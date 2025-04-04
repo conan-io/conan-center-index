@@ -8,7 +8,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class JerryScriptStackConan(ConanFile):
@@ -132,9 +132,6 @@ class JerryScriptStackConan(ConanFile):
         if not self.options.debugger:
             del self.options.keep_line_info
 
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("jerryscript shared lib is not yet supported under windows")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -154,7 +151,7 @@ class JerryScriptStackConan(ConanFile):
             for check_res, txt in checks:
                 if not check_res:
                     raise ConanInvalidConfiguration(txt)
-        except ValueError as e:
+        except ValueError:
             raise ConanInvalidConfiguration(
                 "jerryscript heap size, gc mark limit, stack limit, "
                 "gc limit should be a positive integer"
@@ -170,6 +167,8 @@ class JerryScriptStackConan(ConanFile):
             raise ConanInvalidConfiguration("jerryscript system allocator not available on 64bit systems")
         if self.options.system_allocator and not self.options.cpointer_32_bit:
             raise ConanInvalidConfiguration("jerryscript system allocator must be used with 32 bit pointers")
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("jerryscript shared lib is not yet supported under windows")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -212,6 +211,8 @@ class JerryScriptStackConan(ConanFile):
         tc.variables["JERRY_VALGRIND"] = self.options.valgrind
         tc.variables["JERRY_MEM_GC_BEFORE_EACH_ALLOC"] = self.options.gc_before_each_alloc
         tc.variables["JERRY_VM_EXEC_STOP"] = self.options.vm_exec_stop
+        if Version(self.version) < "3.0.0": # pylint: disable=conan-condition-evals-to-constant
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         tc = CMakeDeps(self)
