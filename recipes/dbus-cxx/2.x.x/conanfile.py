@@ -74,6 +74,7 @@ class DbusCXX(ConanFile):
         tc.cache_variables["ENABLE_GLIB_SUPPORT"] = self.options.with_glib
         tc.cache_variables["ENABLE_QT_SUPPORT"] = self.options.with_qt
         tc.cache_variables["ENABLE_UV_SUPPORT"] = self.options.with_uv
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         # FIXME: libuv: Next release will likely use these lines
         # if self.options.with_uv and not self.dependencies["libuv"].options.shared:
         #     tc.cache_variables["UV_STATIC"] = True
@@ -95,7 +96,8 @@ class DbusCXX(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.settings.os == "Windows":
-            copy(self, "*.dll", src=os.path.join(self.build_folder, self.build_type), dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+            copy(self, "*.dll", src=os.path.join(self.build_folder, str(self.settings.build_type)),
+                 dst=os.path.join(self.package_folder, "bin"), keep_path=False)
 
     def package_info(self):
         # dbus-cxx
