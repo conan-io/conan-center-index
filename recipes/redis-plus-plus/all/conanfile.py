@@ -23,12 +23,14 @@ class RedisPlusPlusConan(ConanFile):
         "fPIC": [True, False],
         "with_tls": [True, False],
         "build_async": [True, False],
+        "coroutines": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_tls": False,
         "build_async": False,
+        "coroutines": False
     }
 
     @property
@@ -81,6 +83,9 @@ class RedisPlusPlusConan(ConanFile):
         if self.info.options.with_tls and not self.dependencies["hiredis"].options.with_ssl:
             raise ConanInvalidConfiguration(f"{self.name}:with_tls=True requires hiredis:with_ssl=True")
 
+        if self.info.options.coroutines and not self.info.options.build_async:
+            raise ConanInvalidConfiguration(f"{self.name}:coroutines=True requires {self.name}:build_async")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -91,6 +96,8 @@ class RedisPlusPlusConan(ConanFile):
         tc.variables["REDIS_PLUS_PLUS_USE_TLS"] = self.options.with_tls
         if self.options.get_safe("build_async"):
             tc.cache_variables["REDIS_PLUS_PLUS_BUILD_ASYNC"] = "libuv"
+        if self.options.get_safe("coroutines"):
+            tc.cache_variables["REDIS_PLUS_PLUS_BUILD_CORO"] = "ON"
         tc.variables["REDIS_PLUS_PLUS_BUILD_TEST"] = False
         tc.variables["REDIS_PLUS_PLUS_BUILD_STATIC"] = not self.options.shared
         tc.variables["REDIS_PLUS_PLUS_BUILD_SHARED"] = self.options.shared
