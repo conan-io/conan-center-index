@@ -16,6 +16,12 @@ sources:
     sha256: "68ebd396a4220d5a9b5a621c6e9c66349c5cfdf5efaea3f16e3bb92e45f4e2a3"
 patches:
   "8.0.0":
-    - patch_file: "patches/0001-cmake-pic.patch"
+    - patch_file: "patches/0001-cmake4-support.patch"
+      patch_description: "Remove hardcoded fPIC, increase CMake minimum to 3.5, substitute CMP0063 OLD with new setup"
+      patch_type: "portability"
+      patch_source: "https://github.com/leethomason/tinyxml2/commit/7df6b3ff4ab3e3cec7a242fa5f8749decd129e13#diff-1e7de1ae2d059d21e1dd75d5812d5a34b0222cef273b7c3a2af62eb747f9d20aR19"
   "7.1.0":
-    - patch_file: "patches/0001-cmake-pic.patch"
+    - patch_file: "patches/0001-cmake4-support.patch"
+      patch_description: "Remove hardcoded fPIC, increase CMake minimum to 3.5, substitute CMP0063 OLD with new setup"
+      patch_type: "portability"
+      patch_source: "https://github.com/leethomason/tinyxml2/commit/7df6b3ff4ab3e3cec7a242fa5f8749decd129e13#diff-1e7de1ae2d059d21e1dd75d5812d5a34b0222cef273b7c3a2af62eb747f9d20aR19"
