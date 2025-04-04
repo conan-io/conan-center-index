@@ -7,7 +7,7 @@ import glob
 import os
 import yaml
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class Open62541Conan(ConanFile):
@@ -109,6 +109,7 @@ class Open62541Conan(ConanFile):
         "cpp_compatible": [True, False],
         # UA_ENABLE_STATUSCODE_DESCRIPTIONS=readable_statuscodes
         "readable_statuscodes": [True, False],
+        "parsing": [True, False],
     }
     default_options = {
         "fPIC": True,
@@ -137,6 +138,7 @@ class Open62541Conan(ConanFile):
         "hardening": True,
         "cpp_compatible": False,
         "readable_statuscodes": True,
+        "parsing": False,
     }
 
     exports = "submoduledata.yml"
@@ -278,6 +280,9 @@ class Open62541Conan(ConanFile):
         tc.variables["UA_LOGLEVEL"] = self._get_log_level()
         tc.variables["UA_ENABLE_SUBSCRIPTIONS"] = self.options.subscription != False
 
+        if self.settings.os == "Neutrino":
+            tc.cache_variables["UA_ARCHITECTURE"] = "posix"
+
         if self.options.subscription != False:
             if "events" in str(self.options.subscription):
                 tc.variables["UA_ENABLE_SUBSCRIPTIONS_EVENTS"] = True
@@ -352,6 +357,7 @@ class Open62541Conan(ConanFile):
             tc.variables["UA_MSVC_FORCE_STATIC_CRT"] = True
 
         tc.variables["UA_COMPILE_AS_CXX"] = self.options.cpp_compatible
+        tc.variables["UA_ENABLE_PARSING"] = self.options.parsing
 
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
@@ -363,8 +369,7 @@ class Open62541Conan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if Version(self.version) >= "1.3.1":
-            os.unlink(os.path.join(self.source_folder, "tools", "cmake", "FindPython3.cmake"))
+        rm(self, "FindPython3.cmake", os.path.join(self.source_folder, "tools", "cmake"))
 
     def build(self):
         self._patch_sources()
@@ -411,18 +416,12 @@ class Open62541Conan(ConanFile):
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "open62541"
-        self.cpp_info.names["cmake_find_package_multi"] = "open62541"
-        self.cpp_info.names["pkg_config"] = "open62541"
         self.cpp_info.libs = collect_libs(self)
         self.cpp_info.includedirs = ["include"]
 
         # required for creating custom servers from ua-nodeset
         self.conf_info.define("user.open62541:tools_dir", os.path.join(
             self.package_folder, "res", "tools").replace("\\", "/"))
-        # v1 legacy support for tools_dir definition
-        self.user_info.tools_dir = os.path.join(
-            self.package_folder, "res", "tools").replace("\\", "/")
         self._chmod_plus_x(os.path.join(self.package_folder,
                            "res", "tools", "generate_nodeid_header.py"))
 
@@ -445,12 +444,9 @@ class Open62541Conan(ConanFile):
                 self.cpp_info.system_libs.append("iphlpapi")
         elif self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["pthread", "m", "rt"])
+        elif self.settings.os == "Neutrino":
+            self.cpp_info.system_libs.extend(["m", "rt", "socket"])
 
         self.cpp_info.builddirs.append(self._module_subfolder)
-        # v1 legacy support for open62541Macros.cmake auto-include
-        self.cpp_info.build_modules["cmake_find_package"] = [
-            self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [
-            self._module_file_rel_path]
         self.cpp_info.set_property("cmake_build_modules", [
                                    self._module_file_rel_path])
