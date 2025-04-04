@@ -6,11 +6,10 @@ from conan.tools.build import can_run
 
 class DbusCXXTest(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
+    generators = "CMakeToolchain", "CMakeDeps"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-
-    generators = "CMakeToolchain", "CMakeDeps"
 
     def build(self):
         cmake = CMake(self)
@@ -22,5 +21,5 @@ class DbusCXXTest(ConanFile):
 
     def test(self):
         if can_run(self):
-            cmd = os.path.join(self.cpp.build.bindir, "test")
-            self.run(cmd, env="conanrun")
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run(bin_path, env="conanrun")
