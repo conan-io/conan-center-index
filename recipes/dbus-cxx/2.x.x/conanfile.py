@@ -3,10 +3,11 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMakeDeps
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
 from conan.tools.files import get, replace_in_file, rmdir, copy
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.cmake import CMakeDeps
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 
@@ -106,6 +107,8 @@ class DbusCXX(ConanFile):
         self.cpp_info.components["dbus-cxx"].includedirs = ['include/dbus-cxx-2.0']
         self.cpp_info.components["dbus-cxx"].set_property("cmake_target_name", "dbus-cxx")
         self.cpp_info.components["dbus-cxx"].set_property("pkg_config_name", "dbus-cxx-2.0")
+        if is_msvc(self):
+            self.cpp_info.cxxflags.extend(["/Zc:__cplusplus"])
         # dbus-cxx-glib
         if self.options.with_glib:
             self.cpp_info.components["dbus-cxx-glib"].libs = ["dbus-cxx-glib"]
