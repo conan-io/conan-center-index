@@ -1,0 +1,9 @@
+sources:
+  "0.0.1-2561":
+    url: "https://www.ccoderun.ca/GeoLite2PP/download/geolite2++-0.0.1-2561-Source.tar.gz"
+    sha256: "be83723196b676d8b91067777e27a2a071022d3f34facba37540e113cd801e17"
+patches:
+  "0.0.1-2561":
+    - patch_file: "patches/0001-fix-cmake.patch"
+      patch_description: "use cci's maxminddb, disable -Werror, build static and shared lib separately"
+      patch_type: "conan"
