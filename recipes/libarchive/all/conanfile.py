@@ -113,6 +113,10 @@ class LibarchiveConan(ConanFile):
         if self.options.get_safe("with_pcre2"):
             self.requires("pcre2/10.43")
 
+    def build_requirements(self):
+        if Version(self.version) >= "3.7.9":
+            self.tool_requires("cmake/[>=3.17 <4]")
+
     def validate(self):
         if self.settings.os != "Windows" and self.options.with_cng:
             # TODO: add cng when available in CCI

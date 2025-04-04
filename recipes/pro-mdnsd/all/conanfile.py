@@ -1,12 +1,12 @@
 import os
-import textwrap
-
 from conan import ConanFile
+from conan.errors import ConanException
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save, rename
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class mdnsdConan(ConanFile):
@@ -54,6 +54,10 @@ class mdnsdConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["MDNSD_ENABLE_SANITIZERS"] = False
         tc.variables["MDNSD_COMPILE_AS_CXX"] = self.options.compile_as_cpp
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "0.8.4": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
+
         tc.generate()
 
     def build(self):
@@ -72,27 +76,6 @@ class mdnsdConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {"libmdnsd": "mdnsd::mdnsd"}
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "mdnsd")
         self.cpp_info.set_property("cmake_target_name", "libmdnsd")
@@ -100,9 +83,3 @@ class mdnsdConan(ConanFile):
         self.cpp_info.libs = ["mdnsd"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32", "wsock32"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "mdnsd"
-        self.cpp_info.names["cmake_find_package_multi"] = "mdnsd"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

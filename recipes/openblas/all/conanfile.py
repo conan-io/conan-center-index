@@ -9,7 +9,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 # Maps Conan's settings.arch to the corresponding OpenBLAS TARGET:
 conan_arch_to_openblas_target = {
@@ -190,6 +190,8 @@ class OpenblasConan(ConanFile):
             tc.cache_variables["TARGET"] = self.options.target
 
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        if Version(self.version) < "0.3.29": # pylint: disable=conan-condition-evals-to-constant
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def _patch_sources(self):
@@ -272,10 +274,3 @@ class OpenblasConan(ConanFile):
 
         self.buildenv_info.define_path("OpenBLAS_HOME", self.package_folder)
         self.runenv_info.define_path("OpenBLAS_HOME", self.package_folder)
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "OpenBLAS"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenBLAS"
-        self.cpp_info.components["openblas_component"].names["cmake_find_package"] = cmake_component_name
-        self.cpp_info.components["openblas_component"].names["cmake_find_package_multi"] = cmake_component_name
-        self.env_info.OpenBLAS_HOME = self.package_folder

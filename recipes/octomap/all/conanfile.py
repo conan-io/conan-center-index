@@ -1,14 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 import os
-import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 class OctomapConan(ConanFile):
     name = "octomap"
@@ -67,6 +66,8 @@ class OctomapConan(ConanFile):
             tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if Version(self.version) >= "1.10.0":
             tc.variables["CMAKE_CXX_STANDARD"] = self.settings.compiler.get_safe("cppstd", "11").replace("gnu", "")
+        else:
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def _patch_sources(self):
@@ -99,30 +100,6 @@ class OctomapConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators are removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {
-                self._octomath_target: f"octomap::{self._octomath_target}",
-                self._octomap_target: f"octomap::{self._octomap_target}",
-            }
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
-
     @property
     def _octomath_target(self):
         return "octomath" if self.options.shared else "octomath-static"
@@ -144,13 +121,3 @@ class OctomapConan(ConanFile):
         self.cpp_info.components["octomaplib"].set_property("cmake_target_name", self._octomap_target)
         self.cpp_info.components["octomaplib"].libs = ["octomap"]
         self.cpp_info.components["octomaplib"].requires = ["octomath"]
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators are removed
-        self.cpp_info.components["octomath"].names["cmake_find_package"] = self._octomath_target
-        self.cpp_info.components["octomath"].names["cmake_find_package_multi"] = self._octomath_target
-        self.cpp_info.components["octomath"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["octomath"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["octomaplib"].names["cmake_find_package"] = self._octomap_target
-        self.cpp_info.components["octomaplib"].names["cmake_find_package_multi"] = self._octomap_target
-        self.cpp_info.components["octomaplib"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["octomaplib"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

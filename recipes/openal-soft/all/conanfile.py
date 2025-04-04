@@ -8,7 +8,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class OpenALSoftConan(ConanFile):
@@ -91,6 +91,8 @@ class OpenALSoftConan(ConanFile):
         tc.variables["ALSOFT_EXAMPLES"] = False
         tc.variables["ALSOFT_TESTS"] = False
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_SoundIO"] = True
+        if Version(self.version) < "1.24.0": # pylint: disable=conan-condition-evals-to-constant
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):
@@ -133,10 +135,6 @@ class OpenALSoftConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "OpenAL::OpenAL")
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.set_property("pkg_config_name", "openal")
-
-        self.cpp_info.names["cmake_find_package"] = "OpenAL"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenAL"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
 
         self.cpp_info.libs = collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "AL"))
