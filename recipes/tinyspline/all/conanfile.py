@@ -78,6 +78,7 @@ class TinysplineConan(ConanFile):
             tc.variables["TINYSPLINE_DISABLE_PYTHON"] = True
             tc.variables["TINYSPLINE_DISABLE_R"] = True
             tc.variables["TINYSPLINE_DISABLE_RUBY"] = True
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         else:
             tc.variables["TINYSPLINE_WARNINGS_AS_ERRORS"] = False
             tc.variables["TINYSPLINE_ENABLE_CXX"] = self.options.cxx
