@@ -13,6 +13,9 @@ versions:
   # keep 3.2.1 for libcoap, libgit2, lief
   "3.2.1":
     folder: all
+  # final 2.28.x (old LTS) version
+  "2.28.10":
+    folder: all
   # keep 2.28.4 for libssh2
   "2.28.4":
     folder: all
