@@ -14,7 +14,7 @@ class ManifoldConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/elalish/manifold"
     topics = ("geometry", "topological", "mesh")
-    # package_type should usually be "library", "shared-library" or "static-library"
+
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -52,7 +52,7 @@ class ManifoldConan(ConanFile):
         tc.cache_variables["MANIFOLD_DOWNLOADS"] = False
         tc.cache_variables["MANIFOLD_TEST"] = False
         tc.cache_variables["MANIFOLD_CBIND"] = False
-        
+        tc.cache_variables["MANIFOLD_PYBIND"] = False
         tc.cache_variables["MANIFOLD_PAR"] = self.options.with_parallel_acceleration
         tc.generate()
 
