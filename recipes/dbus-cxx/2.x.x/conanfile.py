@@ -36,6 +36,13 @@ class DbusCXX(ConanFile):
     }
 
     def validate(self):
+        if self.settings.os == "Windows" and any([
+            self.options.get_safe("with_uv"),
+            self.options.get_safe("with_qt"),
+            self.options.get_safe("with_glib")
+        ]):
+            raise ConanInvalidConfiguration("Using any of these options (with_uv, with_glib, "
+                                            "with_qt) is not working on Windows.")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 17)
         # FIXME: Next release will likely be able to use static/shared mode.
