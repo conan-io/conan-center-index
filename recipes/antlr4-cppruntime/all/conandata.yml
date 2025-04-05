@@ -1,4 +1,7 @@
 sources:
+  "4.13.2":
+    url: "https://github.com/antlr/antlr4/archive/refs/tags/4.13.2.tar.gz"
+    sha256: "9f18272a9b32b622835a3365f850dd1063d60f5045fb1e12ce475ae6e18a35bb"
   "4.13.1":
     url: "https://github.com/antlr/antlr4/archive/refs/tags/4.13.1.tar.gz"
     sha256: "da20d487524d7f0a8b13f73a8dc326de7fc2e5775f5a49693c0a4e59c6b1410c"
