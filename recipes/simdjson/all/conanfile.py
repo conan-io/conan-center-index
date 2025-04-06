@@ -49,10 +49,22 @@ class SimdjsonConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    @property
+    def _cmake_cxx_standard(self):
+        compiler_cppstd = self.settings.get_safe("compiler.cppstd")
+        if compiler_cppstd is None:
+            return None
+        if compiler_cppstd.startswith("gnu"):
+            return compiler_cppstd[3:]
+        return compiler_cppstd
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["SIMDJSON_ENABLE_THREADS"] = self.options.threads
         tc.variables["SIMDJSON_DEVELOPER_MODE"] = False
+        cppstd = self._cmake_cxx_standard
+        if cppstd:
+            tc.variables["SIMDJSON_CXX_STANDARD"] = cppstd
         tc.generate()
 
     def build(self):
