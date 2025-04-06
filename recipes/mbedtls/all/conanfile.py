@@ -2,11 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy, get, rmdir
-from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class MBedTLSConan(ConanFile):
@@ -87,6 +87,7 @@ class MBedTLSConan(ConanFile):
         if Version(self.version) < "3.0.0":
             # relocatable shared libs on macOS
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         if is_msvc(self) and "2.16.12" <= Version(self.version) <= "3.6.0":
             tc.preprocessor_definitions["MBEDTLS_PLATFORM_SNPRINTF_MACRO"] = "snprintf"
         if self.options.enable_threading:
@@ -147,9 +148,3 @@ class MBedTLSConan(ConanFile):
         if self.options.get_safe("with_zlib"):
             for component in self.cpp_info.components:
                 self.cpp_info.components[component].requires.append("zlib::zlib")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "MbedTLS"
-        self.cpp_info.names["cmake_find_package_multi"] = "MbedTLS"
-        self.cpp_info.components["libembedtls"].names["cmake_find_package"] = "mbedtls"
-        self.cpp_info.components["libembedtls"].names["cmake_find_package_multi"] = "mbedtls"

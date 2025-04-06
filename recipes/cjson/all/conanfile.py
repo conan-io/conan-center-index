@@ -68,6 +68,8 @@ class CjsonConan(ConanFile):
         tc.variables["ENABLE_LOCALES"] = self.options.use_locales
         tc.variables["ENABLE_FUZZING"] = False
         tc.variables["ENABLE_CUSTOM_COMPILER_FLAGS"] = False
+        # Relocatable shared lib on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         if Version(self.version) > "1.7.18": # pylint: disable=conan-unreachable-upper-version
             raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")

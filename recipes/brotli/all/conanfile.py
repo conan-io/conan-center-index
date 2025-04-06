@@ -79,6 +79,8 @@ class BrotliConan(ConanFile):
         if self.options.enable_log:
             tc.preprocessor_definitions["BROTLI_ENABLE_LOG"] = 1
         if Version(self.version) < "1.1.0":
+            # To install relocatable shared libs on Macos
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
@@ -95,21 +97,18 @@ class BrotliConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        includedir = os.path.join("include", "brotli")
+
         # brotlicommon
         self.cpp_info.components["brotlicommon"].set_property("pkg_config_name", "libbrotlicommon")
-        self.cpp_info.components["brotlicommon"].includedirs.append(includedir)
         self.cpp_info.components["brotlicommon"].libs = [self._get_decorated_lib("brotlicommon")]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.components["brotlicommon"].defines.append("BROTLI_SHARED_COMPILATION")
         # brotlidec
         self.cpp_info.components["brotlidec"].set_property("pkg_config_name", "libbrotlidec")
-        self.cpp_info.components["brotlidec"].includedirs.append(includedir)
         self.cpp_info.components["brotlidec"].libs = [self._get_decorated_lib("brotlidec")]
         self.cpp_info.components["brotlidec"].requires = ["brotlicommon"]
         # brotlienc
         self.cpp_info.components["brotlienc"].set_property("pkg_config_name", "libbrotlienc")
-        self.cpp_info.components["brotlienc"].includedirs.append(includedir)
         self.cpp_info.components["brotlienc"].libs = [self._get_decorated_lib("brotlienc")]
         self.cpp_info.components["brotlienc"].requires = ["brotlicommon"]
         if self.settings.os in ["Linux", "FreeBSD"]:
