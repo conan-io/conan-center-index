@@ -103,6 +103,8 @@ class PCRE2Conan(ConanFile):
         if Version(self.version) < "10.38":
             # relocatable shared libs on Macos
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if Version(self.version) < "10.43":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         cd = CMakeDeps(self)
@@ -183,31 +185,12 @@ class PCRE2Conan(ConanFile):
                 self.cpp_info.components["pcre2-32"].defines.append("PCRE2_STATIC")
 
         if self.options.build_pcre2grep:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH environment variable: {bin_path}")
-            self.env_info.PATH.append(bin_path)
             # FIXME: This is a workaround to avoid ConanException. zlib and bzip2
             # are optional requirements of pcre2grep executable, not of any pcre2 lib.
             if self.options.with_zlib:
                 self.cpp_info.components["pcre2-8"].requires.append("zlib::zlib")
             if self.options.with_bzip2:
                 self.cpp_info.components["pcre2-8"].requires.append("bzip2::bzip2")
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generator removed
-        self.cpp_info.names["cmake_find_package"] = "PCRE2"
-        self.cpp_info.names["cmake_find_package_multi"] = "PCRE2"
-        self.cpp_info.names["pkg_config"] = "libpcre2"
-        if self.options.build_pcre2_8:
-            self.cpp_info.components["pcre2-8"].names["cmake_find_package"] = "8BIT"
-            self.cpp_info.components["pcre2-8"].names["cmake_find_package_multi"] = "8BIT"
-            self.cpp_info.components["pcre2-posix"].names["cmake_find_package"] = "POSIX"
-            self.cpp_info.components["pcre2-posix"].names["cmake_find_package_multi"] = "POSIX"
-        if self.options.build_pcre2_16:
-            self.cpp_info.components["pcre2-16"].names["cmake_find_package"] = "16BIT"
-            self.cpp_info.components["pcre2-16"].names["cmake_find_package_multi"] = "16BIT"
-        if self.options.build_pcre2_32:
-            self.cpp_info.components["pcre2-32"].names["cmake_find_package"] = "32BIT"
-            self.cpp_info.components["pcre2-32"].names["cmake_find_package_multi"] = "32BIT"
 
     def _lib_name(self, name):
         libname = name
