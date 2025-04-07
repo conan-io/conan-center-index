@@ -646,6 +646,11 @@ class LibcurlConan(ConanFile):
         tc.variables["CURL_DISABLE_PROXY"] = not self.options.with_proxy
         tc.variables["USE_LIBRTMP"] = self.options.with_librtmp
         tc.variables["USE_LIBIDN2"] = self.options.with_libidn
+        if self.options.with_libidn:
+            # Conan won't generate this variable as we're setting prefixes,
+            # and CMake might not either as it's looking for Libidn2
+            # Ensure it's there
+            tc.cache_variables["LIBIDN2_FOUND"] = True
         tc.variables["CURL_DISABLE_RTSP"] = not self.options.with_rtsp
         tc.variables["CURL_DISABLE_CRYPTO_AUTH"] = not self.options.with_crypto_auth
         tc.variables["CURL_DISABLE_VERBOSE_STRINGS"] = not self.options.with_verbose_strings
