@@ -7,7 +7,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class LibcoroConan(ConanFile):
@@ -113,6 +113,8 @@ class LibcoroConan(ConanFile):
             tc.variables["LIBCORO_RUN_GITCONFIG"] = False
             tc.variables["LIBCORO_BUILD_SHARED_LIBS"] = self.options.shared
             tc.variables["LIBCORO_FEATURE_TLS"] = self.options.get_safe("with_ssl", False)
+        if Version(self.version) < "0.10":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
