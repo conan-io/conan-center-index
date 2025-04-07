@@ -1,4 +1,4 @@
-#include <plutosvg.h>
+#include <plutosvg/plutosvg.h>
 #include <stdio.h>
 
 int main(void) {
