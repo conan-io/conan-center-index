@@ -43,8 +43,7 @@ class DbusCXX(ConanFile):
         ]):
             raise ConanInvalidConfiguration("Using any of these options (with_uv, with_glib, "
                                             "with_qt) is not working on Windows.")
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 17)
+        check_min_cppstd(self, 17)
         # FIXME: Next release will likely be able to use static/shared mode.
         if self.options.get_safe("with_uv") and not self.dependencies["libuv"].options.shared:
             raise ConanInvalidConfiguration(f"libuv needs to be shared for "
