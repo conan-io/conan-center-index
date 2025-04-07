@@ -60,6 +60,10 @@ class DbusCXX(ConanFile):
         if self.options.with_qt:
             self.requires("qt/[~5.15]", transitive_headers=True)
 
+    def build_requirements(self):
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/[>=2 <3]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         # Version 2.5.2
