@@ -115,6 +115,7 @@ class Libx265Conan(ConanFile):
         tc.variables["ENABLE_SVT_HEVC"] = self.options.SVG_HEVC_encoder
         if is_msvc(self):
             tc.variables["STATIC_LINK_CRT"] = is_msvc_static_runtime(self)
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
         if self.settings.os == "Linux":
             tc.variables["PLATFORM_LIBS"] = "dl"
         if "arm" in self.settings.arch:
