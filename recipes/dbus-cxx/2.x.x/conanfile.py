@@ -8,7 +8,6 @@ from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
 from conan.tools.files import get, replace_in_file, rmdir, copy
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
 
 class DbusCXX(ConanFile):

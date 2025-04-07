@@ -1,4 +1,4 @@
 sources:
   "2.5.2":
-    url: "https://github.com/dbus-cxx/dbus-cxx/archive/refs/tags/2.5.1.tar.gz"
+    url: "https://github.com/dbus-cxx/dbus-cxx/archive/refs/tags/2.5.2.tar.gz"
     sha256: "848467b14db37710ac3ad31cc6474b2d65b9b24e6cdcbb7e88c7637c0ad7b388"
