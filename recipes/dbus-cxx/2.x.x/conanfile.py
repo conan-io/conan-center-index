@@ -34,20 +34,9 @@ class DbusCXX(ConanFile):
         "with_uv": False,
     }
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def validate(self):
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("The recipe does not support Macos.")
-        if self.settings.os == "Windows" and any([
-            self.options.get_safe("with_uv"),
-            self.options.get_safe("with_qt"),
-            self.options.get_safe("with_glib")
-        ]):
-            raise ConanInvalidConfiguration("Using any of these options (with_uv, with_glib, "
-                                            "with_qt) is not working on Windows.")
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("The recipe only supports Linux.")
         check_min_cppstd(self, 17)
         # FIXME: Next release will likely be able to use static/shared mode.
         if self.options.get_safe("with_uv") and not self.dependencies["libuv"].options.shared:
@@ -62,10 +51,6 @@ class DbusCXX(ConanFile):
             self.requires("libuv/[>=1 <2]", transitive_headers=True)
         if self.options.with_qt:
             self.requires("qt/[~5.15]", transitive_headers=True)
-
-    def build_requirements(self):
-        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/[>=2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -90,7 +75,6 @@ class DbusCXX(ConanFile):
         tc.cache_variables["ENABLE_GLIB_SUPPORT"] = self.options.with_glib
         tc.cache_variables["ENABLE_QT_SUPPORT"] = self.options.with_qt
         tc.cache_variables["ENABLE_UV_SUPPORT"] = self.options.with_uv
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         # FIXME: libuv: Next release will likely use these lines
         # if self.options.with_uv and not self.dependencies["libuv"].options.shared:
         #     tc.cache_variables["UV_STATIC"] = True
@@ -112,9 +96,6 @@ class DbusCXX(ConanFile):
         # remove useless folders
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if self.settings.os == "Windows":
-            copy(self, "*.dll", src=os.path.join(self.build_folder, str(self.settings.build_type)),
-                 dst=os.path.join(self.package_folder, "bin"), keep_path=False)
 
     def package_info(self):
         # dbus-cxx
@@ -123,8 +104,6 @@ class DbusCXX(ConanFile):
         self.cpp_info.components["dbus-cxx"].includedirs = ['include/dbus-cxx-2.0']
         self.cpp_info.components["dbus-cxx"].set_property("cmake_target_name", "dbus-cxx")
         self.cpp_info.components["dbus-cxx"].set_property("pkg_config_name", "dbus-cxx-2.0")
-        if is_msvc(self):
-            self.cpp_info.components["dbus-cxx"].cxxflags.extend(["/Zc:__cplusplus"])
         # dbus-cxx-glib
         if self.options.with_glib:
             self.cpp_info.components["dbus-cxx-glib"].libs = ["dbus-cxx-glib"]
