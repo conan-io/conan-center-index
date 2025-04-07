@@ -169,6 +169,7 @@ class GdalConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.options["arrow"].filesystem_layer = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -185,7 +186,6 @@ class GdalConan(ConanFile):
             self.requires("armadillo/12.6.4")
         if self.options.with_arrow:
             self.requires("arrow/16.1.0")
-            self.options["arrow"].filesystem_layer = True
         if self.options.with_basisu:
             self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
