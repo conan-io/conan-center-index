@@ -25,3 +25,12 @@
  include(CheckIncludeFiles)
  include(CheckFunctionExists)
  include(CheckSymbolExists)
+@@ -130,7 +125,7 @@ if(APPLE)
+   add_definitions(-DMACOS=1)
+ endif()
+ 
+-if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
++if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+     set(CLANG 1)
+ endif()
+ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")

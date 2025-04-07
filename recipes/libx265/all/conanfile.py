@@ -75,9 +75,6 @@ class Libx265Conan(ConanFile):
             #   <instantiation>:11:9: error: unknown directive
             #           .func x265_pixel_avg_pp_4x4_neon
             raise ConanInvalidConfiguration(f"{self.ref} fails to build with '&:assembly=True' for Android. Contributions are welcome.")
-        if cross_building(self) and Version(self.version) == "3.2.1" and is_apple_os(self) and self.settings.arch == "x86_64":
-            raise ConanInvalidConfiguration(f"Cross-building is not supported for {self.ref} from {self.settings_build.arch} to {self.settings.arch}.")
-
 
     def validate(self):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
