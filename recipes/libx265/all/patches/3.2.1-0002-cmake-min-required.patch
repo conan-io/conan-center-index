@@ -1,6 +1,6 @@
 --- a/source/CMakeLists.txt
 +++ b/source/CMakeLists.txt
-@@ -1,11 +1,6 @@
+@@ -1,23 +1,7 @@
 -# vim: syntax=cmake
 -if(NOT CMAKE_BUILD_TYPE)
 -    # default to Release build for GCC builds
@@ -10,22 +10,22 @@
 -endif()
 +cmake_minimum_required(VERSION 3.5)
  message(STATUS "cmake version ${CMAKE_VERSION}")
-+if(0)
- if(POLICY CMP0025)
-     cmake_policy(SET CMP0025 OLD) # report Apple's Clang as just Clang
- endif()
-@@ -15,9 +10,9 @@ endif()
- if(POLICY CMP0054)
-     cmake_policy(SET CMP0054 OLD) # Only interpret if() arguments as variables or keywords when unquoted
- endif()
-+endif()
+-if(POLICY CMP0025)
+-    cmake_policy(SET CMP0025 OLD) # report Apple's Clang as just Clang
+-endif()
+-if(POLICY CMP0042)
+-    cmake_policy(SET CMP0042 NEW) # MACOSX_RPATH
+-endif()
+-if(POLICY CMP0054)
+-    cmake_policy(SET CMP0054 OLD) # Only interpret if() arguments as variables or keywords when unquoted
+-endif()
  
  project (x265)
 -cmake_minimum_required (VERSION 2.8.8) # OBJECT libraries require 2.8.8
  include(CheckIncludeFiles)
  include(CheckFunctionExists)
  include(CheckSymbolExists)
-@@ -130,7 +125,7 @@ if(APPLE)
+@@ -130,7 +114,7 @@ if(APPLE)
    add_definitions(-DMACOS=1)
  endif()
  
