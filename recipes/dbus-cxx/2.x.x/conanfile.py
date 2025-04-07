@@ -36,6 +36,8 @@ class DbusCXX(ConanFile):
     }
 
     def validate(self):
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("The recipe does not support Macos.")
         if self.settings.os == "Windows" and any([
             self.options.get_safe("with_uv"),
             self.options.get_safe("with_qt"),
