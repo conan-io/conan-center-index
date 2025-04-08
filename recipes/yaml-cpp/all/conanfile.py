@@ -62,7 +62,7 @@ class YamlCppConan(ConanFile):
         tc.variables["YAML_CPP_INSTALL"] = True
         tc.variables["YAML_BUILD_SHARED_LIBS"] = self.options.shared
         if Version(self.version) <= "0.8.0": # pylint: disable=conan-condition-evals-to-constant
-             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         if is_msvc(self):
             tc.variables["YAML_MSVC_SHARED_RT"] = not is_msvc_static_runtime(self)
             tc.preprocessor_definitions["_NOEXCEPT"] = "noexcept"
