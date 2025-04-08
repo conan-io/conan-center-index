@@ -50,6 +50,7 @@ class EasyhttpcppConan(ConanFile):
 
     def requirements(self):
         self.requires("poco/1.12.4", transitive_headers=True, transitive_libs=True)
+        self.requires("openssl/[>=1.1 <4]")
 
     @property
     def _required_poco_components(self):
@@ -117,6 +118,6 @@ class EasyhttpcppConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.components["easyhttp"].requires.append("poco::poco_netsslwin")
         else:
-            self.cpp_info.components["easyhttp"].requires.append("poco::poco_netssl")
+            self.cpp_info.components["easyhttp"].requires.extend(["poco::poco_netssl", "openssl::ssl"])
 
         self.cpp_info.components["easyhttp"].set_property("cmake_target_name", "easyhttpcpp::easyhttp")
