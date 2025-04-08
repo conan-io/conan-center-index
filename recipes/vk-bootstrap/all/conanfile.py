@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import copy, get, rm
+from conan.tools.files import copy, get, rm, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -46,9 +46,6 @@ class VkBootstrapConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) >= "1.0":
-            del self.options.shared
-            self.package_type = "static-library"
 
     def configure(self):
         if self.options.get_safe("shared"):
@@ -100,7 +97,15 @@ class VkBootstrapConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
+    def _source_patches(self):
+        # INFO: The upstream did not forbid the use of shared libraries
+        # https://github.com/charles-lunarg/vk-bootstrap/issues/367
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                         "add_library(vk-bootstrap STATIC",
+                         "add_library(vk-bootstrap ")
+
     def build(self):
+        self._source_patches()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
