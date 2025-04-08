@@ -42,6 +42,10 @@ class VcConan(ConanFile):
         tc = CMakeToolchain(self)
         if Version(self.version) < "1.4.5": # pylint: disable=conan-condition-evals-to-constant
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+
+        if self.settings.os == "Macos" and self.settings.arch == "x86_64":
+            # set a compatible baseline with macs from 2015 onwards
+            tc.cache_variables["TARGET_ARCHITECTURE"] = "broadwell"
         tc.generate()
 
     def _patch_sources(self):
