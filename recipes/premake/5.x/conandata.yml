@@ -1,7 +1,7 @@
 sources:
-  "5.0.0-alpha15":
-    url: "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha15/premake-5.0.0-alpha15-src.zip"
-    sha256: "880f56e7cb9f4945d1cb879f059189462c1b7bf62ef43ac7d25842dfb177dd53"
+  "5.0.0-beta6":
+    url: "https://github.com/premake/premake-core/releases/download/v5.0.0-beta6/premake-5.0.0-beta6-src.zip"
+    sha256: "8832890451889c7ca9ab62c507d86fc9bfde45094274e5e4f46f82a258b5789b"
 patches:
-  "5.0.0-alpha15":
-    - patch_file: "patches/0001-5.0.0-alpha15-mingw.patch"
+  "5.0.0-beta6":
+    - patch_file: "patches/0001-5.0.0-beta6-mingw.patch"
