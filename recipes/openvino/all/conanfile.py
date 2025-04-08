@@ -162,6 +162,7 @@ class OpenvinoConan(ConanFile):
     def requirements(self):
         self.requires("onetbb/2021.10.0")
         self.requires("pugixml/1.14")
+        self.requires("nlohmann_json/3.11.3")
         if self._target_x86_64:
             self.requires("xbyak/6.73")
         if self.options.get_safe("enable_gpu"):
@@ -293,7 +294,7 @@ class OpenvinoConan(ConanFile):
 
         openvino_runtime = self.cpp_info.components["Runtime"]
         openvino_runtime.set_property("cmake_target_name", "openvino::runtime")
-        openvino_runtime.requires = ["onetbb::libtbb", "pugixml::pugixml"]
+        openvino_runtime.requires = ["onetbb::libtbb", "pugixml::pugixml", "nlohmann_json::nlohmann_json"]
         openvino_runtime.libs = ["openvino"]
         if self._preprocessing_available:
             openvino_runtime.requires.append("ade::ade")
@@ -356,7 +357,7 @@ class OpenvinoConan(ConanFile):
                 openvino_runtime.libs.append("openvino_builders")
             openvino_runtime.libs.extend(["openvino_reference", "openvino_shape_inference", "openvino_itt",
                                           # utils goes last since all others depend on it
-                                          "openvino_util"])
+                                          "openvino_util", "openvino_common_translators"])
             # set 'openvino' once again for transformations objects files (cyclic dependency)
             # openvino_runtime.libs.append("openvino")
             full_openvino_lib_path = os.path.join(self.package_folder, "lib", "openvino.lib").replace("\\", "/") if self.settings.os == "Windows" else \
