@@ -1,14 +1,14 @@
 --- a/source/CMakeLists.txt
 +++ b/source/CMakeLists.txt
-@@ -1,23 +1,7 @@
--# vim: syntax=cmake
--if(NOT CMAKE_BUILD_TYPE)
--    # default to Release build for GCC builds
--    set(CMAKE_BUILD_TYPE Release CACHE STRING
--        "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel."
--        FORCE)
--endif()
-+cmake_minimum_required(VERSION 3.5)
+@@ -1,4 +1,5 @@
+ # vim: syntax=cmake
++cmake_minimum_required (VERSION 3.5) # OBJECT libraries require 2.8.8
+ if(NOT CMAKE_BUILD_TYPE)
+     # default to Release build for GCC builds
+     set(CMAKE_BUILD_TYPE Release CACHE STRING
+@@ -6,18 +7,8 @@ if(NOT CMAKE_BUILD_TYPE)
+         FORCE)
+ endif()
  message(STATUS "cmake version ${CMAKE_VERSION}")
 -if(POLICY CMP0025)
 -    cmake_policy(SET CMP0025 OLD) # report Apple's Clang as just Clang
@@ -25,7 +25,7 @@
  include(CheckIncludeFiles)
  include(CheckFunctionExists)
  include(CheckSymbolExists)
-@@ -130,7 +114,7 @@ if(APPLE)
+@@ -138,7 +129,7 @@ if(APPLE)
    add_definitions(-DMACOS=1)
  endif()
  
