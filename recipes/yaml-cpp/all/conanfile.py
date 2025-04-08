@@ -6,7 +6,6 @@ from conan.tools.files import apply_conandata_patches, collect_libs, copy, expor
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
-import textwrap
 
 required_conan_version = ">=2.1"
 
@@ -82,10 +81,6 @@ class YamlCppConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "CMake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "yaml-cpp")
