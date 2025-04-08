@@ -15,6 +15,7 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str, run=True)
+        self.tool_requires("cmake/[>=3.15.7]")
 
     def build(self):
         if not can_run(self):
