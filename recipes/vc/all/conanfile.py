@@ -2,9 +2,10 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2.1"
 
 
 class VcConan(ConanFile):
@@ -39,6 +40,8 @@ class VcConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if Version(self.version) < "1.4.5": # pylint: disable=conan-condition-evals-to-constant
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def _patch_sources(self):
@@ -61,7 +64,3 @@ class VcConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Vc")
         self.cpp_info.set_property("cmake_target_name", "Vc::Vc")
         self.cpp_info.libs = ["Vc"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Vc"
-        self.cpp_info.names["cmake_find_package_multi"] = "Vc"
