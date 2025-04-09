@@ -35,7 +35,7 @@ class AafConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("expat/2.5.0")
+        self.requires("expat/[>=2.6.2 <3]")
         self.requires("libjpeg/9e")
         if self.settings.os in ("FreeBSD", "Linux"):
             self.requires("util-linux-libuuid/2.39")
@@ -60,6 +60,7 @@ class AafConan(ConanFile):
         tc.cache_variables["AAF_NO_STRUCTURED_STORAGE"] = not self.options.structured_storage
         jpeg_res_dirs = ";".join([p.replace("\\", "/") for p in self.dependencies["libjpeg"].cpp_info.aggregated_components().resdirs])
         tc.variables["JPEG_RES_DIRS"] = jpeg_res_dirs
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

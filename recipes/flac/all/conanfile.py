@@ -1,11 +1,12 @@
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir, replace_in_file
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class FlacConan(ConanFile):
@@ -14,7 +15,7 @@ class FlacConan(ConanFile):
     topics = ("flac", "codec", "audio", )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xiph/flac"
-    license = ("BSD-3-Clause", "GPL-2.0-or-later", "LPGL-2.1-or-later", "GFDL-1.2")
+    license = ("BSD-3-Clause", "GPL-2.0-or-later", "LGPL-2.1-or-later", "GFDL-1.2")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -55,7 +56,11 @@ class FlacConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_DOCS"] = False
+        tc.variables["BUILD_PROGRAMS"] = not is_apple_os(self) or self.settings.os == "Macos"
         tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        if Version(self.version) < "1.3.4":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
@@ -103,17 +108,3 @@ class FlacConan(ConanFile):
             self.cpp_info.components["libflac"].defines = ["FLAC__NO_DLL"]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["libflac"].system_libs += ["m"]
-
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
-
-        # TODO: to remove in conan v2
-        self.cpp_info.filenames["cmake_find_package"] = "flac"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "flac"
-        self.cpp_info.names["cmake_find_package"] = "FLAC"
-        self.cpp_info.names["cmake_find_package_multi"] = "FLAC"
-        self.cpp_info.components["libflac"].names["cmake_find_package"] = "FLAC"
-        self.cpp_info.components["libflac"].names["cmake_find_package_multi"] = "FLAC"
-        self.cpp_info.components["libflac++"].names["cmake_find_package"] = "FLAC++"
-        self.cpp_info.components["libflac++"].names["cmake_find_package_multi"] = "FLAC++"

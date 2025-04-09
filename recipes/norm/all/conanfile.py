@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class NormConan(ConanFile):
@@ -39,7 +39,7 @@ class NormConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libxml2/2.12.3") # dependency of protolib actually
+        self.requires("libxml2/[>=2.12.5 <3]") # dependency of protolib actually
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])

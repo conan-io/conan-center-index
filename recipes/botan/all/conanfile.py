@@ -7,7 +7,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name, XCRun
 from conan.tools.build import build_jobs, check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, VCVars, check_min_vs
@@ -53,6 +53,8 @@ class BotanConan(ConanFile):
         "with_powercrypto": [True, False],
         "enable_modules": [None, "ANY"],
         "disable_modules": [None, "ANY"],
+        "enable_experimental_features": [True, False],
+        "enable_deprecated_features": [True, False],
         "system_cert_bundle": [None, "ANY"],
         "module_policy": [None, "bsi", "modern", "nist"],
     }
@@ -81,6 +83,8 @@ class BotanConan(ConanFile):
         "with_powercrypto": True,
         "enable_modules": None,
         "disable_modules": None,
+        "enable_experimental_features": False,
+        "enable_deprecated_features": True,
         "system_cert_bundle": None,
         "module_policy": None,
     }
@@ -193,7 +197,7 @@ class BotanConan(ConanFile):
             minimum_version = self._compilers_minimum_version.get(compiler_name, False)
             if minimum_version and Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support (minimum {compiler_name} {minimum_version})."
                 )
             if not minimum_version:
                 self.output.warning(f"{self.name} recipe lacks information about the {compiler_name} compiler support.")
@@ -202,7 +206,8 @@ class BotanConan(ConanFile):
             raise ConanInvalidConfiguration(
                 'Using Botan with GCC >= 5 on Linux requires "compiler.libcxx=libstdc++11"')
 
-        if self.settings.compiler == 'clang' and self.settings.compiler.libcxx not in ['libstdc++11', 'libc++']:
+        if (self.settings.compiler == 'clang' and self.settings.os == "Linux" and self.settings.compiler.libcxx not in ['libstdc++11', 'libc++']
+           and self.settings.os != "Android"):
             raise ConanInvalidConfiguration(
                 'Using Botan with Clang on Linux requires either "compiler.libcxx=libstdc++11" ' \
                 'or "compiler.libcxx=libc++"')
@@ -253,6 +258,8 @@ class BotanConan(ConanFile):
         with chdir(self, self.source_folder):
             # Note: this will fail to properly consider the package_folder if a "conan build" followed by a "conan export-pkg" is executed
             self.run(self._make_install_cmd)
+        if Version(self.version) >= "3.3.0":
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
@@ -279,7 +286,7 @@ class BotanConan(ConanFile):
         return {'Windows': 'windows',
                 'Linux': 'linux',
                 'Macos': 'darwin',
-                'Android': 'linux',
+                'Android': 'android',
                 'baremetal': 'none',
                 'iOS': 'ios'}.get(str(self.settings.os))
 
@@ -335,6 +342,20 @@ class BotanConan(ConanFile):
 
         if self._extra_cxxflags:
             botan_extra_cxx_flags.append(self._extra_cxxflags)
+
+        if Version(self.version) >= '3.4':
+            # Botan 3.4.0 introduced a 'module life cycle' feature, before that
+            # the experimental/deprecated feature switches are ignored.
+
+            if self.options.enable_experimental_features:
+                build_flags.append('--enable-experimental-features')
+            else:
+                build_flags.append('--disable-experimental-features')
+
+            if self.options.enable_deprecated_features:
+                build_flags.append('--enable-deprecated-features')
+            else:
+                build_flags.append('--disable-deprecated-features')
 
         if self.options.enable_modules:
             build_flags.append('--minimized-build')
@@ -457,7 +478,7 @@ class BotanConan(ConanFile):
                          ' --extra-cxxflags="{cxxflags}"'
                          ' --cc={compiler}'
                          ' --cpu={cpu}'
-                         ' --prefix={prefix}'
+                         ' --prefix="{prefix}"'
                          ' --os={os}'
                          ' {build_flags}').format(
                              python_call=call_python,
@@ -516,6 +537,8 @@ class BotanConan(ConanFile):
         # https://github.com/conan-io/conan-center-index/pull/18079#issuecomment-1919206949
         # https://github.com/conan-io/conan-center-index/pull/18079#issuecomment-1919486839
 
+        if self.settings.os != 'Linux':
+            return False
         libver = platform.libc_ver()
         return (
             self.settings.os == 'Linux' and

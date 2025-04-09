@@ -1,0 +1,4 @@
+sources:
+  "0.4.1":
+    url: "https://github.com/aurora-opensource/au/archive/refs/tags/0.4.1.tar.gz"
+    sha256: "5e88a0ffcb0a0843f4bd4d4ea4429c793f85dfcb8c1e7f7978de6fecab739b84"

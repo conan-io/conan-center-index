@@ -1,0 +1,4 @@
+sources:
+  "cci.20240405":
+    url: "https://github.com/socketio/socket.io-client-cpp/archive/c6be96b226f0fe3853beaeaa99c06834342a78db.zip"
+    sha256: "7c68117185dbc49579bba09a3e877f2a716cc331c28b3d8b6d3f867c4346b639"

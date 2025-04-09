@@ -32,7 +32,7 @@ class HwlocConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libxml2:
-            self.requires("libxml2/2.12.3")
+            self.requires("libxml2/[>=2.12.5 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

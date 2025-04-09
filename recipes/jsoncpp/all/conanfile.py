@@ -11,12 +11,12 @@ required_conan_version = ">=1.53.0"
 
 class JsoncppConan(ConanFile):
     name = "jsoncpp"
-    license = "MIT"
-    homepage = "https://github.com/open-source-parsers/jsoncpp"
-    url = "https://github.com/conan-io/conan-center-index"
-    topics = ("json", "parser", "config")
     description = "A C++ library for interacting with JSON."
-
+    license = "MIT"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/open-source-parsers/jsoncpp"
+    topics = ("json", "parser", "config")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],

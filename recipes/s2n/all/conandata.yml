@@ -1,48 +1,31 @@
 sources:
-  "1.4.1":
-    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.4.1.tar.gz"
-    sha256: "d8c1d8e1142441412434feacb4947ce6430a244dcd8f58921af79b29bd901731"
-  "1.4.0":
-    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.4.0.tar.gz"
-    sha256: "3f786cb2f35e0551e120e1747e7b510a8228cd852073afa241313939672046cb"
-  "1.3.56":
-    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.3.56.tar.gz"
-    sha256: "5d7bab81357a564453bc453469b4ae02936f1f35225ad297b8d846d2ecdda521"
-  "1.3.55":
-    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.3.55.tar.gz"
-    sha256: "3b4d51d08326757440a7a134dd4d73c904b700d64837aa7fec0aca908b70fd9b"
-  "1.3.52":
-    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.3.52.tar.gz"
-    sha256: "c8ae02ae427763dcffe10d211ed7a2433803affd9aa5836951ef972c53db0120"
-  "1.3.50":
-    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.3.50.tar.gz"
-    sha256: "19c9a7e9e0ce14aae3fc0c55995759f4eadd5b55f5353de69f82c62ccb3693f8"
-  "1.3.49":
-    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.3.49.tar.gz"
-    sha256: "2bc7b170a750a435ad02ab8e696c3ad6e9bb7a585c02899472793f87670184dd"
-  "1.3.31":
-    url: "https://github.com/aws/s2n-tls/archive/v1.3.31.tar.gz"
-    sha256: "23cfb42f82cbe1ce94b59f3b1c1c8eb9d24af2a1ae4c8f854209ff88fddd3900"
+  "1.5.9":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.5.9.tar.gz"
+    sha256: "8a9aa2ba9a25f936e241eaa6bb7e39bc1a097d178c4b255fa36795c0457e3f4e"
+  "1.5.7":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.5.7.tar.gz"
+    sha256: "c30b97c8bcccc0557331dd1a043010a70984c9cff11b0bbd769651db68f8b91d"
+  "1.5.6":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.5.6.tar.gz"
+    sha256: "85602d0ad672cb233052504624dec23b47fc6d324bb82bd6eaff13b8f652dec3"
+  "1.5.5":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.5.5.tar.gz"
+    sha256: "6316e1ad2c8ef5807519758bb159d314b9fef31d79ae27bc8f809104b978bb04"
+  "1.5.3":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.5.3.tar.gz"
+    sha256: "609d4ab5747e592a8749f2db7ff6422ea2e0aff3d2790b6d36defe276f422a71"
+  "1.5.2":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.5.2.tar.gz"
+    sha256: "896d9f8f8e9bd2fdcb9a21b18aede4f7afc65bde279afabc60abf97fa5069dd1"
+  "1.5.1":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.5.1.tar.gz"
+    sha256: "d79710d6ef089097a3b84fc1e5cec2f08d1ec46e93b1d400df59fcfc859e15a3"
+  "1.5.0":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.5.0.tar.gz"
+    sha256: "5e86d97d8f24653ef3dff3abe6165169f0ba59cdf52b5264987125bba070174d"
+  "1.4.16":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.4.16.tar.gz"
+    sha256: "84fdbaa894c722bf13cac87b8579f494c1c2d66de642e5e6104638fddea76ad9"
   "1.3.15":
     url: "https://github.com/aws/s2n-tls/archive/v1.3.15.tar.gz"
     sha256: "e3fc3405bb56334cbec90c35cbdf0e8a0f53199749a3f4b8fddb8d8a41e6db8b"
-  "1.3.9":
-    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.3.9.tar.gz"
-    sha256: "09f03600d45cac99b8495f9c7aa5f70a83b5c02867a3018a1ba9975d53184658"
-  "1.2.0":
-    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.2.0.tar.gz"
-    sha256: "90c1b5f4ac2c46774c8f100cac4f2a951715ae0bf2661799b9aaa891e6fb1f30"
-  "1.1.1":
-    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.1.1.tar.gz"
-    sha256: "a17ef1e55b0a6c3d422b8b857bcfd26af7d2f8b33628a540854a6c17b8bed4d8"
-  "1.1.0":
-    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.1.0.tar.gz"
-    sha256: "e094fd1f2044cfaeedb534ef1d7e4fd8745d8c07a247ce383cd8a6a5288e195c"
-  "1.0.11":
-    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.0.11.tar.gz"
-    sha256: "dbe886cf8cd6658cce571cdaba81e9a93d8c914fd1eba0d3233fec64ed53224b"
-patches:
-  "1.1.0":
-    - patch_file: "patches/1.1.0/001-try-compile.patch"
-  "1.0.11":
-    - patch_file: "patches/1.0.11/001-try-compile.patch"

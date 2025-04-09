@@ -1,4 +1,7 @@
 sources:
+  "11.4.5":
+    url: "https://github.com/machinezone/IXWebSocket/archive/refs/tags/v11.4.5.tar.gz"
+    sha256: "c5fc225edec32bf7d583e55347ef2c9c4940d005c13ef5e848354a85602f5fd6"
   "11.4.3":
     url: "https://github.com/machinezone/IXWebSocket/archive/refs/tags/v11.4.3.tar.gz"
     sha256: "aa2d02c9c71339943cc61eb4efeb2ffc3a5a0011128a67027b9251b7d8a6e0ac"

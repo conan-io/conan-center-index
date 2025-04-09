@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.8)
-project(test_package C)
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES C)
 
 add_executable(test_package test_package.c)
 if(PROJ_VERSION_GE_7)

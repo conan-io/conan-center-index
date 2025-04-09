@@ -1,9 +1,25 @@
 sources:
+  "3.6":
+    url: "https://github.com/winsoft666/zoe/archive/refs/tags/v3.6.tar.gz"
+    sha256: "5cae2a51bbac0bfa54aab78a4d2b534a66bea7bc2d72764cfb5bc8e02a751927"
+  "3.3":
+    url: "https://github.com/winsoft666/zoe/archive/refs/tags/v3.3.tar.gz"
+    sha256: "e75d24690d16feff8bf1fc57d1943d545a5203ba769ff94034dc1f35f89927a5"
+  "3.1":
+    url: "https://github.com/winsoft666/zoe/archive/refs/tags/v3.1.tar.gz"
+    sha256: "4b5a0c0cac5fb61846875699cb7e013c84bc33d852041824bde7af80d793f15d"
   "3.0":
     url: "https://github.com/winsoft666/zoe/archive/refs/tags/v3.0.tar.gz"
     sha256: "718c6de993bea2a4b1866070a8685e77cfa7929bbd9e22abb29e54c67a687a5e"
-
 patches:
+  "3.3":
+    - patch_file: "patches/3.1-0002-support-macosx.patch"
+      patch_description: "support macosx"
+      patch_type: "portability"
+  "3.1":
+    - patch_file: "patches/3.1-0002-support-macosx.patch"
+      patch_description: "support macosx"
+      patch_type: "portability"
   "3.0":
     - patch_file: "patches/3.0-0001-follow-cxx-standards.patch"
       patch_description: "include threads header"

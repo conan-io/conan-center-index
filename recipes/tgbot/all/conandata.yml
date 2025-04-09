@@ -1,4 +1,8 @@
 sources:
+  "1.8":
+    url: "https://github.com/reo7sp/tgbot-cpp/archive/v1.8.tar.gz"
+    sha256: "43ff1a359b8db026e58e517703e616accaae33e01ebc7e87613632b7e4653467"
+  # This is the last version for C++11.
   "1.7.2":
     url: "https://github.com/reo7sp/tgbot-cpp/archive/v1.7.2.tar.gz"
     sha256: "3a41c25c5e4b60bda3f278550a380f1c7c382fd50ea1ab1801edc837d1535462"

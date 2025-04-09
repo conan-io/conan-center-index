@@ -1,0 +1,11 @@
+--- a/include/ANN/ANN.h
++++ b/include/ANN/ANN.h
+@@ -59,7 +59,7 @@
+ #ifndef ANN_H
+ #define ANN_H
+ 
+-#ifdef WIN32
++#if defined(_WIN32) && !defined(ANN_STATIC)
+   //----------------------------------------------------------------------
+   // For Microsoft Visual C++, externally accessible symbols must be
+   // explicitly indicated with DLL_API, which is somewhat like "extern."

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(rply LANGUAGES C)
 
 add_library(rply ${RPLY_SRC_DIR}/rply.c)
