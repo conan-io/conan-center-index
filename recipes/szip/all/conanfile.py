@@ -1,11 +1,12 @@
 from conan import ConanFile
+from conan.errors import ConanException
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, collect_libs, get, copy, replace_in_file, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, collect_libs, get, copy, replace_in_file
 from conan.tools.build import cross_building
+from conan.tools.scm import Version
 import os
-import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.1"
 
 
 class SzipConan(ConanFile):
@@ -16,7 +17,7 @@ class SzipConan(ConanFile):
     topics = "compression", "decompression"
     homepage = "https://support.hdfgroup.org/doc_resource/SZIP/"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -81,32 +82,15 @@ class SzipConan(ConanFile):
             tc.variables["TEST_LFS_WORKS_RUN__TRYRUN_OUTPUT"] = True
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "2.1.1": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {"szip-shared" if self.options.shared else "szip-static": "szip::szip"}
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """.format(alias=alias, aliased=aliased))
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "szip")
@@ -118,7 +102,3 @@ class SzipConan(ConanFile):
 
         if self.options.shared:
             self.cpp_info.defines.append("SZ_BUILT_AS_DYNAMIC_LIB=1")
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

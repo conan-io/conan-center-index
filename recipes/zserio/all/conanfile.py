@@ -7,13 +7,13 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 class ZserioConanFile(ConanFile):
     name = "zserio"
     description = "Zserio C++ Runtime Library"
     license = "BSD-3-Clause"
-    url = "https://github.com/conan-io/conan-center-index/"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://zserio.org"
     topics = ("zserio", "cpp", "c++", "serialization")
     package_type = "static-library"
@@ -79,6 +79,8 @@ class ZserioConanFile(ConanFile):
         tc = CMakeToolchain(self)
         if not self.settings.get_safe("compiler.cppstd"):
             tc.variables["CMAKE_CXX_STANDARD"] = str(self._min_cppstd)
+        if Version(self.version) < "2.14.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):
@@ -123,6 +125,3 @@ class ZserioConanFile(ConanFile):
         zserio_compiler_module = os.path.join(self.package_folder, self._cmake_module_path,
                                               "zserio_compiler.cmake")
         self.cpp_info.set_property("cmake_build_modules", [zserio_compiler_module])
-
-        # TODO: remove in conan v2
-        self.env_info.ZSERIO_JAR_FILE = zserio_jar_file
