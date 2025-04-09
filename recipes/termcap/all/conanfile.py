@@ -86,7 +86,7 @@ class TermcapConan(ConanFile):
 
     @property
     def _termcap_path(self):
-        return os.path.join(self.package_folder, "bin", "etc", "termcap")
+        return os.path.join(self.package_folder, "etc", "termcap")
 
     def package_info(self):
         self.cpp_info.libs = ["termcap"]
