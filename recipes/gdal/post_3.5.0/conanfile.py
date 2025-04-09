@@ -634,11 +634,12 @@ class GdalConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
                         "JXL_THREADS", "JXL", strict=False)
         # Workaround for Parquet and ArrowDataset being provided by Arrow on CCI.
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
-                        "gdal_check_package(Parquet", "# gdal_check_package(Parquet", strict=False)
-        if Version(self.version) >= "3.6.0":
+        if Version(self.version) < "3.10.0":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
-                            "gdal_check_package(ArrowDataset", "# gdal_check_package(ArrowDataset", strict=False)
+                            "gdal_check_package(Parquet", "# gdal_check_package(Parquet")
+        if Version(self.version) >= "3.6.0" and Version(self.version) < "3.10.0":
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
+                            "gdal_check_package(ArrowDataset", "# gdal_check_package(ArrowDataset")
 
     def build(self):
         self._patch_sources()
