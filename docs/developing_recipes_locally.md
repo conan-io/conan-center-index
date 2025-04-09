@@ -27,12 +27,31 @@ This file is intended to provide all the commands you need to run in order to be
 
 ## Setup your environment
 
-1. Install a C++ development toolchain - ConanCenter's [build images](#testing-more-environments) are available
-2. [Install the Conan client](https://docs.conan.io/2/installation.html) - make sure to keep it up to date!
-3. Install CMake - this is the only tool which is assumed to be present
-   [see FAQ](faqs.md#why-recipes-that-use-build-tools-like-cmake-that-have-packages-in-conan-center-do-not-use-it-as-a-build-require-by-default) for details.
+In Conan Center, we require a baseline of tools and libraries that are assumed to be preinstalled on your system. This primarily affects Linux and similar platforms (FreeBSD, MinGW, etc.), while on Windows and macOS the distinction between system and non-system components is clearer.
 
-> **Note**: It's recommended to use a dedicated Python virtualenv when installing with `pip`.
+Conan Center Index recipes assume the following components are already installed:
+
+1. Conan client
+  * [Install the Conan client](https://docs.conan.io/2/installation.html) - make sure to keep it up to date!
+
+2. CMake (version 3.15 or higher)
+  * Some recipes with higher version requirements will include a [tool_requires](https://docs.conan.io/2/reference/conanfile/methods/build_requirements.html#tool-requires) on CMake
+
+3. Compiler toolchain
+  * Complete compiler suite and helper executables (e.g., strip, ar)
+  * On Debian-based distros, typically provided by the `build-essential` package
+  * See ConanCenter's [build images](#testing-more-environments) for Docker images with preinstalled toolchains
+
+4. Build tools
+  * [GNU make](https://www.gnu.org/software/make/ required by many recipes e.g. libcurl)
+  * [Perl](https://www.perl.org) (required by autotools and many recipes e.g. OpenSSL)
+  * Python interpreter (needed by some recipes e.g. pybind11)
+
+5. System integration
+  * pkg-config (required when using system dependencies like xorg, opengl, etc.)
+  * It's strongly recommended to define `tools.gnu:pkg_config` in your profile to point to this executable
+
+> **Note**: Using a dedicated Python virtual environment is highly recommended to avoid conflicts with other Python packages.
 
 ## Basic Commands
 
