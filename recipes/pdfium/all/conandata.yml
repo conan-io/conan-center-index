@@ -13,3 +13,8 @@ sources:
     chromium_build:
       url: "https://chromium.googlesource.com/chromium/src/build/+archive/95667421554b672f9330df8efb8148b6c2d00594.tar.gz"
       # sha256 is volatile on googlesource, no up-to-date github fork
+patches:
+  "95.0.4629":
+    - patch_file: "patches/95.0.4629-0001-include-cstdint.patch"
+      patch_description: "Avoids build failure on newer gcc versions"
+      patch_type: "conan"
