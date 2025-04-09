@@ -8,6 +8,7 @@ to be possible. There are usually waves of new features, patches and fixes that 
 ## Contents
 
   * [Breaking changes](#breaking-changes)
+  * [Expected Environment](#expected-environment)
   * [Isolate your project from upstream changes](#isolate-your-project-from-upstream-changes)<!-- endToc -->
 
 ## Breaking changes
@@ -34,6 +35,12 @@ It will substitute the syntax error by one nicer error provided by Conan client.
 
 To be sure that people using these new experimental features are using the required Conan version and testing the actual behavior
 of those features (feedback about them is very important to Conan).
+
+## Expected Environment
+
+When consuming pre-built Conan packages from Conan Center, in most cases you only need the Conan client installed on your system.
+
+However, when building packages from source, additional tools and dependencies are required. These vary depending on the package but typically include a compiler toolchain, CMake, and other build utilities. For a comprehensive list of requirements, please refer to the [setup your environment](developing_recipes_locally.md#setup-your-environment) section.
 
 ## Isolate your project from upstream changes
 

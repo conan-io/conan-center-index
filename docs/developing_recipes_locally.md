@@ -43,7 +43,7 @@ Conan Center Index recipes assume the following components are already installed
   * See ConanCenter's [build images](#testing-more-environments) for Docker images with preinstalled toolchains
 
 4. Build tools
-  * [GNU make](https://www.gnu.org/software/make/ required by many recipes e.g. libcurl)
+  * [GNU make](https://www.gnu.org/software/make/) (required by many recipes e.g. libcurl)
   * [Perl](https://www.perl.org) (required by autotools and many recipes e.g. OpenSSL)
   * Python interpreter (needed by some recipes e.g. pybind11)
 
