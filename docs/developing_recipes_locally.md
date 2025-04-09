@@ -39,7 +39,7 @@ Conan Center Index recipes assume the following components are already installed
 
 3. Compiler toolchain
   * Complete compiler suite and helper executables (e.g., strip, ar)
-  * On Debian-based distros, typically provided by the `build-essential` package
+  * On Debian-based distros, these are typically provided by the `build-essential` package
   * See ConanCenter's [build images](#testing-more-environments) for Docker images with preinstalled toolchains
 
 4. Build tools
