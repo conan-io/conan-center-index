@@ -1,7 +1,6 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -34,13 +33,7 @@ class Z3Conan(ConanFile):
         "use_gmp": False
     }
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -53,7 +46,7 @@ class Z3Conan(ConanFile):
         check_min_cppstd(self, 11)
 
     def validate_build(self):
-        check_min_cppstd(self, 17)
+        check_min_cppstd(self, 17 if Version(self.version) < "4.14" else 20)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
@@ -62,9 +55,6 @@ class Z3Conan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        venv = VirtualBuildEnv(self)
-        venv.generate()
-
         tc = CMakeToolchain(self)
         tc.variables["Z3_USE_LIB_GMP"] = self.options.use_gmp
         tc.variables["Z3_SINGLE_THREADED"] = not self.options.multithreaded
