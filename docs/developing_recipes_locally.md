@@ -31,7 +31,7 @@ In Conan Center, we require a baseline of tools and libraries that are assumed t
 
 Conan Center Index recipes assume the following components are already installed:
 
-1. Conan client
+1. Conan client 2.x
   * [Install the Conan client](https://docs.conan.io/2/installation.html) - make sure to keep it up to date!
 
 2. CMake (version 3.15 or higher)
