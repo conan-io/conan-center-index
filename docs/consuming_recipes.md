@@ -38,7 +38,7 @@ of those features (feedback about them is very important to Conan).
 
 ## Expected Environment
 
-When consuming pre-built Conan packages from Conan Center, in most cases you only need the Conan client installed on your system.
+When consuming pre-built Conan packages from Conan Center, in most cases you only need the [Conan client](https://docs.conan.io/2/installation.html) installed on your system.
 
 However, when building packages from source, additional tools and dependencies are required. These vary depending on the package but typically include a compiler toolchain, CMake, and other build utilities. For a comprehensive list of requirements, please refer to the [setup your environment](developing_recipes_locally.md#setup-your-environment) section.
 
