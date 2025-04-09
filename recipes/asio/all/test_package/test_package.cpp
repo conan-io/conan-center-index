@@ -1,11 +1,7 @@
 #include <asio.hpp>
+#include <iostream>
 
 int main()
 {
-#ifdef ASIO_IO_SERVICE
-    auto && service = asio::io_service{};
-#else
-    auto && service = asio::io_context{};
-#endif
-	(void)service;
+    std::cout << "ASIO VERSION: " << ASIO_VERSION << std::endl;
 }
