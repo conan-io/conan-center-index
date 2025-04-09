@@ -45,7 +45,7 @@ Conan Center Index recipes assume the following components are already installed
 4. Build tools
   * [GNU make](https://www.gnu.org/software/make/) (required by many recipes e.g. libcurl)
   * [Perl](https://www.perl.org) (required by autotools and many recipes e.g. OpenSSL)
-  * Python interpreter (needed by some recipes e.g. pybind11)
+  * Some recipes might require a Python interpreter (e.g. pybind11)
 
 5. System integration
   * pkg-config (required when using system dependencies like xorg, opengl, etc.)
