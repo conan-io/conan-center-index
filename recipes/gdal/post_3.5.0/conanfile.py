@@ -165,11 +165,15 @@ class GdalConan(ConanFile):
             self.options.with_arrow = False
         if Version(self.version) < "3.8":
             del self.options.with_libaec
+        
+        # Newer arrow requires the filesystem_layer enabled to make newer gdal
+        # ogr/ogrsf_frmts/parquet build correctly
+        if self.options.with_arrow and Version(self.version) >= "3.10.0":
+            self.options["arrow"].filesystem_layer = True
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.options["arrow"].filesystem_layer = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
