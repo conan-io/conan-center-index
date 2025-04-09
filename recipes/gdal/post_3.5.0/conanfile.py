@@ -175,7 +175,7 @@ class GdalConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("json-c/0.18")
+        self.requires("json-c/0.17")
         self.requires("libgeotiff/1.7.1")
         self.requires("libtiff/4.6.0")
         self.requires("proj/9.3.1")
