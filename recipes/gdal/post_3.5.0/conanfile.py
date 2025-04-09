@@ -185,7 +185,12 @@ class GdalConan(ConanFile):
         if self.options.with_armadillo:
             self.requires("armadillo/12.6.4")
         if self.options.with_arrow:
-            self.requires("arrow/16.1.0")
+            # Use arrow >= 16 with gdal >= 3.10 to take advantage of new features
+            # in arrow that newer gdal versions can use
+            if Version(self.version) < "3.10.0":
+                self.requires("arrow/14.0.2")
+            else:
+                self.requires("arrow/16.1.0")
         if self.options.with_basisu:
             self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
