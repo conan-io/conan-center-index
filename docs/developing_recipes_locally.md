@@ -31,25 +31,16 @@ In Conan Center, we require a baseline of tools and libraries that are assumed t
 
 Conan Center Index recipes assume the following components are already installed:
 
-1. Conan client 2.x
-  * [Install the Conan client](https://docs.conan.io/2/installation.html) - make sure to keep it up to date!
+Here’s a merged table that clearly separates the requirements for Linux, Windows, and macOS:
 
-2. CMake (version 3.15 or higher)
-  * Some recipes with higher version requirements will include a [tool_requires](https://docs.conan.io/2/reference/conanfile/methods/build_requirements.html#tool-requires) on CMake
+| Requirement | Linux | Windows | macOS |
+|-------------|-------|---------|-------|
+| **Conan client 2.x** | [Install the Conan client](https://docs.conan.io/2/installation.html) and keep it updated | [Install the Conan client](https://docs.conan.io/2/installation.html) | [Install the Conan client](https://docs.conan.io/2/installation.html) |
+| **CMake** | Version 3.15 or higher | Version 3.15 or higher | Version 3.15 or higher |
+| **Compiler toolchain** | Complete compiler suite with helper executables (e.g., `strip`, `ar`) <br> Install via `build-essential` on Debian-based distros | Visual Studio with C++ development components <br> Required: MSVC, Windows SDK, C++ CMake tools | Xcode or Command Line Tools <br> Install via App Store or `xcode-select --install` |
+| **Build tools** | GNU make, Perl, Python (for specific recipes) | Perl, Python (for specific recipes) | GNU make, Perl, Python (for specific recipes) |
+| **System integration** | pkg-config (define `tools.gnu:pkg_config` in your profile) | Not typically required | pkg-config (install via Homebrew: `brew install pkg-config`) |
 
-3. Compiler toolchain
-  * Complete compiler suite and helper executables (e.g., strip, ar)
-  * On Debian-based distros, these are typically provided by the `build-essential` package
-  * See ConanCenter's [build images](#testing-more-environments) for Docker images with preinstalled toolchains
-
-4. Build tools
-  * [GNU make](https://www.gnu.org/software/make/) (required by many recipes e.g. libcurl)
-  * [Perl](https://www.perl.org) (required by autotools and many recipes e.g. OpenSSL)
-  * Some recipes might require a Python interpreter (e.g. pybind11)
-
-5. System integration
-  * pkg-config (required when using system dependencies like xorg, opengl, etc.)
-  * It's strongly recommended to define `tools.gnu:pkg_config` in your profile to point to this executable
 
 > **Note**: Using a dedicated Python virtual environment is highly recommended to avoid conflicts with other Python packages.
 
