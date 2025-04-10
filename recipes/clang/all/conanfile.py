@@ -148,6 +148,14 @@ class ClangConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        if self.dependencies["llvm-core"].options.shared:
+            # CMake only supports this for in-tree builds (ie when building LLVM and Clang together) as
+            # we need to build clang-tblgen which requires the LLVMSupport library. See
+            # clang/lib/Support/CMakeLists.txt
+            raise ConanInvalidConfiguration("Building with the shared LLVM library is not supported")
+        elif self.options.shared:
+            # See Clang CMakeLists.txt
+            raise ConanInvalidConfiguration("Clang tools built against the shared library cannot be linked against static LLVM (llvm-core)")
 
     def source(self):
         sources = self.conan_data["sources"][self.version]
@@ -155,11 +163,15 @@ class ClangConan(ConanFile):
         get(self, **sources["cmake"], destination="cmake", strip_root=True)
 
     def generate(self):
+        llvm = self.dependencies["llvm-core"]
         tc = CMakeToolchain(self)
         tc.cache_variables.update({
+            "CLANG_LINK_CLANG_DYLIB": self.options.shared,
             "LLVM_INCLUDE_TESTS": False,
             # Following not necessary when https://github.com/conan-io/conan-center-index/pull/27156 is merged
-            "LLVM_ENABLE_RTTI": bool(self.dependencies["llvm-core"].options.rtti)
+            "LLVM_ENABLE_RTTI": llvm.options.rtti,
+            "LLVM_ENABLE_PIC": llvm.options.get_safe("fPIC", True),
+            "LLVM_LINK_LLVM_DYLIB": llvm.options.shared,
         })
 
         tc.generate()
