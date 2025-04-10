@@ -40,7 +40,19 @@ of those features (feedback about them is very important to Conan).
 
 When consuming pre-built Conan packages from Conan Center, in most cases you only need the [Conan client](https://docs.conan.io/2/installation.html) installed on your system.
 
-However, when building packages from source, additional tools and dependencies are required. These vary depending on the package but typically include a compiler toolchain, CMake, and other build utilities. For a comprehensive list of requirements, please refer to the [setup your environment](developing_recipes_locally.md#setup-your-environment) section.
+However, when building packages from source, for instance, when using `--build=missing`, additional tools and dependencies may be required. These vary depending on the package but typically include a compiler toolchain, CMake, and other build utilities.
+
+Conan Center Index recipes assume the following components are already installed in your system:
+
+| Requirement | Linux | Windows | macOS |
+|-------------|-------|---------|-------|
+| **Conan client 2.x** | [Install the Conan client](https://docs.conan.io/2/installation.html) and keep it updated | [Install the Conan client](https://docs.conan.io/2/installation.html) | [Install the Conan client](https://docs.conan.io/2/installation.html) |
+| **CMake** | Version 3.15 or higher. In case not present in the system, it can be installed as [tool_requires](https://docs.conan.io/2/reference/conanfile/methods/build_requirements.html#tool-requires) | Version 3.15 or higher | Version 3.15 or higher |
+| **Compiler toolchain** | Complete compiler suite with helper executables (e.g., `strip`, `ar`) <br> Install via `build-essential` on Debian-based distros | Visual Studio with C++ development components <br> Required: MSVC, Windows SDK, C++ CMake tools | Xcode or Command Line Tools <br> Install via App Store or `xcode-select --install` |
+| **Build tools** | GNU make, Perl, Python (for specific recipes) | Perl, Python (for specific recipes) | GNU make, Perl, Python (for specific recipes) |
+| **System integration** | pkg-config (define `tools.gnu:pkg_config` in your profile) | Not typically required | pkg-config (install via Homebrew: `brew install pkg-config`) |
+
+> **Note**: Using a dedicated Python virtual environment is highly recommended to avoid conflicts with other Python packages.
 
 ## Isolate your project from upstream changes
 
