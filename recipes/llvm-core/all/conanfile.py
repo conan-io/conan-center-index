@@ -483,6 +483,8 @@ class LLVMCoreConan(ConanFile):
             set(LLVM_TARGETS_WITH_JIT "{';'.join(targets_with_jit)}")
             set(LLVM_NATIVE_ARCH "{build_info['native_arch']}")
             set(LLVM_ENABLE_RTTI "{boolean_option_to_str(self.options.rtti)}")
+            set(LLVM_ENABLE_PIC "{boolean_option_to_str(self.options.get_safe("fPIC", default=True))}")
+            set(LLVM_LINK_LLVM_DYLIB "{boolean_option_to_str(self.options.shared)}")
             
             set_property(GLOBAL PROPERTY LLVM_TARGETS_CONFIGURED On)
             set_property(GLOBAL PROPERTY LLVM_COMPONENT_LIBS ${{LLVM_AVAILABLE_LIBS}})
