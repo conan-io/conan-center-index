@@ -126,6 +126,9 @@ class OpenvinoConan(ConanFile):
             destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/ComputeLibrary")
         get(self, **self.conan_data["sources"][self.version]["onednn_gpu"], strip_root=True,
             destination=f"{self.source_folder}/src/plugins/intel_gpu/thirdparty/onednn_gpu")
+        if Version(self.version) >= "2025.1.0":
+            get(self, **self.conan_data["sources"][self.version]["arm_kleidiai"], strip_root=True,
+                destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/kleidiai")
         rmdir(self, f"{self.source_folder}/src/plugins/intel_gpu/thirdparty/rapidjson")
         apply_conandata_patches(self)
 
@@ -318,6 +321,8 @@ class OpenvinoConan(ConanFile):
                 openvino_runtime.libs.extend(["openvino_onednn_cpu", "openvino_snippets", "mlas"])
                 if self._target_arm:
                     openvino_runtime.libs.append("arm_compute-static")
+                    if Version(self.version) >= "2025.1.0":
+                        openvino_runtime.libs.append("kleidiai")
             if self.options.get_safe("enable_gpu"):
                 openvino_runtime.libs.extend(["openvino_intel_gpu_plugin", "openvino_intel_gpu_graph",
                                               "openvino_intel_gpu_runtime", "openvino_intel_gpu_kernels"])

@@ -6,6 +6,9 @@ sources:
     "arm_compute":
       url: "https://github.com/ARM-software/ComputeLibrary/archive/refs/tags/v24.09.tar.gz"
       sha256: "49b8620f21cbbe49e825a131d9eacd548532646289b50e070b83860bd88087fe"
+    "arm_kleidiai":
+      url: "https://github.com/ARM-software/kleidiai/archive/eaf63a6ae9a903fb4fa8a4d004a974995011f444.tar.gz"
+      sha256: "756fa3040ff23f78a4c3f4c1984a3814d78d302b0b5dc3f0b255322368aefc58"
     "onednn_cpu":
       url: "https://github.com/openvinotoolkit/oneDNN/archive/5baba714e16e11309774a62783f363cad30e97c7.tar.gz"
       sha256: "4430875c1690abecc57d9cc8464be690430e217a0453c69e030c667e5801e749"
