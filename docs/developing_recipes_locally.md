@@ -8,7 +8,6 @@ This file is intended to provide all the commands you need to run in order to be
 ## Contents
 
   * [Clone your fork](#clone-your-fork)
-  * [Setup your environment](#setup-your-environment)
   * [Basic Commands](#basic-commands)
     * [Try it yourself](#try-it-yourself)
   * [Debugging Failed Builds](#debugging-failed-builds)
@@ -24,25 +23,6 @@ This file is intended to provide all the commands you need to run in order to be
 
 1. Follow the GitHub UI to [fork this repository](https://github.com/conan-io/conan-center-index/fork)
 2. [Clone your fork](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
-
-## Setup your environment
-
-In Conan Center, we require a baseline of tools and libraries that are assumed to be preinstalled on your system. This primarily affects Linux and similar platforms (FreeBSD, MinGW, etc.), while on Windows and macOS the distinction between system and non-system components is clearer.
-
-Conan Center Index recipes assume the following components are already installed:
-
-Here’s a merged table that clearly separates the requirements for Linux, Windows, and macOS:
-
-| Requirement | Linux | Windows | macOS |
-|-------------|-------|---------|-------|
-| **Conan client 2.x** | [Install the Conan client](https://docs.conan.io/2/installation.html) and keep it updated | [Install the Conan client](https://docs.conan.io/2/installation.html) | [Install the Conan client](https://docs.conan.io/2/installation.html) |
-| **CMake** | Version 3.15 or higher | Version 3.15 or higher | Version 3.15 or higher |
-| **Compiler toolchain** | Complete compiler suite with helper executables (e.g., `strip`, `ar`) <br> Install via `build-essential` on Debian-based distros | Visual Studio with C++ development components <br> Required: MSVC, Windows SDK, C++ CMake tools | Xcode or Command Line Tools <br> Install via App Store or `xcode-select --install` |
-| **Build tools** | GNU make, Perl, Python (for specific recipes) | Perl, Python (for specific recipes) | GNU make, Perl, Python (for specific recipes) |
-| **System integration** | pkg-config (define `tools.gnu:pkg_config` in your profile) | Not typically required | pkg-config (install via Homebrew: `brew install pkg-config`) |
-
-
-> **Note**: Using a dedicated Python virtual environment is highly recommended to avoid conflicts with other Python packages.
 
 ## Basic Commands
 
