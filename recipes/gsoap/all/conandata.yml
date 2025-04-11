@@ -7,6 +7,11 @@
 # At some point the Conan client might come pre-configured with this backup remote by default, but don't delete the links then
 # some users might still rely on the old revisions/not have it set to point to our CCI backup remote
 sources:
+  "2.8.138":
+    url:
+      - "https://sourceforge.net/projects/gsoap2/files/gsoap_2.8.138.zip/download"
+      - "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/5ddd63eebd6a08e1838e93400a843975c65ae77e09a95276f9adf166d3ca6f74"
+    sha256: "5ddd63eebd6a08e1838e93400a843975c65ae77e09a95276f9adf166d3ca6f74"
   "2.8.134":
     url:
       - "https://sourceforge.net/projects/gsoap2/files/gsoap_2.8.134.zip/download"
