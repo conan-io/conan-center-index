@@ -1,17 +1,17 @@
 from conan import ConanFile
 from conan.errors import ConanException
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import Environment
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rename, replace_in_file, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import check_min_vs, is_msvc, unix_path_package_info_legacy
+from conan.tools.microsoft import is_msvc
 
 import os
 import re
 import shutil
 
-required_conan_version = ">=1.60.0 <2 || >=2.0.5"
+required_conan_version = ">=2.4"
 
 
 class LibtoolConan(ConanFile):
@@ -25,6 +25,8 @@ class LibtoolConan(ConanFile):
     topics = ("configure", "library", "shared", "static")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
     settings = "os", "arch", "compiler", "build_type"
+    languages = ["C"]
+    implements = ["auto_shared_fpic"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -34,22 +36,8 @@ class LibtoolConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _has_dual_profiles(self):
-        return hasattr(self, "settings_build")
-
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -57,21 +45,11 @@ class LibtoolConan(ConanFile):
     def requirements(self):
         self.requires("automake/1.16.5")
 
-        #TODO: consider adding m4 as direct dependency, perhaps when we start using version ranges.
-        # https://github.com/conan-io/conan-center-index/pull/16248#discussion_r1116332095
-        #self.requires("m4/1.4.19")
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def build_requirements(self):
-        if self._has_dual_profiles:
-            self.tool_requires("automake/<host_version>")
-            self.tool_requires("m4/1.4.19")               # Needed by configure
-
+        self.tool_requires("automake/1.16.5")
+        self.tool_requires("m4/1.4.19")               # Needed by configure
         self.tool_requires("gnu-config/cci.20210814")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -84,10 +62,6 @@ class LibtoolConan(ConanFile):
         return os.path.join(self.package_folder, "res")
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
-        if not self._has_dual_profiles:
-            VirtualRunEnv(self).generate(scope="build")
-
         if is_msvc(self):
             # __VSCMD_ARG_NO_LOGO: this test_package has too many invocations,
             #                      this avoids printing the logo everywhere
@@ -99,10 +73,6 @@ class LibtoolConan(ConanFile):
             env.vars(self, scope="build").save_script("conanbuild_vcvars_options.bat")
 
         tc = AutotoolsToolchain(self)
-
-        if is_msvc(self) and check_min_vs(self, "180", raise_invalid=False):
-            tc.extra_cflags.append("-FS")
-
         tc.configure_args.extend([
             "--datarootdir=${prefix}/res",
             "--enable-shared",
@@ -238,8 +208,3 @@ class LibtoolConan(ConanFile):
         self.buildenv_info.append_path("AUTOMAKE_CONAN_INCLUDES", libtool_aclocal_dir)
         self.runenv_info.append_path("ACLOCAL_PATH", libtool_aclocal_dir)
         self.runenv_info.append_path("AUTOMAKE_CONAN_INCLUDES", libtool_aclocal_dir)
-
-        # For Conan 1.x downstream consumers, can be removed once recipe is Conan 1.x only:
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.env_info.ACLOCAL_PATH.append(unix_path_package_info_legacy(self, libtool_aclocal_dir))
-        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(unix_path_package_info_legacy(self, libtool_aclocal_dir))
