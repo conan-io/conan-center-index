@@ -1,4 +1,10 @@
 sources:
+  "9.0.0":
+    url: "https://downloads.sourceforge.net/project/tcl/Tcl/9.0.0/tcl9.0.0-src.tar.gz"
+    sha256: "3bfda6dbaee8e9b1eeacc1511b4e18a07a91dff82d9954cdb9c729d8bca4bbb7"
+  "8.6.15":
+    url: "https://downloads.sourceforge.net/project/tcl/Tcl/8.6.15/tcl8.6.15-src.tar.gz"
+    sha256: "861e159753f2e2fbd6ec1484103715b0be56be3357522b858d3cbb5f893ffef1"
   "8.6.13":
     url: "https://downloads.sourceforge.net/project/tcl/Tcl/8.6.13/tcl8.6.13-src.tar.gz"
     sha256: "43a1fae7412f61ff11de2cfd05d28cfc3a73762f354a417c62370a54e2caf066"
@@ -9,6 +15,10 @@ sources:
     url: "https://downloads.sourceforge.net/project/tcl/Tcl/8.6.10/tcl8.6.10-src.tar.gz"
     sha256: "5196dbf6638e3df8d5c87b5815c8c2b758496eb6f0e41446596c9a4e638d87ed"
 patches:
+  "9.0.0":
+    - patch_file: "patches/0001-8.6.11-no-read-only-data.patch"
+  "8.6.15":
+    - patch_file: "patches/0001-8.6.11-no-read-only-data.patch"
   "8.6.13":
     - patch_file: "patches/0001-8.6.11-no-read-only-data.patch"
   "8.6.11":

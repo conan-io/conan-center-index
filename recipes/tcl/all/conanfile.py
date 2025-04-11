@@ -105,13 +105,15 @@ class TclConan(ConanFile):
         unix_config_dir = os.path.join(self.source_folder, "unix")
         # When disabling 64-bit support (in 32-bit), this test must be 0 in order to use "long long" for 64-bit ints
         # (${tcl_type_64bit} can be either "__int64" or "long long")
-        replace_in_file(self, os.path.join(unix_config_dir, "configure"),
-                        "(sizeof(${tcl_type_64bit})==sizeof(long))",
-                        "(sizeof(${tcl_type_64bit})!=sizeof(long))")
+        if Version(self.version) < "9.0.0":
+            replace_in_file(self, os.path.join(unix_config_dir, "configure"),
+                            "(sizeof(${tcl_type_64bit})==sizeof(long))",
+                            "(sizeof(${tcl_type_64bit})!=sizeof(long))")
 
         unix_makefile_in = os.path.join(unix_config_dir, "Makefile.in")
         # Avoid building internal libraries as shared libraries
-        replace_in_file(self, unix_makefile_in, "--enable-shared --enable-threads", "--enable-threads")
+        if Version(self.version) < "9.0.0":
+            replace_in_file(self, unix_makefile_in, "--enable-shared --enable-threads", "--enable-threads")
         # Avoid clearing CFLAGS and LDFLAGS in the makefile
         replace_in_file(self, unix_makefile_in, "\nCFLAGS\t", "\n#CFLAGS\t")
         replace_in_file(self, unix_makefile_in, "\nLDFLAGS\t", "\n#LDFLAGS\t")
@@ -180,10 +182,23 @@ class TclConan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.configure(build_script_folder=self._get_configure_subdir())
+
+            exe = ".exe" if self.settings.os == "Windows" else ""
+            minizip = os.path.join(self.build_folder, f"minizip{exe}")
+
             # https://core.tcl.tk/tcl/tktview/840660e5a1
             for root, _, list_of_files in os.walk(self.build_folder):
                 if "Makefile" in list_of_files:
                     replace_in_file(self, os.path.join(root, "Makefile"), "-Dstrtod=fixstrtod", "", strict=False)
+
+                if "configure" in list_of_files:
+                    # In case it tries to use the built minizip (which it uses if it can't find
+                    # a system `zip`), fix the path to it.
+                    replace_in_file(self, os.path.join(root, "configure"),
+                                    'ZIP_PROG="./minizip${EXEEXT_FOR_BUILD}"',
+                                    f'ZIP_PROG="{minizip}"',
+                                    strict=False)
+
             # For some reason this target "binaries" may not be built before others
             # on Windows while it's a dependency of many other targets
             autotools.make(target="binaries")
