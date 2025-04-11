@@ -2,12 +2,12 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, valid_max_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 class ZXingCppConan(ConanFile):
     name = "zxing-cpp"
@@ -72,6 +72,9 @@ class ZXingCppConan(ConanFile):
     def validate(self):
         cpp_version = 17 if Version(self.version) >= "1.2.0" else 14
 
+        if Version(self.version) >= "2.3.0" and valid_max_cppstd(self, 17):
+            self.output.warning("Using C++17 lacks support for DataBarLimited and multi-symbol and position independent detection for DataMatrix")
+
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, cpp_version)
         min_version = self._compiler_cpp_support.get(str(cpp_version)).get(str(self.settings.compiler))
@@ -123,6 +126,7 @@ class ZXingCppConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "ZXing")
         self.cpp_info.set_property("cmake_target_name", "ZXing::ZXing")
         self.cpp_info.set_property("pkg_config_name", "zxing")
+        self.cpp_info.includedirs.append(os.path.join("include", "ZXing"))
         self.cpp_info.libs = ["ZXingCore" if Version(self.version) < "1.1" else "ZXing"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "m"]
