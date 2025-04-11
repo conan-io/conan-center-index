@@ -98,7 +98,7 @@ class VkBootstrapConan(ConanFile):
         deps.generate()
 
     def _source_patches(self):
-        if Version(self.version) >= "v1.3.266":
+        if Version(self.version) >= "1.3.266":
             # INFO: The upstream did not forbid the use of shared libraries
             # https://github.com/charles-lunarg/vk-bootstrap/issues/367
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
