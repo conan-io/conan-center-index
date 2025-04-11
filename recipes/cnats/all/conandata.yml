@@ -17,3 +17,6 @@ sources:
   "3.9.3":
     url: "https://github.com/nats-io/nats.c/archive/refs/tags/v3.9.3.tar.gz"
     sha256: "b5dd3971b72fa5fc4c5b6d71c6900dc0a8a20465824fc23c0054f7f319e97952"
+  "3.10.1":
+    url: "https://github.com/nats-io/nats.c/archive/refs/tags/v3.10.1.tar.gz"
+    sha256: "1765533bbc1270ab7c89e3481b4778db7d1e7b4db2fa906b6602cd5c02846222"
