@@ -1,0 +1,14 @@
+sources:
+  cci.20211015:
+    url: https://github.com/ArchangelSDY/QtMockWebServer/archive/069384a8994ee0bbbec52eda2d28d61d057ab314.tar.gz
+    sha256: 2ee7fa685d085d5ce240d167d09b08759590ad483c37850b74b4a5fc842c79d0
+patches:
+  cci.20211015:
+    - patch_file: "patches/0001-disabled-Qt6-mandatory-cmake-requirement.patch"
+      patch_type: "conan"
+    - patch_file: "patches/0002-fixed-cmake-policy-CMP0091-error.patch"
+      patch_type: "bugfix"
+    - patch_file: "patches/0003-added-support-for-older-qt-5.patch"
+      patch_type: "portability"
+    - patch_file: "patches/0004-fixed-server-hangs.patch"
+      patch_type: "bugfix"
