@@ -73,9 +73,7 @@ class PodofoConan(ConanFile):
     def requirements(self):
         self.requires("freetype/2.13.2")
         self.requires("zlib/[>=1.2.11 <2]")
-        if (
-            Version(self.version) >= "0.10.4"
-        ):  # pylint: disable=conan-condition-evals-to-constant
+        if Version(self.version) >= "0.10.4":  # pylint: disable=conan-condition-evals-to-constant
             self.requires("libxml2/[>2 <3]")
         if self.settings.os != "Windows":
             self.requires("fontconfig/2.15.0")
