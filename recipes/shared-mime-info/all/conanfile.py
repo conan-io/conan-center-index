@@ -17,17 +17,8 @@ class SharedMimeInfoConan(ConanFile):
     license = ("GPL-2.0")
     homepage = "https://gitlab.freedesktop.org/xdg/shared-mime-info"
     topics = ("ferrdesktop", "mime")
-    package_type = "library"
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-    }
 
     def layout(self):
         basic_layout(self, src_folder="src")
