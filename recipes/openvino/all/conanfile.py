@@ -362,7 +362,9 @@ class OpenvinoConan(ConanFile):
                 openvino_runtime.libs.append("openvino_builders")
             openvino_runtime.libs.extend(["openvino_reference", "openvino_shape_inference", "openvino_itt",
                                           # utils goes last since all others depend on it
-                                          "openvino_util", "openvino_common_translators"])
+                                          "openvino_util"])
+            if Version(self.version) >= "2025.1.0":
+                openvino_runtime.libs.append("openvino_common_translators")
             # set 'openvino' once again for transformations objects files (cyclic dependency)
             # openvino_runtime.libs.append("openvino")
             full_openvino_lib_path = os.path.join(self.package_folder, "lib", "openvino.lib").replace("\\", "/") if self.settings.os == "Windows" else \
