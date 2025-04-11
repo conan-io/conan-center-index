@@ -55,8 +55,18 @@ class PodofoConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
+        if (
+            Version(self.version) < "0.10.4"
+        ):  # pylint: disable=conan-condition-evals-to-constant
+            # Not available in older versions
+            self.options.with_lib_only = False
+        else:
+            # Required for this version
+            self.options.with_openssl = True
+
         if self.settings.os == "Windows":
             del self.options.fPIC
+
         if is_msvc(self):
             # libunistring recipe raises for Visual Studio
             # TODO: Enable again when fixed?
@@ -105,7 +115,9 @@ class PodofoConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["PODOFO_BUILD_TOOLS"] = self.options.with_tools
         tc.variables["PODOFO_BUILD_LIB_ONLY"] = self.options.with_lib_only
-        if Version(self.version) < "0.10.0":
+        if (
+            podofo_version < "0.10.0"
+        ):  # pylint: disable=conan-condition-evals-to-constant
             tc.variables["PODOFO_BUILD_SHARED"] = self.options.shared
         tc.variables["PODOFO_BUILD_STATIC"] = not self.options.shared
         if not self.options.threadsafe:
