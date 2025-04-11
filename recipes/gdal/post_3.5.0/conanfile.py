@@ -7,7 +7,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.0.5"
 
 
 class GdalConan(ConanFile):
@@ -165,6 +165,11 @@ class GdalConan(ConanFile):
             self.options.with_arrow = False
         if Version(self.version) < "3.8":
             del self.options.with_libaec
+        
+        # Newer arrow requires the filesystem_layer enabled to make newer gdal
+        # ogr/ogrsf_frmts/parquet build correctly
+        if self.options.with_arrow and Version(self.version) >= "3.10.0":
+            self.options["arrow"].filesystem_layer = True
 
     def configure(self):
         if self.options.shared:
@@ -184,7 +189,12 @@ class GdalConan(ConanFile):
         if self.options.with_armadillo:
             self.requires("armadillo/12.6.4")
         if self.options.with_arrow:
-            self.requires("arrow/14.0.2")
+            # Use arrow >= 16 with gdal >= 3.10 to take advantage of new features
+            # in arrow that newer gdal versions can use
+            if Version(self.version) < "3.10.0":
+                self.requires("arrow/14.0.2")
+            else:
+                self.requires("arrow/16.1.0")
         if self.options.with_basisu:
             self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
@@ -633,9 +643,10 @@ class GdalConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
                         "JXL_THREADS", "JXL", strict=False)
         # Workaround for Parquet and ArrowDataset being provided by Arrow on CCI.
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
-                        "gdal_check_package(Parquet", "# gdal_check_package(Parquet")
-        if Version(self.version) >= "3.6.0":
+        if Version(self.version) < "3.10.0":
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
+                            "gdal_check_package(Parquet", "# gdal_check_package(Parquet")
+        if Version(self.version) >= "3.6.0" and Version(self.version) < "3.10.0":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
                             "gdal_check_package(ArrowDataset", "# gdal_check_package(ArrowDataset")
 
