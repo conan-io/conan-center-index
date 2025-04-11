@@ -1,13 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import (
-    apply_conandata_patches,
-    copy,
-    export_conandata_patches,
-    get,
-    rmdir,
-)
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -55,9 +49,7 @@ class PodofoConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if (
-            Version(self.version) < "0.10.4"
-        ):  # pylint: disable=conan-condition-evals-to-constant
+        if Version(self.version) < "0.10.4":  # pylint: disable=conan-condition-evals-to-constant
             # Not available in older versions
             self.options.with_lib_only = False
         else:
@@ -66,7 +58,6 @@ class PodofoConan(ConanFile):
 
         if self.settings.os == "Windows":
             del self.options.fPIC
-
         if is_msvc(self):
             # libunistring recipe raises for Visual Studio
             # TODO: Enable again when fixed?
@@ -105,12 +96,8 @@ class PodofoConan(ConanFile):
         check_min_cppstd(self, 11)
 
     def source(self):
-        get(
-            self,
-            **self.conan_data["sources"][self.version],
-            destination=self.source_folder,
-            strip_root=True,
-        )
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
     def generate(self):
         podofo_version = Version(self.version)
@@ -118,9 +105,7 @@ class PodofoConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["PODOFO_BUILD_TOOLS"] = self.options.with_tools
         tc.variables["PODOFO_BUILD_LIB_ONLY"] = self.options.with_lib_only
-        if (
-            podofo_version < "0.10.0"
-        ):  # pylint: disable=conan-condition-evals-to-constant
+        if podofo_version < "0.10.0":  # pylint: disable=conan-condition-evals-to-constant
             tc.variables["PODOFO_BUILD_SHARED"] = self.options.shared
         tc.variables["PODOFO_BUILD_STATIC"] = not self.options.shared
         if not self.options.threadsafe:
@@ -138,20 +123,13 @@ class PodofoConan(ConanFile):
         tc.variables["PODOFO_WITH_UNISTRING"] = self.options.with_unistring
 
         if self.options.with_openssl:
-            tc.variables["PODOFO_HAVE_OPENSSL_1_1"] = (
-                Version(self.dependencies["openssl"].ref.version) >= "1.1"
-            )
-            if "no_rc4" in self.dependencies["openssl"].options:
-                tc.variables["PODOFO_HAVE_OPENSSL_NO_RC4"] = self.dependencies[
-                    "openssl"
-                ].options.no_rc4
+            tc.variables["PODOFO_HAVE_OPENSSL_1_1"] = Version(self.dependencies["openssl"].ref.version) >= "1.1"
+            if self.options.with_openssl and ("no_rc4" in self.dependencies["openssl"].options):
+                tc.variables["PODOFO_HAVE_OPENSSL_NO_RC4"] = self.dependencies["openssl"].options.no_rc4
 
-        if (
-            podofo_version < "0.10.0"
-        ):  # pylint: disable=conan-condition-evals-to-constant
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = (
-                "3.5"  # CMake 4 support
-            )
+        if podofo_version < "0.10.0": # pylint: disable=conan-condition-evals-to-constant
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -164,20 +142,14 @@ class PodofoConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(
-            self,
-            "COPYING",
-            src=self.source_folder,
-            dst=os.path.join(self.package_folder, "licenses"),
-        )
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         podofo_version = Version(self.version)
-        pkg_config_name = "libpodofo"
-        self.cpp_info.set_property("pkg_config_name", pkg_config_name)
+        self.cpp_info.set_property("pkg_config_name", "libpodofo")
         if podofo_version < "0.10.0":
             self.cpp_info.libs = ["podofo"]
             if self.settings.os == "Windows" and self.options.shared:
