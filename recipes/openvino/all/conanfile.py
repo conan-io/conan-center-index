@@ -165,7 +165,8 @@ class OpenvinoConan(ConanFile):
     def requirements(self):
         self.requires("onetbb/2021.10.0")
         self.requires("pugixml/1.14")
-        self.requires("nlohmann_json/3.11.3")
+        if Version(self.version) >= "2025.1.0":
+                self.requires("nlohmann_json/3.11.3")
         if self._target_x86_64:
             self.requires("xbyak/6.73")
         if self.options.get_safe("enable_gpu"):
