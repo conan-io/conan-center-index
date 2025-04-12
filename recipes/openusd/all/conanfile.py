@@ -113,8 +113,8 @@ class OpenUSDConan(ConanFile):
             self.options.rm_safe("fPIC")
         # Set same options as in https://github.com/PixarAnimationStudios/OpenUSD/blob/release/build_scripts/build_usd.py#L1476
         self.options["opensubdiv/*"].with_tbb = True
-        # if self.options.enable_gl_support:
-        self.options["opensubdiv/*"].with_opengl = self.options.enable_gl_support
+        if self.options.enable_gl_support:
+            self.options["opensubdiv/*"].with_opengl = self.options.enable_gl_support
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -158,8 +158,6 @@ class OpenUSDConan(ConanFile):
             self.requires("imath/3.1.12")
 
     def validate(self):
-        if not self.options.shared:
-            raise ConanInvalidConfiguration("static not yet supported")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -213,10 +211,10 @@ class OpenUSDConan(ConanFile):
             tc.variables["PXR_ENABLE_OPENVDB_SUPPORT"] = self.options.enable_openvdb_support and self.options.enable_gl_support
             tc.variables["OPENVDB_LIBRARY"] = "OpenVDB::openvdb"
 
-            tc.variables["PXR_BUILD_OPENIMAGEIO_PLUGIN"] = self.options.build_openimageio_plugin and self.options.build_gpu_support
-            tc.variables["PXR_BUILD_COLORIO_PLUGIN"] = self.options.build_opencolorio_plugin and self.options.enable_gl_support and self.options.build_gpu_support
+            tc.variables["PXR_BUILD_OPENIMAGEIO_PLUGIN"] = self.options.build_openimageio_plugin and self.options.shared and self.options.build_gpu_support
+            tc.variables["PXR_BUILD_COLORIO_PLUGIN"] = self.options.build_opencolorio_plugin and self.options.shared and self.options.enable_gl_support and self.options.build_gpu_support
 
-            if self.options.build_embree_plugin and self.options.build_gpu_support:
+            if self.options.build_embree_plugin and self.options.shared and self.options.build_gpu_support:
                 tc.variables["PXR_BUILD_EMBREE_PLUGIN"] = self.options.build_embree_plugin
                 tc.variables["EMBREE_LIBRARY"] = self.dependencies['embree3'].cpp_info.libdirs[0]
                 tc.variables["EMBREE_INCLUDE_DIR"] = self.dependencies['embree3'].cpp_info.includedirs[0].replace("\\", "/")
@@ -229,7 +227,7 @@ class OpenUSDConan(ConanFile):
         # Renderman is a proprietary software, see build_renderman_plugin 
         tc.variables["PXR_BUILD_PRMAN_PLUGIN"] = False
 
-        if self.options.build_alembic_plugin:
+        if self.options.build_alembic_plugin and self.options.shared:
             tc.variables["PXR_BUILD_ALEMBIC_PLUGIN"] = True
             tc.variables["ALEMBIC_FOUND"] = True
             tc.variables["ALEMBIC_LIBRARIES"] = "Alembic::Alembic"
@@ -238,7 +236,7 @@ class OpenUSDConan(ConanFile):
 
         tc.variables["PXR_ENABLE_HDF5_SUPPORT"] = self.options.build_alembic_plugin and self.options.enable_hdf5_support
 
-        if self.options.build_draco_plugin:
+        if self.options.build_draco_plugin and self.options.shared:
             tc.variables["PXR_BUILD_DRACO_PLUGIN"] = True
             tc.variables["DRACO_LIBRARY"] = "draco::draco"
             tc.variables["DRACO_INCLUDES"] = self.dependencies['draco'].cpp_info.includedirs[0].replace("\\", "/")
@@ -251,24 +249,22 @@ class OpenUSDConan(ConanFile):
         tc.generate()
 
         tc = CMakeDeps(self)
+        if self.options.build_imaging:
+            tc.set_property("opensubdiv::osdcpu", "cmake_target_name", "OpenSubdiv::osdcpu")
+            tc.set_property("opensubdiv::osdcpu", "cmake_target_aliases", ["OpenSubdiv::osdcpu_static"])
         if self.options.enable_materialx_support:
             tc.set_property("materialx::MaterialXCore", "cmake_target_name", "MaterialXCore")
             tc.set_property("materialx::MaterialXFormat", "cmake_target_name", "MaterialXFormat")
             tc.set_property("materialx::MaterialXGenShader", "cmake_target_name", "MaterialXGenShader")
             tc.set_property("materialx::MaterialXRender", "cmake_target_name", "MaterialXRender")
             tc.set_property("materialx::MaterialXGenGlsl", "cmake_target_name", "MaterialXGenGlsl")
+            
         tc.generate()
 
         tc = VirtualBuildEnv(self)
         tc.generate()
 
-    def _patch_sources(self):
-        rmdir(self, os.path.join(self.source_folder, "cmake", "modules"))
-        
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "defaults", "Packages.cmake"), "find_package(OpenSubdiv 3 REQUIRED)", "find_package(OpenSubdiv REQUIRED)")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
