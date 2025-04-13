@@ -9,7 +9,7 @@ from conan.tools.files import copy, get, rm, rmdir, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class ResiprocateConan(ConanFile):
@@ -40,16 +40,12 @@ class ResiprocateConan(ConanFile):
         "with_mysql": False,
     }
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    implements = ["auto_shared_fpic"]
 
-    def configure(self):
+    def validate(self):
         if self.settings.os == "Windows" or is_apple_os(self):
             # FIXME: unreleased versions of resiprocate use CMake and should support Windows and macOS
             raise ConanInvalidConfiguration(f"reSIProcate recipe does not currently support {self.settings.os}.")
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -58,7 +54,7 @@ class ResiprocateConan(ConanFile):
         if self.options.with_ssl:
             self.requires("openssl/1.1.1w")  # OpenSSL 3.x is not supported
         if self.options.with_postgresql:
-            self.requires("libpq/15.4")
+            self.requires("libpq/16.8")
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.1.0")
 
@@ -101,6 +97,3 @@ class ResiprocateConan(ConanFile):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs = ["pthread"]
 
-        # TODO: Legacy, to be removed on Conan 2.0
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bin_path)
