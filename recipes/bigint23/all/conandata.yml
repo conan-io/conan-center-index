@@ -1,4 +1,4 @@
 sources:
-  "1.0":
-    url: "https://github.com/rwindegger/bigint23/archive/refs/tags/v1.0.tar.gz"
-    sha256: "157C05B13C049F31B5ABF5FD8AC3EA53E738B294353736787B6BEBDD848DBFE7"
+  "2.0":
+    url: "https://github.com/rwindegger/bigint23/archive/refs/tags/v2.0.tar.gz"
+    sha256: "623DAD137A6D536FBF975E8CF501920D709754955DE24DAB9EDCBEC62D645823"

@@ -11,7 +11,7 @@ required_conan_version = ">=2.0.9"
 
 class PackageConan(ConanFile):
     name = "bigint23"
-    description = "A header-only C++ library provides a fixed-width arbitrary-precision integer type called `bigint23`. It supports both signed and unsigned numbers with a customizable bit-width."
+    description = "A header-only C++ library provides a arbitrary-fixed-width integer type called `bigint`. It supports both signed and unsigned numbers with a customizable bit-width."
     license = "MIT"
     url = "https://github.com/rwindegger/bigint23"
     homepage = "https://github.com/rwindegger/bigint23"

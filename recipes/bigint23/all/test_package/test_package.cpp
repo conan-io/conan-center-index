@@ -1,8 +1,8 @@
-#include <bigint23/bigint23.h>
+#include <bigint23/bigint.hpp>
 #include <iostream>
 
 int main(void) {
-	bigint23::bigint23<128, false> const value = 0x12345678;
+	bigint::bigint<bigint::BitWidth{128}, bigint::Signedness::Unsigned> const value = 0x12345678;
 	std::cout << value << '\n';
     return EXIT_SUCCESS;
 }
