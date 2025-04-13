@@ -36,6 +36,16 @@ class QuantlibConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if is_msvc(self):
+            # From no later than 1.30, CMAKE_MSVC_RUNTIME_LIBRARY determine target name postfix
+            # CMAKE_MSVC_RUNTIME_LIBRARY will set to MultiThreaded$<$<CONFIG:Debug>:Debug> if not explicited set
+            # after testing, only this way can take effect
+            # (see https://github.com/lballabio/QuantLib/blob/QuantLib-v1.30/cmake/Platform.cmake#L7
+            #  and https://github.com/quantlib/QuantLib/blob/QuantLib-v1.30/CMakeLists.txt#L232)
+            if self.settings.compiler.runtime == "dynamic":
+                self.conf.define("tools.cmake.cmaketoolchain:extra_variables", {"CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"})
+            else: # static runtime
+                self.conf.define("tools.cmake.cmaketoolchain:extra_variables", {"CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>"})
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
@@ -43,6 +53,7 @@ class QuantlibConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # Loss check is preferred
         self.requires("boost/[>=1.80.0]", transitive_headers=True)
 
     def validate(self):
