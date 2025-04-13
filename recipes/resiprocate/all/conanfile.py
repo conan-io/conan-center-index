@@ -54,7 +54,7 @@ class ResiprocateConan(ConanFile):
         if self.options.with_ssl:
             self.requires("openssl/1.1.1w")  # OpenSSL 3.x is not supported
         if self.options.with_postgresql:
-            self.requires("libpq/16.8")
+            self.requires("libpq/[>=16.8 <17]")
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.1.0")
 
