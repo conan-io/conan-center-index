@@ -45,11 +45,7 @@ class AdaConan(ConanFile):
                 f"{self.ref} requires <charconv>, please use libc++ or upgrade compiler."
             )
         if Version(self.version) >= "3.0.0" and \
-            ( \
-                (self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14.3") \
-                or (self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "12") \
-                or (self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "14") \
-            ):
+                (self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14.3"):
             raise ConanInvalidConfiguration(
                 f"{self.ref} doesn't support ${self.settings.compiler} ${self.settings.compiler.version}"
             )
@@ -61,8 +57,6 @@ class AdaConan(ConanFile):
         # solve APPLE RELOCATABLE SHARED LIBS (KB-H077)
         if Version(self.version) < "2.6.10":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "ada-flags.cmake"), "set(CMAKE_MACOSX_RPATH OFF)", "")
-        if Version(self.version) >= "3.0.0":
-            replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "-Wfatal-errors", "")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -72,6 +66,7 @@ class AdaConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["ADA_TOOLS"] = False
+        tc.extra_cxxflags = ["-Wno-fatal-errors"]
         tc.generate()
 
         deps = CMakeDeps(self)
