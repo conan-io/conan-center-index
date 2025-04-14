@@ -1,7 +1,7 @@
 sources:
-  "9.0.0":
-    url: "https://github.com/odygrd/quill/releases/download/v9.0.0/quill-9.0.0.zip"
-    sha256: "f2667dcc85e1125bac3280bb95d2a1db04404f7c7c53eaada713f2ba50c70642"
+  "9.0.1":
+    url: "https://github.com/odygrd/quill/releases/download/v9.0.1/quill-9.0.1.zip"
+    sha256: "ea0312e133972e930e4d72c74cae66f23a0676f0b30b83cc2583698c992a6ad1"
   "8.2.0":
     url: "https://github.com/odygrd/quill/releases/download/v8.2.0/quill-8.2.0.zip"
     sha256: "846a2ace10e4d5482215e4c2461eb9b157a1b4d7f485700233b06d393cab97c4"
