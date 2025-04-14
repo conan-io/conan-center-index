@@ -298,7 +298,9 @@ class OpenvinoConan(ConanFile):
 
         openvino_runtime = self.cpp_info.components["Runtime"]
         openvino_runtime.set_property("cmake_target_name", "openvino::runtime")
-        openvino_runtime.requires = ["onetbb::libtbb", "pugixml::pugixml", "nlohmann_json::nlohmann_json"]
+        openvino_runtime.requires = ["onetbb::libtbb", "pugixml::pugixml"]
+        if Version(self.version) >= "2025.1.0":
+            openvino_runtime.requires.append("nlohmann_json::nlohmann_json")
         openvino_runtime.libs = ["openvino"]
         if self._preprocessing_available:
             openvino_runtime.requires.append("ade::ade")
