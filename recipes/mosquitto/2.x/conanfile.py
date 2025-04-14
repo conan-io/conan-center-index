@@ -69,7 +69,7 @@ class Mosquitto(ConanFile):
             self.requires("cjson/1.7.16")
         if self.options.get_safe("websockets"):
             self.requires("libwebsockets/4.3.2")
-        if self.options.get_safe("threading") and self.settings.os == "Windows":
+        if self.options.get_safe("threading") and self.settings.os == "Windows" and Version(self.version) >= "2.0.21":
             self.requires("pthreads4w/3.0.0")
 
     def build_requirements(self):
@@ -81,7 +81,7 @@ class Mosquitto(ConanFile):
 
     def generate(self):
         deps = CMakeDeps(self)
-        if self.options.get_safe("threading") and self.settings.os == "Windows":
+        if self.options.get_safe("threading") and self.settings.os == "Windows" and Version(self.version) >= "2.0.21":
             deps.set_property("pthreads4w", "cmake_target_aliases", ["PThreads4W::PThreads4W"])
         deps.generate()
 
@@ -98,7 +98,11 @@ class Mosquitto(ConanFile):
         tc.variables["WITH_APPS"] = self.options.apps
         tc.variables["WITH_PLUGINS"] = False
         tc.variables["WITH_LIB_CPP"] = self.options.build_cpp
-        tc.variables["WITH_THREADING"] = self.options.threading
+        if self.settings.os == "Windows" and Version(self.version) < "2.0.21":
+            # Threading not supported by recipe before 2.0.21
+            tc.variables["WITH_THREADING"] = False
+        else:
+            tc.variables["WITH_THREADING"] = self.options.threading
         tc.variables["WITH_WEBSOCKETS"] = self.options.get_safe("websockets", False)
         tc.variables["STATIC_WEBSOCKETS"] = self.options.get_safe("websockets", False) and not self.dependencies["libwebsockets"].options.shared
         tc.variables["DOCUMENTATION"] = False
@@ -146,7 +150,7 @@ class Mosquitto(ConanFile):
             self.cpp_info.components["libmosquitto"].system_libs = ["pthread", "m"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["libmosquitto"].system_libs = ["ws2_32"]
-            if self.options.get_safe("threading"):
+            if self.options.get_safe("threading") and Version(self.version) >= "2.0.21":        
                 self.cpp_info.components["libmosquitto"].requires.append("pthreads4w::pthreads4w")
 
         if self.options.build_cpp:
