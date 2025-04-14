@@ -72,6 +72,10 @@ class Mosquitto(ConanFile):
         if self.options.get_safe("threading") and self.settings.os == "Windows":
             self.requires("pthreads4w/3.0.0")
 
+    def build_requirements(self):
+        # cmake_minimum_version is 3.18 in CMakeLists.txt for mosquitto >= 2.0.21
+        self.tool_requires("cmake/[>=3.18 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
