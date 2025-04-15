@@ -51,9 +51,9 @@ class SQLiteCppConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_sqlcipher"):
-            self.requires("sqlcipher/4.5.6")
+            self.requires("sqlcipher/4.6.1")
         else:
-            self.requires("sqlite3/3.45.0")
+            self.requires("sqlite3/[>=3.45 <4]")
 
     def validate(self):
         if Version(self.version) >= "3.0.0" and self.info.settings.compiler.get_safe("cppstd"):
@@ -144,14 +144,11 @@ class SQLiteCppConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "SQLiteCpp")
         self.cpp_info.set_property("cmake_target_name", "SQLiteCpp")
         self.cpp_info.libs = ["SQLiteCpp"]
+        if self.options.get_safe("with_sqlcipher"):
+            self.cpp_info.defines.append("SQLITE_HAS_CODEC")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "dl", "m"]
 
         if self._is_mingw:
             self.cpp_info.system_libs = ["ssp"]
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "SQLiteCpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "SQLiteCpp"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
