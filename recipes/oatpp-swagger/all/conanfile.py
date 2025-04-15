@@ -20,9 +20,11 @@ class OatppSwaggerConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
     }
 
@@ -37,6 +39,13 @@ class OatppSwaggerConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -46,6 +55,9 @@ class OatppSwaggerConan(ConanFile):
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
+
+        if is_msvc(self) and self.info.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared library with msvc")
 
         if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration(f"{self.ref} requires GCC >=5")
@@ -85,7 +97,10 @@ class OatppSwaggerConan(ConanFile):
             os.path.join("include", f"oatpp-{self._version}", "oatpp-swagger")
         ]
         self.cpp_info.components["_oatpp-swagger"].libdirs = [os.path.join("lib", f"oatpp-{self._version}")]
-        self.cpp_info.components["_oatpp-swagger"].bindirs = []
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.components["_oatpp-swagger"].bindirs = [os.path.join("bin", f"oatpp-{self._version}")]
+        else:
+            self.cpp_info.components["_oatpp-swagger"].bindirs = []
         self.cpp_info.components["_oatpp-swagger"].libs = ["oatpp-swagger"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_oatpp-swagger"].system_libs = ["pthread"]
