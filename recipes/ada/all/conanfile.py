@@ -4,6 +4,7 @@ from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=2.0"
@@ -45,7 +46,12 @@ class AdaConan(ConanFile):
                 f"{self.ref} requires <charconv>, please use libc++ or upgrade compiler."
             )
         if Version(self.version) >= "3.0.0" and \
-                (self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14.3"):
+                ( \
+                    # for std::ranges::any_of
+                    (self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14.3") \
+                    # std::string_view is not constexpr in gcc < 12
+                    or (self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "12") \
+                ):
             raise ConanInvalidConfiguration(
                 f"{self.ref} doesn't support ${self.settings.compiler} ${self.settings.compiler.version}"
             )
@@ -66,7 +72,8 @@ class AdaConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["ADA_TOOLS"] = False
-        tc.extra_cxxflags = ["-Wno-fatal-errors"]
+        if not is_msvc(self):
+            tc.extra_cxxflags = ["-Wno-fatal-errors"]
         tc.generate()
 
         deps = CMakeDeps(self)
