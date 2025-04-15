@@ -16,5 +16,5 @@ sources:
 patches:
   "95.0.4629":
     - patch_file: "patches/95.0.4629-0001-include-cstdint.patch"
-      patch_description: "Avoids build failure on newer gcc versions"
+      patch_description: "Add missing standard include which affects newer versions of gcc"
       patch_type: "conan"
