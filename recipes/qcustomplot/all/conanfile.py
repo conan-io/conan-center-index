@@ -42,7 +42,7 @@ class QCustomPlotConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("qt/6.4.2", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/[>=6.4.2 <7]", transitive_headers=True, transitive_libs=True)
 
         if self.options.with_opengl and self.settings.os == "Windows":
             self.requires("opengl/system")
@@ -51,11 +51,8 @@ class QCustomPlotConan(ConanFile):
         self.tool_requires("qt/<host_version>")
 
     def validate(self):
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration(f"{self.ref} Macos not supported at this moment")
-        if self.info.settings.compiler.cppstd:
-            min_cppstd = "11" if Version(self.dependencies["qt"].ref.version) < "6.0.0" else "17"
-            check_min_cppstd(self, min_cppstd)
+        min_cppstd = "11" if Version(self.dependencies["qt"].ref.version) < "6.0.0" else "17"
+        check_min_cppstd(self, min_cppstd)
         if not (self.dependencies["qt"].options.gui and self.dependencies["qt"].options.widgets):
             raise ConanInvalidConfiguration(f"{self.ref} requires qt gui and widgets")
         if self.info.options.with_opengl and self.dependencies["qt"].options.opengl == "no":
