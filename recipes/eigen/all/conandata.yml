@@ -17,6 +17,10 @@ patches:
       patch_description: "Fix vectorized reductions compilation errors for Eigen::half"
       patch_type: "bugfix"
       patch_source: "https://gitlab.com/libeigen/eigen/-/commit/b0fe14213ec4c8615de485fe4c2bcd4bab0cbd19.patch"
+    - patch_file: "patches/3.4.0-0002-Change-Eigen-aligned-allocator.patch"
+      patch_description: "Fix segmentation fault when using libc++ and -DEIGEN_MAX_ALIGN_BYTES=32 or -mavx"
+      patch_type: "bugfix"
+      patch_source: "https://gitlab.com/libeigen/eigen/-/commit/c486af5ad38a8cd2d12b790123b55456e902341c.patch"
   "3.3.9":
     - patch_file: "patches/0002-cmake-minimum-required.patch"
       patch_description: "CMake: Move cmake_minimum_required() before project()"
