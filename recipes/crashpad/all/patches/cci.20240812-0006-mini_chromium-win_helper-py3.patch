@@ -1,0 +1,97 @@
+--- third_party/mini_chromium/mini_chromium/build/win_helper.py
++++ third_party/mini_chromium/mini_chromium/build/win_helper.py
+@@ -39,13 +39,12 @@
+       'systemroot',
+       'temp',
+       'tmp',
+       )
+   env = {}
+   for line in output_of_set.splitlines():
+-    line = line.decode("utf-8")
+     for envvar in envvars_to_save:
+       if re.match(envvar + '=', line.lower()):
+         var, setting = line.split('=', 1)
+         env[var.upper()] = setting
+         break
+   for required in ('SYSTEMROOT', 'TEMP', 'TMP'):
+@@ -77,26 +76,26 @@
+   environment, and then do not prefix the compiler with an absolute path,
+   instead preferring something like "cl.exe" in the rule which will then run
+   whichever the environment setup has put in the path."""
+   archs = ('x86', 'amd64', 'arm64')
+   result = []
+   for arch in archs:
+-    # Extract environment variables for subprocesses.
++    sys.stderr.write("install_dir {} script_path {}".format(install_dir, script_path))
+     args = [os.path.join(install_dir, script_path)]
+     script_arch_name = arch
+     if script_path.endswith('SetEnv.cmd') and arch == 'amd64':
+       script_arch_name = '/x64'
+     if arch == 'arm64':
+       script_arch_name = 'x86_arm64'
+     args.extend((script_arch_name, '&&', 'set'))
+     popen = subprocess.Popen(
+         args, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+     variables, _ = popen.communicate()
+     if popen.returncode != 0:
+       raise Exception('"%s" failed with error %d' % (args, popen.returncode))
+-    env = _ExtractImportantEnvironment(variables)
++    env = _ExtractImportantEnvironment(variables.decode())
+ 
+     env_block = _FormatAsEnvironmentBlock(env)
+     basename = 'environment.' + arch
+     with open(os.path.join(out_dir, basename), 'wb') as f:
+       f.write(env_block.encode())
+     result.append(basename)
+@@ -135,30 +134,28 @@
+     env = _GetEnvAsDict(arch)
+     args = list(args)  # *args is a tuple by default, which is read-only.
+     args[0] = args[0].replace('/', '\\')
+     link = subprocess.Popen(args, env=env, shell=True, stdout=subprocess.PIPE)
+     out, _ = link.communicate()
+     for line in out.splitlines():
+-      line = line.decode("utf-8")
+-      if (not line.startswith('   Creating library ') and
+-          not line.startswith('Generating code') and
+-          not line.startswith('Finished generating code')):
++      if (not line.startswith(b'   Creating library ') and
++          not line.startswith(b'Generating code') and
++          not line.startswith(b'Finished generating code')):
+         print(line)
+     return link.returncode
+ 
+   def ExecAsmWrapper(self, arch, *args):
+     """Filter logo banner from invocations of asm.exe."""
+     env = _GetEnvAsDict(arch)
+     popen = subprocess.Popen(args, env=env, shell=True,
+                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+     out, _ = popen.communicate()
+     for line in out.splitlines():
+-      line = line.decode("utf-8")
+-      if (not line.startswith('Copyright (C) Microsoft Corporation') and
+-          not line.startswith('Microsoft (R) Macro Assembler') and
+-          not line.startswith(' Assembling: ') and
++      if (not line.startswith(b'Copyright (C) Microsoft Corporation') and
++          not line.startswith(b'Microsoft (R) Macro Assembler') and
++          not line.startswith(b' Assembling: ') and
+           line):
+         print(line)
+     return popen.returncode
+ 
+   def ExecGetVisualStudioData(self, outdir, toolchain_path):
+     setenv_paths = [
+@@ -183,13 +180,13 @@
+       # Try vswhere, which will find VS2017.2+. Note that earlier VS2017s will
+       # not be found.
+       vswhere_path = os.path.join(os.environ.get('ProgramFiles(x86)'),
+           'Microsoft Visual Studio', 'Installer', 'vswhere.exe')
+       if os.path.exists(vswhere_path):
+         installation_path = subprocess.check_output(
+-            [vswhere_path, '-latest', '-property', 'installationPath']).strip()
++            [vswhere_path, '-latest', '-property', 'installationPath']).strip().decode()
+         if installation_path:
+           return (installation_path.decode("utf-8"),
+                   os.path.join('VC', 'Auxiliary', 'Build', 'vcvarsall.bat'))
+ 
+       # Otherwise, try VS2015.
+       version = '14.0'
