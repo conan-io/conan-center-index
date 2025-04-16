@@ -1,12 +1,11 @@
 from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
-from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.50.0"
-
+required_conan_version = ">=1.65.0"
 
 class IncbinConan(ConanFile):
     name = "incbin"
@@ -22,20 +21,33 @@ class IncbinConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def package_id(self):
-        self.info.clear()
-
-    def validate(self):
-        if is_msvc(self):
-            raise ConanInvalidConfiguration("Currently incbin recipe is not supported for Visual Studio because it requires external command 'incbin'.")
+    def configure(self):
+        self._is_msvc = is_msvc(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        if self._is_msvc:
+            with open("CMakeLists.txt", "w") as f:
+                f.write("cmake_minimum_required(VERSION 3.10)\n"
+                        "project(incbin_tool)\n"
+                        "add_executable(incbin_tool incbin.c)\n"
+                        "install(TARGETS incbin_tool)")
+
+    def build(self):
+        if self._is_msvc:
+            tc = CMakeToolchain(self)
+            tc.generate()
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
+            cmake.install()
 
     def package(self):
         copy(self, "UNLICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, "incbin.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder)
+        copy(self, "incbin_tool.exe", dst=os.path.join(self.package_folder, "bin"), src=self.build_folder, keep_path=False)
 
     def package_info(self):
-        self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        if not self._is_msvc:
+            self.cpp_info.bindirs = []
