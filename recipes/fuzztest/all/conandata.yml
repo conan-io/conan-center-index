@@ -1,0 +1,4 @@
+sources:
+  "cci.20240305":
+    url: "https://github.com/google/fuzztest/archive/e317d5277e34948ae7048cb5e48309e0288e8df3.tar.gz"
+    sha256: "cd13071a90258e9017122903ef1cd61228d8beb3b99d15bd5c60f74379d2681e"
