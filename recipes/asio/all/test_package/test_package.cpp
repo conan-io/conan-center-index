@@ -1,7 +1,7 @@
 #include <asio.hpp>
+#include <iostream>
 
 int main()
 {
-	auto && service = asio::io_service{};
-	(void)service;
+    std::cout << "ASIO VERSION: " << ASIO_VERSION << std::endl;
 }
