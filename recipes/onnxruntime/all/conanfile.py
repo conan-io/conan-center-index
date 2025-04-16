@@ -193,7 +193,7 @@ class OnnxRuntimeConan(ConanFile):
         if Version(self.version) >= "15.0":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "CMakeLists.txt"),
                             "if (Git_FOUND)", "if (FALSE)")
-        if Version(self.version) >= "1.17":
+        if Version(self.version) >= "1.17" and Version(self.version) < "1.19":
             # https://github.com/microsoft/onnxruntime/commit/5bfca1dc576720627f3af8f65e25af408271079b
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "onnxruntime_providers_cuda.cmake"),
                             'option(onnxruntime_NVCC_THREADS "Number of threads that NVCC can use for compilation." 1)', 
