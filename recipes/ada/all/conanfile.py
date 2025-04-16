@@ -4,9 +4,10 @@ from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 class AdaConan(ConanFile):
     name = "ada"
@@ -26,20 +27,6 @@ class AdaConan(ConanFile):
         "shared": False,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "9",
-            "clang": "10",
-            "apple-clang": "12",
-            "Visual Studio": "16",
-            "msvc": "192",
-        }
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -52,41 +39,47 @@ class AdaConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 20 if Version(self.version) >= "3.0.0" else 17)
 
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "12.0.0" and self.settings.compiler.libcxx != "libc++":
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires <charconv>, please use libc++ or upgrade compiler."
             )
+        if Version(self.version) >= "3.0.0" and \
+                ( \
+                    # for std::ranges::any_of
+                    (self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14.3") \
+                    # std::string_view is not constexpr in gcc < 12
+                    or (self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "12") \
+                ):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} doesn't support ${self.settings.compiler} ${self.settings.compiler.version}"
+            )
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["BUILD_TESTING"] = False
-        tc.variables["ADA_TOOLS"] = False
-        tc.generate()
-
-        deps = CMakeDeps(self)
-        deps.generate()
 
     def _patch_sources(self):
         # solve APPLE RELOCATABLE SHARED LIBS (KB-H077)
         if Version(self.version) < "2.6.10":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "ada-flags.cmake"), "set(CMAKE_MACOSX_RPATH OFF)", "")
 
-    def build(self):
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
         self._patch_sources()
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["ADA_TOOLS"] = False
+        if not is_msvc(self):
+            tc.extra_cxxflags = ["-Wno-fatal-errors"]
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def build(self):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
