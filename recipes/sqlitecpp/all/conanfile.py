@@ -88,7 +88,6 @@ class SQLiteCppConan(ConanFile):
             pc.generate()
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
