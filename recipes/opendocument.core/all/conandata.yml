@@ -1,0 +1,4 @@
+sources:
+  "4.1.1":
+    url: "https://github.com/opendocument-app/OpenDocument.core/archive/refs/tags/v4.1.1.tar.gz"
+    sha256: "c4721aa8a50ea0ce123aae7979380f7d515b0e4e66454307a9be94006801cadf"
