@@ -26,11 +26,7 @@ class SparrowRecipe(ConanFile):
         "use_date_polyfill": [True, False],
     }
 
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-        "use_date_polyfill": True
-    }
+    default_options = {"shared": False, "fPIC": True, "use_date_polyfill": True}
 
     implements = ["auto_shared_fpic"]
 
@@ -57,8 +53,8 @@ class SparrowRecipe(ConanFile):
         return {
             "apple-clang": "16",
             "clang": "18",
-            "gcc": "12",
-            "msvc": "194"
+            "gcc": "11" if Version(self.version) >= "0.6.0" else "13",
+            "msvc": "194",
         }
 
     def validate(self):
