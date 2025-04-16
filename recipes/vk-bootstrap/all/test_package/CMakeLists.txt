@@ -5,4 +5,9 @@ find_package(vk-bootstrap REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE vk-bootstrap::vk-bootstrap)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
+
+if(DEFINED VK_BOOTSTRAP_VERSION AND VK_BOOTSTRAP_VERSION VERSION_GREATER_EQUAL "1.3.296.0")
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+else()
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
+endif()
