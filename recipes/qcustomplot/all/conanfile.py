@@ -7,7 +7,7 @@ from conan.tools.files import apply_conandata_patches, copy, get, export_conanda
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.56.0 <2 || >=2.0.6"
+required_conan_version = ">=2.1"
 
 class QCustomPlotConan(ConanFile):
     name = "qcustomplot"
@@ -66,8 +66,6 @@ class QCustomPlotConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        VirtualRunEnv(self).generate(scope="build")
-
         tc = CMakeToolchain(self)
         tc.variables["QCUSTOMPLOT_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.variables["QCUSTOMPLOT_VERSION"] = self.version
