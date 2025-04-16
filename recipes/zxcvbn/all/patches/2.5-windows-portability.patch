@@ -1,0 +1,17 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -9,4 +9,4 @@ 
+-add_compile_options("-Wall" "-Wextra")
++
+ 
+ find_library(LIBM m)
+ 
+@@ -29,7 +29,7 @@ set_target_properties(zxcvbn-shared PROPERTIES
+ 	OUTPUT_NAME zxcvbn
+ 	VERSION ${CMAKE_PROJECT_VERSION}
+ 	SOVERSION ${PROJECT_VERSION_MAJOR}
+-)
++	WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+ 
+ # build static version of library
+ add_library(zxcvbn-static STATIC zxcvbn.c dict-crc.h dict-src.h)
