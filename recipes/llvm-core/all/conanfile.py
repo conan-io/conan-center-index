@@ -241,21 +241,21 @@ class LLVMCoreConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ffi:
-            self.requires("libffi/3.4.6")
+            self.requires("libffi/[>=3.4.6 <4]")
         if self.options.get_safe("with_libedit"):
-            self.requires("editline/3.1")
+            self.requires("editline/[>=3.1 <4]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_xml2:
             self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_z3:
-            self.requires("z3/4.13.0")
+            self.requires("z3/[>=4.13.0 <5]")
         if self.options.get_safe("with_zstd"):
-            self.requires("zstd/1.5.6")
+            self.requires("zstd/[>=1.5.6 <2]")
 
     def build_requirements(self):
         self.tool_requires("ninja/[>=1.10.2 <2]")
-        self.tool_requires("cmake/[>=3.20 <4]") # required by LLVM 19
+        self.tool_requires("cmake/[>=3.20 <5]") # required by LLVM 19
 
     def validate(self):
         if self.settings.compiler.cppstd:
