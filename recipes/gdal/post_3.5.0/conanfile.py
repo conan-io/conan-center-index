@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
@@ -166,11 +167,6 @@ class GdalConan(ConanFile):
         if Version(self.version) < "3.8":
             del self.options.with_libaec
         
-        # Newer arrow requires the filesystem_layer enabled to make newer gdal
-        # ogr/ogrsf_frmts/parquet build correctly
-        if self.options.with_arrow and Version(self.version) >= "3.10.0":
-            self.options["arrow"].filesystem_layer = True
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -189,12 +185,7 @@ class GdalConan(ConanFile):
         if self.options.with_armadillo:
             self.requires("armadillo/12.6.4")
         if self.options.with_arrow:
-            # Use arrow >= 16 with gdal >= 3.10 to take advantage of new features
-            # in arrow that newer gdal versions can use
-            if Version(self.version) < "3.10.0":
-                self.requires("arrow/14.0.2")
-            else:
-                self.requires("arrow/16.1.0")
+            self.requires("arrow/14.0.2")
         if self.options.with_basisu:
             self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
@@ -314,6 +305,11 @@ class GdalConan(ConanFile):
         self.tool_requires("cmake/[>=3.18 <4]")
 
     def validate(self):
+        if Version(self.version) >= "3.10.0":
+            check_min_cppstd(self, 17)
+        else:
+            check_min_cppstd(self, 11)
+
         for option in ["crypto", "zlib", "proj", "libtiff"]:
             if self.options.get_safe(f"with_{option}") != "deprecated":
                 self.output.warning(f"{self.ref}:with_{option} option is deprecated. The {option} dependecy is always enabled now.")
