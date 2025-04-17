@@ -1,5 +1,5 @@
 diff --git CMakeLists.txt CMakeLists.txt
-index 35af090a2..4d3504d36 100644
+index 58893b450..2fd34c68c 100644
 --- CMakeLists.txt
 +++ CMakeLists.txt
 @@ -42,7 +42,7 @@ endif ()
@@ -34,7 +34,7 @@ index f66bf756e..6cea07a17 100644
              install_targets (${_plugin_NAME})
          endif ()
 diff --git src/cmake/externalpackages.cmake src/cmake/externalpackages.cmake
-index eee6373d8..60dfc03aa 100644
+index 6cb6aaf50..a25798e48 100644
 --- src/cmake/externalpackages.cmake
 +++ src/cmake/externalpackages.cmake
 @@ -73,16 +73,15 @@ set (OPENIMAGEIO_CONFIG_DO_NOT_FIND_IMATH OFF CACHE BOOL
@@ -77,16 +77,20 @@ index eee6373d8..60dfc03aa 100644
  
  # Pugixml setup.  Normally we just use the version bundled with oiio, but
  # some linux distros are quite particular about having separate packages so we
-@@ -113,7 +114,7 @@ else ()
+@@ -113,9 +114,9 @@ else ()
  endif()
  
  # From pythonutils.cmake
--find_python()
-+#find_python()
+-if (USE_PYTHON)
+-    find_python()
+-endif ()
++#if (USE_PYTHON)
++#    find_python()
++#endif ()
  if (USE_PYTHON)
      checked_find_package (pybind11 REQUIRED VERSION_MIN 2.7)
  endif ()
-@@ -123,77 +124,105 @@ endif ()
+@@ -125,77 +126,105 @@ endif ()
  # Dependencies for optional formats and features. If these are not found,
  # we will continue building, but the related functionality will be disabled.
  
@@ -247,7 +251,7 @@ index eee6373d8..60dfc03aa 100644
  
  if (FFmpeg_FOUND OR FREETYPE_FOUND)
      checked_find_package (BZip2)   # Used by ffmpeg and freetype
-@@ -205,10 +234,10 @@ endif()
+@@ -207,10 +236,10 @@ endif()
  
  # Qt -- used for iv
  option (USE_QT "Use Qt if found" ON)
@@ -261,7 +265,7 @@ index eee6373d8..60dfc03aa 100644
      checked_find_package (Qt6 COMPONENTS Core Gui Widgets OpenGLWidgets)
      if (NOT Qt6_FOUND)
          checked_find_package (Qt5 COMPONENTS Core Gui Widgets OpenGL)
-@@ -221,18 +250,13 @@ endif ()
+@@ -223,18 +252,13 @@ endif ()
  
  
  # Tessil/robin-map
@@ -495,7 +499,7 @@ index dcd3059b3..4a4b98aba 100644
  if (WIN32)
      target_link_libraries (OpenImageIO PRIVATE psapi)
 diff --git src/libutil/CMakeLists.txt src/libutil/CMakeLists.txt
-index 9af7e28a5..712f7ab63 100644
+index c1b8b5dc0..26693306f 100644
 --- src/libutil/CMakeLists.txt
 +++ src/libutil/CMakeLists.txt
 @@ -58,6 +58,8 @@ function (setup_oiio_util_library targetname)
