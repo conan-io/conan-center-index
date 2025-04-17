@@ -138,6 +138,8 @@ class PodofoConan(ConanFile):
         self.cpp_info.requires = []
         self.cpp_info.requires.append("freetype::freetype")
         self.cpp_info.requires.append("zlib::zlib")
+        if self.settings.os != "Windows":
+            self.cpp_info.requires.append("fontconfig:fontconfig")
         if self.options.with_openssl:
             self.cpp_info.requires.append("openssl::openssl")
         if self.options.with_libidn:
