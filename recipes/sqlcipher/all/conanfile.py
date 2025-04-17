@@ -174,6 +174,9 @@ class SqlcipherConan(ConanFile):
             tc.configure_args.append("--with-crypto-lib=commoncrypto")
         else:
             tc.extra_defines.append("SQLCIPHER_CRYPTO_OPENSSL")
+
+        if self.options.enable_column_metadata:
+            tc.extra_defines.append("SQLITE_ENABLE_COLUMN_METADATA=1")
         tc.generate()
 
         deps = AutotoolsDeps(self)
