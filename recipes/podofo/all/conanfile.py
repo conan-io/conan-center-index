@@ -108,7 +108,7 @@ class PodofoConan(ConanFile):
         tc.variables["PODOFO_WITH_TIFF"] = self.options.with_tiff
         tc.variables["PODOFO_WITH_PNG"] = self.options.with_png
         tc.variables["PODOFO_WITH_UNISTRING"] = self.options.with_unistring
-        tc.variables["PODOFO_HAVE_OPENSSL_1_1"] = Version(self.dependencies["openssl"].ref.version) >= "1.1"
+        tc.variables["PODOFO_HAVE_OPENSSL_1_1"] = self.options.with_openssl and Version(self.dependencies["openssl"].ref.version) >= "1.1"
         if self.options.with_openssl and ("no_rc4" in self.dependencies["openssl"].options):
             tc.variables["PODOFO_HAVE_OPENSSL_NO_RC4"] = self.dependencies["openssl"].options.no_rc4
         if Version(self.version) < "0.10.0": # pylint: disable=conan-condition-evals-to-constant
@@ -139,7 +139,7 @@ class PodofoConan(ConanFile):
         self.cpp_info.requires.append("freetype::freetype")
         self.cpp_info.requires.append("zlib::zlib")
         if self.settings.os != "Windows":
-            self.cpp_info.requires.append("fontconfig:fontconfig")
+            self.cpp_info.requires.append("fontconfig::fontconfig")
         if self.options.with_openssl:
             self.cpp_info.requires.append("openssl::openssl")
         if self.options.with_libidn:
