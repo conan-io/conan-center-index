@@ -1,0 +1,36 @@
+--- cmake/helpers/CheckDependentLibrariesCommon.cmake
++++ cmake/helpers/CheckDependentLibrariesCommon.cmake
+@@ -11,7 +11,7 @@
+ include(CheckFunctionExists)
+ include(CMakeDependentOption)
+ include(FeatureSummary)
+-include(DefineFindPackage2)
++include(ConanFindPackage)
+ include(CheckSymbolExists)
+ 
+ option(
+@@ -109,9 +109,8 @@
+   string(TOUPPER ${name} key)
+   set(_find_dependency "")
+   set(_find_dependency_args "")
+-  if(FIND_PACKAGE2_${name}_ENABLED)
+-    find_package2(${name} QUIET OUT_DEPENDENCY _find_dependency)
+-  else()
++  find_package2(${name} QUIET)
++  if(FALSE)
+     set(_find_package_args)
+     # For some reason passing the HDF5 version requirement cause a linking error of the libkea driver on Conda Windows builds...
+     if (_GCP_VERSION AND NOT ("${name}" STREQUAL "TileDB") AND NOT ("${name}" STREQUAL "HDF5"))
+--- cmake/helpers/CheckDependentLibraries.cmake
++++ cmake/helpers/CheckDependentLibraries.cmake
+@@ -176,8 +176,8 @@
+   NAMES json-c
+   TARGETS json-c::json-c JSONC::JSONC
+ )
+-gdal_internal_library(JSONC REQUIRED)
+-if(TARGET json-c::json-c)
++find_package2(JSONC REQUIRED)
++if(FALSE)
+   get_target_property(include_dirs json-c::json-c INTERFACE_INCLUDE_DIRECTORIES)
+   find_path(GDAL_JSON_INCLUDE_DIR NAMES json.h PATHS ${include_dirs} PATH_SUFFIXES json-c NO_DEFAULT_PATH)
+   list(APPEND include_dirs "${GDAL_JSON_INCLUDE_DIR}")
