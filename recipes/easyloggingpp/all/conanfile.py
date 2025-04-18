@@ -74,7 +74,7 @@ class EasyloggingppConan(ConanFile):
             defines.append("ELPP_THREAD_SAFE")
         if self.options.enable_debug_errors:
             defines.append("ELPP_DEBUG_ERRORS")
-        if self.options.enable_default_logfile:
+        if not self.options.enable_default_logfile:
             defines.append("ELPP_NO_DEFAULT_LOG_FILE")
         if self.options.disable_logs:
             defines.append("ELPP_DISABLE_LOGS")
