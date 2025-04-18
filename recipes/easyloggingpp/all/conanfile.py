@@ -91,7 +91,7 @@ class EasyloggingppConan(ConanFile):
         if self.options.disable_verbose_logs:
             defines.append("ELPP_DISABLE_VERBOSE_LOGS")
         if self.options.disable_trace_logs:
-            defines.append("lib_utc_datetime")
+            defines.append("ELPP_DISABLE_TRACE_LOGS")
         if self.options.lib_utc_datetime:
             defines.append("ELPP_UTC_DATETIME")
         return defines
