@@ -59,8 +59,7 @@ class mdnsdConan(ConanFile):
             "Warning": "400",
             "Info": "300",
             "Debug": "200",
-            "Trace": "100",
-            "PackageOption": "300"
+            "Trace": "100"
         }.get(str(self.options.logging_level), "300")
 
     def generate(self):
