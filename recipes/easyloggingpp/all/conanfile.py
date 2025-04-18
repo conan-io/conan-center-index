@@ -122,3 +122,6 @@ class EasyloggingppConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["easyloggingpp"]
         self.cpp_info.defines = self._public_defines
+
+        if self.options.enable_thread_safe and self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
