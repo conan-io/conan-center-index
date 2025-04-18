@@ -13,7 +13,7 @@ class EasyloggingppConan(ConanFile):
     description = "Single-header C++ logging library."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/amrayn/easyloggingpp"
+    homepage = "https://github.com/abumq/easyloggingpp"
     topics = ("logging", "stacktrace", "efficient-logging")
 
     package_type = "static-library"
