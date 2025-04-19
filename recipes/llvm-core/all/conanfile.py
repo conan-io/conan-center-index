@@ -61,6 +61,10 @@ def components_from_dotfile(dotfile):
 
     In future a [CPS](https://cps-org.github.io/cps/index.html) format could be used, or generated directly
     by the LLVM build system
+
+    CMake Graphviz output changed significantly in 3.17.0, prior to that version the dotfile cannot be relied upon
+    to correctly express inter-target dependencies
+    (See [Graphviz: Add tests, refactor and fix bug(s)](https://gitlab.kitware.com/cmake/cmake/-/merge_requests/3766))
     """
     def node_labels(dot):
         """
@@ -73,7 +77,7 @@ def components_from_dotfile(dotfile):
             "-lpthread": "pthread"
         }
         for row in dot:
-            match_label = re.match(r'''^\s*"(node[0-9]+)"\s*\[\s*label\s*=\s*"(.+)".*''', row)
+            match_label = re.match(r'''^\s*"(node[0-9]+)"\s*\[\s*label\s*=\s*"(\S+)".*''', row)
             if match_label:
                 node = match_label.group(1)
                 label = match_label.group(2)
@@ -257,6 +261,10 @@ class LLVMCoreConan(ConanFile):
         self.tool_requires("ninja/[>=1.10.2 <2]")
         if Version(self.version) >= 19:
             self.tool_requires("cmake/[>=3.20 <5]")
+        else:
+            # we require at least 3.17 for correct graphviz output.
+            # Earlier LLVM versions will not build with CMake 4
+            self.tool_requires("cmake/[>=3.17 <4]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
