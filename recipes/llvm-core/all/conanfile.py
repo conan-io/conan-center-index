@@ -77,7 +77,7 @@ def components_from_dotfile(dotfile):
             "-lpthread": "pthread"
         }
         for row in dot:
-            match_label = re.match(r'''^\s*"(node[0-9]+)"\s*\[\s*label\s*=\s*"(\S+)".*''', row)
+            match_label = re.match(r'''^\s*"(node[0-9]+)"\s*\[\s*label\s*=\s*"(.+)".*''', row)
             if match_label:
                 node = match_label.group(1)
                 label = match_label.group(2)
