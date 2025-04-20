@@ -78,6 +78,8 @@ class PackageConan(ConanFile):
         self.cpp_info.set_property("cmake_module_target_name", "smtpclient::smtpclient")
         self.cpp_info.set_property("cmake_file_name", "smtpclient")
         self.cpp_info.set_property("cmake_target_name", "smtpclient::smtpclient")
+        if not self.options.shared:
+            self.cpp_info.defines.append("SMTPCLIENT_STATIC")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
