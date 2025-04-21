@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
@@ -46,6 +46,7 @@ class PackageConan(ConanFile):
 
     def source(self):
         get(self, "https://github.com/jeremydumais/CPP-SMTPClient-library/archive/refs/tags/v1.1.10.zip", strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "${OPENSSL_CRYPTO_LIBRARY} ${OPENSSL_SSL_LIBRARY}", "OpenSSL::Crypto OpenSSL::SSL")
 
     def generate(self):
         tc = CMakeToolchain(self)
