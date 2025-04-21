@@ -253,7 +253,7 @@ class LLVMCoreConan(ConanFile):
         if self.options.with_xml2:
             self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_z3:
-            self.requires("z3/[>=4.13.0 <5]")
+            self.requires("z3/[>=4.14.1 <5]")
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/[>=1.5.6 <2]")
 
