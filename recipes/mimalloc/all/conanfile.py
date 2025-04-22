@@ -97,7 +97,7 @@ class MimallocConan(ConanFile):
            is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(
                 "Dynamic runtime (MD/MDd) is required when using mimalloc as a shared library for override")
-        
+
         if self.options.get_safe("win_redirect") and not (
             self.options.override and \
             self.options.shared and \
@@ -128,6 +128,8 @@ class MimallocConan(ConanFile):
         tc.variables["MI_WIN_REDIRECT"] = "ON" if self.options.get_safe("win_redirect") else "OFF"
         tc.variables["MI_INSTALL_TOPLEVEL"] = "ON"
         tc.variables["MI_GUARDED"] = self.options.get_safe("guarded", False)
+        if Version(self.version) <= "1.7.6":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         venv = VirtualBuildEnv(self)
         venv.generate(scope="build")
