@@ -3,3 +3,9 @@ sources:
     url: "https://github.com/RippeR37/libbase/archive/refs/tags/v1.1.1.tar.gz"
     sha256: "d3e7ab81ad79b98b29087fe0bfb0a3c6ac2aa72cfaa06778276445a8b76f2f83"
     strip_root: true
+patches:
+  "1.1.1":
+    - patch_file: "patches/1.1.1-0001-glog-0.7.1-msvc-2019-compile-fix.patch"
+      patch_description: "fixes compilation of glog v0.7.1 on msvc 2019"
+      patch_type: "portability"
+      patch_source: "https://github.com/RippeR37/libbase/pull/60"

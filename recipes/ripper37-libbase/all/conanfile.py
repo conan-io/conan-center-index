@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 
 
 required_conan_version = ">=2.0.9"
@@ -38,7 +38,9 @@ class LibbaseConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if self.settings.os != "Windows":
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        else:
             del self.options.module_win
 
     def layout(self):
@@ -58,6 +60,7 @@ class LibbaseConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)

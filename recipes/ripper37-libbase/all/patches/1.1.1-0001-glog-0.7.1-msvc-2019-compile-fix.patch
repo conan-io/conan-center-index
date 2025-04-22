@@ -1,0 +1,13 @@
+diff --git a/cmake/SetupCompileFlags.cmake b/cmake/SetupCompileFlags.cmake
+index 14fa4c3..94813b5 100644
+--- a/cmake/SetupCompileFlags.cmake
++++ b/cmake/SetupCompileFlags.cmake
+@@ -30,7 +30,7 @@ function(SETUP_COMPILE_FLAGS)
+         endif()
+       endif()
+   elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+-      set(WARNINGS "/W4;/WX;/EHsc;/permissive-")
++      set(WARNINGS "/W4;/WX;/EHsc;/permissive-;/W34996;/W4244")
+   endif()
+
+   if(LIBBASE_BUILD_TESTS AND LIBBASE_CODE_COVERAGE)
