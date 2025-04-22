@@ -11,10 +11,10 @@ required_conan_version = ">=2.0"
 class TgBotStaterConan(ConanFile):
     name = "tgbotstater"
     description = "A C++ library for constructing Telegram bots in compile-time!"
-    author = "Maxim Fomin fominmaxim3721@gmail.com"
     license = "MIT"
 
-    url = "https://github.com/Makcal/TgBotStater"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/Makcal/TgBotStater"
     topics = ("telegram", "telegram-bot")
 
     package_type = "header-library"
@@ -28,13 +28,13 @@ class TgBotStaterConan(ConanFile):
         self.requires("brigand/cpp11-1.3.0", options={"with_boost": False})
 
     def validate(self):
-        check_min_cppstd(self, 23)
+        check_min_cppstd(self, 20)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder='src')
 
     def build(self):
         cmake = CMake(self)
