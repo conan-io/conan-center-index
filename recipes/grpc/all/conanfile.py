@@ -67,10 +67,8 @@ class GrpcConan(ConanFile):
     def _cxxstd_required(self):
         if Version(self.version) >= "1.70":
             return 17
-        elif Version(self.version) >= "1.47":
-            return 14
         else:
-            return 11
+            return 14
 
     @property
     def _supports_libsystemd(self):
