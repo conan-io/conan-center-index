@@ -297,7 +297,7 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["OPENTELEMETRY_INSTALL"] = True
         if not self.settings.compiler.cppstd:
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
-        if self.with_abi_v2:
+        if self.options.get_safe("with_abi_v2"):
             tc.variables["WITH_ABI_VERSION_1"] = False
             tc.variables["WITH_ABI_VERSION_2"] = True
         tc.generate()
