@@ -1,4 +1,0 @@
-sources:
-  "3.0":
-    url: "https://github.com/rwindegger/msgpack23/archive/refs/tags/v3.0.tar.gz"
-    sha256: "706CB1A623B9FB178F1A14C00322B147165B57E557DF9777A5825FF32052EB5F"
