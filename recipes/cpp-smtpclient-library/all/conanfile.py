@@ -47,6 +47,7 @@ class PackageConan(ConanFile):
     def source(self):
         get(self, "https://github.com/jeremydumais/CPP-SMTPClient-library/archive/refs/tags/v1.1.10.zip", strip_root=True)
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "${OPENSSL_CRYPTO_LIBRARY} ${OPENSSL_SSL_LIBRARY}", "OpenSSL::Crypto OpenSSL::SSL")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "ssl crypto", "OpenSSL::Crypto OpenSSL::SSL")
 
     def generate(self):
         tc = CMakeToolchain(self)
