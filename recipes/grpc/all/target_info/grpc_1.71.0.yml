@@ -184,5 +184,3 @@ grpc_plugins:
       executable: "grpc_python_plugin"
     - target: "gRPC::grpc_ruby_plugin"
       executable: "grpc_ruby_plugin"
-    - target: "gRPC::grpc_otel_plugin"
-      executable: "grpc_otel_plugin"

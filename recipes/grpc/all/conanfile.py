@@ -128,6 +128,9 @@ class GrpcConan(ConanFile):
 
     def validate(self):
         check_min_vs(self, "190")
+            # otel_plugin is a library not aw executable
+            raise ConanInvalidConfiguration("The otel_plugin option is not supported. Contributions are welcome")
+
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} shared not supported by Visual Studio")
 
@@ -244,9 +247,10 @@ class GrpcConan(ConanFile):
                             f'COMMAND ${{CMAKE_COMMAND}} -E env --modify "{variable}=path_list_prepend:{repl}" ${{_gRPC_PROTOBUF_PROTOC_EXECUTABLE}}')
 
         if self.settings.os == "Macos" and Version(self.version) >= "1.64":
+            _cxx_std_version = "17" if Version(self.version) >= "1.70" else "14"
             # See https://github.com/grpc/grpc/issues/36654#issuecomment-2228569158
-            replace_in_file(self, cmakelists, "target_compile_features(upb_textformat_lib PUBLIC cxx_std_14)",
-            """target_compile_features(upb_textformat_lib PUBLIC cxx_std_14)
+            replace_in_file(self, cmakelists, f"target_compile_features(upb_textformat_lib PUBLIC cxx_std_{_cxx_std_version})",
+            f"""target_compile_features(upb_textformat_lib PUBLIC cxx_std_{_cxx_std_version})
             target_link_options(upb_textformat_lib PRIVATE -Wl,-undefined,dynamic_lookup)
             target_link_options(upb_json_lib PRIVATE -Wl,-undefined,dynamic_lookup)
             """)
