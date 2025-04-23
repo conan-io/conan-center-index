@@ -1,9 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
-from conan.tools.scm import Version
+from conan.tools.files import copy, get, rmdir, replace_in_file
 import os
 
 required_conan_version = ">=2.0"
@@ -12,8 +10,8 @@ required_conan_version = ">=2.0"
 class TslibConan(ConanFile):
     name = "tslib"
     description = "C library for filtering touchscreen events"
-    license = ("LGPL-2.0", "GPL")
-    topics = ("touchscreen")
+    license = "LGPL-2.1"
+    topics = ("touchscreen", "input")
     homepage = "https://github.com/kergoth/tslib"
     url = "https://github.com/conan-io/conan-center-index"
 
