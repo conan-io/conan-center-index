@@ -31,7 +31,10 @@ class VkBootstrapConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "14"
+        if Version(self.version) >= "1.3.296":
+            return "17"
+        else:
+            return "14"
 
     @property
     def _compilers_minimum_version(self):
@@ -58,7 +61,11 @@ class VkBootstrapConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) < "0.7":
+        if Version(self.version) > "1.3.296":
+            raise Exception("Future version is not supported. Add requirements here.")
+        elif Version(self.version) == "1.3.296":
+            self.requires(f"vulkan-headers/{self.version}.0", transitive_headers=True)
+        elif Version(self.version) < "0.7":
             self.requires("vulkan-headers/1.3.236.0", transitive_headers=True)
         else:
             self.requires("vulkan-headers/1.3.239.0", transitive_headers=True)
@@ -93,10 +100,16 @@ class VkBootstrapConan(ConanFile):
             [os.path.join(vulkan_headers.package_folder, includedir).replace("\\", "/")
              for includedir in vulkan_headers.cpp_info.includedirs],
         )
-        if Version(self.version) < "0.3.0":
-            tc.variables["Vulkan_INCLUDE_DIR"] = includedirs
-        else:
+        if Version(self.version) >= "1.3.296":
+            # TODO: Revisit this in the future.
+            # Currently, setting VK_BOOTSTRAP_VULKAN_HEADER_DIR causes install to not work
+            # https://github.com/charles-lunarg/vk-bootstrap/blob/f85a1f1e28a724dfd7404ceb953b2c5903a6f1c6/CMakeLists.txt#L30
+            pass
+        elif Version(self.version) >= "0.3.0":
             tc.variables["VK_BOOTSTRAP_VULKAN_HEADER_DIR"] = includedirs
+        else:
+            tc.variables["Vulkan_INCLUDE_DIR"] = includedirs
+
         if Version(self.version) >= "0.4.0":
             tc.variables["VK_BOOTSTRAP_WERROR"] = False
         tc.generate()
@@ -104,7 +117,14 @@ class VkBootstrapConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure()
+
+        cmake_vars = {
+            "VK_BOOTSTRAP_INSTALL": "ON",
+        }
+        if Version(self.version) >= "1.3.296":
+            cmake.configure(variables = cmake_vars)
+        else:
+            cmake.configure()
         cmake.build()
 
     def package(self):

@@ -16,8 +16,12 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def build(self):
+        vk_bootstrap_version = self.dependencies["vk-bootstrap"].ref.version
+        cmake_vars = {
+                    "VK_BOOTSTRAP_VERSION": self.dependencies["vk-bootstrap"].ref.version,
+        }
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(variables = cmake_vars)
         cmake.build()
 
     def test(self):
