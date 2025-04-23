@@ -128,6 +128,7 @@ class GrpcConan(ConanFile):
 
     def validate(self):
         check_min_vs(self, "190")
+        if self.options.get_safe("otel_plugin") and Version(self.version) >= "1.70.0":
             # otel_plugin is a library not aw executable
             raise ConanInvalidConfiguration("The otel_plugin option is not supported. Contributions are welcome")
 
