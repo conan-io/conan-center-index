@@ -23,13 +23,15 @@ class PackageConan(ConanFile):
         "with_tls": [True, False],
         "with_sodium": [True, False],
         "enable_streaming": [True, False],
+        "with_experimental" : [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_tls": True,
         "with_sodium": False,
-        "enable_streaming": False
+        "enable_streaming": False,
+        "with_experimental" : False,
     }
 
     def config_options(self):
@@ -68,6 +70,7 @@ class PackageConan(ConanFile):
         if self.options.with_tls:
             tc.variables["NATS_BUILD_TLS_USE_OPENSSL_1_1_API"] = Version(self.dependencies["openssl"].ref.version) >= "1.1"
         tc.variables["NATS_BUILD_STREAMING"] = self.options.enable_streaming
+        tc.variables["NATS_WITH_EXPERIMENTAL"] = self.options.with_experimental
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -101,6 +104,8 @@ class PackageConan(ConanFile):
 
         if self.options.enable_streaming:
             self.cpp_info.defines.append("NATS_HAS_STREAMING")
+        if self.options.with_experimental:
+            self.cpp_info.defines.append("NATS_WITH_EXPERIMENTAL")
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("nats_IMPORTS")
 
