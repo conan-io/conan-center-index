@@ -1,4 +1,7 @@
 sources:
+  "1.7.2":
+    url: "https://github.com/mesonbuild/meson/archive/1.7.2.tar.gz"
+    sha256: "3640ef596523393100df31ba790bc5fe732215e9711a66b673a21c4eb39bc8f1"
   "1.6.0":
     url: "https://github.com/mesonbuild/meson/archive/1.6.0.tar.gz"
     sha256: "342300656bfdafb6cc09325bdd0fd507366ecaa6be25fa4525f50889adf7c606"

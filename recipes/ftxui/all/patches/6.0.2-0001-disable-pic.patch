@@ -1,0 +1,13 @@
+diff --git a/cmake/ftxui_set_options.cmake b/cmake/ftxui_set_options.cmake
+index 185739e..549022f 100644
+--- a/cmake/ftxui_set_options.cmake
++++ b/cmake/ftxui_set_options.cmake
+@@ -53,7 +53,7 @@ function(ftxui_set_options library)
+   # does not add it when linking a static library. This is a problem when the 
+   # static library is later linked into a shared library. 
+   # Doing it helps some users.
+-  set_property(TARGET ${library} PROPERTY POSITION_INDEPENDENT_CODE ON)
++  # set_property(TARGET ${library} PROPERTY POSITION_INDEPENDENT_CODE ON)
+ 
+   # Add as many warning as possible:
+   if (WIN32)

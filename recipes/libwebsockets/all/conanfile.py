@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.56.0"
+required_conan_version = ">=2.1"
 
 
 class LibwebsocketsConan(ConanFile):
@@ -16,7 +16,7 @@ class LibwebsocketsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/warmcat/libwebsockets"
     license = "MIT"
-    topics = ("websocket")
+    topics = ("websocket",)
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -422,6 +422,7 @@ class LibwebsocketsConan(ConanFile):
         tc.variables["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"
         tc.variables["DISABLE_WERROR"] = True
 
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -440,7 +441,7 @@ class LibwebsocketsConan(ConanFile):
             save(self, project_include_file, 'find_package(OpenSSL REQUIRED)\nset(OPENSSL_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIR})')
 
         # Prevent locating and copying OpenSSL binaries (not needed by the recipe)
-        replace_in_file(self, 
+        replace_in_file(self,
                         os.path.join(self.source_folder, "cmake", "FindOpenSSLbins.cmake"),
                         "if(OPENSSL_FOUND)", "if(FALSE)")
 
@@ -498,14 +499,6 @@ class LibwebsocketsConan(ConanFile):
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_libwebsockets"].system_libs.extend(["dl", "m"])
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Libwebsockets"
-        self.cpp_info.names["cmake_find_package_multi"] = "Libwebsockets"
-        self.cpp_info.names["pkg_config"] = pkgconfig_name
-        self.cpp_info.components["_libwebsockets"].names["cmake_find_package"] = self._cmake_target
-        self.cpp_info.components["_libwebsockets"].names["cmake_find_package_multi"] = self._cmake_target
-        self.cpp_info.components["_libwebsockets"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["_libwebsockets"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components["_libwebsockets"].builddirs.append(os.path.join("lib", "cmake"))
         self.cpp_info.components["_libwebsockets"].set_property("cmake_target_name", self._cmake_target)
         self.cpp_info.components["_libwebsockets"].set_property("pkg_config_name", pkgconfig_name)

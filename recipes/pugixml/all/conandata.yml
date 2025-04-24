@@ -1,4 +1,7 @@
 sources:
+  "1.15":
+    url: "https://github.com/zeux/pugixml/releases/download/v1.15/pugixml-1.15.tar.gz"
+    sha256: "655ade57fa703fb421c2eb9a0113b5064bddb145d415dd1f88c79353d90d511a"
   "1.14":
     url: "https://github.com/zeux/pugixml/releases/download/v1.14/pugixml-1.14.tar.gz"
     sha256: "2f10e276870c64b1db6809050a75e11a897a8d7456c4be5c6b2e35a11168a015"
