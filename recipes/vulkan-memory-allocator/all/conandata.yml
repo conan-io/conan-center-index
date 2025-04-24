@@ -2,6 +2,9 @@ sources:
   "cci.20231120":
     url: "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/5e43c795daf43dd09398d8307212e85025215052.tar.gz"
     sha256: "1ee9922fb059bc3b1dc5bbf71020e7a590b6ceb27fc3025d746e15be53fe31b7"
+  "3.2.1":
+    url: https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/refs/tags/v3.2.1.zip
+    sha256: "46d5f8c529b9102f2d3dd933beba38f3873a59896b249a90dcad009ecca4bfff"
   "3.0.1":
     url: "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/refs/tags/v3.0.1.tar.gz"
     sha256: "2a84762b2d10bf540b9dc1802a198aca8ad1f3d795a4ae144212c595696a360c"
