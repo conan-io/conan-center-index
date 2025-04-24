@@ -1,0 +1,4 @@
+sources:
+  "0.7.3":
+    url: "https://github.com/cschreib/observable_unique_ptr/archive/refs/tags/v0.7.3.zip"
+    sha256: "7bb69fb686212441c1bb84eac433278e147fa571f45fb084c8343e4fc3198699"
