@@ -55,7 +55,7 @@ class Box2dConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "3.0.0":
+        if "3.0.0" <= Version(self.version) < "3.1.0":
             self.requires("simde/0.8.2")
 
     def validate(self):
