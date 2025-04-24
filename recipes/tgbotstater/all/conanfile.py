@@ -15,7 +15,7 @@ class TgBotStaterConan(ConanFile):
 
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Makcal/TgBotStater"
-    topics = ("telegram", "telegram-bot")
+    topics = ("telegram", "telegram-bot", "header-only")
 
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
@@ -34,7 +34,7 @@ class TgBotStaterConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def layout(self):
-        cmake_layout(self, src_folder='src')
+        cmake_layout(self, src_folder='.')
 
     def build(self):
         cmake = CMake(self)
