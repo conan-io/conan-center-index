@@ -7,6 +7,3 @@ patches:
     - patch_file: "patches/0001-fix-cmake.patch"
       patch_description: "use cci's package"
       patch_type: "conan"
-    - patch_file: "patches/0002-include-cstdbool.patch"
-      patch_description: "include cstdbool for portability"
-      patch_type: "portability"
