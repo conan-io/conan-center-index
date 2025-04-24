@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir, save
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir, save, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -49,6 +49,9 @@ class SpirvtoolsConan(ConanFile):
                 "Visual Studio": "15",
             }
         }.get(self._min_cppstd, {})
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -125,6 +128,7 @@ class SpirvtoolsConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         # CMAKE_POSITION_INDEPENDENT_CODE was set ON for the entire
         # project in the lists file.
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
