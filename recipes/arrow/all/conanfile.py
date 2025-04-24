@@ -334,6 +334,7 @@ class ArrowConan(ConanFile):
         if self.options.with_zstd:
             tc.variables["ARROW_ZSTD_USE_SHARED"] = bool(self.dependencies["zstd"].options.shared)
         tc.variables["ORC_SOURCE"] = "SYSTEM"
+        tc.variables["ARROW_ORC"] = bool(self.options.with_orc)
         tc.variables["ARROW_WITH_THRIFT"] = bool(self.options.with_thrift)
         tc.variables["ARROW_THRIFT"] = bool(self.options.with_thrift)
         tc.variables["Thrift_SOURCE"] = "SYSTEM"
