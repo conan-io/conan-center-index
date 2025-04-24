@@ -1,0 +1,20 @@
+sources:
+  "8.0.2":
+    url:
+    - "https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-8_0_2/ACE-8.0.2.tar.gz"
+    sha256: "b10b55bafe49750660da053fa18f2f427f64658fbcc86a888385d6edb65efba7"
+  "7.1.4":
+    url:
+    - "https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-7_1_4/ACE-7.1.4.tar.gz"
+    sha256: "a2bc358401178dd8175f4d826e60d23d901bfe38bc2fa0ac9275d01d7fda34bc"
+
+# patches:
+#   "1.1.0":
+#     - patch_file: "patches/0001-fix-cmake.patch"
+#       patch_description: "correct the order of cmake min and project"
+#       patch_type: "backport"
+#       patch_source: "https://github.com/owner/package/pulls/42"
+#     - patch_file: "patches/0002-fix-linux.patch"
+#       patch_description: "add missing header to support linux"
+#       patch_type: "portability"
+#       patch_source: "https://github.com/owner/package/issues/0"

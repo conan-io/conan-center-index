@@ -7,3 +7,7 @@
 *.txt text eol=lf
 *.yml text eol=lf
 *.am text eol=lf
+*.json text eol=lf
+*.sh text eol=lf
+Dockerfile text eol=lf
+.gitattributes text eol=lf
