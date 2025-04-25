@@ -16,14 +16,12 @@ class OupConan(ConanFile):
     homepage = "https://github.com/cschreib/observable_unique_ptr"
     topics = ("memory", "smart-pointer")
     package_type = "header-library"
-    exports_sources = "include/*"
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, 17)
+        check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
