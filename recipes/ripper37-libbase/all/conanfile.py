@@ -14,8 +14,8 @@ class LibbaseConan(ConanFile):
     name = "ripper37-libbase"
     description = "Standalone reimplementation of //base module from Chromium"
     license = "MIT"
-    url = "https://github.com/RippeR37/libbase"
-    homepage = "https://ripper37.github.io/libbase"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/RippeR37/libbase"
     topics = ("Chromium", "base", "net", "multithreading", "async")
 
     package_type = "static-library"
@@ -44,7 +44,7 @@ class LibbaseConan(ConanFile):
             del self.options.module_win
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("glog/0.7.1", transitive_headers=True, transitive_libs=True)
@@ -56,7 +56,7 @@ class LibbaseConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 17)
         if self.settings.os not in ["Windows", "Linux", "Macos"]:
-           raise ConanInvalidConfiguration(f"{self.ref} not supported on {self.settings.os}")
+            raise ConanInvalidConfiguration(f"{self.ref} not supported on {self.settings.os}")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
