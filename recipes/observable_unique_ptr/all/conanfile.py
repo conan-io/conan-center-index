@@ -16,6 +16,7 @@ class OupConan(ConanFile):
     homepage = "https://github.com/cschreib/observable_unique_ptr"
     topics = ("memory", "smart-pointer")
     package_type = "header-library"
+    settings = "compiler"
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -25,6 +26,9 @@ class OupConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+    
+    def package_id(self):
+        self.info.clear()
 
     def package(self):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
