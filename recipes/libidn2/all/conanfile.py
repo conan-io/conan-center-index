@@ -87,6 +87,22 @@ class LibIdn(ConanFile):
             "--disable-nls",
             "--disable-rpath",
         ]
+
+        if cross_building(self) and is_msvc(self):
+            # INFO: AutotoolsToolchain uses i686-unknown-windows for x86, causing error when building:
+            #   fatal error C1083: Cannot open include file: '': No such file or directory
+            # The upstram recommends using i686-w64-mingw32 when cross-compiling for x86:
+            #   https://gitlab.com/libidn/libidn2/-/blob/master/CONTRIBUTING.md#cross-compiling
+            triplet_arch_windows = {"x86_64": "x86_64", "x86": "i686", "armv8": "aarch64"}
+            host_arch = triplet_arch_windows.get(str(self.settings.arch))
+            build_arch = triplet_arch_windows.get(str(self.settings_build.arch))
+            host = self.conf.get("tools.gnu:host_triplet", f"{host_arch}-w64-mingw32")
+            build = self.conf.get("tools.gnu:build_triplet", f"{build_arch}-w64-mingw32")
+            tc.configure_args.extend([
+                f"--host={host}",
+                f"--build={build}",
+            ])
+
         tc.generate()
 
         if is_msvc(self):
