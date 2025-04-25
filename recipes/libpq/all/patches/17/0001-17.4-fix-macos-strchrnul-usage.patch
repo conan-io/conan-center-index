@@ -1,0 +1,103 @@
+diff --git a/configure b/configure
+index 055fd1b..e021f25 100755
+--- a/configure
++++ b/configure
+@@ -15816,6 +15816,17 @@ cat >>confdefs.h <<_ACEOF
+ #define HAVE_DECL_PWRITEV $ac_have_decl
+ _ACEOF
+ 
++ac_fn_c_check_decl "$LINENO" "strchrnul" "ac_cv_have_decl_strchrnul" "#include <string.h>
++"
++if test "x$ac_cv_have_decl_strchrnul" = xyes; then :
++  ac_have_decl=1
++else
++  ac_have_decl=0
++fi
++
++cat >>confdefs.h <<_ACEOF
++#define HAVE_DECL_STRCHRNUL $ac_have_decl
++_ACEOF
+ 
+ # This is probably only present on macOS, but may as well check always
+ ac_fn_c_check_decl "$LINENO" "F_FULLFSYNC" "ac_cv_have_decl_F_FULLFSYNC" "#include <fcntl.h>
+diff --git a/configure.ac b/configure.ac
+index 82b4640..6f0230b 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1763,7 +1763,6 @@ AC_CHECK_FUNCS(m4_normalize([
+ 	pthread_is_threaded_np
+ 	setproctitle
+ 	setproctitle_fast
+-	strchrnul
+ 	strsignal
+ 	syncfs
+ 	sync_file_range
+@@ -1803,6 +1802,7 @@ AC_CHECK_DECLS([strlcat, strlcpy, strnlen])
+ # won't handle deployment target restrictions on macOS
+ AC_CHECK_DECLS([preadv], [], [], [#include <sys/uio.h>])
+ AC_CHECK_DECLS([pwritev], [], [], [#include <sys/uio.h>])
++AC_CHECK_DECLS([strchrnul], [], [], [#include <string.h>])
+ 
+ # This is probably only present on macOS, but may as well check always
+ AC_CHECK_DECLS(F_FULLFSYNC, [], [], [#include <fcntl.h>])
+diff --git a/src/include/pg_config.h.in b/src/include/pg_config.h.in
+index 2397d90..0ee4a63 100644
+--- a/src/include/pg_config.h.in
++++ b/src/include/pg_config.h.in
+@@ -115,6 +115,10 @@
+    don't. */
+ #undef HAVE_DECL_PWRITEV
+ 
++/* Define to 1 if you have the declaration of `strchrnul', and to 0 if you
++   don't. */
++#undef HAVE_DECL_STRCHRNUL
++
+ /* Define to 1 if you have the declaration of `strlcat', and to 0 if you
+    don't. */
+ #undef HAVE_DECL_STRLCAT
+@@ -393,9 +397,6 @@
+ /* Define to 1 if you have the <stdlib.h> header file. */
+ #undef HAVE_STDLIB_H
+ 
+-/* Define to 1 if you have the `strchrnul' function. */
+-#undef HAVE_STRCHRNUL
+-
+ /* Define to 1 if you have the `strerror_r' function. */
+ #undef HAVE_STRERROR_R
+ 
+diff --git a/src/port/snprintf.c b/src/port/snprintf.c
+index 884f026..0030512 100644
+--- a/src/port/snprintf.c
++++ b/src/port/snprintf.c
+@@ -344,7 +344,9 @@ static void trailing_pad(int padlen, PrintfTarget *target);
+  * Note: glibc declares this as returning "char *", but that would require
+  * casting away const internally, so we don't follow that detail.
+  */
+-#ifndef HAVE_STRCHRNUL
++#if !HAVE_DECL_STRCHRNUL
++
++#define strchrnul pg_strchrnul
+ 
+ static inline const char *
+ strchrnul(const char *s, int c)
+@@ -354,19 +356,7 @@ strchrnul(const char *s, int c)
+ 	return s;
+ }
+ 
+-#else
+-
+-/*
+- * glibc's <string.h> declares strchrnul only if _GNU_SOURCE is defined.
+- * While we typically use that on glibc platforms, configure will set
+- * HAVE_STRCHRNUL whether it's used or not.  Fill in the missing declaration
+- * so that this file will compile cleanly with or without _GNU_SOURCE.
+- */
+-#ifndef _GNU_SOURCE
+-extern char *strchrnul(const char *s, int c);
+-#endif
+-
+-#endif							/* HAVE_STRCHRNUL */
++#endif							/* !HAVE_DECL_STRCHRNUL */
+ 
+ 
+ /*

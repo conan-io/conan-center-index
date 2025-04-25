@@ -102,10 +102,21 @@ class LibpqConan(ConanFile):
                 env = VirtualRunEnv(self)
                 env.generate(scope="build")
             tc = AutotoolsToolchain(self)
-            tc.configure_args.append('--without-readline')
-            tc.configure_args.append('--without-zlib')
-            tc.configure_args.append('--with-icu' if self.options.get_safe("with_icu") else '--without-icu')
-            tc.configure_args.append('--with-openssl' if self.options.with_openssl else '--without-openssl')
+            if Version(self.version) >= "17":
+                tc.configure_args.append("--with-zlib=no")
+                tc.configure_args.append("--with-readline=no")
+                tc.configure_args.append("--with-icu=" + ("yes" if self.options.get_safe("with_icu") else "no"))
+                if self.options.with_openssl:
+                    tc.configure_args.append('--with-ssl=openssl')
+                    tc.configure_args.append("--with-includes={}".format(self.dependencies["openssl"].cpp_info.aggregated_components().includedirs[0]))
+                    tc.configure_args.append("--with-libraries={}".format(self.dependencies["openssl"].cpp_info.aggregated_components().libdirs[0]))
+                else:
+                    tc.configure_args.append('--with-openssl=no')
+            else:
+                tc.configure_args.append('--without-zlib')
+                tc.configure_args.append('--without-readline')
+                tc.configure_args.append('--with-openssl' if self.options.with_openssl else '--without-openssl')
+                tc.configure_args.append('--with-icu' if self.options.get_safe("with_icu") else '--without-icu')
             if cross_building(self) and not self.options.with_openssl:
                 tc.configure_args.append("--disable-strong-random")
             if cross_building(self, skip_x64_x86=True):
@@ -122,7 +133,7 @@ class LibpqConan(ConanFile):
             PkgConfigDeps(self).generate()
 
     def _patch_sources(self):
-        if is_msvc(self):
+        if is_msvc(self) and Version(self.version) < "17":
             # https://www.postgresql.org/docs/8.3/install-win32-libpq.html
             # https://github.com/postgres/postgres/blob/master/src/tools/msvc/README
             if not self.options.shared:
@@ -185,11 +196,14 @@ class LibpqConan(ConanFile):
         # When linking to static openssl, it comes with static pthread library too, failing with:
         # libpq.so.5.15: U pthread_exit@GLIBC_2.2.5: libpq must not be calling any function which invokes exit
         # https://www.postgresql.org/message-id/20210703001639.GB2374652%40rfd.leadboat.com
-        if Version(self.version) >= "15":
+        if "15" <= Version(self.version) < "17":
             replace_in_file(self, os.path.join(self.source_folder, "src", "interfaces", "libpq", "Makefile"),
                 "-v __cxa_atexit",
                 "-v __cxa_atexit -e pthread_exit")
-
+        elif Version(self.version) >= "17":
+            replace_in_file(self, os.path.join(self.source_folder, "src", "interfaces", "libpq", "Makefile"),
+                            "-e __cxa_atexit",
+                            "-e __cxa_atexit -e pthread_exit")
     def build(self):
         apply_conandata_patches(self)
         self._patch_sources()
