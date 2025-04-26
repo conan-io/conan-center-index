@@ -1,4 +1,7 @@
 sources:
+  "2.76":
+    url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.76.tar.xz"
+    sha256: "629da4ab29900d0f7fcc36227073743119925fd711c99a1689bbf5c9b40c8e6f"
   "2.75":
     url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.75.tar.xz"
     sha256: "de4e7e064c9ba451d5234dd46e897d7c71c96a9ebf9a0c445bc04f4742d83632"
@@ -42,6 +45,13 @@ sources:
     url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.45.tar.xz"
     sha256: "d66639f765c0e10557666b00f519caf0bd07a95f867dddaee131cd284fac3286"
 patches:
+  "2.76":
+    - patch_file: "patches/2.73/0001-libcap-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
+    - patch_file: "patches/2.76/0001-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"
   "2.75":
     - patch_file: "patches/2.73/0001-libcap-Remove-hardcoded-fPIC.patch"
       patch_description: "allow to configure fPIC option from conan recipe"
