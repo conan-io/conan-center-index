@@ -1,10 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
 from conan.tools.env import Environment
 from conan.tools.files import get, save
 from conan.tools.layout import basic_layout
 from conan.internal.model.cpp_info import CppInfo
+
 import os
 
 
@@ -68,6 +70,13 @@ TAO is a C++ implementation of the OMG's CORBA standard.
         check_min_cppstd(self, 14)
         # INFO: I have no access to other systems than linux to develop this
         # please submit PRs if you want this to build/work on other OSes
+        if self.settings.os == "Linux":
+            # If compiler is GCC, check if version is >= 4.8
+            if self.settings.compiler == "gcc":
+                self.output.info(f"compiler.version: {self.settings.compiler.version}")
+                if Version(self.settings.compiler.version) < Version("4.8"):
+                    raise ConanInvalidConfiguration(f"{self} requires GCC >= 4.8.")
+
         if self.settings.os not in ["Linux"]:
             raise ConanInvalidConfiguration(f"{self} is not supported on {self.settings.os}.")
 
