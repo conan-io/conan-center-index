@@ -6,7 +6,7 @@ LIBCURL_OBJECTS := $(patsubst %.c,%.o,$(strip $(CSOURCES)))
 
 RESOURCE = libcurl.res
 
-RC = windres
+RC ?= windres
 
 all-local: $(libcurl_dll_LIBRARY)
 
@@ -15,7 +15,7 @@ $(libcurl_dll_LIBRARY): $(LIBCURL_OBJECTS) $(RESOURCE) $(libcurl_dll_DEPENDENCIE
 	@$(call DEL, $@)
 	$(CC) $(LDFLAGS) -shared -o $@ \
 	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY) \
-	  $(LIBCURL_OBJECTS) $(RESOURCE) $(LIBCURL_LIBS)
+	  $(LIBCURL_OBJECTS) $(RESOURCE) $(LIBCURL_PC_LIBS_PRIVATE)
 
 %.o: %.c $(PROOT)/include/curl/curlbuild.h
 	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
