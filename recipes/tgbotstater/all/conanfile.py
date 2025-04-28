@@ -26,6 +26,14 @@ class TgBotStaterConan(ConanFile):
     def requirements(self):
         self.requires("tgbot/1.8")
         self.requires("brigand/cpp11-1.3.0", options={"with_boost": False})
+        compiler = self.settings.compiler
+        if compiler == "gcc" and float(compiler.version.value) >= 13 or \
+            compiler == "clang" and float(compiler.version.value) >= 17 or \
+            compiler == "apple-clang" and float(compiler.version.value) >= 193 or \
+            compiler == "msvc" and float(compiler.version.value) >= 15:
+            pass
+        else:
+            self.requires("fmt/11.1.4", options={"header_only": True})
 
     def validate(self):
         check_min_cppstd(self, 20)
@@ -48,8 +56,8 @@ class TgBotStaterConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["TgBotStater"]
-        self.cpp_info.includedirs = ['include']
         self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
 
     def package_id(self):
         self.info.clear()
