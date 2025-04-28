@@ -167,6 +167,11 @@ class GdalConan(ConanFile):
         if Version(self.version) < "3.8":
             del self.options.with_libaec
         
+        # Newer gdal requires this flag for
+        # ogr/ogrsf_frmts/parquet build correctly
+        if self.options.with_arrow and Version(self.version) >= "3.10.0":
+            self.options["arrow"].filesystem_layer = True
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
