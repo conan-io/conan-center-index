@@ -248,6 +248,7 @@ class Open62541Conan(ConanFile):
                     destination=path,
                     filename=archive_name,
                     strip_root=True)
+        self._patch_sources()
 
     def _get_log_level(self):
         return {
@@ -366,7 +367,6 @@ class Open62541Conan(ConanFile):
             os.unlink(os.path.join(self.source_folder, "tools", "cmake", "FindPython3.cmake"))
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
