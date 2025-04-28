@@ -1,4 +1,8 @@
 sources:
+  "5.40.0.1":
+    x86_64:
+      url: "https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_54001_64bit_UCRT/strawberry-perl-5.40.0.1-64bit-portable.zip"
+      sha256: "754f3e2a8e473dc68d1540c7802fb166a025f35ef18960c4564a31f8b5933907"
   "5.38.2.2":
     x86_64:
       url: "https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_53822_64bit/strawberry-perl-5.38.2.2-64bit-portable.zip"
