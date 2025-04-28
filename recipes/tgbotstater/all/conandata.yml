@@ -5,3 +5,6 @@ sources:
   "0.1.1":
     url: "https://github.com/Makcal/TgBotStater/archive/refs/tags/v0.1.1.tar.gz"
     sha256: "ed8e1e99747677b627483a7017a34d04725ba95932bc315918d0aa7b5476d280"
+  "0.1.2":
+    url: "https://github.com/Makcal/TgBotStater/archive/refs/tags/v0.1.2.tar.gz"
+    sha256: "3d7d9f35ca59cd5d86a25742b8e01dc3a3d1f9404c4fb6a77ef3db4d02efab20"
