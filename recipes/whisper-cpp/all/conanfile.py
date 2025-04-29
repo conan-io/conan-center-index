@@ -36,6 +36,7 @@ class WhisperCppConan(ConanFile):
         "coreml_allow_fallback": [True, False],
         "with_blas": [True, False],
         "with_openvino": [True, False],
+        "with_cuda": [True, False],
     }
     default_options = {
         "shared": False,
@@ -54,6 +55,7 @@ class WhisperCppConan(ConanFile):
         "coreml_allow_fallback": False,
         "with_blas": False,
         "with_openvino": False,
+        "with_cuda": False,
     }
     package_type = "library"
 
@@ -154,6 +156,14 @@ class WhisperCppConan(ConanFile):
 
         # TODO: Implement OpenMP support
         tc.variables["GGML_OPENMP"] = False
+
+        if self.options.with_cuda:
+            if Version(self.version) >= "1.7.0":
+                tc.variables["GGML_CUDA"] = True
+            elif Version(self.version) >= "1.5.5":
+                tc.variables["WHISPER_CUDA"] = True
+            else:
+                tc.variables["WHISPER_CUBLAS"] = True
 
         if self.options.get_safe("with_openvino"):
             tc.variables["WHISPER_OPENVINO"] = True
