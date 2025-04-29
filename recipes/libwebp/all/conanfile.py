@@ -101,6 +101,8 @@ class LibwebpConan(ConanFile):
         self.cpp_info.components["webpdecoder"].libs = ["webpdecoder"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["webpdecoder"].system_libs = ["m", "pthread"]
+        if self.settings.os == "Android":
+            self.cpp_info.components["webpdecoder"].system_libs = ["m"]
 
         # webp
         self.cpp_info.components["webp"].set_property("cmake_target_name", "WebP::webp")
@@ -108,6 +110,8 @@ class LibwebpConan(ConanFile):
         self.cpp_info.components["webp"].libs = ["webp"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["webp"].system_libs = ["m", "pthread"]
+        if self.settings.os == "Android":
+            self.cpp_info.components["webp"].system_libs = ["m"]
 
         if Version(self.version) >= "1.3.0":
             # sharpyuv
@@ -116,6 +120,8 @@ class LibwebpConan(ConanFile):
             self.cpp_info.components["sharpyuv"].libs = ["sharpyuv"]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["sharpyuv"].system_libs = ["m", "pthread"]
+            if self.settings.os == "Android":
+                self.cpp_info.components["sharpyuv"].system_libs = ["m"]
             # note: webp now depends on sharpyuv
             self.cpp_info.components["webp"].requires = ["sharpyuv"]
 
@@ -130,7 +136,7 @@ class LibwebpConan(ConanFile):
         self.cpp_info.components["webpmux"].set_property("pkg_config_name", "libwebpmux")
         self.cpp_info.components["webpmux"].libs = ["webpmux"]
         self.cpp_info.components["webpmux"].requires = ["webp"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             self.cpp_info.components["webpmux"].system_libs = ["m"]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed

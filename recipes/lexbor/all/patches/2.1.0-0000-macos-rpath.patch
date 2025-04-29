@@ -1,0 +1,31 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3f271b0..4b5ba64 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -59,6 +59,9 @@ IF(NOT LEXBOR_MAKE_DISTRO_NUM)
+     set(LEXBOR_MAKE_DISTRO_NUM "1")
+ ENDIF()
+ 
++enable_language(C)
++enable_language(CXX)
++
+ ################
+ ## Version and path
+ #########################
+@@ -78,13 +81,13 @@ set(LEXBOR_INSTALL_DLL_EXE_DIR "bin")
+ ################
+ ## RPATH
+ #########################
+-include(GNUInstallDirs)
+-
+ IF(APPLE)
+     set(CMAKE_MACOSX_RPATH ON)
+ 
+     set(CMAKE_INSTALL_NAME_DIR ${CMAKE_INSTALL_FULL_LIBDIR})
+-ENDIF(APPLE)
++ELSEIF(UNIX)
++    include(GNUInstallDirs)
++ENDIF()
+ 
+ ################
+ ## lib param

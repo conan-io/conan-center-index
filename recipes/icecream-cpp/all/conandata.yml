@@ -2,3 +2,6 @@ sources:
   '0.3.1':
     url: 'https://github.com/renatoGarcia/icecream-cpp/archive/v0.3.1.tar.gz'
     sha256: '51bebb040c9c7e44f443d6356256ae4d93300d2e1f01824fd219c97d168a438f'
+  '1.0.0':
+    url: 'https://github.com/renatoGarcia/icecream-cpp/archive/refs/tags/v1.0.0.tar.gz'
+    sha256: '35fdbd012a4f7990c404c59b8291e04dc6103232323371ea7a2b18613b1b7900'

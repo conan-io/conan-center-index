@@ -53,8 +53,6 @@ class LibdwarfConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_dwarfgen:
-            self.requires("libelf/0.8.13")
         self.requires("zlib/[>=1.2.11 <2]")
         if  Version(self.version) >= Version("0.9.0"):
             self.requires("zstd/[~1.5]")
@@ -73,6 +71,8 @@ class LibdwarfConan(ConanFile):
         if cross_building(self):
             tc.variables["HAVE_UNUSED_ATTRIBUTE_EXITCODE"] = "0"
             tc.variables["HAVE_UNUSED_ATTRIBUTE_EXITCODE__TRYRUN_OUTPUT"] = ""
+        if Version(self.version) < "0.9.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         dpes = CMakeDeps(self)
