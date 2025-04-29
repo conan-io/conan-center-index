@@ -78,18 +78,6 @@ class OpenCascadeConan(ConanFile):
     def _min_cppstd(self):
         return "11"
 
-    @property
-    def _compilers_minimum_version(self):
-        if Version(self.version) >= "7.8":
-            return {
-                "gcc": "7",
-                "clang": "7",
-                "apple-clang": "10",
-                "Visual Studio": "15",
-                "msvc": "191",
-            }
-        return {}
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -140,11 +128,6 @@ class OpenCascadeConan(ConanFile):
         if self.settings.compiler == "clang" and self.settings.compiler.version == "6.0" and \
            self.settings.build_type == "Release":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support Clang 6.0 if Release build type")
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -152,9 +135,16 @@ class OpenCascadeConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
-        if Version(self.version) >= "7.8.0":
-            cppstd = str(self.settings.compiler.cppstd).replace("gnu", "").upper()
-            tc.cache_variables["BUILD_CPP_STANDARD"] = f"C++{cppstd}"
+        if Version(self.version) < "7.8.0":
+            # Inject C++ standard from profile since we have removed hardcoded C++ standard from upstream build files
+            if not valid_min_cppstd(self, self._min_cppstd):
+                tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        else:
+            if not valid_min_cppstd(self, self._min_cppstd):
+                tc.cache_variables["BUILD_CPP_STANDARD"] = self._min_cppstd
+            else:
+                cppstd = str(self.settings.compiler.cppstd).replace("gnu", "").upper()
+                tc.cache_variables["BUILD_CPP_STANDARD"] = f"C++{cppstd}"
 
         tc.cache_variables["BUILD_LIBRARY_TYPE"] = "Shared" if self.options.shared else "Static"
         tc.cache_variables["INSTALL_TEST_CASES"] = False
@@ -631,7 +621,11 @@ class OpenCascadeConan(ConanFile):
         def _register_components(modules_dict):
             for module, targets in modules_dict.items():
                 conan_component_module_name = _to_qualified_name(module)
-                self.cpp_info.components[conan_component_module_name].set_property("cmake_target_name", module)
+                # FIXME: in this "module" target we would like to model COMPONENTS for find_package() but
+                #       for the moment it generates in CMakeDeps some weird component name like
+                #       opencascade::FoundationClasses instead of FoundationClasses.
+                #       see https://github.com/conan-io/conan/issues/10258
+                # self.cpp_info.components[conan_component_module_name].set_property("cmake_target_name", module)
 
                 for target_lib, target_deps in targets.items():
                     conan_component_target_name = _to_qualified_name(target_lib)
