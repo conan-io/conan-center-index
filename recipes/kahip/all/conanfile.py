@@ -18,11 +18,13 @@ class KahipConan(ConanFile):
     options  = {
         "shared"         : [True, False],
         "fPIC"           : [True, False],
+        "with_mpi"       : [True, False],
         "python_module"  : [True, False],
     }
     default_options = {
         "shared"         : False,
         "fPIC"           : True,
+        "with_mpi"       : False,
         "python_module"  : False,
     }
     implements = ["auto_shared_fpic"]
@@ -51,7 +53,7 @@ class KahipConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["NOMPI"]             = True
+        tc.cache_variables["NOMPI"]             = not self.options.with_mpi
         tc.cache_variables["USE_TCMALLOC"]      = False
         tc.cache_variables["USE_ILP"]           = False # would require gurobi
         
