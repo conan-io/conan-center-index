@@ -1,0 +1,10 @@
+sources:
+  "17.4":
+    url: "https://ftp.postgresql.org/pub/source/v17.4/postgresql-17.4.tar.bz2"
+    sha256: "c4605b73fea11963406699f949b966e5d173a7ee0ccaef8938dec0ca8a995fe7"
+patches:
+  "17.4":
+    - patch_file: "patches/17/0001-17.4-fix-macos-strchrnul-usage.patch"
+      patch_description: "Fix macOS strchrnul usage"
+      patch_type: "backport"
+      patch_source: "https://git.postgresql.org/gitweb/?p=postgresql.git;a=commitdiff;h=6da2ba1d8a031984eb016fed6741bb2ac945f19d"
