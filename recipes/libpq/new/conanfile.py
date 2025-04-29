@@ -8,6 +8,8 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 import os
 
+from conan.tools.microsoft import is_msvc
+
 required_conan_version = ">=2.4"
 
 
@@ -133,8 +135,49 @@ class LibpqConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
-        self.cpp_info.set_property("pkg_config_name", "package")
+        self.cpp_info.set_property("cmake_file_name", "PostgreSQL")
+        self.cpp_info.set_property("cmake_target_name", "PostgreSQL::PostgreSQL")
+        self.cpp_info.set_property("pkg_config_name", "libpq")
+
+        self.runenv_info.define_path("PostgreSQL_ROOT", self.package_folder)
+
+        self.cpp_info.components["pq"].libs = [f"{'lib' if is_msvc(self) else ''}pq"]
+
+        if self.options.with_openssl:
+            self.cpp_info.components["pq"].requires.append("openssl::openssl")
+        if self.options.with_icu:
+            self.cpp_info.components["pq"].requires.append("icu::icu")
+        if self.options.with_zlib:
+            self.cpp_info.components["pq"].requires.append("zlib::zlib")
+        if self.options.with_zstd:
+            self.cpp_info.components["pq"].requires.append("zstd::zstd")
+        if self.options.with_libxml2:
+            self.cpp_info.components["pq"].requires.append("libxml2::libxml2")
+        if self.options.with_lz4:
+            self.cpp_info.components["pq"].requires.append("lz4::lz4")
+        if self.options.with_xslt:
+            self.cpp_info.components["pq"].requires.append("libxslt::libxslt")
+        if self.options.get_safe("with_readline"):
+            self.cpp_info.components["pq"].requires.append("readline::readline")
+
+        if not self.options.shared:
+            if is_msvc(self):
+                self.cpp_info.components["pgport"].libs = ["libpgport"]
+                self.cpp_info.components["pq"].requires.append("pgport")
+                self.cpp_info.components["pgcommon"].libs = ["libpgcommon"]
+                self.cpp_info.components["pq"].requires.append("pgcommon")
+            else:
+                self.cpp_info.components["pgcommon"].libs = ["pgcommon"]
+                self.cpp_info.components["pq"].requires.append("pgcommon")
+                self.cpp_info.components["pgcommon"].libs.append("pgcommon_shlib")
+                self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
+                if self.settings.os == "Windows":
+                    self.cpp_info.components["pgport"].system_libs = ["ws2_32"]
+                self.cpp_info.components["pgcommon"].requires.append("pgport")
+
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
+            self.cpp_info.components["pq"].system_libs = ["pthread"]
+            self.cpp_info.components["pgcommon"].system_libs = ["m"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
 
