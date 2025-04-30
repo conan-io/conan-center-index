@@ -135,16 +135,9 @@ class OpenCascadeConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
-        if Version(self.version) < "7.8.0":
-            # Inject C++ standard from profile since we have removed hardcoded C++ standard from upstream build files
-            if not valid_min_cppstd(self, self._min_cppstd):
-                tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
-        else:
-            if not valid_min_cppstd(self, self._min_cppstd):
-                tc.cache_variables["BUILD_CPP_STANDARD"] = self._min_cppstd
-            else:
-                cppstd = str(self.settings.compiler.cppstd).replace("gnu", "").upper()
-                tc.cache_variables["BUILD_CPP_STANDARD"] = f"C++{cppstd}"
+        if Version(self.version) >= "7.8.0":
+            cppstd = str(self.settings.compiler.cppstd).replace("gnu", "").upper()
+            tc.cache_variables["BUILD_CPP_STANDARD"] = f"C++{cppstd}"
 
         tc.cache_variables["BUILD_LIBRARY_TYPE"] = "Shared" if self.options.shared else "Static"
         tc.cache_variables["INSTALL_TEST_CASES"] = False
