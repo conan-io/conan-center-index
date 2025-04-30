@@ -8,6 +8,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment
 
 import os
+import shutil
 
 required_conan_version = ">=1.55.0"
 
@@ -353,6 +354,11 @@ class SDLConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "libdata"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        if self.settings.os == "Android":
+            # too much hassle via mkdir+copy due to amount of subdirectories
+            shutil.copytree(
+                os.path.join(self.source_folder, "android-project", "app", "src", "main", "java"),
+                os.path.join(self.package_folder, "src-java"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SDL2")
