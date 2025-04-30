@@ -1,4 +1,7 @@
 sources:
+  "42":
+    url: "https://github.com/SimonKagstrom/kcov/archive/refs/tags/v42.tar.gz"
+    sha256: "2c47d75397af248bc387f60cdd79180763e1f88f3dd71c94bb52478f8e74a1f8"
   "40":
     url: "https://github.com/SimonKagstrom/kcov/archive/refs/tags/v40.tar.gz"
     sha256: "6b1c11b066d57426d61375a31c3816f1fcd2610b447050c86d9920e22d5200b3"
@@ -6,9 +9,14 @@ sources:
     url: "https://github.com/SimonKagstrom/kcov/archive/38.tar.gz"
     sha256: "b37af60d81a9b1e3b140f9473bdcb7975af12040feb24cc666f9bb2bb0be68b4"
 patches:
-  "40": []
+  "42":
+    - patch_file: "patches/0003-fix-missing-include.patch"
+      patch_description: "Add a missing includes on macOS"
+      patch_type: "backport"
+      patch_source: "https://github.com/SimonKagstrom/kcov/commit/4efe5e4a4ac4e7b6d99fc869d826aa74ff716ebf"
+    - patch_file: "patches/0004-fix-libdwarf-prefix.patch"
+      patch_description: "Adjust libdwarf include to match CCI includedirs"
+      patch_type: "conan"
   "38":
     - patch_file: "patches/0001-fix-SOLIB-path.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-fix-missing-libssl-dependency.patch"
-      base_path: "source_subfolder"

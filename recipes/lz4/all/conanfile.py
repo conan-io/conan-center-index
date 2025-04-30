@@ -6,7 +6,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class LZ4Conan(ConanFile):
@@ -16,7 +16,7 @@ class LZ4Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lz4/lz4"
     topics = ("compression")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -50,21 +50,21 @@ class LZ4Conan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["LZ4_BUILD_CLI"] = False
-        tc.variables["LZ4_BUILD_LEGACY_LZ4C"] = False
+        if Version(self.version) < "1.10.0":
+            tc.variables["LZ4_BUILD_LEGACY_LZ4C"] = False
         tc.variables["LZ4_BUNDLED_MODE"] = False
         tc.variables["LZ4_POSITION_INDEPENDENT_LIB"] = self.options.get_safe("fPIC", True)
         # Generate a relocatable shared lib on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         # Honor BUILD_SHARED_LIBS (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        if Version(self.version) < "1.10.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     @property
     def _cmakelists_folder(self):
-        if Version(self.version) < "1.9.3":
-            subfolder = os.path.join("contrib", "cmake_unofficial")
-        else:
-            subfolder = os.path.join("build", "cmake")
+        subfolder = os.path.join("build", "cmake")
         return os.path.join(self.source_folder, subfolder)
 
     def build(self):
@@ -72,21 +72,6 @@ class LZ4Conan(ConanFile):
         cmake = CMake(self)
         cmake.configure(build_script_folder=self._cmakelists_folder)
         cmake.build()
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -96,12 +81,6 @@ class LZ4Conan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-
-        # TODO: to remove in conan v2 once legacy generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {self._lz4_target: "lz4::lz4"},
-        )
 
     @property
     def _lz4_target(self):
@@ -115,8 +94,3 @@ class LZ4Conan(ConanFile):
         self.cpp_info.libs = ["lz4"]
         if is_msvc(self) and self.options.shared:
             self.cpp_info.defines.append("LZ4_DLL_IMPORT=1")
-
-        # TODO: to remove in conan v2 once legacy generators removed
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.names["pkg_config"] = "liblz4"

@@ -8,12 +8,12 @@ required_conan_version = ">=1.50.0"
 
 class GslLiteConan(ConanFile):
     name = "gsl-lite"
+    description = "A single-file header-only version of ISO C++ " \
+                  "Guideline Support Library (GSL) for C++98, C++11 and later"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/martinmoene/gsl-lite"
-    topics = ("GSL",)
-    description = "A single-file header-only version of ISO C++ " \
-                  "Guideline Support Library (GSL) for C++98, C++11 and later"
+    topics = ("GSL", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     #  There are three configuration options for this GSL implementation's behavior

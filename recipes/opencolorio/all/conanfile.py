@@ -18,6 +18,7 @@ class OpenColorIOConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("colors", "visual", "effects", "animation")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -46,11 +47,11 @@ class OpenColorIOConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("expat/2.5.0")
+        self.requires("expat/[>=2.6.2 <3]")
         if Version(self.version) < "2.2.0":
             self.requires("openexr/2.5.7")
         else:
-            self.requires("openexr/3.2.1")
+            self.requires("openexr/3.3.2")
             self.requires("imath/3.1.9")
 
         if Version(self.version) < "2.0.0":
@@ -66,12 +67,11 @@ class OpenColorIOConan(ConanFile):
             self.requires("minizip-ng/3.0.9")
 
         # for tools only
-        self.requires("lcms/2.14")
+        self.requires("lcms/2.16")
         # TODO: add GLUT (needed for ociodisplay tool)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
         if Version(self.version) >= "2.3.0" and \
             self.settings.compiler == "gcc" and \
             Version(self.settings.compiler.version) < "6.0":
@@ -94,8 +94,6 @@ class OpenColorIOConan(ConanFile):
 
         if Version(self.version) == "1.1.1" and self.options.shared and self.dependencies["yaml-cpp"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} requires static build yaml-cpp")
-        if Version(self.version) >= "2.2.1" and self.options.shared and self.dependencies["minizip-ng"].options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} requires static build minizip-ng")
 
     def build_requirements(self):
         if Version(self.version) >= "2.2.0":
@@ -199,12 +197,3 @@ class OpenColorIOConan(ConanFile):
 
         if is_msvc(self) and not self.options.shared:
             self.cpp_info.defines.append("OpenColorIO_SKIP_IMPORTS")
-
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH env var with: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
-
-        # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "OpenColorIO"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenColorIO"
-        self.cpp_info.names["pkg_config"] = "OpenColorIO"

@@ -2,11 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy, get, rmdir
-from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class MBedTLSConan(ConanFile):
@@ -15,10 +15,10 @@ class MBedTLSConan(ConanFile):
         "mbed TLS makes it trivially easy for developers to include "
         "cryptographic and SSL/TLS capabilities in their (embedded) products"
     )
-    topics = ("polarssl", "tls", "security")
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tls.mbed.org"
-    license = "Apache-2.0"
+    topics = ("polarssl", "tls", "security")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -87,11 +87,9 @@ class MBedTLSConan(ConanFile):
         if Version(self.version) < "3.0.0":
             # relocatable shared libs on macOS
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        if is_msvc(self):
-            if check_min_vs(self, 190, raise_invalid=False):
-                tc.preprocessor_definitions["MBEDTLS_PLATFORM_SNPRINTF_MACRO"] = "snprintf"
-            else:
-                tc.preprocessor_definitions["MBEDTLS_PLATFORM_SNPRINTF_MACRO"] = "MBEDTLS_PLATFORM_STD_SNPRINTF"
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if is_msvc(self) and "2.16.12" <= Version(self.version) <= "3.6.0":
+            tc.preprocessor_definitions["MBEDTLS_PLATFORM_SNPRINTF_MACRO"] = "snprintf"
         if self.options.enable_threading:
             tc.preprocessor_definitions["MBEDTLS_THREADING_C"] = True
             tc.preprocessor_definitions["MBEDTLS_THREADING_PTHREAD"] = True
@@ -139,15 +137,14 @@ class MBedTLSConan(ConanFile):
         self.cpp_info.components["libembedtls"].set_property("cmake_target_name", "MbedTLS::mbedtls")
         self.cpp_info.components["libembedtls"].libs = ["mbedtls"]
         self.cpp_info.components["libembedtls"].requires = ["mbedx509"]
+
+        if is_msvc(self) and "2.16.12" <= Version(self.version) <= "3.6.0":
+            for component in ["mbedcrypto", "libembedtls", "mbedx509"]:
+                self.cpp_info.components[component].defines.append("MBEDTLS_PLATFORM_SNPRINTF_MACRO=snprintf")
+
         if Version(self.version) >= "3.6.0":
             self.cpp_info.components["libembedtls"].set_property("pkg_config_name", "embedtls")
 
         if self.options.get_safe("with_zlib"):
             for component in self.cpp_info.components:
                 self.cpp_info.components[component].requires.append("zlib::zlib")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "MbedTLS"
-        self.cpp_info.names["cmake_find_package_multi"] = "MbedTLS"
-        self.cpp_info.components["libembedtls"].names["cmake_find_package"] = "mbedtls"
-        self.cpp_info.components["libembedtls"].names["cmake_find_package_multi"] = "mbedtls"

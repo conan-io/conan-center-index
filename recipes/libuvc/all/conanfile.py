@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
@@ -8,7 +8,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class LibuvcConan(ConanFile):
@@ -24,13 +24,11 @@ class LibuvcConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
-        "jpeg_turbo": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_jpeg": "libjpeg",
-        "jpeg_turbo": "deprecated",
     }
 
     def export_sources(self):
@@ -46,12 +44,6 @@ class LibuvcConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
-        # TODO: to remove once deprecated jpeg_turbo option removed
-        if self.options.jpeg_turbo != "deprecated":
-            self.output.warning("jpeg_turbo option is deprecated, please use with_jpeg option instead")
-            if self.options.jpeg_turbo:
-                self.options.with_jpeg == "libjpeg-turbo"
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -63,10 +55,6 @@ class LibuvcConan(ConanFile):
             self.requires("libjpeg-turbo/3.0.0")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.3")
-
-    def package_id(self):
-        # TODO: to remove once deprecated jpeg_turbo option removed
-        del self.info.options.jpeg_turbo
 
     def validate(self):
         if is_msvc(self):
@@ -93,6 +81,9 @@ class LibuvcConan(ConanFile):
 
         # Relocatable shared libs on macOS
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "0.0.7": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
         CMakeDeps(self).generate()
@@ -129,13 +120,5 @@ class LibuvcConan(ConanFile):
             self.cpp_info.components["_libuvc"].requires.append("libjpeg-turbo::jpeg")
         elif self.options.with_jpeg == "mozjpeg":
             self.cpp_info.components["_libuvc"].requires.append("mozjpeg::libjpeg")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "libuvc"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "libuvc"
-        self.cpp_info.names["cmake_find_package"] = "LibUVC"
-        self.cpp_info.names["cmake_find_package_multi"] = "LibUVC"
-        self.cpp_info.components["_libuvc"].names["cmake_find_package"] = cmake_target
-        self.cpp_info.components["_libuvc"].names["cmake_find_package_multi"] = cmake_target
         self.cpp_info.components["_libuvc"].set_property("cmake_target_name", f"LibUVC::{cmake_target}")
         self.cpp_info.components["_libuvc"].set_property("pkg_config_name", "libuvc")

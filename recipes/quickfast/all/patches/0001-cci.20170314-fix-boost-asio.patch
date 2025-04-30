@@ -1,0 +1,44 @@
+diff --git a/src/Common/QuickFASTPch.h b/src/Common/QuickFASTPch.h
+index 381f846..d3016bd 100644
+--- a/src/Common/QuickFASTPch.h
++++ b/src/Common/QuickFASTPch.h
+@@ -36,7 +36,6 @@
+ #include <string.h>
+ 
+ // If building for .NET, must link boost threads dynamically
+-#define BOOST_THREAD_USE_DLL
+ // This reports at compile time which boost libraries will be used
+ // #define BOOST_LIB_DIAGNOSTIC
+ 
+diff --git a/src/Communication/AsioService.h b/src/Communication/AsioService.h
+index 4f61915..b5fa821 100644
+--- a/src/Communication/AsioService.h
++++ b/src/Communication/AsioService.h
+@@ -24,7 +24,7 @@ namespace QuickFAST
+     /// Normal case is for all classes derived from AsioService to share
+     /// the same boost::io_service.  The alternate constructor gives the
+     /// application more control if it is needed.
+-    class QuickFAST_Export AsioService
++    class QuickFAST_Export AsioService : public boost::asio::io_service
+     {
+     public:
+       /// @brief Construct using the internal, common io service
+diff --git a/src/Communication/AsioService_fwd.h b/src/Communication/AsioService_fwd.h
+index dc2f235..8d9be19 100644
+--- a/src/Communication/AsioService_fwd.h
++++ b/src/Communication/AsioService_fwd.h
+@@ -13,13 +13,7 @@
+ 
+ // forward declare io_service without including
+ // boost header
+-namespace boost
+-{
+-  namespace asio
+-  {
+-    class io_service;
+-  }
+-}
++#include <boost/asio/io_service.hpp>
+ 
+ namespace QuickFAST
+ {

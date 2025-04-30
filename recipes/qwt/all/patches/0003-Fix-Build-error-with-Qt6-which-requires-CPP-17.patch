@@ -1,0 +1,64 @@
+From fc8e1ba33ca4db5a9b07072734025dcd9ad53d58 Mon Sep 17 00:00:00 2001
+From: Ashley Brighthope <ashley.b@reddegrees.com>
+Date: Mon, 6 Mar 2023 19:19:40 +1100
+Subject: [PATCH] Fix: Build error with Qt6, which requires C++17
+
+Removed enforced C++ version of 11 to be a minimum version of C++ 11
+---
+ CMakeLists.txt          | 4 ----
+ designer/CMakeLists.txt | 6 ++++++
+ src/CMakeLists.txt      | 6 ++++++
+ 3 files changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b42d510..469fa28 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -7,10 +7,6 @@ project(Qwt
+   LANGUAGES CXX
+ )
+ 
+-set(CMAKE_CXX_STANDARD 11)
+-set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+-set(CMAKE_CXX_EXTENSIONS OFF)
+-
+ if(MSVC)
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /permissive-")
+ else()
+diff --git a/designer/CMakeLists.txt b/designer/CMakeLists.txt
+index aa81efd..98db4b3 100644
+--- a/designer/CMakeLists.txt
++++ b/designer/CMakeLists.txt
+@@ -18,6 +18,12 @@ else()
+   target_link_libraries(qwt_designer_plugin PRIVATE qwt)
+ endif()
+ 
++if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
++  target_compile_features(qwt_designer_plugin PUBLIC cxx_std_17)
++else()
++  target_compile_features(qwt_designer_plugin PUBLIC cxx_std_11)
++endif()
++
+ target_link_libraries(qwt_designer_plugin PUBLIC Qt${QT_VERSION_MAJOR}::Designer)
+ 
+ set_target_properties(qwt_designer_plugin PROPERTIES
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index d25655a..2714b4f 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -285,6 +285,12 @@ endif()
+ 
+ add_library(qwt_objects OBJECT ${SOURCES} ${HEADERS})
+ 
++if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
++  target_compile_features(qwt_objects PUBLIC cxx_std_17)
++else()
++  target_compile_features(qwt_objects PUBLIC cxx_std_11)
++endif()
++
+ target_include_directories(qwt_objects INTERFACE
+   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+   $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/classincludes>
+-- 
+2.43.0
+

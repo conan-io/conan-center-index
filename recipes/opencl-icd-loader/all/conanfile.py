@@ -3,9 +3,10 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class OpenclIcdLoaderConan(ConanFile):
@@ -63,6 +64,8 @@ class OpenclIcdLoaderConan(ConanFile):
         tc.variables["OPENCL_ICD_LOADER_BUILD_TESTING"] = False
         if self.settings.os == "Windows":
             tc.variables["OPENCL_ICD_LOADER_DISABLE_OPENCLON12"] = self.options.disable_openclon12
+        if Version(self.version) < "2024.10.24": # pylint: disable=conan-condition-evals-to-constant
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):
@@ -92,9 +95,3 @@ class OpenclIcdLoaderConan(ConanFile):
                 self.cpp_info.system_libs = ["dl", "pthread"]
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["cfgmgr32", "runtimeobject"]
-
-        # TODO: to remove in conan v2
-        self.cpp_info.filenames["cmake_find_package"] = "OpenCL"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCLICDLoader"
-        self.cpp_info.names["cmake_find_package"] = "OpenCL"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenCL"

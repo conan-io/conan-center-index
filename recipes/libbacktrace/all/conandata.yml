@@ -1,8 +1,22 @@
 sources:
+  "cci.20240730":
+    url: "https://github.com/ianlancetaylor/libbacktrace/archive/0dd27b95f9f2c11b4a89db5f185a888af912838e.tar.gz"
+    sha256: "dfbc52012846c57759eaaa5131c329c43f77695c808b3e1847ec2dacce238c35"
   "cci.20210118":
     url: "https://github.com/ianlancetaylor/libbacktrace/archive/dedbe13fda00253fe5d4f2fb812c909729ed5937.tar.gz"
     sha256: "dc8c167f48f3de5ae318c528b26b72f300edb6e33744e55394674fd4b7cdd21d"
 patches:
+  "cci.20240730":
+    - patch_file: "patches/cci.20240719-0001-pointer-arithmetic.patch"
+      patch_description: "casting pointer types for pointer arithmetics"
+      patch_type: "portability"
+    - patch_file: "patches/0002-msvc-unistd-alternative.patch"
+      patch_description: "support msvc for codes using unistd.h"
+      patch_type: "portability"
   "cci.20210118":
     - patch_file: "patches/0001-pointer-arithmetic.patch"
+      patch_description: "casting pointer types for pointer arithmetics"
+      patch_type: "portability"
     - patch_file: "patches/0002-msvc-unistd-alternative.patch"
+      patch_description: "support msvc for codes using unistd.h"
+      patch_type: "portability"

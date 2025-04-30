@@ -88,9 +88,9 @@ class LibdrmConan(ConanFile):
             raise ConanInvalidConfiguration("libdrm supports only Linux or FreeBSD")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.4.0")
+        self.tool_requires("meson/[>=1.4.0 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2.0 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -118,6 +118,7 @@ class LibdrmConan(ConanFile):
 
         tc.project_options["datadir"] = "res"
         tc.project_options["mandir"] = os.path.join("res", "man")
+        tc.project_options["man-pages"] = "disabled" if Version(self.version) >= "2.4.113" else "false"
         tc.generate()
 
     def build(self):
