@@ -15,7 +15,7 @@ class GnuConfigConan(ConanFile):
     topics = ("gnu", "config", "autotools", "canonical", "host", "build", "target", "triplet")
     license = "GPL-3.0-or-later", "autoconf-special-exception"
     package_type = "build-scripts"
-    os = "arch", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
 
     def export_sources(self):
         export_conandata_patches(self)
