@@ -257,8 +257,7 @@ class OpenCascadeConan(ConanFile):
             self,
             occt_csf_cmake,
             "set (CSF_FREETYPE \"freetype\")",
-            f"set (CSF_FREETYPE \"{freetype_libs}\")",
-            strict=False
+            f"set (CSF_FREETYPE \"{freetype_libs}\")"
         )
         ## tcl
         deps_targets.append("tcl::tcl")
@@ -614,11 +613,6 @@ class OpenCascadeConan(ConanFile):
         def _register_components(modules_dict):
             for module, targets in modules_dict.items():
                 conan_component_module_name = _to_qualified_name(module)
-                # FIXME: in this "module" target we would like to model COMPONENTS for find_package() but
-                #       for the moment it generates in CMakeDeps some weird component name like
-                #       opencascade::FoundationClasses instead of FoundationClasses.
-                #       see https://github.com/conan-io/conan/issues/10258
-                # self.cpp_info.components[conan_component_module_name].set_property("cmake_target_name", module)
 
                 for target_lib, target_deps in targets.items():
                     conan_component_target_name = _to_qualified_name(target_lib)
