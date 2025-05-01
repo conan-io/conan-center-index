@@ -1,4 +1,7 @@
 sources:
+  "77.1":
+    url: "https://github.com/unicode-org/icu/releases/download/release-77-1/icu4c-77_1-src.tgz"
+    sha256: "588e431f77327c39031ffbb8843c0e3bc122c211374485fa87dc5f3faff24061"
   "76.1":
     url: "https://github.com/unicode-org/icu/releases/download/release-76-1/icu4c-76_1-src.tgz"
     sha256: "dfacb46bfe4747410472ce3e1144bf28a102feeaa4e3875bac9b4c6cf30f4f3e"
@@ -18,11 +21,14 @@ sources:
     url: "https://github.com/unicode-org/icu/releases/download/release-73-1/icu4c-73_1-src.tgz"
     sha256: "a457431de164b4aa7eca00ed134d00dfbf88a77c6986a10ae7774fc076bb8c45"
 patches:
+  "77.1":
+    - patch_file: "patches/0001-76.1-fix-mingw.patch"
+      patch_description: "support mingw"
+      patch_type: "portability"
   "76.1":
     - patch_file: "patches/0001-76.1-fix-mingw.patch"
       patch_description: "support mingw"
       patch_type: "portability"
-
   "75.1":
     - patch_file: "patches/0001-69.1-fix-mingw.patch"
       patch_description: "support mingw"
