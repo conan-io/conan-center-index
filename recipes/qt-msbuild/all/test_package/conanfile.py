@@ -22,5 +22,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         res_folder = load(self, os.path.join(self.build_folder, "QtMsBuild"))
-        qt_props_path = os.path.join(res_folder, "qt.props")
+        qt_props_path = os.path.join(res_folder, "Qt.props")
         assert os.path.isfile(qt_props_path)
