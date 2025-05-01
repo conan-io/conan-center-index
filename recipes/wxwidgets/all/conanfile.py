@@ -124,7 +124,7 @@ class wxWidgetsConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("ninja/1.11.1")
-        self.tool_requires("cmake/[>=3.17]")
+        self.tool_requires("cmake/[>=3.17 <4]")
 
     # TODO: add support for gtk non system version when it's ready for Conan 2
     def requirements(self):
