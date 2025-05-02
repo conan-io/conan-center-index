@@ -151,6 +151,7 @@ class OpenCVConan(ConanFile):
         "with_v4l": [True, False],
         # text module options
         "with_tesseract": [True, False],
+        "cv_trace": [True, False],
         # TODO: deprecated options to remove in few months
         "contrib": [True, False, "deprecated"],
         "contrib_freetype": [True, False, "deprecated"],
@@ -211,6 +212,7 @@ class OpenCVConan(ConanFile):
         "with_v4l": False,
         # text module options
         "with_tesseract": True,
+        "cv_trace": True,
         # TODO: deprecated options to remove in few months
         "contrib": "deprecated",
         "contrib_freetype": "deprecated",
@@ -1478,6 +1480,7 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_MSMF_DXVA"] = self.options.get_safe("with_msmf_dxva", False)
         tc.variables["OPENCV_MODULES_PUBLIC"] = "opencv"
         tc.variables["OPENCV_ENABLE_NONFREE"] = self.options.nonfree
+        tc.variables["CV_TRACE"] = self.options.get_safe("cv_trace", False)
 
         if self.options.cpu_baseline or self.options.cpu_baseline == "":
             tc.variables["CPU_BASELINE"] = self.options.cpu_baseline
