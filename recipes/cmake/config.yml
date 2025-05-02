@@ -1,5 +1,5 @@
 versions:
-  "4.0.0-rc4":
+  "4.0.1":
     folder: "binary"
   "3.31.6":
     folder: "binary"
