@@ -212,6 +212,8 @@ class WhisperCppConan(ConanFile):
             self.cpp_info.libs.append("ggml")
         if Version(self.version) >= "1.7.3":
             self.cpp_info.libs.extend(["ggml-base", "ggml-cpu"])
+            if self.options.get_safe("with_cuda"):
+                self.cpp_info.libs.append("ggml-cuda")
         self.cpp_info.resdirs = ["res"]
         if Version(self.version) < "1.7.0":
             self.cpp_info.libdirs = ["lib", "lib/static"]
