@@ -1,0 +1,4 @@
+sources:
+  "8.0.0":
+    url: "https://github.com/Open-Cascade-SAS/OCCT/archive/refs/tags/V8_0_0_rc1.tar.gz"
+    sha256: "186c84aa682446566e39bc8da06bbd279c25bfc4378393e53a75006af976f34e"
