@@ -32,6 +32,7 @@ class AssimpConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "double_precision": False,
+        "minizip-ng/*:mz_compatibility": True,
     }
 
     _format_option_map = {
@@ -176,7 +177,7 @@ class AssimpConan(ConanFile):
     def requirements(self):
         # TODO: unvendor others libs:
         # - Open3DGC
-        self.requires("minizip/1.2.13")
+        self.requires("minizip-ng/4.0.7")
         self.requires("pugixml/1.14")
         self.requires("utfcpp/4.0.1")
         self.requires("zlib/[>=1.2.11 <2]")
@@ -264,6 +265,7 @@ class AssimpConan(ConanFile):
         cd = CMakeDeps(self)
         cd.set_property("rapidjson", "cmake_target_name", "rapidjson::rapidjson")
         cd.set_property("utfcpp", "cmake_target_name", "utf8cpp::utf8cpp")
+        cd.set_property("minizip-ng", "cmake_target_name", "minizip::minizip")
         cd.generate()
 
         venv = VirtualBuildEnv(self)
