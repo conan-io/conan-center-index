@@ -9,8 +9,6 @@ class ResultLibConan(ConanFile):
     name = "resultlib"
     description = "Elegant error handling in C"
     license = "Apache-2.0"
-    author = "Guillermo Calvo (guillermo@guillermo.dev)"
-    url = "https://github.com/guillermocalvo/resultlib/"
     homepage = "https://result.guillermo.dev/"
     topics = ("header-only", "error-handling", "c-library", "declarative-programming", "monadic-interface", "result")
     exports_sources = "src/result.h"
