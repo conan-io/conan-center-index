@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.build import check_min_cstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 import os
@@ -15,15 +16,15 @@ class ResultLibConan(ConanFile):
     package_type = "header-library"
     no_copy_source = True
 
+    languages = ["C"]
+    implements = ["auto_header_only"]
+
     def layout(self):
         basic_layout(self, src_folder="src")
     
     def validate(self):
         if self.settings.get_safe("compiler.cstd"):
             check_min_cstd(self, 23)
-
-    def package_id(self):
-        self.info.clear()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
