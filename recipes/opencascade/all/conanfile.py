@@ -135,6 +135,7 @@ class OpenCascadeConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         if Version(self.version) >= "7.8.0":
             cppstd = str(self.settings.compiler.cppstd).replace("gnu", "").upper()
             tc.cache_variables["BUILD_CPP_STANDARD"] = f"C++{cppstd}"
