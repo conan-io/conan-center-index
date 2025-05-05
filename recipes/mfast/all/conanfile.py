@@ -10,7 +10,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class mFASTConan(ConanFile):
@@ -103,8 +103,10 @@ class mFASTConan(ConanFile):
         tc.variables["BUILD_SQLITE3"] = self.options.with_sqlite3
         if not valid_min_cppstd(self, self._min_cppstd):
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
-        # Relocatable shared libs on macOS
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if Version(self.version) <= "1.2.2": # pylint: disable=conan-condition-evals-to-constant
+            # Relocatable shared libs on macOS
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -272,22 +274,9 @@ class mFASTConan(ConanFile):
             if self.options.shared:
                 self.cpp_info.components[conan_comp].defines = ["MFAST_DYN_LINK"]
 
-            # TODO: to remove in conan v2 once cmake_find_package* generators removed
-            self.cpp_info.components[conan_comp].names["cmake_find_package"] = target
-            self.cpp_info.components[conan_comp].names["cmake_find_package_multi"] = target
-            self.cpp_info.components[conan_comp].build_modules["cmake"] = [self._fast_type_gen_target_file]
-            build_modules = [self._lib_targets_module_file, self._fast_type_gen_target_file]
-            self.cpp_info.components[conan_comp].build_modules["cmake_find_package"] = build_modules
-            self.cpp_info.components[conan_comp].build_modules["cmake_find_package_multi"] = build_modules
             if comp != target:
                 conan_comp_alias = conan_comp + "_alias"
-                self.cpp_info.components[conan_comp_alias].names["cmake_find_package"] = comp
-                self.cpp_info.components[conan_comp_alias].names["cmake_find_package_multi"] = comp
                 self.cpp_info.components[conan_comp_alias].requires = [conan_comp]
                 self.cpp_info.components[conan_comp_alias].includedirs = []
                 self.cpp_info.components[conan_comp_alias].libdirs = []
                 self.cpp_info.components[conan_comp_alias].bindirs = []
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "mFAST"
-        self.cpp_info.names["cmake_find_package_multi"] = "mFAST"

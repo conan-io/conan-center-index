@@ -315,7 +315,7 @@ class LibcurlConan(ConanFile):
                                   "noinst_LTLIBRARIES = libcurl.la")
             # add directives to build dll
             # used only for native mingw-make
-            if not cross_building(self):
+            if not cross_building(self) or self._is_mingw:
                 # The patch file is located in the base src folder
                 added_content = load(self, os.path.join(self.folders.base_source, "lib_Makefile_add.am"))
                 save(self, lib_makefile, added_content, append=True)

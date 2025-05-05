@@ -116,6 +116,10 @@ class PocoConan(ConanFile):
             },
         }.get(self._min_cppstd, {})
 
+    @property
+    def _is_mingw(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -368,6 +372,9 @@ class PocoConan(ConanFile):
             self.cpp_info.components["poco_foundation"].defines.append("POCO_STATIC=ON")
             if self.settings.os == "Windows":
                 self.cpp_info.components["poco_foundation"].system_libs.extend(["ws2_32", "iphlpapi", "crypt32"])
+        if self.options.enable_net:
+            if not self.options.shared and self._is_mingw and Version(self.version) >= "1.13.0":
+                self.cpp_info.components["poco_net"].system_libs.extend(["mswsock"])
         if self.options.enable_data_odbc:
             if self.settings.os == "Windows":
                 self.cpp_info.components["poco_dataodbc"].system_libs.extend(["odbc32", "odbccp32"])

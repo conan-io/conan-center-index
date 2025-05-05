@@ -128,6 +128,11 @@ class OneTBBConan(ConanFile):
             if self.settings.os == "Windows":
                 toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_DLL_PATH"] = \
                     os.path.join(hwloc_package_folder, "bin", "hwloc.dll").replace("\\", "/")
+        if self.options.get_safe("build_apple_frameworks"):
+            toolchain.variables["TBB_BUILD_APPLE_FRAMEWORKS"] = True
+        if Version(self.version) <= "2021.10.0":
+            toolchain.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
+
         toolchain.generate()
 
         if self._tbbbind_build and not self._tbbbind_explicit_hwloc:
@@ -192,7 +197,13 @@ class OneTBBConan(ConanFile):
                 tbbproxy = self.cpp_info.components["tbbmalloc_proxy"]
 
                 tbbproxy.set_property("cmake_target_name", "TBB::tbbmalloc_proxy")
-                tbbproxy.libs = [lib_name("tbbmalloc_proxy")]
+
+                if self.options.get_safe("build_apple_frameworks"):
+                    tbbproxy.frameworkdirs.append(os.path.join(self.package_folder, "lib"))
+                    tbbproxy.frameworks.append("tbbmalloc_proxy")
+                else:
+                    tbbproxy.libs = [lib_name("tbbmalloc_proxy")]
+
                 tbbproxy.requires = ["tbbmalloc"]
                 if self.settings.os in ["Linux", "FreeBSD"]:
                     tbbproxy.system_libs = ["m", "dl", "pthread"]

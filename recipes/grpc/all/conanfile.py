@@ -125,8 +125,10 @@ class GrpcConan(ConanFile):
             )
 
     def build_requirements(self):
-        if not self._is_legacy_one_profile:
-            self.tool_requires("protobuf/<host_version>")
+        # cmake >=3.25 required to use `cmake -E env --modify` below
+        # note: grpc 1.69.0 requires cmake >=3.16
+        self.tool_requires("cmake/[>=3.25 <4]")
+        self.tool_requires("protobuf/<host_version>")
         if cross_building(self):
             # when cross compiling we need pre compiled grpc plugins for protoc
             self.tool_requires(f"grpc/{self.version}")
@@ -413,7 +415,8 @@ class GrpcConan(ConanFile):
             self.cpp_info.components[component].libs = [lib]
             self.cpp_info.components[component].requires = values.get("requires", [])
             self.cpp_info.components[component].system_libs = values.get("system_libs", [])
-            self.cpp_info.components[component].frameworks = values.get("frameworks", [])
+            if is_apple_os(self):
+                self.cpp_info.components[component].frameworks = values.get("frameworks", [])
 
             # TODO: to remove in conan v2 once cmake_find_package_* generators removed
             self.cpp_info.components[component].names["cmake_find_package"] = target

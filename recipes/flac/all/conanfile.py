@@ -103,17 +103,5 @@ class FlacConan(ConanFile):
             self.cpp_info.components["libflac"].defines = ["FLAC__NO_DLL"]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["libflac"].system_libs += ["m"]
-
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
-
-        # TODO: to remove in conan v2
-        self.cpp_info.filenames["cmake_find_package"] = "flac"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "flac"
-        self.cpp_info.names["cmake_find_package"] = "FLAC"
-        self.cpp_info.names["cmake_find_package_multi"] = "FLAC"
-        self.cpp_info.components["libflac"].names["cmake_find_package"] = "FLAC"
-        self.cpp_info.components["libflac"].names["cmake_find_package_multi"] = "FLAC"
-        self.cpp_info.components["libflac++"].names["cmake_find_package"] = "FLAC++"
-        self.cpp_info.components["libflac++"].names["cmake_find_package_multi"] = "FLAC++"
+                if Version(self.version) >= "1.5.0":
+                    self.cpp_info.components["libflac"].system_libs += ["pthread"]
