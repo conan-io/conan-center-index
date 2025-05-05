@@ -338,7 +338,7 @@ class GdalConan(ConanFile):
             self.output.error(msg)
             raise ConanInvalidConfiguration(msg)
 
-        if self.options.with_arrow and Version(self.version) >= "3.10.0" and self.options["arrow"].filesystem_layer == False:
+        if self.options.with_arrow and Version(self.version) >= "3.10.0" and not self.dependencies["arrow"].filesystem_layer:
             raise ConanInvalidConfiguration("Gdal[>=3.10.0] requires -o arrow/*:filesystem_layer=True")
 
     def source(self):
