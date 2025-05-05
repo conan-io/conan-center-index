@@ -6,7 +6,7 @@ from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
 
-required_conan_version = ">=1.51.0"
+required_conan_version = ">=2"
 
 class CMakeConan(ConanFile):
     name = "cmake"
@@ -61,9 +61,3 @@ class CMakeConan(ConanFile):
         if self.settings.os == "Macos":
             bindir = os.path.join(self.package_folder, "CMake.app", "Contents", "bin")
             self.cpp_info.bindirs = [bindir]
-        else:
-            bindir = os.path.join(self.package_folder, "bin")
-
-        # Needed for compatibility with v1.x - Remove when 2.0 becomes the default
-        self.output.info(f"Appending PATH environment variable: {bindir}")
-        self.env_info.PATH.append(bindir)
