@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.1)
 
 project(libXpm VERSION "${CONAN_libXpm_VERSION}" LANGUAGES C)
 
@@ -16,7 +16,8 @@ endif()
 
 # ---- Library ----
 
-add_library(Xpm
+add_library(
+    Xpm
     src/Attrib.c
     src/CrBufFrI.c
     src/CrDatFrI.c
@@ -40,25 +41,20 @@ add_library(Xpm
     src/WrFFrI.c
 )
 
-if(UNIX)
-  # Pixmap-related functions require X11 and are not available on Windows
-  target_sources(Xpm PRIVATE
+if(WIN32)
+  target_sources(Xpm PRIVATE windows/libXpm.def)
+  target_compile_definitions(Xpm PRIVATE FOR_MSW)
+else()
+  target_sources(
+      Xpm PRIVATE
       src/CrBufFrP.c
       src/CrDatFrP.c
       src/CrIFrP.c
-      src/CrPFrBuf.c
-      src/CrPFrDat.c
-      src/CrPFrI.c
       src/RdFToP.c
       src/WrFFrP.c
   )
   target_include_directories(Xpm PRIVATE "${X11_INCLUDE_DIR}")
   target_link_libraries(Xpm PRIVATE "${X11_LIBRARY}")
-endif()
-
-if(WIN32)
-  set_target_properties(Xpm PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-  target_compile_definitions(Xpm PRIVATE FOR_MSW)
 endif()
 
 if(MSVC)
@@ -71,14 +67,6 @@ if(MSVC)
 endif()
 
 target_include_directories(Xpm PRIVATE include/X11)
-
-if(NOT WIN32)
-    target_compile_definitions(Xpm PRIVATE
-        # Build without the --enable-open-zfile option:
-        # https://gitlab.freedesktop.org/xorg/lib/libxpm/-/blob/libXpm-3.5.17/configure.ac?ref_type=tags#L67-88
-        NO_ZPIPE
-    )
-endif()
 
 set_target_properties(
     Xpm PROPERTIES

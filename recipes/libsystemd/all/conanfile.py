@@ -11,7 +11,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.64.0"
+required_conan_version = ">=1.60.0"
 
 
 class LibsystemdConan(ConanFile):
@@ -52,19 +52,13 @@ class LibsystemdConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",  # gcc 5 is failing
-            "clang": "10"
-        }
-
     def requirements(self):
         self.requires("libcap/2.69")
         self.requires("libmount/2.39.2")
-        self.requires("libxcrypt/4.4.36")
+        if Version(self.version) >= "251.18":
+            self.requires("libxcrypt/4.4.36")
         if self.options.with_selinux:
-            self.requires("libselinux/3.6")
+            self.requires("libselinux/3.5")
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_xz:
@@ -75,14 +69,9 @@ class LibsystemdConan(ConanFile):
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Only Linux supported")
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if Version(self.version) >= "255.0" and minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires {str(self.settings.compiler)} >= {minimum_version}."
-            )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.4.0")
+        self.tool_requires("meson/1.3.0")
         self.tool_requires("m4/1.4.19")
         self.tool_requires("gperf/3.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
@@ -145,10 +134,14 @@ class LibsystemdConan(ConanFile):
             "libiptc", "elfutils", "repart", "homed", "importd", "acl",
             "dns-over-tls", "log-trace"]
 
-        unrelated.append("oomd")
-        unrelated.extend(["sysext", "nscd"])
-        unrelated.append("link-boot-shared")
-        unrelated.append("link-journalctl-shared")
+        if Version(self.version) >= "247.1":
+            unrelated.append("oomd")
+        if Version(self.version) >= "248.1":
+            unrelated.extend(["sysext", "nscd"])
+        if Version(self.version) >= "251.1":
+            unrelated.append("link-boot-shared")
+        if Version(self.version) >= "252.1":
+            unrelated.append("link-journalctl-shared")
         if Version(self.version) < "254.7":
             unrelated.extend(["gnu-efi", "valgrind"])
         else:
@@ -157,10 +150,9 @@ class LibsystemdConan(ConanFile):
         for opt in unrelated:
             tc.project_options[opt] = "false"
 
-        if Version(self.version) < "255":
-            # 'rootprefix' is unused during libsystemd packaging but systemd > v247
-            # build files require 'prefix' to be a subdirectory of 'rootprefix'.
-            tc.project_options["rootprefix"] = "/"  # Since, Conan 1.64
+        # 'rootprefix' is unused during libsystemd packaging but systemd > v247
+        # build files require 'prefix' to be a subdirectory of 'rootprefix'.
+        tc.project_options["rootprefix"] = self.package_folder
 
         # There are a few places in libsystemd where pkgconfig dependencies are
         # not used in compile time and only used in link time. And because of

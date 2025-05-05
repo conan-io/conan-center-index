@@ -8,14 +8,13 @@ required_conan_version = ">=1.50.0"
 class CloveUnitConan(ConanFile):
     name = "clove-unit"
     description = "Single-header Unit Testing framework for C (interoperable with C++) with test autodiscovery feature"
-    license = "MIT"
+    topics = ("unit-testing", "testing", "unit testing", "test")
     homepage = "https://github.com/fdefelici/clove-unit"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("unit-testing", "testing", "unit testing", "test", "header-only")
+    license = "MIT"
     no_copy_source = True
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
     def layout(self):
         basic_layout(self, src_folder="src")

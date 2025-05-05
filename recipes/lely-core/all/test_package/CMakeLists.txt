@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.15)
-project(test_package LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.2)
+project(test_package)
 
 find_package(lely-core REQUIRED)
 

@@ -1,117 +1,68 @@
 import os
-from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rm, rmdir, copy
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
+from conan import ConanFile, tools
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.46.0"
 
 
 class Box2dConan(ConanFile):
     name = "box2d"
-    description = "Box2D is a 2D physics engine for games"
     license = "Zlib"
-    url = "https://github.com/conan-io/conan-center-index"
+    description = "Box2D is a 2D physics engine for games"
+    topics = ("physics", "engine", "game development")
     homepage = "http://box2d.org/"
-    topics = ("physics-engine", "graphic", "2d", "collision")
-    package_type = "library"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False]
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True
-    }
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "8",
-            "msvc": "193",
-            "Visual Studio": "17",
-        }
-
-    def export_sources(self):
-        export_conandata_patches(self)
+    url = "https://github.com/conan-io/conan-center-index"
+    settings = "os", "compiler", "build_type", "arch"
+    options = {"shared": [True, False],
+               "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True,}
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
 
     def configure(self):
         if self.options.shared:
-            self.options.rm_safe("fPIC")
-        if Version(self.version) >= "3.0.0":
-            self.settings.rm_safe("compiler.cppstd")
-            self.settings.rm_safe("compiler.libcxx")
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
-
-    def requirements(self):
-        if Version(self.version) >= "3.0.0":
-            self.requires("simde/0.8.2")
-
-    def validate(self):
-        if Version(self.version) < "3.0.0":
-            return
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C17, which your compiler does not support."
-            )
-
-    def build_requirements(self):
-        if Version(self.version) >= "3.0.0":
-            self.tool_requires("cmake/[>=3.22 <4]")
+        cmake_layout(self, src_folder="Box2D")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        tools.files.get(self,
+                        **self.conan_data["sources"][self.version],
+                        strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-        tc.cache_variables["CMAKE_COMPILE_WARNING_AS_ERROR"] = False
-        if Version(self.version) < "3.0.0":
-            tc.variables["BOX2D_BUILD_TESTBED"] = False
-            tc.variables["BOX2D_BUILD_UNIT_TESTS"] = False
-        else:
-            tc.variables["BOX2D_SAMPLES"] = False
-            tc.variables["BOX2D_VALIDATE"] = False
-            tc.variables["BOX2D_UNIT_TESTS"] = False
+        tc.variables["BOX2D_BUILD_SHARED"] = self.options.shared
+        tc.variables["BOX2D_BUILD_STATIC"] = not self.options.shared
+        if self.settings.os == "Windows" and self.options.shared:
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.variables["BOX2D_BUILD_EXAMPLES"] = False
         tc.generate()
-        if Version(self.version) >= "3.0.0":
-            deps = CMakeDeps(self)
-            deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder="Box2D")
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rm(self, "*.pdb", self.package_folder, recursive=True)
+        tools.files.copy(self, "License.txt", src=os.path.join(self.source_folder, "Box2D"), dst=os.path.join(self.package_folder,"licenses"))
+        tools.files.copy(self, os.path.join("Box2D", "*.h"), src=os.path.join(self.source_folder, "Box2D"), dst=os.path.join(self.package_folder, "include"))
+        tools.files.copy(self, "*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        tools.files.copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+        tools.files.copy(self, "*.so*", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        tools.files.copy(self, "*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        tools.files.copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "box2d"
-        self.cpp_info.names["cmake_find_package_multi"] = "box2d"
-        self.cpp_info.libs = ["box2d"]
-        if Version(self.version) >= "3.0.0" and is_msvc(self) and self.options.shared:
-            self.cpp_info.defines.append("BOX2D_DLL")
-        elif Version(self.version) >= "2.4.1" and self.options.shared:
-            self.cpp_info.defines.append("B2_SHARED")
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
+        self.cpp_info.libs = ["Box2D"]
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.cpp_info.system_libs = ["m"]

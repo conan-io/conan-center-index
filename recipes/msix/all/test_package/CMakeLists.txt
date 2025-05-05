@@ -1,8 +1,9 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.1)
 project(test_package CXX)
 
-find_package(msix REQUIRED CONFIG)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
 
 add_executable(${PROJECT_NAME} example.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE msix::msix)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
+
+conan_target_link_libraries(${PROJECT_NAME})

@@ -29,9 +29,6 @@ class SysConfigGLUConan(ConanFile):
         self.info.clear()
 
     def system_requirements(self):
-        if self.settings.os not in ["Linux", "FreeBSD", "SunOS"]:
-            return
-
         dnf = package_manager.Dnf(self)
         dnf.install(["mesa-libGLU-devel"], update=True, check=True)
 
@@ -50,9 +47,6 @@ class SysConfigGLUConan(ConanFile):
         pkg = package_manager.Pkg(self)
         pkg.install(["libGLU"], update=True, check=True)
 
-        pkg_util = package_manager.PkgUtil(self)
-        pkg_util.install(["mesalibs"], update=True, check=True)
-
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.includedirs = []
@@ -60,6 +54,6 @@ class SysConfigGLUConan(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["glu32"]
-        elif self.settings.os in ["Linux", "FreeBSD", "SunOS"]:
+        elif self.settings.os in ["Linux", "FreeBSD"]:
             pkg_config = PkgConfig(self, 'glu')
             pkg_config.fill_cpp_info(self.cpp_info, is_system=self.settings.os != "FreeBSD")

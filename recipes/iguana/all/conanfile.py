@@ -21,14 +21,14 @@ class IguanaConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 17
+        return 20
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "8",
-            "clang": "7",
-            "apple-clang": "12",
+            "gcc": "11",
+            "clang": "12",
+            "apple-clang": "14",
             "Visual Studio": "16",
             "msvc": "192",
         }

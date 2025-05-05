@@ -1,0 +1,12 @@
+diff --git a/configure b/configure
+index 8521174..8ea6133 100755
+--- a/configure
++++ b/configure
+@@ -22337,7 +22337,6 @@ $as_echo "$as_me: WARNING: Strong authentication not supported!" >&2;}
+ fi
+ 
+ WITH_SYSTEMD=no
+-systemdsystemunitdir=
+ ol_link_systemd=no
+ if test $ol_enable_slapd == no && test $ol_enable_balancer != yes ; then
+ 	if test $ol_with_systemd != no ; then

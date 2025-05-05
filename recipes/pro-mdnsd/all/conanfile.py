@@ -1,37 +1,41 @@
+from conans import ConanFile, CMake, tools
 import os
-from conan import ConanFile
-from conan.errors import ConanException
-from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.scm import Version
+import textwrap
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=1.43.0"
 
 
 class mdnsdConan(ConanFile):
     name = "pro-mdnsd"
-    description = "Improved version of Jeremie Miller's MDNS-SD implementation"
     license = "BSD-3-Clause"
-    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Pro/mdnsd"
+    url = "https://github.com/conan-io/conan-center-index"
+    description = "Improved version of Jeremie Miller's MDNS-SD implementation"
     topics = ("dns", "daemon", "multicast", "embedded", "c")
 
-    package_type = "library"
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
+        "shared": [True, False],
         "compile_as_cpp": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
+        "shared": False,
         "compile_as_cpp": False,
     }
 
+    generators = "cmake"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
     def export_sources(self):
-        export_conandata_patches(self)
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,47 +43,68 @@ class mdnsdConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            self.options.rm_safe("fPIC")
+            del self.options.fPIC
         if not self.options.compile_as_cpp:
-            self.settings.rm_safe("compiler.libcxx")
-            self.settings.rm_safe("compiler.cppstd")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["MDNSD_ENABLE_SANITIZERS"] = False
-        tc.variables["MDNSD_COMPILE_AS_CXX"] = self.options.compile_as_cpp
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if Version(self.version) > "0.8.4": # pylint: disable=conan-unreachable-upper-version
-            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
-
-        tc.generate()
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["MDNSD_ENABLE_SANITIZERS"] = False
+        self._cmake.definitions["MDNSD_COMPILE_AS_CXX"] = self.options.compile_as_cpp
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
-        apply_conandata_patches(self)
-        cmake = CMake(self)
-        cmake.configure()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE",
-             dst=os.path.join(self.package_folder, "licenses"),
-             src=self.source_folder)
-        cmake = CMake(self)
+        cmake = self._configure_cmake()
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
-        fix_apple_shared_install_name(self)
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"libmdnsd": "mdnsd::mdnsd"}
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "mdnsd")
-        self.cpp_info.set_property("cmake_target_name", "libmdnsd")
-        self.cpp_info.set_property("cmake_target_aliases", ["mdnsd::mdnsd"])
+        self.cpp_info.set_property("cmake_target_name",  "libmdnsd")
         self.cpp_info.libs = ["mdnsd"]
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["ws2_32", "wsock32"]
+            self.cpp_info.system_libs.append("ws2_32")
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "mdnsd"
+        self.cpp_info.names["cmake_find_package_multi"] = "mdnsd"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

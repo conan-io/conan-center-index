@@ -1,0 +1,72 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5520747..dfccbc1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -94,6 +94,10 @@ elseif(WIN32)
+     if(NOT MSVC12)
+          message(STATUS "On Windows, only MSVC version 12 is supported!")
+     endif()
++    set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /arch:AVX")
++    set (CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} /arch:AVX")
++    set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /arch:AVX")
++    set (CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} /arch:AVX")
+ else ()
+     message(FATAL_ERROR "Please, use GCC, Clang, or the Intel compiler!")
+ endif()
+@@ -108,7 +112,7 @@ MESSAGE( STATUS "CMAKE_C_FLAGS_RELEASE: " ${CMAKE_C_FLAGS_RELEASE} )
+ 
+ # library target
+ include_directories(headers)
+-add_library(FastPFOR STATIC
++add_library(FastPFOR
+     src/bitpacking.cpp
+     src/bitpackingaligned.cpp
+     src/bitpackingunaligned.cpp
+@@ -117,9 +121,8 @@ add_library(FastPFOR STATIC
+     src/simdbitpacking.cpp
+     src/varintdecode.c
+     src/streamvbyte.c)
+-set_target_properties(FastPFOR PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+-
+ 
++if(0)
+ # other executables
+ add_executable(gapstats src/gapstats.cpp)
+ add_executable(partitionbylength src/partitionbylength.cpp)
+@@ -132,6 +135,7 @@ if( SUPPORT_SSE42 )
+     add_executable(benchbitpacking src/benchbitpacking.cpp)
+     target_link_libraries(benchbitpacking FastPFOR)
+ endif()
++endif(0)
+ 
+ find_package(snappy)
+ if(NOT ${snappy_FOUND})
+@@ -141,6 +145,8 @@ else()
+     message(STATUS "Snappy was found. Building additional targets "
+                    "codecssnappy and inmemorybenchmarksnappy.")
+     include_directories(${snappy_INCLUDE_DIRS})
++
++    if(0)
+     add_executable(codecssnappy src/codecs.cpp)
+     set_target_properties(codecssnappy PROPERTIES DEFINE_SYMBOL USESNAPPY)
+     target_link_libraries(codecssnappy FastPFOR ${snappy_LIBRARIES})
+@@ -148,8 +154,10 @@ else()
+     add_executable(inmemorybenchmarksnappy src/inmemorybenchmark.cpp)
+     set_target_properties(inmemorybenchmarksnappy PROPERTIES DEFINE_SYMBOL USESNAPPY)
+     target_link_libraries(inmemorybenchmarksnappy FastPFOR ${snappy_LIBRARIES})
++    endif(0)
+ endif()
+ 
++if(0)
+ # Download and unpack googletest at configure time
+ configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+ execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+@@ -207,7 +215,7 @@ target_link_libraries(FastPFOR_unittest gtest FastPFOR)
+ enable_testing()
+ add_test("unit" unit)
+ add_test("FastPFOR_unittest" FastPFOR_unittest)
+-
++endif(0)
+ 
+ include(GNUInstallDirs)
+ install(TARGETS FastPFOR

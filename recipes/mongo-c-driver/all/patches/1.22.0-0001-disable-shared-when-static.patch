@@ -1,0 +1,77 @@
+--- a/src/libbson/CMakeLists.txt
++++ b/src/libbson/CMakeLists.txt
+@@ -209,6 +209,7 @@ set (HEADERS_FORWARDING
+    ${PROJECT_SOURCE_DIR}/src/bson/forwarding/bson.h
+ )
+ 
++if (NOT MONGOC_ENABLE_STATIC_BUILD)
+ add_library (bson_shared SHARED ${SOURCES} ${HEADERS} ${HEADERS_FORWARDING})
+ set (CMAKE_CXX_VISIBILITY_PRESET hidden)
+ target_compile_definitions (bson_shared
+@@ -275,6 +276,7 @@ if (WIN32)
+    # must be handled specially since we can't resolve them
+    set (BSON_SYSTEM_LIBRARIES ${BSON_SYSTEM_LIBRARIES} ws2_32)
+ endif ()
++endif()
+ 
+ if (MONGOC_ENABLE_STATIC_BUILD)
+    add_library (bson_static STATIC ${SOURCES} ${HEADERS} ${HEADERS_FORWARDING})
+@@ -349,7 +351,7 @@ set (BSON_HEADER_INSTALL_DIR
+ )
+ 
+ if (MONGOC_ENABLE_STATIC_INSTALL)
+-   set (TARGETS_TO_INSTALL bson_shared bson_static)
++   set (TARGETS_TO_INSTALL bson_static)
+ else ()
+    set (TARGETS_TO_INSTALL bson_shared)
+ endif ()
+--- a/src/libmongoc/CMakeLists.txt
++++ b/src/libmongoc/CMakeLists.txt
+@@ -758,6 +758,7 @@ if (MONGOC_ENABLE_MONGODB_AWS_AUTH)
+    endif()
+ endif ()
+ 
++if (NOT MONGOC_ENABLE_STATIC_BUILD)
+ add_library (mongoc_shared SHARED ${SOURCES} ${HEADERS} ${HEADERS_FORWARDING})
+ set_target_properties (mongoc_shared PROPERTIES CMAKE_CXX_VISIBILITY_PRESET hidden)
+ target_link_libraries (mongoc_shared PRIVATE ${LIBRARIES} PUBLIC ${BSON_LIBRARIES})
+@@ -795,6 +796,7 @@ target_include_directories (
+ 
+ set_target_properties (mongoc_shared PROPERTIES VERSION 0.0.0 SOVERSION 0)
+ set_target_properties (mongoc_shared PROPERTIES OUTPUT_NAME "${MONGOC_OUTPUT_BASENAME}-${MONGOC_API_VERSION}")
++endif()
+ 
+ if (MONGOC_ENABLE_STATIC_BUILD)
+    add_library (mongoc_static STATIC ${SOURCES} ${HEADERS} ${HEADERS_FORWARDING})
+@@ -835,6 +837,7 @@ if (MONGOC_ENABLE_STATIC_BUILD)
+    set_target_properties (mongoc_static PROPERTIES OUTPUT_NAME "${MONGOC_OUTPUT_BASENAME}-static-${MONGOC_API_VERSION}")
+ endif ()
+ 
++if (NOT MONGOC_ENABLE_STATIC_BUILD)
+ if (ENABLE_APPLE_FRAMEWORK)
+    set_target_properties (mongoc_shared PROPERTIES
+       FRAMEWORK TRUE
+@@ -845,9 +848,14 @@ if (ENABLE_APPLE_FRAMEWORK)
+       PUBLIC_HEADER "${HEADERS}"
+    )
+ endif ()
++endif()
+ 
+ add_executable (mongoc-stat ${PROJECT_SOURCE_DIR}/../../src/tools/mongoc-stat.c)
++if (NOT MONGOC_ENABLE_STATIC_BUILD)
+ target_link_libraries (mongoc-stat mongoc_shared ${LIBRARIES})
++else ()
++target_link_libraries (mongoc-stat mongoc_static ${STATIC_LIBRARIES})
++endif ()
+ 
+ # mongoc-stat works if shared memory performance counters are enabled.
+ if (ENABLE_SHM_COUNTERS STREQUAL "ON")
+@@ -1161,7 +1169,7 @@ file (COPY ${PROJECT_SOURCE_DIR}/tests/x509gen DESTINATION ${PROJECT_BINARY_DIR}
+ file (COPY ${PROJECT_SOURCE_DIR}/tests/release_files DESTINATION ${PROJECT_BINARY_DIR}/tests)
+ 
+ if (MONGOC_ENABLE_STATIC_INSTALL)
+-   set (TARGETS_TO_INSTALL mongoc_shared mongoc_static)
++   set (TARGETS_TO_INSTALL mongoc_static)
+ else ()
+    set (TARGETS_TO_INSTALL mongoc_shared)
+ endif ()

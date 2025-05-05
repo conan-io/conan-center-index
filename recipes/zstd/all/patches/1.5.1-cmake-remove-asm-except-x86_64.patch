@@ -1,0 +1,17 @@
+diff --git a/build/cmake/lib/CMakeLists.txt b/build/cmake/lib/CMakeLists.txt
+index 7ba4693..d6e1046 100644
+--- a/build/cmake/lib/CMakeLists.txt
++++ b/build/cmake/lib/CMakeLists.txt
+@@ -22,7 +22,11 @@ include_directories(${LIBRARY_DIR} ${LIBRARY_DIR}/common)
+
+ file(GLOB CommonSources ${LIBRARY_DIR}/common/*.c)
+ file(GLOB CompressSources ${LIBRARY_DIR}/compress/*.c)
+-file(GLOB DecompressSources ${LIBRARY_DIR}/decompress/*.c ${LIBRARY_DIR}/decompress/*.S)
++if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
++    file(GLOB DecompressSources ${LIBRARY_DIR}/decompress/*.c ${LIBRARY_DIR}/decompress/*.S)
++else()
++    file(GLOB DecompressSources ${LIBRARY_DIR}/decompress/*.c)
++endif()
+ file(GLOB DictBuilderSources ${LIBRARY_DIR}/dictBuilder/*.c)
+
+ set(Sources

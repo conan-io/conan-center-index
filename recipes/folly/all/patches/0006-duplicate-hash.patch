@@ -1,0 +1,13 @@
+diff --git a/folly/hash/Hash.h b/folly/hash/Hash.h
+index 33fa553..4266cf1 100644
+--- a/folly/hash/Hash.h
++++ b/folly/hash/Hash.h
+@@ -730,7 +730,7 @@ struct TupleHasher<0, Ts...> {
+ 
+ // Custom hash functions.
+ namespace std {
+-#if FOLLY_SUPPLY_MISSING_INT128_TRAITS
++#if 0
+ template <>
+ struct hash<__int128> : folly::detail::integral_hasher<__int128> {};
+ 

@@ -1,0 +1,68 @@
+diff --git a/test/CMakeLists.txt b/test/CMakeLists.txt
+index f98c8675acc06b3c998f29fcc712ac8befcda129..f464ead3ea55bacd71451a24252cbaf33194292c 100644
+--- a/test/CMakeLists.txt
++++ b/test/CMakeLists.txt
+@@ -151,7 +151,7 @@ set(lib_list
+     $<TARGET_OBJECTS:ENCODER_ASM_AVX512>
+     $<TARGET_OBJECTS:ENCODER_GLOBALS>
+     $<TARGET_OBJECTS:ENCODER_CODEC>
+-    cpuinfo_public
++    $<IF:$<BOOL:${USE_EXTERNAL_CPUINFO}>,cpuinfo::cpuinfo,cpuinfo_public>
+     gtest_all)
+ if(UNIX)
+   # App Source Files
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2c7c8d67f6ce94e74b685a3494b0430b60f80105..f7f0dbe1f480060aebd5ccd9b62969ab4a69449a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -41,6 +41,11 @@ if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+ endif()
+ 
+ option(COMPILE_C_ONLY "Compile only C code with no simds (autodetect, default off for x86)" OFF)
++option(USE_EXTERNAL_CPUINFO "Consume system cpuinfo library only" OFF)
++
++if(USE_EXTERNAL_CPUINFO)
++    find_package(cpuinfo CONFIG REQUIRED)
++endif()
+ 
+ include(CheckCSourceCompiles)
+ 
+@@ -542,7 +547,7 @@ endif()
+ 
+ add_subdirectory(third_party/fastfeat)
+ 
+-if(NOT COMPILE_C_ONLY AND HAVE_X86_PLATFORM)
++if(NOT USE_EXTERNAL_CPUINFO AND NOT COMPILE_C_ONLY AND HAVE_X86_PLATFORM)
+     add_subdirectory(third_party/cpuinfo)
+ endif()
+ 
+diff --git a/Source/Lib/Encoder/CMakeLists.txt b/Source/Lib/Encoder/CMakeLists.txt
+index 2991364b7d12dd846ff981c86306d9d2b46cc934..0c0ee78b869c0c875eb36fce4706b6fd3f1c9b7c 100644
+--- a/Source/Lib/Encoder/CMakeLists.txt
++++ b/Source/Lib/Encoder/CMakeLists.txt
+@@ -129,7 +129,9 @@ set_target_properties(SvtAv1Enc PROPERTIES VERSION ${ENC_VERSION})
+ set_target_properties(SvtAv1Enc PROPERTIES SOVERSION ${ENC_VERSION_MAJOR})
+ set_target_properties(SvtAv1Enc PROPERTIES C_VISIBILITY_PRESET hidden)
+ target_link_libraries(SvtAv1Enc PUBLIC ${PLATFORM_LIBS})
+-if(NOT COMPILE_C_ONLY AND HAVE_X86_PLATFORM)
++if(USE_EXTERNAL_CPUINFO)
++    target_link_libraries(SvtAv1Enc PRIVATE cpuinfo::cpuinfo)
++elseif(NOT COMPILE_C_ONLY AND HAVE_X86_PLATFORM)
+     target_link_libraries(SvtAv1Enc PRIVATE cpuinfo_public)
+ endif()
+ 
+diff --git a/Source/Lib/Decoder/CMakeLists.txt b/Source/Lib/Decoder/CMakeLists.txt
+index 0f220a78a6db783ef2b5d6dd6cc182766c4362a3..8fb88f1c958fa965bc8f9ed9c1d563ee3858baee 100644
+--- a/Source/Lib/Decoder/CMakeLists.txt
++++ b/Source/Lib/Decoder/CMakeLists.txt
+@@ -147,7 +147,9 @@ set_target_properties(SvtAv1Dec PROPERTIES SOVERSION ${DEC_VERSION_MAJOR})
+ set_target_properties(SvtAv1Dec PROPERTIES C_VISIBILITY_PRESET hidden)
+ add_dependencies(SvtAv1Dec EbVersionHeaderGen)
+ target_link_libraries(SvtAv1Dec PUBLIC ${PLATFORM_LIBS})
+-if(NOT COMPILE_C_ONLY AND HAVE_X86_PLATFORM)
++if(USE_EXTERNAL_CPUINFO)
++    target_link_libraries(SvtAv1Dec PRIVATE cpuinfo::cpuinfo)
++elseif(NOT COMPILE_C_ONLY AND HAVE_X86_PLATFORM)
+     target_link_libraries(SvtAv1Dec PRIVATE cpuinfo_public)
+ endif()
+ 

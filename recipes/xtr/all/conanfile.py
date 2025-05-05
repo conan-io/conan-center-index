@@ -133,12 +133,11 @@ class XtrConan(ConanFile):
                             "find_package(liburing REQUIRED NO_DEFAULT_PATH PATHS ${CMAKE_PREFIX_PATH})"
                             if self.options.get_safe("enable_io_uring") else
                             "")
-        if Version(self.version) < "2.1.2":
-            # Non-single header installation is broken until 2.1.2
-            # https://github.com/choll/xtr/pull/4
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "        PUBLIC_HEADER DESTINATION include)",
-                            ")\ninstall(DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION include)")
+        # Non-single header installation is broken as of 2.1.0
+        # https://github.com/choll/xtr/pull/4
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "        PUBLIC_HEADER DESTINATION include)",
+                        ")\ninstall(DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION include)")
 
     def build(self):
         self._patch_sources()

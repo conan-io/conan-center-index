@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -13,9 +12,9 @@ class SqliteOrmConan(ConanFile):
     name = "sqlite_orm"
     description = "SQLite ORM light header only library for modern C++."
     license = "BSD-3-Clause"
-    url = "https://github.com/conan-io/conan-center-index"
+    topics = ("sqlite", "sql", "database", "orm")
     homepage = "https://github.com/fnc12/sqlite_orm"
-    topics = ("sqlite", "sql", "database", "orm", "header-only")
+    url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
@@ -26,7 +25,7 @@ class SqliteOrmConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "5" if Version(self.version) < "1.9" else "8",
+            "gcc": "5",
             "Visual Studio": "14",
             "msvc": "190",
             "clang": "3.4",
@@ -40,7 +39,7 @@ class SqliteOrmConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("sqlite3/[>=3.45.0 <4]", transitive_headers=True, transitive_libs=True)
+        self.requires("sqlite3/3.45.0", transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
         self.info.clear()

@@ -12,9 +12,9 @@ class KangaruConan(ConanFile):
     name = "kangaru"
     description = "A dependency injection container for C++11, C++14 and later"
     license = "MIT"
-    url = "https://github.com/conan-io/conan-center-index"
+    topics = ("DI", "IoC", "inversion of control")
     homepage = "https://github.com/gracicot/kangaru/wiki"
-    topics = ("DI", "IoC", "inversion of control", "header-only")
+    url = "https://github.com/conan-io/conan-center-index"
 
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"

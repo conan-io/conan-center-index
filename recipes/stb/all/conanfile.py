@@ -10,10 +10,10 @@ required_conan_version = ">=1.50.0"
 class StbConan(ConanFile):
     name = "stb"
     description = "single-file public domain libraries for C/C++"
-    license = ("Unlicense", "MIT")
+    topics = ("stb", "single-file")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nothings/stb"
-    topics = ("stb", "single-file", "header-only")
+    license = ("Unlicense", "MIT")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
@@ -50,6 +50,9 @@ class StbConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))

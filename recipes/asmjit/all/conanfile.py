@@ -2,11 +2,10 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
-from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.53.0"
+
 
 class AsmjitConan(ConanFile):
     name = "asmjit"
@@ -14,8 +13,9 @@ class AsmjitConan(ConanFile):
                   "generation written in C++ language."
     license = "Zlib"
     topics = ("asmjit", "compiler", "assembler", "jit")
-    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://asmjit.com"
+    url = "https://github.com/conan-io/conan-center-index"
+
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -26,16 +26,6 @@ class AsmjitConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 11
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-        }
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -50,17 +40,7 @@ class AsmjitConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
-        if self.version >= "cci.20240531":
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} does not support {self.settings.compiler}/{self.settings.compiler.version}."
-                )
-
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.19 <4]")
+            check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

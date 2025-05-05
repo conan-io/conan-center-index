@@ -28,8 +28,12 @@ class LibelfConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    deprecated = "elfutils"
+
     exports_sources = "CMakeLists.txt"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,7 +58,7 @@ class LibelfConan(ConanFile):
         if self.settings.os != "Windows":
             self.tool_requires("autoconf/2.71")
             self.tool_requires("gnu-config/cci.20210814")
-            if self.settings_build.os == "Windows":
+            if self._settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                     self.tool_requires("msys2/cci.latest")

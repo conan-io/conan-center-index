@@ -48,8 +48,7 @@ class LuajitConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} is not supported by Mac M1. Please, try any version >=2.1")
 
     def source(self):
-        filename = f"LuaJIT-{self.version}.tar.gz"
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, filename=filename, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
         if is_msvc(self):

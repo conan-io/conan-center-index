@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4406362..c346e60 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -16,7 +16,6 @@ option(BUILD_CTL "Build drogon_ctl" ${BUILD_PROGRAMS})
+ option(BUILD_EXAMPLES "Build examples" ${BUILD_PROGRAMS})
+ option(BUILD_ORM "Build orm" ON)
+ option(COZ_PROFILING "Use coz for profiling" OFF)
+-option(BUILD_SHARED_LIBS "Build drogon as a shared lib" OFF)
+ option(BUILD_DOC "Build Doxygen documentation" OFF)
+ option(BUILD_BROTLI "Build Brotli" ON)
+ option(BUILD_YAML_CONFIG "Build yaml config" ON)

@@ -132,13 +132,12 @@ class VulkanLoaderConan(ConanFile):
                                   "if(${configuration} MATCHES \"/MD\")",
                                   "if(FALSE)")
         else:
-            if Version(self.version) < "1.3.275":
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    "set(TESTS_STANDARD_CXX_PROPERTIES ${LOADER_STANDARD_CXX_PROPERTIES} MSVC_RUNTIME_LIBRARY \"MultiThreaded$<$<CONFIG:Debug>:Debug>DLL\")",
-                    "set(TESTS_STANDARD_CXX_PROPERTIES ${LOADER_STANDARD_CXX_PROPERTIES})",
-                )
+            replace_in_file(
+                self,
+                cmakelists,
+                "set(TESTS_STANDARD_CXX_PROPERTIES ${LOADER_STANDARD_CXX_PROPERTIES} MSVC_RUNTIME_LIBRARY \"MultiThreaded$<$<CONFIG:Debug>:Debug>DLL\")",
+                "set(TESTS_STANDARD_CXX_PROPERTIES ${LOADER_STANDARD_CXX_PROPERTIES})",
+            )
             replace_in_file(
                 self,
                 cmakelists,

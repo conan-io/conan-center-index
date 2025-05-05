@@ -1,0 +1,16 @@
+Avoids weird issue on c3i Windows builders:
+    
+  CMake Error at source_subfolder/cmake_install.cmake:104 (file):
+    file INSTALL cannot read symlink
+    "C:/J/w/cci_PR-2903@2/.conan/data/getdns/1.6.0/_/_/build/dd6d0e14f162a68e24ee52fee674d130eac57dea/source_subfolder/COPYING"
+    to duplicate at
+    "C:/J/w/cci_PR-2903@2/.conan/data/getdns/1.6.0/_/_/package/dd6d0e14f162a68e24ee52fee674d130eac57dea/share/doc/getdns/COPYING":
+    File exists.
+  Call Stack (most recent call first):
+
+
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -1080,1 +1080,1 @@
+-install(FILES AUTHORS ChangeLog COPYING LICENSE NEWS README.md DESTINATION ${docdir})
++install(FILES AUTHORS ChangeLog NEWS README.md DESTINATION ${docdir})

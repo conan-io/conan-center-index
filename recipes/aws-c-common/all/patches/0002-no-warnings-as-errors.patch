@@ -1,0 +1,20 @@
+--- a/cmake/AwsCFlags.cmake
++++ b/cmake/AwsCFlags.cmake
+@@ -34,7 +34,7 @@ function(aws_set_common_properties target)
+             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}" PARENT_SCOPE)
+         endif()
+ 
+-        list(APPEND AWS_C_FLAGS /W4 /WX /MP)
++        list(APPEND AWS_C_FLAGS /W4 /MP)
+         # /volatile:iso relaxes some implicit memory barriers that MSVC normally applies for volatile accesses
+         # Since we want to be compatible with user builds using /volatile:iso, use it for the tests.
+         list(APPEND AWS_C_FLAGS /volatile:iso)
+@@ -49,7 +49,7 @@ function(aws_set_common_properties target)
+         list(APPEND AWS_C_FLAGS "${_FLAGS}")
+ 
+     else()
+-        list(APPEND AWS_C_FLAGS -Wall -Werror -Wstrict-prototypes)
++        list(APPEND AWS_C_FLAGS -Wall -Wstrict-prototypes)
+ 
+         if(NOT SET_PROPERTIES_NO_WEXTRA)
+             list(APPEND AWS_C_FLAGS -Wextra)

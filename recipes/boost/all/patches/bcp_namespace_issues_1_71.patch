@@ -1,0 +1,33 @@
+From d0586e88122f41cd5ac9666db70c37d6f0fc7480 Mon Sep 17 00:00:00 2001
+From: Peter Dimov <pdimov@gmail.com>
+Date: Sun, 26 May 2019 18:49:12 +0300
+Subject: [PATCH] Fix `bcp --namespace` issues
+
+---
+ Jamroot | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/Jamroot b/Jamroot
+index e0d7c90f51d..4e913c2b3f3 100644
+--- a/Jamroot
++++ b/Jamroot
+@@ -140,7 +140,8 @@ import "class" : new ;
+ import property-set ;
+ import threadapi-feature ;
+ import option ;
+-import tools/boost_install/boost-install ;
++# Backslash because of `bcp --namespace`
++import tools/boost\_install/boost-install ;
+ 
+ path-constant BOOST_ROOT : . ;
+ constant BOOST_VERSION : 1.71.0 ;
+@@ -311,8 +312,8 @@ rule boost-install ( libraries * )
+ # stage and install targets via boost-install, above.
+ rule boost-lib ( name : sources * : requirements * : default-build * : usage-requirements * )
+ {
++    autolink = <link>shared:<define>BOOST_$(name:U)_DYN_LINK=1 ;
+     name = boost_$(name) ;
+-    autolink = <link>shared:<define>$(name:U)_DYN_LINK=1 ;
+     lib $(name)
+         : $(sources)
+         : $(requirements) $(autolink)

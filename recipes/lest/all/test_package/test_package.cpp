@@ -1,16 +1,14 @@
-#include "lest/lest_cpp03.hpp"
+#include "lest/lest.hpp"
 
-#define CASE( name ) lest_CASE( specification, name )
 
-using namespace lest;
-
-test_specification specification;
-
-CASE( "Comment converted to bool indicates absence or presence of comment" )
+const lest::test specification[] =
 {
-    EXPECT( false == bool( comment( "") ) );
-    EXPECT(  true == bool( comment("x") ) );
-}
+    CASE( "Empty string has length zero (succeed)" )
+    {
+        EXPECT( 0 == std::string(  ).length() );
+        EXPECT( 0 == std::string("").length() );
+    },
+};
 
 int main( int argc, char * argv[] )
 {

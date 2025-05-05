@@ -1,29 +1,23 @@
+from conan import ConanFile
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir
+from conans import CMake
 import os
 
-from conan import ConanFile
-from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
-from conan.tools.scm import Version
-
-required_conan_version = ">=2.0.9"
-
+required_conan_version = ">=1.52.0"
 
 class QtADS(ConanFile):
     name = "qt-advanced-docking-system"
+    license = "LGPL-2.1"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System"
+    topics = ("qt", "gui")
     description = (
         "Qt Advanced Docking System lets you create customizable layouts "
         "using a full featured window docking system similar to what is found "
         "in many popular integrated development environments (IDEs) such as "
         "Visual Studio."
     )
-    license = "LGPL-2.1-or-later"
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System"
-    topics = ("qt", "gui")
-
-    package_type = "library"
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -32,78 +26,70 @@ class QtADS(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    implements = ["auto_shared_fpic"]
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
+
+    _cmake = None
+    _qt_version = "5.15.6"
 
     @property
-    def _qt_major(self):
-        return Version(self.dependencies["qt"].ref.version).major
+    def _source_subfolder(self):
+        return "source_subfolder"
 
-    @property
-    def _min_cppstd(self):
-        if self._qt_major >= 6:
-            return 17
-        else:
-            return 14
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
 
     def requirements(self):
-        self.requires("qt/[>=5.15 <7]", transitive_headers=True)
-
-    def build_requirements(self):
-        self.tool_requires("qt/<host_version>")
-        self.tool_requires("cmake/[>=3.27 <4]") # to be able to use CMAKE_AUTOMOC_EXECUTABLE
-
-    def validate(self):
-        check_min_cppstd(self, self._min_cppstd)
+        self.requires(f"qt/{self._qt_version}")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True,
+                  destination=self._source_subfolder)
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.cache_variables["ADS_VERSION"] = self.version
-        tc.cache_variables["BUILD_EXAMPLES"] = "OFF"
-        tc.cache_variables["BUILD_STATIC"] = not self.options.shared
-        # https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System/blob/a16d17a8bf375127847ac8f40af1ebcdb841b13c/src/CMakeLists.txt#L12
-        # TODO: the upstream Qt recipe should expose this variable
-        qt_version = str(self.dependencies["qt"].ref.version)
-        qt_include_root = self.dependencies["qt"].cpp_info.includedirs[0]
-        tc.cache_variables[f"Qt{self._qt_major}Gui_PRIVATE_INCLUDE_DIRS"] = os.path.join(qt_include_root, "QtGui", qt_version, "QtGui")
-        qt_tools_rootdir = self.conf.get("user.qt:tools_directory", None)
-        tc.cache_variables["CMAKE_AUTOMOC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "moc.exe" if self.settings_build.os == "Windows" else "moc")
-        tc.cache_variables["CMAKE_AUTORCC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "rcc.exe" if self.settings_build.os == "Windows" else "rcc")
-        tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+
+        self._cmake = CMake(self)
+        self._cmake.definitions["ADS_VERSION"] = self.version
+        self._cmake.definitions["BUILD_EXAMPLES"] = "OFF"
+        self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
+
+        self._cmake.configure()
+        return self._cmake
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
+        replace_in_file(self,
+            f"{self.source_folder}/{self._source_subfolder}/src/ads_globals.cpp",
+            "#include <qpa/qplatformnativeinterface.h>",
+            f"#include <{self._qt_version}/QtGui/qpa/qplatformnativeinterface.h>"
+        )
 
     def build(self):
-        cmake = CMake(self)
-        cmake.configure()
+        self._patch_sources()
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        cmake = CMake(self)
+        cmake = self._configure_cmake()
         cmake.install()
-        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        copy(self, "gnu-lgpl-v2.1.md", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         rmdir(self, os.path.join(self.package_folder, "license"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        if Version(self.version) >= 4:
-            name = f"qt{self._qt_major}advanceddocking"
-            self.cpp_info.includedirs.append(os.path.join("include", name))
-            lib_name = f"{name}d" if self.settings.build_type == "Debug" else name
-        else:
-            lib_name = "qtadvanceddocking"
-
-        self.cpp_info.set_property("cmake_file_name", lib_name)
-        self.cpp_info.set_property("cmake_target_name", f"ads::{lib_name}")
-
         if self.options.shared:
-            self.cpp_info.libs = [lib_name]
+            self.cpp_info.libs = ["qtadvanceddocking"]
         else:
             self.cpp_info.defines.append("ADS_STATIC")
-            self.cpp_info.libs = [f"{lib_name}_static"]
+            self.cpp_info.libs = ["qtadvanceddocking_static"]

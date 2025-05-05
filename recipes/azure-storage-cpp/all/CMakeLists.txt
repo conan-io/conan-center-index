@@ -1,16 +1,7 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 2.8.12)
 project(cmake_wrapper)
 
-find_package(cpprestsdk REQUIRED)
-find_package(OpenSSL REQUIRED)
-find_package(LibXml2 REQUIRED)
-find_package(UUID QUIET)
+include(conanbuildinfo.cmake)
+conan_basic_setup()
 
-add_subdirectory(src/Microsoft.WindowsAzure.Storage)
-
-target_link_libraries(azurestorage
-    cpprestsdk::cpprestsdk
-    OpenSSL::SSL
-    LibXml2::LibXml2
-    $<TARGET_NAME_IF_EXISTS:libuuid::libuuid>
-)
+add_subdirectory("source_subfolder/Microsoft.WindowsAzure.Storage")

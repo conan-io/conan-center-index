@@ -11,9 +11,10 @@ class MujsConan(ConanFile):
     description = "MuJS is a lightweight Javascript interpreter designed for " \
                   "embedding in other software to extend them with scripting capabilities."
     license = "ISC"
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://mujs.com"
     topics = ("interpreter", "javascript")
+    homepage = "https://mujs.com"
+    url = "https://github.com/conan-io/conan-center-index"
+
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {

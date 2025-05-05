@@ -12,21 +12,19 @@ required_conan_version = ">=1.54.0"
 class libsvmConan(ConanFile):
     name = "libsvm"
     description = "Libsvm is a simple, easy-to-use, and efficient software for SVM classification and regression"
-    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.csie.ntu.edu.tw/~cjlin/libsvm/"
-    topics = ("svm", "vector")
-
-    package_type = "library"
+    license = "BSD-3-Clause"
+    topics = "svm", "vector"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-    }
+        }
     default_options = {
         "shared": False,
         "fPIC": True,
-    }
+        }
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)

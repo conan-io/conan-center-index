@@ -18,8 +18,7 @@ class JemallocConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-2-Clause"
     homepage = "https://jemalloc.net/"
-    topics = ("jemalloc", "malloc", "free")
-    package_type = "library"
+    topics = ("conan", "jemalloc", "malloc", "free")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -120,7 +119,10 @@ class JemallocConan(ConanFile):
             if self.options.enable_cxx and self.settings.compiler.get_safe("libcxx") == "libc++" and \
                     Version(self.settings.compiler.version) < "10":
                 raise ConanInvalidConfiguration("Clang 9 or earlier with libc++ is not supported due to the missing mutex implementation.")
-        # 3: Apple Silicon specific checks
+        # 3. Verify the build type
+        if self.settings.build_type not in ("Release", "Debug", None):
+            raise ConanInvalidConfiguration("Only Release and Debug builds are supported.")
+        # 4: Apple Silicon specific checks
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             if Version(self.version) < "5.3.0":
                 raise ConanInvalidConfiguration("Support for Apple Silicon is only available as of 5.3.0.")

@@ -1,0 +1,11 @@
+--- CMakeLists.txt.orig	2024-02-23 17:49:55
++++ CMakeLists.txt	2024-02-23 17:50:20
+@@ -314,7 +314,7 @@
+ aws_use_package(aws-c-event-stream)
+ aws_use_package(aws-c-s3)
+ 
+-aws_add_sanitizers(${PROJECT_NAME})
++#aws_add_sanitizers(${PROJECT_NAME})
+ 
+ target_link_libraries(${PROJECT_NAME} PUBLIC ${DEP_AWS_LIBS})
+ 

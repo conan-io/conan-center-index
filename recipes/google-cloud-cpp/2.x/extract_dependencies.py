@@ -25,8 +25,6 @@ _PROTO_DEPS_COMMON_REQUIRES = {"grpc::grpc++", "grpc::_grpc", "protobuf::libprot
 # Used in _generate_proto_requires(): the *.deps files are generated from
 # Bazel and contain a few targets that do not exit (nor do they need to
 # exist) in CMake.
-#
-# This list maps onto google_cloud_cpp_load_protodeps()'s `targets_to_omit`.
 _PROTO_DEPS_REMOVED_TARGETS = {
     "cloud_kms_v1_kms_protos",
     "cloud_orgpolicy_v1_orgpolicy_protos",
@@ -37,15 +35,13 @@ _PROTO_DEPS_REMOVED_TARGETS = {
 
 # Used in _generate_proto_requires(): the *.deps files are generated from
 # Bazel and contain a few targets that have incorrect names for CMake.
-#
-# This list maps onto google_cloud_cpp_load_protodeps()'s `targets_substitutions`.
 _PROTO_DEPS_REPLACED_TARGETS = {
     "grafeas_v1_grafeas_protos": "grafeas_protos",
-    "iam_v2_policy_protos": "iam_v2_protos",
-    "logging_type_type_protos": "logging_type_protos",
     "identity_accesscontextmanager_v1_accesscontextmanager_protos": "accesscontextmanager_protos",
     "cloud_osconfig_v1_osconfig_protos": "osconfig_protos",
+    "devtools_source_v1_source_protos": "devtools_source_v1_source_context_protos",
     "cloud_documentai_v1_documentai_protos": "documentai_protos",
+    "iam_v2_policy_protos": "iam_v2_protos",
 }
 
 # A few *.deps files use ad-hoc naming.
@@ -81,6 +77,7 @@ _PROTO_BASE_COMPONENTS = {
     "api_endpoint_protos",
     "api_launch_stage_protos",
     "api_documentation_protos",
+    "devtools_source_v1_source_context_protos",
     "type_color_protos",
     "api_distribution_protos",
     "api_config_change_protos",
@@ -117,7 +114,7 @@ _DEFAULT_EXPERIMENTAL_COMPONENTS = {
     "pubsublite",
 }
 
-# `google-cloud-cpp` manages these dependencies using CMake code.
+# `google-cloud-cpp` managems these dependencies using CMake code.
 _HARD_CODED_DEPENDENCIES = {
     "api_annotations_protos": ["api_http_protos"],
     "api_auth_protos": ["api_annotations_protos"],
@@ -267,10 +264,15 @@ def main():
         proto_components.add(component)
         proto_components.update(deps)
         print(f'    "{component}": {sorted(deps)},')
+    print(f'    "compute_internal_protos": ["protobuf::libprotobuf"],')
     print(f'    "cloud_extended_operations_protos": ["protobuf::libprotobuf"],')
-    print(f'    "compute_protos": ["cloud_extended_operations_protos", "protobuf::libprotobuf"],')
+    proto_components.add("compute_internal_protos")
     proto_components.add("cloud_extended_operations_protos")
-    proto_components.add("compute_protos")
+    for component in sorted(components):
+        if not component.startswith("compute_"):
+            continue
+        proto_components.add(component + "_protos")
+        print(f'    "{component}_protos": ["compute_internal_protos", "cloud_extended_operations_protos", "protobuf::libprotobuf"],')
     print("}")
     proto_components = proto_components - _PROTO_DEPS_COMMON_REQUIRES
     names = ['"%s"' % c for c in proto_components]

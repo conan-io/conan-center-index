@@ -15,10 +15,10 @@ required_conan_version = ">=1.55.0"
 class SDLConan(ConanFile):
     name = "sdl"
     description = "Access to audio, keyboard, mouse, joystick, and graphics hardware via OpenGL, Direct3D and Vulkan"
-    license = "Zlib"
+    topics = ("sdl2", "audio", "keyboard", "graphics", "opengl")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libsdl.org"
-    topics = ("sdl2", "audio", "keyboard", "graphics", "opengl")
+    license = "Zlib"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -49,7 +49,6 @@ class SDLConan(ConanFile):
         "opengles": [True, False],
         "vulkan": [True, False],
         "libunwind": [True, False],
-        "hidapi": [True, False],
     }
     default_options = {
         "shared": False,
@@ -78,7 +77,6 @@ class SDLConan(ConanFile):
         "opengles": True,
         "vulkan": True,
         "libunwind": True,
-        "hidapi": True,
     }
     generators = "CMakeDeps", "PkgConfigDeps", "VirtualBuildEnv"
 
@@ -103,11 +101,11 @@ class SDLConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        # Don't depend on iconv on Apple by default
+        # Don't depend on iconv on macOS by default
         # SDL2 depends on many system freamworks,
         # which depend on the system-provided iconv
         # and can conflict with the Conan provided one
-        self.options.iconv = not is_apple_os(self)
+        self.options.iconv = self.settings.os != "Macos"
 
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -139,10 +137,8 @@ class SDLConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # TODO: C++ is also required for WinRT and Haiku
-        if not (self.settings.os == "Android" and self.options.hidapi):
-            self.settings.rm_safe("compiler.libcxx")
-            self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def requirements(self):
         if self.options.get_safe("iconv", False):
@@ -190,7 +186,8 @@ class SDLConan(ConanFile):
             self.build_requires("wayland/1.22.0")  # Provides wayland-scanner
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True,
+            destination=self.source_folder)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -220,8 +217,6 @@ class SDLConan(ConanFile):
                 "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED)",
                 'find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED PATHS "${WAYLAND_BIN_DIR}" NO_DEFAULT_PATH)',
             )
-        if Version(self.version) >= "2.30.6" and not self.options.shared:
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "list(APPEND targets SDL2-static)", "set(targets SDL2-static)")
 
     def define_toolchain(self):
         tc = CMakeToolchain(self)
@@ -247,7 +242,6 @@ class SDLConan(ConanFile):
         tc.variables["SDL_OPENGL"] = self.options.opengl
         tc.variables["SDL_OPENGLES"] = self.options.opengles
         tc.variables["SDL_VULKAN"] = self.options.vulkan
-        tc.variables["SDL_HIDAPI"] = self.options.hidapi
         if self.settings.os == "Linux":
             # See https://github.com/bincrafters/community/issues/696
             tc.variables["SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS"] = 1
@@ -420,15 +414,7 @@ class SDLConan(ConanFile):
                 "AVFoundation", "Foundation", "QuartzCore",
             ]
             if self.settings.os == "Macos":
-                self.cpp_info.components["libsdl2"].frameworks.extend([
-                    "Cocoa",
-                    "Carbon",
-                    "IOKit",
-                    "ForceFeedback",
-                    "CoreFoundation",
-                    "CoreServices",
-                    "AppKit"
-                ])
+                self.cpp_info.components["libsdl2"].frameworks.extend(["Cocoa", "Carbon", "IOKit", "ForceFeedback"])
                 self.cpp_info.components["libsdl2"].frameworks.append("GameController")
             elif self.settings.os in ["iOS", "tvOS", "watchOS"]:
                 self.cpp_info.components["libsdl2"].frameworks.extend([

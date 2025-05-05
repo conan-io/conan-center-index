@@ -14,6 +14,7 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        self.requires("stb/cci.20210910")
 
     def build(self):
         cmake = CMake(self)
@@ -23,4 +24,5 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            self.run(bin_path, env="conanrun")
+            img_path = os.path.join(self.source_folder, "test.png")
+            self.run(f"{bin_path} {img_path}", env="conanrun")

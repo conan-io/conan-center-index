@@ -13,10 +13,11 @@ required_conan_version = ">=1.50.0"
 class MicrosoftGslConan(ConanFile):
     name = "ms-gsl"
     description = "Microsoft's implementation of the Guidelines Support Library"
-    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/microsoft/GSL"
-    topics = ("gsl", "guidelines", "core", "span", "header-only")
+    license = "MIT"
+    topics = ("gsl", "guidelines", "core", "span")
+    no_copy_source = True
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -25,7 +26,6 @@ class MicrosoftGslConan(ConanFile):
     default_options = {
         "on_contract_violation": "terminate"
     }
-    no_copy_source = True
 
     @property
     def _minimum_cpp_standard(self):

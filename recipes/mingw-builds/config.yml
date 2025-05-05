@@ -1,8 +1,4 @@
 versions:
-    "14.2.0":
-        folder: "all"
-    "13.2.0":
-        folder: "all"
     "12.2.0":
         folder: "all"
     "12.1.0":

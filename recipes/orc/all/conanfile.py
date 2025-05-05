@@ -1,13 +1,14 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rmdir, replace_in_file, mkdir
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
 class OrcRecipe(ConanFile):
     name = "orc"
@@ -33,8 +34,26 @@ class OrcRecipe(ConanFile):
     }
 
     @property
+    def _min_cppstd(self):
+        return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "12",
+        }
+
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
+
+    @property
     def _should_patch_thirdparty_toolchain(self):
-        return Version(self.version) < "2.0.0"
+        return self.version < "2.0.0"
 
     def export_sources(self):
         if self._should_patch_thirdparty_toolchain:
@@ -60,17 +79,23 @@ class OrcRecipe(ConanFile):
         self.requires("lz4/1.9.4")
         self.requires("snappy/1.1.9")
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("zstd/[~1.5]")
+        self.requires("zstd/1.5.5")
 
     def validate(self):
-        check_min_cppstd(self, 17)
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def build_requirements(self):
-        self.tool_requires("protobuf/<host_version>")
+        if not self._is_legacy_one_profile:
+            self.tool_requires("protobuf/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
 
     def generate(self):
         VirtualBuildEnv(self).generate()
@@ -88,6 +113,11 @@ class OrcRecipe(ConanFile):
         tc.variables["BUILD_ENABLE_AVX512"] = self.options.get_safe("build_avx512", False)
         tc.variables["STOP_BUILD_ON_WARNING"] = False
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+
+        # CMake versions less than 3.12 are supported by ORC pre-1.9.0 versions.
+        # Setting policy CMP0077 to NEW to remove unnecessary cache_variables settings.
+        if self.version < "1.9.0":
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
         protoc_path = os.path.join(self.dependencies["protobuf"].cpp_info.bindir, "protoc")
         tc.variables["PROTOBUF_EXECUTABLE"] = protoc_path.replace("\\", "/")
@@ -107,6 +137,7 @@ class OrcRecipe(ConanFile):
                         "add_library (orc STATIC ${SOURCE_FILES})", "add_library (orc ${SOURCE_FILES})")
 
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -117,8 +148,7 @@ class OrcRecipe(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        if self.settings.os == "Windows" and self.options.shared and Version(self.version) < "2.1.1":
+        if self.settings.os == "Windows" and self.options.shared:
             mkdir(self, os.path.join(self.package_folder, "bin"))
             os.rename(os.path.join(self.package_folder, "lib", "orc.dll"),
                       os.path.join(self.package_folder, "bin", "orc.dll"))

@@ -12,18 +12,13 @@ required_conan_version = ">=1.53.0"
 
 class LelyConan(ConanFile):
     name = "lely-core"
-    description = (
-        "The Lely core libraries are a collection of C and C++ libraries and tools, "
-        "providing high-performance I/O and sensor/actuator control for robotics and IoT applications. "
-        "The libraries are cross-platform and have few dependencies. "
-        "They can be even be used on bare-metal microcontrollers with as little as 32 kB RAM."
-    )
     license = "Apache-2.0"
-    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.com/lely_industries/lely-core/"
+    url = "https://github.com/conan-io/conan-center-index"
+    description = "The Lely core libraries are a collection of C and C++ libraries and tools, providing high-performance I/O and sensor/actuator control for robotics and IoT applications. The libraries are cross-platform and have few dependencies. They can be even be used on bare-metal microcontrollers with as little as 32 kB RAM."
     topics = ("canopen",)
     package_type = "library"
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
