@@ -2,3 +2,8 @@ sources:
   "0.5.1":
     url: "https://github.com/FrancoisCarouge/Kalman/archive/refs/tags/0.5.1.tar.gz"
     sha256: "b6d8ff8820cd42fa8b175c510f2bd0722564c5591cff1eb035664c0af35a5ada"
+patches:
+    "0.5.1":
+      - patch_file: "patches/0001-0.5.1-disable-testing.patch"
+        patch_description: "Disable testing, samples and exampples"
+        patch_type: "conan"
