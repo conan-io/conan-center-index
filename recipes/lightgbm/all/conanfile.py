@@ -6,7 +6,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -66,10 +65,6 @@ class LightGBMConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
-    def build_requirements(self):
-        if Version(self.version) >= "4.3.0":
-            self.tool_requires("cmake/[>=3.18 <4]")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -83,10 +78,8 @@ class LightGBMConan(ConanFile):
             tc.cache_variables["APPLE_OUTPUT_DYLIB"] = True
         tc.variables["_MAJOR_VERSION"] = Version(self.version).major
         tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
-        venv = VirtualBuildEnv(self)
-        venv.generate(scope="build")
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)

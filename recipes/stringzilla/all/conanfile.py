@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -37,26 +36,12 @@ class StringZillaConan(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        if Version(self.version) < "3.0.0":
-            copy(
-                self,
-                pattern="*.h",
-                dst=os.path.join(self.package_folder, "include"),
-                src=os.path.join(self.source_folder, "stringzilla"),
-            )
-        else:
-            copy(
-                self,
-                pattern="*.h",
-                dst=os.path.join(self.package_folder, "include"),
-                src=os.path.join(self.source_folder, "include"),
-            )
-            copy(
-                self,
-                pattern="*.hpp",
-                dst=os.path.join(self.package_folder, "include"),
-                src=os.path.join(self.source_folder, "include"),
-            )
+        copy(
+            self,
+            pattern="*.h",
+            dst=os.path.join(self.package_folder, "include"),
+            src=os.path.join(self.source_folder, "stringzilla"),
+        )
 
     def package_info(self):
         self.cpp_info.bindirs = []

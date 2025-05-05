@@ -1,0 +1,70 @@
+diff --git a/libmscgen/mscgen_bool.h b/libmscgen/mscgen_bool.h
+index e982d80..d16ef98 100644
+--- libmscgen/mscgen_bool.h
++++ libmscgen/mscgen_bool.h
+@@ -23,6 +23,14 @@
+ #ifndef MSCGEN_BOOL_H
+ #define MSCGEN_BOOL_H
+ 
++/* Some system headers define TRUE and FALSE so undefine them first */
++#ifdef TRUE
++#undef TRUE
++#endif
++#ifdef FALSE
++#undef FALSE
++#endif
++
+ typedef enum
+ {
+     FALSE = 0,
+diff --git a/qtools/qglobal.h b/qtools/qglobal.h
+index 0deef5d..86846f8 100644
+--- qtools/qglobal.h
++++ qtools/qglobal.h
+@@ -357,6 +356,7 @@ typedef const char     *pcchar;
+ typedef __int64            int64;
+ typedef unsigned __int64   uint64;
+ #else
++#include <cinttypes>
+ #if !defined(_OS_AIX_) || !defined(_H_INTTYPES)
+ typedef long long          int64;
+ #endif
+diff --git a/src/doxygen.cpp b/src/doxygen.cpp
+index 3fdde9bc..1b32e273 100644
+--- src/doxygen.cpp
++++ src/doxygen.cpp
+@@ -12,6 +12,7 @@
+  * input used in their production; they are not affected by this license.
+  *
+  */
++#include <cinttypes>
+ 
+ #include <locale.h>
+ 
+@@ -32,7 +33,6 @@
+ #include <algorithm>
+ #include <unordered_map>
+ #include <memory>
+-#include <cinttypes>
+ 
+ #include "version.h"
+ #include "doxygen.h"
+diff --git a/src/util.cpp b/src/util.cpp
+index 7fcd5ed..399e7a2 100644
+--- src/util.cpp
++++ src/util.cpp
+@@ -13,13 +13,13 @@
+  * input used in their production; they are not affected by this license.
+  *
+  */
++#include <cinttypes>
+ 
+ #include <stdlib.h>
+ #include <ctype.h>
+ #include <errno.h>
+ #include <math.h>
+ #include <limits.h>
+-#include <cinttypes>
+ #include <string.h>
+ 
+ #include <mutex>

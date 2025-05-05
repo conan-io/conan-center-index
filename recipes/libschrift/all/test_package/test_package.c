@@ -1,10 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "schrift.h"
 
-int main(void)  {
-    printf("Schrift version: %s\n", sft_version());
+int main(int argc, char* argv[])  {
+    sft_loadfile(argv[1]);
 
-    return EXIT_SUCCESS;
+    return 0;
 }

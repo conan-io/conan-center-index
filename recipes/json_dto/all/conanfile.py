@@ -12,13 +12,13 @@ required_conan_version = ">=1.52.0"
 
 class JsonDtoConan(ConanFile):
     name = "json_dto"
-    description = "A small header-only helper for converting data between json representation and c++ structs"
     license = "BSD-3-Clause"
-    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Stiffstream/json_dto"
-    topics = ("json", "dto", "serialization", "header-only")
+    url = "https://github.com/conan-io/conan-center-index"
+    description = "A small header-only helper for converting data between json representation and c++ structs"
+    topics = ("json", "dto", "serialization")
     package_type = "header-library"
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
 
     @property

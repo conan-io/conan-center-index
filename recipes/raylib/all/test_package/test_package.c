@@ -8,6 +8,5 @@ int main(void) {
   if (CheckCollisionSpheres(center, r, center, r)) {
     printf("unit sphere collides with itself!\n");
   }
-
   return 0;
 }

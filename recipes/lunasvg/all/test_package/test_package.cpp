@@ -1,8 +1,4 @@
-#ifdef LUNASVG_BEFORE_3_0_0
 #include "lunasvg.h"
-#else
-#include "lunasvg/lunasvg.h"
-#endif
 #include <iostream>
 
 int main() {

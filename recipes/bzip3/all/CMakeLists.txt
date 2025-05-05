@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.4)
 project(bzip3 LANGUAGES C)
 
 option(BZIP3_WITH_THREAD "enable thread" OFF)

@@ -27,6 +27,10 @@ class ZlibConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _is_mingw(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -96,10 +100,7 @@ class ZlibConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "ZLIB")
         self.cpp_info.set_property("cmake_target_name", "ZLIB::ZLIB")
         self.cpp_info.set_property("pkg_config_name", "zlib")
-
-        if self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime"):
-            # The recipe patches the CMakeLists.txt to generate different filenames when CMake
-            # detects MINGW (clang, gcc with compiler.runtime undefined and compiler.libcxx defined)
+        if self.settings.os == "Windows" and not self._is_mingw:
             libname = "zdll" if self.options.shared else "zlib"
         else:
             libname = "z"

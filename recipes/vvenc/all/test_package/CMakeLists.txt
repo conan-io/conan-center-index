@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
-project(test_package LANGUAGES C)
+project(PackageTest C)
 
 find_package(vvenc CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} PRIVATE vvenc::vvenc)
+
+
+add_executable(example src/example.c)
+target_link_libraries(example vvenc::vvenc)

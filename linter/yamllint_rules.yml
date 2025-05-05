@@ -1,0 +1,26 @@
+extends: default
+rules:
+  document-start:
+    level: error
+    present: false
+  document-end:
+    level: error
+    present: false
+  empty-values:
+    forbid-in-block-mappings: true
+    forbid-in-flow-mappings: true
+  line-length: disable
+  indentation:
+    level: error
+  new-line-at-end-of-file:
+    level: error
+  trailing-spaces:
+    level: error
+  comments:
+    level: error
+  comments-indentation:
+    level: error
+  new-lines:
+    type: unix
+  key-duplicates:
+    level: error

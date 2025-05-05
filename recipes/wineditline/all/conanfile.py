@@ -1,63 +1,64 @@
+import functools
 import os
 
-from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.43.0"
 
 
 class WineditlineConan(ConanFile):
     name = "wineditline"
-    description = "A BSD-licensed EditLine API implementation for the native Windows Console"
-    license = "BSD-3-Clause"
+    description = (
+        "A BSD-licensed EditLine API implementation for the native "
+        "Windows Console"
+    )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://mingweditline.sourceforge.net/"
     topics = ("readline", "editline", "windows")
-
-    package_type = "library"
-    settings = "os", "arch", "compiler", "build_type"
+    license = "BSD-3-Clause"
+    generators = ("cmake",)
+    settings = ("os", "arch", "compiler", "build_type")
     options = {
         "shared": [True, False],
     }
     default_options = {
         "shared": False,
     }
-    provides = "editline"
-
-    @property
-    def _target_name(self):
-        return "edit" if self.options.shared else "edit_static"
-
-    def configure(self):
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+    exports_sources = ("patches/*", "CMakeLists.txt")
 
     def validate(self):
         if self.settings.os != "Windows":
-            raise ConanInvalidConfiguration(f"{self.ref} is supported only on Windows.")
+            message = "wineditline is supported only on Windows."
+            raise ConanInvalidConfiguration(message)
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        root = self._source_subfolder
+        get_args = self.conan_data["sources"][self.version]
+        tools.get(**get_args, destination=root, strip_root=True)
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.generate()
+    def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
-    def build(self):
+    @functools.lru_cache(1)
+    def _configure_cmake(self):
         cmake = CMake(self)
         cmake.configure()
-        cmake.build(target=self._target_name)
+        return cmake
+
+    def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+        self._configure_cmake().build()
 
     def package(self):
-        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, "*.h", dst=os.path.join(self.package_folder, "include", "editline"), src=os.path.join(self.source_folder, "src", "editline"))
-        copy(self, "*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
-        copy(self, "*.dll", dst=os.path.join(self.package_folder, "bin"), src=self.build_folder, keep_path=False)
+        self.copy("COPYING", "licenses", self._source_subfolder)
+        self._configure_cmake().install()
 
     def package_info(self):
-        self.cpp_info.libs = [self._target_name]
+        self.cpp_info.libs = ["edit"]

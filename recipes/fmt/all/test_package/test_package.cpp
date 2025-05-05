@@ -40,6 +40,7 @@ namespace fmt {
 int main() {
     const std::string thing("World");
     fmt::print("PRINT: Hello {}!\n", thing);
+    fmt::printf("PRINTF: Hello, %s!\n", thing);
 
     const std::string formatted = fmt::format("{0}{1}{0}", "abra", "cad");
     fmt::print("{}\n", formatted);

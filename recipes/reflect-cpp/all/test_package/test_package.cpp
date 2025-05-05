@@ -1,15 +1,15 @@
-#include <cstdlib>
-#include <iostream>
 #include <string>
+#include <rfl.hpp>
 
-#include "rfl.hpp"
-#include "rfl/Generic.hpp"
-#include "rfl/json.hpp"
+struct TestStruct {
+    int x;
+    std::string name;
+};
 
 int main(void) {
-    auto person = rfl::Generic::Object();
-    person["first_name"] = "John";
-    person["last_name"] = "Doe";
-    rfl::json::write(person, std::cout) << std::endl;
-    return EXIT_SUCCESS;
+    for (const auto& f : rfl::fields<TestStruct>()) {
+        (void) f.name();
+        (void) f.type();
+    }
+    return 0;
 }

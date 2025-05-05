@@ -4,12 +4,11 @@
 #include <sys/types.h>
 #endif
 
-#include <stdlib.h>
 #include "nfsc/libnfs.h"
 
 int main() {
     struct nfs_context* nfs = nfs_init_context();
-
+    
     if (nfs == NULL) {
         return 0;
     }

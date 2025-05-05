@@ -11,9 +11,9 @@ class TslRobinMapConan(ConanFile):
     name = "tsl-robin-map"
     license = "MIT"
     description = "C++ implementation of a fast hash map and hash set using robin hood hashing."
-    url = "https://github.com/conan-io/conan-center-index"
+    topics = ("robin-map", "structure", "hash map", "hash set")
     homepage = "https://github.com/Tessil/robin-map"
-    topics = ("robin-map", "structure", "hash map", "hash set", "header-only")
+    url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True

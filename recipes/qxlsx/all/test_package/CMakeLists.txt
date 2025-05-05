@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.1)
 project(test_package LANGUAGES CXX)
 
-find_package(QXlsxQt5 QUIET CONFIG)
-find_package(QXlsxQt6 QUIET CONFIG)
+find_package(QXlsx REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE QXlsx::QXlsx)
+target_link_libraries(${PROJECT_NAME} PRIVATE QXlsx::Core)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)

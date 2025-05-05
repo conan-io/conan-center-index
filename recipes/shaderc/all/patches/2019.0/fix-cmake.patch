@@ -1,0 +1,402 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -70,7 +70,6 @@ endif(MSVC)
+ 
+ # Configure subdirectories.
+ # We depend on these for later projects, so they should come first.
+-add_subdirectory(third_party)
+ 
+ if(SHADERC_ENABLE_SPVC)
+ add_subdirectory(libshaderc_spvc)
+@@ -79,12 +78,11 @@ endif()
+ add_subdirectory(libshaderc_util)
+ add_subdirectory(libshaderc)
+ add_subdirectory(glslc)
+-add_subdirectory(examples)
+ 
+ add_custom_target(build-version
+   ${PYTHON_EXECUTABLE}
+   ${CMAKE_CURRENT_SOURCE_DIR}/utils/update_build_version.py
+-  ${shaderc_SOURCE_DIR} ${spirv-tools_SOURCE_DIR} ${glslang_SOURCE_DIR}
++  ${shaderc_SOURCE_DIR}
+   COMMENT "Update build-version.inc in the Shaderc build directory (if necessary).")
+ 
+ function(define_pkg_config_file NAME LIBS)
+--- a/cmake/utils.cmake
++++ b/cmake/utils.cmake
+@@ -11,7 +11,6 @@ function(shaderc_default_c_compile_options TARGET)
+   if (NOT "${MSVC}")
+     target_compile_options(${TARGET} PRIVATE -Wall -Werror -fvisibility=hidden)
+     if (NOT "${MINGW}")
+-      target_compile_options(${TARGET} PRIVATE -fPIC)
+     endif()
+     if (ENABLE_CODE_COVERAGE)
+       # The --coverage option is a synonym for -fprofile-arcs -ftest-coverage
+@@ -24,10 +23,6 @@ function(shaderc_default_c_compile_options TARGET)
+     endif()
+     if (NOT SHADERC_ENABLE_SHARED_CRT)
+       if (WIN32)
+-        # For MinGW cross compile, statically link to the libgcc runtime.
+-        # But it still depends on MSVCRT.dll.
+-        set_target_properties(${TARGET} PROPERTIES
+-          LINK_FLAGS "-static -static-libgcc")
+       endif(WIN32)
+     endif(NOT SHADERC_ENABLE_SHARED_CRT)
+   else()
+@@ -40,13 +35,8 @@ endfunction(shaderc_default_c_compile_options)
+ function(shaderc_default_compile_options TARGET)
+   shaderc_default_c_compile_options(${TARGET})
+   if (NOT "${MSVC}")
+-    target_compile_options(${TARGET} PRIVATE -std=c++11)
+     if (NOT SHADERC_ENABLE_SHARED_CRT)
+       if (WIN32)
+-        # For MinGW cross compile, statically link to the C++ runtime.
+-        # But it still depends on MSVCRT.dll.
+-        set_target_properties(${TARGET} PROPERTIES
+-          LINK_FLAGS "-static -static-libgcc -static-libstdc++")
+       endif(WIN32)
+     endif(NOT SHADERC_ENABLE_SHARED_CRT)
+   endif()
+--- a/glslc/CMakeLists.txt
++++ b/glslc/CMakeLists.txt
+@@ -16,31 +16,19 @@ add_library(glslc STATIC
+ )
+ 
+ shaderc_default_compile_options(glslc)
+-target_include_directories(glslc PUBLIC ${glslang_SOURCE_DIR})
+-target_link_libraries(glslc PRIVATE glslang OSDependent OGLCompiler
+-  HLSL glslang SPIRV ${CMAKE_THREAD_LIBS_INIT})
+-target_link_libraries(glslc PRIVATE shaderc_util shaderc)
++target_link_libraries(glslc PRIVATE ${CMAKE_THREAD_LIBS_INIT})
++target_link_libraries(glslc PUBLIC shaderc_util shaderc)
+ 
+ add_executable(glslc_exe src/main.cc)
+ shaderc_default_compile_options(glslc_exe)
+-target_include_directories(glslc_exe PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/.. ${spirv-tools_SOURCE_DIR}/include)
++target_include_directories(glslc_exe PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/..)
+ set_target_properties(glslc_exe PROPERTIES OUTPUT_NAME glslc)
+-target_link_libraries(glslc_exe PRIVATE glslc shaderc_util shaderc)
++target_link_libraries(glslc_exe PRIVATE glslc shaderc_util shaderc CONAN_PKG::spirv-tools)
+ add_dependencies(glslc_exe build-version)
+ 
+-shaderc_add_tests(
+-  TEST_PREFIX glslc
+-  LINK_LIBS glslc shaderc_util shaderc
+-  TEST_NAMES
+-    file
+-    resource_parse
+-    stage)
+-
+ shaderc_add_asciidoc(glslc_doc_README README)
+ 
+ if(SHADERC_ENABLE_INSTALL)
+   install(TARGETS glslc_exe
+     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+ endif(SHADERC_ENABLE_INSTALL)
+-
+-add_subdirectory(test)
+--- a/libshaderc/CMakeLists.txt
++++ b/libshaderc/CMakeLists.txt
+@@ -10,18 +10,16 @@ set(SHADERC_SOURCES
+   src/shaderc_private.h
+ )
+ 
+-add_library(shaderc STATIC ${SHADERC_SOURCES})
++add_library(shaderc ${SHADERC_SOURCES})
+ shaderc_default_compile_options(shaderc)
+-target_include_directories(shaderc PUBLIC include PRIVATE ${glslang_SOURCE_DIR})
+-
+-add_library(shaderc_shared SHARED ${SHADERC_SOURCES})
+-shaderc_default_compile_options(shaderc_shared)
+-target_include_directories(shaderc_shared PUBLIC include PRIVATE ${glslang_SOURCE_DIR})
+-target_compile_definitions(shaderc_shared
+-    PRIVATE SHADERC_IMPLEMENTATION
+-    PUBLIC SHADERC_SHAREDLIB
+-)
+-set_target_properties(shaderc_shared PROPERTIES SOVERSION 1)
++target_include_directories(shaderc PUBLIC include)
++if(BUILD_SHARED_LIBS)
++  target_compile_definitions(shaderc
++      PRIVATE SHADERC_IMPLEMENTATION
++      PUBLIC SHADERC_SHAREDLIB
++  )
++  set_target_properties(shaderc PROPERTIES OUTPUT_NAME "shaderc_shared" SOVERSION 1)
++endif()
+ 
+ if(SHADERC_ENABLE_INSTALL)
+   install(
+@@ -34,70 +32,19 @@ if(SHADERC_ENABLE_INSTALL)
+     DESTINATION
+       ${CMAKE_INSTALL_INCLUDEDIR}/shaderc)
+ 
+-  install(TARGETS shaderc shaderc_shared
++  install(TARGETS shaderc
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ endif(SHADERC_ENABLE_INSTALL)
+ 
+-find_package(Threads)
+ set(SHADERC_LIBS
+-  glslang OSDependent OGLCompiler glslang ${CMAKE_THREAD_LIBS_INIT}
+   shaderc_util
+-  SPIRV # from glslang
+-  SPIRV-Tools
++  "CONAN_PKG::glslang"
++  "CONAN_PKG::spirv-tools"
+ )
+ 
+ target_link_libraries(shaderc PRIVATE ${SHADERC_LIBS})
+-target_link_libraries(shaderc_shared PRIVATE ${SHADERC_LIBS})
+-
+-shaderc_add_tests(
+-  TEST_PREFIX shaderc
+-  LINK_LIBS shaderc
+-  INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc_util/include ${glslang_SOURCE_DIR}
+-               ${spirv-tools_SOURCE_DIR}/include
+-  TEST_NAMES
+-    shaderc
+-    shaderc_cpp
+-    shaderc_private)
+-
+-shaderc_add_tests(
+-  TEST_PREFIX shaderc_shared
+-  LINK_LIBS shaderc_shared SPIRV-Tools
+-  INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc_util/include ${glslang_SOURCE_DIR}
+-               ${spirv-tools_SOURCE_DIR}/include
+-  TEST_NAMES
+-    shaderc
+-    shaderc_cpp
+-    shaderc_private)
+-
+-shaderc_combine_static_lib(shaderc_combined shaderc)
+-
+-if(SHADERC_ENABLE_INSTALL)
+-  # Since shaderc_combined is defined as an imported library, we cannot use the
+-  # install() directive to install it. Install it like a normal file.
+-  get_target_property(generated_location shaderc_combined LOCATION)
+-  string(REGEX MATCH "Visual Studio .*" vs_generator "${CMAKE_GENERATOR}")
+-  if (NOT "${vs_generator}" STREQUAL "")
+-    # With Visual Studio generators, the LOCATION property is not properly
+-    # expanded according to the current build configuration. We need to work
+-    # around this problem by manually substitution.
+-    string(REPLACE "$(Configuration)" "\${CMAKE_INSTALL_CONFIG_NAME}"
+-      install_location "${generated_location}")
+-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${install_location} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+-  else()
+-    install(FILES ${generated_location} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+-  endif()
+-endif(SHADERC_ENABLE_INSTALL)
+-
+-shaderc_add_tests(
+-  TEST_PREFIX shaderc_combined
+-  LINK_LIBS shaderc_combined ${CMAKE_THREAD_LIBS_INIT}
+-  INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc_util/include ${glslang_SOURCE_DIR}
+-               ${spirv-tools_SOURCE_DIR}/include
+-  TEST_NAMES
+-    shaderc
+-    shaderc_cpp)
+ 
+ if(${SHADERC_ENABLE_TESTS})
+   add_executable(shaderc_c_smoke_test ./src/shaderc_c_smoke_test.c)
+--- a/libshaderc_spvc/CMakeLists.txt
++++ b/libshaderc_spvc/CMakeLists.txt
+@@ -9,26 +9,22 @@ set(SPVC_SOURCES
+   src/spvc.cc
+ )
+ 
+-add_library(shaderc_spvc STATIC ${SPVC_SOURCES})
++add_library(shaderc_spvc ${SPVC_SOURCES})
+ shaderc_default_compile_options(shaderc_spvc)
+-target_include_directories(shaderc_spvc PUBLIC include PRIVATE ${shaderc_SOURCE_DIR}/libshaderc/include ${shaderc_SOURCE_DIR}/libshaderc_util/include ${spirv-tools_SOURCE_DIR}/include ${SPIRV-Cross_SOURCE_DIR}/..)
+-
+-add_library(shaderc_spvc_shared SHARED ${SPVC_SOURCES})
+-shaderc_default_compile_options(shaderc_spvc_shared)
+-target_include_directories(shaderc_spvc_shared PUBLIC include PRIVATE ${shaderc_SOURCE_DIR}/libshaderc/include ${shaderc_SOURCE_DIR}/libshaderc_util/include ${spirv-tools_SOURCE_DIR}/include ${SPIRV-Cross_SOURCE_DIR}/..)
+-
+-target_compile_definitions(shaderc_spvc_shared
+-    PRIVATE SHADERC_IMPLEMENTATION
+-    PUBLIC SHADERC_SHAREDLIB
+-)
++target_include_directories(shaderc_spvc
++  PUBLIC include ${shaderc_SOURCE_DIR}/libshaderc/include PRIVATE ${shaderc_SOURCE_DIR}/libshaderc_util/include)
++if(BUILD_SHARED_LIBS)
++  target_compile_definitions(shaderc_spvc
++      PRIVATE SHADERC_IMPLEMENTATION
++      PUBLIC SHADERC_SHAREDLIB
++  )
++  set_target_properties(shaderc_spvc PROPERTIES OUTPUT_NAME "shaderc_spvc_shared" SOVERSION 1)
++endif()
+ 
+ if (DISABLE_EXCEPTIONS)
+   target_compile_definitions(shaderc_spvc PRIVATE SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS)
+-  target_compile_definitions(shaderc_spvc_shared PRIVATE SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS)
+ endif (DISABLE_EXCEPTIONS)
+ 
+-set_target_properties(shaderc_spvc_shared PROPERTIES SOVERSION 1)
+-
+ if(SHADERC_ENABLE_INSTALL)
+   install(
+     FILES
+@@ -37,71 +33,18 @@ if(SHADERC_ENABLE_INSTALL)
+     DESTINATION
+       ${CMAKE_INSTALL_INCLUDEDIR}/shaderc)
+ 
+-  install(TARGETS shaderc_spvc shaderc_spvc_shared
++  install(TARGETS shaderc_spvc
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ endif(SHADERC_ENABLE_INSTALL)
+ 
+-find_package(Threads)
+ set(SPVC_LIBS
+-  ${CMAKE_THREAD_LIBS_INIT}
+-  SPIRV-Tools
+-  SPIRV-Tools-opt
+-  spirv-cross-glsl
+-  spirv-cross-hlsl
+-  spirv-cross-msl
++  "CONAN_PKG::spirv-cross"
++  "CONAN_PKG::spirv-tools"
+ )
+ 
+ target_link_libraries(shaderc_spvc PRIVATE ${SPVC_LIBS})
+-target_link_libraries(shaderc_spvc_shared PRIVATE ${SPVC_LIBS})
+-
+-shaderc_add_tests(
+-  TEST_PREFIX shaderc
+-  LINK_LIBS shaderc_spvc
+-  INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc/include ${SPIRV-Cross_SOURCE_DIR}/..
+-  TEST_NAMES
+-    spvc
+-    spvc_cpp
+-    spvc_webgpu
+-    spvc_webgpu_cpp)
+-
+-shaderc_add_tests(
+-  TEST_PREFIX shaderc_shared
+-  LINK_LIBS shaderc_spvc_shared SPIRV-Tools SPIRV-Tools-opt
+-  INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc/include ${SPIRV-Cross_SOURCE_DIR}/..
+-  TEST_NAMES
+-    spvc
+-    spvc_cpp
+-    spvc_webgpu
+-    spvc_webgpu_cpp)
+-
+-shaderc_combine_static_lib(shaderc_spvc_combined shaderc_spvc)
+-
+-if(SHADERC_ENABLE_INSTALL)
+-  # Since shaderc_combined is defined as an imported library, we cannot use the
+-  # install() directive to install it. Install it like a normal file.
+-  get_target_property(generated_location shaderc_spvc_combined LOCATION)
+-  string(REGEX MATCH "Visual Studio .*" vs_generator "${CMAKE_GENERATOR}")
+-  if (NOT "${vs_generator}" STREQUAL "")
+-    # With Visual Studio generators, the LOCATION property is not properly
+-    # expanded according to the current build configuration. We need to work
+-    # around this problem by manually substitution.
+-    string(REPLACE "$(Configuration)" "\${CMAKE_INSTALL_CONFIG_NAME}"
+-      install_location "${generated_location}")
+-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${install_location} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+-  else()
+-    install(FILES ${generated_location} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+-  endif()
+-endif(SHADERC_ENABLE_INSTALL)
+-
+-shaderc_add_tests(
+-  TEST_PREFIX shaderc_spvc_combined
+-  LINK_LIBS shaderc_spvc_combined ${CMAKE_THREAD_LIBS_INIT} shaderc_util
+-  INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc/include ${spirv-tools_SOURCE_DIR}/include
+-  TEST_NAMES
+-    spvc
+-    spvc_cpp)
+ 
+ if(${SHADERC_ENABLE_TESTS})
+   add_executable(spvc_c_smoke_test ./src/spvc_smoke_test_util.c ./src/spvc_c_smoke_test.c)
+--- a/libshaderc_util/CMakeLists.txt
++++ b/libshaderc_util/CMakeLists.txt
+@@ -24,25 +24,20 @@ add_library(shaderc_util STATIC
+ 
+ shaderc_default_compile_options(shaderc_util)
+ target_include_directories(shaderc_util
+-  PUBLIC include PRIVATE ${glslang_SOURCE_DIR})
++  PUBLIC include)
+ 
+ find_package(Threads)
+-target_link_libraries(shaderc_util PRIVATE
+-  glslang OSDependent OGLCompiler HLSL glslang SPIRV
+-  SPIRV-Tools-opt ${CMAKE_THREAD_LIBS_INIT})
+-
+-shaderc_add_tests(
+-  TEST_PREFIX shaderc_util
+-  LINK_LIBS shaderc_util
+-  TEST_NAMES
+-    counting_includer
+-    string_piece
+-    format
+-    file_finder
+-    io
+-    message
+-    mutex
+-    version_profile)
++target_link_libraries(shaderc_util PUBLIC
++  CONAN_PKG::glslang
++  CONAN_PKG::spirv-tools
++  ${CMAKE_THREAD_LIBS_INIT})
++
++if(SHADERC_ENABLE_INSTALL AND NOT BUILD_SHARED_LIBS)
++  install(TARGETS shaderc_util
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
++endif(SHADERC_ENABLE_INSTALL)
+ 
+ if(${SHADERC_ENABLE_TESTS})
+   target_include_directories(shaderc_util_counting_includer_test
+@@ -51,15 +46,6 @@ if(${SHADERC_ENABLE_TESTS})
+     PRIVATE ${glslang_SOURCE_DIR})
+ endif()
+ 
+-shaderc_add_tests(
+-  TEST_PREFIX shaderc_util
+-  LINK_LIBS shaderc_util
+-  INCLUDE_DIRS
+-    ${glslang_SOURCE_DIR}
+-    ${spirv-tools_SOURCE_DIR}/include
+-  TEST_NAMES
+-    compiler)
+-
+ # This target copies content of testdata into the build directory.
+ add_custom_target(testdata COMMAND
+   ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/testdata/copy-to-build.cmake
+--- a/spvc/CMakeLists.txt
++++ b/spvc/CMakeLists.txt
+@@ -1,8 +1,8 @@
+ add_executable(spvc_exe src/main.cc)
+ shaderc_default_compile_options(spvc_exe)
+-target_include_directories(spvc_exe PRIVATE ${shaderc_SOURCE_DIR}/libshaderc/include ${spirv-tools_SOURCE_DIR}/include)
++target_include_directories(spvc_exe PRIVATE ${shaderc_SOURCE_DIR}/libshaderc/include)
+ set_target_properties(spvc_exe PROPERTIES OUTPUT_NAME spvc)
+-target_link_libraries(spvc_exe PRIVATE shaderc_spvc shaderc_util)
++target_link_libraries(spvc_exe PRIVATE shaderc_spvc shaderc_util CONAN_PKG::spirv-tools)
+ add_dependencies(spvc_exe build-version)
+ 
+ shaderc_add_asciidoc(spvc_doc_README README)
+--- a/utils/update_build_version.py
++++ b/utils/update_build_version.py
+@@ -114,12 +114,12 @@ def get_version_string(project, directory):
+ 
+ 
+ def main():
+-    if len(sys.argv) != 4:
+-        print('usage: {} <shaderc-dir> <spirv-tools-dir> <glslang-dir>'.format(
++    if len(sys.argv) != 2:
++        print('usage: {} <shaderc-dir>'.format(
+             sys.argv[0]))
+         sys.exit(1)
+ 
+-    projects = ['shaderc', 'spirv-tools', 'glslang']
++    projects = ['shaderc']
+     new_content = ''.join([
+         '"{}\\n"\n'.format(get_version_string(p, d))
+         for (p, d) in zip(projects, sys.argv[1:])

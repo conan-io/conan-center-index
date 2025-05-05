@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.12)
 project(test_package CXX)
 
 find_package(wg21_linear_algebra REQUIRED CONFIG)

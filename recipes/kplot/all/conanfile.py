@@ -12,10 +12,9 @@ class KplotConan(ConanFile):
     description = "open source Cairo plotting library"
     license = "ISC"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/kristapsdz/kplot"
-    topics = ("plot", "cairo", "chart")
-    package_type = "library"
-    settings = "os", "arch", "compiler", "build_type"
+    homepage = "https://github.com/kristapsdz/kplot/"
+    topics = ("plot", "cairo", "chart") # no "conan"  and project name in topics
+    settings = "os", "arch", "compiler", "build_type" # even for header only
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -26,7 +25,7 @@ class KplotConan(ConanFile):
     }
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -35,6 +34,7 @@ class KplotConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        # for plain C projects only
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
@@ -46,24 +46,26 @@ class KplotConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} can not be built on Visual Studio and msvc.")
 
     def requirements(self):
-        self.requires("cairo/1.17.4", transitive_headers=True)
+        self.requires("cairo/1.17.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["KPLOT_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.generate()
+
         deps = CMakeDeps(self)
         deps.generate()
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE.md", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, pattern="LICENSE.md", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
 

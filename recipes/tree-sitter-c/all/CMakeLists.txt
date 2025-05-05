@@ -1,11 +1,12 @@
-cmake_minimum_required(VERSION 3.15)
-project(tree-sitter-c LANGUAGES C)
+cmake_minimum_required(VERSION 3.0)
+project(tree-sitter-c C)
 
 find_package(tree-sitter REQUIRED CONFIG)
 include(GenerateExportHeader)
 
 file(WRITE api.h [[
 #pragma once
+#include <tree_sitter/parser.h>
 #include "tree_sitter_c_export.h"
 
 #ifdef __cplusplus

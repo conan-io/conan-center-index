@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7caf642..05bbf4a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -205,6 +205,7 @@ if (SCN_INSTALL)
+     install(TARGETS ${SCN_EXPORT_TARGETS_LIST}
+             COMPONENT scnlib_Development
+             EXPORT scnTargets
++            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+             INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

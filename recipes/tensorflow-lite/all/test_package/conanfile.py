@@ -22,5 +22,6 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
+            model_path = os.path.join(self.source_folder, "model.tflite")
             command = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            self.run(command, env="conanrun")
+            self.run(f"{command} {model_path}", env="conanrun")

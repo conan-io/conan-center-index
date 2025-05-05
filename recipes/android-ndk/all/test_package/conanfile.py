@@ -1,8 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
-from conan.tools.scm import Version
 import os
-import platform
 
 
 class TestPackgeConan(ConanFile):
@@ -10,13 +8,8 @@ class TestPackgeConan(ConanFile):
     generators = "CMakeToolchain", "VirtualBuildEnv"
     test_type = "explicit"
 
-    def requirements(self):
-        if self.settings.os == "Android":
-            # Assume we're testing as a tool requires
-            self.tool_requires(self.tested_reference_str)
-        else:
-            # only test the contents of the package on the current machine
-            self.requires(self.tested_reference_str)
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
 
     def layout(self):
         cmake_layout(self)
@@ -29,15 +22,10 @@ class TestPackgeConan(ConanFile):
             cmake.build()
 
     def test(self):
-        ndk_build = "ndk-build.cmd" if self.settings.os == "Windows" else "ndk-build"
-        ndk_version = Version(self.tested_reference_str.split('/')[1])
-        skip_run = platform.system() == "Darwin" and "arm" in platform.processor() and ndk_version < "r23c"
-        if not skip_run:
-            run_env = "conanbuild" if self.settings.os == "Android" else "conanrun"
-            self.run(f"{ndk_build} --version", env=run_env)
+        if self.settings.os == "Windows":
+            self.run("ndk-build.cmd --version")
         else:
-            self.output.warning("Skipped running ndk-build on macOS Apple Silicon in arm64 mode, please use a newer"
-                                 " version of the Android NDK")
+            self.run("ndk-build --version")
 
         # INFO: Run the project that was built using Android NDK
         if self.settings.os == "Android":

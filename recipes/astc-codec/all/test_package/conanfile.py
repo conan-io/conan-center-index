@@ -23,4 +23,5 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            self.run(bin_path, env="conanrun")
+            bees = os.path.join(self.source_folder, "atlas_small_4x4.astc")
+            self.run(f"{bin_path} {bees} 256 256", env="conanrun")

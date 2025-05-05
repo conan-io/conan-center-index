@@ -1,8 +1,4 @@
 versions:
-  "4.11.0":
-    folder: "4.x"
-  "4.10.0":
-    folder: "4.x"
   "4.9.0":
     folder: "4.x"
   "4.8.1":

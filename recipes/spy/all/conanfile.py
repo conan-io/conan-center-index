@@ -10,12 +10,11 @@ required_conan_version = ">=1.50.0"
 
 class SpyConan(ConanFile):
     name = "spy"
-    description = "C++ 17 for constexpr-proof detection and classification of informations about OS, compiler, etc..."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://jfalcou.github.io/spy/"
-    topics = ("config", "metaprogramming", "header-only")
-    package_type = "header-library"
+    description = "C++ 17 for constexpr-proof detection and classification of informations about OS, compiler, etc..."
+    topics = ("c++17", "config", "metaprogramming")
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -28,7 +27,6 @@ class SpyConan(ConanFile):
         return {
             "gcc": "7.4",
             "Visual Studio": "15.7",
-            "msvc": "191",
             "clang": "6",
             "apple-clang": "10",
         }
@@ -56,7 +54,11 @@ class SpyConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
         copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -64,4 +66,6 @@ class SpyConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []

@@ -40,9 +40,10 @@ class DetoursConan(ConanFile):
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only os=Windows is supported")
         if is_msvc(self) and not is_msvc_static_runtime(self):
-            self.output.warning("Detours might behave unexpectedly when not built with static runtime (MT)")
+            # Debug and/or dynamic runtime is undesired for a hooking library
+            raise ConanInvalidConfiguration("Only static runtime is supported (MT)")
         if self.settings.build_type != "Release":
-            self.output.warning("Detours might behave unexpectedly when not built with Release build type")
+            raise ConanInvalidConfiguration("Detours only supports the Release build type")
         try:
             self.output.info(f"target process is {self._target_processor}")
         except KeyError:

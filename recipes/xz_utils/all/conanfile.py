@@ -50,13 +50,6 @@ class XZUtilsConan(ConanFile):
     @property
     def _msbuild_target(self):
         return "liblzma_dll" if self.options.shared else "liblzma"
-    
-    @property
-    def _use_msbuild(self):
-        assume_clang_cl = (self.settings.os == "Windows"
-                           and self.settings.compiler == "clang"
-                           and self.settings.get_safe("compiler.runtime") is not None)
-        return is_msvc(self) or assume_clang_cl
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -75,7 +68,7 @@ class XZUtilsConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not self._use_msbuild:
+        if self._settings_build.os == "Windows" and not is_msvc(self):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -84,7 +77,7 @@ class XZUtilsConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        if self._use_msbuild:
+        if is_msvc(self):
             tc = MSBuildToolchain(self)
             tc.configuration = self._effective_msbuild_type
             tc.generate()
@@ -131,24 +124,16 @@ class XZUtilsConan(ConanFile):
                 "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
                 f"<Import Project=\"{conantoolchain_props}\" /><Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
             )
-            
-            if self.settings.arch == "armv8":
-                replace_in_file(self, vcxproj_file, "x64", "ARM64")
-            
-        solution_file = os.path.join(build_script_folder, "xz_win.sln")
-        if self.settings.arch == "armv8":
-            replace_in_file(self, solution_file, "x64", "ARM64")
-
         #==============================
 
         msbuild = MSBuild(self)
         msbuild.build_type = self._effective_msbuild_type
         msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
-        msbuild.build(os.path.join(build_script_folder, solution_file), targets=[self._msbuild_target])
+        msbuild.build(os.path.join(build_script_folder, "xz_win.sln"), targets=[self._msbuild_target])
 
     def build(self):
         apply_conandata_patches(self)
-        if self._use_msbuild:
+        if is_msvc(self):
             self._build_msvc()
         else:
             autotools = Autotools(self)
@@ -157,7 +142,7 @@ class XZUtilsConan(ConanFile):
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        if self._use_msbuild:
+        if is_msvc(self):
             inc_dir = os.path.join(self.source_folder, "src", "liblzma", "api")
             copy(self, "*.h", src=inc_dir, dst=os.path.join(self.package_folder, "include"))
             output_dir = os.path.join(self.source_folder, "windows")

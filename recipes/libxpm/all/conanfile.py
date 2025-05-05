@@ -26,9 +26,15 @@ class LibXpmConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    no_copy_source = True
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
+        copy(self, "CMakeLists.txt",
+             src=self.recipe_folder,
+             dst=os.path.join(self.export_sources_folder, "src"))
+        copy(self, "*",
+             src=os.path.join(self.recipe_folder, "windows"),
+             dst=os.path.join(self.export_sources_folder, "src", "windows"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -56,7 +62,7 @@ class LibXpmConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["CONAN_libXpm_VERSION"] = self.version
+        tc.variables["CONAN_libXpm_VERSION"] = self.version
         tc.generate()
 
     def build(self):

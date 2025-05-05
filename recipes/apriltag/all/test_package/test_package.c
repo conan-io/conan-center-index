@@ -10,8 +10,8 @@ int main(int argc, char *argv[])
     apriltag_family_t *tf = tagStandard41h12_create();
     apriltag_detector_add_family(td, tf);
 
-    apriltag_detector_destroy(td);
     tagStandard41h12_destroy(tf);
+    apriltag_detector_destroy(td);
 
     printf("Apriltag test_package ran successfully\n");
 

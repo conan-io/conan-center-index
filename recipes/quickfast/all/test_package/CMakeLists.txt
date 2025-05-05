@@ -1,8 +1,11 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.1)
 project(PackageTest CXX)
 
-find_package(quickfast REQUIRED CONFIG)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
 
 add_executable(test ${PROJECT_SOURCE_DIR}/main.cpp)
-target_link_libraries(test PRIVATE quickfast::quickfast)
-target_compile_features(test PRIVATE cxx_std_11)
+
+target_link_libraries(test ${CONAN_LIBS})
+
+set_property(TARGET test PROPERTY CXX_STANDARD 11)

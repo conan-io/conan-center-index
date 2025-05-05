@@ -1,19 +1,9 @@
-from conan import ConanFile
-from conan.tools.cmake import cmake_layout
-from conan.tools.build import can_run
+from conans import ConanFile, tools
 
 
-class TestPackageConan(ConanFile):
-    settings = "os", "arch", "compiler", "build_type"
-    generators = "VirtualRunEnv"
-    test_type = "explicit"
-
-    def requirements(self):
-        self.requires(self.tested_reference_str)
-
-    def layout(self):
-        cmake_layout(self)
+class KcovTestConan(ConanFile):
+    settings = "os", "compiler", "build_type", "arch"
 
     def test(self):
-        if can_run(self):
-            self.run("kcov --version", env="conanrun")
+        if not tools.cross_building(self.settings):
+            self.run("kcov --version", run_environment=True)

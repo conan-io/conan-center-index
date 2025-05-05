@@ -21,16 +21,12 @@ class RapidYAMLConan(ConanFile):
         "fPIC": [True, False],
         "with_default_callbacks": [True, False],
         "with_tab_tokens": [True, False],
-        "with_default_callback_uses_exceptions": [True, False],
-        "with_assert": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_default_callbacks": True,
         "with_tab_tokens": False,
-        "with_default_callback_uses_exceptions": False,
-        "with_assert": False,
     }
 
     @property
@@ -45,25 +41,16 @@ class RapidYAMLConan(ConanFile):
             del self.options.fPIC
         if Version(self.version) < "0.4.0":
             del self.options.with_tab_tokens
-        if Version(self.version) < "0.6.0":
-            del self.options.with_default_callback_uses_exceptions
-            del self.options.with_assert
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # with_default_callback_uses_exceptions should only be valid if with_default_callbacks is true
-        if not self.options.with_default_callbacks:
-            self.options.rm_safe("with_default_callback_uses_exceptions")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) < "0.6.0":
-            self.requires("c4core/0.1.11", transitive_headers=True)
-        else:
-            self.requires("c4core/0.2.0", transitive_headers=True)
+        self.requires("c4core/0.1.11", transitive_headers=True)
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -78,9 +65,6 @@ class RapidYAMLConan(ConanFile):
         tc.variables["RYML_DEFAULT_CALLBACKS"] = self.options.with_default_callbacks
         if Version(self.version) >= "0.4.0":
             tc.variables["RYML_WITH_TAB_TOKENS"] = self.options.with_tab_tokens
-        if Version(self.version) >= "0.6.0":
-            tc.variables["RYML_DEFAULT_CALLBACK_USES_EXCEPTIONS"] = self.options.with_default_callback_uses_exceptions
-            tc.variables["RYML_USE_ASSERT"] = self.options.with_assert
         tc.generate()
 
         deps = CMakeDeps(self)

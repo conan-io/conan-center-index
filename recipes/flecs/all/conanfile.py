@@ -17,7 +17,6 @@ class FlecsConan(ConanFile):
     homepage = "https://github.com/SanderMertens/flecs"
     url = "https://github.com/conan-io/conan-center-index"
 
-    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -54,7 +53,6 @@ class FlecsConan(ConanFile):
         else:
             tc.variables["FLECS_STATIC"] = not self.options.shared
             tc.variables["FLECS_SHARED"] = self.options.shared
-            tc.variables["FLECS_TESTS"] = False
         tc.variables["FLECS_PIC"] = self.options.get_safe("fPIC", True)
         tc.generate()
 

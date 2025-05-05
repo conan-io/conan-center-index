@@ -19,9 +19,9 @@ class LinuxSyscallSupportConan(ConanFile):
     settings = "os"
     no_copy_source = True
 
-    def validate(self):
+    def configure(self):
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Only Linux is supported")
+            raise ConanInvalidConfiguration("{} supported only on Linux".format(self.name))
 
     def layout(self):
         basic_layout(self, src_folder="src")

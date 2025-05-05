@@ -37,7 +37,14 @@ class UvwConan(ConanFile):
 
     @property
     def _required_libuv_version(self):
-        return self.conan_data["libuv_version_mapping"][self.version]
+        return {
+            "3.3.0": "1.47.0",
+            "3.2.0": "1.46.0",
+            "3.1.0": "1.45.0",
+            "2.12.1": "1.44.2",
+            "2.11.0": "1.43.0",
+            "2.10.0": "1.42.0",
+        }[self.version]
 
     def layout(self):
         basic_layout(self, src_folder="src")

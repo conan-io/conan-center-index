@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.1)
 project(PackageTest LANGUAGES C)
 
 find_package(tinyalsa CONFIG REQUIRED)

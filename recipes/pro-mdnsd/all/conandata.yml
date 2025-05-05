@@ -5,3 +5,4 @@ sources:
 patches:
   "0.8.4":
     - patch_file: "patches/0001-cmake-install-bundle.patch"
+      base_path: "source_subfolder"

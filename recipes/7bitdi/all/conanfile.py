@@ -1,20 +1,21 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get, copy, rmdir
 from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
 
+
 class SevenBitDIConan(ConanFile):
     name = "7bitdi"
-    description = "a simple C++ dependency injection library."
-    license = "MIT"
-    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/7bitcoder/7bitDI"
+    description = "7bitDI is a simple C++ dependency injection library."
     topics = ("cpp17", "dependency-injector", "injector", "header-only")
+    url = "https://github.com/conan-io/conan-center-index"
+    license = "MIT"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -27,10 +28,6 @@ class SevenBitDIConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 17
 
     @property
     def _minimum_compilers_version(self):
@@ -64,11 +61,12 @@ class SevenBitDIConan(ConanFile):
         compiler_name = str(compiler)
 
         if compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+            check_min_cppstd(self, 17)
+
         minimum_version = self._minimum_compilers_version.get(compiler_name, False)
         if minimum_version and Version(compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires compiler {compiler_name} minimum version: {minimum_version} with C++{self._min_cppstd} support."
+                f"Requires compiler {compiler_name} minimum version: {minimum_version} with C++17 support."
             )
 
     def source(self):

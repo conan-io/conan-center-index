@@ -1,11 +1,10 @@
 from conan import ConanFile
-from conan.tools.build import check_max_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=1.53.0"
 
 
 class MuparserxConan(ConanFile):
@@ -38,11 +37,6 @@ class MuparserxConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def validate(self):
-        if Version(self.version) < "4.0.12":
-            # std::binary_function used in previous versions was removed in C++17
-            check_max_cppstd(self, 14)
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -53,8 +47,6 @@ class MuparserxConan(ConanFile):
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         # Relocatable shared libs on macOS
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        if Version(self.version) <= "4.0.12":
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def _patch_sources(self):

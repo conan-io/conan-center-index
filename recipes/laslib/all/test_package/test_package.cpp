@@ -4,9 +4,10 @@
 int main(void) {
 
     LASreadOpener readOpener;
-    readOpener.set_file_name("test_package.cpp");
+    readOpener.set_file_name("test.laz");
+    LASreader* lasreader = readOpener.open();
 
-    std::cout << "Test: " << readOpener.active() << std::endl;
+    std::cout << "test.laz number of points : " << lasreader->header.number_of_point_records << std::endl;
 
     return EXIT_SUCCESS;
 }

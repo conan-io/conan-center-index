@@ -1,11 +1,12 @@
-cmake_minimum_required(VERSION 3.15)
-project(test_package LANGUAGES C CXX)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
 find_package(lerc REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME}_cxx test_package.cpp)
-target_link_libraries(${PROJECT_NAME}_cxx PRIVATE lerc::lerc)
-target_compile_features(${PROJECT_NAME}_cxx PRIVATE cxx_std_11)
+add_executable(test_package test_package.cpp)
+target_link_libraries(test_package PRIVATE lerc::lerc)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
 
-add_executable(${PROJECT_NAME}_c test_package.c)
-target_link_libraries(${PROJECT_NAME}_c PRIVATE lerc::lerc)
+if(lerc_VERSION VERSION_GREATER_EQUAL "3.0")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE -DLERC_VER3_LATER)
+endif()

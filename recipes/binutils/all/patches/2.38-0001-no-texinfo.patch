@@ -1,0 +1,20 @@
+--- gas/Makefile.in
++++ gas/Makefile.in
+@@ -1778,7 +1778,7 @@
+ check-am: all-am
+ 	$(MAKE) $(AM_MAKEFLAGS) check-DEJAGNU
+ check: check-recursive
+-all-am: Makefile $(INFO_DEPS) $(PROGRAMS) $(SCRIPTS) $(MANS) config.h
++all-am: Makefile $(PROGRAMS) $(SCRIPTS) $(MANS) config.h
+ installdirs: installdirs-recursive
+ installdirs-am:
+ 	for dir in "$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)"; do \
+@@ -1854,7 +1854,7 @@ info: info-recursive
+ 
+ info-am: $(INFO_DEPS) info-local
+ 
+-install-data-am: install-data-local install-info-am install-man
++install-data-am: install-man
+ 
+ install-dvi: install-dvi-recursive
+ 

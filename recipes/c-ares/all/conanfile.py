@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get, rm, rmdir, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import collect_libs, copy, get, rm, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -10,11 +10,12 @@ required_conan_version = ">=1.53.0"
 
 class CAresConan(ConanFile):
     name = "c-ares"
-    description = "A C library for asynchronous DNS requests"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://c-ares.haxx.se/"
+    description = "A C library for asynchronous DNS requests"
     topics = ("dns", "resolver", "async")
+    homepage = "https://c-ares.haxx.se/"
+
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -27,9 +28,6 @@ class CAresConan(ConanFile):
         "fPIC": True,
         "tools": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -57,7 +55,6 @@ class CAresConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -86,7 +83,8 @@ class CAresConan(ConanFile):
                 self.cpp_info.components["cares"].system_libs.append("pthread")
         elif self.settings.os == "Windows":
             self.cpp_info.components["cares"].system_libs.extend(["ws2_32", "advapi32"])
-            self.cpp_info.components["cares"].system_libs.append("iphlpapi")
+            if Version(self.version) >= "1.18.0":
+                self.cpp_info.components["cares"].system_libs.append("iphlpapi")
         elif is_apple_os(self):
             self.cpp_info.components["cares"].system_libs.append("resolv")
 

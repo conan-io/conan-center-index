@@ -23,5 +23,6 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
+            font = os.path.join(self.source_folder, "example.ttf")
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            self.run(bin_path, env="conanrun")
+            self.run(f"{bin_path} {font}", env="conanrun")

@@ -1,27 +1,19 @@
+from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
-from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd, valid_min_cppstd
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, export_conandata_patches, apply_conandata_patches
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.scm import Version
-
-required_conan_version = ">=1.53.0"
-
+required_conan_version = ">=1.33.0"
 
 class AzureStorageCppConan(ConanFile):
     name = "azure-storage-cpp"
-    description = "Microsoft Azure Storage Client Library for C++"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Azure/azure-storage-cpp"
+    description = "Microsoft Azure Storage Client Library for C++"
     topics = ("azure", "cpp", "cross-platform", "microsoft", "cloud")
-
-    package_type = "library"
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "compiler", "build_type", "arch"
+    generators = "cmake", "cmake_find_package"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -30,10 +22,16 @@ class AzureStorageCppConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    short_paths = True
+    _cmake = None
 
-    # Use azure-sdk-for-cpp::azure-storage-blobs-cpp instead
-    # https://github.com/Azure/azure-sdk-for-cpp/blob/main/sdk/storage/MigrationGuide.md
-    deprecated = "azure-sdk-for-cpp"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     @property
     def _minimum_cpp_standard(self):
@@ -42,16 +40,41 @@ class AzureStorageCppConan(ConanFile):
     @property
     def _minimum_compiler_version(self):
         return {
-            "gcc": "6",
+            "gcc": "5",
             "Visual Studio": "14",
-            "msvc": "190",
             "clang": "3.4",
             "apple-clang": "5.1",
         }
 
-    def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
-        export_conandata_patches(self)
+    def requirements(self):
+        self.requires("cpprestsdk/2.10.18")
+        if self.settings.os != "Windows":
+            self.requires("boost/1.76.0")
+            self.requires("libxml2/2.9.10")
+            self.requires("util-linux-libuuid/2.39")
+        if self.settings.os == "Macos":
+            self.requires("libgettext/0.20.1")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+
+        self._cmake.definitions["CMAKE_FIND_FRAMEWORK"] = "LAST"
+        self._cmake.definitions["BUILD_TESTS"] = False
+        self._cmake.definitions["BUILD_SAMPLES"] = False
+        if not self.settings.compiler.cppstd:
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
+
+        if self.settings.os == "Macos":
+            self._cmake.definitions["GETTEXT_LIB_DIR"] = self.deps_cpp_info["libgettext"].lib_paths[0]
+
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -59,100 +82,42 @@ class AzureStorageCppConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            self.options.rm_safe("fPIC")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
-    def requirements(self):
-        self.requires("cpprestsdk/2.10.19", transitive_headers=True, transitive_libs=True)
-        self.requires("libxml2/[>=2.12.5 <3]", transitive_headers=True, transitive_libs=True)
-        if self.settings.os != "Windows":
-            # Boost.Asio is used in a public header here:
-            # https://github.com/Azure/azure-storage-cpp/blob/v7.5.0/Microsoft.WindowsAzure.Storage/includes/wascore/timer_handler.h#L27
-            self.requires("boost/1.83.0", transitive_headers=True, transitive_libs=True)
-            self.requires("util-linux-libuuid/2.39.2", transitive_headers=True, transitive_libs=True)
-            self.requires("openssl/[>=1.1 <4]")
-        if is_apple_os(self):
-            self.requires("libgettext/0.22")
+            del self.options.fPIC
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
+            tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compiler_version.get(str(self.settings.compiler))
         if not min_version:
-            self.output.warning(
-                f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support."
-            )
+            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+                self.name, self.settings.compiler))
         else:
-            if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.name} requires C++{self._minimum_cpp_standard} support. The current compiler"
-                    f" {self.settings.compiler} {self.settings.compiler.version} does not support it."
-                )
+            if tools.Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
+                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
 
         # FIXME: Visual Studio 2015 & 2017 are supported but CI of CCI lacks several Win SDK components
         # https://github.com/conan-io/conan-center-index/issues/4195
-        if not check_min_vs(self, 192, raise_invalid=False):
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "16":
             raise ConanInvalidConfiguration("Visual Studio < 2019 not yet supported in this recipe")
-        if self.options.shared and is_msvc_static_runtime(self):
+        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["CMAKE_FIND_FRAMEWORK"] = "LAST"
-        tc.variables["BUILD_TESTS"] = False
-        tc.variables["BUILD_SAMPLES"] = False
-        if is_apple_os(self):
-            tc.variables["GETTEXT_LIB_DIR"] = self.dependencies["libgettext"].cpp_info.libdir
-        if not valid_min_cppstd(self, self._minimum_cpp_standard):
-            tc.variables["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
-        # Allow non-cache_variables to be used
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-        # Relocatable shared libs on macOS
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        tc.generate()
-
-        deps = CMakeDeps(self)
-        deps.set_property("util-linux-libuuid", "cmake_file_name", "UUID")
-        deps.generate()
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        cmakelists_path = os.path.join(self.source_folder, "Microsoft.WindowsAzure.Storage", "CMakeLists.txt")
-        # Do not force C++11 and libc++
-        replace_in_file(self, cmakelists_path, "-std=c++11", "")
-        replace_in_file(self, cmakelists_path, "-stdlib=libc++", "")
-        # Let Conan handle the Boost defines
-        replace_in_file(self, cmakelists_path, "add_definitions(-DBOOST_LOG_DYN_LINK)", "")
-
     def build(self):
-        self._patch_sources()
-        cmake = CMake(self)
-        cmake.configure(build_script_folder=self.source_path.parent)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE.txt",
-             dst=os.path.join(self.package_folder, "licenses"),
-             src=self.source_folder)
-        cmake = CMake(self)
+        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
+        cmake = self._configure_cmake()
         cmake.install()
 
     def package_info(self):
+
+        self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
-            # https://github.com/Azure/azure-storage-cpp/blob/v7.5.0/Microsoft.WindowsAzure.Storage/src/CMakeLists.txt#L100
-            self.cpp_info.libs = ["wastorage"]
-            # https://github.com/Azure/azure-storage-cpp/blob/v7.5.0/Microsoft.WindowsAzure.Storage/src/CMakeLists.txt#L90
             self.cpp_info.system_libs = ["ws2_32", "rpcrt4", "xmllite", "bcrypt"]
-            if is_msvc(self):
-                # https://github.com/Azure/azure-storage-cpp/blob/v7.5.0/Microsoft.WindowsAzure.Storage/CMakeLists.txt#L116-L120
-                if self.options.shared:
-                    self.cpp_info.defines = ["WASTORAGE_DLL", "_USRDLL"]
-                else:
-                    self.cpp_info.defines = ["_NO_WASTORAGE_API"]
-        else:
-            self.cpp_info.libs = ["azurestorage"]
+            if not self.options.shared:
+                self.cpp_info.defines = ["_NO_WASTORAGE_API"]

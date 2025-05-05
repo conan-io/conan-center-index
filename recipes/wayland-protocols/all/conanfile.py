@@ -18,7 +18,6 @@ class WaylandProtocolsConan(ConanFile):
     homepage = "https://gitlab.freedesktop.org/wayland/wayland-protocols"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
-    short_paths = True
 
     def package_id(self):
         self.info.clear()
@@ -43,6 +42,8 @@ class WaylandProtocolsConan(ConanFile):
         tc.project_options["datadir"] = "res"
         tc.project_options["tests"] = "false"
         tc.generate()
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
 
     def _patch_sources(self):
         if Version(self.version) <= "1.23":
@@ -50,10 +51,6 @@ class WaylandProtocolsConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
                             "dep_scanner = dependency('wayland-scanner', native: true)",
                             "#dep_scanner = dependency('wayland-scanner', native: true)")
-        elif Version(self.version) >= "1.42":
-            replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
-                            "dep_scanner = dependency('wayland-scanner',",
-                            "dep_scanner = dependency('wayland-scanner', required: false, disabler: true,")
 
     def build(self):
         self._patch_sources()

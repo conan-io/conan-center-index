@@ -1,0 +1,15 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 49cd799..d601aaa 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -87,8 +87,8 @@ install(FILES ${ads_HEADERS}
+     COMPONENT headers
+ )
+ install(FILES
+-    "${CMAKE_SOURCE_DIR}/LICENSE"
+-    "${CMAKE_SOURCE_DIR}/gnu-lgpl-v2.1.md"
++    "${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE"
++    "${CMAKE_CURRENT_SOURCE_DIR}/../gnu-lgpl-v2.1.md"
+     DESTINATION license
+     COMPONENT license
+ )

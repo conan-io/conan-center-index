@@ -1,0 +1,13 @@
+diff --git a/cmake/dependencies.cmake b/cmake/dependencies.cmake
+index ae2832b..fec6359 100644
+--- a/cmake/dependencies.cmake
++++ b/cmake/dependencies.cmake
+@@ -154,7 +154,7 @@ if (SCN_REGEX_BACKEND STREQUAL "re2")
+         message(FATAL_ERROR "SCN_REGEX_BOOST_USE_ICU isn't supported when SCN_REGEX_BACKEND is re2")
+     endif ()
+ 
+-    find_package(re2 11.0.0 REQUIRED)
++    find_package(re2 REQUIRED)
+     set(SCN_REGEX_BACKEND_TARGET re2::re2)
+ endif ()
+ 

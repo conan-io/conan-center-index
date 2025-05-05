@@ -28,9 +28,7 @@ class Seqan3Conan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        if Version(self.version) < "3.3.0":
-            return {"gcc": "10"}
-        return {"gcc": "11"}
+        return {"gcc": "10"}
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -46,8 +44,11 @@ class Seqan3Conan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("SeqAn3 requires C++20, which your compiler does not fully support.")
+        if minimum_version:
+            if Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration("SeqAn3 requires C++20, which your compiler does not fully support.")
+        else:
+            self.output.warning("SeqAn3 requires C++20. Your compiler is unknown. Assuming it supports C++20.")
 
         if self.settings.compiler == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
             self.output.warning("SeqAn3 does not actively support libstdc++, consider using libstdc++11 instead.")

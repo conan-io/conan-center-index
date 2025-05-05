@@ -35,7 +35,7 @@ class PoptConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Neutrino":
-            self.requires("libiconv/1.17")
+            self.requires("libiconv/1.15")
 
     def configure(self):
         if self.options.shared:

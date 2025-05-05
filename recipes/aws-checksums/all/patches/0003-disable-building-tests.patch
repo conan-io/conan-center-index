@@ -1,0 +1,11 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -109,7 +109,7 @@
+ file(GLOB TESTS ${TEST_HDRS} ${TEST_SRC})
+   
+ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/tests)
+-add_executable(aws-checksums-tests ${TESTS})
++add_executable(aws-checksums-tests EXCLUDE_FROM_ALL ${TESTS})
+ target_compile_options(aws-checksums-tests PRIVATE ${_FLAGS})
+ target_link_libraries(aws-checksums-tests aws-checksums)
+ set_target_properties(aws-checksums-tests PROPERTIES LINKER_LANGUAGE C)
