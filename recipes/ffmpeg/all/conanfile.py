@@ -46,6 +46,7 @@ class FFMpegConan(ConanFile):
         "with_lzma": [True, False],
         "with_libiconv": [True, False],
         "with_freetype": [True, False],
+        "with_libxml2": [True, False],
         "with_openjpeg": [True, False],
         "with_openh264": [True, False],
         "with_opus": [True, False],
@@ -131,6 +132,7 @@ class FFMpegConan(ConanFile):
         "with_lzma": True,
         "with_libiconv": True,
         "with_freetype": True,
+        "with_libxml2": False,
         "with_openjpeg": True,
         "with_openh264": True,
         "with_opus": True,
@@ -216,6 +218,7 @@ class FFMpegConan(ConanFile):
             "with_zlib": ["avcodec"],
             "with_lzma": ["avcodec"],
             "with_libiconv": ["avcodec"],
+            "with_libxml2": ["avcodec"],
             "with_openjpeg": ["avcodec"],
             "with_openh264": ["avcodec"],
             "with_vorbis": ["avcodec"],
@@ -295,6 +298,8 @@ class FFMpegConan(ConanFile):
             self.requires("libiconv/1.17")
         if self.options.with_freetype:
             self.requires("freetype/2.13.2")
+        if self.options.with_libxml2:
+            self.requires("libxml2/2.13.6")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.2")
         if self.options.with_openh264:
@@ -501,6 +506,7 @@ class FFMpegConan(ConanFile):
             # Dependencies
             opt_enable_disable("bzlib", self.options.with_bzip2),
             opt_enable_disable("zlib", self.options.with_zlib),
+            opt_enable_disable("libxml2", self.options.with_libxml2),
             opt_enable_disable("lzma", self.options.with_lzma),
             opt_enable_disable("iconv", self.options.with_libiconv),
             opt_enable_disable("libopenjpeg", self.options.with_openjpeg),
@@ -876,6 +882,8 @@ class FFMpegConan(ConanFile):
                 avcodec.requires.append("xz_utils::xz_utils")
             if self.options.with_libiconv:
                 avcodec.requires.append("libiconv::libiconv")
+            if self.options.with_libxml2:
+                avcodec.requires.append("libxml2::libxml2")
             if self.options.with_openjpeg:
                 avcodec.requires.append("openjpeg::openjpeg")
             if self.options.with_openh264:
