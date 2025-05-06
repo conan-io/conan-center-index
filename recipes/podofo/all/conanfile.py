@@ -4,6 +4,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=2.1"
@@ -52,12 +53,10 @@ class PodofoConan(ConanFile):
         if Version(self.version) < "0.10.4":  # pylint: disable=conan-condition-evals-to-constant
             # Not available in older versions
             del self.options.with_lib_only
-        else:
-            # Required for this version
-            self.options.with_openssl = True
 
         if self.settings.os == "Windows":
             del self.options.fPIC
+
         if is_msvc(self):
             # libunistring recipe raises for Visual Studio
             # TODO: Enable again when fixed?
@@ -99,6 +98,12 @@ class PodofoConan(ConanFile):
             check_min_cppstd(self, 11)
         else:
             check_min_cppstd(self, 17)
+            
+        if Version(self.version) >= "0.10.4":  # pylint: disable=conan-condition-evals-to-constant
+            if not self.options.with_openssl:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires option 'with_openssl' to be set to True.",
+                )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
