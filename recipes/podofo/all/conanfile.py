@@ -95,9 +95,10 @@ class PodofoConan(ConanFile):
             self.tool_requires("cmake/[>=3.15.7 <4]")
 
     def validate(self):
-        check_min_cppstd(self, 11)
-        if Version(self.version) >= "0.10.4":
-            check_min_cppstd(self, "17")
+        if Version(self.version) < "0.10.4":
+            check_min_cppstd(self, 11)
+        else:
+            check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
