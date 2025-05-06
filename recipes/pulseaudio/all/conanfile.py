@@ -114,7 +114,7 @@ class PulseAudioConan(ConanFile):
         ])
         # Workaround for https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=268250
         # clang-15 works, but we need to skip the gnu11 flag check
-        if self.settings.compiler == "clang" and self.settings.compiler.version == 15:
+        if self.settings.compiler == "clang":
             tc.configure_args.append("ax_cv_check_cflags__pedantic__Werror__std_gnu11=yes")
         for lib in ["alsa", "x11", "openssl", "dbus"]:
             tc.configure_args.append(f"--enable-{lib}={yes_no(getattr(self.options, f'with_{lib}'))}")
