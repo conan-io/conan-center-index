@@ -51,7 +51,7 @@ class PodofoConan(ConanFile):
     def config_options(self):
         if Version(self.version) < "0.10.4":  # pylint: disable=conan-condition-evals-to-constant
             # Not available in older versions
-            self.options.with_lib_only = False
+            del self.options.with_lib_only
         else:
             # Required for this version
             self.options.with_openssl = True
@@ -109,7 +109,8 @@ class PodofoConan(ConanFile):
 
         tc = CMakeToolchain(self)
         tc.variables["PODOFO_BUILD_TOOLS"] = self.options.with_tools
-        tc.variables["PODOFO_BUILD_LIB_ONLY"] = self.options.with_lib_only
+        if self.options.with_lib_only is not None:
+            tc.variables["PODOFO_BUILD_LIB_ONLY"] = self.options.with_lib_only
         if podofo_version < "0.10.0":  # pylint: disable=conan-condition-evals-to-constant
             tc.variables["PODOFO_BUILD_SHARED"] = self.options.shared
         tc.variables["PODOFO_BUILD_STATIC"] = not self.options.shared
