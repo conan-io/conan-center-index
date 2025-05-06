@@ -188,6 +188,22 @@ class OpenCascadeConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+        def _replace_find_package(cmakelists, file, package_name):
+            if Version(self.version) >= "7.9.0":
+                replace_in_file(
+                    self,
+                    cmakelists,
+                    f"list (APPEND OCCT_3RDPARTY_CMAKE_LIST \"adm/cmake/{file}\")",
+                    f"find_package({package_name} REQUIRED)"
+                )
+            else:
+                replace_in_file(
+                    self,
+                    cmakelists,
+                    f"OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/{file}\")",
+                    f"find_package({package_name} REQUIRED)",
+                )
+
         apply_conandata_patches(self)
 
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
@@ -238,20 +254,7 @@ class OpenCascadeConan(ConanFile):
 
         ## freetype
         deps_targets.append("Freetype::Freetype")
-        if Version(self.version) >= "7.9.0":
-            replace_in_file(
-                self,
-                cmakelists,
-                "list (APPEND OCCT_3RDPARTY_CMAKE_LIST \"adm/cmake/freetype\")",
-                "find_package(Freetype REQUIRED)"
-            )
-        else:
-            replace_in_file(
-                self,
-                cmakelists,
-                "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/freetype\")",
-                "find_package(Freetype REQUIRED)",
-            )
+        _replace_find_package(cmakelists, "freetype", "Freetype")
         freetype_libs = " ".join(self.dependencies["freetype"].cpp_info.aggregated_components().libs)
         replace_in_file(
             self,
@@ -261,27 +264,19 @@ class OpenCascadeConan(ConanFile):
         )
         ## tcl
         deps_targets.append("tcl::tcl")
-        if Version(self.version) >= "7.9.0":
-            replace_in_file(self, cmakelists, "list (APPEND OCCT_3RDPARTY_CMAKE_LIST \"adm/cmake/tcl\")", "find_package(TCL REQUIRED)")
-        else:
-            replace_in_file(self, cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/tcl\")", "find_package(TCL REQUIRED)")
+        _replace_find_package(cmakelists, "tcl", "TCL")
         tcl_libs = " ".join(self.dependencies["tcl"].cpp_info.aggregated_components().libs)
         csf_tcl_libs = f"set (CSF_TclLibs \"{tcl_libs}\")"
         replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs     \"tcl86\")", csf_tcl_libs)
         replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   Tcl)", csf_tcl_libs)
-        if Version(self.version) >= "7.9.0":
-            replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   \"tcl8.6\")", csf_tcl_libs)
-        elif Version(self.version) >= "7.6.0":
+        if Version(self.version) >= "7.6.0":
             replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   \"tcl8.6\")", csf_tcl_libs)
         else:
             replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs     \"tcl8.6\")", csf_tcl_libs)
         ## tk
         if self._link_tk:
             deps_targets.append("tk::tk")
-            if Version(self.version) >= "7.9.0":
-                replace_in_file(self, cmakelists, "list (APPEND OCCT_3RDPARTY_CMAKE_LIST \"adm/cmake/tk\")", "find_package(tk REQUIRED)")
-            else:
-                replace_in_file(self, cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/tk\")", "find_package(tk REQUIRED)")
+            _replace_find_package(cmakelists, "tk", "tk")
             tk_libs = " ".join(self.dependencies["tk"].cpp_info.aggregated_components().libs)
             csf_tk_libs = f"set (CSF_TclTkLibs \"{tk_libs}\")"
             replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs   \"tk86\")", csf_tk_libs)
@@ -311,20 +306,7 @@ class OpenCascadeConan(ConanFile):
         ## onetbb
         if self.options.with_tbb:
             deps_targets.append("TBB::tbb")
-            if Version(self.version) >= "7.9.0":
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    "list (APPEND OCCT_3RDPARTY_CMAKE_LIST \"adm/cmake/tbb\")",
-                    "find_package(TBB REQUIRED)",
-                )
-            else:
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/tbb\")",
-                    "find_package(TBB REQUIRED)",
-                )
+            _replace_find_package(cmakelists, "tbb", "TBB")
             tbb_libs = " ".join(self.dependencies["onetbb"].cpp_info.aggregated_components().libs)
             replace_in_file(
                 self,
@@ -335,20 +317,7 @@ class OpenCascadeConan(ConanFile):
         ## ffmpeg
         if self.options.with_ffmpeg:
             deps_targets.append("ffmpeg::ffmpeg")
-            if Version(self.version) >= "7.9.0":
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    "list (APPEND OCCT_3RDPARTY_CMAKE_LIST \"adm/cmake/ffmpeg\")",
-                    "find_package(ffmpeg REQUIRED)",
-                )
-            else:   
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/ffmpeg\")",
-                    "find_package(ffmpeg REQUIRED)",
-                )
+            _replace_find_package(cmakelists, "ffmpeg", "ffmpeg")
             ffmpeg_libs = " ".join(self.dependencies["ffmpeg"].cpp_info.aggregated_components().libs)
             replace_in_file(
                 self,
@@ -359,19 +328,7 @@ class OpenCascadeConan(ConanFile):
         ## freeimage
         if self.options.with_freeimage:
             deps_targets.append("freeimage::freeimage")
-            if Version(self.version) >= "7.9.0":
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    "list (APPEND OCCT_3RDPARTY_CMAKE_LIST \"adm/cmake/freeimage\")",
-                    "find_package(freeimage REQUIRED)",
-                )
-            else:
-                replace_in_file(
-                    self, cmakelists,
-                    "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/freeimage\")",
-                    "find_package(freeimage REQUIRED)",
-                )
+            _replace_find_package(cmakelists, "freeimage", "freeimage")
             freeimage_libs = " ".join(self.dependencies["freeimage"].cpp_info.aggregated_components().libs)
             replace_in_file(
                 self,
@@ -382,20 +339,7 @@ class OpenCascadeConan(ConanFile):
         ## openvr
         if self.options.with_openvr:
             deps_targets.append("openvr::openvr")
-            if Version(self.version) >= "7.9.0":
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    "list (APPEND OCCT_3RDPARTY_CMAKE_LIST \"adm/cmake/openvr\")",
-                    "find_package(openvr REQUIRED)",
-                )
-            else:
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/openvr\")",
-                    "find_package(openvr REQUIRED)",
-                )
+            _replace_find_package(cmakelists, "openvr", "openvr")
             openvr_libs = " ".join(self.dependencies["openvr"].cpp_info.aggregated_components().libs)
             replace_in_file(
                 self,
@@ -406,37 +350,11 @@ class OpenCascadeConan(ConanFile):
         ## rapidjson
         if self.options.with_rapidjson:
             deps_targets.append("rapidjson")
-            if Version(self.version) >= "7.9.0":
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    "list (APPEND OCCT_3RDPARTY_CMAKE_LIST \"adm/cmake/rapidjson\")",
-                    "find_package(RapidJSON REQUIRED)",
-                )
-            else:
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/rapidjson\")",
-                    "find_package(RapidJSON REQUIRED)",
-                )
+            _replace_find_package(cmakelists, "rapidjson", "RapidJSON")
         ## draco
         if self.options.get_safe("with_draco"):
             deps_targets.append("draco::draco")
-            if Version(self.version) >= "7.9.0":
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    "list (APPEND OCCT_3RDPARTY_CMAKE_LIST \"adm/cmake/draco\")",
-                    "find_package(draco REQUIRED)",
-                )
-            else:
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/draco\")",
-                    "find_package(draco REQUIRED)",
-                )
+            _replace_find_package(cmakelists, "draco", "draco")
         ## opengl
         replace_in_file(
             self,
