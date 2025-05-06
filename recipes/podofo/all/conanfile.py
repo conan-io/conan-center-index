@@ -92,7 +92,7 @@ class PodofoConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "0.10.4":  # pylint: disable=conan-condition-evals-to-constant
-            self.tool_requires("cmake/[>=3.15.7]")
+            self.tool_requires("cmake/[>=3.15.7 <4]")
 
     def validate(self):
         check_min_cppstd(self, 11)
