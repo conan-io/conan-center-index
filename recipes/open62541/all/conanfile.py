@@ -110,6 +110,8 @@ class Open62541Conan(ConanFile):
         # UA_ENABLE_STATUSCODE_DESCRIPTIONS=readable_statuscodes
         "readable_statuscodes": [True, False],
         "parsing": [True, False],
+        # UA_ENABLE_NODESETLOADER=nodeset_loader
+        "nodeset_loader": [True, False],
     }
     default_options = {
         "fPIC": True,
@@ -139,6 +141,7 @@ class Open62541Conan(ConanFile):
         "cpp_compatible": False,
         "readable_statuscodes": True,
         "parsing": False,
+        "nodeset_loader": False,
     }
 
     exports = "submoduledata.yml"
@@ -152,6 +155,13 @@ class Open62541Conan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         del self.options.embedded_profile
+
+        if Version(self.version) >= "1.3.1":
+            del self.options.embedded_profile
+
+        # NodesetLoader has only rudimentary Windows support --> disabling for now. This might change in the future.
+        if Version(self.version) < "1.4.8" or self.settings.os != "Linux": 
+            del self.options.nodeset_loader
 
     def configure(self):
         if self.options.shared:
@@ -170,6 +180,11 @@ class Open62541Conan(ConanFile):
         if self.options.web_socket:
             self.options["libwebsockets"].with_ssl = self.options.encryption
 
+        if self.options.nodeset_loader:
+            self.options["libxml2"].iconv = False
+            self.options["libxml2"].shared = False
+            self.options["libxml2"].with_subunit = False
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -182,6 +197,8 @@ class Open62541Conan(ConanFile):
             self.requires("libwebsockets/4.3.2")
         if self.options.discovery == "With Multicast" or "multicast" in str(self.options.discovery):
             self.requires("pro-mdnsd/0.8.4")
+        if self.options.nodeset_loader:
+            self.requires("libxml2/2.13.4")
 
     def validate(self):
         if not self.options.subscription:
@@ -230,7 +247,8 @@ class Open62541Conan(ConanFile):
                     destination=path,
                     filename=archive_name,
                     strip_root=True)
-
+        self._patch_sources()
+        
     def _get_log_level(self):
         return {
             "Fatal": "600",
@@ -329,6 +347,8 @@ class Open62541Conan(ConanFile):
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
+        if Version(self.version) >= "1.4.8":
+            tc.variables["UA_ENABLE_NODESETLOADER"]=self.options.nodeset_loader
         tc.generate()
         tc = CMakeDeps(self)
         tc.set_property("mbedtls", "cmake_additional_variables_prefixes", ["MBEDTLS"])
@@ -336,10 +356,10 @@ class Open62541Conan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        rm(self, "FindPython3.cmake", os.path.join(self.source_folder, "tools", "cmake"))
+        if Version(self.version) >= "1.3.1" and Version(self.version) <="1.4.7":
+            rm(self, "FindPython3.cmake", os.path.join(self.source_folder, "tools", "cmake"))
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

@@ -34,6 +34,9 @@ patches:
     - patch_file: "patches/1.4.11.1-0001-use-external-mdnsd.patch"
       patch_description: "Consume mdnsd as external dependency provided by Conan"
       patch_type: "conan"
+    - patch_file: "patches/0005-use-external-libxml2.patch"
+      patch_description: "Consume libxml2 as external dependency provided by Conan"
+      patch_type: "conan"
   "1.4.6":
     - patch_file: "patches/0001-disable-sanitizers-1_4_x.patch"
       patch_description: "Disable static code analysis"
