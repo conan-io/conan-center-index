@@ -1,7 +1,7 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.files import get, replace_in_file, copy
+from conan.tools.files import get, replace_in_file, copy, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
@@ -339,6 +339,9 @@ class SDLConan(ConanFile):
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+
 
     @property
     def _is_clang_cl(self):
