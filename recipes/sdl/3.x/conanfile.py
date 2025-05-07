@@ -227,7 +227,7 @@ class SDLConan(ConanFile):
         if self.options.get_safe("pulseaudio"):
             self.requires("pulseaudio/17.0")
         if self.options.get_safe("alsa"):
-            self.requires("libalsa/1.2.12")
+            self.requires("libalsa/[>=1.2 <1.3]")
         if self.options.get_safe("sndio"):
             self.requires("libsndio/1.9.0")
         if self.options.get_safe("wayland"):
