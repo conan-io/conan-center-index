@@ -81,8 +81,10 @@ TAO is a C++ implementation of the OMG's CORBA standard.
             self.requires("zlib/[>=1.2 <2]")
 
     def _has_perl(self) -> bool:
-        result = subprocess.run(["which", "perl"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
-        return result.returncode == 0
+        if self.settings.os == "Linux":
+            result = subprocess.run(["which", "perl"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+            return result.returncode == 0
+        return True
 
     def validate_build(self):
         if not self._has_perl():
@@ -101,24 +103,36 @@ TAO is a C++ implementation of the OMG's CORBA standard.
                 if Version(self.settings.compiler.version) < Version("4.8"):
                     raise ConanInvalidConfiguration(f"{self} requires GCC >= 4.8.")
 
-        if self.settings.os not in ["Linux"]:
+        if self.settings.os not in ["Linux", "Windows"]:
             raise ConanInvalidConfiguration(f"{self} is not supported on {self.settings.os}.")
 
     def build_requirements(self):
-        pass
+        if self.settings.os == "Windows":
+            self.tool_requires("strawberryperl/5.32.1.1")
+            self.tool_requires("make/4.4.1")
 
+    @property
+    def _ace_root(self):
+        return self.source_folder
+    
+    @property
+    def _tao_root(self):
+        return os.path.join(self._ace_root, "TAO")
 
     def generate(self):
         ace_platforms = {
             "Linux": "linux",
+            "Windows": "windows",
+        }
+        ace_gnu_platforms = {
+            "Linux": "linux",
+            "Windows": "win32_msvc",
         }
 
         env = Environment()
         
-        ace_root = self.source_folder
-        tao_root = os.path.join(ace_root, "TAO")
-        env.define("ACE_ROOT", ace_root)
-        env.define("TAO_ROOT", tao_root)
+        env.define("ACE_ROOT", self._ace_root)
+        env.define("TAO_ROOT", self._tao_root)
         env.define("INSTALL_PREFIX", self.package_folder)
 
         if self.options.with_openssl:
@@ -137,11 +151,12 @@ TAO is a C++ implementation of the OMG's CORBA standard.
 
         # Create a config file
         ace_platform = ace_platforms[str(self.settings.os)]
-        config_path = os.path.join(ace_root, "ace", "config.h")
+        ace_gnu_platform = ace_gnu_platforms[str(self.settings.os)]
+        config_path = os.path.join(self._ace_root, "ace", "config.h")
         save(self, config_path, f"#include \"ace/config-{ace_platform}.h\"\n")
 
         # Create the makefile parameters
-        build_conf_path = os.path.join(ace_root, "include", "makeinclude" , "platform_macros.GNU")
+        build_conf_path = os.path.join(self._ace_root, "include", "makeinclude" , "platform_macros.GNU")
         # see wrapper_macros.GNU for all options
 
         build_config = ( f"shared_lib={_BOOL_STR[bool(self.options.shared)]}\n"
@@ -153,7 +168,7 @@ TAO is a C++ implementation of the OMG's CORBA standard.
                         f"probe={_BOOL_STR[bool(self.options.with_probe)]}\n"
                         f"profile={_BOOL_STR[bool(self.options.with_profile)]}\n"
                         f"ssl={_BOOL_STR[bool(self.options.with_openssl)]}\n"
-                        f"include $(ACE_ROOT)/include/makeinclude/platform_{ace_platform}.GNU\n" )
+                        f"include $(ACE_ROOT)/include/makeinclude/platform_{ace_gnu_platform}.GNU\n" )
         
 
         self.output.info(f"{build_conf_path} will be: {build_config}")
@@ -164,20 +179,20 @@ TAO is a C++ implementation of the OMG's CORBA standard.
     def build(self):     
         
         self.output.highlight("Building makefiles")
-        self.run("perl $ACE_ROOT/bin/mwc.pl "
-                 "TAO/TAO_ACE.mwc -type gnuace "
+        self.run(f"perl {os.path.join(self._ace_root, "bin", "mwc.pl")} "
+                 f"{os.path.join("TAO","TAO_ACE.mwc")} -type gnuace "
                  f"-features zlib={_BOOL_STR[bool(self.options.with_zlib)]},"
                  f"ssl={_BOOL_STR[bool(self.options.with_openssl)]},"
                  f"ace_for_tao={_BOOL_STR[bool(self.options.with_ace_for_tao)]} "
                  f"-workers {os.cpu_count()}"
                  + (" -static" if not self.options.shared else ""),
                  cwd = self.source_folder,
-                 env=["my_env_file"])
+                 )
 
         self.output.highlight("Making ACE")
-        self.run(f"make -j {os.cpu_count()}", cwd=self.source_folder, env=["my_env_file"])
+        self.run(f"gnumake -j {os.cpu_count()}", cwd=self.source_folder, scope="build" )
         self.output.highlight("Making TAO")
-        self.run(f"make -j {os.cpu_count()}", cwd=os.path.join(self.source_folder, "TAO"), env=["my_env_file"])
+        self.run(f"gnumake -j {os.cpu_count()}", cwd=os.path.join(self.source_folder, "TAO"))
 
 
     def package(self):
