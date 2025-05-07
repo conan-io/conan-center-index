@@ -50,7 +50,7 @@ class PodofoConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if Version(self.version) < "0.10.4":  # pylint: disable=conan-condition-evals-to-constant
+        if Version(self.version) < "0.10.4":
             # Not available in older versions
             del self.options.with_lib_only
 
@@ -72,7 +72,7 @@ class PodofoConan(ConanFile):
     def requirements(self):
         self.requires("freetype/2.13.2")
         self.requires("zlib/[>=1.2.11 <2]")
-        if Version(self.version) >= "0.10.4":  # pylint: disable=conan-condition-evals-to-constant
+        if Version(self.version) >= "0.10.4":
             self.requires("libxml2/[>2 <3]")
         if self.settings.os != "Windows":
             self.requires("fontconfig/2.15.0")
@@ -90,7 +90,7 @@ class PodofoConan(ConanFile):
             self.requires("libunistring/0.9.10")
 
     def build_requirements(self):
-        if Version(self.version) >= "0.10.4":  # pylint: disable=conan-condition-evals-to-constant
+        if Version(self.version) >= "0.10.4":
             self.tool_requires("cmake/[>=3.15.7 <4]")
 
     def validate(self):
@@ -99,7 +99,7 @@ class PodofoConan(ConanFile):
         else:
             check_min_cppstd(self, 17)
             
-        if Version(self.version) >= "0.10.4":  # pylint: disable=conan-condition-evals-to-constant
+        if Version(self.version) >= "0.10.4":
             if not self.options.with_openssl:
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires option 'with_openssl' to be set to True.",
@@ -116,7 +116,7 @@ class PodofoConan(ConanFile):
         tc.variables["PODOFO_BUILD_TOOLS"] = self.options.with_tools
         if self.options.with_lib_only is not None:
             tc.variables["PODOFO_BUILD_LIB_ONLY"] = self.options.with_lib_only
-        if podofo_version < "0.10.0":  # pylint: disable=conan-condition-evals-to-constant
+        if podofo_version < "0.10.0":
             tc.variables["PODOFO_BUILD_SHARED"] = self.options.shared
         tc.variables["PODOFO_BUILD_STATIC"] = not self.options.shared
         if not self.options.threadsafe:
@@ -138,7 +138,7 @@ class PodofoConan(ConanFile):
             if self.options.with_openssl and ("no_rc4" in self.dependencies["openssl"].options):
                 tc.variables["PODOFO_HAVE_OPENSSL_NO_RC4"] = self.dependencies["openssl"].options.no_rc4
 
-        if podofo_version < "0.10.0": # pylint: disable=conan-condition-evals-to-constant
+        if podofo_version < "0.10.0"
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
 
         tc.generate()
