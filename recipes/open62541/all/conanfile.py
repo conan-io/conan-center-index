@@ -198,7 +198,7 @@ class Open62541Conan(ConanFile):
         if self.options.discovery == "With Multicast" or "multicast" in str(self.options.discovery):
             self.requires("pro-mdnsd/0.8.4")
         if self.options.nodeset_loader:
-            self.requires("libxml2/2.13.4")
+            self.requires("libxml2/[>=2.12.5 <3]")
 
     def validate(self):
         if not self.options.subscription:
