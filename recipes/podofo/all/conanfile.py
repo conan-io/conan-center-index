@@ -114,7 +114,7 @@ class PodofoConan(ConanFile):
 
         tc = CMakeToolchain(self)
         tc.variables["PODOFO_BUILD_TOOLS"] = self.options.with_tools
-        if self.options.with_lib_only is not None:
+        if self.options.get_safe("with_lib_only") is not None:
             tc.variables["PODOFO_BUILD_LIB_ONLY"] = self.options.with_lib_only
         if podofo_version < "0.10.0":
             tc.variables["PODOFO_BUILD_SHARED"] = self.options.shared
