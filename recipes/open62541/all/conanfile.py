@@ -293,6 +293,9 @@ class Open62541Conan(ConanFile):
         tc.variables["UA_LOGLEVEL"] = self._get_log_level()
         tc.variables["UA_ENABLE_SUBSCRIPTIONS"] = self.options.subscription != False
 
+        if version >= "1.4.11.1":        
+            tc.variables["UA_ENABLE_DEBUG_SANITIZER"] = False
+
         if self.options.subscription != False:
             if "events" in str(self.options.subscription):
                 tc.variables["UA_ENABLE_SUBSCRIPTIONS_EVENTS"] = True
