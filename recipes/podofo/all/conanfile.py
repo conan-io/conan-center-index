@@ -138,7 +138,6 @@ class PodofoConan(ConanFile):
             if self.options.with_openssl and ("no_rc4" in self.dependencies["openssl"].options):
                 tc.variables["PODOFO_HAVE_OPENSSL_NO_RC4"] = self.dependencies["openssl"].options.no_rc4
 
-        if podofo_version < "0.10.0"
         if podofo_version < "0.10.0":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
 
