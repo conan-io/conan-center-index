@@ -190,19 +190,11 @@ class OpenCascadeConan(ConanFile):
     def _patch_sources(self):
         def _replace_find_package(cmakelists, file, package_name):
             if Version(self.version) >= "7.9.0":
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    f"list (APPEND OCCT_3RDPARTY_CMAKE_LIST \"adm/cmake/{file}\")",
-                    f"find_package({package_name} REQUIRED)"
-                )
+                pattern = f"list (APPEND OCCT_3RDPARTY_CMAKE_LIST \"adm/cmake/{file}\")"
             else:
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    f"OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/{file}\")",
-                    f"find_package({package_name} REQUIRED)",
-                )
+                pattern = f"OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/{file}\")"
+
+            replace_in_file(self, cmakelists, pattern, f"find_package({package_name} REQUIRED)")
 
         apply_conandata_patches(self)
 
