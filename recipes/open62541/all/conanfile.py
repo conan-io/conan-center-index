@@ -281,6 +281,9 @@ class Open62541Conan(ConanFile):
         if self.settings.os == "Neutrino":
             tc.cache_variables["UA_ARCHITECTURE"] = "posix"
 
+        if version >= "1.4.11.1":        
+            tc.variables["UA_ENABLE_DEBUG_SANITIZER"] = False
+
         if self.options.subscription != False:
             if "events" in str(self.options.subscription):
                 tc.variables["UA_ENABLE_SUBSCRIPTIONS_EVENTS"] = True
