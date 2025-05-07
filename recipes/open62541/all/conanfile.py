@@ -180,7 +180,7 @@ class Open62541Conan(ConanFile):
         if self.options.web_socket:
             self.options["libwebsockets"].with_ssl = self.options.encryption
 
-        if self.options.nodeset_loader:
+        if self.options.get_safe("nodeset_loader"):
             self.options["libxml2"].iconv = False
             self.options["libxml2"].shared = False
             self.options["libxml2"].with_subunit = False
@@ -197,7 +197,7 @@ class Open62541Conan(ConanFile):
             self.requires("libwebsockets/4.3.2")
         if self.options.discovery == "With Multicast" or "multicast" in str(self.options.discovery):
             self.requires("pro-mdnsd/0.8.4")
-        if self.options.nodeset_loader:
+        if self.options.get_safe("nodeset_loader"):
             self.requires("libxml2/[>=2.12.5 <3]")
 
     def validate(self):
@@ -348,7 +348,7 @@ class Open62541Conan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
         if Version(self.version) >= "1.4.8":
-            tc.variables["UA_ENABLE_NODESETLOADER"]=self.options.nodeset_loader
+            tc.variables["UA_ENABLE_NODESETLOADER"] = self.options.get_safe("nodeset_loader")
         tc.generate()
         tc = CMakeDeps(self)
         tc.set_property("mbedtls", "cmake_additional_variables_prefixes", ["MBEDTLS"])
