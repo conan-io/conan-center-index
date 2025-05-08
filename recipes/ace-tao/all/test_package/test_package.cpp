@@ -7,7 +7,8 @@
 
 #include "tao/Version.h"
 
-int main(void)
+/* see https://comp.soft-sys.ace.narkive.com/J3xRPy8I/ace-link-error */
+int main(int argc, char *argv[])
 {
 
 #ifndef ACE_LACKS_ACE_TOKEN

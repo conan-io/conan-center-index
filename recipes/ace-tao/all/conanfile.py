@@ -76,9 +76,7 @@ TAO is a C++ implementation of the OMG's CORBA standard.
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def configure(self):
-        self.output.info(f"ACE/TAO Require C++17 standard")
-        self.settings.compiler.cppstd = 17
-
+        pass
 
     def layout(self):
         basic_layout(self, src_folder="ACE_wrappers")
@@ -224,7 +222,7 @@ TAO is a C++ implementation of the OMG's CORBA standard.
             + f"-features zlib={_BOOL_STR[bool(self.options.with_zlib)]},"
             + f"ssl={_BOOL_STR[bool(self.options.with_openssl)]},"
             + f"ace_for_tao={_BOOL_STR[bool(self.options.with_ace_for_tao)]} "
-            + f"-workers {os.cpu_count()}"
+            + f"-workers {os.cpu_count()} "
             + (" -static " if not self.options.shared else "")
         )
 
@@ -315,10 +313,13 @@ TAO is a C++ implementation of the OMG's CORBA standard.
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
         self.output.info(f"libs: {self.cpp_info.libs}")
+        
+        self.cpp_info.defines.append("ACE_HAS_CPP17")
 
         if self.options.with_ace_for_tao:
             self.cpp_info.defines.append("ACE_LACKS_ACE_TOKEN")
 
+            
         if not self.options.shared:
             self.cpp_info.defines.append("ACE_AS_STATIC_LIBS")
             self.cpp_info.defines.append("TAO_AS_STATIC_LIBS")
@@ -326,3 +327,10 @@ TAO is a C++ implementation of the OMG's CORBA standard.
         if self.options.with_threads:
             threads_lib = "Iphlpapi" if self.settings.os == "Windows" else "pthread"
             self.cpp_info.system_libs.extend([threads_lib])
+
+        if self.settings.os == "Windows":
+            # So consumer can find the DLLs
+            bin_path = os.path.join(self.package_folder, "bin")
+            lib_path = os.path.join(self.package_folder, "lib")
+            self.runenv_info.prepend_path("PATH", bin_path)
+            self.runenv_info.prepend_path("PATH", lib_path)
