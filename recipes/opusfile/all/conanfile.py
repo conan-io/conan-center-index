@@ -8,7 +8,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, MSBuild, MSBuildDeps, MSBuildToolchain
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.4.0"
 
 
 class OpusFileConan(ConanFile):
@@ -136,7 +136,8 @@ class OpusFileConan(ConanFile):
             msbuild.build(os.path.join(sln_folder, "opusfile.sln"), targets=["opusfile"])
         else:
             if self.settings.os == "Android":
-                replace_in_file(self, os.path.join(self.source_folder, "configure.ac"), "c89", "c99")
+                cstd = self.settings.get_safe("compiler.cstd", default="99")
+                replace_in_file(self, os.path.join(self.source_folder, "configure.ac"), "c89", f"c{cstd}")
 
             autotools = Autotools(self)
             autotools.autoreconf()
