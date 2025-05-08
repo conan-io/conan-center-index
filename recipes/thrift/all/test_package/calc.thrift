@@ -1,5 +1,3 @@
-include "shared.thrift"
-
 namespace cpp tutorial
 namespace d tutorial
 namespace java tutorial
@@ -44,7 +42,7 @@ struct Work {
  * Structs can also be exceptions, if they are nasty.
  */
 exception InvalidOperation {
-  1: i32 what,
+  1: i32 whatError,
   2: string why
 }
 
@@ -52,7 +50,7 @@ exception InvalidOperation {
  * Ahh, now onto the cool part, defining a service. Services just need a name
  * and can optionally inherit from another service using the extends keyword.
  */
-service Calculator extends shared.SharedService {
+service Calculator {
 
   /**
    * A method definition looks like C code. It has a return type, arguments,
