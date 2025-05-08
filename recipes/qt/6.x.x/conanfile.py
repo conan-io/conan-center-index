@@ -977,6 +977,10 @@ class QtConan(ConanFile):
                 )""")
             save(self, os.path.join(self.package_folder, self._cmake_entry_point_file), contents)
 
+        # https://github.com/qt/qtbase/blob/6.7.3/cmake/QtPlatformTargetHelpers.cmake#L68
+        # https://github.com/qt/qtbase/blob/6.7.3/cmake/QtPlatformTargetHelpers.cmake#L71
+        # https://github.com/qt/qtbase/blob/6.7.3/cmake/QtFlagHandlingHelpers.cmake#L384
+        # https://github.com/qt/qtbase/blob/6.7.3/cmake/QtFlagHandlingHelpers.cmake#L402
         if self.settings.os == "Windows" or is_msvc(self):
             contents = textwrap.dedent("""\
                 set(utf8_flags "")
