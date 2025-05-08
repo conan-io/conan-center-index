@@ -18,6 +18,7 @@ class XtlConan(ConanFile):
     description = "The x template library"
     topics = ("templates", "containers", "algorithms")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "header-library"
     no_copy_source = True
 
     @property
@@ -26,42 +27,12 @@ class XtlConan(ConanFile):
             return "14"
         return "17"
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "14": {
-                "clang": "3.9",
-                "gcc": "6",
-                "Visual Studio": "15",
-                "msvc": "191",
-            },
-            # https://en.cppreference.com/w/cpp/compiler_support/17
-            "17": {
-                "clang": "4",
-                "gcc": "7",
-                "Visual Studio": "15",
-                "msvc": "191",
-            },
-        }.get(self._min_cppstd, {})
-
     def package_id(self):
         self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-
-        def loose_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration(
-                f"{self.name} {self.version} requires C++{self._min_cppstd}, which your compiler does not support.",
-            )
 
     def layout(self):
         basic_layout(self, src_folder="src")
