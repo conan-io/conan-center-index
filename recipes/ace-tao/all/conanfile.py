@@ -159,11 +159,12 @@ TAO is a C++ implementation of the OMG's CORBA standard.
         build_conf_path = os.path.join(self._ace_root, "include", "makeinclude" , "platform_macros.GNU")
         # see wrapper_macros.GNU for all options
 
+        debug = bool(self.options.debug) or ( self.settings.build_type == "Debug" )
         build_config = ( f"shared_lib={_BOOL_STR[bool(self.options.shared)]}\n"
                         f"ace_for_tao={_BOOL_STR[bool(self.options.with_ace_for_tao)]}\n"
                         f"static_libs={_BOOL_STR[not bool(self.options.shared)]}\n"
                         f"threads={_BOOL_STR[bool(self.options.with_threads)]}\n"
-                        f"debug={_BOOL_STR[bool(self.options.debug) or self.settings.build_type == "Debug"]}\n"
+                        f"debug={_BOOL_STR[debug]}\n"
                         f"optimize={_BOOL_STR[bool(self.options.with_optimize)]}\n"
                         f"probe={_BOOL_STR[bool(self.options.with_probe)]}\n"
                         f"profile={_BOOL_STR[bool(self.options.with_profile)]}\n"
@@ -178,9 +179,12 @@ TAO is a C++ implementation of the OMG's CORBA standard.
 
     def build(self):     
         
+        mcw_path = os.path.join(self._ace_root, "bin", "mwc.pl")
+        tao_mwc_path = os.path.join("TAO","TAO_ACE.mwc")
+
         self.output.highlight("Building makefiles")
-        self.run(f"perl {os.path.join(self._ace_root, "bin", "mwc.pl")} "
-                 f"{os.path.join("TAO","TAO_ACE.mwc")} -type gnuace "
+        self.run(f"perl {mcw_path} "
+                 f"{tao_mwc_path} -type gnuace "
                  f"-features zlib={_BOOL_STR[bool(self.options.with_zlib)]},"
                  f"ssl={_BOOL_STR[bool(self.options.with_openssl)]},"
                  f"ace_for_tao={_BOOL_STR[bool(self.options.with_ace_for_tao)]} "
