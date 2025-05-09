@@ -3,24 +3,24 @@ sources:
     mcf:
       seh:
         ucrt:
-          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev0/x86_64-14.2.0-release-mcf-seh-ucrt-rt_v12-rev0.7z"
-          sha256: "80fa0d1dd58c9eed4ca9d21f6e5a83e3262978aed0a2b4994296a0ee5809503e"
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev1/x86_64-14.2.0-release-mcf-seh-ucrt-rt_v12-rev1.7z"
+          sha256: "638D81B6E5B3FC6C5CF0B56FA902F492A1765219E485A3C80477E9D76E4F964D"
     posix:
       seh:
         ucrt:
-          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev0/x86_64-14.2.0-release-posix-seh-ucrt-rt_v12-rev0.7z"
-          sha256: "0f1afc3b48f66dda68fbfb7b8b0f1d22b831396fbe1e3dea776745f32d930b24"
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev1/x86_64-14.2.0-release-posix-seh-ucrt-rt_v12-rev1.7z"
+          sha256: "9FA5768BA0E628203C4631D447CE533335CDD1FD9C318D84C774E729EFA4EDAD"
         msvcrt:
-          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev0/x86_64-14.2.0-release-posix-seh-msvcrt-rt_v12-rev0.7z"
-          sha256: "8afdb7e16253e3d235ea933cb40b2c14d0c9ba334aa668ab9e2eada472a0caef"
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev1/x86_64-14.2.0-release-posix-seh-msvcrt-rt_v12-rev1.7z"
+          sha256: "055291A5BDEC4D4D9B9541605EAFB5131025841D156C7BA09D3C2D2BC3F926EE"
     win32:
       seh:
         ucrt:
-          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev0/x86_64-14.2.0-release-win32-seh-ucrt-rt_v12-rev0.7z"
-          sha256: "d7270f76483aefe0c88f45284b374e27648dec59fb6f89ee2f5cb62f6a060082"
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev1/x86_64-14.2.0-release-win32-seh-ucrt-rt_v12-rev1.7z"
+          sha256: "9BB1001DB11A54E69455A3470146D54C835E7116C3E611E137889F538C480F31"
         msvcrt:
-          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev0/x86_64-14.2.0-release-win32-seh-msvcrt-rt_v12-rev0.7z"
-          sha256: "32bf3d1337c89f1f0326b42f49fea96fc7eb115af29b765a69bc69be546fd2a1"
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev1/x86_64-14.2.0-release-win32-seh-msvcrt-rt_v12-rev1.7z"
+          sha256: "0FD2AF05633F8372A495E8C9555CDD7C296F1BC774E704BE8E0DC613CAED30BB"
   "13.2.0":
     mcf:
       seh:
