@@ -7,6 +7,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 
 import os
+import shutil
 
 required_conan_version = ">=2"
 
@@ -337,6 +338,12 @@ class SDLConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        if self.settings.os == "Android":
+            # too much hassle via mkdir+copy due to amount of subdirectories
+            shutil.copytree(
+                os.path.join(self.source_folder, "android-project", "app", "src", "main", "java"),
+                os.path.join(self.package_folder, "src-java"))
+
         cmake = CMake(self)
         cmake.install()
 
