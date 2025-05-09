@@ -99,14 +99,14 @@ class GladConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         if "gl_profile" in self.options:
-            tc.cache_variables["GLAD_PROFILE"] = self.options.gl_profile
-        tc.cache_variables["GLAD_API"] = self._get_api()
-        tc.cache_variables["GLAD_EXTENSIONS"] = self.options.extensions
-        tc.cache_variables["GLAD_SPEC"] = self.options.spec
-        tc.cache_variables["GLAD_NO_LOADER"] = self.options.no_loader
-        tc.cache_variables["GLAD_GENERATOR"] = "c" if self.settings.build_type == "Release" else "c-debug"
-        tc.cache_variables["GLAD_EXPORT"] = True
-        tc.cache_variables["GLAD_INSTALL"] = True
+            tc.variables["GLAD_PROFILE"] = self.options.gl_profile
+        tc.variables["GLAD_API"] = self._get_api()
+        tc.variables["GLAD_EXTENSIONS"] = self.options.extensions
+        tc.variables["GLAD_SPEC"] = self.options.spec
+        tc.variables["GLAD_NO_LOADER"] = self.options.no_loader
+        tc.variables["GLAD_GENERATOR"] = "c" if self.settings.build_type == "Release" else "c-debug"
+        tc.variables["GLAD_EXPORT"] = True
+        tc.variables["GLAD_INSTALL"] = True
         tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
