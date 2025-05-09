@@ -259,6 +259,14 @@ class ArrowConan(ConanFile):
         if self.options.parquet and not self.options.with_thrift:
             raise ConanInvalidConfiguration("arrow:parquet requires arrow:with_thrift")
 
+        if self.options.with_orc and (
+            not self.options.with_zstd
+            or not self.options.with_snappy
+            or not self.options.with_zlib
+            or not self.options.with_lz4
+        ):
+            raise ConanInvalidConfiguration("arrow:with_orc requires arrow:with_zstd, arrow:with_snappy, arrow:with_zlib and arrow:with_lz4")
+
     def build_requirements(self):
         if Version(self.version) >= "13.0.0":
             self.tool_requires("cmake/[>=3.16 <4]")
@@ -346,6 +354,7 @@ class ArrowConan(ConanFile):
         if self.options.with_zstd:
             tc.variables["ARROW_ZSTD_USE_SHARED"] = bool(self.dependencies["zstd"].options.shared)
         tc.variables["ORC_SOURCE"] = "SYSTEM"
+        tc.variables["ARROW_ORC"] = bool(self.options.with_orc)
         tc.variables["ARROW_WITH_THRIFT"] = bool(self.options.with_thrift)
         tc.variables["ARROW_THRIFT"] = bool(self.options.with_thrift)
         tc.variables["Thrift_SOURCE"] = "SYSTEM"
