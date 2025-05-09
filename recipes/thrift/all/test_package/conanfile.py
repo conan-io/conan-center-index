@@ -12,6 +12,10 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
+    def build_requirements(self):
+        # Add thrift as a tool so that cmake can call the thrift compiler
+        self.tool_requires("thrift/<host_version>")
+
     def requirements(self):
         self.requires(self.tested_reference_str, run=can_run(self))
 
