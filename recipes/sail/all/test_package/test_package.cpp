@@ -7,10 +7,11 @@ int main(int argc, char *argv[])
     const char* filename = "my-binary.bmp";
     try {
         const sail::image image(filename);
-        std::cout << "Size: " << image.width() << std::endl; // Never reached
+        std::cout << "Size: " << image.width() << '\n'; // Never reached
     } catch (const std::exception& e) {
-        std::cerr << "Error - file not found generate: " << e.what() << std::endl;
+        std::cout << "Tried to open " << filename << " with sail library\n";
     }
+    std::cout << "TEST SUCCEED\n";
 
     return 0;
 }
