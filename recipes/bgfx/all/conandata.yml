@@ -1,4 +1,11 @@
 sources:
-  "cci.20230216":
-    url: "https://github.com/bkaradzic/bgfx/archive/9d5b980f5c060e54cc30dec18500a5b54db00405.tar.gz"
-    sha256: "291739720E369C5C2422273D887AEC590084B29E5C9DC5C9441F5A68869B6736"
+  "1.129.8878":
+    "bgfx":
+      url: "https://github.com/bkaradzic/bgfx/archive/ee8664e068bee23c144dcb2bd323dab5321e035a.tar.gz"
+      sha256: "433CEAB2F6AA35CDB3DD647B6A30429401CBBC982ABA20AADC7CD204A5F76A71"
+    "bimg":
+      url: "https://github.com/bkaradzic/bimg/archive/c5c7b6e1874cf60caa18b643391f5122f89a4ca8.tar.gz"
+      sha256: "3D282061AB57FA779079E00E779600D364B7DC3E84B855AFDB48C9C84B61EDCE"
+    "bx":
+      url: "https://github.com/bkaradzic/bx/archive/8e9a9983574171b80ae96150f32a3eef2093bb39.tar.gz"
+      sha256: "709A0FE99AEDFA9B723B83FE6E74CE2685F6134DE05E45B0539546C24F799000"
