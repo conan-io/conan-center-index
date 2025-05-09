@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.env import Environment
-from conan.tools.files import get,copy, rmdir, save, collect_libs
+from conan.tools.files import get, copy, rmdir, save, collect_libs
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, msvs_toolset, is_msvc_static_runtime
 from conan.internal.model.cpp_info import CppInfo
@@ -267,30 +267,39 @@ TAO is a C++ implementation of the OMG's CORBA standard.
             )
 
     def package(self):
-        self.output.highlight("Packaging")
-
-        
         if self.settings.os == "Windows":
 
             def mycopy(pattern, d):
-                copy(self, pattern, src=self.source_folder, dst=os.path.join(self.package_folder, d) )
+                copy(
+                    self,
+                    pattern,
+                    src=self.source_folder,
+                    dst=os.path.join(self.package_folder, d),
+                )
 
-            self.output.info("Copying stuff manually, as there is no make install on Windows")
+            self.output.info(
+                "Copying files manually, as there is no make install on Windows"
+            )
             mycopy("bin/*.exe", "")
             mycopy("bin/*.pdb", "")
             mycopy("lib/*.dll", "")
             mycopy("lib/*.lib", "")
             mycopy("lib/*.pdb", "")
             for ext in ["*.h", "*.cpp", "*.inl", "*.idl", "*.pidl"]:
-                def mycopy(pattern, src, dst):
-                    copy(self, pattern, src=os.path.join(self._ace_root,src), dst=os.path.join(self.package_folder, dst))
-                
-                mycopy(ext, "ace", "include/ace")
-                mycopy( ext, "ACEXML", "include/ACEXML")
-                mycopy( ext,"Kokyu", "include/Kokyu")
-                mycopy( ext, "TAO/orbsvcs/orbsvcs", "include/orbsvcs")
-                mycopy( ext, "TAO/tao", "include/tao")
 
+                def mycopy(pattern, src, dst):
+                    copy(
+                        self,
+                        pattern,
+                        src=os.path.join(self._ace_root, src),
+                        dst=os.path.join(self.package_folder, dst),
+                    )
+
+                mycopy(ext, "ace", "include/ace")
+                mycopy(ext, "ACEXML", "include/ACEXML")
+                mycopy(ext, "Kokyu", "include/Kokyu")
+                mycopy(ext, "TAO/orbsvcs/orbsvcs", "include/orbsvcs")
+                mycopy(ext, "TAO/tao", "include/tao")
 
         if self.settings.os == "Linux":
             self.run(
@@ -309,17 +318,16 @@ TAO is a C++ implementation of the OMG's CORBA standard.
         rmdir(self, os.path.join(self.package_folder, "include", "ACEXML", "tests"))
         rmdir(self, os.path.join(self.package_folder, "include", "Kokyu", "tests"))
 
-
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
         self.output.info(f"libs: {self.cpp_info.libs}")
-        
+
+        # In case you consume ace headers
         self.cpp_info.defines.append("ACE_HAS_CPP17")
 
         if self.options.with_ace_for_tao:
             self.cpp_info.defines.append("ACE_LACKS_ACE_TOKEN")
 
-            
         if not self.options.shared:
             self.cpp_info.defines.append("ACE_AS_STATIC_LIBS")
             self.cpp_info.defines.append("TAO_AS_STATIC_LIBS")
@@ -330,7 +338,5 @@ TAO is a C++ implementation of the OMG's CORBA standard.
 
         if self.settings.os == "Windows":
             # So consumer can find the DLLs
-            bin_path = os.path.join(self.package_folder, "bin")
             lib_path = os.path.join(self.package_folder, "lib")
-            self.runenv_info.prepend_path("PATH", bin_path)
             self.runenv_info.prepend_path("PATH", lib_path)
