@@ -1,0 +1,9 @@
+sources:
+  "8.0.2":
+    url:
+    - "https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-8_0_2/ACE+TAO-src-8.0.2.tar.gz"
+    sha256: "1641c76a4a58293b36e35b85f70c17e42e8a2b1aa4848647421b659bf71220b6"
+  "7.1.4":
+    url:
+    - "https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-7_1_4/ACE+TAO-src-7.1.4.tar.gz"
+    sha256: "07a40ba84b96b3a3c4ea68c78a60647989872cf79e430ce42e269d368d99eb38"
