@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.24)
 project(test_package LANGUAGES CXX)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
