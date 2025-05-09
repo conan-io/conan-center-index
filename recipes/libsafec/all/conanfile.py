@@ -65,7 +65,7 @@ class LibSafeCConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if is_apple_os(self) and self.settings.arch == "armv8":
+        if Version(self.version) < "3.9.1" and is_apple_os(self) and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration(
                 f"This platform is not yet supported by {self.ref} (os=Macos arch=armv8)"
             )
@@ -90,7 +90,13 @@ class LibSafeCConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+
+        # Apple Silicon
+        is_apple_silicon = is_apple_os(self) and self.settings.arch == "armv8"
+
         tc = AutotoolsToolchain(self)
+        tc_env = tc.environment()
+
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args += [
             f"--enable-debug={yes_no(self.settings.build_type == 'Debug')}",
@@ -99,7 +105,17 @@ class LibSafeCConan(ConanFile):
             f"--enable-strmax={self.options.strmax}",
             f"--enable-memmax={self.options.memmax}",
         ]
-        tc.generate()
+
+        if is_apple_silicon:
+            tc.configure_args += [
+                "--disable-hardening",
+            ]
+            # create a universal binary
+            tc_env.define("CC", "clang -arch arm64 -arch x86_64")
+            tc_env.define("CXX", "clang -arch arm64 -arch x86_64")
+            tc_env.define("CPP", "clang -E")
+            tc_env.define("CXXCPP", "clang -E")
+        tc.generate(tc_env)
 
     def build(self):
         with chdir(self, self.source_folder):
