@@ -2,11 +2,10 @@ import os
 import yaml
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, valid_min_cppstd, check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
@@ -66,7 +65,10 @@ class GrpcConan(ConanFile):
 
     @property
     def _cxxstd_required(self):
-        return 14 if Version(self.version) >= "1.47" else 11
+        if Version(self.version) >= "1.70":
+            return 17
+        else:
+            return 14
 
     @property
     def _supports_libsystemd(self):
@@ -126,6 +128,10 @@ class GrpcConan(ConanFile):
 
     def validate(self):
         check_min_vs(self, "190")
+        if self.options.get_safe("otel_plugin") and Version(self.version) >= "1.70.0":
+            # otel_plugin is a library not aw executable
+            raise ConanInvalidConfiguration("The otel_plugin option is not supported. Contributions are welcome")
+
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} shared not supported by Visual Studio")
 
@@ -242,9 +248,10 @@ class GrpcConan(ConanFile):
                             f'COMMAND ${{CMAKE_COMMAND}} -E env --modify "{variable}=path_list_prepend:{repl}" ${{_gRPC_PROTOBUF_PROTOC_EXECUTABLE}}')
 
         if self.settings.os == "Macos" and Version(self.version) >= "1.64":
+            _cxx_std_version = "17" if Version(self.version) >= "1.70" else "14"
             # See https://github.com/grpc/grpc/issues/36654#issuecomment-2228569158
-            replace_in_file(self, cmakelists, "target_compile_features(upb_textformat_lib PUBLIC cxx_std_14)",
-            """target_compile_features(upb_textformat_lib PUBLIC cxx_std_14)
+            replace_in_file(self, cmakelists, f"target_compile_features(upb_textformat_lib PUBLIC cxx_std_{_cxx_std_version})",
+            f"""target_compile_features(upb_textformat_lib PUBLIC cxx_std_{_cxx_std_version})
             target_link_options(upb_textformat_lib PRIVATE -Wl,-undefined,dynamic_lookup)
             target_link_options(upb_json_lib PRIVATE -Wl,-undefined,dynamic_lookup)
             """)
