@@ -61,6 +61,10 @@ def components_from_dotfile(dotfile):
 
     In future a [CPS](https://cps-org.github.io/cps/index.html) format could be used, or generated directly
     by the LLVM build system
+
+    CMake Graphviz output changed significantly in 3.17.0, prior to that version the dotfile cannot be relied upon
+    to correctly express inter-target dependencies
+    (See [Graphviz: Add tests, refactor and fix bug(s)](https://gitlab.kitware.com/cmake/cmake/-/merge_requests/3766))
     """
     def node_labels(dot):
         """
@@ -241,21 +245,26 @@ class LLVMCoreConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ffi:
-            self.requires("libffi/3.4.6")
+            self.requires("libffi/[>=3.4.6 <4]")
         if self.options.get_safe("with_libedit"):
-            self.requires("editline/3.1")
+            self.requires("editline/[>=3.1 <4]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_xml2:
             self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_z3:
-            self.requires("z3/4.13.0")
+            self.requires("z3/[>=4.14.1 <5]")
         if self.options.get_safe("with_zstd"):
-            self.requires("zstd/1.5.6")
+            self.requires("zstd/[>=1.5.6 <2]")
 
     def build_requirements(self):
         self.tool_requires("ninja/[>=1.10.2 <2]")
-        self.tool_requires("cmake/[>=3.20 <4]") # required by LLVM 19
+        if Version(self.version) >= 19:
+            self.tool_requires("cmake/[>=3.20 <5]")
+        else:
+            # we require at least 3.17 for correct graphviz output.
+            # Earlier LLVM versions will not build with CMake 4
+            self.tool_requires("cmake/[>=3.17 <4]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
