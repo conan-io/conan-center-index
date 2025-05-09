@@ -1,0 +1,13 @@
+sources:
+  "0.5.4":
+    url: "https://github.com/otofoto/Pole/archive/refs/tags/Release-0.5.zip"
+    sha256: "5827013dfbc7638bd4a9d6262da15498d2bc0329dc5ef3b0b11e7cb14e2ac673"
+patches:
+  "0.5.4":
+    - patch_file: "patches/0.5.4/0001-conan.patch"
+      patch_description: "Add conan support with a cmake"
+      patch_type: "conan"
+    - patch_file: "patches/0.5.4/0001-code.patch"
+      patch_description: "Add conan support with a cmake"
+      patch_type: "portability"
+      
