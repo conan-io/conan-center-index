@@ -32,17 +32,27 @@ class XtensorConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "14"
+        if Version(self.version) < "0.26.0":
+            return "14"
+        return "17"
 
     @property
     def _compilers_minimum_version(self):
-        # https://github.com/xtensor-stack/xtensor/blob/master/README.md
         return {
-            "Visual Studio": "14",
-            "msvc": "190",
-            "gcc": "4.9",
-            "clang": "4",
-        }
+            "14": {
+                "Visual Studio": "14",
+                "msvc": "190",
+                "gcc": "4.9",
+                "clang": "4",
+            },
+            # https://en.cppreference.com/w/cpp/compiler_support/17
+            "17": {
+                "Visual Studio": "15",
+                "msvc": "191",
+                "gcc": "7",
+                "clang": "4",
+            },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -51,13 +61,17 @@ class XtensorConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("xtl/0.7.5")
+        # https://github.com/xtensor-stack/xtensor?tab=readme-ov-file#dependencies
+        if Version(self.version) < "0.26.0":
+            self.requires("xtl/0.7.5")
+        else:
+            self.requires("xtl/0.8.0")
         self.requires("nlohmann_json/3.11.3")
         if self.options.xsimd:
             if Version(self.version) < "0.24.0":
                 self.requires("xsimd/7.5.0")
             else:
-                self.requires("xsimd/13.0.0")
+                self.requires("xsimd/13.2.0")
         if self.options.tbb:
             self.requires("onetbb/2021.10.0")
 
