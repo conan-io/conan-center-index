@@ -1,10 +1,11 @@
 import os
 
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, replace_in_file
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class EasyloggingppConan(ConanFile):
@@ -54,6 +55,9 @@ class EasyloggingppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def validate(self):
+        check_min_cppstd(self, 11)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -69,7 +73,7 @@ class EasyloggingppConan(ConanFile):
             defines.append("ELPP_THREAD_SAFE")
         if self.options.enable_debug_errors:
             defines.append("ELPP_DEBUG_ERRORS")
-        if self.options.enable_default_logfile:
+        if not self.options.enable_default_logfile:
             defines.append("ELPP_NO_DEFAULT_LOG_FILE")
         if self.options.disable_logs:
             defines.append("ELPP_DISABLE_LOGS")
@@ -86,7 +90,7 @@ class EasyloggingppConan(ConanFile):
         if self.options.disable_verbose_logs:
             defines.append("ELPP_DISABLE_VERBOSE_LOGS")
         if self.options.disable_trace_logs:
-            defines.append("lib_utc_datetime")
+            defines.append("ELPP_DISABLE_TRACE_LOGS")
         if self.options.lib_utc_datetime:
             defines.append("ELPP_UTC_DATETIME")
         return defines
@@ -117,3 +121,6 @@ class EasyloggingppConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["easyloggingpp"]
         self.cpp_info.defines = self._public_defines
+
+        if self.options.enable_thread_safe and self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
