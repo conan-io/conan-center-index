@@ -179,6 +179,8 @@ class wxWidgetsConan(ConanFile):
         # Fix for strcpy_s (fix upstream?)
         if is_apple_os(self):
             cmake_version = "3.0"
+            if Version(self.version) >= "3.2.7":
+                cmake_version = "3.0...3.31"
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             f'cmake_minimum_required(VERSION {cmake_version})',
                             f'cmake_minimum_required(VERSION {cmake_version})\nadd_definitions(-D__STDC_WANT_LIB_EXT1__)')
