@@ -1,9 +1,4 @@
 sources:
-  "1.8.0":
-    url: "https://github.com/facebookresearch/faiss/archive/refs/tags/v1.8.0.tar.gz"
-    sha256: "56ece0a419d62eaa11e39022fa27c8ed6d5a9b9eb7416cc5a0fdbeab07ec2f0c"
-patches:
-  "1.8.0":
-    - patch_file: "patches/1.8.0-0001-fix-c_api-installation.patch"
-      patch_description: "Add installation of faiss_c_api library"
-      patch_type: "conan"
+  "1.11.0":
+    url: "https://github.com/facebookresearch/faiss/archive/refs/tags/v1.11.0.tar.gz"
+    sha256: "c5d517da6deb6a6d74290d7145331fc7474426025e2d826fa4a6d40670f4493c"

@@ -17,8 +17,6 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if str(self.dependencies["faiss"].options.enable_gpu) == "True":
-            tc.preprocessor_definitions["WITH_GPU"] = 1
         tc.generate()
 
     def build(self):
