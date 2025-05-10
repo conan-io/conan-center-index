@@ -95,7 +95,6 @@ class LibSafeCConan(ConanFile):
         is_apple_silicon = is_apple_os(self) and self.settings.arch == "armv8"
 
         tc = AutotoolsToolchain(self)
-        tc_env = tc.environment()
 
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args += [
@@ -111,11 +110,9 @@ class LibSafeCConan(ConanFile):
                 "--disable-hardening",
             ]
             # create a universal binary
-            tc_env.define("CC", "clang -arch arm64 -arch x86_64")
-            tc_env.define("CXX", "clang -arch arm64 -arch x86_64")
-            tc_env.define("CPP", "clang -E")
-            tc_env.define("CXXCPP", "clang -E")
-        tc.generate(tc_env)
+            tc.extra_cflags.extend(["-arch", "arm64", "-arch", "x86_64"])
+            tc.extra_cxxflags.extend(["-arch", "arm64", "-arch", "x86_64"])
+        tc.generate()
 
     def build(self):
         with chdir(self, self.source_folder):
