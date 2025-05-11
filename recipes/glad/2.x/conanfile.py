@@ -20,36 +20,41 @@ class GladConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "no_loader": [True, False],
-        "extensions": ["ANY"], # A comma separated list of extensions, if missing all extensions are included
-        "debug": [True, False], # Enable the additional GLAD Debugging layer
+        "extensions": [None, "ANY"],
+        "debug_layer": [True, False],
         "multicontext": [True, False],
         "gl_profile": ["compatibility", "core"],
-        "gl_version": ["None", "1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "2.0",
+        "gl_version": [None, "1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "2.0",
                        "2.1", "3.0", "3.1", "3.2", "3.3", "4.0", "4.1", "4.2",
                        "4.3", "4.4", "4.5", "4.6"],
-        "gles1_version": ["None", "1.0"],
-        "gles2_version": ["None", "2.0", "3.0", "3.1", "3.2"],
-        "glsc2_version": ["None", "2.0"],
-        "egl_version": ["None", "1.0", "1.1", "1.2", "1.3", "1.4", "1.5"],
-        "glx_version": ["None", "1.0", "1.1", "1.2", "1.3", "1.4"],
-        "wgl_version": ["None", "1.0"]
+        "gles1_version": [None, "1.0"],
+        "gles2_version": [None, "2.0", "3.0", "3.1", "3.2"],
+        "glsc2_version": [None, "2.0"],
+        "egl_version": [None, "1.0", "1.1", "1.2", "1.3", "1.4", "1.5"],
+        "glx_version": [None, "1.0", "1.1", "1.2", "1.3", "1.4"],
+        "wgl_version": [None, "1.0"]
+    }
+
+    options_description = {
+        "extensions": "A comma separated list of extensions, if missing all extensions are included",
+        "debug_layer": "Enable the additional GLAD debug wrappers"
     }
 
     default_options = {
         "shared": False,
         "fPIC": True,
         "no_loader": False,
-        "extensions": "",
-        "debug": False,
+        "extensions": None,
+        "debug_layer": False,
         "multicontext": False,
         "gl_profile": "compatibility",
         "gl_version": "3.3",
-        "gles1_version": "None",
-        "gles2_version": "None",
-        "glsc2_version": "None",
-        "egl_version": "None",
-        "glx_version": "None",
-        "wgl_version": "None"
+        "gles1_version": None,
+        "gles2_version": None,
+        "glsc2_version": None,
+        "egl_version": None,
+        "glx_version": None,
+        "wgl_version": None
     }
 
     def export_sources(self):
@@ -58,7 +63,9 @@ class GladConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        else:
             del self.options.wgl_version
+        self.options.debug_layer = self.settings.build_type == "Debug"
 
     def configure(self):
         if self.options.shared:
@@ -70,6 +77,8 @@ class GladConan(ConanFile):
     def validate(self):
         if (self.options.gles1_version != "None" or self.options.gles2_version != "None") and self.options.egl_version == "None":
             raise ConanInvalidConfiguration(f"{self.ref} Generating an OpenGLES spec requires a valid version of EGL")
+        if self.options.debug_layer and self.options.multicontext:
+            raise ConanInvalidConfiguration("The multicontext and debug layer options are incompatible")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -90,8 +99,9 @@ class GladConan(ConanFile):
         if not self.options.no_loader:
             tc.cache_variables["GLAD_CONAN_LOADER"] = "LOADER"
 
-        if self.options.debug:
-            # This is more than just debug symbols - it wraps all gl calls in a debugging layer.
+        if self.options.debug_layer:
+            # wraps all gl calls in a debugging layer - can be used independently of the
+            # conan build type
             # See https://github.com/Dav1dde/glad/wiki/C#debugging
             tc.cache_variables["GLAD_CONAN_DEBUG"] = "DEBUG"
 
