@@ -1,7 +1,11 @@
 #include "glad/gl.h"
 
-#include <stdlib.h>
+#include <stdio.h>
 
 int main() {
-  return EXIT_SUCCESS;
+    int version = gladLoaderLoadGL();
+    printf("GL %d.%d\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
+    gladLoaderUnloadGL();
+
+    return 0;
 }
