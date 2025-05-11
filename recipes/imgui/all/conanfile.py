@@ -187,8 +187,7 @@ class ImguiConan(ConanFile):
             self.output.warning("The -docking versions of imgui are deprecated. Use -o imgui/*:docking=True instead.")
 
     def source(self):
-        # Handled in build() instead to support self.options.docking.
-        pass
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -220,11 +219,6 @@ class ImguiConan(ConanFile):
 
         deps = CMakeDeps(self)
         deps.generate()
-
-    def _source(self):
-        version = self.version.replace("-docking", "")
-        kind = "docking" if self.options.docking else "regular"
-        get(self, **self.conan_data["sources"][version][kind], destination=self.source_folder, strip_root=True)
 
     def _configure_header(self):
         defines = {}
@@ -261,16 +255,11 @@ class ImguiConan(ConanFile):
                         '#include "imconfig.h"\n\n#include "imgui_export.h"')
 
     def build(self):
-        self._source()
         self._configure_header()
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
-
         cmake.build()
-
-    def _match_docking_branch(self):
-        return re.match(r'cci\.\d{8}\+(?P<version>\d+\.\d+(?:\.\d+))\.docking', str(self.version))
 
     def package(self):
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
