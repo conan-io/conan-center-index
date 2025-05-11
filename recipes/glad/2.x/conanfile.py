@@ -20,7 +20,6 @@ class GladConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "no_loader": [True, False],
-        "spec": ["gl", "egl", "glx", "wgl"], # Not relevant for 2.x. A spec will be included unless its version is None
         "extensions": ["ANY"], # A comma separated list of extensions, if missing all extensions are included
         "debug": [True, False], # Enable the additional GLAD Debugging layer
         "multicontext": [True, False],
@@ -31,11 +30,8 @@ class GladConan(ConanFile):
         "gles1_version": ["None", "1.0"],
         "gles2_version": ["None", "2.0", "3.0", "3.1", "3.2"],
         "glsc2_version": ["None", "2.0"],
-        # if specification is egl
         "egl_version": ["None", "1.0", "1.1", "1.2", "1.3", "1.4", "1.5"],
-        # if specification is glx
         "glx_version": ["None", "1.0", "1.1", "1.2", "1.3", "1.4"],
-        # if specification is wgl
         "wgl_version": ["None", "1.0"]
     }
 
@@ -43,7 +39,6 @@ class GladConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "no_loader": False,
-        "spec": "gl",
         "extensions": "",
         "debug": False,
         "multicontext": False,
@@ -81,7 +76,7 @@ class GladConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-    
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables.update({
