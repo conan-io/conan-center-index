@@ -1,0 +1,4 @@
+sources:
+  "1.15.0":
+    url: "https://github.com/reductstore/reduct-cpp/archive/refs/tags/v1.15.0.tar.gz"
+    sha256: "120caa687389b6a0f9d05b1d1b8670640e63aaeaf2463714427d7cd353220b86"
