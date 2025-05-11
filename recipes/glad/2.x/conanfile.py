@@ -75,7 +75,7 @@ class GladConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
     def validate(self):
-        if (self.options.gles1_version != "None" or self.options.gles2_version != "None") and self.options.egl_version == "None":
+        if (self.options.gles1_version != None or self.options.gles2_version != None) and self.options.egl_version == None:
             raise ConanInvalidConfiguration(f"{self.ref} Generating an OpenGLES spec requires a valid version of EGL")
         if self.options.debug_layer and self.options.multicontext:
             raise ConanInvalidConfiguration("The multicontext and debug layer options are incompatible")
@@ -92,8 +92,9 @@ class GladConan(ConanFile):
                 "GLAD_SOURCES_DIR": self.source_folder,
                 "GLAD_CONAN_LIB_TYPE": "SHARED" if self.options.shared else "STATIC",
                 "GLAD_CONAN_API": self._get_api(),
-                "GLAD_CONAN_EXTENSIONS": ";".join(str(self.options.extensions).split(","))
         })
+        if self.options.extensions:
+            tc.cache_variables["GLAD_CONAN_EXTENSIONS"] = ";".join(str(self.options.extensions).split(","))
 
         if not self.options.no_loader:
             tc.cache_variables["GLAD_CONAN_LOADER"] = "LOADER"
@@ -117,7 +118,7 @@ class GladConan(ConanFile):
     def _get_api(self):
         def api(spec):
             for api_name, api_version in spec.items():
-                if api_version == "None":
+                if api_version == None:
                     continue
                 if api_name == "gl":
                     yield f"{api_name}:{self.options.gl_profile}={api_version}"
