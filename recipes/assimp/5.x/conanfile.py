@@ -32,7 +32,6 @@ class AssimpConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "double_precision": False,
-        "minizip-ng/*:mz_compatibility": True,
     }
 
     _format_option_map = {
@@ -177,7 +176,7 @@ class AssimpConan(ConanFile):
     def requirements(self):
         # TODO: unvendor others libs:
         # - Open3DGC
-        self.requires("minizip-ng/4.0.7")
+        self.requires("minizip/1.2.13")
         self.requires("pugixml/1.14")
         self.requires("utfcpp/4.0.1")
         self.requires("zlib/[>=1.2.11 <2]")
