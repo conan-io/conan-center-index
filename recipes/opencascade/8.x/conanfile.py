@@ -48,7 +48,7 @@ class OpenCascadeConan(ConanFile):
         "with_freeimage": True,
         "with_openvr": True,
         "with_rapidjson": True,
-        "with_draco": True,
+        "with_draco": False,
         "with_tk": True,
         "with_tbb": True,
         "with_opengl": True,
@@ -174,7 +174,7 @@ class OpenCascadeConan(ConanFile):
         tc.variables["3RDPARTY_DIR"] = self.source_folder+"/../"+self.folders.generators
         
         tcl = self.dependencies['tcl'].cpp_info
-        tc.variables["3RDPARTY_TCL_DIR"] = tcl.includedirs[0]+"/../"
+        tc.variables["3RDPARTY_TCL_LIBRARY_DIR"] = tcl.includedirs[0]+"/../"
         tc.variables["3RDPARTY_TCL_LIBRARY"] = tcl.libdirs[0]
         tc.variables["3RDPARTY_TCL_INCLUDE_DIR"] = tcl.includedirs[0]
 
