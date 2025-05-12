@@ -139,6 +139,9 @@ class ArrowConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.options["boost"].without_iostreams = False
+        self.options["boost"].zstd = True
+        self.options["boost"].lzma = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
