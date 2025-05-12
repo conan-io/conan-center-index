@@ -4,5 +4,7 @@ sources:
     sha256: "446a821d115949f6511b7eb01e6a0e4f014b17bfeba0f3dc33a51750a9d5eca5"
 patches:
   "7.5.0":
-    - base_path: source_subfolder
-      patch_file: patches/0001-cmake-fixes.patch
+    - patch_file: "patches/fix-cpp17-incompatibility.patch"
+      patch_description: "Fix a minor C++17 incompatibility in util.cpp"
+      patch_type: "portability"
+      patch_source: "https://patch-diff.githubusercontent.com/raw/Azure/azure-storage-cpp/pull/366"

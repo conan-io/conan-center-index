@@ -1,4 +1,7 @@
 sources:
+  "6.2.0":
+    url: "https://download.kde.org/stable/frameworks/6.2/extra-cmake-modules-6.2.0.tar.xz"
+    sha256: "6374bfa0dded8be265c702acd5de11eecd2851c625b93e1c87d8d0f5f1a8ebe1"
   "5.113.0":
     url: "https://download.kde.org/stable/frameworks/5.113/extra-cmake-modules-5.113.0.tar.xz"
     sha256: "265e5440eebeca07351a469e617a4bf35748927bd907b00ace9c018392bb3bc4"

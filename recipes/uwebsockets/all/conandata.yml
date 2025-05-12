@@ -1,28 +1,14 @@
 sources:
+  "20.71.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v20.71.0.tar.gz"
+    sha256: "1e4e7bfa379dd8096182d0b47ae648c7bcf93be4a4130ad6e7625ed1d46aec1d"
+  "20.70.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v20.70.0.tar.gz"
+    sha256: "39a7e32182df2da02955ab1c1681af9710c82115075f4caabb8689a2c04460b9"
+  "20.68.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v20.68.0.tar.gz"
+    sha256: "02dd1dd2925c639c01222d19f4ddd6fe12261571bcb3befc7eedaf8fa75c008f"
+  # keep 20.62.0, the last version to provide C-API
   "20.62.0":
     url: "https://github.com/uNetworking/uWebSockets/archive/v20.62.0.tar.gz"
     sha256: "03dfc8037cf43856a41e64bbc7fc5a7cf5e6369c9158682753074ecbbe09eed1"
-  "20.60.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v20.60.0.tar.gz"
-    sha256: "eb72223768f93d40038181653ee5b59a53736448a6ff4e8924fd56b2fcdc00db"
-  "20.58.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v20.58.0.tar.gz"
-    sha256: "f71ca310cc5c39b12f56db1cf85727ee4d0f03fdf019a9e14ef4ba08addc6077"
-  "20.57.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v20.57.0.tar.gz"
-    sha256: "82d15eea0889a6b73c6e6170dd506995162bddfc7565c6df2c2d1e8287bbb9b0"
-  "20.56.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v20.56.0.tar.gz"
-    sha256: "bbac3e317eabf4e558dffe9bfeab4f5ae2d23affcc6df54fb8e580a9e0372767"
-  "20.55.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v20.55.0.tar.gz"
-    sha256: "bf6b22229fcd10c7cbd256bfd9abf31c829d44eefd56341c0f404e0fa0184f2f"
-  "20.53.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v20.53.0.tar.gz"
-    sha256: "324b857e787a472bd258aaa66f5ceeac6b01ebc41bbb423fff71559d72872783"
-  "19.3.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v19.3.0.tar.gz"
-    sha256: "6f709b4e5fe053a94a952da93c07c919b36bcb8c838c69067560ae85f97c5621"
-  "18.3.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v18.3.0.tar.gz"
-    sha256: "f51317e2a8cd743e6ff9dfd215569824eaca489c24f7d8fd94eaca44443a9728"

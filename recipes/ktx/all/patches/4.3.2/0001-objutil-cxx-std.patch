@@ -1,0 +1,10 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -972,6 +972,6 @@
+ PUBLIC
+     utils
+ )
+-
++target_compile_features(objUtil PUBLIC cxx_std_11)
+ # In C++ apps that use statically linked Libraries all compilatiom units must
+ # be compiled with matching symbol visibility settings to avoid warnings from

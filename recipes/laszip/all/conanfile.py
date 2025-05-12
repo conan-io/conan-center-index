@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import stdcpp_library
+from conan.tools.build import stdcpp_library, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.scm import Version
@@ -27,6 +27,10 @@ class LaszipConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _min_cppstd(self):
+        return 14
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -35,8 +39,14 @@ class LaszipConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if Version(self.version) >= "3.4.4":
+            self.license = "Apache-2.0"
         if self.options.shared:
             self.options.rm_safe("fPIC")
+    
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
     def layout(self):
         cmake_layout(self, src_folder="src")

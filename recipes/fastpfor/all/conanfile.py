@@ -2,10 +2,13 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.apple import is_apple_os
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
+
 class FastPFORConan(ConanFile):
     name = "fastpfor"
     description = "Fast integer compression"
@@ -13,13 +16,12 @@ class FastPFORConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lemire/FastPFor"
     topics = ("compression", "sorted-lists", "simd", "x86", "x86-64")
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
     }
 
@@ -30,30 +32,37 @@ class FastPFORConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def validate(self):
-        if self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration(f"{self.settings.arch} architecture is not supported")
+    @property
+    def _has_simde(self):
+        return "arm" in str(self.settings.arch)
 
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "11")
+    def requirements(self):
+        if self._has_simde:
+            self.requires("simde/0.8.0", transitive_headers=True)
+
+    def validate(self):
+        check_min_cppstd(self, 11)
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "15.0":
+            raise ConanInvalidConfiguration("${self.ref} doesn't support ${self.settings.compiler} < 15.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.variables["WITH_TEST"] = False
+        if self._has_simde:
+            tc.cache_variables["SUPPORT_NEON"] = True
+            tc.preprocessor_definitions["SIMDE_ENABLE_NATIVE_ALIASES"] = 1
+        tc.generate()
+        tc = CMakeDeps(self)
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -75,8 +84,5 @@ class FastPFORConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "FastPFOR"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "FastPFOR"
-        self.cpp_info.names["cmake_find_package"] = "FastPFOR"
-        self.cpp_info.names["cmake_find_package_multi"] = "FastPFOR"
+        if self._has_simde:
+            self.cpp_info.defines = ["SIMDE_ENABLE_NATIVE_ALIASES"]

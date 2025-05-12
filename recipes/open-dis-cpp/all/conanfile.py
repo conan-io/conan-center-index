@@ -1,13 +1,13 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanException
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.layout import basic_layout
+from conan.tools.files import copy, get, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class OpenDisConan(ConanFile):
@@ -17,6 +17,7 @@ class OpenDisConan(ConanFile):
     topics = ("library","protocol","simulation-framework","dis")
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-2-Clause"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -27,13 +28,13 @@ class OpenDisConan(ConanFile):
         "fPIC": True
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_EXAMPLES"] = "FALSE"
         tc.cache_variables["BUILD_TESTS"] = "FALSE"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "1.1.0": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
     def layout(self):
@@ -56,7 +57,6 @@ class OpenDisConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -79,16 +79,7 @@ class OpenDisConan(ConanFile):
         self.cpp_info.components["OpenDIS6"].libs = ["OpenDIS6"]
         self.cpp_info.components["OpenDIS7"].libs = ["OpenDIS7"]
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "OpenDIS"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenDIS"
-        self.cpp_info.names["cmake_find_package"] = "OpenDIS"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenDIS"
-        self.cpp_info.components["OpenDIS6"].names["cmake_find_package"] = "OpenDIS6"
-        self.cpp_info.components["OpenDIS6"].names["cmake_find_package_multi"] = "OpenDIS6"
         self.cpp_info.components["OpenDIS6"].set_property("cmake_target_name", "OpenDIS::OpenDIS6")
         self.cpp_info.components["OpenDIS6"].set_property("cmake_target_aliases", ["OpenDIS::DIS6","OpenDIS6"])
-        self.cpp_info.components["OpenDIS7"].names["cmake_find_package"] = "OpenDIS7"
-        self.cpp_info.components["OpenDIS7"].names["cmake_find_package_multi"] = "OpenDIS7"
         self.cpp_info.components["OpenDIS7"].set_property("cmake_target_name", "OpenDIS::OpenDIS7")
         self.cpp_info.components["OpenDIS7"].set_property("cmake_target_aliases", ["OpenDIS::DIS7","OpenDIS7"])

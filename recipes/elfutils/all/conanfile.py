@@ -73,22 +73,22 @@ class ElfutilsConan(ConanFile):
         if self.options.with_bzlib:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.get_safe("with_zstd"):
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[~1.5]")
         if self.options.get_safe("libdebuginfod"):
             self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.debuginfod:
             self.requires("libmicrohttpd/0.9.75")
 
     def build_requirements(self):
-        self.tool_requires("gettext/0.21")
+        self.tool_requires("gettext/0.22.5")
         self.tool_requires("automake/1.16.5")
         self.build_requires("m4/1.4.19")
         self.build_requires("flex/2.6.4")
         self.tool_requires("bison/3.8.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -171,6 +171,7 @@ class ElfutilsConan(ConanFile):
         # library components
         self.cpp_info.components["libelf"].libs = ["elf"]
         self.cpp_info.components["libelf"].requires = ["zlib::zlib"]
+        self.cpp_info.components["libelf"].set_property("pkg_config_name", "libelf")
         if self.options.with_bzlib:
             self.cpp_info.components["libelf"].requires.append("bzip2::bzip2")
         if self.options.with_lzma:
@@ -182,6 +183,7 @@ class ElfutilsConan(ConanFile):
 
         self.cpp_info.components["libdw"].libs = ["dw"]
         self.cpp_info.components["libdw"].requires = ["libelf"]
+        self.cpp_info.components["libdw"].set_property("pkg_config_name", "libdw")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libdw"].system_libs.extend(["dl"])
 
@@ -192,6 +194,7 @@ class ElfutilsConan(ConanFile):
         if self.options.get_safe("libdebuginfod"):
             self.cpp_info.components["libdebuginfod"].libs = ["debuginfod"]
             self.cpp_info.components["libdebuginfod"].requires = ["libcurl::curl"]
+            self.cpp_info.components["libdebuginfod"].set_property("pkg_config_name", "libdebuginfod")
 
         # utilities
         bin_path = os.path.join(self.package_folder, "bin")

@@ -6,7 +6,7 @@ from conan.tools.microsoft import check_min_vs
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=2.4"
 
 
 class XnnpackConan(ConanFile):
@@ -35,26 +35,18 @@ class XnnpackConan(ConanFile):
         "memopt": True,
         "sparse": True,
     }
+    implements = ["auto_shared_fpic"]
+    languages = ["C"]
 
     def export_sources(self):
         copy(self, "xnnpack_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.version in ["cci.20220801", "cci.20220621", "cci.20211210"]:
-            self.requires("cpuinfo/cci.20220228")
+            self.requires("cpuinfo/cci.20220618")
         else:
             self.requires("cpuinfo/cci.20231129")
         self.requires("fp16/cci.20210320")
@@ -64,9 +56,9 @@ class XnnpackConan(ConanFile):
 
     def validate(self):
         check_min_vs(self, 192)
-        compiler = self.info.settings.compiler
+        compiler = self.settings.compiler
         compiler_version = Version(compiler.version)
-        if self.version < "cci.20230715":
+        if Version(self.version) < "cci.20230715":
             if (compiler == "gcc" and compiler_version < "6") or \
                 (compiler == "clang" and compiler_version < "5"):
                 raise ConanInvalidConfiguration(f"{self.ref} doesn't support {compiler} {compiler.version}")
@@ -75,6 +67,10 @@ class XnnpackConan(ConanFile):
             if (compiler == "gcc" and compiler_version < "11") or \
                 (compiler == "clang" and compiler_version < "8"):
                 raise ConanInvalidConfiguration(f"{self.ref} doesn't support {compiler} {compiler.version}")
+        if self.options.assembly and compiler == "clang" and self.settings.arch == "armv6":
+            # clang assembly validator fails on XNNPACK's math.h for armv6:
+            # https://github.com/google/XNNPACK/issues/4348#issuecomment-1445437613
+            raise ConanInvalidConfiguration(f"{self.ref} assembly option is incompatible with clang+armv6")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -120,6 +116,12 @@ class XnnpackConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                               "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}",
                               "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}")
+        if self.settings.compiler == "clang" and self.settings.arch == "armv7":
+            # https://github.com/google/XNNPACK/issues/4348
+            # XNNPACK targets armv6, but clang fails to compile to due to a bug in the assembler (see linked issue).
+            # The user is targetting armv7, so adjust XNNPACK's -march accordingly to avoid the bug.
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                  "-march=armv6 -mfpu=vfp", "-march=armv7-a -mfpu=neon")
 
     def build(self):
         self._patch_sources()

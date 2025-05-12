@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
@@ -73,6 +73,8 @@ class LercConan(ConanFile):
         self.cpp_info.libs = ["LercLib" if Version(self.version) < "4.0.0" else "Lerc"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+        if not self.options.shared and stdcpp_library(self):
+            self.cpp_info.system_libs.append(stdcpp_library(self))
 
         if Version(self.version) >= "3.0":
             self.cpp_info.set_property("pkg_config_name", "Lerc")

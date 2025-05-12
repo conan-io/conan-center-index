@@ -23,14 +23,16 @@ class VulkanValidationLayersConan(ConanFile):
     topics = ("vulkan", "validation-layers")
     homepage = "https://github.com/KhronosGroup/Vulkan-ValidationLayers"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "fPIC": [True, False],
         "with_wsi_xcb": [True, False],
         "with_wsi_xlib": [True, False],
         "with_wsi_wayland": [True, False],
     }
     default_options = {
+        "fPIC": True,
         "with_wsi_xcb": True,
         "with_wsi_xlib": True,
         "with_wsi_wayland": True,
@@ -53,7 +55,8 @@ class VulkanValidationLayersConan(ConanFile):
 
     @property
     def _needs_wayland_for_build(self):
-        return self.options.get_safe("with_wsi_wayland") and Version(self.version) < "1.3.231"
+        return (self.options.get_safe("with_wsi_wayland") and
+                (Version(self.version) < "1.3.231" or Version(self.version) >= "1.3.243.0"))
 
     @property
     def _needs_pkg_config(self):
@@ -90,6 +93,8 @@ class VulkanValidationLayersConan(ConanFile):
             del self.options.with_wsi_xcb
             del self.options.with_wsi_xlib
             del self.options.with_wsi_wayland
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -149,13 +154,19 @@ class VulkanValidationLayersConan(ConanFile):
         env.generate()
 
         tc = CMakeToolchain(self)
+        if Version(self.version) >= "1.3.239":
+            tc.cache_variables["VVL_CLANG_TIDY"] = False
         if Version(self.version) < "1.3.234":
             tc.variables["VULKAN_HEADERS_INSTALL_DIR"] = self.dependencies["vulkan-headers"].package_folder.replace("\\", "/")
         tc.variables["USE_CCACHE"] = False
         if self.settings.os in ["Linux", "FreeBSD"]:
-            tc.variables["BUILD_WSI_XCB_SUPPORT"] = self.options.with_wsi_xcb
-            tc.variables["BUILD_WSI_XLIB_SUPPORT"] = self.options.with_wsi_xlib
-            tc.variables["BUILD_WSI_WAYLAND_SUPPORT"] = self.options.with_wsi_wayland
+            tc.variables["BUILD_WSI_XCB_SUPPORT"] = self.options.get_safe("with_wsi_xcb")
+            tc.variables["BUILD_WSI_XLIB_SUPPORT"] = self.options.get_safe("with_wsi_xlib")
+            tc.variables["BUILD_WSI_WAYLAND_SUPPORT"] = self.options.get_safe("with_wsi_wayland")
+        elif self.settings.os == "Android":
+            tc.variables["BUILD_WSI_XCB_SUPPORT"] = False
+            tc.variables["BUILD_WSI_XLIB_SUPPORT"] = False
+            tc.variables["BUILD_WSI_WAYLAND_SUPPORT"] = False
         tc.variables["BUILD_WERROR"] = False
         tc.variables["BUILD_TESTS"] = False
         tc.variables["INSTALL_TESTS"] = False
@@ -175,7 +186,8 @@ class VulkanValidationLayersConan(ConanFile):
         # Vulkan-ValidationLayers relies on Vulkan-Headers version from CMake config file
         # to set api_version in its manifest file, but this value MUST have format x.y.z (no extra number).
         # FIXME: find a way to force correct version in CMakeDeps of vulkan-headers recipe?
-        if Version(self.version) >= "1.3.235":
+        # NOTE: At version 1.3.239, the JSON_API_VERSION was removed from the cmakelists file, 
+        if Version(self.version) >= "1.3.235" and Version(self.version) < "1.3.239":
             vk_version = Version(self.dependencies["vulkan-headers"].ref.version)
             sanitized_vk_version = f"{vk_version.major}.{vk_version.minor}.{vk_version.patch}"
             replace_in_file(
@@ -190,6 +202,14 @@ class VulkanValidationLayersConan(ConanFile):
                 os.path.join(self.generators_folder, "SPIRV-ToolsConfig.cmake"),
                 os.path.join(self.generators_folder, "SPIRV-Tools-optConfig.cmake"),
             )
+        if self.settings.os == "Android":
+            # INFO: libVkLayer_utils.a: error: undefined symbol: __android_log_print
+            # https://github.com/KhronosGroup/Vulkan-ValidationLayers/commit/a26638ae9fdd8c40b56d4c7b72859a5b9a0952c9
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "VkLayer_utils PUBLIC Vulkan::Headers", "VkLayer_utils PUBLIC Vulkan::Headers -landroid -llog")
+        if not self.options.get_safe("fPIC"):
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "CMAKE_POSITION_INDEPENDENT_CODE ON", "CMAKE_POSITION_INDEPENDENT_CODE OFF")
 
     def build(self):
         self._patch_sources()
@@ -239,3 +259,6 @@ class VulkanValidationLayersConan(ConanFile):
 
         # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
         self.env_info.VK_LAYER_PATH.append(vk_layer_path)
+
+        if self.settings.os == "Android":
+            self.cpp_info.system_libs.extend(["android", "log"])

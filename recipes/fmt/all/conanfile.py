@@ -6,17 +6,18 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.layout import basic_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class FmtConan(ConanFile):
     name = "fmt"
-    homepage = "https://github.com/fmtlib/fmt"
     description = "A safe and fast alternative to printf and IOStreams."
-    topics = ("format", "iostream", "printf")
-    url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/fmtlib/fmt"
+    topics = ("format", "iostream", "printf")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -25,6 +26,7 @@ class FmtConan(ConanFile):
         "fPIC": [True, False],
         "with_fmt_alias": [True, False],
         "with_os_api": [True, False],
+        "with_unicode": [True, False],
     }
     default_options = {
         "header_only": False,
@@ -32,11 +34,16 @@ class FmtConan(ConanFile):
         "fPIC": True,
         "with_fmt_alias": False,
         "with_os_api": True,
+        "with_unicode": True,
     }
 
     @property
     def _has_with_os_api_option(self):
         return Version(self.version) >= "7.0.0"
+
+    @property
+    def _has_with_unicode_option(self):
+        return Version(self.version) >= "11.0.0"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -48,6 +55,8 @@ class FmtConan(ConanFile):
             del self.options.with_os_api
         elif str(self.settings.os) == "baremetal":
             self.options.with_os_api = False
+        if not self._has_with_unicode_option:
+            del self.options.with_unicode
 
     def configure(self):
         if self.options.header_only:
@@ -85,6 +94,8 @@ class FmtConan(ConanFile):
             tc.cache_variables["FMT_LIB_DIR"] = "lib"
             if self._has_with_os_api_option:
                 tc.cache_variables["FMT_OS"] = bool(self.options.with_os_api)
+            if self._has_with_unicode_option:
+                tc.cache_variables["FMT_UNICODE"] = bool(self.options.with_unicode)
             tc.generate()
 
     def build(self):
@@ -113,7 +124,19 @@ class FmtConan(ConanFile):
         target = "fmt-header-only" if self.options.header_only else "fmt"
         self.cpp_info.set_property("cmake_file_name", "fmt")
         self.cpp_info.set_property("cmake_target_name", f"fmt::{target}")
+
+        # Mirror upstream find package version policy:
+        # https://github.com/fmtlib/fmt/blob/11.1.1/CMakeLists.txt#L403-L407
+        self.cpp_info.set_property("cmake_config_version_compat", "AnyNewerVersion")
         self.cpp_info.set_property("pkg_config_name",  "fmt")
+
+        if is_msvc(self):
+            if self.options.get_safe("with_unicode"):
+                self.cpp_info.components["_fmt"].cxxflags.append("/utf-8")
+            else:
+                # Set the FMT_UNICODE=0, as defined publicly upstream
+                # https://github.com/fmtlib/fmt/blob/11.1.1/CMakeLists.txt#L371
+                self.cpp_info.components["_fmt"].defines.append("FMT_UNICODE=0")
 
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         if self.options.with_fmt_alias:
@@ -123,7 +146,6 @@ class FmtConan(ConanFile):
             self.cpp_info.components["_fmt"].defines.append("FMT_HEADER_ONLY=1")
             self.cpp_info.components["_fmt"].libdirs = []
             self.cpp_info.components["_fmt"].bindirs = []
-
         else:
             postfix = "d" if self.settings.build_type == "Debug" else ""
             libname = "fmt" + postfix
@@ -133,10 +155,4 @@ class FmtConan(ConanFile):
             if self.options.shared:
                 self.cpp_info.components["_fmt"].defines.append("FMT_SHARED")
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "fmt"
-        self.cpp_info.names["cmake_find_package_multi"] = "fmt"
-        self.cpp_info.names["pkg_config"] = "fmt"
-        self.cpp_info.components["_fmt"].names["cmake_find_package"] = target
-        self.cpp_info.components["_fmt"].names["cmake_find_package_multi"] = target
         self.cpp_info.components["_fmt"].set_property("cmake_target_name", f"fmt::{target}")

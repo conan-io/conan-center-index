@@ -101,8 +101,9 @@ class QrCodeGeneratorConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = [
-            "qrcodegen" if Version(self.version) < "1.7.0" else "qrcodegencpp"
-        ]
+        self.cpp_info.components["qrcodegencpp"].set_property("cmake_target_name", "qr-code-generator::qrcodegencpp")
+        self.cpp_info.components["qrcodegencpp"].libs = ["qrcodegen" if Version(self.version) < "1.7.0" else "qrcodegencpp"]
+        self.cpp_info.components["qrcodegenc"].set_property("cmake_target_name", "qr-code-generator::qrcodegenc")
+        self.cpp_info.components["qrcodegenc"].libs = ["qrcodegenc"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")

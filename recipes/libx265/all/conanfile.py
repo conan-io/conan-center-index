@@ -1,13 +1,15 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rename, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class Libx265Conan(ConanFile):
@@ -49,7 +51,8 @@ class Libx265Conan(ConanFile):
             del self.options.with_numa
         # FIXME: Disable assembly by default if host is arm and compiler apple-clang for the moment.
         # Indeed, apple-clang is not able to understand some asm instructions of libx265
-        if self.settings.compiler == "apple-clang" and "arm" in self.settings.arch:
+        # FIXME: Disable assembly by default if host is Android for the moment. It fails to build
+        if (self.settings.compiler == "apple-clang" and "arm" in self.settings.arch) or self.settings.os == "Android":
             self.options.assembly = False
 
     def configure(self):
@@ -63,9 +66,26 @@ class Libx265Conan(ConanFile):
         if self.options.get_safe("with_numa", False):
             self.requires("libnuma/2.0.14")
 
+    def validate_build(self):
+        if cross_building(self) and self.settings.os == "Android" and self.options.assembly:
+            # FIXME: x265 uses custom command to invoke clang to compile assembly files.
+            #   clang++ -fPIC -c src/source/common/aarch64/mc-a.S -o mc-a.S.o
+            #   FAILED: mc-a.S.o libx2f309356bd8526/b/build/Release/mc-a.S.o
+            #   clang++ -fPIC -c src/source/common/aarch64/mc-a.S -o mc-a.S.o
+            #   <instantiation>:11:9: error: unknown directive
+            #           .func x265_pixel_avg_pp_4x4_neon
+            raise ConanInvalidConfiguration(f"{self.ref} fails to build with '&:assembly=True' for Android. Contributions are welcome.")
+
     def validate(self):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("shared not supported with static runtime")
+
+        if self.settings.compiler == "apple-clang" and "arm" in self.settings.arch and self.options.assembly:
+            # Undefined symbols for architecture arm64:
+            # "x265::setupAssemblyPrimitives(x265::EncoderPrimitives&, int)", referenced from:
+            # x265::x265_setup_primitives(x265_param*) in libx265.a[20](primitives.cpp.o)
+            # ld: symbol(s) not found for architecture arm64
+            raise ConanInvalidConfiguration(f"{self.ref} fails to build for Mac M1. Contributions are welcome.")
 
     def build_requirements(self):
         if self.options.assembly:
@@ -91,6 +111,7 @@ class Libx265Conan(ConanFile):
         tc.variables["ENABLE_SVT_HEVC"] = self.options.SVG_HEVC_encoder
         if is_msvc(self):
             tc.variables["STATIC_LINK_CRT"] = is_msvc_static_runtime(self)
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
         if self.settings.os == "Linux":
             tc.variables["PLATFORM_LIBS"] = "dl"
         if "arm" in self.settings.arch:
@@ -154,7 +175,10 @@ class Libx265Conan(ConanFile):
             if not self.options.shared:
                 self.cpp_info.sharedlinkflags = ["-Wl,-Bsymbolic,-znoexecstack"]
         elif self.settings.os == "Android":
-            self.cpp_info.libs.extend(["dl", "m"])
-        libcxx = stdcpp_library(self)
-        if libcxx:
-            self.cpp_info.system_libs.append(libcxx)
+            self.cpp_info.system_libs.extend(["dl", "m"])
+        if not self.options.shared:
+            libcxx = stdcpp_library(self)
+            if libcxx:
+                if self.settings.os == "Android" and self.settings.compiler.libcxx == "c++_static":
+                    self.cpp_info.system_libs.append("c++abi")
+                self.cpp_info.system_libs.append(libcxx)

@@ -22,7 +22,7 @@ index 1cc34b20..ccbf68dc 100644
                          if (!X509V3_EXT_print(extbio.get(), ext, 0, 0)) 
                          {
 -                            M_ASN1_OCTET_STRING_print(extbio.get(), ext->value);
-+                            M_ASN1_OCTET_STRING_print(extbio.get(), X509_EXTENSION_get_data(ext));
++                            ASN1_STRING_print(extbio.get(), X509_EXTENSION_get_data(ext));
                          }
                          // null terminate the string.
                          BIO_write(extbio.get(), "", 1);

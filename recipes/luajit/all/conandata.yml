@@ -1,10 +1,11 @@
+# INFO: Upstream moved to rolling releases and removed all tarballs.
+#       The Github mirror (https://github.com/LuaJIT/LuaJIT) does not match the checksums and have missing header files.
+#       Conan will consume the backup sources from the Conan Center Artifactory instead, which are the original tarballs (same checksums).
+#       Read the issue https://github.com/conan-io/conan-center-index/issues/25032 for more information.
 sources:
   "2.1.0-beta3":
-    url: "https://luajit.org/download/LuaJIT-2.1.0-beta3.tar.gz"
+    url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/1ad2e34b111c802f9d0cdf019e986909123237a28c746b21295b63c9e785d9c3"
     sha256: "1ad2e34b111c802f9d0cdf019e986909123237a28c746b21295b63c9e785d9c3"
-  "2.0.5":
-    url: "http://luajit.org/download/LuaJIT-2.0.5.tar.gz"
-    sha256: "874b1f8297c697821f561f9b73b57ffd419ed8f4278c82e05b48806d30c1e979"
 patches:
   "2.1.0-beta3":
     - patch_file: "patches/2.1.0-beta3-0001-remove-mac-deploy.patch"

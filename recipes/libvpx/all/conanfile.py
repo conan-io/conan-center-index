@@ -60,6 +60,9 @@ class LibVPXConan(ConanFile):
             self.package_type = "static-library"
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
+        if self.settings.os == "Android":
+            del self.options.shared
+            self.package_type = "static-library"
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -103,7 +106,7 @@ class LibVPXConan(ConanFile):
             compiler = f"vs{vc_version}"
         elif is_msvc(self):
             vc_version = str(self.settings.compiler.version)
-            vc_version = {"170": "11", "180": "12", "190": "14", "191": "15", "192": "16", "193": "17"}[vc_version]
+            vc_version = {"170": "11", "180": "12", "190": "14", "191": "15", "192": "16", "193": "17", "194": "17"}[vc_version]
             compiler = f"vs{vc_version}"
         elif self.settings.compiler in ["gcc", "clang", "apple-clang"]:
             compiler = 'gcc'

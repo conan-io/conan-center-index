@@ -26,6 +26,29 @@
 #include <string>
 #include <vector>
 
+#ifdef PROXY_VERSION_3_LATER
+
+PRO_DEF_MEM_DISPATCH(MemAt, at);
+
+struct Dictionary : pro::facade_builder
+    ::add_convention<MemAt, std::string(int)>
+    ::build {};
+
+// This is a function, rather than a function template
+void demo_print(pro::proxy<Dictionary> dictionary) {
+  std::cout << dictionary->at(1) << "\n";
+}
+
+int main() {
+  static std::map<int, std::string> container1{{1, "hello"}};
+  auto container2 = std::make_shared<std::vector<const char*>>();
+  container2->push_back("hello");
+  container2->push_back("world");
+  demo_print(&container1);  // Prints: "hello"
+  demo_print(container2);  // Prints: "world"
+}
+
+#else
 
 namespace poly {
 
@@ -45,3 +68,4 @@ int main() {
   demo_print(&container2);  // print: world\n
   return 0;
 }
+#endif

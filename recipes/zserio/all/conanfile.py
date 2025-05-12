@@ -5,14 +5,15 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, download, get
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 class ZserioConanFile(ConanFile):
     name = "zserio"
     description = "Zserio C++ Runtime Library"
     license = "BSD-3-Clause"
-    url = "https://github.com/conan-io/conan-center-index/"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://zserio.org"
     topics = ("zserio", "cpp", "c++", "serialization")
     package_type = "static-library"
@@ -26,11 +27,23 @@ class ZserioConanFile(ConanFile):
     }
 
     @property
+    def _compilers_minimum_version(self):
+        # https://github.com/ndsev/zserio/tree/master/compiler/extensions/cpp#supported-compilers
+        return {
+            "apple-clang": "11",
+            "clang": "11",
+            "gcc": "5",
+            "msvc": "191",
+            "Visual Studio": "15",
+        }
+
+    @property
     def _min_cppstd(self):
         return 11
 
     def export_sources(self):
-        copy(self, "zserio_compiler.cmake", self.recipe_folder, self.export_sources_folder)
+        if Version(self.version) < "2.14.0":
+            copy(self, "zserio_compiler.cmake", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -50,6 +63,13 @@ class ZserioConanFile(ConanFile):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
 
+        minimum_compiler_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_compiler_version and Version(self.settings.compiler.version) < minimum_compiler_version:
+            raise ConanInvalidConfiguration(
+                f"Compiler version '{self.settings.compiler.version}' not supported, "
+                f"minumum is '{minimum_compiler_version}'!"
+            )
+
     def source(self):
         sources = self.conan_data["sources"][self.version]
         get(self, **sources["runtime"], strip_root=True)
@@ -57,6 +77,10 @@ class ZserioConanFile(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if not self.settings.get_safe("compiler.cppstd"):
+            tc.variables["CMAKE_CXX_STANDARD"] = str(self._min_cppstd)
+        if Version(self.version) < "2.14.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):
@@ -65,6 +89,8 @@ class ZserioConanFile(ConanFile):
         cmake.build()
         sources = self.conan_data["sources"][self.version]
         get(self, **sources["compiler"], pattern="zserio.jar")
+        if Version(self.version) >= "2.14.0":
+            get(self, **sources["compiler"], pattern="cmake/zserio_compiler.cmake")
 
     @property
     def _cmake_module_path(self):
@@ -80,8 +106,13 @@ class ZserioConanFile(ConanFile):
         copy(self, "*.a", self.build_folder, lib_dir, keep_path=False)
 
         copy(self, "zserio.jar", self.build_folder, os.path.join(self.package_folder, "bin"))
-        copy(self, "zserio_compiler.cmake", self.export_sources_folder,
-             os.path.join(self.package_folder, self._cmake_module_path))
+        if Version(self.version) >= "2.14.0":
+            # from 2.14.0 the cmake script is available directly in zserio repository
+            copy(self, "zserio_compiler.cmake", os.path.join(self.build_folder, "cmake"),
+                os.path.join(self.package_folder, self._cmake_module_path))
+        else:
+            copy(self, "zserio_compiler.cmake", self.export_sources_folder,
+                os.path.join(self.package_folder, self._cmake_module_path))
 
     def package_info(self):
         self.cpp_info.libs = ["ZserioCppRuntime"]
@@ -94,6 +125,3 @@ class ZserioConanFile(ConanFile):
         zserio_compiler_module = os.path.join(self.package_folder, self._cmake_module_path,
                                               "zserio_compiler.cmake")
         self.cpp_info.set_property("cmake_build_modules", [zserio_compiler_module])
-
-        # TODO: remove in conan v2
-        self.env_info.ZSERIO_JAR_FILE = zserio_jar_file

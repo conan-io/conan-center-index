@@ -1,0 +1,57 @@
+diff --git CMakeLists.txt CMakeLists.txt
+index 3139ef78e..a08fbb589 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -91,11 +91,26 @@ add_custom_target(bmx_test_data)
+ 
+ include("${PROJECT_SOURCE_DIR}/cmake/libmxf.cmake")
+ include("${PROJECT_SOURCE_DIR}/cmake/libmxfpp.cmake")
+-include("${PROJECT_SOURCE_DIR}/cmake/ext_uuid.cmake")
+-include("${PROJECT_SOURCE_DIR}/cmake/ext_expat.cmake")
+-include("${PROJECT_SOURCE_DIR}/cmake/ext_uriparser.cmake")
++#include("${PROJECT_SOURCE_DIR}/cmake/ext_uuid.cmake")
++#include("${PROJECT_SOURCE_DIR}/cmake/ext_expat.cmake")
++#include("${PROJECT_SOURCE_DIR}/cmake/ext_uriparser.cmake")
++#if(BMX_BUILD_WITH_LIBCURL)
++#    include("${PROJECT_SOURCE_DIR}/cmake/ext_libcurl.cmake")
++#endif()
++
++find_package(expat REQUIRED)
++find_package(uriparser REQUIRED)
++if(UNIX AND NOT APPLE)
++    find_package(libuuid REQUIRED)
++    set(uuid_link_lib libuuid::libuuid)
++else()
++    # MSVC: "ole" will already be linked in
++    # APPLE: doesn't require uuid library
++    set(uuid_link_lib)
++endif()
+ if(BMX_BUILD_WITH_LIBCURL)
+     include("${PROJECT_SOURCE_DIR}/cmake/ext_libcurl.cmake")
++    find_package(CURL REQUIRED)
+ endif()
+ 
+ configure_file(config.h.in config.h)
+diff --git src/CMakeLists.txt src/CMakeLists.txt
+index 59c94b8b9..94f9c00d6 100644
+--- src/CMakeLists.txt
++++ src/CMakeLists.txt
+@@ -67,13 +67,14 @@ target_link_libraries(bmx
+         ${MXFpp_link_lib}
+     PRIVATE
+         ${uuid_link_lib}
+-        ${expat_link_lib}
+-        ${uriparser_link_lib}
++        expat::expat
++        uriparser::uriparser
+ )
+ 
+ if(BMX_BUILD_WITH_LIBCURL)
+-    target_link_libraries(bmx PRIVATE
+-        ${libcurl_link_lib}
++    # Linking public to see if the shared library for curls dependencies correctly link
++    target_link_libraries(bmx PUBLIC
++        CURL::libcurl
+     )
+ endif()
+ 

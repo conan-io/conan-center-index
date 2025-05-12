@@ -1,13 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc_static_runtime
-from conan.tools.files import get, copy, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import get, copy, apply_conandata_patches, export_conandata_patches, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 class ZoeConan(ConanFile):
     name = "zoe"
@@ -27,20 +27,10 @@ class ZoeConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 11
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -50,10 +40,12 @@ class ZoeConan(ConanFile):
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, "11")
         if self.info.settings.compiler == "apple-clang" and Version(self.info.settings.compiler.version) < "12.0":
             raise ConanInvalidConfiguration(f"{self.ref} can not build on apple-clang < 12.0.")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -68,8 +60,16 @@ class ZoeConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def build(self):
+    def _apply_patches(self):
         apply_conandata_patches(self)
+        # Remove hardcoded CMAKE_CXX_STANDANRD in newer versions
+        if Version(self.version) >= "3.2":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "set (CMAKE_CXX_STANDARD 11)",
+                            "")
+
+    def build(self):
+        self._apply_patches()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -78,6 +78,7 @@ class ZoeConan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         libname = "zoe" if self.options.shared else "zoe-static"
@@ -88,6 +89,10 @@ class ZoeConan(ConanFile):
             self.cpp_info.defines.append("ZOE_EXPORTS")
         else:
             self.cpp_info.defines.append("ZOE_STATIC")
+
+        # https://github.com/winsoft666/zoe/blob/master/src/CMakeLists.txt#L88
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["ws2_32", "crypt32"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")

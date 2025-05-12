@@ -3,7 +3,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, VCVars
 from conan.tools.scm import Version
@@ -16,22 +16,25 @@ required_conan_version = ">=1.54.0"
 class LibpqConan(ConanFile):
     name = "libpq"
     description = "The library used by all the standard PostgreSQL tools."
-    topics = ("libpq", "postgresql", "database", "db")
+    topics = ("postgresql", "database", "db")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.postgresql.org/docs/current/static/libpq.html"
     license = "PostgreSQL"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "with_openssl": [True, False],
+        "with_icu": [True, False],
         "disable_rpath": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_openssl": False,
+        "with_icu": False,
         "disable_rpath": False,
     }
 
@@ -39,7 +42,7 @@ class LibpqConan(ConanFile):
     def _is_clang8_x86(self):
         return self.settings.os == "Linux" and \
                self.settings.compiler == "clang" and \
-               self.settings.compiler.version == "8" and \
+               Version(self.settings.compiler.version) == "8" and \
                self.settings.arch == "x86"
 
     @property
@@ -65,10 +68,9 @@ class LibpqConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            if Version(self.version) < "13.5":
-                self.requires("openssl/1.1.1w")
-            else:
-                self.requires("openssl/[>=1.1 <4]")
+            self.requires("openssl/[>=1.1 <4]")
+        if self.options.with_icu:
+            self.requires("icu/75.1")
 
     def build_requirements(self):
         if is_msvc(self):
@@ -77,6 +79,10 @@ class LibpqConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
+        else:
+            if self.options.with_openssl or self.options.with_icu:
+                if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                    self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -98,6 +104,7 @@ class LibpqConan(ConanFile):
             tc = AutotoolsToolchain(self)
             tc.configure_args.append('--without-readline')
             tc.configure_args.append('--without-zlib')
+            tc.configure_args.append('--with-icu' if self.options.get_safe("with_icu") else '--without-icu')
             tc.configure_args.append('--with-openssl' if self.options.with_openssl else '--without-openssl')
             if cross_building(self) and not self.options.with_openssl:
                 tc.configure_args.append("--disable-strong-random")
@@ -112,6 +119,7 @@ class LibpqConan(ConanFile):
                 tc.make_args.append("MAKE_DLL={}".format(str(self.options.shared).lower()))
             tc.generate()
             AutotoolsDeps(self).generate()
+            PkgConfigDeps(self).generate()
 
     def _patch_sources(self):
         if is_msvc(self):
@@ -127,8 +135,9 @@ class LibpqConan(ConanFile):
                 system_libs.extend(dep.cpp_info.aggregated_components().system_libs)
 
             linked_system_libs = ", ".join(["'{}.lib'".format(lib) for lib in system_libs])
+            libraries_pattern = "libraries             => []," if Version(self.version) < '16' else "libraries => [],"
             replace_in_file(self,os.path.join(self.source_folder, "src", "tools", "msvc", "Project.pm"),
-                                  "libraries             => [],",
+                                  libraries_pattern,
                                   "libraries             => [{}],".format(linked_system_libs))
             runtime = {
                 "MT": "MultiThreaded",
@@ -155,15 +164,31 @@ class LibpqConan(ConanFile):
                     replace_in_file(self,solution_pm,
                                           "%s.lib" % crypto,
                                           "%s.lib" % openssl.cpp_info.components["crypto"].libs[0])
+                openssl_entry = "openssl => undef" if Version(self.version) >= "16.0" else "openssl   => undef"
                 replace_in_file(self,config_default_pl,
-                                      "openssl   => undef",
+                                      openssl_entry,
                                       "openssl   => '%s'" % openssl.package_folder.replace("\\", "/"))
+            if self.options.with_icu:
+                libicu = self.dependencies["icu"]
+                iculibdir = libicu.cpp_info.components["icu"].libdirs[0]
+                replace_in_file(self, solution_pm, "\\lib64\\icu", f"\\{iculibdir}\\icu")
+                icu_undef = "icu => undef" if Version(self.version) >= "16.0" else "icu       => undef"
+                replace_in_file(self,config_default_pl,
+                                        icu_undef,
+                                       "icu => '%s'" % libicu.package_folder.replace("\\", "/"))
         elif self.settings.os == "Windows":
             if self.settings.get_safe("compiler.threads") == "posix":
                 # Use MinGW pthread library
                 replace_in_file(self, os.path.join(self.source_folder, "src", "interfaces", "libpq", "Makefile"),
                 "ifeq ($(enable_thread_safety), yes)\nOBJS += pthread-win32.o\nendif",
                 "")
+        # When linking to static openssl, it comes with static pthread library too, failing with:
+        # libpq.so.5.15: U pthread_exit@GLIBC_2.2.5: libpq must not be calling any function which invokes exit
+        # https://www.postgresql.org/message-id/20210703001639.GB2374652%40rfd.leadboat.com
+        if Version(self.version) >= "15":
+            replace_in_file(self, os.path.join(self.source_folder, "src", "interfaces", "libpq", "Makefile"),
+                "-v __cxa_atexit",
+                "-v __cxa_atexit -e pthread_exit")
 
     def build(self):
         apply_conandata_patches(self)
@@ -175,21 +200,22 @@ class LibpqConan(ConanFile):
                     self.run("perl build.pl libpgport")
         else:
             autotools = Autotools(self)
-            with chdir(self, os.path.join(self.source_folder)):
+            with chdir(self, os.path.join(self.build_folder)):
                 autotools.configure()
-            with chdir(self, os.path.join(self.source_folder, "src", "backend")):
+            with chdir(self, os.path.join(self.build_folder, "src", "backend")):
                 autotools.make(target="generated-headers")
-            with chdir(self, os.path.join(self.source_folder, "src", "common")):
+            with chdir(self, os.path.join(self.build_folder, "src", "common")):
                 autotools.make()
-            with chdir(self, os.path.join(self.source_folder, "src", "include")):
+            with chdir(self, os.path.join(self.build_folder, "src", "include")):
                 autotools.make()
-            with chdir(self, os.path.join(self.source_folder, "src", "interfaces", "libpq")):
+            with chdir(self, os.path.join(self.build_folder, "src", "bin", "pg_config")):
+                autotools.make()
+            with chdir(self, os.path.join(self.build_folder, "src", "interfaces", "libpq")):
                 autotools.make()
             if Version(self.version) >= 12:
-                with chdir(self, os.path.join(self.source_folder, "src", "port")):
+                with chdir(self, os.path.join(self.build_folder, "src", "port")):
                     autotools.make()
-            with chdir(self, os.path.join(self.source_folder, "src", "bin", "pg_config")):
-                autotools.make()
+
 
     def _remove_unused_libraries_from_package(self):
         bin_folder = os.path.join(self.package_folder, "bin")
@@ -225,25 +251,25 @@ class LibpqConan(ConanFile):
                 copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
         else:
             autotools = Autotools(self)
-            with chdir(self, os.path.join(self.source_folder, "src", "common")):
+            with chdir(self, os.path.join(self.build_folder, "src", "common")):
                 autotools.install()
-            with chdir(self, os.path.join(self.source_folder, "src", "include")):
+            with chdir(self, os.path.join(self.build_folder, "src", "include")):
                 autotools.install()
-            with chdir(self, os.path.join(self.source_folder, "src", "interfaces", "libpq")):
+            with chdir(self, os.path.join(self.build_folder, "src", "interfaces", "libpq")):
                 autotools.install()
             if Version(self.version) >= 12:
-                with chdir(self, os.path.join(self.source_folder, "src", "port")):
+                with chdir(self, os.path.join(self.build_folder, "src", "port")):
                     autotools.install()
-            with chdir(self, os.path.join(self.source_folder, "src", "bin", "pg_config")):
+            with chdir(self, os.path.join(self.build_folder, "src", "bin", "pg_config")):
                 autotools.install()
-            copy(self, "*.h", src=os.path.join(self.build_folder, "src", "include", "catalog"),
+            copy(self, "*.h", src=os.path.join(self.source_folder, "src", "include", "catalog"),
                               dst=os.path.join(self.package_folder, "include", "catalog"))
             rmdir(self, os.path.join(self.package_folder, "share"))
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "include", "postgresql", "server"))
             self._remove_unused_libraries_from_package()
             fix_apple_shared_install_name(self)
-        copy(self, "*.h", src=os.path.join(self.build_folder, "src", "backend", "catalog"),
+        copy(self, "*.h", src=os.path.join(self.source_folder, "src", "backend", "catalog"),
                           dst=os.path.join(self.package_folder, "include", "catalog"))
 
     def package_info(self):
@@ -258,26 +284,27 @@ class LibpqConan(ConanFile):
 
         if self.options.with_openssl:
             self.cpp_info.components["pq"].requires.append("openssl::openssl")
+        if self.options.with_icu:
+            self.cpp_info.components["pq"].requires.append("icu::icu")
 
         if not self.options.shared:
             if is_msvc(self):
                 self.cpp_info.components["pgport"].libs = ["libpgport"]
                 self.cpp_info.components["pq"].requires.append("pgport")
-                if Version(self.version) >= "12":
-                    self.cpp_info.components["pgcommon"].libs = ["libpgcommon"]
-                    self.cpp_info.components["pq"].requires.append("pgcommon")
+                self.cpp_info.components["pgcommon"].libs = ["libpgcommon"]
+                self.cpp_info.components["pq"].requires.append("pgcommon")
             else:
                 self.cpp_info.components["pgcommon"].libs = ["pgcommon"]
                 self.cpp_info.components["pq"].requires.append("pgcommon")
-                if Version(self.version) >= "12":
-                    self.cpp_info.components["pgcommon"].libs.append("pgcommon_shlib")
-                    self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
-                    if self.settings.os == "Windows":
-                        self.cpp_info.components["pgport"].system_libs = ["ws2_32"]
-                    self.cpp_info.components["pgcommon"].requires.append("pgport")
+                self.cpp_info.components["pgcommon"].libs.append("pgcommon_shlib")
+                self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
+                if self.settings.os == "Windows":
+                    self.cpp_info.components["pgport"].system_libs = ["ws2_32"]
+                self.cpp_info.components["pgcommon"].requires.append("pgport")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["pq"].system_libs = ["pthread"]
+            self.cpp_info.components["pgcommon"].system_libs = ["m"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
 

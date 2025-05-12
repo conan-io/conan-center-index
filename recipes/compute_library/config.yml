@@ -1,0 +1,5 @@
+versions:
+  "23.08":
+    folder: all
+  "23.02.1":
+    folder: all

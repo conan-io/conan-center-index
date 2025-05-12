@@ -8,6 +8,7 @@ from conan import ConanFile, conan_version
 from conan.tools.build import stdcpp_library, check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, rmdir, rm
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.60.1"
 
@@ -22,11 +23,11 @@ class vvencRecipe(ConanFile):
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False], 
+        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False, 
+        "shared": False,
         "fPIC": True,
     }
 
@@ -59,10 +60,11 @@ class vvencRecipe(ConanFile):
         # and it cannot be built with newer C++ standard
         # because they have existing C++ features removed
         check_min_cppstd(self, 14)
-        # FIXME: linter complains, but function is there
-        # https://docs.conan.io/2.0/reference/tools/build.html?highlight=check_min_cppstd#conan-tools-build-check-max-cppstd
-        check_max_cppstd = getattr(sys.modules['conan.tools.build'], 'check_max_cppstd')
-        check_max_cppstd(self, 14)
+        if Version(self.version) < "1.10.0":
+            # FIXME: linter complains, but function is there
+            # https://docs.conan.io/2.0/reference/tools/build.html?highlight=check_min_cppstd#conan-tools-build-check-max-cppstd
+            check_max_cppstd = getattr(sys.modules['conan.tools.build'], 'check_max_cppstd')
+            check_max_cppstd(self, 14)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -80,7 +82,7 @@ class vvencRecipe(ConanFile):
         # object files created with newer binutils,
         # thus linker cannot find any valid object and therefore symbols
         # (fails to find `vvenc_get_version`, which is obviously always there)
-        # this is not exactly modeled by conan right now, 
+        # this is not exactly modeled by conan right now,
         # so "compiler" setting is closest thing to avoid an issue
         # (while technically it's not a compiler, but linker and archiver)
         # del self.info.settings.compiler

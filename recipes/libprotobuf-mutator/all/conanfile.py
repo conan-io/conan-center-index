@@ -1,8 +1,14 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibProtobufMutatorConan(ConanFile):
@@ -13,76 +19,117 @@ class LibProtobufMutatorConan(ConanFile):
     description = "A library to randomly mutate protobuffers."
     topics = ("test", "fuzzing", "protobuf")
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
-    exports_sources = ["CMakeLists.txt"]
-
-    _cmake = None
+    package_type = "library"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True
+    }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 14
 
     @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def _compilers_minimum_version(self):
+        return {
+            "apple-clang": "10",
+            "clang": "7",
+            "gcc": "5",
+            "msvc": "191",
+            "Visual Studio": "15",
+        }
+
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.get_safe("shared"):
+            self.options.rm_safe("fPIC")
+        if is_msvc(self):
+            self.options.rm_safe("shared")
+            self.package_type = "static-library"
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("protobuf/3.17.1")
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        # Protobuf headers are required by public src/binary_format.h and
+        self.requires("protobuf/4.25.3", transitive_headers=True)
+        # Abseil headers are required by public src/field_instance.h
+        self.requires("abseil/20240116.2")
 
     def validate(self):
-        if self.settings.compiler != "clang":
-            raise ConanInvalidConfiguration("Only clang allowed")
-        if self.settings.compiler.libcxx != "libstdc++11":
-            raise ConanInvalidConfiguration("Requires either compiler.libcxx=libstdc++11")
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.24 <4]")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, 'CMakeLists.txt'),
-            """include_directories(${PROTOBUF_INCLUDE_DIRS})""",
-            """include_directories(${protobuf_INCLUDE_DIRS})""")
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, 'CMakeLists.txt'),
-            """set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/external)""",
-            """# (disabled by conan) set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/external)""")
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, 'CMakeLists.txt'),
-            """add_subdirectory(examples EXCLUDE_FROM_ALL)""",
-            """# (disabled by conan) add_subdirectory(examples EXCLUDE_FROM_ALL)""")
+        # Preserves Conan as dependency manager
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+            "set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/external)",
+            "",
+        )
+        # Fix libprotobuf-mutator.pc installation origin path
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+            "${CMAKE_BINARY_DIR}/libprotobuf-mutator.pc",
+            "${CMAKE_CURRENT_BINARY_DIR}/libprotobuf-mutator.pc",
+        )
+        # Do not include examples when running CMake configure to avoid more dependencies
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+            "add_subdirectory(examples EXCLUDE_FROM_ALL)",
+            "",
+        )
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        self._cmake.definitions["LIB_PROTO_MUTATOR_TESTING"] = "OFF"
-        self._cmake.definitions["LIB_PROTO_MUTATOR_DOWNLOAD_PROTOBUF"] = "OFF"
-        self._cmake.definitions["LIB_PROTO_MUTATOR_WITH_ASAN"] = "OFF"
-        self._cmake.definitions["LIB_PROTO_MUTATOR_FUZZER_LIBRARIES"] = ""
-        # todo: check option(LIB_PROTO_MUTATOR_MSVC_STATIC_RUNTIME "Link static runtime libraries" ON)
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = VirtualBuildEnv(self)
+        tc.generate()
+        tc = CMakeToolchain(self)
+        tc.variables["LIB_PROTO_MUTATOR_TESTING"] = False
+        tc.variables["LIB_PROTO_MUTATOR_DOWNLOAD_PROTOBUF"] = False
+        tc.variables["LIB_PROTO_MUTATOR_WITH_ASAN"] = False
+        tc.variables["PKG_CONFIG_PATH"] = "share"
+        if is_msvc(self):
+            tc.variables["LIB_PROTO_MUTATOR_MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "OFF"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "libprotobuf-mutator"
-        self.cpp_info.names["cmake_find_package_multi"] = "libprotobuf-mutator"
+        self.cpp_info.components["mutator"].libs = ["protobuf-mutator"]
+        self.cpp_info.components["mutator"].set_property("cmake_target_name", "libprotobuf-mutator::protobuf-mutator")
+        self.cpp_info.components["mutator"].includedirs.append("include/libprotobuf-mutator")
+        self.cpp_info.components["mutator"].requires = ["protobuf::libprotobuf", "abseil::absl_strings"]
 
-        self.cpp_info.libs = ['protobuf-mutator-libfuzzer', 'protobuf-mutator']
-        self.cpp_info.includedirs.append(os.path.join("include", "libprotobuf-mutator"))
+        self.cpp_info.components["fuzzer"].libs = ['protobuf-mutator-libfuzzer']
+        self.cpp_info.components["fuzzer"].set_property("cmake_target_name", "libprotobuf-mutator::protobuf-mutator-libfuzzer")
+        self.cpp_info.components["fuzzer"].includedirs.append("include/libprotobuf-mutator")
+        self.cpp_info.components["fuzzer"].requires = ["mutator", "protobuf::libprotobuf"]

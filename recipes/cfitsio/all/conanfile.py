@@ -1,9 +1,10 @@
+import glob
+import os
+
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
-import glob
-import os
 
 required_conan_version = ">=1.54.0"
 
@@ -12,7 +13,7 @@ class CfitsioConan(ConanFile):
     name = "cfitsio"
     description = "C library for reading and writing data files in FITS " \
                   "(Flexible Image Transport System) data format"
-    license = "CFITSIO"
+    license = ("CFITSIO", "NASA-1.3")
     topics = ("fits", "image", "nasa", "astronomy", "astrophysics", "space")
     homepage = "https://heasarc.gsfc.nasa.gov/fitsio/"
     url = "https://github.com/conan-io/conan-center-index"
@@ -104,7 +105,11 @@ class CfitsioConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "License.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if Version(self.version) >= "4.4.0":
+            copy(self, "NASA*", src=os.path.join(self.source_folder, "licenses"),
+                 dst=os.path.join(self.package_folder, "licenses"))
+        else:
+            copy(self, "License.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

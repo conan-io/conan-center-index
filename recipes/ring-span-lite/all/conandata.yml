@@ -1,4 +1,7 @@
 sources:
+  "0.7.0":
+    url: "https://github.com/martinmoene/ring-span-lite/archive/v0.7.0.tar.gz"
+    sha256: "7650bb1bcf76cb0f7ac75240c5346203cbe7eb7027c0843c60253f6db08a93c1"
   "0.6.0":
     url: "https://github.com/martinmoene/ring-span-lite/archive/v0.6.0.tar.gz"
     sha256: "3248ee40a3147e6ba3cee051a838f727770654ade0c9852b1640f0f40d2e0573"

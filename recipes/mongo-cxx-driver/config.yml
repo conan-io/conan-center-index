@@ -1,4 +1,11 @@
 versions:
+  "3.11.0":
+    folder: all
+  "3.10.2":
+    folder: all
+  "3.10.1":
+    folder: all
+  # keep 3.8.1 for gdal
   "3.8.1":
     folder: all
   "3.8.0":
@@ -7,11 +14,6 @@ versions:
     folder: all
   "3.7.0":
     folder: all
+  # keep 3.6.7 for gdal
   "3.6.7":
-    folder: all
-  "3.6.6":
-    folder: all
-  "3.6.2":
-    folder: all
-  "3.6.1":
     folder: all

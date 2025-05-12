@@ -1,0 +1,13 @@
+diff --git a/include/CMakeLists.txt b/include/CMakeLists.txt
+index 137cbe9..c06dd41 100644
+--- a/include/CMakeLists.txt
++++ b/include/CMakeLists.txt
+@@ -10,7 +10,7 @@ SET(MARIADB_CLIENT_INCLUDES ${CC_SOURCE_DIR}/include/mariadb_com.h
+                             ${CC_SOURCE_DIR}/include/mariadb_ctype.h
+                             ${CC_SOURCE_DIR}/include/mariadb_rpl.h
+                             )
+-IF(NOT IS_SUBPROJECT)
++IF(TRUE)
+   SET(MARIADB_CLIENT_INCLUDES ${MARIADB_CLIENT_INCLUDES}
+                               ${CC_SOURCE_DIR}/include/mysqld_error.h
+                               )

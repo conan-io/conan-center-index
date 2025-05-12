@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import get, copy
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
 import os
@@ -35,7 +36,7 @@ class QuickJSConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.version >= "2023-12-09":
+        if Version(self.version) >= "2023-12-09":
             del self.options.use_bignum
 
     def configure(self):

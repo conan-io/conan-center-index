@@ -1,0 +1,20 @@
+commit 77056b1ab930c36c8066446615577be4d121e3ea
+Author: talyz <kim.lindberger@gmail.com>
+Date:   Thu Dec 14 11:43:16 2023 +0100
+
+    cmake: Disable the use of mmap on Windows
+
+diff --git a/tensorflow/lite/CMakeLists.txt b/tensorflow/lite/CMakeLists.txt
+index 83bc7629004..0958ed1b9ce 100644
+--- a/tensorflow/lite/CMakeLists.txt
++++ b/tensorflow/lite/CMakeLists.txt
+@@ -202,7 +202,8 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+   # Use NOMINMAX to disable the min / max macros in windows.h as they break
+   # use of std::min std::max.
+   # Use NOGDI to ERROR macro which breaks TensorFlow logging.
+-  list(APPEND TFLITE_TARGET_PRIVATE_OPTIONS "-DNOMINMAX" "-DNOGDI")
++  # Disable mmap, which is not available on Windows.
++  list(APPEND TFLITE_TARGET_PRIVATE_OPTIONS "-DNOMINMAX" "-DNOGDI" "-DTFLITE_MMAP_DISABLED")
+   # lite/kernels/conv.cc has more than 64k sections so enable /bigobj to
+   # support compilation with MSVC2015.
+   if(MSVC)

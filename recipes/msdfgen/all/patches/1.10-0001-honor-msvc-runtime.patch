@@ -1,0 +1,26 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -79,7 +79,6 @@ file(GLOB_RECURSE MSDFGEN_EXT_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "ext/
+ add_library(msdfgen-core "${CMAKE_CURRENT_SOURCE_DIR}/msdfgen.h" ${MSDFGEN_CORE_HEADERS} ${MSDFGEN_CORE_SOURCES})
+ add_library(msdfgen::msdfgen-core ALIAS msdfgen-core)
+ set_target_properties(msdfgen-core PROPERTIES PUBLIC_HEADER "${MSDFGEN_CORE_HEADERS}")
+-set_property(TARGET msdfgen-core PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+ target_compile_definitions(msdfgen-core PUBLIC
+     MSDFGEN_VERSION=${MSDFGEN_VERSION}
+     MSDFGEN_VERSION_MAJOR=${MSDFGEN_VERSION_MAJOR}
+@@ -127,7 +126,6 @@ if(NOT MSDFGEN_CORE_ONLY)
+     add_library(msdfgen-ext "${CMAKE_CURRENT_SOURCE_DIR}/msdfgen-ext.h" ${MSDFGEN_EXT_HEADERS} ${MSDFGEN_EXT_SOURCES})
+     add_library(msdfgen::msdfgen-ext ALIAS msdfgen-ext)
+     set_target_properties(msdfgen-ext PROPERTIES PUBLIC_HEADER "${MSDFGEN_EXT_HEADERS}")
+-    set_property(TARGET msdfgen-ext PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+     target_compile_definitions(msdfgen-ext PUBLIC MSDFGEN_USE_LIBPNG)
+     target_link_libraries(msdfgen-ext PRIVATE msdfgen::msdfgen-core Freetype::Freetype tinyxml2::tinyxml2 PNG::PNG)
+     target_include_directories(msdfgen-ext
+@@ -171,7 +169,6 @@ if(MSDFGEN_BUILD_STANDALONE)
+     add_executable(msdfgen ${MSDFGEN_STANDALONE_SOURCES})
+     target_compile_definitions(msdfgen PUBLIC MSDFGEN_STANDALONE)
+     target_compile_definitions(msdfgen PRIVATE MSDFGEN_VERSION_UNDERLINE=${MSDFGEN_VERSION_UNDERLINE})
+-    set_property(TARGET msdfgen PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+     target_link_libraries(msdfgen PRIVATE msdfgen::msdfgen)
+     set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT msdfgen)
+ endif()

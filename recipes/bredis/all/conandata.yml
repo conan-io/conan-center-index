@@ -1,0 +1,4 @@
+sources:
+  "0.12":
+    url: "https://github.com/basiliscos/cpp-bredis/archive/refs/tags/v0.12.tar.gz"
+    sha256: "c5a6aa58835d5ef8cd97c4ae7e677f6237ef4ee01ae4a609293e2351c01db6cc"

@@ -1,0 +1,7 @@
+sources:
+  "2.4.0":
+    url: https://github.com/mpusz/units/archive/v2.4.0.tar.gz
+    sha256: 777e53ba8da891161e90a93b90b92fa66951d49aaae1b0203ddf934532bbeb56
+  "2.3.0":
+    url: https://github.com/mpusz/units/archive/v2.3.0.tar.gz
+    sha256: ce2f167ff788ae769e73ea7676f15302827cd37908da3928dcae048f916898d6

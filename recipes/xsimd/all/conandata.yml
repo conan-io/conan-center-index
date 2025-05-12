@@ -1,4 +1,10 @@
 sources:
+  "13.0.0":
+    url: "https://github.com/xtensor-stack/xsimd/archive/13.0.0.tar.gz"
+    sha256: "8bdbbad0c3e7afa38d88d0d484d70a1671a1d8aefff03f4223ab2eb6a41110a3"
+  "12.1.1":
+    url: "https://github.com/xtensor-stack/xsimd/archive/12.1.1.tar.gz"
+    sha256: "73f94a051278ef3da4533b691d31244d12074d5d71107473a9fd8d7be15f0110"
   "12.1.0":
     url: "https://github.com/xtensor-stack/xsimd/archive/12.1.0.tar.gz"
     sha256: "86b86e0aeba7a85575f6e079728f0c2b65307dddb7210487f2b7cb261ac8a4a2"

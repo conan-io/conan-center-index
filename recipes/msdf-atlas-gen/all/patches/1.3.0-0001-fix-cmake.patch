@@ -1,0 +1,23 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5b7f6db..1936ca5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -109,7 +109,8 @@ target_include_directories(msdf-atlas-gen INTERFACE
+ if(MSDF_ATLAS_NO_ARTERY_FONT)
+     target_compile_definitions(msdf-atlas-gen PUBLIC MSDF_ATLAS_NO_ARTERY_FONT)
+ else()
+-    target_include_directories(msdf-atlas-gen PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/artery-font-format)
++    find_package(artery-font-format REQUIRED CONFIG)
++    target_link_libraries(msdf-atlas-gen PRIVATE artery-font-format::artery-font-format)
+ endif()
+ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT msdf-atlas-gen)
+ 
+@@ -118,7 +119,7 @@ target_link_libraries(msdf-atlas-gen PRIVATE Threads::Threads)
+ if(NOT MSDFGEN_DISABLE_PNG)
+     target_link_libraries(msdf-atlas-gen PRIVATE PNG::PNG)
+ endif()
+-target_link_libraries(msdf-atlas-gen PUBLIC msdfgen::msdfgen)
++target_link_libraries(msdf-atlas-gen PUBLIC msdfgen::msdfgen msdfgen::msdfgen-ext)
+ 
+ if(BUILD_SHARED_LIBS AND WIN32)
+     target_compile_definitions(msdf-atlas-gen PRIVATE "MSDF_ATLAS_PUBLIC=__declspec(dllexport)")

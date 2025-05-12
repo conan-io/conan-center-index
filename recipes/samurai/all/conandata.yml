@@ -1,4 +1,10 @@
 sources:
+  "0.16.0":
+    url: "https://github.com/hpc-maths/samurai/archive/v0.16.0.tar.gz"
+    sha256: "61616de42557e5cd5e9483103fd640f94f3235354e42a22a0ec76520196059a5"
+  "0.13.0":
+    url: "https://github.com/hpc-maths/samurai/archive/v0.13.0.tar.gz"
+    sha256: "f38e379218b1206fc5c5e157ee5e80687721a896f70b892623d9f30280529448"
   "0.9.0":
     url: "https://github.com/hpc-maths/samurai/archive/v0.9.0.tar.gz"
     sha256: "49f94a7451b1b50cab335a62e294e612fea27cbf5b131827eb69a8e228ad8010"

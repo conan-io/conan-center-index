@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4b0a02b..a9cc6b5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,7 +1,6 @@
+ cmake_minimum_required(VERSION 3.10)
+ 
+ project(LASZIP CXX C)
+-set(CMAKE_CXX_STANDARD 17)
+ string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
+ 
+ set(ROOT_DIR "${PROJECT_SOURCE_DIR}")

@@ -12,10 +12,10 @@ required_conan_version = ">=1.54.0"
 class HighFiveConan(ConanFile):
     name = "highfive"
     description = "HighFive is a modern header-only C++11 friendly interface for libhdf5."
-    license = "Boost Software License 1.0"
-    topics = ("hdf5", "hdf", "data")
-    homepage = "https://github.com/BlueBrain/HighFive"
+    license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/BlueBrain/HighFive"
+    topics = ("hdf5", "hdf", "data", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -42,7 +42,7 @@ class HighFiveConan(ConanFile):
         else:
             self.requires("hdf5/1.14.3")
         if self.options.with_boost:
-            self.requires("boost/1.84.0")
+            self.requires("boost/1.85.0")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.with_xtensor:

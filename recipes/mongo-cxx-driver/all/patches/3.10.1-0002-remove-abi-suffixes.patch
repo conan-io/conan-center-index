@@ -1,0 +1,26 @@
+diff --git a/cmake/BsoncxxUtil.cmake b/cmake/BsoncxxUtil.cmake
+index c72f98e..5f977e1 100644
+--- a/cmake/BsoncxxUtil.cmake
++++ b/cmake/BsoncxxUtil.cmake
+@@ -76,7 +76,7 @@ function(bsoncxx_add_library TARGET OUTPUT_NAME LINK_TYPE)
+         endif()
+ 
+         # MSVC-specific ABI tag suffixes.
+-        if(MSVC)
++        if(0)
+             set(vs_suffix "")
+ 
+             # Include the target architecture if applicable (Win32, x64, etc.).
+diff --git a/cmake/MongocxxUtil.cmake b/cmake/MongocxxUtil.cmake
+index de9210c..f9937f4 100644
+--- a/cmake/MongocxxUtil.cmake
++++ b/cmake/MongocxxUtil.cmake
+@@ -63,7 +63,7 @@ function(mongocxx_add_library TARGET OUTPUT_NAME LINK_TYPE)
+         endif()
+ 
+         # MSVC-specific ABI tag suffixes. Inherit from bsoncxx.
+-        if(MSVC)
++        if(0)
+             get_target_property(vs_suffix ${bsoncxx_target} BSONCXX_ABI_TAG_VS_SUFFIX)
+             set_target_properties(${TARGET} PROPERTIES
+                 BSONCXX_ABI_TAG_VS_SUFFIX ${vs_suffix}

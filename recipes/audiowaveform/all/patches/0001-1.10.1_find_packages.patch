@@ -1,0 +1,66 @@
+Use packages that are provided by conan
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -88,40 +88,11 @@ if(BUILD_STATIC)
+     endif()
+ endif(BUILD_STATIC)
+ 
+-find_package(LibGD REQUIRED)
+-if(LIBGD_FOUND)
+-    message(STATUS "LIBGD_INCLUDE_DIRS='${LIBGD_INCLUDE_DIRS}'")
+-    message(STATUS "LIBGD_LIBRARIES=${LIBGD_LIBRARIES}")
+-    include_directories(${LIBGD_INCLUDE_DIRS})
+-endif(LIBGD_FOUND)
+-
+-find_package(LibSndFile REQUIRED)
+-if(LIBSNDFILE_FOUND)
+-    message(STATUS "LIBSNDFILE_INCLUDE_DIRS='${LIBSNDFILE_INCLUDE_DIRS}'")
+-    message(STATUS "LIBSNDFILE_LIBRARIES=${LIBSNDFILE_LIBRARIES}")
+-    include_directories(${LIBSNDFILE_INCLUDE_DIRS})
+-endif(LIBSNDFILE_FOUND)
+-
+-find_package(LibMad REQUIRED)
+-if(LIBMAD_FOUND)
+-    message(STATUS "LIBMAD_INCLUDE_DIRS='${LIBMAD_INCLUDE_DIRS}'")
+-    message(STATUS "LIBMAD_LIBRARIES=${LIBMAD_LIBRARIES}")
+-    include_directories(${LIBMAD_INCLUDE_DIRS})
+-endif(LIBMAD_FOUND)
+-
+-find_package(LibId3Tag REQUIRED)
+-if(LIBID3TAG_FOUND)
+-    message(STATUS "LIBID3TAG_INCLUDE_DIRS='${LIBID3TAG_INCLUDE_DIRS}'")
+-    message(STATUS "LIBID3TAG_LIBRARIES=${LIBID3TAG_LIBRARIES}")
+-    include_directories(${LIBID3TAG_INCLUDE_DIRS})
+-endif(LIBID3TAG_FOUND)
+-
+-find_package(Boost 1.46.0 COMPONENTS program_options filesystem regex system REQUIRED)
+-if(Boost_FOUND)
+-    message(STATUS "Boost_INCLUDE_DIRS='${Boost_INCLUDE_DIRS}'")
+-    message(STATUS "Boost_LIBRARIES='${Boost_LIBRARIES}'")
+-    include_directories(${Boost_INCLUDE_DIRS})
+-endif(Boost_FOUND)
++find_package(libgd REQUIRED CONFIG)
++find_package(SndFile REQUIRED CONFIG)
++find_package(libmad REQUIRED CONFIG)
++find_package(libid3tag REQUIRED CONFIG)
++find_package(Boost COMPONENTS program_options filesystem regex REQUIRED)
+ 
+ #-------------------------------------------------------------------------------
+ #
+@@ -278,11 +249,11 @@ add_executable(audiowaveform ${SRCS})
+ 
+ # Specify libraries to link against.
+ set(LIBS
+-    ${LIBSNDFILE_LIBRARIES}
+-    ${LIBGD_LIBRARIES}
+-    ${LIBMAD_LIBRARIES}
+-    ${LIBID3TAG_LIBRARIES}
+-    ${Boost_LIBRARIES}
++    SndFile::sndfile
++    libgd::libgd
++    libmad::libmad
++    libid3tag::libid3tag
++    Boost::program_options Boost::filesystem Boost::regex
+ )
+ 
+ target_link_libraries(audiowaveform ${LIBS})

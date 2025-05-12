@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -45,8 +45,6 @@ class RoaringConan(ConanFile):
         if self.settings.arch not in ("x86", "x86_64"):
             del self.options.with_avx
             del self.options.with_avx512
-        elif Version(self.version) < "1.1.0":
-            del self.options.with_avx512
         if not str(self.settings.arch).startswith("arm"):
             del self.options.with_neon
 
@@ -79,11 +77,11 @@ class RoaringConan(ConanFile):
         tc.variables["ENABLE_ROARING_TESTS"] = False
         # Relocatable shared lib on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if Version(self.version) < "3.0.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):
-        if Version(self.version) < "2.0.0":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_MACOSX_RPATH OFF)", "")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

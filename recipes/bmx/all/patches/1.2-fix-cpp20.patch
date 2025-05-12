@@ -1,0 +1,26 @@
+diff --git deps/libMXFpp/libMXF++/MXFVersion.cpp deps/libMXFpp/libMXF++/MXFVersion.cpp
+index 333d5871..bb247a32 100644
+--- deps/libMXFpp/libMXF++/MXFVersion.cpp
++++ deps/libMXFpp/libMXF++/MXFVersion.cpp
+@@ -33,6 +33,8 @@
+ #include "config.h"
+ #endif
+ 
++#include <string>
++
+ #include "git.h"
+ #include "fallback_git_version.h"
+ 
+diff --git src/common/Version.cpp src/common/Version.cpp
+index a4f00e14..d51da64a 100644
+--- src/common/Version.cpp
++++ src/common/Version.cpp
+@@ -219,7 +219,7 @@ mxfProductVersion bmx::get_bmx_mxf_product_version()
+         // Set the patch version value to the commit offset from the release tag.
+         // The commit offset is part of the git describe tag string which has the
+         // format "<tag>-<offset>-g<commit id>"
+-        string describe = bmx_git::DescribeTag();
++        string describe = std::string(bmx_git::DescribeTag());
+ #ifdef PACKAGE_GIT_VERSION_STRING
+         if (describe.empty() || describe == "unknown")
+             describe = PACKAGE_GIT_VERSION_STRING;

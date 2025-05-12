@@ -1,7 +1,7 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.android import android_abi
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, to_apple_arch
 from conan.tools.build import build_jobs, check_min_cppstd, cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, copy, get, load, replace_in_file, rm, rmdir, save, export_conandata_patches, apply_conandata_patches
@@ -10,6 +10,7 @@ from conan.tools.microsoft import is_msvc, msvc_runtime_flag, is_msvc_static_run
 from conan.tools.scm import Version
 import configparser
 import glob
+from io import StringIO
 import itertools
 import os
 import textwrap
@@ -55,7 +56,7 @@ class QtConan(ConanFile):
         "with_libjpeg": ["libjpeg", "libjpeg-turbo", False],
         "with_libpng": [True, False],
         "with_sqlite3": [True, False],
-        "with_mysql": [True, False],
+        "with_mysql": ["mysql", "mariadb", False],
         "with_pq": [True, False],
         "with_odbc": [True, False],
         "with_libalsa": [True, False],
@@ -99,7 +100,7 @@ class QtConan(ConanFile):
         "with_libjpeg": "libjpeg",
         "with_libpng": True,
         "with_sqlite3": True,
-        "with_mysql": True,
+        "with_mysql": "mysql",
         "with_pq": True,
         "with_odbc": True,
         "with_libalsa": False,
@@ -122,9 +123,10 @@ class QtConan(ConanFile):
         "sysroot": None,
         "config": None,
         "multiconfiguration": False,
-        "essential_modules": not os.getenv('CONAN_CENTER_BUILD_SERVICE')
     }
-    default_options.update({f"{status}_modules": False for status in _module_statuses if status != "essential"})
+    # essential_modules, addon_modules, deprecated_modules, preview_modules:
+    #    these are only provided for convenience, set to False by default
+    default_options.update({f"{status}_modules": False for status in _module_statuses})
 
     no_copy_source = True
     short_paths = True
@@ -154,20 +156,17 @@ class QtConan(ConanFile):
                 raise ConanInvalidConfiguration(msg)
 
             # In any case, check its actual version for compatibility
-            from six import StringIO  # Python 2 and 3 compatible
-            mybuf = StringIO()
-            cmd_v = f"\"{python_exe}\" --version"
-            self.run(cmd_v, mybuf)
-            verstr = mybuf.getvalue().strip().split("Python ")[1]
-            if verstr.endswith("+"):
-                verstr = verstr[:-1]
+            command_output = StringIO()
+            cmd_v = f"\"{python_exe}\" -c \"import platform;print(platform.python_version())\""
+            self.run(cmd_v, command_output)
+            verstr = command_output.getvalue().strip()
             version = Version(verstr)
             # >= 2.7.5 & < 3
             v_min = "2.7.5"
             v_max = "3.0.0"
             if (version >= v_min) and (version < v_max):
                 msg = ("Found valid Python 2 required for QtWebengine:"
-                       f" version={mybuf.getvalue()}, path={python_exe}")
+                       f" version={verstr}, path={python_exe}")
                 self.output.success(msg)
             else:
                 msg = (f"Found Python 2 in path, but with invalid version {verstr}"
@@ -192,7 +191,6 @@ class QtConan(ConanFile):
         if self.settings.compiler in ["gcc", "clang"] and Version(self.settings.compiler.version) < "5.3":
             del self.options.with_mysql
         if self.settings.os == "Windows":
-            self.options.with_mysql = False
             self.options.opengl = "dynamic"
             del self.options.with_gssapi
         if self.settings.os != "Linux":
@@ -209,23 +207,27 @@ class QtConan(ConanFile):
         if self.settings.os != "Android":
             del self.options.android_sdk
 
+    def _debug_output(self, message):
+        if Version(conan_version) >= "2":
+            self.output.debug(message)
+
     def configure(self):
         # if self.settings.os != "Linux":
         #         self.options.with_libiconv = False # QTBUG-84708
 
         if not self.options.gui:
-            del self.options.opengl
-            del self.options.with_vulkan
-            del self.options.with_freetype
-            del self.options.with_fontconfig
-            del self.options.with_harfbuzz
-            del self.options.with_libjpeg
-            del self.options.with_libpng
-            del self.options.with_md4c
-            del self.options.with_x11
+            self.options.rm_safe("opengl")
+            self.options.rm_safe("with_vulkan")
+            self.options.rm_safe("with_freetype")
+            self.options.rm_safe("with_fontconfig")
+            self.options.rm_safe("with_harfbuzz")
+            self.options.rm_safe("with_libjpeg")
+            self.options.rm_safe("with_libpng")
+            self.options.rm_safe("with_md4c")
+            self.options.rm_safe("with_x11")
 
         if not self.options.with_dbus:
-            del self.options.with_atspi
+            self.options.rm_safe("with_atspi")
 
         if self.options.multiconfiguration:
             del self.settings.build_type
@@ -251,25 +253,50 @@ class QtConan(ConanFile):
         for m in submodules_tree:
             assert m in ["qtbase", "qtqa", "qtrepotools"] or m in self._submodules, "module %s is not present in recipe options : (%s)" % (m, ",".join(self._submodules))
 
-        for m in self._submodules:
-            if m not in submodules_tree:
-                delattr(self.options, m)
-
-        def _enablemodule(mod):
-            if mod != "qtbase":
-                setattr(self.options, mod, True)
-            for req in submodules_tree[mod]["depends"]:
-                _enablemodule(req)
-
         for module in self._submodules:
-            if self.options.get_safe(module):
-                _enablemodule(module)
-            else:
-                if module in submodules_tree:
-                    for status in self._module_statuses:
-                        if getattr(self.options, f"{status}_modules") and submodules_tree[module]['status'] == status:
-                            _enablemodule(module)
-                            break
+            if module not in submodules_tree:
+                self._debug_output(f"qt5: removing {module} from options as it is not an option for this version, or it is ignored or obsolete")
+                self.options.rm_safe(module)
+
+        # Requested modules:
+        # - any module for non-removed options that have 'True' value
+        # - any enabled via `xxx_modules` that does not have a 'False' value
+        # Note that at this point, the submodule options dont have a value unless one is given externally
+        # to the recipe (e.g. via the command line, a profile, or a consumer)
+        requested_modules = set([module for module in self._submodules if self.options.get_safe(module)])
+        for module in [m for m in self._submodules if m in submodules_tree]:
+            status = submodules_tree[module]['status']
+            is_disabled = self.options.get_safe(module) == False
+            if self.options.get_safe(f"{status}_modules"):
+                if not is_disabled:
+                    requested_modules.add(module)
+                else:
+                    self.output.warning(f"qt5: {module} requested because {status}_modules=True"
+                                        f" but it has been explicitly disabled with {module}=False")
+
+        self.output.info(f"qt5: requested modules {list(requested_modules)}")
+
+        required_modules = {}
+        for module in requested_modules:
+            deps = submodules_tree[module]["depends"]
+            for dep in deps:
+                required_modules.setdefault(dep,[]).append(module)
+
+        required_but_disabled = [m for m in required_modules.keys() if self.options.get_safe(m) == False]
+        if required_modules:
+            self._debug_output(f"qt5: required_modules modules {list(required_modules.keys())}")
+        if required_but_disabled:
+            required_by = set()
+            for m in required_but_disabled:
+                required_by.update(required_modules[m])
+                raise ConanInvalidConfiguration(f"Modules {required_but_disabled} are explicitly disabled, "
+                                    f"but are required by {list(required_by)}, enabled by other options")
+
+        enabled_modules = requested_modules.union(set(required_modules.keys()))
+        enabled_modules.discard("qtbase")
+
+        for module in list(enabled_modules):
+            setattr(self.options, module, True)
 
         for module in self._submodules:
             if module in self.options and not self.options.get_safe(module):
@@ -284,6 +311,16 @@ class QtConan(ConanFile):
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.qtwebengine:
                 self.options.with_fontconfig = True
+
+        for status in self._module_statuses:
+            # These are convenience only, should not affect package_id
+            option_name = f"{status}_modules"
+            self._debug_output(f"qt5 removing convenience option: {option_name},"
+                              f" see individual module options")
+            self.options.rm_safe(option_name)
+
+        for option in self.options.items():
+            self._debug_output(f"qt5 option {option[0]}={option[1]}")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -377,15 +414,17 @@ class QtConan(ConanFile):
             self.requires("harfbuzz/8.3.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/3.0.1")
+                self.requires("libjpeg-turbo/[>=3.0 <3.1]")
             else:
                 self.requires("libjpeg/9e")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
-            self.requires("libpng/1.6.42")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.45.0")
-        if self.options.get_safe("with_mysql", False):
+            self.requires("sqlite3/[>=3.45.0 <4]")
+        if self.options.get_safe("with_mysql", False) == "mysql":
             self.requires("libmysqlclient/8.1.0")
+        if self.options.get_safe("with_mysql", False) == "mariadb":
+            self.requires("mariadb-connector-c/3.3.3")
         if self.options.with_pq:
             self.requires("libpq/15.4")
         if self.options.with_odbc:
@@ -404,7 +443,7 @@ class QtConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("expat/2.6.0")
+            self.requires("expat/[>=2.6.2 <3]")
             self.requires("opus/1.4")
             if not self.options.qtwayland:
                 self.requires("xorg-proto/2022.2")
@@ -440,14 +479,12 @@ class QtConan(ConanFile):
                 self.info.settings.compiler.runtime_type = "Release/Debug"
         if self.info.settings.os == "Android":
             del self.info.options.android_sdk
-        for status in self._module_statuses:
-            delattr(self.info.options, f"{status}_modules")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and is_msvc(self):
-            self.tool_requires("jom/1.1.3")
+            self.tool_requires("jom/[>=1.1 <2]")
         if self.options.qtwebengine:
-            self.tool_requires("ninja/1.11.1")
+            self.tool_requires("ninja/[>=1.12 <2]")
             self.tool_requires("nodejs/18.15.0")
             self.tool_requires("gperf/3.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
@@ -613,9 +650,6 @@ class QtConan(ConanFile):
         if cross_building(self):
             args.append(f"-extprefix {self.package_folder}")
         args.append("-v")
-        args.append("-archdatadir  %s" % os.path.join(self.package_folder, "bin", "archdatadir"))
-        args.append("-datadir  %s" % os.path.join(self.package_folder, "bin", "datadir"))
-        args.append("-sysconfdir  %s" % os.path.join(self.package_folder, "bin", "sysconfdir"))
         if self.options.commercial:
             args.append("-commercial")
         else:
@@ -727,6 +761,7 @@ class QtConan(ConanFile):
                   ("libjpeg-turbo", "LIBJPEG"),
                   ("libpng", "LIBPNG"),
                   ("sqlite3", "SQLITE"),
+                  ("mariadb-connector-c", "MYSQL"),
                   ("libmysqlclient", "MYSQL"),
                   ("libpq", "PSQL"),
                   ("odbc", "ODBC"),
@@ -754,12 +789,14 @@ class QtConan(ConanFile):
 
         if "libmysqlclient" in [d.ref.name for d in self.dependencies.direct_host.values()]:
             args.append("-mysql_config \"%s\"" % os.path.join(self.dependencies["libmysqlclient"].package_folder, "bin", "mysql_config"))
+        if "mariadb-connector-c" in [d.ref.name for d in self.dependencies.direct_host.values()]:
+            args.append("-mysql_config \"%s\"" % os.path.join(self.dependencies["mariadb-connector-c"].package_folder, "bin", "mysql_config"))
         if "libpq" in [d.ref.name for d in self.dependencies.direct_host.values()]:
             args.append("-psql_config \"%s\"" % os.path.join(self.dependencies["libpq"].package_folder, "bin", "pg_config"))
         if self.settings.os == "Macos":
             args += ["-no-framework"]
-            if self.settings.arch == "armv8":
-                args.append('QMAKE_APPLE_DEVICE_ARCHS="arm64"')
+            if cross_building(self):
+                args.append(f"QMAKE_APPLE_DEVICE_ARCHS={to_apple_arch(self)}")
         elif self.settings.os == "Android":
             args += [f"-android-ndk-platform android-{self.settings.os.api_level}"]
             args += [f"-android-abis {android_abi(self)}"]
@@ -826,6 +863,13 @@ class QtConan(ConanFile):
                     # see https://doc.qt.io/qt-5/qmake-variable-reference.html#qmake-rpathdir
                     args += [f"QMAKE_RPATHDIR+=\"{libpath}\""]
 
+        if self.settings.compiler == "apple-clang" and self.options.qtmultimedia:
+            # XCode 14.3 finally removes std::unary_function, so compilation fails
+            # when using newer SDKs when using C++17 or higher.
+            # This macro re-enables them. Should be safe to pass this macro even 
+            # in earlier versions, as it would have no effect.
+            args += ['QMAKE_CXXFLAGS+="-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION=1"']
+
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             args += ["-qt-webengine-ffmpeg",
                      "-system-webengine-opus",
@@ -854,18 +898,7 @@ class QtConan(ConanFile):
         with chdir(self, "build_folder"):
             self.run(f"{self._make_program()} install")
         save(self, os.path.join(self.package_folder, "bin", "qt.conf"), """[Paths]
-Prefix = ..
-ArchData = bin/archdatadir
-HostData = bin/archdatadir
-Data = bin/datadir
-Sysconf = bin/sysconfdir
-LibraryExecutables = bin/archdatadir/bin
-Plugins = bin/archdatadir/plugins
-Imports = bin/archdatadir/imports
-Qml2Imports = bin/archdatadir/qml
-Translations = bin/datadir/translations
-Documentation = bin/datadir/doc
-Examples = bin/datadir/examples""")
+Prefix = ..""")
         copy(self, "*LICENSE*", os.path.join(self.source_folder, "qt5/"), os.path.join(self.package_folder, "licenses"),
              excludes="qtbase/examples/*")
         for module in self._submodules:
@@ -877,6 +910,7 @@ Examples = bin/datadir/examples""")
         rm(self, "*.la*", os.path.join(self.package_folder, "lib"), recursive=True)
         rm(self, "*.pdb*", os.path.join(self.package_folder, "lib"), recursive=True)
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"), recursive=True)
+        rm(self, "*.pdb", os.path.join(self.package_folder, "plugins"), recursive=True)
         # "Qt5Bootstrap" is internal Qt library - removing it to avoid linking error, since it contains
         # symbols that are also in "Qt5Core.lib". It looks like there is no "Qt5Bootstrap.dll".
         for fl in glob.glob(os.path.join(self.package_folder, "lib", "*Qt5Bootstrap*")):
@@ -977,6 +1011,11 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtdeclarative:
             _create_private_module("Qml", ["CorePrivate", "Qml"])
+            if self.options.gui:
+                _create_private_module("Quick", ["CorePrivate", "GuiPrivate", "QmlPrivate", "Quick"])
+
+        if self.options.qtscxml:
+            _create_private_module("Scxml", ["Scxml", "Qml"])
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Qt5")
@@ -1049,7 +1088,7 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
             if not self.options.shared:
                 self.cpp_info.components[componentname].libs = [libname + libsuffix]
-            self.cpp_info.components[componentname].libdirs = [os.path.join("bin", "archdatadir", "plugins", plugintype)]
+            self.cpp_info.components[componentname].libdirs = [os.path.join("plugins", plugintype)]
             self.cpp_info.components[componentname].includedirs = []
             if "Core" not in requires:
                 requires.append("Core")
@@ -1073,6 +1112,9 @@ Examples = bin/datadir/examples""")
             "exec_prefix=${prefix}",
         ]
         self.cpp_info.components["qtCore"].set_property("pkg_config_custom_content", "\n".join(pkg_config_vars))
+
+        if self.settings.build_type != "Debug":
+            self.cpp_info.components['qtCore'].defines.append('QT_NO_DEBUG')
 
         if self.settings.os == "Windows":
             module = "WinMain"
@@ -1216,8 +1258,10 @@ Examples = bin/datadir/examples""")
             _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"])
         if self.options.with_pq:
             _create_plugin("QPSQLDriverPlugin", "qsqlpsql", "sqldrivers", ["libpq::libpq"])
-        if self.options.get_safe("with_mysql", False):
+        if self.options.get_safe("with_mysql", False) == "mysql":
             _create_plugin("QMySQLDriverPlugin", "qsqlmysql", "sqldrivers", ["libmysqlclient::libmysqlclient"])
+        if self.options.get_safe("with_mysql", False) == "mariadb":
+            _create_plugin("QMySQLDriverPlugin", "qsqlmysql", "sqldrivers", ["mariadb-connector-c::mariadb-connector-c"])
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 _create_plugin("QODBCDriverPlugin", "qsqlodbc", "sqldrivers", ["odbc::odbc"])
@@ -1246,6 +1290,7 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components["qtQmlImportScanner"].requires = _get_corrected_reqs(["Qml"])
             if self.options.gui:
                 _create_module("Quick", ["Gui", "Qml", "QmlModels"])
+                _add_build_module("qtQuick", self._cmake_qt5_private_file("Quick"))
                 if self.options.widgets:
                     _create_module("QuickWidgets", ["Gui", "Qml", "Quick", "Widgets"])
                 _create_module("QuickShapes", ["Gui", "Qml", "Quick"])
@@ -1334,6 +1379,7 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtscxml:
             _create_module("Scxml", ["Qml"])
+            _add_build_module("qtScxml", self._cmake_qt5_private_file("Scxml"))
 
         if self.options.qtpurchasing:
             _create_module("Purchasing")
@@ -1391,8 +1437,10 @@ Examples = bin/datadir/examples""")
                 _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
                 _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
             if self.settings.os == "Linux":
-                _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
-                _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
+                if self.options.with_gstreamer:
+                    _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
+                if self.options.get_safe("with_libalsa", False):
+                    _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
             if self.settings.os == "Windows":
                 _create_plugin("AudioCaptureServicePlugin", "qtmedia_audioengine", "mediaservice", [])
                 _create_plugin("DSServicePlugin", "dsengine", "mediaservice", [])
@@ -1491,7 +1539,7 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.components["qtCore"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
 
-        self.cpp_info.components["qtCore"].builddirs.append(os.path.join("bin","archdatadir","bin"))
+        self.cpp_info.components["qtCore"].builddirs.append(os.path.join("bin"))
         _add_build_module("qtCore", self._cmake_core_extras_file)
         _add_build_module("qtCore", self._cmake_qt5_private_file("Core"))
 
@@ -1506,8 +1554,7 @@ Examples = bin/datadir/examples""")
             os.path.join("lib", "cmake", "Qt5Core", "Qt5CoreConfigExtrasMkspecDir.cmake"))
         mkspecs_dir_begin = qt5core_config_extras_mkspec_dir_cmake.find("mkspecs/")
         mkspecs_dir_end = qt5core_config_extras_mkspec_dir_cmake.find("\"", mkspecs_dir_begin)
-        mkspecs_dir = qt5core_config_extras_mkspec_dir_cmake[mkspecs_dir_begin:mkspecs_dir_end].split('/')
-        mkspecs_path = os.path.join("bin", "archdatadir", *mkspecs_dir)
+        mkspecs_path = qt5core_config_extras_mkspec_dir_cmake[mkspecs_dir_begin:mkspecs_dir_end]
         assert os.path.exists(mkspecs_path)
         self.cpp_info.components["qtCore"].includedirs.append(mkspecs_path)
 

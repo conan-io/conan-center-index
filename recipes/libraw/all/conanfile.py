@@ -1,8 +1,10 @@
+import os
+
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
-import os
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
 
@@ -18,6 +20,7 @@ class LibRawConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "build_thread_safe": [True, False],
         "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_lcms": [True, False],
         "with_jasper": [True, False],
@@ -25,6 +28,7 @@ class LibRawConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "build_thread_safe": False,
         "with_jpeg": "libjpeg",
         "with_lcms": True,
         "with_jasper": True,
@@ -38,6 +42,8 @@ class LibRawConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if is_msvc(self):
+            del self.options.build_thread_safe
 
     def configure(self):
         if self.options.shared:
@@ -56,7 +62,7 @@ class LibRawConan(ConanFile):
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.3")
         if self.options.with_lcms:
-            self.requires("lcms/2.14")
+            self.requires("lcms/2.16")
         if self.options.with_jasper:
             self.requires("jasper/4.0.0")
 
@@ -71,6 +77,7 @@ class LibRawConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["RAW_LIB_VERSION_STRING"] = self.version
         tc.variables["LIBRAW_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["LIBRAW_BUILD_THREAD_SAFE"] = self.options.get_safe("build_thread_safe", False)
         tc.variables["LIBRAW_WITH_JPEG"] = bool(self.options.with_jpeg)
         tc.variables["LIBRAW_WITH_LCMS"] = self.options.with_lcms
         tc.variables["LIBRAW_WITH_JASPER"] = self.options.with_jasper
@@ -91,20 +98,37 @@ class LibRawConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["raw"]
+        self.cpp_info.components["libraw_"].set_property("pkg_config_name", "libraw")
+        self.cpp_info.components["libraw_"].libs = ["raw"]
+        self.cpp_info.components["libraw_"].includedirs.append(os.path.join("include", "libraw"))
 
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("ws2_32")
+            self.cpp_info.components["libraw_"].system_libs.append("ws2_32")
             if not self.options.shared:
-                self.cpp_info.defines.append("LIBRAW_NODLL")
+                self.cpp_info.components["libraw_"].defines.append("LIBRAW_NODLL")
 
+        requires = []
         if self.options.with_jpeg == "libjpeg":
-            self.cpp_info.requires.append("libjpeg::libjpeg")
+            requires.append("libjpeg::libjpeg")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.cpp_info.requires.append("libjpeg-turbo::jpeg")
+            requires.append("libjpeg-turbo::jpeg")
         elif self.options.with_jpeg == "mozjpeg":
-            self.cpp_info.requires.append("mozjpeg::libjpeg")
+            requires.append("mozjpeg::libjpeg")
         if self.options.with_lcms:
-            self.cpp_info.requires.append("lcms::lcms")
+            requires.append("lcms::lcms")
         if self.options.with_jasper:
-            self.cpp_info.requires.append("jasper::jasper")
+            requires.append("jasper::jasper")
+        self.cpp_info.components["libraw_"].requires = requires
+
+        if self.options.get_safe("build_thread_safe"):
+            self.cpp_info.components["libraw_r"].set_property("pkg_config_name", "libraw_r")
+            self.cpp_info.components["libraw_r"].libs = ["raw_r"]
+            self.cpp_info.components["libraw_r"].includedirs.append(os.path.join("include", "libraw"))
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["libraw_r"].system_libs.append("pthread")
+            self.cpp_info.components["libraw_r"].requires = requires
+
+        if not self.options.shared and stdcpp_library(self):
+            self.cpp_info.components["libraw_"].system_libs.append(stdcpp_library(self))
+            if self.options.get_safe("build_thread_safe"):
+                self.cpp_info.components["libraw_r"].system_libs.append(stdcpp_library(self))

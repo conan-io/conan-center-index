@@ -1,4 +1,13 @@
 sources:
-  "2022.08":
-    url: "https://github.com/Minres/SystemC-Components/releases/download/2022.08/systemc-components.tar.gz"
-    sha256: "825dfc38e7b00df34330f01ba38f5913e1a88c5002344e433b972faf0e6c4501"
+  "2023.06":
+    url: "https://github.com/Minres/SystemC-Components/releases/download/2023.06/SCC-2023.06-full.tar.gz"
+    sha256: "6d1a842f474daa512030d61526e83182f9289b977a3a7cb88ed151050c33c4e9"
+patches:
+  "2023.06":
+    - patch_file: "patches/2023.06-fix-conan-targets.patch"
+      patch_description: "add find_package()-s and disable automatic Conan setup"
+      patch_type: "conan"
+    - patch_file: "patches/2023.06-add-fmt-10-support.patch"
+      patch_description: "fix incompatibility with fmt 10.x and newer"
+      patch_type: "portability"
+      patch_source: "https://github.com/Minres/SystemC-Components/pull/51"

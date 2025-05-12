@@ -1,7 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.scm import Version
 
 import os
 
@@ -20,11 +22,13 @@ class Md4cConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "md2html": [True, False],
         "encoding": ["utf-8", "utf-16", "ascii"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        #"md2html": True,  # conditional default value in config_options
         "encoding": "utf-8",
     }
 
@@ -34,6 +38,14 @@ class Md4cConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) >= "0.5.0":
+            # Set it to false for iOS, tvOS, watchOS, visionOS
+            # to prevent cmake from creating a bundle for the md2html executable
+            is_ios_variant = is_apple_os(self) and not self.settings.os == "Macos"
+            self.options.md2html = not is_ios_variant
+        else:
+            # md2html was introduced in 0.5.0
+            del self.options.md2html
 
     def configure(self):
         if self.options.shared:
@@ -53,6 +65,7 @@ class Md4cConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_MD2HTML_EXECUTABLE"] = self.options.get_safe("md2html", True)
         if self.options.encoding == "utf-8":
             tc.preprocessor_definitions["MD4C_USE_UTF8"] = "1"
         elif self.options.encoding == "utf-16":
@@ -103,10 +116,3 @@ class Md4cConan(ConanFile):
         # to create unofficial target or pkgconfig file
         self.cpp_info.set_property("cmake_target_name", "md4c::md4c-html")
         self.cpp_info.set_property("pkg_config_name", "md4c-html")
-
-        # TODO: to remove in conan v2
-        self.cpp_info.components["_md4c"].names["cmake_find_package"] = "md4c"
-        self.cpp_info.components["_md4c"].names["cmake_find_package_multi"] = "md4c"
-        self.cpp_info.components["md4c_html"].names["cmake_find_package"] = "md4c-html"
-        self.cpp_info.components["md4c_html"].names["cmake_find_package_multi"] = "md4c-html"
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

@@ -4,9 +4,10 @@ from conan.tools.files import (
     apply_conandata_patches, collect_libs, copy, export_conandata_patches, get,
     replace_in_file, rmdir
 )
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class CppRestSDKConan(ConanFile):
@@ -83,6 +84,8 @@ class CppRestSDKConan(ConanFile):
             tc.variables["CPPREST_HTTP_CLIENT_IMPL"] = self.options.http_client_impl
         if self.options.get_safe("http_listener_impl"):
             tc.variables["CPPREST_HTTP_LISTENER_IMPL"] = self.options.http_listener_impl
+        if Version(self.version) <= "2.10.15":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -112,7 +115,13 @@ class CppRestSDKConan(ConanFile):
         # cpprestsdk_boost_internal
         self.cpp_info.components["cpprestsdk_boost_internal"].set_property("cmake_target_name", "cpprestsdk::cpprestsdk_boost_internal")
         self.cpp_info.components["cpprestsdk_boost_internal"].includedirs = []
-        self.cpp_info.components["cpprestsdk_boost_internal"].requires = ["boost::boost"]
+        ## List of Boost components cpprestsdk depends on:
+        ## see https://github.com/microsoft/cpprestsdk/blob/v2.10.19/Release/cmake/cpprest_find_boost.cmake#L77-L106
+        self.cpp_info.components["cpprestsdk_boost_internal"].requires = ["boost::headers", "boost::system"]
+        if self.settings.os != "Windows":
+            self.cpp_info.components["cpprestsdk_boost_internal"].requires.extend(["boost::random", "boost::thread", "boost::filesystem", "boost::chrono", "boost::atomic"])
+        if self.settings.os != "Android":
+            self.cpp_info.components["cpprestsdk_boost_internal"].requires.extend(["boost::date_time", "boost::regex"])
         # cpprestsdk_openssl_internal
         self.cpp_info.components["cpprestsdk_openssl_internal"].set_property("cmake_target_name", "cpprestsdk::cpprestsdk_openssl_internal")
         self.cpp_info.components["cpprestsdk_openssl_internal"].includedirs = []

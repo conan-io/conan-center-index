@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
@@ -21,6 +21,13 @@ class ToonConan(ConanFile):
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["config.hh"]
+
+    options = {
+        "with_lapack": [True, False]
+    }
+    default_options = {
+        "with_lapack": True
+    }
 
     @property
     def _min_cppstd(self):
@@ -43,7 +50,8 @@ class ToonConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openblas/0.3.26", options={"build_lapack": True})
+        if self.options.with_lapack:
+            self.requires("openblas/0.3.26", options={"build_lapack": True})
 
     def package_id(self):
         self.info.clear()
@@ -57,8 +65,8 @@ class ToonConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if not self.dependencies["openblas"].options.build_lapack:
-            raise ConanInvalidConfiguration("TooN requires LAPACK support in OpenBLAS")
+        if self.options.with_lapack and not self.dependencies["openblas"].options.build_lapack:
+            raise ConanInvalidConfiguration(f"{self.ref} requires LAPACK support in OpenBLAS with -o='openblas/*:build_lapack=True'")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -73,6 +81,14 @@ class ToonConan(ConanFile):
              os.path.join(self.package_folder, "include", "TooN"))
         copy(self, "config.hh", self.export_sources_folder,
              os.path.join(self.package_folder, "include", "TooN", "internal"))
+
+        if not self.options.with_lapack:
+            replace_in_file(
+                self,
+                os.path.join(self.package_folder, "include", "TooN", "internal", "config.hh"),
+                "define TOON_USE_LAPACK",
+                "undef TOON_USE_LAPACK"
+        )
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "TooN")

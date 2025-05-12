@@ -9,26 +9,23 @@ required_conan_version = ">=1.50.0"
 
 class UtfCppConan(ConanFile):
     name = "utfcpp"
+    description = "UTF-8 with C++ in a Portable Way"
+    license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nemtrif/utfcpp"
-    description = "UTF-8 with C++ in a Portable Way"
-    topics = ("utf", "utf8", "unicode", "text")
-    license = "BSL-1.0"
+    topics = ("utf", "utf8", "unicode", "text", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    def package_id(self):
-        self.info.clear()
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def package_id(self):
+        self.info.clear()
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def build(self):
-        pass
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))

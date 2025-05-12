@@ -1,3 +1,5 @@
 sources:
+  "cci.20240611":
+    url: "https://gn.googlesource.com/gn/+archive/b2afae122eeb6ce09c52d63f67dc53fc517dbdc8.tar.gz"
   "cci.20210429":
     url: "https://gn.googlesource.com/gn/+archive/6771ce569fb4803dad7a427aa2e2c23e960b917e.tar.gz"

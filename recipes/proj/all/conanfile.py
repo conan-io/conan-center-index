@@ -2,12 +2,11 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs, rm, rename
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
-
 
 required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
@@ -16,9 +15,9 @@ class ProjConan(ConanFile):
     name = "proj"
     description = "Cartographic Projections and Coordinate Transformations Library."
     license = "MIT"
-    topics = "dsp", "proj", "proj4", "projections", "gis", "geospatial"
-    homepage = "https://proj.org"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://proj.org"
+    topics = ("dsp", "proj", "proj4", "projections", "gis", "geospatial")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -37,10 +36,6 @@ class ProjConan(ConanFile):
         "with_curl": True,
         "build_executables": True,
     }
-
-    @property
-    def _is_legacy_one_profile(self):
-        return not hasattr(self, "settings_build")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -61,15 +56,17 @@ class ProjConan(ConanFile):
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.3")
-        self.requires("sqlite3/3.44.2")
+        self.requires("sqlite3/[>=3.44 <4]")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.6.0")
         if self.options.get_safe("with_curl"):
             self.requires("libcurl/[>=7.78.0 <9]")
 
     def build_requirements(self):
-        if not self._is_legacy_one_profile:
-            self.tool_requires("sqlite3/<host_version>")
+        if Version(self.version) >= "9.4.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
+
+        self.tool_requires("sqlite3/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -77,9 +74,6 @@ class ProjConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if self._is_legacy_one_profile:
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
 
         tc = CMakeToolchain(self)
         tc.variables["USE_THREAD"] = self.options.threadsafe
@@ -109,6 +103,7 @@ class ProjConan(ConanFile):
             # Workaround for: https://github.com/conan-io/conan/issues/13560
             libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
             tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -118,19 +113,19 @@ class ProjConan(ConanFile):
         apply_conandata_patches(self)
 
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+
         replace_in_file(self, cmakelists, "/W4", "")
 
         # Fix up usage of SQLite3 finder outputs
-        rm(self, "FindSqlite3.cmake", os.path.join(self.source_folder, "cmake"))
-        replace_in_file(self, cmakelists, "SQLITE3_FOUND", "SQLite3_FOUND")
-        replace_in_file(self, cmakelists, "SQLITE3_VERSION", "SQLite3_VERSION")
-        replace_in_file(self, cmakelists, "find_package(Sqlite3 REQUIRED)", "find_package(SQLite3 REQUIRED)")
+        if Version(self.version) < "9.4.0":
+            rm(self, "FindSqlite3.cmake", os.path.join(self.source_folder, "cmake"))
+            replace_in_file(self, cmakelists, "SQLITE3_FOUND", "SQLite3_FOUND")
+            replace_in_file(self, cmakelists, "SQLITE3_VERSION", "SQLite3_VERSION")
+            replace_in_file(self, cmakelists, "find_package(Sqlite3 REQUIRED)", "find_package(SQLite3 REQUIRED)")
 
         # Let CMake install shared lib with a clean rpath !
-        if Version(self.version) >= "7.1.0" and Version(self.version) < "9.0.0":
-            replace_in_file(self, cmakelists,
-                                  "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)",
-                                  "")
+        if "7.1.0" <= Version(self.version) < "9.0.0":
+            replace_in_file(self, cmakelists, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
 
         # Aggressive workaround against SIP on macOS, to handle sqlite3 executable
         # linked to shared sqlite3 lib
@@ -141,10 +136,8 @@ class ProjConan(ConanFile):
             else:
                 cmake_sqlite_call = "generate_proj_db.cmake"
                 pattern = "\"${EXE_SQLITE3}\""
-            if self._is_legacy_one_profile:
-                lib_paths = self.dependencies["sqlite3"].cpp_info.libdirs
-            else:
-                lib_paths = self.dependencies.build["sqlite3"].cpp_info.libdirs
+
+            lib_paths = self.dependencies.build["sqlite3"].cpp_info.libdirs
             replace_in_file(self,
                 os.path.join(self.source_folder, "data", cmake_sqlite_call),
                 f"COMMAND {pattern}",
@@ -154,6 +147,11 @@ class ProjConan(ConanFile):
         # unvendor nlohmann_json
         if Version(self.version) < "8.1.0":
             rmdir(self, os.path.join(self.source_folder, "include", "proj", "internal", "nlohmann"))
+
+        # Remove warning flags that are unfamiliar to GCC 5
+        if Version(self.version) >= "9.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8.0":
+            replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "${PROJ_C_WARN_FLAGS}", "")
+            replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "${PROJ_CXX_WARN_FLAGS}", "")
 
     def build(self):
         self._patch_sources()
@@ -173,7 +171,6 @@ class ProjConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-
 
     def package_info(self):
         proj_version = Version(self.version)
@@ -218,16 +215,3 @@ class ProjConan(ConanFile):
         if self.options.build_executables:
             self.buildenv_info.prepend_path(proj_data_env_var_name, res_path)
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = cmake_config_filename
-        self.cpp_info.filenames["cmake_find_package_multi"] = cmake_config_filename
-        self.cpp_info.names["cmake_find_package"] = cmake_namespace
-        self.cpp_info.names["cmake_find_package_multi"] = cmake_namespace
-        self.cpp_info.components["projlib"].names["cmake_find_package"] = "proj"
-        self.cpp_info.components["projlib"].names["cmake_find_package_multi"] = "proj"
-        if Version(self.version) < "9.1.0":
-            self.env_info.PROJ_LIB.append(res_path)
-        else:
-            self.env_info.PROJ_DATA.append(res_path)
-        if self.options.build_executables:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

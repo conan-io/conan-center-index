@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(dr_wav LANGUAGES C)
 
 include(GNUInstallDirs)
@@ -11,7 +11,7 @@ add_library(${CMAKE_PROJECT_NAME} dr_wav.c)
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${DRWAV_SRC_DIR})
 
-set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES 
+set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
     PUBLIC_HEADER ${DRWAV_SRC_DIR}/dr_wav.h
     C_STANDARD 99
 )

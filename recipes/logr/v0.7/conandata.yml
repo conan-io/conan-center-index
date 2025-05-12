@@ -1,0 +1,4 @@
+sources:
+  "0.7.0":
+    url: "https://github.com/ngrodzitski/logr/archive/v0.7.0.tar.gz"
+    sha256: "b43b6624a9223bcb0a11c83afb3df69ef4388d42abef9abb1b80fbc85b890287"

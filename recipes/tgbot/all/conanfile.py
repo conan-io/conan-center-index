@@ -5,7 +5,8 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file
+from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -28,6 +29,32 @@ class TgbotConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    @property
+    def _min_cppstd(self):
+        # tgbot requiroes C++17 since 1.7.3
+        return "14" if Version(self.version) < "1.7.3" else "17"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "17": {
+                # tgbot/>= 1.7.3 require C++17 filesystem
+                "gcc": "9",
+                "clang": "9",
+                "apple-clang": "13",
+                "Visual Studio": "16",
+                "msvc": "192",
+            },
+            "14": {
+                "gcc": "5",
+                "clang": "3",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            }
+        }.get(self._min_cppstd, {})
+
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,7 +80,13 @@ class TgbotConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
         miss_boost_required_comp = any(
             self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
             for boost_comp in self._required_boost_components
@@ -70,6 +103,8 @@ class TgbotConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_TESTS"] = False
+        if not self.settings.compiler.cppstd:
+            tc.cache_variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -82,6 +117,11 @@ class TgbotConan(ConanFile):
             "set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)",
             "",
         )
+        # Don't force CMAKE_CXX_STANDARD
+        replace_in_file(self,
+            os.path.join(self.source_folder, "CMakeLists.txt"),
+            "set(CMAKE_CXX_STANDARD",
+            "#")
 
     def build(self):
         self._patch_sources()
@@ -96,7 +136,11 @@ class TgbotConan(ConanFile):
              dst=os.path.join(self.package_folder, "licenses"),
              src=self.source_folder)
         fix_apple_shared_install_name(self)
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["TgBot"]
         self.cpp_info.defines = ["HAVE_CURL=1"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")

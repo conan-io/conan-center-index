@@ -120,13 +120,13 @@ class OsgearthConan(ConanFile):
         if self.options.build_leveldb_cache:
             self.requires("leveldb/1.22")
         if self.options.build_rocksdb_cache:
-            self.requires("rocksdb/6.20.3")
+            self.requires("rocksdb/6.29.5")
         if self.options.build_zip_plugin:
             self.requires("zstd/1.5.5")  # override
         if self.options.with_geos:
             self.requires("geos/3.11.1")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.42.0")
+            self.requires("sqlite3/[>=3.42 <4]")
         if self.options.with_draco:
             self.requires("draco/1.4.3")
         # if self.options.with_basisu:

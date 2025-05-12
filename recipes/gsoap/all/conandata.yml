@@ -1,11 +1,22 @@
+# The sources for this project get deleted from time to time.
+# We use the backup sources from Conan Center as mirrors to let users compile in the future
+# When adding new versions, directly add the URL following previous versions schema
+# https://c3i.jfrog.io/artifactory/conan-center-backup-sources/ + sha256 of the sources
+# The file will be automatically uploaded after the first successful compilation of the new version
+# And will be usable as a mirror from then on.
+# At some point the Conan client might come pre-configured with this backup remote by default, but don't delete the links then
+# some users might still rely on the old revisions/not have it set to point to our CCI backup remote
 sources:
+  "2.8.134":
+    url:
+      - "https://sourceforge.net/projects/gsoap2/files/gsoap_2.8.134.zip/download"
+      - "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/63478e555c0ccde0164f055ff605b02805db0abc6712a04bcb14cb617b047218"
+    sha256: "63478e555c0ccde0164f055ff605b02805db0abc6712a04bcb14cb617b047218"
   "2.8.132":
     url:
-      - "https://downloads.sourceforge.net/project/gsoap2/gsoap_2.8.132.zip"
-      - "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/gsoap/gsoap_2.8.132.zip"
+      - "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/d6eb5d0d2c31532746f4dc9fa1ce95d4553414e918059eac23cf081d88c2aeee"
     sha256: "d6eb5d0d2c31532746f4dc9fa1ce95d4553414e918059eac23cf081d88c2aeee"
   "2.8.129":
     url:
-      - "https://downloads.sourceforge.net/project/gsoap2/gsoap_2.8.129.zip"
-      - "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/gsoap/gsoap_2.8.129.zip"
+      - "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/16cb8852ea791a6aec8f0213d619c15eecc8171e0c888f3b0e0c66d3ef78e20a"
     sha256: "16cb8852ea791a6aec8f0213d619c15eecc8171e0c888f3b0e0c66d3ef78e20a"

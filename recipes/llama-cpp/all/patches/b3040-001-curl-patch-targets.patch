@@ -1,0 +1,15 @@
+diff --git a/common/CMakeLists.txt b/common/CMakeLists.txt
+index 0ec8d6d8..647ef30b 100644
+--- a/common/CMakeLists.txt
++++ b/common/CMakeLists.txt
+@@ -77,9 +77,7 @@ set(LLAMA_COMMON_EXTRA_LIBS build_info)
+ if (LLAMA_CURL)
+     find_package(CURL REQUIRED)
+     add_definitions(-DLLAMA_USE_CURL)
+-    include_directories(${CURL_INCLUDE_DIRS})
+-    find_library(CURL_LIBRARY curl REQUIRED)
+-    set(LLAMA_COMMON_EXTRA_LIBS ${LLAMA_COMMON_EXTRA_LIBS} ${CURL_LIBRARY})
++    list(APPEND LLAMA_COMMON_EXTRA_LIBS CURL::libcurl)
+ endif ()
+ 
+ target_include_directories(${TARGET} PUBLIC .)
