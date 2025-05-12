@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -9,7 +9,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
     save, mkdir
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class OpenvrConan(ConanFile):
@@ -68,6 +68,9 @@ class OpenvrConan(ConanFile):
         tc.cache_variables["BUILD_UNIVERSAL"] = False
         # Let Conan handle the stdlib setting, even if we are using libc++
         tc.cache_variables["USE_LIBCXX"] = False
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "1.16.8": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()

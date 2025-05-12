@@ -39,7 +39,7 @@ class NcbiCxxToolkit(ConanFile):
         "NGHTTP2":      "libnghttp2/1.46.0",
         "PCRE":         "pcre/8.45",
         "PNG":          "libpng/1.6.37",
-        "SQLITE3":      "sqlite3/3.37.2",
+        "SQLITE3":      "sqlite3/[>=3.37 <4]",
         "TIFF":         "libtiff/4.3.0",
         "XML":          "libxml2/2.9.12",
         "XSLT":         "libxslt/1.1.34",

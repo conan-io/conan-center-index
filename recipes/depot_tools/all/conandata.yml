@@ -1,4 +1,6 @@
 sources:
+  "cci.20241206":
+    url: "https://chromium.googlesource.com/chromium/tools/depot_tools.git/+archive/ba733f35cde8ae85e7ca85956cdc63b297dc9425.tar.gz"
   "20200407":
     url: "https://chromium.googlesource.com/chromium/tools/depot_tools/+archive/48c5c9c50455c625c58dab2fbb0904cac467168c.tar.gz"
   "cci.20201009":

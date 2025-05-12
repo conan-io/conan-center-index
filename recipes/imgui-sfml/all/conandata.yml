@@ -1,0 +1,9 @@
+sources:
+  "2.6.1":
+    url: "https://github.com/SFML/imgui-sfml/archive/refs/tags/v2.6.1.tar.gz"
+    sha256: "b250df2ee308b614f0bb061a49a61c3796d0f7224a9539099e6b479fed2d451b"
+patches:
+  "2.6.1":
+    - patch_file: "patches/0001-2.6-fix-imgui-linking.patch"
+      patch_description: "Link to imgui, avoid compiling it directly"
+      patch_type: "conan"

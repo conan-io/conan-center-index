@@ -1,0 +1,42 @@
+From 6cc59b3a14fc9c2a2301eae9809c64fbdb1b524d Mon Sep 17 00:00:00 2001
+From: William S Fulton <wsf@fultondesigns.co.uk>
+Date: Fri, 7 Mar 2025 19:04:20 +0000
+Subject: [PATCH] Use uname -o to detect msys instead of x86_64-pc-msys
+
+Closes #20
+---
+ README.markdown | 2 ++
+ cccl            | 5 +++--
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/README.markdown b/README.markdown
+index 1b69922..f0c3273 100644
+--- a/README.markdown
++++ b/README.markdown
+@@ -69,8 +69,10 @@ do anything but copy the cccl script, though.
+ 
+ cccl uses and hence requires ports of the following Unix utilities:
+   - bash
++  - grep
+   - sed
+   - tr
++  - uname
+ 
+ cccl is a bash shell script which makes use of these utilities.  Therefore, you
+ will need at the very least a Windows versions of these utilities.  The easiest
+diff --git a/cccl b/cccl
+index 28571fe..d681117 100755
+--- a/cccl
++++ b/cccl
+@@ -30,8 +30,9 @@ given by [OPTIONS] that Unix cc understands into parameters that cl understands.
+ EOF
+ }
+ 
+-case $MACHTYPE in
+-    *-msys)
++operating_system=$(uname -o)
++case $operating_system in
++    Msys)
+         slash="-"
+         ;;
+     *)

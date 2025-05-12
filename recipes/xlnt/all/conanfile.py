@@ -1,12 +1,12 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class XlntConan(ConanFile):
@@ -65,6 +65,9 @@ class XlntConan(ConanFile):
         tc.variables["SAMPLES"] = False
         tc.variables["BENCHMARKS"] = False
         tc.variables["PYTHON"] = False
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "1.5.0": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -97,9 +100,3 @@ class XlntConan(ConanFile):
         self.cpp_info.libs = [f"xlnt{suffix}"]
         if not self.options.shared:
             self.cpp_info.defines.append("XLNT_STATIC")
-
-        # TODO: to remove in conan v2
-        self.cpp_info.filenames["cmake_find_package"] = "Xlnt"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Xlnt"
-        self.cpp_info.names["cmake_find_package"] = "xlnt"
-        self.cpp_info.names["cmake_find_package_multi"] = "xlnt"

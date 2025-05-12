@@ -1,10 +1,11 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir, rm
+from conan.tools.scm import Version
 import glob
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 class ZstdConan(ConanFile):
     name = "zstd"
@@ -54,6 +55,8 @@ class ZstdConan(ConanFile):
         tc.variables["ZSTD_BUILD_STATIC"] = not self.options.shared or self.options.build_programs
         tc.variables["ZSTD_BUILD_SHARED"] = self.options.shared
         tc.variables["ZSTD_MULTITHREAD_SUPPORT"] = self.options.threading
+        if Version(self.version) < "1.5.6":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def _patch_sources(self):
@@ -94,10 +97,5 @@ class ZstdConan(ConanFile):
             self.cpp_info.components["zstdlib"].system_libs.append("pthread")
 
         # TODO: Remove after dropping Conan 1.x from ConanCenterIndex
-        self.cpp_info.components["zstdlib"].names["cmake_find_package"] = zstd_cmake
-        self.cpp_info.components["zstdlib"].names["cmake_find_package_multi"] = zstd_cmake
         self.cpp_info.components["zstdlib"].set_property("cmake_target_name", f"zstd::{zstd_cmake}")
         self.cpp_info.components["zstdlib"].set_property("pkg_config_name", "libzstd")
-        if self.options.build_programs:
-            bindir = os.path.join(self.package_folder, "bin")
-            self.env_info.PATH.append(bindir)

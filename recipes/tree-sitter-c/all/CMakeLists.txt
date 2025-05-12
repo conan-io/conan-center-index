@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.15)
 project(tree-sitter-c LANGUAGES C)
 
 find_package(tree-sitter REQUIRED CONFIG)

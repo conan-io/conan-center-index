@@ -2,7 +2,7 @@
 +++ b/CMakeLists.txt
 @@ -1,4 +1,4 @@
 -cmake_minimum_required(VERSION 2.4.4)
-+cmake_minimum_required(VERSION 3.0) # it's important to have https://cmake.org/cmake/help/latest/policy/CMP0042.html#policy:CMP0042
++cmake_minimum_required(VERSION 3.5) # for CMP0042 and CMake 4
  set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
  
  project(zlib C)

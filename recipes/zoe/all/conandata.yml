@@ -1,4 +1,7 @@
 sources:
+  "3.6":
+    url: "https://github.com/winsoft666/zoe/archive/refs/tags/v3.6.tar.gz"
+    sha256: "5cae2a51bbac0bfa54aab78a4d2b534a66bea7bc2d72764cfb5bc8e02a751927"
   "3.3":
     url: "https://github.com/winsoft666/zoe/archive/refs/tags/v3.3.tar.gz"
     sha256: "e75d24690d16feff8bf1fc57d1943d545a5203ba769ff94034dc1f35f89927a5"

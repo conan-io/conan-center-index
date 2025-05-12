@@ -1,0 +1,4 @@
+sources:
+  "1.0.2":
+    url: "https://github.com/jorgen/json_struct/archive/refs/tags/1.0.2.tar.gz"
+    sha256: "c424ae3e8dbe6846311cb878d2d400c98a297a28eb1556961a985b6ed7b16090"

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(voro++ LANGUAGES CXX)
 
 add_library(${PROJECT_NAME} ${VOROPP_SRC_DIR}/src/voro++.cc)

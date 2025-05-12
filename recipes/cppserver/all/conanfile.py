@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, collect_libs
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -28,20 +27,6 @@ class CppServer(ConanFile):
         "shared": False,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "9",
-            "Visual Studio": "15",
-            "msvc": "191",
-            "clang": "5",
-            "apple-clang": "10",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -57,18 +42,12 @@ class CppServer(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("asio/1.27.0")
-        self.requires("openssl/[>=1.1 <4]")
-        self.requires("cppcommon/1.0.3.0")
+        self.requires("asio/1.27.0", transitive_headers=True)
+        self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
+        self.requires("cppcommon/1.0.3.0", transitive_headers=True)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn(f"{self.ref} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-        elif Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires a compiler that supports at least C++17")
+        check_min_cppstd(self, 17)
 
     def build_requirements(self):
         if Version(self.version) >= "1.0.2.0":

@@ -1,0 +1,10 @@
+--- a/src/client/linux/handler/minidump_descriptor.h
++++ b/src/client/linux/handler/minidump_descriptor.h
+@@ -30,6 +30,7 @@
+ #ifndef CLIENT_LINUX_HANDLER_MINIDUMP_DESCRIPTOR_H_
+ #define CLIENT_LINUX_HANDLER_MINIDUMP_DESCRIPTOR_H_
+ 
++#include <cstdint>
+ #include <assert.h>
+ #include <sys/types.h>
+ 

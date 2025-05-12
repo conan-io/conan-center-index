@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(mikktspace LANGUAGES C)
 
 add_library(mikktspace ${MIKKTSPACE_SRC_DIR}/mikktspace.c)

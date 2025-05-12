@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
 find_package(nlohmann_json_schema_validator CONFIG REQUIRED)

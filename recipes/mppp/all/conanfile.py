@@ -24,6 +24,7 @@ class MpppConan(ConanFile):
         "fPIC": [True, False],
         "with_mpfr": [True, False],
         "with_arb": [True, False],
+        "with_flint": [True, False],
         "with_mpc": [True, False],
         "with_quadmath": [True, False],
         "with_boost": [True, False],
@@ -34,6 +35,7 @@ class MpppConan(ConanFile):
         "fPIC": True,
         "with_mpfr": False,
         "with_arb": False,
+        "with_flint": False,
         "with_mpc": False,
         "with_quadmath": False,
         "with_boost": False,
@@ -54,8 +56,10 @@ class MpppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if Version(self.version) < "0.27":
-            del self.options.with_fmt
+        if Version(self.version) < "2.0.0":
+            del self.options.with_flint
+        else:
+            del self.options.with_arb
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -63,23 +67,27 @@ class MpppConan(ConanFile):
     def requirements(self):
         self.requires("gmp/6.3.0", transitive_headers=True)
         if self.options.with_mpfr:
-            self.requires("mpfr/4.2.0")
+            self.requires("mpfr/4.2.1", transitive_headers=True)
         if self.options.with_mpc:
             self.requires("mpc/1.2.0")
         if self.options.with_boost:
             self.requires("boost/1.83.0")
         if self.options.get_safe("with_fmt"):
             self.requires("fmt/10.2.1", transitive_headers=True)
+        if self.options.get_safe("with_flint"):
+            self.requires("flint/3.0.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        if self.options.with_arb:
+        if self.options.get_safe("with_arb"):
             raise ConanInvalidConfiguration(f"{self.ref}:with_arb=True is not supported because `fredrik-johansson/arb` is not packaged in CCI. (yet)")
         if self.options.with_quadmath:
             raise ConanInvalidConfiguration(f"{self.ref}:with_quadmath=True is not supported because `libquadmath` is not available from CCI. (yet)")
         if self.options.with_boost and self.dependencies["boost"].options.without_serialization:
             raise ConanInvalidConfiguration(f"{self.ref}:with_boost=True requires boost:without_serialization=False")
+        if self.options.get_safe("with_flint") and not self.options.with_mpfr:
+            raise ConanInvalidConfiguration(f"{self.ref}:with_flint=True requires with_mpfr=True")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -89,16 +97,22 @@ class MpppConan(ConanFile):
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["MPPP_BUILD_STATIC_LIBRARY"] = not self.options.shared
         tc.variables["MPPP_WITH_MPFR"] = self.options.with_mpfr
-        tc.variables["MPPP_WITH_ARB"] = self.options.with_arb
+        if "with_arb" in self.options:
+            tc.variables["MPPP_WITH_ARB"] = self.options.with_arb
+        if "with_flint" in self.options:
+            tc.variables["MPPP_WITH_FLINT"] = self.options.with_flint
         tc.variables["MPPP_WITH_MPC"] = self.options.with_mpc
         tc.variables["MPPP_WITH_QUADMATH"] = self.options.with_quadmath
         tc.variables["MPPP_WITH_BOOST_S11N"] = self.options.with_boost
-        if Version(self.version) >= "0.27":
-            tc.variables["MPPP_WITH_FMT"] = self.options.with_fmt
+        tc.variables["MPPP_WITH_FMT"] = self.options.with_fmt
         if not self.options.shared:
             tc.variables["MPPP_BUILD_STATIC_LIBRARY_WITH_DYNAMIC_MSVC_RUNTIME"] = not is_msvc_static_runtime(self)
         tc.generate()
         deps = CMakeDeps(self)
+        if self.options.get_safe("with_flint"):
+            deps.set_property("flint", "cmake_file_name", "mp++_FLINT")
+            deps.set_property("flint", "cmake_target_name", "mp++::FLINT")
+            deps.set_property("fmt",  "cmake_config_version_compat", "AnyNewerVersion")
         deps.generate()
 
     def build(self):

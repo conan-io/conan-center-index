@@ -41,9 +41,13 @@ class ZlibNgConan(ConanFile):
         "with_reduced_mem": False,
         "with_runtime_cpu_detection": True,
     }
+    
+    @property
+    def _is_windows(self):
+        return self.settings.os in ["Windows", "WindowsStore"]
 
     def config_options(self):
-        if self.settings.os == "Windows":
+        if self._is_windows:
             del self.options.fPIC
         if Version(self.version) < "2.1.0":
             del self.options.with_reduced_mem
@@ -104,7 +108,7 @@ class ZlibNgConan(ConanFile):
         #FIXME: CMake targets are https://github.com/zlib-ng/zlib-ng/blob/29fd4672a2279a0368be936d7cd44d013d009fae/CMakeLists.txt#L914
         suffix = "" if self.options.zlib_compat else "-ng"
         self.cpp_info.set_property("pkg_config_name", f"zlib{suffix}")
-        if self.settings.os == "Windows":
+        if self._is_windows:
             # The library name of zlib-ng is complicated in zlib-ng>=2.0.4:
             # https://github.com/zlib-ng/zlib-ng/blob/2.0.4/CMakeLists.txt#L994-L1016
             base = "zlib" if is_msvc(self) or Version(self.version) < "2.0.4" or self.options.shared else "z"

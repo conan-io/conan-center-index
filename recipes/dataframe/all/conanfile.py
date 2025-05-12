@@ -15,7 +15,7 @@ class DataFrameConan(ConanFile):
     name = "dataframe"
     description = (
         "C++ DataFrame for statistical, Financial, and ML analysis -- in modern C++ "
-        "using native types, continuous memory storage, and no pointers are involved"
+        "using native types and contiguous memory storage"
     )
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"

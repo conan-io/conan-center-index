@@ -7,7 +7,7 @@ from conan.tools.files import collect_libs, copy, get, replace_in_file, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class IXWebSocketConan(ConanFile):
@@ -17,7 +17,7 @@ class IXWebSocketConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/machinezone/IXWebSocket"
     license = "BSD-3-Clause"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -92,6 +92,8 @@ class IXWebSocketConan(ConanFile):
         if Version(self.version) >= "10.1.5":
             tc.variables["USE_ZLIB"] = self.options.with_zlib
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        if Version(self.version) < "9.8.5":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

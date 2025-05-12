@@ -113,7 +113,8 @@ class AvahiConan(ConanFile):
             self.cpp_info.components[lib].names["cmake_find_package"] = lib
             self.cpp_info.components[lib].names["cmake_find_package_multi"] = lib
             self.cpp_info.components[lib].libs = [avahi_lib]
-            self.cpp_info.components[lib].includedirs = ["include", os.path.join("include", avahi_lib)]
+            if lib != "common":
+                self.cpp_info.components[lib].includedirs = ["include", os.path.join("include", avahi_lib)]
         self.cpp_info.components["compat-libdns_sd"].libs = ["dns_sd"]
 
         self.cpp_info.components["client"].requires = ["common", "dbus::dbus"]

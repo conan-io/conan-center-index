@@ -18,7 +18,7 @@ patches:
     - patch_file: "patches/1892-0001-fix-cmake.patch"
       patch_description: "Fix CMake to be more robust & predictable"
       patch_type: "conan"
-    - patch_file: "patches/1892-0001-check-arm-sve.patch"
+    - patch_file: "patches/1892-0002-check-arm-sve.patch"
       patch_description: "Check if -march=armv9-a+sve2 is supported"
       patch_type: "conan"
   "1880":

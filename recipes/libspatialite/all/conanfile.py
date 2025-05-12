@@ -87,7 +87,7 @@ class LibspatialiteConan(ConanFile):
     def requirements(self):
         # Included in public spatialite/sqlite.h
         # https://www.gaia-gis.it/fossil/libspatialite/file?name=src/headers/spatialite/sqlite.h&ci=tip
-        self.requires("sqlite3/3.44.2", transitive_headers=True, transitive_libs=True)
+        self.requires("sqlite3/[>=3.44 <4]", transitive_headers=True, transitive_libs=True)
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_proj:
             self.requires("proj/9.3.1")
@@ -100,7 +100,7 @@ class LibspatialiteConan(ConanFile):
         if self.options.get_safe("with_rttopo"):
             self.requires("librttopo/1.1.0")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.12.4")
+            self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_minizip:
             self.requires("minizip/1.2.13")
 

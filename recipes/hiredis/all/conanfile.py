@@ -5,7 +5,7 @@ from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class HiredisConan(ConanFile):
@@ -56,6 +56,8 @@ class HiredisConan(ConanFile):
         # Since 1.2.0, BUILD_SHARED_LIBS has been defined by option()
         if Version(self.version) >= "1.2.0":
             tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        if Version(self.version) <= "1.2.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.7" # CMake 4 support
         tc.cache_variables["ENABLE_SSL"] = self.options.with_ssl
         tc.cache_variables["DISABLE_TESTS"] = True
         tc.cache_variables["ENABLE_EXAMPLES"] = False
@@ -92,8 +94,6 @@ class HiredisConan(ConanFile):
         # hiredis
         self.cpp_info.components["hiredislib"].set_property("cmake_target_name", "hiredis::hiredis")
         self.cpp_info.components["hiredislib"].set_property("pkg_config_name", "hiredis")
-        self.cpp_info.components["hiredislib"].names["cmake_find_package"] = "hiredis"
-        self.cpp_info.components["hiredislib"].names["cmake_find_package_multi"] = "hiredis"
         self.cpp_info.components["hiredislib"].libs = [f"hiredis{suffix}"]
         if self.settings.os == "Windows":
             self.cpp_info.components["hiredislib"].system_libs = ["ws2_32"]
@@ -101,8 +101,6 @@ class HiredisConan(ConanFile):
         if self.options.with_ssl:
             self.cpp_info.components["hiredis_ssl"].set_property("cmake_target_name", "hiredis::hiredis_ssl")
             self.cpp_info.components["hiredis_ssl"].set_property("pkg_config_name", "hiredis_ssl")
-            self.cpp_info.components["hiredis_ssl"].names["cmake_find_package"] = "hiredis_ssl"
-            self.cpp_info.components["hiredis_ssl"].names["cmake_find_package_multi"] = "hiredis_ssl"
             self.cpp_info.components["hiredis_ssl"].libs = [f"hiredis_ssl{suffix}"]
             self.cpp_info.components["hiredis_ssl"].requires = ["openssl::ssl"]
             if self.settings.os == "Windows":

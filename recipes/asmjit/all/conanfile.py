@@ -59,6 +59,9 @@ class AsmjitConan(ConanFile):
                     f"{self.ref} does not support {self.settings.compiler}/{self.settings.compiler.version}."
                 )
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.19 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 

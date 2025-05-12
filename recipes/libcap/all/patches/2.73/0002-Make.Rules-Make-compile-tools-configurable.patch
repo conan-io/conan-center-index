@@ -1,0 +1,33 @@
+From 903c526352f0cea70200c3f3231dffce8d1c9621 Mon Sep 17 00:00:00 2001
+From: Sergey Bobrenok <bobrofon@gmail.com>
+Date: Sun, 22 Dec 2024 20:52:43 +0700
+Subject: [PATCH 2/2] Make.Rules: Make compile tools configurable
+
+Signed-off-by: Sergey Bobrenok <bobrofon@gmail.com>
+---
+ Make.Rules | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/Make.Rules b/Make.Rules
+index d349697..7bec1af 100644
+--- a/Make.Rules
++++ b/Make.Rules
+@@ -66,11 +66,11 @@ DEFINES := -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
+ SYSTEM_HEADERS = /usr/include
+ 
+ SUDO := sudo
+-CC := $(CROSS_COMPILE)gcc
++CC ?= $(CROSS_COMPILE)gcc
+ LD := $(CC) -Wl,-x -shared -Wl,-shared
+-AR := $(CROSS_COMPILE)ar
+-RANLIB := $(CROSS_COMPILE)ranlib
+-OBJCOPY := $(CROSS_COMPILE)objcopy
++AR ?= $(CROSS_COMPILE)ar
++RANLIB ?= $(CROSS_COMPILE)ranlib
++OBJCOPY ?= $(CROSS_COMPILE)objcopy
+ 
+ # Reference:
+ #   CPPFLAGS used for building .o files from .c & .h files
+-- 
+2.47.1
+

@@ -2,9 +2,10 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class LibmikmodConan(ConanFile):
@@ -87,6 +88,8 @@ class LibmikmodConan(ConanFile):
         tc.variables["ENABLE_COREAUDIO"] = self.options.get_safe("with_coreaudio", False)
         # Relocatable shared libs on macOS
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if Version(self.version) < "3.3.12": # pylint: disable=conan-condition-evals-to-constant
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         deps = CMakeDeps(self)

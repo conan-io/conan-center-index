@@ -106,8 +106,6 @@ class PCREConan(ConanFile):
         tc.variables["PCRE_NO_RECURSE"] = not self.options.with_stack_for_recursion
         if is_msvc(self):
             tc.variables["PCRE_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
-        # Relocatable shared lib on Macos
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         # Honor BUILD_SHARED_LIBS since upstream CMakeLists overrides it as a CACHE variable.
         # Issue quite similar to https://github.com/conan-io/conan/issues/11840
         tc.cache_variables["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
@@ -179,15 +177,9 @@ class PCREConan(ConanFile):
                 self.cpp_info.components["libpcre32"].defines.append("PCRE_STATIC=1")
 
         if self.options.build_pcregrep:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
             # FIXME: This is a workaround to avoid ConanException. zlib and bzip2
             # are optional requirements of pcregrep executable, not of any pcre lib.
             if self.options.with_bzip2:
                 self.cpp_info.components["libpcre"].requires.append("bzip2::bzip2")
             if self.options.with_zlib:
                 self.cpp_info.components["libpcre"].requires.append("zlib::zlib")
-
-        # TODO: to remove in conan v2 once legacy generators removed
-        #       DO NOT port this name to cmake_file_name/cmake_target_name properties, it was a mistake
-        self.cpp_info.names["cmake_find_package"] = "PCRE"
-        self.cpp_info.names["cmake_find_package_multi"] = "PCRE"

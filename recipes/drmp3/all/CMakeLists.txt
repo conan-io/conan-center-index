@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(dr_mp3 LANGUAGES C)
 
 include(GNUInstallDirs)
@@ -10,7 +10,7 @@ add_library(${CMAKE_PROJECT_NAME} dr_mp3.c)
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${DRMP3_SRC_DIR})
 
-set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES 
+set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
     PUBLIC_HEADER ${DRMP3_SRC_DIR}/dr_mp3.h
     C_STANDARD 99
 )

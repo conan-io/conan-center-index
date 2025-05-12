@@ -1,0 +1,9 @@
+sources:
+  "0.9.0":
+    url: "https://github.com/OpenVisualCloud/SVT-JPEG-XS/archive/refs/tags/v0.9.0.tar.gz"
+    sha256: "ff5dfb3b98348a39049da4fd3062d3391cbadec4c4b61825a9f3435ca671effa"
+patches:
+  "0.9.0":
+    - patch_file: "patches/0.9.0-0001-manage-fpic.patch"
+      patch_type: "conan"
+      patch_description: "Let Conan configure fPIC"

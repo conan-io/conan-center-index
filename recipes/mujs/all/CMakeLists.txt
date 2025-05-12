@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(mujs LANGUAGES C)
 
 file(GLOB MUJS_SRC ${MUJS_SRC_DIR}/js*.c ${MUJS_SRC_DIR}/utf*.c ${MUJS_SRC_DIR}/regexp.c)

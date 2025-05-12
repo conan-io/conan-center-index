@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.15)
 
 add_project(aws-sdk-cpp-plugin "C++ AWS SDK plugin" AWS::aws-sdk-cpp-s3)
 

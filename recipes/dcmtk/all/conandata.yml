@@ -13,14 +13,26 @@ patches:
     - patch_file: "patches/3.6.8-0002-cmake-check-openssl-symbol.patch"
       patch_description: "CMake: fix OpenSSL compatibility checks"
       patch_type: conan
+    - patch_file: "patches/3.6.8-0003-fix-two-segmentation-faults.patch"
+      patch_description: "Fix CVE-2024-34508 and CVE-2024-34509 (SEGFAULT from malformed C-Store request)"
+      patch_type: vulnerability
+      patch_source: "https://github.com/DCMTK/dcmtk/commit/c78e434c0c5f9d932874f0b17a8b4ce305ca01f5"
+    - patch_file: "patches/3.6.8-0004-disable-oficonv-passthrough.patch"
+      patch_description: "Fix data corruption in UTF8-to-UTF8 conversion"
+      patch_type: bugfix
+      patch_source: "https://github.com/DCMTK/dcmtk/commit/8ccfd5a07024e50b160da0231524da535c745b79"
   "3.6.7":
     - patch_file: "patches/3.6.7-0001-cmake-robust-deps-handling.patch"
       patch_description: "CMake: robust discovery with find_package() and use imported targets"
-      patch_type: "conan"
+      patch_type: conan
     - patch_file: "patches/3.6.7-0002-cmake-check-openssl-symbol.patch"
       patch_description: "CMake: fix OpenSSL compatibility checks"
-      patch_type: "conan"
+      patch_type: conan
     - patch_file: "patches/3.6.7-0003-ambiguous-overload-operator-equal.patch"
       patch_description: "C++20: Fix ambiguous overload for operator== between DB_SerializedTagKey and DcmTagKey"
-      patch_type: "portability"
+      patch_type: portability
       patch_source: "https://github.com/DCMTK/dcmtk/pull/88"
+    - patch_file: "patches/3.6.7-0004-fix-two-segmentation-faults.patch"
+      patch_description: "Fix CVE-2024-34508 and CVE-2024-34509 (SEGFAULT from malformed C-Store request)"
+      patch_type: vulnerability
+      patch_source: "https://github.com/DCMTK/dcmtk/commit/c78e434c0c5f9d932874f0b17a8b4ce305ca01f5"

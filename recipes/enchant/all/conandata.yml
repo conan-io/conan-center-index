@@ -1,7 +1,7 @@
 sources:
   "2.3.2":
+    url: "https://github.com/rrthomas/enchant/releases/download/v2.3.2/enchant-2.3.2.tar.gz"
     sha256: "ce9ba47fd4d34031bd69445598a698a6611602b2b0e91d705e91a6f5099ead6e"
-    url: https://github.com/AbiWord/enchant/releases/download/v2.3.2/enchant-2.3.2.tar.gz
 patches:
   "2.3.2":
     - patch_file: patches/0001-add-visibility-annotations.patch

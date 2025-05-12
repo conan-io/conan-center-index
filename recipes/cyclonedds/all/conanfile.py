@@ -107,6 +107,7 @@ class CycloneDDSConan(ConanFile):
         tc.variables["BUILD_IDLC_TESTING"] = False
         tc.variables["BUILD_DDSPERF"] = False
         tc.variables["BUILD_IDLC_TESTING"] = False
+        tc.cache_variables["ENABLE_LTO"] = False
         # variables which effects build
         tc.variables["ENABLE_SSL"] = self.options.with_ssl
         tc.variables["ENABLE_SHM"] = self.options.with_shm

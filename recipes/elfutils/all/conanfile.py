@@ -73,9 +73,9 @@ class ElfutilsConan(ConanFile):
         if self.options.with_bzlib:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.get_safe("with_zstd"):
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[~1.5]")
         if self.options.get_safe("libdebuginfod"):
             self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.debuginfod:
@@ -88,7 +88,7 @@ class ElfutilsConan(ConanFile):
         self.build_requires("flex/2.6.4")
         self.tool_requires("bison/3.8.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):

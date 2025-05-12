@@ -1,10 +1,11 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, save
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.1"
 
 
 class WinflexbisonConan(ConanFile):
@@ -34,6 +35,9 @@ class WinflexbisonConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "2.5.25": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
     def build(self):
@@ -83,8 +87,3 @@ class WinflexbisonConan(ConanFile):
         yacc_path = os.path.join(self.package_folder, "bin", "win_bison -y").replace("\\", "/")
         self.output.info("Setting YACC environment variable: {}".format(yacc_path))
         self.buildenv_info.define_path("YACC", yacc_path)
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.env_info.LEX = lex_path
-        self.env_info.YACC = yacc_path

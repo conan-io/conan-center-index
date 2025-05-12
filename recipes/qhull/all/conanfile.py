@@ -4,7 +4,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class QhullConan(ConanFile):
@@ -85,16 +85,8 @@ class QhullConan(ConanFile):
         if is_msvc(self) and self.options.shared:
             self.cpp_info.components["libqhull"].defines.extend(["qh_dllimport"])
 
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "Qhull"
-        self.cpp_info.names["cmake_find_package_multi"] = "Qhull"
-        self.cpp_info.names["pkg_config"] = self._qhull_pkgconfig_name
-        self.cpp_info.components["libqhull"].names["cmake_find_package"] = self._qhull_cmake_name
-        self.cpp_info.components["libqhull"].names["cmake_find_package_multi"] = self._qhull_cmake_name
-        self.cpp_info.components["libqhull"].names["pkg_config"] = self._qhull_pkgconfig_name
         self.cpp_info.components["libqhull"].set_property("cmake_target_name", f"Qhull::{self._qhull_cmake_name}")
         self.cpp_info.components["libqhull"].set_property("pkg_config_name", self._qhull_pkgconfig_name)
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
 
     @property
     def _qhull_cmake_name(self):

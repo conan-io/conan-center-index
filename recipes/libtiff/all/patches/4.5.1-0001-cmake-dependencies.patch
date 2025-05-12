@@ -1,3 +1,16 @@
+diff --git a/cmake/JBIGCodec.cmake b/cmake/JBIGCodec.cmake
+index a4350028..4cb01552 100644
+--- a/cmake/JBIGCodec.cmake
++++ b/cmake/JBIGCodec.cmake
+@@ -34,7 +34,7 @@ if(JBIG_FOUND)
+     set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${JBIG_INCLUDE_DIRS})
+     set(CMAKE_REQUIRED_LIBRARIES_SAVE ${CMAKE_REQUIRED_LIBRARIES})
+     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${JBIG_LIBRARIES})
+-    check_symbol_exists(jbg_newlen "jbig.h" HAVE_JBG_NEWLEN)
++    set(HAVE_JBG_NEWLEN TRUE)
+     set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_SAVE})
+     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_SAVE})
+ endif()
 diff --git a/cmake/JPEGCodec.cmake b/cmake/JPEGCodec.cmake
 index 8455a3ec..09fe975a 100644
 --- a/cmake/JPEGCodec.cmake
@@ -29,3 +42,17 @@ index 8455a3ec..09fe975a 100644
  endif()
  
  if (NOT HAVE_JPEGTURBO_DUAL_MODE_8_12)
+diff --git a/cmake/LZMACodec.cmake b/cmake/LZMACodec.cmake
+index c51afe82..53ef874e 100644
+--- a/cmake/LZMACodec.cmake
++++ b/cmake/LZMACodec.cmake
+@@ -28,7 +28,7 @@
+ set(LZMA_SUPPORT FALSE)
+ find_package(liblzma)
+ 
+-option(lzma "use liblzma (required for LZMA2 compression)" ${LIBLZMA_FOUND})
+-if (lzma AND LIBLZMA_FOUND)
++option(lzma "use liblzma (required for LZMA2 compression)" ${liblzma_FOUND})
++if (lzma AND liblzma_FOUND)
+     set(LZMA_SUPPORT TRUE)
+ endif()

@@ -9,3 +9,6 @@ patches:
     - patch_file: "patches/0003-cpp20-compat.patch"
       patch_description: "C++20 compatibility: Fix ambiguous overloaded operator =="
       patch_type: "portability"
+    - patch_file: "patches/0004-cmake4-support.patch"
+      patch_description: "Increase cmake_minimum_required on protolib submodule to 3.5, minimum version supporting CMake 4"
+      patch_type: "portability"

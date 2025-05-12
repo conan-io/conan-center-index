@@ -1,0 +1,60 @@
+--- a/dcmdata/libsrc/dcelem.cc
++++ b/dcmdata/libsrc/dcelem.cc
+@@ -717,6 +717,13 @@ OFCondition DcmElement::loadValue(DcmInputStream *inStream)
+             if (isStreamNew)
+                 delete readStream;
+         }
++        else
++        {
++            errorFlag = EC_InvalidStream; // incomplete dataset read from stream
++            DCMDATA_ERROR("DcmElement: " << getTagName() << " " << getTag()
++                << " larger (" << getLengthField() << ") than remaining bytes ("
++                << getTransferredBytes() << ") in file, premature end of stream");
++        }
+     }
+     /* return result value */
+     return errorFlag;
+diff --git a/dcmnet/libsrc/dimcmd.cc b/dcmnet/libsrc/dimcmd.cc
+index 6dca39546..ffd225f4b 100644
+--- a/dcmnet/libsrc/dimcmd.cc
++++ b/dcmnet/libsrc/dimcmd.cc
+@@ -205,22 +205,25 @@ getString(DcmDataset *obj, DcmTagKey t, char *s, int maxlen, OFBool *spacePadded
+             return parseErrorWithMsg("dimcmd:getString: string too small", t);
+         } else {
+             ec =  elem->getString(aString);
+-            strncpy(s, aString, maxlen);
+-            if (spacePadded)
++            if (ec.good())
+             {
+-                /* before we remove leading and tailing spaces we want to know
+-                 * whether the string is actually space padded. Required to communicate
+-                 * with dumb peers which send space padded UIDs and fail if they
+-                 * receive correct UIDs back.
+-                 *
+-                 * This test can only detect space padded strings if
+-                 * dcmEnableAutomaticInputDataCorrection is false; otherwise the padding
+-                 * has already been removed by dcmdata at this stage.
+-                 */
+-                size_t s_len = strlen(s);
+-                if ((s_len > 0)&&(s[s_len-1] == ' ')) *spacePadded = OFTrue; else *spacePadded = OFFalse;
++                strncpy(s, aString, maxlen);
++                if (spacePadded)
++                {
++                    /* before we remove leading and tailing spaces we want to know
++                     * whether the string is actually space padded. Required to communicate
++                     * with dumb peers which send space padded UIDs and fail if they
++                     * receive correct UIDs back.
++                     *
++                     * This test can only detect space padded strings if
++                     * dcmEnableAutomaticInputDataCorrection is false; otherwise the padding
++                     * has already been removed by dcmdata at this stage.
++                     */
++                    size_t s_len = strlen(s);
++                    if ((s_len > 0)&&(s[s_len-1] == ' ')) *spacePadded = OFTrue; else *spacePadded = OFFalse;
++                }
++                DU_stripLeadingAndTrailingSpaces(s);
+             }
+-            DU_stripLeadingAndTrailingSpaces(s);
+         }
+     }
+     return (ec.good())? ec : DIMSE_PARSEFAILED;

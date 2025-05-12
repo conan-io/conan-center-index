@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(tiny-bignum-c LANGUAGES C)
 
 add_library(tiny-bignum-c ${TINY_BIGNUM_C_SRC_DIR}/bn.c)

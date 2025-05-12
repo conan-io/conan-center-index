@@ -7,7 +7,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 class LunaSVGConan(ConanFile):
     name = "lunasvg"
@@ -95,11 +95,11 @@ class LunaSVGConan(ConanFile):
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         if Version(self.version) < "2.4.1":
             tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        tc.generate()
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.variables["LUNASVG_BUILD_EXAMPLES"] = False
-
-        tc = CMakeDeps(self)
         tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)

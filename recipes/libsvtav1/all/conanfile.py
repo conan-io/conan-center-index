@@ -137,10 +137,14 @@ class SVTAV1Conan(ConanFile):
             self.cpp_info.components["encoder"].requires = ["cpuinfo::cpuinfo"]
             if self.settings.os in ("FreeBSD", "Linux"):
                 self.cpp_info.components["encoder"].system_libs = ["pthread", "dl", "m"]
+            if self.settings.os == "Android":
+                self.cpp_info.components["encoder"].system_libs = ["m"]
         if self.options.get_safe("build_decoder"):
             self.cpp_info.components["decoder"].libs = ["SvtAv1Dec"]
             self.cpp_info.components["decoder"].includedirs = ["include/svt-av1"]
             self.cpp_info.components["decoder"].set_property("pkg_config_name", "SvtAv1Dec")
             self.cpp_info.components["decoder"].requires = ["cpuinfo::cpuinfo"]
             if self.settings.os in ("FreeBSD", "Linux"):
-                self.cpp_info.components["encoder"].system_libs = ["pthread", "dl", "m"]
+                self.cpp_info.components["decoder"].system_libs = ["pthread", "dl", "m"]
+            if self.settings.os == "Android":
+                self.cpp_info.components["decoder"].system_libs = ["m"]

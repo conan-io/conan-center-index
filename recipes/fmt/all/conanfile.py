@@ -8,7 +8,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class FmtConan(ConanFile):
@@ -124,10 +124,19 @@ class FmtConan(ConanFile):
         target = "fmt-header-only" if self.options.header_only else "fmt"
         self.cpp_info.set_property("cmake_file_name", "fmt")
         self.cpp_info.set_property("cmake_target_name", f"fmt::{target}")
+
+        # Mirror upstream find package version policy:
+        # https://github.com/fmtlib/fmt/blob/11.1.1/CMakeLists.txt#L403-L407
+        self.cpp_info.set_property("cmake_config_version_compat", "AnyNewerVersion")
         self.cpp_info.set_property("pkg_config_name",  "fmt")
 
-        if self.options.get_safe("with_unicode") and is_msvc(self):
-            self.cpp_info.components["_fmt"].cxxflags.append("/utf-8")
+        if is_msvc(self):
+            if self.options.get_safe("with_unicode"):
+                self.cpp_info.components["_fmt"].cxxflags.append("/utf-8")
+            else:
+                # Set the FMT_UNICODE=0, as defined publicly upstream
+                # https://github.com/fmtlib/fmt/blob/11.1.1/CMakeLists.txt#L371
+                self.cpp_info.components["_fmt"].defines.append("FMT_UNICODE=0")
 
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         if self.options.with_fmt_alias:
@@ -146,10 +155,4 @@ class FmtConan(ConanFile):
             if self.options.shared:
                 self.cpp_info.components["_fmt"].defines.append("FMT_SHARED")
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "fmt"
-        self.cpp_info.names["cmake_find_package_multi"] = "fmt"
-        self.cpp_info.names["pkg_config"] = "fmt"
-        self.cpp_info.components["_fmt"].names["cmake_find_package"] = target
-        self.cpp_info.components["_fmt"].names["cmake_find_package_multi"] = target
         self.cpp_info.components["_fmt"].set_property("cmake_target_name", f"fmt::{target}")

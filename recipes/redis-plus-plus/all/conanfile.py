@@ -1,12 +1,12 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class RedisPlusPlusConan(ConanFile):
@@ -95,6 +95,9 @@ class RedisPlusPlusConan(ConanFile):
         tc.variables["REDIS_PLUS_PLUS_BUILD_STATIC"] = not self.options.shared
         tc.variables["REDIS_PLUS_PLUS_BUILD_SHARED"] = self.options.shared
         tc.variables["REDIS_PLUS_PLUS_BUILD_STATIC_WITH_PIC"] = self.options.shared
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "1.3.13": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -132,10 +135,5 @@ class RedisPlusPlusConan(ConanFile):
             self.cpp_info.components["redis++lib"].system_libs.append("pthread")
             self.cpp_info.components["redis++lib"].system_libs.append("m")
 
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "redis++"
-        self.cpp_info.names["cmake_find_package_multi"] = "redis++"
-        self.cpp_info.components["redis++lib"].names["cmake_find_package"] = f"redis++{target_suffix}"
-        self.cpp_info.components["redis++lib"].names["cmake_find_package_multi"] = f"redis++{target_suffix}"
         self.cpp_info.components["redis++lib"].set_property("cmake_target_name", f"redis++::redis++{target_suffix}")
         self.cpp_info.components["redis++lib"].set_property("pkg_config_name", "redis++")

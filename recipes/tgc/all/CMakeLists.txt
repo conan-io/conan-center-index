@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(tgc LANGUAGES C)
 
 add_library(tgc ${TGC_SRC_DIR}/tgc.c)

@@ -6,7 +6,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=2.7"
+required_conan_version = ">=2.4"
 
 
 class Libssh2Conan(ConanFile):
@@ -65,6 +65,8 @@ class Libssh2Conan(ConanFile):
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         # To install relocatable shared lib on Macos by default
         tc.variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if Version(self.version) < "1.11.1":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         # Workaround until github.com/conan-io/conan/pull/12600 is merged
         if is_msvc(self):
             tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
@@ -98,7 +100,8 @@ class Libssh2Conan(ConanFile):
                 self.requires("mbedtls/2.28.4")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.20 <4]")
+        if Version(self.version) >= "1.11":
+            self.tool_requires("cmake/[>=3.20 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

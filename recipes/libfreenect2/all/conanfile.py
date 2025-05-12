@@ -1,13 +1,15 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class Libfreenect2Conan(ConanFile):
@@ -93,6 +95,9 @@ class Libfreenect2Conan(ConanFile):
             tc.variables["NVCUDASAMPLES_ROOT"] = os.path.join(self.dependencies["cuda-samples"].package_folder, "include")
             # Required for deprecated FindCUDA support
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0146"] = "OLD"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "0.2.1": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -160,7 +165,3 @@ class Libfreenect2Conan(ConanFile):
             self.cpp_info.requires += ["vaapi::vaapi"]
         if self.options.with_cuda:
             self.cpp_info.requires += ["cuda-samples::cuda-samples"]
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "freenect2"
-        self.cpp_info.names["cmake_find_package_multi"] = "freenect2"

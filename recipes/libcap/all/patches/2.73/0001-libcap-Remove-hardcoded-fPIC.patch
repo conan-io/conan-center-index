@@ -1,0 +1,26 @@
+From 8b86ac7b057ce529900969ead958a9ca7ae85b3c Mon Sep 17 00:00:00 2001
+From: Sergey Bobrenok <bobrofon@gmail.com>
+Date: Sun, 22 Dec 2024 20:30:31 +0700
+Subject: [PATCH 1/2] libcap: Remove hardcoded -fPIC
+
+Signed-off-by: Sergey Bobrenok <bobrofon@gmail.com>
+---
+ libcap/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libcap/Makefile b/libcap/Makefile
+index 5f5c601..02be223 100644
+--- a/libcap/Makefile
++++ b/libcap/Makefile
+@@ -19,7 +19,7 @@ PSXFILES=../psx/psx ../psx/wrap/psx_wrap
+ PSXMAGICOBJ=psx_magic.o
+ 
+ # Always build libcap sources this way:
+-CFLAGS += -fPIC -D_LIBPSX_PTHREAD_LINKAGE
++CFLAGS += -D_LIBPSX_PTHREAD_LINKAGE
+ 
+ # https://bugzilla.kernel.org/show_bug.cgi?id=219168
+ OVERRIDE_BSYMBOLIC_FUNCTIONS := -Wl,-Bsymbolic-functions
+-- 
+2.47.1
+

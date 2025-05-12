@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(cgltf C)
 
 set(SOURCES_DIR ${CMAKE_CURRENT_LIST_DIR}/src)

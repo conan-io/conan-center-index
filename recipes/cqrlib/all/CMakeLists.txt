@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(CQRlib LANGUAGES C)
 
 add_library(CQRlib ${CQRLIB_SRC_DIR}/cqrlib.c)

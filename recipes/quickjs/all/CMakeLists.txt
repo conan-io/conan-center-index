@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(quickjs C)
 
 option(USE_BIGNUM "Use bignum" ON)

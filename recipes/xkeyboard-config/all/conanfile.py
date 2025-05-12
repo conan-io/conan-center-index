@@ -17,7 +17,7 @@ class XkeyboardConfigConan(ConanFile):
     topics = ("x11", "xorg", "keyboard")
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
+        if self.settings.os not in ["Linux", "FreeBSD", "Android"]:
             raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
 
     def package_id(self):

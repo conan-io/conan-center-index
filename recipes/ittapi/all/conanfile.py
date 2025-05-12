@@ -4,7 +4,7 @@ from conan.tools.files import copy, get, replace_in_file
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=2.0"
 
 
 class IttApiConan(ConanFile):
@@ -61,6 +61,8 @@ class IttApiConan(ConanFile):
         self._patch_sources()
         toolchain = CMakeToolchain(self)
         toolchain.variables["ITT_API_IPT_SUPPORT"] = self.options.ptmark
+        if Version(self.version) < "3.25.1":
+            toolchain.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         toolchain.generate()
 
     def build(self):
@@ -78,6 +80,9 @@ class IttApiConan(ConanFile):
         copy(self, "GPL-2.0-only.txt", src=os.path.join(self.source_folder, "LICENSES"), dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
+        # https://github.com/intel/ittapi/blob/03f7260c96d4b437d12dceee7955ebb1e30e85ad/CMakeLists.txt#L176
+        self.cpp_info.set_property("cmake_target_name", "ittapi::ittnotify")
+        self.cpp_info.set_property("cmake_target_aliases", ["ittapi::ittapi"]) # for compatibility with earlier revisions of the recipe
         if self.settings.os == "Windows":
             self.cpp_info.libs = ['libittnotify']
         else:

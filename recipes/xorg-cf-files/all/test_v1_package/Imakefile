@@ -1,4 +1,0 @@
-PROGRAMS = ProgramTargetName(test_package)
-AllTarget($(PROGRAMS))
-
-NormalProgramTarget(test_package,test_package.o,,,)

@@ -52,25 +52,23 @@ class HictkConan(ConanFile):
     def requirements(self):
         if self.options.get_safe("with_arrow"):
             self.requires("arrow/16.1.0")
-        self.requires("bshoshany-thread-pool/4.1.0")
+        if Version(self.version) < "2.0.0":
+            self.requires("bshoshany-thread-pool/4.1.0")
+        else:
+            self.requires("bshoshany-thread-pool/5.0.0")
+        self.requires("concurrentqueue/1.0.4")
         self.requires("fast_float/6.1.1")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         self.requires("fmt/10.2.1")
         self.requires("hdf5/1.14.3")
         self.requires("highfive/2.9.0")
-        self.requires("libdeflate/1.20")
-        self.requires("parallel-hashmap/1.3.12")  # Note: v1.3.12 is more recent than v1.37
+        self.requires("libdeflate/1.22")
+        self.requires("parallel-hashmap/1.3.12") # Note: v1.3.12 is more recent than v1.37
+        self.requires("readerwriterqueue/1.0.6")
         self.requires("span-lite/0.11.0")
         self.requires("spdlog/1.14.1")
         self.requires("zstd/[>=1.5 <1.6]")
-
-        if Version(self.version) == "0.0.3":
-            self.requires("xxhash/0.8.2")
-
-        if Version(self.version) > "0.0.7":
-            self.requires("readerwriterqueue/1.0.6")
-            self.requires("concurrentqueue/1.0.4")
 
     def package_id(self):
         self.info.clear()
@@ -85,6 +83,11 @@ class HictkConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+        if self.info.options.get_safe("with_arrow"):
+            arrow = self.dependencies["arrow"]
+            if not arrow.options.compute:
+                raise ConanInvalidConfiguration(f"{self.ref} requires the dependency option arrow/*:compute=True")
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.25 <4]")
 
@@ -98,6 +101,7 @@ class HictkConan(ConanFile):
         tc.variables["HICTK_BUILD_TOOLS"] = "OFF"
         tc.variables["HICTK_ENABLE_GIT_VERSION_TRACKING"] = "OFF"
         tc.variables["HICTK_ENABLE_TESTING"] = "OFF"
+        tc.variables["HICTK_ENABLE_FUZZY_TESTING"] = "OFF"
         tc.variables["HICTK_WITH_ARROW"] = self.options.get_safe("with_arrow", False)
         tc.variables["HICTK_WITH_EIGEN"] = self.options.with_eigen
         tc.generate()

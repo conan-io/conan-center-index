@@ -33,6 +33,7 @@ patches:
   "2.53.1":
     - patch_file: "patches/2.53.1-0001-fix-cmake.patch"
     - patch_file: "patches/2.53.1-0002-fix-avx-check.patch"
+    - patch_file: "patches/2.53.1-0004-fix-os-flags-arm64.patch"
     - patch_file: "patches/2.53.1-0003-fix-GUID_DEVINTERFACE_USB_DEVICE.patch"
       patch_description: "Fix undefined ref to GUID_DEVINTERFACE_USB_DEVICE on Windows"
       patch_type: "conan"
@@ -45,3 +46,4 @@ patches:
     - patch_file: "patches/2.49.0-0004-fix-GUID_DEVINTERFACE_USB_DEVICE.patch"
       patch_description: "Fix undefined ref to GUID_DEVINTERFACE_USB_DEVICE on Windows"
       patch_type: "conan"
+    - patch_file: "patches/2.49.0-0005-fix-os-flags-arm64.patch"
