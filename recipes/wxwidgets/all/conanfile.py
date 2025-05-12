@@ -21,6 +21,7 @@ class wxWidgetsConan(ConanFile):
     license = "wxWidgets"
     settings = "os", "arch", "compiler", "build_type"
 
+    package_type = "library"
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"],
