@@ -94,18 +94,17 @@ class NiftiClibConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             sys_libs += ["m"]
 
-        self.cpp_info.requires = ["zlib::zlib"]
-        if self.options.use_cifti:
-            self.cpp_info.requires += ["expat::expat"]
-
         self.cpp_info.components["znz"].libs = ["znz"]
         self.cpp_info.components["znz"].set_property("pkg_config_name", "znz")
         self.cpp_info.components["znz"].set_property("cmake_target_name", "NIFTI::znz")
         self.cpp_info.components["znz"].includedirs += [os.path.join("include", "nifti")]
         self.cpp_info.components["znz"].system_libs += sys_libs
+        self.cpp_info.components["znz"].requires = ["zlib::zlib"]
+        self.cpp_info.components["znz"].defines = ["HAVE_ZLIB"]
 
         # inside the niftilib folder
         self.cpp_info.components["niftiio"].libs = ["niftiio"]
+        self.cpp_info.components["niftiio"].requires = ["znz"]
         self.cpp_info.components["niftiio"].set_property("pkg_config_name", "niftiio")
         self.cpp_info.components["niftiio"].set_property("cmake_target_name", "NIFTI::niftiio")
         self.cpp_info.components["niftiio"].includedirs += [os.path.join("include", "nifti")]
@@ -128,7 +127,7 @@ class NiftiClibConan(ConanFile):
 
         if self.options.use_cifti:
             self.cpp_info.components["cifti"].libs = ["cifti"]
-            self.cpp_info.components["cifti"].requires = ["nifti2"]
+            self.cpp_info.components["cifti"].requires = ["nifti2", "expat::expat"]
             self.cpp_info.components["cifti"].set_property("pkg_config_name", "cifti")
             self.cpp_info.components["cifti"].set_property("cmake_target_name", "NIFTI::cifti")
             self.cpp_info.components["cifti"].includedirs += [os.path.join("include", "nifti")]
@@ -136,7 +135,7 @@ class NiftiClibConan(ConanFile):
 
         if self.options.use_fslio:
             self.cpp_info.components["fslio"].libs = ["fslio"]
-            self.cpp_info.components["fslio"].requires = ["nifti2"]
+            self.cpp_info.components["fslio"].requires = ["niftiio"]
             self.cpp_info.components["fslio"].set_property("pkg_config_name", "fslio")
             self.cpp_info.components["fslio"].set_property("cmake_target_name", "NIFTI::fslio")
             self.cpp_info.components["fslio"].includedirs += [os.path.join("include", "nifti")]
