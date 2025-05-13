@@ -27,13 +27,11 @@ class TreeSitterCConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
     languages = ["C"]
+    exports_sources = "CMakeLists.txt"
     generators = "CMakeDeps", "CMakeToolchain"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-
-    def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"))
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -43,7 +41,7 @@ class TreeSitterCConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=os.path.join(self.source_folder,  os.pardir))
         cmake.build()
 
     def package(self):

@@ -1,6 +1,5 @@
 #include <tree_sitter/api.h>
-
-#include <tree_sitter/tree-sitter-glsl.h>
+#include <tree-sitter-glsl.h>
 
 #include <stdlib.h>
 #include <string.h>
