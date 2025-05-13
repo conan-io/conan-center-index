@@ -271,6 +271,7 @@ class Open62541Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.extra_cflags.extend(["-Wno-unused-variable"])
 
         version = Version(self.version)
         tc.variables["OPEN62541_VER_MAJOR"] = version.major
