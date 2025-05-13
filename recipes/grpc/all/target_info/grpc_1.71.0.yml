@@ -8,6 +8,7 @@ grpc_targets:
         - abseil::absl_base
         - abseil::absl_core_headers
         - abseil::absl_log_severity
+        - abseil::absl_cleanup
         - abseil::absl_flags
         - abseil::absl_flags_marshalling
         - abseil::absl_any_invocable
@@ -24,7 +25,6 @@ grpc_targets:
         - abseil::absl_synchronization
         - abseil::absl_time
         - abseil::absl_optional
-        - abseil::absl_variant
     - name: "_grpc"
       lib: "grpc"
       requires:
@@ -35,7 +35,6 @@ grpc_targets:
         - abseil::absl_algorithm_container
         - abseil::absl_config
         - abseil::absl_no_destructor
-        - abseil::absl_cleanup
         - abseil::absl_flat_hash_map
         - abseil::absl_flat_hash_set
         - abseil::absl_inlined_vector
@@ -63,7 +62,6 @@ grpc_targets:
         - abseil::absl_algorithm_container
         - abseil::absl_config
         - abseil::absl_no_destructor
-        - abseil::absl_cleanup
         - abseil::absl_flat_hash_map
         - abseil::absl_flat_hash_set
         - abseil::absl_inlined_vector
@@ -146,7 +144,6 @@ grpc_targets:
         - zlib::zlib
         - abseil::absl_config
         - abseil::absl_no_destructor
-        - abseil::absl_cleanup
         - abseil::absl_flat_hash_map
         - abseil::absl_flat_hash_set
         - abseil::absl_inlined_vector
