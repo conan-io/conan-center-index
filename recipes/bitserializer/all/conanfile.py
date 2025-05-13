@@ -7,7 +7,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=2.4"
+required_conan_version = ">=2"
 
 
 class BitserializerConan(ConanFile):
@@ -37,20 +37,6 @@ class BitserializerConan(ConanFile):
         "with_csv": False,
         "with_msgpack": False,
     }
-
-    @property
-    def _min_cppstd(self):
-        return "17"
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "8",
-            "clang": "8",
-            "Visual Studio": "15",
-            "msvc": "191",
-            "apple-clang": "12",
-        }
 
     def _is_header_only(self, info=False):
         # All components of library are header-only except csv-archive and msgpack-archive
@@ -94,14 +80,7 @@ class BitserializerConan(ConanFile):
             self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
-            )
+        check_min_cppstd(self, 17)
 
         # Check stdlib ABI compatibility
         compiler_name = str(self.settings.compiler)
