@@ -113,9 +113,7 @@ class LibpqConan(ConanFile):
         tc.project_options["readline"] = feature(self.options.get_safe("with_readline"))
 
         tc.project_options["tap_tests"] = "disabled"
-        if cross_building(self):
-            # INFO: Several Undefined symbols for host architecture: e.g. _PyArg_ParseTuple, __Py_TrueStruct
-            tc.project_options["plpython"] = "disabled"
+        tc.project_options["plpython"] = "disabled"
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
