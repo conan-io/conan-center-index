@@ -134,13 +134,6 @@ class PremakeConan(ConanFile):
         if self.options.get_safe("lto", None) is False:
             for fn in glob.glob(os.path.join(self._gmake_build_dir, "*.make")):
                 replace_in_file(self, fn, "-flto", "", strict=False)
-        if check_min_vs(self, 193, raise_invalid=False):
-            # Create VS 2022 project directory based on VS 2019 one
-            if "alpha" in str(self.version) or "beta" in str(self.version):
-                shutil.move(os.path.join(self.source_folder, "build", "vs2019"),
-                            os.path.join(self.source_folder, "build", "vs2022"))
-                for vcxproj in glob.glob(os.path.join(self.source_folder, "build", "vs2022", "*.vcxproj")):
-                    replace_in_file(self, vcxproj, "v142", "v143")
 
     def build(self):
         self._patch_sources()
