@@ -91,9 +91,6 @@ class LibSafeCConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
 
-        # Apple Silicon
-        is_apple_silicon = is_apple_os(self) and self.settings.arch == "armv8"
-
         tc = AutotoolsToolchain(self)
 
         yes_no = lambda v: "yes" if v else "no"
@@ -105,7 +102,7 @@ class LibSafeCConan(ConanFile):
             f"--enable-memmax={self.options.memmax}",
         ]
 
-        if is_apple_silicon:
+        if is_apple_os(self) and self.settings.arch in ["x86_64", "armv8"]:
             tc.configure_args += [
                 "--disable-hardening",
             ]
