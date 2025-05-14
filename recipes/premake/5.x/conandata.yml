@@ -5,3 +5,8 @@ sources:
 patches:
   "5.0.0-beta6":
     - patch_file: "patches/0001-5.0.0-beta6-mingw.patch"
+      patch_description: "Add lcrypt32 on windows compilations"
+      patch_type: "portability"
+    - patch_file: "patches/0001-5.0.0-beta6-fdopen-apple.patch"
+      patch_description: "Avoid redefinition of fdopen on apple systems, as it is already defined in newer SDK versions"
+      patch_type: "portability"
