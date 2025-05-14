@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.11)
 project(test_package LANGUAGES CXX)
 
-find_package(Graaf REQUIRED CONFIG)
+find_package(graaflib REQUIRED CONFIG)
 
 set(_CXX_STANDARD cxx_std_20)
 
