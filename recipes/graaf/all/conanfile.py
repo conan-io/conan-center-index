@@ -73,7 +73,3 @@ class GraafConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "Graaf")
         self.cpp_info.set_property("cmake_target_name", "Graaf::Graaf")
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
-        if is_msvc(self):
-            self.cpp_info.defines.append("_ENABLE_EXTENDED_ALIGNED_STORAGE")
