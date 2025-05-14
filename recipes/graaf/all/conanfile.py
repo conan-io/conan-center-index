@@ -42,5 +42,5 @@ class GraafConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
-        self.cpp_info.set_property("cmake_file_name", "Graaf")
+        self.cpp_info.set_property("cmake_file_name", "graaflib")
         self.cpp_info.set_property("cmake_target_name", "Graaf::Graaf")
