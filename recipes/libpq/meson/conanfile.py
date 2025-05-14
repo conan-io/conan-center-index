@@ -91,9 +91,6 @@ class LibpqConan(ConanFile):
         else:
             self.tool_requires("flex/2.6.4")
             self.tool_requires("bison/3.8.2")
-            # self.win_bash = True
-            # if not self.conf.get("tools.microsoft.bash:path", check_type=str):
-            #     self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
