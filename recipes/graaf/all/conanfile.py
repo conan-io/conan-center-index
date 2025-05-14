@@ -4,7 +4,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -37,11 +36,8 @@ class GraafConan(ConanFile):
             "apple-clang": "16.0",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder=".")
 
     def package_id(self):
         self.info.clear()
@@ -65,9 +61,6 @@ class GraafConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def build(self):
-        apply_conandata_patches(self)
-
     def package(self):
         copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*",
@@ -84,7 +77,3 @@ class GraafConan(ConanFile):
             self.cpp_info.system_libs.append("pthread")
         if is_msvc(self):
             self.cpp_info.defines.append("_ENABLE_EXTENDED_ALIGNED_STORAGE")
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Graaf"
-        self.cpp_info.names["cmake_find_package_multi"] = "Graaf"
