@@ -82,6 +82,7 @@ class LibpqConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
+        self.tool_requires("ninja/[>=1.11.0 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         if self.settings.os == "Windows":
@@ -90,6 +91,7 @@ class LibpqConan(ConanFile):
             self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("flex/2.6.4")
+            self.tool_requires("bison/3.8.2")
             # self.win_bash = True
             # if not self.conf.get("tools.microsoft.bash:path", check_type=str):
             #     self.tool_requires("msys2/cci.latest")
@@ -100,7 +102,7 @@ class LibpqConan(ConanFile):
     def generate(self):
         def feature(v): return "enabled" if v else "disabled"
 
-        tc = MesonToolchain(self)
+        tc = MesonToolchain(self, backend="ninja")
         tc.project_options["ssl"] = "openssl" if self.options.with_openssl else "disabled"
         tc.project_options["icu"] = feature(self.options.with_icu)
         # Why did the old version disable this explicitly?
@@ -178,4 +180,3 @@ class LibpqConan(ConanFile):
             self.cpp_info.components["pgcommon"].system_libs = ["m"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
-
