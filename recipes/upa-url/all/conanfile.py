@@ -4,11 +4,10 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import copy, get, rmdir
 import os
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2"
 
 class upa_urlRecipe(ConanFile):
     name = "upa-url"
-    package_type = "library"
 
     # Optional metadata
     license = "BSD-2-Clause"
@@ -18,23 +17,12 @@ class upa_urlRecipe(ConanFile):
     topics = ("url", "parser", "psl", "whatwg")
 
     # Binary configuration
+    package_type = "static-library"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"fPIC": [True, False]}
+    default_options = {"fPIC": True}
 
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        # Equivalent to:
-        # data = self.conan_data["sources"][self.version]
-        # get(self, data["url"], sha256=data["sha256"], strip_root=data["strip_root"])
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -42,8 +30,12 @@ class upa_urlRecipe(ConanFile):
     def validate(self):
         check_min_cppstd(self, 17)
 
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["URL_BUILD_TESTS"] = False
         tc.cache_variables["UPA_BUILD_TESTS"] = False
         tc.generate()
 
