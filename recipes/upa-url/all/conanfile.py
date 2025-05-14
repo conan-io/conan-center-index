@@ -12,8 +12,8 @@ class upa_urlRecipe(ConanFile):
 
     # Optional metadata
     license = "BSD-2-Clause"
-    author = "Rimas Misevičius <rmisev3@gmail.com>"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/upa-url/upa"
     description = "An implementation of the WHATWG URL Standard in C++"
     topics = ("url", "parser", "psl", "whatwg")
 
@@ -37,7 +37,7 @@ class upa_urlRecipe(ConanFile):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         check_min_cppstd(self, 17)
