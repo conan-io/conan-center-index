@@ -16,8 +16,9 @@ class GraafConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/bobluppes/graaf"
     topics = ("graph", "header-only")
+    settings = "compiler"
     package_type = "header-library"
-    short_paths = True
+    no_copy_source = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
