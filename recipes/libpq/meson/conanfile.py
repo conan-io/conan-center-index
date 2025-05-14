@@ -39,7 +39,9 @@ class LibpqConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_openssl": True,
-        "with_icu": True,
+        # False to keep in line with old versions,
+        # but this is True by default in upstream
+        "with_icu": False,
         "with_zlib": True,
         "with_zstd": True,
         "with_libxml2": True,
