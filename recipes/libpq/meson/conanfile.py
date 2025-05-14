@@ -1,8 +1,7 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get, rm, rmdir, collect_libs
+from conan.tools.build import cross_building
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -114,6 +113,9 @@ class LibpqConan(ConanFile):
         tc.project_options["readline"] = feature(self.options.get_safe("with_readline"))
 
         tc.project_options["tap_tests"] = "disabled"
+        if cross_building(self):
+            # INFO: Several Undefined symbols for host architecture: e.g. _PyArg_ParseTuple, __Py_TrueStruct
+            tc.project_options["plpython"] = "disabled"
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
