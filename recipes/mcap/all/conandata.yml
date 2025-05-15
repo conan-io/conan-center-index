@@ -1,4 +1,7 @@
 sources:
+  "2.0.2":
+    url: "https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v2.0.2.tar.gz"
+    sha256: "af44f92b62f43bd4b44a00728780f93df59601537d9aebbc862c4cb9b5ad743e"
   "2.0.1":
     url: "https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v2.0.1.tar.gz"
     sha256: "415db9f3cd8ed82be940b80f428ed5bba90c2089f47af7616e18ebd591d67e2b"
