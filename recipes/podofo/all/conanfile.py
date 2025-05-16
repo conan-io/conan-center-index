@@ -24,7 +24,7 @@ class PodofoConan(ConanFile):
         "threadsafe": [True, False],
         "with_openssl": [True, False],
         "with_libidn": [True, False],
-        "with_jpeg": [True, False],
+        "with_libjpeg": [True,False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_tiff": [True, False],
         "with_png": [True, False],
         "with_unistring": [True, False],
@@ -36,7 +36,7 @@ class PodofoConan(ConanFile):
         "threadsafe": True,
         "with_openssl": True,
         "with_libidn": True,
-        "with_jpeg": True,
+        "with_libjpeg": True,
         "with_tiff": True,
         "with_png": True,
         "with_unistring": True,
@@ -70,8 +70,12 @@ class PodofoConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_libidn:
             self.requires("libidn/1.36")
-        if self.options.with_jpeg:
+        if self.options.with_libjpeg == "libjpeg" or self.options.with_libjpeg==True:
             self.requires("libjpeg/9e")
+        elif self.options.with_libjpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/3.0.2")
+        elif self.options.with_libjpeg == "mozjpeg":
+            self.requires("mozjpeg/4.1.5")			
         if self.options.with_tiff:
             self.requires("libtiff/4.6.0")
         if self.options.with_png:
@@ -100,11 +104,11 @@ class PodofoConan(ConanFile):
         # Custom CMake options injected in our patch, required to ensure reproducible builds
         tc.variables["PODOFO_WITH_OPENSSL"] = self.options.with_openssl
         tc.variables["PODOFO_WITH_LIBIDN"] = self.options.with_libidn
-        tc.variables["PODOFO_WITH_LIBJPEG"] = self.options.with_jpeg
+        tc.variables["PODOFO_WITH_LIBJPEG"] = self.options.with_libjpeg!=False
         tc.variables["PODOFO_WITH_TIFF"] = self.options.with_tiff
         tc.variables["PODOFO_WITH_PNG"] = self.options.with_png
         tc.variables["PODOFO_WITH_UNISTRING"] = self.options.with_unistring
-        tc.variables["PODOFO_HAVE_OPENSSL_1_1"] = Version(self.dependencies["openssl"].ref.version) >= "1.1"
+        tc.variables["PODOFO_HAVE_OPENSSL_1_1"] = self.options.with_openssl and Version(self.dependencies["openssl"].ref.version) >= "1.1"
         if self.options.with_openssl and ("no_rc4" in self.dependencies["openssl"].options):
             tc.variables["PODOFO_HAVE_OPENSSL_NO_RC4"] = self.dependencies["openssl"].options.no_rc4
         if Version(self.version) < "0.10.0": # pylint: disable=conan-condition-evals-to-constant
@@ -131,7 +135,4 @@ class PodofoConan(ConanFile):
         pkg_config_name = f"libpodofo-{podofo_version.major}" if podofo_version < "0.9.7" else "libpodofo"
         self.cpp_info.set_property("pkg_config_name", pkg_config_name)
         self.cpp_info.libs = ["podofo"]
-        if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.defines.append("USING_SHARED_PODOFO")
-        if self.settings.os in ["Linux", "FreeBSD"] and self.options.threadsafe:
-            self.cpp_info.system_libs = ["pthread"]
+
