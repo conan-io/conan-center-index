@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.files import (
     export_conandata_patches,
     get,
@@ -11,12 +11,10 @@ from conan.tools.files import (
 from conan.tools.build import check_min_cppstd
 import os
 
+required_conan_version = ">=2.0"
 
 class CmaesConan(ConanFile):
     name = "cmaes"
-
-    generators = "CMakeDeps"
-
     license = "LGPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/CMA-ES/libcmaes"
@@ -28,15 +26,12 @@ class CmaesConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "surrog": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "surrog": True,
     }
 
-    short_paths = True
 
     @property
     def _min_cppstd(self):
@@ -61,6 +56,7 @@ class CmaesConan(ConanFile):
         apply_conandata_patches(self)
 
     def requirements(self):
+        # Transitive header: https://github.com/CMA-ES/libcmaes/blob/v0.10/include/libcmaes/eigenmvn.h#L36
         self.requires("eigen/3.4.0", transitive_headers=True)
 
     def layout(self):
@@ -71,10 +67,11 @@ class CmaesConan(ConanFile):
         tc.variables["LIBCMAES_BUILD_EXAMPLES"] = False
         tc.variables["LIBCMAES_BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["LIBCMAES_USE_OPENMP"] = False
-        tc.variables["LIBCMAES_ENABLE_SURROG"] = self.options.surrog
         tc.variables["LIBCMAES_BUILD_PYTHON"] = False
         tc.variables["LIBCMAES_BUILD_TESTS"] = False
         tc.generate()
+        deps = CMakeDeps()
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -86,11 +83,7 @@ class CmaesConan(ConanFile):
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rm(
-            self,
-            "*.cmake",
-            os.path.join(self.package_folder, "lib", "cmake", "libcmaes"),
-        )
+        rmdir(self, os.path.join(self.package_folder, "lib"))
         copy(
             self,
             "COPYING",
