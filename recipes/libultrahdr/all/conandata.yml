@@ -1,0 +1,10 @@
+
+sources:
+  "1.3.0":
+    url: "https://github.com/google/libultrahdr/archive/refs/tags/v1.3.0.tar.gz"
+    sha256: "bf425e10a1a36507d47eb2711018e90effe11c76db8ecd4f10f4e1af9cb5288c"
+patches:
+  "1.3.0":
+    - patch_file: "patches/1.3.0_cmake-portability.patch"
+      patch_description: "Ensure project builds correctly with Conan (Ensure correct finding & linkin of dependencies and prevent some forced overriden settings provided by the Conan CMake toolchain)"
+      patch_type: "conan"
