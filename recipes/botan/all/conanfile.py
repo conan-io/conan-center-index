@@ -61,7 +61,7 @@ class BotanConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "amalgamation": False,
+        "amalgamation": True,
         "with_bzip2": False,
         "with_openssl": False,
         "with_sqlite3": False,
@@ -221,6 +221,9 @@ class BotanConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"botan amalgamation is not supported for {compiler}/{compiler_version}")
 
+        if Version(self.version) >= "3.7" and is_msvc(self) and Version(self.settings.compiler.version) < 194 and self.settings.get_safe("compiler.update", "0") < "6":
+            raise ConanInvalidConfiguration("Botan requires MSVC 19.36 or newer")
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -311,6 +314,10 @@ class BotanConan(ConanFile):
         botan_abi_flags = []
         botan_extra_cxx_flags = []
         build_flags = []
+
+        if Version(self.version) >= '3.7' and is_msvc(self) and Version(self.settings.compiler.version) < '194':
+            # https://github.com/conan-io/conan-center-index/pull/26531#issuecomment-2636504872
+            build_flags.append('--disable-modules=bitvector')
 
         if self._is_linux_clang_libcxx:
             botan_abi_flags.extend(['-stdlib=libc++', '-lc++abi'])
