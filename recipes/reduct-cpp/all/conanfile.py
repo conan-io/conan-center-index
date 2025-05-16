@@ -1,9 +1,10 @@
 from os.path import join
 
+import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy
+from conan.tools.files import copy, rmdir, rm
 from conan.tools.files import get
 
 required_conan_version = ">=2"
@@ -77,6 +78,10 @@ class ReductCppConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["reductcpp"]
