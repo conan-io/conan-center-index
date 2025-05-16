@@ -1,0 +1,43 @@
+--- arch/eventloop_posix_udp.c	2024-11-25 13:09:34.000000000 +0100
++++ arch/eventloop_posix_udp.c	2025-01-23 12:08:42.740468433 +0100
+@@ -65,11 +65,12 @@
+ } MultiCastType;
+ 
+ typedef union {
+-#ifdef UA_ARCHITECTURE_WIN32
++#if !defined(ip_mreqn)
+     struct ip_mreq ipv4;
+ #else
+     struct ip_mreqn ipv4;
+ #endif
++
+ #if UA_IPV6
+     struct ipv6_mreq ipv6;
+ #endif
+@@ -221,12 +222,15 @@
+         return UA_STATUSCODE_BADINTERNALERROR;
+ 
+     /* Write the interface index */
+-    if(info->ai_family == AF_INET)
++if(info->ai_family == AF_INET) {
++#if defined(ip_mreqn)
+         req->ipv4.imr_ifindex = idx;
++#endif
+ #if UA_IPV6
+-    else /* if(info->ai_family == AF_INET6) */
++    } else { /* if(info->ai_family == AF_INET6) */
+         req->ipv6.ipv6mr_interface = idx;
+ #endif
++    }
+     return UA_STATUSCODE_GOOD;
+ }
+ 
+@@ -239,7 +243,7 @@
+     if(info->ai_family == AF_INET) {
+         struct sockaddr_in *sin = (struct sockaddr_in *)info->ai_addr;
+         req->ipv4.imr_multiaddr = sin->sin_addr;
+-#ifdef UA_ARCHITECTURE_WIN32
++#if !defined(ip_mreqn)
+         req->ipv4.imr_interface.s_addr = htonl(INADDR_ANY); /* default ANY */
+ #else
+         req->ipv4.imr_address.s_addr = htonl(INADDR_ANY); /* default ANY */
