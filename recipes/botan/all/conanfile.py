@@ -221,9 +221,6 @@ class BotanConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"botan amalgamation is not supported for {compiler}/{compiler_version}")
 
-        if Version(self.version) >= "3.7" and is_msvc(self) and Version(self.settings.compiler.version) < 194 and self.settings.get_safe("compiler.update", "0") < "6":
-            raise ConanInvalidConfiguration("Botan requires MSVC 19.36 or newer")
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
