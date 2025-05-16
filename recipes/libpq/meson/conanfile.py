@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import cross_building
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -60,6 +59,15 @@ class LibpqConan(ConanFile):
         if self.settings.compiler == "msvc":
             del self.options.with_readline
 
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        if self.settings.os == "Windows":
+            # INFO: Libpq maintainer said that the library is only shared on Windows
+            # https://stackoverflow.com/q/79598760/2036859
+            del self.options.shared
+            self.package_type = "shared-library"
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -98,7 +106,8 @@ class LibpqConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        def feature(v): return "enabled" if v else "disabled"
+        def feature(v):
+            return "enabled" if v else "disabled"
 
         tc = MesonToolchain(self, backend="ninja")
         tc.project_options["ssl"] = "openssl" if self.options.with_openssl else "disabled"
@@ -159,7 +168,7 @@ class LibpqConan(ConanFile):
         if self.options.get_safe("with_readline"):
             self.cpp_info.components["pq"].requires.append("readline::readline")
 
-        if not self.options.shared:
+        if not self.options.get_safe("shared"):
             if is_msvc(self):
                 self.cpp_info.components["pgport"].libs = ["libpgport"]
                 self.cpp_info.components["pq"].requires.append("pgport")
