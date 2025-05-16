@@ -90,9 +90,7 @@ class LibSafeCConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-
         tc = AutotoolsToolchain(self)
-
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args += [
             f"--enable-debug={yes_no(self.settings.build_type == 'Debug')}",
@@ -101,14 +99,6 @@ class LibSafeCConan(ConanFile):
             f"--enable-strmax={self.options.strmax}",
             f"--enable-memmax={self.options.memmax}",
         ]
-
-        if is_apple_os(self) and self.settings.arch in ["x86_64", "armv8"]:
-            tc.configure_args += [
-                "--disable-hardening",
-            ]
-            # create a universal binary
-            tc.extra_cflags.extend(["-arch", "arm64", "-arch", "x86_64"])
-            tc.extra_cxxflags.extend(["-arch", "arm64", "-arch", "x86_64"])
         tc.generate()
 
     def build(self):
