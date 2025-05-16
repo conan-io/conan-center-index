@@ -18,9 +18,9 @@ class TestPackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         bitserializerOptions = self.dependencies[self.tested_reference_str].options
-        tc.variables["WITH_CPPRESTSDK"] = bitserializerOptions.with_cpprestsdk
-        tc.variables["WITH_RAPIDJSON"] = bitserializerOptions.with_rapidjson
-        tc.variables["WITH_PUGIXML"] = bitserializerOptions.with_pugixml
+        tc.variables["WITH_CPPRESTSDK"] = bitserializerOptions.get_safe("with_cpprestsdk", False)
+        tc.variables["WITH_RAPIDJSON"] = bitserializerOptions.get_safe("with_rapidjson", False)
+        tc.variables["WITH_PUGIXML"] = bitserializerOptions.get_safe("with_pugixml", False)
         tc.variables["WITH_RAPIDYAML"] = bitserializerOptions.get_safe("with_rapidyaml", False)
         tc.variables["WITH_CSV"] = bitserializerOptions.get_safe("with_csv", False)
         tc.variables["WITH_MSGPACK"] = bitserializerOptions.get_safe("with_msgpack", False)
