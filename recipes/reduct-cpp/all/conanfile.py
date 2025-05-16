@@ -1,6 +1,7 @@
 from os.path import join
 
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy
 from conan.tools.files import get
@@ -49,6 +50,9 @@ class ReductCppConan(ConanFile):
         self.requires("concurrentqueue/1.0.4")
         if not self.options.with_chrono:
             self.requires("date/3.0.1")
+
+    def validate(self):
+        check_min_cppstd(self, 20)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
