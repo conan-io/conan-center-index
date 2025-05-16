@@ -57,16 +57,17 @@ class ReductCppConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
     def generate(self):
-        deps = CMakeDeps(self)
-        deps.generate()
         tc = CMakeToolchain(self)
         if self.options.with_chrono:
             tc.variables["REDUCT_CPP_USE_STD_CHRONO"] = "ON"
         tc.generate()
 
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -76,8 +77,6 @@ class ReductCppConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-
-        copy(self, "LICENSE", src=self.source_folder, dst=join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.libs = ["reductcpp"]
