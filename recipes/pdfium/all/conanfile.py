@@ -1,15 +1,13 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class PdfiumConan(ConanFile):
@@ -32,6 +30,9 @@ class PdfiumConan(ConanFile):
         "fPIC": True,
         "with_libjpeg": "libjpeg",
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -56,22 +57,11 @@ class PdfiumConan(ConanFile):
             self.requires("libjpeg-turbo/3.0.1")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 14)
-        minimum_compiler_versions = {
-            "gcc": "8",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-        min_compiler_version = minimum_compiler_versions.get(str(self.settings.compiler))
-        if min_compiler_version and Version(self.settings.compiler.version) < min_compiler_version:
-            raise ConanInvalidConfiguration(
-                f"pdfium needs at least compiler version {min_compiler_version}"
-            )
+        check_min_cppstd(self, 14)
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["pdfium-cmake"],
@@ -82,6 +72,7 @@ class PdfiumConan(ConanFile):
             destination=os.path.join(self.source_folder, "base", "trace_event", "common"))
         get(self, **self.conan_data["sources"][self.version]["chromium_build"],
             destination=os.path.join(self.source_folder, "build"))
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
