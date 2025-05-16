@@ -5,14 +5,15 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy
 from conan.tools.files import get
 
+required_conan_version = ">=2"
+
 
 class ReductCppConan(ConanFile):
     name = "reduct-cpp"
     description = "Reduct Storage Client SDK for C++"
     license = "MIT"
-    url = "https://github.com/reduct-storage/reduct-cpp"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.reduct.store/docs/getting-started/with-cpp"
-    author = "Alexey Timin"
     topics = ("reduct-storage", "http-client", "http-api")
     package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
@@ -30,14 +31,6 @@ class ReductCppConan(ConanFile):
         "date/*:header_only": True,
     }
 
-    requires = (
-        "fmt/11.0.2",
-        "cpp-httplib/0.16.0",
-        "nlohmann_json/3.11.3",
-        "openssl/3.2.2",
-        "concurrentqueue/1.0.4",
-    )
-
     def config_options(self):
         if self.settings.get_safe("os") == "Windows":
             self.options.rm_safe("fPIC")
@@ -49,11 +42,16 @@ class ReductCppConan(ConanFile):
             self.options.with_chrono = True
 
     def requirements(self):
+        self.requires("fmt/11.0.2")
+        self.requires("cpp-httplib/0.16.0")
+        self.requires("nlohmann_json/3.11.3")
+        self.requires("openssl/3.2.2")
+        self.requires("concurrentqueue/1.0.4")
         if not self.options.with_chrono:
             self.requires("date/3.0.1")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def generate(self):
         deps = CMakeDeps(self)
