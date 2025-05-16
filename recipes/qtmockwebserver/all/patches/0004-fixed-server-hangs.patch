@@ -1,0 +1,120 @@
+From 8e3b9b71282267c2e869484107b3a39bb9a055e0 Mon Sep 17 00:00:00 2001
+From: Tomas Krupa <tomas.krupa@innovatrics.com>
+Date: Sun, 30 Mar 2025 22:48:11 +0200
+Subject: [PATCH 1/2] fixed server hangs
+
+---
+ src/QtMockWebServer.cpp | 19 +++++++++++++------
+ src/QtMockWebServer.h   |  8 ++++++++
+ 2 files changed, 21 insertions(+), 6 deletions(-)
+
+diff --git a/src/QtMockWebServer.cpp b/src/QtMockWebServer.cpp
+index 4e94fba..0c9dc84 100644
+--- a/src/QtMockWebServer.cpp
++++ b/src/QtMockWebServer.cpp
+@@ -44,8 +44,8 @@ public:
+ 
+         int sequenceNumber = 0;
+ 
+-        while (!processOneRequest(socket, sequenceNumber)) {
+-            socket->waitForReadyRead();
++        while (!m_server->finished() && !processOneRequest(socket, sequenceNumber)) {
++            socket->waitForReadyRead(3000/*msec*/);
+         }
+ 
+         if (sequenceNumber == 0) {
+@@ -54,7 +54,7 @@ public:
+ 
+         socket->disconnectFromHost();
+         if (socket->state() != QAbstractSocket::UnconnectedState) {
+-            socket->waitForDisconnected(1000);
++            socket->waitForDisconnected(1000/*msec*/);
+         }
+         socket->deleteLater();
+     }
+@@ -120,13 +120,13 @@ public:
+             hasBody = (contentLength > 0);
+             body = socket->read(contentLength);
+             if (body.length() < contentLength) {
+-                socket->waitForReadyRead();     // Wait at most once for 3000ms
++                socket->waitForReadyRead(3000/*msec*/);
+                 body += socket->read(contentLength - body.length());
+             }
+         } else if (chunked) {
+             hasBody = true;
+             forever {
+-                socket->waitForReadyRead();
++                socket->waitForReadyRead(3000/*msec*/);
+                 int chunkSize =
+                     readAsciiUntilCrlf(socket).trimmed().toInt(0, 16);
+                 if (chunkSize == 0) {
+@@ -218,7 +218,7 @@ public:
+ 
+     void waitForDone()
+     {
+-        m_threadPool.waitForDone();
++        m_threadPool.waitForDone(3000/*msec*/);
+     }
+ 
+ protected:
+@@ -305,6 +305,7 @@ void QtMockWebServer::play(int port)
+ {
+     if (m_server->listen(QHostAddress::LocalHost, port)) {
+         m_port = m_server->serverPort();
++        m_finished = false;
+     } else {
+         qWarning() << m_server->errorString();
+     }
+@@ -312,6 +313,7 @@ void QtMockWebServer::play(int port)
+ 
+ void QtMockWebServer::shutdown()
+ {
++    m_finished = true;
+     m_server->close();
+ }
+ 
+@@ -322,3 +324,8 @@ void QtMockWebServer::setDispatcher(Dispatcher *dispatcher)
+         m_dispatcher = dispatcher;
+     }
+ }
++
++bool QtMockWebServer::finished() const
++{
++    return m_finished;
++}
+diff --git a/src/QtMockWebServer.h b/src/QtMockWebServer.h
+index 0609cef..9f65aea 100644
+--- a/src/QtMockWebServer.h
++++ b/src/QtMockWebServer.h
+@@ -19,6 +19,7 @@
+ #include <QMutex>
+ #include <QObject>
+ #include <QQueue>
++#include <atomic>
+ 
+ class QString;
+ class QTcpSocket;
+@@ -106,6 +107,12 @@ public:
+      */
+     void setDispatcher(Dispatcher *dispatcher);
+ 
++     /**
++     * @brief Get finished
++     * @return server want to finish
++     */
++    bool finished() const;
++
+ private:
+     void enqueueRequest(const RecordedRequest &request);
+ 
+@@ -114,6 +121,7 @@ private:
+     QAtomicInt m_requestCount;
+     int m_port;
+     int m_bodyLimit;
++    std::atomic<bool> m_finished;
+     Dispatcher *m_dispatcher;
+     ThreadTcpServer *m_server;
+ };
+-- 
+2.34.1
+
