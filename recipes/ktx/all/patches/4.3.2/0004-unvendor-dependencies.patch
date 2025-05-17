@@ -1,6 +1,8 @@
---- CMakeLists.txt
-+++ CMakeLists.txt
-@@ -355,7 +355,6 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e99fb14..34aa34e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -355,7 +355,6 @@ set(KTX_MAIN_SRC
      lib/basisu/transcoder/basisu_transcoder.cpp
      lib/basisu/transcoder/basisu_transcoder.h
      lib/basisu/transcoder/basisu.h
@@ -8,7 +10,7 @@
      lib/checkheader.c
      lib/dfdutils/createdfd.c
      lib/dfdutils/colourspaces.c
-@@ -765,6 +764,10 @@
+@@ -765,6 +764,10 @@ PRIVATE
      BASISD_SUPPORT_KTX2=0
  )
  
@@ -19,3 +21,12 @@
  # Turn off these warnings until Rich fixes the occurences.
  # It it not clear to me if generator expressions can be used here
  # hence the long-winded way.
+@@ -1071,7 +1074,7 @@ endif()
+ if((KTX_FEATURE_TOOLS OR KTX_FEATURE_TESTS) AND NOT TARGET fmt::fmt)
+     set(FMT_INSTALL OFF)
+     set(FMT_SYSTEM_HEADERS ON)
+-    add_subdirectory(other_projects/fmt)
++    find_package(fmt)
+ endif()
+ if(KTX_FEATURE_TOOLS AND NOT TARGET cxxopts::cxxopts)
+     add_subdirectory(other_projects/cxxopts)
