@@ -284,6 +284,13 @@ class QtConan(ConanFile):
             # note: assuming that by now, any xcode 13 is updated to the latest 13.4.1
             raise ConanInvalidConfiguration("apple-clang >= 13.1 is required by qt >= 6.6.1 cf QTBUG-119490")
 
+        if Version(self.version) >= "6.8.3":
+            if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "193":
+                raise ConanInvalidConfiguration("Visual Studio 2022 (MSVC 1930 or newer) is required by qt >= 6.8.3")
+
+            if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "15":
+                raise ConanInvalidConfiguration("apple-clang >= 14 is required by qt >= 6.8.3")
+
         if self.options.get_safe("qtwebengine"):
             if not self.options.shared:
                 raise ConanInvalidConfiguration("Static builds of Qt WebEngine are not supported")
