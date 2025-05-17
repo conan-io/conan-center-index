@@ -527,7 +527,7 @@ class QtConan(ConanFile):
         ms.generate()
         vbe = VirtualBuildEnv(self)
         vbe.generate()
-        if not cross_building(self):
+        if not cross_building(self) or self.settings.os == "Windows":
             vre = VirtualRunEnv(self)
             vre.generate(scope="build")
         env = Environment()
