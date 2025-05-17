@@ -23,8 +23,8 @@ class Pybind11JsonConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("nlohmann_json/3.11.2")
-        self.requires("pybind11/2.10.4")
+        self.requires("nlohmann_json/[>=3.9 <4]")
+        self.requires("pybind11/[>=2.6 <3]")
 
     def package_id(self):
         self.info.clear()
