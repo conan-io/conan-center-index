@@ -1,3 +1,5 @@
+#include "tg_stater/state_storage/common.hpp"
+#include "tg_stater/state_storage/memory.hpp"
 #include <tgbot/Bot.h>
 #include <tg_stater/bot.hpp>
 #include <tg_stater/handler/handler.hpp>
@@ -14,6 +16,7 @@ struct StateB {
 };
 
 using State = std::variant<StateA, StateB>;
+using StateManager = tg_stater::StateProxy<tg_stater::MemoryStateStorage<State>>;
 
 int main() {
     using namespace tg_stater;
@@ -21,8 +24,9 @@ int main() {
     TgBot::Bot bot{""};
 
     static constexpr const char helpCmd[] = "help";
-    auto help = [](StateA&, const TgBot::Message& m, const TgBot::Api& bot) {
+    auto help = [](StateA&, const TgBot::Message& m, const TgBot::Api& bot, const StateManager& stateManager) {
         bot.sendMessage(m.chat->id, "This is a test bot");
+        stateManager.put(StateB{1});
     };
 
     // Test for compilation
