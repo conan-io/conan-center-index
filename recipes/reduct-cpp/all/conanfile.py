@@ -1,12 +1,11 @@
+import os
 from os.path import join
 
-import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, rmdir, rm
-from conan.tools.files import get
+from conan.tools.files import copy, get, rm, rmdir
 
 required_conan_version = ">=2"
 
@@ -51,13 +50,14 @@ class ReductCppConan(ConanFile):
         if not httplib.options.with_zlib:
             raise ConanInvalidConfiguration("cpp-httplib must be built with zlib")
 
-        if 'date' in self.dependencies:
+        if "date" in self.dependencies:
             date = self.dependencies["date"]
             if not date.options.header_only:
                 raise ConanInvalidConfiguration("date must be built as header-only")
+
         if (
-                self.settings.get_safe("compiler") == "gcc"
-                and self.settings.get_safe("compiler.version") < "14"
+            self.settings.get_safe("compiler") == "gcc"
+            and self.settings.get_safe("compiler.version") < "14"
             and self.options.with_chrono
         ):
             raise ConanInvalidConfiguration(
@@ -85,7 +85,12 @@ class ReductCppConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(
+            self,
+            "LICENSE",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"),
+        )
         cmake = CMake(self)
         cmake.install()
 
