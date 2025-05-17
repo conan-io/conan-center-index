@@ -7,7 +7,7 @@ from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class AmqpcppConan(ConanFile):
@@ -89,6 +89,7 @@ class AmqpcppConan(ConanFile):
         tc.variables["AMQP-CPP_BUILD_SHARED"] = self.options.shared
         tc.variables["AMQP-CPP_BUILD_EXAMPLES"] = False
         tc.variables["AMQP-CPP_LINUX_TCP"] = self.options.get_safe("linux_tcp_module", False)
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
