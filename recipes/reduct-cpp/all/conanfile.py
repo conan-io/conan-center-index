@@ -31,16 +31,6 @@ class ReductCppConan(ConanFile):
         "with_chrono": False,
     }
 
-    def config_options(self):
-        if self.settings.get_safe("os") == "Windows":
-            self.options.rm_safe("fPIC")
-            self.options.with_chrono = True
-        elif (
-                self.settings.get_safe("compiler") == "gcc"
-                and self.settings.get_safe("compiler.version") >= "14"
-        ):
-            self.options.with_chrono = True
-
     def requirements(self):
         self.requires("fmt/11.0.2")
         self.requires("cpp-httplib/0.16.0")
@@ -65,6 +55,14 @@ class ReductCppConan(ConanFile):
             date = self.dependencies["date"]
             if not date.options.header_only:
                 raise ConanInvalidConfiguration("date must be built as header-only")
+        if (
+                self.settings.get_safe("compiler") == "gcc"
+                and self.settings.get_safe("compiler.version") < "14"
+            and self.options.with_chrono
+        ):
+            raise ConanInvalidConfiguration(
+                "ReductCpp with chrono requires GCC 14 or higher. "
+            )
 
     def layout(self):
         cmake_layout(self, src_folder="src")
