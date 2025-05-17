@@ -55,14 +55,24 @@ class ReductCppConan(ConanFile):
             if not date.options.header_only:
                 raise ConanInvalidConfiguration("date must be built as header-only")
 
-        if (
-            self.settings.get_safe("compiler") == "gcc"
-            and self.settings.get_safe("compiler.version") < "14"
-            and self.options.with_chrono
-        ):
-            raise ConanInvalidConfiguration(
-                "ReductCpp with chrono requires GCC 14 or higher. "
-            )
+        if self.settings.get_safe("os") == "Windows" and not self.options.with_chrono:
+            raise ConanInvalidConfiguration("ReductCpp requires chrono on Windows.")
+
+        elif self.settings.get_safe("compiler") == "gcc":
+            if (
+                self.settings.get_safe("compiler.version") < "14"
+                and self.options.with_chrono
+            ):
+                raise ConanInvalidConfiguration(
+                    "ReductCpp with chrono requires GCC 14 or higher. "
+                )
+            elif (
+                self.settings.get_safe("compiler.version") >= "14"
+                and not self.options.with_chrono
+            ):
+                raise ConanInvalidConfiguration(
+                    "ReductCpp requires chrono with GCC 14 or higher. "
+                )
 
     def layout(self):
         cmake_layout(self, src_folder="src")
