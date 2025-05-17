@@ -35,7 +35,6 @@ class upa_urlRecipe(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["URL_BUILD_TESTS"] = False
         tc.cache_variables["UPA_BUILD_TESTS"] = False
         tc.generate()
 
