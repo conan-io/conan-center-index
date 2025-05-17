@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 
 
@@ -15,8 +16,13 @@ class TestPackageConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
+    def build_requirements(self):
+        if Version(self.tested_reference_str) >= "3.0.0":
+            self.tool_requires("cmake/[>=3.24]")
+
     def generate(self):
         tc = CMakeToolchain(self)
+
         tc.variables["SFML_WITH_WINDOW"] = self.dependencies["sfml"].options.window
         tc.variables["SFML_WITH_GRAPHICS"] = self.dependencies["sfml"].options.graphics
         tc.variables["SFML_WITH_NETWORK"] = self.dependencies["sfml"].options.network
