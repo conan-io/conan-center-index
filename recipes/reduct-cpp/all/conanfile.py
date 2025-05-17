@@ -36,10 +36,10 @@ class ReductCppConan(ConanFile):
         export_conandata_patches(self)
 
     def requirements(self):
-        self.requires("fmt/11.0.2")
+        self.requires("fmt/11.0.2", transitive_headers=True, transitive_libs=True)
         self.requires("cpp-httplib/0.14.1")
         self.requires("nlohmann_json/3.11.3")
-        self.requires("openssl/[>=1.1 <4]")
+        self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
         self.requires("concurrentqueue/1.0.4")
         if not self.options.with_chrono:
             self.requires("date/3.0.1")
