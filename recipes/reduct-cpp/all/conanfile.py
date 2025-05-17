@@ -5,7 +5,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
 
 required_conan_version = ">=2"
 
@@ -30,11 +30,16 @@ class ReductCppConan(ConanFile):
         "with_chrono": False,
     }
 
+    implements = ["auto_shared_fpic"]
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def requirements(self):
         self.requires("fmt/11.0.2")
-        self.requires("cpp-httplib/0.16.0")
+        self.requires("cpp-httplib/0.14.1")
         self.requires("nlohmann_json/3.11.3")
-        self.requires("openssl/3.2.2")
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("concurrentqueue/1.0.4")
         if not self.options.with_chrono:
             self.requires("date/3.0.1")
@@ -50,7 +55,7 @@ class ReductCppConan(ConanFile):
         if not httplib.options.with_zlib:
             raise ConanInvalidConfiguration("cpp-httplib must be built with zlib")
 
-        if "date" in self.dependencies:
+        if self.options.with_chrono:
             date = self.dependencies["date"]
             if not date.options.header_only:
                 raise ConanInvalidConfiguration("date must be built as header-only")
@@ -79,11 +84,13 @@ class ReductCppConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
         if self.options.with_chrono:
-            tc.variables["REDUCT_CPP_USE_STD_CHRONO"] = "ON"
+            tc.cache_variables["REDUCT_CPP_USE_STD_CHRONO"] = True
+        tc.cache_variables["REDUCT_CPP_USE_CONAN"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -111,4 +118,4 @@ class ReductCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["reductcpp"]
         self.cpp_info.set_property("cmake_file_name", "ReductCpp")
-        self.cpp_info.set_property("cmake_target_name", "reductcpp::reductcpp")
+        self.cpp_info.set_property("cmake_target_name", "reductcpp")
