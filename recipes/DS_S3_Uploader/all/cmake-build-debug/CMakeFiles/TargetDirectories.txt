@@ -1,0 +1,3 @@
+C:/Users/MH.Rezaiy_110/Desktop/conan-center-index/recipes/DS_S3_Uploader/all/cmake-build-debug/CMakeFiles/ds_s3_uploader.dir
+C:/Users/MH.Rezaiy_110/Desktop/conan-center-index/recipes/DS_S3_Uploader/all/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/MH.Rezaiy_110/Desktop/conan-center-index/recipes/DS_S3_Uploader/all/cmake-build-debug/CMakeFiles/rebuild_cache.dir
