@@ -43,13 +43,13 @@ class PcapplusplusConan(ConanFile):
             self.requires("npcap/1.70")
         else:
             self.requires("libpcap/1.10.1")
-    
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
     def validate(self):
-        if Version(self.version) <= "24.09" and self.options.shared and self.settings.os == "Windows":
+        if Version(self.version) <= "25.05" and self.options.shared and self.settings.os == "Windows":
             # https://github.com/seladb/PcapPlusPlus/issues/1396
             raise ConanInvalidConfiguration(f"{self.ref} does not support Windows shared builds for now")
         if self.settings.compiler.cppstd:
