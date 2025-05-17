@@ -1,0 +1,11 @@
+[settings]
+arch=x86_64
+os=Windows
+compiler=msvc
+compiler.version=194
+compiler.runtime=dynamic
+compiler.cppstd=17
+build_type=Debug
+[conf]
+tools.cmake.cmaketoolchain:generator=Ninja
+tools.build:compiler_executables={"c":"C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/14.41.34120/bin/Hostx64/x64/cl.exe","cpp":"C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/14.41.34120/bin/Hostx64/x64/cl.exe","rc":"C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x64/rc.exe"}
