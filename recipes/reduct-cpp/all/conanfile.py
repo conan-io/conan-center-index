@@ -2,6 +2,7 @@ from os.path import join
 
 import os
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, rmdir, rm
@@ -28,9 +29,6 @@ class ReductCppConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_chrono": False,
-        "cpp-httplib/*:with_openssl": True,
-        "cpp-httplib/*:with_zlib": True,
-        "date/*:header_only": True,
     }
 
     def config_options(self):
@@ -54,6 +52,19 @@ class ReductCppConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 20)
+
+        httplib = self.dependencies["cpp-httplib"]
+
+        if not httplib.options.with_openssl:
+            raise ConanInvalidConfiguration("cpp-httplib must be built with OpenSSL")
+
+        if not httplib.options.with_zlib:
+            raise ConanInvalidConfiguration("cpp-httplib must be built with zlib")
+
+        if 'date' in self.dependencies:
+            date = self.dependencies["date"]
+            if not date.options.header_only:
+                raise ConanInvalidConfiguration("date must be built as header-only")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
