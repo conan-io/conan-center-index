@@ -5,7 +5,7 @@ from conan.tools.files import copy, download, rmdir
 from conan.tools.scm import Version
 
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=2"
 
 class MingwConan(ConanFile):
     name = "mingw-builds"
@@ -15,6 +15,8 @@ class MingwConan(ConanFile):
     license = "ZPL-2.1", "MIT", "GPL-2.0-or-later"
     topics = ("gcc", "gnu", "unix", "mingw32", "binutils")
     settings = "os", "arch"
+
+    package_type = "application"
     options = {
         "threads": ["posix", "win32", "mcf"],
         "exception": ["seh", "sjlj"],
@@ -26,10 +28,6 @@ class MingwConan(ConanFile):
         "runtime": "ucrt"
     }
     provides = "mingw-w64"
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         # Before version 12 (included) the only possible runtime was msvcrt
@@ -115,21 +113,3 @@ class MingwConan(ConanFile):
         self.buildenv_info.define("STRINGS", os.path.join(self.package_folder, "bin", "strings.exe").replace("\\", "/"))
         self.buildenv_info.define("OBJDUMP", os.path.join(self.package_folder, "bin", "objdump.exe").replace("\\", "/"))
         self.buildenv_info.define("GCOV", os.path.join(self.package_folder, "bin", "gcov.exe").replace("\\", "/"))
-
-        # TODO: Remove this after conan v1 support is dropped
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bin_path)
-        self.env_info.MINGW_HOME = str(self.package_folder)
-
-        self.env_info.CONAN_CMAKE_GENERATOR = "MinGW Makefiles"
-        self.env_info.CXX = os.path.join(self.package_folder, "bin", "g++.exe").replace("\\", "/")
-        self.env_info.CC = os.path.join(self.package_folder, "bin", "gcc.exe").replace("\\", "/")
-        self.env_info.LD = os.path.join(self.package_folder, "bin", "ld.exe").replace("\\", "/")
-        self.env_info.NM = os.path.join(self.package_folder, "bin", "nm.exe").replace("\\", "/")
-        self.env_info.AR = os.path.join(self.package_folder, "bin", "ar.exe").replace("\\", "/")
-        self.env_info.AS = os.path.join(self.package_folder, "bin", "as.exe").replace("\\", "/")
-        self.env_info.STRIP = os.path.join(self.package_folder, "bin", "strip.exe").replace("\\", "/")
-        self.env_info.RANLIB = os.path.join(self.package_folder, "bin", "ranlib.exe").replace("\\", "/")
-        self.env_info.STRINGS = os.path.join(self.package_folder, "bin", "strings.exe").replace("\\", "/")
-        self.env_info.OBJDUMP = os.path.join(self.package_folder, "bin", "objdump.exe").replace("\\", "/")
-        self.env_info.GCOV = os.path.join(self.package_folder, "bin", "gcov.exe").replace("\\", "/")
