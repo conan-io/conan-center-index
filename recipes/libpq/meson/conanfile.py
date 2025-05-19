@@ -149,12 +149,13 @@ class LibpqConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "PostgreSQL")
-        self.cpp_info.set_property("cmake_target_name", "PostgreSQL::PostgreSQL")
-        self.cpp_info.set_property("pkg_config_name", "libpq")
+        self.cpp_info.set_property("pkg_config_name", "__libpq")
 
         self.runenv_info.define_path("PostgreSQL_ROOT", self.package_folder)
 
         self.cpp_info.components["pq"].libs = [f"{'lib' if is_msvc(self) else ''}pq"]
+        self.cpp_info.components["pq"].set_property("pkg_config_name", "libpq")
+        self.cpp_info.components["pq"].set_property("cmake_target_name", "PostgreSQL::PostgreSQL")
 
         if self.options.with_openssl:
             self.cpp_info.components["pq"].requires.append("openssl::openssl")
