@@ -26,7 +26,9 @@ class VulkanProfilesConan(ConanFile):
             self.requires(f"vulkan-loader/{self.version}", transitive_headers=True)
         self.requires("valijson/1.0.5")
         self.requires("jsoncpp/1.9.6")
-        self.requires("cpython/3.12.7")
+        # TODO: resolve dependency conflicts
+        self.requires("cpython/3.12.7",
+                      options={"with_sqlite3": False, "with_tkinter": False, "with_curses": False, "with_gdbm": False})
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -47,6 +49,6 @@ class VulkanProfilesConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "VulkanExtensionLayer")
-        self.cpp_info.set_property("cmake_target_name", "Vulkan::ExtensionLayer")
-        self.cpp_info.libs = ["VulkanLayerSettings", "VulkanSafeStruct"]
+        self.cpp_info.set_property("cmake_file_name", "VulkanProfiles")
+        self.cpp_info.set_property("cmake_target_name", "Vulkan::VulkanProfiles")
+        #self.cpp_info.libs = ["VulkanLayerSettings", "VulkanSafeStruct"]
