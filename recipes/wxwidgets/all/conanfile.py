@@ -172,15 +172,6 @@ class wxWidgetsConan(ConanFile):
                         "CMAKE_OSX_DEPLOYMENT_TARGET",
                         "CMAKE_OSX_DEPLOYMENT_TARGET_IGNORED")
 
-        # Fix for strcpy_s (fix upstream?)
-        if is_apple_os(self):
-            cmake_version = "3.0"
-            if Version(self.version) >= "3.2.7":
-                cmake_version = "3.0...3.31"
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            f'cmake_minimum_required(VERSION {cmake_version})',
-                            f'cmake_minimum_required(VERSION {cmake_version})\nadd_definitions(-D__STDC_WANT_LIB_EXT1__)')
-
     def generate(self):
         tc = CMakeToolchain(self)
 
@@ -259,7 +250,18 @@ class wxWidgetsConan(ConanFile):
         deps.set_property("nanosvg", "cmake_target_name", "NanoSVG::nanosvg")
         deps.generate()
 
+    def _patch_sources(self):
+        # Fix for strcpy_s on Apple platforms (fix upstream?)
+        if is_apple_os(self):
+            cmake_version = "3.0"
+            if Version(self.version) >= "3.2.7":
+                cmake_version = "3.0...3.31"
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            f'cmake_minimum_required(VERSION {cmake_version})',
+                            f'cmake_minimum_required(VERSION {cmake_version})\nadd_definitions(-D__STDC_WANT_LIB_EXT1__)')
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
