@@ -153,7 +153,8 @@ class LibpqConan(ConanFile):
 
         self.runenv_info.define_path("PostgreSQL_ROOT", self.package_folder)
 
-        self.cpp_info.components["pq"].libs = [f"{'lib' if is_msvc(self) else ''}pq"]
+        prefix = "lib" if is_msvc(self) else ""
+        self.cpp_info.components["pq"].libs = [f"{prefix}pq"]
         self.cpp_info.components["pq"].set_property("pkg_config_name", "libpq")
         self.cpp_info.components["pq"].set_property("cmake_target_name", "PostgreSQL::PostgreSQL")
 
@@ -174,26 +175,27 @@ class LibpqConan(ConanFile):
         if self.options.get_safe("with_readline"):
             self.cpp_info.components["pq"].requires.append("readline::readline")
 
-        if not is_msvc(self):
+        if not is_msvc(self) or self.options.get_shared("shared"):
             self.cpp_info.components["pgcommon"].libs = ["pgcommon", "pgcommon_shlib"]
             self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
             self.cpp_info.components["pgcommon"].requires.append("pgport")
             self.cpp_info.components["pq"].requires.append("pgcommon")
 
-        self.cpp_info.components["pgtypes"].libs = ["pgtypes"]
+        self.cpp_info.components["pgtypes"].libs = [f"{prefix}pgtypes"]
         self.cpp_info.components["pgtypes"].set_property("pkg_config_name", "libpgtypes")
 
-        self.cpp_info.components["ecpg"].libs = ["ecpg"]
+        self.cpp_info.components["ecpg"].libs = [f"{prefix}ecpg"]
         self.cpp_info.components["ecpg"].requires = ["pq", "pgtypes"]
         self.cpp_info.components["ecpg"].set_property("pkg_config_name", "libecpg")
 
-        self.cpp_info.components["ecpg_compat"].libs = ["ecpg_compat"]
+        self.cpp_info.components["ecpg_compat"].libs = [f"{prefix}ecpg_compat"]
         self.cpp_info.components["ecpg_compat"].requires = ["ecpg", "pgtypes"]
         self.cpp_info.components["ecpg_compat"].set_property("pkg_config_name", "libecpg_compat")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["pq"].system_libs = ["pthread", "m", "dl", "rt"]
             self.cpp_info.components["pgtypes"].system_libs = ["pthread"]
-            self.cpp_info.components["pgcommon"].system_libs = ["m"]
+            if not self.options.get_safe("shared"):
+                self.cpp_info.components["pgcommon"].system_libs = ["m"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
