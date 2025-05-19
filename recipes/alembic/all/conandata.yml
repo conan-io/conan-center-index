@@ -1,4 +1,7 @@
 sources:
+  "1.8.7":
+    url: "https://github.com/alembic/alembic/archive/refs/tags/1.8.7.tar.gz"
+    sha256: "6de0b97cd14dcfb7b2d0d788c951b6da3c5b336c47322ea881d64f18575c33da"
   "1.8.6":
     url: "https://github.com/alembic/alembic/archive/refs/tags/1.8.6.tar.gz"
     sha256: "c572ebdea3a5f0ce13774dd1fceb5b5815265cd1b29d142cf8c144b03c131c8c"
