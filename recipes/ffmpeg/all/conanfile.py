@@ -299,7 +299,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_freetype:
             self.requires("freetype/2.13.2")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.13.6")
+            self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.2")
         if self.options.with_openh264:
