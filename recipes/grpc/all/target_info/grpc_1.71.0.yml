@@ -1,4 +1,4 @@
-grpc_version: 1.67.1
+grpc_version: 1.71.0
 grpc_targets:
     - name: "address_sorting"
       lib: "address_sorting"
@@ -8,6 +8,7 @@ grpc_targets:
         - abseil::absl_base
         - abseil::absl_core_headers
         - abseil::absl_log_severity
+        - abseil::absl_cleanup
         - abseil::absl_flags
         - abseil::absl_flags_marshalling
         - abseil::absl_any_invocable
@@ -15,6 +16,7 @@ grpc_targets:
         - abseil::absl_log_globals
         - abseil::absl_log
         - abseil::absl_memory
+        - abseil::absl_bits
         - abseil::absl_random_random
         - abseil::absl_status
         - abseil::absl_cord
@@ -23,7 +25,6 @@ grpc_targets:
         - abseil::absl_synchronization
         - abseil::absl_time
         - abseil::absl_optional
-        - abseil::absl_variant
     - name: "_grpc"
       lib: "grpc"
       requires:
@@ -34,7 +35,6 @@ grpc_targets:
         - abseil::absl_algorithm_container
         - abseil::absl_config
         - abseil::absl_no_destructor
-        - abseil::absl_cleanup
         - abseil::absl_flat_hash_map
         - abseil::absl_flat_hash_set
         - abseil::absl_inlined_vector
@@ -62,7 +62,6 @@ grpc_targets:
         - abseil::absl_algorithm_container
         - abseil::absl_config
         - abseil::absl_no_destructor
-        - abseil::absl_cleanup
         - abseil::absl_flat_hash_map
         - abseil::absl_flat_hash_set
         - abseil::absl_inlined_vector
@@ -141,12 +140,10 @@ grpc_targets:
       requires:
         - upb_mini_descriptor_lib
         - upb_wire_lib
-        - upb_message_lib
         - re2::re2
         - zlib::zlib
         - abseil::absl_config
         - abseil::absl_no_destructor
-        - abseil::absl_cleanup
         - abseil::absl_flat_hash_map
         - abseil::absl_flat_hash_set
         - abseil::absl_inlined_vector
@@ -162,6 +159,7 @@ grpc_targets:
     - name: "grpc_plugin_support"
       lib: "grpc_plugin_support"
       requires:
+        - abseil::absl_status
         - protobuf::libprotobuf
         - protobuf::libprotoc
     - name: "grpcpp_channelz"
@@ -183,5 +181,3 @@ grpc_plugins:
       executable: "grpc_python_plugin"
     - target: "gRPC::grpc_ruby_plugin"
       executable: "grpc_ruby_plugin"
-    - target: "gRPC::grpc_otel_plugin"
-      executable: "grpc_otel_plugin"
