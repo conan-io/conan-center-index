@@ -174,6 +174,12 @@ class LibpqConan(ConanFile):
         if self.options.get_safe("with_readline"):
             self.cpp_info.components["pq"].requires.append("readline::readline")
 
+        if not is_msvc(self):
+            self.cpp_info.components["pgcommon"].libs = ["pgcommon", "pgcommon_shlib"]
+            self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
+            self.cpp_info.components["pgcommon"].requires.append("pgport")
+            self.cpp_info.components["pq"].requires.append("pgcommon")
+
         self.cpp_info.components["pgtypes"].libs = ["pgtypes"]
         self.cpp_info.components["pgtypes"].set_property("pkg_config_name", "libpgtypes")
 
@@ -188,5 +194,6 @@ class LibpqConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["pq"].system_libs = ["pthread", "m", "dl", "rt"]
             self.cpp_info.components["pgtypes"].system_libs = ["pthread"]
+            self.cpp_info.components["pgcommon"].system_libs = ["m"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
