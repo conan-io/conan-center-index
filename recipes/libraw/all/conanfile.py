@@ -1,10 +1,12 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -24,6 +26,11 @@ class LibRawConan(ConanFile):
         "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_lcms": [True, False],
         "with_jasper": [True, False],
+
+        # Option to override the maximum file size for .CR3 (including .CRM) files.
+        # The default limit of 2 GB can be way too small for canon raw movie files (.CRM).
+        # Value in bytes.
+        "libraw_max_cr3_raw_file_size": [None, "ANY"],
     }
     default_options = {
         "shared": False,
@@ -32,6 +39,7 @@ class LibRawConan(ConanFile):
         "with_jpeg": "libjpeg",
         "with_lcms": True,
         "with_jasper": True,
+        "libraw_max_cr3_raw_file_size": None,
     }
     exports_sources = ["CMakeLists.txt"]
 
@@ -70,6 +78,11 @@ class LibRawConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
+        if self.options.libraw_max_cr3_raw_file_size and not str(self.options.libraw_max_cr3_raw_file_size).isdigit():
+            raise ConanInvalidConfiguration("-o='libraw/*:libraw_max_cr3_raw_file_size' should be a positive integer")
+        elif self.options.libraw_max_cr3_raw_file_size and Version(self.version) < '0.22.0':
+            raise ConanInvalidConfiguration("-o='libraw/*:libraw_max_cr3_raw_file_size' Only supported in libraw 0.22 and newer")
+
     def source(self):
        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -81,6 +94,8 @@ class LibRawConan(ConanFile):
         tc.variables["LIBRAW_WITH_JPEG"] = bool(self.options.with_jpeg)
         tc.variables["LIBRAW_WITH_LCMS"] = self.options.with_lcms
         tc.variables["LIBRAW_WITH_JASPER"] = self.options.with_jasper
+        if self.options.libraw_max_cr3_raw_file_size:
+            tc.variables["LIBRAW_MAX_CR3_RAW_FILE_SIZE"] = self.options.libraw_max_cr3_raw_file_size
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -106,6 +121,9 @@ class LibRawConan(ConanFile):
             self.cpp_info.components["libraw_"].system_libs.append("ws2_32")
             if not self.options.shared:
                 self.cpp_info.components["libraw_"].defines.append("LIBRAW_NODLL")
+
+        if self.options.libraw_max_cr3_raw_file_size:
+            self.cpp_info.components["libraw_"].defines.append("LIBRAW_MAX_CR3_RAW_FILE_SIZE={}LL".format(self.options.libraw_max_cr3_raw_file_size))
 
         requires = []
         if self.options.with_jpeg == "libjpeg":
