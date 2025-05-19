@@ -163,14 +163,6 @@ class wxWidgetsConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        # Don't change library names when cross-compiling
-        replace_in_file(self, os.path.join(self.source_folder, "build", "cmake", "functions.cmake"),
-                        'set(cross_target "-${CMAKE_SYSTEM_NAME}")',
-                        'set(cross_target)')
-        # Don't override Conan's toolchain
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "CMAKE_OSX_DEPLOYMENT_TARGET",
-                        "CMAKE_OSX_DEPLOYMENT_TARGET_IGNORED")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -251,6 +243,15 @@ class wxWidgetsConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+        # Don't change library names when cross-compiling
+        replace_in_file(self, os.path.join(self.source_folder, "build", "cmake", "functions.cmake"),
+                        'set(cross_target "-${CMAKE_SYSTEM_NAME}")',
+                        'set(cross_target)')
+        # Don't override Conan's toolchain
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "CMAKE_OSX_DEPLOYMENT_TARGET",
+                        "CMAKE_OSX_DEPLOYMENT_TARGET_IGNORED")
+
         # Fix for strcpy_s on Apple platforms (fix upstream?)
         if is_apple_os(self):
             cmake_version = "3.0"
