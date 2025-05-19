@@ -35,7 +35,7 @@ class BearConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("grpc/<host_version>")
-        self.tool_requires("pkgconf/2.2.0")
+        self.tool_requires("pkgconf/[>=2.2 <3]")
         self.tool_requires("protobuf/<host_version>")
 
     def package_id(self):
