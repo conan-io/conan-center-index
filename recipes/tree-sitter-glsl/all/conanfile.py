@@ -37,7 +37,7 @@ class TreeSitterCConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def requirements(self):
-        self.requires("tree-sitter/0.25.1", transitive_headers=True, transitive_libs=True)
+        self.requires("tree-sitter/0.24.3", transitive_headers=True, transitive_libs=True)
 
     def build(self):
         cmake = CMake(self)
