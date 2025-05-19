@@ -77,6 +77,7 @@ class PlutoSVGConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
         fix_apple_shared_install_name(self)
+
     def package_info(self):
         self.cpp_info.libs = ["plutosvg"]
         self.cpp_info.includedirs = [os.path.join("include", "plutosvg")]
