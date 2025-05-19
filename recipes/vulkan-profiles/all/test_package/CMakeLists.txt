@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-find_package(VulkanExtensionLayer REQUIRED)
+find_package(VulkanProfiles REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::ExtensionLayer)
+target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::VulkanProfiles)
