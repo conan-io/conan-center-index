@@ -1,8 +1,7 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
@@ -11,7 +10,6 @@ required_conan_version = ">=2.0.9"
 
 class PackageConan(ConanFile):
     name = "cpp-smtpclient-library"
-    version = "1.1.10"
     description = "An SMTP client library built in C++ that support authentication and secure connections"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
@@ -29,9 +27,6 @@ class PackageConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -41,11 +36,8 @@ class PackageConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 14)
 
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.10 <4]")
-
     def source(self):
-        get(self, "https://github.com/jeremydumais/CPP-SMTPClient-library/archive/refs/tags/v1.1.10.zip", strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "${OPENSSL_CRYPTO_LIBRARY} ${OPENSSL_SSL_LIBRARY}", "OpenSSL::Crypto OpenSSL::SSL")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "ssl crypto", "OpenSSL::Crypto OpenSSL::SSL")
 
@@ -74,7 +66,7 @@ class PackageConan(ConanFile):
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.libdirs = ["lib/smtpclient"]
+        self.cpp_info.libdirs = [os.path.join("lib", "smtpclient")]
         self.cpp_info.libs = ["smtpclient"]
         self.cpp_info.set_property("cmake_module_file_name", "smtpclient")
         self.cpp_info.set_property("cmake_module_target_name", "smtpclient::smtpclient")
@@ -83,6 +75,4 @@ class PackageConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines.append("SMTPCLIENT_STATIC")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("dl")
+            self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
