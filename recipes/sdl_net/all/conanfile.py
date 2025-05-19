@@ -5,7 +5,7 @@ from conan.tools.files import copy, get
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 
 class SdlnetConan(ConanFile):
@@ -28,22 +28,15 @@ class SdlnetConan(ConanFile):
 
     exports_sources = "CMakeLists.txt"
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
+    implements = ["auto_shared_fpic"]
+    languages = "C"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         # SDL_net.h includes SDL.h, SDL_endian.h and SDL_version.h
-        self.requires("sdl/2.28.5", transitive_headers=True)
+        self.requires("sdl/2.32.2", transitive_headers=True)
 
     def validate(self):
         if Version(self.version).major != Version(self.dependencies["sdl"].ref.version).major:
@@ -80,7 +73,3 @@ class SdlnetConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi"])
 
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "SDL2_net"
-        self.cpp_info.names["cmake_find_package_multi"] = "SDL2_net"
-        self.cpp_info.names["pkg_config"] = "SDL2_net"

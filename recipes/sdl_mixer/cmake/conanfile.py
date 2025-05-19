@@ -89,7 +89,7 @@ class SDLMixerConan(ConanFile):
             raise ConanInvalidConfiguration("wavpack is not yet available in CCI, contributions are welcome")
 
     def requirements(self):
-        self.requires("sdl/2.28.5", transitive_headers=True, transitive_libs=True)
+        self.requires("sdl/2.32.2", transitive_headers=True, transitive_libs=True)
         if self.options.flac:
             self.requires("flac/1.4.2")
         elif self.options.gme:
@@ -264,6 +264,3 @@ class SDLMixerConan(ConanFile):
             self.cpp_info.frameworks.extend(["AudioToolbox", "CoreServices", "CoreGraphics", "CoreFoundation"])
             if self.settings.os == "Macos":
                 self.cpp_info.frameworks.extend(["AppKit", "AudioUnit"])
-
-        self.cpp_info.names["cmake_find_package"] = "SDL2_mixer"
-        self.cpp_info.names["cmake_find_package_multi"] = "SDL2_mixer"
