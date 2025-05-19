@@ -139,6 +139,8 @@ class LibpqConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
+        if is_msvc(self):
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
 
         fix_apple_shared_install_name(self)
 
@@ -168,20 +170,14 @@ class LibpqConan(ConanFile):
         if self.options.get_safe("with_readline"):
             self.cpp_info.components["pq"].requires.append("readline::readline")
 
-        if not self.options.get_safe("shared"):
-            if is_msvc(self):
-                self.cpp_info.components["pgport"].libs = ["libpgport"]
-                self.cpp_info.components["pq"].requires.append("pgport")
-                self.cpp_info.components["pgcommon"].libs = ["libpgcommon"]
-                self.cpp_info.components["pq"].requires.append("pgcommon")
-            else:
-                self.cpp_info.components["pgcommon"].libs = ["pgcommon"]
-                self.cpp_info.components["pq"].requires.append("pgcommon")
-                self.cpp_info.components["pgcommon"].libs.append("pgcommon_shlib")
-                self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
-                if self.settings.os == "Windows":
-                    self.cpp_info.components["pgport"].system_libs = ["ws2_32"]
-                self.cpp_info.components["pgcommon"].requires.append("pgport")
+        if is_msvc(self):
+            self.cpp_info.components["pgtypes"].libs = ["pgtypes"]
+
+            self.cpp_info.components["ecpg"].libs = ["ecpg"]
+            self.cpp_info.components["ecpg"].requires = ["pq", "pgtypes"]
+
+            self.cpp_info.components["ecpg_compat"].libs = ["ecpg_compat"]
+            self.cpp_info.components["ecpg_compat"].requires = ["ecpg", "pgtypes"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["pq"].system_libs = ["pthread"]
