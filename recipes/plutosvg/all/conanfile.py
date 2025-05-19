@@ -1,11 +1,9 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, rename, replace_in_file
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=2"
@@ -13,7 +11,7 @@ required_conan_version = ">=2"
 class PlutoSVGConan(ConanFile):
     name = "plutosvg"
     description = "PlutoSVG is a compact and efficient SVG rendering library written in C"
-    license = "MIT",
+    license = "MIT"
     topics = ("vector", "graphics", "svg")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/sammycage/plutosvg"
@@ -32,9 +30,6 @@ class PlutoSVGConan(ConanFile):
 
     languages = "C"
     implements = ["auto_shared_fpic"]
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
