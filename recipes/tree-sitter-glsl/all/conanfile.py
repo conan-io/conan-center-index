@@ -4,7 +4,7 @@ from conan.tools.files import get, copy
 
 import os
 
-required_conan_version = ">2.0"
+required_conan_version = ">=2.4"
 
 
 class TreeSitterCConan(ConanFile):
