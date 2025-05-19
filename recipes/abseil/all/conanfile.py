@@ -1,15 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, load, replace_in_file, rmdir, save
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, load, rmdir, save
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import json
 import os
 import re
-import textwrap
 
 required_conan_version = ">=2.1"
 
@@ -34,10 +33,6 @@ class AbseilConan(ConanFile):
     short_paths = True
     extension_properties = {"compatibility_cppstd": False}
 
-    @property
-    def _min_cppstd(self):
-        return "11" if Version(self.version) < "20230125.0" else "14"
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -50,7 +45,7 @@ class AbseilConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def validate(self):
-        check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 14)
 
         if self.options.shared and is_msvc(self) and Version(self.version) < "20230802.1":
             # upstream tries its best to export symbols, but it's broken for the moment
