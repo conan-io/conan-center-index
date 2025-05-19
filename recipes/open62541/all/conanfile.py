@@ -183,7 +183,6 @@ class Open62541Conan(ConanFile):
         if self.options.get_safe("nodeset_loader"):
             self.options["libxml2"].iconv = False
             self.options["libxml2"].shared = False
-            self.options["libxml2"].with_subunit = False
 
     def layout(self):
         cmake_layout(self, src_folder="src")
