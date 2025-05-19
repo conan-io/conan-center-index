@@ -139,8 +139,11 @@ class LibpqConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
-        if is_msvc(self):
+        if is_msvc(self) or self.options.get_safe("shared"):
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+        elif not self.options.get_safe("shared"):
+            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
 
         fix_apple_shared_install_name(self)
 
@@ -170,17 +173,19 @@ class LibpqConan(ConanFile):
         if self.options.get_safe("with_readline"):
             self.cpp_info.components["pq"].requires.append("readline::readline")
 
-        if is_msvc(self):
-            self.cpp_info.components["pgtypes"].libs = ["pgtypes"]
+        self.cpp_info.components["pgtypes"].libs = ["pgtypes"]
+        self.cpp_info.components["pgtypes"].set_property("pkg_config_name", "libpgtypes")
 
-            self.cpp_info.components["ecpg"].libs = ["ecpg"]
-            self.cpp_info.components["ecpg"].requires = ["pq", "pgtypes"]
+        self.cpp_info.components["ecpg"].libs = ["ecpg"]
+        self.cpp_info.components["ecpg"].requires = ["pq", "pgtypes"]
+        self.cpp_info.components["ecpg"].set_property("pkg_config_name", "libecpg")
 
-            self.cpp_info.components["ecpg_compat"].libs = ["ecpg_compat"]
-            self.cpp_info.components["ecpg_compat"].requires = ["ecpg", "pgtypes"]
+        self.cpp_info.components["ecpg_compat"].libs = ["ecpg_compat"]
+        self.cpp_info.components["ecpg_compat"].requires = ["ecpg", "pgtypes"]
+        self.cpp_info.components["ecpg_compat"].set_property("pkg_config_name", "libecpg_compat")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["pq"].system_libs = ["pthread"]
-            self.cpp_info.components["pgcommon"].system_libs = ["m"]
+            self.cpp_info.components["pq"].system_libs = ["pthread", "m", "dl", "rt"]
+            self.cpp_info.components["pgtypes"].system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
