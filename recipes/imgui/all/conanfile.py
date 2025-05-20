@@ -21,10 +21,12 @@ class IMGUIConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "enable_test_engine": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "enable_test_engine": False
     }
 
     def export_sources(self):
@@ -47,6 +49,8 @@ class IMGUIConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["IMGUI_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        if self.options.enable_test_engine:
+            tc.preprocessor_definitions.append("IMGUI_ENABLE_TEST_ENGINE")
         tc.generate()
 
     def _patch_sources(self):
