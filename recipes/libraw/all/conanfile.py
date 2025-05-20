@@ -52,6 +52,8 @@ class LibRawConan(ConanFile):
             del self.options.fPIC
         if is_msvc(self):
             del self.options.build_thread_safe
+        if Version(self.version) < '0.22.0':
+            del self.options.libraw_max_cr3_raw_file_size
 
     def configure(self):
         if self.options.shared:
@@ -77,11 +79,8 @@ class LibRawConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-
-        if self.options.libraw_max_cr3_raw_file_size and not str(self.options.libraw_max_cr3_raw_file_size).isdigit():
+        if self.options.get_safe("libraw_max_cr3_raw_file_size") and not str(self.options.get_safe("libraw_max_cr3_raw_file_size")).isdigit():
             raise ConanInvalidConfiguration("-o='libraw/*:libraw_max_cr3_raw_file_size' should be a positive integer")
-        elif self.options.libraw_max_cr3_raw_file_size and Version(self.version) < '0.22.0':
-            raise ConanInvalidConfiguration("-o='libraw/*:libraw_max_cr3_raw_file_size' Only supported in libraw 0.22 and newer")
 
     def source(self):
        get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -94,8 +93,8 @@ class LibRawConan(ConanFile):
         tc.variables["LIBRAW_WITH_JPEG"] = bool(self.options.with_jpeg)
         tc.variables["LIBRAW_WITH_LCMS"] = self.options.with_lcms
         tc.variables["LIBRAW_WITH_JASPER"] = self.options.with_jasper
-        if self.options.libraw_max_cr3_raw_file_size:
-            tc.variables["LIBRAW_MAX_CR3_RAW_FILE_SIZE"] = self.options.libraw_max_cr3_raw_file_size
+        if self.options.get_safe("libraw_max_cr3_raw_file_size"):
+            tc.variables["LIBRAW_MAX_CR3_RAW_FILE_SIZE"] = self.options.get_safe("libraw_max_cr3_raw_file_size")
         tc.generate()
 
         deps = CMakeDeps(self)
