@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=2.1"
 
 
 class SociConan(ConanFile):
@@ -17,7 +17,7 @@ class SociConan(ConanFile):
     description = "The C++ Database Access Library "
     topics = ("mysql", "odbc", "postgresql", "sqlite3")
     license = "BSL-1.0"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared":           [True, False],
@@ -125,6 +125,8 @@ class SociConan(ConanFile):
         tc.variables["WITH_MYSQL"] = self.options.with_mysql
         tc.variables["WITH_POSTGRESQL"] = self.options.with_postgresql
         tc.variables["WITH_BOOST"] = self.options.with_boost
+        if Version(self.version) < "4.1.0": # pylint: disable=conan-condition-evals-to-constant
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -159,7 +161,7 @@ class SociConan(ConanFile):
         self.cpp_info.components["soci_core"].set_property("cmake_target_name", "SOCI::soci_core{}".format(target_suffix))
         self.cpp_info.components["soci_core"].libs = ["{}soci_core{}".format(lib_prefix, lib_suffix)]
         if self.options.with_boost:
-            self.cpp_info.components["soci_core"].requires.append("boost::boost")
+            self.cpp_info.components["soci_core"].requires.append("boost::headers")
 
         # soci_empty
         if self.options.empty:
@@ -194,24 +196,3 @@ class SociConan(ConanFile):
             self.cpp_info.components["soci_postgresql"].set_property("cmake_target_name", "SOCI::soci_postgresql{}".format(target_suffix))
             self.cpp_info.components["soci_postgresql"].libs = ["{}soci_postgresql{}".format(lib_prefix, lib_suffix)]
             self.cpp_info.components["soci_postgresql"].requires = ["soci_core", "libpq::libpq"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "SOCI"
-        self.cpp_info.names["cmake_find_package_multi"] = "SOCI"
-        self.cpp_info.components["soci_core"].names["cmake_find_package"] = "soci_core{}".format(target_suffix)
-        self.cpp_info.components["soci_core"].names["cmake_find_package_multi"] = "soci_core{}".format(target_suffix)
-        if self.options.empty:
-            self.cpp_info.components["soci_empty"].names["cmake_find_package"] = "soci_empty{}".format(target_suffix)
-            self.cpp_info.components["soci_empty"].names["cmake_find_package_multi"] = "soci_empty{}".format(target_suffix)
-        if self.options.with_sqlite3:
-            self.cpp_info.components["soci_sqlite3"].names["cmake_find_package"] = "soci_sqlite3{}".format(target_suffix)
-            self.cpp_info.components["soci_sqlite3"].names["cmake_find_package_multi"] = "soci_sqlite3{}".format(target_suffix)
-        if self.options.with_odbc:
-            self.cpp_info.components["soci_odbc"].names["cmake_find_package"] = "soci_odbc{}".format(target_suffix)
-            self.cpp_info.components["soci_odbc"].names["cmake_find_package_multi"] = "soci_odbc{}".format(target_suffix)
-        if self.options.with_mysql:
-            self.cpp_info.components["soci_mysql"].names["cmake_find_package"] = "soci_mysql{}".format(target_suffix)
-            self.cpp_info.components["soci_mysql"].names["cmake_find_package_multi"] = "soci_mysql{}".format(target_suffix)
-        if self.options.with_postgresql:
-            self.cpp_info.components["soci_postgresql"].names["cmake_find_package"] = "soci_postgresql{}".format(target_suffix)
-            self.cpp_info.components["soci_postgresql"].names["cmake_find_package_multi"] = "soci_postgresql{}".format(target_suffix)

@@ -8,7 +8,7 @@ from conan.tools.system import package_manager
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
+required_conan_version = ">=2.0.6"
 
 
 class wxWidgetsConan(ConanFile):
@@ -21,6 +21,7 @@ class wxWidgetsConan(ConanFile):
     license = "wxWidgets"
     settings = "os", "arch", "compiler", "build_type"
 
+    package_type = "library"
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"],
@@ -249,6 +250,8 @@ class wxWidgetsConan(ConanFile):
         for item in str(self.options.custom_disables).split(","):
             if len(item) > 0:
                 tc.variables[item] = False
+
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
 
         tc.generate()
 

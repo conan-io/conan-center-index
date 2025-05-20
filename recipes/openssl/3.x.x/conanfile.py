@@ -116,11 +116,6 @@ class OpenSSLConan(ConanFile):
         else:
             self.options.rm_safe("fPIC")
 
-        if self.settings.os == "Emscripten":
-            self.options.no_asm = True
-            self.options.no_threads = True
-            self.options.no_stdio = True
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -135,10 +130,6 @@ class OpenSSLConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
-        if self.settings.os == "Emscripten":
-            if not all((self.options.no_asm, self.options.no_threads, self.options.no_stdio)):
-                raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,no_threads,no_stdio}=True")
-
         if self.settings.os == "iOS" and self.options.shared:
             raise ConanInvalidConfiguration("OpenSSL 3 does not support building shared libraries for iOS")
 
@@ -367,8 +358,6 @@ class OpenSSLConan(ConanFile):
 
         if self.settings.os == "Android":
             args.append(f" -D__ANDROID_API__={str(self.settings.os.api_level)}")  # see NOTES.ANDROID
-        if self.settings.os == "Emscripten":
-            args.append("-D__STDC_NO_ATOMICS__=1")
         if self.settings.os == "Windows":
             if self.options.enable_capieng:
                 args.append("enable-capieng")
@@ -391,20 +380,29 @@ class OpenSSLConan(ConanFile):
         if not self.options.no_zlib:
             zlib_cpp_info = self.dependencies["zlib"].cpp_info.aggregated_components()
             include_path = self._adjust_path(zlib_cpp_info.includedirs[0])
+            is_shared_zlib = self.dependencies["zlib"].options.shared
+
+
+            # the --with-zlib-lib flag takes a different value depending on platform and if ZLIB is shared
+            # From https://github.com/openssl/openssl/blob/openssl-3.4.1/INSTALL.md#with-zlib-lib
+            # On Unix: the directory where the zlib library is (for -L flag)
+            # On Windows with static zlib: the path to the static library to link (assumed)
+            # On Windows with shared zlib: the leaf name of the dll (its loaded with LoadLibrary)
             if self._use_nmake:
+                # notes: consider where this should be "if on windows"
+                #        zlib1 is assumed to be the name of the zlib1.dll for all windows configurations
                 lib_path = self._adjust_path(os.path.join(zlib_cpp_info.libdirs[0], f"{zlib_cpp_info.libs[0]}.lib"))
+                zlib_lib_flag = "zlib1" if is_shared_zlib else lib_path
             else:
                 # Just path, GNU like compilers will find the right file
-                lib_path = self._adjust_path(zlib_cpp_info.libdirs[0])
+                zlib_lib_flag = self._adjust_path(zlib_cpp_info.libdirs[0])
 
-            if self.dependencies["zlib"].options.shared:
-                args.append("zlib-dynamic")
-            else:
-                args.append("zlib")
+            zlib_configure_arg = "zlib-dynamic" if is_shared_zlib else "zlib"
+            args.append(zlib_configure_arg)
 
             args.extend([
                 f'--with-zlib-include="{include_path}"',
-                f'--with-zlib-lib="{lib_path}"',
+                f'--with-zlib-lib="{zlib_lib_flag}"',
             ])
 
         for option_name in self.default_options.keys():

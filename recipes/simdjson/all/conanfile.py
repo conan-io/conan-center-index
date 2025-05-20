@@ -3,6 +3,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -11,7 +12,7 @@ required_conan_version = ">=1.53.0"
 class SimdjsonConan(ConanFile):
     name = "simdjson"
     description = "Parsing gigabytes of JSON per second"
-    license = "Apache-2.0"
+    license = ("Apache-2.0", "MIT")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lemire/simdjson"
     topics = ("json", "parser", "simd", "format")
@@ -36,6 +37,8 @@ class SimdjsonConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if Version(self.version) < "3.12.0":
+            self.license = "Apache-2.0"
 
     def layout(self):
         cmake_layout(self, src_folder="src")

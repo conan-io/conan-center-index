@@ -1,3 +1,6 @@
+patches:
+  "2.3.0":
+  - patch_file: patches/0001-Fix-gcc13-compilation.patch
 sources:
   "3.2.0":
     url: "https://github.com/asmaloney/libE57Format/archive/refs/tags/v3.2.0.tar.gz"
