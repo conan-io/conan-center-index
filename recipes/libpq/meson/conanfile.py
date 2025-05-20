@@ -177,9 +177,7 @@ class LibpqConan(ConanFile):
             self.cpp_info.components["pq"].requires.append("readline::readline")
 
         if not is_msvc(self) and not self.options.get_safe("shared"):
-            self.cpp_info.components["pgcommon"].libs = ["pgcommon", "pgcommon_shlib"]
-            self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
-            self.cpp_info.components["pgcommon"].requires.append("pgport")
+            self.cpp_info.components["pgcommon"].libs = ["pgcommon_shlib", "pgport_shlib", "pgfeutils"]
             self.cpp_info.components["pq"].requires.append("pgcommon")
 
         self.cpp_info.components["pgtypes"].libs = [f"{prefix}pgtypes"]
