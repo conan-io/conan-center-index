@@ -59,10 +59,6 @@ if (LIBRAW_WITH_JASPER)
     target_link_libraries(raw PUBLIC Jasper::Jasper)
 endif ()
 
-if (LIBRAW_MAX_CR3_RAW_FILE_SIZE)
-    target_compile_definitions(raw PUBLIC "-DLIBRAW_MAX_CR3_RAW_FILE_SIZE=${LIBRAW_MAX_CR3_RAW_FILE_SIZE}LL")
-endif ()
-
 include(GNUInstallDirs)
 if(LIBRAW_BUILD_THREAD_SAFE)
     add_library(raw_r ${libraw_LIB_SRCS})

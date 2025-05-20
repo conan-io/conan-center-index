@@ -1,7 +1,4 @@
 sources:
-  "0.22.0.cci.20250224":
-    url: "https://github.com/LibRaw/LibRaw/archive/8afe44cd0e96611ba3cb73779b83ad05e945634c.tar.gz"
-    sha256: "1a19cbf95a0b35be537c295c31d3bf6a05a0df577b7d2a1ed443e894db942296"
   "0.21.4":
     url: "https://github.com/LibRaw/LibRaw/archive/0.21.4.tar.gz"
     sha256: "8baeb5253c746441fadad62e9c5c43ff4e414e41b0c45d6dcabccb542b2dff4b"
