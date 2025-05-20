@@ -83,7 +83,7 @@ class LibRawConan(ConanFile):
             raise ConanInvalidConfiguration("-o='libraw/*:libraw_max_cr3_raw_file_size' should be a positive integer")
 
     def source(self):
-       get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -94,7 +94,7 @@ class LibRawConan(ConanFile):
         tc.variables["LIBRAW_WITH_LCMS"] = self.options.with_lcms
         tc.variables["LIBRAW_WITH_JASPER"] = self.options.with_jasper
         if self.options.get_safe("libraw_max_cr3_raw_file_size"):
-            tc.variables["LIBRAW_MAX_CR3_RAW_FILE_SIZE"] = self.options.get_safe("libraw_max_cr3_raw_file_size")
+            tc.variables["LIBRAW_MAX_CR3_RAW_FILE_SIZE"] = self.options.libraw_max_cr3_raw_file_size
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -121,7 +121,7 @@ class LibRawConan(ConanFile):
             if not self.options.shared:
                 self.cpp_info.components["libraw_"].defines.append("LIBRAW_NODLL")
 
-        if self.options.libraw_max_cr3_raw_file_size:
+        if self.options.get_safe("libraw_max_cr3_raw_file_size"):
             self.cpp_info.components["libraw_"].defines.append("LIBRAW_MAX_CR3_RAW_FILE_SIZE={}LL".format(self.options.libraw_max_cr3_raw_file_size))
 
         requires = []
