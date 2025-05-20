@@ -420,8 +420,8 @@ class OpenSSLConan(ConanFile):
             env.define_path("CROSS_SDK", os.path.basename(xcrun.sdk_path))
             env.define_path("CROSS_TOP", os.path.dirname(os.path.dirname(xcrun.sdk_path)))
 
-        if is_apple_os(self):
-            # Inject -headerpad_max_install_names, otherwise fix_apple_shared_install_name() may fail.
+        if is_apple_os(self) and self.options.shared:
+            # Inject -headerpad_max_install_names for shared library, otherwise fix_apple_shared_install_name() may fail.
             # See https://github.com/conan-io/conan-center-index/issues/27424
             tc.extra_ldflags.append("-headerpad_max_install_names")
 
