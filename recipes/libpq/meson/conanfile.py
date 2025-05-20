@@ -120,6 +120,7 @@ class LibpqConan(ConanFile):
         tc.project_options["libxslt"] = feature(self.options.with_xslt)
         tc.project_options["readline"] = feature(self.options.get_safe("with_readline"))
 
+        tc.project_options["ldap"] = "disabled"
         tc.project_options["tap_tests"] = "disabled"
         tc.project_options["plpython"] = "disabled"
         tc.generate()
