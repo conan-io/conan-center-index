@@ -86,14 +86,14 @@ class OpenImageIOConan(ConanFile):
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/[>=3.0.3 <4]")
-        self.requires("pugixml/1.14")
+        self.requires("pugixml/1.15")
         self.requires("tsl-robin-map/1.3.0")
-        self.requires("fmt/10.2.1", transitive_headers=True)
-        self.requires("opencolorio/2.4.0")
+        self.requires("fmt/11.2.0", transitive_headers=True)
+        self.requires("opencolorio/2.4.2")
 
         # Optional libraries
         if self.options.with_libjxl:
-            self.requires("libjxl/0.10.3")
+            self.requires("libjxl/0.11.1")
         if self.options.with_libpng:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_freetype:
