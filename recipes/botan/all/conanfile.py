@@ -312,11 +312,6 @@ class BotanConan(ConanFile):
         botan_extra_cxx_flags = []
         build_flags = []
 
-        if Version(self.version) >= '3.7' and is_msvc(self) and Version(self.settings.compiler.version) < '194':
-            # https://github.com/conan-io/conan-center-index/pull/26531#issuecomment-2636504872
-            # Note that this disables support for Classic McEliece
-            build_flags.append('--disable-modules=bitvector')
-
         if self._is_linux_clang_libcxx:
             botan_abi_flags.extend(['-stdlib=libc++', '-lc++abi'])
 
