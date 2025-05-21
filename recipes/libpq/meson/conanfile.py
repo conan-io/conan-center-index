@@ -1,12 +1,14 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, rename
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-import os
-
 from conan.tools.microsoft import is_msvc
+
+import os
+import glob
+
 
 required_conan_version = ">=2.4"
 
@@ -18,7 +20,6 @@ class LibpqConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.postgresql.org/docs/current/static/libpq.html"
     license = "PostgreSQL"
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -62,11 +63,6 @@ class LibpqConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.settings.os == "Windows":
-            # INFO: Libpq maintainer said that the library is only shared on Windows
-            # https://stackoverflow.com/q/79598760/2036859
-            del self.options.shared
-            self.package_type = "shared-library"
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -140,9 +136,13 @@ class LibpqConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
-        if is_msvc(self) or self.options.get_safe("shared"):
+        if is_msvc(self) or self.options.shared:
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
-        elif not self.options.get_safe("shared"):
+        elif is_msvc(self) and not self.options.shared:
+            rm(self, "*.lib", os.path.join(self.package_folder, "lib"))
+            for import_lib in glob.glob(os.path.join(self.package_folder, "*.lib")):
+                rename(self, import_lib, os.path.join(self.package_folder, "lib", import_lib.replace(".lib", ".a")))
+        elif not self.options.shared:
             rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
 
@@ -176,7 +176,7 @@ class LibpqConan(ConanFile):
         if self.options.get_safe("with_readline"):
             self.cpp_info.components["pq"].requires.append("readline::readline")
 
-        if not is_msvc(self) and not self.options.get_safe("shared"):
+        if not is_msvc(self) and not self.options.shared:
             self.cpp_info.components["pgcommon"].libs = ["pgcommon_shlib", "pgport_shlib", "pgfeutils"]
             self.cpp_info.components["pq"].requires.append("pgcommon")
 
@@ -194,7 +194,7 @@ class LibpqConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["pq"].system_libs = ["pthread", "m", "dl", "rt"]
             self.cpp_info.components["pgtypes"].system_libs = ["pthread"]
-            if not self.options.get_safe("shared"):
+            if not self.options.shared:
                 self.cpp_info.components["pgcommon"].system_libs = ["m"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
