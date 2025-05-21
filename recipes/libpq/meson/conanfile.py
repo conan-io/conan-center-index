@@ -60,10 +60,6 @@ class LibpqConan(ConanFile):
         if self.settings.compiler == "msvc":
             del self.options.with_readline
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -136,12 +132,13 @@ class LibpqConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
-        if is_msvc(self) or self.options.shared:
+
+        if (is_msvc(self) and self.options.shared) or (not is_msvc(self) and self.options.shared):
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
         elif is_msvc(self) and not self.options.shared:
             rm(self, "*.lib", os.path.join(self.package_folder, "lib"))
-            for import_lib in glob.glob(os.path.join(self.package_folder, "*.lib")):
-                rename(self, import_lib, os.path.join(self.package_folder, "lib", import_lib.replace(".lib", ".a")))
+            for import_lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
+                rename(self, import_lib, import_lib.replace(".a", ".lib"))
         elif not self.options.shared:
             rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
@@ -176,8 +173,8 @@ class LibpqConan(ConanFile):
         if self.options.get_safe("with_readline"):
             self.cpp_info.components["pq"].requires.append("readline::readline")
 
-        if not is_msvc(self) and not self.options.shared:
-            self.cpp_info.components["pgcommon"].libs = ["pgcommon_shlib", "pgport_shlib", "pgfeutils"]
+        if not self.options.shared:
+            self.cpp_info.components["pgcommon"].libs = [f"{prefix}pgcommon_shlib", f"{prefix}pgport_shlib", f"{prefix}pgfeutils"]
             self.cpp_info.components["pq"].requires.append("pgcommon")
 
         self.cpp_info.components["pgtypes"].libs = [f"{prefix}pgtypes"]
@@ -194,7 +191,6 @@ class LibpqConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["pq"].system_libs = ["pthread", "m", "dl", "rt"]
             self.cpp_info.components["pgtypes"].system_libs = ["pthread"]
-            if not self.options.shared:
-                self.cpp_info.components["pgcommon"].system_libs = ["m"]
+            self.cpp_info.components["pgcommon"].system_libs = ["m"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
