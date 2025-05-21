@@ -217,6 +217,15 @@ class ArrowConan(ConanFile):
                 raise ConanException("'with_boost' option should be True when 'gandiva=True'")
             if not self.options.with_utf8proc:
                 raise ConanException("'with_utf8proc' option should be True when 'gandiva=True'")
+        if self.options.with_orc:
+            if not self.options.with_lz4:
+                raise ConanException("'with_lz4' option should be True when 'orc=True'")
+            if not self.options.with_snappy:
+                raise ConanException("'with_snappy' option should be True when 'orc=True'")
+            if not self.options.with_zlib:
+                raise ConanException("'with_zlib' option should be True when 'orc=True'")
+            if not self.options.with_zstd:
+                raise ConanException("'with_zstd' option should be True when 'orc=True'")
         if self.options.with_thrift and not self.options.with_boost:
             raise ConanException("'with_boost' option should be True when 'thrift=True'")
         if self.options.parquet:
