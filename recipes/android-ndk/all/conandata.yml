@@ -1,4 +1,17 @@
 sources:
+  "r28b":
+    "Windows":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r28b-windows.zip"
+        sha256: "7699a87eb141377d9c3375bc1d3c587441bb18268d66da8cb70b186e90f47127"
+    "Linux":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r28b-linux.zip"
+        sha256: "e9f2759862cecfd48c20bbb7d8cfedbb020f4d91b5f78d9a2fc106f7db3c27ed"
+    "Macos":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r28b-darwin.zip"
+        sha256: "76d33f698302dce31f59b86e9ed82e87b530f10cc52cbaeb44207473689be309"
   "r27c":
     "Windows":
       "x86_64":
