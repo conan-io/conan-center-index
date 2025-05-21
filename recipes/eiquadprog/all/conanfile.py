@@ -1,7 +1,10 @@
+import os
+
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get
+from conan.tools.files import get, rmdir, copy
 
+required_conan_version = ">=2"
 
 class EiquadprogConan(ConanFile):
     name = "eiquadprog"
@@ -21,31 +24,30 @@ class EiquadprogConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "build_tests": [True, False],
     }
-    default_options = {"shared": False, "fPIC": True, "build_tests": False}
+    default_options = {
+        "shared": False,
+        "fPIC": True
+    }
+
+    implements = ["auto_shared_fpic"]
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def requirements(self):
         self.requires("eigen/3.4.0", transitive_headers=True)
-        if self.options.build_tests:
-            self.requires("boost/1.87.0", options={"shared": True})
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def generate(self):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
-        if not self.options.build_tests:
-            tc.variables["BUILD_TESTING"] = "OFF"
+        tc.cache_variables["BUILD_TESTING"] = False
+        # Upstream has this as an option
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.generate()
 
     def build(self):
@@ -54,8 +56,12 @@ class EiquadprogConan(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, "COPYING*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["eiquadprog"]
