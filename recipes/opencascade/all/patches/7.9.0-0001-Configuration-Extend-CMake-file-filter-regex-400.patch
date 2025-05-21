@@ -1,0 +1,59 @@
+From de5406aabdfe2a0df7ec2634a779f2f3e2d1de4a Mon Sep 17 00:00:00 2001
+From: Pasukhin Dmitry <dpasukhi@opencascade.com>
+Date: Mon, 3 Mar 2025 09:42:35 +0100
+Subject: [PATCH] Configuration - Extend CMake file filter regex (#400)
+
+Fixed issue when folder name contains .c or .h as a part of the name.
+---
+ adm/cmake/occt_macros.cmake  |  4 ++--
+ adm/cmake/occt_toolkit.cmake | 10 +++++-----
+ 2 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/adm/cmake/occt_macros.cmake b/adm/cmake/occt_macros.cmake
+index 9ca124d503..a0ed0fbcba 100644
+--- a/adm/cmake/occt_macros.cmake
++++ b/adm/cmake/occt_macros.cmake
+@@ -437,7 +437,7 @@ function (COLLECT_AND_INSTALL_OCCT_HEADER_FILES THE_ROOT_TARGET_OCCT_DIR THE_OCC
+     foreach(OCCT_PACKAGE ${USED_PACKAGES})
+       EXTRACT_PACKAGE_FILES (${THE_RELATIVE_PATH} ${OCCT_PACKAGE} ALL_FILES _)
+       set (HEADER_FILES_FILTERING ${ALL_FILES})
+-      list (FILTER HEADER_FILES_FILTERING INCLUDE REGEX ".+[.](h|g|p|lxx)")
++      list (FILTER HEADER_FILES_FILTERING INCLUDE REGEX ".+[.](h|g|p|lxx|hxx|pxx|hpp|gxx)$")
+       list (APPEND OCCT_HEADER_FILES_COMPLETE ${HEADER_FILES_FILTERING})
+     endforeach()
+   endforeach()
+@@ -477,7 +477,7 @@ function (COLLECT_AND_INSTALL_OCCT_HEADER_FILES THE_ROOT_TARGET_OCCT_DIR THE_OCC
+   endforeach()
+ 
+   set (OCCT_HEADER_FILES_INSTALLATION ${OCCT_HEADER_FILES_COMPLETE})
+-  list (FILTER OCCT_HEADER_FILES_INSTALLATION INCLUDE REGEX ".*[.](h|lxx)")
++  list (FILTER OCCT_HEADER_FILES_INSTALLATION INCLUDE REGEX ".*[.](h|hxx|lxx)$")
+   install (FILES ${OCCT_HEADER_FILES_INSTALLATION} DESTINATION "${INSTALL_DIR}/${THE_OCCT_INSTALL_DIR_PREFIX}")
+ endfunction()
+ 
+diff --git a/adm/cmake/occt_toolkit.cmake b/adm/cmake/occt_toolkit.cmake
+index 36accf907f..033c82ec8b 100644
+--- a/adm/cmake/occt_toolkit.cmake
++++ b/adm/cmake/occt_toolkit.cmake
+@@ -63,13 +63,13 @@ foreach (OCCT_PACKAGE ${USED_PACKAGES})
+ 
+   set (HEADER_FILES_FILTERING ${ALL_FILES})
+   set (SOURCE_FILES_FILTERING ${ALL_FILES})
+-  
+-  list (FILTER HEADER_FILES_FILTERING INCLUDE REGEX ".+[.](h|p|g|lxx)")
+-  
++
++  list (FILTER HEADER_FILES_FILTERING INCLUDE REGEX ".+[.](h|p|g|lxx|hxx|pxx|hpp|gxx)$")
++    
+   if(APPLE)
+-    list (FILTER SOURCE_FILES_FILTERING INCLUDE REGEX ".+[.](c|mm)")
++    list (FILTER SOURCE_FILES_FILTERING INCLUDE REGEX ".+[.](c|cxx|cpp|mm)$")
+   else()
+-    list (FILTER SOURCE_FILES_FILTERING INCLUDE REGEX ".+[.](c)")
++    list (FILTER SOURCE_FILES_FILTERING INCLUDE REGEX ".+[.](c|cpp|cxx)$")
+   endif()
+ 
+   list (APPEND HEADER_FILES ${HEADER_FILES_FILTERING})
+-- 
+2.43.0
+
