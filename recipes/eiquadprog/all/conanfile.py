@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get, rmdir, copy
 
@@ -32,14 +33,18 @@ class EiquadprogConan(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("eigen/3.4.0", transitive_headers=True)
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+    def validate(self):
+        if self.settings.compiler == "msvc":
+            raise ConanInvalidConfiguration("MSVC is not supported")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         deps = CMakeDeps(self)
