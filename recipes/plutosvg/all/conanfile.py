@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.files import copy, get, rm, rmdir, replace_in_file
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -47,10 +47,6 @@ class PlutoSVGConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        # Seems like upstream places the header in a different folder from where the installed header is
-        replace_in_file(self, os.path.join(self.source_folder, "source", "plutosvg.h"),
-                        "#include <plutovg.h>",
-                        "#include <plutovg/plutovg.h>")
 
     def generate(self):
         tc = MesonToolchain(self)
