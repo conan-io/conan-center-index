@@ -1,6 +1,12 @@
+#ifdef XTENSOR_VERSION_LESS_0_26_0
 #include "xtensor/xarray.hpp"
 #include "xtensor/xio.hpp"
 #include "xtensor/xview.hpp"
+#else
+#include "xtensor/containers/xarray.hpp"
+#include "xtensor/io/xio.hpp"
+#include "xtensor/views/xview.hpp"
+#endif
 #include <iostream>
 
 int main(int argc, char *argv[]) {
