@@ -167,16 +167,17 @@ if(NOT OMIT_LOAD_EXTENSION)
     target_link_libraries(${PROJECT_NAME}  PRIVATE ${CMAKE_DL_LIBS})
 endif()
 
-if(ENABLE_FTS5 OR ENABLE_MATH_FUNCTIONS)
+if(SQLITE3_BUILD_EXECUTABLE OR ENABLE_FTS5 OR ENABLE_MATH_FUNCTIONS)
     include(CheckLibraryExists)
     # Check if math functionality is on the separate 'libm' library,
     # otherwise assume that it is already part of the C runtime.
     # The `m` library is part of the compiler toolchain, this checks
     # if the compiler can successfully link against the library.
     check_library_exists(m log "" HAVE_MATH_LIBRARY)
-    if(HAVE_MATH_LIBRARY)
-        target_link_libraries(${PROJECT_NAME} PRIVATE m)
-    endif()
+endif()
+
+if(HAVE_MATH_LIBRARY AND (ENABLE_FTS5 OR ENABLE_MATH_FUNCTIONS))
+    target_link_libraries(${PROJECT_NAME} PRIVATE m)
 endif()
 
 include(GNUInstallDirs)
@@ -191,6 +192,9 @@ install(DIRECTORY ${SQLITE3_SRC_DIR}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 if(SQLITE3_BUILD_EXECUTABLE)
     add_executable(sqlite3-bin ${SQLITE3_SRC_DIR}/shell.c)
     target_link_libraries(sqlite3-bin PRIVATE ${PROJECT_NAME})
+    if(HAVE_MATH_LIBRARY)
+        target_link_libraries(sqlite3-bin PRIVATE m)
+    endif()
     if(ENABLE_DBPAGE_VTAB)
         target_compile_definitions(sqlite3-bin PRIVATE SQLITE_ENABLE_DBPAGE_VTAB)
     endif()
