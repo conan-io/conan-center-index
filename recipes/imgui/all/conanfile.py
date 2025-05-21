@@ -45,12 +45,18 @@ class IMGUIConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        m = self._match_docking_branch()
+        version = Version(m.group('version')) if m else Version(self.version)
+        get(self, f"https://github.com/ocornut/imgui_test_engine/archive/v{version}.tar.gz", strip_root=True, destination="test_engine")
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["IMGUI_SRC_DIR"] = self.source_folder.replace("\\", "/")
         if self.options.enable_test_engine:
-            tc.preprocessor_definitions.append("IMGUI_ENABLE_TEST_ENGINE")
+            tc.preprocessor_definitions["IMGUI_ENABLE_TEST_ENGINE"] = "1"
+            tc.preprocessor_definitions["IMGUI_TEST_ENGINE_ENABLE_COROUTINE_STDTHREAD_IMPL"] = "1"
+            tc.variables["IMGUI_ENABLE_TEST_ENGINE"] = "ON"
+            tc.variables["IMGUI_TEST_ENGINE_DIR"] = os.path.join(self.source_folder, "test_engine").replace("\\", "/")
         tc.generate()
 
     def _patch_sources(self):
@@ -68,7 +74,7 @@ class IMGUIConan(ConanFile):
         cmake.build()
 
     def _match_docking_branch(self):
-        return re.match(r'cci\.\d{8}\+(?P<version>\d+\.\d+(?:\.\d+))\.docking', str(self.version))
+        return re.match(r'cci\.\d{8}\+(?P<version>\d+\.\d+(?:\.\d+))\.docking', str(self.version)) or re.match(r'(?P<version>\d+\.\d+(.\d+)?)-docking', str(self.version))
 
     def package(self):
         copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
@@ -95,6 +101,7 @@ class IMGUIConan(ConanFile):
 
     def package_info(self):
         self.conf_info.define("user.imgui:with_docking", bool(self._match_docking_branch()))
+        self.conf_info.define("user.imgui:enable_test_engine", bool(self.options.enable_test_engine))
 
         self.cpp_info.libs = ["imgui"]
         if self.settings.os == "Linux":
