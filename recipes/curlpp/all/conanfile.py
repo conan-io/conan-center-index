@@ -42,7 +42,7 @@ class CurlppConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 11)
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
-            raise ConanInvalidConfiguration("${self.ref} requires C++11. Please set 'compiler.cppstd=11'.")
+            raise ConanInvalidConfiguration(f"${self.ref} requires at least GCC 6.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
