@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-find_package(ValiJSON REQUIRED CONFIG)
+find_package(valijson REQUIRED CONFIG)
 find_package(nlohmann_json REQUIRED CONFIG)
 find_package(picojson REQUIRED CONFIG)
 find_package(RapidJSON REQUIRED CONFIG)
