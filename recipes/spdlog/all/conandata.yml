@@ -37,8 +37,7 @@ patches:
       patch_source: "https://github.com/gabime/spdlog/pull/2694"
 # Each release is intended to work with some specific versions
 fmt_version_mapping:
-  "1.15.2": "11.1.4"
-  "1.15.0": "11.0.2"
+  "1.15.3": "11.2.0"
   "1.14.1": "10.2.1"
   "1.14.0": "10.2.1"
   "1.13.0": "10.2.1"
