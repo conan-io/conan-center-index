@@ -1,7 +1,7 @@
 sources:
-  "7.9.0":
-    url: "https://github.com/Open-Cascade-SAS/OCCT/archive/refs/tags/V7_9_0.tar.gz"
-    sha256: "151b7a522ba8220aed3009e440246abbaf2ffec42672c37e9390096f7f2c098d"
+  "7.9.1":
+    url: "https://github.com/Open-Cascade-SAS/OCCT/archive/refs/tags/V7_9_1.tar.gz"
+    sha256: "de442298cd8860f5580b01007f67f0ecd0b8900cfa4da467fa3c823c2d1a45df"
   "7.6.2":
     url: "https://github.com/Open-Cascade-SAS/OCCT/archive/refs/tags/V7_6_2.tar.gz"
     sha256: "dea04077d71507c666aaa7ccaeacc73ab580d6572d7f75e90a1984c4c0302a7a"
@@ -12,11 +12,6 @@ sources:
     url: "https://github.com/Open-Cascade-SAS/OCCT/archive/V7_5_0.tar.gz"
     sha256: "dbe1d62a9317ad1516bd4575293d9aab2dc20206ca7a60a7705c9a3b77dc59c9"
 patches:
-  "7.9.0":
-    - patch_file: "patches/7.9.0-0001-Configuration-Extend-CMake-file-filter-regex-400.patch"
-      patch_description: "Fix compilation error with mm objectifc files on Unix"
-      patch_source: "https://github.com/Open-Cascade-SAS/OCCT/commit/de5406aabdfe2a0df7ec2634a779f2f3e2d1de4a"
-      patch_type: "portability"
   "7.6.2":
     - patch_file: "patches/7.5.0-0001-fix-compile-error-cxx17.patch"
       patch_description: "Fix compilation error with C++17"
