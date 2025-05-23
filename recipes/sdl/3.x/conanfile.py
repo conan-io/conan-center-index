@@ -337,6 +337,11 @@ class SDLConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        if self.settings.os == "Android":
+            copy(self, pattern="*",
+                src=os.path.join(self.source_folder, "android-project", "app", "src", "main", "java"),
+                dst=os.path.join(self.package_folder, "src-java"))
+
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "cmake"))
