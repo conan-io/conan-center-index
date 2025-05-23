@@ -26,7 +26,10 @@ class CPPValidatorConan(ConanFile):
     def _min_cppstd(self):
         # cpp-validator rquires C++17 on MSVC
         # https://github.com/evgeniums/cpp-validator/blob/v2.0.3/CMakeLists.txt#L241
-        return "17" if is_msvc(self) else "14"
+        if is_msvc(self) or Version(self.version) >= "2.1.1":
+            return "17"
+        else:
+            return "14"
 
     @property
     def _compilers_minimum_version(self):

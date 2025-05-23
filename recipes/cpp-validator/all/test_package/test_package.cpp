@@ -1,8 +1,14 @@
 #include <iostream>
 
+#ifdef CPP_VALIDATOR_2_0
 #include "dracosha/validator/validator.hpp"
 #include "dracosha/validator/validate.hpp"
 using namespace DRACOSHA_VALIDATOR_NAMESPACE;
+#else
+#include "hatn/validator/validator.hpp"
+#include "hatn/validator/validate.hpp"
+using namespace HATN_VALIDATOR_NAMESPACE;
+#endif
 
 int main()
 {
