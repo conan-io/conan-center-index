@@ -1,7 +1,6 @@
 import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
@@ -20,12 +19,6 @@ class CtreConan(ConanFile):
     topics = ("cpp17", "regex", "compile-time-regular-expressions", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "build_module": [True, False]
-    }
-    default_options = {
-        "build_module": False
-    }
     no_copy_source = True
 
     def layout(self):
@@ -66,27 +59,9 @@ class CtreConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],  strip_root=True)
 
-    def generate(self):
-        if self.options.build_module:
-            tc = CMakeToolchain(self, generator="Ninja")
-        else:
-            tc = CMakeToolchain(self)
-        tc.variables["CTRE_MODULE"] = self.options.build_module
-        tc.variables["CTRE_BUILD_TESTS"] = False
-        tc.generate()
-
-        deps = CMakeDeps(self)
-        deps.generate()
-
-    def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
-
     def package(self):
+        copy(self, pattern="*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        cmake = CMake(self)
-        cmake.install()
 
     def package_info(self):
         self.cpp_info.bindirs = []
