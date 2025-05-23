@@ -146,7 +146,7 @@ class OpenImageIOConan(ConanFile):
             )
 
         # https://github.com/conan-io/conan-center-index/issues/23421
-        if self.options.cci_hack and self.settings.os == "Linux";
+        if self.options.cci_hack and self.settings.os == "Linux":
             raise ConanInvalidConfiguration(
                 "Bug in Linux linking!"
             )
