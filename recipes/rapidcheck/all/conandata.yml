@@ -1,4 +1,7 @@
 sources:
+  "cci.20231215":
+    url: "https://github.com/emil-e/rapidcheck/archive/ff6af6fc683159deb51c543b065eba14dfcf329b.zip"
+    sha256: "60951dbc4de162622f51a4a34117c269a9921833a51dddce36f4cc80a5f7cf9f"
   "cci.20230815":
     url: "https://github.com/emil-e/rapidcheck/archive/1c91f40e64d87869250cfb610376c629307bf77d.zip"
     sha256: "21dc5ed99390bc62e10f45698aff2704cf994c27cb388b0296db741bf128d803"
