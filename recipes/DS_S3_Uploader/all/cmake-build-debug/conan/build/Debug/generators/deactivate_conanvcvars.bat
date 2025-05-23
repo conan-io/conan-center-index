@@ -1,0 +1,1 @@
+echo [deactivate_conanvcvars.bat]: vcvars env cannot be deactivated
