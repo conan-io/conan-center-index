@@ -126,6 +126,13 @@ class TrantorConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "Trantor::Trantor")
         self.cpp_info.libs = ["trantor"]
 
+        self.cpp_info.requires = ["openssl::ssl", "openssl::crypto"]
+
+        if self.options.with_c_ares:
+            self.cpp_info.requires.append("c-ares::cares")
+        if self.options.get_safe("with_spdlog"):
+            self.cpp_info.requires.append("spdlog::spdlog_header_only")
+
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
         if self.settings.os in ["Linux", "FreeBSD"]:
