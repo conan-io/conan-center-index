@@ -1,0 +1,20 @@
+sources:
+  "1.4.313":
+    source:
+      url: "https://github.com/KhronosGroup/Vulkan-Hpp/archive/refs/tags/v1.4.313.tar.gz"
+      sha256: "66777b4397a46e6d1fe8beb79a127d6101277be56f7d2aa183df9f3d0edbc3cc"
+    glslang:
+      url: "https://github.com/KhronosGroup/glslang/archive/refs/tags/vulkan-sdk-1.4.313.0.tar.gz"
+      sha256: "555ac780ccceca926fa25775834639ce6ffc744120bfb68fb8657dd4032d21ee"
+    glfw:
+      url: "https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.zip"
+      sha256: "b5ec004b2712fd08e8861dc271428f048775200a2df719ccf575143ba749a3e9"
+    glm:
+      url: "https://github.com/g-truc/glm/releases/download/1.0.1/glm-1.0.1-light.zip"
+      sha256: "9A995DE4DA09723BD33EF194E6B79818950E5A8F2E154792F02E4615277CFB8D"
+    tinyxml2:
+      url: "https://github.com/leethomason/tinyxml2/archive/refs/tags/11.0.0.tar.gz"
+      sha256: "5556deb5081fb246ee92afae73efd943c889cef0cafea92b0b82422d6a18f289"
+    vulkan-headers:
+      url: "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/vulkan-sdk-1.4.313.0.tar.gz"
+      sha256: "20743c99a96c07290f24377360e7a12bdd2c465ba202e0c7ef2ec25d446cf61d"
