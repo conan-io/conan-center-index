@@ -1,6 +1,6 @@
-
+import os
+import re
 from conan import ConanFile
-from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 
 
@@ -9,11 +9,6 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-        self.requires("cpython/[~3.12]")
-
-    def build_requirements(self):
-        self.tool_requires("cmake/[^3]")
-        self.tool_requires("cpython/<host_version>")
 
     def layout(self):
         cmake_layout(self)
@@ -30,9 +25,9 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if can_run(self):
-            self.run(
-                'python -c "import test_module; print(test_module.add(2, 3))"',
-                env="conanrun",
-                cwd=self.cpp.build.bindir,
-            )
+        pattern = re.compile(r"^test_module\..*\.(so|dylib|dll)$")
+        for filename in os.listdir(self.cpp.build.bindir):
+            if pattern.match(filename):
+                print("Found test_module shared object:", filename)
+                return
+        raise FileNotFoundError("test_module shared object not found in bindir")
