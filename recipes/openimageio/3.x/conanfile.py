@@ -43,6 +43,10 @@ class OpenImageIOConan(ConanFile):
         "with_ptex": [True, False],
         "with_raw": [True, False],
         "with_tbb": [True, False],
+
+        # To be replaced with some proper check or fix of the build?
+        # https://github.com/conan-io/conan-center-index/issues/23421
+        "cci_hack": [True, False],
     }
     default_options = {
         "shared": False,
@@ -63,6 +67,8 @@ class OpenImageIOConan(ConanFile):
         "with_ptex": True,
         "with_raw": False,  # libraw is available under CDDL-1.0 or LGPL-2.1, for this reason it is disabled by default
         "with_tbb": False,
+
+        "cci_hack": True,
     }
 
     def export_sources(self):
@@ -137,6 +143,12 @@ class OpenImageIOConan(ConanFile):
         if is_msvc(self) and is_msvc_static_runtime(self) and self.options.shared:
             raise ConanInvalidConfiguration(
                 "Building shared library with static runtime is not supported!"
+            )
+
+        # https://github.com/conan-io/conan-center-index/issues/23421
+        if self.options.cci_hack and self.settings.os == "Linux";
+            raise ConanInvalidConfiguration(
+                "Bug in Linux linking!"
             )
 
     def layout(self):
