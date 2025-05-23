@@ -33,6 +33,7 @@ class WtConan(ConanFile):
         "with_opengl": [True, False],
         "with_unwind": [True, False],
         "with_haru": [True, False],
+        "with_pango": [True, False],
         "raster_image": ["none", "Direct2D", "GraphicsMagick"],
         "no_std_locale": [True, False],
         "no_std_wstring": [True, False],
@@ -54,6 +55,7 @@ class WtConan(ConanFile):
         "with_opengl": False,
         "with_unwind": True,
         "with_haru": False,
+        "with_pango": False,
         "raster_image": "none",
         "no_std_locale": False,
         "no_std_wstring": False,
@@ -187,7 +189,7 @@ class WtConan(ConanFile):
         tc.variables["BUILD_TESTS"] = False
         tc.variables["ENABLE_SSL"] = self.options.with_ssl
         tc.variables["ENABLE_HARU"] = self.options.with_haru
-        tc.variables["ENABLE_PANGO"] = False
+        tc.variables["ENABLE_PANGO"] = self.options.with_pango
         tc.variables["ENABLE_SQLITE"] = self.options.get_safe("with_sqlite", False)
         tc.variables["ENABLE_POSTGRES"] = self.options.get_safe("with_postgres", False)
         tc.variables["ENABLE_FIREBIRD"] = False
