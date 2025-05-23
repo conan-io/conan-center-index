@@ -1,21 +1,19 @@
 import os
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
+from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout
 
 class CtreTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    #generators = "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
 
     def generate(self):
-        deps = CMakeDeps(self)
-        deps.generate()
-        tc = CMakeToolchain(self, generator="Ninja")
+        tc = CMakeToolchain(self)
         tc.generate()
 
     def layout(self):
