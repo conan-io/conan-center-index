@@ -1,0 +1,13 @@
+diff --git a/include/co/time.h b/include/co/time.h
+index 4136833..1bbd353 100644
+--- a/include/co/time.h
++++ b/include/co/time.h
+@@ -37,6 +37,8 @@ struct Mono {
+
+ } // xx
+
++#undef unix
++
+ extern xx::Mono mono;
+ extern xx::Unix unix;
+
