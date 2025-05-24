@@ -1,4 +1,7 @@
 sources:
+  "2.2":
+    url: "https://github.com/Nicoshev/rapidhash/archive/refs/tags/rapidhash_v2.2.tar.gz"
+    sha256: "c9fd02dfb18833b806f9863c7fd4b69629448bd3b5c3297d5355417047999469"
   "1.0":
     url: "https://github.com/Nicoshev/rapidhash/archive/refs/tags/rapidhash_v1.0.tar.gz"
     sha256: "d295e66eec6745cc0e0c8c65fb8b5edf08ab3af83b0a503c54c6705144b53848"
