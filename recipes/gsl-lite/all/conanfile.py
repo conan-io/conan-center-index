@@ -18,6 +18,32 @@ class GslLiteConan(ConanFile):
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
+    #  There are three configuration options for this GSL implementation's behavior
+    #  when pre/post conditions on the GSL types are violated:
+    #
+    #  1. GSL_TERMINATE_ON_CONTRACT_VIOLATION: std::terminate will be called (default)
+    #  2. GSL_THROW_ON_CONTRACT_VIOLATION: a gsl::fail_fast exception will be thrown
+    #  3. GSL_UNENFORCED_ON_CONTRACT_VIOLATION: nothing happens
+    #
+    options = {
+        "on_contract_violation": ["terminate", "throw", "unenforced"]
+    }
+    default_options = {
+        "on_contract_violation": "terminate",
+    }
+
+    @property
+    def _contract_map(self):
+        return {
+            "terminate": "GSL_TERMINATE_ON_CONTRACT_VIOLATION",
+            "throw": "GSL_THROW_ON_CONTRACT_VIOLATION",
+            "unenforced": "GSL_UNENFORCED_ON_CONTRACT_VIOLATION"
+        }
+
+    def config_options(self):
+        if Version(self.version) >= "1.0":
+            del self.options.on_contract_violation
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -49,9 +75,7 @@ class GslLiteConan(ConanFile):
 
         self.cpp_info.set_property("cmake_config_version_compat", "SameMajorVersion")
 
-
-
-        # The package also defines the versioned targets `gsl::gsl-lite-v0`, `gsl::gsl-lite-v1`,
-        # `gsl-lite::gsl-lite-v0` and `gsl-lite::gsl-lite-v1`. Versioned targets `*-v<X>` for which
-        # <X> differs from the major version of the package add a compile definition
-        # `gsl_CONFIG_DEFAULTS_VERSION=<X>`. These targets are not exposed here.
+        if Version(self.version) < "1.0":
+            # Don't define a cmake target for versions >= 1.0
+            # the old versions might expect it so keep it
+            self.cpp_info.components["gsllite"].defines = [self._contract_map[str(self.options.on_contract_violation)]]
