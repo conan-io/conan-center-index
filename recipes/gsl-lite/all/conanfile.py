@@ -60,6 +60,7 @@ class GslLiteConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure()
+        cmake.build()
 
     def package(self):
         copy(self, "LICENSE",  src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -79,3 +80,5 @@ class GslLiteConan(ConanFile):
             # Don't define a cmake target for versions >= 1.0
             # the old versions might expect it so keep it
             self.cpp_info.components["gsllite"].defines = [self._contract_map[str(self.options.on_contract_violation)]]
+            self.cpp_info.components["gsllite"].bindirs = []
+            self.cpp_info.components["gsllite"].libdirs = []
