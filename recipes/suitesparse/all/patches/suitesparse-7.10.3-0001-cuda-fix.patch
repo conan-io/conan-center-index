@@ -1,0 +1,16 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -21,8 +21,11 @@
+ # CMakeLists.txt files are used to build any package in SuiteSparse.
+ cmake_minimum_required ( VERSION 3.22 )
+ 
+-project ( "SuiteSparse" )
+-
++project ( "SuiteSparse" LANGUAGES CXX)
++if(SUITESPARSE_USE_CUDA)
++
++  enable_language(CUDA)
++endif()
+ #-------------------------------------------------------------------------------
+ # SuiteSparse policies
+ #-------------------------------------------------------------------------------

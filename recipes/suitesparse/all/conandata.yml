@@ -1,0 +1,10 @@
+sources:
+  "7.10.3":
+    url: "https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags/v7.10.3.tar.gz"
+    sha256: "09E7BCC8E5DE0A5B55D2AE9FD6378D5F4DC1B85A933593339A0872B24E2CC102"
+patches:         
+  "7.10.3":
+    - patch_file: "patches/suitesparse-7.10.3-0001-cuda-fix.patch"
+      patch_type: "bug-fix"          
+    - patch_file: "patches/suitesparse-7.10.3-0002-fix-openmp-error-intel-llvm.patch"
+      patch_type: "bug-fix"            
