@@ -19,7 +19,7 @@ class GslLiteConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -39,28 +39,17 @@ class GslLiteConan(ConanFile):
         copy(self, "LICENSE",  src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        if Version(self.version) >= "1.0.0":
-            rmdir(self, os.path.join(self.package_folder, "share"))
-        else:
-            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "gsl-lite")
-
-        if Version(self.version) >= "1.0.0":
-            # Both targets are defined by the CMake package
-            self.cpp_info.set_property("cmake_target_name", "gsl-lite::gsl-lite")
-            self.cpp_info.set_property("cmake_target_aliases", ["gsl::gsl-lite"])
-
-            rmdir(self, os.path.join(self.package_folder, "share"))
-        else:
-            # The target `gsl-lite::gsl-lite` is not present in the CMake package;
-            # it was fabricated by the original Conan recipe and is retained for compatibility
-            self.cpp_info.set_property("cmake_target_name", "gsl::gsl-lite")
-            self.cpp_info.set_property("cmake_target_aliases", ["gsl-lite::gsl-lite"])
-            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        self.cpp_info.set_property("cmake_target_name", "gsl-lite::gsl-lite")
+        self.cpp_info.set_property("cmake_target_aliases", ["gsl::gsl-lite"])
 
         self.cpp_info.set_property("cmake_config_version_compat", "SameMajorVersion")
+
+
 
         # The package also defines the versioned targets `gsl::gsl-lite-v0`, `gsl::gsl-lite-v1`,
         # `gsl-lite::gsl-lite-v0` and `gsl-lite::gsl-lite-v1`. Versioned targets `*-v<X>` for which
