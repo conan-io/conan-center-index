@@ -1,6 +1,7 @@
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import collect_libs, get, copy, rmdir
+from conan.tools.files import collect_libs, get, copy, rmdir, replace_in_file
 import os
 
 required_conan_version = ">=2.1"
@@ -35,8 +36,14 @@ class PmpConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def validate(self):
+        check_min_cppstd(self, 17)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_CXX_STANDARD",
+                        "#set(CMAKE_CXX_STANDARD")
 
     def generate(self):
         deps = CMakeDeps(self)
