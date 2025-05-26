@@ -24,11 +24,13 @@ class LibPslConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_idna": [False, "icu", "libidn", "libidn2"],
+        "enable_builtin": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_idna": "icu",
+        "enable_builtin": True,
     }
 
     def export_sources(self):
@@ -43,6 +45,8 @@ class LibPslConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+        if Version(self.version) < "0.21.5":
+            self.options.rm_safe("enable_builtin")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -76,7 +80,7 @@ class LibPslConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options["runtime"] = self._idna_option
         if Version(self.version) >= "0.21.5":
-            tc.project_options["builtin"] = "true" if self.options.with_idna else "false"
+            tc.project_options["builtin"] = self.options.enable_builtin
             tc.project_options["tests"] = "false"  # disable tests and fuzzes
         else:
             tc.project_options["builtin"] = self._idna_option
