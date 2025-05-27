@@ -51,7 +51,7 @@ class RestinioConan(ConanFile):
                 self.requires("asio/1.31.0")
         else:
             if Version(self.version) >= "0.7.4":
-                self.requires("boost/1.87.0")
+                self.requires("boost/[>=1.87.0]")
             else:
                 self.requires("boost/1.86.0")
 
