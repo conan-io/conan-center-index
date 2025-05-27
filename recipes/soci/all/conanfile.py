@@ -80,7 +80,7 @@ class SociConan(ConanFile):
         tc.cache_variables["SOCI_EMPTY"] = self.options.empty
         tc.cache_variables["WITH_SQLITE3"] = self.options.with_sqlite3
         tc.cache_variables["WITH_DB2"] = False
-        tc.cache_variables["git a"] = self.options.with_odbc
+        tc.cache_variables["WITH_ODBC"] = self.options.with_odbc
         tc.cache_variables["WITH_ORACLE"] = False
         tc.cache_variables["WITH_FIREBIRD"] = False
         tc.cache_variables["WITH_MYSQL"] = self.options.with_mysql
