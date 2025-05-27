@@ -7,6 +7,12 @@ option(UFBX_BUILD_TESTS "Build ufbx tests" OFF)
 set(UFBX_SOURCES ufbx.c)
 set(UFBX_HEADERS ufbx.h)
 
+# 添加 Windows 导出定义
+if(UFBX_BUILD_SHARED AND WIN32)
+    add_definitions(-DUFBX_DLL_EXPORT)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
 if(UFBX_BUILD_SHARED)
     add_library(ufbx SHARED ${UFBX_SOURCES} ${UFBX_HEADERS})
 else()
@@ -16,6 +22,7 @@ endif()
 set_target_properties(ufbx PROPERTIES
     PUBLIC_HEADER "${UFBX_HEADERS}"
     OUTPUT_NAME "ufbx"
+    WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 
 if(UFBX_BUILD_TESTS)
@@ -29,4 +36,4 @@ install(TARGETS ufbx
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
     PUBLIC_HEADER DESTINATION include
-) 
+)
