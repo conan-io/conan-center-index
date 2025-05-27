@@ -1,0 +1,10 @@
+sources:
+  v0.18.2:
+    url: "https://github.com/ufbx/ufbx/archive/refs/tags/v0.18.2.tar.gz"
+    sha256: "9161239e9aade9fc3e432420450687fa538893566002ffc016aa0cba4d1c36a6"
+  v0.18.1:
+    url: "https://github.com/ufbx/ufbx/archive/refs/tags/v0.18.1.tar.gz"
+    sha256: "349a5bded1905b1ef32dc05c82f9a3adcc074606680321e8c1254aff66c3f8e1"
+  v0.18.0:
+    url: "https://github.com/ufbx/ufbx/archive/refs/tags/v0.18.0.tar.gz"
+    sha256: "1e25a221e08d12b329421faeaa4b937f5c11378de25336ab9219af94bf7f1d42"
