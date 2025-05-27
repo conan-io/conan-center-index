@@ -1,41 +1,44 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, rename
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=2.4"
 
-class PlutoVGConan(ConanFile):
-    name = "plutovg"
-    description = "Tiny 2D vector graphics library in C"
-    license = "MIT",
-    topics = ("vector", "graphics", )
+class PlutoSVGConan(ConanFile):
+    name = "plutosvg"
+    description = "PlutoSVG is a compact and efficient SVG rendering library written in C"
+    license = "MIT"
+    topics = ("vector", "graphics", "svg")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/sammycage/plutovg"
+    homepage = "https://github.com/sammycage/plutosvg"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_freetype": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_freetype": True,
     }
 
-    implements = ["auto_shared_fpic"]
     languages = "C"
-
-    def export_sources(self):
-        export_conandata_patches(self)
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         basic_layout(self, src_folder="src")
+
+    def requirements(self):
+        # Public symbols and used in headers
+        self.requires("plutovg/1.0.0", transitive_headers=True, transitive_libs=True)
+        if self.options.with_freetype:
+            self.requires("freetype/2.13.2")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
@@ -44,12 +47,12 @@ class PlutoVGConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = MesonToolchain(self)
         tc.project_options["examples"] = "disabled"
         tc.project_options["tests"] = "disabled"
+        tc.project_options["freetype"] = "enabled" if self.options.with_freetype else "disabled"
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
@@ -64,7 +67,6 @@ class PlutoVGConan(ConanFile):
         meson = Meson(self)
         meson.install()
 
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
@@ -72,14 +74,12 @@ class PlutoVGConan(ConanFile):
 
         fix_apple_shared_install_name(self)
 
-        if is_msvc(self) and not self.options.shared:
-            rename(self, os.path.join(self.package_folder, "lib", "libplutovg.a"), os.path.join(self.package_folder, "lib", "plutovg.lib"))
-
     def package_info(self):
-        self.cpp_info.libs = ["plutovg"]
-        self.cpp_info.includedirs = ["include", os.path.join("include", "plutovg")]
+        self.cpp_info.libs = ["plutosvg"]
+        self.cpp_info.includedirs = [os.path.join("include", "plutosvg")]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["m"]
-        if is_msvc(self) and not self.options.shared:
-            self.cpp_info.defines.append("PLUTOVG_BUILD_STATIC")
-
+        if self.options.with_freetype:
+            self.cpp_info.defines.append("PLUTOSVG_HAS_FREETYPE")
+        if not self.options.shared:
+            self.cpp_info.defines.append("PLUTOSVG_BUILD_STATIC")
