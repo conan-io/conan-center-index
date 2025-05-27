@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
@@ -24,10 +24,7 @@ class SociConan(ConanFile):
         "fPIC":             [True, False],
         "empty":            [True, False],
         "with_sqlite3":     [True, False],
-        "with_db2":         [True, False],
         "with_odbc":        [True, False],
-        "with_oracle":      [True, False],
-        "with_firebird":    [True, False],
         "with_mysql":       [True, False],
         "with_postgresql":  [True, False],
         "with_boost":       [True, False],
@@ -37,14 +34,13 @@ class SociConan(ConanFile):
         "fPIC":             True,
         "empty":            False,
         "with_sqlite3":     False,
-        "with_db2":         False,
         "with_odbc":        False,
-        "with_oracle":      False,
-        "with_firebird":    False,
         "with_mysql":       False,
         "with_postgresql":  False,
         "with_boost":       False,
     }
+
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -52,79 +48,44 @@ class SociConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def requirements(self):
+        # New versions will not need transitive_headers=True
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.44.2")
+            self.requires("sqlite3/[>=3.44 <4]", transitive_headers=True)
         if self.options.with_odbc and self.settings.os != "Windows":
-            self.requires("odbc/2.3.11")
+            self.requires("odbc/2.3.11", transitive_headers=True)
         if self.options.with_mysql:
-            self.requires("libmysqlclient/8.1.0")
+            self.requires("libmysqlclient/8.1.0", transitive_headers=True)
         if self.options.with_postgresql:
             self.requires("libpq/15.4", transitive_headers=True)
         if self.options.with_boost:
-            self.requires("boost/1.83.0")
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "14",
-            "gcc": "4.8",
-            "clang": "3.8",
-            "apple-clang": "8.0"
-        }
+            self.requires("boost/1.83.0", transitive_headers=True)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
-
-        compiler = str(self.settings.compiler)
-        compiler_version = Version(self.settings.compiler.version.value)
-        if compiler not in self._minimum_compilers_version:
-            self.output.warning("{} recipe lacks information about the {} compiler support.".format(self.name, self.settings.compiler))
-        elif compiler_version < self._minimum_compilers_version[compiler]:
-            raise ConanInvalidConfiguration("{} requires a {} version >= {}".format(self.name, compiler, compiler_version))
-
-        prefix  = "Dependencies for"
-        message = "not configured in this conan package."
-        if self.options.with_db2:
-            # self.requires("db2/0.0.0") # TODO add support for db2
-            raise ConanInvalidConfiguration("{} DB2 {} ".format(prefix, message))
-        if self.options.with_oracle:
-            # self.requires("oracle_db/0.0.0") # TODO add support for oracle
-            raise ConanInvalidConfiguration("{} ORACLE {} ".format(prefix, message))
-        if self.options.with_firebird:
-            # self.requires("firebird/0.0.0") # TODO add support for firebird
-            raise ConanInvalidConfiguration("{} firebird {} ".format(prefix, message))
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
 
         # MacOS @rpath
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        tc.variables["SOCI_SHARED"] = self.options.shared
-        tc.variables["SOCI_STATIC"] = not self.options.shared
-        tc.variables["SOCI_TESTS"] = False
-        tc.variables["SOCI_CXX11"] = True
-        tc.variables["SOCI_EMPTY"] = self.options.empty
-        tc.variables["WITH_SQLITE3"] = self.options.with_sqlite3
-        tc.variables["WITH_DB2"] = self.options.with_db2
-        tc.variables["WITH_ODBC"] = self.options.with_odbc
-        tc.variables["WITH_ORACLE"] = self.options.with_oracle
-        tc.variables["WITH_FIREBIRD"] = self.options.with_firebird
-        tc.variables["WITH_MYSQL"] = self.options.with_mysql
-        tc.variables["WITH_POSTGRESQL"] = self.options.with_postgresql
-        tc.variables["WITH_BOOST"] = self.options.with_boost
+        tc.cache_variables["SOCI_SHARED"] = self.options.shared
+        tc.cache_variables["SOCI_STATIC"] = not self.options.shared
+        tc.cache_variables["SOCI_TESTS"] = False
+        tc.cache_variables["SOCI_CXX11"] = True
+        tc.cache_variables["SOCI_EMPTY"] = self.options.empty
+        tc.cache_variables["WITH_SQLITE3"] = self.options.with_sqlite3
+        tc.cache_variables["WITH_DB2"] = False
+        tc.cache_variables["git a"] = self.options.with_odbc
+        tc.cache_variables["WITH_ORACLE"] = False
+        tc.cache_variables["WITH_FIREBIRD"] = False
+        tc.cache_variables["WITH_MYSQL"] = self.options.with_mysql
+        tc.cache_variables["WITH_POSTGRESQL"] = self.options.with_postgresql
+        tc.cache_variables["WITH_BOOST"] = self.options.with_boost
         if Version(self.version) < "4.1.0": # pylint: disable=conan-condition-evals-to-constant
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
@@ -132,11 +93,10 @@ class SociConan(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("mysql", "cmake_file_name", "MYSQL")
         deps.set_property("libpq", "cmake_file_name", "POSTGRESQL")
-        deps.set_property("sqlite3", "cmake_file_name", "SQLITE3")
+        deps.set_property("sqlite3", "cmake_file_name", "SQLite3")
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
