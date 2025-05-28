@@ -29,7 +29,7 @@ class CpphttplibConan(ConanFile):
         "with_zlib": False,
         "with_brotli": False,
         "use_macos_keychain_certs": True,
-        "with_zstd": True,
+        "with_zstd": False,
     }
     no_copy_source = True
 
