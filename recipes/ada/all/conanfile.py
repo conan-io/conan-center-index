@@ -27,13 +27,7 @@ class AdaConan(ConanFile):
         "shared": False,
     }
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.get_safe("shared"):
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -48,7 +42,7 @@ class AdaConan(ConanFile):
         if Version(self.version) >= "3.0.0" and \
                 ( \
                     # for std::ranges::any_of
-                    (self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14.3") \
+                    (self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14.3")
                     # std::string_view is not constexpr in gcc < 12
                     or (self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "12") \
                 ):
@@ -71,13 +65,11 @@ class AdaConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables["ADA_TESTING"] = False
         tc.variables["ADA_TOOLS"] = False
         if not is_msvc(self):
             tc.extra_cxxflags = ["-Wno-fatal-errors"]
         tc.generate()
-
-        deps = CMakeDeps(self)
-        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -90,6 +82,7 @@ class AdaConan(ConanFile):
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = ["ada"]
