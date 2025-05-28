@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, load, rmdir, save
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import json
 import os
@@ -68,6 +68,8 @@ class AbseilConan(ConanFile):
         tc.cache_variables["ABSL_ENABLE_INSTALL"] = True
         tc.cache_variables["ABSL_PROPAGATE_CXX_STD"] = True
         tc.cache_variables["BUILD_TESTING"] = False
+        if is_msvc(self):
+            tc.cache_variables["ABSL_MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.generate()
 
     def build(self):
