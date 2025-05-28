@@ -65,8 +65,9 @@ class ProjConan(ConanFile):
         self.tool_requires("sqlite3/<host_version>")
 
     def validate(self):
-        # validate the minimum cpp standard supported. For C++ projects only.
-        check_min_cppstd(self, 14)
+        if Version(self.version) >= "9.6.0":
+            # https://github.com/OSGeo/PROJ/issues/4450
+            check_min_cppstd(self, 14)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -76,25 +77,24 @@ class ProjConan(ConanFile):
         env.generate()
 
         tc = CMakeToolchain(self)
-        tc.variables["USE_THREAD"] = self.options.threadsafe
-        tc.variables["BUILD_CCT"] = self.options.build_executables
-        tc.variables["BUILD_CS2CS"] = self.options.build_executables
-        tc.variables["BUILD_GEOD"] = self.options.build_executables
-        tc.variables["BUILD_GIE"] = self.options.build_executables
-        tc.variables["BUILD_PROJ"] = self.options.build_executables
-        tc.variables["BUILD_PROJINFO"] = self.options.build_executables
-        tc.variables["ENABLE_TIFF"] = self.options.with_tiff
-        tc.variables["ENABLE_CURL"] = self.options.with_curl
-        tc.variables["BUILD_TESTING"] = False
-        tc.variables["ENABLE_IPO"] = False
-        tc.variables["BUILD_PROJSYNC"] = self.options.build_executables and self.options.with_curl
-        tc.variables["NLOHMANN_JSON_ORIGIN"] = "external"
-        tc.variables["CMAKE_MACOSX_BUNDLE"] = False
+        tc.cache_variables["USE_THREAD"] = self.options.threadsafe
+        tc.cache_variables["BUILD_CCT"] = self.options.build_executables
+        tc.cache_variables["BUILD_CS2CS"] = self.options.build_executables
+        tc.cache_variables["BUILD_GEOD"] = self.options.build_executables
+        tc.cache_variables["BUILD_GIE"] = self.options.build_executables
+        tc.cache_variables["BUILD_PROJ"] = self.options.build_executables
+        tc.cache_variables["BUILD_PROJINFO"] = self.options.build_executables
+        tc.cache_variables["ENABLE_TIFF"] = self.options.with_tiff
+        tc.cache_variables["ENABLE_CURL"] = self.options.with_curl
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["ENABLE_IPO"] = False
+        tc.cache_variables["BUILD_PROJSYNC"] = self.options.build_executables and self.options.with_curl
+        tc.cache_variables["NLOHMANN_JSON_ORIGIN"] = "external"
+        tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
         if self.settings.os == "Linux":
             # Workaround for: https://github.com/conan-io/conan/issues/13560
             libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
-            tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+            tc.cache_variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
         if Version(self.version) < "9.4.0":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
