@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
+from conan.tools.files import copy, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -37,9 +37,6 @@ class SdlttfConan(ConanFile):
     implements = ["auto_shared_fpic"]
     languages = "C"
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -50,7 +47,7 @@ class SdlttfConan(ConanFile):
         if self.options.with_harfbuzz:
             self.requires("harfbuzz/8.3.0")
         if self.options.with_plutosvg:
-            self.requires("plutosvg/0.0.6")
+            self.requires("plutosvg/0.0.7")
 
     def validate(self):
         if Version(self.version).major != Version(self.dependencies["sdl"].ref.version).major:
@@ -93,11 +90,11 @@ class SdlttfConan(ConanFile):
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        # rmdir(self, os.path.join(self.package_folder, "cmake"))
-        # rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        # rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # rmdir(self, os.path.join(self.package_folder, "SDL2_ttf.framework"))
-        # rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "SDL2_ttf.framework"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["SDL3_ttf"]
