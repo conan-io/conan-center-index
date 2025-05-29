@@ -225,8 +225,7 @@ class ArrowConan(ConanFile):
         if self.options.with_flight_rpc and not self.options.with_protobuf:
             raise ConanException("'with_protobuf' option should be True when 'with_flight_rpc=True'")
 
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
 
         if self.options.get_safe("skyhook", False):
             raise ConanInvalidConfiguration("CCI has no librados recipe (yet)")
