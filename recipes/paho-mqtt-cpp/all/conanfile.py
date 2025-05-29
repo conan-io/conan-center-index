@@ -29,7 +29,7 @@ class PahoMqttCppConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return 17 if Version(self.version) >= Version("1.5.3") else 11
 
     def export_sources(self):
         export_conandata_patches(self)
