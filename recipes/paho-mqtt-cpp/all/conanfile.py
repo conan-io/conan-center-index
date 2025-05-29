@@ -98,7 +98,7 @@ class PahoMqttCppConan(ConanFile):
         # TODO: back to root level once conan v1 support removed
         if self.settings.os == "Windows":
             self.cpp_info.components["paho-mqttpp"].libs = [target]
-            if self.options.shared:
+            if self.options.shared and Version(self.version) >= Version("1.5.3"):
                 self.cpp_info.components["paho-mqttpp"].defines.append("PAHO_MQTTPP_IMPORTS")
         else:
             self.cpp_info.components["paho-mqttpp"].libs = ["paho-mqttpp3"]
