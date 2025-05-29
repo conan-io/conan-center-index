@@ -246,12 +246,15 @@ class ArrowConan(ConanFile):
             raise ConanInvalidConfiguration("arrow:parquet requires arrow:with_thrift")
 
     def build_requirements(self):
-        if Version(self.version) >= "13.0.0":
+        if Version(self.version) >= "20.0.0":
+            self.tool_requires("cmake/[>=3.25 <4]")
+        elif Version(self.version) >= "13.0.0":
             self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             filename=f"apache-arrow-{self.version}.tar.gz", strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -378,7 +381,6 @@ class ArrowConan(ConanFile):
         apply_conandata_patches(self)
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "cpp"))
         cmake.build()
