@@ -42,7 +42,7 @@ class BitserializerConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "8",
-            "clang": "7" if Version(self.version) < "0.44" else "8",
+            "clang": "8",
             "Visual Studio": "15",
             "msvc": "191",
             "apple-clang": "12",
