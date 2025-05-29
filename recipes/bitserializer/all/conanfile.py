@@ -38,6 +38,16 @@ class BitserializerConan(ConanFile):
         "with_msgpack": False,
     }
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "8",
+            "clang": "7" if Version(self.version) < "0.44" else "8",
+            "Visual Studio": "15",
+            "msvc": "191",
+            "apple-clang": "12",
+        }
+
     def _is_header_only(self, info=False):
         # All components of library are header-only except csv-archive and msgpack-archive
         options = self.info.options if info else self.options
@@ -82,6 +92,12 @@ class BitserializerConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 17)
 
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires at least {self.settings.compiler} {minimum_version}.",
+            )
+
         # Check stdlib ABI compatibility
         compiler_name = str(self.settings.compiler)
         if compiler_name == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
@@ -92,16 +108,17 @@ class BitserializerConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         if not self._is_header_only():
             tc = CMakeToolchain(self)
-            tc.variables["BUILD_CPPRESTJSON_ARCHIVE"] = self.options.get_safe("with_cpprestsdk")
-            tc.variables["BUILD_RAPIDJSON_ARCHIVE"] = self.options.get_safe("with_rapidjson")
-            tc.variables["BUILD_PUGIXML_ARCHIVE"] = self.options.get_safe("with_pugixml")
-            tc.variables["BUILD_RAPIDYAML_ARCHIVE"] = self.options.get_safe("with_rapidyaml")
-            tc.variables["BUILD_CSV_ARCHIVE"] = self.options.get_safe("with_csv")
-            tc.variables["BUILD_MSGPACK_ARCHIVE"] = self.options.get_safe("with_msgpack")
+            tc.cache_variables["BUILD_CPPRESTJSON_ARCHIVE"] = self.options.get_safe("with_cpprestsdk")
+            tc.cache_variables["BUILD_RAPIDJSON_ARCHIVE"] = self.options.get_safe("with_rapidjson")
+            tc.cache_variables["BUILD_PUGIXML_ARCHIVE"] = self.options.get_safe("with_pugixml")
+            tc.cache_variables["BUILD_RAPIDYAML_ARCHIVE"] = self.options.get_safe("with_rapidyaml")
+            tc.cache_variables["BUILD_CSV_ARCHIVE"] = self.options.get_safe("with_csv")
+            tc.cache_variables["BUILD_MSGPACK_ARCHIVE"] = self.options.get_safe("with_msgpack")
             tc.generate()
             deps = CMakeDeps(self)
             deps.generate()
@@ -116,7 +133,6 @@ class BitserializerConan(ConanFile):
         )
 
     def build(self):
-        self._patch_sources()
         if not self._is_header_only():
             cmake = CMake(self)
             cmake.configure()
