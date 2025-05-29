@@ -6,12 +6,6 @@ find_package(PahoMqttCpp REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 
-if(PahoMqttCpp_VERSION VERSION_LESS "1.5.3")
-    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
-else()
-    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
-endif()
-
 target_link_libraries(${PROJECT_NAME} PRIVATE
         $<$<TARGET_EXISTS:PahoMqttCpp::paho-mqttpp3>:PahoMqttCpp::paho-mqttpp3>
         $<$<NOT:$<TARGET_EXISTS:PahoMqttCpp::paho-mqttpp3>>:PahoMqttCpp::paho-mqttpp3-static>)
