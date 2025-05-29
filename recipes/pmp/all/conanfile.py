@@ -77,4 +77,3 @@ class PmpConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "pmp::pmp")
         self.cpp_info.set_property("pkg_config_name", "pmp")
         self.cpp_info.libs = ["pmp"]
-        self.cpp_info.requires = ["eigen::eigen"]
