@@ -1,0 +1,38 @@
+From 00ff4c451deaa70da84fbac8d810d94ef7d59ab9 Mon Sep 17 00:00:00 2001
+From: "Andrei K." <alatarum@gmail.com>
+Date: Sun, 17 Nov 2024 11:32:43 +0400
+Subject: [PATCH] cmake: use find_package to locate json-c library
+
+Signed-off-by: Andrei K. <alatarum@gmail.com>
+---
+ CMakeLists.txt | 13 +++----------
+ 1 file changed, 3 insertions(+), 10 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 086b827..763c0b3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -115,17 +115,10 @@ else(BINARY_STATIC OR NOT BUILD_SHARED_LIB)
+ endif(BINARY_STATIC OR NOT BUILD_SHARED_LIB)
+ 
+ if(ENABLE_JSON)
+-	find_package(PkgConfig)
+-	pkg_check_modules(json-c REQUIRED json-c)
+-
++	find_package(json-c CONFIG REQUIRED)
++	message (STATUS "Using JSON Library found at " ${json-c_DIR})
+ 	add_definitions(-D__HAS_JSON__)
+-	if(JSON_STATIC OR BINARY_STATIC)
+-		target_link_libraries(frugen ${json-c_STATIC_LIBRARIES})
+-	else()
+-		target_link_libraries(frugen ${json-c_LIBRARIES})
+-	endif()
+-
+-	target_include_directories(frugen PRIVATE ${json-c_INCLUDE_DIRS})
++	target_link_libraries(frugen json-c::json-c)
+ else(ENABLE_JSON)
+ 	message (WARNING "JSON library support *disabled*!")
+ endif(ENABLE_JSON)
+-- 
+2.45.2
+

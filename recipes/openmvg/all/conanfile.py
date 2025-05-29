@@ -65,17 +65,17 @@ class Openmvgconan(ConanFile):
         self.requires("coin-clp/1.17.7")
         self.requires("coin-lemon/1.3.1")
         self.requires("coin-osi/0.108.7")
-        self.requires("coin-utils/2.11.6")
+        self.requires("coin-utils/2.11.9")
         self.requires("eigen/3.4.0", transitive_headers=True)
         self.requires("flann/1.9.2", transitive_headers=True, transitive_libs=True)
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
+            self.requires("libjpeg-turbo/[>=3.0 <3.1]")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
-        self.requires("libpng/1.6.40")
-        self.requires("libtiff/4.5.1")
+        self.requires("libpng/[>=1.6 <2]")
+        self.requires("libtiff/4.6.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -120,7 +120,7 @@ class Openmvgconan(ConanFile):
             # Workaround for: https://github.com/conan-io/conan/issues/13560
             libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
             tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
-        
+
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -166,6 +166,7 @@ class Openmvgconan(ConanFile):
                 "target": "openMVG_features",
                 "libs": ["openMVG_features"],
                 "requires": ["openmvg_fast", "openmvg_stlplus", "eigen::eigen", "cereal::cereal"],
+                "add_library_name_prefix_to_include_dirs": True,
             },
             "openmvg_geodesy": {
                 "target": "openMVG_geodesy",
@@ -200,6 +201,7 @@ class Openmvgconan(ConanFile):
                 "libs": ["openMVG_matching"],
                 "requires": ["openmvg_features", "openmvg_stlplus", "cereal::cereal", "flann::flann"],
                 "system_libs": [(self.settings.os in ["Linux", "FreeBSD"], ["pthread"])],
+                "add_library_name_prefix_to_include_dirs": True,
             },
             "openmvg_kvld": {
                 "target": "openMVG_kvld",
@@ -210,6 +212,7 @@ class Openmvgconan(ConanFile):
                 "target": "openMVG_matching_image_collection",
                 "libs": ["openMVG_matching_image_collection"],
                 "requires": ["openmvg_matching", "openmvg_multiview"],
+                "add_library_name_prefix_to_include_dirs": True,
             },
             "openmvg_multiview": {
                 "target": "openMVG_multiview",
@@ -226,6 +229,7 @@ class Openmvgconan(ConanFile):
                 "target": "openMVG_robust_estimation",
                 "libs": ["openMVG_robust_estimation"],
                 "requires": ["openmvg_numeric"],
+                "add_library_name_prefix_to_include_dirs": True,
             },
             "openmvg_sfm": {
                 "target": "openMVG_sfm",
@@ -235,6 +239,7 @@ class Openmvgconan(ConanFile):
                     "openmvg_multiview", "openmvg_image", "openmvg_linftycomputervision",
                     "openmvg_system", "openmvg_stlplus", "cereal::cereal", "ceres-solver::ceres-solver",
                 ],
+                "add_library_name_prefix_to_include_dirs": True,
             },
             "openmvg_system": {
                 "target": "openMVG_system",
@@ -283,12 +288,5 @@ class Openmvgconan(ConanFile):
             self.cpp_info.components[component].system_libs = system_libs
             self.cpp_info.components[component].resdirs = ["res"]
 
-            # TODO: to remove in conan v2
-            self.cpp_info.components[component].names["cmake_find_package"] = target
-            self.cpp_info.components[component].names["cmake_find_package_multi"] = target
-
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "OpenMVG"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenMVG"
-        if self.options.programs:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+            if values.get("add_library_name_prefix_to_include_dirs", False):
+                self.cpp_info.components[component].includedirs.append(os.path.join("include", "openMVG"))

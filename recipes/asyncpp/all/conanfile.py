@@ -16,7 +16,7 @@ class AsyncppRecipe(ConanFile):
     description = "A C++20 coroutine library for asynchronous and parallel programming."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/project/package"
+    homepage = "https://github.com/petiaccja/asyncpp/"
     topics = ("coroutine", "c++20", "async", "parallel", "concurrency")
 
     package_type = "library"
@@ -52,11 +52,9 @@ class AsyncppRecipe(ConanFile):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        # validate the minimum cpp standard supported. For C++ projects only
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)

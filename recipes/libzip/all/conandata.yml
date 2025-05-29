@@ -1,4 +1,19 @@
 sources:
+  "1.11.3":
+    url:
+      - "https://libzip.org/download/libzip-1.11.3.tar.gz"
+      - "https://github.com/nih-at/libzip/releases/download/v1.11.3/libzip-1.11.3.tar.gz"
+    sha256: "76653f135dde3036036c500e11861648ffbf9e1fc5b233ff473c60897d9db0ea"
+  "1.11.2":
+    url:
+      - "https://libzip.org/download/libzip-1.11.2.tar.gz"
+      - "https://github.com/nih-at/libzip/releases/download/v1.11.2/libzip-1.11.2.tar.gz"
+    sha256: "6b2a43837005e1c23fdfee532b78f806863e412d2089b9c42b49ab08cbcd7665"
+  "1.11.1":
+    url:
+      - "https://libzip.org/download/libzip-1.11.1.tar.gz"
+      - "https://github.com/nih-at/libzip/releases/download/v1.11.1/libzip-1.11.1.tar.gz"
+    sha256: "c0e6fa52a62ba11efd30262290dc6970947aef32e0cc294ee50e9005ceac092a"
   "1.10.1":
     url:
       - "https://libzip.org/download/libzip-1.10.1.tar.gz"
@@ -20,6 +35,24 @@ sources:
       - "https://github.com/nih-at/libzip/releases/download/v1.7.3/libzip-1.7.3.tar.gz"
     sha256: "0e2276c550c5a310d4ebf3a2c3dfc43fb3b4602a072ff625842ad4f3238cb9cc"
 patches:
+  "1.11.3":
+    - patch_file: "patches/1.11.3-0002-remove-rpath.patch"
+      patch_description: "remove rpath feature"
+      patch_type: "conan"
+  "1.11.2":
+    - patch_file: "patches/1.7.3-0001-cmake-install-bundle.patch"
+      patch_description: "fix installation path of utilities"
+      patch_type: "conan"
+    - patch_file: "patches/1.11.2-0002-remove-rpath.patch"
+      patch_description: "remove rpath feature"
+      patch_type: "conan"
+  "1.11.1":
+    - patch_file: "patches/1.7.3-0001-cmake-install-bundle.patch"
+      patch_description: "fix installation path of utilities"
+      patch_type: "conan"
+    - patch_file: "patches/1.11.1-0002-remove-rpath.patch"
+      patch_description: "remove rpath feature"
+      patch_type: "conan"
   "1.10.1":
     - patch_file: "patches/1.7.3-0001-cmake-install-bundle.patch"
       patch_description: "fix installation path of utilities"

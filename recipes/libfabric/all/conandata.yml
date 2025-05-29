@@ -1,4 +1,4 @@
 sources:
-  "1.12.1":
-    url: https://github.com/ofiwg/libfabric/releases/download/v1.12.1/libfabric-1.12.1.tar.bz2
-    sha256: db3c8e0a495e6e9da6a7436adab905468aedfbd4579ee3da5232a5c111ba642c
+  "1.21.0":
+    url: "https://github.com/ofiwg/libfabric/releases/download/v1.21.0/libfabric-1.21.0.tar.bz2"
+    sha256: "0c1b7b830d9147f661e5d7f359250b85b5a9885c330464cd3b5e5d35b86551c7"

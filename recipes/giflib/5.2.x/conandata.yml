@@ -18,4 +18,8 @@ patches:
       patch_description: "Use strtok_s instead of strtok_r with MSVC"
       patch_type: "portability"
     - patch_file: "patches/0001-msvc-unistd.patch"
+      patch_description: "import unistd in non windows os"
+      patch_type: "portability"
     - patch_file: "patches/5.2.1-0002-msvc-export.patch"
+      patch_description: "export symbols with MSVC"
+      patch_type: "portability"

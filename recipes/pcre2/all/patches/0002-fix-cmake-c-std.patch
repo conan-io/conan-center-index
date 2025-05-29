@@ -1,0 +1,52 @@
+From 12b0e40ee4556318e5a0da3155f28bdfd7c5bc35 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Carlo=20Marcelo=20Arenas=20Bel=C3=B3n?= <carenas@gmail.com>
+Date: Sun, 15 Jan 2023 14:38:44 -0800
+Subject: [PATCH] build: make the C99 requirement explicit
+
+Recent code uses C99 syntax (as reported in #163, and therefore it
+will fail to build unless C99 (or higher) support is required by the
+compiler (gcc >= 5 does it by default).
+
+For those unfortunate to need an older compiler that does require a
+flag to enable that, make sure that both autoconf and cmake make it
+explicit.
+
+While testing the change with the ancient autoconf version listed as
+a prerequisite, noticed that the LT_INIT syntax introduced with 91485e5
+(Update configure.ac for latest version of autoconf., 2021-02-02), was
+not supported, so update the autoconf minimum as well.
+---
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cec7dfb4..a8147575 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -107,1 +107,3 @@
+ PROJECT(PCRE2 C)
++set(CMAKE_C_STANDARD 99)
++set(CMAKE_C_STANDARD_REQUIRED TRUE)
+ 
+ # Set policy CMP0026 to avoid warnings for the use of LOCATION in
+ # GET_TARGET_PROPERTY. This should no longer be required.
+diff --git a/configure.ac b/configure.ac
+index ce5bda3c..67b2fdce 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -22,7 +22,7 @@ m4_define(libpcre2_posix_version, [3:4:0])
+ # NOTE: The CMakeLists.txt file searches for the above variables in the first
+ # 50 lines of this file. Please update that if the variables above are moved.
+ 
+-AC_PREREQ([2.60])
++AC_PREREQ([2.62])
+ AC_INIT([PCRE2],pcre2_major.pcre2_minor[]pcre2_prerelease,[],[pcre2])
+ AC_CONFIG_SRCDIR([src/pcre2.h.in])
+ AM_INIT_AUTOMAKE([dist-bzip2 dist-zip])
+@@ -42,7 +42,7 @@ AC_CONFIG_MACRO_DIR([m4])
+ 
+ remember_set_CFLAGS="$CFLAGS"
+ 
+-AC_PROG_CC
++m4_version_prereq(2.70, [AC_PROG_CC], [AC_PROG_CC_C99])
+ AM_PROG_CC_C_O
+ AC_USE_SYSTEM_EXTENSIONS
+ 

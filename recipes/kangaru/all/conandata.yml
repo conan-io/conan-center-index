@@ -1,4 +1,7 @@
 sources:
+  "4.3.2":
+    url: "https://github.com/gracicot/kangaru/archive/v4.3.2.tar.gz"
+    sha256: "ed2dec53087fe4c5fbfc7f7ffcb0e963b3e0a7f27699338c4bc5a116193113b8"
   "4.3.1":
     url: "https://github.com/gracicot/kangaru/archive/v4.3.1.tar.gz"
     sha256: "3896ea2a13cc1c220b4d83bf598e27e77004170b4a212af8f14264f8a6fb0e45"
@@ -11,3 +14,6 @@ sources:
 patches:
   "4.2.4":
     - patch_file: "patches/fix-cmake.patch"
+      patch_description: "use CURRENT macros for portability"
+      patch_type: "portability"
+      patch_source: "https://github.com/gracicot/kangaru/commit/3908d927c43c1a9c99daaef6eca12d55dd0dcc79"

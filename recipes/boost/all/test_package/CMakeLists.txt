@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-if(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE AND NOT EMSCRIPTEN)
     # use RPATH instead of RUNPATH so that
     # transitive dependencies can be located
     add_link_options("LINKER:--disable-new-dtags")
@@ -131,6 +131,14 @@ if(NOT HEADER_ONLY)
             set_property(TARGET stacktrace_basic_exe PROPERTY CXX_STANDARD 11)
             add_test(NAME boost_stacktrace_basic COMMAND stacktrace_basic_exe)
         endif()
+    endif()
+
+    if (WITH_PROCESS)
+        find_package(Boost COMPONENTS process REQUIRED)
+        add_executable(process_exe process.cpp)
+        target_link_libraries(process_exe PRIVATE Boost::process)
+        set_property(TARGET process_exe PROPERTY CXX_STANDARD 11)
+        add_test(NAME boost_process COMMAND process_exe)
     endif()
 
     if(WITH_PYTHON)

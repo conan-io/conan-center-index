@@ -142,7 +142,9 @@ class MSYS2Conan(ConanFile):
             for package in packages:
                 self.run(f'bash -l -c "pacman -S {package} --noconfirm"')
             for package in ['pkgconf']:
-                self.run(f'bash -l -c "pacman -Rs -d -d $(pacman -Qsq {package}) --noconfirm"')
+                if self.run(f'bash -l -c "pacman -Qq {package}"', ignore_errors=True, quiet=True) == 0:
+                    self.run(f'bash -l -c "pacman -Rs -d -d {package} --noconfirm"')
+            self.run(f'bash -l -c "pacman -Scc --noconfirm"')
 
         self._kill_pacman()
 

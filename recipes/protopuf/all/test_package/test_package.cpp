@@ -6,12 +6,12 @@ using namespace pp;
 using namespace std;
 
 using Student = message<
-    uint32_field<"id", 1>, 
+    uint32_field<"id", 1>,
     string_field<"name", 3>
 >;
 
 using Class = message<
-    string_field<"name", 8>, 
+    string_field<"name", 8>,
     message_field<"students", 3, Student, repeated>
 >;
 
@@ -25,8 +25,12 @@ int main() {
     auto            bufferEnd = message_coder<Class>::encode(myClass, buffer);
 
     // deserialization
+#ifdef PROTOPUF_V2
     auto [yourClass, bufferEnd2] = message_coder<Class>::decode(buffer);
-
+#else
+    auto result = message_coder<Class>::decode(buffer);
+    auto [yourClass, bufferEnd2] = *result;
+#endif
 
     return 0;
 }

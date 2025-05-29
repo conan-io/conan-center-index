@@ -1,0 +1,8 @@
+sources:
+  # Newer versions at the top
+  "1.4.1":
+    url: "https://github.com/SpartanJ/efsw/archive/refs/tags/1.4.1.tar.gz"
+    sha256: "f0ddee587928737c6a3dc92eb88266a804c77279cbdf29d47e5e6f6ad6c7fd9a"
+  "1.4.0":
+    url: "https://github.com/SpartanJ/efsw/archive/refs/tags/1.4.0.tar.gz"
+    sha256: "9eed5fc8471767faa44134f5379d4de02825e3756007dafa482fd1656e42bc4a"

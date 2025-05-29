@@ -1,4 +1,10 @@
 sources:
+  "3.8.7":
+    url:
+      - "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-3.8.7.tar.xz"
+      - "http://www.ring.gr.jp/pub/net/gnupg/gnutls/v3.8/gnutls-3.8.7.tar.xz"
+      - "https://www.mirrorservice.org/sites/ftp.gnupg.org/gcrypt/gnutls/v3.8/gnutls-3.8.7.tar.xz"
+    sha256: "fe302f2b6ad5a564bcb3678eb61616413ed5277aaf8e7bf7cdb9a95a18d9f477"
   "3.8.2":
     url:
       - "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-3.8.2.tar.xz"
@@ -12,8 +18,17 @@ sources:
       - "https://www.mirrorservice.org/sites/ftp.gnupg.org/gcrypt/gnutls/v3.7/gnutls-3.7.8.tar.xz"
     sha256: "c58ad39af0670efe6a8aee5e3a8b2331a1200418b64b7c51977fb396d4617114"
 patches:
+  "3.8.2":
+    - patch_file: "patches/3.8.2-0001-ossstaues-argument-fix.patch"
+      patch_description: "specify osstatus_error takes in an OSStatus as its first argument"
+      patch_type: "backport"
+      patch_source: "https://gitlab.com/gnutls/gnutls/-/commit/925b7072ac1a242b0968f889585e61993f9ca449.patch"
   "3.7.8":
-    - patch_description: "Fix Mac OS build when linking to libtasn1"
+    - patch_file: "patches/3.7.8-0001-fix-isdigit.patch"
+      patch_description: "Fix Mac OS build when linking to libtasn1"
       patch_type: "portability"
       patch_source: "https://github.com/xbmc/inputstream.ffmpegdirect/blob/Matrix/depends/common/gnutls/03-undo-libtasn1-cisdigit.patch"
-      patch_file: "patches/0001-fix-isdigit.patch"
+    - patch_file: "patches/3.7.8-0002-ossstaues-argument-fix.patch"
+      patch_description: "specify osstatus_error takes in an OSStatus as its first argument (reapplied from 3.8.2)"
+      patch_type: "backport"
+      patch_source: "https://gitlab.com/gnutls/gnutls/-/commit/925b7072ac1a242b0968f889585e61993f9ca449.patch"

@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 763c0b3..0ce32df 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -39,8 +39,8 @@ option(ENABLE_JSON "enable JSON support" ON)
+ option(JSON_STATIC "link json-c library statically" OFF)
+ option(DEBUG_OUTPUT "show extra debug output" OFF)
+ 
+-set(CMAKE_C_FLAGS_RELEASE "-Os -Wall -Werror -Wfatal-errors")
+-set(CMAKE_C_FLAGS_DEBUG "-g3 -O0 -Wall -Werror -Wfatal-errors")
++# set(CMAKE_C_FLAGS_RELEASE "-Os -Wall -Werror -Wfatal-errors")
++# set(CMAKE_C_FLAGS_DEBUG "-g3 -O0 -Wall -Werror -Wfatal-errors")
+ if(MSVC)
+ 	# warning level 4
+ 	add_compile_options(/W4)
