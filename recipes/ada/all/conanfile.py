@@ -1,9 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, rmdir, replace_in_file
+from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc
 import os
 
@@ -47,20 +47,14 @@ class AdaConan(ConanFile):
                     or (self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "12") \
                 ):
             raise ConanInvalidConfiguration(
-                f"{self.ref} doesn't support ${self.settings.compiler} ${self.settings.compiler.version}"
+                f"{self.ref} doesn't support {self.settings.compiler} {self.settings.compiler.version}"
             )
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
 
-    def _patch_sources(self):
-        # solve APPLE RELOCATABLE SHARED LIBS (KB-H077)
-        if Version(self.version) < "2.6.10":
-            replace_in_file(self, os.path.join(self.source_folder, "cmake", "ada-flags.cmake"), "set(CMAKE_MACOSX_RPATH OFF)", "")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
