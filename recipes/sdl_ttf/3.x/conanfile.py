@@ -97,7 +97,10 @@ class SdlttfConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["SDL3_ttf"]
+        lib_suffix = ""
+        if self.settings.os == "Windows" and not self.options.shared:
+            lib_suffix = "-static"
+        self.cpp_info.libs = [f"SDL3_ttf{lib_suffix}"]
         self.cpp_info.set_property("cmake_file_name", "SDL3_ttf")
 
         suffix = "-static" if not self.options.shared else ""
