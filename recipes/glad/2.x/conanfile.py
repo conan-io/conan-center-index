@@ -88,6 +88,12 @@ class GladConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if os.getenv("CONAN_CENTER_BUILD_SERVICE"):
+            # We need the Jinja2 package for Glad's code generation,
+            # but the Python found by CMake's FindPython may not have it installed.
+            # For CCI runners, we know that the Python running Conan will definitely have it.
+            tc.cache_variables["Python_EXECUTABLE"] = sys.executable
+
         tc.cache_variables.update({
                 "GLAD_SOURCES_DIR": self.source_folder,
                 "GLAD_CONAN_LIB_TYPE": "SHARED" if self.options.shared else "STATIC",
