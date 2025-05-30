@@ -2,6 +2,16 @@
 #include <Mathematics/DistAlignedBoxAlignedBox.h>
 #include <iostream>
 
+#ifdef _WIN32
+    #ifndef GTE_USE_MSWINDOWS
+        #error "Missing GTE_USE_MSWINDOWS definition for Windows platform."
+    #endif
+#else
+    #ifndef GTE_USE_LINUX
+        #error "Missing GTE_USE_LINUX definition for Non-Windows platform."
+    #endif
+#endif
+
 int main() {
     gte::AlignedBox3<double> box1({0.0, 0.0, 0.0}, {2.0, 2.0, 2.0});
     gte::AlignedBox3<double> box2({3.0, 0.0, 0.0}, {5.0, 5.0, 5.0});
