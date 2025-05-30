@@ -1,4 +1,4 @@
 sources:
   "8.0":
-    url: "https://www.geometrictools.com/Downloads/GeometricToolsEngine8p0.zip"
-    sha256: "A945468A95036BCF1787E6DE6FE5FF51D2349CB33C059F58B0CD25748A44D656"
+    url: "https://github.com/davideberly/GeometricTools/archive/refs/tags/GTE-version-8.0.tar.gz"
+    sha256: "858c63d6c6b974528fc012c7a401f3071a81a8bed0a1544d97b4c92c1a006a2d"
