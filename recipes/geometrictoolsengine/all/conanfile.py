@@ -40,10 +40,8 @@ class GeometricToolsRecipe(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def build(self):
-        pass
-
     def package(self):
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*.h", src=os.path.join(self.source_folder, "GTE/Mathematics"),
             dst=os.path.join(self.package_folder, "include/Mathematics"))
 
@@ -65,4 +63,3 @@ class GeometricToolsRecipe(ConanFile):
 
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
