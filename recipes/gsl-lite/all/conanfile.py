@@ -1,21 +1,23 @@
-from conan import ConanFile
-from conan.tools.files import get, copy
-from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.50.0"
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
+
+required_conan_version = ">=2.1"
 
 
 class GslLiteConan(ConanFile):
     name = "gsl-lite"
-    description = "A single-file header-only version of ISO C++ " \
-                  "Guideline Support Library (GSL) for C++98, C++11 and later"
+    description = "ISO C++ Core Guidelines Library implementation for C++98, C++11 up"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/martinmoene/gsl-lite"
+    homepage = "https://github.com/gsl-lite/gsl-lite"
     topics = ("GSL", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+
     #  There are three configuration options for this GSL implementation's behavior
     #  when pre/post conditions on the GSL types are violated:
     #
@@ -30,8 +32,6 @@ class GslLiteConan(ConanFile):
         "on_contract_violation": "terminate",
     }
 
-    no_copy_source = True
-
     @property
     def _contract_map(self):
         return {
@@ -40,8 +40,12 @@ class GslLiteConan(ConanFile):
             "unenforced": "GSL_UNENFORCED_ON_CONTRACT_VIOLATION"
         }
 
+    def config_options(self):
+        if Version(self.version) >= "1.0":
+            del self.options.on_contract_violation
+
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -49,25 +53,32 @@ class GslLiteConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
     def package(self):
-        copy(self, "*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
         copy(self, "LICENSE",  src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "gsl-lite")
-        self.cpp_info.set_property("cmake_target_name", "gsl::gsl-lite")
-        self.cpp_info.bindirs = []
-        self.cpp_info.libdirs = []
-        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["gsllite"].defines = [self._contract_map[str(self.options.on_contract_violation)]]
+        self.cpp_info.set_property("cmake_target_name", "gsl-lite::gsl-lite")
+        self.cpp_info.set_property("cmake_target_aliases", ["gsl::gsl-lite"])
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "gsl-lite"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "gsl-lite"
-        self.cpp_info.names["cmake_find_package"] = "gsl"
-        self.cpp_info.names["cmake_find_package_multi"] = "gsl"
-        self.cpp_info.components["gsllite"].names["cmake_find_package"] = "gsl-lite"
-        self.cpp_info.components["gsllite"].names["cmake_find_package_multi"] = "gsl-lite"
-        self.cpp_info.components["gsllite"].set_property("cmake_target_name", "gsl::gsl-lite")
-        self.cpp_info.components["gsllite"].bindirs = []
-        self.cpp_info.components["gsllite"].libdirs = []
+        self.cpp_info.set_property("cmake_config_version_compat", "SameMajorVersion")
+
+        if Version(self.version) < "1.0":
+            # Don't define a cmake target for versions >= 1.0
+            # the old versions might expect it so keep it
+            self.cpp_info.components["gsllite"].defines = [self._contract_map[str(self.options.on_contract_violation)]]
+            self.cpp_info.components["gsllite"].bindirs = []
+            self.cpp_info.components["gsllite"].libdirs = []
