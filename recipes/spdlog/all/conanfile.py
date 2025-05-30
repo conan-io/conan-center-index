@@ -164,7 +164,6 @@ class SpdlogConan(ConanFile):
 
     def package_info(self):
         target = "spdlog_header_only" if self.options.header_only else "spdlog"
-
         self.cpp_info.set_property("cmake_file_name", "spdlog")
         self.cpp_info.set_property("cmake_target_name", f"spdlog::{target}")
         self.cpp_info.set_property("pkg_config_name", "spdlog")
