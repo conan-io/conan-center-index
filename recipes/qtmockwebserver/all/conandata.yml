@@ -10,5 +10,3 @@ patches:
       patch_type: "bugfix"
     - patch_file: "patches/0003-added-support-for-older-qt-5.patch"
       patch_type: "portability"
-    - patch_file: "patches/0004-fixed-server-hangs.patch"
-      patch_type: "bugfix"
