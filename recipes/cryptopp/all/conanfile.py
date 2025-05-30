@@ -112,6 +112,7 @@ class CryptoPPConan(ConanFile):
                 tc.cache_variables["CRYPTOPP_NATIVE_ARCH"] = True
             tc.cache_variables["CRYPTOPP_USE_OPENMP"] = self.options.use_openmp
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Git"] = True
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def _ensure_android_cpufeatures(self):
