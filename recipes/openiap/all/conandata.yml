@@ -1,0 +1,16 @@
+sources:
+  "0.0.1":
+    - url: "https://github.com/openiap/rustapi/releases/download/0.0.27/libopeniap-linux-arm64.so"
+      sha256: 3c165f4179bad9d5142f412d2a0d4561c24b625b8a01c15cb010ee2d54c4d270
+    - url: "https://github.com/openiap/rustapi/releases/download/0.0.27/libopeniap-linux-x64.so"
+      sha256: 1dd4449e121037a755e5f349bb26b48002d57117848aa90e0bd3f90ab49ddbb1
+    - url: "https://github.com/openiap/rustapi/releases/download/0.0.27/libopeniap-macos-arm64.dylib"
+      sha256: 38ecd81ff7779d2981b09b2770c59ebd3cbbf7d7a41899a3e2aab8e10d712087
+    - url: "https://github.com/openiap/rustapi/releases/download/0.0.27/libopeniap-macos-x64.dylib"
+      sha256: 1f83d78ca090b963632900c1635df8f6ea4aba9fc15f3521c356e917e2e9822d
+    - url: "https://github.com/openiap/rustapi/releases/download/0.0.27/openiap-windows-i686.dll"
+      sha256: 778dd79c932f4e48c68df4744ecfe792bfb0e8ce10a34284f787f2687ddb0a20
+    - url: "https://github.com/openiap/rustapi/releases/download/0.0.27/openiap-windows-x64.dll"
+      sha256: e1efeb851d0c0dbec4650b2e04328baf3d9407ce00f21e2f5a63db3a0b93bc6b
+    - url: "https://raw.githubusercontent.com/openiap/rustapi/d3d7378de8cb9b359ba17abac5848ef90cf2ac54/crates/clib/clib_openiap.h"
+      sha256: eae5e6d0864296b9bb6775094363399f95e796085460592eba22ad7ff1f37c3c
