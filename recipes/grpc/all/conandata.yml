@@ -1,4 +1,10 @@
 sources:
+  "1.72.0":
+    url: "https://github.com/grpc/grpc/archive/v1.72.0.tar.gz"
+    sha256: "4a8aa99d5e24f80ea6b7ec95463e16af5bd91aa805e26c661ef6491ae3d2d23c"
+  "1.71.0":
+    url: "https://github.com/grpc/grpc/archive/v1.71.0.tar.gz"
+    sha256: "0d631419e54ec5b29def798623ee3bf5520dac77abeab3284ef7027ec2363f91"
   "1.69.0":
     url: "https://github.com/grpc/grpc/archive/v1.69.0.tar.gz"
     sha256: "cd256d91781911d46a57506978b3979bfee45d5086a1b6668a3ae19c5e77f8dc"

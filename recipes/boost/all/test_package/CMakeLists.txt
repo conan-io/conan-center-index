@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-
-if(BOOST_NAMESPACE)
-    add_definitions("-DBOOST_NAMESPACE=${BOOST_NAMESPACE}")
-endif()
-
 if(NOT HEADER_ONLY)
     if(WITH_RANDOM)
         find_package(Boost COMPONENTS random REQUIRED)

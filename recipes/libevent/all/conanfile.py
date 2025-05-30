@@ -1,10 +1,12 @@
 from conan import ConanFile
+from conan.errors import ConanException
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class LibeventConan(ConanFile):
@@ -67,6 +69,9 @@ class LibeventConan(ConanFile):
         # libevent uses static runtime (MT) for static builds by default
         if is_msvc(self):
             tc.variables["EVENT__MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "2.1.12": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -126,7 +131,3 @@ class LibeventConan(ConanFile):
             self.cpp_info.components["pthreads"].set_property("pkg_config_name", "libevent_pthreads")
             self.cpp_info.components["pthreads"].libs = ["event_pthreads"]
             self.cpp_info.components["pthreads"].requires = ["core"]
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "Libevent"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Libevent"
