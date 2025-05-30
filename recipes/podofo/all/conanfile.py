@@ -135,4 +135,7 @@ class PodofoConan(ConanFile):
         pkg_config_name = f"libpodofo-{podofo_version.major}" if podofo_version < "0.9.7" else "libpodofo"
         self.cpp_info.set_property("pkg_config_name", pkg_config_name)
         self.cpp_info.libs = ["podofo"]
-
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("USING_SHARED_PODOFO")
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.threadsafe:
+            self.cpp_info.system_libs = ["pthread"]
