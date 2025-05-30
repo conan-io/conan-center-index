@@ -1,14 +1,15 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
 from conan.tools.files import get, copy
-from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.0"
+
 
 class ValijsonConan(ConanFile):
     name = "valijson"
-    description = "Valijson is a header-only JSON Schema Validation library for C++11."
+    description = "Header-only C++ library for JSON Schema validation, with support for many popular parsers"
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/tristanpenman/valijson"
@@ -22,10 +23,11 @@ class ValijsonConan(ConanFile):
         return 11
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self)
 
-    def package_id(self):
-        self.info.clear()
+    def requirements(self):
+        self.requires("poco/1.13.3")
+        self.requires("qt/[>=5.15 <6]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -34,30 +36,28 @@ class ValijsonConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
     def build(self):
-        pass
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package_id(self):
+        self.info.clear()
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(
-            self,
-            pattern="*.hpp",
-            dst=os.path.join(self.package_folder, "include"),
-            src=os.path.join(self.source_folder, "include"),
-        )
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "valijson")
         self.cpp_info.set_property("cmake_target_name", "ValiJSON::valijson")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        # self.cpp_info.filenames["cmake_find_package"] = "valijson" # TBA: There's no installed config file
-        # self.cpp_info.filenames["cmake_find_package_multi"] = "valijson" # TBA: There's no installed config file
-        self.cpp_info.names["cmake_find_package"] = "ValiJSON"
-        self.cpp_info.names["cmake_find_package_multi"] = "ValiJSON"
-        self.cpp_info.components["libvalijson"].names["cmake_find_package"] = "valijson"
-        self.cpp_info.components["libvalijson"].names["cmake_find_package_multi"] = "valijson"
-        self.cpp_info.components["libvalijson"].set_property("cmake_target_name", "ValiJSON::valijson")
-        self.cpp_info.components["libvalijson"].bindirs = []
-        self.cpp_info.components["libvalijson"].libdirs = []
