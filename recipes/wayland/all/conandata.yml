@@ -1,4 +1,7 @@
 sources:
+  "1.23.91":
+    url: "https://gitlab.freedesktop.org/wayland/wayland/-/releases/1.23.91/downloads/wayland-1.23.91.tar.xz"
+    sha256: "fc2bec1a53e24f48b83d17e72d6d1170239d31edc3f3c9383b4ac2188349a304"
   "1.23.0":
     url: "https://gitlab.freedesktop.org/wayland/wayland/-/releases/1.23.0/downloads/wayland-1.23.0.tar.xz"
     sha256: "05b3e1574d3e67626b5974f862f36b5b427c7ceeb965cb36a4e6c2d342e45ab2"
