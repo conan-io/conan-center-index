@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import chdir, copy, get
+from conan.tools.files import chdir, copy, get, apply_conandata_patches
 from conan.tools.layout import basic_layout
 
 from contextlib import contextmanager
@@ -79,6 +79,7 @@ class B2Conan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     @property
     def _b2_dir(self):
