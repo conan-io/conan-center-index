@@ -1,13 +1,15 @@
 versions:
-    "14.2.0":
-        folder: "all"
-    "13.2.0":
-        folder: "all"
-    "12.2.0":
-        folder: "all"
-    "12.1.0":
-        folder: "all"
-    "11.2.0":
-        folder: "all"
-    "8.1":
-        folder: "all"
+  "15.1.0":
+    folder: "all"
+  "14.2.0":
+    folder: "all"
+  "13.2.0":
+    folder: "all"
+  "12.2.0":
+    folder: "all"
+  "12.1.0":
+    folder: "all"
+  "11.2.0":
+    folder: "all"
+  "8.1":
+    folder: "all"
