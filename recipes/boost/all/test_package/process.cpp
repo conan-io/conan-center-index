@@ -10,8 +10,10 @@
 
 #if BOOST_PROCESS_V2_DEFAULT
 #include <boost/process.hpp>
+#include <boost/process/shell.hpp>
 #else
 #include <boost/process/v2.hpp>
+#include <boost/process/v2/shell.hpp>
 #endif
 
 int main() {
