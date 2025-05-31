@@ -1,7 +1,7 @@
-#ifdef TRACY_GE_0_9
-#include <tracy/Tracy.hpp>
+#ifdef TRACY_GE_0_12
+#include <tracy/tracy/Tracy.hpp>
 #else
-#include <Tracy.hpp>
+#include <tracy/Tracy.hpp>
 #endif
 
 int main(int argc, char **argv) {
