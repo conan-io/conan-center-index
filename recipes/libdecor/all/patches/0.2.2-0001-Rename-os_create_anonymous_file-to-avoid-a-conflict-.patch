@@ -1,0 +1,96 @@
+From 64638f1affc4fcff1ca07e6544101b7beeecd563 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Mon, 4 Mar 2024 07:01:04 -0600
+Subject: [PATCH] Rename os_create_anonymous_file to avoid a conflict in
+ wayland-cursor
+
+Fixes #66.
+---
+ demo/c++-demo.cc                   | 2 +-
+ demo/demo.c                        | 2 +-
+ src/os-compatibility.c             | 2 +-
+ src/os-compatibility.h             | 2 +-
+ src/plugins/cairo/libdecor-cairo.c | 2 +-
+ src/plugins/gtk/libdecor-gtk.c     | 2 +-
+ 6 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/demo/c++-demo.cc b/demo/c++-demo.cc
+index 72f63db..1a29ec7 100644
+--- a/demo/c++-demo.cc
++++ b/demo/c++-demo.cc
+@@ -94,7 +94,7 @@ public:
+ 		stride = width * 4;
+ 		size = stride * height;
+ 
+-		fd = os_create_anonymous_file(size);
++		fd = libdecor_os_create_anonymous_file(size);
+ 		if (fd < 0) {
+ 			cerr << "Creating a buffer file for " << size <<
+ 				" B failed: " << strerror(errno) << endl;
+diff --git a/demo/demo.c b/demo/demo.c
+index c347845..a736a46 100644
+--- a/demo/demo.c
++++ b/demo/demo.c
+@@ -1026,7 +1026,7 @@ create_shm_buffer(int width,
+ 	stride = width * 4;
+ 	size = stride * height;
+ 
+-	fd = os_create_anonymous_file(size);
++	fd = libdecor_os_create_anonymous_file(size);
+ 	if (fd < 0) {
+ 		fprintf(stderr, "creating a buffer file for %d B failed: %s\n",
+ 			size, strerror(errno));
+diff --git a/src/os-compatibility.c b/src/os-compatibility.c
+index 8287da0..2376647 100644
+--- a/src/os-compatibility.c
++++ b/src/os-compatibility.c
+@@ -148,7 +148,7 @@ os_resize_anonymous_file(int fd, off_t size)
+  * XDG_RUNTIME_DIR.
+  */
+ int
+-os_create_anonymous_file(off_t size)
++libdecor_os_create_anonymous_file(off_t size)
+ {
+ 	static const char template[] = "/libdecor-shared-XXXXXX";
+ 	const char *path;
+diff --git a/src/os-compatibility.h b/src/os-compatibility.h
+index d0e69ac..6ce49d0 100644
+--- a/src/os-compatibility.h
++++ b/src/os-compatibility.h
+@@ -29,6 +29,6 @@
+ #include <sys/types.h>
+ 
+ int
+-os_create_anonymous_file(off_t size);
++libdecor_os_create_anonymous_file(off_t size);
+ 
+ #endif /* OS_COMPATIBILITY_H */
+diff --git a/src/plugins/cairo/libdecor-cairo.c b/src/plugins/cairo/libdecor-cairo.c
+index 765800d..30f6f87 100644
+--- a/src/plugins/cairo/libdecor-cairo.c
++++ b/src/plugins/cairo/libdecor-cairo.c
+@@ -597,7 +597,7 @@ create_shm_buffer(struct libdecor_plugin_cairo *plugin_cairo,
+ 	stride = buffer_width * 4;
+ 	size = stride * buffer_height;
+ 
+-	fd = os_create_anonymous_file(size);
++	fd = libdecor_os_create_anonymous_file(size);
+ 	if (fd < 0) {
+ 		fprintf(stderr, "creating a buffer file for %d B failed: %s\n",
+ 			size, strerror(errno));
+diff --git a/src/plugins/gtk/libdecor-gtk.c b/src/plugins/gtk/libdecor-gtk.c
+index ef638f1..8655d45 100644
+--- a/src/plugins/gtk/libdecor-gtk.c
++++ b/src/plugins/gtk/libdecor-gtk.c
+@@ -595,7 +595,7 @@ create_shm_buffer(struct libdecor_plugin_gtk *plugin_gtk,
+ 	stride = buffer_width * 4;
+ 	size = stride * buffer_height;
+ 
+-	fd = os_create_anonymous_file(size);
++	fd = libdecor_os_create_anonymous_file(size);
+ 	if (fd < 0) {
+ 		fprintf(stderr, "creating a buffer file for %d B failed: %s\n",
+ 			size, strerror(errno));
+-- 
+2.44.0
+
