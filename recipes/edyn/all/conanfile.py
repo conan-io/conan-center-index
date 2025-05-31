@@ -55,7 +55,10 @@ class EdynConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("entt/3.10.3", transitive_headers=True)
+        if self.version < Version("1.3"):
+            self.requires("entt/3.10.3", transitive_headers=True)
+        else:
+            self.requires("entt/3.14.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
