@@ -39,13 +39,13 @@ class CrashpadConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def _minimum_compiler_cxx14(self):
+    def _minimum_compiler_cxx20(self):
         return {
-            "apple-clang": 10,
-            "gcc": 5,
-            "clang": "3.9",
-            "msvc": "190",
-            "Visual Studio": 14,
+            "apple-clang": 12,
+            "gcc": 12,
+            "clang": "10",
+            "msvc": "191",
+            "Visual Studio": 16,
         }.get(str(self.settings.compiler))
 
     def config_options(self):
@@ -80,14 +80,14 @@ class CrashpadConan(ConanFile):
             if not self.dependencies["libcurl"].options.shared:
                 # FIXME: is this true?
                 self.output.warning("crashpad needs a shared libcurl library")
-        min_compiler_version = self._minimum_compiler_cxx14()
+        min_compiler_version = self._minimum_compiler_cxx20()
         if min_compiler_version:
             if Version(self.settings.compiler.version) < min_compiler_version:
-                raise ConanInvalidConfiguration("crashpad needs a c++14 capable compiler, version >= {}".format(min_compiler_version))
+                raise ConanInvalidConfiguration("crashpad needs a c++20 capable compiler, version >= {}".format(min_compiler_version))
         else:
-            self.output.warning("This recipe does not know about the current compiler and assumes it has sufficient c++14 supports.")
+            self.output.warning("This recipe does not know about the current compiler and assumes it has sufficient c++20 supports.")
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 14)
+            check_min_cppstd(self, 20)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["crashpad"], destination=self.source_folder, strip_root=True)
@@ -218,7 +218,7 @@ class CrashpadConan(ConanFile):
         save(self, os.path.join(self.package_folder, "lib", "cmake", "crashpad-cxx.cmake"),
                    textwrap.dedent("""\
                     if(TARGET crashpad::mini_chromium_base)
-                        target_compile_features(crashpad::mini_chromium_base INTERFACE cxx_std_14)
+                        target_compile_features(crashpad::mini_chromium_base INTERFACE cxx_std_20)
                     endif()
                    """))
 
