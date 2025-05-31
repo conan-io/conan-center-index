@@ -58,7 +58,7 @@ class S2GeometryConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("abseil/20230802.1", transitive_headers=True, transitive_libs=True)
+        self.requires("abseil/20250127.0", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
 
     def validate(self):
