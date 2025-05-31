@@ -1,4 +1,7 @@
 sources:
+  "15.1.0":
+    sha256: 51b9919ea69c980d7a381db95d4be27edf73b21254eb13d752a08003b4d013b1
+    url: https://ftp.gnu.org/gnu/gcc/gcc-15.1.0/gcc-15.1.0.tar.gz
   "12.2.0":
     sha256: ac6b317eb4d25444d87cf29c0d141dedc1323a1833ec9995211b13e1a851261c
     url: https://ftp.gnu.org/gnu/gcc/gcc-12.2.0/gcc-12.2.0.tar.gz
