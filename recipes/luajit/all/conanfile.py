@@ -4,8 +4,9 @@ from conan.tools.files import get, chdir, replace_in_file, copy, rmdir, export_c
 from conan.tools.microsoft import is_msvc, MSBuildToolchain, VCVars, unix_path
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import XCRun, to_apple_arch
 from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -41,6 +42,15 @@ class LuajitConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    @property
+    def _is_host_32bit(self):
+        return self.settings.arch in ["armv7", "x86"]
+
+    def validate_build(self):
+        if self._is_host_32bit and self.settings_build.os == "Macos":
+            # well, technically it should work on macOS <= 10.14
+            raise ConanInvalidConfiguration(f"{self.ref} cannot be cross-built to a 32-bit platform on macOS, see https://github.com/LuaJIT/LuaJIT/issues/664")
+
     def validate(self):
         if self.settings.os == "Macos" and self.settings.arch == "armv8" and cross_building(self):
             raise ConanInvalidConfiguration(f"{self.ref} can not be cross-built to Mac M1. Please, try any version >=2.1")
@@ -59,7 +69,11 @@ class LuajitConan(ConanFile):
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
-            tc.generate()
+            env = tc.environment()
+            if self.settings.os == "iOS" or self.settings.os == "Android":
+                env.define("CFLAGS", "")
+                env.define("LDFLAGS", "")
+            tc.generate(env)
 
     def _patch_sources(self):
         if not is_msvc(self):
@@ -83,18 +97,54 @@ class LuajitConan(ConanFile):
                 replace_in_file(self, makefile,
                                       'TARGET_O= $(LUAJIT_A)',
                                       'TARGET_O= $(LUAJIT_SO)')
-            if "clang" in str(self.settings.compiler):
-                replace_in_file(self, makefile, 'CC= $(DEFAULT_CC)', 'CC= clang')
 
-    @property
-    def _macosx_deployment_target(self):
-        return self.settings.get_safe("os.version")
+    def _apple_deployment_target(self, default=None):
+        return self.settings.get_safe("os.version", default=default)
 
     @property
     def _make_arguments(self):
         args = [f"PREFIX={unix_path(self, self.package_folder)}"]
-        if is_apple_os(self) and self._macosx_deployment_target:
-            args.append(f"MACOSX_DEPLOYMENT_TARGET={self._macosx_deployment_target}")
+        if "clang" in str(self.settings.compiler):
+            args.append("DEFAULT_CC=clang")
+
+        # upstream doesn't read CPPFLAGS, inject them manually
+        cppflags = AutotoolsToolchain(self).environment().vars(self).get("CPPFLAGS")
+        args.append(f"TARGET_CFLAGS='{cppflags}'")
+
+        if self.settings.os == "Macos" and self._apple_deployment_target():
+            args.append(f"MACOSX_DEPLOYMENT_TARGET={self._apple_deployment_target()}")
+        elif self.settings.os == "iOS":
+            xcrun = XCRun(self)
+            target_flag = f"{to_apple_arch(self)}-apple-ios{self._apple_deployment_target(default='')}"
+            args.extend([
+                f"CROSS={os.path.dirname(xcrun.cxx)}/",
+                f"""TARGET_FLAGS='-isysroot "{xcrun.sdk_path}" -target {target_flag}'""",
+                "TARGET_SYS=iOS",
+            ])
+        elif self.settings.os == "Android":
+            buildenv_vars = VirtualBuildEnv(self).vars()
+            compiler_path = buildenv_vars.get("CC")
+            triplet_prefix = f"{buildenv_vars.get('CHOST')}-"
+            args.extend([
+                f"CROSS={os.path.join(buildenv_vars.get('NDK_ROOT'), 'bin', triplet_prefix)}",
+                f"DYNAMIC_CC='{compiler_path} -fPIC'",
+                f"STATIC_CC={compiler_path}",
+                f"TARGET_AR='{buildenv_vars.get('AR')} rcus'",
+                f"TARGET_LD={compiler_path}",
+                f"TARGET_STRIP={buildenv_vars.get('STRIP')}",
+            ])
+            if self._is_host_32bit:
+                args.append("HOST_CC='gcc -m32'")
+            if self.settings_build.os != "Linux":
+                args.append("TARGET_SYS=Linux")
+            if self.settings_build.os == "Macos":
+                # must look for headers in macOS SDK, having NDK clang in PATH breaks this default behavior
+                xcrun_build = XCRun(self, sdk='macosx')
+                isysroot_flag = f"""'-isysroot "{xcrun_build.sdk_path}"'"""
+                args.extend([
+                    f"HOST_CFLAGS={isysroot_flag}",
+                    f"HOST_LDFLAGS={isysroot_flag}",
+                ])
         return args
 
     @property
