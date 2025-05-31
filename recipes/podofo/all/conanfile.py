@@ -46,6 +46,10 @@ class PodofoConan(ConanFile):
         "with_lib_only": True,
     }
 
+    @property
+    def _with_openssl(self):
+        return self.options.get_safe("with_openssl", True)
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -53,6 +57,8 @@ class PodofoConan(ConanFile):
         if Version(self.version) < "0.10.4":
             # Not available in older versions
             del self.options.with_lib_only
+        else:
+            del self.options.with_openssl
 
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -73,10 +79,10 @@ class PodofoConan(ConanFile):
         self.requires("freetype/2.13.2")
         self.requires("zlib/[>=1.2.11 <2]")
         if Version(self.version) >= "0.10.4":
-            self.requires("libxml2/[>2 <3]")
+            self.requires("libxml2/[>=2.12.5 <3]")
         if self.settings.os != "Windows":
             self.requires("fontconfig/2.15.0")
-        if self.options.with_openssl:
+        if self._with_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_libidn:
             self.requires("libidn/1.36")
@@ -91,19 +97,13 @@ class PodofoConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "0.10.4":
-            self.tool_requires("cmake/[>=3.15.7 <4]")
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def validate(self):
         if Version(self.version) < "0.10.4":
             check_min_cppstd(self, 11)
         else:
             check_min_cppstd(self, 17)
-            
-        if Version(self.version) >= "0.10.4":
-            if not self.options.with_openssl:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires option 'with_openssl' to be set to True.",
-                )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -126,16 +126,16 @@ class PodofoConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
 
         # Custom CMake options injected in our patch, required to ensure reproducible builds
-        tc.variables["PODOFO_WITH_OPENSSL"] = self.options.with_openssl
+        tc.variables["PODOFO_WITH_OPENSSL"] = self._with_openssl
         tc.variables["PODOFO_WITH_LIBIDN"] = self.options.with_libidn
         tc.variables["PODOFO_WITH_LIBJPEG"] = self.options.with_jpeg
         tc.variables["PODOFO_WITH_TIFF"] = self.options.with_tiff
         tc.variables["PODOFO_WITH_PNG"] = self.options.with_png
         tc.variables["PODOFO_WITH_UNISTRING"] = self.options.with_unistring
 
-        if self.options.with_openssl:
+        if self._with_openssl:
             tc.variables["PODOFO_HAVE_OPENSSL_1_1"] = Version(self.dependencies["openssl"].ref.version) >= "1.1"
-            if self.options.with_openssl and ("no_rc4" in self.dependencies["openssl"].options):
+            if self._with_openssl and ("no_rc4" in self.dependencies["openssl"].options):
                 tc.variables["PODOFO_HAVE_OPENSSL_NO_RC4"] = self.dependencies["openssl"].options.no_rc4
 
         if podofo_version < "0.10.0":
