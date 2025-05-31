@@ -19,6 +19,7 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        self.requires("glfw/3.4")
 
     def test(self):
         if can_run(self):
