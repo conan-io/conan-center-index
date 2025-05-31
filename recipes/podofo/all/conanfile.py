@@ -4,7 +4,6 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=2.1"
@@ -54,11 +53,12 @@ class PodofoConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if Version(self.version) < "0.10.4":
+        if Version(self.version) >= "0.10.4":
+            # Required in newer versions
+            del self.options.with_openssl
+        else:
             # Not available in older versions
             del self.options.with_lib_only
-        else:
-            del self.options.with_openssl
 
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -100,24 +100,25 @@ class PodofoConan(ConanFile):
             self.tool_requires("cmake/[>=3.16 <4]")
 
     def validate(self):
-        if Version(self.version) < "0.10.4":
-            check_min_cppstd(self, 11)
-        else:
+        if Version(self.version) >= "0.10.4":
             check_min_cppstd(self, 17)
+        else:
+            check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
-        podofo_version = Version(self.version)
-
         tc = CMakeToolchain(self)
         tc.variables["PODOFO_BUILD_TOOLS"] = self.options.with_tools
-        if self.options.get_safe("with_lib_only") is not None:
+        if self.options.get_safe("with_lib_only"):
             tc.variables["PODOFO_BUILD_LIB_ONLY"] = self.options.with_lib_only
-        if podofo_version < "0.10.0":
+        if Version(self.version) < "0.10.0":
+            # _STATIC controls the shared/static build type
             tc.variables["PODOFO_BUILD_SHARED"] = self.options.shared
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.variables["PODOFO_BUILD_STATIC"] = not self.options.shared
         if not self.options.threadsafe:
             tc.variables["PODOFO_NO_MULTITHREAD"] = True
@@ -134,12 +135,9 @@ class PodofoConan(ConanFile):
         tc.variables["PODOFO_WITH_UNISTRING"] = self.options.with_unistring
 
         if self._with_openssl:
-            tc.variables["PODOFO_HAVE_OPENSSL_1_1"] = Version(self.dependencies["openssl"].ref.version) >= "1.1"
+            tc.variables["PODOFO_HAVE_OPENSSL_1_1"] = self.dependencies["openssl"].ref.version >= "1.1"
             if self._with_openssl and ("no_rc4" in self.dependencies["openssl"].options):
                 tc.variables["PODOFO_HAVE_OPENSSL_NO_RC4"] = self.dependencies["openssl"].options.no_rc4
-
-        if podofo_version < "0.10.0":
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
 
         tc.generate()
 
@@ -147,7 +145,6 @@ class PodofoConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -157,11 +154,11 @@ class PodofoConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        podofo_version = Version(self.version)
         self.cpp_info.set_property("pkg_config_name", "libpodofo")
-        if podofo_version < "0.10.0":
+        if Version(self.version) < "0.10.0":
             self.cpp_info.libs = ["podofo"]
             if self.settings.os == "Windows" and self.options.shared:
                 self.cpp_info.defines.append("USING_SHARED_PODOFO")
