@@ -1,0 +1,88 @@
+--- CMakeLists.txt	2025-03-25 07:17:59.134362815 +0100
++++ CMakeLists.txt	2025-03-25 07:26:46.093132446 +0100
+@@ -746,23 +746,7 @@
+ configure_file(include/open62541/config.h.in ${PROJECT_BINARY_DIR}/src_generated/open62541/config.h)
+ 
+ if(UA_ENABLE_DISCOVERY_MULTICAST)
+-  include(GenerateExportHeader)
+-    set(MDNSD_LOGLEVEL 300 CACHE STRING "Level at which logs shall be reported" FORCE)
+-    
+-    # create a "fake" empty library to generate the export header macros
+-    if (APPLE)
+-    	add_library(libmdnsd INTERFACE ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/mdnsd.h)
+-    else()
+-    	add_library(libmdnsd ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/mdnsd.h)
+-    endif()
+-    
+-    set_property(TARGET libmdnsd PROPERTY LINKER_LANGUAGE C)
+-    set_property(TARGET libmdnsd PROPERTY DEFINE_SYMBOL "MDNSD_DYNAMIC_LINKING_EXPORT")
+-    configure_file("deps/mdnsd/libmdnsd/mdnsd_config_extra.in"
+-                   "${PROJECT_BINARY_DIR}/src_generated/mdnsd_config_extra")
+-    file(READ "${PROJECT_BINARY_DIR}/src_generated/mdnsd_config_extra" MDNSD_CONFIG_EXTRA)
+-    generate_export_header(libmdnsd EXPORT_FILE_NAME "${PROJECT_BINARY_DIR}/src_generated/mdnsd_config.h"
+-                           BASE_NAME MDNSD DEFINE_NO_DEPRECATED CUSTOM_CONTENT_FROM_VARIABLE MDNSD_CONFIG_EXTRA)
++  find_package(mdnsd REQUIRED)
+ endif()
+ 
+ # Exported headers
+@@ -940,19 +924,8 @@
+ endif()
+ 
+ if(UA_ENABLE_DISCOVERY_MULTICAST)
+-    # prepend in list, otherwise it complains that winsock2.h has to be included before windows.h
+-    list(APPEND lib_headers
+-         ${PROJECT_BINARY_DIR}/src_generated/mdnsd_config.h
+-         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/1035.h
+-         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/xht.h
+-         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/sdtxt.h
+-         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/mdnsd.h)
+-    list(APPEND lib_sources
+-         ${PROJECT_SOURCE_DIR}/src/server/ua_discovery_mdns.c
+-         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/1035.c
+-         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/xht.c
+-         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/sdtxt.c
+-         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/mdnsd.c)
++  set(lib_sources ${PROJECT_SOURCE_DIR}/src/server/ua_discovery_mdns.c
++  ${lib_sources})
+ endif()
+ 
+ if(UA_BUILD_FUZZING OR UA_BUILD_OSS_FUZZ)
+@@ -1365,6 +1338,14 @@
+ 
+     add_library(open62541 $<TARGET_OBJECTS:open62541-object> $<TARGET_OBJECTS:open62541-plugins>)
+ 
++    if(UA_ENABLE_DISCOVERY_MULTICAST)
++      target_include_directories(open62541-object PUBLIC ${mdnsd_INCLUDE_DIRS})
++    endif()
++
++    if(UA_ENABLE_DISCOVERY_MULTICAST)
++      list(APPEND open62541_LIBRARIES mdnsd::mdnsd)
++    endif()
++
+     if(UA_ENABLE_ENCRYPTION_LIBRESSL)
+         # Prevent Wincrypt override warning.
+         target_compile_definitions(open62541-plugins PUBLIC NOCRYPT=1)
+--- src/server/ua_discovery.h	2025-03-25 07:28:41.103147762 +0100
++++ src/server/ua_discovery.h	2025-03-25 07:29:06.853151169 +0100
+@@ -44,7 +44,7 @@
+ 
+ #ifdef UA_ENABLE_DISCOVERY_MULTICAST
+ 
+-#include "mdnsd/libmdnsd/mdnsd.h"
++#include "libmdnsd/mdnsd.h"
+ #define UA_MAXMDNSRECVSOCKETS 8
+ 
+ /**
+--- src/server/ua_discovery_mdns.c	2025-03-25 07:34:44.643199975 +0100
++++ src/server/ua_discovery_mdns.c	2025-03-25 07:35:05.213202805 +0100
+@@ -13,8 +13,8 @@
+ #ifdef UA_ENABLE_DISCOVERY_MULTICAST
+ 
+ #ifndef UA_ENABLE_AMALGAMATION
+-#include "mdnsd/libmdnsd/xht.h"
+-#include "mdnsd/libmdnsd/sdtxt.h"
++#include "libmdnsd/xht.h"
++#include "libmdnsd/sdtxt.h"
+ #endif
+ 
+ #include "../deps/mp_printf.h"
