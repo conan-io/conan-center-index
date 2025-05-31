@@ -43,14 +43,19 @@ class DoxygenConan(ConanFile):
         if self.options.enable_app or self.options.enable_parse:
             self.requires("libiconv/1.17")
 
+    def validate_build(self):
+        if (self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "17") or \
+           (self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= "19"):
+            check_min_cppstd(self, "20")
+        else:
+            check_min_cppstd(self, "17")
+
     def validate(self):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("Doxygen requires GCC >=5")
-        
+
         if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "191":
             raise ConanInvalidConfiguration("Doxygen requires Visual Studio 2017 or newer")
-        
-        check_min_cppstd(self, "17")
 
     def build_requirements(self):
         if self.settings_build.os == "Windows":
