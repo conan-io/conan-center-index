@@ -97,7 +97,7 @@ class Libssh2Conan(ConanFile):
             if Version(self.version) >= "1.11":
                 self.requires("mbedtls/3.5.0")
             else:
-                self.requires("mbedtls/2.28.4")
+                self.requires("mbedtls/[~2.28]")
 
     def build_requirements(self):
         if Version(self.version) >= "1.11":

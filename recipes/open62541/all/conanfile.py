@@ -175,7 +175,7 @@ class Open62541Conan(ConanFile):
 
     def requirements(self):
         if self.options.encryption == "mbedtls":
-            self.requires("mbedtls/2.25.0")
+            self.requires("mbedtls/[~2.28]")
         elif self.options.encryption == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         if self.options.web_socket:
