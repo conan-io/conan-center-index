@@ -62,18 +62,22 @@ def components_from_dotfile(dotfile):
             if is_package_label(label):
                 yield label, None
 
-    def component_key(dependency):
-        return "requires"
+    def sanitize_requirement(dependency_name):
+        if dependency_name is None:
+            return None, None
+        if dependency_name.startswith("-framework"):
+            return "frameworks", dependency_name.split()[1]
+        return "requires", dependency_name
 
     components = {}
     dotfile_rows = dotfile.split("\n")
     for component, dependency in component_and_dependency(dotfile_rows):
-        key = component_key(dependency)
+        key, dependency = sanitize_requirement(dependency)
         if key is None:
             continue
 
         if not component in components:
-            components[component] = { "system_libs": [], "requires": [] }
+            components[component] = { "frameworks": [], "requires": [] }
             if dependency is not None:
                 components[component][key] = [dependency]
         elif dependency is not None:
