@@ -109,7 +109,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/[>=1.5 <1.6]")
         if self.options.get_safe("with_mbedtls"):
-            self.requires("mbedtls/3.6.1")
+            self.requires("mbedtls/[~3.6]")
         if self.options.get_safe("with_pcre2"):
             self.requires("pcre2/10.43")
 
@@ -167,6 +167,8 @@ class LibarchiveConan(ConanFile):
         # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
         if is_msvc(self):
             tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+        if Version(self.version) <= "3.7.7":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):

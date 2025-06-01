@@ -1,22 +1,10 @@
 sources:
-  "3.6.2":
-    url: "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.2/mbedtls-3.6.2.tar.bz2"
-    sha256: "8b54fb9bcf4d5a7078028e0520acddefb7900b3e66fec7f7175bb5b7d85ccdca"
-  "3.6.1":
-    url: "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.1/mbedtls-3.6.1.tar.bz2"
-    sha256: "fc8bef0991b43629b7e5319de6f34f13359011105e08e3e16eed3a9fe6ffd3a3"
-  "3.6.0":
-    url: "https://github.com/Mbed-TLS/mbedtls/releases/download/v3.6.0/mbedtls-3.6.0.tar.bz2"
-    sha256: "3ecf94fcfdaacafb757786a01b7538a61750ebd85c4b024f56ff8ba1490fcd38"
+  "3.6.3.1":
+    url: "https://github.com/Mbed-TLS/mbedtls/releases/download/v3.6.3.1/mbedtls-3.6.3.1.tar.bz2"
+    sha256: "243ed496d5f88a5b3791021be2800aac821b9a4cc16e7134aa413c58b4c20e0c"
   "3.5.2":
     url: "https://github.com/Mbed-TLS/mbedtls/archive/mbedtls-3.5.2.tar.gz"
     sha256: "eedecc468b3f8d052ef05a9d42bf63f04c8a1c50d1c5a94c251c681365a2c723"
-  "3.5.0":
-    url: "https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.5.0.tar.gz"
-    sha256: "bdee0e3e45bbf360541306cac0cc27e00402c7a46b9bdf2d24787d5107f008f2"
-  "3.2.1":
-    url: "https://github.com/Mbed-TLS/mbedtls/archive/mbedtls-3.2.1.tar.gz"
-    sha256: "5850089672560eeaca03dc36678ee8573bb48ef6e38c94f5ce349af60c16da33"
   "2.28.10":
     url: "https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v2.28.10.tar.gz"
     sha256: "0f2e0525903a89ae1d39ce439d858be66933bda54c5b6102b72a29ed8fe7c088"

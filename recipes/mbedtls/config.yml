@@ -1,14 +1,7 @@
 versions:
-  "3.6.2":
-    folder: all
-  "3.6.1":
-    folder: all
-  "3.6.0":
+  "3.6.3.1":
     folder: all
   "3.5.2":
-    folder: all
-  # keep 3.5.0 for libcurl, libssh2, libwebsockets, libzip
-  "3.5.0":
     folder: all
   # keep 3.2.1 for libcoap, libgit2, lief
   "3.2.1":

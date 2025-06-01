@@ -73,7 +73,7 @@ class LibZipConan(ConanFile):
         if self.options.crypto == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         elif self.options.crypto == "mbedtls":
-            self.requires("mbedtls/3.5.0")
+            self.requires("mbedtls/[~3.6]")
         elif self.options.crypto == "gnutls":
             self.requires("gnutls/3.8.2")
 
@@ -110,6 +110,8 @@ class LibZipConan(ConanFile):
         tc.variables["ENABLE_MBEDTLS"] = self.options.crypto == "mbedtls"
         tc.variables["ENABLE_OPENSSL"] = self.options.crypto == "openssl"
         tc.variables["ENABLE_WINDOWS_CRYPTO"] = self.options.crypto == "win32"
+        if Version(self.version) <= "1.9.2":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
         deps = CMakeDeps(self)
