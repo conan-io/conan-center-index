@@ -31,10 +31,10 @@ class YojimboConan(ConanFile):
     def requirements(self):
         self.requires("libsodium/1.0.18")
         self.requires("mbedtls/2.25.0")
-
+ 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-
+        
         submodule_filename = os.path.join(self.recipe_folder, 'submoduledata.yml')
         with open(submodule_filename, 'r') as submodule_stream:
             submodules_data = yaml.load(submodule_stream)
