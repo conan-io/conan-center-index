@@ -46,6 +46,9 @@ class FFMpegConan(ConanFile):
         "with_lzma": [True, False],
         "with_libiconv": [True, False],
         "with_freetype": [True, False],
+        "with_fontconfig": [True, False],
+        "with_fribidi": [True, False],
+        "with_harfbuzz": [True, False],
         "with_openjpeg": [True, False],
         "with_openh264": [True, False],
         "with_opus": [True, False],
@@ -131,6 +134,9 @@ class FFMpegConan(ConanFile):
         "with_lzma": True,
         "with_libiconv": True,
         "with_freetype": True,
+        "with_fontconfig": False,
+        "with_fribidi": False,
+        "with_harfbuzz": False,
         "with_openjpeg": True,
         "with_openh264": True,
         "with_opus": True,
@@ -227,6 +233,9 @@ class FFMpegConan(ConanFile):
             "with_libfdk_aac": ["avcodec"],
             "with_libwebp": ["avcodec"],
             "with_freetype": ["avfilter"],
+            "with_fontconfig": ["avfilter"],
+            "with_fribidi": ["avfilter"],
+            "with_harfbuzz": ["avfilter"],
             "with_zeromq": ["avfilter", "avformat"],
             "with_libalsa": ["avdevice"],
             "with_xcb": ["avdevice"],
@@ -243,6 +252,11 @@ class FFMpegConan(ConanFile):
     @property
     def _version_supports_libsvtav1(self):
         return Version(self.version) >= "5.1.0"
+
+    @property
+    def _version_supports_harfbuzz(self):
+        # https://github.com/FFmpeg/FFmpeg/compare/n6.0.1...n6.1#diff-90d08e583c4c9c6f391b2ae90f819f600a6326928ea9512c9e0c6d98e9f29ac2R235
+        return Version(self.version) >= "6.1"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -272,6 +286,8 @@ class FFMpegConan(ConanFile):
             del self.options.with_mediacodec
         if not self._version_supports_libsvtav1:
             self.options.rm_safe("with_libsvtav1")
+        if not self._version_supports_harfbuzz:
+            self.options.rm_safe("with_harfbuzz")
         if self.settings.os == "Android":
             del self.options.with_libfdk_aac
 
@@ -293,8 +309,14 @@ class FFMpegConan(ConanFile):
             self.requires("xz_utils/5.4.5")
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
-        if self.options.with_freetype:
+        if self.options.get_safe("with_freetype"):
             self.requires("freetype/2.13.2")
+        if self.options.get_safe("with_fontconfig"):
+            self.requires("fontconfig/2.15.0")
+        if self.options.get_safe("with_fribidi"):
+            self.requires("fribidi/1.0.13")
+        if self.options.get_safe("with_harfbuzz"):
+            self.requires("harfbuzz/8.3.0")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.2")
         if self.options.with_openh264:
@@ -503,6 +525,9 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("zlib", self.options.with_zlib),
             opt_enable_disable("lzma", self.options.with_lzma),
             opt_enable_disable("iconv", self.options.with_libiconv),
+            opt_enable_disable("libfreetype", self.options.get_safe("with_freetype")),
+            opt_enable_disable("libfontconfig", self.options.get_safe("with_fontconfig")),
+            opt_enable_disable("libfribidi", self.options.get_safe("with_fribidi")),
             opt_enable_disable("libopenjpeg", self.options.with_openjpeg),
             opt_enable_disable("libopenh264", self.options.with_openh264),
             opt_enable_disable("libvorbis", self.options.with_vorbis),
@@ -608,6 +633,8 @@ class FFMpegConan(ConanFile):
 
         if self._version_supports_libsvtav1:
             args.append(opt_enable_disable("libsvtav1", self.options.get_safe("with_libsvtav1")))
+        if self._version_supports_harfbuzz:
+            args.append(opt_enable_disable("libharfbuzz", self.options.get_safe("with_harfbuzz")))
         if is_apple_os(self):
             # relocatable shared libs
             args.append("--install-name-dir=@rpath")
@@ -918,8 +945,14 @@ class FFMpegConan(ConanFile):
                 avformat.frameworks.append("Security")
 
         if self.options.avfilter:
-            if self.options.with_freetype:
+            if self.options.get_safe("with_freetype"):
                 avfilter.requires.append("freetype::freetype")
+            if self.options.get_safe("with_fontconfig"):
+                avfilter.requires.append("fontconfig::fontconfig")
+            if self.options.get_safe("with_fribidi"):
+                avfilter.requires.append("fribidi::fribidi")
+            if self.options.get_safe("with_harfbuzz"):
+                avfilter.requires.append("harfbuzz::harfbuzz")
             if self.options.with_zeromq:
                 avfilter.requires.append("zeromq::libzmq")
             if self.options.get_safe("with_appkit"):
