@@ -28,6 +28,7 @@ patches:
     - patch_file: "patches/0006-3.7.9-fix-msvc-build.patch"
       patch_description: "Fix MSVC build"
       patch_type: "conan"
+    - patch_file: "patches/0007-3.7.9-openssl-try-compile.patch"
   "3.7.7":
     - patch_file: "patches/0003-3.7.7-cmake.patch"
       patch_description: "Make CMake build-system compatible with Conan"
