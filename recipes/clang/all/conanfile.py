@@ -62,9 +62,24 @@ def components_from_dotfile(dotfile):
             if is_package_label(label):
                 yield label, None
 
-    def sanitize_requirement(dependency_name):
-        if dependency_name is None:
+    def sanitize_dependency(dependency_name):
+        """
+        Split dependencies into normal, Macos framework and system requirements,
+        and rename if necessary
+        """
+        ignore = [
+            "version" # appears in some windows builds
+        ]
+        system_libs = [
+            "-lpthread",
+            "-ldl",
+            "-lm"
+        ]
+        if dependency_name is None or dependency_name in ignore:
             return None, None
+        if dependency_name in system_libs:
+            return "system_libs", dependency_name[2:]
+
         if dependency_name.startswith("-framework"):
             return "frameworks", dependency_name.split()[1]
         return "requires", dependency_name
@@ -72,12 +87,12 @@ def components_from_dotfile(dotfile):
     components = {}
     dotfile_rows = dotfile.split("\n")
     for component, dependency in component_and_dependency(dotfile_rows):
-        key, dependency = sanitize_requirement(dependency)
+        key, dependency = sanitize_dependency(dependency)
         if key is None:
             continue
 
         if not component in components:
-            components[component] = { "frameworks": [], "requires": [] }
+            components[component] = { "frameworks": [], "requires": [], "system_libs": [] }
             if dependency is not None:
                 components[component][key] = [dependency]
         elif dependency is not None:
@@ -317,5 +332,7 @@ class ClangConan(ConanFile):
             self.cpp_info.components[component].set_property("cmake_target_name", component)
             self.cpp_info.components[component].libs = [_lib_name_from_component(component)]
             self.cpp_info.components[component].requires = data["requires"]
+            self.cpp_info.components[component].frameworks = data["frameworks"]
+            self.cpp_info.components[component].system_libs = data["system_libs"]
             if not llvm.options.rtti:
                 _add_no_rtti_flag(self.cpp_info.components[component])
