@@ -60,6 +60,7 @@ class AafConan(ConanFile):
         tc.cache_variables["AAF_NO_STRUCTURED_STORAGE"] = not self.options.structured_storage
         jpeg_res_dirs = ";".join([p.replace("\\", "/") for p in self.dependencies["libjpeg"].cpp_info.aggregated_components().resdirs])
         tc.variables["JPEG_RES_DIRS"] = jpeg_res_dirs
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

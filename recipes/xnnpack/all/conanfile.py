@@ -6,7 +6,7 @@ from conan.tools.microsoft import check_min_vs
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=2.4"
 
 
 class XnnpackConan(ConanFile):
@@ -35,26 +35,18 @@ class XnnpackConan(ConanFile):
         "memopt": True,
         "sparse": True,
     }
+    implements = ["auto_shared_fpic"]
+    languages = ["C"]
 
     def export_sources(self):
         copy(self, "xnnpack_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.version in ["cci.20220801", "cci.20220621", "cci.20211210"]:
-            self.requires("cpuinfo/cci.20220228")
+            self.requires("cpuinfo/cci.20220618")
         else:
             self.requires("cpuinfo/cci.20231129")
         self.requires("fp16/cci.20210320")
@@ -66,7 +58,7 @@ class XnnpackConan(ConanFile):
         check_min_vs(self, 192)
         compiler = self.settings.compiler
         compiler_version = Version(compiler.version)
-        if self.version < "cci.20230715":
+        if Version(self.version) < "cci.20230715":
             if (compiler == "gcc" and compiler_version < "6") or \
                 (compiler == "clang" and compiler_version < "5"):
                 raise ConanInvalidConfiguration(f"{self.ref} doesn't support {compiler} {compiler.version}")

@@ -64,7 +64,10 @@ class CppItertoolsConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "*.hpp", src=self.source_folder, dst=os.path.join(self.package_folder, "include", "cppitertools"), excludes=('examples/**', 'test/**'))
+        if Version(self.version) < "2.2":
+            copy(self, "*.hpp", src=self.source_folder, dst=os.path.join(self.package_folder, "include", "cppitertools"), excludes=('examples/**', 'test/**'))
+        else:
+            copy(self, "*.hpp", src=self.source_folder, dst=os.path.join(self.package_folder, "include"), excludes=('examples/**', 'test/**'))
 
     def package_info(self):
         self.cpp_info.bindirs = []

@@ -1,9 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class ZipConan(ConanFile):
@@ -46,6 +47,8 @@ class ZipConan(ConanFile):
         tc.variables["CMAKE_DISABLE_TESTING"] = True
         tc.variables["ZIP_STATIC_PIC"] = self.options.get_safe("fPIC", True)
         tc.variables["ZIP_BUILD_DOCS"] = False
+        if Version(self.version) < "0.2.3":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def _patch_sources(self):
@@ -66,9 +69,6 @@ class ZipConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "zip")
         self.cpp_info.set_property("cmake_target_name", "zip::zip")
-
-        self.cpp_info.names["cmake_find_package"] = "zip"
-        self.cpp_info.names["cmake_find_package_multi"] = "zip"
 
         self.cpp_info.libs = ["zip"]
         if self.options.shared:

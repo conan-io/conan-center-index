@@ -1,8 +1,7 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 import os
@@ -34,27 +33,10 @@ class GlogConan(ConanFile):
         "with_unwind": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os not in ["Linux", "FreeBSD"] or Version(self.version) < "0.5.0":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_unwind
 
     def configure(self):
@@ -70,19 +52,14 @@ class GlogConan(ConanFile):
         if self.options.with_gflags:
             self.requires("gflags/2.2.2", transitive_headers=True, transitive_libs=True)
         # 0.4.0 requires libunwind unconditionally
-        if self.options.get_safe("with_unwind") or (Version(self.version) < "0.5.0" and self.settings.os in ["Linux", "FreeBSD"]):
+        if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.8.0", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if Version(self.version) < "0.7.0":
             return
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+
+        check_min_cppstd(self, 14)
 
     def build_requirements(self):
         if Version(self.version) >= "0.7.0":
@@ -100,36 +77,26 @@ class GlogConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["WITH_GFLAGS"] = self.options.with_gflags
         tc.variables["WITH_THREADS"] = self.options.with_threads
-        if Version(self.version) >= "0.5.0":
-            tc.variables["WITH_PKGCONFIG"] = True
-            if self.settings.os == "Emscripten":
-                tc.variables["WITH_SYMBOLIZE"] = False
-                tc.variables["HAVE_SYSCALL_H"] = False
-                tc.variables["HAVE_SYS_SYSCALL_H"] = False
-            else:
-                tc.variables["WITH_SYMBOLIZE"] = True
-            tc.variables["WITH_UNWIND"] = self.options.get_safe("with_unwind", default=False)
+        tc.variables["WITH_PKGCONFIG"] = True
+        if self.settings.os == "Emscripten":
+            tc.variables["WITH_SYMBOLIZE"] = False
+            tc.variables["HAVE_SYSCALL_H"] = False
+            tc.variables["HAVE_SYS_SYSCALL_H"] = False
+        else:
+            tc.variables["WITH_SYMBOLIZE"] = True
+        tc.variables["WITH_UNWIND"] = self.options.get_safe("with_unwind", default=False)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["WITH_GTEST"] = False
+        # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
+        # Needed for https://github.com/google/glog/blob/v0.7.1/CMakeLists.txt#L81
+        # and https://github.com/google/glog/blob/v0.7.1/CMakeLists.txt#L90
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
 
         tc = CMakeDeps(self)
         tc.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # do not force PIC
-        if Version(self.version) <= "0.5.0":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                  "set_target_properties (glog PROPERTIES POSITION_INDEPENDENT_CODE ON)",
-                                  "")
-        # INFO: avoid "CONAN_LIB::gflags_gflags_nothreads_RELEASE" but the target was not found.
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-        "determine_gflags_namespace",
-        "# determine_gflags_namespace")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

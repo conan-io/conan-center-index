@@ -4,7 +4,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.1"
 
 
 class CppcheckConan(ConanFile):
@@ -48,6 +48,8 @@ class CppcheckConan(ConanFile):
         if Version(self.version) >= "2.11.0":
             tc.variables["DISABLE_DMAKE"] = True
         tc.variables["FILESDIR"] = "bin"
+        if Version(self.version) < "2.14.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -70,8 +72,5 @@ class CppcheckConan(ConanFile):
         self.cpp_info.libdirs = []
 
         bin_folder = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bin_folder)
-
         cppcheck_htmlreport = os.path.join(bin_folder, "cppcheck-htmlreport")
-        self.env_info.CPPCHECK_HTMLREPORT = cppcheck_htmlreport
         self.runenv_info.define_path("CPPCHECK_HTMLREPORT", cppcheck_htmlreport)

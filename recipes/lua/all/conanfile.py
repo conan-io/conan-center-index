@@ -7,7 +7,7 @@ from conan.tools.files import get, copy, load, save, export_conandata_patches, a
 from conan.tools.apple import fix_apple_shared_install_name
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class LuaConan(ConanFile):

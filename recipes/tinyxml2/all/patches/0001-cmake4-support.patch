@@ -1,0 +1,23 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -5,11 +5,7 @@ IF(BIICODE)
+     ENDIF()
+     RETURN()
+ ENDIF(BIICODE)
+-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+-cmake_policy(VERSION 2.6)
+-if(POLICY CMP0063)
+-	cmake_policy(SET CMP0063 OLD)
+-endif()
++cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+ 
+ project(tinyxml2)
+ include(GNUInstallDirs)
+@@ -40,7 +36,6 @@ option(BUILD_SHARED_LIBS "build as shared library" ON)
+ option(BUILD_TESTS "build xmltest (deprecated: Use BUILD_TESTING)" ON)
+ 
+ # To allow using tinyxml in another shared library
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ 
+ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+ set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)

@@ -1,0 +1,4 @@
+sources:
+  "2.5.2":
+    url: "https://github.com/dbus-cxx/dbus-cxx/archive/refs/tags/2.5.2.tar.gz"
+    sha256: "a739a29efc9ad42ba6518b38e13bb44c12947d4f7503d211c12823233e277987"

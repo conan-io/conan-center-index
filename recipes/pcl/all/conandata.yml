@@ -21,3 +21,7 @@ patches:
       patch_description: "Fix missing functional include in ply_parser.h"
       patch_source: "https://github.com/PointCloudLibrary/pcl/pull/5964"
       patch_type: "portability"
+    - patch_file: "patches/1.13.1-0006-Compatibility-with-clang-19.patch"
+      patch_description: "Compatibility with clang-19"
+      patch_source: "https://github.com/PointCloudLibrary/pcl/pull/6113"
+      patch_type: "portability"

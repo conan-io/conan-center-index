@@ -6,3 +6,4 @@ patches:
   "0.0.7":
     - patch_file: "patches/memleaksfix.patch"
     - patch_file: "patches/cmake-no-cflags.patch"
+    - patch_file: "patches/cmake4-support.patch"

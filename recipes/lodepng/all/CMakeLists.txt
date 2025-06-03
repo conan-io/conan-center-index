@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(lodepng LANGUAGES CXX)
 
 add_library(lodepng ${LODEPNG_SRC_DIR}/lodepng.cpp)

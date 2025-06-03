@@ -23,12 +23,14 @@ class ZXingCppConan(ConanFile):
         "fPIC": [True, False],
         "enable_encoders": [True, False],
         "enable_decoders": [True, False],
+        "enable_c_api": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_encoders": True,
         "enable_decoders": True,
+        "enable_c_api": True,
     }
 
     @property
@@ -64,6 +66,9 @@ class ZXingCppConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        self.build_requires("cmake/[>=3.16 <4]")
+
     def validate(self):
         cpp_version = 17 if Version(self.version) >= "1.2.0" else 14
 
@@ -87,11 +92,16 @@ class ZXingCppConan(ConanFile):
             tc.variables["ENABLE_ENCODERS"] = self.options.enable_encoders
             tc.variables["ENABLE_DECODERS"] = self.options.enable_decoders
             tc.variables["BUILD_SHARED_LIBRARY"] = self.options.shared
-        else:
+        elif Version(self.version) < "2.3.0":
             tc.variables["BUILD_WRITERS"] = self.options.enable_encoders
             tc.variables["BUILD_READERS"] = self.options.enable_decoders
             tc.variables["BUILD_EXAMPLES"] = False
             tc.variables["BUILD_BLACKBOX_TESTS"] = False
+        else:
+            tc.variables["ZXING_WRITERS"] = "ON" if self.options.enable_encoders else "OFF"
+            tc.variables["ZXING_READERS"] = "ON" if self.options.enable_decoders else "OFF"
+            tc.variables["ZXING_C_API"] = "ON" if self.options.enable_c_api else "OFF"
+            tc.variables["ZXING_EXAMPLES"] = False
         if is_msvc(self):
             tc.variables["LINK_CPP_STATICALLY"] = is_msvc_static_runtime(self)
         tc.generate()

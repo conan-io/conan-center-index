@@ -106,7 +106,7 @@ class PangoConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires -o=&:with_fontconfig=True for {self.settings.os}")
 
         if (self.options.with_fontconfig and self.options.with_freetype
-                and not self.dependencies["cairo"].options.with_fontconfig):
+                and self.options.with_cairo and not self.dependencies["cairo"].options.with_fontconfig):
             raise ConanInvalidConfiguration(f"{self.ref} with -o=&:with_fontconfig=True and -o=&:with_freetype=True requires -o=cairo/*:with_fontconfig=True")
 
         if self.options.shared:

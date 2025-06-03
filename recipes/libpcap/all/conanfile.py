@@ -1,6 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
@@ -44,10 +43,6 @@ class LibPcapConan(ConanFile):
         "with_snf": False,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -79,17 +74,8 @@ class LibPcapConan(ConanFile):
             self.requires("dbus/1.15.8")
         # TODO: Add libbluetooth when available
 
-    def validate(self):
-        if Version(self.version) < "1.10.0" and self.settings.os == "Macos" and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on OSX.")
-        if hasattr(self, "settings_build") and cross_building(self) and \
-           self.options.shared and is_apple_os(self):
-            raise ConanInvalidConfiguration("cross-build of libpcap shared is broken on Apple")
-        if Version(self.version) < "1.10.1" and self.settings.os == "Windows" and not self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built static on Windows")
-
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("bison/3.8.2")
@@ -111,6 +97,11 @@ class LibPcapConan(ConanFile):
                 # Don't force -static-libgcc for MinGW, because conan users expect
                 # to inject this compilation flag themselves
                 tc.variables["USE_STATIC_RT"] = False
+            tc.cache_variables["DISABLE_DPDK"] = True
+
+            if Version(self.version) >= "1.10.5":
+                self.output.warning("PCAP on Windows is currently built with package capture capabilities - only support is for reading/writing capture files")
+                tc.cache_variables["PCAP_TYPE"] = "null"
             tc.generate()
         else:
             if not cross_building(self):
@@ -127,8 +118,8 @@ class LibPcapConan(ConanFile):
                 "--disable-bluetooth",
                 f"--with-snf={yes_no(self.options.get_safe('with_snf'))}",
             ])
-            if Version(self.version) < "1.10":
-                tc.configure_args.append("--disable-packet-ring")
+            tc.configure_args.append("--disable-packet-ring")
+            tc.configure_args.append("--without-dpdk")
             if cross_building(self):
                 target_os = "linux" if self.settings.os in ["Linux", "Android"] else "null"
                 tc.configure_args.append(f"--with-pcap={target_os}")

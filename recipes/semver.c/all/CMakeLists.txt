@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(semver.c LANGUAGES C)
 
 include(GNUInstallDirs)

@@ -113,16 +113,6 @@ class OpenvinoConan(ConanFile):
         return "ade" in self._dependencies_versions
 
     @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "clang": "9",
-            "apple-clang": "11",
-            "Visual Studio": "16",
-            "msvc": "192",
-        }
-
-    @property
     def _is_legacy_one_profile(self):
         return not hasattr(self, "settings_build")
 
@@ -136,6 +126,9 @@ class OpenvinoConan(ConanFile):
             destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/ComputeLibrary")
         get(self, **self.conan_data["sources"][self.version]["onednn_gpu"], strip_root=True,
             destination=f"{self.source_folder}/src/plugins/intel_gpu/thirdparty/onednn_gpu")
+        if Version(self.version) >= "2025.1.0":
+            get(self, **self.conan_data["sources"][self.version]["arm_kleidiai"], strip_root=True,
+                destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/kleidiai")
         rmdir(self, f"{self.source_folder}/src/plugins/intel_gpu/thirdparty/rapidjson")
         apply_conandata_patches(self)
 
@@ -172,6 +165,8 @@ class OpenvinoConan(ConanFile):
     def requirements(self):
         self.requires("onetbb/2021.10.0")
         self.requires("pugixml/1.14")
+        if Version(self.version) >= "2025.1.0":
+                self.requires("nlohmann_json/3.11.3")
         if self._target_x86_64:
             self.requires("xbyak/6.73")
         if self.options.get_safe("enable_gpu"):
@@ -257,15 +252,8 @@ class OpenvinoConan(ConanFile):
         toolchain.generate()
 
     def validate_build(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "11")
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        compiler_version = Version(self.settings.compiler.version)
-        if minimum_version and compiler_version < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires {self.settings.compiler} ver. {minimum_version}, provided ver. {compiler_version}.",
-            )
+        min_cppstd = "17" if Version(self.version) >= "2025.0.0" else "11"
+        check_min_cppstd(self, min_cppstd)
 
         # OpenVINO has unresolved symbols, when clang is used with libc++
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
@@ -311,6 +299,8 @@ class OpenvinoConan(ConanFile):
         openvino_runtime = self.cpp_info.components["Runtime"]
         openvino_runtime.set_property("cmake_target_name", "openvino::runtime")
         openvino_runtime.requires = ["onetbb::libtbb", "pugixml::pugixml"]
+        if Version(self.version) >= "2025.1.0":
+            openvino_runtime.requires.append("nlohmann_json::nlohmann_json")
         openvino_runtime.libs = ["openvino"]
         if self._preprocessing_available:
             openvino_runtime.requires.append("ade::ade")
@@ -334,6 +324,8 @@ class OpenvinoConan(ConanFile):
                 openvino_runtime.libs.extend(["openvino_onednn_cpu", "openvino_snippets", "mlas"])
                 if self._target_arm:
                     openvino_runtime.libs.append("arm_compute-static")
+                    if Version(self.version) >= "2025.1.0":
+                        openvino_runtime.libs.append("kleidiai")
             if self.options.get_safe("enable_gpu"):
                 openvino_runtime.libs.extend(["openvino_intel_gpu_plugin", "openvino_intel_gpu_graph",
                                               "openvino_intel_gpu_runtime", "openvino_intel_gpu_kernels"])
@@ -374,6 +366,8 @@ class OpenvinoConan(ConanFile):
             openvino_runtime.libs.extend(["openvino_reference", "openvino_shape_inference", "openvino_itt",
                                           # utils goes last since all others depend on it
                                           "openvino_util"])
+            if Version(self.version) >= "2025.1.0":
+                openvino_runtime.libs.append("openvino_common_translators")
             # set 'openvino' once again for transformations objects files (cyclic dependency)
             # openvino_runtime.libs.append("openvino")
             full_openvino_lib_path = os.path.join(self.package_folder, "lib", "openvino.lib").replace("\\", "/") if self.settings.os == "Windows" else \

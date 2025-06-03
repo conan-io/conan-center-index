@@ -1,0 +1,32 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 10ef840..1735338 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -51,4 +51,4 @@ ENDIF ()
+ 
+ ADD_SUBDIRECTORY(src)
+ ADD_SUBDIRECTORY(elzma)
+-ADD_SUBDIRECTORY(test)
++# ADD_SUBDIRECTORY(test)
+diff --git a/elzma/CMakeLists.txt b/elzma/CMakeLists.txt
+index 159b48f..1149176 100644
+--- a/elzma/CMakeLists.txt
++++ b/elzma/CMakeLists.txt
+@@ -33,7 +33,7 @@ ADD_EXECUTABLE(elzma ${SRCS})
+ TARGET_LINK_LIBRARIES(elzma easylzma_s)
+ 
+ # make a hard link (or copy on win32) from unelzma to elzma
+-GET_TARGET_PROPERTY(binPath elzma LOCATION)
++# GET_TARGET_PROPERTY(binPath elzma LOCATION)
+ IF (WIN32)
+   SET(exeExt ".exe") 
+   SET(hardLinkCommand ${CMAKE_COMMAND} -E copy_if_different) 
+@@ -42,6 +42,7 @@ ELSE (WIN32)
+   SET(exeExt ) 
+ ENDIF (WIN32)
+ ADD_CUSTOM_COMMAND(TARGET elzma POST_BUILD
+-      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${binPath} ${binDir}
++      # COMMAND ${CMAKE_COMMAND} -E copy_if_different ${binPath} ${binDir}
++      COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:elzma> ${binDir}
+       COMMAND ${hardLinkCommand} elzma${exeExt} unelzma${exeExt}
+       WORKING_DIRECTORY "${binDir}")    

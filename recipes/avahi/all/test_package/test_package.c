@@ -1,8 +1,10 @@
+#include <malloc.h>
 #include <stdlib.h>
 
 #include "dns_sd.h"
-#include "avahi-core/log.h"
-
+#include <avahi-core/log.h>
+#include <avahi-common/malloc.h>
+#include <avahi-common/error.h>
 
 int main(void) {
     DNSServiceRef sdRef;
@@ -16,5 +18,6 @@ int main(void) {
     {
         avahi_log_info("DNSServiceBrowse failed: %d\n", err);
     }
+    malloc_trim(0);  // from <malloc.h>
     return EXIT_SUCCESS;
 }

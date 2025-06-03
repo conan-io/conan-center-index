@@ -8,7 +8,7 @@ sources:
 patches:
   "3.4":
     - patch_file: "patches/3.2.1-0001-remove_register_classifier.patch"
-    - patch_file: "patches/3.2.1-0002-cmake-min-required.patch"
+    - patch_file: "patches/3.4-0002-cmake-min-required.patch"
     - patch_file: "patches/3.4-0001-numa.patch"
   "3.2.1":
     - patch_file: "patches/3.2.1-0001-remove_register_classifier.patch"

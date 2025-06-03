@@ -2,6 +2,8 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.scm import Version
+from conan.errors import ConanException
 import os
 
 required_conan_version = ">=1.53.0"
@@ -51,6 +53,9 @@ class BaicalP7Conan(ConanFile):
         tc.variables["P7_TESTS_BUILD"] = False
         tc.cache_variables["P7_BUILD_SHARED"] = self.options.shared
         tc.variables["P7_EXAMPLES_BUILD"] = False
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "5.6": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
     def build(self):

@@ -22,18 +22,23 @@ class CpphttplibConan(ConanFile):
         "with_zlib": [True, False],
         "with_brotli": [True, False],
         "use_macos_keychain_certs": [True, False],
+        "with_zstd": [True, False],
     }
     default_options = {
         "with_openssl": False,
         "with_zlib": False,
         "with_brotli": False,
         "use_macos_keychain_certs": True,
+        "with_zstd": False,
     }
     no_copy_source = True
 
     def config_options(self):
         if self.settings.os != "Macos":
             del self.options.use_macos_keychain_certs
+
+        if Version(self.version) < "0.20":
+            del self.options.with_zstd
 
     def requirements(self):
         if self.options.with_openssl:
@@ -46,6 +51,8 @@ class CpphttplibConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_brotli:
             self.requires("brotli/1.1.0")
+        if self.options.get_safe("with_zstd"):
+            self.requires("zstd/[>=1.5 <1.6]")
 
     def package_id(self):
         self.info.clear()
@@ -75,6 +82,8 @@ class CpphttplibConan(ConanFile):
             self.cpp_info.defines.append("CPPHTTPLIB_ZLIB_SUPPORT")
         if self.options.with_brotli:
             self.cpp_info.defines.append("CPPHTTPLIB_BROTLI_SUPPORT")
+        if self.options.get_safe("with_zstd"):
+            self.cpp_info.defines.append("CPPHTTPLIB_ZSTD_SUPPORT")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":

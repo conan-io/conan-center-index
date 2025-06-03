@@ -1,0 +1,9 @@
+sources:
+  "5.4.11":
+    url: "https://github.com/VectorCamp/vectorscan/archive/refs/tags/vectorscan/5.4.11.tar.gz"
+    sha256: "905f76ad1fa9e4ae0eb28232cac98afdb96c479666202c5a4c27871fb30a2711"
+patches:
+  "5.4.11":
+    - patch_file: "patches/5.4.11-0001-fix-cmake.patch"
+      patch_description: "modify cmake files to build with conan"
+      patch_type: "conan"

@@ -1,19 +1,19 @@
 sources:
+  "0.21.2":
+    url: "https://github.com/aous72/OpenJPH/archive/0.21.2.tar.gz"
+    sha256: "5c25f5fe820ccb4fee3b7a0d3246bf836508e313708f0b57f3654dbe8b0c4a01"
   "0.18.0":
     url: "https://github.com/aous72/OpenJPH/archive/0.18.0.tar.gz"
     sha256: "2484908bf5a171cda957643d9bc85c39d58ef939016e2d1a00122b1cefbbd4f8"
-  "0.17.0":
-    url: "https://github.com/aous72/OpenJPH/archive/0.17.0.tar.gz"
-    sha256: "9cd09a5f3a8046b10bded787212afd2410836f9c266964a36f61dc4b63f99b6c"
   "0.16.0":
     url: "https://github.com/aous72/OpenJPH/archive/0.16.0.tar.gz"
     sha256: "94bea4d7057f7a5dcb3f8eee3f854955ce153d98dad99602dd0ba50a560d7cf6"
 patches:
-  "0.18.0":
-    - patch_file: "patches/0.15.0_cmake-cxx-standard.patch"
+  "0.21.2":
+    - patch_file: "patches/0.21.2_cmake-cxx-standard.patch"
       patch_description: "Remove setting of CXX standard to a fixed value overriding the toolchain provided by Conan"
       patch_type: "conan"
-  "0.17.0":
+  "0.18.0":
     - patch_file: "patches/0.15.0_cmake-cxx-standard.patch"
       patch_description: "Remove setting of CXX standard to a fixed value overriding the toolchain provided by Conan"
       patch_type: "conan"

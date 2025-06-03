@@ -1,4 +1,7 @@
 sources:
+  "7.1.1":
+    url: "https://ffmpeg.org//releases/ffmpeg-7.1.1.tar.bz2"
+    sha256: "0c8da2f11579a01e014fc007cbacf5bb4da1d06afd0b43c7f8097ec7c0f143ba"
   "7.0.1":
     url: "https://ffmpeg.org//releases/ffmpeg-7.0.1.tar.bz2"
     sha256: "5e77e84b6434d656106fafe3bceccc77176449014f3eba24d33db3fbd0939dc9"

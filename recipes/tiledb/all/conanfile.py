@@ -157,7 +157,8 @@ class TileDBConan(ConanFile):
             self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        strip_root = Version(self.version) < "2.28.0"
+        get(self, **self.conan_data["sources"][self.version], strip_root=strip_root)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -216,7 +217,7 @@ class TileDBConan(ConanFile):
             "libwebp::webpmux": "WebP::libwebpmux",
             "lz4": "LZ4::LZ4",
             "zlib": "ZLIB::ZLIB",
-            "zstd": "Zstd::Zstd",
+            "zstd": "Zstd::Zstd" if Version(self.version) < "2.28.0" else "zstd::libzstd",
         }
         for component, new_target_name in renamed_targets.items():
             deps.set_property(component, "cmake_target_name", new_target_name)

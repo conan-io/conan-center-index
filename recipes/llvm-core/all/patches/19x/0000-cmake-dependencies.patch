@@ -1,0 +1,93 @@
+diff --git a/cmake/config-ix.cmake b/cmake/config-ix.cmake
+index 0aae13e30f2a..c87f22d28dc6 100644
+--- a/cmake/config-ix.cmake
++++ b/cmake/config-ix.cmake
+@@ -137,7 +137,7 @@ if(LLVM_ENABLE_ZLIB)
+     # library on a 64-bit system which would result in a link-time failure.
+     cmake_push_check_state()
+     list(APPEND CMAKE_REQUIRED_INCLUDES ${ZLIB_INCLUDE_DIRS})
+-    list(APPEND CMAKE_REQUIRED_LIBRARIES ${ZLIB_LIBRARY})
++    list(APPEND CMAKE_REQUIRED_LIBRARIES ${ZLIB_LIBRARIES})
+     check_symbol_exists(compress2 zlib.h HAVE_ZLIB)
+     cmake_pop_check_state()
+     if(LLVM_ENABLE_ZLIB STREQUAL FORCE_ON AND NOT HAVE_ZLIB)
+@@ -232,11 +232,11 @@ if(NOT LLVM_USE_SANITIZER MATCHES "Memory.*")
+     # Skip libedit if using ASan as it contains memory leaks.
+     if (LLVM_ENABLE_LIBEDIT AND NOT LLVM_USE_SANITIZER MATCHES ".*Address.*")
+       if(LLVM_ENABLE_LIBEDIT STREQUAL FORCE_ON)
+-        find_package(LibEdit REQUIRED)
++        find_package(editline REQUIRED)
+       else()
+-        find_package(LibEdit)
++        find_package(editline)
+       endif()
+-      set(HAVE_LIBEDIT "${LibEdit_FOUND}")
++      set(HAVE_LIBEDIT "${editline_FOUND}")
+     else()
+       set(HAVE_LIBEDIT 0)
+     endif()
+diff --git a/lib/LineEditor/CMakeLists.txt b/lib/LineEditor/CMakeLists.txt
+index c4cd91cbb0cd..b95d073d9725 100644
+--- a/lib/LineEditor/CMakeLists.txt
++++ b/lib/LineEditor/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ if(HAVE_LIBEDIT)
+-  set(link_libs LibEdit::LibEdit)
++  set(link_libs editline::editline)
+ endif()
+ 
+ add_llvm_component_library(LLVMLineEditor
+diff --git a/lib/Support/CMakeLists.txt b/lib/Support/CMakeLists.txt
+index f653379e3033..4cb691de3027 100644
+--- a/lib/Support/CMakeLists.txt
++++ b/lib/Support/CMakeLists.txt
+@@ -301,27 +301,13 @@ set(llvm_system_libs ${system_libs})
+ # This block is only needed for llvm-config. When we deprecate llvm-config and
+ # move to using CMake export, this block can be removed.
+ if(LLVM_ENABLE_ZLIB)
+-  # CMAKE_BUILD_TYPE is only meaningful to single-configuration generators.
+-  if(CMAKE_BUILD_TYPE)
+-    string(TOUPPER ${CMAKE_BUILD_TYPE} build_type)
+-    get_property(zlib_library TARGET ZLIB::ZLIB PROPERTY LOCATION_${build_type})
+-  endif()
+-  if(NOT zlib_library)
+-    get_property(zlib_library TARGET ZLIB::ZLIB PROPERTY LOCATION)
+-  endif()
++  set(zlib_library ${ZLIB_LIBRARIES})
+   get_library_name(${zlib_library} zlib_library)
+   set(llvm_system_libs ${llvm_system_libs} "${zlib_library}")
+ endif()
+ 
+ if(LLVM_ENABLE_ZSTD)
+-  # CMAKE_BUILD_TYPE is only meaningful to single-configuration generators.
+-  if(CMAKE_BUILD_TYPE)
+-    string(TOUPPER ${CMAKE_BUILD_TYPE} build_type)
+-    get_property(zstd_library TARGET ${zstd_target} PROPERTY LOCATION_${build_type})
+-  endif()
+-  if(NOT zstd_library)
+-    get_property(zstd_library TARGET ${zstd_target} PROPERTY LOCATION)
+-  endif()
++  set(zstd_library ${zstd_LIBRARIES})
+   if (zstd_target STREQUAL zstd::libzstd_shared)
+     get_library_name(${zstd_library} zstd_library)
+     set(llvm_system_libs ${llvm_system_libs} "${zstd_library}")
+diff --git a/lib/WindowsManifest/CMakeLists.txt b/lib/WindowsManifest/CMakeLists.txt
+index 910132a4c7de..f4d91c9d56da 100644
+--- a/lib/WindowsManifest/CMakeLists.txt
++++ b/lib/WindowsManifest/CMakeLists.txt
+@@ -21,14 +21,7 @@ add_llvm_component_library(LLVMWindowsManifest
+ # This block is only needed for llvm-config. When we deprecate llvm-config and
+ # move to using CMake export, this block can be removed.
+ if(LLVM_ENABLE_LIBXML2)
+-  # CMAKE_BUILD_TYPE is only meaningful to single-configuration generators.
+-  if(CMAKE_BUILD_TYPE)
+-    string(TOUPPER ${CMAKE_BUILD_TYPE} build_type)
+-    get_property(libxml2_library TARGET LibXml2::LibXml2 PROPERTY LOCATION_${build_type})
+-  endif()
+-  if(NOT libxml2_library)
+-    get_property(libxml2_library TARGET LibXml2::LibXml2 PROPERTY LOCATION)
+-  endif()
++  set(libxml2_library ${libxml2_LIBRARIES})
+   get_library_name(${libxml2_library} libxml2_library)
+   set_property(TARGET LLVMWindowsManifest PROPERTY LLVM_SYSTEM_LIBS ${libxml2_library})
+ endif()

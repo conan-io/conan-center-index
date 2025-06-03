@@ -111,6 +111,8 @@ class CBlosc2Conan(ConanFile):
         tc.cache_variables["BUILD_PLUGINS"] = bool(self.options.with_plugins)
         if self.options.with_zlib == "zlib-ng-compat":
             tc.preprocessor_definitions["ZLIB_COMPAT"] = "1"
+        if Version(self.version) >= "2.15.2":
+            tc.cache_variables["WITH_ZLIB_OPTIM"] = self.settings.arch != "wasm"
         tc.generate()
 
         deps = CMakeDeps(self)

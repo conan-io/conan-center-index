@@ -14,6 +14,7 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        self.requires("sqlite3/[*]") #the upstream headers dont include sqlite3.h, so consumer has to
 
     def build(self):
         cmake = CMake(self)

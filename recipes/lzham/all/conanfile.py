@@ -15,7 +15,7 @@ from conan.tools.microsoft import (
     MSBuild, MSBuildDeps, MSBuildToolchain, VCVars, is_msvc, vs_layout
 )
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.1"
 
 SLN_FILE = "lzham.sln"
 
@@ -106,6 +106,7 @@ class PackageConan(ConanFile):
 
             # Build relocatable shared libraries on Apple OSs
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
             tc.generate()
 
     def build(self):
@@ -183,9 +184,3 @@ class PackageConan(ConanFile):
             self.cpp_info.set_property("cmake_file_name", "lzham")
             self.cpp_info.set_property("cmake_target_name", "lzham::lzham")
             self.cpp_info.set_property("pkg_config_name", "lzham")
-
-            # TODO: to remove in conan v2 once cmake_find_package_* generators
-            # removed
-            self.cpp_info.names["cmake_find_package"] = "lzham"
-            self.cpp_info.names["cmake_find_package_multi"] = "lzham"
-            self.cpp_info.names["pkg_config"] = "lzham"

@@ -47,8 +47,13 @@ class JSONCConan(ConanFile):
         if Version(self.version) >= "0.15":
             tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
             tc.variables["DISABLE_STATIC_FPIC"] = not self.options.get_safe("fPIC", True)
-        # To install relocatable shared libs on Macos
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.cache_variables["BUILD_TESTING"] = False
+        if Version(self.version) < "0.17":
+            # To install relocatable shared libs on Macos
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        else:
+            tc.cache_variables["BUILD_APPS"] = False
         tc.generate()
 
     def build(self):
@@ -71,5 +76,5 @@ class JSONCConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "json-c")
         self.cpp_info.includedirs = ["include", os.path.join("include", "json-c")]
 
-        if Version(self.version) >= "0.17" and self.settings.os in ["Linux", "FreeBSD"]:
+        if Version(self.version) >= "0.17" and self.settings.os in ["Linux", "FreeBSD", "Neutrino"]:
             self.cpp_info.system_libs.extend(["m",])

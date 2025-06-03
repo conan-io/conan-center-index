@@ -6,7 +6,7 @@ from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 
 class NiftiClibConan(ConanFile):
@@ -32,10 +32,8 @@ class NiftiClibConan(ConanFile):
         "use_cifti": False,  # seems to be beta?
         "use_fslio": False  # Note in CMakeLists.txt: "If OFF, The copyright of this code is questionable for inclusion with nifti."
     }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    implements = ["auto_shared_fpic"]
+    languages = ["C"]
 
     def validate(self):
         if is_msvc(self) and self.options.shared:
@@ -43,12 +41,6 @@ class NiftiClibConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support -o {self.ref}:shared=True with MSVC compiler.")
         if not self.options.use_nifti2 and self.options.use_cifti:
             raise ConanInvalidConfiguration(f"{self.ref} -o '&:use_cifti=True' requires -o '&:use_nifti2=True'")
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -72,8 +64,8 @@ class NiftiClibConan(ConanFile):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
             tc.preprocessor_definitions["_CRT_SECURE_NO_WARNINGS"] = 1
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -102,18 +94,17 @@ class NiftiClibConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             sys_libs += ["m"]
 
-        self.cpp_info.required_components = ["ZLIB::ZLIB"]
-        if self.options.use_cifti:
-            self.cpp_info.required_components += ["EXPAT::EXPAT"]
-
         self.cpp_info.components["znz"].libs = ["znz"]
         self.cpp_info.components["znz"].set_property("pkg_config_name", "znz")
         self.cpp_info.components["znz"].set_property("cmake_target_name", "NIFTI::znz")
         self.cpp_info.components["znz"].includedirs += [os.path.join("include", "nifti")]
         self.cpp_info.components["znz"].system_libs += sys_libs
+        self.cpp_info.components["znz"].requires = ["zlib::zlib"]
+        self.cpp_info.components["znz"].defines = ["HAVE_ZLIB"]
 
         # inside the niftilib folder
         self.cpp_info.components["niftiio"].libs = ["niftiio"]
+        self.cpp_info.components["niftiio"].requires = ["znz"]
         self.cpp_info.components["niftiio"].set_property("pkg_config_name", "niftiio")
         self.cpp_info.components["niftiio"].set_property("cmake_target_name", "NIFTI::niftiio")
         self.cpp_info.components["niftiio"].includedirs += [os.path.join("include", "nifti")]
@@ -136,7 +127,7 @@ class NiftiClibConan(ConanFile):
 
         if self.options.use_cifti:
             self.cpp_info.components["cifti"].libs = ["cifti"]
-            self.cpp_info.components["cifti"].requires = ["nifti2"]
+            self.cpp_info.components["cifti"].requires = ["nifti2", "expat::expat"]
             self.cpp_info.components["cifti"].set_property("pkg_config_name", "cifti")
             self.cpp_info.components["cifti"].set_property("cmake_target_name", "NIFTI::cifti")
             self.cpp_info.components["cifti"].includedirs += [os.path.join("include", "nifti")]
@@ -144,7 +135,7 @@ class NiftiClibConan(ConanFile):
 
         if self.options.use_fslio:
             self.cpp_info.components["fslio"].libs = ["fslio"]
-            self.cpp_info.components["fslio"].requires = ["nifti2"]
+            self.cpp_info.components["fslio"].requires = ["niftiio"]
             self.cpp_info.components["fslio"].set_property("pkg_config_name", "fslio")
             self.cpp_info.components["fslio"].set_property("cmake_target_name", "NIFTI::fslio")
             self.cpp_info.components["fslio"].includedirs += [os.path.join("include", "nifti")]
