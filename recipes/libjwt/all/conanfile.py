@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, replace_in_file
+from conan.tools.files import copy, get, replace_in_file, rmdir
 import os
 
 required_conan_version = ">=2.1"
@@ -31,12 +31,12 @@ class libjwtRecipe(ConanFile):
         self.requires("jansson/[>=2 <3]")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["USE_INSTALLED_JANSSON"] = True
-        tc.cache_variables["ENABLE_PIC"] = False # let Conan it via the toolchain
+        tc.cache_variables["ENABLE_PIC"] = False # let Conan handle it via the toolchain
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.generate()
 
@@ -52,6 +52,9 @@ class libjwtRecipe(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+
+        copy(self, "LICENSE", self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "libjwt")) # cmake configs
 
     def package_info(self):
         self.cpp_info.libs = ["jwt"]
