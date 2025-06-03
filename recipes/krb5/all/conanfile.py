@@ -1,15 +1,19 @@
+import os
+
 from conan import ConanFile
-from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches, chdir
+from conan.tools import files
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
-import os
+from conan.tools.scm import Version
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+
 
 required_conan_version = ">=1.54.0"
 
+# Based on https://github.com/madebr/conan-center-index/tree/recipes_wip/recipes/krb5/all
 class Krb5Conan(ConanFile):
     name = "krb5"
     description = "Kerberos is a network authentication protocol. It is designed to provide strong authentication " \
@@ -18,62 +22,69 @@ class Krb5Conan(ConanFile):
     topics = ("kerberos", "network", "authentication", "protocol", "client", "server", "cryptography")
     license = "LicenseRef-NOTICE"
     url = "https://github.com/conan-io/conan-center-index"
-    package_type = "shared-library"
+
     options = {
-        "use_thread": [True, False],
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "thread": [True, False],
         "use_dns_realms": [True, False],
         "with_tls": [False, "openssl"],
     }
+
     default_options = {
-        "use_thread": True,
+        "shared": False,
+        "fPIC": True,
+        "thread": True,
         "use_dns_realms": False,
-        "with_tls": "openssl"
+        "with_tls": "openssl",
     }
-    options_description = {
-        "use_thread": "Enable thread support",
-        "use_dns_realms": "Enable DNS for realms",
-        "with_tls": "Enable TLS support with OpenSSL",
-    }
+
     settings = "os", "arch", "compiler", "build_type"
 
-    def export_sources(self):
-        export_conandata_patches(self)
+    def requirements(self):
+        self.requires("libverto/0.3.2")
+        if self.options.get_safe("with_tls") == "openssl":
+            self.requires("openssl/1.1.1w")
+        if self.options.get_safe("with_tcl"):
+            self.requires("tcl/8.6.10")
+
 
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration(f"{self.ref} Conan recipe is not prepared for Windows yet. Contributions are welcome!")
+
+
+    def source(self):
+        files.get(self, **self.conan_data["sources"][self.version],
+            destination=self.folders.base_source, strip_root=True)
+
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def validate(self):
-        if is_msvc(self):
-            raise ConanInvalidConfiguration(f"{self.ref} Conan recipe is not prepared for Windows yet. Contributions are welcome!")
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration(f"{self.ref} Conan recipe is not prepared for Macos yet. Contributions are welcome!")
-        if self.options.with_tls == "openssl" and not self.dependencies["openssl"].options.shared:
-            # k5tls does not respect linkage order, it passes krb5 and krb5support before openssl to the linker, which causes linking errors
-            # gcc -shared -fPIC -Wl,-h,k5tls.so.0 -Wl,--no-undefined -o k5tls.so openssl.so notls.so -L../../../lib -lkrb5 -lkrb5support ...
-            # /usr/bin/ld: /.../lib/libssl.a(libssl-lib-ssl_cert_comp.o): in function `OSSL_COMP_CERT_from_uncompressed_data':
-            #     ssl_cert_comp.c:(.text+0x3d1): undefined reference to `COMP_CTX_free'
-            raise ConanInvalidConfiguration(f"{self.ref} building with static OpenSSL generates linking errors. Please use '-o openssl/*:shared=True'")
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
-
-        tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
+        tc = AutotoolsToolchain(self)
+
+        # fix compiling error
+        if self.settings.compiler == 'gcc' and Version(self.settings.compiler.version) >= "10" or self.settings.compiler == 'clang':
+            tc.extra_cflags.append('-fcommon')
+
         tls_impl = {"openssl": "openssl",}.get(str(self.options.get_safe('with_tls')))
+
         tc.configure_args.extend([
+            f"--enable-shared={yes_no(self.options.shared)}",
+            f"--enable-static={yes_no(not self.options.shared)}",
             f"--enable-thread-support={yes_no(self.options.get_safe('use_thread'))}",
             f"--enable-dns-for-realm={yes_no(self.options.use_dns_realms)}",
             f"--enable-pkinit={yes_no(self.options.get_safe('with_tls'))}",
@@ -84,11 +95,11 @@ class Krb5Conan(ConanFile):
             "--disable-rpath",
             "--without-libedit",
             "--without-readline",
-            "--with-system-verto",
+            "--without-system-verto",
             "--enable-dns-for-realm",
             f"--with-keyutils={self.package_folder}",
             f"--with-tcl={(self.dependencies['tcl'].package_folder if self.options.get_safe('with_tcl') else 'no')}",
-            ])
+        ])
         tc.generate()
 
         pkg = AutotoolsDeps(self)
@@ -96,39 +107,41 @@ class Krb5Conan(ConanFile):
         pkg = PkgConfigDeps(self)
         pkg.generate()
 
-    def requirements(self):
-        self.requires("libverto/0.3.2")
-        if self.options.get_safe("with_tls") == "openssl":
-            self.requires("openssl/[>=1.1 <4]")
-        if self.options.get_safe("with_tcl"):
-            self.requires("tcl/8.6.11")
-
-    def build_requirements(self):
-        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
-        self.build_requires("automake/1.16.5")
-        self.build_requires("bison/3.8.2")
 
     def build(self):
-        apply_conandata_patches(self)
-        with chdir(self, os.path.join(self.source_folder, "src")):
-            self.run("autoreconf -vif")
         autotools = Autotools(self)
-        autotools.configure(build_script_folder=os.path.join(self.source_folder, "src"))
+        autotools.autoreconf()
+        autotools.configure()
         autotools.make()
 
+
+    def build_requirements(self):
+        if self.settings.compiler != "msvc":
+            self.build_requires("automake/1.16.4")
+            self.build_requires("bison/3.7.6")
+            self.build_requires("pkgconf/1.7.4")
+
+
     def package(self):
-        copy(self, "NOTICE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        files.copy(self, "NOTICE", src=self.source_folder, dst=os.path.join(self.package_folder,"licenses"))
         autotools = Autotools(self)
         autotools.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "var"))
+        fix_apple_shared_install_name(self)
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rmdir(self, os.path.join(self.package_folder, "share"))
+        files.rmdir(self, os.path.join(self.package_folder, "var"))
+
 
     def package_info(self):
-        self.cpp_info.components["mit-krb5"].libs = ["krb5", "k5crypto", "com_err"]
+        self.cpp_info.set_property("cmake_file_name", "krb5")
+        self.cpp_info.set_property("cmake_target_name", "krb5::krb5")
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("pkg_config_name", "krb5")
+
+        # krb5::libkrb5
+        self.cpp_info.components["mit-krb5"].libs = ["krb5", "k5crypto", "krb5support", "com_err"]
         if self.options.get_safe('with_tls') == "openssl":
-            self.cpp_info.components["mit-krb5"].requires = ["openssl::crypto"]
+            self.cpp_info.components["mit-krb5"].requires = [ "openssl::crypto"]
         self.cpp_info.components["mit-krb5"].names["pkg_config"] = "mit-krb5"
         if self.settings.os == "Linux":
             self.cpp_info.components["mit-krb5"].system_libs = ["resolv"]
@@ -136,33 +149,40 @@ class Krb5Conan(ConanFile):
         self.cpp_info.components["libkrb5"].libs = []
         self.cpp_info.components["libkrb5"].requires = ["mit-krb5"]
         self.cpp_info.components["libkrb5"].names["pkg_config"] = "krb5"
+        self.cpp_info.components["libkrb5"].set_property("cmake_target_name", "krb5::libkrb5")
 
+        # krb5-gssapi:
         self.cpp_info.components["mit-krb5-gssapi"].libs = ["gssapi_krb5"]
         self.cpp_info.components["mit-krb5-gssapi"].requires = ["mit-krb5"]
         self.cpp_info.components["mit-krb5-gssapi"].names["pkg_config"] = "mit-krb5-gssapi"
-
         self.cpp_info.components["krb5-gssapi"].libs = []
         self.cpp_info.components["krb5-gssapi"].requires = ["mit-krb5-gssapi"]
         self.cpp_info.components["krb5-gssapi"].names["pkg_config"] = "krb5-gssapi"
+        self.cpp_info.components["krb5-gssapi"].set_property("cmake_target_name", "krb5::krb5-gssapi")
 
-        self.cpp_info.components["gssrpc"].libs = ["gssrpc"]
-        self.cpp_info.components["gssrpc"].requires = ["mit-krb5-gssapi"]
-        self.cpp_info.components["gssrpc"].names["pkg_config"] = "gssrpc"
+        # krb5-gssrpc
+        self.cpp_info.components["krb5-gssrpc"].libs = ["gssrpc"]
+        self.cpp_info.components["krb5-gssrpc"].requires = ["krb5-gssapi"]
+        self.cpp_info.components["krb5-gssrpc"].set_property("cmake_target_name", "krb5::krb5-gssrpc")
 
+        # kadm-client
         self.cpp_info.components["kadm-client"].libs = ["kadm5clnt_mit"]
-        self.cpp_info.components["kadm-client"].requires = ["mit-krb5-gssapi", "gssrpc"]
-        self.cpp_info.components["kadm-client"].names["pkg_config"] = "kadm-client"
+        self.cpp_info.components["kadm-client"].requires = ["krb5-gssapi", "krb5-gssrpc"]
+        self.cpp_info.components["kadm-client"].set_property("cmake_target_name", "krb5::kadm-client")
 
+        # kdb5
         self.cpp_info.components["kdb"].libs = ["kdb5"]
-        self.cpp_info.components["kdb"].requires = ["mit-krb5-gssapi", "mit-krb5", "gssrpc"]
-        self.cpp_info.components["kdb"].names["pkg_config"] = "kdb-client"
+        self.cpp_info.components["kdb"].requires = ["libkrb5", "krb5-gssapi", "krb5-gssrpc"]
+        self.cpp_info.components["kdb"].set_property("cmake_target_name", "krb5::kdb")
 
+        # kadm-client
         self.cpp_info.components["kadm-server"].libs = ["kadm5srv_mit"]
-        self.cpp_info.components["kadm-server"].requires = ["kdb", "mit-krb5-gssapi"]
-        self.cpp_info.components["kadm-server"].names["pkg_config"] = "kadm-server"
+        self.cpp_info.components["kadm-server"].requires = ["kdb", "krb5-gssapi"]
+        self.cpp_info.components["kdb"].set_property("cmake_target_name", "krb5::kadm-server")
 
         self.cpp_info.components["krad"].libs = ["krad"]
         self.cpp_info.components["krad"].requires = ["libkrb5", "libverto::libverto"]
+        self.cpp_info.components["krad"].set_property("cmake_target_name", "krb5::krad")
 
         krb5_config = os.path.join(self.package_folder, "bin", "krb5-config").replace("\\", "/")
         self.output.info("Appending KRB5_CONFIG environment variable: {}".format(krb5_config))
