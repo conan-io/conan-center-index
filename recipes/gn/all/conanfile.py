@@ -4,7 +4,7 @@ import textwrap
 
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import chdir, copy, get, load, save, replace_in_file
+from conan.tools.files import chdir, copy, get, load, save, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars
@@ -29,6 +29,9 @@ class GnConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
 
+    def export_sources(self):
+        export_conandata_patches(self)
+    
     def validate_build(self):
         min_cppstd = 17 if self.version == "cci.20210429" else 20
         check_min_cppstd(self, min_cppstd)
@@ -70,7 +73,11 @@ class GnConan(ConanFile):
             configure_args.append("-d")
         save(self, os.path.join(self.source_folder, "configure_args"), " ".join(configure_args))
 
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
     def build(self):
+        self._patch_sources()
         with chdir(self, self.source_folder):
             # Generate dummy header to be able to run `build/gen.py` with `--no-last-commit-position`.
             # This allows running the script without the tree having to be a git checkout.
