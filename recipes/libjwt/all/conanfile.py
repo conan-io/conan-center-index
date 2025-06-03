@@ -1,73 +1,48 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get
-from conan.tools.system import package_manager
-from conan.tools.scm import Version
+from conan.tools.files import get, replace_in_file
+import os
 
-
+required_conan_version = ">=2.1"
 class libjwtRecipe(ConanFile):
     name = "libjwt"
     package_type = "library"
-
-    # Optional metadata
-    license = "Mozilla Public License Version 2.0"
-    author = "Ben Collins"
-    url = "https://github.com/benmcollins/libjwt"
+    license = "MPL-2.0"
+    homepage = "https://github.com/benmcollins/libjwt"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "The C JSON Web Token Library +JWK +JWKS"
     topics = ("json", "jwt", "jwt-token")
 
-    # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    implements = ["auto_shared_fpic"]
+
     def source(self):
         get(self, self.conan_data["sources"][self.version]["url"], strip_root=True)
+        replace_in_file(
+            self, os.path.join(self.source_folder, "libjwt", "CMakeLists.txt"),
+            "PKG_SEARCH_MODULE( JANSSON jansson )",
+            "find_package(jansson REQUIRED CONFIG)")
 
     def requirements(self):
-        self.requires("openssl/3.3.2")
-        self.requires("jansson/2.14")
-
-    def system_requirements(self):
-        apt = package_manager.Apt(self)
-        apt.install(["libjansson-dev"], update=True, check=True)
-        
-        yum = package_manager.Yum(self)
-        yum.install(["jansson-devel"], update=True, check=True)
-
-        dnf = package_manager.Dnf(self)
-        dnf.install(["jansson-devel"], update=True, check=True)
-
-        zypper = package_manager.Zypper(self)
-        zypper.install(["libjansson-devel"], update=True, check=True)
-
-        pacman = package_manager.PacMan(self)
-        pacman.install(["jansson"], update=True, check=True)
-
-        pkg = package_manager.Pkg(self)
-        pkg.install(["jansson"], update=True, check=True)
-        
-        if Version(conan_version) >= "2.0.10":
-            alpine = package_manager.Apk(self)
-            alpine.install(["jansson"], update=True, check=True)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+        self.requires("openssl/[>=3 <4]")
+        self.requires("jansson/[>=2 <3]")
 
     def layout(self):
         cmake_layout(self)
 
     def generate(self):
-        cmakeDeps = CMakeDeps(self)
-        cmakeDeps.generate()
-
         tc = CMakeToolchain(self)
+        tc.cache_variables["USE_INSTALLED_JANSSON"] = True
+        tc.cache_variables["ENABLE_PIC"] = False # let Conan it via the toolchain
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.generate()
+
+        cmakeDeps = CMakeDeps(self)
+        cmakeDeps.set_property("jansson", "cmake_target_name", "jansson")
+        cmakeDeps.generate()
 
     def build(self):
         cmake = CMake(self)
