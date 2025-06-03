@@ -70,7 +70,7 @@ class LibsndfileConan(ConanFile):
         if self.options.with_sndio:
             self.requires("libsndio/1.9.0", options={"with_alsa": self.options.get_safe("with_alsa")})
         if self.options.get_safe("with_alsa"):
-            self.requires("libalsa/1.2.10")
+            self.requires("libalsa/[>=1.2 <1.3]")
         if self.options.with_external_libs:
             self.requires("ogg/1.3.5")
             self.requires("vorbis/1.3.7")
@@ -108,6 +108,8 @@ class LibsndfileConan(ConanFile):
             tc.variables["ENABLE_MPEG"] = self.options.with_mpeg
         # Fix iOS/tvOS/watchOS
         tc.variables["CMAKE_MACOSX_BUNDLE"] = False
+        if Version(self.version) <= "1.2.2":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
