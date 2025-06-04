@@ -1615,10 +1615,8 @@ class BoostConan(ConanFile):
         # clang          | 12               | Macos       | clang-darwin12 |
         # gcc            | 11               | Linux       | gcc8           |
         # gcc            | 8                | Windows     | mgw8           |
-        # Visual Studio  | 17               | Windows     | vc142          | depends on compiler.toolset
         compiler = {
             "apple-clang": "",
-            "Visual Studio": "vc",
             "msvc": "vc",
         }.get(str(self.settings.compiler), str(self.settings.compiler))
         if (self.settings.compiler, self.settings.os) == ("gcc", "Windows"):
