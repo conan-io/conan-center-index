@@ -42,6 +42,9 @@ class PackageConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "set(CMAKE_CXX_STANDARD 20)", "")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.20 <4]")
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.generate()
