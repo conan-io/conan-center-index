@@ -150,7 +150,6 @@ class BoostConan(ConanFile):
     default_options.update({f"without_{_name}": False for _name in CONFIGURE_OPTIONS})
     default_options.update({f"without_{_name}": True for _name in ("graph_parallel", "mpi", "python")})
 
-    short_paths = True
     no_copy_source = True
     _cached_dependencies = None
 
