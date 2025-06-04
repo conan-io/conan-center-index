@@ -38,21 +38,50 @@ of those features (feedback about them is very important to Conan).
 
 ## Expected Environment
 
-When consuming pre-built Conan packages from Conan Center, in most cases you only need the [Conan client](https://docs.conan.io/2/installation.html) installed on your system.
+If you are installing packages and we host binary packages for your requested configuration, in most cases you will only need the [Conan client](https://docs.conan.io/2/installation.html) installed on your system.
 
-However, when building packages from source, for instance, when using `--build=missing`, additional tools and dependencies may be required. These vary depending on the package but typically include a compiler toolchain, CMake, and other build utilities.
+However, if the packages need to be built from source, for instance, when using `--build=missing` or `conan create`, additional tools and dependencies are required. These vary depending on the package but typically include a compiler toolchain, CMake, and other build utilities.
 
 Conan Center Index recipes assume the following components are already installed in your system:
 
-| Requirement | Linux | Windows | macOS |
-|-------------|-------|---------|-------|
-| **Conan client 2.x** | [Install the Conan client](https://docs.conan.io/2/installation.html) and keep it updated | [Install the Conan client](https://docs.conan.io/2/installation.html) | [Install the Conan client](https://docs.conan.io/2/installation.html) |
-| **CMake** | Version 3.15 or higher. In case not present in the system, it can be installed as [tool_requires](https://docs.conan.io/2/reference/conanfile/methods/build_requirements.html#tool-requires) | Version 3.15 or higher | Version 3.15 or higher |
-| **Compiler toolchain** | Complete compiler suite with helper executables (e.g., `strip`, `ar`) <br> Install via `build-essential` on Debian-based distros | Visual Studio with C++ development components <br> Required: MSVC, Windows SDK, C++ CMake tools | Xcode or Command Line Tools <br> Install via App Store or `xcode-select --install` |
-| **Build tools** | GNU make, Perl, Python (for specific recipes) | Perl, Python (for specific recipes) | GNU make, Perl, Python (for specific recipes) |
-| **System integration** | pkg-config (define `tools.gnu:pkg_config` in your profile) | Not typically required | pkg-config (install via Homebrew: `brew install pkg-config`) |
+<table><thead>
+  <tr>
+    <th>Requirement</th>
+    <th>Linux</th>
+    <th>Windows</th>
+    <th>macOS</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td>Conan 2.x client</td>
+    <td colspan="3">See <a href="https://docs.conan.io/2/installation.html">installation instructions</a></td>
+  </tr>
+  <tr>
+    <td>CMake 3.15 or higher</td>
+    <td colspan="3">Linux: check your system package manager (recommended)<br>All platforms: consider installing directly from (<a href="https://cmake.org/download/">CMake downloads</a>)<br><br>Alternatively: you can add it as a `tool_requires` in your profile (Conan <a href="https://docs.conan.io/2/reference/config_files/profiles.html#tool-requires">docs</a>)</td>
+  </tr>
+  <tr>
+    <td>Compiler toolchain</td>
+    <td>Complete compiler suite with helper executables (e.g. `strip`, `ar`)<br><br>Install via `build-essential` (Debian-based distros) or equivalent</td>
+    <td>Visual Studio with C++ development components<br>Required: MSVC, Windows SDK, C++ CMake TOols</td>
+    <td>Xcode or Command Line Tools<br>Install via macOS App Store<br>or run the `xcode-select --install` command</td>
+  </tr>
+  <tr>
+    <td>Build tools</td>
+    <td>GNU Make, Perl (typically covered by `build-essential`)<br><br>Python (only required by some recipes)</td>
+    <td>Python (only required by some recipes)<br><a href="https://www.python.org/downloads/windows/">installation instructions</a><br><br>Alternatively, it's possible to install it via the Visual Studio installer</td>
+    <td>GNU make, Perl, Python<br>Usually these do not require a separate installation if Xcode/CLT are installed. </td>
+  </tr>
+  <tr>
+    <td>pkg-config</td>
+    <td>Please install via system package manager<br>and define `tools.gnu:pkg_config` in the `[conf]` section of your profile</span></td>
+    <td>(not required)</td>
+    <td>(not required)</td>
+  </tr>
+</tbody></table>
 
-> **Note**: Using a dedicated Python virtual environment is highly recommended to avoid conflicts with other Python packages.
+> **Note**: Using a dedicated Python virtual environment for Conan is highly recommended to avoid conflicts with other Python packages.
+
 
 ## Isolate your project from upstream changes
 
