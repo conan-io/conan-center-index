@@ -97,7 +97,7 @@ class BoostConan(ConanFile):
         "lzma": [True, False],
         "zstd": [True, False],
         "segmented_stacks": [True, False],
-        "debug_level": list(range(0, 14)),
+        "debug_level": list(range(0, 14)) + ["deprecated"],
         "pch": [True, False],
         "extra_b2_flags": [None, "ANY"],  # custom b2 flags
         "i18n_backend": ["iconv", "icu", None, "deprecated"],
@@ -136,7 +136,7 @@ class BoostConan(ConanFile):
         "lzma": False,
         "zstd": False,
         "segmented_stacks": False,
-        "debug_level": 0,
+        "debug_level": "deprecated",  # deprecated, use Conan conf tools.build:verbosity
         "pch": True,
         "extra_b2_flags": None,
         "i18n_backend": "deprecated",
@@ -665,11 +665,6 @@ class BoostConan(ConanFile):
         if self.options.without_fiber:
             self.options.rm_safe("numa")
 
-        # Use verbosity from [conf] if specified
-        verbosity = self.conf.get("tools.build:verbosity", default="quiet")
-        if verbosity == "verbose" and int(self.options.debug_level) < 2:
-            self.options.debug_level.value = 2
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -770,6 +765,9 @@ class BoostConan(ConanFile):
         # TODO: Revisit on Boost 1.87.0. Remove in case Process is fixed.
         if Version(self.version) == "1.86.0" and is_msvc(self) and self.options.get_safe("shared") and self.options.get_safe("without_process", None) == False:
             raise ConanInvalidConfiguration(f"{self.ref} Boost.Process will fail to be consumed as shared library on MSVC. See https://github.com/boostorg/process/issues/408.")
+
+        if str(self.options.debug_level) != "deprecated":
+            self.output.warning("The option debug_level is deprecated. Use Conan conf tools.build:verbosity instead.")
 
     def _with_dependency(self, dependency):
         """
@@ -1069,11 +1067,17 @@ class BoostConan(ConanFile):
     def _boost_build_dir(self):
         return os.path.join(self.source_folder, "tools", "build")
 
+    @property
+    def _debug_flag(self):
+        verbosity = self.conf.get("tools.build:verbosity", default="quiet", check_type=str)
+        debug_level = {"quiet": 0, "verbose": 2}.get(verbosity)
+        return f"-d{debug_level}"
+
     def _build_bcp(self):
         folder = os.path.join(self.source_folder, "tools", "bcp")
         with chdir(self, folder):
             command = f"{self._b2_exe} -j{build_jobs(self)} --abbreviate-paths toolset={self._toolset}"
-            command += f" -d{self.options.debug_level}"
+            command += f" {self._debug_flag}"
             self.output.warning(command)
             self.run(command)
 
