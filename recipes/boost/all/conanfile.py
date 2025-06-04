@@ -965,7 +965,7 @@ class BoostConan(ConanFile):
                 if os.path.isfile(python_h):
                     self.output.info(f"found Python.h: {python_h}")
                     return candidate.replace("\\", "/")
-        raise Exception("couldn't locate Python.h - make sure you have installed python development files")
+        raise ConanException("Could not locate Python.h - make sure you have installed python development files.")
 
     @property
     def _python_library_dir(self):
