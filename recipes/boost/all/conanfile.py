@@ -100,7 +100,6 @@ class BoostConan(ConanFile):
         "debug_level": list(range(0, 14)) + ["deprecated"],
         "pch": [True, False],
         "extra_b2_flags": [None, "ANY"],  # custom b2 flags
-        "i18n_backend": ["iconv", "icu", None, "deprecated"],
         "i18n_backend_iconv": ["libc", "libiconv", "off"],
         "i18n_backend_icu": [True, False],
         "visibility": ["global", "protected", "hidden"],
@@ -139,7 +138,6 @@ class BoostConan(ConanFile):
         "debug_level": "deprecated",  # deprecated, use Conan conf tools.build:verbosity
         "pch": True,
         "extra_b2_flags": None,
-        "i18n_backend": "deprecated",
         "i18n_backend_iconv": "libc",
         "i18n_backend_icu": False,
         "visibility": "hidden",
@@ -634,17 +632,6 @@ class BoostConan(ConanFile):
         elif self.options.shared:
             self.options.rm_safe("fPIC")
 
-        if self.options.i18n_backend != "deprecated":
-            self.output.warning("i18n_backend option is deprecated, do not use anymore.")
-            if self.options.i18n_backend == "iconv":
-                self.options.i18n_backend_iconv = "libiconv"
-                self.options.i18n_backend_icu = False
-            if self.options.i18n_backend == "icu":
-                self.options.i18n_backend_iconv = "off"
-                self.options.i18n_backend_icu = True
-            if self.options.i18n_backend == "None":
-                self.options.i18n_backend_iconv = "off"
-                self.options.i18n_backend_icu = False
         if self.options.without_locale:
             self.options.rm_safe("i18n_backend_iconv")
             self.options.rm_safe("i18n_backend_icu")
@@ -825,8 +812,6 @@ class BoostConan(ConanFile):
             self.requires("libiconv/1.17")
 
     def package_id(self):
-        del self.info.options.i18n_backend
-
         if self.info.options.header_only:
             self.info.clear()
         else:
