@@ -198,6 +198,9 @@ class DuckdbConan(ConanFile):
                 "duckdb_mbedtls",
             ]
             self.cpp_info.libs.append("duckdb_fsst")
+            if Version(self.version) >= "1.3.0":
+                self.cpp_info.libs.append("core_functions_extension")
+                self.cpp_info.libs.append("duckdb_zstd")
             if Version(self.version) >= "0.10.0":
                 self.cpp_info.libs.append("duckdb_skiplistlib")
             if Version(self.version) >= "0.10.3":
