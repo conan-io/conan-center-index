@@ -298,8 +298,8 @@ class LibcurlConan(ConanFile):
         # - link errors if mingw shared or iOS/tvOS/watchOS
         # - it makes recipe consistent with CMake build where we don't build curl tool
         top_makefile = os.path.join(self.source_folder, "Makefile.am")
-        if Version(self.version) < "8.8.0":
-            replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib src" if self.options.build_executable else "SUBDIRS = lib")
+        if Version(self.version) < "8.8.0" and not self.options.build_executable:
+            replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
         else:
             replace_in_file(self, top_makefile, "SUBDIRS = lib docs src scripts", "SUBDIRS = lib src" if self.options.build_executable else "SUBDIRS = lib")
 
