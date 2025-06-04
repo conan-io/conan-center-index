@@ -138,10 +138,6 @@ class LibcurlConan(ConanFile):
     def _is_using_cmake_build(self):
         return is_msvc(self) or self._is_win_x_android
 
-    @property
-    def _is_apple_embedded_platform(self):
-        return self.settings.os in ["iOS", "watchOS", "tvOS"]
-
     def export_sources(self):
         copy(self, "lib_Makefile_add.am", self.recipe_folder, self.export_sources_folder)
 
@@ -213,8 +209,6 @@ class LibcurlConan(ConanFile):
         if self.options.build_executable:
             if self._is_mingw and self.options.shared:
                 raise ConanInvalidConfiguration("Building curl executable with shared library version of libcurl not supported with mingw compiler")
-            if self._is_apple_embedded_platform:
-                raise ConanInvalidConfiguration("Building curl executable not supprtoed on embedded apple platforms 'iOS', 'watchOS' and 'tvOS'")
 
     def build_requirements(self):
         if self._is_using_cmake_build:
