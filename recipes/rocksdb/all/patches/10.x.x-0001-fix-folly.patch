@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -607,7 +607,7 @@
+   find_package(folly)
+   # If cmake could not find the folly-config.cmake file, fall back
+   # to looking in third-party/folly for folly and its dependencies
+-  if(NOT FOLLY_LIBRARIES)
++  if(NOT folly_LIBRARIES)
+     exec_program(python3 ${PROJECT_SOURCE_DIR}/third-party/folly ARGS
+     build/fbcode_builder/getdeps.py show-inst-dir OUTPUT_VARIABLE
+     FOLLY_INST_PATH)
