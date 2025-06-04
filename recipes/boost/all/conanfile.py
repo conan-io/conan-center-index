@@ -148,7 +148,6 @@ class BoostConan(ConanFile):
         "buildid": None,
         "python_buildid": None,
         "system_use_utf8": False,
-        "with_stacktrace_backtrace": True,
     }
     default_options.update({f"without_{_name}": False for _name in CONFIGURE_OPTIONS})
     default_options.update({f"without_{_name}": True for _name in ("graph_parallel", "mpi", "python")})
@@ -239,6 +238,10 @@ class BoostConan(ConanFile):
     @property
     def _bcp_dir(self):
         return "custom-boost"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     @property
     def _is_clang_cl(self):
@@ -739,7 +742,7 @@ class BoostConan(ConanFile):
                 if os.path.isfile(python_h):
                     self.output.info(f"found Python.h: {python_h}")
                     return candidate.replace("\\", "/")
-        raise Exception("couldn't locate Python.h - make sure you have installed python development files.")
+        raise Exception("couldn't locate Python.h - make sure you have installed python development files")
 
     @property
     def _python_library_dir(self):
@@ -821,12 +824,6 @@ class BoostConan(ConanFile):
     def _boost_build_dir(self):
         return os.path.join(self.source_folder, "tools", "build")
 
-    @property
-    def _debug_flag(self):
-        verbosity = self.conf.get("tools.build:verbosity", default="quiet", check_type=str)
-        debug_level = {"quiet": 0, "verbose": 2}.get(verbosity)
-        return f"-d{debug_level}"
-
     def _build_bcp(self):
         folder = os.path.join(self.source_folder, "tools", "bcp")
         with chdir(self, folder):
@@ -853,20 +850,39 @@ class BoostConan(ConanFile):
             self.output.warning(command)
             self.run(command)
 
-    def _patch_sources(self):
+    def build(self):
         stacktrace_jamfile = os.path.join(self.source_folder, "libs", "stacktrace", "build", "Jamfile.v2")
-        if not can_run(self):
+        if cross_building(self, skip_x64_x86=True):
             # When cross building, do not attempt to run the test-executable (assume they work)
             replace_in_file(self, stacktrace_jamfile, "$(>) > $(<)", "echo \"\" > $(<)", strict=False)
-        elif self._with_stacktrace_backtrace and self.settings.os != "Windows":
+        if self._with_stacktrace_backtrace and self.settings.os != "Windows" and not cross_building(self):
             # When libbacktrace is shared, give extra help to the test-executable
             linker_var = "DYLD_LIBRARY_PATH" if self.settings.os == "Macos" else "LD_LIBRARY_PATH"
             libbacktrace_libdir = self.dependencies["libbacktrace"].cpp_info.aggregated_components().libdirs[0]
             patched_run_rule = f"{linker_var}={libbacktrace_libdir} $(>) > $(<)"
             replace_in_file(self, stacktrace_jamfile, "$(>) > $(<)", patched_run_rule, strict=False)
-            # INFO: libstacktrace is consumed as static always by
             if self.dependencies["libbacktrace"].options.shared:
                 replace_in_file(self, stacktrace_jamfile, "<link>static", "<link>shared", strict=False)
+
+        # Older clang releases require a thread_local variable to be initialized by a constant value
+        replace_in_file(self, os.path.join(self.source_folder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+                              "/* thread_local */", "thread_local", strict=False)
+        replace_in_file(self, os.path.join(self.source_folder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+                              "/* static __thread */", "static __thread", strict=False)
+        if self.settings.compiler == "apple-clang" or (self.settings.compiler == "clang" and Version(self.settings.compiler.version) < 6):
+            replace_in_file(self, os.path.join(self.source_folder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+                                  "thread_local", "/* thread_local */")
+            replace_in_file(self, os.path.join(self.source_folder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+                                  "static __thread", "/* static __thread */")
+        replace_in_file(self, os.path.join(self.source_folder, "tools", "build", "src", "tools", "gcc.jam"),
+                              "local generic-os = [ set.difference $(all-os) : aix darwin vxworks solaris osf hpux ] ;",
+                              "local generic-os = [ set.difference $(all-os) : aix darwin vxworks solaris osf hpux iphone appletv ] ;",
+                              strict=False)
+        replace_in_file(self, os.path.join(self.source_folder, "tools", "build", "src", "tools", "gcc.jam"),
+                              "local no-threading = android beos haiku sgi darwin vxworks ;",
+                              "local no-threading = android beos haiku sgi darwin vxworks iphone appletv ;",
+                              strict=False)
+
         replace_in_file(self, os.path.join(self.source_folder, "libs", "fiber", "build", "Jamfile.v2"),
                               "    <conditional>@numa",
                               "    <link>shared:<library>.//boost_fiber : <conditional>@numa",
@@ -879,11 +895,8 @@ class BoostConan(ConanFile):
                             "! [ $(property-set).get <target-os> ] in windows cygwin darwin aix android &&",
                             strict=False)
 
-    def build(self):
-        self._patch_sources()
-
         if self.options.header_only:
-            self.output.info("Header only package, skipping build")
+            self.output.warning("Header only package, skipping build")
             return
 
         self._clean()
@@ -896,9 +909,10 @@ class BoostConan(ConanFile):
         # JOIN ALL FLAGS
         b2_flags = " ".join(self._build_flags)
         full_command = f"{self._b2_exe} {b2_flags}"
+        # -d2 is to print more debug info and avoid travis timing out without output
         sources = os.path.join(self.source_folder, self._bcp_dir) if self._use_bcp else self.source_folder
         full_command += f' --debug-configuration --build-dir="{self.build_folder}"'
-        self.output.info(full_command)
+        self.output.warning(full_command)
 
         # If sending a user-specified toolset to B2, setting the vcvars
         # interferes with the compiler selection.
@@ -1204,7 +1218,7 @@ class BoostConan(ConanFile):
         if not cross_building(self):
             return flags
         arch = self.settings.get_safe("arch")
-        self.output.warning("Cross building, detecting compiler...")
+        self.output.info("Cross building, detecting compiler...")
 
         if arch.startswith("arm"):
             if "hf" in arch:
@@ -1258,7 +1272,7 @@ class BoostConan(ConanFile):
         return ""
 
     def _create_user_config_jam(self, folder):
-        self.output.info("Patching user-config.jam")
+        self.output.warning("Patching user-config.jam")
 
         def create_library_config(deps_name, name):
             aggregated_cpp_info = self.dependencies[deps_name].cpp_info.aggregated_components()
@@ -1398,7 +1412,7 @@ class BoostConan(ConanFile):
         # clang          | 12               | Macos       | clang-darwin12 |
         # gcc            | 11               | Linux       | gcc8           |
         # gcc            | 8                | Windows     | mgw8           |
-        # Visual Studio | 17 | Windows | vc142 | depends on compiler.toolset
+        # Visual Studio  | 17               | Windows     | vc142          | depends on compiler.toolset
         compiler = {
             "apple-clang": "",
             "Visual Studio": "vc",
@@ -1559,6 +1573,7 @@ class BoostConan(ConanFile):
             self.cpp_info.components["disable_autolinking"].names["cmake_find_package"] = "disable_autolinking"
             self.cpp_info.components["disable_autolinking"].names["cmake_find_package_multi"] = "disable_autolinking"
             self.cpp_info.components["disable_autolinking"].names["pkg_config"] = "boost_disable_autolinking"  # FIXME: disable on pkg_config
+
             # Even headers needs to know the flags for disabling autolinking ...
             # magic_autolink is an option in the recipe, so if a consumer wants this version of boost,
             # then they should not get autolinking.
