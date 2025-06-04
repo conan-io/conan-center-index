@@ -150,7 +150,7 @@ class BoostConan(ConanFile):
         "system_use_utf8": False,
     }
     default_options.update({f"without_{_name}": False for _name in CONFIGURE_OPTIONS})
-    default_options.update({f"without_{_name}": True for _name in ("graph_parallel", "mpi", "python")})
+    default_options.update({f"without_{_name}": True for _name in ("graph_parallel", "mpi", "python", "cobalt")})
 
     short_paths = True
     no_copy_source = True
