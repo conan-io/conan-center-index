@@ -4,4 +4,5 @@ project(test_package LANGUAGES CXX)
 find_package(ctd_cli REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE ctd_cli::ctd_cli)
+target_link_libraries(${PROJECT_NAME} PRIVATE korgorusze::CLI)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
