@@ -982,7 +982,7 @@ class BoostConan(ConanFile):
         if libdir and multiarch and masd and not libdir.endswith(masd):
             if masd.startswith(os.sep):
                 masd = masd[len(os.sep):]
-            self.output.warning(f"Python libdir candidate thingy: {libdir}")
+            self.output.info(f"Python libdir candidate thingy: {libdir}")
             libdir = os.path.join(libdir, masd)
 
         if not libdir:
@@ -1027,7 +1027,7 @@ class BoostConan(ConanFile):
         ]
         for d in clean_dirs:
             if os.path.isdir(d):
-                self.output.warning(f"removing '{d}'")
+                self.output.info(f"removing '{d}'")
                 shutil.rmtree(d)
 
     @property
@@ -1058,7 +1058,7 @@ class BoostConan(ConanFile):
         with chdir(self, folder):
             command = f"{self._b2_exe} -j{build_jobs(self)} --abbreviate-paths toolset={self._toolset}"
             command += f" {self._debug_flag}"
-            self.output.warning(command)
+            self.output.info(command)
             self.run(command)
 
     def _run_bcp(self):
@@ -1076,7 +1076,7 @@ class BoostConan(ConanFile):
                     libraries.add(d)
             libraries = " ".join(libraries)
             command = f"{self._bcp_exe} {namespace} {alias} {boostdir} {libraries} {self._bcp_dir}"
-            self.output.warning(command)
+            self.output.info(command)
             self.run(command)
 
     def build(self):
@@ -1124,7 +1124,7 @@ class BoostConan(ConanFile):
                             strict=False)
 
         if self.options.header_only:
-            self.output.warning("Header only package, skipping build")
+            self.output.info("Header only package, skipping build")
             return
 
         self._clean()
@@ -1141,7 +1141,7 @@ class BoostConan(ConanFile):
         # -d2 is to print more debug info and avoid travis timing out without output
         sources = os.path.join(self.source_folder, self._bcp_dir) if self._use_bcp else self.source_folder
         full_command += f' --debug-configuration --build-dir="{self.build_folder}"'
-        self.output.warning(full_command)
+        self.output.info(full_command)
 
         # If sending a user-specified toolset to B2, setting the vcvars
         # interferes with the compiler selection.
@@ -1499,7 +1499,7 @@ class BoostConan(ConanFile):
         return ""
 
     def _create_user_config_jam(self, folder):
-        self.output.warning("Patching user-config.jam")
+        self.output.info("Patching user-config.jam")
 
         def create_library_config(deps_name, name):
             aggregated_cpp_info = self.dependencies[deps_name].cpp_info.aggregated_components()
@@ -1591,7 +1591,7 @@ class BoostConan(ConanFile):
 
         contents += " ;"
 
-        self.output.warning(contents)
+        self.output.info(contents)
         filename = f"{folder}/user-config.jam"
         save(self, filename, contents)
 
