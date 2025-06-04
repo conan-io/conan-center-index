@@ -11,7 +11,7 @@ import glob
 import os
 import shutil
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2.0"
 
 
 class LibffiConan(ConanFile):
@@ -31,11 +31,6 @@ class LibffiConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _settings_build(self):
-        # TODO: Remove for Conan v2
-        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -58,11 +53,11 @@ class LibffiConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
                 self.tool_requires("msys2/cci.latest")
-        if is_msvc(self):
+        if self.settings_build.os == "Windows" and self.settings.get_safe("compiler.runtime"):
             self.tool_requires("automake/1.16.5")
 
     def source(self):
@@ -80,7 +75,7 @@ class LibffiConan(ConanFile):
             "--enable-docs=no",
         ])
 
-        if self._settings_build.compiler == "apple-clang":
+        if self.settings_build.compiler == "apple-clang":
             tc.configure_args.append("--disable-multi-os-directory")
 
         if self.options.shared:
@@ -91,10 +86,10 @@ class LibffiConan(ConanFile):
             tc.extra_defines.append("FFI_STATIC_BUILD")
 
         env = tc.environment()
-        if self._settings_build.os == "Windows" and (is_msvc(self) or self.settings.compiler == "clang"):
+        if self.settings_build.os == "Windows" and self.settings.get_safe("compiler.runtime"):
             build = "{}-{}-{}".format(
-                "x86_64" if self._settings_build.arch == "x86_64" else "i686",
-                "pc" if self._settings_build.arch == "x86" else "win64",
+                "x86_64" if self.settings_build.arch == "x86_64" else "i686",
+                "pc" if self.settings_build.arch == "x86" else "win64",
                 "mingw64")
             host = "{}-{}-{}".format(
                 "x86_64" if self.settings.arch == "x86_64" else "i686",

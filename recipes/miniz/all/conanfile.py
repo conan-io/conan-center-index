@@ -4,7 +4,7 @@ from conan.tools.files import export_conandata_patches, apply_conandata_patches,
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class MinizConan(ConanFile):
@@ -16,6 +16,7 @@ class MinizConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/richgel999/miniz"
     topics = ("zlib", "compression", "lossless")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -56,6 +57,8 @@ class MinizConan(ConanFile):
             tc.variables["INSTALL_PROJECT"] = True
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        if Version(self.version) <= "3.0.2":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):

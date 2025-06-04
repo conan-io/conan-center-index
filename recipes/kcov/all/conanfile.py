@@ -7,7 +7,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class KcovConan(ConanFile):
@@ -61,6 +61,8 @@ class KcovConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_PROJECT_kcov_INCLUDE"] = "conan_deps.cmake"
+        if Version(self.version) < "43": # pylint: disable=conan-condition-evals-to-constant
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         # Match Find*.cmake module names used by the project
@@ -92,7 +94,3 @@ class KcovConan(ConanFile):
         self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
-
-        # TODO: to remove in conan v2
-        bindir = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bindir)
