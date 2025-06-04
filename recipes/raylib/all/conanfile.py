@@ -192,8 +192,6 @@ class RaylibConan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "pthread"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("winmm")
-        elif str(self.settings.arch).startswith("wasm"):
-            self.cpp_info.exelinkflags.extend(["-sUSE_GLFW=3", "-sASYNCIFY", "-sGL_ENABLE_GET_PROC_ADDRESS=1"])
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
