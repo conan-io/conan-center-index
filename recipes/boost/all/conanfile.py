@@ -1411,7 +1411,7 @@ class BoostConan(ConanFile):
             f"--prefix={self.package_folder}",
             f"-j{build_jobs(self)}",
             "--abbreviate-paths",
-            f"-d{self.options.debug_level}",
+            self._debug_flag,
         ])
         return flags
 
