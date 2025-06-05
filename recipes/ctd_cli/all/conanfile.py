@@ -32,8 +32,8 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate_build(self):
-        if self.settings.compiler == "msvc":
-            raise ConanInvalidConfiguration("The library does not support building on MSVC")
+        if self.settings.compiler == "msvc" and self.options.shared:
+            raise ConanInvalidConfiguration("The library does not support shared builds with MSVC")
 
     def validate(self):
         check_min_cppstd(self, 20)

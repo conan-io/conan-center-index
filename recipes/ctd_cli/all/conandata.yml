@@ -1,4 +1,4 @@
 sources:
-  "0.1.1":
-    url: "https://gitlab.com/slavic-demons/korgorusze/compile_time_defined_cli/-/archive/v0.1.1/compile_time_defined_cli-v0.1.1.tar.gz"
-    sha256: "af629e1b15854e8f4400a357ac7fce8c78abf5d8e1cd7524817e38a768b89618"
+  "0.1.2":
+    url: "https://gitlab.com/slavic-demons/korgorusze/compile_time_defined_cli/-/archive/v0.1.2/compile_time_defined_cli-v0.1.2.tar.gz"
+    sha256: "aea8e123717d627dd9dea8985fe85921a0790d008f3e46a3d0ffe1537bd3755d"
