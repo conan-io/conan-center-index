@@ -48,6 +48,10 @@ class SociConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        if Version(self.version) >= "4.1.0":
+            self.tool_requires("cmake/[>3.23 <4]")
+
     def requirements(self):
         # New versions will not need transitive_headers=True
         if self.options.with_sqlite3:
