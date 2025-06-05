@@ -2,7 +2,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.scm import Git
-from conan.tools.files import replace_in_file, get
+from conan.tools.files import replace_in_file, get, rmdir
 from conan.tools.apple import is_apple_os
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import PkgConfigDeps
