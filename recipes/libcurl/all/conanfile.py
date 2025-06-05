@@ -571,9 +571,12 @@ class LibcurlConan(ConanFile):
         if cross_building(self):
             if self.settings.os == "Linux" and "arm" in self.settings.arch:
                 tc.configure_args.append(f"--host={self._get_linux_arm_host()}")
-            elif self.settings.os == "iOS":
+            elif is_apple_os(self) and not self.settings.os == "Macos":
                 tc.configure_args.append("--enable-threaded-resolver")
                 tc.configure_args.append("--disable-verbose")
+                if self.options.build_executable:
+                    # INFO: Need to propage required frameworks to the executable build. Otherwise it will fail to link.
+                    tc.extra_ldflags.extend(["-Wl,-framework,CoreFoundation", "-Wl,-framework,Security"])
             elif self.settings.os == "Android":
                 pass # this just works, conan is great!
 
