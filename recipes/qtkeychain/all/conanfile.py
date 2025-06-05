@@ -39,7 +39,6 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         self.requires("qt/[>=6.7 <7]", transitive_headers=True, transitive_libs=True)
-        # self.requires("dbus/1.15.8")
 
     def build_requirements(self):
         self.tool_requires("qt/<host_version>")
@@ -55,6 +54,7 @@ class PackageConan(ConanFile):
         # Settings this to True would need LinguistTools, which requires qttools, gui and widgets
         # qttools is not built by default in qt package, so we would need to add a check in validate()
         tc.cache_variables["BUILD_TRANSLATIONS"] = False
+        tc.cache_variables["LIBSECRET_SUPPORT"] = False # Contributions welcome
         tc.generate()
 
         deps = CMakeDeps(self)
