@@ -10,7 +10,7 @@ class TestPackageConan(ConanFile):
     generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
 
     def build_requirements(self):
-        if Version(self.dependencies["soci"].ref.version) >= "4.1.0":
+        if Version(self.tested_reference_str.split('/')[1]) >= "4.1.0":
             self.tool_requires("cmake/[>=3.23 <4]")
 
     def requirements(self):
