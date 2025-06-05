@@ -1,3 +1,4 @@
 sources:
   "2.0.6":
-    branch: "v2.0.6"
+    url: "https://github.com/signalwire/libks/archive/refs/tags/v2.0.6.tar.gz"
+    sha256: "0b78d07d7a4ebf6c58d898bde2873bc40941ed29ca237a3c9939860de4a0ba25"
