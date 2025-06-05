@@ -206,10 +206,6 @@ class LibcurlConan(ConanFile):
         if self.options.with_ssl == "wolfssl" and not self.dependencies["wolfssl"].options.with_curl:
             raise ConanInvalidConfiguration("option with_ssl=wolfssl requires wolfssl/*:with_curl=True")
 
-        if self.options.build_executable:
-            if self._is_mingw and self.options.shared:
-                raise ConanInvalidConfiguration("Building curl executable with shared library version of libcurl not supported with mingw compiler")
-
     def build_requirements(self):
         if self._is_using_cmake_build:
             if self._is_win_x_android:
@@ -324,6 +320,12 @@ class LibcurlConan(ConanFile):
             replace_in_file(self, lib_makefile,
                                   "lib_LTLIBRARIES = libcurl.la",
                                   "noinst_LTLIBRARIES = libcurl.la")
+
+            if self.options.build_executable:
+                # Link libcurl.dll.a to curl.exe
+                replace_in_file(self, os.path.join(self.source_folder, "src", "Makefile.am"),
+                                        "curl_LDADD = $(top_builddir)/lib/libcurl.la",
+                                        "curl_LDADD = $(top_builddir)/lib/libcurl.la $(top_builddir)/lib/libcurl.dll.a")
             # add directives to build dll
             # used only for native mingw-make
             if not cross_building(self) or self._is_mingw:
