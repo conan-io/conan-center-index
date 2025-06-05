@@ -825,6 +825,7 @@ class BoostConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
         apply_conandata_patches(self)
+        self._patch_sources()
 
     def generate(self):
         if not self.options.header_only:
@@ -1079,7 +1080,7 @@ class BoostConan(ConanFile):
             self.output.info(command)
             self.run(command)
 
-    def build(self):
+    def _patch_sources(self):
         stacktrace_jamfile = os.path.join(self.source_folder, "libs", "stacktrace", "build", "Jamfile.v2")
         if cross_building(self, skip_x64_x86=True):
             # When cross building, do not attempt to run the test-executable (assume they work)
@@ -1105,6 +1106,7 @@ class BoostConan(ConanFile):
                             "! [ $(property-set).get <target-os> ] in windows cygwin darwin aix android &&",
                             )
 
+    def build(self):
         if self.options.header_only:
             self.output.info("Header only package, skipping build")
             return
