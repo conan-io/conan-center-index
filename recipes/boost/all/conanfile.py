@@ -1081,9 +1081,6 @@ class BoostConan(ConanFile):
 
     def _patch_sources(self):
         stacktrace_jamfile = os.path.join(self.source_folder, "libs", "stacktrace", "build", "Jamfile.v2")
-        if cross_building(self, skip_x64_x86=True):
-            # When cross building, do not attempt to run the test-executable (assume they work)
-            replace_in_file(self, stacktrace_jamfile, "$(>) > $(<)", "echo \"\" > $(<)")
         if self._with_stacktrace_backtrace and self.settings.os != "Windows" and not cross_building(self):
             # When libbacktrace is shared, give extra help to the test-executable
             linker_var = "DYLD_LIBRARY_PATH" if self.settings.os == "Macos" else "LD_LIBRARY_PATH"
@@ -1095,7 +1092,7 @@ class BoostConan(ConanFile):
 
         if self.settings.compiler == "apple-clang" or (self.settings.compiler == "clang" and Version(self.settings.compiler.version) < 6):
             replace_in_file(self, os.path.join(self.source_folder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
-                                    "thread_local", "/* thread_local */")
+                                  "thread_local", "/* thread_local */")
             replace_in_file(self, os.path.join(self.source_folder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                                     "static __thread", "/* static __thread */")
         replace_in_file(self, os.path.join(self.source_folder, "libs", "fiber", "build", "Jamfile.v2"),
