@@ -284,14 +284,14 @@ class LibcurlConan(ConanFile):
         if self._is_using_cmake_build:
             return
 
-        # Disable curl tool for these reasons:
-        # - link errors if mingw shared or iOS/tvOS/watchOS
-        # - it makes recipe consistent with CMake build where we don't build curl tool
+        # Disable the executable build if requested
         top_makefile = os.path.join(self.source_folder, "Makefile.am")
         if Version(self.version) < "8.8.0" and not self.options.build_executable:
             replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
-        else:
-            replace_in_file(self, top_makefile, "SUBDIRS = lib docs src scripts", "SUBDIRS = lib src" if self.options.build_executable else "SUBDIRS = lib")
+        elif Version(self.version) >= "8.8.0" and not self.options.build_executable:
+            replace_in_file(self, top_makefile, "SUBDIRS = lib docs src scripts", "SUBDIRS = lib")
+        elif Version(self.version) >= "8.8.0" and self.options.build_executable:
+            replace_in_file(self, top_makefile, "SUBDIRS = lib docs src scripts", "SUBDIRS = lib src")
 
         # `Makefile.inc` has been removed from 8.12.0 onwards
         if Version(self.version) < "8.12.0":
