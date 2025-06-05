@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rename, rm, rmdir
+from conan.tools.files import copy, get, rename, rm, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
@@ -43,6 +43,7 @@ class WolfSSLConan(ConanFile):
         "with_quic": [True, False],
         "with_experimental": [True, False],
         "with_rpk": [True, False],
+        "with_asio": [True, False],
     }
     default_options = {
         "shared": False,
@@ -63,6 +64,7 @@ class WolfSSLConan(ConanFile):
         "with_quic": False,
         "with_experimental": False,
         "with_rpk": False,
+        "with_asio": False,
     }
 
     @property
@@ -87,6 +89,9 @@ class WolfSSLConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -104,6 +109,7 @@ class WolfSSLConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -139,6 +145,8 @@ class WolfSSLConan(ConanFile):
             tc.configure_args.append("--enable-experimental")
         if self.options.get_safe("with_rpk"):
             tc.configure_args.append("--enable-rpk")
+        if self.options.get_safe("with_asio"):
+            tc.configure_args.append("--enable-asio")
         if is_msvc(self):
             tc.extra_ldflags.append("-ladvapi32")
             if check_min_vs(self, "180", raise_invalid=False):
