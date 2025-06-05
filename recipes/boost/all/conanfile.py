@@ -825,7 +825,6 @@ class BoostConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
         apply_conandata_patches(self)
-        self._patch_sources()
 
     def generate(self):
         if not self.options.header_only:
@@ -1094,11 +1093,16 @@ class BoostConan(ConanFile):
             if self.dependencies["libbacktrace"].options.shared:
                 replace_in_file(self, stacktrace_jamfile, "<link>static", "<link>shared")
 
+        if self.settings.compiler == "apple-clang" or (self.settings.compiler == "clang" and Version(self.settings.compiler.version) < 6):
+            replace_in_file(self, os.path.join(self.source_folder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+                                    "thread_local", "/* thread_local */")
+            replace_in_file(self, os.path.join(self.source_folder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+                                    "static __thread", "/* static __thread */")
         replace_in_file(self, os.path.join(self.source_folder, "libs", "fiber", "build", "Jamfile.v2"),
                               "    <conditional>@numa",
                               "    <link>shared:<library>.//boost_fiber : <conditional>@numa",
                               )
-        if self.settings.os == "Android":
+        if self.settings.os == "Android" and Version(self.version) < "1.83.0":
             # force versionless soname from boostorg/boost#206
             # this can be applied to all versions and it's easier with a replace
             replace_in_file(self, os.path.join(self.source_folder, "boostcpp.jam"),
@@ -1107,6 +1111,7 @@ class BoostConan(ConanFile):
                             )
 
     def build(self):
+        self._patch_sources()
         if self.options.header_only:
             self.output.info("Header only package, skipping build")
             return
