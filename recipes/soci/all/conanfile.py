@@ -123,7 +123,7 @@ class SociConan(ConanFile):
         target_suffix = "" if self.options.shared else "_static"
         lib_prefix = "lib" if is_msvc(self) and not self.options.shared else ""
         version = Version(self.version)
-        lib_suffix = "_{}_{}".format(version.major, version.minor) if self.settings.os == "Windows" else ""
+        lib_suffix = "_{}_{}".format(version.major, version.minor) if version < "4.1.0" and self.settings.os == "Windows" else ""
 
         # soci_core
         self.cpp_info.components["soci_core"].set_property("cmake_target_name", "SOCI::soci_core{}".format(target_suffix))
