@@ -21,7 +21,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake_cxx_standard = 11 if Version(self.tested_reference_str.split('/')[1]) < "4.1.0" else 14
+        cmake_cxx_standard = 14 if Version(self.tested_reference_str.split('/')[1]) >= "4.1.0" else 11
         cmake.configure(
             defs={
                 "CMAKE_CXX_STANDARD": cmake_cxx_standard,
