@@ -57,12 +57,15 @@ class SociConan(ConanFile):
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.1.0", transitive_headers=True)
         if self.options.with_postgresql:
-            self.requires("libpq/15.4", transitive_headers=True)
+            self.requires("libpq/[>=15.4 <17.0]", transitive_headers=True)
         if self.options.with_boost:
             self.requires("boost/1.83.0", transitive_headers=True)
 
     def validate(self):
-        check_min_cppstd(self, 11)
+        if Version(self.version) < "4.1.0":
+            check_min_cppstd(self, 11)
+        else:
+            check_min_cppstd(self, 14)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -70,23 +73,23 @@ class SociConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-
+        backend_prefix = "WITH" if Version(self.version) < "4.1.0" else "SOCI"
         # MacOS @rpath
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.cache_variables["SOCI_SHARED"] = self.options.shared
         tc.cache_variables["SOCI_STATIC"] = not self.options.shared
         tc.cache_variables["SOCI_TESTS"] = False
-        tc.cache_variables["SOCI_CXX11"] = True
         tc.cache_variables["SOCI_EMPTY"] = self.options.empty
-        tc.cache_variables["WITH_SQLITE3"] = self.options.with_sqlite3
-        tc.cache_variables["WITH_DB2"] = False
-        tc.cache_variables["WITH_ODBC"] = self.options.with_odbc
-        tc.cache_variables["WITH_ORACLE"] = False
-        tc.cache_variables["WITH_FIREBIRD"] = False
-        tc.cache_variables["WITH_MYSQL"] = self.options.with_mysql
-        tc.cache_variables["WITH_POSTGRESQL"] = self.options.with_postgresql
+        tc.cache_variables["{}_SQLITE3".format(backend_prefix)] = self.options.with_sqlite3
+        tc.cache_variables["{}_DB2".format(backend_prefix)] = False
+        tc.cache_variables["{}_ODBC".format(backend_prefix)] = self.options.with_odbc
+        tc.cache_variables["{}_ORACLE".format(backend_prefix)] = False
+        tc.cache_variables["{}_FIREBIRD".format(backend_prefix)] = False
+        tc.cache_variables["{}_MYSQL".format(backend_prefix)] = self.options.with_mysql
+        tc.cache_variables["{}_POSTGRESQL".format(backend_prefix)] = self.options.with_postgresql
         tc.cache_variables["WITH_BOOST"] = self.options.with_boost
         if Version(self.version) < "4.1.0": # pylint: disable=conan-condition-evals-to-constant
+            tc.cache_variables["SOCI_CXX11"] = True
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
