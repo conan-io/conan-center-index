@@ -50,7 +50,7 @@ class SociConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "4.1.0":
-            self.tool_requires("cmake/[>3.23 <4]")
+            self.tool_requires("cmake/[>=3.23 <4]")
 
     def requirements(self):
         # New versions will not need transitive_headers=True
