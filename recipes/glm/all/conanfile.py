@@ -18,6 +18,27 @@ class GlmConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
+    options = {
+        "enable_experimental": [True, False],
+        "force_ctor_init": [True, False],
+        "force_explicit_ctor": [True, False],
+        "force_inline": [True, False]
+    }
+
+    default_options = {
+        "enable_experimental": False,
+        "force_ctor_init": False,
+        "force_explicit_ctor": False,
+        "force_inline": False
+    }
+
+    options_descriptions = {
+        "enable_experimental": "Enable experimental features",
+        "force_ctor_init": "Default-initialize matrices and vectors in constructors",
+        "force_explicit_ctor": "Require explicit conversions",
+        "force_inline": "Inline GLM code for performance",
+    }
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -42,5 +63,15 @@ class GlmConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "glm")
         self.cpp_info.set_property("cmake_target_name", "glm::glm")
+
+        if self.options.enable_experimental:
+            self.cpp_info.defines.append("GLM_ENABLE_EXPERIMENTAL")
+        if self.options.force_ctor_init:
+            self.cpp_info.defines.append("GLM_FORCE_CTOR_INIT")
+        if self.options.force_explicit_ctor:
+            self.cpp_info.defines.append("GLM_FORCE_EXPLICIT_CTOR")
+        if self.options.force_inline:
+            self.cpp_info.defines.append("GLM_FORCE_INLINE")
+
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
