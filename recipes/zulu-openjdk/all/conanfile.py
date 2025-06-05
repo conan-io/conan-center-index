@@ -13,7 +13,7 @@ class ZuluOpenJDK(ConanFile):
     homepage = "https://www.azul.com"
     topics = ("java", "jdk", "openjdk")
     package_type = "application"
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler", "build_type"
 
     @property
     def _jni_folder(self):
