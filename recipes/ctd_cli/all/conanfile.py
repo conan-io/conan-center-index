@@ -43,6 +43,9 @@ class PackageConan(ConanFile):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("The library requires constexpr std::vector support, which is not available in gcc < 12")
 
+        if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "193":
+            raise ConanInvalidConfiguration("The library requires MSVC >= 193")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
