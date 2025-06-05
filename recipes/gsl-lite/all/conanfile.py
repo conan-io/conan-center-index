@@ -54,20 +54,28 @@ class GslLiteConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = CMakeToolchain(self)
-        tc.generate()
+        if Version(self.version) >= "1.0":
+            tc = CMakeToolchain(self)
+            tc.generate()
 
     def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        if Version(self.version) >= "1.0":
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
     def package(self):
         copy(self, "LICENSE",  src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        cmake = CMake(self)
-        cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        if Version(self.version) >= "1.0":
+            cmake = CMake(self)
+            cmake.install()
+            rmdir(self, os.path.join(self.package_folder, "share"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        else:
+            # Even though old versions have CMake install instructions, they do not package the same files
+            # this library did for old versions - keep our behaviour for those
+            copy(self, "*", src=os.path.join(self.source_folder, "include"), 
+                 dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "gsl-lite")
