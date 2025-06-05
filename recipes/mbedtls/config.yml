@@ -6,7 +6,7 @@ versions:
   # keep 3.2.1 for libcoap, libgit2, lief
   "3.2.1":
     folder: all
-  # Last release of LTS 2.28
+  # final 2.28.x (old LTS) version
   "2.28.10":
     folder: all
   # keep 2.6.12 for cose-c
