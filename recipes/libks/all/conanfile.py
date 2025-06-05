@@ -2,7 +2,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.scm import Git
-from conan.tools.files import replace_in_file, get, rmdir
+from conan.tools.files import replace_in_file, get, rmdir, copy
 from conan.tools.apple import is_apple_os
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import PkgConfigDeps
@@ -76,6 +76,7 @@ class LibksConan(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "include", "libks2", "libks", "cmake"))
