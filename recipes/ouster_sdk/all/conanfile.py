@@ -82,7 +82,9 @@ class OusterSdkConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]", transitive_libs=True)
 
         if self.options.build_viz:
-            self.requires("glad/0.1.36")
+            if Version(self.version) < "0.14.0":
+                # 0.14.0+ vendorized glad instead of external dependency
+                self.requires("glad/0.1.36")
             self.requires("glfw/3.4")
 
     def validate(self):
@@ -191,6 +193,7 @@ class OusterSdkConan(ConanFile):
             self.cpp_info.components["ouster_viz"].libs = ["ouster_viz"]
             self.cpp_info.components["ouster_viz"].requires = [
                 "ouster_client",
-                "glad::glad",
                 "glfw::glfw",
             ]
+            if Version(self.version) < "0.14.0":
+                self.cpp_info.components["ouster_viz"].requires.append("glad::glad")
