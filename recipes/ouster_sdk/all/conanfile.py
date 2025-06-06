@@ -60,11 +60,9 @@ class OusterSdkConan(ConanFile):
     def requirements(self):
         # Used in ouster/types.h
         self.requires("eigen/3.4.0", transitive_headers=True)
-        self.requires("fmt/10.2.1")
         self.requires("libcurl/[>=7.78 <9]")
         # Replaces vendored optional-lite
         self.requires("optional-lite/3.6.0", transitive_headers=True)
-
         if Version(self.version) < "0.14.0":
             # Used in ouster/sensor_http.h
             # 0.14.0+ replaced jsoncpp by vendorized jsoncons
@@ -154,7 +152,6 @@ class OusterSdkConan(ConanFile):
         self.cpp_info.components["ouster_client"].libs = ["ouster_client"]
         self.cpp_info.components["ouster_client"].requires = [
             "eigen::eigen",
-            "fmt::fmt",
             "libcurl::libcurl",
             "optional-lite::optional-lite",
         ]
