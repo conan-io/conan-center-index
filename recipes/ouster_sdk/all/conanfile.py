@@ -121,6 +121,7 @@ class OusterSdkConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+
         # Unvendor optional-lite
         rmdir(self, os.path.join(self.source_folder, "ouster_client", "include", "optional-lite"))
         replace_in_file(self, os.path.join(self.source_folder, "ouster_client", "CMakeLists.txt"),
@@ -133,7 +134,7 @@ class OusterSdkConan(ConanFile):
         # Allow non-static ouster_osf for consistency with other components
         replace_in_file(self, os.path.join(self.source_folder, "ouster_osf", "CMakeLists.txt"),
                         "add_library(ouster_osf STATIC", "add_library(ouster_osf")
-        
+
 
     def build(self):
         self._patch_sources()
@@ -160,6 +161,8 @@ class OusterSdkConan(ConanFile):
             "libcurl::libcurl",
             "optional-lite::optional-lite",
         ]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["ouster_client"].system_libs = ["ws2_32"]
         if Version(self.version) >= "0.14.0":
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["ouster_client"].system_libs = ["pthread"]
@@ -189,6 +192,8 @@ class OusterSdkConan(ConanFile):
             ]
             if Version(self.version) >= "0.14.0":
                 self.cpp_info.components["ouster_pcap"].requires.append("libpcap::libpcap")
+            if self.settings.os == "Windows":
+                self.cpp_info.components["ouster_pcap"].system_libs = ["ws2_32"]
 
         if self.options.build_viz:
             self.cpp_info.components["ouster_viz"].set_property("cmake_target_name", "OusterSDK::ouster_viz")
