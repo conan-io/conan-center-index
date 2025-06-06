@@ -82,9 +82,9 @@ class OusterSdkConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]", transitive_libs=True)
 
         if self.options.build_viz:
-            if Version(self.version) < "0.14.0":
-                # 0.14.0+ vendorized glad instead of external dependency
-                self.requires("glad/0.1.36")
+            # 0.14.0+ vendorized glad instead of external dependency
+            # But static linking deferral requires glad to be linked later
+            self.requires("glad/0.1.36")
             self.requires("glfw/3.4")
 
     def validate(self):
@@ -202,8 +202,7 @@ class OusterSdkConan(ConanFile):
                 "ouster_client",
                 "glfw::glfw",
             ]
-            if Version(self.version) < "0.14.0":
-                self.cpp_info.components["ouster_viz"].requires.append("glad::glad")
+            self.cpp_info.components["ouster_viz"].requires.append("glad::glad")
 
         if Version(self.version) >= "0.14.0" and self.options.shared:
             self.cpp_info.components["shared_library"].set_property("cmake_target_name", "OusterSDK::shared_library")
