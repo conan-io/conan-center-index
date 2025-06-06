@@ -1,13 +1,13 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.env import Environment
 from conan.tools.files import chdir, copy, get, replace_in_file
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
+from pathlib import Path
 import json
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.0.9"
 
 
 class EmSDKConan(ConanFile):
@@ -27,11 +27,6 @@ class EmSDKConan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
-
-    def requirements(self):
-        self.requires("nodejs/16.3.0")
-        # self.requires("python")  # FIXME: Not available as Conan package
-        # self.requires("wasm")  # FIXME: Not available as Conan package
 
     def package_id(self):
         del self.info.settings.compiler
@@ -65,6 +60,13 @@ class EmSDKConan(ConanFile):
     def _em_cache(self):
         return os.path.join(self.package_folder, "bin", ".emscripten_cache")
 
+    @property
+    def _node_path(self):
+        subfolders = [path for path in (Path(self.package_folder) / "bin" / "node").iterdir() if path.is_dir()]
+        if len(subfolders) != 1:
+            return None
+        return os.path.join(self.package_folder, "bin", "node", subfolders[0].name, "bin")
+
     def generate(self):
         env = Environment()
         env.prepend_path("PATH", self._paths)
@@ -73,11 +75,6 @@ class EmSDKConan(ConanFile):
         env.define_path("EM_CONFIG", self._em_config)
         env.define_path("EM_CACHE", self._em_cache)
         env.vars(self, scope="emsdk").save_script("emsdk_env_file")
-
-    @staticmethod
-    def _chmod_plus_x(filename):
-        if os.name == "posix":
-            os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def _tools_for_version(self):
         ret = {}
@@ -99,14 +96,11 @@ class EmSDKConan(ConanFile):
     def build(self):
         with chdir(self, self.source_folder):
             emsdk = "emsdk.bat" if self._settings_build.os == "Windows" else "./emsdk"
-            self._chmod_plus_x("emsdk")
-
             # Install required tools
             required_tools = self._tools_for_version()
-            for key, value in required_tools.items():
-                if key != 'nodejs':
-                    self.run(f"{emsdk} install {value}")
-                    self.run(f"{emsdk} activate {value}")
+            for value in required_tools.values():
+                self.run(f"{emsdk} install {value}")
+                self.run(f"{emsdk} activate {value}")
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -133,11 +127,13 @@ class EmSDKConan(ConanFile):
     def _define_tool_var(self, value):
         suffix = ".bat" if self.settings.os == "Windows" else ""
         path = os.path.join(self._emscripten, f"{value}{suffix}")
-        self._chmod_plus_x(path)
         return path
 
     def package_info(self):
         self.cpp_info.bindirs = self._relative_paths
+        # Add node binaries into emsdk for convenience
+        if self._node_path:
+            self.cpp_info.bindirs.append(self._node_path)
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
@@ -180,17 +176,3 @@ class EmSDKConan(ConanFile):
             os.path.join("bin", "upstream", "emscripten", "tests", "cmake", "target_library"),
             os.path.join("bin", "upstream", "lib", "cmake", "llvm"),
         ]
-
-        if Version(conan_version).major < 2:
-            self.env_info.PATH.extend(self._paths)
-            self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = toolchain
-            self.env_info.EMSDK = self._emsdk
-            self.env_info.EMSCRIPTEN = self._emscripten
-            self.env_info.EM_CONFIG = self._em_config
-            self.env_info.EM_CACHE = self._em_cache
-            self.env_info.CC = compiler_executables["c"]
-            self.env_info.CXX = compiler_executables["cpp"]
-            self.env_info.AR = self._define_tool_var("emar")
-            self.env_info.NM = self._define_tool_var("emnm")
-            self.env_info.RANLIB = self._define_tool_var("emranlib")
-            self.env_info.STRIP = self._define_tool_var("emstrip")
