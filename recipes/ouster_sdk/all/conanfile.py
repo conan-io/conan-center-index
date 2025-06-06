@@ -60,17 +60,17 @@ class OusterSdkConan(ConanFile):
     def requirements(self):
         # Used in ouster/types.h
         self.requires("eigen/3.4.0", transitive_headers=True)
-        self.requires("spdlog/[>=1.12.0 <1.15]")
         self.requires("fmt/10.2.1")
         self.requires("libcurl/[>=7.78 <9]")
         # Replaces vendored optional-lite
         self.requires("optional-lite/3.6.0", transitive_headers=True)
 
-        if Version(self.version) >= "0.14.0":
-            self.requires("jsoncons/1.3.0")
-        else:
+        if Version(self.version) < "0.14.0":
             # Used in ouster/sensor_http.h
+            # 0.14.0+ replaced jsoncpp by vendorized jsoncons
             self.requires("jsoncpp/1.9.5", transitive_headers=True, transitive_libs=True)
+            # 0.14.0+ vendorized spdlog instead of external dependency
+            self.requires("spdlog/[>=1.12.0 <1.15]")
 
         if self.options.build_pcap:
             self.requires("libtins/4.5")
@@ -119,7 +119,6 @@ class OusterSdkConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-
         # Unvendor optional-lite
         rmdir(self, os.path.join(self.source_folder, "ouster_client", "include", "optional-lite"))
         replace_in_file(self, os.path.join(self.source_folder, "ouster_client", "CMakeLists.txt"),
@@ -155,8 +154,6 @@ class OusterSdkConan(ConanFile):
         self.cpp_info.components["ouster_client"].libs = ["ouster_client"]
         self.cpp_info.components["ouster_client"].requires = [
             "eigen::eigen",
-            "jsoncpp::jsoncpp",
-            "spdlog::spdlog",
             "fmt::fmt",
             "libcurl::libcurl",
             "optional-lite::optional-lite",
@@ -165,6 +162,8 @@ class OusterSdkConan(ConanFile):
             self.cpp_info.components["ouster_client"].requires.append("jsoncons::jsoncons")
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["ouster_client"].system_libs = ["pthread"]
+        else:
+            self.cpp_info.components["ouster_client"].requires.extend(["jsoncpp::jsoncpp", "spdlog::spdlog",])
 
         if self.options.build_osf:
             self.cpp_info.components["ouster_osf"].set_property("cmake_target_name", "OusterSDK::ouster_osf")
