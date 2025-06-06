@@ -12,10 +12,10 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires(self.tested_reference_str)
-        self.requires("nlohmann_json/3.12.0")
-        self.requires("picojson/1.3.0")
+        self.requires("nlohmann_json/3.11.2")
         self.requires("rapidjson/cci.20200410")
+        self.requires("picojson/1.3.0")
+        self.requires(self.tested_reference_str)
 
     def build(self):
         cmake = CMake(self)
