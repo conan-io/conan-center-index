@@ -112,6 +112,8 @@ class OusterSdkConan(ConanFile):
         tc.cache_variables["BUILD_OSF"] = self.options.build_osf
         tc.cache_variables["OUSTER_USE_EIGEN_MAX_ALIGN_BYTES_32"] = self.options.eigen_max_align_bytes
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        if Version(self.version) >= "0.14.0":
+            tc.cache_variables["BUILD_SHARED_LIBRARY"] = self.options.shared
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
