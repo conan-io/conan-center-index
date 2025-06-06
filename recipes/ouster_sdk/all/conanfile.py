@@ -60,13 +60,17 @@ class OusterSdkConan(ConanFile):
     def requirements(self):
         # Used in ouster/types.h
         self.requires("eigen/3.4.0", transitive_headers=True)
-        # Used in ouster/sensor_http.h
-        self.requires("jsoncpp/1.9.5", transitive_headers=True, transitive_libs=True)
         self.requires("spdlog/[>=1.12.0 <1.15]")
         self.requires("fmt/10.2.1")
         self.requires("libcurl/[>=7.78 <9]")
         # Replaces vendored optional-lite
         self.requires("optional-lite/3.6.0", transitive_headers=True)
+
+        if Version(self.version) >= "0.14.0":
+            self.requires("jsoncons/1.3.0")
+        else:
+            # Used in ouster/sensor_http.h
+            self.requires("jsoncpp/1.9.5", transitive_headers=True, transitive_libs=True)
 
         if self.options.build_pcap:
             self.requires("libtins/4.5")
@@ -158,6 +162,7 @@ class OusterSdkConan(ConanFile):
             "optional-lite::optional-lite",
         ]
         if Version(self.version) >= "0.14.0":
+            self.cpp_info.components["ouster_client"].requires.append("jsoncons::jsoncons")
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["ouster_client"].system_libs = ["pthread"]
 
@@ -172,6 +177,8 @@ class OusterSdkConan(ConanFile):
                 "libpng::libpng",
                 "zlib::zlib",
             ]
+            if Version(self.version) >= "0.14.0":
+                self.cpp_info.components["ouster_osf"].requires.append("jsoncons::jsoncons")
 
         if self.options.build_pcap:
             self.cpp_info.components["ouster_pcap"].set_property("cmake_target_name", "OusterSDK::ouster_pcap")
