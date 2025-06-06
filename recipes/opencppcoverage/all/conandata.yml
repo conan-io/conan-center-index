@@ -1,0 +1,5 @@
+sources:
+  "0.9.9.0":
+    url:
+    - "https://github.com/OpenCppCoverage/OpenCppCoverage/archive/refs/tags/release-0.9.9.0.tar.gz"
+    sha256: "33f4413d9e83c5fe586efa743922eddbb1ad5f4ccc193e91c24efc7112954dfe"
