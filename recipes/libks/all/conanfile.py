@@ -85,6 +85,8 @@ class LibksConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["ks2"]
+        self.cpp_info.set_property("cmake_file_name", "LibKS2")
+        self.cpp_info.set_property("cmake_target_name", "ks2")
         self.cpp_info.includedirs = ["include/libks2"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
