@@ -157,6 +157,9 @@ class OusterSdkConan(ConanFile):
             "libcurl::libcurl",
             "optional-lite::optional-lite",
         ]
+        if Version(self.version) >= "0.14.0":
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["ouster_client"].system_libs = ["pthread"]
 
         if self.options.build_osf:
             self.cpp_info.components["ouster_osf"].set_property("cmake_target_name", "OusterSDK::ouster_osf")
