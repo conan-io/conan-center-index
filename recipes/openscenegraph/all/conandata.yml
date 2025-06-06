@@ -36,3 +36,9 @@ patches:
       patch_source:
         - https://github.com/openscenegraph/OpenSceneGraph/pull/1296
         - https://github.com/openscenegraph/OpenSceneGraph/pull/951
+    - patch_file: patches/0012-_FPOSOFF-deprecated.patch
+      patch_description: _FPOSOFF identifier not found
+      patch_type: bugfix
+      patch_source:
+        - https://github.com/openscenegraph/OpenSceneGraph/issues/1323
+        - https://github.com/microsoft/vcpkg/pull/38666/files
