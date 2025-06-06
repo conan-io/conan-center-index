@@ -29,11 +29,25 @@ def components_from_dotfile(dotfile):
         """
         match each node in the dotfile with a label property, and map the label to a conan component
         """
+        def sanitize(label_name):
+            # allow macos frameworks to pass as-is
+            if label_name.startswith("-framework"):
+                return label_name
+            # some component names on windows builds have newlines and other text.
+            # sanitize by finding the first sensible string value
+            m = re.search(r"[A-Za-z0-9_\-.]+", label_name.strip())
+            replacements = {
+                "-lpthread": "pthread",
+                "-ldl": "dl",
+                "-lm": "m",
+            }
+            return replacements.get(m[0], m[0])
+
         for row in dot:
-            match_label = re.match(r'''^\s*"(node[0-9]+)"\s*\[\s*label\s*=\s*"(.+)".*''', row)
+            match_label = re.match(r'''^"(node[0-9]+)"\s*\[\s*label\s*=\s*"(.+)"''', row.strip())
             if match_label:
                 node = match_label.group(1)
-                label = match_label.group(2)
+                label = sanitize(match_label.group(2))
                 if label.startswith("LLVM"):
                     yield node, f"llvm-core::{label}"
                 else:
@@ -52,7 +66,7 @@ def components_from_dotfile(dotfile):
 
         labels = {k: v for k, v in node_labels(dot)}
         for row in dot:
-            match_dep = re.match(r'''^\s*"(node[0-9]+)"\s*->\s*"(node[0-9]+)".*''', row)
+            match_dep = re.match(r'''"(node[0-9]+)"\s*->\s*"(node[0-9]+)"''', row.strip())
             if match_dep:
                 node_label = labels[match_dep.group(1)]
                 if is_package_label(node_label):
@@ -67,21 +81,19 @@ def components_from_dotfile(dotfile):
         Split dependencies into normal, Macos framework and system requirements,
         and rename if necessary
         """
-        ignore = [
-            "version" # appears in some windows builds
-        ]
         system_libs = [
-            "-lpthread",
-            "-ldl",
-            "-lm"
+            "pthread",
+            "dl",
+            "m",
+            "version"
         ]
-        if dependency_name is None or dependency_name in ignore:
+        if dependency_name is None:
             return None, None
         if dependency_name in system_libs:
-            return "system_libs", dependency_name[2:]
-
+            return "system_libs", dependency_name
         if dependency_name.startswith("-framework"):
             return "frameworks", dependency_name.split()[1]
+
         return "requires", dependency_name
 
     components = {}
@@ -251,15 +263,11 @@ class ClangConan(ConanFile):
     def _build_module_file_rel_path(self):
         return self._cmake_build_folder_rel_path / f"conan-official-{self.name}-variables.cmake"
 
-    @property
-    def _components_path(self):
-        return Path(self.package_folder) / self._cmake_build_folder_rel_path / "components.json"
-
     def _create_cmake_build_module(self, module_file):
         package_folder = Path(self.package_folder)
         content = textwrap.dedent(f"""\
-            set(CLANG_INSTALL_PREFIX "{str(package_folder)}")
-            set(CLANG_CMAKE_DIR "{str(package_folder / self._cmake_build_folder_rel_path)}")
+            set(CLANG_INSTALL_PREFIX "{package_folder.as_posix()}")
+            set(CLANG_CMAKE_DIR "{(package_folder / self._cmake_build_folder_rel_path).as_posix()}")
             if (NOT TARGET clang-tablegen-targets)
               add_custom_target(clang-tablegen-targets)
             endif()
