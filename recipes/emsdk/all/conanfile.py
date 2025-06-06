@@ -76,11 +76,6 @@ class EmSDKConan(ConanFile):
         env.define_path("EM_CACHE", self._em_cache)
         env.vars(self, scope="emsdk").save_script("emsdk_env_file")
 
-    @staticmethod
-    def _chmod_plus_x(filename):
-        if os.name == "posix":
-            os.chmod(filename, os.stat(filename).st_mode | 0o111)
-
     def _tools_for_version(self):
         ret = {}
         # Select release-upstream from version (wasm-binaries)
@@ -101,8 +96,6 @@ class EmSDKConan(ConanFile):
     def build(self):
         with chdir(self, self.source_folder):
             emsdk = "emsdk.bat" if self._settings_build.os == "Windows" else "./emsdk"
-            self._chmod_plus_x("emsdk")
-
             # Install required tools
             required_tools = self._tools_for_version()
             for value in required_tools.values():
@@ -134,7 +127,6 @@ class EmSDKConan(ConanFile):
     def _define_tool_var(self, value):
         suffix = ".bat" if self.settings.os == "Windows" else ""
         path = os.path.join(self._emscripten, f"{value}{suffix}")
-        self._chmod_plus_x(path)
         return path
 
     def package_info(self):
