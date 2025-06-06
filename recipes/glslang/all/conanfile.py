@@ -171,7 +171,7 @@ class GlslangConan(ConanFile):
             self.cpp_info.components["glslang-core"].requires.append("osdependent")
         if has_oglcompiler:
             self.cpp_info.components["glslang-core"].requires.append("oglcompiler")
-        if self.options.hlsl:
+        if has_hlsl:
             self.cpp_info.components["glslang-core"].defines.append("ENABLE_HLSL")
 
         if has_machineindependent:
