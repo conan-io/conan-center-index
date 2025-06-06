@@ -78,7 +78,7 @@ class OusterSdkConan(ConanFile):
         if self.options.build_osf:
             # Used in fb_generated/*.h
             self.requires("flatbuffers/24.3.7", transitive_headers=True)
-            self.requires("libpng/[>=1.6 <2]")
+            self.requires("libpng/[>=1.6 <2]", transitive_libs=True)
             self.requires("zlib/[>=1.2.11 <2]", transitive_libs=True)
 
         if self.options.build_viz:
@@ -204,3 +204,14 @@ class OusterSdkConan(ConanFile):
             ]
             if Version(self.version) < "0.14.0":
                 self.cpp_info.components["ouster_viz"].requires.append("glad::glad")
+
+        if Version(self.version) >= "0.14.0" and self.options.shared:
+            self.cpp_info.components["shared_library"].set_property("cmake_target_name", "OusterSDK::shared_library")
+            self.cpp_info.components["shared_library"].libs = ["shared_library"]
+            self.cpp_info.components["shared_library"].requires = ["ouster_client"]
+            if self.options.build_osf:
+                self.cpp_info.components["shared_library"].requires.append("ouster_osf")
+            if self.options.build_pcap:
+                self.cpp_info.components["shared_library"].requires.append("ouster_pcap")
+            if self.options.build_viz:
+                self.cpp_info.components["shared_library"].requires.append("ouster_viz")
