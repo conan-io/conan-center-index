@@ -69,12 +69,9 @@ class OusterSdkConan(ConanFile):
         self.requires("optional-lite/3.6.0", transitive_headers=True)
 
         if self.options.build_pcap:
-            # transitive-libs: when building the shared library, the `libtins` runtime dependency
-            # is not encoded in the binaries (as it is a private dependency of the static library that
-            # is linked into a shared library). This is a workaround to ensure that the shared library
-            # has the necessary runtime dependencies.
-            transitive_libtins = None if Version(self.version) < "0.13.1" else True
-            self.requires("libtins/4.5", transitive_libs=transitive_libtins)
+            self.requires("libtins/4.5")
+            if Version(self.version) >= "0.14.0":
+                self.requires("libpcap/1.10.4")
 
         if self.options.build_osf:
             # Used in fb_generated/*.h
@@ -180,6 +177,8 @@ class OusterSdkConan(ConanFile):
                 "ouster_client",
                 "libtins::libtins",
             ]
+            if Version(self.version) >= "0.14.0":
+                self.cpp_info.components["ouster_pcap"].requires.append("libpcap::libpcap")
 
         if self.options.build_viz:
             self.cpp_info.components["ouster_viz"].set_property("cmake_target_name", "OusterSDK::ouster_viz")
