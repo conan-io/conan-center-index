@@ -78,12 +78,12 @@ class OusterSdkConan(ConanFile):
         if self.options.build_osf:
             # Used in fb_generated/*.h
             self.requires("flatbuffers/24.3.7", transitive_headers=True)
-            self.requires("libpng/[>=1.6 <2]", transitive_libs=True)
+            # 0.14.0+ shared_library uses transitive libpng from ouster_client and result in missing symbols
+            libpng_transtive_libs = Version(self.version) >= "0.14.0" and self.options.shared
+            self.requires("libpng/[>=1.6 <2]", transitive_libs=libpng_transtive_libs)
             self.requires("zlib/[>=1.2.11 <2]", transitive_libs=True)
 
         if self.options.build_viz:
-            # 0.14.0+ vendorized glad instead of external dependency
-            # But static linking deferral requires glad to be linked later
             self.requires("glad/0.1.36")
             self.requires("glfw/3.4")
 
