@@ -43,20 +43,6 @@ class OusterSdkConan(ConanFile):
         "eigen_max_align_bytes": "Force maximum alignment of Eigen data to 32 bytes.",
     }
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "clang": "5",
-            "apple-clang": "10",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -107,13 +93,7 @@ class OusterSdkConan(ConanFile):
     def validate(self):
         if conan_version.major < 2 and self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows builds require Conan >= 2.0")
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 14)
 
         if self.options.build_osf and not self.options.build_pcap:
             raise ConanInvalidConfiguration("build_osf=True requires build_pcap=True")
@@ -221,4 +201,3 @@ class OusterSdkConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "OusterSDK"
         self.cpp_info.names["cmake_find_package"] = "OusterSDK"
         self.cpp_info.names["cmake_find_package_multi"] = "OusterSDK"
-
