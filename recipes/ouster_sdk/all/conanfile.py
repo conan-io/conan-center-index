@@ -166,10 +166,10 @@ class OusterSdkConan(ConanFile):
         if Version(self.version) >= "0.14.0":
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["ouster_client"].system_libs = ["pthread"]
-            if self.options.eigen_max_align_bytes:
-                self.cpp_info.components["ouster_client"].defines = ["EIGEN_MAX_ALIGN_BYTES=32"]
         else:
             self.cpp_info.components["ouster_client"].requires.extend(["jsoncpp::jsoncpp", "spdlog::spdlog",])
+        if self.options.eigen_max_align_bytes:
+            self.cpp_info.components["ouster_client"].defines = ["EIGEN_MAX_ALIGN_BYTES=32"]
 
         if self.options.build_osf:
             self.cpp_info.components["ouster_osf"].set_property("cmake_target_name", "OusterSDK::ouster_osf")
@@ -201,8 +201,8 @@ class OusterSdkConan(ConanFile):
             self.cpp_info.components["ouster_viz"].requires = [
                 "ouster_client",
                 "glfw::glfw",
+                "glad::glad"
             ]
-            self.cpp_info.components["ouster_viz"].requires.append("glad::glad")
 
         if Version(self.version) >= "0.14.0" and self.options.shared:
             self.cpp_info.components["shared_library"].set_property("cmake_target_name", "OusterSDK::shared_library")
