@@ -28,3 +28,8 @@ patches:
       patch_type: "portability"
       patch_description: "Fix non-const string issue with C++20"
       patch_source: "https://github.com/ouster-lidar/ouster-sdk/pull/579"
+  "0.14.0":
+    - patch_file: "patches/001-0.14.0-link-optional-components.patch"
+      patch_type: "bugfix"
+      patch_description: "Link optional components only when enabled"
+      patch_source: "https://github.com/ouster-lidar/ouster-sdk/pull/656"

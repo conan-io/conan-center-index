@@ -133,29 +133,7 @@ class OusterSdkConan(ConanFile):
         # Allow non-static ouster_osf for consistency with other components
         replace_in_file(self, os.path.join(self.source_folder, "ouster_osf", "CMakeLists.txt"),
                         "add_library(ouster_osf STATIC", "add_library(ouster_osf")
-
-        for component in ["pcap", "osf", "viz"]:
-            replace_in_file(self, os.path.join(self.source_folder, "ouster_library", "CMakeLists.txt"),
-                    f"$<TARGET_OBJECTS:ouster_{component}>", "")
         
-        replace_in_file(self, os.path.join(self.source_folder, "ouster_library", "CMakeLists.txt"),
-        "ouster_library_common(shared_library)"
-,
-"""
-  ouster_library_common(shared_library)
-  if(TARGET ouster_osf)
-      message(STATUS "ouster_osf found, adding to shared_library")
-      target_sources(shared_library PRIVATE $<TARGET_OBJECTS:ouster_osf>)
-  endif()
-  if(TARGET ouster_pcap)
-      message(STATUS "ouster_pcap found, adding to shared_library")
-      target_sources(shared_library PRIVATE $<TARGET_OBJECTS:ouster_pcap>)
-  endif()
-  if(TARGET ouster_viz)
-      message(STATUS "ouster_viz found, adding to shared_library")
-      target_sources(shared_library PRIVATE $<TARGET_OBJECTS:ouster_viz>)
-  endif()
-""")
 
     def build(self):
         self._patch_sources()
@@ -185,6 +163,8 @@ class OusterSdkConan(ConanFile):
         if Version(self.version) >= "0.14.0":
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["ouster_client"].system_libs = ["pthread"]
+            if self.options.eigen_max_align_bytes:
+                self.cpp_info.components["ouster_client"].defines = ["EIGEN_MAX_ALIGN_BYTES=32"]
         else:
             self.cpp_info.components["ouster_client"].requires.extend(["jsoncpp::jsoncpp", "spdlog::spdlog",])
 
