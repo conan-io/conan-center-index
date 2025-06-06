@@ -111,7 +111,7 @@ class CPythonConan(ConanFile):
         if self._supports_modules:
             self.requires("openssl/[>=1.1 <4]")
             self.requires("expat/[>=2.6.2 <3]")
-            self.requires("libffi/3.4.8")
+            self.requires("libffi/3.4.4")
             if Version(self.version) < "3.10" or is_apple_os(self):
                 # FIXME: mpdecimal > 2.5.0 on MacOS causes the _decimal module to not be importable
                 self.requires("mpdecimal/2.5.0")

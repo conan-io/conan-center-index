@@ -241,7 +241,7 @@ class LLVMCoreConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ffi:
-            self.requires("libffi/3.4.8")
+            self.requires("libffi/3.4.6")
         if self.options.get_safe("with_libedit"):
             self.requires("editline/3.1")
         if self.options.with_zlib:
