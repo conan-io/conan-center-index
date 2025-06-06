@@ -89,6 +89,7 @@ class GlslangConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_EXTERNAL"] = False
         tc.variables["SKIP_GLSLANG_INSTALL"] = False
+        tc.cache_variables["GLSLANG_ENABLE_INSTALL"] = True
         tc.variables["ENABLE_SPVREMAPPER"] = self.options.spv_remapper
         tc.variables["ENABLE_GLSLANG_BINARIES"] = self.options.build_executables
         tc.variables["ENABLE_GLSLANG_JS"] = False
@@ -150,7 +151,10 @@ class GlslangConan(ConanFile):
         has_machineindependent = not self.options.shared
         has_genericcodegen = not self.options.shared
         has_osdependent = not self.options.shared
-        has_oglcompiler = not self.options.shared
+
+        # removed - see CHANGES.md
+        has_oglcompiler = not self.options.shared and Version(self.version) <= "1.3.243"
+        has_hlsl = self.options.hlsl and Version(self.version) <= "1.3.243"
 
         # glslang
         self.cpp_info.components["glslang-core"].set_property("cmake_target_name", "glslang::glslang")
@@ -167,9 +171,8 @@ class GlslangConan(ConanFile):
             self.cpp_info.components["glslang-core"].requires.append("osdependent")
         if has_oglcompiler:
             self.cpp_info.components["glslang-core"].requires.append("oglcompiler")
-        if self.options.hlsl:
+        if has_hlsl:
             self.cpp_info.components["glslang-core"].defines.append("ENABLE_HLSL")
-            self.cpp_info.components["glslang-core"].requires.append("hlsl")
 
         if has_machineindependent:
             # MachineIndependent
@@ -208,9 +211,10 @@ class GlslangConan(ConanFile):
             self.cpp_info.components["spirv"].defines.append("ENABLE_OPT")
 
         # HLSL
-        if self.options.hlsl:
+        if has_hlsl:
             self.cpp_info.components["hlsl"].set_property("cmake_target_name", "glslang::HLSL")
             self.cpp_info.components["hlsl"].libs = [f"HLSL{lib_suffix}"]
+            self.cpp_info.components["glslang-core"].requires.append("hlsl")
 
         # SPVRemapper
         if self.options.spv_remapper:
