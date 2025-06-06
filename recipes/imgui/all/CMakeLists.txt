@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.8)
 project(imgui LANGUAGES CXX)
 
+option(BUILD_BINARY_TO_COMPRESSED_C "Build the binary_to_compressed_c executable" ON)
+
 set(MISC_DIR ${IMGUI_SRC_DIR}/misc)
 set(EXTRA_FONTS_DIR ${MISC_DIR}/fonts)
 set(IMGUI_EXPORT_HEADERS imgui_export_headers.h)
@@ -13,10 +15,11 @@ if (MSVC)
     file(GLOB EXTRA_NATVIS_FILES ${MISC_DIR}/natvis/*.natvis)
 endif()
 
-set(BINARY_TO_COMPRESSED_BIN binary_to_compressed_c)
-
-add_executable(${BINARY_TO_COMPRESSED_BIN} ${EXTRA_FONTS_DIR}/binary_to_compressed_c.cpp)
-target_compile_features(${BINARY_TO_COMPRESSED_BIN} PRIVATE cxx_std_11)
+if(BUILD_BINARY_TO_COMPRESSED_C)
+    set(BINARY_TO_COMPRESSED_BIN binary_to_compressed_c)
+    add_executable(${BINARY_TO_COMPRESSED_BIN} ${EXTRA_FONTS_DIR}/binary_to_compressed_c.cpp)
+    target_compile_features(${BINARY_TO_COMPRESSED_BIN} PRIVATE cxx_std_11)
+endif()
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -41,8 +44,10 @@ install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(TARGETS ${BINARY_TO_COMPRESSED_BIN}
+if(BUILD_BINARY_TO_COMPRESSED_C)
+    install(TARGETS ${BINARY_TO_COMPRESSED_BIN}
         DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
 install(FILES ${HEADER_FILES} ${CMAKE_CURRENT_BINARY_DIR}/${IMGUI_EXPORT_HEADERS}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
