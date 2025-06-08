@@ -16,23 +16,30 @@ class ReductCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.reduct.store/docs/getting-started/with-cpp"
     topics = ("reduct-storage", "http-client", "http-api")
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
         "with_chrono": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
         "with_chrono": False,
     }
 
-    implements = ["auto_shared_fpic"]
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+            # Chrono is always used on Windows
+            del self.options.with_chrono
 
     def export_sources(self):
         export_conandata_patches(self)
+
+    @property
+    def _with_chrono(self):
+        # True because removal means that chrono is always used
+        return self.options.get_safe("with_chrono", True)
 
     def requirements(self):
         self.requires("fmt/11.0.2", transitive_headers=True, transitive_libs=True)
@@ -40,7 +47,7 @@ class ReductCppConan(ConanFile):
         self.requires("nlohmann_json/3.11.3")
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
         self.requires("concurrentqueue/1.0.4")
-        if not self.options.with_chrono:
+        if not self._with_chrono:
             self.requires("date/3.0.1")
 
     def validate(self):
@@ -54,25 +61,22 @@ class ReductCppConan(ConanFile):
         if not httplib.options.with_zlib:
             raise ConanInvalidConfiguration("cpp-httplib must be built with zlib")
 
-        if self.options.with_chrono:
+        if not self._with_chrono:
             date = self.dependencies["date"]
             if not date.options.header_only:
                 raise ConanInvalidConfiguration("date must be built as header-only")
 
-        if self.settings.get_safe("os") == "Windows" and not self.options.with_chrono:
-            raise ConanInvalidConfiguration("ReductCpp requires chrono on Windows.")
-
-        elif self.settings.get_safe("compiler") == "gcc":
+        if self.settings.os != "Windows" and self.settings.get_safe("compiler") == "gcc":
             if (
                 self.settings.get_safe("compiler.version") < "14"
-                and self.options.with_chrono
+                and self._with_chrono
             ):
                 raise ConanInvalidConfiguration(
                     "ReductCpp with chrono requires GCC 14 or higher. "
                 )
             elif (
                 self.settings.get_safe("compiler.version") >= "14"
-                and not self.options.with_chrono
+                and not self._with_chrono
             ):
                 raise ConanInvalidConfiguration(
                     "ReductCpp requires chrono with GCC 14 or higher. "
@@ -87,7 +91,7 @@ class ReductCppConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.options.with_chrono:
+        if self._with_chrono:
             tc.cache_variables["REDUCT_CPP_USE_STD_CHRONO"] = True
         tc.cache_variables["REDUCT_CPP_USE_CONAN"] = True
         tc.generate()
