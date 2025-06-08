@@ -1,0 +1,361 @@
+diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
+index 7bb1eedc2..b1d159289 100644
+--- a/cmake/CMakeLists.txt
++++ b/cmake/CMakeLists.txt
+@@ -18,6 +18,20 @@
+ ################################################################################
+ 
+ cmake_minimum_required(VERSION 3.21)
++
++option(VERSION_OVERRIDE "Override the version defined in IfcParse.h with the file VERSION in the repository root" OFF)
++
++if (VERSION_OVERRIDE)
++    file(READ "../VERSION" "RELEASE_VERSION_")
++    string(STRIP "${RELEASE_VERSION_}" RELEASE_VERSION)
++    message(STATUS "Detected version '${RELEASE_VERSION}'")
++else()
++    set(RELEASE_VERSION "0.8.0")
++endif()
++
++project(IfcOpenShell VERSION ${RELEASE_VERSION})
++
++
+ set(CMAKE_CXX_STANDARD 17)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON) # not necessary, but encouraged
+ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+@@ -82,17 +96,6 @@ option(WITH_RELATIONSHIP_VALIDATION "Build IfcConvert with option to validate ge
+ 
+ option(USERSPACE_PYTHON_PREFIX "Installs IfcPython for the current user only instead of system-wide." OFF)
+ option(ADD_COMMIT_SHA "Add commit sha and branch in version number, warning results in many rebuilds, requires git" OFF)
+-option(VERSION_OVERRIDE "Override the version defined in IfcParse.h with the file VERSION in the repository root" OFF)
+-
+-if (VERSION_OVERRIDE)
+-    file(READ "../VERSION" "RELEASE_VERSION_")
+-    string(STRIP "${RELEASE_VERSION_}" RELEASE_VERSION)
+-    message(STATUS "Detected version '${RELEASE_VERSION}'")
+-else()
+-    set(RELEASE_VERSION "0.8.0")
+-endif()
+-
+-project(IfcOpenShell VERSION ${RELEASE_VERSION})
+ 
+ if(MINIMAL_BUILD)
+     message(STATUS "Setting options for minimal build")
+@@ -367,6 +370,8 @@ if(BUILD_IFCGEOM)
+         add_debug_variants(LIBXML2_LIBRARIES "${LIBXML2_LIBRARIES}" d)
+     endif()
+ 
++    find_package(Eigen3 REQUIRED CONFIG)
++
+     # Open CASCADE
+     if(WITH_OPENCASCADE)
+     if("${OCC_INCLUDE_DIR}" STREQUAL "")
+@@ -420,43 +425,47 @@ if(BUILD_IFCGEOM)
+         list(APPEND OPENCASCADE_LIBRARY_NAMES TKDESTEP TKDEIGES)
+     endif(OCC_VERSION_STRING VERSION_LESS 7.8.0)
+ 
+-    if("${OCC_LIBRARY_DIR}" STREQUAL "")
+-        find_library(OCC_LIBRARY TKernel
+-            PATHS
+-                /usr/lib
+-            REQUIRED
+-        )
+-
+-        if(OCC_LIBRARY)
+-            GET_FILENAME_COMPONENT(OCC_LIBRARY_DIR ${OCC_LIBRARY} PATH)
+-            message(STATUS "Found Open CASCADE library files in: ${OCC_LIBRARY_DIR}")
+-        else()
+-            message(FATAL_ERROR "Unable find Open CASCADE library directory, specify OCC_LIBRARY_DIR manually.")
+-        endif()
+-    else()
+-        set(OCC_LIBRARY_DIR ${OCC_LIBRARY_DIR} CACHE FILEPATH "Open CASCADE library files")
+-        message(STATUS "Looking for Open CASCADE library files in: ${OCC_LIBRARY_DIR}")
+-    endif()
++    # if("${OCC_LIBRARY_DIR}" STREQUAL "")
++    #     find_library(OCC_LIBRARY TKernel
++    #         PATHS
++    #             /usr/lib
++    #         REQUIRED
++    #     )
++
++    #     if(OCC_LIBRARY)
++    #         GET_FILENAME_COMPONENT(OCC_LIBRARY_DIR ${OCC_LIBRARY} PATH)
++    #         message(STATUS "Found Open CASCADE library files in: ${OCC_LIBRARY_DIR}")
++    #     else()
++    #         message(FATAL_ERROR "Unable find Open CASCADE library directory, specify OCC_LIBRARY_DIR manually.")
++    #     endif()
++    # else()
++    #     set(OCC_LIBRARY_DIR ${OCC_LIBRARY_DIR} CACHE FILEPATH "Open CASCADE library files")
++    #     message(STATUS "Looking for Open CASCADE library files in: ${OCC_LIBRARY_DIR}")
++    # endif()
+ 
+     clear_wasm_sysroot()
+-    find_library(libTKernel NAMES TKernel TKerneld PATHS ${OCC_LIBRARY_DIR} NO_DEFAULT_PATH)
++    find_package(OpenCASCADE REQUIRED FoundationClasses ModelingData ModelingAlgorithms CONFIG)
++    # find_library(libTKernel NAMES TKernel TKerneld PATHS ${OCC_LIBRARY_DIR} NO_DEFAULT_PATH)
+     restore_wasm_sysroot()
+ 
+-    if(libTKernel)
+-        message(STATUS "Required Open Cascade Library files found")
+-    else()
+-        message(FATAL_ERROR "Unable to find Open Cascade library files, aborting")
+-    endif()
++    # if(libTKernel)
++    #     message(STATUS "Required Open Cascade Library files found")
++    # else()
++    #     message(FATAL_ERROR "Unable to find Open Cascade library files, aborting")
++    # endif()
+ 
+     # Use the found libTKernel as a template for all other OCC libraries
+     # TODO Extract this into macro/function
+-    foreach(lib ${OPENCASCADE_LIBRARY_NAMES})
+-        # Make sure we'll handle the Windows/MSVC debug postfix convention too.
+-        string(REPLACE TKerneld "${lib}" lib_path "${libTKernel}")
+-        string(REPLACE TKernel "${lib}" lib_path "${lib_path}")
+-        list(APPEND OPENCASCADE_LIBRARIES "${lib_path}")
+-    endforeach()
+-
++    set(OPENCASCADE_LIBRARIES ${OPENCASCADE_LIBRARY_NAMES})
++    # foreach(lib ${OPENCASCADE_LIBRARY_NAMES})
++    #     # Make sure we'll handle the Windows/MSVC debug postfix convention too.
++    #     string(REPLACE TKerneld "${lib}" lib_path "${libTKernel}")
++    #     string(REPLACE TKernel "${lib}" lib_path "${lib_path}")
++    #     list(APPEND OPENCASCADE_LIBRARIES "${lib_path}")
++    # endforeach()
++
++    list(APPEND OPENCASCADE_LIBRARIES "Eigen3::Eigen")
++    
+     if(MSVC)
+         add_definitions(-DHAVE_NO_DLL)
+         add_debug_variants(OPENCASCADE_LIBRARIES "${OPENCASCADE_LIBRARIES}" d)
+@@ -469,10 +478,10 @@ if(BUILD_IFCGEOM)
+ 
+     # Make sure cross-referenced symbols between static OCC libraries get
+     # resolved. Also add thread and rt libraries.
+-    get_filename_component(libTKernelExt ${libTKernel} EXT)
+-    if("${libTKernelExt}" STREQUAL ".a")
+-        set(OCCT_STATIC ON)
+-    endif()
++    # get_filename_component(libTKernelExt ${libTKernel} EXT)
++    # if("${libTKernelExt}" STREQUAL ".a")
++    #     set(OCCT_STATIC ON)
++    # endif()
+ 
+     if(OCCT_STATIC)
+         find_package(Threads)
+@@ -584,6 +593,7 @@ if(COLLADA_SUPPORT)
+ endif(COLLADA_SUPPORT)
+ 
+ if(HDF5_SUPPORT)
++    find_package(HDF5 REQUIRED)
+     if("${HDF5_INCLUDE_DIR}" STREQUAL "")
+         message(STATUS "No HDF5 include directory specified")
+     else()
+@@ -613,12 +623,7 @@ if(HDF5_SUPPORT)
+                 set(debug_postfix "_debug")
+             endif()
+ 
+-            set(HDF5_LIBRARIES
+-                "${HDF5_LIBRARY_DIR}/libhdf5_cpp${debug_postfix}.${lib_ext}"
+-                "${HDF5_LIBRARY_DIR}/libhdf5${debug_postfix}.${lib_ext}"
+-                "${HDF5_LIBRARY_DIR}/libz${zlib_post}${debug_postfix}.${lib_ext}"
+-                "${HDF5_LIBRARY_DIR}/libsz${debug_postfix}.${lib_ext}"
+-                "${HDF5_LIBRARY_DIR}/libaec${debug_postfix}.${lib_ext}"
++            set(HDF5_LIBRARIES "HDF5::HDF5"
+             )
+ 
+         else()
+@@ -887,12 +892,14 @@ if(BUILD_CONVERT OR BUILD_IFCPYTHON)
+         foreach(schema ${SCHEMA_VERSIONS})
+             set(GEOM_SERIALIZER_SCHEMA_LIBRARIES ${GEOM_SERIALIZER_SCHEMA_LIBRARIES} GeometrySerializers_ifc${schema})
+ 
+-            add_library(geometry_serializer_ifc${schema} STATIC ../src/ifcgeom/Serialization/schema/Serialization.cpp)
++            add_library(geometry_serializer_ifc${schema} ../src/ifcgeom/Serialization/schema/Serialization.cpp)
+             set_target_properties(geometry_serializer_ifc${schema} PROPERTIES COMPILE_FLAGS "-DIFC_GEOM_EXPORTS -DIfcSchema=Ifc${schema}")
+             list(APPEND geometry_serializer_libraries geometry_serializer_ifc${schema})
++            target_link_libraries(geometry_serializer_ifc${schema} TKBRep)
+         endforeach()
+ 
+-        add_library(geometry_serializer STATIC ../src/ifcgeom/Serialization/Serialization.cpp)
++        add_library(geometry_serializer ../src/ifcgeom/Serialization/Serialization.cpp)
++        file(GLOB IFCGEOM_SERIALIZATION_H_FILE ../src/ifcgeom/Serialization/*.h)
+         target_link_libraries(geometry_serializer ${geometry_serializer_libraries})
+         set(IFCOPENSHELL_LIBRARIES ${IFCOPENSHELL_LIBRARIES} geometry_serializer ${geometry_serializer_libraries})
+     endif()
+@@ -942,10 +949,10 @@ endif()
+ 
+ if(BUILD_IFCGEOM)
+     if(WITH_CGAL)
+-	clear_wasm_sysroot()
++        clear_wasm_sysroot()
+         find_library(libGMP NAMES gmp mpir PATHS ${GMP_LIBRARY_DIR} NO_DEFAULT_PATH)
+         find_library(libMPFR NAMES mpfr PATHS ${MPFR_LIBRARY_DIR} NO_DEFAULT_PATH)
+-	restore_wasm_sysroot()
++        restore_wasm_sysroot()
+         if(NOT libGMP)
+             message(FATAL_ERROR "Unable to find GMP library files, aborting")
+         endif()
+@@ -979,7 +986,7 @@ if(BUILD_IFCGEOM)
+             # needed?
+             # if(NOT WASM_BUILD)
+             # endif()
+-            target_link_libraries(geometry_kernel_${kernel}_simple ${${KERNEL_UPPER}_LIBRARIES})
++            target_link_libraries(geometry_kernel_${kernel}_simple ${${KERNEL_UPPER}_LIBRARIES} "Eigen3::Eigen")
+             list(APPEND kernel_libraries geometry_kernel_${kernel}_simple)
+         endif()
+     endforeach()
+@@ -991,7 +998,7 @@ if(BUILD_IFCGEOM)
+         file(GLOB IFCGEOM_CPP_FILES ../src/ifcgeom/mapping/*.cpp)
+         set(IFCGEOM_FILES ${IFCGEOM_CPP_FILES} ${IFCGEOM_H_FILES} ${IFCGEOM_I_FILES})
+         
+-        add_library(geometry_mapping_ifc${schema} STATIC ${IFCGEOM_FILES})
++        add_library(geometry_mapping_ifc${schema} ${IFCGEOM_FILES})
+         set_target_properties(geometry_mapping_ifc${schema} PROPERTIES COMPILE_FLAGS "-DIFC_GEOM_EXPORTS -DIfcSchema=Ifc${schema}")
+         target_link_libraries(geometry_mapping_ifc${schema} IfcParse)
+         list(APPEND mapping_libraries geometry_mapping_ifc${schema})
+@@ -1010,9 +1017,9 @@ if(BUILD_IFCGEOM)
+     endif()
+ 
+     if(WASM_BUILD)
+-        target_link_libraries(IfcGeom ${kernel_libraries} ${mapping_libraries} ${CMAKE_THREAD_LIBS_INIT})
++        target_link_libraries(IfcGeom ${kernel_libraries} ${mapping_libraries} ${CMAKE_THREAD_LIBS_INIT} "Eigen3::Eigen")
+     else()
+-        target_link_libraries(IfcGeom IfcParse ${kernel_libraries} ${mapping_libraries} ${CMAKE_THREAD_LIBS_INIT})
++        target_link_libraries(IfcGeom IfcParse ${kernel_libraries} ${mapping_libraries} ${CMAKE_THREAD_LIBS_INIT} "Eigen3::Eigen")
+     endif()
+ 
+ endif(BUILD_IFCGEOM)
+@@ -1027,7 +1034,7 @@ if(BUILD_CONVERT OR BUILD_IFCPYTHON)
+     set(SERIALIZERS_S_FILES ${SERIALIZERS_S_H_FILES} ${SERIALIZERS_S_CPP_FILES})
+ 
+     foreach(schema ${SCHEMA_VERSIONS})
+-        add_library(Serializers_ifc${schema} STATIC ${SERIALIZERS_S_FILES})
++        add_library(Serializers_ifc${schema} ${SERIALIZERS_S_FILES})
+         set_target_properties(Serializers_ifc${schema} PROPERTIES COMPILE_FLAGS "-DIFC_GEOM_EXPORTS -DIfcSchema=Ifc${schema}")
+         
+         if(WASM_BUILD)
+@@ -1105,12 +1112,12 @@ if(BUILD_CONVERT)
+         set_property(TARGET IfcConvert APPEND_STRING PROPERTY COMPILE_FLAGS " -DIFOPSH_WITH_CITYJSON")
+     endif()
+ 
+-    if((NOT WIN32) AND BUILD_SHARED_LIBS)
+-        # Only set RPATHs when building shared libraries (i.e. IfcParse and
+-        # IfcGeom are dynamically linked). Not necessarily a perfect solution
+-        # but probably a good indication of whether RPATHs are necessary.
+-        SET_INSTALL_RPATHS(IfcConvert "${IFCOPENSHELL_LIBRARY_DIR};${OCC_LIBRARY_DIR};${Boost_LIBRARY_DIRS};${OPENCOLLADA_LIBRARY_DIR}")
+-    endif()
++    # if((NOT WIN32) AND BUILD_SHARED_LIBS)
++    #     # Only set RPATHs when building shared libraries (i.e. IfcParse and
++    #     # IfcGeom are dynamically linked). Not necessarily a perfect solution
++    #     # but probably a good indication of whether RPATHs are necessary.
++    #     SET_INSTALL_RPATHS(IfcConvert "${IFCOPENSHELL_LIBRARY_DIR};${OCC_LIBRARY_DIR};${Boost_LIBRARY_DIRS};${OPENCOLLADA_LIBRARY_DIR}")
++    # endif()
+ 
+     install(TARGETS IfcConvert
+         ARCHIVE DESTINATION ${LIBDIR}
+@@ -1127,9 +1134,9 @@ if(BUILD_GEOMSERVER)
+     add_executable(IfcGeomServer ${SOURCE_FILES})
+     target_link_libraries(IfcGeomServer ${IFCOPENSHELL_LIBRARIES} ${OPENCASCADE_LIBRARIES} ${Boost_LIBRARIES})
+ 
+-    if((NOT WIN32) AND BUILD_SHARED_LIBS)
+-        SET_INSTALL_RPATHS(IfcGeomServer "${IFCOPENSHELL_LIBRARY_DIR};${OCC_LIBRARY_DIR};${Boost_LIBRARY_DIRS}")
+-    endif()
++    # if((NOT WIN32) AND BUILD_SHARED_LIBS)
++    #     SET_INSTALL_RPATHS(IfcGeomServer "${IFCOPENSHELL_LIBRARY_DIR};${OCC_LIBRARY_DIR};${Boost_LIBRARY_DIRS}")
++    # endif()
+ 
+     install(TARGETS IfcGeomServer
+         ARCHIVE DESTINATION ${LIBDIR}
+@@ -1208,9 +1215,9 @@ if(BUILD_IFCMAX)
+     add_subdirectory(../src/ifcmax ifcmax)
+ endif()
+ 
+-if(WITH_CGAL)
+-    add_subdirectory(../src/svgfill svgfill)        
+-endif()
++# if(WITH_CGAL)
++#     add_subdirectory(../src/svgfill svgfill)        
++# endif()
+ 
+ if(BUILD_QTVIEWER)
+     add_subdirectory(../src/qtviewer qtviewer)
+@@ -1228,14 +1235,18 @@ install(TARGETS IfcParse
+ )
+ 
+ if(BUILD_IFCGEOM)
+-    # install(FILES ${IFCGEOM_H_FILES}
+-    #     DESTINATION ${INCLUDEDIR}/ifcgeom
+-    # )
++    install(FILES ${IFCGEOM_H_FILES}
++        DESTINATION ${INCLUDEDIR}/ifcgeom
++    )
+ 
+     install(FILES ${SCHEMA_AGNOSTIC_H_FILES}
+         DESTINATION ${INCLUDEDIR}/ifcgeom
+     )
+ 
++    install(FILES ${IFCGEOM_SERIALIZATION_H_FILE}
++        DESTINATION ${INCLUDEDIR}/ifcgeom/Serialization
++    )   
++
+     foreach(kernel ${GEOMETRY_KERNELS})
+         file(GLOB IFCGEOM_H_FILES ../src/ifcgeom/kernels/${kernel}/*.h)
+          install(FILES ${IFCGEOM_H_FILES}
+diff --git a/src/ifcwrap/CMakeLists.txt b/src/ifcwrap/CMakeLists.txt
+index 187f0f958..7940104ee 100644
+--- a/src/ifcwrap/CMakeLists.txt
++++ b/src/ifcwrap/CMakeLists.txt
+@@ -111,28 +111,28 @@ IF((PYTHONINTERP_FOUND AND NOT "${PYTHON_EXECUTABLE}" STREQUAL "") OR PYTHON_MOD
+             set(python_package_dir ${CMAKE_INSTALL_LIBDIR}/python${PYTHON_VERSION_MAJOR}/dist-packages/)
+         endif()
+     endif()
+-    IF("${python_package_dir}" STREQUAL "")
+-        MESSAGE(WARNING "Unable to locate Python site-package directory, unable to install the Python wrapper")
+-    ELSE()
+-        FILE(GLOB_RECURSE sourcefiles 
+-            "${CMAKE_CURRENT_SOURCE_DIR}/../ifcopenshell-python/ifcopenshell/*"
+-        )
+-        FOREACH(file ${sourcefiles})
+-            FILE(RELATIVE_PATH relative "${CMAKE_CURRENT_SOURCE_DIR}/../ifcopenshell-python/ifcopenshell/" "${file}")
+-            GET_FILENAME_COMPONENT(dir "${relative}" DIRECTORY)
+-            if(NOT IS_DIRECTORY "${file}")
+-			    INSTALL(FILES "${file}"
+-                        DESTINATION "${python_package_dir}/ifcopenshell/${dir}")
+-            endif()
+-        ENDFOREACH()
+-        INSTALL(FILES "${CMAKE_BINARY_DIR}/ifcwrap/ifcopenshell_wrapper.py"
+-                DESTINATION "${python_package_dir}/ifcopenshell")
+-        INSTALL(TARGETS ${SWIG_MODULE_ifcopenshell_wrapper_REAL_NAME}
+-                DESTINATION "${python_package_dir}/ifcopenshell")
+-	if (MSVC)
+-	    INSTALL(FILES $<TARGET_PDB_FILE:${SWIG_MODULE_ifcopenshell_wrapper_REAL_NAME}> DESTINATION bin OPTIONAL)
+-	endif()
+-    ENDIF()
++    # IF("${python_package_dir}" STREQUAL "")
++    #     MESSAGE(WARNING "Unable to locate Python site-package directory, unable to install the Python wrapper")
++    # ELSE()
++    #     FILE(GLOB_RECURSE sourcefiles 
++    #         "${CMAKE_CURRENT_SOURCE_DIR}/../ifcopenshell-python/ifcopenshell/*"
++    #     )
++    #     FOREACH(file ${sourcefiles})
++    #         FILE(RELATIVE_PATH relative "${CMAKE_CURRENT_SOURCE_DIR}/../ifcopenshell-python/ifcopenshell/" "${file}")
++    #         GET_FILENAME_COMPONENT(dir "${relative}" DIRECTORY)
++    #         if(NOT IS_DIRECTORY "${file}")
++	# 		    INSTALL(FILES "${file}"
++    #                     DESTINATION "${python_package_dir}/ifcopenshell/${dir}")
++    #         endif()
++    #     ENDFOREACH()
++    #     INSTALL(FILES "${CMAKE_BINARY_DIR}/ifcwrap/ifcopenshell_wrapper.py"
++    #             DESTINATION "${python_package_dir}/ifcopenshell")
++    #     INSTALL(TARGETS ${SWIG_MODULE_ifcopenshell_wrapper_REAL_NAME}
++    #             DESTINATION "${python_package_dir}/ifcopenshell")
++	# if (MSVC)
++	#     INSTALL(FILES $<TARGET_PDB_FILE:${SWIG_MODULE_ifcopenshell_wrapper_REAL_NAME}> DESTINATION bin OPTIONAL)
++	# endif()
++    # ENDIF()
+ ELSE()
+     MESSAGE(WARNING "No Python interpreter found, unable to install the Python wrapper")
+ ENDIF()
+-- 
+2.43.0
+
