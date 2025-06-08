@@ -1,0 +1,65 @@
+From 3305a5e4a9ebd7d1a66099396c1ff2d3f479f602 Mon Sep 17 00:00:00 2001
+From: Esteban DUGUEPEROUX <esteban.dugueperoux@gmail.com>
+Date: Thu, 11 Dec 2025 22:42:02 +0100
+Subject: [PATCH] cmake: Remove specific FindPackage
+
+---
+ cmake/CMakeLists.txt | 24 ------------------------
+ 1 file changed, 24 deletions(-)
+
+diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
+index e1e06b04e..721358073 100644
+--- a/cmake/CMakeLists.txt
++++ b/cmake/CMakeLists.txt
+@@ -53,9 +53,6 @@ if(NOT CMAKE_BUILD_TYPE)
+     set(CMAKE_BUILD_TYPE "Release")
+ endif()
+ 
+-# Include utility macros and functions
+-include(utilities.cmake)
+-
+ # use extra version to make pre-release using eg semver
+ if(NOT DEFINED EXTRA_VERSION)
+     set(EXTRA_VERSION "-alpha.3")
+@@ -103,9 +100,6 @@ set(
+     "Directory to install IfcPython package to. By default package is installed in found Python's site-packages."
+ )
+ 
+-# Make sure CMake modules in this project are found first
+-list(PREPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
+-
+ if(MINIMAL_BUILD)
+     message(STATUS "Setting options for minimal build")
+     set(BUILD_GEOMSERVER OFF)
+@@ -182,22 +176,6 @@ if(BUILD_SHARED_LIBS)
+     endif()
+ endif()
+ 
+-UNIFY_ENVVARS_AND_CACHE(BOOST_ROOT)
+-
+-if(NOT MINIMAL_BUILD)
+-    UNIFY_ENVVARS_AND_CACHE(PYTHON_INCLUDE_DIR)
+-    UNIFY_ENVVARS_AND_CACHE(PYTHON_LIBRARY)
+-    UNIFY_ENVVARS_AND_CACHE(PYTHON_EXECUTABLE)
+-endif()
+-
+-# Get a list of all OPTION flags from the CMakeLists.txt
+-get_all_option_flags(option_flags)
+-
+-# Loop through the list of OPTION flags and convert the corresponding environment variables
+-foreach(option_flag IN LISTS option_flags)
+-    convert_env_var_to_bool("${option_flag}")
+-endforeach()
+-
+ 
+ if(BUILD_IFCGEOM AND WITH_OPENCASCADE)
+     find_package(OpenCASCADE REQUIRED)
+@@ -683,5 +661,3 @@ set(CPACK_DEBIAN_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}")
+ # set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_SOURCE_DIR}/cmake/debian/postinst")
+ 
+ include(CPack)
+-
+-include(package_export.cmake)
+-- 
+2.43.0
+

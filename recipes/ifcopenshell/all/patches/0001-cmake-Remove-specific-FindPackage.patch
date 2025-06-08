@@ -1,0 +1,15 @@
+--- a/src/ifcwrap/CMakeLists.txt
++++ b/src/ifcwrap/CMakeLists.txt
+@@ -148,9 +148,6 @@ else()
+ target_link_libraries(ifcopenshell_wrapper PRIVATE ${IFCOPENSHELL_LIBRARIES} ${LIBSVGFILL})
+ endif()
+ target_link_libraries(ifcopenshell_wrapper PRIVATE ${CGAL_LIBRARIES})
+-if ((NOT WIN32) AND BUILD_SHARED_LIBS)
+-    SET_INSTALL_RPATHS(ifcopenshell_wrapper "${IFCDIRS};${OCC_LIBRARY_DIR}")
+-endif()
+ 
+ # Try to find the Python interpreter to get the site-packages
+ # directory in which the wrapper can be installed.
+-- 
+2.43.0
+
