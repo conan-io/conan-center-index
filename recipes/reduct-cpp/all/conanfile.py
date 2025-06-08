@@ -1,5 +1,4 @@
 import os
-from os.path import join
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
