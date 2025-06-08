@@ -23,11 +23,13 @@ class mdnsdConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "compile_as_cpp": [True, False],
+        "logging_level": ["Fatal", "Error", "Warning", "Info", "Debug", "Trace"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "compile_as_cpp": False,
+        "logging_level": "Info",
     }
 
     def export_sources(self):
@@ -50,10 +52,21 @@ class mdnsdConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def _get_log_level(self):
+        return {
+            "Fatal": "600",
+            "Error": "500",
+            "Warning": "400",
+            "Info": "300",
+            "Debug": "200",
+            "Trace": "100"
+        }.get(str(self.options.logging_level), "300")
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["MDNSD_ENABLE_SANITIZERS"] = False
         tc.variables["MDNSD_COMPILE_AS_CXX"] = self.options.compile_as_cpp
+        tc.variables["MDNSD_LOGLEVEL"] = self._get_log_level()
         tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         if Version(self.version) > "0.8.4": # pylint: disable=conan-unreachable-upper-version
             raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
