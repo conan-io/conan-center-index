@@ -73,8 +73,9 @@ class MlpackConan(ConanFile):
     def _configure_headers(self):
         # https://github.com/mlpack/mlpack/blob/4.3.0/src/mlpack/config.hpp
         config_hpp = os.path.join(self.package_folder, "include", "mlpack", "config.hpp")
-        replace_in_file(self, config_hpp, "// #define MLPACK_HAS_STB", "#define MLPACK_HAS_STB")
-        replace_in_file(self, config_hpp, "// #define MLPACK_HAS_NO_STB_DIR", "// #define MLPACK_HAS_NO_STB_DIR")
+        if Version(self.version) < "4.6.0":
+            replace_in_file(self, config_hpp, "// #define MLPACK_HAS_STB", "#define MLPACK_HAS_STB")
+            replace_in_file(self, config_hpp, "// #define MLPACK_HAS_NO_STB_DIR", "// #define MLPACK_HAS_NO_STB_DIR")
 
     def package(self):
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
