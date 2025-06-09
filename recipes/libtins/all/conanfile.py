@@ -121,3 +121,7 @@ class LibTinsConan(ConanFile):
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("TINS_STATIC")
             self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi"])
+        if self.options.with_tcp_stream_custom_data:
+            self.cpp_info.defines.append("TINS_HAVE_TCP_STREAM_CUSTOM_DATA")
+        if self.options.with_ack_tracker:
+            self.cpp_info.defines.append("TINS_HAVE_ACK_TRACKER")
