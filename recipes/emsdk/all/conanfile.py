@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
-from conan.tools.env import Environment
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import chdir, copy, get, replace_in_file
 from conan.tools.layout import basic_layout
 from pathlib import Path
@@ -17,13 +17,9 @@ class EmSDKConan(ConanFile):
     homepage = "https://github.com/kripken/emscripten"
     topics = ("emsdk", "emscripten", "sdk")
     license = "MIT"
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-
     short_paths = True
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -76,6 +72,13 @@ class EmSDKConan(ConanFile):
         env.define_path("EM_CACHE", self._em_cache)
         env.vars(self, scope="emsdk").save_script("emsdk_env_file")
 
+        if cross_building(self):
+            env = VirtualBuildEnv(self)
+            # If cross-compiling, we need to set EMSDK_ARCH
+            # This is important for the emsdk install command
+            env.environment().define("EMSDK_ARCH", str(self.settings.arch))
+            env.generate()
+
     def _tools_for_version(self):
         ret = {}
         # Select release-upstream from version (wasm-binaries)
@@ -95,7 +98,7 @@ class EmSDKConan(ConanFile):
 
     def build(self):
         with chdir(self, self.source_folder):
-            emsdk = "emsdk.bat" if self._settings_build.os == "Windows" else "./emsdk"
+            emsdk = "emsdk.bat" if self.settings_build.os == "Windows" else "./emsdk"
             # Install required tools
             required_tools = self._tools_for_version()
             for value in required_tools.values():

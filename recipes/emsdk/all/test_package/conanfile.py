@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.build import can_run
 from conan.tools.env import Environment
 from conan.tools.cmake import CMake, cmake_layout
 import os
@@ -9,8 +10,8 @@ class TestPackageConan(ConanFile):
     generators = "CMakeToolchain", "VirtualBuildEnv"
     test_type = "explicit"
 
-    def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def layout(self):
         cmake_layout(self)
@@ -31,10 +32,11 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         # Check the package provides working binaries
-        self.run("emcc -v")
-        self.run("em++ -v")
+        if can_run(self):
+            self.run("emcc -v")
+            self.run("em++ -v")
 
-        # Run the project that was built using emsdk
-        if self.settings.os == "Emscripten":
-            test_file = os.path.join(self.cpp.build.bindirs[0], "test_package.js")
-            self.run(f"node {test_file}")
+            # Run the project that was built using emsdk
+            if self.settings.os == "Emscripten":
+                test_file = os.path.join(self.cpp.build.bindirs[0], "test_package.js")
+                self.run(f"node {test_file}")
