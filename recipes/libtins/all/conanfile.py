@@ -85,6 +85,7 @@ class LibTinsConan(ConanFile):
         tc.variables["LIBTINS_ENABLE_WPA2"] = self.options.with_wpa2
         tc.variables["LIBTINS_ENABLE_DOT11"] = self.options.with_dot11
         tc.variables["PCAP_LIBRARY"] = "libpcap::libpcap"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("libpcap", "cmake_file_name", "PCAP")
