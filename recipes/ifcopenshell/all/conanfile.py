@@ -1,14 +1,15 @@
+
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
-import os
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
 
+required_conan_version = ">=2.1"
 
-required_conan_version = ">=2.0.9"
+IFC_SCHEMAS = sorted(["2x3", "4", "4x1", "4x2", "4x3", "4x3_tc1", "4x3_add1", "4x3_add2"])
 
 class IfcopenshellConan(ConanFile):
     name = "ifcopenshell"
@@ -16,134 +17,114 @@ class IfcopenshellConan(ConanFile):
     license = "LGPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://ifcopenshell.org/"
-    topics = ("ifc", "bim", "topic3")
+    topics = ("ifc", "bim")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "schemas": ["ANY"],
-        "with_ifcgeom": [True, False],
-        "with_opencascade": [True, False],
+        "build_ifcgeom": [True, False],
+        "build_convert": [True, False],
+        "ifcxml_support": [True, False],
+        "use_mmap": [True, False],
         "with_cgal": [True, False],
-        "with_ifcxml": [True, False],
-        "with_hdf5_support": [True, False],
+        "with_hdf5": [True, False],       
     }
+    options.update({f"schema_{schema}": [True, False] for schema in IFC_SCHEMAS})
     default_options = {
         "shared": False,
         "fPIC": True,
-        "schemas": ["2x3", "4", "4x1", "4x2", "4x3", "4x3_tc1", "4x3_add1", "4x3_add2"],
-        "with_ifcgeom": True,
-        "with_opencascade": True,
+        "build_ifcgeom": True,
+        "build_convert": True,
+        "ifcxml_support": True,
+        "use_mmap": True,
         "with_cgal": True,
-        "with_ifcxml": True,
-        "with_hdf5_support": True,
-    }
+        "with_hdf5": True,
+    }   
+    # Limit the default set of schemas to the basic ones and the latest to limit the size of the build.
+    default_options.update({f"schema_{schema}": schema in ["4x3_add2"] for schema in IFC_SCHEMAS})
 
     @property
-    def _all_supported_ifc_schemas(self):
-        return sorted(["2x3", "4", "4x1", "4x2", "4x3", "4x3_tc1", "4x3_add1", "4x3_add2"])
-
-    def _supported_ifc_schemas(self, info=False):
-        options = self.info.options if info else self.options
-        return sorted(set(str(options.schemas).split(",")))
-    
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
+    def _selected_ifc_schemas(self):
+        return [schema for schema in IFC_SCHEMAS if self.options.get_safe(f"schema_{schema}")]
 
     def export_sources(self):
         export_conandata_patches(self)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-        self.options.schemas = ",".join(self._all_supported_ifc_schemas)
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-
+        if not self.options.build_ifcgeom:
+            del self.options.with_cgal
+        if not self.options.build_convert:
+            del self.options.with_hdf5
+    
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def package_id(self):
-        # normalize the schemas option (sorted+comma separated)
-        self.info.options.schemas = ",".join(self._supported_ifc_schemas(info=True))
-
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
-        unsupported_schemas = [schema for schema in self._supported_ifc_schemas() if schema not in self._all_supported_ifc_schemas]
-        if unsupported_schemas:
-            raise ConanInvalidConfiguration(
-                f"Invalid schema(s) in schemas option: {unsupported_schemas}\n"
-                f"Valid supported ifc schemas are: {self._all_supported_ifc_schemas}")
+        check_min_cppstd(self, 17)
+        if self.options.build_convert and not self.options.build_ifcgeom:
+            raise ConanInvalidConfiguration("build_convert requires build_ifcgeom to be enabled")
 
     def requirements(self):
-        if self.options.with_hdf5_support:
-            self.requires("hdf5/1.14.6")
-        if self.options.with_ifcgeom:
-            if self.options.with_opencascade:
-                self.requires("opencascade/7.9.1")
-            if self.options.with_cgal:
-                self.requires("cgal/6.0.1")
-                self.requires("gmp/6.3.0")
-                self.requires("mpfr/4.2.1")
+        self.requires("boost/1.83.0", transitive_headers=True, transitive_libs=True)
+        if self.options.get_safe("with_hdf5"):
+            # Used in public serializers/HdfSerializer.h, ifcgeom/kernels/opencascade/IfcGeomTree.h
+            self.requires("hdf5/[^1.8]", transitive_headers=True, transitive_libs=True)
+        if self.options.build_ifcgeom:
+            self.requires("opencascade/[^7.5]", transitive_headers=True, transitive_libs=True)
+            # ifcgeom/taxonomy.h
             self.requires("eigen/3.4.0", transitive_headers=True)
-        self.requires("boost/1.83.0")
-        if self.options.with_ifcgeom or self.options.with_ifcxml:
-            self.requires("libxml2/2.13.6")
+            if self.options.with_cgal:
+                # Used in ifcgeom/kernels/cgal public headers
+                self.requires("cgal/[>=5.6]", transitive_headers=True, transitive_libs=True)
+                self.requires("gmp/[^6.3.0]")
+                self.requires("mpfr/[^4.2.1]")
+        if self.options.build_ifcgeom or self.options.ifcxml_support:
+            self.requires("libxml2/[^2.12.5]")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=4 <5]")
+        self.tool_requires("cmake/[>=3.21 <5]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
+        replace_in_file(self, "cmake/CMakeLists.txt", "set(CMAKE_CXX_STANDARD 17)", "")
 
     def generate(self):
+        def includedir(dep):
+            return self.dependencies[dep].cpp_info.includedirs[0].replace("\\", "/")
+
+        def libdir(dep):
+            return self.dependencies[dep].cpp_info.libdirs[0].replace("\\", "/")
+
         tc = CMakeToolchain(self)
-        tc.variables["SCHEMA_VERSIONS"] = ";".join(self._supported_ifc_schemas())
-        tc.variables["BUILD_IFCGEOM"] = self.options.with_ifcgeom
-        tc.variables["WITH_OPENCASCADE"] = self.options.with_opencascade
-        tc.variables["WITH_CGAL"] = self.options.with_cgal
-        if self.options.with_cgal:
-            tc.variables["CGAL_INCLUDE_DIR"] = self.dependencies['cgal'].cpp_info.includedirs[0]
-            tc.variables["CGAL_LIBRARY_DIR"] = self.dependencies['cgal'].cpp_info.libdirs[0]
-
-            tc.variables["GMP_INCLUDE_DIR"] = self.dependencies['gmp'].cpp_info.includedirs[0]
-            tc.variables["GMP_LIBRARY_DIR"] = self.dependencies['gmp'].cpp_info.libdirs[0]
-            
-            tc.variables["MPFR_INCLUDE_DIR"] = self.dependencies['mpfr'].cpp_info.includedirs[0]
-            tc.variables["MPFR_LIBRARY_DIR"] = self.dependencies['mpfr'].cpp_info.libdirs[0]
-
-        tc.variables["IFCXML_SUPPORT"] = self.options.with_ifcxml
-        tc.variables["COLLADA_SUPPORT"] = False
+        tc.variables["BUILD_IFCGEOM"] = self.options.build_ifcgeom
+        tc.variables["BUILD_CONVERT"] = self.options.build_convert
+        tc.variables["BUILD_GEOMSERVER"] = False
         tc.variables["BUILD_IFCPYTHON"] = False
         tc.variables["BUILD_EXAMPLES"] = False
-        if self.options.with_ifcgeom:
-            tc.variables["EIGEN_DIR"] = self.dependencies["eigen"].cpp_info.includedirs[0] + "/eigen3/"
-
-        if self.options.with_hdf5_support:
-            tc.variables["HDF5_SUPPORT"] = self.options.with_hdf5_support
-            tc.variables["HDF5_INCLUDE_DIR"] = self.dependencies['hdf5'].cpp_info.includedirs[0]
-            tc.variables["HDF5_LIBRARY_DIR"] = self.dependencies['hdf5'].cpp_info.libdirs[0]
+        tc.variables["IFCXML_SUPPORT"] = self.options.ifcxml_support
+        tc.variables["USE_MMAP"] = self.options.use_mmap
+        tc.variables["SCHEMA_VERSIONS"] = ";".join(self._selected_ifc_schemas)
+        tc.variables["WITH_OPENCASCADE"] = self.options.build_ifcgeom
+        tc.variables["WITH_CGAL"] = self.options.get_safe("with_cgal")
+        tc.variables["HDF5_SUPPORT"] = self.options.get_safe("with_hdf5")
+        tc.variables["COLLADA_SUPPORT"] = False
+        if self.options.build_ifcgeom:
+            tc.variables["EIGEN_DIR"] = includedir("eigen") + "/eigen3/"
+        if self.options.get_safe("with_cgal"):
+            tc.variables["CGAL_INCLUDE_DIR"] = includedir("cgal")
+            tc.variables["CGAL_LIBRARY_DIR"] = libdir("cgal")
+            tc.variables["GMP_INCLUDE_DIR"] = includedir("gmp")
+            tc.variables["GMP_LIBRARY_DIR"] = libdir("gmp")
+            tc.variables["MPFR_INCLUDE_DIR"] = includedir("mpfr")
+            tc.variables["MPFR_LIBRARY_DIR"] = libdir("mpfr")
+        if self.options.get_safe("with_hdf5"):
+            tc.variables["HDF5_INCLUDE_DIR"] = includedir("hdf5")
+            tc.variables["HDF5_LIBRARY_DIR"] = libdir("hdf5")
+        tc.generate()
 
         tc.generate()
 
@@ -156,63 +137,93 @@ class IfcopenshellConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING*", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
+        # No official CMake or .pc config exported. Based on CPack values for consistency.
+        self.cpp_info.set_property("cmake_file_name", "IfcOpenShell")
+
+        def _add_component(name, requires=None):
+            component = self.cpp_info.components[name]
+            component.set_property("cmake_target_name", name)
+            component.libs = [name]
+            component.requires = requires or []
+            return component
+
+        ifcparse = _add_component("IfcParse", requires=[
+            "boost::system",
+            "boost::program_options",
+            "boost::regex",
+            "boost::thread",
+            "boost::date_time",
+        ])
+        if self.options.use_mmap:
+            ifcparse.requires.extend(["boost::iostreams", "boost::filesystem",])
+            ifcparse.defines.append("USE_MMAP")
+        if self.options.ifcxml_support:
+            ifcparse.requires.append("libxml2::libxml2")
+            ifcparse.defines.append("WITH_IFCXML")
+        ifcparse.defines.append(f"SCHEMA_SEQ=({')('.join(self._selected_ifc_schemas)})")
+        for schema in self._selected_ifc_schemas:
+            ifcparse.defines.append(f"HAS_SCHEMA_{schema}")
+        if self.options.shared:
+            ifcparse.defines.append("IFC_SHARED_BUILD")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            if self.options.with_ifcgeom:
-                self.cpp_info.system_libs.append("pthread")
+            ifcparse.system_libs = ["m", "dl"]
 
-        self.cpp_info.components["IfcParse"].libs = ["IfcParse"]
-        self.cpp_info.components["IfcParse"].requires = ["boost::boost", "libxml2::libxml2"]
-        # self.cpp_info.components["IfcParse"].defines.append(f"SCHEMA_SEQ=({")(".join(self._supported_ifc_schemas())})")
-        for schema in self._supported_ifc_schemas():
-            self.cpp_info.components["IfcParse"].defines.append(f"HAS_SCHEMA_{schema}")
-
-        if self.options.with_ifcgeom:
-            for schema in self._supported_ifc_schemas():
-                component_name = f"geometry_mapping_ifc{schema}"
-                self.cpp_info.components[component_name].libs = [component_name]
-                self.cpp_info.components[component_name].requires = ["IfcParse"]
+        if self.options.build_ifcgeom:
+            ifcgeom = _add_component("IfcGeom", requires=["IfcParse", "eigen::eigen"])
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                ifcgeom.system_libs.append("pthread")
 
             if self.options.with_cgal:
-                self.cpp_info.components["geometry_kernel_cgal"].libs = ["geometry_kernel_cgal"]
-                self.cpp_info.components["geometry_kernel_cgal"].requires = ["cgal::cgal", "mpfr::mpfr", "gmp::gmp", "eigen::eigen"]
+                _add_component("geometry_kernel_cgal", requires=["cgal::cgal", "mpfr::mpfr", "gmp::gmp", "eigen::eigen",])
+                ifcgeom.requires.append("geometry_kernel_cgal")
+                simple = _add_component("geometry_kernel_cgal_simple", requires=["cgal::cgal", "gmp::gmp", "eigen::eigen",])
+                simple.defines.append("IFOPSH_SIMPLE_KERNEL")
+                ifcgeom.requires.append("geometry_kernel_cgal_simple")
 
-                self.cpp_info.components["geometry_kernel_cgal_simple"].libs = ["geometry_kernel_cgal_simple"]
-                self.cpp_info.components["geometry_kernel_cgal_simple"].requires = ["cgal::cgal", "mpfr::mpfr", "gmp::gmp", "eigen::eigen"]
+            _add_component("geometry_kernel_opencascade", requires=[
+                "opencascade::occt_tkernel",
+                "opencascade::occt_tkmath",
+                "opencascade::occt_tkbrep",
+                "opencascade::occt_tkgeombase",
+                "opencascade::occt_tkgeomalgo",
+                "opencascade::occt_tkg3d",
+                "opencascade::occt_tkg2d",
+                "opencascade::occt_tkshhealing",
+                "opencascade::occt_tktopalgo",
+                "opencascade::occt_tkmesh",
+                "opencascade::occt_tkprim",
+                "opencascade::occt_tkbool",
+                "opencascade::occt_tkbo",
+                "opencascade::occt_tkfillet",
+                "opencascade::occt_tkxsbase",
+                "opencascade::occt_tkoffset",
+                "opencascade::occt_tkhlr",
+                "eigen::eigen",
+            ])
+            ifcgeom.requires.append("geometry_kernel_opencascade")
+            ifcgeom.defines.append("IFOPSH_WITH_OPENCASCADE")
 
-            if self.options.with_opencascade:
-                self.cpp_info.components["geometry_kernel_opencascade"].libs = ["geometry_kernel_opencascade"]
-                self.cpp_info.components["geometry_kernel_opencascade"].requires = ["opencascade::occt_tkernel", "opencascade::occt_tkmath", "opencascade::occt_tkbrep", "opencascade::occt_tkgeombase", "opencascade::occt_tkgeomalgo", "opencascade::occt_tkg3d", "opencascade::occt_tkg2d", "opencascade::occt_tkshhealing", "opencascade::occt_tktopalgo", "opencascade::occt_tkmesh", "opencascade::occt_tkprim", "opencascade::occt_tkbool", "opencascade::occt_tkbo", "opencascade::occt_tkfillet", "opencascade::occt_tkxsbase", "opencascade::occt_tkoffset", "opencascade::occt_tkhlr", "eigen::eigen"]
+            for schema in self._selected_ifc_schemas:
+                _add_component(f"geometry_mapping_ifc{schema}", requires=["IfcParse"])
+                ifcgeom.requires.append(f"geometry_mapping_ifc{schema}")
 
-            self.cpp_info.components["IfcGeom"].libs = ["IfcGeom"]
-            for schema in self._supported_ifc_schemas():
-                self.cpp_info.components["IfcGeom"].requires.append(f"geometry_mapping_ifc{schema}")
-            self.cpp_info.components["IfcGeom"].requires = ["IfcParse", "eigen::eigen"]
-            if self.options.with_cgal:
-                self.cpp_info.components["IfcGeom"].requires.extend(["geometry_kernel_cgal", "geometry_kernel_cgal_simple"])
-            if self.options.with_opencascade:
-                self.cpp_info.components["IfcGeom"].requires.append("geometry_kernel_opencascade")
-                
-        if self.options.with_opencascade:
-            self.cpp_info.components["geometry_serializer"].libs = ["geometry_serializer"]
-            for schema in self._supported_ifc_schemas():
+        if self.options.build_convert:
+            serializers = _add_component("Serializers", requires=["IfcGeom"])
+            if self.options.with_hdf5:
+                serializers.requires.append("hdf5::hdf5_cpp")
+
+            for schema in self._selected_ifc_schemas:
+                component_name = f"Serializers_ifc{schema}"
+                _add_component(component_name)
+                self.cpp_info.components["Serializers"].requires.append(component_name)
+
+            geometry_serializer = _add_component("geometry_serializer")
+            for schema in self._selected_ifc_schemas:
                 component_name = f"geometry_serializer_ifc{schema}"
-                self.cpp_info.components[component_name].libs = [component_name]
-                self.cpp_info.components[component_name].requires = ["opencascade::occt_tkbrep"]
-                self.cpp_info.components["geometry_serializer"].requires.append(component_name)
-        
-        self.cpp_info.components["Serializers"].libs = ["Serializers"]
-        self.cpp_info.components["Serializers"].requires = ["IfcGeom"]
-        if self.options.with_hdf5_support:
-            self.cpp_info.components["Serializers"].requires.append("hdf5::hdf5")
-        for schema in self._supported_ifc_schemas():
-            component_name = f"Serializers_ifc{schema}"
-            self.cpp_info.components[component_name].libs = [component_name]
-            self.cpp_info.components["Serializers"].requires.append(component_name)
-            if self.options.with_hdf5_support:
-                self.cpp_info.components[component_name].requires.append("hdf5::hdf5")
+                _add_component(component_name, requires=["opencascade::occt_tkbrep"])
+                geometry_serializer.requires.append(component_name)

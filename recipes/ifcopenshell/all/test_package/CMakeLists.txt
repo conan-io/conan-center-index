@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-find_package(ifcopenshell REQUIRED CONFIG)
+find_package(IfcOpenShell CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE ifcopenshell::IfcParse ifcopenshell::IfcGeom)
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+                IfcParse 
+                IfcGeom 
+                )
