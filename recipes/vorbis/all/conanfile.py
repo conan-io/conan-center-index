@@ -1,9 +1,11 @@
 from conan import ConanFile
+from conan.errors import ConanException
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class VorbisConan(ConanFile):
@@ -50,6 +52,9 @@ class VorbisConan(ConanFile):
         tc = CMakeToolchain(self)
         # Relocatable shared lib on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "1.3.7": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
@@ -98,19 +103,6 @@ class VorbisConan(ConanFile):
         self.cpp_info.components["vorbisfile"].libs = ["vorbisfile"]
         self.cpp_info.components["vorbisfile"].requires = ["vorbismain"]
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Vorbis"
-        self.cpp_info.names["cmake_find_package_multi"] = "Vorbis"
-        self.cpp_info.names["pkg_config"] = "vorbis-all-do-not-use"
-        self.cpp_info.components["vorbismain"].names["cmake_find_package"] = "vorbis"
-        self.cpp_info.components["vorbismain"].names["cmake_find_package_multi"] = "vorbis"
-        self.cpp_info.components["vorbisenc"].names["cmake_find_package"] = "vorbisenc"
-        self.cpp_info.components["vorbisenc"].names["cmake_find_package_multi"] = "vorbisenc"
-        self.cpp_info.components["vorbisfile"].names["cmake_find_package"] = "vorbisfile"
-        self.cpp_info.components["vorbisfile"].names["cmake_find_package_multi"] = "vorbisfile"
-        self.cpp_info.components["vorbisenc-alias"].names["cmake_find_package"] = "Enc"
-        self.cpp_info.components["vorbisenc-alias"].names["cmake_find_package_multi"] = "Enc"
+        # vorbisenc-alias
         self.cpp_info.components["vorbisenc-alias"].requires.append("vorbisenc")
-        self.cpp_info.components["vorbisfile-alias"].names["cmake_find_package"] = "File"
-        self.cpp_info.components["vorbisfile-alias"].names["cmake_find_package_multi"] = "File"
         self.cpp_info.components["vorbisfile-alias"].requires.append("vorbisfile")

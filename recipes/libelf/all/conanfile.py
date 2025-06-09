@@ -28,7 +28,7 @@ class LibelfConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
+    deprecated = "elfutils"
     exports_sources = "CMakeLists.txt"
 
     def config_options(self):

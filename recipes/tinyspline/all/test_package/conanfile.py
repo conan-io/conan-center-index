@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import cross_building
+from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
@@ -25,12 +25,10 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not cross_building(self):
-            bin_c_path = os.path.join(self.cpp.build.bindirs[0], "test_package_c")
-            self.run(bin_c_path, run_environment=True)
+        if can_run(self):
+            bin_c_path = os.path.join(self.cpp.build.bindir, "test_package_c")
+            self.run(bin_c_path, env="conanrun")
 
-            # TODO: rely on self.dependencies["tinyspline"].options.cxx in CONAN_V2 mode
-            # see https://github.com/conan-io/conan/issues/11940#issuecomment-1223940786
-            bin_cpp_path = os.path.join(self.cpp.build.bindirs[0], "test_package_cpp")
-            if os.path.exists(bin_cpp_path):
-                self.run(bin_cpp_path, run_environment=True)
+            if self.dependencies["tinyspline"].options.cxx:
+                bin_cpp_path = os.path.join(self.cpp.build.bindir, "test_package_cpp")
+                self.run(bin_cpp_path, env="conanrun")

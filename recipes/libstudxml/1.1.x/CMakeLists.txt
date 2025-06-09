@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(libstudxml LANGUAGES C CXX)
 
 find_package(EXPAT REQUIRED MODULE)

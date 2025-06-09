@@ -1,0 +1,21 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 837da48..713521f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -76,7 +76,7 @@ target_include_directories(ImGui-SFML PUBLIC
+   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+ )
+ target_compile_features(ImGui-SFML PUBLIC cxx_std_11)
+-target_link_libraries(ImGui-SFML PUBLIC sfml-graphics OpenGL::GL)
++target_link_libraries(ImGui-SFML PUBLIC sfml-graphics OpenGL::GL imgui::imgui)
+ if(WIN32 AND MINGW)
+   target_link_libraries(ImGui-SFML PUBLIC imm32)
+ endif()
+@@ -119,7 +119,6 @@ target_compile_definitions(ImGui-SFML PUBLIC IMGUI_USER_CONFIG="${IMGUI_SFML_CON
+ set(IMGUI_SFML_PUBLIC_HEADERS
+   ${PROJECT_SOURCE_DIR}/imgui-SFML.h
+   ${PROJECT_SOURCE_DIR}/imgui-SFML_export.h
+-  ${IMGUI_PUBLIC_HEADERS}
+ )
+ if(IMGUI_SFML_USE_DEFAULT_CONFIG OR (NOT DEFINED "${IMGUI_SFML_CONFIG_INSTALL_DIR}"))
+   list(APPEND IMGUI_SFML_PUBLIC_HEADERS "${IMGUI_SFML_CONFIG_DIR}/${IMGUI_SFML_CONFIG_NAME}")

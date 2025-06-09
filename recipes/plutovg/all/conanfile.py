@@ -8,7 +8,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 class PlutoVGConan(ConanFile):
     name = "plutovg"
@@ -28,18 +28,11 @@ class PlutoVGConan(ConanFile):
         "fPIC": True,
     }
 
+    implements = ["auto_shared_fpic"]
+    languages = "C"
+
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -47,10 +40,11 @@ class PlutoVGConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = MesonToolchain(self)
@@ -59,11 +53,8 @@ class PlutoVGConan(ConanFile):
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
-        tc = VirtualBuildEnv(self)
-        tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -86,7 +77,9 @@ class PlutoVGConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["plutovg"]
+        self.cpp_info.includedirs = ["include", os.path.join("include", "plutovg")]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["m"]
         if is_msvc(self) and not self.options.shared:
             self.cpp_info.defines.append("PLUTOVG_BUILD_STATIC")
+

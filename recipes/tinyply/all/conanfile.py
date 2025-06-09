@@ -1,16 +1,18 @@
 from conan import ConanFile
+from conan.errors import ConanException
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import collect_libs, get, load, rmdir, save
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class TinyplyConan(ConanFile):
     name = "tinyply"
     description = "C++11 ply 3d mesh format importer & exporter."
-    license = ["Unlicense", "BSD-2-Clause"]
+    license = ("Unlicense", "BSD-2-Clause")
     topics = ("tinyply", "ply", "geometry", "mesh", "file-format")
     homepage = "https://github.com/ddiakopoulos/tinyply"
     url = "https://github.com/conan-io/conan-center-index"
@@ -50,6 +52,9 @@ class TinyplyConan(ConanFile):
         tc.variables["BUILD_TESTS"] = False
         # Relocatable shared lib on macOS
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "2.3.4": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
     def build(self):

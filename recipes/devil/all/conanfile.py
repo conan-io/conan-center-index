@@ -2,6 +2,8 @@ from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.scm import Version
+from conan.errors import ConanException
 import os
 
 
@@ -76,7 +78,9 @@ class DevilConan(ConanFile):
         tc.variables["IL_NO_JP2"] = not self.options.with_jasper
         tc.variables["IL_NO_LCMS"] = not self.options.with_lcms
         tc.variables["IL_USE_DXTC_SQUISH"] = self.options.with_squish
-
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "1.8.0": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
         deps = CMakeDeps(self)

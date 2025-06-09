@@ -7,7 +7,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class OpusConan(ConanFile):
@@ -62,15 +62,14 @@ class OpusConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        if Version(self.version) >= "1.5.2":
-            env = VirtualBuildEnv(self)
-            env.generate()
         tc = CMakeToolchain(self)
         tc.cache_variables["OPUS_BUILD_SHARED_LIBRARY"] = self.options.shared
         tc.cache_variables["OPUS_FIXED_POINT"] = self.options.fixed_point
         tc.cache_variables["OPUS_STACK_PROTECTOR"] = self.options.stack_protector
         if Version(self.version) >= "1.5.2" and is_msvc(self):
             tc.cache_variables["OPUS_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+        if Version(self.version) < "1.5":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
     def build(self):
@@ -99,9 +98,5 @@ class OpusConan(ConanFile):
             self.cpp_info.components["libopus"].system_libs.append("ssp")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Opus"
-        self.cpp_info.names["cmake_find_package_multi"] = "Opus"
-        self.cpp_info.components["libopus"].names["cmake_find_package"] = "opus"
-        self.cpp_info.components["libopus"].names["cmake_find_package_multi"] = "opus"
         self.cpp_info.components["libopus"].set_property("cmake_target_name", "Opus::opus")
         self.cpp_info.components["libopus"].set_property("pkg_config_name", "opus")

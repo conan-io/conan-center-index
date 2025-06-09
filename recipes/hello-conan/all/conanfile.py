@@ -4,13 +4,13 @@ from conan.tools.files import save
 
 from pathlib import Path
 
-required_conan_version = ">=2.8.0"
+required_conan_version = ">=2.12"
 
 class hello_conanRecipe(ConanFile):
     name = "hello-conan"
     package_type = "library"
 
-    # Optional metadata !_!!!!
+    # Optional metadata
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Dummy recipe for internal testing"

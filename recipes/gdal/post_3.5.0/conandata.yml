@@ -1,4 +1,7 @@
 sources:
+  "3.10.3":
+    url: "https://github.com/OSGeo/gdal/releases/download/v3.10.3/gdal-3.10.3.tar.gz"
+    sha256: "e4bf7f104acbcb3e2d16c97fd1af2b92b28d0ba59d17d976e3ef08b794f4153b"
   "3.8.3":
     url: "https://github.com/OSGeo/gdal/releases/download/v3.8.3/gdal-3.8.3.tar.gz"
     sha256: "f7a30387a8239e9da26200f787a02136df2ee6473e86b36d05ad682761a049ea"
@@ -9,6 +12,19 @@ sources:
     url: "https://github.com/OSGeo/gdal/releases/download/v3.5.3/gdal-3.5.3.tar.gz"
     sha256: "a9ea0300d17e35bab71df4f16e62bb2fb8081caf994ab3ee0502ce4cf0d4e593"
 patches:
+  "3.10.3":
+    - patch_file: "patches/3.10.3/0-replace-find-package.patch"
+      patch_description: "Use custom version of find_package() for Conan deps"
+      patch_type: "conan"
+    - patch_file: "patches/3.10.3/1-do-not-force-private-linking.patch"
+      patch_description: "Fix private linking not working for some Conan dependencies"
+      patch_type: "conan"
+    - patch_file: "patches/3.10.3/2-allow-cycles-in-cmake-targets.patch"
+      patch_description: "Fix CMake failure due to cyclical dependencies in CMakeDeps targets"
+      patch_type: "conan"
+    - patch_file: "patches/3.10.3/3-use-arrow-version-for-parquet.patch"
+      patch_description: "Use Arrow version output from find_package() for Parquet and ArrowDataset"
+      patch_type: "conan"
   "3.8.3":
     - patch_file: "patches/3.8.1/0-replace-find-package.patch"
       patch_description: "Use custom version of find_package() for Conan deps"

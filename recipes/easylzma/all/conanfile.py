@@ -53,8 +53,7 @@ class EazylzmaConan(ConanFile):
         tc = CMakeToolchain(self)
         # Relocatable shared libs on macOS
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        # Silence CMake warning about LOCATION property
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0026"] = "OLD"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):

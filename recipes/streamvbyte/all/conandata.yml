@@ -1,4 +1,7 @@
 sources:
+  "2.0.0":
+    url: "https://github.com/lemire/streamvbyte/archive/refs/tags/v2.0.0.tar.gz"
+    sha256: "51ca1c3b02648ea4b965d65b0e586891981f2e8184b056520e38ad70bcc43dd8"
   "1.0.0":
     url: "https://github.com/lemire/streamvbyte/archive/refs/tags/v1.0.0.tar.gz"
     sha256: "6b1920e9865146ba444cc317aa61cd39cdf760236e354ef7956011a9fe577882"

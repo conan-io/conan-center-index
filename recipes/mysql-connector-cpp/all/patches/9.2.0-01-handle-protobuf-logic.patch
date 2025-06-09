@@ -1,0 +1,25 @@
+diff --git a/cdk/cmake/DepFindProtobuf.cmake b/cdk/cmake/DepFindProtobuf.cmake
+index 1fc785e..41d1405 100644
+--- a/cdk/cmake/DepFindProtobuf.cmake
++++ b/cdk/cmake/DepFindProtobuf.cmake
+@@ -44,6 +44,7 @@
+ #
+ #
+ 
++if(0)
+ if(TARGET ext::protobuf)
+   return()
+ endif()
+@@ -64,6 +65,11 @@ add_ext_targets(protobuf
+   LIBRARY protobuf pb_libprotobuf
+   EXECUTABLE protoc pb_protoc
+ )
++endif()
++
++if (COMMAND mysqlx_protobuf_generate_cpp)
++  return()
++endif()
+ 
+ 
+ # Standard PROTOBUF_GENERATE_CPP modified to our usage
+

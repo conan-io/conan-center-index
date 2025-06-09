@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import stdcpp_library, check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
@@ -31,7 +31,7 @@ class LASlibConan(ConanFile):
     @property
     def _min_cppstd(self):
         return 17
-    
+
     @property
     def _compilers_minimum_version(self):
         return {
@@ -73,8 +73,6 @@ class LASlibConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        save(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(LASlib/src)")
-        save(self, os.path.join(self.source_folder, "LASlib", "example", "CMakeLists.txt"), "")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

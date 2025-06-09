@@ -35,7 +35,7 @@ class MsgpackCXXConan(ConanFile):
     def requirements(self):
         # Boost was not optional until 4.1.0
         if self.options.get_safe("use_boost", True):
-            self.requires("boost/1.83.0")
+            self.requires("boost/[>=1.53 <2]")
 
     def package_id(self):
         self.info.clear()
