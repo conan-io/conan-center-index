@@ -51,14 +51,14 @@ class SentryNativeConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        if Version(self.version) >= "0.7.8" and self.options.get_safe("with_crashpad") == "sentry":
+        if self.options.get_safe("with_crashpad") == "sentry":
             return "20"
         else:
             return "17"
 
     @property
     def _minimum_compilers_version(self):
-        if Version(self.version) >= "0.7.8" and self.options.get_safe("with_crashpad") == "sentry":
+        if self.options.get_safe("with_crashpad") == "sentry":
             # Sentry-native 0.7.8 requires C++20: Concepts and bit_cast
             # https://github.com/chromium/mini_chromium/blob/e49947ad445c4ed4bc1bb4ed60bbe0fe17efe6ec/base/numerics/byte_conversions.h#L88
             return {
@@ -88,17 +88,14 @@ class SentryNativeConan(ConanFile):
 
         # Configure default transport
         if self.settings.os == "Windows":
-            self.options.backend = "crashpad"
             self.options.transport = "winhttp"
         elif self.settings.os == "Android":
             self.options.transport = "none"
 
         # Configure default backend
         # See https://github.com/getsentry/sentry-native/pull/927
-        if self.settings.os == "Macos":
+        if self.settings.os in ("FreeBSD", "Linux", "Macos", "Windows"):
             self.options.backend = "crashpad"
-        if self.settings.os in ("FreeBSD", "Linux"):
-            self.options.backend = "breakpad" if Version(self.version) < "0.7.0" else "crashpad"
         if self.settings.os not in ("Linux", "Android") or self.options.backend != "crashpad" or self.options.with_crashpad != "sentry":
             del self.options.crashpad_with_tls
 
@@ -155,7 +152,7 @@ class SentryNativeConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["SENTRY_BACKEND"] = self.options.backend
         # See https://github.com/getsentry/sentry-native/pull/928
-        if Version(self.version) < "0.7.0" and self.options.backend == "crashpad":
+        if self.options.backend == "crashpad":
             tc.variables["SENTRY_CRASHPAD_SYSTEM"] = self.options.with_crashpad == "google"
         if self.options.backend == "breakpad":
             tc.variables["SENTRY_BREAKPAD_SYSTEM"] = self.options.with_breakpad == "google"
