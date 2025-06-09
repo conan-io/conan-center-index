@@ -76,15 +76,15 @@ class LibTinsConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["LIBTINS_BUILD_EXAMPLES"] = False
-        tc.variables["LIBTINS_BUILD_TESTS"] = False
-        tc.variables["LIBTINS_BUILD_SHARED"] = self.options.shared
-        tc.variables["LIBTINS_ENABLE_CXX11"] = True
-        tc.variables["LIBTINS_ENABLE_ACK_TRACKER"] = self.options.with_ack_tracker
-        tc.variables["LIBTINS_ENABLE_TCP_STREAM_CUSTOM_DATA"] = self.options.with_tcp_stream_custom_data
-        tc.variables["LIBTINS_ENABLE_WPA2"] = self.options.with_wpa2
-        tc.variables["LIBTINS_ENABLE_DOT11"] = self.options.with_dot11
-        tc.variables["PCAP_LIBRARY"] = "libpcap::libpcap"
+        tc.cache_variables["LIBTINS_BUILD_EXAMPLES"] = False
+        tc.cache_variables["LIBTINS_BUILD_TESTS"] = False
+        tc.cache_variables["LIBTINS_BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["LIBTINS_ENABLE_CXX11"] = True
+        tc.cache_variables["LIBTINS_ENABLE_ACK_TRACKER"] = self.options.with_ack_tracker
+        tc.cache_variables["LIBTINS_ENABLE_TCP_STREAM_CUSTOM_DATA"] = self.options.with_tcp_stream_custom_data
+        tc.cache_variables["LIBTINS_ENABLE_WPA2"] = self.options.with_wpa2
+        tc.cache_variables["LIBTINS_ENABLE_DOT11"] = self.options.with_dot11
+        tc.cache_variables["PCAP_LIBRARY"] = "libpcap::libpcap"
         tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
         deps = CMakeDeps(self)
