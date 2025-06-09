@@ -4,6 +4,8 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir
+from conan.errors import ConanException
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -87,6 +89,8 @@ class LibTinsConan(ConanFile):
         tc.cache_variables["LIBTINS_ENABLE_DOT11"] = self.options.with_dot11
         tc.cache_variables["PCAP_LIBRARY"] = "libpcap::libpcap"
         tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
+        if Version(self.version) > "4.5":
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, please, check if new version supports CMake 4.")
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("libpcap", "cmake_file_name", "PCAP")
