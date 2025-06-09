@@ -59,7 +59,7 @@ class LibTinsConan(ConanFile):
 
     def requirements(self):
         # pcap.h is largely imported in public headers: tins/packet_writer.h, tins/sniffer.h
-        self.requires("libpcap/1.10.4", transitive_headers=True)
+        self.requires("libpcap/1.10.5", transitive_headers=True)
         if self.options.with_ack_tracker or self.options.with_tcp_stream_custom_data:
             # Used in two public headers:
             # - https://github.com/mfontanini/libtins/blob/v4.4/include/tins/tcp_ip/ack_tracker.h#L38
