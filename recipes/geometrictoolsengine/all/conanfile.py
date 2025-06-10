@@ -16,21 +16,6 @@ class GeometricToolsRecipe(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    options = {
-        "use_column_major": [True, False],
-        "use_vector_matrix": [True, False]
-    }
-
-    default_options = {
-        "use_column_major": False,
-        "use_vector_matrix": False
-    }
-
-    options_descriptions = {
-        "use_column_major": "Use column-major (rather than row-major) matrix storage",
-        "use_vector_matrix": "Use vector-on-the-left convention (V*A) rather than vector-on-the-right (A*V) for vector-matrix multiplication"
-    }
-
     # Automatically manage the package ID clearing of settings and options
     implements = ["auto_header_only"]
 
@@ -55,11 +40,6 @@ class GeometricToolsRecipe(ConanFile):
             self.cpp_info.defines.append("GTE_USE_MSWINDOWS")
         else:
             self.cpp_info.defines.append("GTE_USE_LINUX")
-
-        if self.options.use_column_major:
-            self.cpp_info.defines.append("GTE_USE_COL_MAJOR")
-        if self.options.use_vector_matrix:
-            self.cpp_info.defines.append("GTE_USE_VEC_MAT")
 
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
