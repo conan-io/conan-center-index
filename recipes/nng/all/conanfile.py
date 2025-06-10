@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
+from conan.tools.files import get, copy, rmdir
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
@@ -44,9 +44,6 @@ class NngConan(ConanFile):
         "tls_engine": "mbed",
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -74,10 +71,7 @@ class NngConan(ConanFile):
         if self.options.tls:
             tls_engine = self.options.get_safe("tls_engine", "mbed")
             if tls_engine == "mbed":
-                if Version(self.version) < "1.5.2":
-                    self.requires("mbedtls/2.25.0")
-                else:
-                    self.requires("mbedtls/3.5.2")
+                self.requires("mbedtls/3.5.2")
             elif tls_engine == "wolf":
                 self.requires("wolfssl/5.7.2")
 
@@ -122,7 +116,6 @@ class NngConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -147,7 +140,3 @@ class NngConan(ConanFile):
             self.cpp_info.defines.append("NNG_SHARED_LIB")
         else:
             self.cpp_info.defines.append("NNG_STATIC_LIB")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "nng"
-        self.cpp_info.names["cmake_find_package_multi"] = "nng"

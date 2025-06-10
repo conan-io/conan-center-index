@@ -89,7 +89,7 @@ class LibGit2Conan(ConanFile):
         if self._need_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self._need_mbedtls:
-            self.requires("mbedtls/3.2.1")
+            self.requires("mbedtls/[~3.6]")
         if self.options.get_safe("with_iconv"):
             self.requires("libiconv/1.17")
         if self.options.with_regex == "pcre":
@@ -169,10 +169,16 @@ class LibGit2Conan(ConanFile):
             tc.variables["STATIC_CRT"] = is_msvc_static_runtime(self)
         # REGEX_BACKEND is SET(), avoid options overriding it
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        if self._need_mbedtls:
+            # CMakeDeps additional variables prefix does not generate found variable
+            tc.cache_variables["MBEDTLS_FOUND"] = True
         tc.generate()
         deps = CMakeDeps(self)
         if self.options.get_safe("with_http_parser") == "llhttp":
             deps.set_property("llhttp", "cmake_file_name", "LLHTTP")
+        if self._need_mbedtls:
+            deps.set_property("mbedtls", "cmake_file_name", "mbedTLS")
+            deps.set_property("mbedtls", "cmake_additional_variables_prefixes", ["MBEDTLS"])
         deps.generate()
 
     def build(self):
