@@ -147,6 +147,7 @@ class LibpqConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "PostgreSQL")
+        # INFO: Upstream libpq.pc is specific for the main library, not the whole package.
         self.cpp_info.set_property("pkg_config_name", "__libpq")
 
         self.runenv_info.define_path("PostgreSQL_ROOT", self.package_folder)
@@ -198,6 +199,7 @@ class LibpqConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["pq"].system_libs = ["pthread", "m", "dl", "rt"]
             self.cpp_info.components["pgtypes"].system_libs = ["pthread"]
-            self.cpp_info.components["pgcommon"].system_libs = ["m"]
+            if not self.options.shared:
+                self.cpp_info.components["pgcommon"].system_libs = ["m"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
