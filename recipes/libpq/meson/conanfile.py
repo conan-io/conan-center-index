@@ -83,7 +83,6 @@ class LibpqConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
-        self.tool_requires("ninja/[>=1.11.0 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         if self.settings.os == "Windows":
@@ -101,7 +100,7 @@ class LibpqConan(ConanFile):
         def feature(v):
             return "enabled" if v else "disabled"
 
-        tc = MesonToolchain(self, backend="ninja")
+        tc = MesonToolchain(self)
         tc.project_options["ssl"] = "openssl" if self.options.with_openssl else "disabled"
         tc.project_options["icu"] = feature(self.options.with_icu)
         # Why did the old version disable this explicitly?
@@ -115,6 +114,7 @@ class LibpqConan(ConanFile):
         tc.project_options["ldap"] = "disabled"
         tc.project_options["tap_tests"] = "disabled"
         tc.project_options["plpython"] = "disabled"
+        tc.project_options["docs"] = "disabled"
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
@@ -151,6 +151,8 @@ class LibpqConan(ConanFile):
 
         self.runenv_info.define_path("PostgreSQL_ROOT", self.package_folder)
 
+        # INFO: Using Meson will install more libraries than when using Autotools.
+        # We list only the libraries that are actually used by the main library.
         prefix = "lib" if is_msvc(self) else ""
         self.cpp_info.components["pq"].libs = [f"{prefix}pq"]
         self.cpp_info.components["pq"].set_property("pkg_config_name", "libpq")
@@ -174,7 +176,12 @@ class LibpqConan(ConanFile):
             self.cpp_info.components["pq"].requires.append("readline::readline")
 
         if not self.options.shared:
-            self.cpp_info.components["pgcommon"].libs = [f"{prefix}pgcommon_shlib", f"{prefix}pgport_shlib", f"{prefix}pgfeutils"]
+            self.cpp_info.components["pqport"].libs = [f"{prefix}pqport_shlib"]
+            self.cpp_info.components["pgfeutils"].libs = [f"{prefix}pgfeutils"]
+
+            self.cpp_info.components["pgcommon"].libs = [f"{prefix}pgcommon_shlib"]
+            self.cpp_info.components["pgcommon"].requires = ["pqport", "pgfeutils"]
+
             self.cpp_info.components["pq"].requires.append("pgcommon")
 
         self.cpp_info.components["pgtypes"].libs = [f"{prefix}pgtypes"]
