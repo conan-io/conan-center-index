@@ -1,5 +1,5 @@
 diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
-index 7bb1eedc2..b1d159289 100644
+index 7bb1eedc2..24b2cbe4e 100644
 --- a/cmake/CMakeLists.txt
 +++ b/cmake/CMakeLists.txt
 @@ -18,6 +18,20 @@
@@ -41,16 +41,18 @@ index 7bb1eedc2..b1d159289 100644
  
  if(MINIMAL_BUILD)
      message(STATUS "Setting options for minimal build")
-@@ -367,6 +370,8 @@ if(BUILD_IFCGEOM)
-         add_debug_variants(LIBXML2_LIBRARIES "${LIBXML2_LIBRARIES}" d)
-     endif()
+@@ -363,9 +366,7 @@ if(IFCXML_SUPPORT)
+ endif()
  
+ if(BUILD_IFCGEOM)
+-    if(MSVC)
+-        add_debug_variants(LIBXML2_LIBRARIES "${LIBXML2_LIBRARIES}" d)
+-    endif()
 +    find_package(Eigen3 REQUIRED CONFIG)
-+
+ 
      # Open CASCADE
      if(WITH_OPENCASCADE)
-     if("${OCC_INCLUDE_DIR}" STREQUAL "")
-@@ -420,43 +425,47 @@ if(BUILD_IFCGEOM)
+@@ -420,60 +421,47 @@ if(BUILD_IFCGEOM)
          list(APPEND OPENCASCADE_LIBRARY_NAMES TKDESTEP TKDEIGES)
      endif(OCC_VERSION_STRING VERSION_LESS 7.8.0)
  
@@ -115,6 +117,23 @@ index 7bb1eedc2..b1d159289 100644
 -        list(APPEND OPENCASCADE_LIBRARIES "${lib_path}")
 -    endforeach()
 -
+-    if(MSVC)
+-        add_definitions(-DHAVE_NO_DLL)
+-        add_debug_variants(OPENCASCADE_LIBRARIES "${OPENCASCADE_LIBRARIES}" d)
+-    endif()
+-
+-    if(WIN32)
+-        # OCC might require linking to Winsock depending on the version and build configuration
+-        list(APPEND OPENCASCADE_LIBRARIES ws2_32.lib)
+-    endif()
+-
+-    # Make sure cross-referenced symbols between static OCC libraries get
+-    # resolved. Also add thread and rt libraries.
+-    get_filename_component(libTKernelExt ${libTKernel} EXT)
+-    if("${libTKernelExt}" STREQUAL ".a")
+-        set(OCCT_STATIC ON)
+-    endif()
+-
 +    set(OPENCASCADE_LIBRARIES ${OPENCASCADE_LIBRARY_NAMES})
 +    # foreach(lib ${OPENCASCADE_LIBRARY_NAMES})
 +    #     # Make sure we'll handle the Windows/MSVC debug postfix convention too.
@@ -125,25 +144,30 @@ index 7bb1eedc2..b1d159289 100644
 +
 +    list(APPEND OPENCASCADE_LIBRARIES "Eigen3::Eigen")
 +    
-     if(MSVC)
-         add_definitions(-DHAVE_NO_DLL)
-         add_debug_variants(OPENCASCADE_LIBRARIES "${OPENCASCADE_LIBRARIES}" d)
-@@ -469,10 +478,10 @@ if(BUILD_IFCGEOM)
- 
-     # Make sure cross-referenced symbols between static OCC libraries get
-     # resolved. Also add thread and rt libraries.
--    get_filename_component(libTKernelExt ${libTKernel} EXT)
--    if("${libTKernelExt}" STREQUAL ".a")
--        set(OCCT_STATIC ON)
--    endif()
-+    # get_filename_component(libTKernelExt ${libTKernel} EXT)
-+    # if("${libTKernelExt}" STREQUAL ".a")
-+    #     set(OCCT_STATIC ON)
-+    # endif()
- 
      if(OCCT_STATIC)
          find_package(Threads)
-@@ -584,6 +593,7 @@ if(COLLADA_SUPPORT)
+         
+@@ -483,7 +471,7 @@ if(BUILD_IFCGEOM)
+             # OPENCASCADE_LIBRARIES repeated N times below in order to fix cyclic dependencies
+             # tfk: --start-group ... --end-group didn't work on the apple linker when last tested
+             if(APPLE)
+-                set(OPENCASCADE_LIBRARIES ${OPENCASCADE_LIBRARIES} ${OPENCASCADE_LIBRARIES} ${OPENCASCADE_LIBRARIES} ${OPENCASCADE_LIBRARIES} ${OPENCASCADE_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
++                set(OPENCASCADE_LIBRARIES ${OPENCASCADE_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+             else()
+                 set(OPENCASCADE_LIBRARIES -Wl,--start-group ${OPENCASCADE_LIBRARIES} -Wl,--end-group ${CMAKE_THREAD_LIBS_INIT})
+             endif()
+@@ -573,10 +561,6 @@ if(COLLADA_SUPPORT)
+             message(FATAL_ERROR "COLLADA_SUPPORT enabled, but unable to find PCRE. "
+                 "Disable COLLADA_SUPPORT or fix PCRE_LIBRARY_DIR path to proceed.")
+         endif()
+-
+-        if(MSVC)
+-            add_debug_variants(OPENCOLLADA_LIBRARIES "${OPENCOLLADA_LIBRARIES}" d)
+-        endif()
+     else()
+         message(FATAL_ERROR "COLLADA_SUPPORT enabled, but unable to find OpenCOLLADA headers. "
+             "Disable COLLADA_SUPPORT or fix OpenCOLLADA paths to proceed.")
+@@ -584,6 +568,7 @@ if(COLLADA_SUPPORT)
  endif(COLLADA_SUPPORT)
  
  if(HDF5_SUPPORT)
@@ -151,7 +175,7 @@ index 7bb1eedc2..b1d159289 100644
      if("${HDF5_INCLUDE_DIR}" STREQUAL "")
          message(STATUS "No HDF5 include directory specified")
      else()
-@@ -613,12 +623,7 @@ if(HDF5_SUPPORT)
+@@ -613,12 +598,7 @@ if(HDF5_SUPPORT)
                  set(debug_postfix "_debug")
              endif()
  
@@ -165,7 +189,7 @@ index 7bb1eedc2..b1d159289 100644
              )
  
          else()
-@@ -887,12 +892,14 @@ if(BUILD_CONVERT OR BUILD_IFCPYTHON)
+@@ -887,12 +867,14 @@ if(BUILD_CONVERT OR BUILD_IFCPYTHON)
          foreach(schema ${SCHEMA_VERSIONS})
              set(GEOM_SERIALIZER_SCHEMA_LIBRARIES ${GEOM_SERIALIZER_SCHEMA_LIBRARIES} GeometrySerializers_ifc${schema})
  
@@ -182,7 +206,7 @@ index 7bb1eedc2..b1d159289 100644
          target_link_libraries(geometry_serializer ${geometry_serializer_libraries})
          set(IFCOPENSHELL_LIBRARIES ${IFCOPENSHELL_LIBRARIES} geometry_serializer ${geometry_serializer_libraries})
      endif()
-@@ -942,10 +949,10 @@ endif()
+@@ -942,10 +924,10 @@ endif()
  
  if(BUILD_IFCGEOM)
      if(WITH_CGAL)
@@ -195,7 +219,7 @@ index 7bb1eedc2..b1d159289 100644
          if(NOT libGMP)
              message(FATAL_ERROR "Unable to find GMP library files, aborting")
          endif()
-@@ -979,7 +986,7 @@ if(BUILD_IFCGEOM)
+@@ -979,7 +961,7 @@ if(BUILD_IFCGEOM)
              # needed?
              # if(NOT WASM_BUILD)
              # endif()
@@ -204,7 +228,7 @@ index 7bb1eedc2..b1d159289 100644
              list(APPEND kernel_libraries geometry_kernel_${kernel}_simple)
          endif()
      endforeach()
-@@ -991,7 +998,7 @@ if(BUILD_IFCGEOM)
+@@ -991,7 +973,7 @@ if(BUILD_IFCGEOM)
          file(GLOB IFCGEOM_CPP_FILES ../src/ifcgeom/mapping/*.cpp)
          set(IFCGEOM_FILES ${IFCGEOM_CPP_FILES} ${IFCGEOM_H_FILES} ${IFCGEOM_I_FILES})
          
@@ -213,7 +237,7 @@ index 7bb1eedc2..b1d159289 100644
          set_target_properties(geometry_mapping_ifc${schema} PROPERTIES COMPILE_FLAGS "-DIFC_GEOM_EXPORTS -DIfcSchema=Ifc${schema}")
          target_link_libraries(geometry_mapping_ifc${schema} IfcParse)
          list(APPEND mapping_libraries geometry_mapping_ifc${schema})
-@@ -1010,9 +1017,9 @@ if(BUILD_IFCGEOM)
+@@ -1010,9 +992,9 @@ if(BUILD_IFCGEOM)
      endif()
  
      if(WASM_BUILD)
@@ -225,7 +249,7 @@ index 7bb1eedc2..b1d159289 100644
      endif()
  
  endif(BUILD_IFCGEOM)
-@@ -1027,7 +1034,7 @@ if(BUILD_CONVERT OR BUILD_IFCPYTHON)
+@@ -1027,7 +1009,7 @@ if(BUILD_CONVERT OR BUILD_IFCPYTHON)
      set(SERIALIZERS_S_FILES ${SERIALIZERS_S_H_FILES} ${SERIALIZERS_S_CPP_FILES})
  
      foreach(schema ${SCHEMA_VERSIONS})
@@ -234,7 +258,7 @@ index 7bb1eedc2..b1d159289 100644
          set_target_properties(Serializers_ifc${schema} PROPERTIES COMPILE_FLAGS "-DIFC_GEOM_EXPORTS -DIfcSchema=Ifc${schema}")
          
          if(WASM_BUILD)
-@@ -1105,12 +1112,12 @@ if(BUILD_CONVERT)
+@@ -1105,12 +1087,12 @@ if(BUILD_CONVERT)
          set_property(TARGET IfcConvert APPEND_STRING PROPERTY COMPILE_FLAGS " -DIFOPSH_WITH_CITYJSON")
      endif()
  
@@ -253,7 +277,7 @@ index 7bb1eedc2..b1d159289 100644
  
      install(TARGETS IfcConvert
          ARCHIVE DESTINATION ${LIBDIR}
-@@ -1127,9 +1134,9 @@ if(BUILD_GEOMSERVER)
+@@ -1127,9 +1109,9 @@ if(BUILD_GEOMSERVER)
      add_executable(IfcGeomServer ${SOURCE_FILES})
      target_link_libraries(IfcGeomServer ${IFCOPENSHELL_LIBRARIES} ${OPENCASCADE_LIBRARIES} ${Boost_LIBRARIES})
  
@@ -266,7 +290,7 @@ index 7bb1eedc2..b1d159289 100644
  
      install(TARGETS IfcGeomServer
          ARCHIVE DESTINATION ${LIBDIR}
-@@ -1208,9 +1215,9 @@ if(BUILD_IFCMAX)
+@@ -1208,9 +1190,9 @@ if(BUILD_IFCMAX)
      add_subdirectory(../src/ifcmax ifcmax)
  endif()
  
@@ -279,7 +303,7 @@ index 7bb1eedc2..b1d159289 100644
  
  if(BUILD_QTVIEWER)
      add_subdirectory(../src/qtviewer qtviewer)
-@@ -1228,14 +1235,18 @@ install(TARGETS IfcParse
+@@ -1228,14 +1210,18 @@ install(TARGETS IfcParse
  )
  
  if(BUILD_IFCGEOM)
