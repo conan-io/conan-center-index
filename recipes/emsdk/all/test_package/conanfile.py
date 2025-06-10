@@ -35,6 +35,7 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             self.run("emcc -v", env="conanrun")
             self.run("em++ -v", env="conanrun")
+            self.run("node -v", env="conanrun")
 
             # Run the project that was built using emsdk
             if self.settings.os == "Emscripten":
