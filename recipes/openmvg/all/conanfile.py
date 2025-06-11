@@ -61,7 +61,7 @@ class Openmvgconan(ConanFile):
 
     def requirements(self):
         self.requires("cereal/1.3.2", transitive_headers=True)
-        self.requires("ceres-solver/2.1.0", transitive_headers=True, transitive_libs=True)
+        self.requires("ceres-solver/2.1.0")
         self.requires("coin-clp/1.17.7")
         self.requires("coin-lemon/1.3.1", transitive_headers=True, transitive_libs=True)
         self.requires("coin-osi/0.108.7")
