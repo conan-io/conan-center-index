@@ -137,7 +137,7 @@ class LibpqConan(ConanFile):
         if ((is_msvc(self) and self.options.shared) or (not is_msvc(self) and self.options.shared)) and not is_mingw:
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
         elif is_msvc(self) and not self.options.shared:
-            rm(self, "*.lib", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
         elif not self.options.shared:
             rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
