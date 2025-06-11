@@ -137,8 +137,6 @@ class LibpqConan(ConanFile):
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
         elif is_msvc(self) and not self.options.shared:
             rm(self, "*.lib", os.path.join(self.package_folder, "lib"))
-            for import_lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
-                rename(self, import_lib, import_lib.replace(".a", ".lib"))
         elif not self.options.shared:
             rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
