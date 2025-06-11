@@ -153,7 +153,8 @@ class LibpqConan(ConanFile):
         # INFO: Using Meson will install more libraries than when using Autotools.
         # We list only the libraries that are actually used by the main library.
         prefix = "lib" if is_msvc(self) else ""
-        self.cpp_info.components["pq"].libs = [f"{prefix}pq"]
+        suffix = ".a" if is_msvc(self) and not self.options.shared else ""
+        self.cpp_info.components["pq"].libs = [f"{prefix}pq{suffix}"]
         self.cpp_info.components["pq"].set_property("pkg_config_name", "libpq")
         self.cpp_info.components["pq"].set_property("cmake_target_name", "PostgreSQL::PostgreSQL")
 
@@ -175,22 +176,22 @@ class LibpqConan(ConanFile):
             self.cpp_info.components["pq"].requires.append("readline::readline")
 
         if not self.options.shared:
-            self.cpp_info.components["pgport"].libs = [f"{prefix}pgport_shlib"]
-            self.cpp_info.components["pgfeutils"].libs = [f"{prefix}pgfeutils"]
+            self.cpp_info.components["pgport"].libs = [f"{prefix}pgport_shlib{suffix}"]
+            self.cpp_info.components["pgfeutils"].libs = [f"{prefix}pgfeutils{suffix}"]
 
-            self.cpp_info.components["pgcommon"].libs = [f"{prefix}pgcommon_shlib"]
+            self.cpp_info.components["pgcommon"].libs = [f"{prefix}pgcommon_shlib{suffix}"]
             self.cpp_info.components["pgcommon"].requires = ["pgport", "pgfeutils"]
 
             self.cpp_info.components["pq"].requires.append("pgcommon")
 
-        self.cpp_info.components["pgtypes"].libs = [f"{prefix}pgtypes"]
+        self.cpp_info.components["pgtypes"].libs = [f"{prefix}pgtypes{suffix}"]
         self.cpp_info.components["pgtypes"].set_property("pkg_config_name", "libpgtypes")
 
-        self.cpp_info.components["ecpg"].libs = [f"{prefix}ecpg"]
+        self.cpp_info.components["ecpg"].libs = [f"{prefix}ecpg{suffix}"]
         self.cpp_info.components["ecpg"].requires = ["pq", "pgtypes"]
         self.cpp_info.components["ecpg"].set_property("pkg_config_name", "libecpg")
 
-        self.cpp_info.components["ecpg_compat"].libs = [f"{prefix}ecpg_compat"]
+        self.cpp_info.components["ecpg_compat"].libs = [f"{prefix}ecpg_compat{suffix}"]
         self.cpp_info.components["ecpg_compat"].requires = ["ecpg", "pgtypes"]
         self.cpp_info.components["ecpg_compat"].set_property("pkg_config_name", "libecpg_compat")
 
