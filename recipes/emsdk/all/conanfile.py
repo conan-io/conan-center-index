@@ -76,7 +76,9 @@ class EmSDKConan(ConanFile):
         # To avoid issues when cross-compiling or with not common arch in profiles we need to set EMSDK_ARCH
         # This is important for the emsdk install command
         env = VirtualBuildEnv(self)
-        env.environment().define("EMSDK_ARCH", str(self.settings.arch))
+        # Special consideration for armv8 as emsdk expects "arm64"
+        arch = "arm64" if str(self.settings.arch) == "armv8" else str(self.settings.arch)
+        env.environment().define("EMSDK_ARCH", arch)
         env.generate()
 
     def _tools_for_version(self):
