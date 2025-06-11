@@ -133,7 +133,8 @@ class LibpqConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
-        if (is_msvc(self) and self.options.shared) or (not is_msvc(self) and self.options.shared):
+        is_mingw = self.settings.os == "Windows" and self.settings.compiler == "gcc"
+        if ((is_msvc(self) and self.options.shared) or (not is_msvc(self) and self.options.shared)) and not is_mingw:
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
         elif is_msvc(self) and not self.options.shared:
             rm(self, "*.lib", os.path.join(self.package_folder, "lib"))
