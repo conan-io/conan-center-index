@@ -81,7 +81,8 @@ class Bullet3Conan(ConanFile):
         if Version(self.version) < "3.21":
             # silence warning
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0115"] = "OLD"
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
+        if Version(self.version) <= "3.25":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
     def build(self):
