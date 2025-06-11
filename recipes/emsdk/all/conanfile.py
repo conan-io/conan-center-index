@@ -4,7 +4,6 @@ from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import chdir, copy, get, replace_in_file
 from conan.tools.layout import basic_layout
 from pathlib import Path
-import json
 import os
 
 required_conan_version = ">=2.0.9"
@@ -62,7 +61,7 @@ class EmSDKConan(ConanFile):
         subfolders = [path for path in (Path(self.package_folder) / "bin" / "node").iterdir() if path.is_dir()]
         if len(subfolders) != 1:
             return None
-        return os.path.join(self.package_folder, "bin", "node", subfolders[0].name, "bin")
+        return os.path.join("bin", "node", subfolders[0].name, "bin")
 
     def generate(self):
         env = Environment()
@@ -81,31 +80,11 @@ class EmSDKConan(ConanFile):
         env.environment().define("EMSDK_ARCH", arch)
         env.generate()
 
-    def _tools_for_version(self):
-        ret = {}
-        # Select release-upstream from version (wasm-binaries)
-        with open(os.path.join(self.source_folder, "emscripten-releases-tags.json"), "r") as f:
-            data = json.load(f)
-            ret["wasm"] = f"releases-upstream-{data['releases'][self.version]}-64bit"
-        # Select python and node versions
-        with open(os.path.join(self.source_folder, "emsdk_manifest.json"), "r") as f:
-            data = json.load(f)
-            tools = data["tools"]
-            if self.settings.os == "Windows":
-                python = next((it for it in tools if (it["id"] == "python" and not it.get("is_old", False))), None)
-                ret["python"] = f"python-{python['version']}-64bit"
-            node = next((it for it in tools if (it["id"] == "node" and not it.get("is_old", False))), None)
-            ret["nodejs"] = f"node-{node['version']}-64bit"
-        return ret
-
     def build(self):
         with chdir(self, self.source_folder):
             emsdk = "emsdk.bat" if self.settings_build.os == "Windows" else "./emsdk"
-            # Install required tools
-            required_tools = self._tools_for_version()
-            for value in required_tools.values():
-                self.run(f"{emsdk} install {value}")
-                self.run(f"{emsdk} activate {value}")
+            self.run(f"{emsdk} install latest")
+            self.run(f"{emsdk} activate latest")
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -135,10 +114,7 @@ class EmSDKConan(ConanFile):
         return path
 
     def package_info(self):
-        self.cpp_info.bindirs = self._relative_paths
-        # Add node binaries into emsdk for convenience
-        if self._node_path:
-            self.cpp_info.bindirs.append(self._node_path)
+        self.cpp_info.bindirs = self._relative_paths + [self._node_path]
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
