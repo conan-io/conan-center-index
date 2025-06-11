@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 
-INCBIN(hello_world, "hello_world.txt");
+INCBIN(hello_world, INCBIN_FILE);
 
 int main(int argc, char* argv[]) {
     fwrite(g_hello_world_data, 1, g_hello_world_size, stdout);

@@ -1,7 +1,6 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy
-from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 import os
 
@@ -13,41 +12,44 @@ class IncbinConan(ConanFile):
     license = "Unlicense"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/graphitemaster/incbin/"
-    topics = ("include", "binary", "preprocess", "header-only")
-    package_type = "header-library"
+    topics = ("include", "binary", "preprocess")
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
+
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
-    def configure(self):
-        self._is_msvc = is_msvc(self)
+    def package_id(self):
+        if self.info.settings.get_safe("compiler") != "msvc":
+            self.info.clear()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        if self._is_msvc:
-            with open("CMakeLists.txt", "w") as f:
-                f.write("cmake_minimum_required(VERSION 3.10)\n"
-                        "project(incbin_tool)\n"
-                        "add_executable(incbin_tool incbin.c)\n"
-                        "install(TARGETS incbin_tool)")
 
-    def build(self):
-        if self._is_msvc:
+    def generate(self):
+        if is_msvc(self):
             tc = CMakeToolchain(self)
             tc.generate()
+
+    def build(self):
+        if is_msvc(self):
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
-            cmake.install()
 
     def package(self):
         copy(self, "UNLICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, "incbin.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder)
-        copy(self, "incbin_tool.exe", dst=os.path.join(self.package_folder, "bin"), src=self.build_folder, keep_path=False)
+        
+        if is_msvc(self):
+            cmake = CMake(self)
+            cmake.install()
 
     def package_info(self):
         self.cpp_info.libdirs = []
-        if not self._is_msvc:
+        
+        if not is_msvc(self):
             self.cpp_info.bindirs = []
