@@ -11,3 +11,7 @@ patches:
     - patch_file: "patches/0002-fix-cmake.patch"
       patch_description: "Fix CMake to add an install target & honor vc runtime"
       patch_type: "compatibility"
+    - patch_file: "patches/0003-bool_h_c23.patch"
+      patch_description: "c23 bool compatibility"
+      patch_type: "compatibility"
+      patch_source: "https://github.com/JWasm/JWasm/pull/218"
