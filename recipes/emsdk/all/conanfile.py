@@ -73,12 +73,11 @@ class EmSDKConan(ConanFile):
         env.define_path("EM_CACHE", self._em_cache)
         env.vars(self, scope="emsdk").save_script("emsdk_env_file")
 
-        if cross_building(self):
-            env = VirtualBuildEnv(self)
-            # If cross-compiling, we need to set EMSDK_ARCH
-            # This is important for the emsdk install command
-            env.environment().define("EMSDK_ARCH", str(self.settings.arch))
-            env.generate()
+        # To avoid issues when cross-compiling or with not common arch in profiles we need to set EMSDK_ARCH
+        # This is important for the emsdk install command
+        env = VirtualBuildEnv(self)
+        env.environment().define("EMSDK_ARCH", str(self.settings.arch))
+        env.generate()
 
     def _tools_for_version(self):
         ret = {}
