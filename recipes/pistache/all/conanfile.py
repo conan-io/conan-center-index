@@ -64,6 +64,10 @@ class PistacheConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} is only support on Linux.")
         if self.settings.compiler == "clang" and Version(self.version) < "0.4.25":
             raise ConanInvalidConfiguration(f"{self.ref}'s clang support is broken. See pistacheio/pistache#835.")
+        
+        if Version(self.version) == "0.4.25" and self.settings.os == "Windows":
+            # See https://github.com/conan-io/conan-center-index/pull/26463#issuecomment-2962541819
+            raise ConanInvalidConfiguration("Windows builds are broken - contributions welcome")
 
         check_min_cppstd(self, 17)
 
