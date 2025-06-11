@@ -42,7 +42,8 @@ class IfcopenshellConan(ConanFile):
         "with_hdf5": True,
     }   
     # Limit the default set of schemas to the basic ones and the latest to limit the size of the build.
-    default_options.update({f"schema_{schema}": schema in ["4x3_add2"] for schema in IFC_SCHEMAS})
+    default_options.update({f"schema_{schema}": schema in ["2x3", "4", "4x3_add2"] for schema in IFC_SCHEMAS})
+    implements = ["auto_shared_fpic"]
 
     @property
     def _selected_ifc_schemas(self):
@@ -124,8 +125,14 @@ class IfcopenshellConan(ConanFile):
         if self.options.get_safe("with_hdf5"):
             tc.variables["HDF5_INCLUDE_DIR"] = includedir("hdf5")
             tc.variables["HDF5_LIBRARY_DIR"] = libdir("hdf5")
-        tc.generate()
-
+            
+        if self.settings.compiler == "msvc":    
+            existing_flags = tc.variables.get("CMAKE_CXX_FLAGS", "")
+            tc.variables["CMAKE_CXX_FLAGS"] = existing_flags + " /permissive- /EHsc"
+            
+        ifcOffsetCurveByDistance = os.path.join(self.source_folder, "src", "ifcgeom", "mapping", "IfcOffsetCurveByDistance.cpp")
+        replace_in_file(self, ifcOffsetCurveByDistance, "// ifc4x1", "#include <ciso646>")
+        
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -222,8 +229,8 @@ class IfcopenshellConan(ConanFile):
                 _add_component(component_name)
                 self.cpp_info.components["Serializers"].requires.append(component_name)
 
-            geometry_serializer = _add_component("geometry_serializer")
+            geometry_serializer = _add_component("geometry_serializer", ["IfcParse", "IfcGeom", "opencascade::occt_tktopalgo", "opencascade::occt_tkbrep"])
             for schema in self._selected_ifc_schemas:
                 component_name = f"geometry_serializer_ifc{schema}"
-                _add_component(component_name, requires=["opencascade::occt_tkbrep"])
+                _add_component(component_name, requires=["IfcParse", "IfcGeom", "opencascade::occt_tkmesh", "opencascade::occt_tkxmesh", "opencascade::occt_tkmeshvs", "opencascade::occt_tktopalgo", "opencascade::occt_tkbrep", "opencascade::occt_tkgeomalgo"])
                 geometry_serializer.requires.append(component_name)
