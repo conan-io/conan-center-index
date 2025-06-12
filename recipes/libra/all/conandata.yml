@@ -1,0 +1,5 @@
+sources:
+  "0.8.7":
+    url:
+    - "https://github.com/jharwell/libra/archive/refs/tags/0.8.7.beta.tar.gz"
+    sha256: "________________________________________________________________"
