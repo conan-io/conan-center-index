@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import chdir, copy, get, replace_in_file
+from conan.tools.files import chdir, copy, get
 from conan.tools.layout import basic_layout
 from pathlib import Path
 import os
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.1"
 
 
 class EmSDKConan(ConanFile):
@@ -14,19 +14,15 @@ class EmSDKConan(ConanFile):
     description = "Emscripten SDK. Emscripten is an Open Source LLVM to JavaScript compiler"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kripken/emscripten"
-    topics = ("emsdk", "emscripten", "sdk")
+    topics = ("emsdk", "emscripten", "sdk", "emcc", "em++", "nodejs")
     license = "MIT"
     package_type = "application"
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "arch"
     upload_policy = "skip"
     build_policy = "missing"
 
     def layout(self):
         basic_layout(self, src_folder="src")
-
-    def package_id(self):
-        del self.info.settings.compiler
-        del self.info.settings.build_type
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -89,23 +85,9 @@ class EmSDKConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"))
-        emscripten = os.path.join(self.package_folder, "bin", "upstream", "emscripten")
-        toolchain = os.path.join(emscripten, "cmake", "Modules", "Platform", "Emscripten.cmake")
-        # FIXME: conan should add the root of conan package requirements to CMAKE_PREFIX_PATH (LIBRARY/INCLUDE -> ONLY; PROGRAM -> NEVER)
-        # allow to find conan libraries
-        replace_in_file(self, toolchain,
-                              "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)",
-                              "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)")
-        replace_in_file(self, toolchain,
-                              "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)",
-                              "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)")
-        replace_in_file(self, toolchain,
-                              "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)",
-                              "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)")
         if not cross_building(self):
             self.run("embuilder build MINIMAL", env=["conanemsdk", "conanrun"]) # force cache population
-            # the line below forces emscripten to accept the cache as-is, even after re-location
-            # https://github.com/emscripten-core/emscripten/issues/15053#issuecomment-920950710
+            # Avoid cache failures in case this package is uploaded as paths in sanity.txt are absolute
             os.remove(os.path.join(self._em_cache, "sanity.txt"))
 
     def _define_tool_var(self, value):
