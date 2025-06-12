@@ -1,0 +1,5 @@
+sources:
+  "0.1.5":
+    url:
+    - "https://github.com/RobinQu/instinct.cpp/archive/refs/tags/v0.1.5.tar.gz"
+    sha256: "76114f398c5775d47c4c3b192a623b6b60d46ded0c4afd3a6efc5659bb8d0cb9"
