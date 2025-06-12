@@ -3,20 +3,11 @@ project(test_package LANGUAGES C)
 
 find_package(incbin REQUIRED CONFIG)
 
-file(WRITE ${CMAKE_BINARY_DIR}/hello_world.txt "Hello World!\n")
-
+# Verify that the helper tool is available when building with MSVC
+# but we will not execute it to reduce complexity of test_package
 if(MSVC)
-    add_custom_command(
-        OUTPUT ${CMAKE_BINARY_DIR}/data.c
-        COMMAND incbin_tool ARGS "${CMAKE_CURRENT_SOURCE_DIR}/test_package.c" -p g_ -Ssnakecase -o "${CMAKE_BINARY_DIR}/data.c"
-        DEPENDS incbin::incbin
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        COMMENT "Generando data.c con incbin_tool..."
-    )
-    add_executable(${PROJECT_NAME} test_package.c ${CMAKE_BINARY_DIR}/data.c)
-else()
-    add_executable(${PROJECT_NAME} test_package.c)
+    find_program(INCBIN_TOOL_PATH NAMES incbin_tool incbin_tool.exe REQUIRED)
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE incbin::incbin)
-target_compile_definitions(${PROJECT_NAME} PUBLIC INCBIN_FILE="${CMAKE_BINARY_DIR}/hello_world.txt")
+add_executable(test_package test_package.c)
+target_link_libraries(test_package PRIVATE incbin::incbin)
