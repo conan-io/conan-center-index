@@ -3,6 +3,7 @@ from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake
 from conan.tools.microsoft import is_msvc
 import os
+from io import StringIO
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
@@ -20,7 +21,9 @@ class TestPackageConan(ConanFile):
         cmake.configure()
         cmake.build()
         if can_run(self):
-            self.run("incbin_tool -help", env="conanrun")
+            stderr_capture = StringIO()
+            self.run("incbin_tool", env="conanrun", stderr=stderr_capture, ignore_errors=True)
+            assert "-help" in stderr_capture.getvalue()
 
     def test(self):
         if can_run(self):
