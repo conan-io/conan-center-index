@@ -1,0 +1,23 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -586,11 +586,15 @@
+     message(FATAL_ERROR "Please specify exactly one of USE_COROUTINES,"
+     " USE_FOLLY, and USE_FOLLY_LITE")
+   endif()
+-  set(CMAKE_CXX_STANDARD 20)
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines -Wno-maybe-uninitialized")
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated")
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-redundant-move")
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-memory-model")
++  if( NOT DEFINED CMAKE_CXX_STANDARD )
++    set(CMAKE_CXX_STANDARD 20)
++  endif()
++  if (NOT MSVC)
++    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines -Wno-maybe-uninitialized")
++    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated")
++    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-redundant-move")
++    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-memory-model")
++  endif()
+   add_compile_definitions(USE_COROUTINES)
+   set(USE_FOLLY 1)
+ endif()

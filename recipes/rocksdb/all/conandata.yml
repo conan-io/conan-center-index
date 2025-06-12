@@ -1,4 +1,7 @@
 sources:
+  "10.2.1":
+    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v10.2.1.tar.gz"
+    sha256: "D1DDFD3551E649F7E2D180D5A6A006D90CFDE56DCFE1E548C58D95B7F1C87049"
   "10.0.1":
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v10.0.1.tar.gz"
     sha256: "3fdc9ca996971c4c039959866382c4a3a6c8ade4abf888f3b2ff77153e07bf28"
@@ -21,6 +24,16 @@ sources:
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v6.29.5.tar.gz"
     sha256: "ddbf84791f0980c0bbce3902feb93a2c7006f6f53bfd798926143e31d4d756f0"
 patches:
+  "10.2.1":
+    - patch_file: "patches/10.x.x-0001-fix-folly.patch"
+      patch_description: "Fix folly check"
+      patch_type: "conan"
+    - patch_file: "patches/10.x.x-0001-fix-msvc-coroutines.patch"
+      patch_description: "Fix coroutines on msvc"
+      patch_type: "portability"
+    - patch_file: "patches/9.x.x-0001-exclude-thirdparty.patch"
+      patch_description: "Do not include thirdparty.inc"
+      patch_type: "portability"
   "10.0.1":
     - patch_file: "patches/9.x.x-0001-exclude-thirdparty.patch"
       patch_description: "Do not include thirdparty.inc"
