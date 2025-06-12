@@ -152,7 +152,7 @@ class ArrowConan(ConanFile):
         if self.options.with_jemalloc:
             self.requires("jemalloc/5.3.0")
         if self.options.with_mimalloc:
-            self.requires("mimalloc/1.7.6")
+            self.requires("mimalloc/2.0.6")
         if self.options.with_boost:
             self.requires("boost/1.85.0")
         if self.options.with_gflags:
