@@ -22,8 +22,12 @@ class IncbinConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def configure(self):
+        if not is_msvc(self):
+            self.package_type = "header-library"
+
     def package_id(self):
-        if self.info.settings.get_safe("compiler") != "msvc":
+        if self.package_type == "header-library":
             self.info.clear()
 
     def source(self):
