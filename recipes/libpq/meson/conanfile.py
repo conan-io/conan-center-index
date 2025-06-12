@@ -193,8 +193,11 @@ class LibpqConan(ConanFile):
 
             self.cpp_info.components["pgcommon"].libs = [f"{prefix}pgcommon"]
             self.cpp_info.components["pq"].requires.append("pgcommon")
-            if not is_apple_os(self):
+            if is_apple_os(self):
                 # INFO: On Apple it results in duplicate symbols when linking
+                # https://github.com/postgres/postgres/blob/REL_17_5/src/common/Makefile#L15
+                self.cpp_info.components["pgcommon"].libs = ["pgcommon_shlib"]
+            else:
                 self.cpp_info.components["pgcommon"].libs.append(f"{prefix}pgcommon_shlib")
 
             self.cpp_info.components["pgcommon"].requires = ["pgport", "pgfeutils"]
