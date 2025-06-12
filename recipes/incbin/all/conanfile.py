@@ -13,7 +13,7 @@ class IncbinConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/graphitemaster/incbin/"
     topics = ("include", "binary", "preprocess")
-    package_type = "static-library"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
     def export_sources(self):
@@ -23,8 +23,8 @@ class IncbinConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def configure(self):
-        if not is_msvc(self):
-            self.package_type = "header-library"
+        if is_msvc(self):
+            self.package_type = "static-library"
 
     def package_id(self):
         if self.package_type == "header-library":
