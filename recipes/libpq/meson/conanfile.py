@@ -1,13 +1,12 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.files import copy, get, rm, rmdir, rename
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
 
 import os
-import glob
 
 
 required_conan_version = ">=2.4"
@@ -53,6 +52,10 @@ class LibpqConan(ConanFile):
 
     languages = "C"
     implements = ["auto_shared_fpic"]
+
+    @property
+    def _is_mingw(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -133,15 +136,19 @@ class LibpqConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
-        is_mingw = self.settings.os == "Windows" and self.settings.compiler == "gcc"
-        if ((is_msvc(self) and self.options.shared) or (not is_msvc(self) and self.options.shared)) and not is_mingw:
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
-        elif is_msvc(self) and not self.options.shared:
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
-        elif not self.options.shared:
+        # INFO: When building on Windows:
+        # - MSVC + Static: produces .a files
+        # - MSVC + Shared: produces .lib + .dll files
+        # - MinGW + Static: produces .a files
+        # - MinGW + Shared: produces .dll.a + .dll files
+        if self.options.shared:
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"), excludes="*.dll.a")
+        else:
             rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
-
+            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
+            rm(self, "*.lib", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dll.a", os.path.join(self.package_folder, "lib"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
@@ -176,12 +183,14 @@ class LibpqConan(ConanFile):
             self.cpp_info.components["pq"].requires.append("readline::readline")
 
         if not self.options.shared:
-            self.cpp_info.components["pgport"].libs = [f"{prefix}pgport_shlib"]
+            self.cpp_info.components["pgport"].libs = [f"{prefix}pgport", f"{prefix}pgport_shlib"]
+            self.cpp_info.components["pq"].requires.append("pgport")
+
             self.cpp_info.components["pgfeutils"].libs = [f"{prefix}pgfeutils"]
+            self.cpp_info.components["pq"].requires.append("pgfeutils")
 
-            self.cpp_info.components["pgcommon"].libs = [f"{prefix}pgcommon_shlib"]
+            self.cpp_info.components["pgcommon"].libs = [f"{prefix}pgcommon", f"{prefix}pgcommon_shlib"]
             self.cpp_info.components["pgcommon"].requires = ["pgport", "pgfeutils"]
-
             self.cpp_info.components["pq"].requires.append("pgcommon")
 
         self.cpp_info.components["pgtypes"].libs = [f"{prefix}pgtypes"]
@@ -198,7 +207,7 @@ class LibpqConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["pq"].system_libs = ["pthread", "m", "dl", "rt"]
             self.cpp_info.components["pgtypes"].system_libs = ["pthread"]
-            if not self.options.shared:
-                self.cpp_info.components["pgcommon"].system_libs = ["m"]
+            self.cpp_info.components["pgcommon"].system_libs = ["m"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
+            self.cpp_info.components["pgcommon"].system_libs = ["ws2_32"]

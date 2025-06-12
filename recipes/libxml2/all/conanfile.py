@@ -259,6 +259,9 @@ class Libxml2Conan(ConanFile):
             fix_library(self.options.iconv, "libiconv", "iconv")
             fix_library(self.options.zlib, "zlib", "z")
             fix_library(self.options.lzma, "xz_utils", "lzma")
+            replace_in_file(self, "Makefile.mingw",
+                                               "LIBS += -lwsock32 -lws2_32",
+                                               "LIBS += -lwsock32 -lws2_32 -lbcrypt")
 
             self.run(f"mingw32-make -j{build_jobs(self)} -f Makefile.mingw libxml libxmla")
             if self.options.include_utils:
