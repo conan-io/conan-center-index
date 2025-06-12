@@ -5,6 +5,7 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
+from conan.tools.apple import is_apple_os
 
 import os
 
@@ -183,22 +184,35 @@ class LibpqConan(ConanFile):
             self.cpp_info.components["pq"].requires.append("readline::readline")
 
         if not self.options.shared:
-            if is_msvc(self):
-                self.cpp_info.components["pgport"].libs = ["libpgport"]
-                self.cpp_info.components["pq"].requires.append("pgport")
-                self.cpp_info.components["pgcommon"].libs = ["libpgcommon"]
-                self.cpp_info.components["pq"].requires.append("pgcommon")
-            else:
-                self.cpp_info.components["pgcommon"].libs = ["pgcommon"]
-                self.cpp_info.components["pq"].requires.append("pgcommon")
-                self.cpp_info.components["pgcommon"].libs.append("pgcommon_shlib")
-                self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
-                if self.settings.os == "Windows":
-                    self.cpp_info.components["pgport"].system_libs = ["ws2_32"]
-                self.cpp_info.components["pgcommon"].requires.append("pgport")
+            self.cpp_info.components["pgport"].libs = [f"{prefix}pgport"]
+            self.cpp_info.components["pq"].requires.append("pgport")
+            self.cpp_info.components["pgport"].libs.append(f"{prefix}pgport_shlib")
+
+            self.cpp_info.components["pgfeutils"].libs = [f"{prefix}pgfeutils"]
+            self.cpp_info.components["pq"].requires.append("pgfeutils")
+
+            self.cpp_info.components["pgcommon"].libs = [f"{prefix}pgcommon"]
+            self.cpp_info.components["pq"].requires.append("pgcommon")
+            if not is_apple_os(self):
+                # INFO: On Apple it results in duplicate symbols when linking
+                self.cpp_info.components["pgcommon"].libs.append(f"{prefix}pgcommon_shlib")
+
+            self.cpp_info.components["pgcommon"].requires = ["pgport", "pgfeutils"]
+
+        self.cpp_info.components["pgtypes"].libs = [f"{prefix}pgtypes"]
+        self.cpp_info.components["pgtypes"].set_property("pkg_config_name", "libpgtypes")
+
+        self.cpp_info.components["ecpg"].libs = [f"{prefix}ecpg"]
+        self.cpp_info.components["ecpg"].requires = ["pq", "pgtypes"]
+        self.cpp_info.components["ecpg"].set_property("pkg_config_name", "libecpg")
+
+        self.cpp_info.components["ecpg_compat"].libs = [f"{prefix}ecpg_compat"]
+        self.cpp_info.components["ecpg_compat"].requires = ["ecpg", "pgtypes"]
+        self.cpp_info.components["ecpg_compat"].set_property("pkg_config_name", "libecpg_compat")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["pq"].system_libs = ["pthread", "m", "dl", "rt"]
+            self.cpp_info.components["pgtypes"].system_libs = ["pthread"]
             self.cpp_info.components["pgcommon"].system_libs = ["m"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
