@@ -57,3 +57,5 @@ class IncbinConan(ConanFile):
         
         if not is_msvc(self):
             self.cpp_info.bindirs = []
+        else:
+            self.runenv_info.prepend_path("PATH", os.path.join(self.package_folder, "bin"))

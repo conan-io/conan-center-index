@@ -15,14 +15,12 @@ class TestPackageConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
-    def build_requirements(self):
-        if is_msvc(self):
-            self.tool_requires(self.tested_reference_str)
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
+        if can_run(self):
+            self.run("incbin_tool -help", env="conanrun")
 
     def test(self):
         if can_run(self):
