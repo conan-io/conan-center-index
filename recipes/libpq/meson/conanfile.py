@@ -183,14 +183,18 @@ class LibpqConan(ConanFile):
             self.cpp_info.components["pq"].requires.append("readline::readline")
 
         if not self.options.shared:
-            self.cpp_info.components["pgport"].libs = [f"{prefix}pgport", f"{prefix}pgport_shlib"]
+            self.cpp_info.components["pgport"].libs = [f"{prefix}pgport"]
             self.cpp_info.components["pq"].requires.append("pgport")
+            if is_msvc(self):
+                self.cpp_info.components["pgport"].libs.append(f"{prefix}pgport_shlib")
 
             self.cpp_info.components["pgfeutils"].libs = [f"{prefix}pgfeutils"]
             self.cpp_info.components["pq"].requires.append("pgfeutils")
 
-            self.cpp_info.components["pgcommon"].libs = [f"{prefix}pgcommon", f"{prefix}pgcommon_shlib"]
+            self.cpp_info.components["pgcommon"].libs = [f"{prefix}pgcommon"]
             self.cpp_info.components["pgcommon"].requires = ["pgport", "pgfeutils"]
+            if is_msvc(self):
+                self.cpp_info.components["pgcommon"].libs.append(f"{prefix}pgcommon_shlib")
             self.cpp_info.components["pq"].requires.append("pgcommon")
 
         self.cpp_info.components["pgtypes"].libs = [f"{prefix}pgtypes"]
