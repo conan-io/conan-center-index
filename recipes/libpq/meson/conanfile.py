@@ -161,7 +161,7 @@ class LibpqConan(ConanFile):
 
         # INFO: Using Meson will install more libraries than when using Autotools.
         # We list only the libraries that are actually used by the main library.
-        prefix = "lib" if is_msvc(self) else ""
+        prefix = "lib" if is_msvc(self) and self.options.shared else ""
         self.cpp_info.components["pq"].libs = [f"{prefix}pq"]
         self.cpp_info.components["pq"].set_property("pkg_config_name", "libpq")
         self.cpp_info.components["pq"].set_property("cmake_target_name", "PostgreSQL::PostgreSQL")
