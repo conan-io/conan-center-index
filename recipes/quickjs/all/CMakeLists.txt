@@ -9,12 +9,15 @@ set(cdef CONFIG_VERSION="${version}" _GNU_SOURCE)
 
 set(QUICKJS_SRC
     ${QUICKJS_SRC_DIR}/quickjs.c
-    ${QUICKJS_SRC_DIR}/libbf.c
     ${QUICKJS_SRC_DIR}/libregexp.c
     ${QUICKJS_SRC_DIR}/libunicode.c
     ${QUICKJS_SRC_DIR}/cutils.c
     ${QUICKJS_SRC_DIR}/quickjs-libc.c
 )
+
+if(QUICKJS_2025_OR_LATER)
+    list(APPEND QUICKJS_SRC ${QUICKJS_SRC_DIR}/dtoa.c)
+endif()
 
 set(QUICKJS_INC
     ${QUICKJS_SRC_DIR}/cutils.h

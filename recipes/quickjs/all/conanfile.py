@@ -57,8 +57,15 @@ class QuickJSConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+
+        is_2025_or_later = self.version >= "2025-04-26"
+
         tc.variables["QUICKJS_SRC_DIR"] = self.source_folder.replace("\\", "/")
-        tc.variables["USE_BIGNUM"] = self.options.get_safe("use_bignum", True)
+        tc.variables["QUICKJS_2025_OR_LATER"] = is_2025_or_later
+        if is_2025_or_later:
+            tc.variables["USE_BIGNUM"] = False
+        else:
+            tc.variables["USE_BIGNUM"] = self.options.get_safe("use_bignum", True)
         tc.variables["DUMP_LEAKS"] = self.options.dump_leaks
         tc.generate()
 
