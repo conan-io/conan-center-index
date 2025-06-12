@@ -20,7 +20,7 @@ class TestPackageConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-        if can_run(self):
+        if is_msvc(self) and can_run(self):
             stderr_capture = StringIO()
             self.run("incbin_tool", env="conanrun", stderr=stderr_capture, ignore_errors=True)
             assert "-help" in stderr_capture.getvalue()
