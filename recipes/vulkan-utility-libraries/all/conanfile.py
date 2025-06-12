@@ -55,7 +55,9 @@ class VulkanUtilityLibraries(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        license_folder = os.path.join(self.package_folder, "licenses")
+        copy(self, "LICENSE.md", self.source_folder, license_folder)
+        copy(self, "LICENSES/*", self.source_folder, license_folder, keep_path=False)
         cmake = CMake(self)
         cmake.install()
 
