@@ -247,7 +247,7 @@ class ArrowConan(ConanFile):
     def build_requirements(self):
         if Version(self.version) >= "20.0.0":
             self.tool_requires("cmake/[>=3.25 <4]")
-        elif Version(self.version) >= "13.0.0":
+        else:
             self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
