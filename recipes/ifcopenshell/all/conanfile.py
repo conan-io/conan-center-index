@@ -6,6 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
+from conan.tools.apple import is_apple_os
 
 required_conan_version = ">=2.1"
 
@@ -28,7 +29,7 @@ class IfcopenshellConan(ConanFile):
         "ifcxml_support": [True, False],
         "use_mmap": [True, False],
         "with_cgal": [True, False],
-        "with_hdf5": [True, False],       
+        "with_hdf5": [True, False],
     }
     options.update({f"schema_{schema}": [True, False] for schema in IFC_SCHEMAS})
     default_options = {
@@ -42,7 +43,7 @@ class IfcopenshellConan(ConanFile):
         "with_hdf5": True,
     }   
     # Limit the default set of schemas to the basic ones and the latest to limit the size of the build.
-    default_options.update({f"schema_{schema}": schema in ["2x3", "4", "4x3_add2"] for schema in IFC_SCHEMAS})
+    default_options.update({f"schema_{schema}": schema in ["4", "4x3_add2"] for schema in IFC_SCHEMAS})
     implements = ["auto_shared_fpic"]
 
     @property
@@ -67,6 +68,10 @@ class IfcopenshellConan(ConanFile):
         check_min_cppstd(self, 17)
         if self.options.build_convert and not self.options.build_ifcgeom:
             raise ConanInvalidConfiguration("build_convert requires build_ifcgeom to be enabled")
+        if is_apple_os(self) or self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Disable temporary apple platform")
+        if self.options.shared:
+            raise ConanInvalidConfiguration("Disable temporary shared build")
 
     def requirements(self):
         self.requires("boost/1.83.0", transitive_headers=True, transitive_libs=True)
@@ -91,7 +96,6 @@ class IfcopenshellConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
-        replace_in_file(self, "cmake/CMakeLists.txt", "set(CMAKE_CXX_STANDARD 17)", "")
 
     def generate(self):
         def includedir(dep):
@@ -125,14 +129,7 @@ class IfcopenshellConan(ConanFile):
         if self.options.get_safe("with_hdf5"):
             tc.variables["HDF5_INCLUDE_DIR"] = includedir("hdf5")
             tc.variables["HDF5_LIBRARY_DIR"] = libdir("hdf5")
-            
-        if self.settings.compiler == "msvc":    
-            existing_flags = tc.variables.get("CMAKE_CXX_FLAGS", "")
-            tc.variables["CMAKE_CXX_FLAGS"] = existing_flags + " /permissive- /EHsc"
-            
-        ifcOffsetCurveByDistance = os.path.join(self.source_folder, "src", "ifcgeom", "mapping", "IfcOffsetCurveByDistance.cpp")
-        replace_in_file(self, ifcOffsetCurveByDistance, "// ifc4x1", "#include <ciso646>")
-        
+
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -232,5 +229,5 @@ class IfcopenshellConan(ConanFile):
             geometry_serializer = _add_component("geometry_serializer", ["IfcParse", "IfcGeom", "opencascade::occt_tktopalgo", "opencascade::occt_tkbrep"])
             for schema in self._selected_ifc_schemas:
                 component_name = f"geometry_serializer_ifc{schema}"
-                _add_component(component_name, requires=["IfcParse", "IfcGeom", "opencascade::occt_tkmesh", "opencascade::occt_tkxmesh", "opencascade::occt_tkmeshvs", "opencascade::occt_tktopalgo", "opencascade::occt_tkbrep", "opencascade::occt_tkgeomalgo"])
+                _add_component(component_name, requires=["IfcParse", f"Serializers_ifc{schema}", f"geometry_mapping_ifc{schema}", "IfcGeom", "opencascade::occt_tkmesh", "opencascade::occt_tkxmesh", "opencascade::occt_tkmeshvs", "opencascade::occt_tktopalgo", "opencascade::occt_tkbrep", "opencascade::occt_tkgeomalgo"])
                 geometry_serializer.requires.append(component_name)

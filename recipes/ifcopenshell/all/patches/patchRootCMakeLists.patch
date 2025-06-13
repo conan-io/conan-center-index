@@ -1,8 +1,8 @@
 diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
-index 7bb1eedc2..24b2cbe4e 100644
+index 65e166aad..a3161b18c 100644
 --- a/cmake/CMakeLists.txt
 +++ b/cmake/CMakeLists.txt
-@@ -18,6 +18,20 @@
+@@ -18,6 +18,19 @@
  ################################################################################
  
  cmake_minimum_required(VERSION 3.21)
@@ -19,11 +19,10 @@ index 7bb1eedc2..24b2cbe4e 100644
 +
 +project(IfcOpenShell VERSION ${RELEASE_VERSION})
 +
-+
- set(CMAKE_CXX_STANDARD 17)
  set(CMAKE_CXX_STANDARD_REQUIRED ON) # not necessary, but encouraged
  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-@@ -82,17 +96,6 @@ option(WITH_RELATIONSHIP_VALIDATION "Build IfcConvert with option to validate ge
+ 
+@@ -81,17 +94,6 @@ option(WITH_RELATIONSHIP_VALIDATION "Build IfcConvert with option to validate ge
  
  option(USERSPACE_PYTHON_PREFIX "Installs IfcPython for the current user only instead of system-wide." OFF)
  option(ADD_COMMIT_SHA "Add commit sha and branch in version number, warning results in many rebuilds, requires git" OFF)
@@ -41,7 +40,7 @@ index 7bb1eedc2..24b2cbe4e 100644
  
  if(MINIMAL_BUILD)
      message(STATUS "Setting options for minimal build")
-@@ -363,9 +366,7 @@ if(IFCXML_SUPPORT)
+@@ -362,9 +364,7 @@ if(IFCXML_SUPPORT)
  endif()
  
  if(BUILD_IFCGEOM)
@@ -52,7 +51,7 @@ index 7bb1eedc2..24b2cbe4e 100644
  
      # Open CASCADE
      if(WITH_OPENCASCADE)
-@@ -420,60 +421,47 @@ if(BUILD_IFCGEOM)
+@@ -419,59 +419,46 @@ if(BUILD_IFCGEOM)
          list(APPEND OPENCASCADE_LIBRARY_NAMES TKDESTEP TKDEIGES)
      endif(OCC_VERSION_STRING VERSION_LESS 7.8.0)
  
@@ -116,7 +115,14 @@ index 7bb1eedc2..24b2cbe4e 100644
 -        string(REPLACE TKernel "${lib}" lib_path "${lib_path}")
 -        list(APPEND OPENCASCADE_LIBRARIES "${lib_path}")
 -    endforeach()
--
++    set(OPENCASCADE_LIBRARIES ${OPENCASCADE_LIBRARY_NAMES})
++    # foreach(lib ${OPENCASCADE_LIBRARY_NAMES})
++    #     # Make sure we'll handle the Windows/MSVC debug postfix convention too.
++    #     string(REPLACE TKerneld "${lib}" lib_path "${libTKernel}")
++    #     string(REPLACE TKernel "${lib}" lib_path "${lib_path}")
++    #     list(APPEND OPENCASCADE_LIBRARIES "${lib_path}")
++    # endforeach()
+ 
 -    if(MSVC)
 -        add_definitions(-DHAVE_NO_DLL)
 -        add_debug_variants(OPENCASCADE_LIBRARIES "${OPENCASCADE_LIBRARIES}" d)
@@ -133,30 +139,11 @@ index 7bb1eedc2..24b2cbe4e 100644
 -    if("${libTKernelExt}" STREQUAL ".a")
 -        set(OCCT_STATIC ON)
 -    endif()
--
-+    set(OPENCASCADE_LIBRARIES ${OPENCASCADE_LIBRARY_NAMES})
-+    # foreach(lib ${OPENCASCADE_LIBRARY_NAMES})
-+    #     # Make sure we'll handle the Windows/MSVC debug postfix convention too.
-+    #     string(REPLACE TKerneld "${lib}" lib_path "${libTKernel}")
-+    #     string(REPLACE TKernel "${lib}" lib_path "${lib_path}")
-+    #     list(APPEND OPENCASCADE_LIBRARIES "${lib_path}")
-+    # endforeach()
-+
 +    list(APPEND OPENCASCADE_LIBRARIES "Eigen3::Eigen")
-+    
+ 
      if(OCCT_STATIC)
          find_package(Threads)
-         
-@@ -483,7 +471,7 @@ if(BUILD_IFCGEOM)
-             # OPENCASCADE_LIBRARIES repeated N times below in order to fix cyclic dependencies
-             # tfk: --start-group ... --end-group didn't work on the apple linker when last tested
-             if(APPLE)
--                set(OPENCASCADE_LIBRARIES ${OPENCASCADE_LIBRARIES} ${OPENCASCADE_LIBRARIES} ${OPENCASCADE_LIBRARIES} ${OPENCASCADE_LIBRARIES} ${OPENCASCADE_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-+                set(OPENCASCADE_LIBRARIES ${OPENCASCADE_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-             else()
-                 set(OPENCASCADE_LIBRARIES -Wl,--start-group ${OPENCASCADE_LIBRARIES} -Wl,--end-group ${CMAKE_THREAD_LIBS_INIT})
-             endif()
-@@ -573,10 +561,6 @@ if(COLLADA_SUPPORT)
+@@ -572,10 +559,6 @@ if(COLLADA_SUPPORT)
              message(FATAL_ERROR "COLLADA_SUPPORT enabled, but unable to find PCRE. "
                  "Disable COLLADA_SUPPORT or fix PCRE_LIBRARY_DIR path to proceed.")
          endif()
@@ -167,7 +154,7 @@ index 7bb1eedc2..24b2cbe4e 100644
      else()
          message(FATAL_ERROR "COLLADA_SUPPORT enabled, but unable to find OpenCOLLADA headers. "
              "Disable COLLADA_SUPPORT or fix OpenCOLLADA paths to proceed.")
-@@ -584,6 +568,7 @@ if(COLLADA_SUPPORT)
+@@ -583,6 +566,7 @@ if(COLLADA_SUPPORT)
  endif(COLLADA_SUPPORT)
  
  if(HDF5_SUPPORT)
@@ -175,7 +162,7 @@ index 7bb1eedc2..24b2cbe4e 100644
      if("${HDF5_INCLUDE_DIR}" STREQUAL "")
          message(STATUS "No HDF5 include directory specified")
      else()
-@@ -613,12 +598,7 @@ if(HDF5_SUPPORT)
+@@ -612,12 +596,7 @@ if(HDF5_SUPPORT)
                  set(debug_postfix "_debug")
              endif()
  
@@ -189,7 +176,7 @@ index 7bb1eedc2..24b2cbe4e 100644
              )
  
          else()
-@@ -887,12 +867,14 @@ if(BUILD_CONVERT OR BUILD_IFCPYTHON)
+@@ -886,12 +865,14 @@ if(BUILD_CONVERT OR BUILD_IFCPYTHON)
          foreach(schema ${SCHEMA_VERSIONS})
              set(GEOM_SERIALIZER_SCHEMA_LIBRARIES ${GEOM_SERIALIZER_SCHEMA_LIBRARIES} GeometrySerializers_ifc${schema})
  
@@ -206,20 +193,7 @@ index 7bb1eedc2..24b2cbe4e 100644
          target_link_libraries(geometry_serializer ${geometry_serializer_libraries})
          set(IFCOPENSHELL_LIBRARIES ${IFCOPENSHELL_LIBRARIES} geometry_serializer ${geometry_serializer_libraries})
      endif()
-@@ -942,10 +924,10 @@ endif()
- 
- if(BUILD_IFCGEOM)
-     if(WITH_CGAL)
--	clear_wasm_sysroot()
-+        clear_wasm_sysroot()
-         find_library(libGMP NAMES gmp mpir PATHS ${GMP_LIBRARY_DIR} NO_DEFAULT_PATH)
-         find_library(libMPFR NAMES mpfr PATHS ${MPFR_LIBRARY_DIR} NO_DEFAULT_PATH)
--	restore_wasm_sysroot()
-+        restore_wasm_sysroot()
-         if(NOT libGMP)
-             message(FATAL_ERROR "Unable to find GMP library files, aborting")
-         endif()
-@@ -979,7 +961,7 @@ if(BUILD_IFCGEOM)
+@@ -978,7 +959,7 @@ if(BUILD_IFCGEOM)
              # needed?
              # if(NOT WASM_BUILD)
              # endif()
@@ -228,7 +202,7 @@ index 7bb1eedc2..24b2cbe4e 100644
              list(APPEND kernel_libraries geometry_kernel_${kernel}_simple)
          endif()
      endforeach()
-@@ -991,7 +973,7 @@ if(BUILD_IFCGEOM)
+@@ -990,7 +971,7 @@ if(BUILD_IFCGEOM)
          file(GLOB IFCGEOM_CPP_FILES ../src/ifcgeom/mapping/*.cpp)
          set(IFCGEOM_FILES ${IFCGEOM_CPP_FILES} ${IFCGEOM_H_FILES} ${IFCGEOM_I_FILES})
          
@@ -237,7 +211,7 @@ index 7bb1eedc2..24b2cbe4e 100644
          set_target_properties(geometry_mapping_ifc${schema} PROPERTIES COMPILE_FLAGS "-DIFC_GEOM_EXPORTS -DIfcSchema=Ifc${schema}")
          target_link_libraries(geometry_mapping_ifc${schema} IfcParse)
          list(APPEND mapping_libraries geometry_mapping_ifc${schema})
-@@ -1010,9 +992,9 @@ if(BUILD_IFCGEOM)
+@@ -1009,9 +990,9 @@ if(BUILD_IFCGEOM)
      endif()
  
      if(WASM_BUILD)
@@ -249,7 +223,7 @@ index 7bb1eedc2..24b2cbe4e 100644
      endif()
  
  endif(BUILD_IFCGEOM)
-@@ -1027,7 +1009,7 @@ if(BUILD_CONVERT OR BUILD_IFCPYTHON)
+@@ -1026,7 +1007,7 @@ if(BUILD_CONVERT OR BUILD_IFCPYTHON)
      set(SERIALIZERS_S_FILES ${SERIALIZERS_S_H_FILES} ${SERIALIZERS_S_CPP_FILES})
  
      foreach(schema ${SCHEMA_VERSIONS})
@@ -258,7 +232,7 @@ index 7bb1eedc2..24b2cbe4e 100644
          set_target_properties(Serializers_ifc${schema} PROPERTIES COMPILE_FLAGS "-DIFC_GEOM_EXPORTS -DIfcSchema=Ifc${schema}")
          
          if(WASM_BUILD)
-@@ -1105,12 +1087,12 @@ if(BUILD_CONVERT)
+@@ -1104,12 +1085,12 @@ if(BUILD_CONVERT)
          set_property(TARGET IfcConvert APPEND_STRING PROPERTY COMPILE_FLAGS " -DIFOPSH_WITH_CITYJSON")
      endif()
  
@@ -277,7 +251,7 @@ index 7bb1eedc2..24b2cbe4e 100644
  
      install(TARGETS IfcConvert
          ARCHIVE DESTINATION ${LIBDIR}
-@@ -1127,9 +1109,9 @@ if(BUILD_GEOMSERVER)
+@@ -1126,9 +1107,9 @@ if(BUILD_GEOMSERVER)
      add_executable(IfcGeomServer ${SOURCE_FILES})
      target_link_libraries(IfcGeomServer ${IFCOPENSHELL_LIBRARIES} ${OPENCASCADE_LIBRARIES} ${Boost_LIBRARIES})
  
@@ -290,7 +264,7 @@ index 7bb1eedc2..24b2cbe4e 100644
  
      install(TARGETS IfcGeomServer
          ARCHIVE DESTINATION ${LIBDIR}
-@@ -1208,9 +1190,9 @@ if(BUILD_IFCMAX)
+@@ -1207,9 +1188,9 @@ if(BUILD_IFCMAX)
      add_subdirectory(../src/ifcmax ifcmax)
  endif()
  
@@ -303,7 +277,7 @@ index 7bb1eedc2..24b2cbe4e 100644
  
  if(BUILD_QTVIEWER)
      add_subdirectory(../src/qtviewer qtviewer)
-@@ -1228,14 +1210,18 @@ install(TARGETS IfcParse
+@@ -1227,14 +1208,18 @@ install(TARGETS IfcParse
  )
  
  if(BUILD_IFCGEOM)
@@ -320,7 +294,7 @@ index 7bb1eedc2..24b2cbe4e 100644
  
 +    install(FILES ${IFCGEOM_SERIALIZATION_H_FILE}
 +        DESTINATION ${INCLUDEDIR}/ifcgeom/Serialization
-+    )   
++    )
 +
      foreach(kernel ${GEOMETRY_KERNELS})
          file(GLOB IFCGEOM_H_FILES ../src/ifcgeom/kernels/${kernel}/*.h)
