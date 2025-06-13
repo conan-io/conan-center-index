@@ -413,6 +413,14 @@ class CPythonConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "configure"),
                             'OPENSSL_LIBS="-lssl -lcrypto"',
                             'OPENSSL_LIBS="-lssl -lcrypto -lz"')
+        if Version(self.version) >= "3.12":
+            if not self.options.get_safe("with_gdbm", False):
+                for src in ["gdbm/ndbm.h", "gdbm-ndbm.h", "gdbm.h", "ndbm.h", "db.h"]:
+                    self._regex_replace_in_file(
+                        os.path.join(self.source_folder, "configure"),
+                        re.compile("\\b(?<![-/])" + src.replace(".", "\\.") + "\\b"),
+                        f"{src}.disabled")
+
         if is_msvc(self):
             runtime_library = {
                 "MT": "MultiThreaded",
