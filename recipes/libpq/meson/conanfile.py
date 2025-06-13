@@ -153,6 +153,10 @@ class LibpqConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
+        # show all libraries in the package folder
+        libs = os.listdir(os.path.join(self.package_folder, "lib"))
+        self.output.info(f"Found packaged libraries: {libs}")
+
         self.cpp_info.set_property("cmake_file_name", "PostgreSQL")
         # INFO: Upstream libpq.pc is specific for the main library, not the whole package.
         self.cpp_info.set_property("pkg_config_name", "__libpq")
