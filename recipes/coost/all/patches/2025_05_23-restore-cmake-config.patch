@@ -1,0 +1,30 @@
+diff --git a/cmake/coost.pc.in b/cmake/coost.pc.in
+new file mode 100644
+index 0000000..701f864
+--- /dev/null
++++ b/cmake/coost.pc.in
+@@ -0,0 +1,11 @@
++prefix=@CMAKE_INSTALL_PREFIX@
++exec_prefix=${prefix}
++includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
++libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
++
++Name: coost
++Description: A tiny boost library in C++11.
++Version: @PROJECT_VERSION@
++Cflags: -I${includedir}
++Libs: -L${libdir} -lco@CO_PKG_EXTRA_LIBS@
++Requires:@CO_PKG_REQUIRES@
+diff --git a/cmake/coostConfig.cmake.in b/cmake/coostConfig.cmake.in
+new file mode 100644
+index 0000000..e8d451a
+--- /dev/null
++++ b/cmake/coostConfig.cmake.in
+@@ -0,0 +1,7 @@
++@PACKAGE_INIT@
++
++include(CMakeFindDependencyMacro)
++@CO_CMAKE_CONFIG_DEPS@
++include("${CMAKE_CURRENT_LIST_DIR}/coostTargets.cmake")
++
++check_required_components(co)
