@@ -1,4 +1,7 @@
 sources:
+  "1.3.14":
+    url: "https://github.com/sewenew/redis-plus-plus/archive/1.3.14.tar.gz"
+    sha256: "a7a15b51a857339cc73f444ea93e042a8c911a0e7858cecc394200c47b76fb3f"
   "1.3.13":
     url: "https://github.com/sewenew/redis-plus-plus/archive/1.3.13.tar.gz"
     sha256: "678a61898ed72f0c692102c7ce103a1bcae1e6ff85a4ad03e6002c1ba8fe1e08"
