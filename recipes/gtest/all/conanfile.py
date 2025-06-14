@@ -106,6 +106,9 @@ class GTestConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+        if Version(self.version) >= "1.17.0":
+            check_min_cppstd(self, 17)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -133,6 +136,10 @@ class GTestConan(ConanFile):
         replace_in_file(self, internal_utils, "-WX", "")
         if Version(self.version) < "1.12.0":
             replace_in_file(self, internal_utils, "-Werror", "")
+
+    def build_requirements(self):
+        if Version(self.version) >= "1.17.0":
+            self.tool_requires("cmake/[>=3.16]")
 
     def build(self):
         self._patch_sources()
