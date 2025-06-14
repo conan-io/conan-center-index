@@ -1,3 +1,5 @@
 versions:
+  "cci.20250614":
+    folder: all
   "4.0":
     folder: all
