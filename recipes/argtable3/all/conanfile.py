@@ -49,9 +49,16 @@ class Argtable3Conan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["ARGTABLE3_ENABLE_TESTS"] = False
+        tc.variables["ARGTABLE3_ENABLE_EXAMPLES"] = False
         tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if Version(self.version) > "3.2.2": # pylint: disable=conan-unreachable-upper-version
-            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
+        if Version(self.version) > "3.3.1": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException(
+                f"Recipe Alert: CMAKE_POLICY_VERSION_MINIMUM is currently '{tc.cache_variables['CMAKE_POLICY_VERSION_MINIMUM']}'. "
+                f"For argtable3 version {self.version} (which is > 3.3.1), "
+                "please verify the library's actual minimum required CMake version. "
+                "Update this recipe's CMAKE_POLICY_VERSION_MINIMUM setting if a version different from "
+                f"'{tc.cache_variables['CMAKE_POLICY_VERSION_MINIMUM']}' is required by the library."
+            )
         tc.generate()
 
     def build(self):
@@ -72,10 +79,13 @@ class Argtable3Conan(ConanFile):
 
     def package_info(self):
         suffix = ""
-        if not self.options.shared:
-            suffix += "_static"
+        if Version(self.version) < "3.3.0":
+            if not self.options.shared:
+                suffix += "_static"
+
         if Version(self.version) >= "3.2.1" and self.settings.build_type == "Debug":
             suffix += "d"
+
         self.cpp_info.libs = [f"argtable3{suffix}"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs.append("m")
