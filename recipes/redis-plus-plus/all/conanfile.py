@@ -95,8 +95,8 @@ class RedisPlusPlusConan(ConanFile):
         tc.variables["REDIS_PLUS_PLUS_BUILD_STATIC"] = not self.options.shared
         tc.variables["REDIS_PLUS_PLUS_BUILD_SHARED"] = self.options.shared
         tc.variables["REDIS_PLUS_PLUS_BUILD_STATIC_WITH_PIC"] = self.options.shared
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if Version(self.version) > "1.3.13": # pylint: disable=conan-unreachable-upper-version
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
+        if Version(self.version) > "1.3.15":  # pylint: disable=conan-unreachable-upper-version
             raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
         deps = CMakeDeps(self)
