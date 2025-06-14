@@ -36,7 +36,7 @@ class ProtobufConan(ConanFile):
         "with_zlib": True,
         "with_rtti": True,
         "lite": False,
-        "upb": False,
+        "upb": True,
         "debug_suffix": True,
     }
 
