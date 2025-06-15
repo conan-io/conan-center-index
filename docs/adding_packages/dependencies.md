@@ -74,6 +74,7 @@ version range only when a requirement for a newer version is needed.
 * meson: `[>=1.2.3 <2]`
 * pkgconf: `[>=2.2 <3]`
 * xz_utils: `[>=5.4.5 <6]`
+* mbedtls: `[~2.28]` or `[~3.6]`, depending on the version of mbedtls your library requires.
 
 Conan maintainers may introduce this for other dependencies over time. Outside of the cases outlined above, version ranges are not allowed in ConanCenter recipes.
 

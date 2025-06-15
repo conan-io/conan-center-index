@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
+from conan.tools.scm import Version
 import os
 
 
@@ -58,7 +59,7 @@ class LibSSHRecipe(ConanFile):
         elif self.options.crypto_backend == "gcrypt":
             self.requires("libgcrypt/1.8.4")
         elif self.options.crypto_backend == "mbedtls":
-            self.requires("mbedtls/3.6.0")
+            self.requires("mbedtls/[~3.6]")
 
     def validate(self):
         if self.options.crypto_backend == "mbedtls" and not self.dependencies["mbedtls"].options.enable_threading:
@@ -82,6 +83,8 @@ class LibSSHRecipe(ConanFile):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+        if Version(self.version) == "0.10.6":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
