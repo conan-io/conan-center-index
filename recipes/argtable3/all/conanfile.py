@@ -49,7 +49,7 @@ class Argtable3Conan(ConanFile):
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
-    def build(self):f)
+    def build(self):
         # The initial space is important (the cmake script does OFFSET 0)
         save(self, os.path.join(self.build_folder, "version.tag"), f" {self.version}.0\n")
         cmake = CMake(self)
