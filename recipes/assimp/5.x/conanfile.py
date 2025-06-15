@@ -264,6 +264,7 @@ class AssimpConan(ConanFile):
         cd = CMakeDeps(self)
         cd.set_property("rapidjson", "cmake_target_name", "rapidjson::rapidjson")
         cd.set_property("utfcpp", "cmake_target_name", "utf8cpp::utf8cpp")
+        cd.set_property("minizip-ng", "cmake_target_name", "minizip::minizip")
         cd.generate()
 
         venv = VirtualBuildEnv(self)
