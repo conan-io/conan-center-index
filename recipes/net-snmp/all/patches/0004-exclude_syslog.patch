@@ -1,0 +1,15 @@
+--- snmplib/snmp_debug.c	2025-03-28 09:23:09.239483413 +0100
++++ snmplib/snmp_debug.c	2025-03-28 09:23:38.829529523 +0100
+@@ -37,7 +37,11 @@
+ #endif
+ 
+ #ifdef HAVE_PRIORITYNAMES
+-#include <sys/syslog.h>
++  #if defined( HAVE_SYSLOG_H )
++    #include <syslog.h>
++  #elif defined ( HAVE_SYS_SYSLOG_H )
++    #include <sys/syslog.h>
++  #endif
+ #endif
+ 
+ #include <net-snmp/types.h>
