@@ -44,7 +44,11 @@ class GTestConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "11" if Version(self.version) < "1.13.0" else "14"
+        if Version(self.version) < "1.13.0":
+            return 11
+        elif Version(self.version) < "1.17.0":
+            return "14"
+        return "17"
 
     @property
     def _minimum_compilers_version(self):
@@ -90,27 +94,18 @@ class GTestConan(ConanFile):
         if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("gtest shared is not compatible with static vc runtime")
 
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
-        def loose_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
+        check_min_cppstd(self, self._min_cppstd)
 
         compiler = self.settings.compiler
         min_version = self._minimum_compilers_version.get(str(compiler))
-        if min_version and loose_lt_semver(str(compiler.version), min_version):
+        if min_version and Version(compiler.version) < min_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if Version(self.version) >= "1.17.0":
-            check_min_cppstd(self, 17)
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -142,7 +137,6 @@ class GTestConan(ConanFile):
             self.tool_requires("cmake/[>=3.16]")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
