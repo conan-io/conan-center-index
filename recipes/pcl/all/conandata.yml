@@ -2,6 +2,9 @@ sources:
   "1.13.1":
     url: https://github.com/PointCloudLibrary/pcl/archive/refs/tags/pcl-1.13.1.tar.gz
     sha256: 8ab98a9db371d822de0859084a375a74bdc7f31c96d674147710cf4101b79621
+  "1.15.0":
+    url: https://github.com/PointCloudLibrary/pcl/archive/refs/tags/pcl-1.15.0.tar.gz
+    sha256: e90c981c21e89c45201c5083db8308e099f34c1782f92fd65a0a4eb0b72c6fbf
 patches:
   "1.13.1":
     - patch_file: "patches/1.13.1-0001-cmake_use_conan_targets.patch"
@@ -25,3 +28,10 @@ patches:
       patch_description: "Compatibility with clang-19"
       patch_source: "https://github.com/PointCloudLibrary/pcl/pull/6113"
       patch_type: "portability"
+  "1.15.0":
+    - patch_file: "patches/1.15.0-0001-outofcore-without-visualization.patch"
+      patch_description: "outofcore module without visualization"
+      patch_type: "conan"
+    - patch_file: "patches/1.15.0-0002-musl-libc.patch"
+      patch_description: "musl libc support"
+      patch_type: "conan"
