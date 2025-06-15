@@ -33,10 +33,6 @@ class DacapClipConan(ConanFile):
         "with_image": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 11
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -59,7 +55,7 @@ class DacapClipConan(ConanFile):
             self.requires("xorg/system")
 
     def validate(self):
-        check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 11)
         if is_msvc(self) and self.info.settings.build_type == "Debug" and self.info.options.shared == True:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support MSVC debug shared build (now).")
 
