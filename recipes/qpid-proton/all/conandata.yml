@@ -1,0 +1,4 @@
+sources:
+  "0.40.0":
+    url: "https://github.com/apache/qpid-proton/archive/refs/tags/0.40.0.tar.gz"
+    sha256: "f3dcd30e85626d8eff13a98009f0b75b2a4d0cbf91520830a67202157dc63d6d"
