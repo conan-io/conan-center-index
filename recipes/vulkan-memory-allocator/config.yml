@@ -1,6 +1,8 @@
 versions:
   "cci.20231120":
     folder: all
+  "3.2.1":
+    folder: all
   "3.0.1":
     folder: all
   "3.0.0":
