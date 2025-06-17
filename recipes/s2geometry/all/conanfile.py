@@ -49,6 +49,10 @@ class S2GeometryConan(ConanFile):
         self.requires(f"abseil/[>={abseil_lower_bound} <=20250127.0]", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
 
+    def build_requirements(self):
+        if Version(self.version) >= "0.12.0":
+            self.tool_requires("cmake/[>=3.18 <4]")
+
     def validate(self):
         check_min_cppstd(self, 14)
 
