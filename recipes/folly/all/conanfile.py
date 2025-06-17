@@ -46,7 +46,6 @@ class FollyConan(ConanFile):
             "clang": "10",
             "apple-clang": "14",
             "msvc": "192",
-            "Visual Studio": "16",
         }
 
     def export_sources(self):
@@ -80,7 +79,7 @@ class FollyConan(ConanFile):
         self.requires("lz4/1.10.0", transitive_libs=True)
         self.requires("snappy/1.2.1")
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("zstd/1.5.5", transitive_libs=True)
+        self.requires("zstd/[~1.5]", transitive_libs=True)
         if not is_msvc(self):
             self.requires("libdwarf/0.9.1")
         self.requires("libsodium/1.0.19")
@@ -94,10 +93,8 @@ class FollyConan(ConanFile):
         self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_libaio"):
             self.requires("libaio/0.3.113")
-        if self.version >= "2025.03.14":
+        if Version(self.version) >= "2025.03.14":
             self.requires("fast_float/8.0.0")
-        elif Version(self.version) >= "2024.11.04":
-            self.requires("fast_float/6.1.5")
 
     def build_requirements(self):
         # INFO: Required due ZIP_LISTS CMake feature in conan_deps.cmake
@@ -139,6 +136,7 @@ class FollyConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=False)
+        self._patch_sources()
 
     def _cppstd_flag_value(self, cppstd):
         if is_msvc(self):
@@ -209,7 +207,7 @@ class FollyConan(ConanFile):
         if self.options.get_safe("with_libaio"):
             deps.set_property("libaio", "cmake_file_name", "LibAIO")
             deps.set_property("libaio", "cmake_additional_variables_prefixes", ["LIBAIO"])
-        if Version(self.version) >= "2024.11.04":
+        if Version(self.version) >= "2025.03.14":
             deps.set_property("fast_float", "cmake_additional_variables_prefixes", ["FASTFLOAT"])
         deps.generate()
 
@@ -228,7 +226,6 @@ class FollyConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "gen_pkgconfig_vars(FOLLY_PKGCONFIG folly_deps)", "")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
