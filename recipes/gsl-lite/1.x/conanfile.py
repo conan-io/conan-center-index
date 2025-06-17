@@ -16,13 +16,15 @@ class GslLiteConan(ConanFile):
     topics = ("GSL", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    tool_requires = "cmake/[>=3.16]"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
+    
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
