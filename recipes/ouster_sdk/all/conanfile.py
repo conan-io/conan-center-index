@@ -152,6 +152,9 @@ class OusterSdkConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
+        if Version(self.version) >= "0.14.0" and self.options.shared:
+            # INFO: Version 0.14.0+ produces both shared and static libraries when shared=True
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OusterSDK")
