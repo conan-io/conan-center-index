@@ -263,6 +263,7 @@ class FollyConan(ConanFile):
             self.cpp_info.components["libfolly"].requires.append("liburing::liburing")
             self.cpp_info.components["libfolly"].system_libs.extend(["pthread", "dl", "rt"])
             self.cpp_info.components["libfolly"].defines.extend(["FOLLY_HAVE_ELF", "FOLLY_HAVE_DWARF"])
+            self.cpp_info.components["libfolly"].requires.append("libaio::libaio")
         elif self.settings.os == "Windows":
             self.cpp_info.components["libfolly"].system_libs.extend(["ws2_32", "iphlpapi", "crypt32"])
 
@@ -274,9 +275,7 @@ class FollyConan(ConanFile):
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) >= "11.0":
             self.cpp_info.components["libfolly"].system_libs.append("c++abi")
 
-        if self.options.get_safe("with_libaio"):
-            self.cpp_info.components["libfolly"].requires.append("libaio::libaio")
-        if Version(self.version) >= "2024.11.04":
+        if Version(self.version) >= "2025.03.14":
             self.cpp_info.components["libfolly"].requires.append("fast_float::fast_float")
 
         self.cpp_info.components["follybenchmark"].set_property("cmake_target_name", "Folly::follybenchmark")
