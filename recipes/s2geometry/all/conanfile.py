@@ -6,9 +6,8 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">2.1"
 
 
 class S2GeometryConan(ConanFile):
@@ -29,20 +28,6 @@ class S2GeometryConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "6",
-            "clang": "7",
-            "apple-clang": "10",
-            "Visual Studio": "15",
-            "msvc": "191",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -62,17 +47,14 @@ class S2GeometryConan(ConanFile):
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 14)
 
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared with Visual Studio")
+
+        abseil_cppstd = self.dependencies.host['abseil'].info.settings.compiler.cppstd
+        if abseil_cppstd != self.settings.compiler.cppstd:
+            raise ConanInvalidConfiguration(f"s2geometry and abseil must be built with the same compiler.cppstd setting")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
