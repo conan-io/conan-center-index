@@ -73,7 +73,7 @@ class OusterSdkConan(ConanFile):
         if self.options.build_pcap:
             self.requires("libtins/4.5")
             if Version(self.version) >= "0.14.0":
-                self.requires("libpcap/1.10.4")
+                self.requires("libpcap/1.10.5")
 
         if self.options.build_osf:
             # Used in fb_generated/*.h
