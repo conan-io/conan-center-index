@@ -86,7 +86,7 @@ class FollyConan(ConanFile):
         if self.settings.os == "Linux":
             self.requires("liburing/2.6")
             self.requires("libaio/0.3.113")
-            
+
         # INFO: Folly does not support fmt 11 on MSVC: https://github.com/facebook/folly/issues/2250
         self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
         if Version(self.version) >= "2025.03.14":
@@ -158,7 +158,7 @@ class FollyConan(ConanFile):
         # Honor Boost_ROOT set by boost recipe
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0074"] = "NEW"
         tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if Version(self.version) > "2024.08.12.00": # pylint: disable=conan-unreachable-upper-version
+        if Version(self.version) > "2025.03.17.00": # pylint: disable=conan-unreachable-upper-version
             raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
 
 
