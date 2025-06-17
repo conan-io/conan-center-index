@@ -8,6 +8,9 @@ sources:
   "0.10.5":
     url: "https://github.com/podofo/podofo/archive/refs/tags/0.10.5.tar.gz"
     sha256: "49b159e88ba177ad2561b5cf6cbd68ecbe83272f5488bc527e44f97dbf695273"
+  "1.0.0":
+    url: "https://github.com/podofo/podofo/archive/refs/tags/1.0.0.tar.gz"
+    sha256: "e44276d927838034b51c4c79001e7ae5c3fef90b6844824004c77f160c1a22ea"
 patches:
   "0.9.7":
     - patch_file: "patches/0001-fix-cmake-0.9.7.patch"
