@@ -95,7 +95,7 @@ class PulseAudioConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         replace_in_file(self, os.path.join(self.source_folder, "configure"),
-                        "-pedantic -Werror", "-pedantic -Werror -Wno-strict-prototypes")
+                        "-pedantic -Werror", "-pedantic")
 
     def generate(self):
         if not cross_building(self):
