@@ -159,9 +159,10 @@ class OusterSdkConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OusterSDK")
         self.cpp_info.set_property("cmake_target_name", "OusterSDK::OusterSDK")
+        produce_library = Version(self.version) < "0.14.0" or not self.options.shared
 
         self.cpp_info.components["ouster_client"].set_property("cmake_target_name", "OusterSDK::ouster_client")
-        self.cpp_info.components["ouster_client"].libs = ["ouster_client"]
+        self.cpp_info.components["ouster_client"].libs = ["ouster_client"] if produce_library else []
         self.cpp_info.components["ouster_client"].requires = [
             "eigen::eigen",
             "libcurl::libcurl",
@@ -179,7 +180,7 @@ class OusterSdkConan(ConanFile):
 
         if self.options.build_osf:
             self.cpp_info.components["ouster_osf"].set_property("cmake_target_name", "OusterSDK::ouster_osf")
-            self.cpp_info.components["ouster_osf"].libs = ["ouster_osf"]
+            self.cpp_info.components["ouster_osf"].libs = ["ouster_osf"] if produce_library else []
             self.cpp_info.components["ouster_osf"].includedirs.append(os.path.join("include", "fb_generated"))
             self.cpp_info.components["ouster_osf"].requires = [
                 "ouster_client",
@@ -191,7 +192,7 @@ class OusterSdkConan(ConanFile):
 
         if self.options.build_pcap:
             self.cpp_info.components["ouster_pcap"].set_property("cmake_target_name", "OusterSDK::ouster_pcap")
-            self.cpp_info.components["ouster_pcap"].libs = ["ouster_pcap"]
+            self.cpp_info.components["ouster_pcap"].libs = ["ouster_pcap"] if produce_library else []
             self.cpp_info.components["ouster_pcap"].requires = [
                 "ouster_client",
                 "libtins::libtins",
@@ -203,7 +204,7 @@ class OusterSdkConan(ConanFile):
 
         if self.options.build_viz:
             self.cpp_info.components["ouster_viz"].set_property("cmake_target_name", "OusterSDK::ouster_viz")
-            self.cpp_info.components["ouster_viz"].libs = ["ouster_viz"]
+            self.cpp_info.components["ouster_viz"].libs = ["ouster_viz"] if produce_library else []
             self.cpp_info.components["ouster_viz"].requires = [
                 "ouster_client",
                 "glfw::glfw",
