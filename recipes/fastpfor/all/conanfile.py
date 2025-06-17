@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -52,11 +52,15 @@ class FastPFORConan(ConanFile):
         apply_conandata_patches(self)
 
     def generate(self):
+        if Version(self.version) > "0.2.0":  # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc = CMakeToolchain(self)
         tc.variables["WITH_TEST"] = False
         if self._has_simde:
             tc.cache_variables["SUPPORT_NEON"] = True
             tc.preprocessor_definitions["SIMDE_ENABLE_NATIVE_ALIASES"] = 1
+        if Version(self.version) <= "0.2.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
