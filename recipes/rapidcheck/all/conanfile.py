@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, save
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from os.path import join
@@ -101,6 +101,7 @@ class RapidcheckConan(ConanFile):
         cmake.install()
 
         rmdir(self, join(self.package_folder, "share"))
+        rm(self, "*.pc", self.package_folder, recursive=True)
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
