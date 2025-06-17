@@ -103,17 +103,6 @@ class RapidcheckConan(ConanFile):
         rmdir(self, join(self.package_folder, "share"))
         rm(self, "*.pc", self.package_folder, recursive=True)
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            join(self.package_folder, self._module_file_rel_path),
-            {
-                "rapidcheck": "rapidcheck::rapidcheck_rapidcheck",
-                "rapidcheck_catch":"rapidcheck::rapidcheck_catch",
-                "rapidcheck_gmock": "rapidcheck::rapidcheck_gmock",
-                "rapidcheck_gtest": "rapidcheck::rapidcheck_gtest",
-            }
-        )
-
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
@@ -154,16 +143,3 @@ class RapidcheckConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["rapidcheck_rapidcheck"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["rapidcheck_rapidcheck"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.enable_catch:
-            self.cpp_info.components["rapidcheck_catch"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components["rapidcheck_catch"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.enable_gmock:
-            self.cpp_info.components["rapidcheck_gmock"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components["rapidcheck_gmock"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.enable_gtest:
-            self.cpp_info.components["rapidcheck_gtest"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components["rapidcheck_gtest"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
