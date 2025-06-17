@@ -6,6 +6,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 required_conan_version = ">2.1"
 
@@ -43,7 +44,8 @@ class S2GeometryConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("abseil/20230802.1", transitive_headers=True, transitive_libs=True)
+        abseil_lower_bound = "20230802.1" if Version(self.version) < "0.12.0" else "20240116.1"
+        self.requires(f"abseil/[>={abseil_lower_bound} <=20250127.0]", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
 
     def validate(self):
