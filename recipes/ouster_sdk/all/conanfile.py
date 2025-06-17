@@ -79,8 +79,8 @@ class OusterSdkConan(ConanFile):
             # Used in fb_generated/*.h
             self.requires("flatbuffers/24.3.7", transitive_headers=True)
             # 0.12.0+ shared_library uses private libpng in ouster_osf and result in missing symbols
-            libpng_transtive_libs = Version(self.version) >= "0.12.0"
-            self.requires("libpng/[>=1.6 <2]", transitive_libs=libpng_transtive_libs)
+            # 0.11.0 and earlier used private libpng in ouster_osf
+            self.requires("libpng/[>=1.6 <2]", transitive_libs=True)
             self.requires("zlib/[>=1.2.11 <2]", transitive_libs=True)
 
         if self.options.build_viz:
