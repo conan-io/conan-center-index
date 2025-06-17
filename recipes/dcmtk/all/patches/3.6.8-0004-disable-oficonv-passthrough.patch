@@ -1,0 +1,35 @@
+--- a/config/docs/macros.txt
++++ b/config/docs/macros.txt
+@@ -70,6 +70,20 @@ DCMTK_ENABLE_ACR_NEMA_DATASET_PRESENT_COMPATIBILITY
+     if backwards compatibility with ACR-NEMA is desired. If this is
+     important, compile with this macro enabled.
+
++DCMTK_ENABLE_ICONV_PASSTHROUGH
++  Affected: oficonv
++  Type of modification: Activates feature
++  Explanation: If compiled with this macro, the oficonv libary will
++    simply copy input to output during a character set conversion if
++    input and output encoding are the same. This is more efficient, but
++    means that in invalid byte sequences in the source will remain
++    undetected and copied to the target, whereas the default behaviour
++    would detect this and stop the conversion. It is also incompatible
++    with the behaviour of the GNU iconv library.
++    In DCMTK 3.6.8, this feature was always enabled.
++    PATCH(conan-center-index): disabled by default in 3.6.8 as well to 
++    avoid regression https://support.dcmtk.org/redmine/issues/1143
++
+ DCMTK_ENABLE_STRICT_HUFFMAN_TABLE_CHECK
+   Affected: dcmjpeg
+   Type of modification: Activates feature
+--- a/oficonv/libsrc/citrus_iconv.c
++++ b/oficonv/libsrc/citrus_iconv.c
+@@ -139,8 +139,7 @@ open_shared(struct _citrus_iconv_shared * * rci,
+     size_t len_convname;
+     int ret;
+
+-#define INCOMPATIBLE_WITH_GNU_ICONV
+-#ifdef INCOMPATIBLE_WITH_GNU_ICONV
++#ifdef DCMTK_ENABLE_ICONV_PASSTHROUGH
+     /* 
+      * Use a pass-through when the (src,dest) encodings are the same.
+      */

@@ -1,4 +1,7 @@
 sources:
+  "0.11.1":
+    url: "https://github.com/davea42/libdwarf-code/archive/refs/tags/v0.11.1.tar.gz"
+    sha256: "dfd24db87c354b3ba6fa72d29a481014f81768fea15ddcde96a8a938b1557c17"
   "0.11.0":
     url: "https://github.com/davea42/libdwarf-code/archive/refs/tags/v0.11.0.tar.gz"
     sha256: "5135af38dc202206538a3dcdc90675aa8b320e132156849c6855dea5ea0c0729"
@@ -11,54 +14,31 @@ sources:
   "0.9.1":
     url: "https://github.com/davea42/libdwarf-code/archive/refs/tags/v0.9.1.tar.gz"
     sha256: "6da3f46a9f92b4e284c97c733851879d9b91b16642bede90c7614860a946824e"
-  "0.9.0":
-    url: "https://github.com/davea42/libdwarf-code/archive/refs/tags/v0.9.0.tar.gz"
-    sha256: "6d4c0ee8a869e68dfeb15c99b869cafca7a5f715ecfc699cbf4fd30729b33226"
   "0.8.0":
     url: "https://github.com/davea42/libdwarf-code/archive/refs/tags/v0.8.0.tar.gz"
     sha256: "8ef0dbfb0816b02aac97b87426689ebaa4efb8ec2ca2c759ea34c5e4678dff3f"
-  "0.7.0":
-    url: "https://www.prevanders.net/libdwarf-0.7.0.tar.xz"
-    sha256: "23b71829de875fa5842e49f232c8ee1a5043805749738bc61424d9abc1189f38"
-  "0.5.0":
-    url: "https://www.prevanders.net/libdwarf-0.5.0.tar.xz"
-    sha256: "11fa822c60317fa00e1a01a2ac9e8388f6693e8662ab72d352c5f50c7e0112a9"
 patches:
+  "0.11.1":
+    - patch_file: "patches/0.9.2-0001-fixes.patch"
+      patch_description: "fix DW_API definition"
+      patch_type: "portability"
   "0.11.0":
-    - patch_file: "patches/0.10.1-0001-fixes.patch"
-      patch_description: "fix DW_API definition and cmake"
+    - patch_file: "patches/0.9.2-0001-fixes.patch"
+      patch_description: "fix DW_API definition"
       patch_type: "portability"
   "0.10.1":
-    - patch_file: "patches/0.10.1-0001-fixes.patch"
-      patch_description: "fix DW_API definition and cmake"
+    - patch_file: "patches/0.9.2-0001-fixes.patch"
+      patch_description: "fix DW_API definition"
       patch_type: "portability"
   "0.9.2":
     - patch_file: "patches/0.9.2-0001-fixes.patch"
-      patch_description: "fix DW_API definition and cmake"
+      patch_description: "fix DW_API definition"
       patch_type: "portability"
   "0.9.1":
     - patch_file: "patches/0.9.1-0001-fixes.patch"
       patch_description: "fix DW_API definition and cmake"
       patch_type: "portability"
-  "0.9.0":
-    - patch_file: "patches/0.9.0-0001-fixes.patch"
-      patch_description: "fix DW_API definition and cmake"
-      patch_type: "portability"
   "0.8.0":
     - patch_file: "patches/0.8.0-0001-fixes.patch"
       patch_description: "fix DW_API definition and cmake"
-      patch_type: "portability"
-  "0.7.0":
-    - patch_file: "patches/0.7.0-0001-fix-cmake.patch"
-      patch_description: "use cci package, remove lib64/bin64 install folders"
-      patch_type: "conan"
-    - patch_file: "patches/0.5.0-0001-fix-DW_API.patch"
-      patch_description: "fix DW_API definition"
-      patch_type: "portability"
-  "0.5.0":
-    - patch_file: "patches/0.5.0-0001-fix-cmake.patch"
-      patch_description: "use cci package, remove lib64/bin64 install folders"
-      patch_type: "conan"
-    - patch_file: "patches/0.5.0-0001-fix-DW_API.patch"
-      patch_description: "fix DW_API definition"
       patch_type: "portability"

@@ -1,0 +1,179 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6cb5a6c..1802e38 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -925,7 +925,7 @@ install(
+   DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+   RENAME tesseract.pc)
+ install(TARGETS tesseract DESTINATION bin)
+-if (MSVC)
++if (0)
+   install(FILES $<TARGET_PDB_FILE:${PROJECT_NAME}> DESTINATION bin OPTIONAL)
+ endif()
+ install(
+@@ -935,7 +935,7 @@ install(
+   RUNTIME DESTINATION bin
+   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+-if (MSVC AND BUILD_SHARED_LIBS)
++if (0)
+   install(FILES $<TARGET_PDB_FILE:libtesseract> DESTINATION bin OPTIONAL)
+ endif()
+ install(
+diff --git a/src/training/CMakeLists.txt b/src/training/CMakeLists.txt
+index c764442..97fb7a4 100644
+--- a/src/training/CMakeLists.txt
++++ b/src/training/CMakeLists.txt
+@@ -126,7 +126,7 @@ install(
+   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ generate_export_header(common_training EXPORT_MACRO_NAME
+                        TESS_COMMON_TRAINING_API)
+-if (MSVC AND BUILD_SHARED_LIBS)
++if (0)
+   install(FILES $<TARGET_PDB_FILE:common_training> DESTINATION bin OPTIONAL)
+ endif()
+ project_group(common_training "Training Tools")
+@@ -144,7 +144,7 @@ if(NOT DISABLED_LEGACY_ENGINE)
+     RUNTIME DESTINATION bin
+     LIBRARY DESTINATION lib
+     ARCHIVE DESTINATION lib)
+-  if (MSVC)
++  if (0)
+     install(FILES $<TARGET_PDB_FILE:ambiguous_words> DESTINATION bin OPTIONAL)
+   endif()
+ endif()
+@@ -162,7 +162,7 @@ if(NOT DISABLED_LEGACY_ENGINE)
+     RUNTIME DESTINATION bin
+     LIBRARY DESTINATION lib
+     ARCHIVE DESTINATION lib)
+-  if (MSVC)
++  if (0)
+     install(FILES $<TARGET_PDB_FILE:classifier_tester> DESTINATION bin OPTIONAL)
+   endif()
+ endif()
+@@ -179,7 +179,7 @@ install(
+   RUNTIME DESTINATION bin
+   LIBRARY DESTINATION lib
+   ARCHIVE DESTINATION lib)
+-if (MSVC)
++if (0)
+   install(FILES $<TARGET_PDB_FILE:combine_tessdata> DESTINATION bin OPTIONAL)
+ endif()
+ 
+@@ -196,7 +196,7 @@ if(NOT DISABLED_LEGACY_ENGINE)
+     RUNTIME DESTINATION bin
+     LIBRARY DESTINATION lib
+     ARCHIVE DESTINATION lib)
+-  if (MSVC)
++  if (0)
+     install(FILES $<TARGET_PDB_FILE:cntraining> DESTINATION bin OPTIONAL)
+   endif()
+ endif()
+@@ -213,7 +213,7 @@ install(
+   RUNTIME DESTINATION bin
+   LIBRARY DESTINATION lib
+   ARCHIVE DESTINATION lib)
+-if (MSVC)
++if (0)
+   install(FILES $<TARGET_PDB_FILE:dawg2wordlist> DESTINATION bin OPTIONAL)
+ endif()
+ 
+@@ -230,7 +230,7 @@ if(NOT DISABLED_LEGACY_ENGINE)
+     RUNTIME DESTINATION bin
+     LIBRARY DESTINATION lib
+     ARCHIVE DESTINATION lib)
+-  if (MSVC)
++  if (0)
+     install(FILES $<TARGET_PDB_FILE:mftraining> DESTINATION bin OPTIONAL)
+   endif()
+ endif()
+@@ -248,7 +248,7 @@ if(NOT DISABLED_LEGACY_ENGINE)
+     RUNTIME DESTINATION bin
+     LIBRARY DESTINATION lib
+     ARCHIVE DESTINATION lib)
+-  if (MSVC)
++  if (0)
+      install(FILES $<TARGET_PDB_FILE:shapeclustering> DESTINATION bin OPTIONAL)
+   endif()
+ endif()
+@@ -265,7 +265,7 @@ install(
+   RUNTIME DESTINATION bin
+   LIBRARY DESTINATION lib
+   ARCHIVE DESTINATION lib)
+-if (MSVC)
++if (0)
+   install(FILES $<TARGET_PDB_FILE:wordlist2dawg> DESTINATION bin OPTIONAL)
+ endif()
+ 
+@@ -298,7 +298,7 @@ if(ICU_FOUND)
+     RUNTIME DESTINATION bin
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+-  if (MSVC AND BUILD_SHARED_LIBS)
++  if (0)
+     install(FILES $<TARGET_PDB_FILE:unicharset_training> DESTINATION bin OPTIONAL)
+   endif()
+   generate_export_header(unicharset_training EXPORT_MACRO_NAME
+@@ -317,7 +317,7 @@ if(ICU_FOUND)
+     RUNTIME DESTINATION bin
+     LIBRARY DESTINATION lib
+     ARCHIVE DESTINATION lib)
+-  if (MSVC)
++  if (0)
+     install(FILES $<TARGET_PDB_FILE:combine_lang_model> DESTINATION bin OPTIONAL)
+   endif()
+ 
+@@ -333,7 +333,7 @@ if(ICU_FOUND)
+     RUNTIME DESTINATION bin
+     LIBRARY DESTINATION lib
+     ARCHIVE DESTINATION lib)
+-  if (MSVC)
++  if (0)
+     install(FILES $<TARGET_PDB_FILE:lstmeval> DESTINATION bin OPTIONAL)
+   endif()
+ 
+@@ -349,7 +349,7 @@ if(ICU_FOUND)
+     RUNTIME DESTINATION bin
+     LIBRARY DESTINATION lib
+     ARCHIVE DESTINATION lib)
+-  if (MSVC)
++  if (0)
+     install(FILES $<TARGET_PDB_FILE:lstmtraining> DESTINATION bin OPTIONAL)
+   endif()
+ 
+@@ -365,7 +365,7 @@ if(ICU_FOUND)
+     RUNTIME DESTINATION bin
+     LIBRARY DESTINATION lib
+     ARCHIVE DESTINATION lib)
+-  if (MSVC)
++  if (0)
+     install(FILES $<TARGET_PDB_FILE:merge_unicharsets> DESTINATION bin OPTIONAL)
+   endif()
+ 
+@@ -381,7 +381,7 @@ if(ICU_FOUND)
+     RUNTIME DESTINATION bin
+     LIBRARY DESTINATION lib
+     ARCHIVE DESTINATION lib)
+-  if (MSVC)
++  if (0)
+     install(FILES $<TARGET_PDB_FILE:set_unicharset_properties> DESTINATION bin OPTIONAL)
+   endif()
+ 
+@@ -398,7 +398,7 @@ if(ICU_FOUND)
+     RUNTIME DESTINATION bin
+     LIBRARY DESTINATION lib
+     ARCHIVE DESTINATION lib)
+-  if (MSVC)
++  if (0)
+     install(FILES $<TARGET_PDB_FILE:unicharset_extractor> DESTINATION bin OPTIONAL)
+   endif()
+ 
+@@ -457,7 +457,7 @@ if(ICU_FOUND)
+       RUNTIME DESTINATION bin
+       LIBRARY DESTINATION lib
+       ARCHIVE DESTINATION lib)
+-    if (MSVC)
++    if (0)
+       install(FILES $<TARGET_PDB_FILE:text2image> DESTINATION bin OPTIONAL)
+     endif()
+   endif()

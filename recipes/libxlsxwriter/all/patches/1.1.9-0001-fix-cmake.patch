@@ -1,0 +1,25 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e444dcc..44a638d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -183,9 +183,9 @@ endif()
+ 
+ if(NOT BUILD_SHARED_LIBS)
+     if(UNIX)
+-        set(CMAKE_POSITION_INDEPENDENT_CODE ON)
++#        set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+     elseif(MINGW OR MSYS)
+-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static -static-libgcc -Wno-char-subscripts -Wno-long-long")
++        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-char-subscripts -Wno-long-long")
+         list(APPEND LXW_PRIVATE_COMPILE_DEFINITIONS USE_FILE32API)
+     elseif(MSVC)
+         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Fd\"${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pdb\"")
+@@ -208,7 +208,7 @@ if(MSVC AND USE_STATIC_MSVC_RUNTIME)
+ endif()
+ 
+ # Configure pkg-config
+-find_package(PkgConfig)
++# find_package(PkgConfig)
+ file(READ "include/xlsxwriter.h" ver)
+ 
+ string(REGEX MATCH "LXW_VERSION \"([^\"]+)\"" _ ${ver})

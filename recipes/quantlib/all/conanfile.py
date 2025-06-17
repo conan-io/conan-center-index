@@ -47,10 +47,10 @@ class QuantlibConan(ConanFile):
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 14 if self.version >= "1.24" else 11)
+            check_min_cppstd(self, 14 if Version(self.version) >= "1.24" else 11)
         if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("gcc < 5 not supported")
-        if self.version >= "1.24" and is_msvc(self) and self.options.shared:
+        if Version(self.version) >= "1.24" and is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration("MSVC DLL build is not supported by upstream")
 
     def source(self):
@@ -61,7 +61,7 @@ class QuantlibConan(ConanFile):
         tc = CMakeToolchain(self)
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-        if self.version >= "1.24":
+        if Version(self.version) >= "1.24":
             tc.cache_variables["QL_BUILD_BENCHMARK"] = False
             tc.cache_variables["QL_BUILD_EXAMPLES"] = False
             tc.cache_variables["QL_BUILD_TEST_SUITE"] = False

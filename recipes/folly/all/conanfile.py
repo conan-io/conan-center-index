@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.env import VirtualBuildEnv
@@ -78,7 +78,7 @@ class FollyConan(ConanFile):
         self.requires("zstd/[~1.5]", transitive_libs=True)
         if not is_msvc(self):
             self.requires("libdwarf/0.9.1")
-        self.requires("libsodium/1.0.19")
+        self.requires("libsodium/1.0.20")
         self.requires("xz_utils/[>=5.4.5 <6]")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("libiberty/9.1.0")
@@ -134,14 +134,6 @@ class FollyConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=False)
         self._patch_sources()
 
-    def _cppstd_flag_value(self, cppstd):
-        if is_msvc(self):
-            prefix = "c"
-            year = str(cppstd)
-            if year > "17":
-                year = "latest"
-        return f"{prefix}++{year}"
-
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -165,11 +157,14 @@ class FollyConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         # Honor Boost_ROOT set by boost recipe
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0074"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "2024.08.12.00": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
 
 
         # 2019.10.21.00 -> either MSVC_ flags or CXX_STD
         if is_msvc(self):
-            cxx_std_value = self._cppstd_flag_value(self.settings.get_safe("compiler.cppstd", self._min_cppstd))
+            cxx_std_value = "c++latest" if str(self.settings.compiler.cppstd) > "17" else f"c++{str(self.settings.compiler.cppstd)}"
             tc.cache_variables["MSVC_LANGUAGE_VERSION"] = cxx_std_value
             tc.cache_variables["MSVC_ENABLE_ALL_WARNINGS"] = False
             tc.cache_variables["MSVC_USE_STATIC_RUNTIME"] = is_msvc_static_runtime(self)

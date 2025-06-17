@@ -68,7 +68,7 @@ index 7d2894da..1e6570b4 100755
          "$<BUILD_INTERFACE:xxHash>"
 -        ${YAML_CPP_LIBRARIES}
 -        MINIZIP::minizip-ng
-+        yaml-cpp
++        PUBLIC yaml-cpp
 +        MINIZIP::minizip
  )
  

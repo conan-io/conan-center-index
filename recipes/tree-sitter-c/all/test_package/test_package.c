@@ -1,5 +1,10 @@
 #include <tree_sitter/api.h>
+
+#ifdef TREE_SITTER_C_API_H
 #include <tree_sitter_c/api.h>
+#else
+#include <tree_sitter/tree-sitter-c.h>
+#endif
 
 #include <stdlib.h>
 #include <string.h>
