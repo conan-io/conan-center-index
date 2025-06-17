@@ -54,7 +54,7 @@ class S2GeometryConan(ConanFile):
             self.tool_requires("cmake/[>=3.18 <4]")
 
     def validate(self):
-        check_min_cppstd(self, 14)
+        check_min_cppstd(self, 14 if Version(self.version) < "0.12.0" else 17)
 
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared with Visual Studio")
