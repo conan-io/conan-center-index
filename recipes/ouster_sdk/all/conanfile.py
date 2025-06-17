@@ -132,9 +132,12 @@ class OusterSdkConan(ConanFile):
              "target_link_libraries(ouster_client PUBLIC nonstd::optional-lite)\n",
              append=True)
 
-        # Allow non-static ouster_osf for consistency with other components
-        replace_in_file(self, os.path.join(self.source_folder, "ouster_osf", "CMakeLists.txt"),
-                        "add_library(ouster_osf STATIC", "add_library(ouster_osf")
+        if Version(self.version) < "0.14.0":
+            # Allow non-static ouster_osf for consistency with other components
+            # FIXME: This was applied previously in the recipe, but does not follow the upstream
+            #        in 0.14.0, it breaks because shared_library.dylib expects static ouster_osf
+            replace_in_file(self, os.path.join(self.source_folder, "ouster_osf", "CMakeLists.txt"),
+                            "add_library(ouster_osf STATIC", "add_library(ouster_osf")
 
 
     def build(self):
