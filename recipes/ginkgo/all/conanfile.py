@@ -104,7 +104,7 @@ class GinkgoConan(ConanFile):
             tc.variables["GINKGO_BUILD_DPCPP"] = False
         tc.variables["GINKGO_BUILD_HWLOC"] = False
         tc.variables["GINKGO_BUILD_MPI"] = False
-        if Version(self.version) >= "1.9.0":
+        if "half" in self.options:
             tc.variables["GINKGO_ENABLE_HALF"] = self.options.half
         tc.generate()
 
