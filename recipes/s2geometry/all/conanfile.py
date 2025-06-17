@@ -45,6 +45,7 @@ class S2GeometryConan(ConanFile):
 
     def requirements(self):
         abseil_lower_bound = "20230802.1" if Version(self.version) < "0.12.0" else "20240116.1"
+        # tested up to 20250127.0, increase if known to be compatible with newer versions
         self.requires(f"abseil/[>={abseil_lower_bound} <=20250127.0]", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
 
