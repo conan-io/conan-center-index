@@ -1,4 +1,6 @@
 versions:
+  "50.1":
+    folder: all
   "48.1":
     folder: all
   "47.0":
