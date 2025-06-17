@@ -45,7 +45,7 @@ class FastPFORConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 11)
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "15.0":
-            raise ConanInvalidConfiguration(f"${self.ref} doesn't support ${self.settings.compiler} < 15.0")
+            raise ConanInvalidConfiguration(f"apple-clang < 15.0 not supported")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
