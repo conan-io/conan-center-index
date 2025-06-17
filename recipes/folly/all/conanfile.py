@@ -26,12 +26,10 @@ class FollyConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_libaio": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_libaio": True,
     }
 
     @property
@@ -54,8 +52,6 @@ class FollyConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os != "Linux":
-            del self.options.with_libaio
 
     def configure(self):
         if self.options.shared:
@@ -89,10 +85,10 @@ class FollyConan(ConanFile):
             self.requires("libunwind/1.8.0")
         if self.settings.os == "Linux":
             self.requires("liburing/2.6")
+            self.requires("libaio/0.3.113")
+            
         # INFO: Folly does not support fmt 11 on MSVC: https://github.com/facebook/folly/issues/2250
         self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
-        if self.options.get_safe("with_libaio"):
-            self.requires("libaio/0.3.113")
         if Version(self.version) >= "2025.03.14":
             self.requires("fast_float/8.0.0")
 
