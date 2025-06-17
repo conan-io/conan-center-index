@@ -40,7 +40,7 @@ class GinkgoConan(ConanFile):
         "fPIC": False,
         "openmp": False,
         "cuda": False,
-        #"half": See config_options() below
+        "half": True,
     }
 
     def export_sources(self):
