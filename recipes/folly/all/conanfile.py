@@ -84,7 +84,7 @@ class FollyConan(ConanFile):
             self.requires("libiberty/9.1.0")
             self.requires("libunwind/1.8.0")
         if self.settings.os == "Linux":
-            self.requires("liburing/2.6")
+            self.requires("liburing/2.11")
             self.requires("libaio/0.3.113")
 
         # INFO: Folly does not support fmt 11 on MSVC: https://github.com/facebook/folly/issues/2250
