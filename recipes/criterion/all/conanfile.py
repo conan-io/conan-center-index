@@ -7,6 +7,8 @@ from conan.tools.layout import basic_layout
 from conan.tools.gnu import PkgConfigDeps
 
 
+required_conan_version = ">=2.4"
+
 class CriterionConan(ConanFile):
     name = "criterion"
     license = "MIT"
@@ -20,22 +22,24 @@ class CriterionConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    requires = ("libgit2/1.5.0", "libffi/3.4.3")
+    implements = ["auto_shared_fpic"]
+    languages = "C"
 
     def export_sources(self):
         export_conandata_patches(self)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
-
-    def configure(self):        
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.compiler.rm_safe("libcxx")
-
     def layout(self):
         basic_layout(self, src_folder="src")
+    
+    def requirements(self):
+        self.requires("libgit2/1.5.0")
+        self.requires("libffi/3.4.3")
+
+    def build_requirements(self):
+        self.tool_requires("meson/[>=1.2.3 <2]")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
+
 
     def generate(self):
         pc = PkgConfigDeps(self)
@@ -54,9 +58,9 @@ class CriterionConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def build(self):
-        apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -75,7 +79,4 @@ class CriterionConan(ConanFile):
         self.cpp_info.resdirs = ["res"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ['anl']
-
-    def build_requirements(self):
-        self.tool_requires("pkgconf/1.9.3")
-        self.tool_requires("meson/1.0.0")
+    
