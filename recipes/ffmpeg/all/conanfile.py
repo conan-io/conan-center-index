@@ -284,8 +284,6 @@ class FFMpegConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if not self.options.avfilter:
-            self.options.rm_safe("with_openvino")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
