@@ -128,7 +128,8 @@ class SentryNativeConan(ConanFile):
                 self.requires("breakpad/cci.20210521")
         if self.options.get_safe("qt"):
             self.requires("qt/5.15.11")
-            self.requires("openssl/[>=1.1 <4]")
+            if not self.options.get_safe("crashpad_with_tls"): # Avoid duplicated requirement
+                self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
