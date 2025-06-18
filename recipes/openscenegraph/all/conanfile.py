@@ -246,6 +246,10 @@ class OpenSceneGraphConanFile(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("freetype", "cmake_module_file_name", "Freetype")
         deps.set_property("giflib", "cmake_file_name", "GIFLIB")
+        deps.set_property("libjpeg-turbo", "cmake_file_name", "JPEG")
+        deps.set_property("libjpeg-turbo::jpeg", "cmake_target_name", "JPEG::JPEG")
+        deps.set_property("mozjpeg", "cmake_file_name", "JPEG")
+        deps.set_property("mozjpeg::libjpeg", "cmake_target_name", "JPEG::JPEG")
         deps.generate()
 
     def _patch_sources(self):

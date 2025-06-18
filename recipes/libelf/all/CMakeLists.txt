@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(elf LANGUAGES C)
 
 if(EXISTS "${LIBELF_SRC_DIR}/lib/sys_elf.h.w32")

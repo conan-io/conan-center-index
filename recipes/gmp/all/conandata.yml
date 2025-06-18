@@ -19,6 +19,7 @@ patches:
   "6.3.0":
     - patch_file: "patches/0001-msvc-dumpbin-yasm-wrapper.patch"
     - patch_file: "patches/6.x.x-0001-fix-MSVC-next-prime-error.patch"
+    - patch_file: "patches/cpp23-unprototyped-functions.patch"
     - patch_file: "patches/emscripten/0001-configure.patch"
       patch_os: "Emscripten"
       patch_source: "https://github.com/fpelliccioni"
