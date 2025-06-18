@@ -63,6 +63,24 @@ class CrashpadConan(ConanFile):
         if self.options.get_safe("with_tls") == "openssl":
             self.requires("openssl/[>=1.1 <4]")
 
+    @property
+    def _compilers_support(self):
+        # This is a list of compilers that we need to build
+        # and why they are here instead of relying on cppstd detection
+        return {
+            "cci.20220219": {
+                # Here from the previous version, assuming good
+                "apple-clang": (10, None),
+                "gcc": (5, None),
+                "clang": ("3.9", None),
+                "msvc": ("190", None),
+                "Visual Studio": (14, None),
+            },
+            "cci.20240812": {
+                "apple-clang": (14, "Missing proper std::range support")
+            }
+        }
+
     def validate(self):
         if is_msvc(self):
             if self.options.http_transport in ("libcurl", "socket"):
@@ -71,6 +89,10 @@ class CrashpadConan(ConanFile):
             if not self.dependencies["libcurl"].options.shared:
                 # FIXME: is this true?
                 self.output.warning("crashpad needs a shared libcurl library")
+        unsupported_version = self._compilers_support.get(self.version).get(str(self.settings.compiler))
+        if unsupported_version and Version(unsupported_version[0]) > self.settings.compiler.version:
+            raise ConanInvalidConfiguration(f"{self.settings.compiler} not supported: " + (unsupported_version[1] or ""))
+        
         check_min_cppstd(self, 14 if Version(self.version) < "cci.20240812" else 20)
 
     def source(self):
@@ -200,7 +222,6 @@ class CrashpadConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["mini_chromium_base"].libs = ["base"]
-        self.cpp_info.set_property("cmake_build_modules", [os.path.join(self.package_folder, "lib", "cmake", "crashpad-cxx.cmake")])
         if is_apple_os(self):
             if self.settings.os == "Macos":
                 self.cpp_info.components["mini_chromium_base"].frameworks = ["ApplicationServices", "CoreFoundation", "Foundation", "IOKit", "Security"]
