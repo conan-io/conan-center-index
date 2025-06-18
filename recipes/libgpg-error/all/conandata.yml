@@ -1,4 +1,7 @@
 sources:
+  "1.55":
+    url: "https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.55.tar.gz"
+    sha256: "bda09f51d7ed64565e41069d782bfcc4984aed908ae68bee01fb692b64ea96e2"
   "1.47":
     url: "https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.47.tar.gz"
     sha256: "685d4bd9d05576c4fc7f0870903dfdfbe41f2dd6a12e76fd8bd1717278f6b365"
