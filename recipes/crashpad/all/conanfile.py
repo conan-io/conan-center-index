@@ -71,7 +71,7 @@ class CrashpadConan(ConanFile):
             if not self.dependencies["libcurl"].options.shared:
                 # FIXME: is this true?
                 self.output.warning("crashpad needs a shared libcurl library")
-        check_min_cppstd(self, 14 if Version(self.version) else 20)
+        check_min_cppstd(self, 14 if Version(self.version) < "cci.20240812" else 20)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["crashpad"], destination=self.source_folder, strip_root=True)
