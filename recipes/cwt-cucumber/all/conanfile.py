@@ -1,60 +1,64 @@
+import os
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy
-from conan.tools.scm import Git
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
+from conan.tools.files import get, copy, replace_in_file, export_conandata_patches, apply_conandata_patches, rmdir
 
-from os.path import join
+required_conan_version = ">=2"
 
 
 class CwtCucumberRecipe(ConanFile):
-  name = "cwt-cucumber"
-  license = "MIT"
-  author = "Thomas Sedlmair, thomas.sedlmair@googlemail.com"
-  url = "https://github.com/ThoSe1990/cucumber-cpp"
-  description = "A C++20 Cucumber interpreter"
-  topics = ("cpp", "bdd", "testing", "cucumber")
+    name = "cwt-cucumber"
+    license = "MIT"
+    homepage = "https://github.com/ThoSe1990/cucumber-cpp"
+    url = "https://github.com/conan-io/conan-center-index"
+    description = "A C++20 Cucumber interpreter"
+    topics = ("cpp", "bdd", "testing", "cucumber")
+    package_type = "library"
+    settings = "os", "compiler", "build_type", "arch"
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
 
-  generators = "CMakeDeps"
-  settings = "os", "compiler", "build_type", "arch"
-  options = {"shared": [True, False]}
-  default_options = {"shared": False}
+    implements = ["auto_shared_fpic"]
 
-  def requirements(self):
-    self.requires("nlohmann_json/3.10.5")
+    def export_sources(self):
+        export_conandata_patches(self)
 
-  def source(self):
-    get(self, **self.conan_data["sources"][self.version], strip_root=True)
+    def requirements(self):
+        self.requires("nlohmann_json/3.10.5")
 
-  def generate(self):
-    tc = CMakeToolchain(self)
-    if self.options.shared:
-      tc.variables["BUILD_SHARED_LIBS"] = True
-    tc.generate()
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
-  def build(self):
-    cmake = CMake(self)
-    cmake.configure()
-    cmake.build()
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
-  def package(self):
-    dst = join(self.package_folder, "include" )
-    src = join(self.source_folder, "src")
-    copy(self, "*.hpp", src, dst)
+    def validate(self):
+        check_min_cppstd(self, 20)
 
-    dst = join(self.package_folder, "lib")
-    src = join(self.source_folder, "lib")
-    copy(self, "*", src, dst, keep_path=False)
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
-    copy(self, "LICENSE", self.source_folder, self.package_folder)
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
-  def package_info(self):
-    self.cpp_info.libs = ["cwt-cucumber"]
+    def package(self):
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
-    self.cpp_info.includedirs = ['include']
-    self.cpp_info.libdirs = ['lib']
+    def package_info(self):
+        self.cpp_info.libs = ["cwt-cucumber"]
 
-    self.cpp_info.components["cucumber"].set_property("cmake_target_name", "cwt::cucumber")
-    self.cpp_info.components["cucumber"].libs = ["cucumber"]
+        self.cpp_info.components["cucumber"].set_property("cmake_target_name", "cwt::cucumber")
+        self.cpp_info.components["cucumber"].libs = ["cucumber"]
 
-    self.cpp_info.components["cucumber-no-main"].set_property("cmake_target_name", "cwt::cucumber-no-main")
-    self.cpp_info.components["cucumber-no-main"].libs = ["cucumber-no-main"]
+        self.cpp_info.components["cucumber-no-main"].set_property("cmake_target_name", "cwt::cucumber-no-main")
+        self.cpp_info.components["cucumber-no-main"].libs = ["cucumber-no-main"]
