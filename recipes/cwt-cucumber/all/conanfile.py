@@ -2,7 +2,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import get, copy, replace_in_file, export_conandata_patches, apply_conandata_patches, rmdir
+from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches, rmdir
 
 required_conan_version = ">=2"
 
