@@ -1,7 +1,7 @@
 sources:
   "2025.06.16.00":
     url: "https://github.com/facebook/folly/releases/download/v2025.06.16.00/folly-v2025.06.16.00.tar.gz"
-    sha256: "ssss"
+    sha256: "109420d8f969e2b27e5f3c44ab647a62d30078e7931b30a8ddff43d7d951d117"
   "2024.08.12.00":
     url: "https://github.com/facebook/folly/releases/download/v2024.08.12.00/folly-v2024.08.12.00.tar.gz"
     sha256: "18d7be721721db547cb9c5dd5cc50df05cd88b0a8e683e3126ec6f9ce2c41c4d"

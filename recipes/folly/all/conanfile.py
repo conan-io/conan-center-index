@@ -157,10 +157,8 @@ class FollyConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         # Honor Boost_ROOT set by boost recipe
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0074"] = "NEW"
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if Version(self.version) > "2025.03.17.00": # pylint: disable=conan-unreachable-upper-version
-            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
-
+        if Version(self.version) < "2025.04.07.00": # pylint: disable=conan-unreachable-upper-version
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
 
         # 2019.10.21.00 -> either MSVC_ flags or CXX_STD
         if is_msvc(self):
@@ -195,7 +193,7 @@ class FollyConan(ConanFile):
         deps.set_property("xz_utils", "cmake_file_name", "LibLZMA")
         deps.set_property("zlib", "cmake_file_name", "ZLIB")
         deps.set_property("zstd", "cmake_file_name", "Zstd")
-        if self.options.get_safe("with_libaio"):
+        if self.settings.os == "Linux":
             deps.set_property("libaio", "cmake_file_name", "LibAIO")
             deps.set_property("libaio", "cmake_additional_variables_prefixes", ["LIBAIO"])
         if Version(self.version) >= "2025.03.14":
