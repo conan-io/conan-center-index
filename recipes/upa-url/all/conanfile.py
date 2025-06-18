@@ -17,10 +17,10 @@ class upa_urlRecipe(ConanFile):
     topics = ("url", "parser", "psl", "whatwg")
 
     # Binary configuration
-    package_type = "static-library"
+    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"fPIC": [True, False]}
-    default_options = {"fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
 
     implements = ["auto_shared_fpic"]
 
