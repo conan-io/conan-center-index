@@ -1,3 +1,10 @@
+From afea23abf322fb7eba0f1bb8675e09b1039fb47d Mon Sep 17 00:00:00 2001
+From: MHU-valantic <>
+Date: Mon, 23 May 2022 18:08:35 +0200
+Subject: [PATCH] Apply patch for #1024
+
+https://github.com/civetweb/civetweb/issues/1024#issuecomment-1131456269
+
 diff --git a/cmake/AddCCompilerFlag.cmake b/cmake/AddCCompilerFlag.cmake
 index 5eaf890..a1a28a6 100644
 --- a/cmake/AddCCompilerFlag.cmake
