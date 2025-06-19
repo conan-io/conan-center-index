@@ -139,7 +139,7 @@ class OpenTelemetryCppConan(ConanFile):
 
         if self.options.with_abseil:
             if self._supports_new_proto_grpc_abseil():
-                self.requires("abseil/[>=20240116.1 <20240117.0]", transitive_headers=True)
+                self.requires("abseil/[>=20240116.1 <=20250127.0]", transitive_headers=True)
             else:
                 self.requires("abseil/[>=20230125.3 <=20230802.1]", transitive_headers=True)
 
@@ -216,7 +216,9 @@ class OpenTelemetryCppConan(ConanFile):
 
     def build_requirements(self):
         if self._needs_proto:
-            if Version(self.version) >= "1.18.0":
+            if Version(self.version) >= "1.21.0":
+                self.tool_requires("opentelemetry-proto/1.7.0")
+            elif Version(self.version) >= "1.18.0":
                 self.tool_requires("opentelemetry-proto/1.4.0")
             else:
                 self.tool_requires("opentelemetry-proto/1.3.2")
