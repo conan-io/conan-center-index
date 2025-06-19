@@ -133,6 +133,6 @@ class ReadstatConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "readstat")
-        self.cpp_info.libs = ["readstat"]
+        self.cpp_info.libs = ["ReadStat"] if is_msvc(self) else ["readstat"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs.append("m")
