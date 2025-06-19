@@ -55,6 +55,9 @@ class PinocchioConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
+        # To enable building Python interfaces, it is necessary to either ensure the installation
+        # of dependencies using self.tool_requires("cpython/X.Y.Z") or implement support for working
+        # with a virtual environment (e.g., https://github.com/conan-io/conan/pull/11601)
         tc.cache_variables["BUILD_PYTHON_INTERFACE"] = False
         tc.cache_variables["BUILD_TESTING"] = False
         tc.generate()
