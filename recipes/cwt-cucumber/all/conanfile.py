@@ -23,6 +23,14 @@ class CwtCucumberRecipe(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        if self.settings.os == "Windows":
+            # No explicit support for shared libraries on Windows
+            self.options.rm_safe("shared")
+            self.package_type = "static-library"
+
     def export_sources(self):
         export_conandata_patches(self)
 
