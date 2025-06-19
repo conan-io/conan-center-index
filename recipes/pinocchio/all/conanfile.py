@@ -44,6 +44,9 @@ class PinocchioConan(ConanFile):
         self.requires("urdfdom/4.0.0")
         self.requires("boost/1.87.0", transitive_headers=True)
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.22 <4]")
+
     def validate(self):
         if self.settings.compiler == "msvc":
             raise ConanInvalidConfiguration("MSVC is not supported")
