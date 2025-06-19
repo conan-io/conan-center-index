@@ -1,11 +1,10 @@
 from conan import ConanFile
-from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, rmdir, download, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rm, rmdir, download, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, MSBuild, MSBuildDeps, MSBuildToolchain
 import os
 
 required_conan_version = ">=2.1"
@@ -33,6 +32,14 @@ class ReadstatConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        if is_msvc(self):
+            self.package_type = "static-library"
+            del self.options.shared
+
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -41,67 +48,78 @@ class ReadstatConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
-        if self.settings_build.os == "Windows":
-            self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
-                self.tool_requires("msys2/cci.latest")
-        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/[>=2.2 <3]")
-        self.tool_requires("libtool/2.4.7")
-        self.tool_requires("automake/1.16.5")
+        if not is_msvc(self):
+            if self.settings_build.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
+            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                self.tool_requires("pkgconf/[>=2.2 <3]")
+            self.tool_requires("libtool/2.4.7")
+            self.tool_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["release"], strip_root=True)
         download(self, **self.conan_data["sources"][self.version]["license"], filename="LICENSE")
+        apply_conandata_patches(self)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
+        if is_msvc(self):
+            tc = MSBuildToolchain(self)
+            tc.generate()
+            deps = MSBuildDeps(self)
+            deps.generate()
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
 
-        tc = AutotoolsToolchain(self)
-        tc.configure_args.extend([
-            "--with-libiconv-prefix={}".format(self.dependencies["libiconv"].package_folder.replace("\\", "/")),
-            ])
-
-        # INFO: Ignores Werror when building:
-        # readstat_parser.c:6:40: error: a function declaration without a prototype is deprecated in all versions of C
-        if not is_msvc(self):
+            tc = AutotoolsToolchain(self)
+            tc.configure_args.extend([
+                "--with-libiconv-prefix={}".format(self.dependencies["libiconv"].package_folder.replace("\\", "/")),])
+            # INFO: Ignores Werror when building:
+            # readstat_parser.c:6:40: error: a function declaration without a prototype is deprecated in all versions of C
             tc.extra_cflags = ["-Wno-error", "-Wno-strict-prototypes"]
+            tc.generate()
 
-        if cross_building(self) and is_msvc(self):
-            triplet_arch_windows = {"x86_64": "x86_64", "x86": "i686", "armv8": "aarch64"}
-            # ICU doesn't like GNU triplet of conan for msvc (see https://github.com/conan-io/conan/issues/12546)
-            host_arch = triplet_arch_windows.get(str(self.settings.arch))
-            build_arch = triplet_arch_windows.get(str(self._settings_build.arch))
+            deps = PkgConfigDeps(self)
+            deps.generate()
 
-            if host_arch and build_arch:
-                host = f"{host_arch}-w64-mingw32"
-                build = f"{build_arch}-w64-mingw32"
-                tc.configure_args.extend([
-                    f"--host={host}",
-                    f"--build={build}",
-                ])
-        env = tc.environment()
-        tc.generate(env)
-
-        deps = PkgConfigDeps(self)
-        deps.generate()
+    def _patch_msvc(self):
+        vcxproj_file = os.path.join(self.source_folder, "VS17", "ReadStat.vcxproj")
+        # Replace the hardcoded platform toolset by the one from the Conan profile
+        platform_toolset = MSBuildToolchain(self).toolset
+        replace_in_file(self, vcxproj_file,
+                "<PlatformToolset>v141</PlatformToolset>",
+                f"<PlatformToolset>{platform_toolset}</PlatformToolset>")
+        # Remove the hardcoded Windows target platform version, let Conan handle it
+        replace_in_file(self, vcxproj_file,
+                "<WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>",
+                "")
+        # Inject the conan generators into the project file, so we can use the dependencies
+        import_conan_generators = ""
+        for props_file in ["conantoolchain.props", "conandeps.props"]:
+            props_path = os.path.join(self.generators_folder, props_file)
+            import_conan_generators += f"<Import Project=\"{props_path}\" />"
+        replace_in_file(self, vcxproj_file,
+                        '<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.targets" />',
+                        f'{import_conan_generators}<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.targets" />')
 
     def build(self):
-        apply_conandata_patches(self)
-        autotools = Autotools(self)
-        autotools.autoreconf()
-        autotools.configure()
-        autotools.make()
+        self._patch_msvc()
+        if is_msvc(self):
+            msbuild = MSBuild(self)
+            msbuild.build(os.path.join(self.source_folder, "VS17", "ReadStat.sln"), targets=["ReadStat"])
+        else:
+            autotools = Autotools(self)
+            autotools.autoreconf()
+            autotools.configure()
+            autotools.make(args=["V=1"])
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
-            copy(self, "readstat.h", src=os.path.join(self.source_folder, "headers"), dst=os.path.join(self.package_folder, "include"))
-            copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-            copy(self, "*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "readstat.h", src=os.path.join(self.source_folder, "src"), dst=os.path.join(self.package_folder, "include"))
             copy(self, "*.lib", src=self.source_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-            copy(self, "*.dll", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         else:
             autotools = Autotools(self)
             autotools.install()
@@ -112,7 +130,6 @@ class ReadstatConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "readstat")
-        suffix = "_i" if is_msvc(self) and self.options.shared else ""
-        self.cpp_info.libs = [f"readstat{suffix}"]
+        self.cpp_info.libs = ["readstat"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs.append("m")
