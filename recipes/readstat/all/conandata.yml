@@ -4,9 +4,6 @@ sources:
       # The release does not come with VS solution files, so we use the source archive
       url: "https://github.com/WizardMac/ReadStat/archive/refs/tags/v1.1.9.tar.gz"
       sha256: "89af7c785a7ae3d9a7af6e64a69028829a429f66a14b1b913be22816dc07ddca"
-    license:
-      url: "https://raw.githubusercontent.com/WizardMac/ReadStat/refs/tags/v1.1.9/LICENSE"
-      sha256: "416b611ef9448b3c7c71f584b1ebf78baff8f553b4b5368f2af732255ca19a3e"
 patches:
   "1.1.9":
     - patch_file: "patches/0001-add-option-spawnv.patch"

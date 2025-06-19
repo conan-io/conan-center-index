@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, rmdir, download, export_conandata_patches, apply_conandata_patches, replace_in_file
+from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.apple import fix_apple_shared_install_name
@@ -61,7 +61,6 @@ class ReadstatConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["release"], strip_root=True)
-        download(self, **self.conan_data["sources"][self.version]["license"], filename="LICENSE")
         apply_conandata_patches(self)
 
     def generate(self):
