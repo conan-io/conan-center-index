@@ -31,6 +31,7 @@ class ProtopufConan(ConanFile):
             "msvc": "192",
             "gcc": "10",
             "clang": "12",
+            "apple-clang": "12",
         }
 
     def layout(self):
@@ -40,11 +41,6 @@ class ProtopufConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler == "apple-clang":
-            raise ConanInvalidConfiguration(
-                f"{self.ref} does not yet support apple-clang."
-            )
-
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
