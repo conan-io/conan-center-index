@@ -4,11 +4,9 @@ from conan.tools.cmake import cmake_layout, CMake
 import os
 
 
-# It will become the standard on Conan 2.x
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "CMakeDeps", "CMakeToolchain"
-    test_type = "explicit"
 
     def layout(self):
         cmake_layout(self)

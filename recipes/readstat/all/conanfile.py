@@ -1,14 +1,14 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.files import copy, get, rm, rmdir, download
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2.1"
 
 class ReadstatConan(ConanFile):
     name = "readstat"
@@ -27,50 +27,39 @@ class ReadstatConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    def export_sources(self):
-        export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        # for plain C projects only
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
+    implements = ["auto_shared_fpic"]
+    languages = "C"
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("libiconv/1.17")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-            self.win_bash = True
         self.tool_requires("libtool/2.4.7")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                self.tool_requires("pkgconf/[>=2.2 <3]")
 
-    def _sys_compiler(self):
-        return self.info.settings.compiler
-    
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version]["release"], strip_root=True)
+        download(self, **self.conan_data["sources"][self.version]["license"], filename="LICENSE")
 
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
 
         tc = AutotoolsToolchain(self)
+
+        # INFO: Ignores Werror when building:
+        # readstat_parser.c:6:40: error: a function declaration without a prototype is deprecated in all versions of C
+        tc.extra_cflags = ["-Wno-error", "-Wno-strict-prototypes"]
+
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
             if self.settings.arch == "x86":
                 tc.update_configure_args({
@@ -100,17 +89,17 @@ class ReadstatConan(ConanFile):
                 ])
         env = tc.environment()
         tc.generate(env)
-                
+
+        deps = PkgConfigDeps(self)
+        deps.generate()
+
     def build(self):
-        apply_conandata_patches(self)
         autotools = Autotools(self)
-        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
     def package(self):
-        # upstream didn't pack license file into distribution
-        copy(self, "NEWS", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
             copy(self, "readstat.h", src=os.path.join(self.source_folder, "headers"), dst=os.path.join(self.package_folder, "include"))
             copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
