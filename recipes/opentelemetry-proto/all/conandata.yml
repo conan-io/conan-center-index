@@ -1,40 +1,10 @@
 sources:
+  "1.7.0":
+    "url": "https://github.com/open-telemetry/opentelemetry-proto/archive/v1.7.0.tar.gz"
+    "sha256": "11330d850f5e24d34c4246bc8cb21fcd311e7565d219195713455a576bb11bed"
   "1.4.0":
     url: "https://github.com/open-telemetry/opentelemetry-proto/archive/v1.4.0.tar.gz"
     sha256: "53cd32cedb27762ea2060a9c8d83e4b822de13d73b5d5d37a2db3cf55018d694"
   "1.3.2":
     url: "https://github.com/open-telemetry/opentelemetry-proto/archive/v1.3.2.tar.gz"
     sha256: "c069c0d96137cf005d34411fa67dd3b6f1f8c64af1e7fb2fe0089a41c425acd7"
-  "1.3.1":
-    url: "https://github.com/open-telemetry/opentelemetry-proto/archive/v1.3.1.tar.gz"
-    sha256: "bed250ceec8e4a83aa5604d7d5595a61945059dc662edd058a9da082283f7a00"
-  "1.3.0":
-    url: "https://github.com/open-telemetry/opentelemetry-proto/archive/v1.3.0.tar.gz"
-    sha256: "73a678b0ff7a29b581381566a2230fe2a00b864608786c99c050a4492e2bbafc"
-  "1.2.0":
-    url: "https://github.com/open-telemetry/opentelemetry-proto/archive/v1.2.0.tar.gz"
-    sha256: "516dc94685dbaa14fb792788f31d2ef2b0c3ad08dfa8a9a8164e3cf60c1ab6f7"
-  "1.1.0":
-    url: "https://github.com/open-telemetry/opentelemetry-proto/archive/v1.1.0.tar.gz"
-    sha256: "df491a05f3fcbf86cc5ba5c9de81f6a624d74d4773d7009d573e37d6e2b6af64"
-  "1.0.0":
-    url: "https://github.com/open-telemetry/opentelemetry-proto/archive/v1.0.0.tar.gz"
-    sha256: "a13a1a7b76a1f22a0ca2e6c293e176ffef031413ab8ba653a82a1dbc286a3a33"
-  "0.20.0":
-    url: "https://github.com/open-telemetry/opentelemetry-proto/archive/v0.20.0.tar.gz"
-    sha256: "6ab267cf82832ed60ad075d574c78da736193eecb9693e8a8d02f65d6d3f3520"
-  "0.19.0":
-    url: "https://github.com/open-telemetry/opentelemetry-proto/archive/v0.19.0.tar.gz"
-    sha256: "464bc2b348e674a1a03142e403cbccb01be8655b6de0f8bfe733ea31fcd421be"
-  "0.18.0":
-    url: "https://github.com/open-telemetry/opentelemetry-proto/archive/refs/tags/v0.18.0.tar.gz"
-    sha256: "134ce87f0a623daac19b9507b92da0d9b82929e3db796bba631e422f6ea8d3b3"
-  "0.17.0":
-    url: "https://github.com/open-telemetry/opentelemetry-proto/archive/refs/tags/v0.17.0.tar.gz"
-    sha256: "f269fbcb30e17b03caa1decd231ce826e59d7651c0f71c3b28eb5140b4bb5412"
-  "0.16.0":
-    url: "https://github.com/open-telemetry/opentelemetry-proto/archive/refs/tags/v0.16.0.tar.gz"
-    sha256: "22763df2020d4e16a411b249f86dda8fa1bea69a9592915bf0b1dab6d7005190"
-  "0.11.0":
-    url: "https://github.com/open-telemetry/opentelemetry-proto/archive/refs/tags/v0.11.0.tar.gz"
-    sha256: "985367f8905e91018e636cbf0d83ab3f834b665c4f5899a27d10cae9657710e2"

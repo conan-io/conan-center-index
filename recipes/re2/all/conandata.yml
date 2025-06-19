@@ -23,21 +23,3 @@ sources:
   "20230301":
     url: "https://github.com/google/re2/archive/refs/tags/2023-03-01.tar.gz"
     sha256: "7a9a4824958586980926a300b4717202485c4b4115ac031822e29aa4ef207e48"
-  "20230201":
-    url: "https://github.com/google/re2/archive/refs/tags/2023-02-01.tar.gz"
-    sha256: "cbce8b7803e856827201a132862e41af386e7afd9cc6d9a9bc7a4fa4d8ddbdde"
-  "20221201":
-    url: "https://github.com/google/re2/archive/refs/tags/2022-12-01.tar.gz"
-    sha256: "665b65b6668156db2b46dddd33405cd422bd611352c5052ab3dae6a5fbac5506"
-  "20220601":
-    url: "https://github.com/google/re2/archive/refs/tags/2022-06-01.tar.gz"
-    sha256: "f89c61410a072e5cbcf8c27e3a778da7d6fd2f2b5b1445cd4f4508bee946ab0f"
-  "20220201":
-    url: "https://github.com/google/re2/archive/refs/tags/2022-02-01.tar.gz"
-    sha256: "9c1e6acfd0fed71f40b025a7a1dabaf3ee2ebb74d64ced1f9ee1b0b01d22fd27"
-  "20211101":
-    url: "https://github.com/google/re2/archive/refs/tags/2021-11-01.tar.gz"
-    sha256: "8c45f7fba029ab41f2a7e6545058d9eec94eef97ce70df58e92d85cfc08b4669"
-  "20210901":
-    url: "https://github.com/google/re2/archive/refs/tags/2021-09-01.tar.gz"
-    sha256: "42a2e1d56b5de252f5d418dc1cc0848e9e52ca22b056453988b18c6195ec7f8d"
