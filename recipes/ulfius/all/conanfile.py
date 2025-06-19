@@ -31,8 +31,8 @@ class UlfiusConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "enable_websockets": False,  # FIXME: should be True (cannot be True because of missing gnutls recipe)
-        "with_gnutls": False,  # FIXME: should be True
+        "enable_websockets": True,
+        "with_gnutls": True,
         "with_jansson": True,
         "with_libcurl": True,
         "with_yder": True,
@@ -40,14 +40,13 @@ class UlfiusConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.enable_websockets = False
+            # INSTALL.md says that websockets are not supported on Windows
+            del self.options.enable_websockets
             del self.options.fPIC
 
     def validate(self):
-        if self.options.with_gnutls:
-            raise ConanInvalidConfiguration("with_gnutls=True is not yet implemented due to missing gnutls CCI recipe")
-        if self.settings.os == "Windows" and self.options.enable_websockets:
-            raise ConanInvalidConfiguration("ulfius does not support with_websockets=True on Windows")
+        if self.options.get_safe("enable_websockets") and not self.options.with_gnutls:
+            raise ConanInvalidConfiguration(f"{self.ref} requires -o=&:with_gnutls=True when -o=&:enable_websockets=True")
 
     def configure(self):
         if self.options.shared:
@@ -56,7 +55,7 @@ class UlfiusConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def requirements(self):
-        self.requires("orcania/2.3.1", transitive_headers=True)
+        self.requires("orcania/2.3.3", transitive_headers=True)
         self.requires("libmicrohttpd/0.9.75", transitive_headers=True)
         if self.options.with_yder:
             self.requires("yder/1.4.18", transitive_headers=True)
@@ -64,6 +63,11 @@ class UlfiusConan(ConanFile):
             self.requires("jansson/2.14", transitive_headers=True)
         if self.options.with_libcurl:
             self.requires("libcurl/[>=7.78.0 <9]")
+        if self.options.with_gnutls:
+            # Used in public ulfius.h:43
+            self.requires("gnutls/3.8.2", transitive_headers=True)
+        if self.options.get_safe("enable_websockets"):
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -81,62 +85,33 @@ class UlfiusConan(ConanFile):
         tc.variables["BUILD_STATIC"] = not self.options.shared
         tc.variables["DOWNLOAD_DEPENDENCIES"] = False
         tc.variables["WITH_GNUTLS"] = self.options.with_gnutls
-        tc.variables["WITH_WEBSOCKETS"] = self.options.enable_websockets
+        tc.variables["WITH_WEBSOCKET"] = self.options.get_safe("enable_websockets")
         tc.variables["WITH_CURL"] = self.options.with_libcurl
         tc.variables["WITH_JANSSON"] = self.options.with_jansson
+
+        # Compilation issues when setting Ulifus as a dependency internally
+        tc.variables["BUILD_UWSC"] = False
+
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.generate()
 
-        # https://github.com/conan-io/conan/issues/12367 + move this before running CMakeDeps.generate()
-        save(self, os.path.join(self.generators_folder, "MHDConfig.cmake"), textwrap.dedent(f"""\
-            include(CMakeFindDependencyMacro)
-            find_dependency(libmicrohttpd)
+        deps.set_property("libmicrohttpd", "cmake_file_name", "MHD")
+        deps.set_property("libmicrohttpd", "cmake_target_name", "MHD::MHD")
 
-            set(MHD_FOUND TRUE)
-            add_library(MHD::MHD INTERFACE IMPORTED)
-            set_target_properties(MHD::MHD PROPERTIES INTERFACE_LINK_LIBRARIES "libmicrohttpd::libmicrohttpd")
-            set(MHD_VERSION_STRING {self.dependencies['libmicrohttpd'].ref.version})
-        """))
-        save(self, os.path.join(self.generators_folder, "MHDConfigVersion.cmake"), textwrap.dedent(f"""\
-            set(PACKAGE_VERSION "{ self.dependencies['libmicrohttpd'].ref.version }")
+        # Orcania generates -static targets for static libraries, but Ulfius does not check for them,
+        # unconditionally set the target name to Orcania::Orcania
+        deps.set_property("orcania", "cmake_target_name", "Orcania::Orcania")
 
-            if(PACKAGE_VERSION VERSION_LESS PACKAGE_FIND_VERSION)
-                set(PACKAGE_VERSION_COMPATIBLE FALSE)
-            else()
-                set(PACKAGE_VERSION_COMPATIBLE TRUE)
-                if(PACKAGE_FIND_VERSION STREQUAL PACKAGE_VERSION)
-                    set(PACKAGE_VERSION_EXACT TRUE)
-                endif()
-            endif()
-        """))
+        # Same for Yder
+        if self.options.with_yder:
+            deps.set_property("yder", "cmake_target_name", "Yder::Yder")
 
-        # Shared ulfius looks for Orcania::Orcania and Yder::Yder
-        # Static ulfius looks for Orcania::Orcania-static and Yder::Yder-static
-        if self.options.shared:
-            if not self.dependencies["orcania"].options.shared:
-                save(self, os.path.join(self.generators_folder, "OrcaniaConfig.cmake"), textwrap.dedent("""\
-                    add_library(Orcania::Orcania INTERFACE IMPORTED)
-                    set_target_properties(Orcania::Orcania PROPERTIES INTERFACE_LINK_LIBRARIES "Orcania::Orcania-static")
-                """), append=True)
-            if self.options.with_yder and not self.dependencies["yder"].options.shared:
-                save(self, os.path.join(self.generators_folder, "YderConfig.cmake"), textwrap.dedent("""\
-                    add_library(Yder::Yder INTERFACE IMPORTED)
-                    set_target_properties(Yder::Yder PROPERTIES INTERFACE_LINK_LIBRARIES "Yder::Yder-static")
-                """), append=True)
-
-        # Create Jansson::Jansson
         if self.options.with_jansson:
-            save(self, os.path.join(self.generators_folder, "jansson-config.cmake"), textwrap.dedent(f"""\
-                add_library(Jansson::Jansson INTERFACE IMPORTED)
-                set_target_properties(Jansson::Jansson PROPERTIES INTERFACE_LINK_LIBRARIES "jansson::jansson")
-                set(JANSSON_VERSION_STRING {self.dependencies['jansson'].ref.version})
-            """), append=True)
+            deps.set_property("jansson", "cmake_file_name", "Jansson")
+            deps.set_property("jansson", "cmake_target_name", "Jansson::Jansson")
 
-        if self.options.with_gnutls:
-            # FIXME: make sure gnutls creates GnuTLSCOnfig.cmake + GnuTLS::GnuTLS target + GNUTLS_VERSION_STRING
-            pass
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)

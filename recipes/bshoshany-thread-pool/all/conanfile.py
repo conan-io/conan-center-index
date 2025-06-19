@@ -12,10 +12,10 @@ required_conan_version = ">=1.43.0"
 
 class BShoshanyThreadPoolConan(ConanFile):
     name = "bshoshany-thread-pool"
-    description = "BS::thread_pool: a fast, lightweight, and easy-to-use C++17 thread pool library"
+    description = "BS::thread_pool: a fast, lightweight, modern, and easy-to-use C++17 / C++20 / C++23 thread pool library"
     homepage = "https://github.com/bshoshany/thread-pool"
     license = "MIT"
-    topics = ("concurrency", "cpp17", "header-only", "library", "multi-threading", "parallel-computing", "thread-pool", "threads")
+    topics = ("concurrency", "cpp17", "cpp20", "cpp23", "header-only", "library", "multi-threading", "parallel-computing", "thread-pool", "threads", "module", "modules")
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
     settings = "arch", "build_type", "compiler", "os"
@@ -58,8 +58,11 @@ class BShoshanyThreadPoolConan(ConanFile):
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
         if Version(self.version) < "3.5.0":
             copy(self, "*.hpp", self.source_folder, os.path.join(self.package_folder, "include"))
-        else:
+        elif Version(self.version) < "5.0.0":
             copy(self, "*.hpp", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
+        else:
+            copy(self, "BS_thread_pool.hpp", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
+            copy(self, "BS.thread_pool.cppm", os.path.join(self.source_folder, "modules"), os.path.join(self.package_folder, "modules"))
 
     def package_info(self):
         self.cpp_info.bindirs = []

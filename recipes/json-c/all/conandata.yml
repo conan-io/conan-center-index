@@ -1,4 +1,7 @@
 sources:
+  "0.18":
+    url: "https://github.com/json-c/json-c/archive/json-c-0.18-20240915.tar.gz"
+    sha256: "3112c1f25d39eca661fe3fc663431e130cc6e2f900c081738317fba49d29e298"
   "0.17":
     url: "https://github.com/json-c/json-c/archive/json-c-0.17-20230812.tar.gz"
     sha256: "024d302a3aadcbf9f78735320a6d5aedf8b77876c8ac8bbb95081ca55054c7eb"

@@ -1,4 +1,7 @@
 sources:
+  "2.0.0":
+    url: "https://github.com/LouisCharlesC/safe/archive/v2.0.0.tar.gz"
+    sha256: "1684c61212d01d1b20db77d17ddd795badc7c1b9feb06ef93ef453c6cb4a1642"
   "1.1.1":
     url: "https://github.com/LouisCharlesC/safe/archive/v1.1.1.tar.gz"
     sha256: "A6E161EAFC32AA522CD2CE1A5F95A3DF963C51263053089FC8F7A9765D054F00"

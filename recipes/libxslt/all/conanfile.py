@@ -60,9 +60,12 @@ class LibxsltConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "1.1.39":
-            # see https://github.com/conan-io/conan-center-index/pull/16205#discussion_r1149570846
+        if Version(self.version) >= "1.1.42":
             self.requires("libxml2/[>=2.12.5 <3]", transitive_headers=True, transitive_libs=True)
+        elif Version(self.version) >= "1.1.39":
+            # see https://github.com/conan-io/conan-center-index/pull/16205#discussion_r1149570846
+            # Older versions use deprecated functions that were removed in libxml2 2.13
+            self.requires("libxml2/[>=2.12.5 <2.13]", transitive_headers=True, transitive_libs=True)
         else:
             self.requires("libxml2/2.11.6", transitive_headers=True, transitive_libs=True)
 
@@ -176,7 +179,7 @@ class LibxsltConan(ConanFile):
             autotools.make()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "Copyright", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
             copy(self, "*.h", src=os.path.join(self.source_folder, "libxslt"),
                               dst=os.path.join(self.package_folder, "include", "libxslt"))

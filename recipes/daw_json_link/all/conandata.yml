@@ -1,4 +1,10 @@
 sources:
+  "3.29.2":
+    url: "https://github.com/beached/daw_json_link/archive/refs/tags/v3.29.2.tar.gz"
+    sha256: "a0450a2d724d83a600d48d503eb11094039a7a4b607fa59b1d7ce83483b1f8b4"
+  "3.28.3":
+    url: "https://github.com/beached/daw_json_link/archive/refs/tags/v3.28.3.tar.gz"
+    sha256: "c9973e8da74c4a6eb84fbd1f86f8048a697068af7dec6aee602e08e9f4df39db"
   "3.24.1":
     url: "https://github.com/beached/daw_json_link/archive/refs/tags/v3.24.1.tar.gz"
     sha256: "439b4678377950f165e3d49d472c0676f0ef2fae3c5e6e7febddd5633f6e4f39"
@@ -26,8 +32,11 @@ sources:
   "3.15.0":
     url: "https://github.com/beached/daw_json_link/archive/refs/tags/v3.15.0.tar.gz"
     sha256: "6f72c69944e33f56823d941b09c8d17ece44b224e802ae0a3416c32f2bdbec40"
+# When updating this, ensure that the versions are consistent across the rest of the daw libraries
 daw_headers_mapping:
-  "3.24.1": "2.106.0"
+  "3.29.2": "2.110.0"
+  "3.28.3": "2.110.0"
+  "3.24.1": "2.110.0"
   "3.23.2": "2.101.0"
   "3.23.0": "2.97.0"
   "3.20.1": "2.97.0"
@@ -37,6 +46,8 @@ daw_headers_mapping:
   "3.16.0": "2.97.0"
   "3.15.0": "2.97.0"
 daw_utf_mapping:
+  "3.29.2": "2.2.5"
+  "3.28.3": "2.2.5"
   "3.24.1": "2.2.5"
   "3.23.2": "2.2.4"
   "3.23.0": "2.2.3"

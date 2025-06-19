@@ -105,7 +105,10 @@ class GetTextConan(ConanFile):
             iconv_libdir = unix_path(self, libiconv.cpp_info.aggregated_components().libdirs[0])
             tc.extra_cflags.append(f"-I{iconv_includedir}")
             tc.extra_ldflags.append(f"-L{iconv_libdir}")
+        tc.generate()
 
+        if is_msvc(self):
+            # Generate this _after_ AutotoolsToolchain to ensure we override the CC variable
             env = Environment()
             compile_wrapper = self.dependencies.build["automake"].conf_info.get("user.automake:compile-wrapper")
             lib_wrapper = self.dependencies.build["automake"].conf_info.get("user.automake:lib-wrapper")
@@ -123,8 +126,6 @@ class GetTextConan(ConanFile):
             windres_arch = {"x86": "i686", "x86_64": "x86-64"}[str(self.settings.arch)]
             env.define("RC", f"windres --target=pe-{windres_arch}")
             env.vars(self).save_script("conanbuild_msvc")
-
-        tc.generate()
 
     def build(self):
         apply_conandata_patches(self)

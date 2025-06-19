@@ -1,4 +1,7 @@
 sources:
+  "3.0.0":
+    url: "https://github.com/PragmaTwice/protopuf/archive/v3.0.0.tar.gz"
+    sha256: "62f89b78989eb054bc52e80cc1517274f5621e32eda4758f123c66c7a3521ee3"
   "2.2.1":
     url: "https://github.com/PragmaTwice/protopuf/archive/v2.2.1.tar.gz"
     sha256: "8d4940206d8e8664f75ae1cdfff8c14fa9a196c03967d520725284429744c19c"

@@ -1,4 +1,7 @@
 sources:
+  "3.5.0":
+    url: "https://github.com/ThePhD/sol2/archive/v3.5.0.tar.gz"
+    sha256: "86c0f6d2836b184a250fc2907091c076bf53c9603dd291eaebade36cc342e13c"
   "3.3.1":
     url: "https://github.com/ThePhD/sol2/archive/v3.3.1.tar.gz"
     sha256: "ad121461047d52b449aa84234a6b578fa3ed95d67d1a0703902eba72417f61bb"
@@ -14,3 +17,7 @@ sources:
   "2.20.6":
     url: "https://github.com/ThePhD/sol2/archive/v2.20.6.tar.gz"
     sha256: "90c72e120cdd67d516434b51fdcff2d63cc25afe06fb7866fcf7f5bc85366808"
+
+patches:
+  "3.3.1":
+    - patch_file: patches/0001-Fix-emplace.patch

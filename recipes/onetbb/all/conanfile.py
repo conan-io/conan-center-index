@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -29,12 +30,14 @@ class OneTBBConan(ConanFile):
         "tbbproxy": [True, False],
         "tbbbind": [True, False],
         "interprocedural_optimization": [True, False],
+        "build_apple_frameworks": [True, False],
     }
     default_options = {
         "tbbmalloc": True,
         "tbbproxy": True,
         "tbbbind": True,
         "interprocedural_optimization": True,
+        "build_apple_frameworks": False,
     }
 
     @property
@@ -52,7 +55,16 @@ class OneTBBConan(ConanFile):
 
     @property
     def _tbbbind_supported(self):
-        return self.settings.os != "Macos" or Version(self.version) >= "2021.11.0"
+        if is_apple_os(self):
+            return self.settings.os == "Macos" and Version(self.version) >= "2021.11.0"
+        return True
+
+    @property
+    def _tbb_apple_frameworks_supported(self):
+        if is_apple_os(self):
+            # if the version is 2021.13.0 or later, the build_apple_frameworks option is supported on macOS
+            return Version(self.version) >= "2021.13.0"
+        return False
 
     @property
     def _tbbbind_build(self):
@@ -76,6 +88,8 @@ class OneTBBConan(ConanFile):
             del self.options.tbbbind
         if Version(self.version) < "2021.6.0" or self.settings.os == "Android":
             del self.options.interprocedural_optimization
+        if not self._tbb_apple_frameworks_supported:
+            del self.options.build_apple_frameworks
 
     def configure(self):
         if Version(self.version) >= "2021.6.0" and not self.options.tbbmalloc:
@@ -113,7 +127,7 @@ class OneTBBConan(ConanFile):
         toolchain.variables["TBB_STRICT"] = False
         if Version(self.version) >= "2021.5.0":
             toolchain.variables["TBBMALLOC_BUILD"] = self.options.tbbmalloc
-        if self.options.get_safe("interprocedural_optimization"):
+        if self.options.get_safe("interprocedural_optimization") is not None:
             toolchain.variables["TBB_ENABLE_IPO"] = self.options.interprocedural_optimization
         if Version(self.version) >= "2021.6.0" and self.options.get_safe("tbbmalloc"):
             toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.tbbproxy
@@ -130,6 +144,11 @@ class OneTBBConan(ConanFile):
             if self.settings.os == "Windows":
                 toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_DLL_PATH"] = \
                     os.path.join(hwloc_package_folder, "bin", "hwloc.dll").replace("\\", "/")
+        if self.options.get_safe("build_apple_frameworks"):
+            toolchain.variables["TBB_BUILD_APPLE_FRAMEWORKS"] = True
+        if Version(self.version) <= "2021.10.0":
+            toolchain.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
+
         toolchain.generate()
 
         if self._tbbbind_build and not self._tbbbind_explicit_hwloc:
@@ -165,7 +184,11 @@ class OneTBBConan(ConanFile):
         tbb = self.cpp_info.components["libtbb"]
 
         tbb.set_property("cmake_target_name", "TBB::tbb")
-        tbb.libs = [lib_name("tbb")]
+        if self.options.get_safe("build_apple_frameworks"):
+            tbb.frameworkdirs.append(os.path.join(self.package_folder, "lib"))
+            tbb.frameworks.append("tbb")
+        else:
+            tbb.libs = [lib_name("tbb")]
         if self.settings.os == "Windows":
             version_info = load(self,
                 os.path.join(self.package_folder, "include", "oneapi", "tbb",
@@ -186,7 +209,13 @@ class OneTBBConan(ConanFile):
             tbbmalloc = self.cpp_info.components["tbbmalloc"]
 
             tbbmalloc.set_property("cmake_target_name", "TBB::tbbmalloc")
-            tbbmalloc.libs = [lib_name("tbbmalloc")]
+
+            if self.options.get_safe("build_apple_frameworks"):
+                tbbmalloc.frameworkdirs.append(os.path.join(self.package_folder, "lib"))
+                tbbmalloc.frameworks.append("tbbmalloc")
+            else:
+                tbbmalloc.libs = [lib_name("tbbmalloc")]
+
             if self.settings.os in ["Linux", "FreeBSD"]:
                 tbbmalloc.system_libs = ["dl", "pthread"]
 
@@ -195,7 +224,13 @@ class OneTBBConan(ConanFile):
                 tbbproxy = self.cpp_info.components["tbbmalloc_proxy"]
 
                 tbbproxy.set_property("cmake_target_name", "TBB::tbbmalloc_proxy")
-                tbbproxy.libs = [lib_name("tbbmalloc_proxy")]
+
+                if self.options.get_safe("build_apple_frameworks"):
+                    tbbproxy.frameworkdirs.append(os.path.join(self.package_folder, "lib"))
+                    tbbproxy.frameworks.append("tbbmalloc_proxy")
+                else:
+                    tbbproxy.libs = [lib_name("tbbmalloc_proxy")]
+
                 tbbproxy.requires = ["tbbmalloc"]
                 if self.settings.os in ["Linux", "FreeBSD"]:
                     tbbproxy.system_libs = ["m", "dl", "pthread"]

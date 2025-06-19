@@ -105,6 +105,8 @@ class AssimpConan(ConanFile):
     options.update(dict.fromkeys(_format_option_map, [True, False]))
     default_options.update(dict.fromkeys(_format_option_map, True))
 
+    short_paths = True
+
     @property
     def _min_cppstd(self):
         if Version(self.version) < "5.2.0":
@@ -238,6 +240,7 @@ class AssimpConan(ConanFile):
         tc.variables["ASSIMP_UBSAN"] = False
         tc.variables["ASSIMP_WARNINGS_AS_ERRORS"] = False
         tc.variables["USE_STATIC_CRT"] = is_msvc_static_runtime(self)
+        tc.variables["ASSIMP_BUILD_USE_CCACHE"] = False
 
         for option, (definition, _) in self._format_option_map.items():
             value = self.options.get_safe(option)

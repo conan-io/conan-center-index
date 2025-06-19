@@ -1,0 +1,4 @@
+sources:
+  "1.0.0-alpha.1":
+    url: "https://github.com/fhamonic/melon/archive/refs/tags/v1.0.0-alpha.1.tar.gz"
+    sha256: "370f6bb1fddc68f1ab771c8b659fed6d9dc8da51290897ed72fd87589143220c"

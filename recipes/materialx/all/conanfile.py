@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import copy, export_conandata_patches, get, rm, rmdir, replace_in_file
 from conan.tools.apple import is_apple_os
 from conan.tools.scm import Version
 import os
@@ -35,7 +35,10 @@ class MaterialXConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 14
+        if Version(self.version) >= "1.39.0":
+            return 17
+        else:
+            return 14
 
     @property
     def _compilers_minimum_version(self):
@@ -59,12 +62,11 @@ class MaterialXConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_openimageio: 
-            self.requires("openimageio/2.5.10.1")
+            self.requires("openimageio/2.5.14.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             self.requires("opengl/system")
@@ -80,7 +82,7 @@ class MaterialXConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16 <4]")
+        self.tool_requires("cmake/[>=3.24 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -91,12 +93,25 @@ class MaterialXConan(ConanFile):
         tc.variables["MATERIALX_TEST_RENDER"] = False
         tc.variables["MATERIALX_BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["MATERIALX_BUILD_GEN_MSL"] = self.options.build_gen_msl and is_apple_os
+        # TODO: Remove when Conan 1 support is dropped
+        if not self.settings.compiler.cppstd:
+            tc.variables["MATERIALX_BUILD_USE_CCACHE"] = self._min_cppstd
+        tc.variables["MATERIALX_BUILD_USE_CCACHE"] = False
         tc.generate()
 
         tc = CMakeDeps(self)
         tc.generate()
 
+    def _patch_sources(self):
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_CXX_STANDARD",
+                        "# set(CMAKE_CXX_STANDARD")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_POSITION_INDEPENDENT_CODE",
+                        "# set(CMAKE_POSITION_INDEPENDENT_CODE")
+
     def build(self):
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
