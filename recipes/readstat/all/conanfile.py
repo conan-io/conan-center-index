@@ -115,7 +115,8 @@ class ReadstatConan(ConanFile):
             autotools = Autotools(self)
             autotools.autoreconf()
             autotools.configure()
-            autotools.make(args=["V=1"])
+            verbose = "1" if self.conf.get("tools.compilation:verbosity", check_type=str) == "verbose" else "0"
+            autotools.make(args=[f"V={verbose}"])
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
