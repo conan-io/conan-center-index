@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, rmdir, download
+from conan.tools.files import copy, get, rm, rmdir, download, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.apple import fix_apple_shared_install_name
@@ -30,6 +30,9 @@ class ReadstatConan(ConanFile):
     implements = ["auto_shared_fpic"]
     languages = "C"
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -42,9 +45,10 @@ class ReadstatConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-        self.tool_requires("libtool/2.4.7")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
+        self.tool_requires("libtool/2.4.7")
+        self.tool_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["release"], strip_root=True)
@@ -55,24 +59,14 @@ class ReadstatConan(ConanFile):
         env.generate()
 
         tc = AutotoolsToolchain(self)
+        tc.configure_args.extend([
+            "--with-libiconv-prefix={}".format(self.dependencies["libiconv"].package_folder.replace("\\", "/")),
+            ])
 
         # INFO: Ignores Werror when building:
         # readstat_parser.c:6:40: error: a function declaration without a prototype is deprecated in all versions of C
-        tc.extra_cflags = ["-Wno-error", "-Wno-strict-prototypes"]
-
-        if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-            if self.settings.arch == "x86":
-                tc.update_configure_args({
-                    "--host": "i686-w64-mingw32",
-                    "RC": "windres --target=pe-i386",
-                    "WINDRES": "windres --target=pe-i386",
-                })
-            elif self.settings.arch == "x86_64":
-                tc.update_configure_args({
-                    "--host": "x86_64-w64-mingw32",
-                    "RC": "windres --target=pe-x86-64",
-                    "WINDRES": "windres --target=pe-x86-64",
-                })
+        if not is_msvc(self):
+            tc.extra_cflags = ["-Wno-error", "-Wno-strict-prototypes"]
 
         if cross_building(self) and is_msvc(self):
             triplet_arch_windows = {"x86_64": "x86_64", "x86": "i686", "armv8": "aarch64"}
@@ -94,7 +88,9 @@ class ReadstatConan(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         autotools = Autotools(self)
+        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 

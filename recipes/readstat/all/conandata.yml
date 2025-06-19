@@ -6,3 +6,9 @@ sources:
     license:
       url: "https://raw.githubusercontent.com/WizardMac/ReadStat/refs/tags/v1.1.9/LICENSE"
       sha256: "416b611ef9448b3c7c71f584b1ebf78baff8f553b4b5368f2af732255ca19a3e"
+patches:
+  "1.1.9":
+    - patch_file: "patches/0001-add-option-spawnv.patch"
+      patch_source: "https://github.com/WizardMac/ReadStat/pull/301"
+      patch_type: "bugfix"
+      patch_description: "Helps UCRT mingw adding option to disable spawnv define"
