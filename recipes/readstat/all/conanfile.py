@@ -39,7 +39,6 @@ class ReadstatConan(ConanFile):
             self.package_type = "static-library"
             del self.options.shared
 
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -57,6 +56,8 @@ class ReadstatConan(ConanFile):
                 self.tool_requires("pkgconf/[>=2.2 <3]")
             self.tool_requires("libtool/2.4.7")
             self.tool_requires("automake/1.16.5")
+            # gettext provides AM_ICONV macro used in configure.ac
+            self.tool_requires("gettext/0.22.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["release"], strip_root=True)
@@ -76,6 +77,7 @@ class ReadstatConan(ConanFile):
             tc = AutotoolsToolchain(self)
             tc.configure_args.extend([
                 "--with-libiconv-prefix={}".format(self.dependencies["libiconv"].package_folder.replace("\\", "/")),])
+
             # INFO: Ignores Werror when building:
             # readstat_parser.c:6:40: error: a function declaration without a prototype is deprecated in all versions of C
             tc.extra_cflags = ["-Wno-error", "-Wno-strict-prototypes"]

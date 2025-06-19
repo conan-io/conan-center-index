@@ -11,5 +11,5 @@ patches:
   "1.1.9":
     - patch_file: "patches/0001-add-option-spawnv.patch"
       patch_source: "https://github.com/WizardMac/ReadStat/pull/301"
-      patch_type: "bugfix"
+      patch_type: "official"
       patch_description: "Helps UCRT mingw adding option to disable spawnv define"
