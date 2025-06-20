@@ -1,0 +1,4 @@
+sources:
+  "5.4.1":
+    url: "https://github.com/oracle/odpi/archive/refs/tags/v5.4.1.tar.gz"
+    sha256: "dc02c694e119c69af3a556a363fe406b26996d0e71c4c5dfbf9d7a253efa6a01"
