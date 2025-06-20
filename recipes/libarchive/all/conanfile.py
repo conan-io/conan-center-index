@@ -109,7 +109,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/[>=1.5 <1.6]")
         if self.options.get_safe("with_mbedtls"):
-            self.requires("mbedtls/3.6.1")
+            self.requires("mbedtls/[~3.6]")
         if self.options.get_safe("with_pcre2"):
             self.requires("pcre2/10.43")
 
@@ -165,6 +165,8 @@ class LibarchiveConan(ConanFile):
         if Version(self.version) >= "3.7.3":
             tc.variables["ENABLE_PCRE2POSIX"] = self.options.with_pcre2
         tc.variables["ENABLE_XATTR"] = self.options.with_xattr
+        if Version(self.version) <= "3.7.7":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
 
