@@ -1,4 +1,11 @@
 sources:
+  "20.1.6":
+    openmp:
+      url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.6/openmp-20.1.6.src.tar.xz"
+      sha256: "ff8dabd89212cd41b4fc5c26433bcde368873e4f10ea0331792e6b6e7707eff9"
+    cmake:
+      url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.6/cmake-20.1.6.src.tar.xz"
+      sha256: "b4b3efa5d5b01b3f211f1ba326bb6f0c318331f828202d332c95b7f30fca5f8c"
   "17.0.6":
     openmp:
       url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/openmp-17.0.6.src.tar.xz"
@@ -49,6 +56,10 @@ sources:
     url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/openmp-8.0.1.src.tar.xz"
     sha256: "3e85dd3cad41117b7c89a41de72f2e6aa756ea7b4ef63bb10dcddf8561a7722c"
 patches:
+  "20.1.6":
+    - patch_file: "patches/20/0001-disable-build-testing.patch"
+      patch_description: "Disable building of tools, gdb-plugin, tests and docs"
+      patch_type: "conan"
   "17.0.4":
     - patch_file: "patches/17/0001-disable-build-testing.patch"
       patch_description: "Disable building of tools, gdb-plugin, tests and docs"

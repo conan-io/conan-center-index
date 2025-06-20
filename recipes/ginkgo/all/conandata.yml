@@ -1,4 +1,7 @@
 sources:
+  "1.10.0":
+    url: "https://github.com/ginkgo-project/ginkgo/archive/refs/tags/v1.10.0.tar.gz"
+    sha256: "5b417bc793b71257a31266eaed50eae0031d9b506380aa29a5f507c1d291cf14"
   "1.8.0":
     url: "https://github.com/ginkgo-project/ginkgo/archive/v1.8.0.tar.gz"
     sha256: "421efaed1be2ef11d230b79fc68bcf7e264a2c57ae52aff6dec7bd90f8d4ae30"
