@@ -35,6 +35,7 @@ class NVTXConan(ConanFile):
     def package(self):
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*.h", src=os.path.join(self.source_folder, "c", "include"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, "*.hpp", src=os.path.join(self.source_folder, "c", "include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
