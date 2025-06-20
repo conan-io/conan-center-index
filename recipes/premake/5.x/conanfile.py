@@ -1,7 +1,6 @@
 import glob
 import os
 import re
-import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -9,9 +8,9 @@ from conan.tools.build import cross_building
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, check_min_vs
+from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class PremakeConan(ConanFile):
@@ -69,7 +68,8 @@ class PremakeConan(ConanFile):
                     "14": "2015",
                     "12": "2013"}.get(compiler_version)
         else:
-            return {"193": "2022",
+            return {"194": "2022",
+                    "193": "2022",
                     "192": "2019",
                     "191": "2017",
                     "190": "2015",
@@ -102,7 +102,7 @@ class PremakeConan(ConanFile):
 
     @property
     def _gmake_build_dir(self):
-        return os.path.join(self.source_folder, "build", f"gmake2.{self._gmake_platform}")
+        return os.path.join(self.source_folder, "build", f"gmake.{self._gmake_platform}")
 
     @property
     def _gmake_config(self):
@@ -133,13 +133,6 @@ class PremakeConan(ConanFile):
         if self.options.get_safe("lto", None) is False:
             for fn in glob.glob(os.path.join(self._gmake_build_dir, "*.make")):
                 replace_in_file(self, fn, "-flto", "", strict=False)
-        if check_min_vs(self, 193, raise_invalid=False):
-            # Create VS 2022 project directory based on VS 2019 one
-            if "alpha" in str(self.version):
-                shutil.move(os.path.join(self.source_folder, "build", "vs2019"),
-                            os.path.join(self.source_folder, "build", "vs2022"))
-                for vcxproj in glob.glob(os.path.join(self.source_folder, "build", "vs2022", "*.vcxproj")):
-                    replace_in_file(self, vcxproj, "v142", "v143")
 
     def build(self):
         self._patch_sources()
@@ -167,7 +160,3 @@ class PremakeConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        bindir = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bindir)
