@@ -45,7 +45,6 @@ class NsyncConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -81,7 +80,6 @@ class NsyncConan(ConanFile):
                 f"{ar_dest}\n{rt_dest})"
             )
 
-    def build(self):
         if is_apple_os(self):
             # Following the Darwin codepath when the OS is an apple OS (e.g. iOS)
             # matches https://github.com/google/nsync/blob/99e0e9e1e32db42e88b98b96e874f4884620b755/BUILD#L131
@@ -89,6 +87,9 @@ class NsyncConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
              'elseif ("${CMAKE_SYSTEM_NAME}X" STREQUAL "DarwinX")',
              'elseif(1)')
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
