@@ -1,7 +1,9 @@
-from conan import ConanFile
-from conan.tools.files import get, copy, rm, rmdir
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
+
+from conan import ConanFile
+from conan.tools.files import get, copy, rm, rmdir, apply_conandata_patches, export_conandata_patches
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
 
@@ -18,15 +20,42 @@ class OsqpConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "printing": [True, False],
+        "profiling": [True, False],
+        "interrupt": [True, False],
+        "dfloat": [True, False],
+        "dlong": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "printing": True,
+        "profiling": True,
+        "interrupt": True,
+        "dfloat": False,
+        "dlong": True
     }
+
+    options_description = {
+        "shared": "Build shared libraries",
+        "fPIC": "Build with -fPIC flag (only for static libraries",
+        "printing": "Enable solver printing",
+        "profiling": "Enable solver profiling / timing (see https://osqp.org/docs/solver/index.html#rho-step-size)",
+        "interrupt": "Enable user interrupt (Ctrl-C)",
+        "dfloat": "Use float numbers instead of doubles",
+        "dlong": "Use long integers (64bit) for indexing"
+    }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def validate(self):
+        if self.info.settings.os == "Windows" and self.info.options.shared:
+            raise ConanInvalidConfiguration("Building ahared OSQP library is not supported on Windows")
 
     def configure(self):
         if self.options.shared:
@@ -44,16 +73,15 @@ class OsqpConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables['UNITTESTS'] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
-        tc.variables["PRINTING"] = True
-        tc.variables["PROFILING"] = True
-        tc.variables["CTRLC"] = True
-        tc.variables["DFLOAT"] = False
-        tc.variables["DLONG"] = True
-        tc.variables["COVERAGE"] = False
-        tc.variables["ENABLE_MKL_PARDISO"] = True
+        tc.variables["PRINTING"] = self.options.printing
+        tc.variables["PROFILING"] = self.options.profiling
+        tc.variables["CTRLC"] = self.options.interrupt
+        tc.variables["DFLOAT"] = self.options.dfloat
+        tc.variables["DLONG"] = self.options.dlong
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
