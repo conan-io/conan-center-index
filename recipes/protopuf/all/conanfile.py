@@ -39,9 +39,10 @@ class ProtopufConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        apply_conandata_patches(self)
 
     def build(self):
-        apply_conandata_patches(self)
+        pass
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
