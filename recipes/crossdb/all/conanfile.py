@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 from conan.tools.microsoft import is_msvc
@@ -18,8 +18,25 @@ class CrossDBConan(ConanFile):
     topics = ("database", "oltp", "embedded")
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    def config_options(self):
+        # from 0.12.0, it is a static/shared library
+        if Version(self.version) < "0.12.0":
+            del self.options.shared
+        else:
+            self.package_type = "library"
 
     def configure(self):
+        if self.options.get_safe("shared", True):
+            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
@@ -35,9 +52,8 @@ class CrossDBConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if Version(self.version) > "0.11.0": # pylint: disable=conan-unreachable-upper-version
-            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
+        if Version(self.version) <= "0.11.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):
