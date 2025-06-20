@@ -1,4 +1,7 @@
 sources:
+  "4.3.1":
+    url: "https://github.com/swig/swig/archive/refs/tags/v4.3.1.tar.gz"
+    sha256: "c6091ef5f2e397945a66899bf6859845f35ef603340e79c086d7f2ecf348678c"
   "4.3.0":
     url: "https://github.com/swig/swig/archive/refs/tags/v4.3.0.tar.gz"
     sha256: "f2136da1137a20dfcec795fe0d17ca1a2465d28e3b307f122526629b6b2f2294"
@@ -18,6 +21,10 @@ sources:
     url: "https://github.com/swig/swig/archive/rel-4.0.1.tar.gz"
     sha256: "2eaf6fb89d071d1be280bf995c63360b3729860c0da64948123b5d7e4cfb6cb7"
 patches:
+  "4.3.1":
+    - patch_file: "patches/0002-4.3.1-do-not-define-SWIG_LIB_WIN_UNIX.patch"
+      patch_type: "portability"
+      patch_description: "swig -swiglib should return the correct path next to the binary even when relocated"
   "4.3.0":
     - patch_file: "patches/0002-4.3.0-do-not-define-SWIG_LIB_WIN_UNIX.patch"
       patch_type: "portability"
