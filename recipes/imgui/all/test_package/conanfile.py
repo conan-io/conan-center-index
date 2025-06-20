@@ -18,7 +18,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         with_docking = self.dependencies[self.tested_reference_str].conf_info.get("user.imgui:with_docking", False)
-        with_test_engine = self.dependencies[self.tested_reference_str].conf_info.get("user.imgui:enable_test_engine", False)
+        with_test_engine = self.dependencies[self.tested_reference_str].options.enable_test_engine
         tc = CMakeToolchain(self)
         tc.variables["DOCKING"] = with_docking
         tc.variables["ENABLE_TEST_ENGINE"] = with_test_engine

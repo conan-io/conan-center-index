@@ -1,3 +1,6 @@
+# this package's recipe relies on version suffixes to handle imgui's docking branch and testengine integration.
+# Suffix: -docking for docking branch sources
+# Suffix: -testengine for testengine integration sources
 sources:
   "1.91.8":
     url: "https://github.com/ocornut/imgui/archive/v1.91.8.tar.gz"

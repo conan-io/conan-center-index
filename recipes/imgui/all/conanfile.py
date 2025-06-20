@@ -30,11 +30,10 @@ class IMGUIConan(ConanFile):
     }
     
     def _base_version(self):
-        match = re.match(r'cci\.\d{8}\+(?P<version>\d+\.\d+(?:\.\d+))\.docking', str(self.version)) or re.match(r'(?P<version>\d+\.\d+(.\d+)?)-docking', str(self.version))
-        return Version(match.group('version')) if match else self.version
+        return self.version.split('-')[0]
     
     def _is_docking_branch(self):
-        return re.match(r'.+(\.|-)docking', str(self.version))
+        return self.version.endswith("-docking")
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
@@ -57,10 +56,10 @@ class IMGUIConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         base_version = self._base_version()
-        try :
-            get(self, **self.conan_data["sources"][f"{base_version}-testengine"], strip_root=True, destination="test_engine")
-        except KeyError:
+        if (f"{self._base_version()}-testengine") not in self.conan_data["sources"]:
             self.output.warning("No test engine found for this version, skipping download")
+        else:
+            get(self, **self.conan_data["sources"][f"{base_version}-testengine"], strip_root=True, destination="test_engine")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -111,7 +110,6 @@ class IMGUIConan(ConanFile):
 
     def package_info(self):
         self.conf_info.define("user.imgui:with_docking", bool(self._is_docking_branch()))
-        self.conf_info.define("user.imgui:enable_test_engine", bool(self.options.get_safe("enable_test_engine")))
 
         self.cpp_info.libs = ["imgui"]
         if self.settings.os == "Linux":
