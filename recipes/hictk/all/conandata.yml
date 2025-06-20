@@ -1,7 +1,7 @@
 sources:
-  "2.1.2":
-    url: "https://github.com/paulsengroup/hictk/archive/refs/tags/v2.1.2.tar.gz"
-    sha256: "6a3d5e30e980d31b99b8be66407d6e54539a6b07f51eed60e60b5fcd297e6e57"
+  "2.1.4":
+    url: "https://github.com/paulsengroup/hictk/archive/refs/tags/v2.1.4.tar.gz"
+    sha256: "3a0030425176dacc25c20afc6fedb5dfbbc3c1a67f773be11ac77d7fa6b7efde"
   "2.0.2":
     url: "https://github.com/paulsengroup/hictk/archive/refs/tags/v2.0.2.tar.gz"
     sha256: "349d7635186f91707ab4f55e9427fd966bebd2337542e394ae93f08c0759411d"
