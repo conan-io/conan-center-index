@@ -32,7 +32,7 @@ class PinocchioConan(ConanFile):
         "shared": False,
         "fPIC": True
         }
-    
+
     implements = ["auto_shared_fpic"]
 
     def layout(self):
@@ -79,4 +79,20 @@ class PinocchioConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["pinocchio_default", "pinocchio_parsers", "pinocchio_visualizers"]
+        self.cpp_info.set_property("cmake_file_name", "pinocchio")
+        self.cpp_info.set_property("cmake_target_name", "pinocchio::pinocchio")
+
+        self.cpp_info.components["pinocchio_headers"].includedirs = ["include"]
+        self.cpp_info.components["pinocchio_headers"].requires = ["eigen::eigen", "boost::boost"]
+
+        self.cpp_info.components["pinocchio_default"].libs = ["pinocchio_default"]
+        self.cpp_info.components["pinocchio_default"].requires = ["pinocchio_headers"]
+        self.cpp_info.components["pinocchio_default"].defines = ["pinocchio_EXPORTS"]  # TODO: should this be added?
+
+        self.cpp_info.components["pinocchio_visualizers"].libs = ["pinocchio_visualizers"]
+        self.cpp_info.components["pinocchio_visualizers"].requires = ["pinocchio_headers", "pinocchio_default"]
+        self.cpp_info.components["pinocchio_visualizers"].defines = ["pinocchio_EXPORTS"]  # TODO: should this be added?
+
+        self.cpp_info.components["pinocchio_parsers"].libs = ["pinocchio_parsers"]
+        self.cpp_info.components["pinocchio_parsers"].requires = ["pinocchio_headers", "pinocchio_default", "boost::filesystem", "urdfdom::urdfdom", "urdfdom_headers::urdfdom_headers"]
+        self.cpp_info.components["pinocchio_parsers"].defines = ["pinocchio_EXPORTS", "PINOCCHIO_WITH_URDFDOM"]  # TODO: should this be added?
