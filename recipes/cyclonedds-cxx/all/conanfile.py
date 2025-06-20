@@ -72,7 +72,7 @@ class CycloneDDSCXXConan(ConanFile):
         self.requires("cyclonedds/{}".format(self.version), transitive_headers=True)
 
         if self.options.with_shm:
-            self.requires("iceoryx/2.0.5")
+            self.requires("iceoryx/2.0.6")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
