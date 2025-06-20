@@ -136,6 +136,7 @@ class OpusFileConan(ConanFile):
             msbuild.build(os.path.join(sln_folder, "opusfile.sln"), targets=["opusfile"])
         else:
             if self.settings.os == "Android":
+                # See https://github.com/conan-io/conan-center-index/pull/26245#pullrequestreview-2825164395
                 cstd = self.settings.get_safe("compiler.cstd", default="99")
                 replace_in_file(self, os.path.join(self.source_folder, "configure.ac"), "c89", f"c{cstd}")
 
