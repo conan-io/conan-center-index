@@ -52,6 +52,7 @@ class FFMpegConan(ConanFile):
         "with_harfbuzz": [True, False],
         "with_openjpeg": [True, False],
         "with_openh264": [True, False],
+        "with_openvino": [True, False],
         "with_opus": [True, False],
         "with_vorbis": [True, False],
         "with_zeromq": [True, False],
@@ -141,6 +142,7 @@ class FFMpegConan(ConanFile):
         "with_harfbuzz": False,
         "with_openjpeg": True,
         "with_openh264": True,
+        "with_openvino": True,
         "with_opus": True,
         "with_vorbis": True,
         "with_zeromq": False,
@@ -227,6 +229,7 @@ class FFMpegConan(ConanFile):
             "with_libxml2": ["avcodec"],
             "with_openjpeg": ["avcodec"],
             "with_openh264": ["avcodec"],
+            "with_openvino": ["avfilter"],
             "with_vorbis": ["avcodec"],
             "with_opus": ["avcodec"],
             "with_libx264": ["avcodec"],
@@ -251,6 +254,10 @@ class FFMpegConan(ConanFile):
             "with_mediacodec": ["with_jni"],
             "with_xlib": ["avdevice"],
         }
+
+    @property
+    def _version_supports_openvino(self):
+        return Version(self.version) >= "6.1.0"
 
     @property
     def _version_supports_libsvtav1(self):
@@ -284,6 +291,8 @@ class FFMpegConan(ConanFile):
             del self.options.with_videotoolbox
         if not is_apple_os(self):
             del self.options.with_avfoundation
+        if not self._version_supports_openvino:
+            del self.options.with_openvino
         if not self.settings.os == "Android":
             del self.options.with_jni
             del self.options.with_mediacodec
@@ -326,6 +335,8 @@ class FFMpegConan(ConanFile):
             self.requires("openjpeg/2.5.2")
         if self.options.with_openh264:
             self.requires("openh264/2.4.1")
+        if self.options.get_safe("with_openvino"):
+            self.requires("openvino/2024.5.0")
         if self.options.with_vorbis:
             self.requires("vorbis/1.3.7")
         if self.options.with_opus:
@@ -576,6 +587,9 @@ class FFMpegConan(ConanFile):
                 self.options.with_libx264 or self.options.with_libx265 or self.options.postproc))),
             opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
         ]
+
+        if self._version_supports_openvino:
+            args.append(opt_enable_disable("libopenvino", self.options.get_safe("with_openvino")))
 
         # Individual Component Options
         opt_append_disable_if_set(args, "everything", self.options.disable_everything)
@@ -969,6 +983,8 @@ class FFMpegConan(ConanFile):
                 avfilter.frameworks.append("CoreImage")
             if Version(self.version) >= "5.0" and is_apple_os(self):
                 avfilter.frameworks.append("Metal")
+            if self.options.get_safe("with_openvino"):
+                avfilter.requires.append("openvino::Runtime_C")
 
         if self.options.get_safe("with_libdrm"):
             avutil.requires.append("libdrm::libdrm_libdrm")
