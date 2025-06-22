@@ -140,7 +140,8 @@ class OpenSSLConan(ConanFile):
             if not self.options.no_asm and self.settings.arch in ["x86", "x86_64"]:
                 self.tool_requires("nasm/2.16.01")
             if self._use_nmake:
-                self.tool_requires("strawberryperl/5.32.1.1")
+                if self.settings.arch in ["x86", "x86_64"]:
+                    self.tool_requires("strawberryperl/5.32.1.1")
             else:
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -501,7 +502,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _perl(self):
-        if self._use_nmake:
+        if self._use_nmake and self.settings.arch in ["x86", "x86_64"]:
             return self.dependencies.build["strawberryperl"].conf_info.get("user.strawberryperl:perl", check_type=str)
         return "perl"
 
