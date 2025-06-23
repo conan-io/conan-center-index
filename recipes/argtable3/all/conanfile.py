@@ -5,7 +5,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.errors import ConanException
 import os
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=2.4"
 
 
 class Argtable3Conan(ConanFile):
@@ -27,44 +27,30 @@ class Argtable3Conan(ConanFile):
         "fPIC": True,
     }
 
+    implements = ["auto_shared_fpic"]
+    languages = "C"
+
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        # The initial space is important (the cmake script does OFFSET 0)
+        save(self, os.path.join(self.source_folder, "version.tag"), f" {self.version}.0\n")
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["ARGTABLE3_ENABLE_TESTS"] = False
         tc.variables["ARGTABLE3_ENABLE_EXAMPLES"] = False
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if Version(self.version) > "3.3.1": # pylint: disable=conan-unreachable-upper-version
-            raise ConanException(
-                f"Recipe Alert: CMAKE_POLICY_VERSION_MINIMUM is currently '{tc.cache_variables['CMAKE_POLICY_VERSION_MINIMUM']}'. "
-                f"For argtable3 version {self.version} (which is > 3.3.1), "
-                "please verify the library's actual minimum required CMake version. "
-                "Update this recipe's CMAKE_POLICY_VERSION_MINIMUM setting if a version different from "
-                f"'{tc.cache_variables['CMAKE_POLICY_VERSION_MINIMUM']}' is required by the library."
-            )
+        if Version(self.version) < "3.3.1":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
-        # The initial space is important (the cmake script does OFFSET 0)
-        save(self, os.path.join(self.build_folder, "version.tag"), f" {self.version}.0\n")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
