@@ -1,7 +1,6 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, chdir, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 import os
 
@@ -15,33 +14,18 @@ class ODPIConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/oracle/odpi"
     topics = ("oracle", "database", "oci")
-    package_type = "library"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-    }
-
     languages = ["C"]
-    implements = ["auto_shared_fpic"]
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
-    def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(f"{self.ref} recipe only supports Linux for now. Pull requests to add new configurtations are welcomed.")
-        # TODO: Check support for other platforms
+    def build_requirements(self):
+        if self.settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -49,19 +33,22 @@ class ODPIConan(ConanFile):
     def generate(self):
         tc = AutotoolsToolchain(self)
         tc.generate()
-        tc = PkgConfigDeps(self)
-        tc.generate()
-        deps = AutotoolsDeps(self)
-        deps.generate()
 
     def build(self):
         with chdir(self, self.source_folder):
-            autotools = Autotools(self)
-            autotools.make(target="all")
+            if self.settings.os == "Windows":
+                self.run(f"nmake -f Makefile.win32")
+            else:
+                autotools = Autotools(self)
+                autotools.make(target="all")
 
     def package(self):
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        with chdir(self, self.source_folder):
+        if self.settings.os == "Windows":
+            copy(self, "*.lib", os.path.join(self.source_folder, "lib"), os.path.join(self.package_folder, "lib"))
+            copy(self, "*.dll", os.path.join(self.source_folder, "lib"), os.path.join(self.package_folder, "bin"))
+            copy(self, "*.h", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
+        else:
             autotools = Autotools(self)
             autotools.install(args=[f"PREFIX={self.package_folder}"])
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
@@ -70,6 +57,5 @@ class ODPIConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["odpic"]
-        self.cpp_info.set_property("pkg_config_name", "odpi")
         if self.settings.os in ["Linux"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
