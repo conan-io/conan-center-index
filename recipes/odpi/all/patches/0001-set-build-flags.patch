@@ -1,0 +1,47 @@
+diff --git a/Makefile b/Makefile
+index e27d6da..16e40af 100644
+--- a/Makefile
++++ b/Makefile
+@@ -43,9 +43,8 @@ LIB_DIR = lib
+ SAMPLES_DIR = samples
+ TESTS_DIR = test
+ 
+-CC = gcc
+-LD = gcc
+-AWK = awk
++CC ?= gcc
++AWK ?= awk
+ 
+ MAJOR_VERSION := $(shell $(AWK) '/define.*DPI_MAJOR_VERSION/ {print $$3}' \
+ 	include/dpi.h )
+@@ -54,10 +53,13 @@ MINOR_VERSION := $(shell $(AWK) '/define.*DPI_MINOR_VERSION/ {print $$3}' \
+ PATCH_LEVEL := $(shell $(AWK) '/define.*DPI_PATCH_LEVEL/ {print $$3}' \
+ 	include/dpi.h )
+ 
+-INSTALL = install
+-CFLAGS = -Iinclude -O2 -g -Wall -Wextra -fPIC
+-LIBS = -ldl -lpthread
+-LDFLAGS = -shared
++INSTALL ?= install
++CFLAGS ?= -O2 -g -Wall -Wextra -fPIC
++EXTRA_CFLAGS ?=
++INCLUDES ?= -Iinclude
++LIBS ?= -ldl -lpthread
++LDFLAGS ?= -shared
++EXTRA_LDFLAGS ?=
+ VERSION_LIB_NAME = $(LIB_NAME).$(MAJOR_VERSION)
+ FULL_LIB_NAME = $(VERSION_LIB_NAME).$(MINOR_VERSION).$(PATCH_LEVEL)
+ ifeq ($(shell uname -s), Darwin)
+@@ -109,10 +111,10 @@ $(LIB_DIR):
+ 	mkdir -p $(LIB_DIR)
+ 
+ $(BUILD_DIR)/%.o: %.c dpi.h dpiImpl.h dpiErrorMessages.h
+-	$(CC) -c $(CFLAGS) $< -o $@
++	$(CC) -c $(INCLUDES) $(CFLAGS) $(EXTRA_CFLAGS) $< -o $@
+ 
+ $(LIB_DIR)/$(FULL_LIB_NAME): $(BUILD_DIR) $(LIB_DIR) $(OBJS)
+-	$(LD) $(LDFLAGS) $(LIB_OUT_OPTS) $(OBJS) $(LIBS)
++	$(CC) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LIB_OUT_OPTS) $(OBJS) $(LIBS)
+ 
+ $(LIB_DIR)/$(VERSION_LIB_NAME): $(LIB_DIR)/$(FULL_LIB_NAME)
+ 	ln -sf $(FULL_LIB_NAME) $@

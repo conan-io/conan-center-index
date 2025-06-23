@@ -2,3 +2,9 @@ sources:
   "5.4.1":
     url: "https://github.com/oracle/odpi/archive/refs/tags/v5.4.1.tar.gz"
     sha256: "dc02c694e119c69af3a556a363fe406b26996d0e71c4c5dfbf9d7a253efa6a01"
+patches:
+  "5.4.1":
+    - patch_file: "patches/0001-set-build-flags.patch"
+      patch_type: "conan"
+      patch_source: "https://github.com/oracle/odpi/issues/196"
+      patch_description: "Set build flags for Make to ensure proper compilation."

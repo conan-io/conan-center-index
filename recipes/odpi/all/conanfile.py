@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import copy, chdir, get, rm, rmdir
+from conan.tools.files import copy, chdir, get, rm, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.apple import fix_apple_shared_install_name
@@ -19,6 +19,9 @@ class ODPIConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     languages = ["C"]
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -30,6 +33,7 @@ class ODPIConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
