@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.layout import basic_layout
 from conan.tools.files import copy, get
+from conan.error import ConanInvalidConfiguration
 import os
 
 
@@ -16,7 +17,6 @@ class TinyOptionalConan(ConanFile):
     homepage = "https://github.com/Sedeniono/tiny-optional"
     topics = ("optional", "memory-efficiency", "cache-friendly", "header-only")
     package_type = "header-library"
-    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     def layout(self):
@@ -24,6 +24,8 @@ class TinyOptionalConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
+        if self.settings.arch not in ("x86", "x86_64"):
+            raise ConanInvalidConfiguration("The library only supports x86/64 archs")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
