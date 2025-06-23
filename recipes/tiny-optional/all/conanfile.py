@@ -40,3 +40,4 @@ class TinyOptionalConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "tiny-optional::tiny-optional")
 
         # Users should define TINY_OPTIONAL_USE_SEPARATE_BOOL_INSTEAD_OF_UB_TRICKS if non x86/64 arch
+        # to avoid UB, but it's not necessary for the library to work so don't force it
