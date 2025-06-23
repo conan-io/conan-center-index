@@ -1,4 +1,8 @@
 sources:
+  "1.1.6":
+    url:
+      - "https://github.com/mariadb-corporation/mariadb-connector-cpp/archive/refs/tags/1.1.6.zip"
+    sha256: "efee997b7f959e5d9101a916d3b630ed3ef111d1796baf7e5edc78780a2af7d0"
   "1.1.4":
     url:
       - "https://github.com/mariadb-corporation/mariadb-connector-cpp/archive/refs/tags/1.1.4.zip"
