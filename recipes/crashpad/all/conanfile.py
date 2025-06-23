@@ -12,7 +12,7 @@ from conan.tools.gnu import AutotoolsDeps, AutotoolsToolchain
 import os
 import textwrap
 
-required_conan_version = ">=1.64.0"
+required_conan_version = ">=2"
 
 
 class CrashpadConan(ConanFile):
@@ -39,15 +39,6 @@ class CrashpadConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def _minimum_compiler_cxx14(self):
-        return {
-            "apple-clang": 10,
-            "gcc": 5,
-            "clang": "3.9",
-            "msvc": "190",
-            "Visual Studio": 14,
-        }.get(str(self.settings.compiler))
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -72,6 +63,24 @@ class CrashpadConan(ConanFile):
         if self.options.get_safe("with_tls") == "openssl":
             self.requires("openssl/[>=1.1 <4]")
 
+    @property
+    def _compilers_support(self):
+        # This is a list of compilers that we need to build
+        # and why they are here instead of relying on cppstd detection
+        return {
+            "cci.20220219": {
+                # Here from the previous version, assuming good
+                "apple-clang": (10, None),
+                "gcc": (5, None),
+                "clang": ("3.9", None),
+                "msvc": ("190", None),
+                "Visual Studio": (14, None),
+            },
+            "cci.20240812": {
+                "apple-clang": (14, "Missing proper std::range support")
+            }
+        }
+
     def validate(self):
         if is_msvc(self):
             if self.options.http_transport in ("libcurl", "socket"):
@@ -80,19 +89,17 @@ class CrashpadConan(ConanFile):
             if not self.dependencies["libcurl"].options.shared:
                 # FIXME: is this true?
                 self.output.warning("crashpad needs a shared libcurl library")
-        min_compiler_version = self._minimum_compiler_cxx14()
-        if min_compiler_version:
-            if Version(self.settings.compiler.version) < min_compiler_version:
-                raise ConanInvalidConfiguration("crashpad needs a c++14 capable compiler, version >= {}".format(min_compiler_version))
-        else:
-            self.output.warning("This recipe does not know about the current compiler and assumes it has sufficient c++14 supports.")
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 14)
+        unsupported_version = self._compilers_support.get(self.version).get(str(self.settings.compiler))
+        if unsupported_version and Version(unsupported_version[0]) > self.settings.compiler.version:
+            raise ConanInvalidConfiguration(f"{self.settings.compiler} not supported: " + (unsupported_version[1] or ""))
+        
+        check_min_cppstd(self, 14 if Version(self.version) < "cci.20240812" else 20)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["crashpad"], destination=self.source_folder, strip_root=True)
         get(self, **self.conan_data["sources"][self.version]["mini_chromium"],
             destination=os.path.join(self.source_folder, "third_party", "mini_chromium", "mini_chromium"), strip_root=True)
+        apply_conandata_patches(self)
 
     @property
     def _gn_os(self):
@@ -134,8 +141,6 @@ class CrashpadConan(ConanFile):
             return str(self.options.http_transport)
 
     def build(self):
-        apply_conandata_patches(self)
-
         if is_msvc(self):
             replace_in_file(self, os.path.join(self.source_folder, "third_party", "zlib", "BUILD.gn"),
                                   "libs = [ \"z\" ]",
@@ -215,17 +220,8 @@ class CrashpadConan(ConanFile):
         # Remove accidentally copied libraries. These are used by the executables, not by the libraries.
         rm(self, "*getopt*", os.path.join(self.package_folder, "lib"), recursive=True)
 
-        save(self, os.path.join(self.package_folder, "lib", "cmake", "crashpad-cxx.cmake"),
-                   textwrap.dedent("""\
-                    if(TARGET crashpad::mini_chromium_base)
-                        target_compile_features(crashpad::mini_chromium_base INTERFACE cxx_std_14)
-                    endif()
-                   """))
-
     def package_info(self):
         self.cpp_info.components["mini_chromium_base"].libs = ["base"]
-        self.cpp_info.set_property("cmake_build_modules", [os.path.join(self.package_folder, "lib", "cmake", "crashpad-cxx.cmake")])
-        self.cpp_info.components["mini_chromium_base"].builddirs = [os.path.join("lib", "cmake")]
         if is_apple_os(self):
             if self.settings.os == "Macos":
                 self.cpp_info.components["mini_chromium_base"].frameworks = ["ApplicationServices", "CoreFoundation", "Foundation", "IOKit", "Security"]
@@ -283,5 +279,3 @@ class CrashpadConan(ConanFile):
         self.cpp_info.components["handler"].libs = ["handler"]
         self.cpp_info.components["handler"].requires = ["client", "util", "handler_common", "minidump", "snapshot"] + extra_handler_req
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bin_path)
