@@ -1,4 +1,7 @@
 sources:
+  "3.4.5":
+    url: "https://downloads.mariadb.com/Connectors/c/connector-c-3.4.5/mariadb-connector-c-3.4.5-src.tar.gz"
+    sha256: "b17e193816cb25c3364c2cc92a0ad3f1d0ad9f0f484dc76b8e7bdb5b50eac1a3"
   "3.4.3":
     url: "https://downloads.mariadb.com/Connectors/c/connector-c-3.4.3/mariadb-connector-c-3.4.3-src.tar.gz"
     sha256: "a9033833a88ca74789bd6db565965382c982d06aae1c086097fa9c3e7c7d1eaf"
