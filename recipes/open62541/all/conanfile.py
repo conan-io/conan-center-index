@@ -230,6 +230,10 @@ class Open62541Conan(ConanFile):
             if self.options["libwebsockets"].with_ssl != self.options.encryption:
                 raise ConanInvalidConfiguration(
                     "When web_socket is enabled, libwebsockets:with_ssl must have the value of open62541:encryption")
+        
+        if self.options.get_safe("nodeset_loader") and not self.options.parsing:
+            # NodesetLoader requires parsing to be enabled
+            raise ConanInvalidConfiguration("When nodeset_loader is enabled, then parsing has to be enabled too.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
