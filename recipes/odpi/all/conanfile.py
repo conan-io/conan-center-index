@@ -37,6 +37,9 @@ class ODPIConan(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
+        if self.settings.os == "Linux":
+            tc.extra_cflags = ["-fPIC"]
+            tc.extra_ldflags = ["-shared"]
         tc.generate()
 
     def build(self):
