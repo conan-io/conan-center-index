@@ -32,6 +32,8 @@ class WasmMicroRuntimeConan(ConanFile):
         "with_wasi_threads": [True, False],
         "with_tail_call": [True, False],
         "with_simd": [True, False],
+        "disable_hw_bound_check": [None, True, False],
+        "disable_write_gs_base": [None, True, False],
     }
     default_options = {
         "shared": False,
@@ -47,6 +49,8 @@ class WasmMicroRuntimeConan(ConanFile):
         "with_wasi_threads": False,
         "with_tail_call": False,
         "with_simd": True,
+        "disable_hw_bound_check": None,
+        "disable_write_gs_base": None,
     }
 
     def export_sources(self):
@@ -114,6 +118,10 @@ class WasmMicroRuntimeConan(ConanFile):
         tc.variables["WAMR_BUILD_LIB_WASI_THREADS"] = is_enabled(self.options.with_wasi_threads)
         tc.variables["WAMR_BUILD_TAIL_CALL"] = is_enabled(self.options.with_tail_call)
         tc.variables["WAMR_BUILD_SIMD"] = is_enabled(self.options.with_simd)
+        if self.options.disable_hw_bound_check is not None:
+            tc.variables["WAMR_DISABLE_HW_BOUND_CHECK"] = is_enabled(self.options.disable_hw_bound_check)
+        if self.options.disable_write_gs_base is not None:
+            tc.variables["WAMR_DISABLE_WRITE_GS_BASE"] = is_enabled(self.options.disable_write_gs_base)
         tc.generate()
 
     def build(self):
