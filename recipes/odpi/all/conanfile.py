@@ -49,8 +49,9 @@ class ODPIConan(ConanFile):
             copy(self, "*.dll", os.path.join(self.source_folder, "lib"), os.path.join(self.package_folder, "bin"))
             copy(self, "*.h", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
         else:
-            autotools = Autotools(self)
-            autotools.install(args=[f"PREFIX={self.package_folder}"])
+            with chdir(self, self.source_folder):
+                autotools = Autotools(self)
+                autotools.install(args=[f"PREFIX={self.package_folder}"])
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
