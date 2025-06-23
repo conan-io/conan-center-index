@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import copy, chdir, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
+from conan.tools.apple import fix_apple_shared_install_name
 import os
 
 
@@ -55,6 +56,7 @@ class ODPIConan(ConanFile):
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["odpic"]
