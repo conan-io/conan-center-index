@@ -1,19 +1,10 @@
-#include <iostream>
- 
-#include "pinocchio/multibody/sample-models.hpp"
-#include "pinocchio/algorithm/joint-configuration.hpp"
-#include "pinocchio/algorithm/rnea.hpp"
- 
+#include <vector>
+#include <string>
+#include "pinocchio/utils/file-explorer.hpp"
+
 int main()
 {
-  pinocchio::Model model;
-  pinocchio::buildModels::manipulator(model);
-  pinocchio::Data data(model);
- 
-  Eigen::VectorXd q = pinocchio::neutral(model);
-  Eigen::VectorXd v = Eigen::VectorXd::Zero(model.nv);
-  Eigen::VectorXd a = Eigen::VectorXd::Zero(model.nv);
- 
-  const Eigen::VectorXd & tau = pinocchio::rnea(model, data, q, v, a);
-  std::cout << "tau = " << tau.transpose() << std::endl;
+   std::vector<std::string> paths;
+   pinocchio::extractPathFromEnvVar("CONAN_PINOCCHIO_TEST_PACKAGE_UNUSED_VAR",
+                                    paths, ";");
 }
