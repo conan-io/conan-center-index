@@ -24,8 +24,6 @@ class TinyOptionalConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
-        if self.settings.arch not in ("x86", "x86_64"):
-            raise ConanInvalidConfiguration("The library only supports x86/64 archs")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -40,3 +38,5 @@ class TinyOptionalConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "tiny-optional")
         self.cpp_info.set_property("cmake_target_name", "tiny-optional::tiny-optional")
+
+        # Users should define TINY_OPTIONAL_USE_SEPARATE_BOOL_INSTEAD_OF_UB_TRICKS if non x86/64 arch

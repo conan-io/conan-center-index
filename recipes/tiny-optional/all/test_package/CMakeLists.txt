@@ -7,8 +7,6 @@ add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE tiny-optional::tiny-optional)
 
 # Some features are not available for non-x86 architectures
-if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE TINY_OPTIONAL_x86)
-elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE TINY_OPTIONAL_x64)
+if(NOT ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86" AND NOT ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE TINY_OPTIONAL_USE_SEPARATE_BOOL_INSTEAD_OF_UB_TRICKS)
 endif()
