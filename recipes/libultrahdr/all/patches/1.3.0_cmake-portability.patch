@@ -1,5 +1,5 @@
 diff --git CMakeLists.txt CMakeLists.txt
-index c518d85..9ae7875 100644
+index c518d85..48d9326 100644
 --- CMakeLists.txt
 +++ CMakeLists.txt
 @@ -19,7 +19,7 @@ cmake_minimum_required(VERSION 3.15)
@@ -11,21 +11,15 @@ index c518d85..9ae7875 100644
  endif()
  
  set(UHDR_MAJOR_VERSION 1)
-@@ -138,10 +138,10 @@ if(UHDR_BUILD_BENCHMARK AND EMSCRIPTEN)
+@@ -138,7 +138,7 @@ if(UHDR_BUILD_BENCHMARK AND EMSCRIPTEN)
  endif()
  
  # side effects
 -if(CMAKE_CROSSCOMPILING AND UHDR_ENABLE_INSTALL)
--  set(UHDR_ENABLE_INSTALL FALSE) # disable install and uninstall targets during cross compilation.
--  message(STATUS "Install and uninstall targets - Disabled")
--endif()
-+# if(CMAKE_CROSSCOMPILING AND UHDR_ENABLE_INSTALL)
-+#   set(UHDR_ENABLE_INSTALL FALSE) # disable install and uninstall targets during cross compilation.
-+#   message(STATUS "Install and uninstall targets - Disabled")
-+# endif()
- 
- if(UHDR_BUILD_FUZZERS AND NOT UHDR_BUILD_DEPS)
-   set(UHDR_BUILD_DEPS TRUE) # For fuzz testing its best to build all dependencies from source.
++if(0)
+   set(UHDR_ENABLE_INSTALL FALSE) # disable install and uninstall targets during cross compilation.
+   message(STATUS "Install and uninstall targets - Disabled")
+ endif()
 @@ -165,9 +165,9 @@ endif()
  ###########################################################
  # Compile flags
@@ -151,13 +145,12 @@ index c518d85..9ae7875 100644
    combine_static_libs(${UHDR_CORE_LIB_NAME} ${UHDR_TARGET_NAME_STATIC})
    if(NOT MSVC)
      set_target_properties(${UHDR_TARGET_NAME_STATIC}
-@@ -789,7 +745,8 @@ if(UHDR_BUILD_JAVA)
+@@ -789,7 +745,7 @@ if(UHDR_BUILD_JAVA)
  endif()
  
  if(UHDR_ENABLE_INSTALL)
 -  if(NOT(MSVC OR XCODE))
 +  if(TRUE)
-+  #if(NOT(MSVC OR XCODE))
      include(GNUInstallDirs)
  
      # pkg-config: libuhdr.pc

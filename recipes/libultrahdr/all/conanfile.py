@@ -19,7 +19,7 @@ class LibultrahdrConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
+        "with_jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"],
     }
     default_options = {
         "shared": False,
@@ -54,29 +54,29 @@ class LibultrahdrConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
 
         # Force-disable fallback to internal dependency builder if no deps found
-        tc.variables["UHDR_BUILD_DEPS"] = False
+        tc.cache_variables["UHDR_BUILD_DEPS"] = False
+        tc.cache_variables['UHDR_BUILD_EXAMPLES'] = False
         if self.options.with_jpeg == "libjpeg":
-            tc.variables["CONAN_USE_JPEG"] = True
+            tc.cache_variables["CONAN_USE_JPEG"] = True
         elif self.options.with_jpeg == "libjpeg-turbo":
-            tc.variables["CONAN_USE_JPEGTURBO"] = True
+            tc.cache_variables["CONAN_USE_JPEGTURBO"] = True
         elif self.options.with_jpeg == "mozjpeg":
-            tc.variables["CONAN_USE_MOZJPEG"] = True
+            tc.cache_variables["CONAN_USE_MOZJPEG"] = True
 
         tc.generate()
         deps = CMakeDeps(self)
+        #if self.options.with_jpeg:
+        #    deps.set_property(self.options.with_jpeg, "cmake_file_name", "JPEG")
+        #    deps.set_property(self.options.with_jpeg, "cmake_target_name", "JPEG::JPEG")
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_sources()
-
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
