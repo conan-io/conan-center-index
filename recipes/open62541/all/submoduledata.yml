@@ -5,8 +5,8 @@ submodules:
       sha256: "b1677e7114004f44103159ae7a2fb220958e6f645177c9d140f6acfe469b8eb8"
       archive_pattern: "UA-Nodeset-{version}"
     deps/nodesetLoader:
-      url: "https://github.com/open62541/open62541-nodeset-loader/archive/76e0994cff81d8c9d2eca9f7f6a9d14519d3e49e.tar.gz"
-      sha256: "0337b1611713d140cc7979da88a14d3bb9c4ced54c424df23e7c1c8f51fdce52"
+      url: "https://github.com/open62541/open62541-nodeset-loader/archive/a6ef45054ff74e0d798fccc257e4646355dadb6a.tar.gz"
+      sha256: "cce4c7c64a9e12f9bcbe6e5402c3515572c66fcc85ffa057e3e35e9397021cbb"
       archive_pattern: "open62541-nodeset-loader-{sha256}"
   "1.4.6":
     deps/ua-nodeset:
