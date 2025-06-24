@@ -161,9 +161,9 @@ class SDLConan(ConanFile):
             self.options.rm_safe("xshape")
             self.options.rm_safe("xsync")
 
-        if not self.options.get_safe("hidapi") or self.settings.os in ["iOS", "tvOS", "visionOS", "watchOS"]:
+        if not self.options.get_safe("hidapi") or self.settings.os in ["Android", "iOS", "tvOS", "visionOS", "watchOS"]:
             # libusb is only an option if hidapi is enabled: https://github.com/libsdl-org/SDL/blob/db3a35e9bc3aa245dfbe67585b3f67d7b4b62845/cmake/sdlchecks.cmake#L1111
-            # libusb is not available on iOS/tvOS/visionOS/watchOS https://github.com/libsdl-org/SDL/blob/db3a35e9bc3aa245dfbe67585b3f67d7b4b62845/CMakeLists.txt#L160
+            # libusb is not available on Android/iOS/tvOS/visionOS/watchOS https://github.com/libsdl-org/SDL/blob/db3a35e9bc3aa245dfbe67585b3f67d7b4b62845/CMakeLists.txt#L159-L160
             self.options.rm_safe("libusb")
 
     def validate(self):
