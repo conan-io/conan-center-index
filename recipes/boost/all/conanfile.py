@@ -1049,9 +1049,14 @@ class BoostConan(ConanFile):
 
     @property
     def _debug_flag(self):
-        verbosity = self.conf.get("tools.build:verbosity", default="quiet", check_type=str)
+        verbosity = self.conf.get("tools.compilation:verbosity", default="quiet", check_type=str)
         debug_level = {"quiet": 0, "verbose": 2}.get(verbosity)
         return f"-d{debug_level}"
+
+    @property
+    def _verbose_flag(self):
+        verbosity = self.conf.get("tools.build:verbosity", default="quiet", check_type=str)
+        return {"quiet": "", "verbose": "--verbose"}.get(verbosity)
 
     def _build_bcp(self):
         folder = os.path.join(self.source_folder, "tools", "bcp")
@@ -1416,6 +1421,7 @@ class BoostConan(ConanFile):
             f"-j{build_jobs(self)}",
             "--abbreviate-paths",
             self._debug_flag,
+            self._verbose_flag,
         ])
         return flags
 
