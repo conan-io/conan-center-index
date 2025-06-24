@@ -23,3 +23,16 @@ sources:
   "1.13.1":
     url: "https://github.com/onnx/onnx/archive/refs/tags/v1.13.1.tar.gz"
     sha256: "090d3e10ec662a98a2a72f1bf053f793efc645824f0d4b779e0ce47468a0890e"
+patches:
+  "1.17.0":
+    - patch_description: "Fix CMakelist.txt to allow protobuf to get its own dependencies"
+      patch_file: "patches/0001-1.17.0-fix-protobuf-dependencies.patch"
+  "1.16.2":
+    - patch_description: "Fix CMakelist.txt to allow protobuf to get its own dependencies"
+      patch_file: "patches/0001-1.16.2-fix-protobuf-dependencies.patch"
+  "1.16.1":
+    - patch_description: "Fix CMakelist.txt to allow protobuf to get its own dependencies"
+      patch_file: "patches/0001-1.16.2-fix-protobuf-dependencies.patch"
+  "1.15.0":
+    - patch_description: "Fix CMakelist.txt to allow protobuf to get its own dependencies"
+      patch_file: "patches/0001-1.15.0-fix-protobuf-dependencies.patch"
