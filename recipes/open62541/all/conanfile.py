@@ -154,8 +154,7 @@ class Open62541Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        del self.options.embedded_profile
-
+        
         if Version(self.version) >= "1.3.1":
             del self.options.embedded_profile
 
