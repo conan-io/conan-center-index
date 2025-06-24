@@ -86,6 +86,7 @@ class PcapplusplusConan(ConanFile):
                 # so that we have precedence over PlatformToolset version
                 replace_in_file(self, template_file, '<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />', 
                                 f'<Import Project="{props_file}" />\n<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />')
+                replace_in_file(self, template_file, "<WholeProgramOptimization>true</WholeProgramOptimization>", "<WholeProgramOptimization>false</WholeProgramOptimization>")
 
     def generate(self):
         if self.settings.os == "Windows":
@@ -143,4 +144,4 @@ class PcapplusplusConan(ConanFile):
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["CoreFoundation", "Security", "SystemConfiguration"])
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["ws2_32"]
+            self.cpp_info.system_libs = ["ws2_32", "iphlpapi"]

@@ -7,7 +7,7 @@ import glob
 import os
 import yaml
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class Open62541Conan(ConanFile):
@@ -109,6 +109,7 @@ class Open62541Conan(ConanFile):
         "cpp_compatible": [True, False],
         # UA_ENABLE_STATUSCODE_DESCRIPTIONS=readable_statuscodes
         "readable_statuscodes": [True, False],
+        "parsing": [True, False],
     }
     default_options = {
         "fPIC": True,
@@ -137,6 +138,7 @@ class Open62541Conan(ConanFile):
         "hardening": True,
         "cpp_compatible": False,
         "readable_statuscodes": True,
+        "parsing": False,
     }
 
     exports = "submoduledata.yml"
@@ -149,9 +151,7 @@ class Open62541Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-        if Version(self.version) >= "1.3.1":
-            del self.options.embedded_profile
+        del self.options.embedded_profile
 
     def configure(self):
         if self.options.shared:
@@ -193,25 +193,7 @@ class Open62541Conan(ConanFile):
                 raise ConanInvalidConfiguration(
                     "Open62541 discovery sempahore option requires discovery option to be enabled")
 
-        if Version(self.version) < "1.1.0":
-            if self.options.encryption == "openssl":
-                raise ConanInvalidConfiguration(
-                    "Lower Open62541 versions than 1.1.0 do not support openssl")
-
-            if self.options.multithreading != "None":
-                raise ConanInvalidConfiguration(
-                    "Lower Open62541 versions than 1.1.0 do not fully support multithreading")
-
-            if self.options.web_socket:
-                raise ConanInvalidConfiguration(
-                    "Lower Open62541 versions than 1.1.0 do not fully support websockets")
-
-            if self.options.cpp_compatible:
-                raise ConanInvalidConfiguration(
-                    "Lower Open62541 versions than 1.1.0 are not cpp compatible due to -fpermisive flags")
-
-        unsupported_clang_version = "8" if Version(self.version) < "1.1.0" else "9"
-        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) == unsupported_clang_version:
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) == "9":
             raise ConanInvalidConfiguration(
                 f"{self.ref} does not support Clang version {self.settings.compiler.version}")
 
@@ -224,8 +206,8 @@ class Open62541Conan(ConanFile):
             raise ConanInvalidConfiguration(
                 "PubSub over Ethernet is not supported for your OS!")
 
-        # Due to https://github.com/open62541/open62541/issues/4687 we cannot build with 1.2.2 + Windows + shared
-        if Version(self.version) >= "1.2.2" and self.settings.os == "Windows" and self.options.shared:
+        # Due to https://github.com/open62541/open62541/issues/4687 we cannot build with Windows + shared
+        if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration(
                 f"{self.ref} doesn't properly support shared lib on Windows")
 
@@ -278,6 +260,9 @@ class Open62541Conan(ConanFile):
         tc.variables["UA_LOGLEVEL"] = self._get_log_level()
         tc.variables["UA_ENABLE_SUBSCRIPTIONS"] = self.options.subscription != False
 
+        if self.settings.os == "Neutrino":
+            tc.cache_variables["UA_ARCHITECTURE"] = "posix"
+
         if self.options.subscription != False:
             if "events" in str(self.options.subscription):
                 tc.variables["UA_ENABLE_SUBSCRIPTIONS_EVENTS"] = True
@@ -287,10 +272,7 @@ class Open62541Conan(ConanFile):
         tc.variables["UA_ENABLE_METHODCALLS"] = self.options.methods
         tc.variables["UA_ENABLE_NODEMANAGEMENT"] = self.options.dynamic_nodes
         tc.variables["UA_ENABLE_AMALGAMATION"] = self.options.single_header
-
-        if version >= "1.1.3":
-            tc.variables["UA_MULTITHREADING"] = self._get_multithreading_option()
-
+        tc.variables["UA_MULTITHREADING"] = self._get_multithreading_option()
         tc.variables["UA_ENABLE_IMMUTABLE_NODES"] = self.options.imutable_nodes
         tc.variables["UA_ENABLE_WEBSOCKET_SERVER"] = self.options.web_socket
         tc.variables["UA_ENABLE_HISTORIZING"] = self.options.historize != False
@@ -310,19 +292,12 @@ class Open62541Conan(ConanFile):
                     self.options.discovery)
 
         tc.variables["UA_ENABLE_QUERY"] = self.options.query
-
-        if Version(self.version) >= "1.3.1":
-            if self.options.encryption == "openssl":
-                tc.variables["UA_ENABLE_ENCRYPTION"] = "OPENSSL"
-            elif self.options.encryption == "mbedtls":
-                tc.variables["UA_ENABLE_ENCRYPTION"] = "MBEDTLS"
-            else:
-                tc.variables["UA_ENABLE_ENCRYPTION"] = "OFF"
+        if self.options.encryption == "openssl":
+            tc.variables["UA_ENABLE_ENCRYPTION"] = "OPENSSL"
+        elif self.options.encryption == "mbedtls":
+            tc.variables["UA_ENABLE_ENCRYPTION"] = "MBEDTLS"
         else:
-            tc.variables["UA_ENABLE_ENCRYPTION"] = self.options.encryption != False
-            if self.options.encryption != False:
-                if self.options.encryption == "openssl":
-                    tc.variables["UA_ENABLE_ENCRYPTION_OPENSSL"] = True
+            tc.variables["UA_ENABLE_ENCRYPTION"] = "OFF"
 
         tc.variables["UA_ENABLE_JSON_ENCODING"] = self.options.json_support
         tc.variables["UA_ENABLE_PUBSUB_INFORMATIONMODEL"] = self.options.pub_sub != False
@@ -341,9 +316,6 @@ class Open62541Conan(ConanFile):
             tc.variables["UA_NAMESPACE_ZERO"] = "FULL"
         else:
             tc.variables["UA_NAMESPACE_ZERO"] = self.options.namespace_zero
-        if Version(self.version) < "1.3.1":
-            tc.variables["UA_ENABLE_MICRO_EMB_DEV_PROFILE"] = self.options.embedded_profile
-
         tc.variables["UA_ENABLE_TYPENAMES"] = self.options.typenames
         tc.variables["UA_ENABLE_STATUSCODE_DESCRIPTIONS"] = self.options.readable_statuscodes
         tc.variables["UA_ENABLE_HARDENING"] = self.options.hardening
@@ -352,6 +324,7 @@ class Open62541Conan(ConanFile):
             tc.variables["UA_MSVC_FORCE_STATIC_CRT"] = True
 
         tc.variables["UA_COMPILE_AS_CXX"] = self.options.cpp_compatible
+        tc.variables["UA_ENABLE_PARSING"] = self.options.parsing
 
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
@@ -363,8 +336,7 @@ class Open62541Conan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if Version(self.version) >= "1.3.1":
-            os.unlink(os.path.join(self.source_folder, "tools", "cmake", "FindPython3.cmake"))
+        rm(self, "FindPython3.cmake", os.path.join(self.source_folder, "tools", "cmake"))
 
     def build(self):
         self._patch_sources()
@@ -411,18 +383,12 @@ class Open62541Conan(ConanFile):
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "open62541"
-        self.cpp_info.names["cmake_find_package_multi"] = "open62541"
-        self.cpp_info.names["pkg_config"] = "open62541"
         self.cpp_info.libs = collect_libs(self)
         self.cpp_info.includedirs = ["include"]
 
         # required for creating custom servers from ua-nodeset
         self.conf_info.define("user.open62541:tools_dir", os.path.join(
             self.package_folder, "res", "tools").replace("\\", "/"))
-        # v1 legacy support for tools_dir definition
-        self.user_info.tools_dir = os.path.join(
-            self.package_folder, "res", "tools").replace("\\", "/")
         self._chmod_plus_x(os.path.join(self.package_folder,
                            "res", "tools", "generate_nodeid_header.py"))
 
@@ -445,12 +411,9 @@ class Open62541Conan(ConanFile):
                 self.cpp_info.system_libs.append("iphlpapi")
         elif self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["pthread", "m", "rt"])
+        elif self.settings.os == "Neutrino":
+            self.cpp_info.system_libs.extend(["m", "rt", "socket"])
 
         self.cpp_info.builddirs.append(self._module_subfolder)
-        # v1 legacy support for open62541Macros.cmake auto-include
-        self.cpp_info.build_modules["cmake_find_package"] = [
-            self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [
-            self._module_file_rel_path]
         self.cpp_info.set_property("cmake_build_modules", [
                                    self._module_file_rel_path])

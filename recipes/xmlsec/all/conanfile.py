@@ -105,6 +105,9 @@ class XmlSecConan(ConanFile):
             tc = AutotoolsToolchain(self)
             if not self.options.shared:
                 tc.extra_defines.append("XMLSEC_STATIC")
+            if self.settings.os == "Windows":
+                tc.extra_defines.append("WIN32_LEAN_AND_MEAN")
+
             yes_no = lambda v: "yes" if v else "no"
             tc.configure_args.extend([
                 "--enable-crypto-dl=no",
