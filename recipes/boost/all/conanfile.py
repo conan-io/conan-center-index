@@ -475,55 +475,47 @@ class BoostConan(ConanFile):
             elif self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
                 disable_math()
 
-        if Version(self.version) >= "1.79.0":
-            # Starting from 1.79.0, Boost.Wave requires a c++11 capable compiler
-            # ==> disable it by default for older compilers or c++ standards
+        def disable_wave():
+            super_modules = self._all_super_modules("wave")
+            for smod in super_modules:
+                try:
+                    setattr(self.options, f"without_{smod}", True)
+                except ConanException:
+                    pass
 
-            def disable_wave():
-                super_modules = self._all_super_modules("wave")
-                for smod in super_modules:
-                    try:
-                        setattr(self.options, f"without_{smod}", True)
-                    except ConanException:
-                        pass
+        if self.settings.compiler.get_safe("cppstd"):
+            if not valid_min_cppstd(self, 11):
+                disable_wave()
+        else:
+            min_compiler_version = self._min_compiler_version_default_cxx11
+            if min_compiler_version is None:
+                self.output.warning("Assuming the compiler supports c++11 by default")
+            elif not self._has_cppstd_11_supported:
+                disable_wave()
+            # Boost.Wave is not built when the compiler is GCC < 5 and uses C++11
+            elif self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
+                disable_wave()
 
-            if self.settings.compiler.get_safe("cppstd"):
-                if not valid_min_cppstd(self, 11):
-                    disable_wave()
-            else:
-                min_compiler_version = self._min_compiler_version_default_cxx11
-                if min_compiler_version is None:
-                    self.output.warning("Assuming the compiler supports c++11 by default")
-                elif not self._has_cppstd_11_supported:
-                    disable_wave()
-                # Boost.Wave is not built when the compiler is GCC < 5 and uses C++11
-                elif self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
-                    disable_wave()
+        def disable_locale():
+            super_modules = self._all_super_modules("locale")
+            for smod in super_modules:
+                try:
+                    setattr(self.options, f"without_{smod}", True)
+                except ConanException:
+                    pass
 
-        if Version(self.version) >= "1.81.0":
-            # Starting from 1.81.0, Boost.Locale requires a c++11 capable compiler
-            # ==> disable it by default for older compilers or c++ standards
-
-            def disable_locale():
-                super_modules = self._all_super_modules("locale")
-                for smod in super_modules:
-                    try:
-                        setattr(self.options, f"without_{smod}", True)
-                    except ConanException:
-                        pass
-
-            if self.settings.compiler.get_safe("cppstd"):
-                if not valid_min_cppstd(self, 11):
-                    disable_locale()
-            else:
-                min_compiler_version = self._min_compiler_version_default_cxx11
-                if min_compiler_version is None:
-                    self.output.warning("Assuming the compiler supports c++11 by default")
-                elif not self._has_cppstd_11_supported:
-                    disable_locale()
-                # Boost.Locale is not built when the compiler is GCC < 5 and uses C++11
-                elif self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
-                    disable_locale()
+        if self.settings.compiler.get_safe("cppstd"):
+            if not valid_min_cppstd(self, 11):
+                disable_locale()
+        else:
+            min_compiler_version = self._min_compiler_version_default_cxx11
+            if min_compiler_version is None:
+                self.output.warning("Assuming the compiler supports c++11 by default")
+            elif not self._has_cppstd_11_supported:
+                disable_locale()
+            # Boost.Locale is not built when the compiler is GCC < 5 and uses C++11
+            elif self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
+                disable_locale()
 
         if Version(self.version) >= "1.84.0":
             # Starting from 1.84.0, Boost.Cobalt requires a c++20 capable compiler
@@ -653,10 +645,8 @@ class BoostConan(ConanFile):
     def _cxx11_boost_libraries(self):
         libraries = ["fiber", "json", "nowide", "url"]
         libraries.append("math")
-        if Version(self.version) >= "1.79.0":
-            libraries.append("wave")
-        if Version(self.version) >= "1.81.0":
-            libraries.append("locale")
+        libraries.append("wave")
+        libraries.append("locale")
         if Version(self.version) >= "1.84.0":
             libraries.append("atomic")
             libraries.append("filesystem")
