@@ -159,7 +159,7 @@ class Open62541Conan(ConanFile):
             del self.options.embedded_profile
 
         # NodesetLoader has only rudimentary Windows support --> disabling for now. This might change in the future.
-        if Version(self.version) < "1.4.8" or self.settings.os != "Linux": 
+        if Version(self.version) < "1.4.11.1" or self.settings.os != "Linux": 
             del self.options.nodeset_loader
 
     def configure(self):
