@@ -1,14 +1,15 @@
 from conan import ConanFile
+from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.files import (
     export_conandata_patches,
     get,
     rmdir,
-    rm,
     copy,
     apply_conandata_patches,
 )
 from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.0"
@@ -32,24 +33,17 @@ class CmaesConan(ConanFile):
         "fPIC": True,
     }
 
-
-    @property
-    def _min_cppstd(self):
-        return 11
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
 
+    def validate_build(self):
+        if self.settings.compiler == "msvc":
+            raise ConanInvalidConfiguration("cmaes does not support MSVC")
+
     def validate(self):
-        check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -64,13 +58,16 @@ class CmaesConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["LIBCMAES_BUILD_EXAMPLES"] = False
-        tc.variables["LIBCMAES_BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["LIBCMAES_USE_OPENMP"] = False
-        tc.variables["LIBCMAES_BUILD_PYTHON"] = False
-        tc.variables["LIBCMAES_BUILD_TESTS"] = False
+        tc.cache_variables["LIBCMAES_BUILD_EXAMPLES"] = False
+        tc.cache_variables["LIBCMAES_BUILD_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["LIBCMAES_USE_OPENMP"] = False
+        tc.cache_variables["LIBCMAES_BUILD_PYTHON"] = False
+        tc.cache_variables["LIBCMAES_BUILD_TESTS"] = False
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
+        if Version(self.version) > "0.10.0":  # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
-        deps = CMakeDeps()
+        deps = CMakeDeps(self)
         deps.generate()
 
     def build(self):
@@ -83,7 +80,7 @@ class CmaesConan(ConanFile):
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         copy(
             self,
             "COPYING",
