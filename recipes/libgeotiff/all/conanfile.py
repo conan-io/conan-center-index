@@ -115,7 +115,7 @@ class LibgeotiffConan(ConanFile):
         self.cpp_info.set_property("cmake_module_file_name", "GeoTIFF")
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_file])
         self.cpp_info.set_property("cmake_file_name", "geotiff")
-        self.cpp_info.set_property("cmake_target_name", "geotiff_library")
+        self.cpp_info.set_property("cmake_target_name", "geotiff::geotiff")
 
         self.cpp_info.names["cmake_find_package"] = "GeoTIFF"
         self.cpp_info.names["cmake_find_package_multi"] = "geotiff"
