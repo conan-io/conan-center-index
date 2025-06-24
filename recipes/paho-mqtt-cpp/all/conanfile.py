@@ -29,7 +29,7 @@ class PahoMqttCppConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return 17 if Version(self.version) >= Version("1.5.3") else 11
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -98,6 +98,8 @@ class PahoMqttCppConan(ConanFile):
         # TODO: back to root level once conan v1 support removed
         if self.settings.os == "Windows":
             self.cpp_info.components["paho-mqttpp"].libs = [target]
+            if self.options.shared and Version(self.version) >= Version("1.5.3"):
+                self.cpp_info.components["paho-mqttpp"].defines.append("PAHO_MQTTPP_IMPORTS")
         else:
             self.cpp_info.components["paho-mqttpp"].libs = ["paho-mqttpp3"]
 
