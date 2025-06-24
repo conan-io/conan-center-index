@@ -25,6 +25,7 @@ class TgBotStaterConan(ConanFile):
 
     def requirements(self):
         self.requires("tgbot/1.8")
+        self.requires("boost/1.83.0")
         self.requires("brigand/cpp11-1.3.0", options={"with_boost": False})
         compiler = self.settings.compiler
         if compiler == "gcc" and float(compiler.version.value) >= 13 or \
