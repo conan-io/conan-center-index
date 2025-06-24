@@ -1,0 +1,52 @@
+name: Export and upload packages
+env:
+  CLICOLOR_FORCE: 1
+  FORCE_COLOR: 1
+  CMAKE_COLOR_DIAGNOSTICS: ON
+  CONAN_REMOTE: ${{ github.ref_name == 'main' && 'entos-iui-prod' || 'entos-iui-dev' }}
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  export-recipes:
+    runs-on: comcast-ubuntu-latest
+    container: ghcr.io/entos-xe/desktop-linux-gcc:sha-4354cf4
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Get changed files
+        id: changed-files
+        uses: comcast-github-actions-community/tj-actions_changed-files@v46.0.1
+
+      - name: Setup conan and config
+        env:
+          CONAN_PASSWORD: ${{ secrets.CONAN_ACCESS_KEY }}
+          CONAN_LOGIN_USERNAME: svc-entos-iui-prod
+        uses: entos-xe/conan-setup-action@main
+        with:
+          config: "https://${{ secrets.XE_ORG_TOKEN }}@github.com/entos-xe/conan-config.git"
+          remotes: ${{ env.CONAN_REMOTE }}
+
+      - name: Export packages to the local cache
+        run: python entos-packages.py --export
+
+      - name: Build updated packages
+        if: ${{ github.event_name == 'pull_request' && github.ref_name != 'upstream-update' }}
+        run: |
+          python entos-packages.py --build="${{ steps.changed-files.outputs.all_changed_files }}"
+
+      - name: Upload the recipes in the cache to the remote
+        run: |
+          conan upload '*' \
+            --remote ${{ env.CONAN_REMOTE }} \
+            --only-recipe \
+            --confirm
