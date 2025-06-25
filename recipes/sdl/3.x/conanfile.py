@@ -1,7 +1,7 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.files import get, replace_in_file, copy, rmdir
+from conan.tools.files import get, copy, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
