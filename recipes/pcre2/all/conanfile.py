@@ -71,6 +71,9 @@ class PCRE2Conan(ConanFile):
         if self.options.get_safe("with_bzip2"):
             self.requires("bzip2/1.0.8")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
+
     def validate(self):
         if not self.options.build_pcre2_8 and not self.options.build_pcre2_16 and not self.options.build_pcre2_32:
             raise ConanInvalidConfiguration("At least one of build_pcre2_8, build_pcre2_16 or build_pcre2_32 must be enabled")
