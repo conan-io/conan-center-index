@@ -50,6 +50,11 @@ class LibultrahdrConan(ConanFile):
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.3")
 
+    def build_requirements(self):
+        # The project requires cmake 3.15 but the use of CMAKE_REQUIRE_FIND_PACKAGE_JPEG below
+        # requires 3.22.
+        self.tool_requires("cmake/[>=3.22 <5]")
+
     def validate(self):
         check_min_cppstd(self, 17)
 
@@ -63,18 +68,13 @@ class LibultrahdrConan(ConanFile):
         # Force-disable fallback to internal dependency builder if no deps found
         tc.cache_variables["UHDR_BUILD_DEPS"] = False
         tc.cache_variables['UHDR_BUILD_EXAMPLES'] = False
-        if self.options.with_jpeg == "libjpeg":
-            tc.cache_variables["CONAN_USE_JPEG"] = True
-        elif self.options.with_jpeg == "libjpeg-turbo":
-            tc.cache_variables["CONAN_USE_JPEGTURBO"] = True
-        elif self.options.with_jpeg == "mozjpeg":
-            tc.cache_variables["CONAN_USE_MOZJPEG"] = True
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_JPEG"] = True
 
         tc.generate()
         deps = CMakeDeps(self)
-        #if self.options.with_jpeg:
-        #    deps.set_property(self.options.with_jpeg, "cmake_file_name", "JPEG")
-        #    deps.set_property(self.options.with_jpeg, "cmake_target_name", "JPEG::JPEG")
+        if self.options.with_jpeg:
+            deps.set_property(self.options.with_jpeg, "cmake_file_name", "JPEG")
+            deps.set_property(self.options.with_jpeg, "cmake_target_name", "JPEG::JPEG")
         deps.generate()
 
     def build(self):
