@@ -1,41 +1,7 @@
---- a/contrib/curl/lib/select.h
-+++ b/contrib/curl/lib/select.h
-@@ -36,7 +36,8 @@
-
- #if !defined(HAVE_STRUCT_POLLFD) && \
-     !defined(HAVE_SYS_POLL_H) && \
--    !defined(HAVE_POLL_H)
-+    !defined(HAVE_POLL_H)  && \
-+    !defined(POLLIN)
-
- #define POLLIN      0x01
- #define POLLPRI     0x02
---- src/host/os_isdir.c
-+++ src/host/os_isdir.c
-@@ -9,7 +9,7 @@
- #include "premake.h"
- 
- #ifdef _WIN32
--#include <Windows.h>
-+#include <windows.h>
- #endif
- 
- int os_isdir(lua_State* L)
---- src/host/os_uuid.c
-+++ src/host/os_uuid.c
-@@ -7,7 +7,7 @@
- #include "premake.h"
- 
- #if PLATFORM_WINDOWS
--#include <Objbase.h>
-+#include <objbase.h>
- #endif
- 
- 
---- build/gmake2.windows/Premake5.make
-+++ build/gmake2.windows/Premake5.make
-@@ -38,7 +38,7 @@
- DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG
+--- a/build/gmake.windows/Premake5.make
++++ b/build/gmake.windows/Premake5.make
+@@ -47,7 +47,7 @@ OBJDIR = obj/x86/Release/Premake5
+ DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -DNDEBUG
  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -flto -O3 -Wall -Wextra
  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -flto -O3 -Wall -Wextra -fno-stack-protector
 -LIBS += bin/x86/Release/lua-lib.lib bin/x86/Release/zip-lib.lib bin/x86/Release/zlib-lib.lib bin/x86/Release/curl-lib.lib -lole32 -lws2_32 -ladvapi32 -lversion
@@ -43,8 +9,8 @@
  LDDEPS += bin/x86/Release/lua-lib.lib bin/x86/Release/zip-lib.lib bin/x86/Release/zlib-lib.lib bin/x86/Release/curl-lib.lib
  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32 -flto -s
  
-@@ -49,7 +49,7 @@
- DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG
+@@ -58,7 +58,7 @@ OBJDIR = obj/x64/Release/Premake5
+ DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -DNDEBUG
  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -flto -O3 -Wall -Wextra
  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -flto -O3 -Wall -Wextra -fno-stack-protector
 -LIBS += bin/x64/Release/lua-lib.lib bin/x64/Release/zip-lib.lib bin/x64/Release/zlib-lib.lib bin/x64/Release/curl-lib.lib -lole32 -lws2_32 -ladvapi32 -lversion
@@ -52,8 +18,8 @@
  LDDEPS += bin/x64/Release/lua-lib.lib bin/x64/Release/zip-lib.lib bin/x64/Release/zlib-lib.lib bin/x64/Release/curl-lib.lib
  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -flto -s
  
-@@ -60,7 +60,7 @@
- DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG
+@@ -69,7 +69,7 @@ OBJDIR = obj/x86/Debug/Premake5
+ DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -D_DEBUG
  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -g -Wall -Wextra
  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -g -Wall -Wextra
 -LIBS += bin/x86/Debug/lua-lib.lib bin/x86/Debug/zip-lib.lib bin/x86/Debug/zlib-lib.lib bin/x86/Debug/curl-lib.lib -lole32 -lws2_32 -ladvapi32 -lversion
@@ -61,8 +27,8 @@
  LDDEPS += bin/x86/Debug/lua-lib.lib bin/x86/Debug/zip-lib.lib bin/x86/Debug/zlib-lib.lib bin/x86/Debug/curl-lib.lib
  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32
  
-@@ -71,7 +71,7 @@
- DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG
+@@ -80,7 +80,7 @@ OBJDIR = obj/x64/Debug/Premake5
+ DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -D_DEBUG
  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g -Wall -Wextra
  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -Wall -Wextra
 -LIBS += bin/x64/Debug/lua-lib.lib bin/x64/Debug/zip-lib.lib bin/x64/Debug/zlib-lib.lib bin/x64/Debug/curl-lib.lib -lole32 -lws2_32 -ladvapi32 -lversion
