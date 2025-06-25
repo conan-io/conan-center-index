@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.layout import basic_layout
 from conan.tools.files import copy, get
-from conan.error import ConanInvalidConfiguration
 import os
 
 
