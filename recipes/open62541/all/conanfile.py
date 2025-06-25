@@ -155,8 +155,7 @@ class Open62541Conan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         
-        if Version(self.version) >= "1.3.1":
-            del self.options.embedded_profile
+        del self.options.embedded_profile
 
         # NodesetLoader has only rudimentary Windows support --> disabling for now. This might change in the future.
         if Version(self.version) < "1.4.11.1" or self.settings.os != "Linux": 
@@ -357,8 +356,7 @@ class Open62541Conan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if Version(self.version) >= "1.3.1" and Version(self.version) <="1.4.7":
-            rm(self, "FindPython3.cmake", os.path.join(self.source_folder, "tools", "cmake"))
+        rm(self, "FindPython3.cmake", os.path.join(self.source_folder, "tools", "cmake"))
 
     def build(self):
         cmake = CMake(self)
