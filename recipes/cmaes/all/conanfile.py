@@ -92,3 +92,4 @@ class CmaesConan(ConanFile):
         self.cpp_info.libs = ["cmaes"]
         self.cpp_info.set_property("cmake_target_name", "libcmaes::cmaes")
         self.cpp_info.set_property("cmake_file_name", "libcmaes")
+        self.cpp_info.set_property("pkg_config_name", "libcmaes")
