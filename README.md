@@ -1,3 +1,42 @@
+Conan Center Index (Entos)
+==========================
+
+This is the Sky Entos-XE fork of the [conan center index]().
+It is [recommended best practice](https://docs.conan.io/2/devops/conancenter/hosting_binaries.html) by Conan that
+organizations fork their own copies of CCI to customize package versions and provide updates more
+quickly than can be guaranteed by the PR review process in the public upstream repository
+(which can often take many weeks).
+
+Where possible, package updates should still be commited to the upstream repository as a PR.
+
+Not all packages available in CCI will be provided by the
+[Comcast Artifactory](https://partners.artifactory.comcast.com) instance.
+
+### Updating or providing a new package:
+
+1. Create a PR to update the repository.
+2. Check first that the package and or version is not available from the upstream repository.
+   If it is, pull the changes from upstream.
+3. If necessary, add or update the required package
+4. Add the package and **and any dependencies** to `entos-packages.yml`
+
+When the PR is merged to `master`, the package recipe will be available from Comcast Artifactory
+
+### Updating from upstream
+
+To merge updates from the upstream repository, create a new branch called `upstream-update`.
+This branch name will be used to disable CI Workflow checks which normally only allow one
+recipe to be updated at a time.
+
+### CI Notes
+
+* Only pushes to the `master` branch upload packages to the `conan-entos-iui-prod` repository. Other branches
+  push to the `conan-entos-iui-dev` repository.
+
+* Only recipes (the python files) are uploaded. Binary packages should be built by the consuming application or library.
+
+---
+
 <p align="center">
     <img src="assets/JFrogConanCenter.png" width="600"/>
 </p>

@@ -1,0 +1,154 @@
+autoconf:
+  versions:
+    - '2.71'
+automake:
+  versions:
+    - '1.16.5'
+b2:
+  versions:
+    - '5.3.2'
+bison:
+  versions:
+    - '3.8.2'
+boost:
+  versions:
+    - '1.84.0'
+brotli:
+  versions:
+    - '1.1.0'
+bzip2:
+  versions:
+    - '1.0.8'
+certify:
+  versions:
+    - 'cci.20201114'
+cpp-httplib:
+  versions:
+    - '0.15.3'
+double-conversion:
+  versions:
+    - '3.3.0'
+expat:
+  versions:
+    - '2.7.1'
+flex:
+  versions:
+    - '2.6.4'
+fontconfig:
+  versions:
+    - '2.15.0'
+freetype:
+  versions:
+    - '2.13.2'
+frozen:
+  versions:
+    - '1.2.0'
+glslang:
+  versions:
+    - '1.3.268.0'
+gnu-config:
+  versions:
+    - 'cci.20210814'
+gperf:
+  versions:
+    - '3.1'
+gtest:
+  versions:
+    - '1.14.0'
+icu:
+  versions:
+    - '74.2'
+libffi:
+  versions:
+    - '3.4.4'
+libiconv:
+  versions:
+    - '1.17'
+libjpeg-turbo:
+  versions:
+    - '3.0.2'
+libpng:
+  versions:
+    - '1.6.44'
+libtool:
+  versions:
+    - '2.4.7'
+libwebp:
+  versions:
+    - '1.4.0'
+libxml2:
+  versions:
+    - '2.13.4'
+m4:
+  versions:
+    - '1.4.19'
+magic_enum:
+  versions:
+    - '0.9.7'
+md4c:
+  versions:
+    - '0.5.2'
+meson:
+  versions:
+    - '1.2.2'
+    - '1.3.0'
+    - '1.3.2'
+    - '1.4.0'
+nasm:
+  versions:
+    - '2.15.05'
+ninja:
+  versions:
+    - '1.12.1'
+nlohmann_json:
+  versions:
+    - '3.11.3'
+opengl:
+  versions:
+    - 'system'
+paho-mqtt-c:
+  versions:
+    - '1.3.13'
+paho-mqtt-cpp:
+  versions:
+    - '1.4.1'
+pcre2:
+  versions:
+    - '10.44'
+pkgconf:
+  versions:
+    - '2.1.0'
+    - '2.2.0'
+sqlite3:
+  versions:
+    - '3.45.3'
+tl-expected:
+  versions:
+    - '1.1.0'
+wayland:
+  versions:
+    - '1.22.0'
+wayland-protocols:
+  versions:
+    - '1.33'
+xkbcommon:
+  versions:
+    - '1.5.0'
+xkeyboard-config:
+  versions:
+    - 'system'
+xmlsec:
+  versions:
+    - '1.3.4'
+xorg:
+  versions:
+    - 'system'
+zlib:
+  versions:
+    - '1.3.1'
+zstd:
+  versions:
+    - '1.5.7'
+zxing-cpp:
+  versions:
+    - '2.2.1'
