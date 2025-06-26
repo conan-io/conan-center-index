@@ -157,7 +157,7 @@ class FollyConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         # Honor Boost_ROOT set by boost recipe
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0074"] = "NEW"
-        if Version(self.version) < "2025.04.07.00": # pylint: disable=conan-unreachable-upper-version
+        if Version(self.version) < "2025.04.07.00":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
 
         # 2019.10.21.00 -> either MSVC_ flags or CXX_STD
