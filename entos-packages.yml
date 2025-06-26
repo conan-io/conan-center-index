@@ -125,6 +125,12 @@ sqlite3:
 tl-expected:
   versions:
     - '1.1.0'
+vulkan-headers:
+  versions:
+    - '1.4.313.0'
+vulkan-hpp:
+  versions:
+    - '1.4.313'
 wayland:
   versions:
     - '1.22.0'

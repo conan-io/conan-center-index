@@ -1,0 +1,4 @@
+sources:
+  "1.4.313":
+    url: "https://github.com/KhronosGroup/Vulkan-Hpp/archive/refs/tags/v1.4.313.tar.gz"
+    sha256: "66777b4397a46e6d1fe8beb79a127d6101277be56f7d2aa183df9f3d0edbc3cc"
