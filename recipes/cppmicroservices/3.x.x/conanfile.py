@@ -62,5 +62,6 @@ class CppMicroServicesConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-    # def package_info(self):
-    #     self.cpp_info.libs = ["cppmicroservices"]
+    def package_info(self):
+        self.cpp_info.libs = ["CppMicroServices", "DeclarativeServices", "ConfigurationAdmin"]
+        self.cpp_info.includedirs = ['include/cppmicroservices3']

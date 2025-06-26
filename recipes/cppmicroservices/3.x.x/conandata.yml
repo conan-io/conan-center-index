@@ -1,9 +1,8 @@
 sources:
   "3.8.7":
-    url: https://github.com/CppMicroServices/CppMicroServices.git
+    url: "https://github.com/CppMicroServices/CppMicroServices.git"
     sha1: "0f3e202a527c8959d15ec069c25e6ccbc2333583"
-    tag: "v3.8.7"
   "3.8.6":
-    url: https://github.com/CppMicroServices/CppMicroServices.git
+    url: "https://github.com/CppMicroServices/CppMicroServices.git"
     sha1: "15e29d490de5c61b55a84f03d78dfbfdfe75d5ef"
-    tag: "v3.8.6"
+
