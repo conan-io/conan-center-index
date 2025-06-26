@@ -3,7 +3,7 @@ env:
   CLICOLOR_FORCE: 1
   FORCE_COLOR: 1
   CMAKE_COLOR_DIAGNOSTICS: ON
-  CONAN_REMOTE: ${{ github.ref_name == 'main' && 'entos-iui-prod' || 'entos-iui-dev' }}
+  CONAN_REMOTE: ${{ github.ref_name == 'master' && 'entos-iui-prod' || 'entos-iui-dev' }}
 
 on:
   workflow_dispatch:
@@ -23,10 +23,6 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Get changed files
-        id: changed-files
-        uses: comcast-github-actions-community/tj-actions_changed-files@v46.0.1
-
       - name: Setup conan and config
         env:
           CONAN_PASSWORD: ${{ secrets.CONAN_ACCESS_KEY }}
@@ -39,8 +35,13 @@ jobs:
       - name: Export packages to the local cache
         run: python entos-packages.py --export
 
+      - name: Get changed files
+        if: ${{ github.event_name == 'pull_request' && github.head_ref != 'upstream-update' }}
+        id: changed-files
+        uses: comcast-github-actions-community/tj-actions_changed-files@v46.0.1
+
       - name: Build updated packages
-        if: ${{ github.event_name == 'pull_request' && github.ref_name != 'upstream-update' }}
+        if: ${{ github.event_name == 'pull_request' && github.head_ref != 'upstream-update' }}
         run: |
           python entos-packages.py --build="${{ steps.changed-files.outputs.all_changed_files }}"
 
