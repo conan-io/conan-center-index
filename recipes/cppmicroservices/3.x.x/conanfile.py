@@ -7,8 +7,11 @@ import os
 
 class CppMicroServicesConan(ConanFile):
     name = "cppmicroservices"
+    description = "CppMicroServices is a C++ implementation of the OSGi spec"
     package_type = "library"
     url = "https://github.com/CppMicroServices/CppMicroServices.git"
+    homepage = "https://cppmicroservices.org"
+    license = "Apache-2.0"
     no_copy_source = True
     settings = "os", "compiler", "build_type", "arch"
     
