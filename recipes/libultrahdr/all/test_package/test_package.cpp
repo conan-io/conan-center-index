@@ -3,6 +3,6 @@
 
 int main()
 {
-    std::cout << "libUltraHDR library version: " << UHDR_LIB_VERSION_STR << "\n";
+    std::cout << "Creating new decoder " << uhdr_create_decoder() << "\n";
     return 0;
 }
