@@ -127,8 +127,7 @@ class SentryNativeConan(ConanFile):
             if self.options.with_breakpad == "google":
                 self.requires("breakpad/cci.20210521")
         if self.options.get_safe("qt"):
-            self.requires("qt/5.15.11")
-            self.requires("openssl/[>=1.1 <4]")
+            self.requires("qt/[>=5.15.16 <7]")
 
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
