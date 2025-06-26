@@ -8,9 +8,10 @@ import os
 class CppMicroServicesConan(ConanFile):
     name = "cppmicroservices"
     package_type = "library"
-
-    # Binary configuration
+    url = "https://github.com/CppMicroServices/CppMicroServices.git"
+    no_copy_source = True
     settings = "os", "compiler", "build_type", "arch"
+    
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -29,10 +30,9 @@ class CppMicroServicesConan(ConanFile):
         git = Git(self)
         target = os.path.join(self.source_folder, "target")
         git.folder = target
-        git.clone(url=self.conan_data["sources"][self.version]["url"], args=["--recurse-submodules"], target=target)
-        git.checkout(commit=self.conan_data["sources"][self.version]["sha1"])
-#        replace_in_file(self, os.path.join(self.target, "third_party", "boost", "nowide", "include", "nowide", "detail", "convert.hpp"),
-#                        "::template ", "::")
+        git.clone(url=self.url, args=["--recurse-submodules"], target=target)
+        git.checkout(commit=(self.conan_data["sources"][self.version]["sha1"]
+                             or self.conan_data["sources"][self.version]["branch"]))
 
     def config_options(self):
         if self.settings.os == "Windows":
