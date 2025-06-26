@@ -5,7 +5,7 @@ find_package(IfcOpenShell CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE 
-                IfcParse 
-                IfcGeom 
-                geometry_serializer
+                IfcParse
+                # IfcGeom
+                # geometry_serializer
                 )

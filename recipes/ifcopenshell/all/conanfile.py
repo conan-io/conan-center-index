@@ -5,7 +5,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.apple import is_apple_os
 
 required_conan_version = ">=2.1"
@@ -35,12 +35,12 @@ class IfcopenshellConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_ifcgeom": True,
-        "build_convert": True,
-        "ifcxml_support": True,
-        "use_mmap": True,
-        "with_cgal": True,
-        "with_hdf5": True,
+        "build_ifcgeom": False,
+        "build_convert": False,
+        "ifcxml_support": False,
+        "use_mmap": False,
+        "with_cgal": False,
+        "with_hdf5": False,
     }   
     # Limit the default set of schemas to the basic ones and the latest to limit the size of the build.
     default_options.update({f"schema_{schema}": schema in ["4", "4x3_add2"] for schema in IFC_SCHEMAS})
@@ -58,8 +58,6 @@ class IfcopenshellConan(ConanFile):
             self.options.rm_safe("fPIC")
         if not self.options.build_ifcgeom:
             del self.options.with_cgal
-        if not self.options.build_convert:
-            del self.options.with_hdf5
     
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -70,7 +68,7 @@ class IfcopenshellConan(ConanFile):
             raise ConanInvalidConfiguration("build_convert requires build_ifcgeom to be enabled")
         if is_apple_os(self) or self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Disable temporary apple platform")
-        if self.options.shared:
+        if not self.options.shared:
             raise ConanInvalidConfiguration("Disable temporary shared build")
 
     def requirements(self):
@@ -82,13 +80,16 @@ class IfcopenshellConan(ConanFile):
             self.requires("opencascade/[^7.5]", transitive_headers=True, transitive_libs=True)
             # ifcgeom/taxonomy.h
             self.requires("eigen/3.4.0", transitive_headers=True)
-            if self.options.with_cgal:
+            if self.options.get_safe("with_cgal"):
                 # Used in ifcgeom/kernels/cgal public headers
                 self.requires("cgal/[>=5.6]", transitive_headers=True, transitive_libs=True)
                 self.requires("gmp/[^6.3.0]")
                 self.requires("mpfr/[^4.2.1]")
-        if self.options.build_ifcgeom or self.options.ifcxml_support:
+        if self.options.get_safe("with_cgal") or self.options.ifcxml_support:
             self.requires("libxml2/[^2.12.5]")
+        if self.options.build_convert:
+            self.requires("openusd/25.05.01")
+            self.requires("proj/9.6.0")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.21 <5]")
@@ -107,6 +108,10 @@ class IfcopenshellConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_IFCGEOM"] = self.options.build_ifcgeom
         tc.variables["BUILD_CONVERT"] = self.options.build_convert
+        tc.variables["WITH_RELATIONSHIP_VALIDATION"] = self.options.build_convert
+        tc.variables["USD_SUPPORT"] = self.options.build_convert
+        tc.variables["WITH_PROJ"] = self.options.build_convert
+
         tc.variables["BUILD_GEOMSERVER"] = False
         tc.variables["BUILD_IFCPYTHON"] = False
         tc.variables["BUILD_EXAMPLES"] = False
@@ -114,8 +119,8 @@ class IfcopenshellConan(ConanFile):
         tc.variables["USE_MMAP"] = self.options.use_mmap
         tc.variables["SCHEMA_VERSIONS"] = ";".join(self._selected_ifc_schemas)
         tc.variables["WITH_OPENCASCADE"] = self.options.build_ifcgeom
-        tc.variables["WITH_CGAL"] = self.options.get_safe("with_cgal")
-        tc.variables["HDF5_SUPPORT"] = self.options.get_safe("with_hdf5")
+        tc.variables["WITH_CGAL"] = self.options.get_safe("with_cgal", False)
+        tc.variables["HDF5_SUPPORT"] = self.options.get_safe("with_hdf5", False)
         tc.variables["COLLADA_SUPPORT"] = False
         if self.options.build_ifcgeom:
             tc.variables["EIGEN_DIR"] = includedir("eigen") + "/eigen3/"
@@ -182,7 +187,7 @@ class IfcopenshellConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 ifcgeom.system_libs.append("pthread")
 
-            if self.options.with_cgal:
+            if self.options.get_safe("with_cgal"):
                 _add_component("geometry_kernel_cgal", requires=["cgal::cgal", "mpfr::mpfr", "gmp::gmp", "eigen::eigen",])
                 ifcgeom.requires.append("geometry_kernel_cgal")
                 simple = _add_component("geometry_kernel_cgal_simple", requires=["cgal::cgal", "gmp::gmp", "eigen::eigen",])

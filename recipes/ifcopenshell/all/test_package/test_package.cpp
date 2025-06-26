@@ -42,13 +42,13 @@
 #include <iostream>
 #include <fstream>
 
-#include <TColgp_Array2OfPnt.hxx>
-#include <TColStd_Array1OfReal.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-#include <Geom_BSplineSurface.hxx>
-#include <BRepBuilderAPI_MakeFace.hxx>
-#include <Standard_Version.hxx>
-#include <Precision.hxx>
+// #include <TColgp_Array2OfPnt.hxx>
+// #include <TColStd_Array1OfReal.hxx>
+// #include <TColStd_Array1OfInteger.hxx>
+// #include <Geom_BSplineSurface.hxx>
+// #include <BRepBuilderAPI_MakeFace.hxx>
+// #include <Standard_Version.hxx>
+// #include <Precision.hxx>
 
 
 #include <ifcparse/macros.h>
@@ -85,32 +85,32 @@
 
 #include <ifcparse/IfcBaseClass.h>
 #include <ifcparse/IfcHierarchyHelper.h>
-#include <ifcgeom/Serialization/Serialization.h>
+// #include <ifcgeom/Serialization/Serialization.h>
 
 using namespace std::string_literals;
 typedef IfcParse::IfcGlobalId guid;
 boost::none_t const null = boost::none;
 
-// Create a simple NURBS surface for IfcSite to test Open CASCADE
-void createGroundShape(TopoDS_Shape& shape) {
-    TColgp_Array2OfPnt cv(0, 1, 0, 1);
-    cv.SetValue(0, 0, gp_Pnt(-1000, -1000, 0));
-    cv.SetValue(0, 1, gp_Pnt(-1000, 1000, 0));
-    cv.SetValue(1, 0, gp_Pnt(1000, -1000, 0));
-    cv.SetValue(1, 1, gp_Pnt(1000, 1000, 0));
-    TColStd_Array1OfReal knots(0, 1);
-    knots(0) = 0;
-    knots(1) = 1;
-    TColStd_Array1OfInteger mult(0, 1);
-    mult(0) = 2;
-    mult(1) = 2;
-    Handle(Geom_BSplineSurface) surf = new Geom_BSplineSurface(cv, knots, knots, mult, mult, 1, 1);
-#if OCC_VERSION_HEX < 0x60502
-    shape = BRepBuilderAPI_MakeFace(surf);
-#else
-    shape = BRepBuilderAPI_MakeFace(surf, Precision::Confusion());
-#endif
-}
+// // Create a simple NURBS surface for IfcSite to test Open CASCADE
+// void createGroundShape(TopoDS_Shape& shape) {
+//     TColgp_Array2OfPnt cv(0, 1, 0, 1);
+//     cv.SetValue(0, 0, gp_Pnt(-1000, -1000, 0));
+//     cv.SetValue(0, 1, gp_Pnt(-1000, 1000, 0));
+//     cv.SetValue(1, 0, gp_Pnt(1000, -1000, 0));
+//     cv.SetValue(1, 1, gp_Pnt(1000, 1000, 0));
+//     TColStd_Array1OfReal knots(0, 1);
+//     knots(0) = 0;
+//     knots(1) = 1;
+//     TColStd_Array1OfInteger mult(0, 1);
+//     mult(0) = 2;
+//     mult(1) = 2;
+//     Handle(Geom_BSplineSurface) surf = new Geom_BSplineSurface(cv, knots, knots, mult, mult, 1, 1);
+// #if OCC_VERSION_HEX < 0x60502
+//     shape = BRepBuilderAPI_MakeFace(surf);
+// #else
+//     shape = BRepBuilderAPI_MakeFace(surf, Precision::Confusion());
+// #endif
+// }
 
 int main() {
     // Initialize IFC file
@@ -137,11 +137,11 @@ int main() {
     wall->setObjectPlacement(file.addLocalPlacement());
 
     // Create a site with a simple NURBS surface to test Open CASCADE
-    TopoDS_Shape shape;
-    createGroundShape(shape);
-    IfcSchema::IfcProductDefinitionShape* ground_representation = IfcGeom::tesselate(STRINGIFY(IfcSchema), shape, 100.)->as<IfcSchema::IfcProductDefinitionShape>();
-    file.getSingle<IfcSchema::IfcSite>()->setRepresentation(ground_representation);
-    file.addEntity(ground_representation);
+    // TopoDS_Shape shape;
+    // createGroundShape(shape);
+    // IfcSchema::IfcProductDefinitionShape* ground_representation = IfcGeom::tesselate(STRINGIFY(IfcSchema), shape, 100.)->as<IfcSchema::IfcProductDefinitionShape>();
+    // file.getSingle<IfcSchema::IfcSite>()->setRepresentation(ground_representation);
+    // file.addEntity(ground_representation);
 
     // Write IFC file
     std::ofstream f("Test.ifc");
