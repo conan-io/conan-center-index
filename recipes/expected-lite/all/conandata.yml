@@ -1,4 +1,7 @@
 sources:
+  "0.9.0":
+    url: "https://github.com/martinmoene/expected-lite/archive/v0.9.0.tar.gz"
+    sha256: "e1b3ac812295ef8512c015d8271204105a71957323f8ab4e75f6856d71b8868d"
   "0.8.0":
     url: "https://github.com/martinmoene/expected-lite/archive/v0.8.0.tar.gz"
     sha256: "27649f30bd9d4fe7b193ab3eb6f78c64d0f585c24c085f340b4722b3d0b5e701"
