@@ -1,51 +1,49 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
 
-required_conan_version = ">=1.43.0"
+import os
+
+required_conan_version = ">=2.1"
+
 
 class SbgEComConan(ConanFile):
     name = "sbgecom"
-    description = "C library used to communicate with SBG Systems IMU, AHRS and INS"
     license = "MIT"
-    topics = ("sbg", "imu", "ahrs", "ins")
-    homepage = "https://github.com/SBG-Systems/sbgECom"
+    author = "Alexandre Petitjean <alexandre.petitjean@sbg-systems.com>"
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "https://github.com/SBG-Systems/sbgECom"
+    description = "C library used to communicate with SBG Systems IMU, AHRS and INS"
+    topics = ("sbg", "imu", "ahrs", "ins")
+    
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def layout(self):
+        cmake_layout(self)
+    
+    def validate(self):
+        check_min_cppstd(self, 14)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        deps = CMakeDeps(self)
+        deps.generate()
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        # TODO: update source_folder until main CMakeLists goes back to root dir.
-        self._cmake.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder + "/cmake")
-        return self._cmake
-
-    # TODO: Remove once a proper cmake install command is done.
     def package(self):
-        self.copy("*.h", dst="include", src=self._source_subfolder + "/common")
-        self.copy("*.h", dst="include", src=self._source_subfolder + "/src")
-        self.copy("*.a", dst="lib", src=self._source_subfolder, keep_path=False)
-        self.copy("*.lib", dst="lib", src=self._source_subfolder, keep_path=False)
+        cmake = CMake(self)
+        cmake.install()
+        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "sbgECom")
-        self.cpp_info.set_property("cmake_target_name", "sbgECom")
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["sbgECom"]
