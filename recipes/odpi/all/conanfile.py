@@ -1,12 +1,12 @@
 from conan import ConanFile
-from conan.tools.files import copy, chdir, get, rm, rmdir, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import copy, chdir, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.apple import fix_apple_shared_install_name
 import os
 
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.4.0"
 
 class ODPIConan(ConanFile):
     name = "odpi"
@@ -19,9 +19,6 @@ class ODPIConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     languages = ["C"]
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -33,11 +30,13 @@ class ODPIConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
         if self.settings.os == "Linux":
+            # INFO: Upstream CFLAGS and LDFLAGS are overridden by AutotoolsToolchain
+            # INFO: AutotoolsToolchain does not pass -fPIC due package type shared-library
+            # INFO: AutotoolsToolchain does not pass -shared by default
             tc.extra_cflags = ["-fPIC"]
             tc.extra_ldflags = ["-shared"]
         tc.generate()
@@ -45,6 +44,8 @@ class ODPIConan(ConanFile):
     def build(self):
         with chdir(self, self.source_folder):
             if self.settings.os == "Windows":
+                # INFO: Upstream indicates to use separate build on Windows
+                # https://github.com/oracle/odpi/blob/v5.6.0/samples/README.md?plain=1#L2
                 self.run(f"nmake -f Makefile.win32")
             else:
                 autotools = Autotools(self)
@@ -53,6 +54,7 @@ class ODPIConan(ConanFile):
     def package(self):
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
         if self.settings.os == "Windows":
+            # INFO: Makefile.win32 does not have an install target
             copy(self, "*.lib", os.path.join(self.source_folder, "lib"), os.path.join(self.package_folder, "lib"))
             copy(self, "*.dll", os.path.join(self.source_folder, "lib"), os.path.join(self.package_folder, "bin"))
             copy(self, "*.h", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
