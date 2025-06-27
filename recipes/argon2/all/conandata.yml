@@ -5,3 +5,5 @@ sources:
 patches:
   "20190702":
     - patch_file: "patches/0001-makefile-no-march.patch"
+    - patch_file: "patches/0002-use-env-AR-if-set.patch"
+    - patch_file: "patches/0003-android.patch"
