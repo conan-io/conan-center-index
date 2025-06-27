@@ -53,7 +53,7 @@ class SentryNativeConan(ConanFile):
     def _min_cppstd(self):
         # Sentry-native broke support of C++17 in 0.7.8 and fixed it in 0.7.19 by forking mini_chromium and using C++17 code instead of bit_cast
         # https://github.com/getsentry/mini_chromium/
-        if Version(self.version) >= "0.7.8" and Version(self.version) < "0.7.19" and self.options.get_safe("with_crashpad") == "sentry":
+        if  self.options.get_safe("with_crashpad") == "sentry" and Version(self.version) >= "0.7.8" and Version(self.version) < "0.7.19":
             return "20"
         else:
             return "17"
