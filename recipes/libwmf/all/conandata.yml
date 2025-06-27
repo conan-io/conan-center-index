@@ -1,0 +1,5 @@
+sources:
+  "0.2.13":
+    url: "https://github.com/caolanm/libwmf/archive/refs/tags/v0.2.13.tar.gz"
+    sha256: "18ba69febd2f515d98a2352de284a8051896062ac9728d2ead07bc39ea75a068"
+patches:
