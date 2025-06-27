@@ -1,4 +1,13 @@
 sources:
+  "4.0.10":
+    url: "https://github.com/zlib-ng/minizip-ng/archive/4.0.10.tar.gz"
+    sha256: "c362e35ee973fa7be58cc5e38a4a6c23cc8f7e652555daf4f115a9eb2d3a6be7"
+  "4.0.9":
+    url: "https://github.com/zlib-ng/minizip-ng/archive/4.0.9.tar.gz"
+    sha256: "353a9e1c1170c069417c9633cc94ced74f826319d6d0b46d442c2cd7b00161c1"
+  "4.0.8":
+    url: "https://github.com/zlib-ng/minizip-ng/archive/4.0.8.tar.gz"
+    sha256: "c3e9ceab2bec26cb72eba1cf46d0e2c7cad5d2fe3adf5df77e17d6bbfea4ec8f"
   "4.0.7":
     url: "https://github.com/zlib-ng/minizip-ng/archive/4.0.7.tar.gz"
     sha256: "a87f1f734f97095fe1ef0018217c149d53d0f78438bcb77af38adc21dff2dfbc"
