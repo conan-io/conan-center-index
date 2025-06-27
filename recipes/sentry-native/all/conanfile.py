@@ -60,16 +60,6 @@ class SentryNativeConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
-        if Version(self.version) >= "0.9.1" and self.options.get_safe("with_crashpad") == "sentry":
-            # Sentry-native 0.9.1 does not require C++20; it has its own version of Chromium, which is C++17
-            # https://github.com/getsentry/mini_chromium/blob/fd75723d16e99fb1e6d1487c4f278a5ce618fdf0/base/numerics/byte_conversions.h
-            return {
-                "Visual Studio": "16",
-                "msvc": "192",
-                "gcc": "11",
-                "clang": "14",
-                "apple-clang": "14", # required 14 for alignas support
-            }
         if Version(self.version) >= "0.7.8" and self.options.get_safe("with_crashpad") == "sentry":
             # Sentry-native 0.7.8 requires C++20: Concepts and bit_cast
             # https://github.com/chromium/mini_chromium/blob/e49947ad445c4ed4bc1bb4ed60bbe0fe17efe6ec/base/numerics/byte_conversions.h#L88
@@ -78,7 +68,7 @@ class SentryNativeConan(ConanFile):
                 "msvc": "192",
                 "gcc": "11",
                 "clang": "14",
-                "apple-clang": "14",
+                "apple-clang": "14", #required 14 for alignas support
             }
         minimum_gcc_version = "5"
         if self.options.get_safe("backend") == "breakpad" or self.options.get_safe("backend") == "crashpad":
