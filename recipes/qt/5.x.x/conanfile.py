@@ -7,7 +7,7 @@ from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, copy, get, load, replace_in_file, rm, rmdir, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, is_msvc_static_runtime, VCVars
-from conan.tools.scm import Version
+from conan.tools.scm import Version, Git
 import configparser
 import glob
 from io import StringIO
@@ -128,7 +128,6 @@ class QtConan(ConanFile):
     #    these are only provided for convenience, set to False by default
     default_options.update({f"{status}_modules": False for status in _module_statuses})
 
-    no_copy_source = True
     short_paths = True
 
     @property
@@ -143,15 +142,18 @@ class QtConan(ConanFile):
 
     def validate_build(self):
         if self.options.qtwebengine:
-            # Check if a valid python2 is available in PATH or it will failflex
-            # Start by checking if python2 can be found
-            python_exe = shutil.which("python2")
+            # Check if a valid python is available in PATH or it will failflex
+            # Start by checking if python can be found, since Windows doesn't usually have `python3`.
+            python_exe = shutil.which("python")
             if not python_exe:
-                # Fall back on regular python
-                python_exe = shutil.which("python")
+                # Fall back on python2
+                python_exe = shutil.which("python2")
+            if not python_exe:
+                # Fall back on python3
+                python_exe = shutil.which("python3")
 
             if not python_exe:
-                msg = ("Python2 must be available in PATH "
+                msg = ("Python must be available in PATH "
                        "in order to build Qt WebEngine")
                 raise ConanInvalidConfiguration(msg)
 
@@ -161,18 +163,16 @@ class QtConan(ConanFile):
             self.run(cmd_v, command_output)
             verstr = command_output.getvalue().strip()
             version = Version(verstr)
-            # >= 2.7.5 & < 3
+            # >= 2.7.5 & < 4
             v_min = "2.7.5"
-            v_max = "3.0.0"
+            v_max = "4.0.0"
             if (version >= v_min) and (version < v_max):
-                msg = ("Found valid Python 2 required for QtWebengine:"
+                msg = ("Found valid Python required for QtWebengine:"
                        f" version={verstr}, path={python_exe}")
                 self.output.success(msg)
             else:
-                msg = (f"Found Python 2 in path, but with invalid version {verstr}"
-                       f" (QtWebEngine requires >= {v_min} & < {v_max})\n"
-                       "If you have both Python 2 and 3 installed, copy the python 2 executable to"
-                       "python2(.exe)")
+                msg = (f"Found Python in path, but with invalid version {verstr}"
+                       f" (QtWebEngine requires >= {v_min} & < {v_max})")
                 raise ConanInvalidConfiguration(msg)
 
     def config_options(self):
@@ -311,6 +311,8 @@ class QtConan(ConanFile):
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.qtwebengine:
                 self.options.with_fontconfig = True
+                # QtWebEngine fails to build with static fontconfig.
+                self.options["fontconfig*"].shared = True
 
         for status in self._module_statuses:
             # These are convenience only, should not affect package_id
@@ -483,6 +485,7 @@ class QtConan(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows" and is_msvc(self):
             self.tool_requires("jom/[>=1.1 <2]")
+            self.tool_requires("strawberryperl/[>=5 <6]")
         if self.options.qtwebengine:
             self.tool_requires("ninja/[>=1.12 <2]")
             self.tool_requires("nodejs/18.15.0")
@@ -501,14 +504,15 @@ class QtConan(ConanFile):
         return os.path.join(self.source_folder, "angle")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            strip_root=True, destination="qt5")
+        git = Git(self, folder="qt5")
+        git.fetch_commit(url=self.conan_data["sources"][self.version]["url"], commit=self.conan_data["sources"][self.version]["commit"])
+        git.run("submodule update --init --recursive")
 
         apply_conandata_patches(self)
         for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
             replace_in_file(self, os.path.join(self.source_folder, "qt5", "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
-                "  if (enable_precompiled_headers) {\n    if (is_win) {",
-                "  if (enable_precompiled_headers) {\n    if (false) {"
+                "  if (enable_precompiled_headers) {" + os.linesep + "    if (is_win) {",
+                "  if (enable_precompiled_headers) {" + os.linesep + "    if (false) {"
             )
         replace_in_file(self, os.path.join(self.source_folder, "qt5", "qtbase", "configure.json"),
             "-ldbus-1d",

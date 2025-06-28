@@ -1,26 +1,10 @@
 sources:
-  "5.15.16":
-    url:
-      - "https://download.qt.io/official_releases/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://download.qt.io/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://qt-mirror.dannhauer.de/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://mirror.netcologne.de/qtproject/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://ftp.fau.de/qtproject/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://ftp.nluug.nl/languages/qt/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://mirrors.dotsrc.org/qtproject/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://mirrors.20i.com/pub/qt.io/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://mirrors.ukfast.co.uk/sites/qt.io/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://ftp.acc.umu.se/mirror/qt.io/qtproject/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://www.nic.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://qt.mirror.constant.com/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://mirrors.cloud.tencent.com/qt/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://mirror.bjtu.edu.cn/qt/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://mirrors.ustc.edu.cn/qtproject/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://ftp.jaist.ac.jp/pub/qtproject/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://mirror.aarnet.edu.au/pub/qtproject/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-    sha256: "efa99827027782974356aceff8a52bd3d2a8a93a54dd0db4cca41b5e35f1041c"
+  "5.15.17":
+    url: "https://invent.kde.org/qt/qt/qt5.git" # kde/5.15 branch
+    commit: "0825fcb14dc8171eb3674d8df2337a2e4593f025" # 2025-06-07
+
 patches:
-  "5.15.16":
+  "5.15.17":
     - "base_path": "qt5/qtbase"
       "patch_file": "patches/aa2a39dea5.diff"
     - "base_path": "qt5/qtwebengine"
@@ -34,17 +18,10 @@ patches:
     - "base_path": "qt5/qtwebengine"
       "patch_description": "qtwebengine don't use rpath-link on macOS"
       "patch_file": "patches/5.15.14-macos-qtwebengine-rpath-link.patch"
-    - "base_path": "qt5/qtlocation"
-      "patch_description": "qtlocation missing utility header"
-      "patch_file": "patches/5.15.14-macos-qtlocation-utility-header.patch"
     - "base_path": "qt5/qtwebengine/src/3rdparty"
       "patch_description": "qtwebengine fix missing headers"
       "patch_file": "patches/5.15.14-qtwebengine-missing-deps.patch"
     - "base_path": "qt5/qtwebengine/src/3rdparty"
       "patch_description": "macos fix chromium build in newer macos SDKs"
       "patch_file": "patches/5.15.14-macos-chromium-newer-sdks.patch"
-    - "base_path": "qt5/qtwebengine"
-      "patch_description": "Fix build error with binutils >= 2.41"
-      "patch_file": "patches/ffmpeg-x86-optimization.patch"
-      "patch_source": "https://packages.ubuntu.com/source/focal-updates/qtwebengine-opensource-src"
-      "patch_type": "portability"
+
