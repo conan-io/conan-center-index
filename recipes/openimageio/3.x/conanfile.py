@@ -36,6 +36,7 @@ class OpenImageIOConan(ConanFile):
         "with_libjpeg": ["libjpeg", "libjpeg-turbo"],
         "with_libjxl": [True, False],
         "with_libpng": [True, False],
+        "with_libultrahdr": [True, False],
         "with_libwebp": [True, False],
         "with_opencv": [True, False],
         "with_openjpeg": [True, False],
@@ -60,6 +61,7 @@ class OpenImageIOConan(ConanFile):
         "with_libjpeg": "libjpeg",
         "with_libjxl": True,
         "with_libpng": True,
+        "with_libultrahdr": True,
         "with_libwebp": True,
         "with_openjpeg": True,
         "with_openvdb": True,
@@ -129,6 +131,8 @@ class OpenImageIOConan(ConanFile):
             self.requires("ptex/2.4.2")
         if self.options.with_libwebp:
             self.requires("libwebp/1.3.2")
+        if self.options.with_libultrahdr:
+            self.requires("libultrahdr/1.4.0")
 
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
@@ -162,57 +166,60 @@ class OpenImageIOConan(ConanFile):
         tc = CMakeToolchain(self)
 
         # CMake options
-        tc.variables["CMAKE_DEBUG_POSTFIX"] = ""  # Needed for 2.3.x.x+ versions
-        tc.variables["OIIO_BUILD_TOOLS"] = True
-        tc.variables["OIIO_BUILD_TESTS"] = False
-        tc.variables["BUILD_DOCS"] = False
-        tc.variables["INSTALL_DOCS"] = False
-        tc.variables["INSTALL_FONTS"] = False
-        tc.variables["INSTALL_CMAKE_HELPER"] = False
-        tc.variables["EMBEDPLUGINS"] = True
-        tc.variables["USE_EXTERNAL_PUGIXML"] = True
-        tc.variables["BUILD_MISSING_FMT"] = False
+        tc.cache_variables["CMAKE_DEBUG_POSTFIX"] = ""  # Needed for 2.3.x.x+ versions
+        tc.cache_variables["OIIO_BUILD_TOOLS"] = True
+        tc.cache_variables["OIIO_BUILD_TESTS"] = False
+        tc.cache_variables["BUILD_DOCS"] = False
+        tc.cache_variables["INSTALL_DOCS"] = False
+        tc.cache_variables["INSTALL_FONTS"] = False
+        tc.cache_variables["INSTALL_CMAKE_HELPER"] = False
+        tc.cache_variables["EMBEDPLUGINS"] = True
+        tc.cache_variables["USE_EXTERNAL_PUGIXML"] = True
+        tc.cache_variables["BUILD_MISSING_FMT"] = False
 
         # Conan is normally not used for testing, so fixing this option to not build the tests
-        tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_TESTING"] = False
 
-        tc.variables["USE_DCMTK"] = self.options.with_dicom
-        tc.variables["USE_FFMPEG"] = self.options.with_ffmpeg
-        tc.variables["USE_FIELD3D"] = False
-        tc.variables["USE_FREETYPE"] = self.options.with_freetype
-        tc.variables["USE_GIF"] = self.options.with_giflib
-        tc.variables["USE_HDF5"] = self.options.with_hdf5
+        tc.cache_variables["USE_DCMTK"] = self.options.with_dicom
+        tc.cache_variables["USE_FFMPEG"] = self.options.with_ffmpeg
+        tc.cache_variables["USE_FIELD3D"] = False
+        tc.cache_variables["USE_FREETYPE"] = self.options.with_freetype
+        tc.cache_variables["USE_GIF"] = self.options.with_giflib
+        tc.cache_variables["USE_HDF5"] = self.options.with_hdf5
         # Needed for jpeg.imageio plugin, libjpeg/libjpeg-turbo selection still works
-        tc.variables["USE_JPEG"] = True
+        tc.cache_variables["USE_JPEG"] = True
         # OIIO CMake files are patched to check USE_* flags to require or not use dependencies
-        tc.variables["USE_JPEGTURBO"] = (self.options.with_libjpeg == "libjpeg-turbo")
-        tc.variables["USE_LIBHEIF"] = self.options.with_libheif
-        tc.variables["USE_LIBJXL"] = self.options.with_libjxl
-        tc.variables["USE_LIBPNG"] = self.options.with_libpng
-        tc.variables["USE_LIBRAW"] = self.options.with_raw
-        tc.variables["USE_LIBWEBP"] = self.options.with_libwebp
-        tc.variables["USE_OPENCV"] = self.options.with_opencv
-        tc.variables["USE_OPENGL"] = False
-        tc.variables["USE_OPENJPEG"] = self.options.with_openjpeg
-        tc.variables["USE_OPENVDB"] = self.options.with_openvdb
-        tc.variables["USE_PTEX"] = self.options.with_ptex
-        tc.variables["USE_PYTHON"] = False
-        tc.variables["USE_QT"] = False
-        tc.variables["USE_TBB"] = self.options.with_tbb
+        tc.cache_variables["USE_JPEGTURBO"] = (self.options.with_libjpeg == "libjpeg-turbo")
+        tc.cache_variables["USE_LIBHEIF"] = self.options.with_libheif
+        tc.cache_variables["USE_LIBJXL"] = self.options.with_libjxl
+        tc.cache_variables["USE_LIBPNG"] = self.options.with_libpng
+        tc.cache_variables["USE_LIBRAW"] = self.options.with_raw
+        tc.cache_variables["USE_LIBWEBP"] = self.options.with_libwebp
+        tc.cache_variables["USE_OPENCV"] = self.options.with_opencv
+        tc.cache_variables["USE_OPENGL"] = False
+        tc.cache_variables["USE_OPENJPEG"] = self.options.with_openjpeg
+        tc.cache_variables["USE_OPENVDB"] = self.options.with_openvdb
+        tc.cache_variables["USE_PTEX"] = self.options.with_ptex
+        tc.cache_variables["USE_PYTHON"] = False
+        tc.cache_variables["USE_QT"] = False
+        tc.cache_variables["USE_TBB"] = self.options.with_tbb
 
         # Unsupported options
-        tc.variables["USE_NUKE"] = False
-        tc.variables["USE_R3DSDK"] = False
+        tc.cache_variables["USE_NUKE"] = False
+        tc.cache_variables["USE_R3DSDK"] = False
 
         # Override variable for internal linking visibility of Imath otherwise not visible
         # in the tools included in the build that consume the library.
         tc.cache_variables["OPENIMAGEIO_IMATH_DEPENDENCY_VISIBILITY"] = "PUBLIC"
 
         tc.generate()
-        cd = CMakeDeps(self)
+        deps = CMakeDeps(self)
         # Map the name of openexr for the target name expected in OIIO cmake
-        cd.set_property("openexr", "cmake_target_name", "OpenEXR::OpenEXR")
-        cd.generate()
+        deps.set_property("openexr", "cmake_target_name", "OpenEXR::OpenEXR")
+        if self.options.with_libultrahdr:
+            deps.set_property("libultrahdr", "cmake_file_name", "libuhdr")
+            deps.set_property("libultrahdr", "cmake_target_name", "libuhdr::libuhdr")
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -306,6 +313,8 @@ class OpenImageIOConan(ConanFile):
             open_image_io.requires.append("ptex::ptex")
         if self.options.with_libwebp:
             open_image_io.requires.append("libwebp::libwebp")
+        if self.options.with_libultrahdr:
+            open_image_io.requires.append("libultrahdr::libultrahdr")
         if self.settings.os in ["Linux", "FreeBSD"]:
             open_image_io.system_libs.extend(["dl", "m", "pthread"])
 
