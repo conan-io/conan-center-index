@@ -128,7 +128,6 @@ class QtConan(ConanFile):
     #    these are only provided for convenience, set to False by default
     default_options.update({f"{status}_modules": False for status in _module_statuses})
 
-    no_copy_source = True
     short_paths = True
 
     @property
