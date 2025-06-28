@@ -482,6 +482,7 @@ class QtConan(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows" and is_msvc(self):
             self.tool_requires("jom/[>=1.1 <2]")
+            self.tool_requires("strawberryperl/[>=5 <6]")
         if self.options.qtwebengine:
             self.tool_requires("ninja/[>=1.12 <2]")
             self.tool_requires("nodejs/18.15.0")
