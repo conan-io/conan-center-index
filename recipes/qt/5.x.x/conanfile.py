@@ -310,6 +310,8 @@ class QtConan(ConanFile):
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.qtwebengine:
                 self.options.with_fontconfig = True
+                # QtWebEngine fails to build with static fontconfig.
+                self.options["fontconfig*"].shared = True
 
         for status in self._module_statuses:
             # These are convenience only, should not affect package_id
