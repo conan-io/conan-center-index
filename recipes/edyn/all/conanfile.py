@@ -53,6 +53,7 @@ class EdynConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+        self.cpp.source.includedirs.append(f"build/{self.settings.build_type}/include")
 
     def requirements(self):
         if self.version < Version("1.3"):
