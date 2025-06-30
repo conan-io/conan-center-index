@@ -35,11 +35,13 @@ class AwsChecksums(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        if self.version == "0.2.6":
+            self.requires("aws-c-common/0.12.3", transitive_headers=True)
         if self.version == "0.2.3":
             self.requires("aws-c-common/0.11.0", transitive_headers=True)
-        if self.version == "0.1.18":
+        elif self.version == "0.1.18":
             self.requires("aws-c-common/0.9.15", transitive_headers=True)
-        if self.version == "0.1.12":
+        elif self.version == "0.1.12":
             self.requires("aws-c-common/0.6.11", transitive_headers=True)
 
     def source(self):
