@@ -1,5 +1,7 @@
 Conan Center Index (Entos)
 ==========================
+![build and upload](https://github.com/entos-xe/conan-center-index/actions/workflows/build_and_upload.yml/badge.svg)
+
 
 This is the Sky Entos-XE fork of the [conan center index]().
 It is [recommended best practice](https://docs.conan.io/2/devops/conancenter/hosting_binaries.html) by Conan that
