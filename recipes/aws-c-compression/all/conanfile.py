@@ -32,8 +32,9 @@ class AwsCCompression(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # Don't bump this on its own, take into account aws-sdk-cpp graph
         if self.version == "0.3.1":
-            self.requires("aws-c-common/0.11.0", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-common/0.12.3", transitive_headers=True, transitive_libs=True)
         if self.version == "0.2.18":
             self.requires("aws-c-common/0.9.15", transitive_headers=True, transitive_libs=True)
         if self.version == "0.2.14":
