@@ -138,6 +138,9 @@ vulkan-headers:
 vulkan-hpp:
   versions:
     - '1.4.313'
+vulkan-utility-libraries:
+  versions:
+    - '1.4.313.0'
 wayland:
   versions:
     - '1.22.0'
