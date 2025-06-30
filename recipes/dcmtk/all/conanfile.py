@@ -169,7 +169,7 @@ class DCMTKConan(ConanFile):
 
         # Prevent libnsl from the system (and not from Conan) from being picked up
         tc.cache_variables["HAVE_LIBNSL_MAIN"] = False
-        tc.cache_variable["HAVE_LIBNSL"] = False
+        tc.cache_variables["HAVE_LIBNSL"] = False
 
         if Version(self.version) >= "3.6.7" and cross_building(self):
             # See https://support.dcmtk.org/redmine/projects/dcmtk/wiki/Cross_Compiling
