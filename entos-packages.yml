@@ -22,6 +22,10 @@ bzip2:
 certify:
   versions:
     - 'cci.20201114'
+cmake:
+  versions:
+    - '4.0.3'
+    - '3.31.8'
 cpp-httplib:
   versions:
     - '0.15.3'
