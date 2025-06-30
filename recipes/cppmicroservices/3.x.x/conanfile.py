@@ -59,7 +59,6 @@ class CppMicroServicesConan(ConanFile):
         cmake.configure(variables={"US_BUILD_TESTING":"Off"},
                          build_script_folder=target)
         cmake.build()
-#         cmake.test()
 
     def package(self):
         cmake = CMake(self)
