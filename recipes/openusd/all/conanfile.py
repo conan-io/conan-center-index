@@ -53,7 +53,7 @@ class OpenUSDConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-        cmake_layout(self, src_folder=".")
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         # self.requires("cpython/3.12.7", transitive_headers=True)
