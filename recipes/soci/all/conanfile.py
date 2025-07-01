@@ -61,7 +61,7 @@ class SociConan(ConanFile):
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.1.0", transitive_headers=True)
         if self.options.with_postgresql:
-            self.requires("libpq/[>=15.4 <17.0]", transitive_headers=True)
+            self.requires("libpq/[>=15.4 <18.0]", transitive_headers=True)
         if self.options.with_boost:
             self.requires("boost/1.83.0", transitive_headers=True)
 
@@ -98,9 +98,11 @@ class SociConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("mysql", "cmake_file_name", "MySQL")
-        deps.set_property("mysql", "cmake_additional_variables_prefixes", ["MYSQL"])
-        deps.set_property("libpq", "cmake_file_name", "PostgreSQL")
+        # libmysqlclient: handle different target names in versions 4.0.3 and 4.1.0
+        deps.set_property("libmysqlclient", "cmake_file_name", "mysql")
+        deps.set_property("libmysqlclient", "cmake_additional_variables_prefixes", ["MySQL", "MYSQL"])
+        deps.set_property("libmysqlclient", "cmake_target_name", "MySQL::MySQL")
+        deps.set_property("libpq", "cmake_file_name", "postgresql")
         deps.set_property("libpq", "cmake_additional_variables_prefixes", ["POSTGRESQL"])
         deps.set_property("sqlite3", "cmake_file_name", "SQLite3")
         deps.set_property("sqlite3", "cmake_additional_variables_prefixes", ["SQLITE3"])
