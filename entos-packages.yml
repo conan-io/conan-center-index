@@ -119,6 +119,9 @@ paho-mqtt-c:
 paho-mqtt-cpp:
   versions:
     - '1.4.1'
+parallel-hashmap:
+  versions:
+    - '2.0.0'
 pcre2:
   versions:
     - '10.44'
@@ -126,6 +129,12 @@ pkgconf:
   versions:
     - '2.1.0'
     - '2.2.0'
+spirv-headers:
+  versions:
+    - '1.4.313.0'
+spirv-tools:
+  versions:
+    - '1.4.313.0'
 sqlite3:
   versions:
     - '3.45.3'
@@ -142,6 +151,9 @@ vulkan-loader:
   versions:
     - '1.4.313.0'
 vulkan-utility-libraries:
+  versions:
+    - '1.4.313.0'
+vulkan-validationlayers:
   versions:
     - '1.4.313.0'
 wayland:

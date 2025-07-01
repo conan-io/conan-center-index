@@ -1,5 +1,5 @@
-from conan import ConanFile, conan_version
-from conan.errors import ConanException, ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -7,11 +7,10 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
-import functools
 import glob
 import os
 import shutil
-import yaml
+
 
 required_conan_version = ">=1.55.0"
 
@@ -23,7 +22,7 @@ class VulkanValidationLayersConan(ConanFile):
     topics = ("vulkan", "validation-layers")
     homepage = "https://github.com/KhronosGroup/Vulkan-ValidationLayers"
     url = "https://github.com/conan-io/conan-center-index"
-    package_type = "static-library"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -39,19 +38,6 @@ class VulkanValidationLayersConan(ConanFile):
     }
 
     short_paths = True
-
-    @property
-    def _dependencies_filename(self):
-        return f"dependencies-{self.version}.yml"
-
-    @property
-    @functools.lru_cache(1)
-    def _dependencies_versions(self):
-        dependencies_filepath = os.path.join(self.recipe_folder, "dependencies", self._dependencies_filename)
-        if not os.path.isfile(dependencies_filepath):
-            raise ConanException(f"Cannot find {dependencies_filepath}")
-        cached_dependencies = yaml.safe_load(open(dependencies_filepath))
-        return cached_dependencies
 
     @property
     def _needs_wayland_for_build(self):
@@ -82,9 +68,6 @@ class VulkanValidationLayersConan(ConanFile):
             },
         }.get(self._min_cppstd, {})
 
-    def export(self):
-        copy(self, f"dependencies/{self._dependencies_filename}", self.recipe_folder, self.export_folder)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -100,23 +83,21 @@ class VulkanValidationLayersConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("robin-hood-hashing/3.11.5")
-        self.requires(self._require("spirv-headers"))
-        if Version(conan_version).major < "2":
-            # TODO: set private=True, once the issue is resolved https://github.com/conan-io/conan/issues/9390
-            self.requires(self._require("spirv-tools"), private=not hasattr(self, "settings_build"))
+        if Version(self.version) >= "1.4.313.0":
+            self.requires("parallel-hashmap/2.0.0")
         else:
-            self.requires(self._require("spirv-tools"))
-        self.requires(self._require("vulkan-headers"), transitive_headers=True)
+            self.requires("robin-hood-hashing/3.11.5")
+
+        if Version(self.version) >= "1.3.268.0":
+            self.requires(f"vulkan-utility-libraries/{self.version}")
+
+        self.requires(f"spirv-headers/{self.version}")
+        self.requires(f"spirv-tools/{self.version}")
+        self.requires(f"vulkan-headers/{self.version}", transitive_headers=True)
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
         if self._needs_wayland_for_build:
             self.requires("wayland/1.22.0")
-
-    def _require(self, recipe_name):
-        if recipe_name not in self._dependencies_versions:
-            raise ConanException(f"{recipe_name} is missing in {self._dependencies_filename}")
-        return f"{recipe_name}/{self._dependencies_versions[recipe_name]}"
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -186,7 +167,7 @@ class VulkanValidationLayersConan(ConanFile):
         # Vulkan-ValidationLayers relies on Vulkan-Headers version from CMake config file
         # to set api_version in its manifest file, but this value MUST have format x.y.z (no extra number).
         # FIXME: find a way to force correct version in CMakeDeps of vulkan-headers recipe?
-        # NOTE: At version 1.3.239, the JSON_API_VERSION was removed from the cmakelists file, 
+        # NOTE: At version 1.3.239, the JSON_API_VERSION was removed from the cmakelists file,
         if Version(self.version) >= "1.3.235" and Version(self.version) < "1.3.239":
             vk_version = Version(self.dependencies["vulkan-headers"].ref.version)
             sanitized_vk_version = f"{vk_version.major}.{vk_version.minor}.{vk_version.patch}"
@@ -221,6 +202,12 @@ class VulkanValidationLayersConan(ConanFile):
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        if Version(self.version) >= "1.3.268.0":
+            # After this version the utilities library is built but is not part of the distribution
+            # (instead it is now part of vulkan-utility-libraries)
+            rm(self, "*.a", self.package_folder)
+            rm(self, "*.lib", self.package_folder)
+
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         if self.settings.os == "Windows":
             # import lib is useless, validation layers are loaded at runtime
@@ -240,7 +227,10 @@ class VulkanValidationLayersConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libs = ["VkLayer_utils"]
+        if Version(self.version) < "1.3.268.0":
+            self.cpp_info.libs = ["VkLayer_utils"]
+        else:
+            self.cpp_info.includedirs = []
 
         manifest_subfolder = "bin" if self.settings.os == "Windows" else os.path.join("res", "vulkan", "explicit_layer.d")
         vk_layer_path = os.path.join(self.package_folder, manifest_subfolder)
@@ -256,9 +246,6 @@ class VulkanValidationLayersConan(ConanFile):
             runtime_lib_discovery_path = "DYLD_LIBRARY_PATH"
         for libdir in [os.path.join(self.package_folder, libdir) for libdir in self.cpp_info.libdirs]:
             self.runenv_info.prepend_path(runtime_lib_discovery_path, libdir)
-
-        # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
-        self.env_info.VK_LAYER_PATH.append(vk_layer_path)
 
         if self.settings.os == "Android":
             self.cpp_info.system_libs.extend(["android", "log"])

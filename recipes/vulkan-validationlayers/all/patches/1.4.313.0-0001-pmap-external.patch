@@ -1,0 +1,50 @@
+diff --git a/layers/CMakeLists.txt b/layers/CMakeLists.txt
+index ea0f19992..5e8dbe6a9 100644
+--- a/layers/CMakeLists.txt
++++ b/layers/CMakeLists.txt
+@@ -101,6 +101,12 @@ endif()
+ if (USE_CUSTOM_HASH_MAP)
+     message(STATUS "Using parallel_hashmap as custom hash maps")
+     target_compile_definitions(VkLayer_utils PUBLIC USE_CUSTOM_HASH_MAP)
++    find_package(phmap CONFIG)
++    if (TARGET phmap)
++        target_link_libraries(VkLayer_utils PRIVATE phmap)
++    else()
++        add_subdirectory(external/parallel_hashmap)
++    endif()
+ else()
+     message(STATUS "Using STL maps instead of custom hash maps")
+ endif()
+@@ -235,15 +241,6 @@ target_sources(vvl PRIVATE
+     error_message/spirv_logging.cpp
+     external/vma/vma.h
+     external/vma/vma.cpp
+-    external/parallel_hashmap/btree.h
+-    external/parallel_hashmap/meminfo.h
+-    external/parallel_hashmap/phmap_base.h
+-    external/parallel_hashmap/phmap_bits.h
+-    external/parallel_hashmap/phmap_config.h
+-    external/parallel_hashmap/phmap_dump.h
+-    external/parallel_hashmap/phmap_fwd_decl.h
+-    external/parallel_hashmap/phmap_utils.h
+-    external/parallel_hashmap/phmap.h
+     ${API_TYPE}/generated/best_practices.cpp
+     ${API_TYPE}/generated/best_practices_device_methods.h
+     ${API_TYPE}/generated/best_practices_instance_methods.h
+diff --git a/layers/external/parallel_hashmap/CMakeLists.txt b/layers/external/parallel_hashmap/CMakeLists.txt
+new file mode 100644
+index 000000000..016783e11
+--- /dev/null
++++ b/layers/external/parallel_hashmap/CMakeLists.txt
+@@ -0,0 +1,11 @@
++target_sources(VkLayer_utils PRIVATE
++    btree.h
++    meminfo.h
++    phmap_base.h
++    phmap_bits.h
++    phmap_config.h
++    phmap_dump.h
++    phmap_fwd_decl.h
++    phmap.h
++    phmap_utils.h
++)

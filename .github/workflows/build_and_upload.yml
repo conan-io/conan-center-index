@@ -43,6 +43,7 @@ jobs:
       - name: Build updated packages
         if: ${{ github.event_name == 'pull_request' && github.head_ref != 'upstream-update' }}
         run: |
+          apt-get update -y
           python entos-packages.py --build="${{ steps.changed-files.outputs.all_changed_files }}"
 
       - name: Upload the recipes in the cache to the remote

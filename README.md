@@ -1,5 +1,7 @@
 Conan Center Index (Entos)
 ==========================
+![build and upload](https://github.com/entos-xe/conan-center-index/actions/workflows/build_and_upload.yml/badge.svg)
+
 
 This is the Sky Entos-XE fork of the [conan center index]().
 It is [recommended best practice](https://docs.conan.io/2/devops/conancenter/hosting_binaries.html) by Conan that
@@ -16,11 +18,17 @@ Not all packages available in CCI will be provided by the
 
 1. Create a PR to update the repository.
 2. Check first that the package and or version is not available from the upstream repository.
-   If it is, pull the changes from upstream.
+   If it is, pull the changes from upstream. Check also that a PR has not also been raised upstream,
+   you may be able to use this.
 3. If necessary, add or update the required package
 4. Add the package and **and any dependencies** to `entos-packages.yml`
 
-When the PR is merged to `master`, the package recipe will be available from Comcast Artifactory
+Upon a successful PR build, the package will be available from 
+[conan-entos-iui-dev](https://partners.artifactory.comcast.com/ui/repos/tree/General/conan-entos-iui-dev) for testing.
+
+When the PR is merged to `master`, the package recipe will be available from the main 
+[conan-entos-iui-prod](https://partners.artifactory.comcast.com/ui/repos/tree/General/conan-entos-iui-prod)
+repository.
 
 ### Updating from upstream
 
