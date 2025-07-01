@@ -48,6 +48,10 @@ class SociConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        if Version(self.version) >= "4.1.0":
+            self.tool_requires("cmake/[>=3.23 <4]")
+
     def requirements(self):
         # New versions will not need transitive_headers=True
         if self.options.with_sqlite3:
@@ -57,12 +61,15 @@ class SociConan(ConanFile):
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.1.0", transitive_headers=True)
         if self.options.with_postgresql:
-            self.requires("libpq/15.4", transitive_headers=True)
+            self.requires("libpq/[>=15.4 <18.0]", transitive_headers=True)
         if self.options.with_boost:
             self.requires("boost/1.83.0", transitive_headers=True)
 
     def validate(self):
-        check_min_cppstd(self, 11)
+        if Version(self.version) < "4.1.0":
+            check_min_cppstd(self, 11)
+        else:
+            check_min_cppstd(self, 14)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -70,29 +77,33 @@ class SociConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-
+        backend_prefix = "WITH" if Version(self.version) < "4.1.0" else "SOCI"
         # MacOS @rpath
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.cache_variables["SOCI_SHARED"] = self.options.shared
         tc.cache_variables["SOCI_STATIC"] = not self.options.shared
         tc.cache_variables["SOCI_TESTS"] = False
-        tc.cache_variables["SOCI_CXX11"] = True
         tc.cache_variables["SOCI_EMPTY"] = self.options.empty
-        tc.cache_variables["WITH_SQLITE3"] = self.options.with_sqlite3
-        tc.cache_variables["WITH_DB2"] = False
-        tc.cache_variables["WITH_ODBC"] = self.options.with_odbc
-        tc.cache_variables["WITH_ORACLE"] = False
-        tc.cache_variables["WITH_FIREBIRD"] = False
-        tc.cache_variables["WITH_MYSQL"] = self.options.with_mysql
-        tc.cache_variables["WITH_POSTGRESQL"] = self.options.with_postgresql
+        tc.cache_variables["{}_SQLITE3".format(backend_prefix)] = self.options.with_sqlite3
+        tc.cache_variables["{}_DB2".format(backend_prefix)] = False
+        tc.cache_variables["{}_ODBC".format(backend_prefix)] = self.options.with_odbc
+        tc.cache_variables["{}_ORACLE".format(backend_prefix)] = False
+        tc.cache_variables["{}_FIREBIRD".format(backend_prefix)] = False
+        tc.cache_variables["{}_MYSQL".format(backend_prefix)] = self.options.with_mysql
+        tc.cache_variables["{}_POSTGRESQL".format(backend_prefix)] = self.options.with_postgresql
         tc.cache_variables["WITH_BOOST"] = self.options.with_boost
         if Version(self.version) < "4.1.0": # pylint: disable=conan-condition-evals-to-constant
+            tc.cache_variables["SOCI_CXX11"] = True
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("mysql", "cmake_file_name", "MYSQL")
-        deps.set_property("libpq", "cmake_file_name", "POSTGRESQL")
+        # libmysqlclient: handle different target names in versions 4.0.3 and 4.1.0
+        deps.set_property("libmysqlclient", "cmake_file_name", "mysql")
+        deps.set_property("libmysqlclient", "cmake_additional_variables_prefixes", ["MySQL", "MYSQL"])
+        deps.set_property("libmysqlclient", "cmake_target_name", "MySQL::MySQL")
+        deps.set_property("libpq", "cmake_file_name", "postgresql")
+        deps.set_property("libpq", "cmake_additional_variables_prefixes", ["POSTGRESQL"])
         deps.set_property("sqlite3", "cmake_file_name", "SQLite3")
         deps.set_property("sqlite3", "cmake_additional_variables_prefixes", ["SQLITE3"])
         deps.generate()
@@ -114,9 +125,9 @@ class SociConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "SOCI")
 
         target_suffix = "" if self.options.shared else "_static"
-        lib_prefix = "lib" if is_msvc(self) and not self.options.shared else ""
         version = Version(self.version)
-        lib_suffix = "_{}_{}".format(version.major, version.minor) if self.settings.os == "Windows" else ""
+        lib_prefix = "lib" if version < "4.1.0" and is_msvc(self) and not self.options.shared else ""
+        lib_suffix = "_{}_{}".format(version.major, version.minor) if (version < "4.1.0" or self.options.shared) and self.settings.os == "Windows" else ""
 
         # soci_core
         self.cpp_info.components["soci_core"].set_property("cmake_target_name", "SOCI::soci_core{}".format(target_suffix))
