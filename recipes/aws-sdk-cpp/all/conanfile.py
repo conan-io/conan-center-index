@@ -22,10 +22,11 @@ class AwsSdkCppConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     # This list comes from tools/code-generation/api-description, which then generates the sdk sources
     # To generate for a new one, run the build once and check src/generated/src inside your build_folder, remove the common aws-sdk-cpp prefix
+    # NON_GENERATED_CLIENT_LIST in src/cmake/sdks.cmake contains extra ones that should also be added here
     # and that's the list of sdks. Then join it to this one
     _sdks = (
         ('AWSMigrationHub', ['1.11.352', '1.11.599']),
-        ('access-management', ['1.9.234', '1.11.352']),
+        ('access-management', ['1.9.234', '1.11.352', '1.11.599']),
         ('accessanalyzer', ['1.9.234', '1.11.352', '1.11.599']),
         ('account', ['1.11.352', '1.11.599']),
         ('acm', ['1.9.234', '1.11.352', '1.11.599']),
@@ -204,7 +205,7 @@ class AwsSdkCppConan(ConanFile):
         ('healthlake', ['1.9.234', '1.11.352', '1.11.599']),
         ('honeycode', ['1.9.234']),
         ('iam', ['1.9.234', '1.11.352', '1.11.599']),
-        ('identity-management', ['1.9.234', '1.11.352']),
+        ('identity-management', ['1.9.234', '1.11.352', '1.11.599']),
         ('identitystore', ['1.9.234', '1.11.352', '1.11.599']),
         ('imagebuilder', ['1.9.234', '1.11.352', '1.11.599']),
         ('importexport', ['1.9.234', '1.11.352', '1.11.599']),
@@ -372,7 +373,7 @@ class AwsSdkCppConan(ConanFile):
         ('rum', ['1.11.352', '1.11.599']),
         ('s3', ['1.9.234', '1.11.352', '1.11.599']),
         ('s3-crt', ['1.9.234', '1.11.352', '1.11.599']),
-        ('s3-encryption', ['1.9.234', '1.11.352']),
+        ('s3-encryption', ['1.9.234', '1.11.352', '1.11.599']),
         ('s3control', ['1.9.234', '1.11.352', '1.11.599']),
         ('s3outposts', ['1.9.234', '1.11.352', '1.11.599']),
         ('s3tables', ['1.11.599']),
@@ -425,7 +426,7 @@ class AwsSdkCppConan(ConanFile):
         ('swf', ['1.9.234', '1.11.352', '1.11.599']),
         ('synthetics', ['1.9.234', '1.11.352', '1.11.599']),
         ('taxsettings', ['1.11.352', '1.11.599']),
-        ('text-to-speech', ['1.9.234', '1.11.352']),
+        ('text-to-speech', ['1.9.234', '1.11.352', '1.11.599']),
         ('textract', ['1.9.234', '1.11.352', '1.11.599']),
         ('timestream-influxdb', ['1.11.352', '1.11.599']),
         ('timestream-query', ['1.9.234', '1.11.352', '1.11.599']),
@@ -433,7 +434,7 @@ class AwsSdkCppConan(ConanFile):
         ('tnb', ['1.11.352', '1.11.599']),
         ('transcribe', ['1.9.234', '1.11.352', '1.11.599']),
         ('transcribestreaming', ['1.9.234', '1.11.352', '1.11.599']),
-        ('transfer', ['1.9.234', '1.11.352']),
+        ('transfer', ['1.9.234', '1.11.352', '1.11.599']),
         ('translate', ['1.9.234', '1.11.352', '1.11.599']),
         ('trustedadvisor', ['1.11.352', '1.11.599']),
         ('verifiedpermissions', ['1.11.352', '1.11.599']),
