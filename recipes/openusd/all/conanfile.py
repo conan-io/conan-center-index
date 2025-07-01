@@ -56,10 +56,13 @@ class OpenUSDConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # self.requires("cpython/3.12.7", transitive_headers=True)
-        self.requires("onetbb/2021.12.0", transitive_headers=True)
+        if self.options.shared:
+            self.requires("onetbb/2021.12.0", transitive_headers=True)
         self.requires("opensubdiv/3.6.0")
         self.requires("opengl/system")
+        
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -70,8 +73,8 @@ class OpenUSDConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
         # Require same options as in https://github.com/PixarAnimationStudios/OpenUSD/blob/release/build_scripts/build_usd.py#L1450
-        if not self.dependencies["opensubdiv"].options.with_tbb:
-            raise ConanInvalidConfiguration("openusd requires -o opensubdiv/*:with_tbb=True")
+        if not self.dependencies["opensubdiv"].options.with_tbb and self.options.shared:
+            raise ConanInvalidConfiguration("openusd requires -o opensubdiv/*:with_tbb=True when building shared")
         if not self.dependencies["opensubdiv"].options.with_opengl:
             raise ConanInvalidConfiguration("openusd requires -o opensubdiv/*:with_opengl=True")
 
@@ -92,7 +95,8 @@ class OpenUSDConan(ConanFile):
         tc.variables["OPENSUBDIV_INCLUDE_DIR"] = self.dependencies['opensubdiv'].cpp_info.includedirs[0].replace("\\", "/")
         target_suffix = "" if self.dependencies["opensubdiv"].options.shared else "_static"
         tc.variables["OPENSUBDIV_OSDCPU_LIBRARY"] = "OpenSubdiv::osdcpu"+target_suffix
-        tc.variables["TBB_tbb_LIBRARY"] = "TBB::tbb"
+        if self.options.shared:
+            tc.variables["TBB_tbb_LIBRARY"] = "TBB::tbb"
         tc.generate()
 
         tc = CMakeDeps(self)
@@ -122,7 +126,9 @@ class OpenUSDConan(ConanFile):
         self.cpp_info.components["usd_arch"].libs = ["usd_arch"]
 
         self.cpp_info.components["usd_ar"].libs = ["usd_ar"]
-        self.cpp_info.components["usd_ar"].requires = ["usd_arch", "usd_js", "usd_tf", "usd_plug", "usd_vt", "onetbb::onetbb"]
+        self.cpp_info.components["usd_ar"].requires = ["usd_arch", "usd_js", "usd_tf", "usd_plug", "usd_vt"]
+        if self.options.shared:
+            self.cpp_info.components["usd_ar"].requires.append("onetbb::libtbb")
 
         self.cpp_info.components["usd_cameraUtil"].libs = ["usd_cameraUtil"]
         self.cpp_info.components["usd_cameraUtil"].requires = ["usd_tf", "usd_gf"]
@@ -140,13 +146,17 @@ class OpenUSDConan(ConanFile):
         self.cpp_info.components["usd_glf"].requires = ["usd_ar", "usd_arch", "usd_garch", "usd_gf", "usd_hf", "usd_hio", "usd_plug", "usd_tf", "usd_trace", "usd_sdf", "opengl::opengl"]
 
         self.cpp_info.components["usd_hd"].libs = ["usd_hd"]
-        self.cpp_info.components["usd_hd"].requires = ["usd_plug", "usd_tf", "usd_trace", "usd_vt", "usd_work", "usd_sdf", "usd_cameraUtil", "usd_hf", "usd_pxOsd", "usd_sdr", "onetbb::libtbb"]
+        self.cpp_info.components["usd_hd"].requires = ["usd_plug", "usd_tf", "usd_trace", "usd_vt", "usd_work", "usd_sdf", "usd_cameraUtil", "usd_hf", "usd_pxOsd", "usd_sdr"]
+        if self.options.shared:
+            self.cpp_info.components["usd_hd"].requires.append("onetbb::libtbb")
 
         self.cpp_info.components["usd_hdar"].libs = ["usd_hdar"]
         self.cpp_info.components["usd_hdar"].requires = ["usd_hd", "usd_ar"]
 
         self.cpp_info.components["usd_hdGp"].libs = ["usd_hdGp"]
-        self.cpp_info.components["usd_hdGp"].requires = ["usd_hd", "usd_hf", "onetbb::libtbb"]
+        self.cpp_info.components["usd_hdGp"].requires = ["usd_hd", "usd_hf"]
+        if self.options.shared:
+            self.cpp_info.components["usd_hdGp"].requires.append("onetbb::libtbb")
 
         self.cpp_info.components["usd_hdsi"].libs = ["usd_hdsi"]
         self.cpp_info.components["usd_hdsi"].requires = ["usd_plug", "usd_tf", "usd_trace", "usd_vt", "usd_work", "usd_sdf", "usd_cameraUtil", "usd_geomUtil", "usd_hf", "usd_hd", "usd_pxOsd"]
@@ -188,13 +198,17 @@ class OpenUSDConan(ConanFile):
         self.cpp_info.components["usd_ndr"].requires = ["usd_tf", "usd_plug", "usd_vt", "usd_work", "usd_ar", "usd_sdf"]
 
         self.cpp_info.components["usd_pcp"].libs = ["usd_pcp"]
-        self.cpp_info.components["usd_pcp"].requires = ["usd_tf", "usd_trace", "usd_vt", "usd_sdf", "usd_work", "usd_ar", "onetbb::libtbb"]
+        self.cpp_info.components["usd_pcp"].requires = ["usd_tf", "usd_trace", "usd_vt", "usd_sdf", "usd_work", "usd_ar"]
+        if self.options.shared:
+            self.cpp_info.components["usd_pcp"].requires.append("onetbb::libtbb")
 
         self.cpp_info.components["usd_pegtl"].libs = ["usd_pegtl"]
         self.cpp_info.components["usd_pegtl"].requires = ["usd_arch"]
 
         self.cpp_info.components["usd_plug"].libs = ["usd_plug"]
-        self.cpp_info.components["usd_plug"].requires = ["usd_arch", "usd_tf", "usd_js", "usd_trace", "usd_work", "onetbb::libtbb"]
+        self.cpp_info.components["usd_plug"].requires = ["usd_arch", "usd_tf", "usd_js", "usd_trace", "usd_work"]
+        if self.options.shared:
+            self.cpp_info.components["usd_plug"].requires.append("onetbb::libtbb")
 
         self.cpp_info.components["usd_pxOsd"].libs = ["usd_pxOsd"]
         self.cpp_info.components["usd_pxOsd"].requires = ["usd_tf", "usd_gf", "usd_vt", "opensubdiv::opensubdiv"]
@@ -206,23 +220,31 @@ class OpenUSDConan(ConanFile):
         self.cpp_info.components["usd_sdr"].requires = ["usd_tf", "usd_vt", "usd_ar", "usd_ndr", "usd_sdf"]
 
         self.cpp_info.components["usd_tf"].libs = ["usd_tf"]
-        self.cpp_info.components["usd_tf"].requires = ["usd_arch", "onetbb::libtbb"]
+        self.cpp_info.components["usd_tf"].requires = ["usd_arch"]
+        if self.options.shared:
+            self.cpp_info.components["usd_tf"].requires.append("onetbb::libtbb")
 
         self.cpp_info.components["usd_trace"].libs = ["usd_trace"]
-        self.cpp_info.components["usd_trace"].requires = ["usd_arch", "usd_tf", "usd_js", "onetbb::libtbb"]
+        self.cpp_info.components["usd_trace"].requires = ["usd_arch", "usd_tf", "usd_js"]
+        if self.options.shared:
+            self.cpp_info.components["usd_trace"].requires.append("onetbb::libtbb")
 
         self.cpp_info.components["usd_ts"].libs = ["usd_ts"]
         self.cpp_info.components["usd_ts"].requires = ["usd_arch", "usd_gf", "usd_plug", "usd_tf", "usd_trace", "usd_vt"]
 
         self.cpp_info.components["usd_usd"].libs = ["usd_usd"]
-        self.cpp_info.components["usd_usd"].requires = ["usd_arch", "usd_kind", "usd_pcp", "usd_sdf", "usd_ar", "usd_plug", "usd_tf", "usd_trace", "usd_vt", "usd_work", "onetbb::libtbb"]
+        self.cpp_info.components["usd_usd"].requires = ["usd_arch", "usd_kind", "usd_pcp", "usd_sdf", "usd_ar", "usd_plug", "usd_tf", "usd_trace", "usd_vt", "usd_work"]
+        if self.options.shared:
+            self.cpp_info.components["usd_usd"].requires.append("onetbb::libtbb")
 
         self.cpp_info.components["usd_usdAppUtils"].libs = ["usd_usdAppUtils"]
         self.cpp_info.components["usd_usdAppUtils"].requires = ["usd_garch", "usd_gf", "usd_hio", "usd_sdf", "usd_tf", "usd_usd", "usd_usdGeom", "usd_usdImagingGL"]
 
         self.cpp_info.components["usd_usdGeom"].libs = ["usd_usdGeom"]
-        self.cpp_info.components["usd_usdGeom"].requires = ["usd_js", "usd_tf", "usd_plug", "usd_vt", "usd_sdf", "usd_trace", "usd_usd", "usd_work", "onetbb::libtbb"]
-        
+        self.cpp_info.components["usd_usdGeom"].requires = ["usd_js", "usd_tf", "usd_plug", "usd_vt", "usd_sdf", "usd_trace", "usd_usd", "usd_work"]
+        if self.options.shared:
+            self.cpp_info.components["usd_usdGeom"].requires.append("onetbb::libtbb")
+            
         self.cpp_info.components["usd_usdGeomValidators"].libs = ["usd_usdGeomValidators"]
         self.cpp_info.components["usd_usdGeomValidators"].requires = ["usd_tf", "usd_plug", "usd_sdf", "usd_usd", "usd_usdGeom", "usd_usdValidation"]
         
@@ -230,10 +252,14 @@ class OpenUSDConan(ConanFile):
         self.cpp_info.components["usd_usdHydra"].requires = ["usd_tf", "usd_usd", "usd_usdShade"]
 
         self.cpp_info.components["usd_usdImaging"].libs = ["usd_usdImaging"]
-        self.cpp_info.components["usd_usdImaging"].requires = ["usd_gf", "usd_tf", "usd_plug", "usd_trace", "usd_vt", "usd_work", "usd_geomUtil", "usd_hd", "usd_hdar", "usd_hio", "usd_pxOsd", "usd_sdf", "usd_usd", "usd_usdGeom", "usd_usdLux", "usd_usdRender", "usd_usdShade", "usd_usdVol", "usd_ar", "onetbb::libtbb"]
+        self.cpp_info.components["usd_usdImaging"].requires = ["usd_gf", "usd_tf", "usd_plug", "usd_trace", "usd_vt", "usd_work", "usd_geomUtil", "usd_hd", "usd_hdar", "usd_hio", "usd_pxOsd", "usd_sdf", "usd_usd", "usd_usdGeom", "usd_usdLux", "usd_usdRender", "usd_usdShade", "usd_usdVol", "usd_ar"]
+        if self.options.shared:
+            self.cpp_info.components["usd_usdImaging"].requires.append("onetbb::libtbb")
 
         self.cpp_info.components["usd_usdImagingGL"].libs = ["usd_usdImagingGL"]
-        self.cpp_info.components["usd_usdImagingGL"].requires = ["usd_gf", "usd_tf", "usd_plug", "usd_trace", "usd_vt", "usd_work", "usd_hio", "usd_garch", "usd_glf", "usd_hd", "usd_hdsi", "usd_hdx", "usd_pxOsd", "usd_sdf", "usd_sdr", "usd_usd", "usd_usdGeom", "usd_usdHydra", "usd_usdShade", "usd_usdImaging", "usd_ar", "onetbb::libtbb"]
+        self.cpp_info.components["usd_usdImagingGL"].requires = ["usd_gf", "usd_tf", "usd_plug", "usd_trace", "usd_vt", "usd_work", "usd_hio", "usd_garch", "usd_glf", "usd_hd", "usd_hdsi", "usd_hdx", "usd_pxOsd", "usd_sdf", "usd_sdr", "usd_usd", "usd_usdGeom", "usd_usdHydra", "usd_usdShade", "usd_usdImaging", "usd_ar"]
+        if self.options.shared:
+            self.cpp_info.components["usd_usdImagingGL"].requires.append("onetbb::libtbb")
 
         self.cpp_info.components["usd_usdLux"].libs = ["usd_usdLux"]
         self.cpp_info.components["usd_usdLux"].requires = ["usd_tf", "usd_vt", "usd_ndr", "usd_sdf", "usd_usd", "usd_usdGeom", "usd_usdShade"]
@@ -242,7 +268,9 @@ class OpenUSDConan(ConanFile):
         self.cpp_info.components["usd_usdMedia"].requires = ["usd_tf", "usd_vt", "usd_sdf", "usd_usd", "usd_usdGeom"]
 
         self.cpp_info.components["usd_usdPhysics"].libs = ["usd_usdPhysics"]
-        self.cpp_info.components["usd_usdPhysics"].requires = ["usd_tf", "usd_plug", "usd_vt", "usd_sdf", "usd_trace", "usd_usd", "usd_usdGeom", "usd_usdShade", "usd_work", "onetbb::libtbb"]
+        self.cpp_info.components["usd_usdPhysics"].requires = ["usd_tf", "usd_plug", "usd_vt", "usd_sdf", "usd_trace", "usd_usd", "usd_usdGeom", "usd_usdShade", "usd_work"]
+        if self.options.shared:
+            self.cpp_info.components["usd_usdPhysics"].requires.append("onetbb::libtbb")
         
         self.cpp_info.components["usd_usdPhysicsValidators"].libs = ["usd_usdPhysicsValidators"]
 
@@ -259,7 +287,9 @@ class OpenUSDConan(ConanFile):
         self.cpp_info.components["usd_usdRi"].requires = ["usd_tf", "usd_vt", "usd_sdf", "usd_usd", "usd_usdShade", "usd_usdGeom"]
 
         self.cpp_info.components["usd_usdRiPxrImaging"].libs = ["usd_usdRiPxrImaging"]
-        self.cpp_info.components["usd_usdRiPxrImaging"].requires = ["usd_gf", "usd_tf", "usd_plug", "usd_trace", "usd_vt", "usd_work", "usd_hd", "usd_pxOsd", "usd_sdf", "usd_usd", "usd_usdGeom", "usd_usdLux", "usd_usdShade", "usd_usdImaging", "usd_usdVol", "usd_ar", "onetbb::libtbb"]
+        self.cpp_info.components["usd_usdRiPxrImaging"].requires = ["usd_gf", "usd_tf", "usd_plug", "usd_trace", "usd_vt", "usd_work", "usd_hd", "usd_pxOsd", "usd_sdf", "usd_usd", "usd_usdGeom", "usd_usdLux", "usd_usdShade", "usd_usdImaging", "usd_usdVol", "usd_ar"]
+        if self.options.shared:
+            self.cpp_info.components["usd_usdRiPxrImaging"].requires.append("onetbb::libtbb")
 
         self.cpp_info.components["usd_usdSemantics"].libs = ["usd_usdSemantics"]
         
@@ -269,7 +299,9 @@ class OpenUSDConan(ConanFile):
         self.cpp_info.components["usd_usdShadeValidators"].libs = ["usd_usdShadeValidators"]
 
         self.cpp_info.components["usd_usdSkel"].libs = ["usd_usdSkel"]
-        self.cpp_info.components["usd_usdSkel"].requires = ["usd_arch", "usd_gf", "usd_tf", "usd_trace", "usd_vt", "usd_work", "usd_sdf", "usd_usd", "usd_usdGeom", "onetbb::libtbb"]
+        self.cpp_info.components["usd_usdSkel"].requires = ["usd_arch", "usd_gf", "usd_tf", "usd_trace", "usd_vt", "usd_work", "usd_sdf", "usd_usd", "usd_usdGeom"]
+        if self.options.shared:
+            self.cpp_info.components["usd_usdSkel"].requires.append("onetbb::libtbb")
 
         self.cpp_info.components["usd_usdSkelImaging"].libs = ["usd_usdSkelImaging"]
         self.cpp_info.components["usd_usdSkelImaging"].requires = ["usd_hio", "usd_hd", "usd_usdImaging", "usd_usdSkel"]
@@ -293,7 +325,11 @@ class OpenUSDConan(ConanFile):
         self.cpp_info.components["usd_usdVolImaging"].requires = ["usd_usdImaging"]
         
         self.cpp_info.components["usd_vt"].libs = ["usd_vt"]
-        self.cpp_info.components["usd_vt"].requires = ["usd_arch", "usd_tf", "usd_gf", "usd_trace", "onetbb::libtbb"]
-        
+        self.cpp_info.components["usd_vt"].requires = ["usd_arch", "usd_tf", "usd_gf", "usd_trace"]
+        if self.options.shared:
+            self.cpp_info.components["usd_vt"].requires.append("onetbb::libtbb")
+            
         self.cpp_info.components["usd_work"].libs = ["usd_work"]
-        self.cpp_info.components["usd_work"].requires = ["usd_tf", "usd_trace", "onetbb::libtbb"]
+        self.cpp_info.components["usd_work"].requires = ["usd_tf", "usd_trace"]
+        if self.options.shared:
+            self.cpp_info.components["usd_work"].requires.append("onetbb::libtbb")
