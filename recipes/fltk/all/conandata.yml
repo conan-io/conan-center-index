@@ -10,6 +10,8 @@ sources:
     sha256: "abddf697bf1b0a59462a0d2ec57557f4bfb9c634627e6fa50d8c664112642811"
 
 patches:
+  "1.4.1":
+    - patch_file: "patches/1.4.1-0001-fix-resources.patch"
   "1.3.9":
     - patch_file: "patches/1.3.8-0001-remove-fluid.patch"
     - patch_file: "patches/1.3.8-0003-build-static-only-on-static.patch"
