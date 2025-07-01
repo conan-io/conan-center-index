@@ -52,7 +52,10 @@ class ProxyConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        copy(self, "proxy.h", self.source_folder, os.path.join(self.package_folder, "include", "proxy"))
+        if self.version == "3.4.0":
+            copy(self, "*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
+        else:
+            copy(self, "proxy.h", self.source_folder, os.path.join(self.package_folder, "include", "proxy"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "proxy")
