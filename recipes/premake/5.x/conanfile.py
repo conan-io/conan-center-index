@@ -56,7 +56,7 @@ class PremakeConan(ConanFile):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=False)
 
     @property
     def _ide_version(self):
