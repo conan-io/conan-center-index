@@ -47,7 +47,7 @@ class QpidProtonConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/3.3.2")
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("cyrus-sasl/2.1.28")
         if self.options.with_opentelemetry:
             self.requires("opentelemetry-cpp/1.14.2")
