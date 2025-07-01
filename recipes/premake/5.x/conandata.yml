@@ -2,8 +2,3 @@ sources:
   "5.0.0-beta7":
     url: "https://github.com/premake/premake-core/releases/download/v5.0.0-beta7/premake-5.0.0-beta7-src.zip"
     sha256: "d39874aed04e317a46bdd281b193fe58c70457cd07bbd50e1bdcb4729c3a4860"
-patches:
-  "5.0.0-beta7":
-    - patch_file: "patches/0001-5.0.0-beta6-mingw.patch"
-      patch_description: "Add lcrypt32 on windows compilations"
-      patch_type: "portability"

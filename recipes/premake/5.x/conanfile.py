@@ -5,7 +5,7 @@ import re
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file
+from conan.tools.files import chdir, copy, get, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc
@@ -33,9 +33,6 @@ class PremakeConan(ConanFile):
     default_options = {
         "lto": False,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os != "Windows" or is_msvc(self):
@@ -129,7 +126,6 @@ class PremakeConan(ConanFile):
             deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         if self.options.get_safe("lto", None) is False:
             for fn in glob.glob(os.path.join(self._gmake_build_dir, "*.make")):
                 replace_in_file(self, fn, "-flto", "", strict=False)
