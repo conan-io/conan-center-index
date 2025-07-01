@@ -1,13 +1,12 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.files import copy, get, rename, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=2.4"
+required_conan_version = ">=2.18" # ability to handle libplutosvg.a static library name on Windows
 
 class PlutoSVGConan(ConanFile):
     name = "plutosvg"
@@ -67,11 +66,6 @@ class PlutoSVGConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
-
-        # https://github.com/mesonbuild/meson/issues/1412
-        if is_msvc(self) and not self.options.shared:
-            rename(self, os.path.join(self.package_folder, "lib", "libplutosvg.a"),
-                os.path.join(self.package_folder, "lib", "plutosvg.lib"))
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
