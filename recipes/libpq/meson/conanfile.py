@@ -152,7 +152,7 @@ class LibpqConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "PostgreSQL")
         # INFO: Upstream libpq.pc is specific for the main library, not the whole package.
-        self.cpp_info.set_property("pkg_config_name", "__libpq")
+        self.cpp_info.set_property("pkg_config_name", "none")
 
         self.runenv_info.define_path("PostgreSQL_ROOT", self.package_folder)
 
