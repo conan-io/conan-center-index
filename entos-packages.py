@@ -57,6 +57,7 @@ def main():
 
         for recipe_to_build in recipes_to_build:
             cmd = "conan create recipes/{recipe}/{folder} --version={version} --build=missing".format(**recipe_to_build)
+            cmd += " -c tools.system.package_manager:mode=install"
             run(cmd.split(), check=True)
 
 
