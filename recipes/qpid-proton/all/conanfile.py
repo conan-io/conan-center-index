@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, export_conandata_patches, get, rmdir
+from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
 
 import os
@@ -22,23 +22,18 @@ class QpidProtonConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "tools": [True, False],
-        "tls": [True, False],
         "with_opentelemetry": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "tools": False,
-        "tls": True,
         "with_opentelemetry": True,
     }
 
     @property
     def _min_cppstd(self):
         return "14"
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,7 +56,7 @@ class QpidProtonConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "14")
+            check_min_cppstd(self, self._min_cppstd)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
@@ -91,10 +86,6 @@ class QpidProtonConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_TOOLS"] = bool(self.options["tools"])
         tc.variables["BUILD_EXAMPLES"] = False
-        if self.settings.os == "Macos":
-            tc.variables["BUILD_TLS"] = False
-        else:
-            tc.variables["BUILD_TLS"] = bool(self.options["tls"])
 
         tc.generate()
 
@@ -143,12 +134,11 @@ class QpidProtonConan(ConanFile):
         self.cpp_info.components["cpp"].libs = [f"qpid-proton-cpp{suffix}"]
         self.cpp_info.components["cpp"].requires = ["core", "proactor"]
 
-        if self.options["tls"] and self.settings.os != "Macos":
-            self.cpp_info.components["tls"].set_property("cmake_target_name", "Proton::tls")
-            self.cpp_info.components["tls"].libs = [f"qpid-proton-tls{suffix}"]
-
         if self.settings.os == "Macos":
             self.cpp_info.components["core"].requires.append("libuv::libuv")
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
 
         if self.options["with_opentelemetry"]:
             self.cpp_info.components["cpp"].requires.append("opentelemetry-cpp::opentelemetry-cpp")
