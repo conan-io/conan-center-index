@@ -470,8 +470,6 @@ class AwsSdkCppConan(ConanFile):
         },
         **{sdk_name: None for sdk_name, _ in _sdks},
         # Overrides
-        "s3": True,  # TODO: testing
-        "s3-crt": True,  # TODO: Testing too
         "monitoring": True  # TODO: Clarify why monitoring is True by default
     }
 
