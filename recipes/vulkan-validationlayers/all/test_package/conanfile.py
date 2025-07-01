@@ -4,6 +4,8 @@ from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.scm import Version
 import os
 
+from conan.tools.system.package_manager import Apt, PacMan
+
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
@@ -18,6 +20,10 @@ class TestPackageConan(ConanFile):
         self.output.info(f"version: {version}")
         self.requires(f"vulkan-loader/1.4.313.0")
         self.requires(self.tested_reference_str)
+
+    def system_requirements(self):
+        Apt(self).install(["mesa-vulkan-drivers"])
+        PacMan(self).install(["vulkan-swrast"])
 
     def build(self):
         cmake = CMake(self)
