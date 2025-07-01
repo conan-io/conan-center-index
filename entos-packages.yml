@@ -138,6 +138,9 @@ vulkan-headers:
 vulkan-hpp:
   versions:
     - '1.4.313'
+vulkan-loader:
+  versions:
+    - '1.4.313.0'
 vulkan-utility-libraries:
   versions:
     - '1.4.313.0'
