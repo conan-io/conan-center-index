@@ -4,7 +4,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy, get
 from conan.tools.scm import Version
-from conan.tools.env import VirtualBuildEnv
 import os
 
 
@@ -20,6 +19,8 @@ class IpfsChromium(ConanFile):
     url = 'https://github.com/conan-io/conan-center-index'
     settings = "os", "compiler", "build_type", "arch"
     package_type = 'static-library'
+    options = {"fPIC": [True, False]}
+    default_options = {"fPIC": True}
 
     @property
     def _min_cppstd(self):
@@ -34,6 +35,10 @@ class IpfsChromium(ConanFile):
             "msvc": "193",
             "Visual Studio": "15",
         }
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def layout(self):
         cmake_layout(self, src_folder="src")
