@@ -53,7 +53,7 @@ class YojimboConan(ConanFile):
         premake.build(workspace="Yojimbo", targets=["netcode", "reliable", "tlsf", "yojimbo"])
 
     def package(self):
-        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENCE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         for folder in ("include", "tlsf", "netcode", "reliable", "serialize"):
             # Add a namespace to avoid conflicts with other libraries
             copy(self, "*.h", os.path.join(self.source_folder, folder), os.path.join(self.package_folder, "include", "yojimbo"))
