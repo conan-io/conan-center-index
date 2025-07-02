@@ -2,12 +2,13 @@ diff --git a/Foundation/CMakeLists.txt b/Foundation/CMakeLists.txt
 index 8508261e9..503db8b3d 100644
 --- a/Foundation/CMakeLists.txt
 +++ b/Foundation/CMakeLists.txt
-@@ -99,7 +99,7 @@ set_target_properties(Foundation
+@@ -99,7 +99,8 @@ set_target_properties(Foundation
  )
 
  if(POCO_UNBUNDLED)
 -	target_link_libraries(Foundation PRIVATE Pcre2::Pcre2 ZLIB::ZLIB Utf8Proc::Utf8Proc)
-+	target_link_libraries(Foundation PRIVATE PCRE2::8BIT ZLIB::ZLIB utf8proc::utf8proc)
++	target_link_libraries(Foundation PRIVATE PCRE2::8BIT utf8proc::utf8proc)
++	target_link_libraries(Foundation INTERFACE ZLIB::ZLIB)
  	target_compile_definitions(Foundation PUBLIC POCO_UNBUNDLED)
  else()
  	target_compile_definitions(Foundation PUBLIC UTF8PROC_STATIC)
