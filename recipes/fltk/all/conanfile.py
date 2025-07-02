@@ -79,11 +79,13 @@ class FltkConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("libjpeg/9e")
         self.requires("libpng/[>=1.6 <2]")
+        # Condition is if((NOT APPLE) OR FLTK_BACKEND_X11)
+        if not is_apple_os(self):
+            self.requires("fontconfig/2.15.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.with_gl:
                 self.requires("opengl/system")
                 self.requires("glu/system")
-            self.requires("fontconfig/2.15.0")
             self.requires("xorg/system")
             if self.options.with_xft:
                 self.requires("libxft/2.3.8")
