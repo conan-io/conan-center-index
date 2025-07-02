@@ -165,6 +165,7 @@ vulkan-validationlayers:
 wayland:
   versions:
     - '1.22.0'
+    - '1.23.0'
 wayland-protocols:
   versions:
     - '1.33'
