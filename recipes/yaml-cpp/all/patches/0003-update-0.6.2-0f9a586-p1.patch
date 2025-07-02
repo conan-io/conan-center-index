@@ -1,0 +1,34 @@
+From b633ec8ef18b6ca4f02972a6a99691f2d8210abe Mon Sep 17 00:00:00 2001
+From: simbahebinbo <lansheng228@163.com>
+Date: Thu, 5 Sep 2024 15:27:40 +0800
+Subject: [PATCH] update
+
+---
+ CMakeLists.txt | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b53bf89..c91cbc7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -8,6 +8,8 @@ cmake_minimum_required(VERSION 3.1)
+ include(CheckCXXCompilerFlag)
+ include(CMakePackageConfigHelpers)
+ 
++set(CMAKE_CXX_STANDARD 11)
++set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ 
+ ###
+ ### Project settings
+@@ -24,7 +26,7 @@ set(YAML_CPP_VERSION "${YAML_CPP_VERSION_MAJOR}.${YAML_CPP_VERSION_MINOR}.${YAML
+ ### Project options
+ ###
+ ## Project stuff
+-option(YAML_CPP_BUILD_TESTS "Enable testing" ON)
++option(YAML_CPP_BUILD_TESTS "Enable testing" OFF)
+ option(YAML_CPP_BUILD_TOOLS "Enable parse tools" ON)
+ option(YAML_CPP_BUILD_CONTRIB "Enable contrib stuff in library" ON)
+ option(YAML_CPP_INSTALL "Enable generation of install target" ON)
+-- 
+2.40.0
+
