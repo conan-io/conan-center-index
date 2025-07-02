@@ -53,6 +53,7 @@ frozen:
 glslang:
   versions:
     - '1.3.268.0'
+    - '1.4.313.0'
 gnu-config:
   versions:
     - 'cci.20210814'
