@@ -74,6 +74,7 @@ libffi:
 libiconv:
   versions:
     - '1.17'
+    - '1.18'
 libjpeg-turbo:
   versions:
     - '3.0.2'
@@ -169,6 +170,7 @@ wayland:
 wayland-protocols:
   versions:
     - '1.33'
+    - '1.42'
 xkbcommon:
   versions:
     - '1.5.0'
