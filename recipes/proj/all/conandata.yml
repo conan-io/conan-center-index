@@ -1,4 +1,7 @@
 sources:
+  "9.6.2":
+    url: "https://github.com/OSGeo/PROJ/releases/download/9.6.2/proj-9.6.2.tar.gz"
+    sha256: "53d0cafaee3bb2390264a38668ed31d90787de05e71378ad7a8f35bb34c575d1"
   "9.6.0":
     url: "https://github.com/OSGeo/PROJ/releases/download/9.6.0/proj-9.6.0.tar.gz"
     sha256: "d8cae521c311c39513193657e75767f7cfbf2f91bd202fcd4a200028d3b57e14"
