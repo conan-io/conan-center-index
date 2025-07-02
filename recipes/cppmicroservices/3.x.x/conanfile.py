@@ -67,3 +67,4 @@ class CppMicroServicesConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["CppMicroServices", "DeclarativeServices", "ConfigurationAdmin"]
         self.cpp_info.includedirs = ['include/cppmicroservices3']
+        self.cpp_info.builddirs = ['share/cppmicroservices3/cmake', 'bin']
