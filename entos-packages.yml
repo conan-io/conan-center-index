@@ -38,6 +38,9 @@ expat:
 flex:
   versions:
     - '2.6.4'
+fmt:
+  versions:
+    - '11.2.0'
 fontconfig:
   versions:
     - '2.15.0'
@@ -129,6 +132,9 @@ pkgconf:
   versions:
     - '2.1.0'
     - '2.2.0'
+spdlog:
+  versions:
+    - '1.15.3'
 spirv-headers:
   versions:
     - '1.4.313.0'
