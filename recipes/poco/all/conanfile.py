@@ -4,6 +4,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag
 from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
 from collections import namedtuple
 import os
 
@@ -112,12 +113,16 @@ class PocoConan(ConanFile):
 
         foundation_external_dependencies = self._poco_component_tree["Foundation"].external_dependencies
         self._poco_component_tree["Foundation"] = self._poco_component_tree["Foundation"]._replace(external_dependencies = list(map(lambda x: 'pcre2::pcre2' if x == 'pcre::pcre' else x, foundation_external_dependencies)))
+        if Version(self.version) >= "1.14.0":
+            self._poco_component_tree["Foundation"].external_dependencies.append("utf8proc::utf8proc")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("pcre2/[>=10.42 <11]")
+        if Version(self.version) >= "1.14.0":
+            self.requires("utf8proc/2.9.0")
         self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
         if self.options.enable_xml:
             self.requires("expat/[>=2.6.2 <3]", transitive_headers=True)
