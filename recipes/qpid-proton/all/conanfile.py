@@ -114,7 +114,8 @@ class QpidProtonConan(ConanFile):
         return os.path.join("lib", "cmake")
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "QpidProton")
+        self.cpp_info.set_property("cmake_file_name", "ProtonCpp")
+        self.cpp_info.set_property("pkg_config_name", "libqpid-proton-cpp")
 
         suffix = "-static" if is_msvc(self) and not self.options.shared else ""
 
