@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(test_package LANGUAGES CXX)
 
-find_package(QpidProton REQUIRED CONFIG)
+find_package(ProtonCpp REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 

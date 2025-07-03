@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
 
 import os
@@ -32,6 +32,8 @@ class QpidProtonConan(ConanFile):
     def _min_cppstd(self):
         return "14"
 
+    def export_sources(self):
+        export_conandata_patches(self)
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -95,6 +97,7 @@ class QpidProtonConan(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
