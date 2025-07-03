@@ -59,7 +59,6 @@ class QpidProtonConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
-        self.tool_requires("cpython/[>=3.9]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=1.7 <3]")
 
