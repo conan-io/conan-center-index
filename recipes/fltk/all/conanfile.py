@@ -58,12 +58,8 @@ class FltkConan(ConanFile):
         if self.options.abi_version == None:
             _version_token = self.version.split(".")
             _version_major = int(_version_token[0])
-            if len(_version_token) >= 3:
-                _version_minor = int(_version_token[1])
-                _version_patch = int(_version_token[2])
-            elif len(_version_token) >= 2:
-                _version_minor = int(_version_token[1])
-                _version_patch = 0
+            _version_minor = int(_version_token[1])
+            _version_patch = int(_version_token[2]) if len(_version_token) >= 3 else 0
             self.options.abi_version = str(
                 int(_version_major) * 10000 + int(_version_minor) * 100 + int(_version_patch)
             )
