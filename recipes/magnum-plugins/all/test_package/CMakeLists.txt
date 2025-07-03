@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.15)
 project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
@@ -29,8 +29,8 @@ set_target_properties(${PROJECT_NAME}
 
 if(TARGET_EMSCRIPTEN)
     message("Embed OBJ file")
-    set_target_properties(${PROJECT_NAME} 
-        PROPERTIES 
+    set_target_properties(${PROJECT_NAME}
+        PROPERTIES
             LINK_FLAGS "--embed-file ${CONAN_STL_FILE}@${CONAN_STL_FILE}"
     )
 endif()

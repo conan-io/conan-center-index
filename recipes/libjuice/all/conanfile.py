@@ -7,7 +7,7 @@ from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.apple import fix_apple_shared_install_name
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=2.4"
 
 class libjuiceConan(ConanFile):
     name = "libjuice"
@@ -27,13 +27,11 @@ class libjuiceConan(ConanFile):
         "fPIC": True,
     }
 
+    languages = "C"
     implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-
-    def validate(self):
-        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -62,10 +60,7 @@ class libjuiceConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        suffix = ""
-        if is_msvc(self) and self.settings.build_type == "Debug":
-            suffix = "d"
-        self.cpp_info.libs = ["juice" + suffix]
+        self.cpp_info.libs = ["juice"]
         self.cpp_info.set_property("cmake_file_name", "LibJuice")
         if self.options.shared:
             self.cpp_info.set_property("cmake_target_name", "LibJuice::LibJuice")

@@ -135,6 +135,7 @@ class QtConan(ConanFile):
         if self._submodules_tree:
             return self._submodules_tree
         config = configparser.ConfigParser()
+        # the reference https://code.qt.io/cgit/qt/qt5.git/tree/.gitmodules?h={self.version}
         config.read(os.path.join(self.recipe_folder, f"qtmodules{self.version}.conf"))
         self._submodules_tree = {}
         assert config.sections(), f"no qtmodules.conf file for version {self.version}"
@@ -264,9 +265,6 @@ class QtConan(ConanFile):
             self.output.debug(f"qt6 option: {option}")
 
     def validate_build(self):
-        if cross_building(self):
-            raise ConanInvalidConfiguration("cross compiling qt 6 is not yet supported. Contributions are welcome")
-
         check_min_cppstd(self, 17)
 
     def validate(self):
@@ -286,6 +284,13 @@ class QtConan(ConanFile):
         if Version(self.version) >= "6.6.1" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "13":
             # note: assuming that by now, any xcode 13 is updated to the latest 13.4.1
             raise ConanInvalidConfiguration("apple-clang >= 13.1 is required by qt >= 6.6.1 cf QTBUG-119490")
+
+        if Version(self.version) >= "6.8.3":
+            if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "193":
+                raise ConanInvalidConfiguration("Visual Studio 2022 (MSVC 1930 or newer) is required by qt >= 6.8.3")
+
+            if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "15":
+                raise ConanInvalidConfiguration("apple-clang >= 14 is required by qt >= 6.8.3")
 
         if self.options.get_safe("qtwebengine"):
             if not self.options.shared:
@@ -624,7 +629,12 @@ class QtConan(ConanFile):
         if self.options.cross_compile:
             tc.variables["QT_QMAKE_DEVICE_OPTIONS"] = f"CROSS_COMPILE={self.options.cross_compile}"
         if cross_building(self):
-            tc.variables["QT_HOST_PATH"] = self.dependencies.direct_build["qt"].package_folder
+            # Mainly to locate Qt6HostInfoConfig.cmake
+            tc.cache_variables["QT_HOST_PATH"] = self.dependencies.direct_build["qt"].package_folder
+            # Stand-in for Qt6CoreTools - which is loaded for the executable targets
+            tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = os.path.join(self.dependencies.direct_build["qt"].package_folder, self._cmake_executables_file)
+            # Ensure tools for host are always built
+            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = True
 
         tc.variables["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
@@ -663,8 +673,6 @@ class QtConan(ConanFile):
                     self.info.settings.compiler.runtime = "MT/MTd"
             elif self.info.settings.compiler == "msvc":
                 self.info.settings.compiler.runtime_type = "Release/Debug"
-        if self.info.settings.os == "Android":
-            del self.info.options.android_sdk
 
     def source(self):
         destination = self.source_folder
@@ -835,7 +843,7 @@ class QtConan(ConanFile):
                 rmdir(self, os.path.join(self.package_folder, "licenses", module))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
-            rm(self, mask, self.package_folder, recursive=True)
+            rm(self, mask, self.package_folder, recursive=True, excludes="Qt6HostInfoConfig.cmake")
         rm(self, "*.la*", os.path.join(self.package_folder, "lib"), recursive=True)
         rm(self, "*.pdb*", self.package_folder, recursive=True)
         rm(self, "ensure_pro_file.cmake", self.package_folder, recursive=True)
@@ -850,7 +858,8 @@ class QtConan(ConanFile):
                 if os.path.isfile(os.path.join(self.package_folder, "lib", "cmake", m, f"{m[:-5]}Macros.cmake")):
                     continue
 
-            rmdir(self, os.path.join(self.package_folder, "lib", "cmake", m))
+            if m != "Qt6HostInfo":
+                rmdir(self, os.path.join(self.package_folder, "lib", "cmake", m))
 
         extension = ""
         if self.settings.os == "Windows":
@@ -862,7 +871,7 @@ class QtConan(ConanFile):
         filecontents += f"set(QT_VERSION_PATCH {ver.patch})\n"
         if self.settings.os == "Macos":
             filecontents += 'set(__qt_internal_cmake_apple_support_files_path "${CMAKE_CURRENT_LIST_DIR}/../../../lib/cmake/Qt6/macos")\n'
-        targets = ["moc", "rcc", "tracegen", "cmake_automoc_parser", "qlalr", "qmake"]
+        targets = ["moc", "qlalr", "rcc", "tracegen", "cmake_automoc_parser", "qmake", "qtpaths", "syncqt", "tracepointgen"]
         if self.options.with_dbus:
             targets.extend(["qdbuscpp2xml", "qdbusxml2cpp"])
         if self.options.gui:
