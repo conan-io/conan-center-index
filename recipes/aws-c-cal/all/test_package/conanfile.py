@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.scm import Version
 import os
 import io
 
@@ -33,4 +34,7 @@ class TestPackageConan(ConanFile):
             self.run(bin_path, stream, env="conanrun")
             self.output.info(stream.getvalue())
             if self._needs_openssl:
-                assert "found static libcrypto" in stream.getvalue()
+                if Version(self.version) < "0.9.1":
+                    assert "found static libcrypto" in stream.getvalue()
+                else:
+                    assert "found weak ref libcrypto" in stream.getvalue()
