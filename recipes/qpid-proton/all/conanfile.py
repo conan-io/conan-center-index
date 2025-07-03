@@ -9,7 +9,6 @@ import os
 required_conan_version = ">=2.1.0"
 
 class QpidProtonConan(ConanFile):
-    version = "0.40.0"
     name = "qpid-proton"
     description = "Qpid Proton is a high-performance, lightweight messaging library."
     license = "Apache-2.0"
