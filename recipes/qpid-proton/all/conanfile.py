@@ -83,6 +83,7 @@ class QpidProtonConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         tc.cache_variables["BUILD_TOOLS"] = False
         tc.variables["BUILD_EXAMPLES"] = False
+        tc.cache_variables["ENABLE_OPENTELEMETRYCPP"] = self.options.with_opentelemetry
         tc.cache_variables["ENABLE_JSONCPP"] = True
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_SWIG"] = True
