@@ -50,6 +50,7 @@ class QpidProtonConan(ConanFile):
             self.requires("opentelemetry-cpp/1.14.2")
         if self.settings.os == "Macos":
             self.requires("libuv/1.49.2")
+        self.requires("jsoncpp/1.9.6")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
