@@ -47,7 +47,7 @@ class FltkConan(ConanFile):
         else:
             self.options.rm_safe("with_gdiplus")
 
-        if self.options.abi_version is None:
+        if self.options.abi_version == None:
             _version_token = self.version.split(".")
             _version_major = int(_version_token[0])
             _version_minor = int(_version_token[1])
