@@ -79,7 +79,8 @@ class FltkConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("libjpeg/9e")
         self.requires("libpng/[>=1.6 <2]")
-        # Condition is if((NOT APPLE) OR FLTK_BACKEND_X11)
+        # If Version >= 1.4.1, it also depends on FLTK_BACKEND_X11, but it's not introduced
+        # in the recipe for now
         if not is_apple_os(self):
             self.requires("fontconfig/2.15.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
