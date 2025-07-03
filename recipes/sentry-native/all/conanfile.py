@@ -68,7 +68,7 @@ class SentryNativeConan(ConanFile):
                 "msvc": "192",
                 "gcc": "11",
                 "clang": "14",
-                "apple-clang": "14", #requires 14 to build crashpad/minidump: llvm/llvm-project#58637
+                "apple-clang": "14", #requires 14 to build crashpad/minidump: https://github.com/llvm/llvm-project/issues/58637
             }
         minimum_gcc_version = "5"
         if self.options.get_safe("backend") == "breakpad" or self.options.get_safe("backend") == "crashpad":
