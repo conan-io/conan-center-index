@@ -131,7 +131,7 @@ class QpidProtonConan(ConanFile):
 
         self.cpp_info.components["cpp"].set_property("cmake_target_name", "Proton::cpp")
         self.cpp_info.components["cpp"].libs = [f"qpid-proton-cpp{suffix}"]
-        self.cpp_info.components["cpp"].requires = ["core", "proactor"]
+        self.cpp_info.components["cpp"].requires = ["core", "proactor", "jsoncpp::jsoncpp"]
 
         if self.settings.os == "Macos":
             self.cpp_info.components["core"].requires.append("libuv::libuv")
