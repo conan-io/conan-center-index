@@ -51,8 +51,8 @@ class SentryNativeConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        # Sentry-native broke support of C++17 in 0.7.8 and fixed it in 0.7.19 by forking mini_chromium and using C++17 code instead of bit_cast
-        # https://github.com/getsentry/mini_chromium/
+        # Sentry-native broke support of C++17 in 0.7.8 and fixed it in 0.7.19
+        # https://github.com/getsentry/sentry-native/releases/tag/0.7.19
         if  self.options.get_safe("with_crashpad") == "sentry" and Version(self.version) >= "0.7.8" and Version(self.version) < "0.7.19":
             return "20"
         else:
@@ -68,7 +68,7 @@ class SentryNativeConan(ConanFile):
                 "msvc": "192",
                 "gcc": "11",
                 "clang": "14",
-                "apple-clang": "14", #required 14 for alignas support
+                "apple-clang": "14", #requires 14 to build crashpad/minidump: llvm/llvm-project#58637
             }
         minimum_gcc_version = "5"
         if self.options.get_safe("backend") == "breakpad" or self.options.get_safe("backend") == "crashpad":
