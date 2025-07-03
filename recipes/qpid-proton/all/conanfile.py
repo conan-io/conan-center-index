@@ -81,7 +81,7 @@ class QpidProtonConan(ConanFile):
         tc.variables["ENABLE_FUZZ_TESTING"] = False
         tc.variables["ENABLE_BENCHMARKS"] = False
 
-        tc.variables["BUILD_STATIC_LIBS"] = not bool(self.options["shared"])
+        tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
 
         tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_TOOLS"] = bool(self.options["tools"])
