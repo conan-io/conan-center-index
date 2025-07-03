@@ -81,7 +81,7 @@ class QpidProtonConan(ConanFile):
         tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
 
         tc.variables["BUILD_TESTING"] = False
-        tc.variables["BUILD_TOOLS"] = bool(self.options["tools"])
+        tc.cache_variables["BUILD_TOOLS"] = False
         tc.variables["BUILD_EXAMPLES"] = False
 
         tc.generate()
