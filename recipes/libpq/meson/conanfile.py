@@ -78,7 +78,7 @@ class LibpqConan(ConanFile):
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_xslt:
-            self.requires("libxslt/1.1.42")
+            self.requires("libxslt/[^1.1]")
         if self.options.get_safe("with_readline"):
             self.requires("readline/8.2")
 
