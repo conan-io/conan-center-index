@@ -38,14 +38,6 @@ class FltkConan(ConanFile):
         "with_xft": False,
     }
 
-    @property
-    def _is_cl_like(self):
-        return self.settings.compiler.get_safe("runtime") is not None
-
-    @property
-    def _is_cl_like_static_runtime(self):
-        return self._is_cl_like and "MT" in msvc_runtime_flag(self)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -55,7 +47,7 @@ class FltkConan(ConanFile):
         else:
             self.options.rm_safe("with_gdiplus")
 
-        if self.options.abi_version == None:
+        if self.options.abi_version is None:
             _version_token = self.version.split(".")
             _version_major = int(_version_token[0])
             _version_minor = int(_version_token[1])
@@ -94,6 +86,7 @@ class FltkConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -124,14 +117,13 @@ class FltkConan(ConanFile):
             tc.variables["FLTK_USE_SYSTEM_ZLIB"] = True
             tc.variables["FLTK_USE_SYSTEM_LIBPNG"] = True
             tc.variables["FLTK_BUILD_FLUID"] = False
-        if Version(self.version) >= "1.3.9" and self._is_cl_like:
-            tc.variables["FLTK_MSVC_RUNTIME_DLL"] = not self._is_cl_like_static_runtime
+        if self.settings.compiler.get_safe("runtime") is not None:
+            tc.variables["FLTK_MSVC_RUNTIME_DLL"] = "MT" not in msvc_runtime_flag(self)
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
