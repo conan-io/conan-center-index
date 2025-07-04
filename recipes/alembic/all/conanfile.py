@@ -44,9 +44,9 @@ class AlembicConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("imath/3.1.9", transitive_headers=True)
+        self.requires("imath/3.1.12", transitive_headers=True)
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.3")
+            self.requires("hdf5/1.14.5")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -68,7 +68,6 @@ class AlembicConan(ConanFile):
         tc.variables["ALEMBIC_BUILD_LIBS"] = True
         tc.variables["ALEMBIC_ILMBASE_LINK_STATIC"] = True # for -DOPENEXR_DLL, handled by OpenEXR package
         tc.variables["ALEMBIC_SHARED_LIBS"] = self.options.shared
-        tc.variables["ALEMBIC_USING_IMATH_3"] = False
         tc.variables["ALEMBIC_ILMBASE_FOUND"] = 1
         tc.variables["ALEMBIC_ILMBASE_LIBS"] = "OpenEXR::OpenEXR"
         if Version(self.version) >= "1.8.4":
