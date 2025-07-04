@@ -1,0 +1,94 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 64671fc6..b82ede28 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -262,6 +262,7 @@ endif (R_LANG)
+ # Add linear system solvers cumulative library
+ add_subdirectory(lin_sys)
+ 
++if (NOT BUILD_SHARED_LIBS)
+ # Static library
+ add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
+ # Give same name to static library output
+@@ -285,7 +286,7 @@ install(TARGETS osqpstatic
+         ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+         LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+         RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
+-
++endif()
+ 
+ # Install Headers
+ # ----------------------------------------------
+@@ -294,14 +295,14 @@ install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
+ 
+ 
+ 
+-if (MATLAB)
++if (MATLAB AND NOT BUILD_SHARED_LIBS)
+ target_link_libraries (osqpstatic ${Matlab_LIBRARIES})
+-endif (MATLAB)
++endif (MATLAB AND NOT BUILD_SHARED_LIBS)
+ 
+ # If we are building Python/Matlab/R interface:
+ #   - do not build shared library
+ #   - do not build demo
+-if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
++if (BUILD_SHARED_LIBS AND NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
+     # Create osqp shared library
+     # NB: Add all the linear system solvers here
+     add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
+@@ -321,11 +322,9 @@ if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
+             ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+             RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
+ 
+-    # Create demo executable (linked to static library)
+-    add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
+-    target_link_libraries (osqp_demo osqpstatic)
++    set(UNITTESTS OFF)
+ 
+-endif (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
++endif (BUILD_SHARED_LIBS AND NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
+ 
+ # Create CMake packages for the build directory
+ # ----------------------------------------------
+diff --git a/lin_sys/direct/qdldl/qdldl_sources/CMakeLists.txt b/lin_sys/direct/qdldl/qdldl_sources/CMakeLists.txt
+index 06c3d9c..426a7d2 100644
+--- a/lin_sys/direct/qdldl/qdldl_sources/CMakeLists.txt
++++ b/lin_sys/direct/qdldl/qdldl_sources/CMakeLists.txt
+@@ -99,6 +99,7 @@ target_include_directories(qdldlobject PRIVATE ${PROJECT_SOURCE_DIR}/include)
+ # Create Static Library
+ # ----------------------------------------------
+ 
++if (NOT BUILD_SHARED_LIBS)
+ include(GNUInstallDirs)
+ 
+ # Static library
+@@ -120,6 +121,7 @@ install(TARGETS qdldlstatic
+         LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+         RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
+ 
++endif()
+ 
+ # Install Headers
+ # ----------------------------------------------
+@@ -128,6 +130,7 @@ install(FILES ${qdldl_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/qdldl")
+ 
+ # Install Shared Library
+ # ----------------------------------------------
++if (BUILD_SHARED_LIBS)
+ # Create qdldl shared library
+ add_library (qdldl SHARED ${qdldl_src} ${qdldl_headers})
+ 
+@@ -143,10 +146,9 @@ install(TARGETS qdldl
+ 	ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+ 	RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
+ 
+-# Create demo executable (linked to static library)
+-add_executable (qdldl_example ${PROJECT_SOURCE_DIR}/examples/example.c)
+-target_link_libraries (qdldl_example qdldlstatic)
++set(UNITTESTS OFF)
+ 
++endif()
+ 
+ # Create CMake packages for the build directory
+ # ----------------------------------------------
