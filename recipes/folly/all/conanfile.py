@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.env import VirtualBuildEnv
@@ -10,7 +10,7 @@ from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=2.4"
 
 
 class FollyConan(ConanFile):
@@ -44,7 +44,6 @@ class FollyConan(ConanFile):
             "clang": "10",
             "apple-clang": "14",
             "msvc": "192",
-            "Visual Studio": "16",
         }
 
     def export_sources(self):
@@ -70,13 +69,13 @@ class FollyConan(ConanFile):
         self.requires("bzip2/1.0.8")
         self.requires("double-conversion/3.3.0", transitive_headers=True, transitive_libs=True)
         self.requires("gflags/2.2.2")
-        self.requires("glog/0.7.1", transitive_headers=True, transitive_libs=True)
+        self.requires("glog/0.6.0", transitive_headers=True, transitive_libs=True)
         self.requires("libevent/2.1.12", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
         self.requires("lz4/1.10.0", transitive_libs=True)
         self.requires("snappy/1.2.1")
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("zstd/1.5.5", transitive_libs=True)
+        self.requires("zstd/[~1.5]", transitive_libs=True)
         if not is_msvc(self):
             self.requires("libdwarf/0.9.1")
         self.requires("libsodium/1.0.20")
@@ -85,9 +84,13 @@ class FollyConan(ConanFile):
             self.requires("libiberty/9.1.0")
             self.requires("libunwind/1.8.0")
         if self.settings.os == "Linux":
-            self.requires("liburing/2.6")
+            self.requires("liburing/2.11")
+            self.requires("libaio/0.3.113")
+
         # INFO: Folly does not support fmt 11 on MSVC: https://github.com/facebook/folly/issues/2250
         self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
+        if Version(self.version) >= "2025.03.14":
+            self.requires("fast_float/8.0.0")
 
     def build_requirements(self):
         # INFO: Required due ZIP_LISTS CMake feature in conan_deps.cmake
@@ -106,8 +109,7 @@ class FollyConan(ConanFile):
         return [f"Boost::{comp}" for comp in self._required_boost_components]
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
@@ -130,6 +132,7 @@ class FollyConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=False)
+        self._patch_sources()
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -154,10 +157,8 @@ class FollyConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         # Honor Boost_ROOT set by boost recipe
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0074"] = "NEW"
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if Version(self.version) > "2024.08.12.00": # pylint: disable=conan-unreachable-upper-version
-            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
-
+        if Version(self.version) < "2025.04.07.00":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
 
         # 2019.10.21.00 -> either MSVC_ flags or CXX_STD
         if is_msvc(self):
@@ -192,6 +193,11 @@ class FollyConan(ConanFile):
         deps.set_property("xz_utils", "cmake_file_name", "LibLZMA")
         deps.set_property("zlib", "cmake_file_name", "ZLIB")
         deps.set_property("zstd", "cmake_file_name", "Zstd")
+        if self.settings.os == "Linux":
+            deps.set_property("libaio", "cmake_file_name", "LibAIO")
+            deps.set_property("libaio", "cmake_additional_variables_prefixes", ["LIBAIO"])
+        if Version(self.version) >= "2025.03.14":
+            deps.set_property("fast_float", "cmake_additional_variables_prefixes", ["FASTFLOAT"])
         deps.generate()
 
     def _patch_sources(self):
@@ -209,7 +215,6 @@ class FollyConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "gen_pkgconfig_vars(FOLLY_PKGCONFIG folly_deps)", "")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -251,6 +256,7 @@ class FollyConan(ConanFile):
             self.cpp_info.components["libfolly"].requires.append("liburing::liburing")
             self.cpp_info.components["libfolly"].system_libs.extend(["pthread", "dl", "rt"])
             self.cpp_info.components["libfolly"].defines.extend(["FOLLY_HAVE_ELF", "FOLLY_HAVE_DWARF"])
+            self.cpp_info.components["libfolly"].requires.append("libaio::libaio")
         elif self.settings.os == "Windows":
             self.cpp_info.components["libfolly"].system_libs.extend(["ws2_32", "iphlpapi", "crypt32"])
 
@@ -261,6 +267,9 @@ class FollyConan(ConanFile):
 
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) >= "11.0":
             self.cpp_info.components["libfolly"].system_libs.append("c++abi")
+
+        if Version(self.version) >= "2025.03.14":
+            self.cpp_info.components["libfolly"].requires.append("fast_float::fast_float")
 
         self.cpp_info.components["follybenchmark"].set_property("cmake_target_name", "Folly::follybenchmark")
         self.cpp_info.components["follybenchmark"].set_property("pkg_config_name", "libfollybenchmark")
