@@ -1,0 +1,9 @@
+sources:
+  "3.0.7.0":
+    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v3.0.7.0.tar.gz"
+    sha256: "2798e398b6ffd836ba7810e8ea510902a4aabc4a373ca0523a3f0d830c5eb103"
+patches:
+  "3.0.7.0":
+    - patch_file: "patches/3.0.7.0-cmake-targets.patch"
+      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
+      patch_type: "conan"
