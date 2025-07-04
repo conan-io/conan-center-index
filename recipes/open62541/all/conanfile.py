@@ -154,11 +154,11 @@ class Open62541Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        
+
         del self.options.embedded_profile
 
         # NodesetLoader has only rudimentary Windows support --> disabling for now. This might change in the future.
-        if Version(self.version) < "1.4.11.1" or self.settings.os != "Linux": 
+        if Version(self.version) < "1.4.11.1" or self.settings.os != "Linux":
             del self.options.nodeset_loader
 
     def configure(self):
@@ -225,7 +225,7 @@ class Open62541Conan(ConanFile):
             if self.options["libwebsockets"].with_ssl != self.options.encryption:
                 raise ConanInvalidConfiguration(
                     "When web_socket is enabled, libwebsockets:with_ssl must have the value of open62541:encryption")
-        
+
         if self.options.get_safe("nodeset_loader") and not self.options.parsing:
             # NodesetLoader requires parsing to be enabled
             raise ConanInvalidConfiguration("When nodeset_loader is enabled, then parsing has to be enabled too.")
@@ -245,7 +245,7 @@ class Open62541Conan(ConanFile):
                     filename=archive_name,
                     strip_root=True)
         self._patch_sources()
-        
+
     def _get_log_level(self):
         return {
             "Fatal": "600",
@@ -278,7 +278,7 @@ class Open62541Conan(ConanFile):
         if self.settings.os == "Neutrino":
             tc.cache_variables["UA_ARCHITECTURE"] = "posix"
 
-        if version >= "1.4.11.1":        
+        if version >= "1.4.11.1":
             tc.variables["UA_ENABLE_DEBUG_SANITIZER"] = False
 
         if self.options.subscription != False:
@@ -347,7 +347,7 @@ class Open62541Conan(ConanFile):
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
-        if Version(self.version) >= "1.4.8":
+        if version >= "1.4.11.1":
             tc.variables["UA_ENABLE_NODESETLOADER"] = self.options.get_safe("nodeset_loader")
         tc.generate()
         tc = CMakeDeps(self)
