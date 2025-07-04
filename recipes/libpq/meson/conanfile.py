@@ -106,7 +106,7 @@ class LibpqConan(ConanFile):
             return "enabled" if v else "disabled"
 
         tc = MesonToolchain(self)
-        tc.project_options["ssl"] = "openssl" if self.options.with_openssl else "disabled"
+        tc.project_options["ssl"] = "openssl" if self.options.with_openssl else "none"
         tc.project_options["icu"] = feature(self.options.with_icu)
         # Why did the old version disable this explicitly?
         tc.project_options["zlib"] = feature(self.options.with_zlib)
