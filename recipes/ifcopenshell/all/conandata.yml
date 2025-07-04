@@ -1,0 +1,9 @@
+sources:
+  "0.8.3.cci.20250613":
+    url: "https://github.com/IfcOpenShell/IfcOpenShell/archive/refs/tags/bonsai-0.8.3-alpha2506131434.tar.gz"
+    sha256: "369737ed12eb754c93319c7a5a4ee3dd9650ceca965349eb09ee30d327c20f0f"
+patches:
+  "0.8.3.cci.20250613":
+    - patch_file: "patches/patchRootCMakeLists.patch"
+      patch_description: "Have options moved after project()"
+      patch_type: "conan"
