@@ -8,12 +8,7 @@
 
 int main(void) {
 
-   activemq::library::ActiveMQCPP::initializeLibrary();
-
-   {
-      // Create a ConnectionFactory
-      std::unique_ptr<cms::ConnectionFactory> connectionFactory (cms::ConnectionFactory::createCMSConnectionFactory("failover:(tcp://localhost:61616)"));
-   }
+    activemq::library::ActiveMQCPP::initializeLibrary();
 
     activemq::library::ActiveMQCPP::shutdownLibrary();
 

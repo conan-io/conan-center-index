@@ -27,12 +27,8 @@ class PackageConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    # In case having config_options() or configure() method, the logic should be moved to the specific methods.
-    implements = ["auto_shared_fpic"]
 
-    # no exports_sources attribute, but export_sources(self) method instead
-    def export_sources(self):
-        export_conandata_patches(self)
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -46,6 +42,12 @@ class PackageConan(ConanFile):
         # INFO: Upstream only support Unix systems. See <URL>
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
+
+        # Handle the fact that the library uses deprecated throws() declarations
+        # check for the max CPP standard version and set it to 14 if it is newer
+        compiler_std = self.settings.get_safe('self.settings.compiler.cppstd')
+        if compiler_std is None or compiler_std > 14:
+            tc.extra_cxxflags.append('-std=c++14')
 
     # if a tool other than the compiler or autotools is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
@@ -61,16 +63,10 @@ class PackageConan(ConanFile):
         if not cross_building(self):
             VirtualRunEnv(self).generate(scope="build")
         tc = AutotoolsToolchain(self)
-        # autotools usually uses 'yes' and 'no' to enable/disable options
-        def yes_no(v): return "yes" if v else "no"
+
         tc.autoreconf_args.extend(["-I", "config", "-I", "m4"])
         if self.options.shared:
             tc.configure_args.extend(["--enable-shared"])
-
-        # Handle the fact that the library uses deprecated throws() declarations
-        compiler_std = self.settings.get_safe('self.settings.compiler.cppstd')
-        if compiler_std is None or compiler_std > 14:
-            tc.extra_cxxflags.append('-std=c++14')
 
         apr_package_folder = self.dependencies.direct_host["apr"].package_folder
         tc.configure_args.extend([
@@ -89,19 +85,12 @@ class PackageConan(ConanFile):
 
         script_folder = "activemq-cpp"
 
-        if conan_version >= Version("2.0.2"):
-            autotools.autoreconf(build_script_folder=script_folder)
-        else:
-            with chdir(self, os.path.join(self.source_folder, script_folder)):
-                mkdir(self, "config")
-                command = "autoreconf --force --install -I config -I m4"
-                self.run(command)
-        
+        autotools.autoreconf(build_script_folder=script_folder)
         autotools.configure(build_script_folder=script_folder)
         autotools.make()
 
     def package(self):
-        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
 
