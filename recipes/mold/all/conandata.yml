@@ -1,4 +1,7 @@
 sources:
+  "2.40.1":
+    url: "https://github.com/rui314/mold/archive/refs/tags/v2.40.1.tar.gz"
+    sha256: "d1ce09a69941f8158604c3edcc96c7178231e7dba2da66b20f5ef6e112c443b7"
   "2.36.0":
     url: "https://github.com/rui314/mold/archive/refs/tags/v2.36.0.tar.gz"
     sha256: "3f57fe75535500ecce7a80fa1ba33675830b7d7deb1e5ee9a737e2bc43cdb1c7"
@@ -26,3 +29,8 @@ sources:
   "1.11.0":
     url: "https://github.com/rui314/mold/archive/refs/tags/v1.11.0.tar.gz"
     sha256: "99318eced81b09a77e4c657011076cc8ec3d4b6867bd324b8677974545bc4d6f"
+patches:
+  "2.40.1":
+    - patch_file: "patches/2.40.1/0001-patch-enforce-c-11-for-tbb.patch"
+      patch_description: "Fix bundled oneTBB build by enforcing C++11 standard"
+      patch_type: "conan"

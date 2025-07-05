@@ -108,3 +108,5 @@ class FlacConan(ConanFile):
             self.cpp_info.components["libflac"].defines = ["FLAC__NO_DLL"]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["libflac"].system_libs += ["m"]
+                if Version(self.version) >= "1.5.0":
+                    self.cpp_info.components["libflac"].system_libs += ["pthread"]

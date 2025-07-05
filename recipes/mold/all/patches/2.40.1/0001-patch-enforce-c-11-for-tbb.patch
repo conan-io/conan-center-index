@@ -1,0 +1,28 @@
+From 2f29fc752620180d88e82792adb2ff8a1d886bd1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim=20Friedrich=20Br=C3=BCggemann?=
+ <tim.brueggemann@dampsoft.de>
+Date: Tue, 17 Jun 2025 09:48:43 +0200
+Subject: [PATCH] patch: Enforce C++11 for TBB
+
+---
+ third-party/tbb/CMakeLists.txt | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/third-party/tbb/CMakeLists.txt b/third-party/tbb/CMakeLists.txt
+index 12273b3e..21c4e2ef 100644
+--- a/third-party/tbb/CMakeLists.txt
++++ b/third-party/tbb/CMakeLists.txt
+@@ -77,9 +77,7 @@ include(CMakeDependentOption)
+ # ---------------------------------------------------------------------------------------------------------
+ # Handle C++ standard version.
+ if (NOT MSVC)  # no need to cover MSVC as it uses C++14 by default.
+-    if (NOT CMAKE_CXX_STANDARD)
+-        set(CMAKE_CXX_STANDARD 11)
+-    endif()
++    set(CMAKE_CXX_STANDARD 11)
+ 
+     if (CMAKE_CXX${CMAKE_CXX_STANDARD}_STANDARD_COMPILE_OPTION)  # if standard option was detected by CMake
+         set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-- 
+2.25.1
+
