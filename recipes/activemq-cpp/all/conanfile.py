@@ -1,13 +1,11 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd, cross_building
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, mkdir, rm, rmdir
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.scm import Version
 import os
 
 class PackageConan(ConanFile):
@@ -44,10 +42,13 @@ class PackageConan(ConanFile):
         if self.settings.os not in ["Linux", "FreeBSD", "MacOS", "Windows"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
 
+        check_min_cppstd(self, 11)
+
         # Handle the fact that the library uses deprecated throws() declarations
         # check for the max CPP standard version and set it to 14 if it is newer
         compiler_std = self.settings.get_safe('self.settings.compiler.cppstd')
         if compiler_std is None or compiler_std > 14:
+            tc = AutotoolsToolchain(self)
             tc.extra_cxxflags.append('-std=c++14')
 
     # if a tool other than the compiler or autotools is required to build the project (pkgconf, bison, flex etc)
@@ -111,5 +112,5 @@ class PackageConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "activemq-cpp")
 
         # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD", "MacOS"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
