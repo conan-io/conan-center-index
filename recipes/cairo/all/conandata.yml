@@ -1,4 +1,7 @@
 sources:
+  "1.18.4":
+    sha256: "6d9281e786fd289d382324d4588d59973a36911e1865b40e64f9ec39936ceba8"
+    url: "https://gitlab.freedesktop.org/cairo/cairo/-/archive/1.18.4/cairo-1.18.4.tar.bz2"
   "1.18.0":
     sha256: "abf8fba4d510086a492783c3e0828e90b32734738fd80906595617d229d02bab"
     url: "https://gitlab.freedesktop.org/cairo/cairo/-/archive/1.18.0/cairo-1.18.0.tar.bz2"

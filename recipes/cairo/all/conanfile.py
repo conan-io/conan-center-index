@@ -86,7 +86,7 @@ class CairoConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("pixman/0.43.4")
+        self.requires("pixman/0.46.2")
         if self.options.with_zlib and self.options.with_png:
             self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_lzo:
@@ -207,8 +207,9 @@ class CairoConan(ConanFile):
 
         # Dependency freetype2 found: NO found 2.11.0 but need: '>= 9.7.3'
         if self.options.with_freetype:
+            freetype_req = "23.0.17" if Version(self.version) >= "1.18.4" else "9.7.3"
             replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
-                                  "freetype_required_version = '>= 9.7.3'",
+                                  f"freetype_required_version = '>= {freetype_req}'",
                                   f"freetype_required_version = '>= {self.dependencies['freetype'].ref.version}'")
         meson = Meson(self)
         meson.configure()
