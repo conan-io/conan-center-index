@@ -34,13 +34,14 @@ class PackageConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("apr/1.7.4")
-        self.requires("openssl/[>=1.0.0]")
+        self.requires("apr/[>=1.3]")
+        self.requires("apr-util/[>=1.3]")
+        self.requires("libuuid/[>=1.0.3]")
 
     def validate(self):
         # Always comment the reason including the upstream issue.
         # INFO: Upstream only support Unix systems. See <URL>
-        if self.settings.os not in ["Linux", "FreeBSD"]:
+        if self.settings.os not in ["Linux", "FreeBSD", "MacOS", "Windows"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
 
         # Handle the fact that the library uses deprecated throws() declarations
