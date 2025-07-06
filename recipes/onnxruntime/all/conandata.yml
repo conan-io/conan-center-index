@@ -1,7 +1,7 @@
 sources:
-  "1.19.2":
-    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.19.2.tar.gz"
-    sha256: "870ee3772d265d1c7b0799ac7280071f8ecd55b11ee3f11868a3e79c7f4cab0f"
+  "1.22.0":
+    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.22.0.tar.gz"
+    sha256: "08b078eb7afbf376064b2b0f1781e3d78151cac0592988a0c0ec78bf72fde810"
   "1.18.1":
     url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.18.1.tar.gz"
     sha256: "480ff5d2450ff18d02db48908c9c0c6a602993942cb47866b8effe32d0469a2c"
@@ -18,14 +18,8 @@ sources:
     url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.14.1.tar.gz"
     sha256: "f998352b131bb89fa7dd1f1d87ddbafe647dfaddd11929b6b5168b3f4ef857de"
 patches:
-  "1.19.2":
-    - patch_file: "patches/1.17.3-0002-missing-include.patch"
-      patch_description: "add missing '<optional>' include when abseil is built without c++17 support"
-      patch_type: "portability"
-    - patch_file: "patches/1.18.0-0004-abseil-no-string-view.patch"
-      patch_description: "allow to build with abseil built without c++17 support"
-      patch_type: "portability"
-    - patch_file: "patches/1.19.0-0005-fix-cutlass-cuda-provider.patch"
+  "1.22.0":
+    - patch_file: "patches/1.22.0-0005-fix-cutlass-cuda-provider.patch"
       patch_description: "use cutlass from Conan"
       patch_type: "portability"
   "1.18.1":
@@ -83,7 +77,7 @@ patches:
 # ONNX versions are based on the minor version used at
 # https://github.com/microsoft/onnxruntime/tree/main/cmake/external
 onnx_version_map:
-  "1.19.2": "1.16.2"
+  "1.22.0": "1.17.0"
   "1.18.1": "1.16.2"
   "1.17.3": "1.15.0"
   "1.16.3": "1.14.1"

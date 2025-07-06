@@ -101,9 +101,9 @@ class OnnxRuntimeConan(ConanFile):
             self.requires("cpuinfo/cci.20231129")
         else:
             self.requires("cpuinfo/cci.20220618")  # Newer versions are not compatible
-        if self.settings.os != "Windows":
+        if self.settings.os != "Windows" and Version(self.version) < "1.22.0":
             self.requires("nsync/1.26.0")
-        else:
+        if self.settings.os == "Windows":
             self.requires("wil/1.0.240803.1")
         if self.options.with_xnnpack:
             if Version(self.version) >= "1.17.0":
@@ -196,7 +196,7 @@ class OnnxRuntimeConan(ConanFile):
         if Version(self.version) >= "1.17" and Version(self.version) < "1.19":
             # https://github.com/microsoft/onnxruntime/commit/5bfca1dc576720627f3af8f65e25af408271079b
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "onnxruntime_providers_cuda.cmake"),
-                            'option(onnxruntime_NVCC_THREADS "Number of threads that NVCC can use for compilation." 1)', 
+                            'option(onnxruntime_NVCC_THREADS "Number of threads that NVCC can use for compilation." 1)',
                             'set(onnxruntime_NVCC_THREADS "1" CACHE STRING "Number of threads that NVCC can use for compilation.")')
 
     def build(self):
@@ -264,9 +264,9 @@ class OnnxRuntimeConan(ConanFile):
             "ms-gsl::ms-gsl",
             "cpuinfo::cpuinfo"
         ]
-        if self.settings.os != "Windows":
+        if self.settings.os != "Windows" and Version(self.version) < "1.22.0":
             self.cpp_info.requires.append("nsync::nsync")
-        else:
+        if self.settings.os == "Windows":
             self.cpp_info.requires.append("wil::wil")
         if self.options.with_xnnpack:
             self.cpp_info.requires.append("xnnpack::xnnpack")

@@ -2,7 +2,7 @@ diff --git a/cmake/onnxruntime_providers_cuda.cmake b/cmake/onnxruntime_provider
 index 0829be05a3..c16dfd9e52 100644
 --- a/cmake/onnxruntime_providers_cuda.cmake
 +++ b/cmake/onnxruntime_providers_cuda.cmake
-@@ -217,8 +217,8 @@
+@@ -253,8 +253,8 @@
        target_link_libraries(${target} PRIVATE CUDA::cuda_driver)
      endif()
  
@@ -10,6 +10,6 @@ index 0829be05a3..c16dfd9e52 100644
 -    target_include_directories(${target} PRIVATE ${cutlass_SOURCE_DIR}/include ${cutlass_SOURCE_DIR}/examples ${cutlass_SOURCE_DIR}/tools/util/include)
 +    find_package(NvidiaCutlass)
 +    target_link_libraries(${target} PRIVATE nvidia::cutlass::cutlass)
- 
-     target_include_directories(${target} PRIVATE ${ONNXRUNTIME_ROOT} ${CMAKE_CURRENT_BINARY_DIR}  ${eigen_INCLUDE_DIRS} ${TVM_INCLUDES}
-      PUBLIC ${CUDAToolkit_INCLUDE_DIRS})
+     target_link_libraries(${target} PRIVATE Eigen3::Eigen)
+     target_include_directories(${target} PRIVATE ${ONNXRUNTIME_ROOT} ${CMAKE_CURRENT_BINARY_DIR} PUBLIC ${CUDAToolkit_INCLUDE_DIRS})
+     # ${CMAKE_CURRENT_BINARY_DIR} is so that #include "onnxruntime_config.h" inside tensor_shape.h is found
