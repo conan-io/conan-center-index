@@ -57,7 +57,7 @@ class LibGphoto2(ConanFile):
         if self.options.with_libcurl:
             self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.12.3")
+            self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_libexif:
             self.requires("libexif/0.6.24")
         if self.options.with_libjpeg:
@@ -69,7 +69,7 @@ class LibGphoto2(ConanFile):
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):

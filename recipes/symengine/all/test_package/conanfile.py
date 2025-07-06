@@ -17,7 +17,6 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CMAKE_CXX_STANDARD"] = "11"
         tc.generate()
 
     def build(self):

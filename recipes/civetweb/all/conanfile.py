@@ -5,7 +5,7 @@ from conan.tools.files import export_conandata_patches, apply_conandata_patches,
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class CivetwebConan(ConanFile):
@@ -99,6 +99,7 @@ class CivetwebConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -132,13 +133,15 @@ class CivetwebConan(ConanFile):
         if self._has_zlib_option:
             tc.variables["CIVETWEB_ENABLE_ZLIB"] = self.options.with_zlib
 
+        if Version(self.version) <= "1.16":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4
+
         tc.generate()
 
         cd = CMakeDeps(self)
         cd.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -187,11 +190,3 @@ class CivetwebConan(ConanFile):
             elif self.settings.os == "Windows":
                 if self.options.shared:
                     self.cpp_info.components["civetweb-cpp"].defines.append("CIVETWEB_CXX_DLL_IMPORTS")
-
-        # TODO: to remove once conan v1 support dropped
-        self.cpp_info.components["_civetweb"].names["cmake_find_package"] = "civetweb"
-        self.cpp_info.components["_civetweb"].names["cmake_find_package_multi"] = "civetweb"
-        if self.options.with_cxx:
-            self.cpp_info.components["civetweb-cpp"].names["cmake_find_package"] = "civetweb-cpp"
-            self.cpp_info.components["civetweb-cpp"].names["cmake_find_package_multi"] = "civetweb-cpp"
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

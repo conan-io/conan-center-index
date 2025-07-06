@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(tinyxml LANGUAGES CXX)
 
 option(TINYXML_WITH_STL "Compile TinyXML with STL" OFF)

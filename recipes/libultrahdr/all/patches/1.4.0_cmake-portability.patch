@@ -1,0 +1,44 @@
+diff --git CMakeLists.txt CMakeLists.txt
+index 69a249b..9fb78be 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -19,7 +19,7 @@ cmake_minimum_required(VERSION 3.15)
+ # CMP0091: MSVC runtime library flags are selected by an abstraction.
+ # New in CMake 3.15. https://cmake.org/cmake/help/latest/policy/CMP0091.html
+ if(POLICY CMP0091)
+-  cmake_policy(SET CMP0091 OLD)
++  cmake_policy(SET CMP0091 NEW)
+ endif()
+ 
+ set(UHDR_MAJOR_VERSION 1)
+@@ -144,7 +144,7 @@ if(UHDR_BUILD_BENCHMARK AND EMSCRIPTEN)
+ endif()
+ 
+ # side effects
+-if(CMAKE_CROSSCOMPILING AND UHDR_ENABLE_INSTALL)
++if(FALSE)
+   set(UHDR_ENABLE_INSTALL FALSE) # disable install and uninstall targets during cross compilation.
+   message(STATUS "Install and uninstall targets - Disabled")
+ endif()
+@@ -171,9 +171,9 @@ endif()
+ ###########################################################
+ # Compile flags
+ ###########################################################
+-set(CMAKE_CXX_STANDARD 17)
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-set(CMAKE_CXX_EXTENSIONS OFF)
++# set(CMAKE_CXX_STANDARD 17)
++# set(CMAKE_CXX_STANDARD_REQUIRED ON)
++# set(CMAKE_CXX_EXTENSIONS OFF)
+ if(BUILD_SHARED_LIBS)
+   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+   set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+@@ -796,7 +796,7 @@ if(UHDR_BUILD_JAVA)
+ endif()
+ 
+ if(UHDR_ENABLE_INSTALL)
+-  if(NOT(MSVC OR XCODE))
++  if(TRUE)
+     include(GNUInstallDirs)
+ 
+     # pkg-config: libuhdr.pc

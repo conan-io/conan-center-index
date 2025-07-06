@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.scm import Version
 import os
@@ -34,13 +34,13 @@ class OpenSubdivConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_tbb": False,
-        "with_opengl": False,
+        "with_opengl": True,
         "with_omp": False,
         "with_cuda": False,
         "with_clew": False,
         "with_opencl": False,
         "with_dx": False,
-        "with_metal": False,
+        "with_metal": True
     }
 
     short_paths = True
@@ -86,7 +86,12 @@ class OpenSubdivConan(ConanFile):
             if Version(self.version) < "3.6.0":
                 self.requires("onetbb/2020.3.3", transitive_headers=True)
             else:
-                self.requires("onetbb/2021.10.0", transitive_headers=True)
+                self.requires("onetbb/2021.12.0", transitive_headers=True)
+        if self.options.with_opengl:
+            self.requires("opengl/system")
+            self.requires("glfw/3.4")
+        if self.options.get_safe("with_metal"):
+            self.requires("metal-cpp/14.2")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -138,6 +143,9 @@ class OpenSubdivConan(ConanFile):
         tc.variables["NO_MACOS_FRAMEWORK"] = True
         tc.generate()
 
+        tc = CMakeDeps(self)
+        tc.generate()
+
     def _patch_sources(self):
         apply_conandata_patches(self)
         if self.settings.os == "Macos" and not self._osd_gpu_enabled:
@@ -172,6 +180,11 @@ class OpenSubdivConan(ConanFile):
         if self._osd_gpu_enabled:
             self.cpp_info.components["osdgpu"].set_property("cmake_target_name", f"OpenSubdiv::osdgpu{target_suffix}")
             self.cpp_info.components["osdgpu"].libs = ["osdGPU"]
+            self.cpp_info.components["osdgpu"].requires = ["osdcpu"]
+            if self.options.with_opengl:
+                self.cpp_info.components["osdgpu"].requires.extend(["opengl::opengl", "glfw::glfw"])
+            if self.options.get_safe("with_metal"):
+                self.cpp_info.components["osdgpu"].requires.append("metal-cpp::metal-cpp")
             dl_required = self.options.with_opengl or self.options.with_opencl
             if self.settings.os in ["Linux", "FreeBSD"] and dl_required:
                 self.cpp_info.components["osdgpu"].system_libs = ["dl"]

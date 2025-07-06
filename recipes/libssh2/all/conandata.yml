@@ -1,4 +1,7 @@
 sources:
+  "1.11.1":
+    sha256: 9954cb54c4f548198a7cbebad248bdc87dd64bd26185708a294b2b50771e3769
+    url: https://github.com/libssh2/libssh2/releases/download/libssh2-1.11.1/libssh2-1.11.1.tar.xz
   "1.11.0":
     sha256: a488a22625296342ddae862de1d59633e6d446eff8417398e06674a49be3d7c2
     url: https://github.com/libssh2/libssh2/releases/download/libssh2-1.11.0/libssh2-1.11.0.tar.xz
@@ -14,3 +17,20 @@ sources:
   "1.8.0":
     sha256: 39f34e2f6835f4b992cafe8625073a88e5a28ba78f83e8099610a7b3af4676d4
     url: https://github.com/libssh2/libssh2/releases/download/libssh2-1.8.0/libssh2-1.8.0.tar.gz
+patches:
+  "1.9.0":
+    - patch_file: "patches/libssh2-1.9.0-CVE2020-22218.patch"
+      patch_description: "Fix CVE2020-22218"
+      patch_type: "vulnerability"
+      patch_source: "https://github.com/libssh2/libssh2/pull/476"
+  "1.8.2":
+    - patch_file: "patches/libssh2-1.8.2-CVE2020-22218.patch"
+      patch_description: "Fix CVE2020-22218"
+      patch_type: "vulnerability"
+      patch_source: "https://github.com/libssh2/libssh2/pull/476"
+  "1.8.0":
+    - patch_file: "patches/libssh2-1.8.0-CVE2020-22218.patch"
+      patch_description: "Fix CVE2020-22218"
+      patch_type: "vulnerability"
+      patch_source: "https://github.com/libssh2/libssh2/pull/476"
+

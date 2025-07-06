@@ -3,14 +3,13 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import chdir, copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, NMakeDeps, NMakeToolchain
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=2.18"
 
 
 class LibxsltConan(ConanFile):
@@ -39,13 +38,6 @@ class LibxsltConan(ConanFile):
         "plugins": False,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -60,21 +52,14 @@ class LibxsltConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "1.1.42":
-            self.requires("libxml2/[>=2.12.5 <3]", transitive_headers=True, transitive_libs=True)
-        elif Version(self.version) >= "1.1.39":
-            # see https://github.com/conan-io/conan-center-index/pull/16205#discussion_r1149570846
-            # Older versions use deprecated functions that were removed in libxml2 2.13
-            self.requires("libxml2/[>=2.12.5 <2.13]", transitive_headers=True, transitive_libs=True)
-        else:
-            self.requires("libxml2/2.11.6", transitive_headers=True, transitive_libs=True)
+        self.requires("libxml2/[>=2.12.5 <3]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.options.plugins and not self.options.shared:
             raise ConanInvalidConfiguration("plugins require shared")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not is_msvc(self):
+        if self.settings_build.os == "Windows" and not is_msvc(self):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -170,7 +155,6 @@ class LibxsltConan(ConanFile):
             self.run(f"nmake -f Makefile.msvc {targets}")
 
     def build(self):
-        apply_conandata_patches(self)
         if is_msvc(self):
             self._build_msvc()
         else:
@@ -179,7 +163,7 @@ class LibxsltConan(ConanFile):
             autotools.make()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "Copyright", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
             copy(self, "*.h", src=os.path.join(self.source_folder, "libxslt"),
                               dst=os.path.join(self.package_folder, "include", "libxslt"))
@@ -206,7 +190,7 @@ class LibxsltConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "LibXslt")
-        self.cpp_info.set_property("pkg_config_name", "libxslt_full_package") # unofficial, avoid conflicts in conan generators
+        self.cpp_info.set_property("pkg_config_name", "none") # see the two standalone ones instead
 
         prefix = "lib" if is_msvc(self) else ""
         suffix = "_a" if is_msvc(self) and not self.options.shared else ""
@@ -230,15 +214,3 @@ class LibxsltConan(ConanFile):
         self.cpp_info.components["exslt"].requires = ["xslt"]
         if not self.options.shared:
             self.cpp_info.components["exslt"].defines = ["LIBEXSLT_STATIC"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "LibXslt"
-        self.cpp_info.names["cmake_find_package_multi"] = "LibXslt"
-        self.cpp_info.names["pkg_config"] = "libxslt_full_package"
-        self.cpp_info.components["xslt"].names["cmake_find_package"] = "LibXslt"
-        self.cpp_info.components["xslt"].names["cmake_find_package_multi"] = "LibXslt"
-        self.cpp_info.components["xslt"].names["pkg_config"] = "libxslt"
-        self.cpp_info.components["exslt"].names["cmake_find_package"] = "LibExslt"
-        self.cpp_info.components["exslt"].names["cmake_find_package_multi"] = "LibExslt"
-        self.cpp_info.components["exslt"].names["pkg_config"] = "libexslt"
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

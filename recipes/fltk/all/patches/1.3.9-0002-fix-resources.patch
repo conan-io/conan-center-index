@@ -1,0 +1,15 @@
+diff --git a/CMake/resources.cmake b/CMake/resources.cmake
+index a763fb6..b80a6d2 100644
+--- a/CMake/resources.cmake
++++ b/CMake/resources.cmake
+@@ -144,7 +144,8 @@ mark_as_advanced (FREETYPE_PATH)
+ # libraries
+ find_library (LIB_dl dl)
+ if (NOT APPLE)
+-  find_library (LIB_fontconfig fontconfig)
++  find_package(Fontconfig REQUIRED)
++  set(LIB_fontconfig "${Fontconfig_LIBRARIES}" CACHE INTERNAL "")
+ endif (NOT APPLE)
+ find_library (LIB_freetype freetype)
+ find_library (LIB_GL GL)
+ 

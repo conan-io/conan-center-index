@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get, replace_in_file, rm, rmdir
@@ -15,11 +14,12 @@ class CalcephConan(ConanFile):
     name = "calceph"
     description = "C Library designed to access the binary planetary ephemeris " \
                   "files, such INPOPxx, JPL DExxx and SPICE ephemeris files."
-    license = ["CECILL-C", "CECILL-B", "CECILL-2.1"]
+    license = ("CECILL-C", "CECILL-B", "CECILL-2.1")
     topics = ("ephemeris", "astronomy", "space", "planet")
     homepage = "https://www.imcce.fr/inpop/calceph"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -43,17 +43,16 @@ class CalcephConan(ConanFile):
             del self.options.threadsafe
 
     def configure(self):
-        if self.options.shared:
+        if self.settings.os == "Windows":
+            del self.options.shared
+            self.package_type = "static-library"
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
-
-    def validate(self):
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared builds with Visual Studio yet")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not is_msvc(self):

@@ -66,7 +66,7 @@ class LibSixelConan(ConanFile):
         if self.options.with_jpeg:
             self.requires("libjpeg/9e")
         if self.options.with_png:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self):
@@ -75,9 +75,9 @@ class LibSixelConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.3")
+        self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

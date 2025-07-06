@@ -9,7 +9,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=2.1"
 
 
 class SentryNativeConan(ConanFile):
@@ -51,7 +51,9 @@ class SentryNativeConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        if Version(self.version) >= "0.7.8" and self.options.get_safe("with_crashpad") == "sentry":
+        # Sentry-native broke support of C++17 in 0.7.8 and fixed it in 0.7.19
+        # https://github.com/getsentry/sentry-native/releases/tag/0.7.19
+        if  self.options.get_safe("with_crashpad") == "sentry" and Version(self.version) >= "0.7.8" and Version(self.version) < "0.7.19":
             return "20"
         else:
             return "17"
@@ -66,7 +68,7 @@ class SentryNativeConan(ConanFile):
                 "msvc": "192",
                 "gcc": "11",
                 "clang": "14",
-                "apple-clang": "14",
+                "apple-clang": "14", #requires 14 to build crashpad/minidump: https://github.com/llvm/llvm-project/issues/58637
             }
         minimum_gcc_version = "5"
         if self.options.get_safe("backend") == "breakpad" or self.options.get_safe("backend") == "crashpad":
@@ -83,7 +85,7 @@ class SentryNativeConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        if self.settings.os != "Windows" or Version(self.version) < "0.6.0":
+        if self.settings.os != "Windows":
             del self.options.wer
 
         # Configure default transport
@@ -127,17 +129,15 @@ class SentryNativeConan(ConanFile):
             if self.options.with_breakpad == "google":
                 self.requires("breakpad/cci.20210521")
         if self.options.get_safe("qt"):
-            self.requires("qt/5.15.11")
-            self.requires("openssl/[>=1.1 <4]")
+            self.requires("qt/[>=5.15.16 <7]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler doesn't support."
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler {self.settings.compiler} version {self.settings.compiler.version} doesn't support."
             )
         if self.options.transport == "winhttp" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("The winhttp transport is only supported on Windows")
@@ -302,30 +302,3 @@ class SentryNativeConan(ConanFile):
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info(f"Appending PATH environment variable: {bin_path}")
             self.env_info.PATH.append(bin_path)
-
-            # TODO: to remove in conan v2 once cmake_find_package* generators removed
-            self.cpp_info.names["cmake_find_package"] = "crashpad"
-            self.cpp_info.names["cmake_find_package_multi"] = "crashpad"
-            self.cpp_info.components["crashpad_mini_chromium"].names["cmake_find_package"] = "mini_chromium"
-            self.cpp_info.components["crashpad_mini_chromium"].names["cmake_find_package_multi"] = "mini_chromium"
-            self.cpp_info.components["crashpad_compat"].names["cmake_find_package"] = "compat"
-            self.cpp_info.components["crashpad_compat"].names["cmake_find_package_multi"] = "compat"
-            self.cpp_info.components["crashpad_util"].names["cmake_find_package"] = "util"
-            self.cpp_info.components["crashpad_util"].names["cmake_find_package_multi"] = "util"
-            self.cpp_info.components["crashpad_client"].names["cmake_find_package"] = "client"
-            self.cpp_info.components["crashpad_client"].names["cmake_find_package_multi"] = "client"
-            self.cpp_info.components["crashpad_snapshot"].names["cmake_find_package"] = "snapshot"
-            self.cpp_info.components["crashpad_snapshot"].names["cmake_find_package_multi"] = "snapshot"
-            self.cpp_info.components["crashpad_minidump"].names["cmake_find_package"] = "minidump"
-            self.cpp_info.components["crashpad_minidump"].names["cmake_find_package_multi"] = "minidump"
-            if self.settings.os == "Windows":
-                self.cpp_info.components["crashpad_getopt"].names["cmake_find_package"] = "getopt"
-                self.cpp_info.components["crashpad_getopt"].names["cmake_find_package_multi"] = "getopt"
-            self.cpp_info.components["crashpad_handler"].names["cmake_find_package"] = "handler"
-            self.cpp_info.components["crashpad_handler"].names["cmake_find_package_multi"] = "handler"
-            self.cpp_info.components["crashpad_tools"].names["cmake_find_package"] = "tools"
-            self.cpp_info.components["crashpad_tools"].names["cmake_find_package_multi"] = "tools"
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "sentry"
-        self.cpp_info.names["cmake_find_package_multi"] = "sentry"

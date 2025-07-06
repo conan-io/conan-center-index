@@ -1,0 +1,22 @@
+A fix for https://github.com/QtExcel/QXlsx/issues/349 based on
+https://github.com/QtExcel/QXlsx/commit/11bafef83286e79a95f17773926b62253ba53cab
+--- a/QXlsx/source/xlsxworkbook.cpp
++++ b/QXlsx/source/xlsxworkbook.cpp
+@@ -607,7 +607,7 @@
+ 
+                 AbstractSheet *sheet = addSheet(name, sheetId, type);
+                 sheet->setSheetState(state);
+-                if (relationship.target.startsWith("/")) {
++                if (relationship.target.startsWith(u'/')) {
+                     QString fullPath = QDir::cleanPath(relationship.target.mid(1));
+ 
+                     sheet->setFilePath(fullPath);
+@@ -618,7 +618,7 @@
+                     // QLatin1String("/") + relationship.target);
+                     const auto parts = splitPath(strFilePath);
+                     QString fullPath =
+-                        QDir::cleanPath(parts.first() + QLatin1String("/") + relationship.target);
++                        QDir::cleanPath(parts.first() + u'/' + relationship.target);
+     
+                     sheet->setFilePath(fullPath);
+                 }

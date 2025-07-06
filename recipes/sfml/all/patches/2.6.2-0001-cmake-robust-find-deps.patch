@@ -1,0 +1,54 @@
+diff --git a/src/SFML/Audio/CMakeLists.txt b/src/SFML/Audio/CMakeLists.txt
+index 8158365..a2e029a 100644
+--- a/src/SFML/Audio/CMakeLists.txt
++++ b/src/SFML/Audio/CMakeLists.txt
+@@ -73,8 +73,8 @@ sfml_find_package(VORBIS INCLUDE "VORBIS_INCLUDE_DIRS" LINK "VORBIS_LIBRARIES")
+ sfml_find_package(FLAC INCLUDE "FLAC_INCLUDE_DIR" LINK "FLAC_LIBRARY")
+ 
+ # avoids warnings in vorbisfile.h
+-target_compile_definitions(VORBIS INTERFACE "OV_EXCLUDE_STATIC_CALLBACKS")
+-target_compile_definitions(FLAC INTERFACE "FLAC__NO_DLL")
++# target_compile_definitions(VORBIS INTERFACE "OV_EXCLUDE_STATIC_CALLBACKS")
++# target_compile_definitions(FLAC INTERFACE "FLAC__NO_DLL")
+ 
+ # define the sfml-audio target
+ sfml_add_library(sfml-audio
+@@ -84,7 +84,8 @@ sfml_add_library(sfml-audio
+ target_link_libraries(sfml-audio PRIVATE OpenAL::OpenAL)
+ 
+ # minimp3 sources
+-target_include_directories(sfml-audio SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/extlibs/headers/minimp3")
++find_package(minimp3 REQUIRED CONFIG)
++target_include_directories(sfml-audio SYSTEM PRIVATE ${minimp3_INCLUDE_DIRS})
+ 
+ if(SFML_OS_ANDROID)
+     target_link_libraries(sfml-audio PRIVATE android OpenSLES)
+@@ -92,4 +93,4 @@ endif()
+ 
+ target_link_libraries(sfml-audio
+                       PUBLIC sfml-system
+-                      PRIVATE VORBIS FLAC)
++                      PRIVATE Vorbis::vorbisenc Vorbis::vorbisfile FLAC::FLAC minimp3::minimp3)
+diff --git a/src/SFML/Graphics/CMakeLists.txt b/src/SFML/Graphics/CMakeLists.txt
+index a939a98..6f16273 100644
+--- a/src/SFML/Graphics/CMakeLists.txt
++++ b/src/SFML/Graphics/CMakeLists.txt
+@@ -93,7 +93,8 @@ sfml_add_library(sfml-graphics
+ target_link_libraries(sfml-graphics PUBLIC sfml-window)
+ 
+ # stb_image sources
+-target_include_directories(sfml-graphics SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/extlibs/headers/stb_image")
++find_package(stb REQUIRED CONFIG)
++target_link_libraries(sfml-graphics PRIVATE stb::stb)
+ 
+ # glad sources
+ target_include_directories(sfml-graphics SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/extlibs/headers/glad/include")
+@@ -123,7 +124,7 @@ if((SFML_COMPILER_MSVC AND SFML_MSVC_VERSION GREATER_EQUAL 14) OR (SFML_COMPILER
+     target_link_libraries(sfml-graphics PRIVATE legacy_stdio_definitions.lib)
+ endif()
+ 
+-sfml_find_package(Freetype INCLUDE "FREETYPE_INCLUDE_DIRS" LINK "FREETYPE_LIBRARY")
++find_package(Freetype REQUIRED)
+ target_link_libraries(sfml-graphics PRIVATE Freetype)
+ 
+ # add preprocessor symbols

@@ -5,3 +5,11 @@ versions:
     folder: all
   "3.8.3":
     folder: all
+  "3.9.1":
+    folder: all
+  "3.9.2":
+    folder: all
+  "3.9.3":
+    folder: all
+  "3.10.1":
+    folder: all

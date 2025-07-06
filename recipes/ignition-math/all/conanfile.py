@@ -67,7 +67,7 @@ class IgnitionMathConan(ConanFile):
 
     def requirements(self):
         self.requires("eigen/3.3.9")
-        self.requires("doxygen/1.8.17")
+        self.requires("doxygen/[>=1.8 <2]")
         self.requires("swig/4.0.2")
 
     def build_requirements(self):

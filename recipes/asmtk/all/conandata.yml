@@ -1,0 +1,9 @@
+sources:
+  "0.0.0.cci.20230718":
+    url: "https://github.com/asmjit/asmtk/archive/e2752c85d39da4b0c5c729737a6faa25286b8e0c.zip"
+    sha256: "8cce0edf5f83df44853469c58037c59ae51b3630ed48be7c2370473f89d0986d"
+patches:
+  "0.0.0.cci.20230718":
+    - patch_file: "patches/0001-update-cmakelist.patch"
+      patch_description: "Simple update to CMakeLists.txt to let asmtk link conan asmjit::asmjit instead of trying to do some magic"
+      patch_type: "conan"

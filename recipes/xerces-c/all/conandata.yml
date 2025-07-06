@@ -1,4 +1,7 @@
 sources:
+  "3.3.0":
+    url: "https://github.com/apache/xerces-c/archive/v3.3.0.tar.gz"
+    sha256: "0f28ea2d7a0a3824d326c8bc4be26a3bb01dde289663beb6f15b241f80cbd3ae"
   "3.2.5":
     url: "https://github.com/apache/xerces-c/archive/v3.2.5.tar.gz"
     sha256: "4042f6f11c9eba745dc0e5f8035d98b442097ee4efc69e4853410e4737a987f8"
@@ -12,6 +15,10 @@ sources:
     url: "https://github.com/apache/xerces-c/archive/v3.2.2.tar.gz"
     sha256: "7fe5af7d7ad9d4a06503c15fb5bb0aa5f2ba7959700d16c21b8bd183ca542e7f"
 patches:
+  "3.3.0":
+    - patch_file: "patches/0002-find-icu-programs.patch"
+      patch_description: "Find ICU programs on environment"
+      patch_type: "conan"
   "3.2.5":
     - patch_file: "patches/0002-find-icu-programs.patch"
       patch_description: "Find ICU programs on environment"
