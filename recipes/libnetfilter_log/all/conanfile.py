@@ -26,11 +26,12 @@ class Libnetfilter_logConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libmnl/1.0.5")
+        self.requires("libmnl/1.0.4")
+        self.requires("libnetfilter_conntrack/1.0.9")
         self.requires("libnfnetlink/1.0.2")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, verify=False)
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
@@ -55,8 +56,12 @@ class Libnetfilter_logConan(ConanFile):
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "etc"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        #rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = ["netfilter_log"]
         self.cpp_info.set_property("pkg_config_name", "libnetfilter_log")
+        self.cpp_info.components["log"].libs = ["netfilter_log"]
+        self.cpp_info.components["log"].requires = ["libnfnetlink::libnfnetlink", "libmnl::libmnl"]
+        #self.cpp_info.components["log"].set_property("pkg_config_name", "libnetfilter_log")
+        self.cpp_info.components["ipulog"].libs = ["netfilter_log_libipulog"]
+        self.cpp_info.components["ipulog"].requires = ["log", "libnfnetlink::libnfnetlink"]
