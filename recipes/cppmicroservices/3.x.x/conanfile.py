@@ -11,6 +11,7 @@ class CppMicroServicesConan(ConanFile):
     package_type = "library"
     url = "https://github.com/CppMicroServices/CppMicroServices.git"
     homepage = "https://cppmicroservices.org"
+    topics = ("modularity", "runtime linking", "dependency inversion", "service oriented")
     license = "Apache-2.0"
     no_copy_source = True
     settings = "os", "compiler", "build_type", "arch"
@@ -65,6 +66,9 @@ class CppMicroServicesConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["CppMicroServices", "DeclarativeServices", "ConfigurationAdmin"]
+        if self.settings.os != "Windows":
+            self.cpp_info.libs = ["CppMicroServices", "DeclarativeServices", "ConfigurationAdmin"]
+        else:
+            self.cpp_info.libs = ["CppMicroServices3", "DeclarativeServices1", "ConfigurationAdmin1"]
         self.cpp_info.includedirs = ['include/cppmicroservices3']
         self.cpp_info.builddirs = ['share/cppmicroservices3/cmake', 'bin']
