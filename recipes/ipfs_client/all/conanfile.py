@@ -44,8 +44,8 @@ class IpfsChromium(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.85.0", transitive_headers=True, transitive_libs=True)
-        self.requires("openssl/[>=1.1 <4]")
+        self.requires("boost/1.86.0", transitive_headers=True, transitive_libs=True)
+        self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
         self.requires("c-ares/[>=1.27 <2]")
         self.requires("nlohmann_json/3.11.3")
         self.requires("protobuf/3.21.12", transitive_headers=True)
@@ -98,8 +98,8 @@ class IpfsChromium(ConanFile):
             "protobuf::libprotobuf",
             "c-ares::c-ares",
             "abseil::absl_statusor",
-            "boost::headers",
             "openssl::openssl",
+            "boost::headers",
             "nlohmann_json::nlohmann_json",
         ]
 
