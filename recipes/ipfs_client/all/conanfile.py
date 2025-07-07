@@ -46,11 +46,11 @@ class IpfsChromium(ConanFile):
     def requirements(self):
         self.requires("boost/1.85.0", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("bzip2/1.0.8")
         self.requires("c-ares/[>=1.27 <2]")
         self.requires("nlohmann_json/3.11.3")
-        self.requires("abseil/20240116.2")
         self.requires("protobuf/3.21.12", transitive_headers=True)
+        # Let protobuf pick the specific version
+        self.requires("abseil/[>=20240116.1 <20240117.0]")
 
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
@@ -71,6 +71,8 @@ class IpfsChromium(ConanFile):
         cppstd = self.settings.get_safe("compiler.cppstd", self._min_cppstd).replace("gnu", "")
         if cppstd:
             tc.cache_variables["CXX_VERSION"] = cppstd
+        # Disable testing discovery if installed in the system
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_GTest"] = True
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -87,7 +89,20 @@ class IpfsChromium(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["ipfs_client", "ic_proto"]
+        self.cpp_info.components["proto"].libs = ["ic_proto"]
+        self.cpp_info.components["proto"].requires = ["protobuf::protobuf"]
+
+        self.cpp_info.components["client"].libs = ["ipfs_client"]
+        self.cpp_info.components["client"].requires = [
+            "proto",
+            "protobuf::libprotobuf",
+            "c-ares::c-ares",
+            "abseil::absl_statusor",
+            "boost::headers",
+            "openssl::openssl",
+            "nlohmann_json::nlohmann_json",
+        ]
+
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["m"]
-        self.cpp_info.defines = ["HAS_BOOST_BEAST=1", "HAS_ARES=1", "HAS_OPENSSL_EVP=1"]
+            self.cpp_info.components["client"].system_libs = ["m"]
+        self.cpp_info.components["client"].defines = ["HAS_BOOST_BEAST=1", "HAS_ARES=1", "HAS_OPENSSL_EVP=1"]
