@@ -66,7 +66,7 @@ class MSYS2Conan(ConanFile):
 
     def config_options(self):
         default_packages = "base-devel,binutils,gcc"
-        if self.settings_target.arch == "armv8":
+        if self.settings_target is not None and self.settings_target.arch == "armv8":
             # The mingw-w64-cross-mingwarm64-gcc contains tools required to target arm64
             default_packages += ",mingw-w64-cross-mingwarm64-gcc"
         self.options.packages = default_packages
