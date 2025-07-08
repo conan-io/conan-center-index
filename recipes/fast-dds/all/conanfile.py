@@ -49,18 +49,13 @@ class FastDDSConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        if Version(self.version) < "2.11.0":
-            return {
-                "gcc": "8",
-                "clang": "12",
-                "apple-clang": "12",
-            }
-        else:
-            return {
-                "gcc": "9",
-                "clang": "15",
-                "apple-clang": "15",
-            }
+        return {
+            "gcc": "8",
+            "clang": "12",
+            "apple-clang": "12",
+            "Visual Studio": "15",
+            "msvc": "191",
+        }
 
     def export_sources(self):
         export_conandata_patches(self)
