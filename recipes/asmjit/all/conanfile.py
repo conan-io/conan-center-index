@@ -29,7 +29,7 @@ class AsmjitConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return 11 if self.version < "cci.20250615" else 17
 
     @property
     def _compilers_minimum_version(self):
