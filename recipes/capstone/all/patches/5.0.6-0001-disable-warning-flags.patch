@@ -1,0 +1,16 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4797bc57..d9c0ec83 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -39,11 +39,6 @@ message(STATUS "PROJECT_VERSION: ${CPACK_PACKAGE_VERSION} CAPSTONE_VERSION: ${PR
+ # Set the project version without the pre-release identifier
+ project(capstone VERSION ${PROJECT_VERSION_BASE})
+ 
+-if (MSVC)
+-    add_compile_options(/W1 /w14189)
+-else()
+-    add_compile_options(-Wmissing-braces -Wunused-function -Warray-bounds -Wunused-variable -Wparentheses -Wint-in-bool-context)
+-endif()
+ 
+ 
+ # to configure the options specify them in in the command line or change them in the cmake UI.
