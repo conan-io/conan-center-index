@@ -1,5 +1,5 @@
 diff --git CMakeLists.txt CMakeLists.txt
-index d45a60498..06544dc7e 100644
+index a07b027cd..80a70aa8b 100644
 --- CMakeLists.txt
 +++ CMakeLists.txt
 @@ -42,7 +42,7 @@ endif ()
@@ -34,7 +34,7 @@ index f66bf756e..6cea07a17 100644
              install_targets (${_plugin_NAME})
          endif ()
 diff --git src/cmake/externalpackages.cmake src/cmake/externalpackages.cmake
-index 6cb6aaf50..a25798e48 100644
+index e31331175..2b44ea872 100644
 --- src/cmake/externalpackages.cmake
 +++ src/cmake/externalpackages.cmake
 @@ -73,16 +73,15 @@ set (OPENIMAGEIO_CONFIG_DO_NOT_FIND_IMATH OFF CACHE BOOL
@@ -445,7 +445,7 @@ index 2bce60968..4492f7550 100644
  else()
      message (WARNING "Jpeg-2000 plugin will not be built")
 diff --git src/jpegxl.imageio/CMakeLists.txt src/jpegxl.imageio/CMakeLists.txt
-index 70d28318a..aec47621f 100644
+index b8ccd8ac1..aec47621f 100644
 --- src/jpegxl.imageio/CMakeLists.txt
 +++ src/jpegxl.imageio/CMakeLists.txt
 @@ -2,10 +2,9 @@
@@ -455,7 +455,7 @@ index 70d28318a..aec47621f 100644
 -if (JXL_FOUND)
 +if (USE_LIBJXL)
      add_oiio_plugin (jxlinput.cpp jxloutput.cpp
--                     INCLUDE_DIRS ${JXL_INCLUDE_DIRS}
+-                     INCLUDE_DIRS ${JXL_INCLUDES}
 -                     LINK_LIBRARIES ${JXL_LIBRARIES}
 +                     LINK_LIBRARIES libjxl::libjxl libjxl::jxl_cms
                       DEFINITIONS "USE_JXL")
