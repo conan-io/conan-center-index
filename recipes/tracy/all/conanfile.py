@@ -157,6 +157,12 @@ class TracyConan(ConanFile):
         if self.options.get_safe("libunwind_backtrace"):
             self.cpp_info.components["tracyclient"].requires.append("libunwind::libunwind")
 
+        # Starting at 0.12.0, upstream has added an extra "tracy" directory for the include directory
+        # include/tracy/tracy/Tracy.hpp
+        # but upstream still generates info for including headers as #include <tracy/Tracy.hpp>
+        if Version(self.version) >= "0.12.0":
+            self.cpp_info.components.includedirs = ['include/tracy']
+
         # Tracy CMake adds options set to ON as public
         for opt in self._tracy_options.keys():
             switch = getattr(self.options, opt)
@@ -164,10 +170,3 @@ class TracyConan(ConanFile):
             if switch:
                 self.cpp_info.components["tracyclient"].defines.append(opt)
 
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "Tracy"
-        self.cpp_info.names["cmake_find_package_multi"] = "Tracy"
-        self.cpp_info.components["tracyclient"].names["cmake_find_package"] = "TracyClient"
-        self.cpp_info.components["tracyclient"].names["cmake_find_package_multi"] = "TracyClient"
-        self.cpp_info.components["tracyclient"].set_property(
-            "cmake_target_name", "Tracy::TracyClient")
