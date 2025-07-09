@@ -44,6 +44,9 @@ class SoxrConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.1 <4]")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
