@@ -5,8 +5,6 @@ set(_srcs src/TestBundleImpl.cpp ${_glue_file})
 usFunctionGetResourceSource(TARGET test_bundle OUT _srcs)
 usFunctionGenerateBundleInit(TARGET test_bundle OUT _srcs)
 
-message(STATUS "===================================== CMAKE_CURRENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}")
-
 add_library(test_bundle ${_srcs})
 set_property(TARGET test_bundle APPEND PROPERTY COMPILE_DEFINITIONS US_BUNDLE_NAME=test_bundle)
 set_property(TARGET test_bundle PROPERTY DEBUG_POSTFIX "")

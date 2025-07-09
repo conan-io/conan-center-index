@@ -5,7 +5,6 @@
 set(_srcs src/main.cpp)
 
 get_target_property(DS_DLL_PATH DeclarativeServices IMPORTED_LOCATION_RELEASE)
-message(STATUS "==================================================== DS_DLL_Path = ${DS_DLL_PATH}")
 set_source_files_properties(
   src/main.cpp
   PROPERTIES
