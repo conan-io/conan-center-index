@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -101,6 +101,7 @@ class TracyConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.cmake", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Tracy")
