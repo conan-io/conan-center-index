@@ -161,7 +161,7 @@ class TracyConan(ConanFile):
         # include/tracy/tracy/Tracy.hpp
         # but upstream still generates info for including headers as #include <tracy/Tracy.hpp>
         if Version(self.version) >= "0.12.0":
-            self.cpp_info.components.includedirs = ['include/tracy']
+            self.cpp_info.components["tracyclient"].includedirs = ['include/tracy']
 
         # Tracy CMake adds options set to ON as public
         for opt in self._tracy_options.keys():
