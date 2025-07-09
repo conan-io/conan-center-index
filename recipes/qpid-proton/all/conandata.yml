@@ -4,6 +4,6 @@ sources:
     sha256: "f3dcd30e85626d8eff13a98009f0b75b2a4d0cbf91520830a67202157dc63d6d"
 patches:
     "0.40.0":
-        - patch_file: "patches/0001-adjust-proton-cpp-dependnecies.patch"
+        - patch_file: "patches/0001-adjust-proton-cpp-dependencies.patch"
           patch_description: "Update of CMakeLists.txt to change the target for opentelemetry trace from 'opentelemetry::trace' to 'opentelemetry::opentelemetry_trace' and add link to JsonCpp library for static and shared configuration."
           patch_type: "conan"
