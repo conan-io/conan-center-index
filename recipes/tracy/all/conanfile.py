@@ -139,3 +139,5 @@ class TracyConan(ConanFile):
             if switch:
                 self.cpp_info.components["tracyclient"].defines.append(opt)
 
+        self.cpp_info.components["tracyclient"].set_property(
+            "cmake_target_name", "Tracy::TracyClient")
