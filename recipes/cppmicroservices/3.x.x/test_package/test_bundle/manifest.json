@@ -1,0 +1,13 @@
+{
+    "bundle.symbolic_name" : "TestBundle",
+    "bundle.name" : "TestBundle",
+    "scr" : {
+        "version" : 1,
+        "components" : [{
+            "implementation-class": "TestBundleImpl",
+            "service" : {
+                "interfaces" : ["TestBundle"]
+            }
+        }]
+    }
+}
