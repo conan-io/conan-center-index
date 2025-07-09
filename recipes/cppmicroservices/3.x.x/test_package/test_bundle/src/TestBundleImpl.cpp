@@ -23,5 +23,5 @@
 #include "ServiceComponents.hpp"
 
 std::string TestBundleImpl::Description() const {
-    return "TestBundleImpl is in the house!";
+    return "TestBundleImpl service implementation has been installed, started, and instantiated properly.";
 }
