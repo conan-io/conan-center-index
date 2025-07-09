@@ -79,16 +79,15 @@ class SubunitConan(ConanFile):
         else:
             # version >=1.4.4 is kept on GitHub without configuration built
             self.tool_requires("libtool/2.4.7")
-            self.tool_requires("pkgconf/2.2.0")
             self.tool_requires("automake/1.16.5")
+            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
@@ -141,10 +140,9 @@ class SubunitConan(ConanFile):
             env.vars(self).save_script("conanbuild_msvc")
 
     def build(self):
-        apply_conandata_patches(self)
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
-            if self.version != "1.4.0":
+            if Version(self.version) > "1.4.0":
                 autotools.autoreconf()
             autotools.configure()
             autotools.make()
