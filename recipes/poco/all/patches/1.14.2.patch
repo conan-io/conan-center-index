@@ -37,3 +37,17 @@ index 008c4a05a..c1b7b8f3a 100644
  		DOC "path to message compiler")
  	if(NOT CMAKE_MC_COMPILER)
  		message(FATAL_ERROR "message compiler not found: required to build")
+diff --git a/Zip/CMakeLists.txt b/Zip/CMakeLists.txt
+index 796898cf6..42058fe94 100644
+--- a/Zip/CMakeLists.txt
++++ b/Zip/CMakeLists.txt
+@@ -21,6 +21,9 @@ set_target_properties(Zip
+ 		DEFINE_SYMBOL Zip_EXPORTS
+ )
+ 
++if(POCO_UNBUNDLED)
++	target_link_libraries(Zip PRIVATE ZLIB::ZLIB)
++endif(POCO_UNBUNDLED)
+ target_link_libraries(Zip PUBLIC Poco::Foundation)
+ target_include_directories(Zip
+ 	PUBLIC
