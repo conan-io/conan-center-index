@@ -14,6 +14,9 @@ patches:
       patch_source: https://github.com/cyrusimap/cyrus-sasl/commit/06f41c41e5c0f62ed5c1d703a9e2da42dfdb71f6
       patch_description: "Fix https://github.com/cyrusimap/cyrus-sasl/issues/831"
       patch_type: "official"
+    - patch_file: "patches/time-h.patch"
+      patch_description: "Include time.h"
+      patch_type: "official"
   "2.1.27":
     - patch_file: "patches/0001-use-attr-on-gnu.patch"
       patch_source: https://github.com/cyrusimap/cyrus-sasl/commit/06f41c41e5c0f62ed5c1d703a9e2da42dfdb71f6
