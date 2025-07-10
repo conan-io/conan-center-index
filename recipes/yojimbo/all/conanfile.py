@@ -61,4 +61,16 @@ class YojimboConan(ConanFile):
             copy(self, lib, os.path.join(self.build_folder, "bin"), os.path.join(self.package_folder, "lib"), keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ['netcode', 'reliable', 'tlsf', 'yojimbo']
+        # Netcode component
+        self.cpp_info.components["netcode"].libs = ['netcode']
+        self.cpp_info.components["netcode"].requires = ["libsodium::libsodium"]
+
+        # Reliable component
+        self.cpp_info.components["reliable"].libs = ['reliable']
+
+        # TLSF component
+        self.cpp_info.components["tlsf"].libs = ['tlsf']
+
+        # Yojimbo final compontent
+        self.cpp_info.components["yojimbo"].libs = ['yojimbo']
+        self.cpp_info.components["yojimbo"].requires = ["netcode", "reliable", "tlsf", "libsodium::libsodium"]
