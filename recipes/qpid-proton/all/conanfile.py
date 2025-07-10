@@ -49,7 +49,7 @@ class QpidProtonConan(ConanFile):
         self.requires("openssl/[>=1.1 <4]")
         self.requires("cyrus-sasl/2.1.28")
         if self.options.with_opentelemetry:
-            self.requires("opentelemetry-cpp/1.14.2")
+            self.requires("opentelemetry-cpp/1.21.0")
         if self.settings.os == "Macos":
             self.requires("libuv/1.49.2")
         self.requires("jsoncpp/1.9.6")
@@ -144,5 +144,5 @@ class QpidProtonConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
 
-        if self.options["with_opentelemetry"]:
+        if self.options.with_opentelemetry:
             self.cpp_info.components["cpp"].requires.append("opentelemetry-cpp::opentelemetry-cpp")
