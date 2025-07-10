@@ -348,10 +348,7 @@ class Open62541Conan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
         if version >= "1.4.11.1":
-            if self.settings.os == "Linux":
-                tc.cache_variables["UA_ENABLE_NODESETLOADER"] = self.options.get_safe("nodeset_loader", False)
-            else:
-                tc.cache_variables["UA_ENABLE_NODESETLOADER"] = False
+            tc.cache_variables["UA_ENABLE_NODESETLOADER"] = self.options.nodeset_loader if self.settings.os == "Linux" else False
 
         tc.generate()
         tc = CMakeDeps(self)
