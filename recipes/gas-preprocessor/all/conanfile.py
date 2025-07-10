@@ -1,11 +1,11 @@
 from conan import ConanFile
-from conan.tools.files import download, copy
+from conan.tools.files import download, copy, get
 import os
 from conan.tools.layout import basic_layout
 
 class GasPreprocessorConan(ConanFile):
     name = "gas-preprocessor"
-    license = "NO LICENSE"
+    license = "GPL-2.0-or-later"
     url = "https://github.com/FFmpeg/gas-preprocessor"
     description = "Perl script that implements a subset of the GNU as preprocessor that Apple's as doesn't"
     requires = "strawberryperl/[*]"
@@ -17,12 +17,17 @@ class GasPreprocessorConan(ConanFile):
 
     def source(self):
         download(self,
-                 url="https://raw.githubusercontent.com/FFmpeg/gas-preprocessor/a120373ba30de06675d8c47617b315beef16c88e/gas-preprocessor.pl",
-                 filename="gas-preprocessor.pl"
+                  url=self.conan_data["sources"][self.version]['url'],
+                  filename="gas-preprocessor.pl"
+                )
+        download(self,
+                 url="https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt",
+                 filename="LICENSE.txt"
                  )
 
     def package(self):
         copy(self, "gas-preprocessor.pl", self.source_folder, os.path.join(self.package_folder, "bin"))
+        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.includedirs = []
