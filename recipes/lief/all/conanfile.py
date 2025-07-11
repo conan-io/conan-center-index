@@ -63,7 +63,7 @@ class LiefConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("mbedtls/3.2.1")
+        self.requires("mbedtls/3.5.2")
 
         if Version(self.version) >= "0.15.1":
             self.requires("utfcpp/4.0.5")
