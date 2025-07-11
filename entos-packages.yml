@@ -12,6 +12,7 @@ bison:
     - '3.8.2'
 boost:
   versions:
+    - '1.84.0'
     - '1.88.0'
 brotli:
   versions:
