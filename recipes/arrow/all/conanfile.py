@@ -36,8 +36,8 @@ class ArrowConan(ConanFile):
         "filesystem_layer":  [True, False],
         "hdfs_bridgs": [True, False],
         "plasma": [True, False, "deprecated"],
-        "simd_level": [None, "default", "sse4_2", "avx2", "avx512", "neon", ],
-        "runtime_simd_level": [None, "sse4_2", "avx2", "avx512", "max"],
+        "simd_level": ["default", "sse4_2", "avx2", "avx512", "neon", "none"],
+        "runtime_simd_level": ["sse4_2", "avx2", "avx512", "max", "none"],
         "with_backtrace": [True, False],
         "with_boost": ["auto", True, False],
         "with_csv": [True, False],
@@ -185,8 +185,8 @@ class ArrowConan(ConanFile):
             self.requires("lz4/1.9.4")
         if self.options.with_snappy:
             self.requires("snappy/1.1.9")
-        if self.options.get_safe("simd_level") != None or \
-                self.options.get_safe("runtime_simd_level") != None:
+        if self.options.simd_level != "none" or \
+            self.options.runtime_simd_level != "none":
                 self.requires("xsimd/13.0.0")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
@@ -252,6 +252,9 @@ class ArrowConan(ConanFile):
 
         if self.options.parquet and not self.options.with_thrift:
             raise ConanInvalidConfiguration("arrow:parquet requires arrow:with_thrift")
+        
+        if self.settings.arch in ["armv8", "armv8.3"] and is_msvc(self):
+            raise ConanInvalidConfiguration("arrow does not support ARM64 with MSVC compiler")
 
     def build_requirements(self):
         if Version(self.version) >= "20.0.0":
@@ -536,7 +539,8 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("lz4::lz4")
         if self.options.with_snappy:
             self.cpp_info.components["libarrow"].requires.append("snappy::snappy")
-        if self.options.get_safe("simd_level") != None or self.options.get_safe("runtime_simd_level") != None:
+        if self.options.simd_level != "none" or \
+            self.options.runtime_simd_level != "none":
             self.cpp_info.components["libarrow"].requires.append("xsimd::xsimd")
         if self.options.with_zlib:
             self.cpp_info.components["libarrow"].requires.append("zlib::zlib")
