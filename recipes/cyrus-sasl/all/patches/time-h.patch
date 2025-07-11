@@ -1,0 +1,28 @@
+diff --git a/configure.ac b/configure.ac
+index 2d89fdaa..2e1e697d 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1231,7 +1231,7 @@ AC_CHECK_HEADERS_ONCE([sys/time.h])
+ 
+ AC_HEADER_DIRENT
+ AC_HEADER_SYS_WAIT
+-AC_CHECK_HEADERS(crypt.h des.h dlfcn.h fcntl.h limits.h malloc.h paths.h strings.h sys/file.h sys/time.h syslog.h unistd.h inttypes.h sys/uio.h sys/param.h sysexits.h stdarg.h varargs.h krb5.h)
++AC_CHECK_HEADERS(crypt.h des.h dlfcn.h fcntl.h limits.h malloc.h paths.h strings.h sys/file.h sys/time.h syslog.h time.h unistd.h inttypes.h sys/uio.h sys/param.h sysexits.h stdarg.h varargs.h krb5.h)
+ 
+ IPv6_CHECK_SS_FAMILY()
+ IPv6_CHECK_SA_LEN()
+diff --git a/plugins/cram.c b/plugins/cram.c
+index d02e9baa..695aaa91 100644
+--- a/plugins/cram.c
++++ b/plugins/cram.c
+@@ -53,6 +53,10 @@
+ #endif
+ #include <fcntl.h>
+ 
++#ifdef HAVE_TIME_H
++#include <time.h>
++#endif
++
+ #include <sasl.h>
+ #include <saslplug.h>
+ #include <saslutil.h>
