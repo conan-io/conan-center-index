@@ -1,0 +1,9 @@
+sources:
+  "1.9.0":
+    url: "https://github.com/BrunoLevy/geogram/archive/refs/tags/v1.9.0.tar.gz"
+    sha256: "22baa50539a56f0f88ce84adfc8bea50a379caf7120f03d3df834c4bd607a1d0"
+patches:
+  "1.9.0":
+    - patch_file: "patches/0001-Patch-to-work-with-conan.patch"
+      patch_description: "To have build in conan center works"
+      patch_type: "conan"
