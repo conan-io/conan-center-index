@@ -13,9 +13,6 @@ sources:
     sha256: "b6943b564787c4953b77ca8d7f987c4b896b3f3e91f45d9f13e9056b6148bc1d"
 patches:
   "1.4.11.1":
-    - patch_file: "patches/0001-disable-sanitizers-1_4_11.patch"
-      patch_description: "Disable static code analysis"
-      patch_type: "conan"
     - patch_file: "patches/0004-include-iphlpapi.patch"
       patch_description: "Include iphlpapi.h for SecureZeroMemory"
       patch_type: "conan"
@@ -33,6 +30,9 @@ patches:
       patch_type: "portability"
     - patch_file: "patches/1.4.11.1-0001-use-external-mdnsd.patch"
       patch_description: "Consume mdnsd as external dependency provided by Conan"
+      patch_type: "conan"
+    - patch_file: "patches/0009-use-external-libxml2.patch"
+      patch_description: "Consume libxml2 as external dependency provided by Conan"
       patch_type: "conan"
   "1.4.6":
     - patch_file: "patches/0001-disable-sanitizers-1_4_x.patch"
