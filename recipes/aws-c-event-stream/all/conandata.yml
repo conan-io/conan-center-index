@@ -1,4 +1,7 @@
 sources:
+  "0.5.4":
+    url: "https://github.com/awslabs/aws-c-event-stream/archive/v0.5.4.tar.gz"
+    sha256: "cef8b78e362836d15514110fb43a0a0c7a86b0a210d5fe25fd248a82027a7272"
   "0.5.1":
     url: "https://github.com/awslabs/aws-c-event-stream/archive/v0.5.1.tar.gz"
     sha256: "22ce7a695b82debe118c9ecc641ea8bc7e59c9843f92d5acf8401fc86cac847a"

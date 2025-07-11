@@ -32,19 +32,26 @@ class AwsCHttp(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.version == "0.9.3":
+        if self.version == "0.10.1":
+            self.requires("aws-c-common/0.12.3", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-compression/0.3.1")
+            # Upstream uses this even if it does not explicitly state it in the CMakeLists
+            # Maybe expecting the headers to be there transitively?
+            self.requires("aws-c-cal/0.9.1")
+            self.requires("aws-c-io/0.19.1", transitive_headers=True, transitive_libs=True)
+        elif self.version == "0.9.3":
             self.requires("aws-c-common/0.11.0", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-compression/0.3.1")
             # Upstream uses this even if it does not explicitly state it in the CMakeLists
             # Maybe expecting the headers to be there transitively?
             self.requires("aws-c-cal/0.8.3")
             self.requires("aws-c-io/0.15.4", transitive_headers=True, transitive_libs=True)
-        if self.version == "0.8.1":
+        elif self.version == "0.8.1":
             self.requires("aws-c-common/0.9.15", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-compression/0.2.18")
             self.requires("aws-c-cal/0.6.14")
             self.requires("aws-c-io/0.14.7", transitive_headers=True, transitive_libs=True)
-        if self.version == "0.6.7":
+        elif self.version == "0.6.7":
             self.requires("aws-c-common/0.6.11", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-compression/0.2.14")
             self.requires("aws-c-io/0.10.9", transitive_headers=True, transitive_libs=True)
