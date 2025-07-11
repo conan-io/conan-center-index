@@ -166,6 +166,9 @@ class PodofoConan(ConanFile):
             if not self.options.shared:
                 self.cpp_info.libs = ["podofo", "podofo_private"]
                 self.cpp_info.defines.append("PODOFO_STATIC")
+
+                if Version(self.version) >= "1.0.0":
+                    self.cpp_info.libs += ["podofo_3rdparty"]
             else:
                 self.cpp_info.libs = ["podofo"]
                 self.cpp_info.defines.append("PODOFO_SHARED")
