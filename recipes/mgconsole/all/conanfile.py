@@ -4,9 +4,6 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 
 import os
 
-# TODO: (andi) Test that shared library version works
-
-
 class Mgconsole(ConanFile):
     name = "mgconsole"
     version = "1.4.0"
