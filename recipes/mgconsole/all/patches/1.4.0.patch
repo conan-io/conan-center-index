@@ -1,0 +1,201 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bebf3dd..b9e8a04 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -14,32 +14,13 @@
+ # You should have received a copy of the GNU General Public License
+ # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ 
+-cmake_minimum_required(VERSION 3.4)
++cmake_minimum_required(VERSION 3.15)
+ project(mgconsole VERSION 1.4)
+ include(CTest)
+ 
+-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+-
+ set(CMAKE_C_STANDARD 11)
+ set(CMAKE_CXX_STANDARD 20)
+ 
+-# Set default build type to 'Release'
+-if (NOT CMAKE_BUILD_TYPE)
+-    set(CMAKE_BUILD_TYPE "Release")
+-endif()
+-message(STATUS "CMake build type: ${CMAKE_BUILD_TYPE}")
+-# Config of some libraries (e.g. replxx) depends on the build type.
+-string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWERCASE)
+-# Enable explicit static linking of SSL because of generic Linux binary.
+-set(MGCONSOLE_STATIC_SSL OFF CACHE STRING "Statically link SSL")
+-
+-# Set default instalation directory to '/usr'
+-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+-    # '/usr' is a special case, for more details see:
+-    # https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html#special-cases
+-    set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "install dir" FORCE)
+-endif()
+-
+ add_subdirectory(src)
+ if(BUILD_TESTING)
+     add_subdirectory(tests)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index a29dec2..f11c5be 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -30,17 +30,10 @@ find_package(Threads REQUIRED)
+ set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+ set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+ 
+-if(NOT MGCONSOLE_ON_LINUX OR MGCONSOLE_STATIC_SSL)
+-  set(OPENSSL_USE_STATIC_LIBS TRUE)
+-endif()
+ find_package(OpenSSL REQUIRED)
+-if(MGCONSOLE_ON_OSX)
+-  set(MACOSX_OPENSSL_ROOTDIR_FLAG "-DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}")
+-endif()
+ 
+ # Handle platforms
+ if(MGCONSOLE_ON_WINDOWS)
+-  set(GFLAGS_WIN_LIB_SUFFIX "_static")
+   set(CMAKE_CXX_STANDARD_LIBRARIES "-static-libgcc -static-libstdc++ -lws2_32")
+   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive")
+ elseif(MGCONSOLE_ON_LINUX)
+@@ -48,61 +41,8 @@ elseif(MGCONSOLE_ON_LINUX)
+   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -no-pie")
+ endif()
+ 
+-if(MGCONSOLE_ON_LINUX)
+-  # On Debian, the libdir has multiarch path which we don't want while searching for
+-  # dependancy libs
+-  string(REGEX MATCH "lib[^/]*" MG_INSTALL_LIB_DIR ${CMAKE_INSTALL_LIBDIR})
+-else()
+-  set(MG_INSTALL_LIB_DIR "lib")
+-endif()
+-
+-# Setup GFlags
+-ExternalProject_Add(gflags-proj
+-  PREFIX gflags
+-  GIT_REPOSITORY https://github.com/gflags/gflags.git
+-  GIT_TAG v2.2.2
+-  CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>"
+-  "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+-  "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+-  INSTALL_DIR "${PROJECT_BINARY_DIR}/gflags")
+-
+-ExternalProject_Get_Property(gflags-proj install_dir)
+-set(GFLAGS_ROOT ${install_dir})
+-set(GFLAGS_INCLUDE_DIRS ${GFLAGS_ROOT}/include)
+-set(GFLAGS_LIBRARY_PATH ${GFLAGS_ROOT}/lib/libgflags${GFLAGS_WIN_LIB_SUFFIX}.a)
+-set(GFLAGS_DEBUG_LIBRARY_PATH ${GFLAGS_ROOT}/lib/libgflags${GFLAGS_WIN_LIB_SUFFIX}_debug.a)
+-set(GFLAGS_LIBRARY gflags)
+-
+-add_library(${GFLAGS_LIBRARY} STATIC IMPORTED)
+-target_compile_definitions(${GFLAGS_LIBRARY} INTERFACE GFLAGS_IS_A_DLL=0)
+-set_target_properties(${GFLAGS_LIBRARY} PROPERTIES
+-  IMPORTED_LOCATION ${GFLAGS_LIBRARY_PATH}
+-  IMPORTED_LOCATION_DEBUG ${GFLAGS_DEBUG_LIBRARY_PATH}
+-  INTERFACE_LINK_LIBRARIES Threads::Threads)
+-add_dependencies(${GFLAGS_LIBRARY} gflags-proj)
+-
+-ExternalProject_Add(mgclient-proj
+-  PREFIX mgclient
+-  GIT_REPOSITORY https://github.com/memgraph/mgclient.git
+-  GIT_TAG v1.4.1
+-  CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>"
+-  "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+-  "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
+-  "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+-  ${MACOSX_OPENSSL_ROOTDIR_FLAG}
+-  INSTALL_DIR "${PROJECT_BINARY_DIR}/mgclient")
+-
+-ExternalProject_Get_Property(mgclient-proj install_dir)
+-set(MGCLIENT_ROOT ${install_dir})
+-set(MGCLIENT_INCLUDE_DIRS ${MGCLIENT_ROOT}/include)
+-set(MGCLIENT_LIBRARY_PATH ${MGCLIENT_ROOT}/${MG_INSTALL_LIB_DIR}/libmgclient.a)
+-set(MGCLIENT_LIBRARY mgclient)
+-
+-add_library(${MGCLIENT_LIBRARY} STATIC IMPORTED)
+-set_target_properties(${MGCLIENT_LIBRARY} PROPERTIES
+-  IMPORTED_LOCATION ${MGCLIENT_LIBRARY_PATH}
+-  INTERFACE_LINK_LIBRARIES Threads::Threads)
+-add_dependencies(${MGCLIENT_LIBRARY} mgclient-proj)
++find_package(gflags REQUIRED)
++find_package(mgclient REQUIRED)
+ 
+ add_subdirectory(utils)
+ 
+@@ -114,24 +54,24 @@ if(MGCONSOLE_ON_WINDOWS)
+ endif()
+ 
+ add_executable(mgconsole main.cpp interactive.cpp serial_import.cpp batch_import.cpp parsing.cpp)
+-target_compile_definitions(mgconsole PRIVATE MGCLIENT_STATIC_DEFINE)
++
+ target_include_directories(mgconsole
+   PRIVATE
+-  ${GFLAGS_INCLUDE_DIRS}
+-  ${MGCLIENT_INCLUDE_DIRS}
+-  ${REPLXX_INCLUDE_DIRS}
+   ${CMAKE_CURRENT_BINARY_DIR})
++
+ target_link_libraries(mgconsole
+   PRIVATE
+-  ${GFLAGS_LIBRARY}
++  mgclient::mgclient
++  gflags
+   utils
+-  ${MGCLIENT_LIBRARY}
+-  ${OPENSSL_LIBRARIES})
++  openssl::openssl)
++
+ if(MGCONSOLE_ON_WINDOWS)
+   target_link_libraries(mgconsole PRIVATE shlwapi)
+ endif()
+ 
+ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.hpp.in"
+   "${CMAKE_CURRENT_BINARY_DIR}/version.hpp")
++
+ install(TARGETS mgconsole
+   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+diff --git a/src/utils/CMakeLists.txt b/src/utils/CMakeLists.txt
+index 66dfd4e..16928ab 100644
+--- a/src/utils/CMakeLists.txt
++++ b/src/utils/CMakeLists.txt
+@@ -1,37 +1,5 @@
+-ExternalProject_Add(replxx-proj
+-        PREFIX replxx
+-        GIT_REPOSITORY https://github.com/AmokHuginnsson/replxx.git
+-        GIT_TAG release-0.0.4
+-        CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>"
+-        "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+-        "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+-        "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
+-        "-DREPLXX_BUILD_EXAMPLES=OFF"
+-        "-DBUILD_SHARED_LIBS=OFF"
+-        INSTALL_DIR "${PROJECT_BINARY_DIR}/replxx")
+-
+-if(CMAKE_BUILD_TYPE_LOWERCASE STREQUAL "debug")
+-  set(REPLXX_LIB_POSTFIX "-d")
+-elseif(CMAKE_BUILD_TYPE_LOWERCASE STREQUAL "relwithdebinfo")
+-  set(REPLXX_LIB_POSTFIX "-rd")
+-else()
+-  set(REPLXX_LIB_POSTFIX "")
+-endif()
+-
+-ExternalProject_Get_Property(replxx-proj INSTALL_DIR)
+-set(REPLXX_ROOT ${INSTALL_DIR})
+-set(REPLXX_INCLUDE_DIRS ${REPLXX_ROOT}/include)
+-set(REPLXX_LIBRARY_PATH ${REPLXX_ROOT}/${MG_INSTALL_LIB_DIR}/libreplxx${REPLXX_LIB_POSTFIX}.a)
+-set(REPLXX_LIBRARY replxx)
++add_library(utils STATIC utils.cpp thread_pool.cpp bolt.cpp)
+ 
+-add_library(${REPLXX_LIBRARY} STATIC IMPORTED GLOBAL)
+-target_compile_definitions(${REPLXX_LIBRARY} INTERFACE REPLXX_STATIC)
+-set_target_properties(${REPLXX_LIBRARY} PROPERTIES
+-        IMPORTED_LOCATION ${REPLXX_LIBRARY_PATH})
++find_package(replxx REQUIRED)
+ 
+-add_dependencies(${REPLXX_LIBRARY} replxx-proj)
+-add_library(utils STATIC utils.cpp thread_pool.cpp bolt.cpp)
+-add_dependencies(utils replxx gflags mgclient)
+-target_compile_definitions(utils PUBLIC MGCLIENT_STATIC_DEFINE)
+-target_include_directories(utils PUBLIC ${REPLXX_INCLUDE_DIRS} ${GFLAGS_INCLUDE_DIRS} ${MGCLIENT_INCLUDE_DIRS})
+-target_link_libraries(utils ${REPLXX_LIBRARY})
++target_link_libraries(utils replxx::replxx mgclient::mgclient gflags)
