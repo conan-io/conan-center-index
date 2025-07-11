@@ -364,6 +364,10 @@ class BotanConan(ConanFile):
         if self.options.disable_modules:
             build_flags.append('--disable-modules={}'.format(self.options.disable_modules))
 
+        compiler_executables = self.conf.get("tools.build:compiler_executables")
+        if compiler_executables:
+            build_flags.append("--cc-bin={}".format(compiler_executables["cpp"]))
+
         if self.options.amalgamation:
             build_flags.append('--amalgamation')
 
