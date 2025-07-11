@@ -8,7 +8,7 @@ class GasPreprocessorConan(ConanFile):
     license = "GPL-2.0-or-later"
     url = "https://github.com/FFmpeg/gas-preprocessor"
     description = "Perl script that implements a subset of the GNU as preprocessor that Apple's as doesn't"
-    requires = "strawberryperl/[*]"
+    #requires = "strawberryperl/5.32.1.1"
     package_type = "application"
     no_copy_source = True
 
