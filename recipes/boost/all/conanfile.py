@@ -946,12 +946,12 @@ class BoostConan(ConanFile):
     @property
     def _python_inc(self):
         """
-        obtain the result of the "sysconfig.get_python_inc()" call
-        :return: result of the "sysconfig.get_python_inc()" execution
+        obtain the result of the "distutils.sysconfig.get_python_inc()" call
+        :return: result of the "distutils.sysconfig.get_python_inc()" execution
         """
         return self._run_python_script("from __future__ import print_function; "
-                                       "import sysconfig; "
-                                       "print(sysconfig.get_python_inc())")
+                                       "import distutils.sysconfig; "
+                                       "print(distutils.sysconfig.get_python_inc())")
 
     @property
     def _python_abiflags(self):
