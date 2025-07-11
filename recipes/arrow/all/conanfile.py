@@ -252,6 +252,9 @@ class ArrowConan(ConanFile):
 
         if self.options.parquet and not self.options.with_thrift:
             raise ConanInvalidConfiguration("arrow:parquet requires arrow:with_thrift")
+        
+        if self.settings.arch in ["armv8", "armv8.3"] and is_msvc(self):
+            raise ConanInvalidConfiguration("arrow does not support ARM64 with MSVC compiler")
 
     def build_requirements(self):
         if Version(self.version) >= "20.0.0":
