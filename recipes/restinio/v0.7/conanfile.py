@@ -39,14 +39,14 @@ class RestinioConan(ConanFile):
 
         if Version(self.version) >= "0.7.3":
             self.requires("fmt/[>=11.0.2]")
-            self.requires("expected-lite/0.8.0")
+            self.requires("expected-lite/0.9.0")
         else:
             self.requires("fmt/10.2.1")
             self.requires("expected-lite/0.6.3")
 
         if self.options.asio == "standalone":
             if Version(self.version) >= "0.7.4":
-                self.requires("asio/1.32.0")
+                self.requires("asio/1.34.2")
             else:
                 self.requires("asio/1.31.0")
         else:
