@@ -1,7 +1,7 @@
 sources:
-  "10.2.1":
-    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v10.2.1.tar.gz"
-    sha256: "D1DDFD3551E649F7E2D180D5A6A006D90CFDE56DCFE1E548C58D95B7F1C87049"
+  "10.4.2":
+    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v10.4.2.tar.gz"
+    sha256: "AFCCFAB496556904900AFACF7D99887F1D50CB893E5D2288BD502DB233ADACAC"
   "10.0.1":
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v10.0.1.tar.gz"
     sha256: "3fdc9ca996971c4c039959866382c4a3a6c8ade4abf888f3b2ff77153e07bf28"
@@ -24,7 +24,7 @@ sources:
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v6.29.5.tar.gz"
     sha256: "ddbf84791f0980c0bbce3902feb93a2c7006f6f53bfd798926143e31d4d756f0"
 patches:
-  "10.2.1":
+  "10.4.2":
     - patch_file: "patches/10.x.x-0001-fix-folly.patch"
       patch_description: "Fix folly check"
       patch_type: "conan"
