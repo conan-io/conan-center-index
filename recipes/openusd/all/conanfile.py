@@ -56,8 +56,7 @@ class OpenUSDConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.shared:
-            self.requires("onetbb/2021.12.0", transitive_headers=True)
+        self.requires("onetbb/2021.12.0", transitive_headers=True)
         self.requires("opensubdiv/3.6.0")
         self.requires("opengl/system")
         
@@ -77,6 +76,10 @@ class OpenUSDConan(ConanFile):
             raise ConanInvalidConfiguration("openusd requires -o opensubdiv/*:with_tbb=True when building shared")
         if not self.dependencies["opensubdiv"].options.with_opengl:
             raise ConanInvalidConfiguration("openusd requires -o opensubdiv/*:with_opengl=True")
+        # As onetbb is a hard requirement if OpenUSD and onetbb forbids static build then we cannot support static builds
+        # See https://github.com/conan-io/conan/issues/15040#issuecomment-1790753531
+        if not self.options.shared:
+            raise ConanInvalidConfiguration("openusd does not supports static build because onetbb conancenter recipe forbids it")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -95,8 +98,7 @@ class OpenUSDConan(ConanFile):
         tc.variables["OPENSUBDIV_INCLUDE_DIR"] = self.dependencies['opensubdiv'].cpp_info.includedirs[0].replace("\\", "/")
         target_suffix = "" if self.dependencies["opensubdiv"].options.shared else "_static"
         tc.variables["OPENSUBDIV_OSDCPU_LIBRARY"] = "OpenSubdiv::osdcpu"+target_suffix
-        if self.options.shared:
-            tc.variables["TBB_tbb_LIBRARY"] = "TBB::tbb"
+        tc.variables["TBB_tbb_LIBRARY"] = "TBB::tbb"
         tc.generate()
 
         tc = CMakeDeps(self)
