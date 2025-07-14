@@ -1,1 +1,0 @@
-. "/home/mg/andi/mgconsole-conan/all/test_package/deactivate_conanrunenv-relwithdebinfo-x86_64.sh"
