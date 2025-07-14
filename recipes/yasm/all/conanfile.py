@@ -34,7 +34,6 @@ class YASMConan(ConanFile):
         del self.info.settings.compiler
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=4]")
         if self.settings_build.os == "Windows" and not is_msvc(self):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
