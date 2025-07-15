@@ -1,0 +1,33 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ee9b58c..01680f6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -48,11 +48,11 @@ option(LIBRDTSC_USE_PMU     "Enables PMU usage on ARM platforms"        OFF)
+ # |          Library Build and Install Properties          |
+ # +--------------------------------------------------------+
+ 
+-add_library(rdtsc SHARED
+-    src/cycles.c
+-    src/common_timer.c
+-    src/timer.c
+-)
++if (NOT BUILD_SHARED_LIBS)
++  add_library(rdtsc src/cycles.c src/common_timer.c src/timer.c)
++else()
++  add_library(rdtsc SHARED src/cycles.c src/common_timer.c src/timer.c)
++endif ()
+ 
+ set_target_properties(rdtsc PROPERTIES
+   VERSION   ${LIBRDTSC_VERSION}
+diff --git a/include/librdtsc/common_timer.h b/include/librdtsc/common_timer.h
+index a6922d8..fc10001 100644
+--- a/include/librdtsc/common_timer.h
++++ b/include/librdtsc/common_timer.h
+@@ -10,6 +10,7 @@ extern uint64_t rdtsc_get_tsc_freq();
+ extern int rdtsc_init();
+ extern void rdtsc_set_tsc_freq();
+ extern uint64_t rdtsc_get_tsc_freq();
++extern uint64_t rdtsc_get_tsc_hz();
+ 
+ #define MS_PER_S 1000
+ #define US_PER_S 1000000
