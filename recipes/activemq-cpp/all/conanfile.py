@@ -39,17 +39,11 @@ class PackageConan(ConanFile):
     def validate(self):
         # Always comment the reason including the upstream issue.
         # INFO: Upstream only support Unix systems. See <URL>
-        if self.settings.os not in ["Linux", "FreeBSD", "MacOS", "Windows"]:
+        if self.settings.os not in ["Linux", "FreeBSD", "Macos", "Windows"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
 
         check_min_cppstd(self, 11)
-
-        # Handle the fact that the library uses deprecated throws() declarations
-        # check for the max CPP standard version and set it to 14 if it is newer
-        compiler_std = self.settings.get_safe('self.settings.compiler.cppstd')
-        if compiler_std is None or compiler_std > 14:
-            tc = AutotoolsToolchain(self)
-            tc.extra_cxxflags.append('-std=c++14')
+        check_max_cppstd(self, 14)
 
     # if a tool other than the compiler or autotools is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
