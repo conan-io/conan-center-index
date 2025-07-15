@@ -18,6 +18,10 @@ sources:
     url: "https://github.com/karastojko/mailio/archive/refs/tags/0.20.0.tar.gz"
     sha256: "073d6b1ff891444b54a01c2a3f17074fd612f9e2e14d9ebd61863c70737b1882"
 patches:
+  "0.25.2":
+    - patch_file: "patches/0.25.2-adapt-cmakelists.patch"
+      patch_description: "fix install path"
+      patch_type: "conan"
   "0.24.1":
     - patch_file: "patches/0.24.1-adapt-cmakelists.patch"
       patch_description: "fix install path"
