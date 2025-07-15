@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import copy, get, rmdir, rm
 from conan.errors import ConanInvalidConfiguration
 
@@ -62,6 +62,9 @@ class LibmngConan(ConanFile):
         tc.variables["WITH_JPEG"] = self.options.with_jpeg
         tc.generate()
 
+        deps = CMakeDeps(self)
+        deps.generate()
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
@@ -77,13 +80,23 @@ class LibmngConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        # Set properties on the main cpp_info
         self.cpp_info.set_property("cmake_file_name", "mng")
         self.cpp_info.set_property("cmake_target_name", "MNG::MNG")
-        self.cpp_info.libs = ["mng"]
 
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
+        # Define the component
+        comp = self.cpp_info.components["mng"]
+        comp.libs = ["mng"]
+        comp.requires = ["zlib::zlib"]
+        if self.options.with_jpeg:
+            comp.requires.append("libjpeg::libjpeg")
+        if self.options.with_lcms:
+            comp.requires.append("lcms::lcms")
 
-        # TODO: Remove after Conan 2.0
-        self.cpp_info.names["cmake_find_package"] = "MNG"
-        self.cpp_info.names["cmake_find_package_multi"] = "MNG"
+        # Make sure the main target has the same properties as the component
+        self.cpp_info.libs = comp.libs
+        self.cpp_info.requires = comp.requires
+
+        if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
+            comp.system_libs.append("m")
+            self.cpp_info.system_libs = comp.system_libs
