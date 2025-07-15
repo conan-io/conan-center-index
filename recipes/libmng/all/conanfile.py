@@ -33,14 +33,16 @@ class LibmngConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
         if self.options.with_jpeg:
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/9e", transitive_headers=True)
         if self.options.with_lcms:
-            self.requires("lcms/2.14")
+            self.requires("lcms/2.14", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Remove the pre-existing config.h file to allow CMake to generate its own
+        rm(self, "config.h", self.source_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
