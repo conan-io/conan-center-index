@@ -15,6 +15,17 @@
 
 //#include "ServiceComponents.hpp"
 
+#if defined(_WIN32) || defined(_WIN64)
+    #define LIB_EXT ".dll"
+    #define LIB_PREFIX
+#elif defined(__APPLE__) || defined(__MACH__)
+    #define LIB_EXT ".dylib"
+    #define LIB_PREFIX "lib"
+#elif defined(__linux__)
+    #define LIB_EXT ".so"
+    #define LIB_PREFIX "lib"
+#endif
+
 namespace {
     // from: https://stackoverflow.com/questions/10270328/the-simplest-and-neatest-c11-scopeguard/28413370#28413370
     class scope_guard {
@@ -143,7 +154,7 @@ int main(int argc, char** argv) {
     std::for_each(ds_bundles.begin(), ds_bundles.end(), [](auto& bundle) { bundle.Start(); });
 
     // Now install/start test_bundle
-    auto bundle_path_str = std::filesystem::current_path().string() + "/lib/libtest_bundle.dylib";
+    auto bundle_path_str = std::string(BINARY_PATH) + "/" + LIB_PREFIX + "test_bundle" + LIB_EXT;
     auto bundles = context.InstallBundles(bundle_path_str);
     std::for_each(bundles.begin(), bundles.end(), [](auto& bundle) { bundle.Start(); });
 

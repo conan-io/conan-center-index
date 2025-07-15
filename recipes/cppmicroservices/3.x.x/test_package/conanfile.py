@@ -41,5 +41,8 @@ class test_package(ConanFile):
 
     def test(self):
         if can_run(self):
-            cmd = os.path.join("bin", "test_app")
-            self.run(cmd)
+            is_windows = self.settings.os == "Windows"
+            exe_name = "test_app.exe" if is_windows else "test_app"
+            print(self.cpp.build.bindir)
+            cmd = os.path.join("bin", self.cpp.build.bindir, exe_name)
+            self.run(cmd, env="conanrun")

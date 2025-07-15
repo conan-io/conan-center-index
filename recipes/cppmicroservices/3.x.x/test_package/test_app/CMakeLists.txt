@@ -5,6 +5,8 @@
 set(_srcs src/main.cpp)
 
 get_target_property(DS_DLL_PATH DeclarativeServices IMPORTED_LOCATION_RELEASE)
+message(STATUS ${DS_DLL_PATH})
+message(STATUS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 set_source_files_properties(
   src/main.cpp
   PROPERTIES
@@ -17,6 +19,9 @@ endif()
 
 add_executable(test_app)
 target_sources(test_app PRIVATE ${_srcs})
+target_compile_definitions(test_app PRIVATE
+    BINARY_PATH="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>"
+)
 
 if(NOT BUILD_SHARED_LIBS)
   target_link_libraries(test_app ${_static_bundles})

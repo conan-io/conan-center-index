@@ -16,6 +16,8 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(CMAKE_CXX_STANDARD 17)
+
 # Output artifacts (executables, shared libraries, and static libraries) to 
 # single top-level directories ('bin' or 'lib') in the out-of-source build folder
 # (rather than the default behavior of mirroring the source folder hierarchy).

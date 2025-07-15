@@ -5,17 +5,20 @@ from conan.tools.files import get, replace_in_file
 
 import os
 
+
 class CppMicroServicesConan(ConanFile):
     name = "cppmicroservices"
     description = "CppMicroServices is a C++ implementation of the OSGi spec"
     package_type = "library"
     url = "https://github.com/CppMicroServices/CppMicroServices.git"
     homepage = "https://cppmicroservices.org"
-    topics = ("modularity", "runtime linking", "dependency inversion", "service oriented")
+    topics = ("modularity", "runtime linking",
+              "dependency inversion", "service oriented")
     license = "Apache-2.0"
     no_copy_source = True
     settings = "os", "compiler", "build_type", "arch"
-    
+    version = "3.8.7"
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -25,8 +28,8 @@ class CppMicroServicesConan(ConanFile):
     default_options = {
         "shared": True,
         "fPIC": True,
-        "with_gtest" : False,
-        "with_doxygen" : False
+        "with_gtest": False,
+        "with_doxygen": False
     }
 
     def source(self):
@@ -57,8 +60,8 @@ class CppMicroServicesConan(ConanFile):
         print(f"package_folder = {self.package_folder}")
         cmake = CMake(self)
         target = os.path.join(self.source_folder, "target")
-        cmake.configure(variables={"US_BUILD_TESTING":"Off"},
-                         build_script_folder=target)
+        cmake.configure(variables={"US_BUILD_TESTING": "Off"},
+                        build_script_folder=target)
         cmake.build()
 
     def package(self):
@@ -67,8 +70,10 @@ class CppMicroServicesConan(ConanFile):
 
     def package_info(self):
         if self.settings.os != "Windows":
-            self.cpp_info.libs = ["CppMicroServices", "DeclarativeServices", "ConfigurationAdmin"]
+            self.cpp_info.libs = ["CppMicroServices",
+                                  "DeclarativeServices", "ConfigurationAdmin"]
         else:
-            self.cpp_info.libs = ["CppMicroServices3", "DeclarativeServices1", "ConfigurationAdmin1"]
+            self.cpp_info.libs = ["CppMicroServices3",
+                                  "DeclarativeServices1", "ConfigurationAdmin1"]
         self.cpp_info.includedirs = ['include/cppmicroservices3']
         self.cpp_info.builddirs = ['share/cppmicroservices3/cmake', 'bin']
