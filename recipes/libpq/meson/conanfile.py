@@ -78,7 +78,7 @@ class LibpqConan(ConanFile):
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_xslt:
-            self.requires("libxslt/1.1.42")
+            self.requires("libxslt/[^1.1]")
         if self.options.get_safe("with_readline"):
             self.requires("readline/8.2")
 
@@ -86,9 +86,8 @@ class LibpqConan(ConanFile):
         self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        if self.settings.os == "Windows":
-            self.tool_requires("strawberryperl/5.32.1.1")
         if self.settings_build.os == "Windows":
+            self.tool_requires("strawberryperl/5.32.1.1")
             self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("flex/2.6.4")
@@ -106,7 +105,7 @@ class LibpqConan(ConanFile):
             return "enabled" if v else "disabled"
 
         tc = MesonToolchain(self)
-        tc.project_options["ssl"] = "openssl" if self.options.with_openssl else "disabled"
+        tc.project_options["ssl"] = "openssl" if self.options.with_openssl else "none"
         tc.project_options["icu"] = feature(self.options.with_icu)
         # Why did the old version disable this explicitly?
         tc.project_options["zlib"] = feature(self.options.with_zlib)

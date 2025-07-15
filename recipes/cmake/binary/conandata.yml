@@ -33,7 +33,7 @@ sources:
     Windows:
       armv8:
         url: "https://cmake.org/files/v3.31/cmake-3.31.8-windows-arm64.zip"
-        sha256: "d37ca89ec60aece080664ee936f7aaffdfdbde0a201b165c45ecfaf68a4c1fa93"
+        sha256: "d37ca89ec60aece080664ee936f7aaffdfdbde0a201b165c45ecfaf68a4c1fa9"
       x86_64:
         url: "https://cmake.org/files/v3.31/cmake-3.31.8-windows-x86_64.zip"
         sha256: "81aa9964dbabd71fe02e7ec50472fd3ad56138c49944515ece9001efbff8d719"

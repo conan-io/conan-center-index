@@ -8,6 +8,7 @@ from conan.tools.files import get, copy, export_conandata_patches, apply_conanda
 from conan.tools.microsoft import is_msvc
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.build import cross_building
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -163,7 +164,7 @@ class Mpg123Conan(ConanFile):
             cmake.configure(build_script_folder=os.path.join(self.source_folder, "ports", "cmake"))
             cmake.build()
         else:
-            if self.settings.compiler == "apple-clang" and cross_building(self):
+            if Version(self.version) < "1.33.0" and self.settings.compiler == "apple-clang" and cross_building(self):
                 # when testing if the assembler supports avx - propagate cflags (CFLAGS) to the assembler
                 # (which should contain "-arch x86_64" when crossbuilding with appleclang)
                 replace_in_file(self, os.path.join(self.source_folder, "configure"),
@@ -185,7 +186,7 @@ class Mpg123Conan(ConanFile):
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        
+
         fix_apple_shared_install_name(self)
 
     def package_info(self):
