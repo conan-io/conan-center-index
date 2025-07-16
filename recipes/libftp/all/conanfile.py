@@ -29,7 +29,7 @@ class LibFTPConan(ConanFile):
     implements = ["auto_shared_fpic"]
 
     def configure(self):
-        if is_msvc(self):
+        if Version(self.version) < "1.4.0" and is_msvc(self):
             del self.options.shared
             self.package_type = "static-library"
         if self.options.get_safe("shared"):
@@ -39,8 +39,14 @@ class LibFTPConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.86.0", transitive_headers=True)
-        if Version(self.version) >= "0.5.0":
+        version = Version(self.version)
+
+        if version >= "1.5.0":
+            self.requires("boost/1.88.0", transitive_headers=True)
+        else:
+            self.requires("boost/1.86.0", transitive_headers=True)
+
+        if version >= "0.5.0":
             self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):

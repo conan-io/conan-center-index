@@ -9,7 +9,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.60.0 <2 || >=2.0.5"
+required_conan_version = ">=2.0.5"
 
 
 class GlfwConan(ConanFile):
@@ -52,6 +52,8 @@ class GlfwConan(ConanFile):
             self.options.rm_safe("with_wayland")
         if self.settings.os not in ["Linux", "FreeBSD"] or Version(self.version) <= "3.3.8":
             self.options.rm_safe("with_x11")
+        if Version(self.version) >= "3.4":
+            self.options.rm_safe("vulkan_static")
 
     def configure(self):
         if self.options.shared:
@@ -61,13 +63,17 @@ class GlfwConan(ConanFile):
 
         if self.options.get_safe("with_wayland"):
             self.options["xkbcommon"].with_wayland = True
+            self.options["wayland"].shared = True
+            self.options["xkbcommon"].shared = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("opengl/system")
-        if self.options.vulkan_static:
+        # libs=False because glfw does not link to opengl, it
+        # loads it via dlopen or equivalent
+        self.requires("opengl/system", libs=False, transitive_headers=True)
+        if self.options.get_safe("vulkan_static"):
             self.requires("vulkan-loader/1.3.268.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.get_safe("with_x11", True):
@@ -77,8 +83,14 @@ class GlfwConan(ConanFile):
             self.requires("xkbcommon/1.6.0")
 
     def validate(self):
-        if self.options.get_safe("with_wayland") and not self.dependencies["xkbcommon"].options.with_wayland:
-            raise ConanInvalidConfiguration(f"{self.ref} requires the with_wayland option in xkbcommon to be enabled when the with_wayland option is enabled")
+        if self.options.get_safe("with_wayland"):
+            xkbcommon_options = self.dependencies["xkbcommon"].options
+            if not xkbcommon_options.with_wayland:
+                raise ConanInvalidConfiguration(f"{self.ref} requires the with_wayland option in xkbcommon to be enabled when the with_wayland option is enabled")
+            if not xkbcommon_options.shared:
+                raise ConanInvalidConfiguration(f"{self.ref} always loads xkbcommon dependencies dynamically and does not support static linkage")
+            if not self.dependencies["wayland"].options.shared:
+                raise ConanInvalidConfiguration(f"{self.ref} always loads wayland dependencies dynamically and does not support static linkage")
 
     def build_requirements(self):
         if self.options.get_safe("with_wayland"):
@@ -86,7 +98,7 @@ class GlfwConan(ConanFile):
             if self._has_build_profile:
                 self.tool_requires("wayland/<host_version>")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.1.0")
+                self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -108,7 +120,8 @@ class GlfwConan(ConanFile):
             tc.cache_variables["GLFW_BUILD_WAYLAND"] = self.options.get_safe("with_wayland", False)
         else:
             tc.cache_variables["GLFW_USE_WAYLAND"] = self.options.get_safe("with_wayland", False)
-        tc.variables["GLFW_VULKAN_STATIC"] = self.options.vulkan_static
+        if Version(self.version) < "3.4":
+            tc.cache_variables["GLFW_VULKAN_STATIC"] = self.options.get_safe("vulkan_static", False)
         if is_msvc(self):
             tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.generate()
@@ -140,13 +153,13 @@ class GlfwConan(ConanFile):
         apply_conandata_patches(self)
         # don't force PIC
         replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
-                              "POSITION_INDEPENDENT_CODE ON", "")
+                        "POSITION_INDEPENDENT_CODE ON", "")
         # don't force static link to libgcc if MinGW
         replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
-                              "target_link_libraries(glfw PRIVATE \"-static-libgcc\")", "")
+                        "target_link_libraries(glfw PRIVATE \"-static-libgcc\")", "")
 
         # Allow to link vulkan-loader into shared glfw
-        if self.options.vulkan_static:
+        if self.options.get_safe("vulkan_static"):
             cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
             replace_in_file(
                 self,
@@ -214,9 +227,8 @@ class GlfwConan(ConanFile):
                 "AppKit", "Cocoa", "CoreFoundation", "CoreGraphics",
                 "CoreServices", "Foundation", "IOKit",
             ])
-
         self.cpp_info.requires = ["opengl::opengl"]
-        if self.options.vulkan_static:
+        if self.options.get_safe("vulkan_static"):
             self.cpp_info.requires.append("vulkan-loader::vulkan-loader")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.get_safe("with_x11", True):
@@ -238,11 +250,15 @@ class GlfwConan(ConanFile):
                 "xkbcommon::xkbcommon"
             ])
 
-        # backward support of cmake_find_package, cmake_find_package_multi & pkg_config generators
-        self.cpp_info.filenames["cmake_find_package"] = "glfw3"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "glfw3"
-        self.cpp_info.names["cmake_find_package"] = "glfw"
-        self.cpp_info.names["cmake_find_package_multi"] = "glfw"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.names["pkg_config"] = "glfw3"
+        # Starting with version 3.4, glfw loads the platform libraries at runtime
+        # and hence does not need to link with them.
+        self.cpp_info.requires = []
+        if Version(self.version) < "3.4":
+            self.cpp_info.requires.append("opengl::opengl")
+            if self.options.get_safe("vulkan_static"):
+                self.cpp_info.requires.append("vulkan-loader::vulkan-loader")
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                if self.options.get_safe("with_x11", True):
+                    self.cpp_info.requires.append("xorg::x11")
+            if self.options.get_safe("with_wayland"):
+                self.cpp_info.requires.extend(["wayland::wayland", "xkbcommon::xkbcommon"])

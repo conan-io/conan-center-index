@@ -82,7 +82,7 @@ class DbusConan(ConanFile):
         if self.options.get_safe("with_systemd"):
             self.requires("libsystemd/253.6")
         if self.options.get_safe("with_selinux"):
-            self.requires("libselinux/3.5")
+            self.requires("libselinux/3.6")
         if self.options.get_safe("with_x11"):
             # X11 is only linked into an executable and should not be propagated as a library dependency.
             # It should still be provided in a VirtualRunEnv context, though,

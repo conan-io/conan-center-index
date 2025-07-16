@@ -2,7 +2,11 @@
 #include <string.h>
 
 #include "tree_sitter/api.h"
+#ifdef TREE_SITTER_SQL_OLD_PATH
 #include "tree-sitter-sql.h"
+#else
+#include "tree_sitter/tree-sitter-sql.h"
+#endif
 
 int main() {
     TSParser *parser = ts_parser_new();

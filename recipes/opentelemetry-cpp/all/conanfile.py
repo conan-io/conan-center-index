@@ -24,6 +24,7 @@ class OpenTelemetryCppConan(ConanFile):
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
+        "with_abi_v2": [True, False],
         "with_no_deprecated_code": [True, False],
         "with_stl": [True, False],
         "with_gsl": [True, False],
@@ -47,6 +48,7 @@ class OpenTelemetryCppConan(ConanFile):
         "fPIC": True,
         "shared": False,
 
+        "with_abi_v2": False,
         "with_no_deprecated_code": False,
         "with_stl": False,
         "with_gsl": False,
@@ -105,6 +107,8 @@ class OpenTelemetryCppConan(ConanFile):
         if Version(self.version) < "1.16.0":
             del self.options.with_otlp_file
             del self.options.with_otlp_http_compression
+        if Version(self.version) < "1.18.0":
+            del self.options.with_abi_v2
 
     def configure(self):
         if self.options.shared:
@@ -141,7 +145,7 @@ class OpenTelemetryCppConan(ConanFile):
 
         if self.options.with_abseil:
             if self._supports_new_proto_grpc_abseil():
-                self.requires("abseil/[>=20240116.1 <20240117.0]", transitive_headers=True)
+                self.requires("abseil/[>=20240116.1 <=20250127.0]", transitive_headers=True)
             else:
                 self.requires("abseil/[>=20230125.3 <=20230802.1]", transitive_headers=True)
 
@@ -222,7 +226,12 @@ class OpenTelemetryCppConan(ConanFile):
 
     def build_requirements(self):
         if self._needs_proto:
-            self.tool_requires("opentelemetry-proto/1.3.2")
+            if Version(self.version) >= "1.21.0":
+                self.tool_requires("opentelemetry-proto/1.7.0")
+            elif Version(self.version) >= "1.18.0":
+                self.tool_requires("opentelemetry-proto/1.4.0")
+            else:
+                self.tool_requires("opentelemetry-proto/1.3.2")
             self.tool_requires("protobuf/<host_version>")
 
         if self.options.with_otlp_grpc:
@@ -288,6 +297,9 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["WITH_ASYNC_EXPORT_PREVIEW"] = self.options.with_async_export_preview
         tc.cache_variables["WITH_METRICS_EXEMPLAR_PREVIEW"] = self.options.with_metrics_exemplar_preview
         tc.cache_variables["OPENTELEMETRY_INSTALL"] = True
+        if self.options.get_safe("with_abi_v2"):
+            tc.variables["WITH_ABI_VERSION_1"] = False
+            tc.variables["WITH_ABI_VERSION_2"] = True
         tc.generate()
 
         deps = CMakeDeps(self)

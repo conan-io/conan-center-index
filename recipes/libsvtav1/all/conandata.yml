@@ -1,4 +1,7 @@
 sources:
+  "2.2.1":
+    url: "https://gitlab.com/AOMediaCodec/SVT-AV1/-/archive/v2.2.1/SVT-AV1-v2.2.1.tar.gz"
+    sha256: "d02b54685542de0236bce4be1b50912aba68aff997c43b350d84a518df0cf4e5"
   "2.1.2":
     url: "https://gitlab.com/AOMediaCodec/SVT-AV1/-/archive/v2.1.2/SVT-AV1-v2.1.2.tar.gz"
     sha256: "65e90af18f31f8c8d2e9febf909a7d61f36172536abb25a7089f152210847cd9"
