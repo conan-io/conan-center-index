@@ -1,28 +1,20 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index bebf3dd..b9e8a04 100644
+index bebf3dd..1781c4c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -14,32 +14,13 @@
+@@ -14,7 +14,7 @@
  # You should have received a copy of the GNU General Public License
  # along with this program.  If not, see <https://www.gnu.org/licenses/>.
  
 -cmake_minimum_required(VERSION 3.4)
-+cmake_minimum_required(VERSION 3.15)
++cmake_minimum_required(VERSION 3.7)
  project(mgconsole VERSION 1.4)
  include(CTest)
  
--set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
--
- set(CMAKE_C_STANDARD 11)
- set(CMAKE_CXX_STANDARD 20)
- 
--# Set default build type to 'Release'
--if (NOT CMAKE_BUILD_TYPE)
--    set(CMAKE_BUILD_TYPE "Release")
--endif()
--message(STATUS "CMake build type: ${CMAKE_BUILD_TYPE}")
--# Config of some libraries (e.g. replxx) depends on the build type.
--string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWERCASE)
+@@ -30,15 +30,6 @@ endif()
+ message(STATUS "CMake build type: ${CMAKE_BUILD_TYPE}")
+ # Config of some libraries (e.g. replxx) depends on the build type.
+ string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWERCASE)
 -# Enable explicit static linking of SSL because of generic Linux binary.
 -set(MGCONSOLE_STATIC_SSL OFF CACHE STRING "Statically link SSL")
 -
@@ -32,12 +24,11 @@ index bebf3dd..b9e8a04 100644
 -    # https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html#special-cases
 -    set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "install dir" FORCE)
 -endif()
--
+ 
  add_subdirectory(src)
  if(BUILD_TESTING)
-     add_subdirectory(tests)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index a29dec2..f11c5be 100644
+index a29dec2..20bfcc0 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -30,17 +30,10 @@ find_package(Threads REQUIRED)
@@ -122,19 +113,14 @@ index a29dec2..f11c5be 100644
  
  add_subdirectory(utils)
  
-@@ -114,24 +54,24 @@ if(MGCONSOLE_ON_WINDOWS)
- endif()
- 
- add_executable(mgconsole main.cpp interactive.cpp serial_import.cpp batch_import.cpp parsing.cpp)
--target_compile_definitions(mgconsole PRIVATE MGCLIENT_STATIC_DEFINE)
-+
+@@ -117,16 +57,14 @@ add_executable(mgconsole main.cpp interactive.cpp serial_import.cpp batch_import
+ target_compile_definitions(mgconsole PRIVATE MGCLIENT_STATIC_DEFINE)
  target_include_directories(mgconsole
    PRIVATE
 -  ${GFLAGS_INCLUDE_DIRS}
 -  ${MGCLIENT_INCLUDE_DIRS}
 -  ${REPLXX_INCLUDE_DIRS}
    ${CMAKE_CURRENT_BINARY_DIR})
-+
  target_link_libraries(mgconsole
    PRIVATE
 -  ${GFLAGS_LIBRARY}
@@ -148,12 +134,6 @@ index a29dec2..f11c5be 100644
  if(MGCONSOLE_ON_WINDOWS)
    target_link_libraries(mgconsole PRIVATE shlwapi)
  endif()
- 
- configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.hpp.in"
-   "${CMAKE_CURRENT_BINARY_DIR}/version.hpp")
-+
- install(TARGETS mgconsole
-   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 diff --git a/src/utils/CMakeLists.txt b/src/utils/CMakeLists.txt
 index 66dfd4e..16928ab 100644
 --- a/src/utils/CMakeLists.txt

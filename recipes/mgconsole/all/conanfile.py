@@ -15,13 +15,6 @@ class Mgconsole(ConanFile):
     topics = ("mgconsole", "memgraph")
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-            "build_tests": [True, False],
-            }
-
-    default_options = {
-            "build_tests": False,
-            }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -33,20 +26,24 @@ class Mgconsole(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
 
+    def package_id(self):
+        del self.info.settings.compiler
+        del self.info.settings.build_type
+
     def requirements(self):
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("gflags/2.2.2")
         self.requires("mgclient/1.4.3")
         self.requires("replxx/0.0.4")
-        self.requires("openssl/3.5.1")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_TESTING"] = self.options.build_tests
+        tc.variables["BUILD_TESTING"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
-    def validate(self):
+    def validate_build(self):
         check_min_cppstd(self, 17)
 
     def build(self):
@@ -61,3 +58,5 @@ class Mgconsole(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = ["bin"]
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["ws2_32"]
