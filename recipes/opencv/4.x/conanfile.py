@@ -8,6 +8,7 @@ from conan.tools.files import apply_conandata_patches, collect_libs, copy, expor
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 import re
 import textwrap
@@ -367,6 +368,10 @@ class OpenCVConan(ConanFile):
             # in a big dependency graph
             if not self._has_with_wayland_option:
                 self.options.with_gtk = True
+
+        if is_msvc(self) and self.settings.arch == "armv8":
+            self.options.cpu_baseline = "NEON"
+            self.options.cpu_dispatch = ""
 
     @property
     def _opencv_modules(self):
