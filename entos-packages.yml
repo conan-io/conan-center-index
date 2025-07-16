@@ -119,6 +119,9 @@ nlohmann_json:
 opengl:
   versions:
     - 'system'
+openssl:
+  versions:
+    - '3.2.2'
 paho-mqtt-c:
   versions:
     - '1.3.13'
