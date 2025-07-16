@@ -1,0 +1,96 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0f15754..961c080 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -21,6 +21,8 @@ set(CMAKE_CXX_STANDARD 17)
+ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ 
+ option(BUILD_TESTING "Enable C++ unit tests." ON)
++option(LD_BUILD_EXAMPLES ON)
++option(LD_USE_FETCH_CONTENT ON)
+ 
+ # If you want to run the unit tests with valgrind, then TESTING_SANITIZERS must of OFF.
+ option(TESTING_SANITIZERS "Enable sanitizers for unit tests." ON)
+@@ -53,13 +55,9 @@ if (BUILD_TESTING)
+     enable_testing()
+ endif ()
+ 
+-set(OPENSSL_USE_STATIC_LIBS ON)
+-set(OPENSSL_ROOT_DIR "/opt/homebrew/opt/openssl@1.1")
+ find_package(OpenSSL REQUIRED)
+ message(STATUS "LaunchDarkly: using OpenSSL v${OPENSSL_VERSION}")
+ 
+-set(Boost_USE_STATIC_LIBS ON)
+-
+ if (BUILD_SHARED_LIBS)
+     # When building a shared library we hide all symbols
+     # aside from this we have specifically exported for the C-API.
+@@ -67,8 +65,6 @@ if (BUILD_SHARED_LIBS)
+     set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+ endif ()
+ 
+-set(Boost_USE_MULTITHREADED ON)
+-set(Boost_USE_STATIC_RUNTIME OFF)
+ find_package(Boost 1.81 REQUIRED COMPONENTS json url coroutine)
+ message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
+ 
+@@ -85,12 +81,21 @@ add_subdirectory(libs/server-sent-events)
+ set(ORIGINAL_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
+ 
+ set(BUILD_TESTING OFF)
++if (LD_USE_FETCH_CONTENT)
+ include(${CMAKE_FILES}/certify.cmake)
++else()
++	find_package(certify REQUIRED)
++endif()
+ add_subdirectory(vendor/foxy)
+ 
+ set(BUILD_TESTING "${ORIGINAL_BUILD_TESTING}")
+ 
+ set(BUILD_SHARED_LIBS "${ORIGINAL_BUILD_SHARED_LIBS}")
+ 
+-add_subdirectory(contract-tests)
+-add_subdirectory(examples)
++if (BUILD_TESTING)
++  add_subdirectory(contract-tests)
++endif()
++
++if (LD_BUILD_EXAMPLES)
++	add_subdirectory(examples)
++endif()
+diff --git a/libs/common/CMakeLists.txt b/libs/common/CMakeLists.txt
+index 08e8d6e..3f1cf4e 100644
+--- a/libs/common/CMakeLists.txt
++++ b/libs/common/CMakeLists.txt
+@@ -22,9 +22,12 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+ endif ()
+ 
+ # Needed to fetch external dependencies.
+-include(FetchContent)
+-
+-include(${CMAKE_FILES}/expected.cmake)
++if (LD_USE_FETCH_CONTENT)
++	include(FetchContent)
++	include(${CMAKE_FILES}/expected.cmake)
++else()
++	find_package(tl-expected REQUIRED)
++endif()
+ #include(${CMAKE_FILES}/foxy.cmake)
+ 
+ # Add main SDK sources.
+diff --git a/libs/internal/CMakeLists.txt b/libs/internal/CMakeLists.txt
+index 1df835d..7141eeb 100644
+--- a/libs/internal/CMakeLists.txt
++++ b/libs/internal/CMakeLists.txt
+@@ -23,7 +23,11 @@ endif ()
+ 
+ 
+ # Needed to fetch external dependencies. 
++if (LD_USE_FETCH_CONTENT)
+ include(FetchContent)
++else()
++find_package(tl-expected REQUIRED)
++endif()
+ 
+ # Add main SDK sources.
+ add_subdirectory(src)

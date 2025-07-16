@@ -1,0 +1,23 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2d74724..2af1c8c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -53,6 +53,7 @@ option(LD_DYNAMIC_LINK_OPENSSL
+ )
+ 
+ option(LD_BUILD_EXAMPLES "Build hello-world examples." ON)
++option(LD_BUILD_SERVER_SDK "Build the server sdk" ON)
+ 
+ # If using 'make' as the build system, CMake causes the 'install' target to have a dependency on 'all', meaning
+ # it will cause a full build. This disables that, allowing us to build piecemeal instead. This is useful
+@@ -132,7 +133,9 @@ add_subdirectory(libs/server-sent-events)
+ # Built as static or shared depending on LD_BUILD_SHARED_LIBS variable.
+ # This target "links" in common, internal, and sse as object libraries.
+ add_subdirectory(libs/client-sdk)
+-add_subdirectory(libs/server-sdk)
++if (LD_BUILD_SERVER_SDK)
++    add_subdirectory(libs/server-sdk)
++endif()
+ 
+ if (LD_BUILD_CONTRACT_TESTS)
+     message(STATUS "LaunchDarkly: building contract tests")

@@ -67,6 +67,9 @@ gtest:
 icu:
   versions:
     - '74.2'
+launchdarkly:
+  versions:
+    - '3.8.2'
 libbacktrace:
   versions:
     - 'cci.20210118'
