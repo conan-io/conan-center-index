@@ -1,7 +1,7 @@
 sources:
-  "1.0.2":
-    url: "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v1.0.2.tar.gz"
-    sha256: f92825b3c839c3af851204c79ea2a63871f9060f016e7c0411cfdc1727978feb
+  "1.0.3":
+    url: "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v1.0.3.tar.gz"
+    sha256: d9145f3ca2b828a984477fbfb49616b1541aa249af945615f9c2abad573a71cc
   "1.0.1":
     url: "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v1.0.1.tar.gz"
     sha256: "bdc1d1ebc3f0e72c384aba6982cdfc08788d85f9ea2228e5621a6ff536df4900"
