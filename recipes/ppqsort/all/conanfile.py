@@ -30,11 +30,6 @@ class PPQSortConan(ConanFile):
     def layout(self):
         basic_layout(self)
 
-    def build(self):
-        # Patch to fix missing include for hardware_constructive_interference_size on libc++
-        replace_in_file(self, os.path.join(self.source_folder, "include", "ppqsort", "parameters.h"),
-                        "#include <execution>", "#include <execution>\n#include <new>")
-
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(
             self.package_folder, "licenses"), src=self.source_folder)
