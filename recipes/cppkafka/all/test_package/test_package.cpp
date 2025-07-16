@@ -8,7 +8,6 @@ int main() {
     try {
         // Create the config
         Configuration kafkaConfig = {
-            {"metadata.broker.list", "127.0.0.1:9092"},
             {"group.id", "xxx"},
             {"auto.offset.reset", "earliest"},
             {"enable.auto.commit", false}
