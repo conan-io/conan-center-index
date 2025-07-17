@@ -2,8 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import copy, get, rmdir, rm
-from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 
 required_conan_version = ">=1.53.0"
 
@@ -26,6 +25,7 @@ class UvgRTPConan(ConanFile):
         "with_crypto": True,
     }
     package_type = "library"
+    exports_sources = "patches/*"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -36,6 +36,7 @@ class UvgRTPConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -68,13 +69,13 @@ class UvgRTPConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "uvgrtp")
         self.cpp_info.set_property("cmake_target_name", "uvgrtp::uvgrtp")
+        self.cpp_info.set_property("pkg_config_name", "uvgrtp")
 
         self.cpp_info.libs = ["uvgrtp"]
 
@@ -83,6 +84,7 @@ class UvgRTPConan(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["wsock32", "ws2_32"])
-
-        if self.settings.os == "Macos":
+        elif self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["pthread"])
+        elif self.settings.os == "Macos":
             self.cpp_info.frameworks.append("Security")
