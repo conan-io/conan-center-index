@@ -7,6 +7,7 @@ import os
 
 required_conan_version = ">=2.9.0"
 
+
 class PPQSortConan(ConanFile):
     name = "ppqsort"
     package_type = "header-library"
@@ -17,7 +18,7 @@ class PPQSortConan(ConanFile):
     description = "Parallel Pattern Quicksort"
     topics = ("algorithms", "sorting", "parallel", "header-only")
 
-    settings = "compiler", "os" # keep it for checking standard and linking pthread
+    settings = "compiler", "os"  # keep it for checking standard and linking pthread
     implements = ["auto_header_only"]
     no_copy_source = True
     languages = "C++"
