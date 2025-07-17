@@ -1,0 +1,68 @@
+diff --git a/rust/pact_ffi/src/plugins/mod.rs b/rust/pact_ffi/src/plugins/mod.rs
+index 6fe387d7..f2fb1144 100644
+--- a/rust/pact_ffi/src/plugins/mod.rs
++++ b/rust/pact_ffi/src/plugins/mod.rs
+@@ -36,6 +36,8 @@ ffi_fn! {
+   ///
+   /// * `plugin_name` is the name of the plugin to load.
+   /// * `plugin_version` is the version of the plugin to load. It is optional, and can be NULL.
++  /// * `completion_delay` is an arbitrary delay specified in milliseconds to add before the 
++  ///    function returns to allow asynchronous tasks to complete.
+   ///
+   /// Returns zero on success, and a positive integer value on failure.
+   ///
+@@ -55,7 +57,7 @@ ffi_fn! {
+   /// * `3` - Pact Handle is not valid.
+   ///
+   /// When an error errors, LAST_ERROR will contain the error message.
+-  fn pactffi_using_plugin(pact: PactHandle, plugin_name: *const c_char, plugin_version: *const c_char) -> c_uint {
++  fn pactffi_using_plugin_with_delay(pact: PactHandle, plugin_name: *const c_char, plugin_version: *const c_char, completion_delay: u64) -> c_uint {
+     let plugin_name = safe_str!(plugin_name);
+     let plugin_version = if_null(plugin_version, "");
+ 
+@@ -78,7 +80,7 @@ ffi_fn! {
+           let result = load_plugin(&dependency).await;
+ 
+           // Add a small delay to let asynchronous tasks to complete
+-          sleep(Duration::from_millis(500)).await;
++          sleep(Duration::from_millis(completion_delay)).await;
+ 
+           result
+         });
+@@ -103,6 +105,36 @@ ffi_fn! {
+   }
+ }
+ 
++/// Add a plugin to be used by the test. The plugin needs to be installed correctly for this
++/// function to work.
++///
++/// * `plugin_name` is the name of the plugin to load.
++/// * `plugin_version` is the version of the plugin to load. It is optional, and can be NULL.
++///
++/// Returns zero on success, and a positive integer value on failure.
++///
++/// Note that plugins run as separate processes, so will need to be cleaned up afterwards by
++/// calling `pactffi_cleanup_plugins` otherwise you will have plugin processes left running.
++///
++/// # Safety
++///
++/// `plugin_name` must be a valid pointer to a NULL terminated string. `plugin_version` may be null,
++/// and if not NULL must also be a valid pointer to a NULL terminated string. Invalid
++/// pointers will result in undefined behaviour.
++///
++/// # Errors
++///
++/// * `1` - A general panic was caught.
++/// * `2` - Failed to load the plugin.
++/// * `3` - Pact Handle is not valid.
++///
++/// When an error errors, LAST_ERROR will contain the error message.
++#[no_mangle]
++pub extern fn pactffi_using_plugin(pact: PactHandle, plugin_name: *const c_char, plugin_version: *const c_char) -> c_uint {
++  let result = pactffi_using_plugin_with_delay(pact, plugin_name, plugin_version, 500);
++  result
++}
++
+ ffi_fn! {
+   /// Decrement the access count on any plugins that are loaded for the Pact. This will shutdown
+   /// any plugins that are no longer required (access count is zero).

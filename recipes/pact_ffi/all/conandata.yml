@@ -1,8 +1,18 @@
 sources:
+  "0.4.28":
+    url: "https://github.com/pact-foundation/pact-reference/archive/refs/tags/libpact_ffi-v0.4.28.tar.gz"
+    sha256: "167064564ec43cba80a80a0acfcb6f9a671e2b5e3963e630ecc4442e0baedfde"
   "0.4.21":
     url: "https://github.com/pact-foundation/pact-reference/archive/refs/tags/libpact_ffi-v0.4.21.tar.gz"
-    sha256: 9fc91c7d6d9f1cbc5a8774a3d691c8fec8ed839129e6f4bae20875bfb015aa9f
+    sha256: "9fc91c7d6d9f1cbc5a8774a3d691c8fec8ed839129e6f4bae20875bfb015aa9f"
 patches:
+  "0.4.28":
+    - patch_file: "patches/0000_cmake-set-target.patch"
+      patch_type: portability
+      patch_description: "allow overriding of target location and architecture"
+    - patch_file: "patches/0001_using-plugin-no-delay.patch"
+      patch_source: "https://github.com/pact-foundation/pact-reference/pull/500"
+      patch_description: "remove delay when loading plugins"
   "0.4.21":
     - patch_file: "patches/0000_cmake-set-target.patch"
       patch_type: portability

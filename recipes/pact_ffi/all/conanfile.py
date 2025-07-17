@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
-from conan.tools.files import get, copy, replace_in_file, rmdir, rm, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, copy, rmdir, rm, export_conandata_patches, apply_conandata_patches
 from conan.tools.layout import basic_layout
 
 from pathlib import Path
@@ -48,6 +48,7 @@ class PactFFIConan(ConanFile):
 
     def requirements(self):
         self.requires("bzip2/1.0.8")
+        self.requires("xz_utils/5.4.5")
 
     def validate(self):
         if self.settings.build_type in ["RelWithDebInfo", "MinSizeRel"]:
