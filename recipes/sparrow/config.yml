@@ -2,6 +2,6 @@ versions:
   "1.0.0":
     folder: "all"
   "0.6.0":
-    folder: "before_1.0.0"
+    folder: "all"
   "0.5.0":
-    folder: "before_1.0.0"
+    folder: "all"
