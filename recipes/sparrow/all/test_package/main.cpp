@@ -1,6 +1,6 @@
 #include <cassert>
 
-#include <sparrow/builder/builder.hpp>
+#include <sparrow/builder.hpp>
 
 int main(int argc, char** argv)
 {
