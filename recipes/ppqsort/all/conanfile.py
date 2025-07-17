@@ -17,8 +17,9 @@ class PPQSortConan(ConanFile):
     description = "Parallel Pattern Quicksort"
     topics = ("algorithms", "sorting", "parallel", "header-only")
 
+    settings = "compiler", "os" # keep it for checking standard and linking pthread
     implements = ["auto_header_only"]
-    settings = "os", "arch", "compiler"
+    no_copy_source = True
     languages = "C++"
 
     def source(self):
@@ -28,7 +29,7 @@ class PPQSortConan(ConanFile):
         check_min_cppstd(self, 20)
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(
@@ -40,6 +41,7 @@ class PPQSortConan(ConanFile):
         self.cpp_info.libdirs = []
 
         self.cpp_info.set_property("cmake_target_name", "PPQSort::PPQSort")
+        self.cpp_info.set_property("cmake_file_name", "PPQSort")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
