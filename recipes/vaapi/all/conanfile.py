@@ -52,4 +52,5 @@ class SysConfigVAAPIConan(ConanFile):
                 pkg_config = PkgConfig(self, name)
                 self.cpp_info.components[name].includedirs = []
                 self.cpp_info.components[name].libdirs = []
+                self.cpp_info.components[name].set_property("pkg_config_name", name)
                 pkg_config.fill_cpp_info(self.cpp_info.components[name])

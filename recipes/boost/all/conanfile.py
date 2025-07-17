@@ -1183,7 +1183,7 @@ class BoostConan(ConanFile):
 
     @property
     def _b2_address_model(self):
-        if self.settings.arch in ("x86_64", "ppc64", "ppc64le", "mips64", "armv8", "armv8.3", "sparcv9", "s390x"):
+        if self.settings.arch in ("x86_64", "ppc64", "ppc64le", "mips64", "armv8", "armv8.3", "sparcv9", "s390x", "riscv64"):
             return "64"
 
         return "32"
@@ -1219,6 +1219,8 @@ class BoostConan(ConanFile):
             return "mips1"
         if str(self.settings.arch).startswith("s390"):
             return "s390x"
+        if str(self.settings.arch).startswith("riscv"):
+            return "riscv"
 
         return None
 
@@ -1232,6 +1234,8 @@ class BoostConan(ConanFile):
             return "aapcs"
         if str(self.settings.arch).startswith("mips"):
             return "o32"
+        if str(self.settings.arch).startswith("riscv"):
+            return "sysv"
 
         return None
 
@@ -1473,6 +1477,8 @@ class BoostConan(ConanFile):
         elif arch.startswith("ppc"):
             pass
         elif arch.startswith("mips"):
+            pass
+        elif arch.startswith("riscv"):
             pass
         else:
             self.output.warning(f"Unable to detect the appropriate ABI for {arch} architecture.")
