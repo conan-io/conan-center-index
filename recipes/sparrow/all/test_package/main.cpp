@@ -1,6 +1,12 @@
 #include <cassert>
 
+#include <sparrow/config/sparrow_version.hpp
+
+#if SPARROW_VERSION_BEFORE_1
+#include <sparrow/builder/builder.hpp>
+#else
 #include <sparrow/builder.hpp>
+#endif
 
 int main(int argc, char** argv)
 {
