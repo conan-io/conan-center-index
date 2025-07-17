@@ -20,8 +20,15 @@ endif()
 add_executable(test_app)
 target_sources(test_app PRIVATE ${_srcs})
 target_compile_definitions(test_app PRIVATE
-    BINARY_PATH="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>"
+  $<IF:$<PLATFORM_ID:Windows>,
+    BINARY_PATH=\"$<JOIN:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>,>\",
+    BINARY_PATH=\"$<JOIN:${CMAKE_LIBRARY_OUTPUT_DIRECTORY},>\"
+  >
 )
+
+#target_compile_definitions(test_app PRIVATE
+#    BINARY_PATH="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>"
+#)
 
 if(NOT BUILD_SHARED_LIBS)
   target_link_libraries(test_app ${_static_bundles})
