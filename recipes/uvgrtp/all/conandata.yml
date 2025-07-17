@@ -1,0 +1,4 @@
+sources:
+  "3.1.6":
+    url: "https://github.com/ultravideo/uvgRTP/archive/refs/tags/v3.1.6.tar.gz"
+    sha256: "3A8B175AE280A26EB6249DB879DA99E80D39DF2443062CCE9E3047FC05DB5CA2"
