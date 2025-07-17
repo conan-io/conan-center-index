@@ -84,6 +84,7 @@ class UvgRTPConan(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["wsock32", "ws2_32"])
+            self.cpp_info.defines = ["NOMINMAX"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread"])
         elif self.settings.os == "Macos":
