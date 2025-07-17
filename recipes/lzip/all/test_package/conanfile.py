@@ -6,8 +6,8 @@ class TestPackageConan(ConanFile):
     generators = "VirtualBuildEnv"
 
     def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
+        self.requires(self.tested_reference_str)
 
     def test(self):
         if can_run(self):
-            self.run("lzip --version", env="conanbuild")
+            self.run("lzip --version", env="conanrun")
