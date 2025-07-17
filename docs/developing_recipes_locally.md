@@ -8,7 +8,6 @@ This file is intended to provide all the commands you need to run in order to be
 ## Contents
 
   * [Clone your fork](#clone-your-fork)
-  * [Setup your environment](#setup-your-environment)
   * [Basic Commands](#basic-commands)
     * [Try it yourself](#try-it-yourself)
   * [Debugging Failed Builds](#debugging-failed-builds)
@@ -24,15 +23,6 @@ This file is intended to provide all the commands you need to run in order to be
 
 1. Follow the GitHub UI to [fork this repository](https://github.com/conan-io/conan-center-index/fork)
 2. [Clone your fork](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
-
-## Setup your environment
-
-1. Install a C++ development toolchain - ConanCenter's [build images](#testing-more-environments) are available
-2. [Install the Conan client](https://docs.conan.io/2/installation.html) - make sure to keep it up to date!
-3. Install CMake - this is the only tool which is assumed to be present
-   [see FAQ](faqs.md#why-recipes-that-use-build-tools-like-cmake-that-have-packages-in-conan-center-do-not-use-it-as-a-build-require-by-default) for details.
-
-> **Note**: It's recommended to use a dedicated Python virtualenv when installing with `pip`.
 
 ## Basic Commands
 

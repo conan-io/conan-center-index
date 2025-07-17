@@ -1,4 +1,7 @@
 sources:
+  "4.0.0":
+    url: "https://github.com/mongodb/mongo-cxx-driver/releases/download/r4.0.0/mongo-cxx-driver-r4.0.0.tar.gz"
+    sha256: "d8a254bde203d0fe2df14243ef2c3bab7f12381dc9206d0c1b450f6ae02da7cf"
   "3.11.0":
     url: "https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.11.0/mongo-cxx-driver-r3.11.0.tar.gz"
     sha256: "cb4263229d769ec44aa66563e2dd2d70c6384c85d93840a52fe26b15436c54f1"
@@ -24,6 +27,10 @@ sources:
     url: "https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.6.7/mongo-cxx-driver-r3.6.7.tar.gz"
     sha256: "2c58005d4fe46f1973352fba821f7bb37e818cefc922377ce979a9fd1bff38ac"
 patches:
+  "4.0.0":
+    - patch_file: "patches/4.0.0-0001-dirs.patch"
+      patch_description: "disable documentation features, fix directories"
+      patch_type: "conan"
   "3.11.0":
     - patch_file: "patches/3.10.2-0001-dirs.patch"
       patch_description: "disable documentation features, fix directories"

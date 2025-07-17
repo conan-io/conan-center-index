@@ -1,4 +1,7 @@
 sources:
+  "3.8.1":
+    url: "https://github.com/randombit/botan/archive/3.8.1.tar.gz"
+    sha256: "8eb79a49c1a3f7e5e7563c13752a37557de935cdac48d9221ea4b580158e8965"
   "3.6.1":
     url: "https://github.com/randombit/botan/archive/3.6.1.tar.gz"
     sha256: "a6c4e8dcb6c7f4b9b67e2c8b43069d65b548970ca17847e3b1e031d3ffdd874a"

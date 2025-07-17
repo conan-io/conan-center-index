@@ -1,4 +1,6 @@
 versions:
+  "17.5":
+    folder: meson
   "16.8":
     folder: all
   "15.12":

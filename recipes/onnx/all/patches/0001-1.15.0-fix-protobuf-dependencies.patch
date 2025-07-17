@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0372c54..bfccb9d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -177,7 +177,7 @@ else()
+     find_package(Protobuf)
+     if (Protobuf_FOUND)
+       set(Build_Protobuf OFF)
+-      if ("${Protobuf_VERSION}" VERSION_GREATER_EQUAL "4.22.0")
++      if (0)
+         # There are extra dependencies for protobuf.
+         find_package(absl REQUIRED)
+         find_package(utf8_range REQUIRED)

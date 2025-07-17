@@ -15,7 +15,6 @@ from conan.tools.files import (
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
@@ -24,7 +23,7 @@ required_conan_version = ">=2.1"
 class LibiconvConan(ConanFile):
     name = "libiconv"
     description = "Convert text to and from Unicode"
-    license = ("LGPL-2.0-or-later", "LGPL-2.1-or-later")
+    license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/libiconv/"
     topics = ("iconv", "text", "encoding", "locale", "unicode", "conversion")
@@ -61,10 +60,6 @@ class LibiconvConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-        if Version(self.version) >= "1.17":
-            self.license = "LGPL-2.1-or-later"
-        else:
-            self.license = "LGPL-2.0-or-later"
 
     def layout(self):
         basic_layout(self, src_folder="src")

@@ -117,6 +117,11 @@ class ProtobufConan(ConanFile):
             if Version(self.settings.compiler.version) < "4":
                 raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 4")
 
+        if "abseil" in self.dependencies.host:
+            abseil_cppstd = self.dependencies.host['abseil'].info.settings.compiler.cppstd
+            if abseil_cppstd != self.settings.compiler.cppstd:
+                raise ConanInvalidConfiguration(f"Protobuf and abseil must be built with the same compiler.cppstd setting")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 

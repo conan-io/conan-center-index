@@ -1,4 +1,7 @@
 sources:
+  "0.80":
+    url: "https://github.com/PavelKisliak/BitSerializer/archive/v0.80.tar.gz"
+    sha256: "d7606e21dba5212ce4652ce5fec4bde7b4b0e44ac33b56a4ccb485dc4e8efbd2"
   "0.75":
     url: "https://github.com/PavelKisliak/BitSerializer/archive/v0.75.tar.gz"
     sha256: "2df980a59de48a19dee28d81a1c00cae1f60ca4d323a2bdf74be4ee9c9b8db05"
@@ -11,9 +14,3 @@ sources:
   "0.50":
     url: "https://github.com/PavelKisliak/BitSerializer/archive/0.50.tar.gz"
     sha256: "0ba9d57f1546b9c9245a97ced0ed05ec9fb969e0542093da3a8bf9dcfe7f7a6d"
-  "0.44":
-    url: "https://github.com/PavelKisliak/BitSerializer/archive/0.44.tar.gz"
-    sha256: "ab0f74914d8120ee5e7a8ed10b0e9d83ed8135cd9e3356b5d0dcefc1cc88e47f"
-  "0.10":
-    url: "https://github.com/PavelKisliak/BitSerializer/archive/0.10.tar.gz"
-    sha256: "e9b898e453c66742a3c9d762c3e9f64f478fdb79680792b8725f953342fcc348"

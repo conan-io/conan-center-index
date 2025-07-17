@@ -1709,6 +1709,10 @@ class BoostConan(ConanFile):
                 rename(self, bin_file, os.path.join(self.package_folder, "bin", os.path.basename(bin_file)))
 
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        if is_apple_os(self) and not self._shared and Version(self.version) >= "1.88.0":
+            # FIXME: Boost 1.88 installs both .a and .dylib files for static libraries
+            # https://github.com/boostorg/boost/issues/1051
+            rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
 
     def _create_emscripten_libs(self):
         # Boost Build doesn't create the libraries, but it gets close,

@@ -57,8 +57,8 @@ class SparrowRecipe(ConanFile):
         return {
             "apple-clang": "16",
             "clang": "18",
-            "gcc": "12",
-            "msvc": "194"
+            "gcc": "11" if Version(self.version) >= "0.6.0" else "13",
+            "msvc": "194",
         }
 
     def validate(self):
@@ -69,6 +69,9 @@ class SparrowRecipe(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.28 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

@@ -1,4 +1,4 @@
-grpc_version: 1.67.0
+grpc_version: 1.67.1
 grpc_targets:
     - name: "address_sorting"
       lib: "address_sorting"
