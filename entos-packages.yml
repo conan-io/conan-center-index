@@ -125,6 +125,9 @@ opengl:
 openssl:
   versions:
     - '3.2.2'
+pact_ffi:
+  versions:
+    - '0.4.28'
 paho-mqtt-c:
   versions:
     - '1.3.13'
@@ -156,6 +159,9 @@ sqlite3:
 tl-expected:
   versions:
     - '1.1.0'
+xz_utils:
+  versions:
+    - '5.4.5'
 vulkan-headers:
   versions:
     - '1.4.313.0'

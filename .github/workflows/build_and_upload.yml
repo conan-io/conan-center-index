@@ -17,7 +17,7 @@ on:
 jobs:
   export-recipes:
     runs-on: comcast-ubuntu-latest
-    container: ghcr.io/entos-xe/desktop-linux-gcc:sha-4354cf4
+    container: ghcr.io/entos-xe/desktop-linux-gcc-rust:sha-4354cf4
 
     steps:
       - name: Checkout source
