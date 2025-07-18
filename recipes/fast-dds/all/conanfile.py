@@ -15,7 +15,6 @@ from conan.tools.files import (
     rmdir,
 )
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc, msvc_runtime_flag
-from conan.tools.scm import Version
 
 
 required_conan_version = ">=2.0.9"
@@ -56,11 +55,7 @@ class FastDDSConan(ConanFile):
     def requirements(self):
         self.requires("tinyxml2/10.0.0")
         self.requires("asio/1.29.0")  # This is now a package_type = header
-        # Fast-DDS < 2.12 uses Fast-CDR 1.x
-        if Version(self.version) < "2.12.0":
-            self.requires("fast-cdr/1.1.0", transitive_headers=True, transitive_libs=True)
-        else:
-            self.requires("fast-cdr/2.1.0", transitive_headers=True, transitive_libs=True)
+        self.requires("fast-cdr/2.1.0", transitive_headers=True, transitive_libs=True)
         self.requires("foonathan-memory/0.7.3")
         if self.options.with_ssl:
             self.requires("openssl/[>=1.1 <4]")
