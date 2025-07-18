@@ -37,15 +37,9 @@ class PackageConan(ConanFile):
         self.requires("libuuid/[>=1.0.3]")
 
     def validate(self):
-        # Always comment the reason including the upstream issue.
-        # INFO: Upstream only support Unix systems. See <URL>
-        if self.settings.os not in ["Linux", "FreeBSD", "Macos", "Windows"]:
-            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
-
         check_min_cppstd(self, 11)
         check_max_cppstd(self, 14)
 
-    # if a tool other than the compiler or autotools is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
         self.tool_requires("libtool/[>=1.5.22]")
 
@@ -53,8 +47,6 @@ class PackageConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        # inject required env vars into the build scope
-        # it's required in case of native build when there is AutotoolsDeps & at least one dependency which might be shared, because configure tries to run a test executable
         if not cross_building(self):
             VirtualRunEnv(self).generate(scope="build")
         tc = AutotoolsToolchain(self)
@@ -69,7 +61,6 @@ class PackageConan(ConanFile):
             ])
 
         tc.generate()
-        # generate pkg-config files of dependencies (useless if upstream configure.ac doesn't rely on PKG_CHECK_MODULES macro)
         tc = PkgConfigDeps(self)
         tc.generate()
         deps = AutotoolsDeps(self)
@@ -89,21 +80,17 @@ class PackageConan(ConanFile):
         autotools = Autotools(self)
         autotools.install()
 
-        # Some files extensions and folders are not allowed. Please, read the FAQs to get informed.
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
-        # In shared lib/executable files, autotools set install_name (macOS) to lib dir absolute path instead of @rpath, it's not relocatable, so fix it
         fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.includedirs = ["include/activemq-cpp-3.9.5"]
         self.cpp_info.libs = ["activemq-cpp"]
 
-        # if the package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
         self.cpp_info.set_property("pkg_config_name", "activemq-cpp")
 
-        # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
         if self.settings.os in ["Linux", "FreeBSD", "MacOS"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
