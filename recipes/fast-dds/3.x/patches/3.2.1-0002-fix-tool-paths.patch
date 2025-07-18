@@ -1,0 +1,67 @@
+diff --git a/tools/fastdds/discovery/parser.py b/tools/fastdds/discovery/parser.py
+index d20585eba..de19fdfc3 100644
+--- a/tools/fastdds/discovery/parser.py
++++ b/tools/fastdds/discovery/parser.py
+@@ -275,7 +275,7 @@ class Parser:
+         """
+         tool_path = Path(os.path.dirname(os.path.realpath(__file__)))
+         # We asume the installation path is relative to Fast DDS' installation path
+-        tool_path = tool_path / '../../../bin'
++        tool_path = tool_path / '../../..'
+         if os.name == 'posix':
+             ret = tool_path / 'fast-discovery-server'
+             if not os.path.exists(ret):
+diff --git a/tools/fastdds/fastdds b/tools/fastdds/fastdds
+index 1f633049b..ff3d551b5 100755
+--- a/tools/fastdds/fastdds
++++ b/tools/fastdds/fastdds
+@@ -1,4 +1,4 @@
+ #!/usr/bin/env sh
+ 
+ dir="`dirname \"$0\"`"
+-python3 "$dir/../tools/fastdds/fastdds.py" ${@}
++python3 "$dir/tools/fastdds/fastdds.py" ${@}
+diff --git a/tools/fastdds/fastdds.bat b/tools/fastdds/fastdds.bat
+index c23d8527c..490cf7ebe 100644
+--- a/tools/fastdds/fastdds.bat
++++ b/tools/fastdds/fastdds.bat
+@@ -16,10 +16,10 @@ if not %ERRORLEVEL%==0 (
+ if not "%PYTHON_VERSION%" == "" (
+       :: Use launcher to profit from shebang hints on fastdds.py
+       :: Select the correct python version to source the appropriate paths
+-      py -%PYTHON_VERSION% "%dir%\..\tools\fastdds\fastdds.py" %*
++      py -%PYTHON_VERSION% "%dir%\tools\fastdds\fastdds.py" %*
+ ) else (
+       :: Use launcher to profit from shebang hints on fastdds.py
+       :: Select latest available python version
+-      py "%dir%\..\tools\fastdds\fastdds.py" %*
++      py "%dir%\tools\fastdds\fastdds.py" %*
+ )
+ 
+diff --git a/tools/fastdds/ros-discovery b/tools/fastdds/ros-discovery
+index 7bc96a753..9e35b0853 100644
+--- a/tools/fastdds/ros-discovery
++++ b/tools/fastdds/ros-discovery
+@@ -1,4 +1,4 @@
+ #!/usr/bin/env sh
+ 
+ dir="`dirname \"$0\"`"
+-python3 "$dir/../tools/fastdds/fastdds.py" discovery ${@}
++python3 "$dir/tools/fastdds/fastdds.py" discovery ${@}
+diff --git a/tools/fastdds/ros-discovery.bat b/tools/fastdds/ros-discovery.bat
+index 141ab6ac5..bb43abe9e 100644
+--- a/tools/fastdds/ros-discovery.bat
++++ b/tools/fastdds/ros-discovery.bat
+@@ -16,10 +16,10 @@ if not %ERRORLEVEL%==0 (
+ if not "%PYTHON_VERSION%" == "" (
+       :: Use launcher to profit from shebang hints on fastdds.py
+       :: Select the correct python version to source the appropriate paths
+-      py -%PYTHON_VERSION% "%dir%\..\tools\fastdds\fastdds.py" discovery %*
++      py -%PYTHON_VERSION% "%dir%\tools\fastdds\fastdds.py" discovery %*
+ ) else (
+ 	  :: Use launcher to profit from shebang hints on fastdds.py
+       :: Select latest available python version
+-      py "%dir%\..\tools\fastdds\fastdds.py" discovery %*
++      py "%dir%\tools\fastdds\fastdds.py" discovery %*
+ )
+ 

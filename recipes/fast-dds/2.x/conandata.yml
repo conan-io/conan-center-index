@@ -1,4 +1,7 @@
 sources:
+  "2.14.4":
+    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.14.4.tar.gz"
+    sha256: "8b655797b8addd5016b919e6131b9e647efe4bf0b54c836f1097d9856bd87047"
   "2.14.3":
     url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.14.3.tar.gz"
     sha256: "292e4170e4689d878eb5ddd38661134a704a1541402a4f564353190e4aadd23d"
@@ -18,6 +21,10 @@ sources:
     url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.3.4.tar.gz"
     sha256: "b1b2322de0ca55a16495666e3fbda8aca32b888bbfaecda29f2ffc4b072ef7ac"
 patches:
+  "2.14.4":
+    - patch_file: "patches/2.13.3-0001-fix-find-asio-and-tinyxml2.patch"
+      patch_type: "conan"
+      patch_description: "Fixup find asio and tinyxml2"
   "2.14.3":
     - patch_file: "patches/2.13.3-0001-fix-find-asio-and-tinyxml2.patch"
       patch_type: "conan"
