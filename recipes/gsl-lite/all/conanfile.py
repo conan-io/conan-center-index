@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2.0.9"
 
 
 class GslLiteConan(ConanFile):
@@ -64,13 +64,6 @@ class GslLiteConan(ConanFile):
         if self.options.on_contract_violation:
             self.cpp_info.components["gsllite"].defines = [self._contract_map[str(self.options.on_contract_violation)]]
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "gsl-lite"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "gsl-lite"
-        self.cpp_info.names["cmake_find_package"] = "gsl"
-        self.cpp_info.names["cmake_find_package_multi"] = "gsl"
-        self.cpp_info.components["gsllite"].names["cmake_find_package"] = "gsl-lite"
-        self.cpp_info.components["gsllite"].names["cmake_find_package_multi"] = "gsl-lite"
         self.cpp_info.components["gsllite"].set_property("cmake_target_name", "gsl::gsl-lite")
         self.cpp_info.components["gsllite"].bindirs = []
         self.cpp_info.components["gsllite"].libdirs = []
