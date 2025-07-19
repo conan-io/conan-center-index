@@ -1,6 +1,7 @@
 --- libmpdec++/Makefile.vc
 +++ libmpdec++/Makefile.vc
-@@ -16,9 +16,9 @@
+@@ -16,10 +16,10 @@
+ # LIBSHARED_CXX = libmpdec++-2.5.0.dll
  
  !if "$(DEBUG)" == "1"
 -OPT = /MTd /Od /Zi /EHsc
