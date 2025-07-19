@@ -63,6 +63,9 @@ class Dav1dConan(ConanFile):
         self.tool_requires("meson/1.4.0")
         if self.options.assembly:
             self.tool_requires("nasm/2.16.01")
+        if is_msvc(self) and self.settings.arch == "armv8":
+            self.tool_requires("gas-preprocessor/0.0.0.cci20250710")
+            self.tool_requires("strawberryperl/5.32.1.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
