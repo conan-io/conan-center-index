@@ -546,9 +546,9 @@ class OpenSSLConan(ConanFile):
 
     def _replace_runtime_in_file(self, filename):
         runtime = msvc_runtime_flag(self)
-        for e in ["MDd", "MTd", "MD", "MT"]:
-            replace_in_file(self, filename, f"/{e} ", f"/{runtime} ", strict=False)
-            replace_in_file(self, filename, f"/{e}\"", f"/{runtime}\"", strict=False)
+        for e in ["MDd", "MD", "MT"]:
+            replace_in_file(self, filename, f"/{e} ", f"/{runtime} ")
+            replace_in_file(self, filename, f"/{e}\"", f"/{runtime}\"")
 
     def package(self):
         copy(self, "*LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
