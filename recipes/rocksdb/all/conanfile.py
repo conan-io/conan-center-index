@@ -35,6 +35,8 @@ class RocksDBConan(ConanFile):
         "with_jemalloc": [True, False],
         "enable_sse": [False, "sse42", "avx2"],
         "use_rtti": [True, False],
+        "use_coroutines": [True, False],
+        "use_folly": [True, False],
     }
     default_options = {
         "shared": False,
@@ -49,11 +51,13 @@ class RocksDBConan(ConanFile):
         "with_jemalloc": False,
         "enable_sse": False,
         "use_rtti": False,
+        "use_coroutines": False,
+        "use_folly": False,
     }
 
     @property
     def _min_cppstd(self):
-        return "11" if Version(self.version) < "8.8.1" else "17"
+        return "11" if Version(self.version) < "8.8.1" else "20" if self.options.use_coroutines else "17"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -69,6 +73,8 @@ class RocksDBConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if Version(self.version) >= "8.0.0":
+            self.options.rm_safe("lite") # RocksDB Lite was removed in 8.0.0
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -77,17 +83,19 @@ class RocksDBConan(ConanFile):
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
         if self.options.with_snappy:
-            self.requires("snappy/1.1.10")
+            self.requires("snappy/[>=1.1.10 <2]")
         if self.options.with_lz4:
-            self.requires("lz4/1.9.4")
+            self.requires("lz4/[>=1.10.0 <2]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[>=1.5.5 <2]")
         if self.options.get_safe("with_tbb"):
             self.requires("onetbb/2021.10.0")
         if self.options.with_jemalloc:
             self.requires("jemalloc/5.3.0")
+        if self.options.use_coroutines or self.options.use_folly:
+            self.requires("folly/[>=2024.08.12.00]")
 
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
@@ -97,6 +105,13 @@ class RocksDBConan(ConanFile):
 
         if is_msvc(self) and Version(self.settings.compiler.version) < "191":
             raise ConanInvalidConfiguration("Rocksdb requires MSVC version >= 191")
+        
+        folly_options = [bool(self.options.use_coroutines), bool(self.options.use_folly)]
+        if sum(folly_options) > 1:
+            raise ConanInvalidConfiguration("Rocksdb requires at most one of use_coroutines or use_folly")
+        
+        if self.options.shared and (self.options.use_coroutines or self.options.use_folly):
+            raise ConanInvalidConfiguration("Rocksdb does not support a shared build with folly or coroutines")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -108,11 +123,19 @@ class RocksDBConan(ConanFile):
         tc.variables["WITH_TOOLS"] = False
         tc.variables["WITH_CORE_TOOLS"] = False
         tc.variables["WITH_BENCHMARK_TOOLS"] = False
-        tc.variables["WITH_FOLLY_DISTRIBUTED_MUTEX"] = False
+        tc.variables["WITH_TRACE_TOOLS"] = False
+        if Version(self.version) >= "7.7.0":
+            tc.variables["USE_COROUTINES"] = self.options.use_coroutines
+            tc.variables["USE_FOLLY_LITE"] = False # Folly Lite would download dependencies through a python script; I'm assuming we do not want that on CC
+        if Version(self.version) < "7.2.0":
+            tc.variables["WITH_FOLLY_DISTRIBUTED_MUTEX"] = False # This option was removed in 7.2.0; no reason to apply it
+        else:
+            tc.variables["USE_FOLLY"] = self.options.use_folly
         if is_msvc(self):
             tc.variables["WITH_MD_LIBRARY"] = not is_msvc_static_runtime(self)
         tc.variables["ROCKSDB_INSTALL_ON_WINDOWS"] = self.settings.os == "Windows"
-        tc.variables["ROCKSDB_LITE"] = self.options.lite
+        if Version(self.version) < "8.0.0":
+            tc.variables["ROCKSDB_LITE"] = self.options.lite
         tc.variables["WITH_GFLAGS"] = self.options.with_gflags
         tc.variables["WITH_SNAPPY"] = self.options.with_snappy
         tc.variables["WITH_LZ4"] = self.options.with_lz4
@@ -120,6 +143,7 @@ class RocksDBConan(ConanFile):
         tc.variables["WITH_ZSTD"] = self.options.with_zstd
         tc.variables["WITH_TBB"] = self.options.get_safe("with_tbb", False)
         tc.variables["WITH_JEMALLOC"] = self.options.with_jemalloc
+
         tc.variables["ROCKSDB_BUILD_SHARED"] = self.options.shared
         tc.variables["ROCKSDB_LIBRARY_EXPORTS"] = self.settings.os == "Windows" and self.options.shared
         tc.variables["ROCKSDB_DLL" ] = self.settings.os == "Windows" and self.options.shared
@@ -188,7 +212,7 @@ class RocksDBConan(ConanFile):
                 self.cpp_info.components["librocksdb"].defines = ["ROCKSDB_DLL"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["librocksdb"].system_libs = ["pthread", "m"]
-        if self.options.lite:
+        if Version(self.version) < "8.0.0" and self.options.lite:
             self.cpp_info.components["librocksdb"].defines.append("ROCKSDB_LITE")
 
         self.cpp_info.components["librocksdb"].set_property("cmake_target_name", f"RocksDB::{cmake_target}")
@@ -206,3 +230,5 @@ class RocksDBConan(ConanFile):
             self.cpp_info.components["librocksdb"].requires.append("onetbb::onetbb")
         if self.options.with_jemalloc:
             self.cpp_info.components["librocksdb"].requires.append("jemalloc::jemalloc")
+        if self.options.use_coroutines or self.options.use_folly:
+            self.cpp_info.components["librocksdb"].requires.append("folly::folly")
