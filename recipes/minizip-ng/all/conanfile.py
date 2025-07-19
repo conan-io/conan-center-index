@@ -85,7 +85,7 @@ class MinizipNgConan(ConanFile):
         if self.options.with_lzma:
             self.requires("xz_utils/5.4.5")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[>=1.5 <1.6]")
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.settings.os != "Windows":
