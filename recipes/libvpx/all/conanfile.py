@@ -68,7 +68,7 @@ class LibVPXConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if str(self.settings.compiler) not in ["Visual Studio", "msvc", "gcc", "clang", "apple-clang"]:
+        if str(self.settings.compiler) not in ["Visual Studio", "msvc", "gcc", "clang", "apple-clang", "emcc"]:
             raise ConanInvalidConfiguration(f"Unsupported compiler {self.settings.compiler}")
         if self.settings.os == "Macos" and self.settings.arch == "armv8" and Version(self.version) < "1.10.0":
             raise ConanInvalidConfiguration("M1 only supported since 1.10, please upgrade")
@@ -129,6 +129,8 @@ class LibVPXConan(ConanFile):
             os_name = 'solaris'
         elif host_os == 'Android':
             os_name = 'android'
+        if compiler == 'emcc':
+            return 'generic-gnu'
         return f"{arch}-{os_name}-{compiler}"
 
     def generate(self):
