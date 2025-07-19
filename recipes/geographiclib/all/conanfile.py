@@ -118,6 +118,9 @@ class GeographiclibConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["GEOGRAPHICLIB_LIB_TYPE"] = "SHARED" if self.options.shared else "STATIC"
         tc.variables["GEOGRAPHICLIB_PRECISION"] = self._cmake_option_precision
+        if not self.options.tools:
+            # https://github.com/geographiclib/geographiclib/pull/39#issuecomment-2885315450
+            tc.variables["BINDIR"] = "OFF"
         tc.generate()
 
         VirtualBuildEnv(self).generate()
@@ -152,11 +155,6 @@ class GeographiclibConan(ConanFile):
         ]:
             rmdir(self, os.path.join(os.path.join(self.package_folder, folder)))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-        if not self.options.tools:
-            rmdir(self, os.path.join(self.package_folder, "sbin"))
-            bin_files = [it for it in os.listdir(os.path.join(self.package_folder, "bin")) if not it.endswith(".dll")]
-            for it in bin_files:
-                rm(self, it, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "geographiclib")
