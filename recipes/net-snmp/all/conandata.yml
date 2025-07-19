@@ -1,7 +1,10 @@
 sources:
   "5.9.4":
-    url: "https://sourceforge.net/projects/net-snmp/files/net-snmp/5.9.4/net-snmp-5.9.4.zip/download"
-    sha256: "ceea0c876f23b87731de2073e6a3a683ea610c66a5a67b5cabf4986b7813c22b"
+    url: "https://github.com/net-snmp/net-snmp/archive/refs/tags/v5.9.4.tar.gz"
+    sha256: "0699e7effc5782124c1fa2f2823d816ae740fac5bef002440edfee86b17c1aba"
+  "5.9.3":
+    url: "https://github.com/net-snmp/net-snmp/archive/refs/tags/v5.9.3.tar.gz"
+    sha256: "022c7e67c338a6829637dbb73b6a3ee602d1d3dd737249ce8d4f18ab8e640609"
 patches:
   "5.9.4":
     - patch_file: patches/0001-fix-openssl-linking-msvc.patch
@@ -11,3 +14,27 @@ patches:
       patch_description: "Avoid install extra helper libraries"
     - patch_file: patches/0003-fix-perl-scripts-msvc.patch
       patch_description: "Avoid injecting extra flags when running perl"
+    - patch_file: patches/0004-exclude_syslog.patch
+      patch_description: "Fixed proper syslog include path"
+      patch_source: "https://github.com/net-snmp/net-snmp/pull/921/commits/08076fb9f300556e97ed44f2e36939868bbfd38a"
+    - patch_file: patches/0005-include_select.patch
+      patch_description: "Added include for select.h"
+      patch_source: "https://github.com/net-snmp/net-snmp/pull/921/commits/08076fb9f300556e97ed44f2e36939868bbfd38a"
+    - patch_file: patches/0006-remove-setlocale-on-qnx.patch
+      patch_description: "Prevent qnx builds from calling unsafe setlocale"
+      patch_source: "https://github.com/net-snmp/net-snmp/pull/921/commits/08076fb9f300556e97ed44f2e36939868bbfd38a"
+  "5.9.3":
+    - patch_file: patches/0001-fix-openssl-linking-msvc.patch
+      patch_description: "Use Conan OpenSSL when linking on Windows"
+      patch_source: "https://github.com/net-snmp/net-snmp/commit/99332c80b68248cb60023d12297135dc9c6c8abf"
+    - patch_file: patches/0003-fix-perl-scripts-msvc.patch
+      patch_description: "Avoid injecting extra flags when running perl"
+    - patch_file: patches/0004-exclude_syslog.patch
+      patch_description: "Fixed proper syslog include path"
+      patch_source: "https://github.com/net-snmp/net-snmp/pull/921/commits/08076fb9f300556e97ed44f2e36939868bbfd38a"
+    - patch_file: patches/0005-include_select.patch
+      patch_description: "Added include for select.h"
+      patch_source: "https://github.com/net-snmp/net-snmp/pull/921/commits/08076fb9f300556e97ed44f2e36939868bbfd38a"
+    - patch_file: patches/0006-remove-setlocale-on-qnx.patch
+      patch_description: "Prevent qnx builds from calling unsafe setlocale"
+      patch_source: "https://github.com/net-snmp/net-snmp/pull/921/commits/08076fb9f300556e97ed44f2e36939868bbfd38a"
