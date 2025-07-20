@@ -47,6 +47,10 @@ class LibuvConan(ConanFile):
         if is_msvc(self):
             check_min_vs(self, "190")
 
+    def build_requirements(self):
+        if Version(self.version) < "1.47.0":
+            self.tool_requires("cmake/[>=3.4 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
