@@ -29,18 +29,3 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
 add_subdirectory(test_bundle)
 add_subdirectory(test_app)
-
-
-# clangd can't find compile_commands.json in build/<configuration> subdirectories so
-# link to it from the build/ directory
-# TODO: does this work / is it necessary with multi-configuration generators?
-if (CMAKE_EXPORT_COMPILE_COMMANDS AND EXISTS "${CMAKE_BINARY_DIR}/compile_commands.json"
-    AND NOT "${CMAKE_SOURCE_DIR}/build" STREQUAL "${CMAKE_BINARY_DIR}")
-    add_custom_target(copy_compile_commands ALL
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_SOURCE_DIR}/build
-        COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_BINARY_DIR}/compile_commands.json
-            ${CMAKE_SOURCE_DIR}/build/compile_commands.json
-        DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
-    )
-endif()
