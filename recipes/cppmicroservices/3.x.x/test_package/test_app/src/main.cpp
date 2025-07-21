@@ -11,9 +11,6 @@
 #include <cppmicroservices/Framework.h>
 #include <cppmicroservices/FrameworkEvent.h>
 #include <cppmicroservices/FrameworkFactory.h>
-#include <cppmicroservices/logservice/LogService.hpp>
-
-//#include "ServiceComponents.hpp"
 
 #if defined(_WIN32) || defined(_WIN64)
     #define LIB_EXT ".dll"
@@ -70,48 +67,6 @@ namespace {
     };
 }
 
-class MyLogService : public cppmicroservices::logservice::LogService
-{
-public:
-    void Log(cppmicroservices::logservice::SeverityLevel, std::string const& str) override
-    {
-        std::cout << str << std::endl;
-    }
-    
-    void Log(cppmicroservices::logservice::SeverityLevel,
-             std::string const& str,
-             std::exception_ptr const) override
-    {
-        std::cout << str << std::endl;
-    }
-
-    void Log(cppmicroservices::ServiceReferenceBase const&,
-                      cppmicroservices::logservice::SeverityLevel,
-                      std::string const& str) override
-    {
-        std::cout << str << std::endl;
-    }
-    
-    void Log(cppmicroservices::ServiceReferenceBase const&,
-                      cppmicroservices::logservice::SeverityLevel,
-                      std::string const& str,
-                      std::exception_ptr const) override
-    {
-        std::cout << str << std::endl;
-    }
-
-    std::shared_ptr<cppmicroservices::logservice::Logger> getLogger(std::string const&) const override
-    {
-        return nullptr;
-    }
-    
-    std::shared_ptr<cppmicroservices::logservice::Logger> getLogger(cppmicroservices::Bundle const&,
-                                                                    std::string const&) const override
-    {
-        return nullptr;
-    }
-};
-
 class US_ABI_IMPORT TestBundle
 {
 public:
@@ -122,18 +77,10 @@ public:
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
-int main(int argc, char** argv) {
-  bool do_logging = false;
-  std::vector<std::string> args(argv, argv + argc);
-  if (args.size() > 1) { // args[0] holds path to executable
-      if (args[1] == "-l")
-          do_logging = true;
-  }
-
+int main(int, char**) {
   // Set up cppms framework
   auto framework = cppmicroservices::FrameworkFactory().NewFramework();
   try {
-    framework.Init();
     framework.Start();
 
     // make sure to stop the framework on exit
@@ -143,11 +90,6 @@ int main(int argc, char** argv) {
     };
     auto context = framework.GetBundleContext();
     
-    // Add in a logger if logging is switched on
-    if (do_logging) {
-        (void)context.RegisterService<cppmicroservices::logservice::LogService>(std::make_shared<MyLogService>());
-    }
-
     // Initialize DeclarativeServices
     std::string ds_dll_path = TOSTRING(DS_DLL_PATH);
     auto ds_bundles = context.InstallBundles(ds_dll_path);
