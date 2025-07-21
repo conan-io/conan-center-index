@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd
@@ -45,6 +46,8 @@ class Mgconsole(ConanFile):
 
     def validate_build(self):
         check_min_cppstd(self, 17)
+        if self.settings.compiler == "msvc":
+            raise ConanInvalidConfiguration("This library does not support MSVC")
 
     def build(self):
         cmake = CMake(self)
@@ -58,5 +61,6 @@ class Mgconsole(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = ["bin"]
+        self.cpp_info.includedirs = []
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
