@@ -40,7 +40,7 @@ set(CPUINFO_SUPPORTED ${cpuinfo_FOUND})
 add_library(clog INTERFACE)
 add_library(cpuinfo INTERFACE)
 
-if (NOT WIN32)
+if ((NOT WIN32) AND (ORT_VERSION VERSION_LESS "1.22"))
   find_package(nsync REQUIRED CONFIG)
   list(APPEND onnxruntime_EXTERNAL_LIBRARIES nsync::nsync_cpp)
   include_directories(${nsync_INCLUDE_DIRS})
