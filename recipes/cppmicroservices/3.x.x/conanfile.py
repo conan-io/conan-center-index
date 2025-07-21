@@ -13,12 +13,11 @@ class CppMicroServicesConan(ConanFile):
     package_type = "library"
     url = "https://github.com/CppMicroServices/CppMicroServices.git"
     homepage = "https://cppmicroservices.org"
-    topics = ("modularity", "runtime linking",
-              "dependency inversion", "service oriented")
+    topics = ("modularity", "runtime linking", "dependency inversion"
+              , "service oriented", "osgi", "microservices", "cross-platform")
     license = "Apache-2.0"
     no_copy_source = True
     settings = "os", "compiler", "build_type", "arch"
-    version = "3.8.7"
 
     options = {
         "shared": [True, False],
@@ -41,15 +40,14 @@ class CppMicroServicesConan(ConanFile):
         target = os.path.join(self.source_folder, "target")
         git.folder = target
         git.clone(url=self.url, args=["--recurse-submodules"], target=target)
-        git.checkout(commit=(self.conan_data["sources"][self.version]["sha1"]
-                             or self.conan_data["sources"][self.version]["branch"]))
+        git.checkout(commit=self.conan_data["sources"][self.version]["sha1"])
 
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
 
     def configure(self):
-        os.environ["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
+        os.environ["CMAKE_POLICY_VERSION_MINIMUM"] = "3.17"
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
@@ -60,7 +58,6 @@ class CppMicroServicesConan(ConanFile):
         tc.generate()
 
     def build(self):
-        print(f"package_folder = {self.package_folder}")
         cmake = CMake(self)
         target = os.path.join(self.source_folder, "target")
         cmake.configure(variables={"US_BUILD_TESTING": "Off"},
