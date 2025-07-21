@@ -98,7 +98,7 @@ class DCMTKConan(ConanFile):
         elif self.options.charset_conversion == "icu":
             self.requires("icu/73.2")
         if self.options.with_libxml2:
-            self.requires("libxml2/[2.12.5 <3]")
+            self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_openssl:
@@ -166,6 +166,10 @@ class DCMTKConan(ConanFile):
         if is_msvc(self):
             tc.variables["DCMTK_ICONV_FLAGS_ANALYZED"] = True
             tc.variables["DCMTK_COMPILE_WIN32_MULTITHREADED_DLL"] = not is_msvc_static_runtime(self)
+
+        # Prevent libnsl from the system (and not from Conan) from being picked up
+        tc.cache_variables["HAVE_LIBNSL_MAIN"] = False
+        tc.cache_variables["HAVE_LIBNSL"] = False
 
         if Version(self.version) >= "3.6.7" and cross_building(self):
             # See https://support.dcmtk.org/redmine/projects/dcmtk/wiki/Cross_Compiling
@@ -383,7 +387,7 @@ class DCMTKConan(ConanFile):
         if self.settings.os == "Windows":
             system_libs = ["iphlpapi", "ws2_32", "netapi32", "wsock32"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            system_libs = ["m", "nsl"]
+            system_libs = ["m"]
             if self.options.with_multithreading:
                 system_libs.append("pthread")
             if Version(self.version) >= "3.6.8":

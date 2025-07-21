@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-if(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE AND NOT EMSCRIPTEN)
     # use RPATH instead of RUNPATH so that
     # transitive dependencies can be located
     add_link_options("LINKER:--disable-new-dtags")

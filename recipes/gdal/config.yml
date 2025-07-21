@@ -1,4 +1,6 @@
 versions:
+  "3.10.3":
+    folder: "post_3.5.0"
   "3.8.3":
     folder: "post_3.5.0"
   "3.7.3":

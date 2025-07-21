@@ -79,6 +79,8 @@ class KtxConan(ConanFile):
             # https://github.com/KhronosGroup/KTX-Software/blob/v4.2.1/tools/imageio/png.imageio/lodepng.h#L26-L32
             self.requires("lodepng/cci.20230410")
         self.requires("zstd/1.5.5")
+        if self.options.tools:
+            self.requires("fmt/10.2.1", transitive_libs=False)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -159,16 +161,9 @@ class KtxConan(ConanFile):
         elif self.settings.os == "Linux":
             self.cpp_info.components["libktx"].system_libs.extend(["m", "dl", "pthread"])
 
-        # TODO: to remove in conan v2
-        self.cpp_info.filenames["cmake_find_package"] = "Ktx"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Ktx"
-        self.cpp_info.names["cmake_find_package"] = "KTX"
-        self.cpp_info.names["cmake_find_package_multi"] = "KTX"
-        self.cpp_info.components["libktx"].names["cmake_find_package"] = "ktx"
-        self.cpp_info.components["libktx"].names["cmake_find_package_multi"] = "ktx"
         self.cpp_info.components["libktx"].set_property("cmake_target_name", "KTX::ktx")
         self.cpp_info.components["libktx"].requires = ["zstd::zstd"]
         if Version(self.version) < "4.2.0":
             self.cpp_info.components["libktx"].requires.append("lodepng::lodepng")
         if self.options.tools:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+            self.cpp_info.components["libktx"].requires.append("fmt::fmt")

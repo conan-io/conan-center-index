@@ -2,11 +2,10 @@ import os
 import yaml
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, valid_min_cppstd, check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
@@ -66,7 +65,7 @@ class GrpcConan(ConanFile):
 
     @property
     def _cxxstd_required(self):
-        return 14 if Version(self.version) >= "1.47" else 11
+        return 17 if Version(self.version) >= "1.70" else 14
 
     @property
     def _supports_libsystemd(self):
@@ -103,7 +102,10 @@ class GrpcConan(ConanFile):
         # abseil requires:
         # transitive_headers=True because grpc headers include abseil headers
         # transitive_libs=True because generated code (grpc_cpp_plugin) require symbols from abseil
-        if Version(self.version) >= "1.62.0":
+        if Version(self.version) > "1.65.0":
+            self.requires("protobuf/5.27.0", transitive_headers=True)
+            self.requires("abseil/[>=20240116.1 <=20250127.0]", transitive_headers=True, transitive_libs=True)
+        elif Version(self.version) >= "1.62.0" and Version(self.version) <= "1.65.0":
             self.requires("protobuf/5.27.0", transitive_headers=True)
             self.requires("abseil/[>=20240116.1 <20240117.0]", transitive_headers=True, transitive_libs=True)
         else:
@@ -126,6 +128,7 @@ class GrpcConan(ConanFile):
 
     def validate(self):
         check_min_vs(self, "190")
+
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} shared not supported by Visual Studio")
 
@@ -140,6 +143,10 @@ class GrpcConan(ConanFile):
                 "If built as shared protobuf must be shared as well. "
                 "Please, use `protobuf:shared=True`.",
             )
+
+        abseil_cppstd = self.dependencies.host['abseil'].info.settings.compiler.cppstd
+        if abseil_cppstd != self.settings.compiler.cppstd:
+            raise ConanInvalidConfiguration(f"grpc and abseil must be built with the same compiler.cppstd setting")
 
     def build_requirements(self):
         # cmake >=3.25 required to use `cmake -E env --modify` below
@@ -243,8 +250,8 @@ class GrpcConan(ConanFile):
 
         if self.settings.os == "Macos" and Version(self.version) >= "1.64":
             # See https://github.com/grpc/grpc/issues/36654#issuecomment-2228569158
-            replace_in_file(self, cmakelists, "target_compile_features(upb_textformat_lib PUBLIC cxx_std_14)",
-            """target_compile_features(upb_textformat_lib PUBLIC cxx_std_14)
+            replace_in_file(self, cmakelists, f"target_compile_features(upb_textformat_lib PUBLIC cxx_std_{self._cxxstd_required})",
+            f"""target_compile_features(upb_textformat_lib PUBLIC cxx_std_{self._cxxstd_required})
             target_link_options(upb_textformat_lib PRIVATE -Wl,-undefined,dynamic_lookup)
             target_link_options(upb_json_lib PRIVATE -Wl,-undefined,dynamic_lookup)
             """)

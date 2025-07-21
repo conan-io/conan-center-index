@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMakeDeps, CMakeToolchain, CMake
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -212,6 +212,7 @@ class sqlite3mc(ConanFile):
         cmake = CMake(self)
         cmake.install()
         copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"), keep_path=False)
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         if self.options.shared:

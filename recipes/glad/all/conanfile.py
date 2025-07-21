@@ -5,6 +5,8 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
 from conan.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=2"
+
 class GladConan(ConanFile):
     name = "glad"
     description = "Multi-Language GL/GLES/EGL/GLX/WGL Loader-Generator based on the official specs."
@@ -13,6 +15,7 @@ class GladConan(ConanFile):
     homepage = "https://github.com/Dav1dde/glad"
     license = "MIT"
     settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
 
     options = {
         "shared": [True, False],
@@ -91,7 +94,8 @@ class GladConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-    
+        apply_conandata_patches(self)
+
     def generate(self):
         tc = CMakeToolchain(self)
         if "gl_profile" in self.options:
@@ -103,10 +107,10 @@ class GladConan(ConanFile):
         tc.variables["GLAD_GENERATOR"] = "c" if self.settings.build_type == "Release" else "c-debug"
         tc.variables["GLAD_EXPORT"] = True
         tc.variables["GLAD_INSTALL"] = True
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

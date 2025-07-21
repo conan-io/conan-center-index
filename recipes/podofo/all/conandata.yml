@@ -2,6 +2,9 @@ sources:
   "0.9.7":
     url: "https://netcologne.dl.sourceforge.net/project/podofo/podofo/0.9.7/podofo-0.9.7.tar.gz"
     sha256: "7cf2e716daaef89647c54ffcd08940492fd40c385ef040ce7529396bfadc1eb8"
+  "0.10.4":
+    url: "https://github.com/podofo/podofo/archive/refs/tags/0.10.4.tar.gz"
+    sha256: "6b1b13cdfb2ba5e8bbc549df507023dd4873bc946211bc6942183b8496986904"
 patches:
   "0.9.7":
     - patch_file: "patches/0001-fix-cmake-0.9.7.patch"

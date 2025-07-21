@@ -1,4 +1,7 @@
 sources:
+  "2.3.8":
+    url: "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz"
+    sha256: "f557911bf6171621e1f72ff35f5b1825bb35b52ed45325dcdee931e5d3c0787a"
   "2.3.0":
     url: "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.0.tar.gz"
     sha256: "e1cb1db3d2e249a6a3eb6f0946777c2e892d5c5dc7bd91c74394fc3a01cab8b5"

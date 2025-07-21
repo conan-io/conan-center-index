@@ -2,7 +2,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 from conan.tools.env import VirtualBuildEnv
@@ -75,8 +75,12 @@ class MoldConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.18.0 <4]")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)

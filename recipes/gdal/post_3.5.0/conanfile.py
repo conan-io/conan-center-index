@@ -2,12 +2,13 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.0.5"
 
 
 class GdalConan(ConanFile):
@@ -170,6 +171,11 @@ class GdalConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+        # Newer gdal requires this flag for
+        # ogr/ogrsf_frmts/parquet build correctly
+        if self.options.with_arrow and Version(self.version) >= "3.10.0":
+            self.options["arrow"].filesystem_layer = True
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -304,6 +310,11 @@ class GdalConan(ConanFile):
         self.tool_requires("cmake/[>=3.18 <4]")
 
     def validate(self):
+        if Version(self.version) >= "3.10.0":
+            check_min_cppstd(self, 17)
+        else:
+            check_min_cppstd(self, 11)
+
         for option in ["crypto", "zlib", "proj", "libtiff"]:
             if self.options.get_safe(f"with_{option}") != "deprecated":
                 self.output.warning(f"{self.ref}:with_{option} option is deprecated. The {option} dependecy is always enabled now.")
@@ -326,6 +337,9 @@ class GdalConan(ConanFile):
             msg = "poppler:with_libjpeg and gdal:with_jpeg must be set to the same value, either libjpeg or libjpeg-turbo."
             self.output.error(msg)
             raise ConanInvalidConfiguration(msg)
+
+        if self.options.with_arrow and Version(self.version) >= "3.10.0" and not self.dependencies["arrow"].options.filesystem_layer:
+            raise ConanInvalidConfiguration("Gdal[>=3.10.0] requires -o arrow/*:filesystem_layer=True")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -633,9 +647,10 @@ class GdalConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
                         "JXL_THREADS", "JXL", strict=False)
         # Workaround for Parquet and ArrowDataset being provided by Arrow on CCI.
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
-                        "gdal_check_package(Parquet", "# gdal_check_package(Parquet")
-        if Version(self.version) >= "3.6.0":
+        if Version(self.version) < "3.10.0":
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
+                            "gdal_check_package(Parquet", "# gdal_check_package(Parquet")
+        if Version(self.version) >= "3.6.0" and Version(self.version) < "3.10.0":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
                             "gdal_check_package(ArrowDataset", "# gdal_check_package(ArrowDataset")
 

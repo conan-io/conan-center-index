@@ -6,7 +6,7 @@ from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 class FakerCXXConan(ConanFile):
     name = "faker-cxx"
@@ -28,9 +28,7 @@ class FakerCXXConan(ConanFile):
         "with_std_format": False,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 20
+    implements = ["auto_shared_fpic"]
 
     @property
     def _compilers_minimum_version(self):
@@ -41,31 +39,49 @@ class FakerCXXConan(ConanFile):
             "Visual Studio": "17",
             "msvc": "193",
         }
+    @property
+    def _min_std_format_support(self):
+        return {
+            "gcc": "13",
+            "clang": "17",
+            # These two are actually earlier, but older versions fail for other reasons
+            "apple-clang": "16",
+            "msvc": "193"
+        }
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+        if Version(self.version) >= "4.0.0":
+            del self.options.with_std_format
+
+    @property
+    def _with_std_format(self):
+        return self.options.get_safe("with_std_format", True)
 
     def requirements(self):
-        if not self.options.with_std_format:
+        if not self._with_std_format:
             self.requires("fmt/10.2.1")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 20)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                f"{self.ref} requires C++20, which your compiler does not support."
             )
-        if self.settings.os == "Windows" and self.options.shared:
+
+        if Version(self.version) >= "4.0.0":
+            format_minimum_version = self._min_std_format_support.get(str(self.settings.compiler), False)
+            if format_minimum_version and Version(self.settings.compiler.version) < format_minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires std::format, which your compiler does not support."
+                )
+        elif self.settings.os == "Windows" and self.options.shared:
             # https://github.com/cieslarmichal/faker-cxx/issues/753
             raise ConanInvalidConfiguration(f"{self.ref} is not prepared to generated shared library on Windows.")
 
@@ -77,10 +93,10 @@ class FakerCXXConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["USE_SYSTEM_DEPENDENCIES"] = True
-        tc.variables["BUILD_TESTING"] = False
-        tc.variables["WARNINGS_AS_ERRORS"] = False
-        tc.variables["WITH_STD_FORMAT"] = self.options.with_std_format
+        tc.cache_variables["USE_SYSTEM_DEPENDENCIES"] = True
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["WARNINGS_AS_ERRORS"] = False
+        tc.cache_variables["USE_STD_FORMAT"] = self._with_std_format
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -95,6 +111,7 @@ class FakerCXXConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = ["faker-cxx"]

@@ -77,7 +77,7 @@ class LibtiffConan(ConanFile):
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[~1.5]")
         if self.options.webp:
             self.requires("libwebp/1.3.2")
 

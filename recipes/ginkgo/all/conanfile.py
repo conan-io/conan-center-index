@@ -33,28 +33,17 @@ class GinkgoConan(ConanFile):
         "fPIC": [True, False],
         "openmp": [True, False],
         "cuda": [True, False],
+        "half": [True, False],
+        "bfloat16": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": False,
         "openmp": False,
         "cuda": False,
+        "half": True,
+        "bfloat16": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return "14"
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "193",
-            "gcc": "5.4",
-            "clang": "3.9",
-            "apple-clang": "10.0",
-            "intel": "18",
-        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -62,6 +51,16 @@ class GinkgoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        is_mingw = self.settings.os == "Windows" and self.settings.compiler == "gcc"
+        if Version(self.version) < "1.9.0" or is_mingw or is_msvc(self):
+            # option was added in 1.9.0
+            # option not supported for msvc/mingw (build system forces it to OFF anyway)
+            # see https://github.com/ginkgo-project/ginkgo/blob/d7e1450b6ba9ee90dbaa839f4b4b5a5ad59e28cc/CMakeLists.txt#L46-L51
+            del self.options.half
+            # option was added in 1.10.0
+            # same reason to force it of as for half
+            del self.options.bfloat16
 
     def configure(self):
         if self.options.shared:
@@ -71,24 +70,8 @@ class GinkgoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
-        def loose_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
-
-        minimum_version = self._minimum_compilers_version.get(
-            str(self.settings.compiler)
-        )
-        if minimum_version and loose_lt_semver(
-            str(self.settings.compiler.version), minimum_version
-        ):
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        min_cppstd = "17" if Version(self.version) >= "1.9.0" else "14"
+        check_min_cppstd(self, min_cppstd)
 
         if is_msvc(self) and self.options.shared:
             if self.settings.build_type == "Debug" and Version(self.version) >= "1.7.0":
@@ -102,10 +85,14 @@ class GinkgoConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "1.7.0":
-            self.tool_requires("cmake/[>=3.16 <4]")
+            if self.options.cuda:
+                self.tool_requires("cmake/[>=3.18 <4]")
+            else:
+                self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -123,10 +110,13 @@ class GinkgoConan(ConanFile):
             tc.variables["GINKGO_BUILD_DPCPP"] = False
         tc.variables["GINKGO_BUILD_HWLOC"] = False
         tc.variables["GINKGO_BUILD_MPI"] = False
+        if "half" in self.options:
+            tc.variables["GINKGO_ENABLE_HALF"] = self.options.half
+        if "bfloat16" in self.options:
+            tc.variables["GINKGO_ENABLE_BFLOAT16"] = self.options.bfloat16
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

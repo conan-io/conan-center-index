@@ -27,8 +27,14 @@ class TestPackageConan(ConanFile):
         return os.path.join(self.cpp.build.bindirs[0], "test_package")
 
     def test(self):
+        if self.dependencies[self.tested_reference_str].options.build_executable:
+            ext = ".exe" if self.settings.os == "Windows" else ""
+            assert os.path.exists(os.path.join(self.dependencies[self.tested_reference_str].cpp_info.bindir, f"curl{ext}"))
+
         if can_run(self):
             self.run(self._test_executable, env="conanrun")
+            if self.dependencies[self.tested_reference_str].options.build_executable:
+                self.run("curl --version", env="conanrun")
         else:
             # We will dump information for the generated executable
             if self.settings.os in ["Android", "iOS"]:

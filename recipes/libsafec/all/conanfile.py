@@ -65,7 +65,7 @@ class LibSafeCConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if is_apple_os(self) and self.settings.arch == "armv8":
+        if Version(self.version) < "3.9.1" and is_apple_os(self) and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration(
                 f"This platform is not yet supported by {self.ref} (os=Macos arch=armv8)"
             )

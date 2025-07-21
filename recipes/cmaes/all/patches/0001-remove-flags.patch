@@ -1,0 +1,14 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4a38212..1d94df8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -6,9 +6,6 @@ if (NOT DEFINED CMAKE_BUILD_TYPE)
+   set (CMAKE_BUILD_TYPE Release CACHE STRING "Build type")
+ endif ()
+ 
+-set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+-set(CMAKE_CXX_FLAGS_DEBUG "-g")
+-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+ 
+ list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+ 

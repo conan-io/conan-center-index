@@ -1,4 +1,8 @@
 versions:
+  "5.40.2.1":
+    folder: all
+  "5.38.2.2":
+    folder: all
   "5.32.1.1":
     folder: all
   "5.30.0.1":
