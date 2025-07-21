@@ -12,8 +12,6 @@ sources:
     url: https://github.com/nodejs/llhttp/archive/refs/tags/release/v6.0.6.tar.gz
     sha256: "14023d0efce07a996a197d3b6b15020b26526605277e521f5aa10dacc3af67ad"
 patches:
-  "9.3.0":
-    - patch_file: "patches/v9.3.0-cmake_remove_pcfiles.patch"
   "9.1.3":
     - patch_file: "patches/v9.1.3-cmake_remove_pcfiles.patch"
   "8.1.0":
