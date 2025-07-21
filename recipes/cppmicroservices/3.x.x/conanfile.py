@@ -30,7 +30,7 @@ class CppMicroServicesConan(ConanFile):
     }
 
     def validate(self):
-        check_min_cppstd(self, 14)
+        check_min_cppstd(self, 17)
         
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.17]")
