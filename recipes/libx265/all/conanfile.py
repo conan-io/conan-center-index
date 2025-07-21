@@ -54,6 +54,8 @@ class Libx265Conan(ConanFile):
         # FIXME: Disable assembly by default if host is Android for the moment. It fails to build
         if (self.settings.compiler == "apple-clang" and "arm" in self.settings.arch) or self.settings.os == "Android":
             self.options.assembly = False
+        if is_msvc(self) and self.settings.arch == "armv8":
+            self.options.assembly = False
 
     def configure(self):
         if self.options.shared:

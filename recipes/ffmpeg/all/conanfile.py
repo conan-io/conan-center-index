@@ -267,6 +267,8 @@ class FFMpegConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            if is_msvc(self) and self.settings.arch == "armv8":
+                self.options.with_libsvtav1 = False
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_vaapi
             del self.options.with_vdpau
