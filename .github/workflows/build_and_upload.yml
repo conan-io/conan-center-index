@@ -51,4 +51,5 @@ jobs:
           conan upload '*' \
             --remote ${{ env.CONAN_REMOTE }} \
             --only-recipe \
-            --confirm
+            --confirm \
+            --force
