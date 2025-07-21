@@ -2,6 +2,7 @@ from conan import ConanFile, tools
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.scm import Git
 from conan.tools.files import get, replace_in_file
+from conan.tools.build import check_min_cppstd
 
 import os
 
@@ -21,17 +22,19 @@ class CppMicroServicesConan(ConanFile):
 
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
-        "with_gtest": [True, False],
-        "with_doxygen": [True, False]
+        "fPIC": [True, False]
     }
     default_options = {
         "shared": True,
-        "fPIC": True,
-        "with_gtest": False,
-        "with_doxygen": False
+        "fPIC": True
     }
 
+    def validate(self):
+        check_min_cppstd(self, 14)
+        
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.17]")
+        
     def source(self):
         # we recover the saved url and commit from conandata.yml and use them to get sources
         git = Git(self)
