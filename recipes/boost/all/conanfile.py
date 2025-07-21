@@ -1183,7 +1183,7 @@ class BoostConan(ConanFile):
 
     @property
     def _b2_address_model(self):
-        if self.settings.arch in ("x86_64", "ppc64", "ppc64le", "mips64", "armv8", "armv8.3", "sparcv9", "s390x"):
+        if self.settings.arch in ("x86_64", "ppc64", "ppc64le", "mips64", "armv8", "armv8.3", "sparcv9", "s390x", "riscv64"):
             return "64"
 
         return "32"
@@ -1219,6 +1219,8 @@ class BoostConan(ConanFile):
             return "mips1"
         if str(self.settings.arch).startswith("s390"):
             return "s390x"
+        if str(self.settings.arch).startswith("riscv"):
+            return "riscv"
 
         return None
 
@@ -1232,6 +1234,8 @@ class BoostConan(ConanFile):
             return "aapcs"
         if str(self.settings.arch).startswith("mips"):
             return "o32"
+        if str(self.settings.arch).startswith("riscv"):
+            return "sysv"
 
         return None
 
@@ -1474,6 +1478,8 @@ class BoostConan(ConanFile):
             pass
         elif arch.startswith("mips"):
             pass
+        elif arch.startswith("riscv"):
+            pass
         else:
             self.output.warning(f"Unable to detect the appropriate ABI for {arch} architecture.")
         self.output.info(f"Cross building flags: {flags}")
@@ -1709,6 +1715,10 @@ class BoostConan(ConanFile):
                 rename(self, bin_file, os.path.join(self.package_folder, "bin", os.path.basename(bin_file)))
 
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        if is_apple_os(self) and not self._shared and Version(self.version) >= "1.88.0":
+            # FIXME: Boost 1.88 installs both .a and .dylib files for static libraries
+            # https://github.com/boostorg/boost/issues/1051
+            rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
 
     def _create_emscripten_libs(self):
         # Boost Build doesn't create the libraries, but it gets close,
@@ -1929,7 +1939,7 @@ class BoostConan(ConanFile):
                 for name in names:
                     if name in ("boost_stacktrace_windbg", "boost_stacktrace_windbg_cached") and self.settings.os != "Windows":
                         continue
-                    if name in ("boost_math_c99l", "boost_math_tr1l") and str(self.settings.arch).startswith("ppc"):
+                    if name in ("boost_math_c99l", "boost_math_tr1l") and (str(self.settings.arch).startswith("ppc") or (Version(self.version) >= "1.87.0" and self.settings.os == "Emscripten")):
                         continue
                     if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic") and self.settings.os == "Windows":
                         continue

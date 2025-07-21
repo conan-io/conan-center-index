@@ -1,0 +1,22 @@
+From d6a65bab60bb1b45075fa41ecdaf6b458aadfb67 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=E6=97=A0=E7=94=A8=E6=8C=82=E4=BB=B6?=
+ <60290926+alk3pInjection@users.noreply.github.com>
+Date: Wed, 7 May 2025 15:49:37 +0800
+Subject: [PATCH] fix(array): add missing header to make MSVC happy (#50)
+
+---
+ include/protopuf/array.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/protopuf/array.h b/include/protopuf/array.h
+index 6437f86..25ef22b 100644
+--- a/include/protopuf/array.h
++++ b/include/protopuf/array.h
+@@ -16,6 +16,7 @@
+ #define PROTOPUF_ARRAY_H
+ 
+ #include <ranges>
++#include <string>
+ #include <vector>
+ #include "coder.h"
+ #include "varint.h"

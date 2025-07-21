@@ -354,7 +354,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_fontconfig", False) and not self.options.get_safe("with_freetype", False):
             raise ConanInvalidConfiguration("with_fontconfig cannot be enabled if with_freetype is disabled.")
 
-        if not self.options.with_doubleconversion and str(self.settings.compiler.libcxx) != "libc++":
+        if not self.options.with_doubleconversion and self.settings.get_safe("compiler.libcxx") != "libc++":
             raise ConanInvalidConfiguration("Qt without libc++ needs qt:with_doubleconversion. "
                                             "Either enable qt:with_doubleconversion or switch to libc++")
 
@@ -527,7 +527,7 @@ class QtConan(ConanFile):
         ms.generate()
         vbe = VirtualBuildEnv(self)
         vbe.generate()
-        if not cross_building(self):
+        if not cross_building(self,  skip_x64_x86=self.settings.os == "Windows"):
             vre = VirtualRunEnv(self)
             vre.generate(scope="build")
         env = Environment()

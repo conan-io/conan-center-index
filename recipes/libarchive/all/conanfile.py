@@ -126,6 +126,7 @@ class LibarchiveConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         cmake_deps = CMakeDeps(self)
@@ -164,13 +165,10 @@ class LibarchiveConan(ConanFile):
         if Version(self.version) >= "3.7.3":
             tc.variables["ENABLE_PCRE2POSIX"] = self.options.with_pcre2
         tc.variables["ENABLE_XATTR"] = self.options.with_xattr
-        # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
-        if is_msvc(self):
-            tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
