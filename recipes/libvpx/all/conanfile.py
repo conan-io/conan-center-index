@@ -74,6 +74,8 @@ class LibVPXConan(ConanFile):
             raise ConanInvalidConfiguration("M1 only supported since 1.10, please upgrade")
         if self.settings.os == "iOS" and (self.settings.os.sdk != "iphonesimulator" and self.settings.arch in ["x86_64", "x86"]):
             raise ConanInvalidConfiguration("iOS platform with x86/x86_64 architectures only supports 'iphonesimulator' SDK option")
+        if is_msvc(self) and self.settings.arch == "armv8" and Version(self.version) < "1.15.2":
+            raise ConanInvalidConfiguration("Unsupported ARM version for MSVC on versions lower than 1.15.2")
 
     def build_requirements(self):
         self.tool_requires("yasm/1.3.0")
@@ -245,9 +247,10 @@ class LibVPXConan(ConanFile):
         if is_msvc(self):
             # Libs are still in the build folder, get from there directly.
             # The makefile cannot correctly install the debug libs (see note about --enable-debug_libs)
+            system = {"x86": "Win32", "armv8": "ARM64", "arm64ec": "ARM64EC"}
             libs_from = os.path.join(
                     self.build_folder,
-                    "Win32" if self.settings.arch == "x86" else "x64",
+                    system.get(str(self.settings.arch), "x64"),
                     "Debug" if self.settings.build_type == "Debug" else "Release"
                     )
             # Copy for msvc, as it will generate a release and debug library, so take what we want
