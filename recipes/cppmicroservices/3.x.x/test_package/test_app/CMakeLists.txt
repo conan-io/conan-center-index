@@ -4,14 +4,6 @@
 
 set(_srcs src/main.cpp)
 
-get_target_property(DS_DLL_PATH DeclarativeServices IMPORTED_LOCATION_RELEASE)
-message(STATUS ${DS_DLL_PATH})
-message(STATUS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-set_source_files_properties(
-  src/main.cpp
-  PROPERTIES
-  COMPILE_FLAGS "-DDS_DLL_PATH=\"${DS_DLL_PATH}\"")
-
 if(NOT BUILD_SHARED_LIBS)
   # Set up dependencies to resources from static bundles
   usFunctionGetResourceSource(TARGET test_app OUT _srcs)
@@ -23,12 +15,9 @@ target_compile_definitions(test_app PRIVATE
   $<IF:$<PLATFORM_ID:Windows>,
     BINARY_PATH=\"$<JOIN:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>,>\",
     BINARY_PATH=\"$<JOIN:${CMAKE_LIBRARY_OUTPUT_DIRECTORY},>\"
-  >
+    >
+    DS_DLL_PATH=$<TARGET_FILE:DeclarativeServices>
 )
-
-#target_compile_definitions(test_app PRIVATE
-#    BINARY_PATH="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>"
-#)
 
 if(NOT BUILD_SHARED_LIBS)
   target_link_libraries(test_app ${_static_bundles})
