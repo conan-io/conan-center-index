@@ -447,6 +447,12 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libacero"].names["pkg_config"] = "acero"
             self.cpp_info.components["libacero"].requires = ["libarrow"]
 
+        if self.options.compute:
+            self.cpp_info.components["libarrow_compute"].set_property("pkg_config_name", "arrow_compute")
+            self.cpp_info.components["libarrow_compute"].set_property("cmake_target_name", f"ArrowCompute::arrow_compute_{cmake_suffix}")
+            self.cpp_info.components["libarrow_compute"].libs = [f"arrow_compute{suffix}"]
+            self.cpp_info.components["libarrow_compute"].requires = ["libarrow"]
+
         if self.options.gandiva:
             self.cpp_info.components["libgandiva"].set_property("pkg_config_name", "gandiva")
             self.cpp_info.components["libgandiva"].set_property("cmake_target_name", f"Gandiva::gandiva_{cmake_suffix}")
