@@ -1,0 +1,100 @@
+diff --git a/src/lib/pubkey/ecc_key/ec_key_data.cpp b/src/lib/pubkey/ecc_key/ec_key_data.cpp
+index ffea08b3b..3ca3ff942 100644
+--- a/src/lib/pubkey/ecc_key/ec_key_data.cpp
++++ b/src/lib/pubkey/ecc_key/ec_key_data.cpp
+@@ -10,15 +10,23 @@
+ 
+ namespace Botan {
+ 
+-EC_PublicKey_Data::EC_PublicKey_Data(EC_Group group, std::span<const uint8_t> bytes) :
+-      m_group(std::move(group)), m_point(m_group, bytes) {
++EC_PublicKey_Data::EC_PublicKey_Data(EC_Group group, EC_AffinePoint pt) :
++      m_group(std::move(group)), m_point(std::move(pt)) {
+ #if defined(BOTAN_HAS_LEGACY_EC_POINT)
+    m_legacy_point = m_point.to_legacy_point();
+ #endif
++
++   // Checking that the point lies on the curve is done in the deserialization
++   // of EC_AffinePoint.
++   BOTAN_ARG_CHECK(!m_point.is_identity(), "ECC public key cannot be point at infinity");
+ }
+ 
+ EC_PrivateKey_Data::EC_PrivateKey_Data(EC_Group group, EC_Scalar x) :
+-      m_group(std::move(group)), m_scalar(std::move(x)), m_legacy_x(m_scalar.to_bigint()) {}
++      m_group(std::move(group)), m_scalar(std::move(x)), m_legacy_x(m_scalar.to_bigint()) {
++   // Checking that the scalar is lower than the group order is ensured in the
++   // deserialization of the EC_Scalar or during the random generation respectively.
++   BOTAN_ARG_CHECK(m_scalar.is_nonzero(), "ECC private key cannot be zero");
++}
+ 
+ namespace {
+ 
+@@ -49,10 +57,8 @@ EC_Scalar decode_ec_secret_key_scalar(const EC_Group& group, std::span<const uin
+ 
+ }  // namespace
+ 
+-EC_PrivateKey_Data::EC_PrivateKey_Data(EC_Group group, std::span<const uint8_t> bytes) :
+-      m_group(std::move(group)),
+-      m_scalar(decode_ec_secret_key_scalar(m_group, bytes)),
+-      m_legacy_x(m_scalar.to_bigint()) {}
++EC_PrivateKey_Data::EC_PrivateKey_Data(const EC_Group& group, std::span<const uint8_t> bytes) :
++      Botan::EC_PrivateKey_Data(group, decode_ec_secret_key_scalar(group, bytes)) {}
+ 
+ std::shared_ptr<EC_PublicKey_Data> EC_PrivateKey_Data::public_key(RandomNumberGenerator& rng,
+                                                                   bool with_modular_inverse) const {
+diff --git a/src/lib/pubkey/ecc_key/ec_key_data.h b/src/lib/pubkey/ecc_key/ec_key_data.h
+index 81ec019ed..f3169be64 100644
+--- a/src/lib/pubkey/ecc_key/ec_key_data.h
++++ b/src/lib/pubkey/ecc_key/ec_key_data.h
+@@ -23,13 +23,10 @@ class RandomNumberGenerator;
+ 
+ class EC_PublicKey_Data final {
+    public:
+-      EC_PublicKey_Data(EC_Group group, EC_AffinePoint pt) : m_group(std::move(group)), m_point(std::move(pt)) {
+-#if defined(BOTAN_HAS_LEGACY_EC_POINT)
+-         m_legacy_point = m_point.to_legacy_point();
+-#endif
+-      }
++      EC_PublicKey_Data(EC_Group group, EC_AffinePoint pt);
+ 
+-      EC_PublicKey_Data(EC_Group group, std::span<const uint8_t> bytes);
++      EC_PublicKey_Data(const EC_Group& group, std::span<const uint8_t> bytes) :
++            EC_PublicKey_Data(group, EC_AffinePoint(group, bytes)) {}
+ 
+       const EC_Group& group() const { return m_group; }
+ 
+@@ -51,7 +48,7 @@ class EC_PrivateKey_Data final {
+    public:
+       EC_PrivateKey_Data(EC_Group group, EC_Scalar x);
+ 
+-      EC_PrivateKey_Data(EC_Group group, std::span<const uint8_t> bytes);
++      EC_PrivateKey_Data(const EC_Group& group, std::span<const uint8_t> bytes);
+ 
+       std::shared_ptr<EC_PublicKey_Data> public_key(RandomNumberGenerator& rng, bool with_modular_inverse) const;
+ 
+diff --git a/src/tests/test_ecdh.cpp b/src/tests/test_ecdh.cpp
+index 40fcc5001..d6b64a639 100644
+--- a/src/tests/test_ecdh.cpp
++++ b/src/tests/test_ecdh.cpp
+@@ -71,6 +71,18 @@ class ECDH_AllGroups_Tests : public Test {
+             try {
+                const auto group = Botan::EC_Group::from_name(group_name);
+ 
++               // Regression test: prohibit loading an all-zero private key
++               result.test_throws<Botan::Invalid_Argument>("all-zero private key is unacceptable", [&] {
++                  const auto one = Botan::EC_Scalar::one(group);
++                  Botan::ECDH_PrivateKey(group, one - one);
++               });
++
++               // Regression test: prohibit loading a public point that is the identity (point at infinity)
++               result.test_throws<Botan::Invalid_Argument>("point at infinity isn't a valid public key", [&] {
++                  const auto infinity = Botan::EC_AffinePoint::identity(group);
++                  Botan::ECDH_PublicKey(group, infinity);
++               });
++
+                for(size_t i = 0; i != 100; ++i) {
+                   const Botan::ECDH_PrivateKey a_priv(rng(), group);
+                   const auto a_pub = a_priv.public_value();
+-- 
+2.43.0
+
