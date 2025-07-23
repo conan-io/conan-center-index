@@ -1,5 +1,8 @@
-from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools
+from conan.tools.files import copy, rm, rmdir
+from conan.tools.microsoft import VCVars
+from conan.tools.meson import Meson
+from conan.errors import ConanInvalidConfiguration
 import glob
 import os
 import shutil
