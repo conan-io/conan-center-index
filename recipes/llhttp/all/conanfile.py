@@ -47,7 +47,7 @@ class LlhttpParserConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "9.3.0":
-            self.tool_requires("cmake/[>=3.25 <=4.2]")
+            self.tool_requires("cmake/[>=3.25]")
 
     def generate(self):
         tc = CMakeToolchain(self)
