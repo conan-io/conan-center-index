@@ -4,8 +4,8 @@ from conan.tools.scm import Git
 from conan.tools.files import get, replace_in_file
 from conan.tools.build import check_min_cppstd
 
-import os
 
+import os
 
 class CppMicroServicesConan(ConanFile):
     name = "cppmicroservices"
@@ -48,6 +48,8 @@ class CppMicroServicesConan(ConanFile):
 
     def configure(self):
         os.environ["CMAKE_POLICY_VERSION_MINIMUM"] = "3.17"
+        if self.settings.os == "Linux":
+            os.environ["CXXFLAGS"] = "-Wno-maybe-uninitialized"
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
@@ -60,7 +62,8 @@ class CppMicroServicesConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         target = os.path.join(self.source_folder, "target")
-        cmake.configure(variables={"US_BUILD_TESTING": "Off", "CMAKE_DEBUG_POSTFIX": ""},
+        cmake.configure(variables={"US_BUILD_TESTING": "Off"
+                                   , "CMAKE_DEBUG_POSTFIX": ""},
                         build_script_folder=target)
         cmake.build()
 
