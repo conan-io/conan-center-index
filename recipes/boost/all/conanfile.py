@@ -1604,7 +1604,7 @@ class BoostConan(ConanFile):
         if cflags.strip():
             contents += f'<cflags>"{cflags.strip()}" '
         if cppflags.strip() or self._build_cross_flags:
-            compiler_flags = cppflags.strip()
+            compiler_flags = cppflags.strip() + " "
             compiler_flags += " ".join(self._build_cross_flags)
             contents += f'<compileflags>"{compiler_flags}" '
         if ldflags.strip():
