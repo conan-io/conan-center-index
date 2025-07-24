@@ -8,6 +8,7 @@ import os
 
 required_conan_version = ">=2.1.0"
 
+
 class QpidProtonConan(ConanFile):
     name = "qpid-proton"
     description = "Qpid Proton is a high-performance, lightweight messaging library."
@@ -34,6 +35,7 @@ class QpidProtonConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -67,6 +69,8 @@ class QpidProtonConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_CyrusSASL"] = True
 
         tc.variables["BUILD_PYTHON"] = False
         tc.variables["BUILD_RUBY"] = False
@@ -118,6 +122,9 @@ class QpidProtonConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ProtonCpp")
         self.cpp_info.set_property("pkg_config_name", "libqpid-proton-cpp")
+
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append(["secur32", "crypt32"])
 
         suffix = "-static" if is_msvc(self) and not self.options.shared else ""
 
