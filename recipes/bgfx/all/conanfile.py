@@ -130,11 +130,11 @@ class bgfxConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires iOS/tvOS sdk version >= 16")
 
     def build_requirements(self):
-        self.tool_requires("genie/1181")
+        self.tool_requires("genie/[>=1181]")
         if not is_msvc(self) and self.settings_build.os == "Windows":
             if self.settings.os == "Windows": # building for windows mingw
                 if "MINGW" not in os.environ:
-                    self.tool_requires("mingw-builds/13.2.0")
+                    self.tool_requires("mingw-builds/[>=13.2.0]")
             else: # cross-compiling for something else, probably android; get native make
                 self.tool_requires("make/[>=4.4.1]")
 
