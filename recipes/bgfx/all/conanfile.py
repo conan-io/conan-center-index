@@ -27,6 +27,15 @@ class bgfxConan(ConanFile):
     default_options = {"fPIC": True, "shared": False, "rtti": True, "tools": False, "profiler": False}
 
     @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "11",
+            "clang": "11",
+            "apple-clang": "12",
+            "msvc": "193",
+        }
+
+    @property
     def _bx_folder(self):
         return "bx"
 
@@ -119,6 +128,9 @@ class bgfxConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires {str(self.settings.compiler)} {self.settings.compiler.version}.")
         if self.settings.os == "Macos":
             if self.settings.get_safe("os.sdk_version") and self.settings.get_safe("os.sdk_version") < "11.0":
                 raise ConanInvalidConfiguration(f"{self.ref} requires macos sdk version >= 11")
