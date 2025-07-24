@@ -20,13 +20,11 @@ class QpidProtonConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
-        "with_opentelemetry": [True, False],
+        "fPIC": [True, False]
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
-        "with_opentelemetry": False,
+        "fPIC": True
     }
 
     @property
@@ -48,9 +46,8 @@ class QpidProtonConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/[>=1.1 <4]")
-        if self.options.with_opentelemetry:
-            self.requires("opentelemetry-cpp/1.21.0")
+        if not is_msvc():
+            self.requires("openssl/[>=1.1 <4]")
         if self.settings.os == "Macos":
             self.requires("libuv/1.49.2")
         self.requires("jsoncpp/1.9.6")
@@ -88,7 +85,6 @@ class QpidProtonConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         tc.cache_variables["BUILD_TOOLS"] = False
         tc.variables["BUILD_EXAMPLES"] = False
-        tc.cache_variables["ENABLE_OPENTELEMETRYCPP"] = self.options.with_opentelemetry
         tc.cache_variables["ENABLE_JSONCPP"] = True
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_SWIG"] = True
@@ -123,22 +119,29 @@ class QpidProtonConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "ProtonCpp")
         self.cpp_info.set_property("pkg_config_name", "libqpid-proton-cpp")
 
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append(["secur32", "crypt32"])
-
         suffix = "-static" if is_msvc(self) and not self.options.shared else ""
 
         self.cpp_info.components["proton"].set_property("cmake_target_name", "Proton::proton")
         self.cpp_info.components["proton"].libs = [f"qpid-proton{suffix}"]
-        self.cpp_info.components["proton"].requires = ["openssl::ssl"]
+        if is_msvc(self):
+            self.cpp_info.components["proton"].system_libs.append(["secur32", "crypt32"])
+        else:
+            self.cpp_info.components["proton"].requires = ["openssl::ssl"]
 
         self.cpp_info.components["core"].set_property("cmake_target_name", "Proton::core")
         self.cpp_info.components["core"].libs = [f"qpid-proton-core{suffix}"]
-        self.cpp_info.components["core"].requires = ["openssl::ssl"]
+        if is_msvc(self):
+            self.cpp_info.components["core"].system_libs.append(["secur32", "crypt32"])
+        else:
+            self.cpp_info.components["core"].requires = ["openssl::ssl"]
 
         self.cpp_info.components["proactor"].set_property("cmake_target_name", "Proton::proactor")
         self.cpp_info.components["proactor"].libs = [f"qpid-proton-proactor{suffix}"]
         self.cpp_info.components["proactor"].requires = ["core"]
+        if is_msvc(self):
+            self.cpp_info.components["proactor"].system_libs.append(["secur32", "crypt32"])
+        else:
+            self.cpp_info.components["proactor"].requires = ["openssl::ssl"]
 
         self.cpp_info.components["cpp"].set_property("cmake_target_name", "Proton::cpp")
         self.cpp_info.components["cpp"].libs = [f"qpid-proton-cpp{suffix}"]
@@ -149,6 +152,3 @@ class QpidProtonConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
-
-        if self.options.with_opentelemetry:
-            self.cpp_info.components["cpp"].requires.append("opentelemetry-cpp::opentelemetry-cpp")
