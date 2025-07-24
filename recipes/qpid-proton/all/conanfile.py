@@ -25,7 +25,7 @@ class QpidProtonConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_opentelemetry": True,
+        "with_opentelemetry": False,
     }
 
     @property
