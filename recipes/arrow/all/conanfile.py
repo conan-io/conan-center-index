@@ -445,9 +445,12 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libacero"].names["cmake_find_package"] = "acero"
             self.cpp_info.components["libacero"].names["cmake_find_package_multi"] = "acero"
             self.cpp_info.components["libacero"].names["pkg_config"] = "acero"
-            self.cpp_info.components["libacero"].requires = ["libarrow", "libarrow_compute"]
+            self.cpp_info.components["libacero"].requires = ["libarrow"]
+            if Version(self.version) >= "21.0.0" and self.options.compute:
+                # libacero depends on compute
+                self.cpp_info.components["libacero"].requires.append("libarrow_compute")
 
-        if self.options.compute:
+        if Version(self.version) >= "21.0.0" and self.options.compute:
             self.cpp_info.components["libarrow_compute"].set_property("pkg_config_name", "arrow_compute")
             self.cpp_info.components["libarrow_compute"].set_property("cmake_target_name", f"ArrowCompute::arrow_compute_{cmake_suffix}")
             self.cpp_info.components["libarrow_compute"].libs = [f"arrow_compute{suffix}"]
