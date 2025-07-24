@@ -10,3 +10,6 @@ patches:
     - patch_file: "patches/0001-Remove-hardcoded-INSTALL_NAME_DIR-for-relocatable-li.patch"
       patch_description: "Generate relocatable libraries on MacOS"
       patch_type: "portability"
+    - patch_file: "patches/0002-Fix-soci_backend.patch"
+      patch_description: "Fix variable names for dependencies"
+      patch_type: "conan"
