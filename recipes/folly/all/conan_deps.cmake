@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.5)
 # Set the dependency flags expected by https://github.com/facebook/folly/blob/v2023.12.18.00/CMake/folly-deps.cmake
 
 macro(custom_find_package package_name variable_prefix)
@@ -23,6 +23,7 @@ endmacro()
 
 custom_find_package(BZip2 BZIP2)
 custom_find_package(DoubleConversion DOUBLE_CONVERSION REQUIRED)
+custom_find_package(FastFloat FASTFLOAT REQUIRED)
 custom_find_package(Gflags LIBGFLAGS)
 custom_find_package(Glog GLOG)
 custom_find_package(LZ4 LZ4)
