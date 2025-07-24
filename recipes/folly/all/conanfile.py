@@ -142,6 +142,9 @@ class FollyConan(ConanFile):
         env.generate()
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_PROJECT_folly_INCLUDE"] = "conan_deps.cmake"
+        # fast_float is only needed on newer folly versions
+        if Version(self.version) > "2024.08.26.00":
+            tc.variables["CONAN_CMAKE_FOLLY_NEEDS_FAST_FLOAT"] = True
         # Folly fails to check Gflags: https://github.com/conan-io/conan/issues/12012
         tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
 
