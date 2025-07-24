@@ -148,7 +148,7 @@ class QpidProtonConan(ConanFile):
         self.cpp_info.components["cpp"].requires = ["core", "proactor", "jsoncpp::jsoncpp"]
 
         if self.settings.os == "Macos":
-            self.cpp_info.components["core"].requires.extend("libuv::libuv")
+            self.cpp_info.components["core"].requires.append("libuv::libuv")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
