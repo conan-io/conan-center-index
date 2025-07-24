@@ -2,6 +2,8 @@ name: Pull Request CI
 
 on:
   pull_request:
+    paths:
+      - 'recipes/**'
     
 jobs:
   find_modified_refs:

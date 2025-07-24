@@ -2,6 +2,8 @@ name: Push CI
 
 on:
   push:
+    paths:
+      - 'recipes/**'
     
 jobs:
   find_modified_refs:
