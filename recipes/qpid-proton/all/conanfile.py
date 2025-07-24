@@ -47,7 +47,6 @@ class QpidProtonConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("cyrus-sasl/2.1.28")
         if self.options.with_opentelemetry:
             self.requires("opentelemetry-cpp/1.21.0")
         if self.settings.os == "Macos":
@@ -124,11 +123,11 @@ class QpidProtonConan(ConanFile):
 
         self.cpp_info.components["proton"].set_property("cmake_target_name", "Proton::proton")
         self.cpp_info.components["proton"].libs = [f"qpid-proton{suffix}"]
-        self.cpp_info.components["proton"].requires = ["openssl::ssl", "cyrus-sasl::cyrus-sasl"]
+        self.cpp_info.components["proton"].requires = ["openssl::ssl"]
 
         self.cpp_info.components["core"].set_property("cmake_target_name", "Proton::core")
         self.cpp_info.components["core"].libs = [f"qpid-proton-core{suffix}"]
-        self.cpp_info.components["core"].requires = ["openssl::ssl", "cyrus-sasl::cyrus-sasl"]
+        self.cpp_info.components["core"].requires = ["openssl::ssl"]
 
         self.cpp_info.components["proactor"].set_property("cmake_target_name", "Proton::proactor")
         self.cpp_info.components["proactor"].libs = [f"qpid-proton-proactor{suffix}"]
