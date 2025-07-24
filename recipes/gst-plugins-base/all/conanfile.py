@@ -65,7 +65,7 @@ class GStPluginsBaseConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return self.settings.compiler == "msvc"
 
     def validate(self):
         if not self.options["glib"].shared and self.options.shared:
@@ -205,7 +205,7 @@ class GStPluginsBaseConan(ConanFile):
             add_flag("cpp_link_args", value)
 
         meson = Meson(self)
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             add_linker_flag("-lws2_32")
             add_compiler_flag("-%s" % self.settings.compiler.runtime)
             if int(str(self.settings.compiler.version)) < 14:
@@ -255,7 +255,7 @@ class GStPluginsBaseConan(ConanFile):
 
     def _fix_library_names(self, path):
         # regression in 1.16
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             with tools.chdir(path):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
