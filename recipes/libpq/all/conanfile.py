@@ -154,6 +154,12 @@ class LibpqConan(ConanFile):
             replace_in_file(self,msbuild_project_pm, "'MultiThreadedDLL'", "'%s'" % runtime)
             config_default_pl = os.path.join(self.source_folder, "src", "tools", "msvc", "config_default.pl")
             solution_pm = os.path.join(self.source_folder, "src", "tools", "msvc", "Solution.pm")
+            if self.settings.arch == "armv8":
+                # Interim solution - recipes should move to using meson-based newer libpq
+                replace_in_file(self, solution_pm, "($output =~ /^\/favor:<.+AMD64/m) ? 'x64' : 'Win32';", "'ARM64';")
+                replace_in_file(self, msbuild_project_pm, "$self->{platform} eq 'Win32' ? 'MachineX86' : 'MachineX64';", "'MachineARM64';")
+                replace_in_file(self, msbuild_project_pm, "<RandomizedBaseAddress>false", "<RandomizedBaseAddress>true")
+                replace_in_file(self, os.path.join(self.source_folder, "src/port/pg_crc32c_sse42.c"), "nmmintrin.h", "intrin.h")
             if self.options.with_openssl:
                 openssl = self.dependencies["openssl"]
                 for ssl in ["VC\\libssl32", "VC\\libssl64", "libssl"]:
