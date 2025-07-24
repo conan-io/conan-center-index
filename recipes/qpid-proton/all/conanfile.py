@@ -46,7 +46,7 @@ class QpidProtonConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if not is_msvc():
+        if not is_msvc(self):
             self.requires("openssl/[>=1.1 <4]")
         if self.settings.os == "Macos":
             self.requires("libuv/1.49.2")
@@ -124,14 +124,14 @@ class QpidProtonConan(ConanFile):
         self.cpp_info.components["proton"].set_property("cmake_target_name", "Proton::proton")
         self.cpp_info.components["proton"].libs = [f"qpid-proton{suffix}"]
         if is_msvc(self):
-            self.cpp_info.components["proton"].system_libs.append(["secur32", "crypt32"])
+            self.cpp_info.components["proton"].system_libs.extend(["secur32", "crypt32"])
         else:
             self.cpp_info.components["proton"].requires = ["openssl::ssl"]
 
         self.cpp_info.components["core"].set_property("cmake_target_name", "Proton::core")
         self.cpp_info.components["core"].libs = [f"qpid-proton-core{suffix}"]
         if is_msvc(self):
-            self.cpp_info.components["core"].system_libs.append(["secur32", "crypt32"])
+            self.cpp_info.components["core"].system_libs.extend(["secur32", "crypt32"])
         else:
             self.cpp_info.components["core"].requires = ["openssl::ssl"]
 
@@ -139,7 +139,7 @@ class QpidProtonConan(ConanFile):
         self.cpp_info.components["proactor"].libs = [f"qpid-proton-proactor{suffix}"]
         self.cpp_info.components["proactor"].requires = ["core"]
         if is_msvc(self):
-            self.cpp_info.components["proactor"].system_libs.append(["secur32", "crypt32"])
+            self.cpp_info.components["proactor"].system_libs.extend(["secur32", "crypt32"])
         else:
             self.cpp_info.components["proactor"].requires = ["openssl::ssl"]
 
@@ -148,7 +148,7 @@ class QpidProtonConan(ConanFile):
         self.cpp_info.components["cpp"].requires = ["core", "proactor", "jsoncpp::jsoncpp"]
 
         if self.settings.os == "Macos":
-            self.cpp_info.components["core"].requires.append("libuv::libuv")
+            self.cpp_info.components["core"].requires.extend("libuv::libuv")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
