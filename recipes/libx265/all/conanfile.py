@@ -55,6 +55,7 @@ class Libx265Conan(ConanFile):
         if (self.settings.compiler == "apple-clang" and "arm" in self.settings.arch) or self.settings.os == "Android":
             self.options.assembly = False
         if is_msvc(self) and self.settings.arch == "armv8":
+            # Build errors, possibly unsupported
             self.options.assembly = False
 
     def configure(self):
