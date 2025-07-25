@@ -1,10 +1,6 @@
 #include <boost/python/numpy.hpp>
 #include <iostream>
 
-#if defined(BOOST_NAMESPACE)
-namespace boost = BOOST_NAMESPACE;
-#endif
-
 namespace p = boost::python;
 namespace np = boost::python::numpy;
 
