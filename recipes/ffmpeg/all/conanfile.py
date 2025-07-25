@@ -369,7 +369,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libaom:
             self.requires("libaom-av1/3.6.1")
         if self.options.get_safe("with_libdav1d"):
-            self.requires("dav1d/1.4.3")
+            self.requires("dav1d/[>=1.4 <2]")
         if self.options.get_safe("with_libdrm"):
             self.requires("libdrm/2.4.119")
 
