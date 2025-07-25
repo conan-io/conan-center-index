@@ -1,4 +1,7 @@
 sources:
+  "cci.20250614":
+    url: "https://github.com/cpputest/cpputest/archive/e332d88164090beba1060bd3159aea5ded3f5bba.tar.gz"
+    sha256: d2629a31939c7877583a24b98f0bc771c0c3f666552ebbab7ef2b4b910ee3f5a
   "4.0":
     url: "https://github.com/cpputest/cpputest/releases/download/v4.0/cpputest-4.0.tar.gz"
     sha256: 21c692105db15299b5529af81a11a7ad80397f92c122bd7bf1e4a4b0e85654f7
