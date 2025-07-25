@@ -1,4 +1,7 @@
 sources:
+  "3.2.1":
+    url: "https://github.com/NVIDIA/NVTX/archive/v3.2.1.tar.gz"
+    sha256: "737c3035f0e43a2252e7cd94c3f26e11e169f624236efe31794f044ce44a70af"
   "3.1.0":
     url: "https://github.com/NVIDIA/NVTX/archive/v3.1.0.tar.gz"
     sha256: "dc4e4a227d04d3da46ad920dfee5f7599ac8d6b2ee1809c9067110fb1cc71ced"
