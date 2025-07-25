@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
 
 import os
 
@@ -44,7 +45,11 @@ class fastgltf(ConanFile):
         cmake_layout(self, src_folder='src')
 
     def requirements(self):
-        self.requires("simdjson/3.11.5")
+        if self.version >= Version("0.9.0"):
+            #https://github.com/spnda/fastgltf/blob/v0.9.0/cmake/dependencies.cmake#L11C9-L11C46
+            self.requires("simdjson/3.12.3")
+        else:
+            self.requires("simdjson/3.11.5")
 
     def validate(self):
         check_min_cppstd(self, 17)
