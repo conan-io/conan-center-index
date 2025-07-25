@@ -10,11 +10,6 @@ class GasPreprocessorConan(ConanFile):
     url = "https://github.com/FFmpeg/gas-preprocessor"
     description = "Perl script that implements a subset of the GNU as preprocessor that Apple's as doesn't"
     package_type = "application"
-    no_copy_source = True
-
-    def build_requirements(self):
-        if is_msvc(self):
-            self.tool_requires("strawberryperl/5.32.1.1")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -22,16 +17,17 @@ class GasPreprocessorConan(ConanFile):
     def source(self):
         download(self,
                   url=self.conan_data["sources"][self.version]['url'],
-                  filename="gas-preprocessor.pl"
-                )
-        download(self,
-                 url="https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt",
-                 filename="LICENSE.txt"
-                 )
+                  filename="gas-preprocessor.pl")
+        
+    def export_sources(self):
+        copy(self, "gpl-2.0.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def package(self):
         copy(self, "gas-preprocessor.pl", self.source_folder, os.path.join(self.package_folder, "bin"))
-        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+
+        # https://github.com/FFmpeg/gas-preprocessor/blob/a120373ba30de06675d8c47617b315beef16c88e/gas-preprocessor.pl#L3
+        # GPL-2.0 or later is mentioned in the file itself - we keep a copy of the license file in the recipe
+        copy(self, "gpl-2.0.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.includedirs = []
