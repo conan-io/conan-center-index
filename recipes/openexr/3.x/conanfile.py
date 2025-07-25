@@ -6,7 +6,7 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class OpenEXRConan(ConanFile):
@@ -29,20 +29,6 @@ class OpenEXRConan(ConanFile):
     }
 
     @property
-    def _min_cppstd(self):
-        if Version(self.version) >= "3.3":
-            return 17
-        return 11
-
-    @property
-    def _minimum_compiler_version(self):
-        return {
-            "17": {
-                "gcc": "9"
-            }
-        }.get(str(self._min_cppstd), {})
-
-    @property
     def _with_libdeflate(self):
         return Version(self.version) >= "3.2"
 
@@ -63,17 +49,12 @@ class OpenEXRConan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         # Note: OpenEXR and Imath are versioned independently.
-        self.requires("imath/3.1.9", transitive_headers=True)
+        self.requires("imath/[>=3.1.9 <4]", transitive_headers=True)
         if self._with_libdeflate:
-            self.requires("libdeflate/[>=1.19 <=1.22]")
+            self.requires("libdeflate/[>=1.19 <2]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
-        minimum_version = self._minimum_compiler_version.get(str(self.settings.compiler))
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires {self.settings.compiler} >= {minimum_version}")
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -118,17 +99,11 @@ class OpenEXRConan(ConanFile):
     def _add_component(self, name):
         component = self.cpp_info.components[self._conan_comp(name)]
         component.set_property("cmake_target_name", f"OpenEXR::{name}")
-        component.names["cmake_find_package"] = name
-        component.names["cmake_find_package_multi"] = name
         return component
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenEXR")
         self.cpp_info.set_property("pkg_config_name", "OpenEXR")
-
-        self.cpp_info.names["cmake_find_package"] = "OpenEXR"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenEXR"
-        self.cpp_info.names["pkg_config"] = "OpenEXR"
 
         lib_suffix = ""
         if not self.options.shared or self.settings.os == "Windows":
