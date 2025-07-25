@@ -1,9 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir, save
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2"
 
 
 class EigenConan(ConanFile):
@@ -39,6 +40,7 @@ class EigenConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -47,7 +49,6 @@ class EigenConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -59,10 +60,26 @@ class EigenConan(ConanFile):
         copy(self, "COPYING.*", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
+        save(self, os.path.join(self.package_folder, self._extra_variables_file_rel_path), self._extra_variables_file_content())
+
+    def _extra_variables_file_content(self):
+        version = Version(self.version)
+        return f"""\
+            set (EIGEN3_VERSION_STRING "{self.version}")
+            set (EIGEN3_VERSION_MAJOR  "{version.major}")
+            set (EIGEN3_VERSION_MINOR  "{version.minor}")
+            set (EIGEN3_VERSION_PATCH  "{version.patch}")
+        """
+
+    @property
+    def _extra_variables_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Eigen3")
         self.cpp_info.set_property("cmake_target_name", "Eigen3::Eigen")
         self.cpp_info.set_property("pkg_config_name", "eigen3")
+        self.cpp_info.set_property("cmake_build_modules", [self._extra_variables_file_rel_path])
         # TODO: back to global scope once cmake_find_package* generators removed
         self.cpp_info.components["eigen3"].bindirs = []
         self.cpp_info.components["eigen3"].libdirs = []
@@ -71,11 +88,5 @@ class EigenConan(ConanFile):
         if self.options.MPL2_only:
             self.cpp_info.components["eigen3"].defines = ["EIGEN_MPL2_ONLY"]
 
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "Eigen3"
-        self.cpp_info.names["cmake_find_package_multi"] = "Eigen3"
-        self.cpp_info.names["pkg_config"] = "eigen3"
-        self.cpp_info.components["eigen3"].names["cmake_find_package"] = "Eigen"
-        self.cpp_info.components["eigen3"].names["cmake_find_package_multi"] = "Eigen"
         self.cpp_info.components["eigen3"].set_property("cmake_target_name", "Eigen3::Eigen")
         self.cpp_info.components["eigen3"].includedirs = [os.path.join("include", "eigen3")]
