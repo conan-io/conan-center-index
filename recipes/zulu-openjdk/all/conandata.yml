@@ -1,4 +1,26 @@
 sources:
+  "21.0.8":
+    "Windows":
+      "x86_64":
+        url: "https://cdn.azul.com/zulu/bin/zulu21.44.17-ca-jdk21.0.8-win_x64.zip"
+        sha256: "f47dbd00384cb759f86a066be7545e467e5764f4653a237c32c07da96dc1c43b"
+      "armv8":
+        url: "https://cdn.azul.com/zulu/bin/zulu21.44.17-ca-jdk21.0.8-win_aarch64.zip"
+        sha256: "76379d799e766fb7ea1cdaacc67aa87f75a118f863cc68ffe32c251be94ab4f4"
+    "Linux":
+      "x86_64":
+        url: "https://cdn.azul.com/zulu/bin/zulu21.44.17-ca-jdk21.0.8-linux_x64.tar.gz"
+        sha256: "63f56bbb46958cf57352fba08f2755e0953799195e5545acc0c8a92920beff1e"
+      "armv8":
+        url: "https://cdn.azul.com/zulu/bin/zulu21.44.17-ca-jdk21.0.8-linux_aarch64.tar.gz"
+        sha256: "ff7f2edd1d5c153cb6cb493a3aa3523453e29a05ec513b25c24aa1477ec0c722"
+    "Macos":
+      "x86_64":
+        url:  "https://cdn.azul.com/zulu/bin/zulu21.44.17-ca-jdk21.0.8-macosx_x64.tar.gz"
+        sha256: "2af080500b5cc286a6353187c7c59b5aafcb3edc29c1c87d1fd71ba2d6a523f1"
+      "armv8":
+        url: "https://cdn.azul.com/zulu/bin/zulu21.44.17-ca-jdk21.0.8-macosx_aarch64.tar.gz"
+        sha256: "d22ce05fea3e3f28c8c59f2c348bc78ee967bf1289a4fb28796cc0177ff6c8db"
   "21.0.4":
     "Windows":
       "x86_64":
