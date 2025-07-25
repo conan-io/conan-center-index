@@ -71,4 +71,4 @@ class WebsocketPPConan(ConanFile):
             self.cpp_info.defines.extend(["ASIO_STANDALONE", "_WEBSOCKETPP_CPP11_STL_"])
             self.cpp_info.requires.append("asio::asio")
         elif self.options.asio == "boost":
-            self.cpp_info.requires.append("boost::headers")
+            self.cpp_info.requires.extend(["boost::headers","boost::random"] )

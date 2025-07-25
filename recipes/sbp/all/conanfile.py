@@ -4,8 +4,9 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class SbpConan(ConanFile):
@@ -55,6 +56,8 @@ class SbpConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["libsbp_ENABLE_TESTS"] = False
         tc.variables["libsbp_ENABLE_DOCS"] = False
+        if Version(self.version) < "4.0.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
