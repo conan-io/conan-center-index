@@ -52,8 +52,8 @@ class OpenH264Conan(ConanFile):
         if self.settings.arch in ["x86", "x86_64"]:
             self.tool_requires("nasm/2.16.01")
         if is_msvc(self) and self.settings.arch == "armv8":
-            self.tool_requires("strawberryperl/5.32.1.1")
-            self.tool_requires("gas-preprocessor/0.0.0.cci20250710")
+            self.tool_requires("strawberryperl/[*]")
+            self.tool_requires("gas-preprocessor/[*]")
 
     def validate(self):
         if Version(self.version) <= "2.1.1" and self.settings.os in ["Android", "Macos"]:
