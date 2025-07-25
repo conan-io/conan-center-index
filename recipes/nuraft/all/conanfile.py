@@ -21,12 +21,12 @@ class NuRaftConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "asio": ["boost", "standalone"],
+        "boost_asio": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "asio": "boost",
+        "boost_asio": True,
     }
 
     def export_sources(self):
@@ -41,7 +41,7 @@ class NuRaftConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
-        if self.options.asio == "boost":
+        if self.options.boost_asio:
             self.requires("boost/1.81.0")
         else:
             self.requires("asio/1.27.0")
@@ -59,6 +59,8 @@ class NuRaftConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["WITH_CONAN"] = True
+        tc.variables["BOOST_ASIO"] = self.options.boost_asio
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
