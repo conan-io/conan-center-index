@@ -1256,7 +1256,9 @@ class BoostConan(ConanFile):
 
     @property
     def _build_flags(self):
-        flags = self._build_cross_flags
+        flags = []
+        if self._build_cross_flags:
+            flags.append(f'compileflags="{" ".join(self._build_cross_flags)}"')
 
         # Stop at the first error. No need to continue building.
         flags.append("-q")
@@ -1601,8 +1603,10 @@ class BoostConan(ConanFile):
             contents += f'<cxxflags>"{cxxflags.strip()}" '
         if cflags.strip():
             contents += f'<cflags>"{cflags.strip()}" '
-        if cppflags.strip():
-            contents += f'<compileflags>"{cppflags.strip()}" '
+        if cppflags.strip() or self._build_cross_flags:
+            compiler_flags = cppflags.strip() + " "
+            compiler_flags += " ".join(self._build_cross_flags)
+            contents += f'<compileflags>"{compiler_flags}" '
         if ldflags.strip():
             contents += f'<linkflags>"{ldflags.strip()}" '
         if asflags.strip():
@@ -1715,10 +1719,11 @@ class BoostConan(ConanFile):
                 rename(self, bin_file, os.path.join(self.package_folder, "bin", os.path.basename(bin_file)))
 
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-        if is_apple_os(self) and not self._shared and Version(self.version) >= "1.88.0":
+        if (is_apple_os(self) or self.settings.os == "Linux") and not self._shared and Version(self.version) >= "1.88.0":
             # FIXME: Boost 1.88 installs both .a and .dylib files for static libraries
             # https://github.com/boostorg/boost/issues/1051
             rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
 
     def _create_emscripten_libs(self):
         # Boost Build doesn't create the libraries, but it gets close,
