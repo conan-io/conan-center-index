@@ -1,4 +1,7 @@
 sources:
+  "3.3.5":
+    url: "https://github.com/AcademySoftwareFoundation/openexr/releases/download/v3.3.5/openexr-3.3.5.tar.gz"
+    sha256: "8f9241f0e9d6b7aec7e9509cf2a9224416b9cd9d41740deab3827b1f2d01c662"
   "3.3.4":
     url: "https://github.com/AcademySoftwareFoundation/openexr/releases/download/v3.3.4/openexr-3.3.4.tar.gz"
     sha256: "73a6d83edcc68333afb95e133f6e12012073815a854bc41abc1a01c1db5f124c"
