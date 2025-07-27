@@ -26,13 +26,15 @@ class SQLGenConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_mysql": [True, False],
         "with_postgres": [True, False],
         "with_sqlite3": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_postgres": True,
+        "with_mysql": False,
+        "with_postgres": False,
         "with_sqlite3": True,
     }
 
@@ -46,6 +48,8 @@ class SQLGenConan(ConanFile):
 
     def requirements(self):
         self.requires("reflect-cpp/0.19.0", transitive_headers=True)
+        if self.options.with_mysql:
+            self.requires("mariadb-connector-c/3.4.3", transitive_headers=True)
         if self.options.with_postgres:
             self.requires("libpq/17.5", transitive_headers=True)
         if self.options.with_sqlite3:
@@ -71,6 +75,7 @@ class SQLGenConan(ConanFile):
         deps.generate()
         tc = CMakeToolchain(self)
         tc.cache_variables["SQLGEN_BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["SQLGEN_MYSQL"] = self.options.with_mysql
         tc.cache_variables["SQLGEN_POSTGRES"] = self.options.with_postgres
         tc.cache_variables["SQLGEN_SQLITE3"] = self.options.with_sqlite3
         tc.cache_variables["SQLGEN_USE_VCPKG"] = False
