@@ -5,8 +5,6 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
 
 import os
 
@@ -63,7 +61,7 @@ class SQLGenConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
     def layout(self):
-        cmake_layout(self, src_folder=".")
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
