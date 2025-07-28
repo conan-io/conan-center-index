@@ -62,7 +62,7 @@ class LibheifConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libde265:
-            self.requires("libde265/1.0.12")
+            self.requires("libde265/[>=1.0.12 <2]")
         if self.options.with_x265:
             self.requires("libx265/[>=3.4 <4]")
         if self.options.with_libaomav1:
@@ -115,8 +115,8 @@ class LibheifConan(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("dav1d", "cmake_additional_variables_prefixes", ["DAV1D"])
+        deps.set_property("libde265", "cmake_file_name", "LIBDE265")
         if Version(self.version) >= "1.18.0":
-            deps.set_property("libde265", "cmake_file_name", "LIBDE265")
             deps.set_property("openjph", "cmake_file_name", "OPENJPH")
         if Version(self.version) >= "1.19.0":
             deps.set_property("openh264", "cmake_file_name", "OpenH264")
