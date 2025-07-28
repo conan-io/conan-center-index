@@ -61,7 +61,7 @@ class BotanConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "amalgamation": True,
+        "amalgamation": False,
         "with_bzip2": False,
         "with_openssl": False,
         "with_sqlite3": False,
