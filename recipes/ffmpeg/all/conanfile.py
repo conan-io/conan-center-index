@@ -414,9 +414,8 @@ class FFMpegConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-            if self.settings.arch == "armv8":
-                self.tool_requires("strawberryperl/5.32.1.1")
-                self.tool_requires("gas-preprocessor/0.0.0.cci20250710")
+            if self.settings.arch == "armv8" and is_msvc(self):
+                self.tool_requires("gas-preprocessor/[*]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
