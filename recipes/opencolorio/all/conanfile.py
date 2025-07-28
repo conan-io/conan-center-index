@@ -51,8 +51,8 @@ class OpenColorIOConan(ConanFile):
         if Version(self.version) < "2.2.0":
             self.requires("openexr/2.5.7")
         else:
-            self.requires("openexr/3.3.2")
-            self.requires("imath/3.1.9")
+            self.requires("openexr/[>=3.3.4 <4]")
+            self.requires("imath/[>=3.1.9 <4]")
 
         if Version(self.version) < "2.0.0":
             self.requires("tinyxml/2.6.2")
@@ -62,12 +62,12 @@ class OpenColorIOConan(ConanFile):
             self.requires("yaml-cpp/0.8.0")
 
         if Version(self.version) >= "2.3.0":
-            self.requires("minizip-ng/4.0.3")
+            self.requires("minizip-ng/[>=4.0.7 <5]")
         elif Version(self.version) >= "2.2.0":
             self.requires("minizip-ng/3.0.9")
 
         # for tools only
-        self.requires("lcms/2.16")
+        self.requires("lcms/[>=2.16 <3]")
         # TODO: add GLUT (needed for ociodisplay tool)
 
     def validate(self):
