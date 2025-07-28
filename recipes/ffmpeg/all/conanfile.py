@@ -309,11 +309,11 @@ class FFMpegConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.with_libiconv:
-            self.requires("libiconv/1.17")
+            self.requires("libiconv/[>=1.17 <2]")
         if self.options.get_safe("with_freetype"):
-            self.requires("freetype/2.13.2")
+            self.requires("freetype/[>=2.13.2 <3]")
         if self.options.with_libxml2:
             self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.get_safe("with_fontconfig"):
@@ -323,7 +323,7 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_harfbuzz"):
             self.requires("harfbuzz/8.3.0")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.5.2")
+            self.requires("openjpeg/2.5.3")
         if self.options.with_openh264:
             self.requires("openh264/2.4.1")
         if self.options.with_vorbis:
@@ -345,11 +345,11 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_libfdk_aac"):
             self.requires("libfdk_aac/2.0.3")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.3.2")
+            self.requires("libwebp/[>=1.3 <2]")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_libalsa"):
-            self.requires("libalsa/1.2.10")
+            self.requires("libalsa/[>=1.2 <1.3]")
         if self.options.get_safe("with_xcb") or self.options.get_safe("with_xlib"):
             self.requires("xorg/system")
         if self.options.get_safe("with_soxr"):
