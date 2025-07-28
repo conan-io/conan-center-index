@@ -92,6 +92,6 @@ class AvcppConan(ConanFile):
         self.cpp_info.libs = ["avcpp"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["AvCpp"].system_libs = ["mvec"]
+            self.cpp_info.system_libs = ["mvec"]
         if self.settings.os == "Windows":
-            self.cpp_info.components["AvCpp"].system_libs = ["mfplat"]
+            self.cpp_info.system_libs = ["mfplat"]
