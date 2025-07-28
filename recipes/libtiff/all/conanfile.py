@@ -65,21 +65,21 @@ class LibtiffConan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.libdeflate:
-            self.requires("libdeflate/[>=1.19 <=1.22]") #tested with this range
+            self.requires("libdeflate/[>=1.19 <2]")
         if self.options.lzma:
             self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9f]")
         elif self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.2")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         elif self.options.jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.5")
+            self.requires("mozjpeg/[>=4.1.5 <5]")
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.zstd:
             self.requires("zstd/[~1.5]")
         if self.options.webp:
-            self.requires("libwebp/1.3.2")
+            self.requires("libwebp/[>=1.3.2 <2]")
 
     def validate(self):
         if self.options.libdeflate and not self.options.zlib:

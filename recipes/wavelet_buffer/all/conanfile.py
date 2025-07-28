@@ -60,11 +60,11 @@ class WaveletBufferConan(ConanFile):
 
     def requirements(self):
         self.requires("blaze/3.8", transitive_headers=True)
-        self.requires("cimg/3.3.0")
+        self.requires("cimg/3.3.2")
         if self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.1")
+            self.requires("libjpeg-turbo/[>=3.0.1 <4]")
         else:
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9f]")
         # FIXME: unvendor SfCompressor which is currently downloaded at build time :s
         if Version(self.version) >= "0.6.0":
             self.requires("streamvbyte/1.0.0")

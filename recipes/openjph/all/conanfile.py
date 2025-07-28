@@ -52,7 +52,7 @@ class OpenJPH(ConanFile):
 
     def requirements(self):
         if self.options.with_executables and self.options.with_tiff:
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.6.0 <5]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
