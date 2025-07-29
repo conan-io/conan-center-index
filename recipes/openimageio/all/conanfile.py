@@ -81,19 +81,16 @@ class OpenImageIOConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("boost/1.84.0")
         self.requires("libtiff/4.6.0")
-        self.requires("imath/3.1.9", transitive_headers=True)
-        self.requires("openexr/3.2.3")
+        self.requires("imath/[>3.1.9 <4]", transitive_headers=True)
+        self.requires("openexr/[>=3.2.3 <4]")
         if self.options.with_libjpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9f]")
         elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.2")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         self.requires("pugixml/1.14")
         self.requires("libsquish/1.15")
         self.requires("tsl-robin-map/1.2.1")
-        if Version(self.version) >= "2.4.17.0":
-            self.requires("fmt/10.2.1", transitive_headers=True)
-        else:
-            self.requires("fmt/9.1.0", transitive_headers=True)
+        self.requires("fmt/10.2.1", transitive_headers=True)
 
         # Optional libraries
         if self.options.with_libpng:
@@ -120,7 +117,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_raw:
             self.requires("libraw/0.21.2")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.5.2")
+            self.requires("openjpeg/[>=2.5.2 <3]")
         if self.options.with_openvdb:
             self.requires("openvdb/8.0.1")
         if self.options.with_ptex:
