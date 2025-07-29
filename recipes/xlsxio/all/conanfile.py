@@ -38,8 +38,6 @@ class XlsxioConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "0.2.34":
-            del self.options.with_minizip_ng
 
     def configure(self):
         if self.options.shared:
