@@ -66,10 +66,6 @@ class OpenColorIOConan(ConanFile):
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
             raise ConanInvalidConfiguration(f"{self.ref} deosn't support clang with libc++")
 
-        # opencolorio>=2.2.0 requires minizip-ng with with_zlib
-        if not self.dependencies["minizip-ng"].options.get_safe("with_zlib", False):
-            raise ConanInvalidConfiguration(f"{self.ref} requires minizip-ng with with_zlib = True. On Apple platforms with_libcomp = False is also needed to enable the with_zlib option.")
-
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16]")
