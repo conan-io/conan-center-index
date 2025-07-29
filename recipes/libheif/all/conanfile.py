@@ -109,8 +109,11 @@ class LibheifConan(ConanFile):
         tc.cache_variables["WITH_OpenJPEG_ENCODER"] = self.options.get_safe("with_openjpeg", False)
         tc.cache_variables["WITH_OPENJPH_ENCODER"] = self.options.get_safe("with_openjph", False)
         tc.cache_variables["WITH_OPENH264_DECODER"] = self.options.get_safe("with_openh264", False)
+        
+        if Version(self.version) == "1.16.2":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         # Disable finding possible Doxygen in system, so no docs are built
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
         tc.cache_variables["CMAKE_COMPILE_WARNING_AS_ERROR"] = False
         tc.generate()
         deps = CMakeDeps(self)
