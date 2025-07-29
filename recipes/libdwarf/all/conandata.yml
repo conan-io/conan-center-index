@@ -22,8 +22,8 @@ sources:
     sha256: "8ef0dbfb0816b02aac97b87426689ebaa4efb8ec2ca2c759ea34c5e4678dff3f"
 patches:
   "2.1.0":
-    - patch_file: "patches/0.9.2-0001-fixes.patch"
-      patch_description: "fix DW_API definition"
+    - patch_file: "patches/2.1.0-0001-fixes.patch"
+      patch_description: "fix off_t redefinition"
       patch_type: "portability"
   "0.11.1":
     - patch_file: "patches/0.9.2-0001-fixes.patch"
