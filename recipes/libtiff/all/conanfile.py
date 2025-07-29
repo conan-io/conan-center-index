@@ -6,7 +6,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class LibtiffConan(ConanFile):
@@ -86,9 +86,7 @@ class LibtiffConan(ConanFile):
             raise ConanInvalidConfiguration("libtiff:libdeflate=True requires libtiff:zlib=True")
 
     def build_requirements(self):
-        if Version(self.version) >= "4.5.1":
-            # https://github.com/conan-io/conan/issues/3482#issuecomment-662284561
-            self.tool_requires("cmake/[>=3.18 <4]")
+        self.tool_requires("cmake/[>=3.18]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -104,12 +102,12 @@ class LibtiffConan(ConanFile):
         tc.variables["zstd"] = self.options.zstd
         tc.variables["webp"] = self.options.webp
         tc.variables["lerc"] = False # TODO: add lerc support for libtiff versions >= 4.3.0
-        if Version(self.version) >= "4.5.0":
-            # Disable tools, test, contrib, man & html generation
-            tc.variables["tiff-tools"] = False
-            tc.variables["tiff-tests"] = False
-            tc.variables["tiff-contrib"] = False
-            tc.variables["tiff-docs"] = False
+
+        # Disable tools, test, contrib, man & html generation
+        tc.variables["tiff-tools"] = False
+        tc.variables["tiff-tests"] = False
+        tc.variables["tiff-contrib"] = False
+        tc.variables["tiff-docs"] = False
         tc.variables["cxx"] = self.options.cxx
         # BUILD_SHARED_LIBS must be set in command line because defined upstream before project()
         tc.cache_variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
