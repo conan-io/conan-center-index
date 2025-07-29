@@ -186,7 +186,11 @@ class OpenImageIOConan(ConanFile):
         tc.variables["USE_FREETYPE"] = self.options.with_freetype
         tc.variables["USE_LIBWEBP"] = self.options.with_libwebp
         tc.variables["USE_OPENJPEG"] = self.options.with_openjpeg
-
+        if self.settings.os == "Linux":
+            # Workaround for: https://github.com/conan-io/conan/issues/13560
+            # note: should not be needed if CMakeConfigDeps is used
+            libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
+            tc.cache_variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()

@@ -99,11 +99,6 @@ class OpenColorIOConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
 
-        if self.settings.os == "Linux":
-            # Workaround for: https://github.com/conan-io/conan/issues/13560
-            # note: should not be needed if CMakeConfigDeps is used
-            libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
-            tc.cache_variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
         tc.generate()
 
         deps = CMakeDeps(self)
