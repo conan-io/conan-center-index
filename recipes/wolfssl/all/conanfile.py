@@ -28,6 +28,7 @@ class WolfSSLConan(ConanFile):
         "fPIC": [True, False],
         "opensslextra": [True, False],
         "opensslall": [True, False],
+        "opensslcoexist": [True, False],
         "sslv3": [True, False],
         "alpn": [True, False],
         "des3": [True, False],
@@ -42,12 +43,14 @@ class WolfSSLConan(ConanFile):
         "with_quic": [True, False],
         "with_experimental": [True, False],
         "with_rpk": [True, False],
+        "with_keylog_export": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "opensslextra": False,
         "opensslall": False,
+        "opensslcoexist": False,
         "sslv3": False,
         "alpn": False,
         "des3": False,
@@ -62,6 +65,7 @@ class WolfSSLConan(ConanFile):
         "with_quic": False,
         "with_experimental": False,
         "with_rpk": False,
+        "with_keylog_export": False,
     }
 
     def config_options(self):
@@ -105,6 +109,7 @@ class WolfSSLConan(ConanFile):
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
             "--enable-opensslall={}".format(yes_no(self.options.opensslall)),
             "--enable-opensslextra={}".format(yes_no(self.options.opensslextra)),
+            "--enable-opensslcoexist={}".format(yes_no(self.options.opensslcoexist)),
             "--enable-sslv3={}".format(yes_no(self.options.sslv3)),
             "--enable-alpn={}".format(yes_no(self.options.alpn)),
             "--enable-des3={}".format(yes_no(self.options.des3)),
@@ -122,6 +127,8 @@ class WolfSSLConan(ConanFile):
             tc.configure_args.append("--enable-curl")
         if self.options.get_safe("with_quic"):
             tc.configure_args.append("--enable-quic")
+        if self.options.get_safe("with_keylog_export"):
+            tc.configure_args.append("--enable-keylog-export")
         if self.options.get_safe("with_experimental"):
             tc.configure_args.append("--enable-experimental")
         if self.options.get_safe("with_rpk"):
