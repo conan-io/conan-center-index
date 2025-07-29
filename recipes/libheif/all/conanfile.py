@@ -78,8 +78,11 @@ class LibheifConan(ConanFile):
         if self.options.get_safe("with_openh264"):
             self.requires("openh264/[>=2.4.1 <3]")
 
-    def validate(self):
+    def validate_build(self):
         check_min_cppstd(self, "20" if Version(self.version) >= "1.19.0" else "11")
+
+    def validate(self):
+        check_min_cppstd(self, "11")
 
     def build_requirements(self):
         if Version(self.version) >= "1.18.0":
@@ -134,8 +137,8 @@ class LibheifConan(ConanFile):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        # rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        # rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libheif")
