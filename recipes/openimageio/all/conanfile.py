@@ -3,7 +3,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -22,7 +21,7 @@ class OpenImageIOConan(ConanFile):
     license = "Apache-2.0", "BSD-3-Clause"
     homepage = "http://www.openimageio.org/"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
