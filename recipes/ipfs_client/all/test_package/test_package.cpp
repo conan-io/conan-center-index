@@ -1,10 +1,8 @@
-#include <boost/asio/io_context.hpp>
-#include <ipfs_client/opinionated_context.h>
-
+#include <ipfs_client/logger.h>
+#include <iostream>
 int main(void) {
-    boost::asio::io_context io;
-    auto ctxt = ipfs::start_default(io);
-    auto mime = ctxt->MimeType("html", "a", "ipfs://bafyaafyscefakakvaaawceqgmexgq5dnnqmaccqcbaaq/a.html");
-    mime.compare("text/html");
+    std::cout << ipfs::log::IsInitialized();
     return 0;
+}
+
 }
