@@ -52,7 +52,7 @@ class OpenColorIOConan(ConanFile):
         self.requires("imath/[>=3.1.9 <4]")
         self.requires("pystring/1.1.4")
         self.requires("yaml-cpp/0.8.0")
-        self.requires("minizip-ng/4.0.3")
+        self.requires("minizip-ng/[>=4.0.3 <5]")
 
         # for tools only
         self.requires("lcms/[>=2.16 <3]")
