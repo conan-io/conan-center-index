@@ -77,8 +77,7 @@ class XlsxioConan(ConanFile):
         tc.variables["BUILD_STATIC"] = not self.options.shared
         tc.variables["BUILD_SHARED"] = self.options.shared
         tc.variables["WITH_LIBZIP"] = self.options.with_libzip
-        if Version(self.version) >= "0.2.34":
-            tc.variables["WITH_MINIZIP_NG"] = self.options.with_minizip_ng
+        tc.variables["WITH_MINIZIP_NG"] = self.options.with_minizip_ng
         tc.variables["WITH_WIDE"] = self.options.with_wide
         # Relocatable shared lib on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
