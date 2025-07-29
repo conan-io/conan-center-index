@@ -11,7 +11,7 @@ required_conan_version = ">=1.51.1"
 class CImgConan(ConanFile):
     name = "cimg"
     description = "The CImg Library is a small and open-source C++ toolkit for image processing"
-    license = "CeCILL V2"
+    license = "CECILL-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://cimg.eu"
     topics = ("physics", "simulation", "robotics", "kinematics", "engine")
