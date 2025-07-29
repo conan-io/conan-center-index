@@ -28,20 +28,6 @@ class InfluxdbCxxConan(ConanFile):
         "boost": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "8",
-            "clang": "7",
-            "apple-clang": "12",
-            "Visual Studio": "16",
-            "msvc": "192",
-        }
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -54,18 +40,12 @@ class InfluxdbCxxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cpr/1.10.4")
+        self.requires("cpr/[~1.10]")
         if self.options.boost:
-            self.requires("boost/1.82.0")
+            self.requires("boost/[>=1.82.0 <2]")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 20)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -78,6 +58,7 @@ class InfluxdbCxxConan(ConanFile):
         tc.cache_variables["INFLUXCXX_WITH_BOOST"] = self.options.boost
         if self.options.shared:
             # See https://github.com/offa/influxdb-cxx/issues/194
+            # Feedback pending: https://github.com/offa/influxdb-cxx/pull/245
             tc.preprocessor_definitions["InfluxDB_EXPORTS"] = 1
         tc.generate()
         deps = CMakeDeps(self)
@@ -92,11 +73,9 @@ class InfluxdbCxxConan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["InfluxDB"]
-
         self.cpp_info.set_property("cmake_file_name", "InfluxDB")
         self.cpp_info.set_property("cmake_target_name", "InfluxData::InfluxDB")
