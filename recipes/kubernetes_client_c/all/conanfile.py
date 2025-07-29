@@ -1,0 +1,67 @@
+from conan import ConanFile
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
+from conan.tools.files import get, copy
+from os.path import join
+
+
+class kubernetes_client_cRecipe(ConanFile):
+    name = "kubernetes_client_c"
+    package_type = "library"
+
+    # Optional metadata
+    license = "Apache-2.0"
+    url = "https://github.com/kubernetes-client/c"
+    homepage = "https://github.com/kubernetes-client/c"
+    description = "Official C client library for Kubernetes"
+    topics = ("kubernetes", "k8s", "kubernetes-client", "k8s-client")
+
+    # Binary configuration
+    settings = "os", "compiler", "build_type", "arch"
+    options = {"shared": [True, False], "fPIC": [True, False], "curl_version": ["7", "8"]}
+    default_options = {"shared": False, "fPIC": True, "curl_version": "8"}
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            self.options.rm_safe("fPIC")
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        self.options["libwebsockets/*"].with_zlib = "zlib"
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def generate(self):
+        deps = CMakeDeps(self)
+        deps.generate()
+        tc = CMakeToolchain(self)
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure(build_script_folder="kubernetes")
+        cmake.build()
+
+    def package(self):
+        copy(self, "*.h", src=join(self.source_folder, "kubernetes", "api"), dst=join(self.package_folder, "include/kubernetes/api"), keep_path=False)
+        copy(self, "*.h", src=join(self.source_folder, "kubernetes", "model"), dst=join(self.package_folder, "include/kubernetes/model"), keep_path=False)
+        copy(self, "*.h", src=join(self.source_folder, "kubernetes", "config"), dst=join(self.package_folder, "include/kubernetes/config"), keep_path=False)
+        copy(self, "*.h", src=join(self.source_folder, "kubernetes", "include"), dst=join(self.package_folder, "include/kubernetes/include"), keep_path=False)
+        copy(self, "*.h", src=join(self.source_folder, "kubernetes", "websocket"), dst=join(self.package_folder, "include/kubernetes/websocket"), keep_path=False)
+        copy(self, "*.h", src=join(self.source_folder, "kubernetes", "external"), dst=join(self.package_folder, "include/kubernetes/external"), keep_path=False)
+        copy(self, "*.h", src=join(self.source_folder, "kubernetes", "watch"), dst=join(self.package_folder, "include/kubernetes/watch"), keep_path=False)
+        cmake = CMake(self)
+        cmake.install()
+
+    def package_info(self):
+        self.cpp_info.libs = ["kubernetes"]
+
+    def requirements(self):
+        self.requires("libcurl/[~{}]".format(self.options.curl_version), transitive_headers=True)
+        self.requires("openssl/[~3]", force=True)
+        self.requires("libwebsockets/[^4.2]", transitive_headers=True)
+        self.requires("libyaml/[^0.2.5]")
