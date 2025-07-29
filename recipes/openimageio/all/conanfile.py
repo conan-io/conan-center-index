@@ -6,7 +6,7 @@ from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class OpenImageIOConan(ConanFile):
@@ -223,9 +223,6 @@ class OpenImageIOConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "OpenImageIO")
         self.cpp_info.set_property("pkg_config_name", "OpenImageIO")
 
-        self.cpp_info.names["cmake_find_package"] = "OpenImageIO"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenImageIO"
-
         # OpenImageIO::OpenImageIO_Util
         open_image_io_util = self._add_component("OpenImageIO_Util")
         open_image_io_util.libs = ["OpenImageIO_Util"]
@@ -299,6 +296,5 @@ class OpenImageIOConan(ConanFile):
             open_image_io.requires.append("libwebp::libwebp")
         if self.settings.os in ["Linux", "FreeBSD"]:
             open_image_io.system_libs.extend(["dl", "m", "pthread"])
-
         if not self.options.shared:
             open_image_io.defines.append("OIIO_STATIC_DEFINE")
