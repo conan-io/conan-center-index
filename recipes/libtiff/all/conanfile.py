@@ -37,10 +37,10 @@ class LibtiffConan(ConanFile):
         "lzma": True,
         "jpeg": "libjpeg",
         "zlib": True,
-        "libdeflate": True,
-        "zstd": True,
-        "jbig": True,
-        "webp": True,
+        "libdeflate": False,
+        "zstd": False,
+        "jbig": False,
+        "webp": False,
         "cxx":  True,
     }
 
