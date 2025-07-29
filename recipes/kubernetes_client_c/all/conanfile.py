@@ -10,7 +10,7 @@ class kubernetes_client_cRecipe(ConanFile):
 
     # Optional metadata
     license = "Apache-2.0"
-    url = "https://github.com/kubernetes-client/c"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kubernetes-client/c"
     description = "Official C client library for Kubernetes"
     topics = ("kubernetes", "k8s", "kubernetes-client", "k8s-client")
@@ -62,6 +62,6 @@ class kubernetes_client_cRecipe(ConanFile):
 
     def requirements(self):
         self.requires("libcurl/[~{}]".format(self.options.curl_version), transitive_headers=True)
-        self.requires("openssl/[~3]", force=True)
+        self.requires("openssl/[~3]")
         self.requires("libwebsockets/[^4.2]", transitive_headers=True)
         self.requires("libyaml/[^0.2.5]")
