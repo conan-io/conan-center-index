@@ -65,6 +65,8 @@ class LibAVIFConan(ConanFile):
         self.requires("libaom-av1/3.6.1")
         self.requires("libyuv/1854")
         self.requires("libwebp/[>=1.3.2 <2]")
+        if self._has_dav1d:
+            self.requires("dav1d/[>=1.4 <2]")
            
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.19]")
