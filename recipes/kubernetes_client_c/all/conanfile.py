@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, rmdir
 from os.path import join
 
 required_conan_version = ">=2"
@@ -58,6 +58,7 @@ class kubernetes_client_cRecipe(ConanFile):
         copy(self, "*.h", src=join(self.source_folder, "kubernetes", "watch"), dst=join(self.package_folder, "include/kubernetes/watch"), keep_path=False)
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["kubernetes"]
