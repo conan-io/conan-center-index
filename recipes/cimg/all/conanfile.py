@@ -11,7 +11,7 @@ required_conan_version = ">=1.51.1"
 class CImgConan(ConanFile):
     name = "cimg"
     description = "The CImg Library is a small and open-source C++ toolkit for image processing"
-    license = "CeCILL V2"
+    license = "CECILL-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://cimg.eu"
     topics = ("physics", "simulation", "robotics", "kinematics", "engine")
@@ -66,20 +66,17 @@ class CImgConan(ConanFile):
         if self.options.enable_fftw:
             self.requires("fftw/3.3.10")
         if self.options.enable_jpeg:
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9f]")
         if self.options.enable_openexr:
-            self.requires("openexr/3.2.1")
+            self.requires("openexr/[>=3.2.1 <4]")
         if self.options.enable_png:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.enable_tiff:
-            self.requires("libtiff/4.6.0")
-        if self.options.enable_ffmpeg:
-            if self.options.enable_opencv:
-                self.requires("ffmpeg/4.4")
-            else:
-                self.requires("ffmpeg/5.1")
+            self.requires("libtiff/[>=4.6.0 <5]")
         if self.options.enable_opencv:
-            self.requires("opencv/4.5.5")
+            self.requires("opencv/[>=4.5.5 <5]")
+        if self.options.enable_ffmpeg:
+            self.requires("ffmpeg/[>=4.4 <8]")
         if self.options.enable_magick:
             self.requires("imagemagick/7.0.11-14")
 
@@ -114,8 +111,3 @@ class CImgConan(ConanFile):
         for option, define in self._cimg_defines:
             if getattr(self.options, option):
                 self.cpp_info.defines.append(define)
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        #       do not use this name in CMakeDeps, it was a mistake, there is no offical CMake config file
-        self.cpp_info.names["cmake_find_package"] = "CImg"
-        self.cpp_info.names["cmake_find_package_multi"] = "CImg"
