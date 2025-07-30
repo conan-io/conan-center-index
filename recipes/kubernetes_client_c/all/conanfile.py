@@ -36,8 +36,8 @@ class kubernetes_client_cRecipe(ConanFile):
             self.options.rm_safe("fPIC")
 
     def validate(self):
-        if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "194":
-            raise ConanInvalidConfiguration("msvc 194 is required")
+        if self.settings.os != "Windows":
+            raise ConanInvalidConfiguration(f"{self.ref} can not be used on Windows.")
 
     def requirements(self):
         self.requires("libcurl/[>=7.78.0 <9]", transitive_headers=True)
