@@ -1,6 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, rmdir
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
 from os.path import join
 
 required_conan_version = ">=2"
@@ -20,7 +22,7 @@ class kubernetes_client_cRecipe(ConanFile):
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    default_options = {"shared": True, "fPIC": True}
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -32,7 +34,16 @@ class kubernetes_client_cRecipe(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # self.options["libwebsockets/*"].with_zlib = "zlib"
+
+    def validate(self):
+        if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "194":
+            raise ConanInvalidConfiguration("msvc 194 is required")
+
+    def requirements(self):
+        self.requires("libcurl/[>=7.78.0 <9]", transitive_headers=True)
+        self.requires("openssl/[>=1.1 <4]")
+        self.requires("libwebsockets/4.3.2", transitive_headers=True)
+        self.requires("libyaml/0.2.5")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -56,15 +67,10 @@ class kubernetes_client_cRecipe(ConanFile):
         copy(self, "*.h", src=join(self.source_folder, "kubernetes", "websocket"), dst=join(self.package_folder, "include/kubernetes/websocket"), keep_path=False)
         copy(self, "*.h", src=join(self.source_folder, "kubernetes", "external"), dst=join(self.package_folder, "include/kubernetes/external"), keep_path=False)
         copy(self, "*.h", src=join(self.source_folder, "kubernetes", "watch"), dst=join(self.package_folder, "include/kubernetes/watch"), keep_path=False)
+        copy(self, "LICENSE", src=join(self.source_folder), dst=join(self.package_folder, "licenses"), keep_path=False)
         cmake = CMake(self)
         cmake.install()
         rmdir(self, join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["kubernetes"]
-
-    def requirements(self):
-        self.requires("libcurl/[>=7.78.0 <9]", transitive_headers=True)
-        self.requires("openssl/[>=1.1 <4]")
-        self.requires("libwebsockets/4.3.2", transitive_headers=True)
-        self.requires("libyaml/0.2.5")
