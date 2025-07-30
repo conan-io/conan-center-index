@@ -68,7 +68,7 @@ class LibheifConan(ConanFile):
         if self.options.with_libaomav1:
             self.requires("libaom-av1/[>=3.6.1 <4]")
         if self.options.with_dav1d:
-            self.requires("dav1d/[>=1.2.1 <3]")
+            self.requires("dav1d/[>=1.4 <2]")
         if self.options.get_safe("with_jpeg"):
             self.requires("libjpeg/[>=9f]")
         if self.options.get_safe("with_openjpeg"):
