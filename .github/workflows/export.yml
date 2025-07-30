@@ -15,7 +15,7 @@ defaults:
     shell: bash
 
 env:
-  CONAN_REMOTE_URL: https://conan.ripplex.io
+  CONAN_REMOTE_URL: http://18.143.149.228:8081/artifactory/api/conan/recipes
   CONAN_REMOTE_NAME: xrplf
 
 jobs:
@@ -32,7 +32,7 @@ jobs:
           echo "Added new conan remote '${{ env.CONAN_REMOTE_NAME }}' at ${{ env.CONAN_REMOTE_URL }}."
       - name: Log into Conan remote
         run: |
-          conan remote login ${{ env.CONAN_REMOTE_NAME }} ${{ secrets.CONAN_USERNAME }} --password "${{ secrets.CONAN_PASSWORD }}"
+          conan remote login ${{ env.CONAN_REMOTE_NAME }} ${{ secrets.CONAN_REMOTE_USERNAME }} --password "${{ secrets.CONAN_REMOTE_PASSWORD }}"
           conan remote list-users
       - name: Export the recipes
         working-directory: recipes
