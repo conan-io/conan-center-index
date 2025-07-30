@@ -8,7 +8,6 @@ from conan.tools.files import apply_conandata_patches, collect_libs, copy, expor
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
-from conan.tools.microsoft import is_msvc
 import os
 import re
 import textwrap
@@ -368,11 +367,6 @@ class OpenCVConan(ConanFile):
             # in a big dependency graph
             if not self._has_with_wayland_option:
                 self.options.with_gtk = True
-
-        if is_msvc(self) and self.settings.arch == "armv8":
-            # See https://github.com/opencv/opencv/pull/24698#issuecomment-1858023908
-            self.options.cpu_baseline = "NEON"
-            self.options.cpu_dispatch = ""
 
     @property
     def _opencv_modules(self):
@@ -1152,7 +1146,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_png"):
             self.requires("libpng/[>=1.6 <2]")
         if self.options.get_safe("with_openexr"):
-            self.requires("openexr/[~3.2.3]") # >=3.3 would force requiring cppstd=17 or higher
+            self.requires("openexr/3.2.3")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.6.0")
         if self.options.get_safe("with_webp"):
