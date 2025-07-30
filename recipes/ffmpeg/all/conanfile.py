@@ -309,9 +309,9 @@ class FFMpegConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_bzip2:
-            self.requires("bzip2/1.0.8")
+            self.requires("bzip2/[>=1.0.8 <2]")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
         if self.options.get_safe("with_freetype"):
@@ -325,9 +325,9 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_harfbuzz"):
             self.requires("harfbuzz/8.3.0")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.5.2")
+            self.requires("openjpeg/[>=2.5.2 <3]")
         if self.options.with_openh264:
-            self.requires("openh264/2.4.1")
+            self.requires("openh264/[>=2.4.1 <3]")
         if self.options.with_vorbis:
             self.requires("vorbis/1.3.7")
         if self.options.with_opus:
@@ -339,15 +339,15 @@ class FFMpegConan(ConanFile):
         if self.options.with_libx264:
             self.requires("libx264/cci.20240224")
         if self.options.with_libx265:
-            self.requires("libx265/3.4")
+            self.requires("libx265/[>=3.4 <4]")
         if self.options.with_libvpx:
-            self.requires("libvpx/1.15.2")
+            self.requires("libvpx/[>=1.15.2 <2]")
         if self.options.with_libmp3lame:
             self.requires("libmp3lame/3.100")
         if self.options.get_safe("with_libfdk_aac"):
             self.requires("libfdk_aac/2.0.3")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.3.2")
+            self.requires("libwebp/[>=1.3.2 <2]")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_libalsa"):
