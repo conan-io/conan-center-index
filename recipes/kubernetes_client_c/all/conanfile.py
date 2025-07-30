@@ -3,6 +3,8 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy
 from os.path import join
 
+required_conan_version = ">=2"
+
 
 class kubernetes_client_cRecipe(ConanFile):
     name = "kubernetes_client_c"
@@ -17,8 +19,8 @@ class kubernetes_client_cRecipe(ConanFile):
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "curl_version": ["7", "8"]}
-    default_options = {"shared": False, "fPIC": True, "curl_version": "8"}
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -30,7 +32,7 @@ class kubernetes_client_cRecipe(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.options["libwebsockets/*"].with_zlib = "zlib"
+        # self.options["libwebsockets/*"].with_zlib = "zlib"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -61,7 +63,7 @@ class kubernetes_client_cRecipe(ConanFile):
         self.cpp_info.libs = ["kubernetes"]
 
     def requirements(self):
-        self.requires("libcurl/[~{}]".format(self.options.curl_version), transitive_headers=True)
-        self.requires("openssl/[~3]")
-        self.requires("libwebsockets/[^4.2]", transitive_headers=True)
-        self.requires("libyaml/[^0.2.5]")
+        self.requires("libcurl/[>=7.78.0 <9]", transitive_headers=True)
+        self.requires("openssl/[>=1.1 <4]")
+        self.requires("libwebsockets/4.3.2", transitive_headers=True)
+        self.requires("libyaml/0.2.5")
