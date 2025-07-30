@@ -36,7 +36,7 @@ class kubernetes_client_cRecipe(ConanFile):
             self.options.rm_safe("fPIC")
 
     def validate(self):
-        if self.settings.os != "Windows":
+        if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} can not be used on Windows.")
 
     def requirements(self):
