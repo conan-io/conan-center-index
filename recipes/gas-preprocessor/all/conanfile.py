@@ -1,13 +1,15 @@
 from conan import ConanFile
-from conan.tools.files import download, copy, get
+from conan.tools.files import download, copy
 import os
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
+
 
 class GasPreprocessorConan(ConanFile):
     name = "gas-preprocessor"
     license = "GPL-2.0-or-later"
-    url = "https://github.com/FFmpeg/gas-preprocessor"
+    url = "https://github.com/conan-io/conan-center-index"
+    topics = ("ffmpeg", "preprocessor", "assembler", "arm64")
+    homepage = "https://github.com/FFmpeg/gas-preprocessor"
     description = "Perl script that implements a subset of the GNU as preprocessor that Apple's as doesn't"
     package_type = "application"
 
