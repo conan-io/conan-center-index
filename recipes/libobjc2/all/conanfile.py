@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
@@ -26,9 +26,6 @@ class PackageConan(ConanFile):
         "fPIC": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -37,10 +34,10 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("tsl-robin-map/[^1.3.0]")
+        self.requires("tsl-robin-map/1.2.1")
 
     def validate(self):
-        if self.settings.compiler != "apple-clang" and self.settings.compiler != "clang":
+        if self.settings.compiler not in ("apple-clang", "clang"):
             raise ConanInvalidConfiguration("libobjc2 supports clang only.")
 
     def build_requirements(self):
@@ -48,13 +45,11 @@ class PackageConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
         # Prevent picking up a default install location through gnustep-config
         tc.variables["GNUSTEP_INSTALL_TYPE"] = "NONE"
-        tc.variables["TESTS"] = not self.conf.get("tools.build:skip_test", default=False)
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -64,7 +59,6 @@ class PackageConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-        cmake.test()
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
