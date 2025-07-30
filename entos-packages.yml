@@ -134,6 +134,7 @@ paho-mqtt-c:
 paho-mqtt-cpp:
   versions:
     - '1.4.1'
+    - '1.5.3'
 parallel-hashmap:
   versions:
     - '2.0.0'
