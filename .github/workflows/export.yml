@@ -40,8 +40,8 @@ jobs:
           conan export protobuf/all --version=6.30.1
           conan export snappy/all --version=1.1.10
           conan export soci/all --version=4.0.3
+      - name: Upload the recipes (dry run)
+        run: conan upload '*' --confirm --check --only-recipe --remote ${{ env.CONAN_REMOTE_NAME }} --dry-run
       - name: Upload the recipes
-        run: |
-          conan upload '*' --confirm --check --only-recipe \
-          --remote ${{ env.CONAN_REMOTE_NAME }} \
-          ${{ github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch && '' || '--dry-run'}}
+        if: ${{ github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch }}
+        run: conan upload '*' --confirm --check --only-recipe --remote ${{ env.CONAN_REMOTE_NAME }}
