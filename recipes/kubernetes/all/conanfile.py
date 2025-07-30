@@ -8,8 +8,8 @@ from os.path import join
 required_conan_version = ">=2"
 
 
-class kubernetes_client_cRecipe(ConanFile):
-    name = "kubernetes_client_c"
+class kubernetesRecipe(ConanFile):
+    name = "kubernetes"
     package_type = "library"
 
     # Optional metadata
