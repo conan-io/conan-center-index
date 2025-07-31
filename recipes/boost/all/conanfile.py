@@ -319,6 +319,24 @@ class BoostConan(ConanFile):
         return cppstd_20_supported and Version(self.settings.compiler.version) >= required_compiler_version
 
     @property
+    def _has_pmr_supported(self):
+        cppstd = self.settings.compiler.get_safe("cppstd")
+        cppstd_17_supported = True
+        if cppstd:
+            cppstd_17_supported = valid_min_cppstd(self, 17)
+        # https://en.cppreference.com/w/cpp/compiler_support/17
+        min_compiler_versions = {
+                "apple-clang": "15",
+                "clang": "16",
+                "gcc": "9",
+                "msvc": "191",
+                "Visual Studio": "15",}
+        required_compiler_version = min_compiler_versions.get(str(self.settings.compiler))
+        if not required_compiler_version:
+            return cppstd_17_supported
+        return cppstd_17_supported and Version(self.settings.compiler.version) >= required_compiler_version
+
+    @property
     def _min_compiler_version_nowide(self):
         # Nowide needs c++11 + swappable std::fstream
         return {
@@ -545,7 +563,7 @@ class BoostConan(ConanFile):
                     except ConanException:
                         pass
 
-            if not self._has_coroutine_supported:
+            if not self._has_coroutine_supported or not self._has_pmr_supported:
                 disable_cobalt()
             elif self.settings.compiler.get_safe("cppstd"):
                 if not valid_min_cppstd(self, 20):
@@ -763,7 +781,8 @@ class BoostConan(ConanFile):
                         f"Boost libraries {', '.join(boost_libraries)} requires a C++{cxx_standard} compiler. "
                         "Please, set compiler.cppstd or use a newer compiler version or disable from building."
                     )
-        if not self.options.get_safe("without_cobalt", True) and not self._has_coroutine_supported:
+        if not self.options.get_safe("without_cobalt", True) and (not self._has_coroutine_supported or \
+            not self._has_pmr_supported):
             raise ConanInvalidConfiguration("Boost.Cobalt requires a C++20 capable compiler. "
                                             "Please, set compiler.cppstd and use a newer compiler version, or disable from building.")
 
