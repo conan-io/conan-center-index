@@ -18,9 +18,9 @@ class GasPreprocessorConan(ConanFile):
 
     def source(self):
         download(self,
-                  url=self.conan_data["sources"][self.version]['url'],
-                  filename="gas-preprocessor.pl")
-        
+                 url=self.conan_data["sources"][self.version]['url'],
+                 filename="gas-preprocessor.pl", sha256=self.conan_data["sources"][self.version]["sha256"])
+
     def export_sources(self):
         copy(self, "gpl-2.0.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
