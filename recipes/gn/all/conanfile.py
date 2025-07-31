@@ -107,6 +107,17 @@ class GnConan(ConanFile):
         # https://gn.googlesource.com/gn/+/refs/heads/main/build/gen.py#386
         env = Environment()
         env.define("CXX", self._cxx)
+
+        if is_apple_os(self) and self.settings.arch:
+            arch_flags = ""
+            if "armv8" in self.settings.arch:
+                arch_flags += "-arch arm64 "
+            if "x86_64" in self.settings.arch:
+                arch_flags += "-arch x86_64 "
+
+            env.append("CFLAGS", arch_flags)
+            env.append("LDFLAGS", arch_flags)
+
         env.vars(self).save_script("conanbuild_gn")
 
         if is_msvc(self):
