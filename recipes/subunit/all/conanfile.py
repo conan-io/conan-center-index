@@ -4,14 +4,14 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.env import Environment, VirtualRunEnv
+from conan.tools.files import chdir, copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class SubunitConan(ConanFile):
@@ -34,15 +34,8 @@ class SubunitConan(ConanFile):
     }
 
     @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    @property
     def _is_clang_cl(self):
         return self.settings.os == "Windows" and self.settings.compiler == "clang"
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -65,23 +58,22 @@ class SubunitConan(ConanFile):
             # Complete error is:
             # make[2]: *** No rule to make target `/Applications/Xcode-9.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Perl/5.18/darwin-thread-multi-2level/CORE/config.h', needed by `Makefile'.  Stop.
             raise ConanInvalidConfiguration("Due to weird make error involving missing config.h file in sysroot")
-        if self.settings.compiler == "apple-clang" and self.options.shared:
-            raise ConanInvalidConfiguration("Shared builds with apple-clang are not supported")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-        if is_msvc(self):
-            self.tool_requires("automake/1.16.5")
+        # version >=1.4.4 is kept on GitHub without configuration built
+        self.tool_requires("libtool/2.4.7")
+        self.tool_requires("automake/1.16.5")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
@@ -134,9 +126,9 @@ class SubunitConan(ConanFile):
             env.vars(self).save_script("conanbuild_msvc")
 
     def build(self):
-        apply_conandata_patches(self)
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
+            autotools.autoreconf()
             autotools.configure()
             autotools.make()
 
@@ -164,4 +156,4 @@ class SubunitConan(ConanFile):
         self.cpp_info.components["libcppunit_subunit"].set_property("pkg_config_name", "libcppunit_subunit")
 
         bin_path = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bin_path)
+        self.runenv_info.append_path("PATH", bin_path)
