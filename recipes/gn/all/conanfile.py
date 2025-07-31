@@ -9,7 +9,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv, Environment
-from conan.tools.files import chdir, copy, get, load, save, replace_in_file
+from conan.tools.files import chdir, copy, get, load, save, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars
 from conan.tools.scm import Version
@@ -60,12 +60,14 @@ class GnConan(ConanFile):
                 "Visual Studio": "16",
             }.get(str(self.settings.compiler))
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def validate_build(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         if self._minimum_compiler_version and Version(self.settings.compiler.version) < self._minimum_compiler_version:
             raise ConanInvalidConfiguration(f"gn requires a compiler supporting C++{self._min_cppstd}")
-
 
     def build_requirements(self):
         # FIXME: add cpython build requirements for `build/gen.py`.
@@ -121,7 +123,11 @@ class GnConan(ConanFile):
             configure_args.append("-d")
         save(self, os.path.join(self.source_folder, "configure_args"), " ".join(configure_args))
 
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
     def build(self):
+        self._patch_sources()
         with chdir(self, self.source_folder):
             # Generate dummy header to be able to run `build/gen.py` with `--no-last-commit-position`.
             # This allows running the script without the tree having to be a git checkout.
