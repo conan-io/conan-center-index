@@ -35,19 +35,6 @@ class ITKConan(ConanFile):
 
     short_paths = True
 
-    @property
-    def _min_cppstd(self):
-        return 11
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "14",
-            "gcc": "4.8.1",
-            "clang": "3.3",
-            "apple-clang": "9",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
@@ -70,43 +57,32 @@ class ITKConan(ConanFile):
         #todo: enable after fixing dcmtk compatibility with openssl on Windows
         #self.requires("dcmtk/3.6.7")
         self.requires("double-conversion/3.3.0")
-        self.requires("eigen/3.4.0")
+        self.requires("eigen/[>=3.4.0 <4]")
         self.requires("expat/[>=2.6.2 <3]")
         self.requires("fftw/3.3.10")
         self.requires("gdcm/3.0.23")
         self.requires("hdf5/1.14.3")
-        self.requires("libjpeg/9e")
+        self.requires("libjpeg/[>=9f]")
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/4.6.0")
-        self.requires("openjpeg/2.5.2")
+        self.requires("openjpeg/[>=2.5.2 <3]")
         self.requires("onetbb/2021.9.0")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_opencv:
-            self.requires("opencv/4.10.0")
+            self.requires("opencv/[>=4.10.0 <5]")
 
     def build_requirements(self):
-        if Version(self.version) >= "5.3.0":
-            self.tool_requires("cmake/[>=3.16.3 <4]")
+        self.tool_requires("cmake/[>=3.16.3]")
 
     def validate(self):
+        check_min_cppstd(self, 11)
         if self.options.shared and not self.dependencies["hdf5"].options.shared:
             raise ConanInvalidConfiguration("When building a shared itk, hdf5 needs to be shared too (or not linked to by the consumer).\n"
                                             "This is because H5::DataSpace::ALL might get initialized twice, which will cause a H5::DataSpaceIException to be thrown).")
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        check_min_vs(self, 190)
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
-        if Version(self.version) < "5.2" and self.settings.os == "Macos":
-            raise ConanInvalidConfiguration(f"{self.ref} fails to compile in {self.settings.os}, fixed in 5.2.0")
-
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -261,7 +237,6 @@ class ITKConan(ConanFile):
                         "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -543,14 +518,3 @@ class ITKConan(ConanFile):
                 self.cpp_info.components[name].libs = [f"{name}{lib_suffix}"]
             self.cpp_info.components[name].system_libs = system_libs
             self.cpp_info.components[name].requires = requires
-
-            # TODO: to remove in conan v2 once cmake_find_package* generators removed
-            for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-                self.cpp_info.components[name].names[generator] = name
-                self.cpp_info.components[name].build_modules[generator].extend([self._module_file_rel_path, self._module_variables_file_rel_path])
-                self.cpp_info.components[name].build_modules[generator].extend(
-                    [os.path.join(self._cmake_module_dir, f) for f in self._itk_modules_files])
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-            self.cpp_info.names[generator] = "ITK"
