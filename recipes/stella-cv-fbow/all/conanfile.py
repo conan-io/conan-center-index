@@ -68,7 +68,8 @@ class StellaCvFbowConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                "set(CMAKE_CXX_STANDARD 11)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -86,12 +87,6 @@ class StellaCvFbowConan(ConanFile):
 
         tc = CMakeDeps(self)
         tc.generate()
-
-    def _patch_sources(self):
-        # Let Conan set the C++ standard
-        if self.settings.compiler.cppstd:
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "set(CMAKE_CXX_STANDARD 11)", "")
 
     def build(self):
         cmake = CMake(self)
