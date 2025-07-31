@@ -1,4 +1,7 @@
 sources:
+  "2.2.0":
+    url: "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.2.0.tar.gz"
+    sha256: "c1f6fc06012ca70dc20c7cec80b998ff8f1d8001071fc280d4460850511a5984"
   "2.1.4":
     url: "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.1.4.tar.gz"
     sha256: "9fa5f5b69e24d020a72b706f05802bf0028587b93a43b59bc99b5bef305b0c72"
