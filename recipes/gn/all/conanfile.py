@@ -58,7 +58,7 @@ class GnConan(ConanFile):
                 "apple-clang": "15",
                 "msvc": "192",
                 "Visual Studio": "16",
-            }
+            }.get(str(self.settings.compiler))
 
     def validate_build(self):
         if self.settings.compiler.cppstd:

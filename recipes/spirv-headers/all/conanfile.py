@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.50.0"
@@ -28,6 +29,10 @@ class SpirvheadersConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["SPIRV_HEADERS_SKIP_EXAMPLES"] = True
+        if Version(self.version) > "1.3.275.0":
+            tc.variables["SPIRV_HEADERS_ENABLE_TESTS"] = False
+        if Version(self.version) <= "1.3.243.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
     def build(self):
@@ -48,8 +53,3 @@ class SpirvheadersConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "SPIRV-Headers")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "SPIRV-Headers"
-        self.cpp_info.names["cmake_find_package_multi"] = "SPIRV-Headers"
-        self.cpp_info.names["pkg_config"] = "SPIRV-Headers"

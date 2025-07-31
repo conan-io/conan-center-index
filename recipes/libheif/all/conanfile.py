@@ -1,12 +1,11 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.scm import Version
-from conan.tools.env import VirtualBuildEnv
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class LibheifConan(ConanFile):
@@ -28,6 +27,7 @@ class LibheifConan(ConanFile):
         "with_jpeg": [True, False],
         "with_openjpeg": [True, False],
         "with_openjph": [True, False],
+        "with_openh264": [True, False],
     }
     default_options = {
         "shared": False,
@@ -39,10 +39,8 @@ class LibheifConan(ConanFile):
         "with_jpeg": False,
         "with_openjpeg": False,
         "with_openjph": False,
+        "with_openh264": False,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -52,6 +50,8 @@ class LibheifConan(ConanFile):
             del self.options.with_openjpeg
         if Version(self.version) < "1.18.0":
             del self.options.with_openjph
+        if Version(self.version) < "1.19.0":
+            del self.options.with_openh264
 
     def configure(self):
         if self.options.shared:
@@ -62,64 +62,73 @@ class LibheifConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libde265:
-            self.requires("libde265/1.0.12")
+            self.requires("libde265/[>=1.0.12 <2]")
         if self.options.with_x265:
-            self.requires("libx265/3.4")
+            self.requires("libx265/[>=3.4 <4]")
         if self.options.with_libaomav1:
-            self.requires("libaom-av1/3.6.1")
+            self.requires("libaom-av1/[>=3.6.1 <4]")
         if self.options.with_dav1d:
-            self.requires("dav1d/1.2.1")
+            self.requires("dav1d/[>=1.4 <2]")
         if self.options.get_safe("with_jpeg"):
-            self.requires("libjpeg/9f")
+            self.requires("libjpeg/[>=9f]")
         if self.options.get_safe("with_openjpeg"):
-            self.requires("openjpeg/2.5.2")
+            self.requires("openjpeg/[>=2.5.2 <3]")
         if self.options.get_safe("with_openjph"):
-            self.requires("openjph/0.16.0", transitive_headers=False)
+            self.requires("openjph/[>=0.16.0 <1]", transitive_headers=False)
+        if self.options.get_safe("with_openh264"):
+            self.requires("openh264/[>=2.4.1 <3]")
+
+    def validate_build(self):
+        check_min_cppstd(self, "20" if Version(self.version) >= "1.19.0" else "11")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, "11")
 
     def build_requirements(self):
         if Version(self.version) >= "1.18.0":
-            self.tool_requires("cmake/[>=3.16 <4]")
+            self.tool_requires("cmake/[>=3.16]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_POSITION_INDEPENDENT_CODE", "#set(CMAKE_POSITION_INDEPENDENT_CODE")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["WITH_LIBSHARPYUV"] = False
-        tc.variables["WITH_LIBDE265"] = self.options.with_libde265
-        tc.variables["WITH_X265"] = self.options.with_x265
-        tc.variables["WITH_AOM"] = self.options.with_libaomav1
-        tc.variables["WITH_AOM_DECODER"] = self.options.with_libaomav1
-        tc.variables["WITH_AOM_ENCODER"] = self.options.with_libaomav1
-        tc.variables["WITH_RAV1E"] = False
-        tc.variables["WITH_DAV1D"] = self.options.with_dav1d
-        tc.variables["WITH_EXAMPLES"] = False
-        tc.variables["WITH_GDK_PIXBUF"] = False
-        tc.variables["BUILD_TESTING"] = False
-        tc.variables["WITH_JPEG_DECODER"] = self.options.get_safe("with_jpeg", False)
-        tc.variables["WITH_JPEG_ENCODER"] = self.options.get_safe("with_jpeg", False)
-        tc.variables["WITH_OpenJPEG_DECODER"] = self.options.get_safe("with_openjpeg", False)
-        tc.variables["WITH_OpenJPEG_ENCODER"] = self.options.get_safe("with_openjpeg", False)
-        tc.variables["WITH_OPENJPH_ENCODER"] = self.options.get_safe("with_openjph", False)
+        tc.cache_variables["WITH_LIBSHARPYUV"] = False
+        tc.cache_variables["WITH_LIBDE265"] = self.options.with_libde265
+        tc.cache_variables["WITH_X265"] = self.options.with_x265
+        tc.cache_variables["WITH_AOM"] = self.options.with_libaomav1
+        tc.cache_variables["WITH_AOM_DECODER"] = self.options.with_libaomav1
+        tc.cache_variables["WITH_AOM_ENCODER"] = self.options.with_libaomav1
+        tc.cache_variables["WITH_RAV1E"] = False
+        tc.cache_variables["WITH_DAV1D"] = self.options.with_dav1d
+        tc.cache_variables["WITH_EXAMPLES"] = False
+        tc.cache_variables["WITH_GDK_PIXBUF"] = False
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["WITH_JPEG_DECODER"] = self.options.get_safe("with_jpeg", False)
+        tc.cache_variables["WITH_JPEG_ENCODER"] = self.options.get_safe("with_jpeg", False)
+        tc.cache_variables["WITH_OpenJPEG_DECODER"] = self.options.get_safe("with_openjpeg", False)
+        tc.cache_variables["WITH_OpenJPEG_ENCODER"] = self.options.get_safe("with_openjpeg", False)
+        tc.cache_variables["WITH_OPENJPH_ENCODER"] = self.options.get_safe("with_openjph", False)
+        tc.cache_variables["WITH_OPENH264_DECODER"] = self.options.get_safe("with_openh264", False)
+        
+        if Version(self.version) == "1.16.2":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         # Disable finding possible Doxygen in system, so no docs are built
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
-
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
+        tc.cache_variables["CMAKE_COMPILE_WARNING_AS_ERROR"] = False
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("dav1d", "cmake_additional_variables_prefixes", ["DAV1D"])
+        deps.set_property("libde265", "cmake_file_name", "LIBDE265")
         if Version(self.version) >= "1.18.0":
-            deps.set_property("libde265", "cmake_file_name", "LIBDE265")
             deps.set_property("openjph", "cmake_file_name", "OPENJPH")
+        if Version(self.version) >= "1.19.0":
+            deps.set_property("openh264", "cmake_file_name", "OpenH264")
         deps.generate()
-        if Version(self.version) >= "1.18.0":
-            venv = VirtualBuildEnv(self)
-            venv.generate(scope="build")
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -135,34 +144,32 @@ class LibheifConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "libheif")
         self.cpp_info.set_property("cmake_target_name", "libheif::heif")
         self.cpp_info.set_property("pkg_config_name", "libheif")
-        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["heif"].libs = ["heif"]
+        self.cpp_info.libs = ["heif"]
+
         if not self.options.shared:
-            self.cpp_info.components["heif"].defines = ["LIBHEIF_STATIC_BUILD"]
+            self.cpp_info.defines = ["LIBHEIF_STATIC_BUILD"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["heif"].system_libs.extend(["m", "pthread"])
+            self.cpp_info.system_libs.extend(["m", "pthread"])
             if Version(self.version) >= "1.18.0":
-                self.cpp_info.components["heif"].system_libs.append("dl")
+                self.cpp_info.system_libs.append("dl")
         if not self.options.shared:
             libcxx = stdcpp_library(self)
             if libcxx:
-                self.cpp_info.components["heif"].system_libs.append(libcxx)
+                self.cpp_info.system_libs.append(libcxx)
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["heif"].set_property("cmake_target_name", "libheif::heif")
-        self.cpp_info.components["heif"].set_property("pkg_config_name", "libheif")
-        self.cpp_info.components["heif"].requires = []
         if self.options.with_libde265:
-            self.cpp_info.components["heif"].requires.append("libde265::libde265")
+            self.cpp_info.requires.append("libde265::libde265")
         if self.options.with_x265:
-            self.cpp_info.components["heif"].requires.append("libx265::libx265")
+            self.cpp_info.requires.append("libx265::libx265")
         if self.options.with_libaomav1:
-            self.cpp_info.components["heif"].requires.append("libaom-av1::libaom-av1")
+            self.cpp_info.requires.append("libaom-av1::libaom-av1")
         if self.options.with_dav1d:
-            self.cpp_info.components["heif"].requires.append("dav1d::dav1d")
+            self.cpp_info.requires.append("dav1d::dav1d")
         if self.options.get_safe("with_jpeg"):
-            self.cpp_info.components["heif"].requires.append("libjpeg::libjpeg")
+            self.cpp_info.requires.append("libjpeg::libjpeg")
         if self.options.get_safe("with_openjpeg"):
-            self.cpp_info.components["heif"].requires.append("openjpeg::openjpeg")
+            self.cpp_info.requires.append("openjpeg::openjpeg")
         if self.options.get_safe("with_openjph"):
-            self.cpp_info.components["heif"].requires.append("openjph::openjph")
+            self.cpp_info.requires.append("openjph::openjph")
+        if self.options.get_safe("with_openh264"):
+            self.cpp_info.requires.append("openh264::openh264")

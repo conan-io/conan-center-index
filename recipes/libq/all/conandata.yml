@@ -1,0 +1,9 @@
+sources:
+  "0.0.0.cci.20180504":
+    url: "https://github.com/grantila/q/archive/0117848bb3e6f0b130b546bc5851caf5f95f8b7e.zip"
+    sha256: "f5e51c1abbbec8e6da2155740917d7f1f60628745363ebd4e2aadfd7ef2ff682"
+patches:
+  "0.0.0.cci.20180504":
+    - patch_file: "patches/0001-cmake-remove-hardcoded-flags.patch"
+      patch_description: "Remove hardcoded flags from CMakeLists.txt"
+      patch_type: "conan"
