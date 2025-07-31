@@ -65,9 +65,11 @@ class PclConan(ConanFile):
         "tools": [True, False],
         # Optional external dependencies.
         # Only used if the corresponding component is enabled.
+        "with_cjson": [True, False],
         "with_cuda": [True, False],
         "with_flann": [True, False],
         "with_libusb": [True, False],
+        "with_musl": [True, False],
         "with_opencv": [True, False],
         "with_opengl": [True, False],
         "with_openmp": [True, False],
@@ -106,7 +108,7 @@ class PclConan(ConanFile):
         "keypoints": True,
         "ml": True,
         "octree": True,
-        "outofcore": False,
+        "outofcore": True,
         "people": False,
         "recognition": True,
         "registration": True,
@@ -139,8 +141,10 @@ class PclConan(ConanFile):
         "tools": False,
         # Optional external dependencies
         "with_cuda": False,
+        "with_cjson": True,
         "with_flann": True,
         "with_libusb": True,
+        "with_musl": False,
         "with_opencv": True,
         "with_opengl": True,
         "with_openmp": False,
@@ -179,6 +183,7 @@ class PclConan(ConanFile):
             "gpu_tracking": ["cuda"],
             "gpu_utils": ["cuda"],
             "io": ["zlib"],
+            "outofcore": ["cjson"] if Version(self.version) >= "1.15" else [],
             "people": ["vtk"],
             "surface": ["zlib"],
             "visualization": ["vtk"],
@@ -205,6 +210,7 @@ class PclConan(ConanFile):
             return []
         return {
             "boost": ["boost::boost"],
+            "cjson": ["cjson::cjson"] if Version(self.version) >= "1.15" else [],
             "cuda": [],
             "davidsdk": [],
             "dssdk": [],
@@ -261,7 +267,7 @@ class PclConan(ConanFile):
             "keypoints": ["common", "features", "filters", "kdtree", "octree", "search"],
             "ml": ["common"],
             "octree": ["common"],
-            "outofcore": ["common", "filters", "io", "octree", "visualization"],
+            "outofcore": ["common", "filters", "io", "octree"],
             "people": ["common", "filters", "geometry", "io", "kdtree", "octree",
                        "sample_consensus", "search", "segmentation", "visualization"],
             "recognition": ["common", "features", "filters", "io", "kdtree", "ml",
@@ -337,6 +343,12 @@ class PclConan(ConanFile):
             del self.options.fPIC
         if self.settings.arch not in ["x86", "x86_64"]:
             del self.options.use_sse
+        if Version(self.version) < "1.15":
+            del self.options.with_cjson
+            del self.options.with_musl
+            self.options.outofcore = False
+        elif self.settings.get_safe("os.distro") == "alpine":
+            self.options.with_musl = True
 
     def configure(self):
         if self.options.shared:
@@ -393,6 +405,8 @@ class PclConan(ConanFile):
             self.requires("opencv/4.8.1", transitive_headers=True)
         if self._is_enabled("zlib"):
             self.requires("zlib/[>=1.2.11 <2]")
+        if self._is_enabled("cjson"):
+            self.requires("cjson/[~1]", transitive_headers=True)
         # TODO:
         # self.requires("vtk/9.x.x", transitive_headers=True)
         # self.requires("openni/x.x.x", transitive_headers=True)
@@ -445,6 +459,8 @@ class PclConan(ConanFile):
         tc.cache_variables["WITH_LIBUSB"] = self._is_enabled("libusb")
         tc.cache_variables["WITH_OPENGL"] = self._is_enabled("opengl")
         tc.cache_variables["WITH_OPENMP"] = self._is_enabled("openmp")
+        if "with_musl" in self.options:
+            tc.cache_variables["WITH_MUSL"] = self.options.with_musl
         tc.cache_variables["WITH_PCAP"] = self._is_enabled("pcap")
         tc.cache_variables["WITH_PNG"] = self._is_enabled("png")
         tc.cache_variables["WITH_QHULL"] = self._is_enabled("qhull")
@@ -486,7 +502,11 @@ class PclConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("eigen", "cmake_file_name", "EIGEN")
+        if Version(self.version) < "1.15":
+            deps.set_property("eigen", "cmake_file_name", "EIGEN")
+        else:
+            deps.set_property("eigen", "cmake_file_name", "Eigen3")
+            deps.set_property("cjson", "cmake_target_name", "cJSON::cJSON")
         deps.set_property("flann", "cmake_file_name", "FLANN")
         deps.set_property("flann", "cmake_target_name", "FLANN::FLANN")
         deps.set_property("libpcap", "cmake_file_name", "PCAP")
@@ -499,7 +519,10 @@ class PclConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        for mod in ["Eigen", "FLANN", "GLEW", "Pcap", "Qhull", "libusb"]:
+        mods = ["FLANN", "Pcap", "Qhull", "libusb"]
+        if Version(self.version) < "1.15":
+            mods.extend(["Eigen", "GLEW"])
+        for mod in mods:
             os.remove(os.path.join(self.source_folder, "cmake", "Modules", f"Find{mod}.cmake"))
 
     def build(self):
