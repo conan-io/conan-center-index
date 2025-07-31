@@ -14,10 +14,6 @@ defaults:
   run:
     shell: bash
 
-env:
-  CONAN_REMOTE_URL: http://18.143.149.228:8081/artifactory/api/conan/recipes
-  CONAN_REMOTE_NAME: xrplf
-
 jobs:
   export:
     runs-on: ubuntu-latest
@@ -28,11 +24,11 @@ jobs:
         uses: conan-io/setup-conan@v1
       - name: Add Conan remote
         run: |
-          conan remote add --index 0 ${{ env.CONAN_REMOTE_NAME }} ${{ env.CONAN_REMOTE_URL }}
-          echo "Added new conan remote '${{ env.CONAN_REMOTE_NAME }}' at ${{ env.CONAN_REMOTE_URL }}."
+          conan remote add --index 0 ${{ vars.CONAN_REMOTE_NAME }} ${{ vars.CONAN_REMOTE_URL }}
+          echo "Added new conan remote '${{ vars.CONAN_REMOTE_NAME }}' at ${{ vars.CONAN_REMOTE_URL }}."
       - name: Log into Conan remote
         run: |
-          conan remote login ${{ env.CONAN_REMOTE_NAME }} ${{ secrets.CONAN_REMOTE_USERNAME }} --password "${{ secrets.CONAN_REMOTE_PASSWORD }}"
+          conan remote login ${{ vars.CONAN_REMOTE_NAME }} ${{ secrets.CONAN_REMOTE_USERNAME }} --password "${{ secrets.CONAN_REMOTE_PASSWORD }}"
           conan remote list-users
       - name: Export the recipes
         working-directory: recipes
@@ -41,7 +37,7 @@ jobs:
           conan export snappy/all --version=1.1.10
           conan export soci/all --version=4.0.3
       - name: Upload the recipes (dry run)
-        run: conan upload '*' --confirm --check --only-recipe --remote ${{ env.CONAN_REMOTE_NAME }} --dry-run
+        run: conan upload '*' --confirm --check --only-recipe --remote ${{ vars.CONAN_REMOTE_NAME }} --dry-run
       - name: Upload the recipes
         if: ${{ github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch }}
-        run: conan upload '*' --confirm --check --only-recipe --remote ${{ env.CONAN_REMOTE_NAME }}
+        run: conan upload '*' --confirm --check --only-recipe --remote ${{ vars.CONAN_REMOTE_NAME }}
