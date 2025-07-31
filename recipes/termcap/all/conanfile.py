@@ -61,7 +61,6 @@ class TermcapConan(ConanFile):
         tc.cache_variables["TERMCAP_HEADERS"] = to_cmake_paths(headers)
         tc.cache_variables["TERMCAP_INC_OPTS"] = to_cmake_paths(optional_headers)
         tc.cache_variables["TERMCAP_CAP_FILE"] = os.path.join(self.source_folder, "termcap.src").replace("\\", "/")
-        tc.cache_variables["CMAKE_INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "bin", "etc").replace("\\", "/")
         tc.generate()
 
     def _patch_sources(self):
@@ -87,7 +86,7 @@ class TermcapConan(ConanFile):
 
     @property
     def _termcap_path(self):
-        return os.path.join(self.package_folder, "bin", "etc", "termcap")
+        return os.path.join(self.package_folder, "etc", "termcap")
 
     def package_info(self):
         self.cpp_info.libs = ["termcap"]
