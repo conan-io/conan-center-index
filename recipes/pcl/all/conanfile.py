@@ -65,6 +65,7 @@ class PclConan(ConanFile):
         "tools": [True, False],
         # Optional external dependencies.
         # Only used if the corresponding component is enabled.
+        "with_cjson": [True, False],
         "with_cuda": [True, False],
         "with_flann": [True, False],
         "with_libusb": [True, False],
@@ -106,8 +107,8 @@ class PclConan(ConanFile):
         "keypoints": True,
         "ml": True,
         "octree": True,
-        "outofcore": False,
-        "people": False,
+        "outofcore": True,
+        "people": True,
         "recognition": True,
         "registration": True,
         "sample_consensus": True,
@@ -118,7 +119,7 @@ class PclConan(ConanFile):
         "surface": True,
         "tracking": True,
         # Visualization is currently disabled by default due to missing VTK package
-        "visualization": False,
+        "visualization": True,
         # GPU components are disabled by default
         "cuda_common": False,
         "cuda_features": False,
@@ -138,6 +139,7 @@ class PclConan(ConanFile):
         "apps": False,
         "tools": False,
         # Optional external dependencies
+        "with_cjson": True,
         "with_cuda": False,
         "with_flann": True,
         "with_libusb": True,
@@ -148,7 +150,7 @@ class PclConan(ConanFile):
         "with_png": True,
         "with_qhull": True,
         "with_qt": True,
-        "with_vtk": False,
+        "with_vtk": True,
         # Enabled to avoid excessive memory usage during compilation in CCI
         "precompile_only_core_point_types": True,
         "add_build_type_postfix": False,
@@ -205,6 +207,7 @@ class PclConan(ConanFile):
             return []
         return {
             "boost": ["boost::boost"],
+            "cjson": ["cjson::cjson"] if Version(self.version) >= "1.15" else [],
             "cuda": [],
             "davidsdk": [],
             "dssdk": [],
@@ -337,6 +340,10 @@ class PclConan(ConanFile):
             del self.options.fPIC
         if self.settings.arch not in ["x86", "x86_64"]:
             del self.options.use_sse
+        if Version(self.version) < "1.15":
+            del self.options.with_cjson
+            self.options.outofcore = False
+            self.options.people = False
 
     def configure(self):
         if self.options.shared:
@@ -347,7 +354,7 @@ class PclConan(ConanFile):
 
     def system_requirements(self):
         if self._is_enabled("vtk"):
-            # TODO: add vtk/system package?
+            # TODO: add vtk/system package (https://github.com/conan-io/conan-center-index/pull/24808/files) ?
             # https://repology.org/project/vtk/versions
             package_manager.Apt(self).install(["libvtk9-dev"], update=True, check=True)
             package_manager.Dnf(self).install(["vtk-devel"], update=True, check=True)
@@ -366,6 +373,9 @@ class PclConan(ConanFile):
         return is_available and is_used
 
     def requirements(self):
+        # Boost 1.87 not usable because of deprecations 
+        # See https://www.boost.org/doc/libs/1_85_0/libs/filesystem/doc/deprecated.html
+        # See https://github.com/PointCloudLibrary/pcl/issues/5881
         self.requires("boost/1.83.0", transitive_headers=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self._is_enabled("flann"):
@@ -375,11 +385,11 @@ class PclConan(ConanFile):
         if self._is_enabled("qhull"):
             self.requires("qhull/8.0.1", transitive_headers=True)
         if self._is_enabled("qt"):
-            self.requires("qt/6.6.1")
+            self.requires("qt/6.7.3")
         if self._is_enabled("libusb"):
             self.requires("libusb/1.0.26", transitive_headers=True)
         if self._is_enabled("pcap"):
-            self.requires("libpcap/1.10.4")
+            self.requires("libpcap/1.10.5")
         if self._is_enabled("opengl"):
             # OpenGL is only used if VTK is available
             self.requires("opengl/system", transitive_headers=True)
@@ -390,9 +400,11 @@ class PclConan(ConanFile):
             else:
                 self.requires("mesa-glu/9.0.3", transitive_headers=True)
         if self._is_enabled("opencv"):
-            self.requires("opencv/4.8.1", transitive_headers=True)
+            self.requires("opencv/4.11.0", transitive_headers=True)
         if self._is_enabled("zlib"):
             self.requires("zlib/[>=1.2.11 <2]")
+        if self._is_enabled("cjson"):
+            self.requires("cjson/[~1]", transitive_headers=True)
         # TODO:
         # self.requires("vtk/9.x.x", transitive_headers=True)
         # self.requires("openni/x.x.x", transitive_headers=True)
@@ -464,7 +476,7 @@ class PclConan(ConanFile):
         tc.variables["OpenGL_GL_PREFERENCE"] = "GLVND"
 
         if not self.options.add_build_type_postfix:
-            tc.cache_variables["CMAKE_DEBUG_POSTFIX"] = ""
+            tc.cache_variables["CMAKE_DEBUG_POSTFIX"] = ""  
             tc.cache_variables["CMAKE_RELEASE_POSTFIX"] = ""
             tc.cache_variables["CMAKE_RELWITHDEBINFO_POSTFIX"] = ""
             tc.cache_variables["CMAKE_MINSIZEREL_POSTFIX"] = ""
@@ -486,7 +498,13 @@ class PclConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("eigen", "cmake_file_name", "EIGEN")
+
+        if Version(self.version) < "1.15":
+            deps.set_property("eigen", "cmake_file_name", "EIGEN")
+        else:
+            deps.set_property("eigen", "cmake_file_name", "Eigen3")
+            deps.set_property("cjson", "cmake_target_name", "cJSON::cJSON")
+
         deps.set_property("flann", "cmake_file_name", "FLANN")
         deps.set_property("flann", "cmake_target_name", "FLANN::FLANN")
         deps.set_property("libpcap", "cmake_file_name", "PCAP")
@@ -499,7 +517,10 @@ class PclConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        for mod in ["Eigen", "FLANN", "GLEW", "Pcap", "Qhull", "libusb"]:
+        mods = ["FLANN", "Pcap", "Qhull", "libusb"]
+        if Version(self.version) < "1.15":
+            mods.extend(["Eigen", "GLEW"])
+        for mod in mods:
             os.remove(os.path.join(self.source_folder, "cmake", "Modules", f"Find{mod}.cmake"))
 
     def build(self):
