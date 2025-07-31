@@ -1,27 +1,22 @@
+#include <cstdlib>
+#include <iostream>
 #include <qcustomplot.h>
 
-#include <QApplication>
-#include <QMainWindow>
-#include <QVector>
 
-int main(int argc, char *argv[]) {
-    QApplication app(argc, argv);
-    QMainWindow window;
+int main(void) {
+#if QCUSTOMPLOT_MAJOR_VERSION > 1
+    QCPVector2D qcp_vector(2, 4);
+#else
+    QCPRange qcp_vector(2, 4);
+#endif
 
-    QCustomPlot customPlot;
-    window.setCentralWidget(&customPlot);
+    qcp_vector.normalize();
 
-    QVector<double> x(101), y(101);
-    for (int i = 0; i < 101; ++i) {
-        x[i] = i / 50.0 - 1;
-        y[i] = x[i] * x[i];
-    }
-    customPlot.addGraph();
-    customPlot.graph(0)->setData(x, y);
-    customPlot.xAxis->setLabel("x");
-    customPlot.yAxis->setLabel("y");
-    customPlot.rescaleAxes();
+#if QCUSTOMPLOT_MAJOR_VERSION > 1
+    std::cout << "QCustomPlot - vector 2D length: " << qcp_vector.length() << std::endl;
+#else
+    std::cout << "QCustomPlot - range size: " << qcp_vector.size() << std::endl;
+#endif
 
-    window.setGeometry(100, 100, 500, 400);
-    return 0;
+    return EXIT_SUCCESS;
 }
