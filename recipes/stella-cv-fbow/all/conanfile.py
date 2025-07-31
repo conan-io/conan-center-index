@@ -5,7 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class StellaCvFbowConan(ConanFile):
@@ -61,15 +61,14 @@ class StellaCvFbowConan(ConanFile):
 
     def requirements(self):
         # https://github.com/stella-cv/FBoW/blob/master/include/fbow/vocabulary.h#L35
-        self.requires("opencv/4.9.0", transitive_headers=True, transitive_libs=True)
-        self.requires("llvm-openmp/17.0.6")
+        self.requires("opencv/[>=4.9.0 <5]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -95,7 +94,6 @@ class StellaCvFbowConan(ConanFile):
                             "set(CMAKE_CXX_STANDARD 11)", "")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
