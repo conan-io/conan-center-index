@@ -100,6 +100,7 @@ class HictkConan(ConanFile):
         tc.variables["HICTK_BUILD_EXAMPLES"] = "OFF"
         tc.variables["HICTK_BUILD_TOOLS"] = "OFF"
         tc.variables["HICTK_ENABLE_GIT_VERSION_TRACKING"] = "OFF"
+        tc.variables["HICTK_ENABLE_TELEMETRY"] = "OFF"
         tc.variables["HICTK_ENABLE_TESTING"] = "OFF"
         tc.variables["HICTK_ENABLE_FUZZY_TESTING"] = "OFF"
         tc.variables["HICTK_WITH_ARROW"] = self.options.get_safe("with_arrow", False)
