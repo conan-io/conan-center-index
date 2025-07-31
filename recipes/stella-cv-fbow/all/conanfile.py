@@ -111,7 +111,6 @@ class StellaCvFbowConan(ConanFile):
             "opencv::opencv_core",
             "opencv::opencv_features2d",
             "opencv::opencv_highgui",
-            "llvm-openmp::llvm-openmp",
         ]
         if self.dependencies["opencv"].options.xfeatures2d:
             self.cpp_info.requires.append("opencv::opencv_xfeatures2d")
