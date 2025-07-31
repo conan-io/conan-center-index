@@ -1,4 +1,7 @@
 sources:
+  "3.2.0":
+    url: "https://github.com/elalish/manifold/archive/refs/tags/v3.2.0.tar.gz"
+    sha256: "d036266381e5591bc71a2bef4fd675237ad2602b7048ac51c761cd9eb48b1d02"
   "3.0.1":
     url: "https://github.com/elalish/manifold/archive/refs/tags/v3.0.1.tar.gz"
     sha256: "5e84fdaab7933a00fb4279a9bbe2885e94db3adfc45a2ef56ae35abfe5e6ea43"
