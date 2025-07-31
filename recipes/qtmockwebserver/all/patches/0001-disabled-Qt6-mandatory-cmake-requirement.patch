@@ -1,0 +1,41 @@
+From 5ea9334d4c4c655c6ed78421f8d17ba56d4b5105 Mon Sep 17 00:00:00 2001
+From: Tomas Krupa <tomas.krupa@innovatrics.com>
+Date: Sun, 30 Mar 2025 22:16:31 +0200
+Subject: [PATCH] disabled Qt6 mandatory cmake requirement
+
+---
+ CMakeLists.txt     | 4 ++--
+ src/CMakeLists.txt | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3d935b9..e7f7a74 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,8 +1,8 @@
+ project (QtMockWebServer)
+ cmake_minimum_required(VERSION 2.8.11)
+ 
+-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
+-find_package(Qt6 COMPONENTS Core Network Test REQUIRED)
++find_package(QT NAMES Qt6 Qt5 COMPONENTS Core QUIET)
++find_package(Qt6 COMPONENTS Core Network Test QUIET)
+ if (NOT Qt6_FOUND)
+     find_package(Qt5 5.15 COMPONENTS Core Network Test REQUIRED)
+ endif()
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 33bb736..a039384 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -11,7 +11,7 @@ file(GLOB PUBLIC_HEADERS "*.h")
+ 
+ add_library(qtmockwebserver ${SRCS})
+ set_target_properties(qtmockwebserver PROPERTIES VERSION 1.0.0 SOVERSION 1)
+-target_link_libraries(qtmockwebserver Qt::Core Qt::Network)
++target_link_libraries(qtmockwebserver Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network)
+ 
+ if(BUILD_SHARED_LIBS)
+     install(FILES ${PUBLIC_HEADERS} DESTINATION include/qtmockwebserver)
+-- 
+2.34.1
+
