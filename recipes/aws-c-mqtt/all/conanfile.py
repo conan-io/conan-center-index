@@ -32,15 +32,18 @@ class AwsCMQTT(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.version == "0.12.1":
+        if self.version == "0.13.1":
+            self.requires("aws-c-common/0.12.3", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-http/0.10.1")
+        elif self.version == "0.12.1":
             self.requires("aws-c-common/0.11.0", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-http/0.9.3")
-        if self.version == "0.10.3":
+        elif self.version == "0.10.3":
             self.requires("aws-c-common/0.9.15", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-cal/0.6.14")
             self.requires("aws-c-io/0.14.7", transitive_headers=True)
             self.requires("aws-c-http/0.8.1")
-        if self.version == "0.7.8":
+        elif self.version == "0.7.8":
             self.requires("aws-c-common/0.6.11", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-cal/0.5.12")
             self.requires("aws-c-io/0.10.9", transitive_headers=True)

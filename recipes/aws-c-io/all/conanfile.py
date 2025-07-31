@@ -35,17 +35,22 @@ class AwsCIO(ConanFile):
     def requirements(self):
         # These versions come from aws-sdl-cpp prefetch_crt_dependency.sh file,
         # dont bump them independently, check the file and update all the dependencies at once
-        if self.version == "0.15.4":
+        if self.version == "0.19.1":
+            self.requires("aws-c-common/0.12.3", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-cal/0.9.1")
+            if self.settings.os in ["Linux", "FreeBSD", "Android"]:
+                self.requires("s2n/1.5.19")
+        elif self.version == "0.15.4":
             self.requires("aws-c-common/0.11.0", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-cal/0.8.3")
             if self.settings.os in ["Linux", "FreeBSD", "Android"]:
                 self.requires("s2n/1.5.9")
-        if self.version == "0.14.7":
+        elif self.version == "0.14.7":
             self.requires("aws-c-common/0.9.15", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-cal/0.6.14")
             if self.settings.os in ["Linux", "FreeBSD", "Android"]:
                 self.requires("s2n/1.4.16")  # 1.4.11 not available, using next available version
-        if self.version == "0.10.9":
+        elif self.version == "0.10.9":
             self.requires("aws-c-common/0.6.11", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-cal/0.5.12")
             if self.settings.os in ["Linux", "FreeBSD", "Android"]:

@@ -32,15 +32,19 @@ class AwsCEventStream(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.version == "0.5.1":
+        if self.version == "0.5.4":
+            self.requires("aws-c-common/0.12.3", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-checksums/0.2.6")
+            self.requires("aws-c-io/0.19.1")
+        elif self.version == "0.5.1":
             self.requires("aws-c-common/0.11.0", transitive_headers=True, transitive_libs=True)
             self.requires("aws-checksums/0.2.3")
             self.requires("aws-c-io/0.15.4")
-        if self.version == "0.4.2":
+        elif self.version == "0.4.2":
             self.requires("aws-c-common/0.9.15", transitive_headers=True, transitive_libs=True)
             self.requires("aws-checksums/0.1.18")
             self.requires("aws-c-io/0.14.7")
-        if self.version == "0.2.7":
+        elif self.version == "0.2.7":
             self.requires("aws-c-common/0.6.11", transitive_headers=True, transitive_libs=True)
             self.requires("aws-checksums/0.1.12")
             self.requires("aws-c-io/0.10.9")
