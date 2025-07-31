@@ -4,14 +4,17 @@
 
 int main(void) {
     /*
-     * Try to invokes the API to load the local k8s configuration.
-     * It doesn't matter whether finds it or not.
+     * Try to create a kubernetes apiClient.
+     * It doesn't matter whether creates it or not.
      * The important thing is that it doesn't fail when use the library.
     */
     char *basePath = NULL;
     sslConfig_t *sslConfig = NULL;
     list_t *apiKeys = NULL;
-    int rc = load_kube_config(&basePath, &sslConfig, &apiKeys, NULL);   /* NULL means loading configuration from $HOME/.kube/config */
+    apiClient_t *apiClient = apiClient_create_with_base_path(basePath, sslConfig, apiKeys);
+    if (!apiClient) {
+        printf("Cannot create a kubernetes client.\n");
+    }
     
     return EXIT_SUCCESS;
 }
