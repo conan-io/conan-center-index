@@ -6,6 +6,7 @@ from conan.tools.files import get, save, replace_in_file, rmdir, copy
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
 import os
 
 
@@ -38,6 +39,33 @@ class Nghttp2Conan(ConanFile):
         "with_asio": False,
     }
 
+    @property
+    def _is_using_cpp(self):
+        return self.options.with_app or self.options.with_hpack or self.options.get_safe("with_asio")
+
+    @property
+    def _min_cppstd(self):
+        return "14" if Version(self.version) <= "1.62.0" else "20"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "14": {
+                "gcc": "6",
+                "clang": "5",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            },
+            "20": {
+                "gcc": "11",
+                "clang": "12",
+                "apple-clang": "13",
+                "Visual Studio": "16",
+                "msvc": "192",
+            }
+        }.get(self._min_cppstd, {})
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -45,7 +73,7 @@ class Nghttp2Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if not (self.options.with_app or self.options.with_hpack or self.options.with_asio):
+        if not self._is_using_cpp:
             self.settings.rm_safe("compiler.cppstd")
             self.settings.rm_safe("compiler.libcxx")
         if not self.options.with_app:
@@ -77,6 +105,14 @@ class Nghttp2Conan(ConanFile):
             raise ConanInvalidConfiguration("Build with asio and MSVC is not supported yet, see upstream bug #589")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration(f"{self.ref} requires GCC >= 6.0")
+        if self._is_using_cpp:
+            if self.settings.compiler.cppstd:
+                check_min_cppstd(self, self._min_cppstd)
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -108,6 +144,10 @@ class Nghttp2Conan(ConanFile):
         tc.generate()
 
         tc = CMakeDeps(self)
+        if self.options.with_app:
+            tc.set_property("libev", "cmake_file_name", "LIBEV")
+        if self.options.with_hpack:
+            tc.set_property("jansson", "cmake_file_name", "JANSSON")
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
