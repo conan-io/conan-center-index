@@ -1,0 +1,4 @@
+sources:
+  "0.13.0":
+    url: "https://github.com/kubernetes-client/c/archive/refs/tags/v0.13.0.tar.gz"
+    sha256: "4421066f4563a734f8ad33313f90d43fe82fd2533e9081fceca5e58790958c8e"
