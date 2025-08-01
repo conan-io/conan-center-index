@@ -7,3 +7,5 @@ add_executable(standalone main.cpp)
 
 target_link_libraries(standalone PRIVATE sparrow::sparrow)
 target_compile_features(standalone PRIVATE cxx_std_20)
+
+target_compile_definitions(standalone PRIVATE SPARROW_MAJOR_VERSION=${sparrow_VERSION_MAJOR})
