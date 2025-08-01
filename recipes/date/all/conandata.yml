@@ -1,7 +1,14 @@
 sources:
   "3.0.4":
-    url: "https://github.com/HowardHinnant/date/archive/refs/tags/v3.0.4.tar.gz"
-    sha256: "56e05531ee8994124eeb498d0e6a5e1c3b9d4fccbecdf555fe266631368fb55f"
+    source:
+      url: "https://github.com/HowardHinnant/date/archive/refs/tags/v3.0.4.tar.gz"
+      sha256: "56e05531ee8994124eeb498d0e6a5e1c3b9d4fccbecdf555fe266631368fb55f"
+    tzdatabase:
+      url: "https://github.com/eggert/tz/archive/refs/tags/2025b.tar.gz"
+      sha256: "7e281b316b85e20c9a67289805aa2a2ee041b5a41ccf5d096af3386ba76cf9d5"
+    windows_zones:
+      url: "https://raw.githubusercontent.com/unicode-org/cldr/master/common/supplemental/windowsZones.xml"
+      sha256: "9cf3db6a31fb382fee21b70be6feba1e82766b0fcd06e6261fb7936a73e537ff"
   "3.0.3":
     url: "https://github.com/HowardHinnant/date/archive/refs/tags/v3.0.3.tar.gz"
     sha256: "30de45a34a2605cca33a993a9ea54e8f140f23b1caf1acf3c2fd436c42c7d942"

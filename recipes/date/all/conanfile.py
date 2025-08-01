@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import get, rmdir, apply_conandata_patches, export_conandata_patches, copy
+from conan.tools.files import download, get, rmdir, apply_conandata_patches, export_conandata_patches, copy
 from conan.tools.scm import Version
 
 import os
@@ -22,15 +22,13 @@ class DateConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "header_only": [True, False],
-        "use_system_tz_db": [True, False],
-        "use_tz_db_in_dot": [True, False],
+        "tz_db": ["embedded", "system", "manual"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "header_only": False,
-        "use_system_tz_db": False,
-        "use_tz_db_in_dot": False,
+        "tz_db": "embedded"
     }
 
     def export_sources(self):
@@ -52,10 +50,6 @@ class DateConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def requirements(self):
-        if not self.options.header_only and not self.options.use_system_tz_db:
-            self.requires("libcurl/[>=7.78 <9]")
-
     def package_id(self):
         if self.info.options.header_only:
             self.info.clear()
@@ -65,21 +59,24 @@ class DateConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version]["tzdatabase"], destination="tzdata", strip_root=True)
+        download(self, **self.conan_data["sources"][self.version]["windows_zones"], filename=os.path.join("tzdata", "windowsZones.xml"))
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ENABLE_DATE_TESTING"] = False
-        tc.variables["USE_SYSTEM_TZ_DB"] = self.options.use_system_tz_db
-        tc.variables["USE_TZ_DB_IN_DOT"] = self.options.use_tz_db_in_dot
-        tc.variables["BUILD_TZ_LIB"] = not self.options.header_only
+        tc.cache_variables["ENABLE_DATE_TESTING"] = False
+        tc.cache_variables["USE_SYSTEM_TZ_DB"] = bool(self.options.tz_db == "system")
+        tc.cache_variables["MANUAL_TZ_DB"] = bool(self.options.tz_db in ["embedded", "manual"])
+        tc.cache_variables["BUILD_TZ_LIB"] = not self.options.header_only
+        if self.options.tz_db == "embedded":
+            tc.preprocessor_definitions["INSTALL"] = self.source_folder.replace("\\", "/")
         # workaround for gcc 7 and clang 5 not having string_view
         if Version(self.version) >= "3.0.0" and \
             ((self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "7.0") or \
              (self.settings.compiler == "clang" and Version(self.settings.compiler.version) <= "5.0")):
             tc.cache_variables["DISABLE_STRING_VIEW"] = True
         tc.generate()
-
         deps = CMakeDeps(self)
         deps.generate()
 
@@ -116,12 +113,16 @@ class DateConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["date-tz"].system_libs.extend(["m", "pthread"])
 
-            if not self.options.use_system_tz_db:
-                self.cpp_info.components["date-tz"].requires.append("libcurl::libcurl")
-
-            use_os_tzdb = 1 if self.options.use_system_tz_db and not self.settings.os == "Windows" else 0
+            use_os_tzdb = 1 if self.options.tz_db == "system" and not self.settings.os == "Windows" else 0
             defines = [f"USE_OS_TZDB={use_os_tzdb}"]
             if self.settings.os == "Windows" and self.options.shared:
-                defines.append("DATE_USE_DLL=1")
+                defines.append("DATE_BUILD_DLL=1")
+
+            if Version(self.version) >= "3.0.0" and \
+                ((self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "7.0") or \
+                (self.settings.compiler == "clang" and Version(self.settings.compiler.version) <= "5.0")):
+                defines.append("HAS_STRING_VIEW=0")
+            else:
+                defines.append("HAS_STRING_VIEW=1")
 
             self.cpp_info.components["date-tz"].defines.extend(defines)
