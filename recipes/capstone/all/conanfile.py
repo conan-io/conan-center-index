@@ -1,11 +1,12 @@
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.2.0"
 
 
 class CapstoneConan(ConanFile):
@@ -29,12 +30,16 @@ class CapstoneConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "use_default_alloc": [True, False],
+        "universal2": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "use_default_alloc": True,
+        "universal2": True,
     }
+
+    implements = ["auto_shared_fpic"]
 
     _archs = ["arm", "m68k", "mips", "ppc", "sparc", "sysz", "xcore", "x86", "tms320c64x", "m680x", "evm"]
     options.update({a: [True, False] for a in _archs})
@@ -42,10 +47,6 @@ class CapstoneConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
@@ -61,19 +62,27 @@ class CapstoneConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) < "5.0":
-            tc.variables["CAPSTONE_BUILD_STATIC"] = not self.options.shared
-            tc.variables["CAPSTONE_BUILD_SHARED"] = self.options.shared
-        tc.variables["CAPSTONE_BUILD_TESTS"] = False
-        tc.variables["CAPSTONE_BUILD_CSTOOL"] = False
-        tc.variables["CAPSTONE_ARCHITECUTRE_DEFAULT"] = False
-        if Version(self.version) < "5.0":
-            tc.variables["CAPSTONE_USE_SYS_DYN_MEM"] = self.options.use_default_alloc
+        if Version(self.version) > "5.0.3":
+            tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
+            tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+            tc.cache_variables["BUILD_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         else:
-            tc.variables["CAPSTONE_USE_DEFAULT_ALLOC"] = self.options.use_default_alloc
+            tc.cache_variables["CAPSTONE_BUILD_STATIC"] = not self.options.shared
+            tc.cache_variables["CAPSTONE_BUILD_SHARED"] = self.options.shared
+            tc.cache_variables["CAPSTONE_BUILD_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+        tc.cache_variables["CAPSTONE_BUILD_TESTS"] = False
+        tc.cache_variables["CAPSTONE_BUILD_CSTOOL"] = False
+        tc.cache_variables["CAPSTONE_ARCHITECUTRE_DEFAULT"] = False
+        if Version(self.version) < "5.0":
+            tc.cache_variables["CAPSTONE_USE_SYS_DYN_MEM"] = self.options.use_default_alloc
+        else:
+            tc.cache_variables["CAPSTONE_USE_DEFAULT_ALLOC"] = self.options.use_default_alloc
         for a in self._archs:
-            tc.variables[f"CAPSTONE_{a.upper()}_SUPPORT"] = self.options.get_safe(a)
-        tc.variables["CAPSTONE_BUILD_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+            tc.cache_variables[f"CAPSTONE_{a.upper()}_SUPPORT"] = self.options.get_safe(a)
+        if Version(self.version) >= "5.0.3":
+            tc.cache_variables["CAPSTONE_BUILD_MACOS_THIN"] = self.options.universal2
+            if is_apple_os(self) and self.options.universal2:
+                tc.blocks["apple_system"].values["CMAKE_OSX_ARCHITECTURES"] = "arm64;x86_64"
         tc.generate()
 
     def build(self):
@@ -88,6 +97,7 @@ class CapstoneConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         suffix = "_dll" if is_msvc(self) and self.options.shared and Version(self.version) < "5.0" else ""
