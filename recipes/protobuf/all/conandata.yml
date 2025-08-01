@@ -21,6 +21,15 @@ sources:
     url: "https://github.com/protocolbuffers/protobuf/archive/v3.20.3.tar.gz"
     sha256: "9c0fd39c7a08dff543c643f0f4baf081988129a411b977a07c46221793605638"
 patches:
+  "6.30.1":
+    - patch_file: "patches/protobuf-6.30.1-change-empty-string.patch"
+      patch_description: "Change how we decide which empty string implementation to use"
+      patch_type: "backport"
+      patch_source: "https://github.com/protocolbuffers/protobuf/issues/20645"
+    - patch_file: "patches/protobuf-6.30.1-disable-fixed-string-MSVC.patch"
+      patch_description: "Disable the optimization for fixed_address_empty_string for MSVC"
+      patch_type: "backport"
+      patch_source: "https://github.com/protocolbuffers/protobuf/issues/21957"
   "3.21.12":
     - patch_file: "patches/protobuf-3.21.12-upstream-macos-macros.patch"
       patch_description: "Handle case where macOS SDK macros may conflict with protobuf message types"
