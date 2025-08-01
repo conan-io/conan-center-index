@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import download, get, rmdir, apply_conandata_patches, export_conandata_patches, copy
@@ -38,13 +39,14 @@ class DateConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.os in ["iOS", "tvOS", "watchOS", "Android"]:
-            self.options.use_system_tz_db = True
+            self.options.tz_db = "system"
 
     def configure(self):
         if self.options.shared or self.options.header_only:
             self.options.rm_safe("fPIC")
         if self.options.header_only:
             del self.options.shared
+            del self.options.tz_db
             self.package_type = "header-library"
 
     def layout(self):
@@ -57,25 +59,34 @@ class DateConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
+        if self.options.get_safe("tz_db") == "system" and self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Using system tz database is not supported on Windows")
+
+    def requirements(self):
+        if self.version == "2.4.1" and self.options.get_safe("tz_db") != "system":
+            self.requires("libcurl/[>=7.78 <9]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
-        get(self, **self.conan_data["sources"][self.version]["tzdatabase"], destination="tzdata", strip_root=True)
+        get(self, **self.conan_data["sources"][self.version]["tz_db"], destination="tzdata", strip_root=True)
         download(self, **self.conan_data["sources"][self.version]["windows_zones"], filename=os.path.join("tzdata", "windowsZones.xml"))
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["ENABLE_DATE_TESTING"] = False
-        tc.cache_variables["USE_SYSTEM_TZ_DB"] = bool(self.options.tz_db == "system")
-        tc.cache_variables["MANUAL_TZ_DB"] = bool(self.options.tz_db in ["embedded", "manual"])
-        tc.cache_variables["BUILD_TZ_LIB"] = not self.options.header_only
-        if self.options.tz_db == "embedded":
-            tc.preprocessor_definitions["INSTALL"] = self.source_folder.replace("\\", "/")
-        # workaround for gcc 7 and clang 5 not having string_view
-        if Version(self.version) >= "3.0.0" and \
-            ((self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "7.0") or \
-             (self.settings.compiler == "clang" and Version(self.settings.compiler.version) <= "5.0")):
-            tc.cache_variables["DISABLE_STRING_VIEW"] = True
+        if self.options.header_only:
+            tc.cache_variables["BUILD_TZ_LIB"] = False
+        else:
+            tc.cache_variables["USE_SYSTEM_TZ_DB"] = bool(self.options.tz_db == "system")
+            tc.cache_variables["MANUAL_TZ_DB"] = bool(self.options.tz_db in ["embedded", "manual"])
+            tc.cache_variables["BUILD_TZ_LIB"] = True
+            if self.options.tz_db == "embedded":
+                tc.preprocessor_definitions["INSTALL"] = self.source_folder.replace("\\", "/")
+            # workaround for gcc 7 and clang 5 not having string_view
+            if Version(self.version) >= "3.0.0" and \
+                ((self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "7.0") or \
+                (self.settings.compiler == "clang" and Version(self.settings.compiler.version) <= "5.0")):
+                tc.cache_variables["DISABLE_STRING_VIEW"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -113,8 +124,10 @@ class DateConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["date-tz"].system_libs.extend(["m", "pthread"])
 
-            use_os_tzdb = 1 if self.options.tz_db == "system" and not self.settings.os == "Windows" else 0
-            defines = [f"USE_OS_TZDB={use_os_tzdb}"]
+            defines = []
+            if self.options.tz_db == "system":
+                defines = defines.append("USE_OS_TZDB=1")
+
             if self.settings.os == "Windows" and self.options.shared:
                 defines.append("DATE_BUILD_DLL=1")
 
@@ -126,3 +139,6 @@ class DateConan(ConanFile):
                 defines.append("HAS_STRING_VIEW=1")
 
             self.cpp_info.components["date-tz"].defines.extend(defines)
+
+            if self.version == "2.4.1" and self.options.tz_db != "system":
+                self.cpp_info.components["date-tz"].requires.append("libcurl::libcurl")
