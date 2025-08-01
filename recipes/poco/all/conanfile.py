@@ -150,6 +150,8 @@ class PocoConan(ConanFile):
         if Version(self.version) >= "1.12.0":
             foundation_external_dependencies = self._poco_component_tree["Foundation"].external_dependencies
             self._poco_component_tree["Foundation"] = self._poco_component_tree["Foundation"]._replace(external_dependencies = list(map(lambda x: 'pcre2::pcre2' if x == 'pcre::pcre' else x, foundation_external_dependencies)))
+        if Version(self.version) >= "1.14.0":
+            self._poco_component_tree["Foundation"].external_dependencies.append("utf8proc::utf8proc")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -159,6 +161,8 @@ class PocoConan(ConanFile):
             self.requires("pcre/8.45")
         else:
             self.requires("pcre2/10.42")
+        if Version(self.version) >= "1.14.0":
+            self.requires("utf8proc/2.9.0")
         self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
         if self.options.enable_xml:
             self.requires("expat/[>=2.6.2 <3]", transitive_headers=True)
@@ -298,12 +302,13 @@ class PocoConan(ConanFile):
                 "find_package(PostgreSQL REQUIRED)",
                 "find_package(PostgreSQL REQUIRED)\nset(POSTGRESQL_FOUND TRUE)",
             )
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "Data", "PostgreSQL", "CMakeLists.txt"),
-                "PostgreSQL::client",
-                "PostgreSQL::PostgreSQL",
-            )
+            if Version(self.version) < "1.14.0":
+                replace_in_file(
+                    self,
+                    os.path.join(self.source_folder, "Data", "PostgreSQL", "CMakeLists.txt"),
+                    "PostgreSQL::client",
+                    "PostgreSQL::PostgreSQL",
+                )
         # Ensure to use FindEXPAT.cmake instead of expat-config.cmake
         # (side effect of CMAKE_FIND_PACKAGE_PREFER_CONFIG ON, see https://github.com/conan-io/conan/issues/10387)
         replace_in_file(
