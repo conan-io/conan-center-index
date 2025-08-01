@@ -141,17 +141,17 @@ class LibvipsConan(ConanFile):
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.15.0")
         if self.options.with_heif:
-            self.requires("libheif/1.16.2")
+            self.requires("libheif/[>=1.16.2 <2]")
         if self.options.get_safe("with_highway"):
             self.requires("highway/[>=1.2.0 <2]")
         if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.2")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.5")
         if self.options.with_jpeg_xl:
-            self.requires("libjxl/0.11.1")
+            self.requires("libjxl/[>=0.11.1 <0.12]")
         if self.options.with_lcms:
             self.requires("lcms/2.16")
         if self.options.with_magick:
@@ -159,9 +159,9 @@ class LibvipsConan(ConanFile):
         if self.options.with_matio:
             self.requires("matio/1.5.24")
         if self.options.with_openexr:
-            self.requires("openexr/3.2.3")
+            self.requires("openexr/[>=3.2.3 <4]")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.5.2")
+            self.requires("openjpeg/[>=2.5.2 <3]")
         if self.options.with_pangocairo:
             self.requires("pango/1.50.10")
         if self.options.with_pdfium:
@@ -173,7 +173,7 @@ class LibvipsConan(ConanFile):
         if self.options.with_poppler:
             self.requires("poppler/21.07.0")
         if self.options.with_tiff:
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.6.0 <5]")
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
         if self.options.with_zlib:
