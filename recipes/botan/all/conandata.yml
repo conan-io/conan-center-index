@@ -2,6 +2,9 @@ sources:
   "3.8.1":
     url: "https://github.com/randombit/botan/archive/3.8.1.tar.gz"
     sha256: "8eb79a49c1a3f7e5e7563c13752a37557de935cdac48d9221ea4b580158e8965"
+  "3.7.1":
+    url: "https://github.com/randombit/botan/archive/3.7.1.tar.gz"
+    sha256: "8d2a072c7cdca6cadd16f89bb966fce1b3ec77cb4614bf1d87dec1337a3d2330"
   "3.6.1":
     url: "https://github.com/randombit/botan/archive/3.6.1.tar.gz"
     sha256: "a6c4e8dcb6c7f4b9b67e2c8b43069d65b548970ca17847e3b1e031d3ffdd874a"
@@ -17,3 +20,13 @@ sources:
   "2.19.5":
     url: "https://github.com/randombit/botan/archive/2.19.5.tar.gz"
     sha256: "8d4a3826787f9febbdc225172ad2d39d7d3960346c5721fe46cb27d480d7e1de"
+patches:
+  "3.7.1":
+    - patch_file: "patches/enforce-that-ecc-keys-are-non-zero-non-identity.patch"
+      patch_description: "Ensure compliance with BSI's TR-02102-1 Section 2.3.6"
+      patch_type: "backport"
+      patch_source: "https://github.com/randombit/botan/pull/4794"
+    - patch_file: "patches/reject-ecdh-agreement-when-peer-sent-the-identity.patch"
+      patch_description: "Ensure compliance with BSI's TR-03111 Section 4.3.1"
+      patch_type: "backport"
+      patch_source: "https://github.com/randombit/botan/pull/4794"
