@@ -1,3 +1,5 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
@@ -8,10 +10,8 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
-import os
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
+required_conan_version = ">=2.18"
 
 
 class LibvipsConan(ConanFile):
@@ -107,9 +107,6 @@ class LibvipsConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "8.15":
-            del self.options.with_archive
-            del self.options.with_highway
         if is_msvc(self):
             # deprecated build fails with
             # vips7compat.h(1661): error C2016: C requires that a struct or union have at least one member
@@ -146,7 +143,7 @@ class LibvipsConan(ConanFile):
         if self.options.with_heif:
             self.requires("libheif/1.16.2")
         if self.options.get_safe("with_highway"):
-            self.requires("highway/1.0.7")
+            self.requires("highway/[>=1.2.0 <2]")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
@@ -183,6 +180,10 @@ class LibvipsConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
+        check_min_cppstd(self, 11)
+        # Visual Studio < 2019 doesn't seem to like pointer restrict of pointer restrict in libnsgif
+        check_min_vs(self, "192")
+
         if self.options.vapi and not self.options.introspection:
             raise ConanInvalidConfiguration("vapi requires introspection")
         if self.options.with_pangocairo and not self.dependencies["pango"].options.with_cairo:
@@ -191,15 +192,8 @@ class LibvipsConan(ConanFile):
             raise ConanInvalidConfiguration("pdf support is enabled either with pdfium or poppler")
         if self.options.with_cgif and not (self.options.with_imagequant or self.options.with_quantizr):
             raise ConanInvalidConfiguration("with_cgif requires either with_imagequant or with_quantizr")
-
-        if Version(self.version) >= "8.15" and self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
-
-        # Visual Studio < 2019 doesn't seem to like pointer restrict of pointer restrict in libnsgif
-        check_min_vs(self, "192")
-
         if is_msvc(self) and is_msvc_static_runtime(self) and not self.options.shared and \
-           self.dependencies["glib"].options.shared:
+                self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration(
                 f"{self.ref} static with MT runtime not supported if glib shared due to conancenter CI limitations"
             )
@@ -234,6 +228,7 @@ class LibvipsConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -248,15 +243,10 @@ class LibvipsConan(ConanFile):
         tc.project_options["doxygen"] = "false"
         tc.project_options["gtk_doc"] = "false"
         tc.project_options["modules"] = "disabled"
-        tc.project_options["introspection"] = (
-            enabled_disabled(self.options.introspection)
-            if Version(self.version) >= "8.15" else
-            true_false(self.options.introspection)
-        )
+        tc.project_options["introspection"] = enabled_disabled(self.options.introspection)
         tc.project_options["vapi"] = true_false(self.options.vapi)
         # External libraries
-        if Version(self.version) >= "8.15":
-            tc.project_options["archive"] = enabled_disabled(self.options.get_safe("with_archive"))
+        tc.project_options["archive"] = enabled_disabled(self.options.get_safe("with_archive"))
         tc.project_options["cfitsio"] = enabled_disabled(self.options.with_cfitsio)
         tc.project_options["cgif"] = enabled_disabled(self.options.with_cgif)
         tc.project_options["exif"] = enabled_disabled(self.options.with_exif)
@@ -264,8 +254,7 @@ class LibvipsConan(ConanFile):
         tc.project_options["fontconfig"] = enabled_disabled(self.options.with_fontconfig)
         tc.project_options["heif"] = enabled_disabled(self.options.with_heif)
         tc.project_options["heif-module"] = "disabled"
-        if Version(self.version) >= "8.15":
-            tc.project_options["highway"] = enabled_disabled(self.options.with_highway)
+        tc.project_options["highway"] = enabled_disabled(self.options.with_highway)
         tc.project_options["imagequant"] = enabled_disabled(self.options.with_imagequant)
         tc.project_options["jpeg"] = enabled_disabled(bool(self.options.with_jpeg))
         tc.project_options["jpeg-xl"] = enabled_disabled(self.options.with_jpeg_xl)
@@ -316,7 +305,6 @@ class LibvipsConan(ConanFile):
                         )
 
     def build(self):
-        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -329,7 +317,6 @@ class LibvipsConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)
-        fix_msvc_libname(self)
 
     def package_info(self):
         self.cpp_info.components["vips"].set_property("pkg_config_name", "vips")
@@ -394,22 +381,3 @@ class LibvipsConan(ConanFile):
             self.cpp_info.components["vips-cpp"].set_property("pkg_config_name", "vips-cpp")
             self.cpp_info.components["vips-cpp"].libs = ["vips-cpp"]
             self.cpp_info.components["vips-cpp"].requires = ["vips"]
-
-        # TODO: to remove once conan v1 support dropped
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-
-def fix_msvc_libname(conanfile, remove_lib_prefix=True):
-    """remove lib prefix & change extension to .lib in case of cl like compiler"""
-    from conan.tools.files import rename
-    import glob
-    if not conanfile.settings.get_safe("compiler.runtime"):
-        return
-    libdirs = getattr(conanfile.cpp.package, "libdirs")
-    for libdir in libdirs:
-        for ext in [".dll.a", ".dll.lib", ".a"]:
-            full_folder = os.path.join(conanfile.package_folder, libdir)
-            for filepath in glob.glob(os.path.join(full_folder, f"*{ext}")):
-                libname = os.path.basename(filepath)[0:-len(ext)]
-                if remove_lib_prefix and libname[0:3] == "lib":
-                    libname = libname[3:]
-                rename(conanfile, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))

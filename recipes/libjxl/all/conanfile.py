@@ -59,19 +59,18 @@ class LibjxlConan(ConanFile):
 
     def requirements(self):
         self.requires("brotli/1.1.0")
-        self.requires("highway/1.1.0")
+        self.requires("highway/[>=1.2.0 <2]")
         self.requires("lcms/2.16")
         if self.options.with_tcmalloc:
             self.requires("gperftools/2.15")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
     def build_requirements(self):
         # Require newer CMake, which allows INCLUDE_DIRECTORIES to be set on INTERFACE targets
         # Also, v0.9+ require CMake 3.16
-        self.tool_requires("cmake/[>=3.19 <4]")
+        self.tool_requires("cmake/[>=3.19]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
