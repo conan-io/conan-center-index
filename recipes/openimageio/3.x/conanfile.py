@@ -88,14 +88,14 @@ class OpenImageIOConan(ConanFile):
         # Required libraries
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("libtiff/4.7.0")
-        self.requires("imath/3.1.9", transitive_headers=True)
-        self.requires("openexr/3.3.2")
+        self.requires("imath/3.1.12", transitive_headers=True)
+        self.requires("openexr/3.3.5")
         if self.options.with_libjpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/9f")
         elif self.options.with_libjpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/[>=3.0.3 <4]")
         self.requires("pugixml/1.15")
-        self.requires("tsl-robin-map/1.3.0")
+        self.requires("tsl-robin-map/1.4.0")
         self.requires("fmt/11.2.0", transitive_headers=True)
         self.requires("opencolorio/2.4.2")
 
@@ -120,17 +120,17 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_giflib:
             self.requires("giflib/5.2.2")
         if self.options.with_libheif:
-            self.requires("libheif/1.18.2")
+            self.requires("libheif/1.20.1")
         if self.options.with_raw:
-            self.requires("libraw/0.21.3")
+            self.requires("libraw/0.21.4")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.5.2")
+            self.requires("openjpeg/2.5.3")
         if self.options.with_openvdb:
             self.requires("openvdb/11.0.0")
         if self.options.with_ptex:
             self.requires("ptex/2.4.2")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.3.2")
+            self.requires("libwebp/1.5.0")
         if self.options.with_libultrahdr:
             self.requires("libultrahdr/1.4.0")
 
