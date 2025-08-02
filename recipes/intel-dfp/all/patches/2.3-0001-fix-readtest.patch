@@ -1,0 +1,13 @@
+diff --git a/TESTS/readtest.c b/TESTS/readtest.c
+index 477bb1b..1503465 100644
+--- a/TESTS/readtest.c
++++ b/TESTS/readtest.c
+@@ -1961,7 +1961,7 @@ main (int argc, char *argv[]) {
+ 
+   printf ("Total tests: %d, failed result: %d, failed status: %d\n",
+ 	  tests, fail_res, fail_status);
+-  return 0;
++  return fail_res || fail_status;
+ 
+ }
+ 
