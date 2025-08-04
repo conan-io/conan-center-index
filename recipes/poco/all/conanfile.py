@@ -122,7 +122,7 @@ class PocoConan(ConanFile):
     def requirements(self):
         self.requires("pcre2/[>=10.42 <11]")
         if Version(self.version) >= "1.14.0":
-            self.requires("utf8proc/2.9.0")
+            self.requires("utf8proc/[>=2.9.0 <3]")
         self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
         if self.options.enable_xml:
             self.requires("expat/[>=2.6.2 <3]", transitive_headers=True)
@@ -219,7 +219,7 @@ class PocoConan(ConanFile):
         deps.set_property("libmysqlclient", "cmake_additional_variables_prefixes", ["MYSQL"])
         deps.set_property("libmysqlclient", "cmake_find_mode", "config")
         deps.set_property("libpq", "cmake_target_name", "PostgreSQL::PostgreSQL")
-        deps.set_property("libpq", "cmake_target_aliases", ["PostgreSQL::Client"])
+        deps.set_property("libpq", "cmake_target_aliases", ["PostgreSQL::client"])
         deps.set_property("libpq", "cmake_file_name", "PostgreSQL")
         deps.set_property("pcre2::pcre2-8", "cmake_target_name", "Pcre2::Pcre2")
         deps.set_property("utf8proc", "cmake_target_name", "Utf8Proc::Utf8Proc")
