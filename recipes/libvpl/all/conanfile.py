@@ -74,7 +74,12 @@ class LibvplConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "VPL::VPL")
         self.cpp_info.set_property("cmake_target_aliases", ["VPL::dispatcher"])
         self.cpp_info.set_property("pkg_config_name", "vpl")
-        self.cpp_info.libs = ["vpl"]
+
+        # Handle debug suffix (only on Windows)
+        debug_suffix = ""
+        if self.settings.os == "Windows" and self.settings.build_type == "Debug":
+            debug_suffix = "d"
+        self.cpp_info.libs = [f"vpl{debug_suffix}"]
 
         # Add system libraries if needed
         if self.settings.os in ["Linux", "FreeBSD"]:
