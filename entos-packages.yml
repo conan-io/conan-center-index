@@ -125,6 +125,9 @@ opengl:
 openssl:
   versions:
     - '3.2.2'
+opentelemetry-cpp:
+  versions:
+    - '1.21.0'
 pact_ffi:
   versions:
     - '0.4.28'
