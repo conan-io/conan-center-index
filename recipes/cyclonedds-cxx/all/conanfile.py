@@ -136,9 +136,10 @@ class CycloneDDSCXXConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS-CXX"))
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        copy(self, "Generate.cmake",
-                   src=os.path.join(self.source_folder, os.pardir, "cmake"),
-                   dst=os.path.join(self.package_folder, self._module_path))
+        if self._has_idlc():
+            copy(self, "Generate.cmake",
+                       src=os.path.join(self.source_folder, os.pardir, "cmake"),
+                       dst=os.path.join(self.package_folder, self._module_path))
         if self.settings.os == "Windows":
             for p in ("*.pdb", "concrt*.dll", "msvcp*.dll", "vcruntime*.dll"):
                 rm(self, p, os.path.join(self.package_folder, "bin"))
@@ -153,10 +154,11 @@ class CycloneDDSCXXConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "CycloneDDS-CXX")
         self.cpp_info.set_property("cmake_target_name", "CycloneDDS-CXX::CycloneDDS-CXX")
         self.cpp_info.set_property("pkg_config_name", "CycloneDDS-CXX")
-        build_modules = [
-            os.path.join(self._module_path, "Generate.cmake"),
-        ]
-        self.cpp_info.set_property("cmake_build_modules", build_modules)
+        if self._has_idlc()
+            build_modules = [
+                os.path.join(self._module_path, "Generate.cmake"),
+            ]
+            self.cpp_info.set_property("cmake_build_modules", build_modules)
         self.cpp_info.includedirs = ["include/ddscxx"]
         self.cpp_info.builddirs = [self._module_path]
         self.cpp_info.components["ddscxx"].libs = ["ddscxx"]
@@ -168,9 +170,10 @@ class CycloneDDSCXXConan(ConanFile):
             self.cpp_info.components["ddscxx"].requires.append("iceoryx::iceoryx")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["ddscxx"].system_libs = ["m"]
-        self.cpp_info.components["idlcxx"].libs = ["cycloneddsidlcxx"]
-        self.cpp_info.components["idlcxx"].set_property("cmake_target_name", "CycloneDDS-CXX::idlcxx")
-        self.cpp_info.components["idlcxx"].requires = ["cyclonedds::idl"]
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.buildenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
-        self.runenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
+        if self._has_idlc()
+            self.cpp_info.components["idlcxx"].libs = ["cycloneddsidlcxx"]
+            self.cpp_info.components["idlcxx"].set_property("cmake_target_name", "CycloneDDS-CXX::idlcxx")
+            self.cpp_info.components["idlcxx"].requires = ["cyclonedds::idl"]
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+            self.buildenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
+            self.runenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
