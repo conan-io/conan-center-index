@@ -1,0 +1,94 @@
+diff --git a/src/osgEarthDrivers/lerc/CMakeLists.txt b/src/osgEarthDrivers/lerc/CMakeLists.txt
+index e8d0f8c..9ca5a21 100644
+--- a/src/osgEarthDrivers/lerc/CMakeLists.txt
++++ b/src/osgEarthDrivers/lerc/CMakeLists.txt
+@@ -1,15 +1,7 @@
+-include_directories(BEFORE ../../third_party/lerc/include )
++include_directories(BEFORE ${lerc_INCLUDE_DIR} )
+ 
+ add_osgearth_plugin(
+     TARGET osgdb_lerc
+-    SOURCES
+-        ReaderWriterLERC.cpp
+-        ../../third_party/lerc/src/LercLib/BitMask.cpp
+-        ../../third_party/lerc/src/LercLib/BitStuffer2.cpp
+-        ../../third_party/lerc/src/LercLib/Huffman.cpp
+-        ../../third_party/lerc/src/LercLib/Lerc.cpp
+-        ../../third_party/lerc/src/LercLib/Lerc_c_api_impl.cpp
+-        ../../third_party/lerc/src/LercLib/Lerc2.cpp
+-        ../../third_party/lerc/src/LercLib/RLE.cpp
+-        ../../third_party/lerc/src/LercLib/Lerc1Decode/BitStuffer.cpp
+-        ../../third_party/lerc/src/LercLib/Lerc1Decode/CntZImage.cpp )
+\ No newline at end of file
++    SOURCES ReaderWriterLERC.cpp
++    LIBRARIES ${lerc_LIBRARIES}
++ )
+\ No newline at end of file
+diff --git a/src/osgEarthProcedural/GroundCoverLayer.cpp b/src/osgEarthProcedural/GroundCoverLayer.cpp
+index 75bbc7c..b6c6e6d 100644
+--- a/src/osgEarthProcedural/GroundCoverLayer.cpp
++++ b/src/osgEarthProcedural/GroundCoverLayer.cpp
+@@ -1302,7 +1302,8 @@ GroundCoverLayer::Renderer::CameraStateRGLO::operator()(
+ void
+ GroundCoverLayer::Renderer::releaseGLObjects(osg::State* state) const
+ {
+-    _cameraState.forEach(CameraStateRGLO(state));
++    CameraStateRGLO state_rglo(state);
++    _cameraState.forEach(state_rglo);
+ 
+     if (_texArena.valid())
+     {
+diff --git a/src/osgEarthDrivers/cache_leveldb/CMakeLists.txt b/src/osgEarthDrivers/cache_leveldb/CMakeLists.txt
+index d5ee8a5..26bb1d0 100644
+--- a/src/osgEarthDrivers/cache_leveldb/CMakeLists.txt
++++ b/src/osgEarthDrivers/cache_leveldb/CMakeLists.txt
+@@ -1,5 +1,3 @@
+-FIND_PACKAGE(LevelDB)
+-
+ IF(LEVELDB_FOUND)
+ 
+     INCLUDE_DIRECTORIES( ${LEVELDB_INCLUDE_DIR} )
+diff --git a/src/osgEarthDrivers/gltf/CMakeLists.txt b/src/osgEarthDrivers/gltf/CMakeLists.txt
+index 0b20396..67c0db1 100644
+--- a/src/osgEarthDrivers/gltf/CMakeLists.txt
++++ b/src/osgEarthDrivers/gltf/CMakeLists.txt
+@@ -16,7 +16,7 @@ add_osgearth_plugin(
+     
+ include_directories(
+     ${OSGEARTH_EMBEDDED_THIRD_PARTY_DIR}/tinygltf 
+-    ${OSGEARTH_EMBEDDED_THIRD_PARTY_DIR}/rapidjson/include/rapidjson )
++    ${RapidJSON_INCLUDE_DIR}/rapidjson )
+ 
+ if (draco_FOUND)
+     #include_directories(${draco_INCLUDE_DIRS})
+diff --git a/src/osgEarthDrivers/fastdxt/dxt.cpp b/src/osgEarthDrivers/fastdxt/dxt.cpp
+index 90970a4..8c688b9 100644
+--- a/src/osgEarthDrivers/fastdxt/dxt.cpp
++++ b/src/osgEarthDrivers/fastdxt/dxt.cpp
+@@ -119,7 +119,12 @@ void CompressImageDXT5YCoCg( const byte *inBuf, byte *outBuf, int width, int hei
+ 			     int &outputBytes )
+ {
+   byte *tmpBuf;
++
++#ifdef __MINGW32__
++  tmpBuf = (byte*)__mingw_aligned_malloc(width*height*4, 16);
++#else
+   tmpBuf = (byte*)memalign(16, width*height*4);
++#endif
+   memset(tmpBuf, 0, width*height*4);
+   RGBAtoYCoCg(inBuf, tmpBuf, width, height);
+   CompressImageDXT5(tmpBuf, outBuf, width, height, outputBytes);
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 37cf728..694d947 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -186,7 +186,8 @@ include(cmake/osgearth-macros.cmake)
+ include(cmake/install-package-config-files.cmake)
+ 
+ # Detect the OSG version so we can append it to plugin DLLs just like OSG does.
+-detect_osg_version()
++set(OPENSCENEGRAPH_VERSION "3.6.5")
++set(OSG_PLUGINS "osgPlugins-${OPENSCENEGRAPH_VERSION}" CACHE STRING "" FORCE)
+ 
+ if(NOT OPENSCENEGRAPH_VERSION)
+ 	set(OPENSCENEGRAPH_VERSION ${OPENSCENEGRAPH_MAJOR_VERSION}.${OPENSCENEGRAPH_MINOR_VERSION}.${OPENSCENEGRAPH_PATCH_VERSION})

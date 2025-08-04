@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(cmake_wrapper)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
-
 if(WIN32)
     add_compile_definitions(NOGDI)
 endif()
@@ -73,7 +70,9 @@ set(LIBZIP_LIBRARY ${libzip_LIBRARIES})
 set(LIBZIP_INCLUDE_DIR ${libzip_INCLUDE_DIR})
 
 # leveldb
-find_package(leveldb)
+if (OSGEARTH_BUILD_LEVELDB_CACHE)
+    find_package(leveldb)
+endif ()
 set(LEVELDB_FOUND ${leveldb_FOUND})
 set(LEVELDB_LIBRARY ${leveldb_LIBRARIES})
 set(LEVELDB_INCLUDE_DIR ${leveldb_INCLUDE_DIR})
