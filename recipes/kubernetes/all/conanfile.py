@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 from os.path import join
 
-required_conan_version = ">=2"
+required_conan_version = ">=2.4"
 
 
 class kubernetesRecipe(ConanFile):
