@@ -755,7 +755,7 @@ class LibcurlConan(ConanFile):
             self.cpp_info.components["curl"].system_libs = ["rt", "pthread"]
         elif self.settings.os == "Windows":
             # used on Windows for VS build, native and cross mingw build
-            self.cpp_info.components["curl"].system_libs = ["ws2_32", "bcrypt"]
+            self.cpp_info.components["curl"].system_libs = ["ws2_32", "bcrypt", "iphlpapi"]
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("wldap32")
             if self.options.with_ssl in ("schannel", "libressl"):
