@@ -1,8 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, VCVars
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag
 from conan.tools.build import check_min_cppstd
 from collections import namedtuple
 import os
@@ -172,16 +172,6 @@ class PocoConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
 
-    def _dep_include_paths(self, dep_name):
-        dep = self.dependencies[dep_name]
-        dep_cpp_info = dep.cpp_info.aggregated_components()
-        return [os.path.join(dep.package_folder, dir).replace("\\", "/") for dir in dep_cpp_info.includedirs]
-
-    def _dep_lib_paths(self, dep_name):
-        dep = self.dependencies[dep_name]
-        dep_cpp_info = dep.cpp_info.aggregated_components()
-        return [os.path.join(dep.package_folder, dir).replace("\\", "/") for dir in dep_cpp_info.libdirs]
-
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_BUILD_TYPE"] = self.settings.build_type
@@ -227,11 +217,6 @@ class PocoConan(ConanFile):
         deps.set_property("libpq", "cmake_file_name", "PostgreSQL")
         deps.set_property("pcre2::pcre2-8", "cmake_target_name", "Pcre2::Pcre2")
         deps.generate()
-
-        if is_msvc(self):
-            # On Windows, Poco needs a message (MC) compiler.
-            vcvars = VCVars(self)
-            vcvars.generate()
 
     def build(self):
         cmake = CMake(self)
