@@ -527,17 +527,17 @@ class AwsSdkCppConan(ConanFile):
         # dont bump them independently, check the file
         # Create the new versions for the dependencies in the order shown
         # in that script, they are mostly topo sorted
-        self.requires("aws-crt-cpp/0.32.8", transitive_headers=True)
+        self.requires("aws-crt-cpp/0.33.2", transitive_headers=True)
         self.requires("aws-c-auth/0.9.0")
-        self.requires("aws-c-cal/0.9.1")
+        self.requires("aws-c-cal/0.9.2")
         self.requires("aws-c-common/0.12.3")
         self.requires("aws-c-compression/0.3.1")
-        self.requires("aws-c-event-stream/0.5.4")
-        self.requires("aws-c-http/0.10.1")
-        self.requires("aws-c-io/0.19.1")
-        self.requires("aws-c-mqtt/0.13.1")
+        self.requires("aws-c-event-stream/0.5.5")
+        self.requires("aws-c-http/0.10.2")
+        self.requires("aws-c-io/0.21.0")
+        self.requires("aws-c-mqtt/0.13.2")
         if self.options.get_safe("s3-crt"):
-            self.requires("aws-c-s3/0.8.0")
+            self.requires("aws-c-s3/0.8.3")
         self.requires("aws-c-sdkutils/0.2.4")  # No mention of this in the code
         self.requires("aws-checksums/0.2.6")
         if self.settings.os != "Windows":

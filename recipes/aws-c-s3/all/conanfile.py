@@ -32,10 +32,10 @@ class AwsCS3(ConanFile):
 
     def requirements(self):
         self.requires("aws-c-common/0.12.3", transitive_headers=True, transitive_libs=True)
-        self.requires("aws-c-cal/0.9.1")
+        self.requires("aws-c-cal/0.9.2")
         self.requires("aws-c-auth/0.9.0", transitive_headers=True)
-        self.requires("aws-c-http/0.10.1")
-        self.requires("aws-c-io/0.19.1", transitive_headers=True)
+        self.requires("aws-c-http/0.10.2")
+        self.requires("aws-c-io/0.21.0", transitive_headers=True)
         self.requires("aws-checksums/0.2.6")
 
     def source(self):
