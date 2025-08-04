@@ -115,7 +115,7 @@ class LibarchiveConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "3.7.9":
-            self.tool_requires("cmake/[>=3.17 <4]")
+            self.tool_requires("cmake/[>=3.17]")
 
     def validate(self):
         if self.settings.os != "Windows" and self.options.with_cng:
@@ -132,6 +132,9 @@ class LibarchiveConan(ConanFile):
         cmake_deps = CMakeDeps(self)
         cmake_deps.generate()
         tc = CMakeToolchain(self)
+        # CMake 4 support
+        if Version(self.version) < "3.7.9":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         # turn off deps to avoid picking up them accidentally
         tc.variables["ENABLE_NETTLE"] = self.options.with_nettle
         tc.variables["ENABLE_OPENSSL"] = self.options.with_openssl
