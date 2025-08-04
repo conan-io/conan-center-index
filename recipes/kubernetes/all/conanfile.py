@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, rmdir
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.scm import Version
 from os.path import join
 
 required_conan_version = ">=2.4"
