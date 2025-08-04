@@ -145,7 +145,7 @@ class ProtobufConan(ConanFile):
             tc.cache_variables["protobuf_DEBUG_POSTFIX"] = ""
         tc.cache_variables["protobuf_BUILD_LIBPROTOC"] = self.settings.os != "tvOS"
         tc.cache_variables["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
-        tc.cache_variables["protobuf_BUILD_LIBUPB"] = self.options.get_safe("upb")
+        tc.cache_variables["protobuf_BUILD_LIBUPB"] = self.settings.os != "tvOS"
         if self._protobuf_release >= "22.0":
             tc.cache_variables["protobuf_ABSL_PROVIDER"] = "package"
             if not self.settings.compiler.get_safe("cppstd") and self._protobuf_release >= "22.0":
