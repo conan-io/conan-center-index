@@ -225,6 +225,7 @@ class PocoConan(ConanFile):
         deps.set_property("libmysqlclient", "cmake_find_mode", "config")
         deps.set_property("libpq", "cmake_target_name", "PostgreSQL::client")
         deps.set_property("libpq", "cmake_file_name", "PostgreSQL")
+        deps.set_property("pcre2::pcre2-8", "cmake_target_name", "Pcre2::Pcre2")
         deps.generate()
 
         if is_msvc(self):
