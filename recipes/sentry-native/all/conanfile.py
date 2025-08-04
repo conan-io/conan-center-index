@@ -130,6 +130,7 @@ class SentryNativeConan(ConanFile):
                 self.requires("breakpad/cci.20210521")
         if self.options.get_safe("qt"):
             self.requires("qt/[>=5.15.16 <7]")
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
@@ -196,6 +197,8 @@ class SentryNativeConan(ConanFile):
             self.cpp_info.components["sentry"].system_libs = ["pthread", "dl"]
         elif is_apple_os(self):
             self.cpp_info.components["sentry"].frameworks = ["CoreGraphics", "CoreText"]
+            if self.options.get_safe("qt"):
+                self.cpp_info.components["sentry"].frameworks.append("UniformTypeIdentifiers")
         elif self.settings.os == "Android":
             self.cpp_info.components["sentry"].system_libs = ["dl", "log"]
         elif self.settings.os == "Windows":
