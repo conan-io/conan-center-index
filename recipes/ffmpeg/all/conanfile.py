@@ -244,7 +244,6 @@ class FFMpegConan(ConanFile):
             "with_libx264": ["avcodec"],
             "with_libx265": ["avcodec"],
             "with_libvpx": ["avcodec"],
-            "with_libvpl": ["avcodec"],
             "with_libmfx": ["avcodec"],
             "with_libmp3lame": ["avcodec"],
             "with_libfdk_aac": ["avcodec"],
@@ -384,6 +383,8 @@ class FFMpegConan(ConanFile):
             self.requires("whisper-cpp/[>=1.7.6 <2]")
         if self.options.get_safe("with_openapv"):
             self.requires("openapv/0.2.0.4")
+        if self.options.with_libvpl:
+            self.requires("libvpl/2.15.0")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -1003,3 +1004,6 @@ class FFMpegConan(ConanFile):
 
         if self.options.get_safe("with_vulkan"):
             avutil.requires.append("vulkan-loader::vulkan-loader")
+
+        if self.options.get_safe("with_libvpl"):
+            avutil.requires.append("VPL::dispatcher")
