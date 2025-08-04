@@ -24,16 +24,11 @@ class kubernetesRecipe(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": True, "fPIC": True}
 
+    implements = ["auto_shared_fpic"]
+    languages = "C"
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def validate(self):
         if self.settings.os == "Windows":
