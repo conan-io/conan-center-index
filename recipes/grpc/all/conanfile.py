@@ -71,6 +71,10 @@ class GrpcConan(ConanFile):
     def _supports_libsystemd(self):
         return self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52"
 
+    @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang"
+
     def export(self):
         copy(self, f"target_info/grpc_{self.version}.yml", src=self.recipe_folder, dst=self.export_folder)
 
@@ -209,6 +213,11 @@ class GrpcConan(ConanFile):
         if is_apple_os(self):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
             tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
+
+        if is_msvc(self) or self._is_clang_cl:
+            runtime = self.settings.get_safe("compiler.runtime")
+            if runtime:
+                tc.cache_variables["grpc_MSVC_STATIC_RUNTIME"] = runtime == "static"
 
         if self._supports_libsystemd:
             tc.cache_variables["gRPC_USE_SYSTEMD"] = self.options.with_libsystemd
