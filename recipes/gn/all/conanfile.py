@@ -138,7 +138,8 @@ class GnConan(ConanFile):
                             "def GenerateLastCommitPosition(host, header):",
                             "def GenerateLastCommitPosition(host, header):\n  return")
 
-            self.run(f"{sys.executable} build/gen.py " + load(self, "configure_args"))
+            python = "python" if self.settings_build.os == "Windows" else "python3"
+            self.run(f"{python} build/gen.py " + load(self, "configure_args"))
             self.run(f"ninja -C out -j{os.cpu_count()} -v")
 
     def package(self):
