@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.4"
@@ -28,21 +27,14 @@ class AwsChecksums(ConanFile):
         "fPIC": True,
     }
 
-    implements = ["auto_shared_fpic"]
+    implements = ["auto_shared_fpic", "auto_language"]
     languages = "C"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.version == "0.2.6":
-            self.requires("aws-c-common/0.12.3", transitive_headers=True)
-        if self.version == "0.2.3":
-            self.requires("aws-c-common/0.11.0", transitive_headers=True)
-        elif self.version == "0.1.18":
-            self.requires("aws-c-common/0.9.15", transitive_headers=True)
-        elif self.version == "0.1.12":
-            self.requires("aws-c-common/0.6.11", transitive_headers=True)
+        self.requires("aws-c-common/0.12.3", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -50,8 +42,6 @@ class AwsChecksums(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
-        if Version(self.version) < "0.2.3":
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

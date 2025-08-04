@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.4"
@@ -25,7 +24,7 @@ class AwsCCompression(ConanFile):
         "fPIC": True,
     }
 
-    implements = ["auto_shared_fpic"]
+    implements = ["auto_shared_fpic", "auto_language"]
     languages = "C"
 
     def layout(self):
@@ -33,12 +32,7 @@ class AwsCCompression(ConanFile):
 
     def requirements(self):
         # Don't bump this on its own, take into account aws-sdk-cpp graph
-        if self.version == "0.3.1":
-            self.requires("aws-c-common/0.12.3", transitive_headers=True, transitive_libs=True)
-        if self.version == "0.2.18":
-            self.requires("aws-c-common/0.9.15", transitive_headers=True, transitive_libs=True)
-        if self.version == "0.2.14":
-            self.requires("aws-c-common/0.6.11", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-common/0.12.3", transitive_headers=True, transitive_libs=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -46,8 +40,6 @@ class AwsCCompression(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
-        if Version(self.version) < "0.3.1":
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

@@ -26,7 +26,7 @@ class S2nConan(ConanFile):
         "fPIC": True,
     }
 
-    implements = ["auto_shared_fpic"]
+    implements = ["auto_shared_fpic", "auto_language"]
     languages = "C"
 
     def export_sources(self):
