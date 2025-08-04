@@ -149,8 +149,8 @@ class PocoConan(ConanFile):
         check_min_cppstd(self, 17)
 
     def validate(self):
-        # For version 1.13.3:
-        # https://github.com/pocoproject/poco/blob/d6bd48a94c5f03e3c69cac1b024fdad5120e3a7b/Foundation/CMakeLists.txt#L125-L128
+        #  1.13.3: https://github.com/pocoproject/poco/blob/d6bd48a94c5f03e3c69cac1b024fdad5120e3a7b/Foundation/CMakeLists.txt#L125-L128
+        #  1.14.2: https://github.com/pocoproject/poco/blob/96d182a99303fb068575294b36f0cc20da2e7b25/Foundation/CMakeLists.txt#L130
         check_min_cppstd(self, 14)
 
         if self.options.enable_apacheconnector:
@@ -218,9 +218,11 @@ class PocoConan(ConanFile):
         deps.set_property("libmysqlclient", "cmake_target_name", "MySQL::client")
         deps.set_property("libmysqlclient", "cmake_additional_variables_prefixes", ["MYSQL"])
         deps.set_property("libmysqlclient", "cmake_find_mode", "config")
-        deps.set_property("libpq", "cmake_target_name", "PostgreSQL::client")
+        deps.set_property("libpq", "cmake_target_name", "PostgreSQL::PostgreSQL")
+        deps.set_property("libpq", "cmake_target_aliases", ["PostgreSQL::Client"])
         deps.set_property("libpq", "cmake_file_name", "PostgreSQL")
         deps.set_property("pcre2::pcre2-8", "cmake_target_name", "Pcre2::Pcre2")
+        deps.set_property("utf8proc", "cmake_target_name", "Utf8Proc::Utf8Proc")
         deps.generate()
 
     def build(self):
