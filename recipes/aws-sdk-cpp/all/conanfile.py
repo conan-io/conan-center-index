@@ -337,6 +337,7 @@ class AwsSdkCppConan(ConanFile):
         ('qconnect', '1.11.618'),
         ('qldb', '1.11.618'),
         ('qldb-session', '1.11.618'),
+        ('queues', '1.11.618'),
         ('quicksight', '1.11.618'),
         ('ram', '1.11.618'),
         ('rbin', '1.11.618'),
