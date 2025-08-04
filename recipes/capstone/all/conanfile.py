@@ -77,7 +77,6 @@ class CapstoneConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        suffix = "_dll" if is_msvc(self) and self.options.shared and Version(self.version) < "5.0" else ""
-        self.cpp_info.libs = [f"capstone{suffix}"]
+        self.cpp_info.libs = ["capstone"]
         if self.options.shared:
             self.cpp_info.defines.append("CAPSTONE_SHARED")
