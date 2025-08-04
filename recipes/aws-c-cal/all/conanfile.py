@@ -26,7 +26,7 @@ class AwsCCal(ConanFile):
         "fPIC": True,
     }
 
-    implements = ["auto_shared_fpic", "auto_language"]
+    implements = ["auto_shared_fpic"]
     languages = "C"
 
     @property

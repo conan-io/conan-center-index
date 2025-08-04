@@ -32,7 +32,7 @@ class AwsCCommon(ConanFile):
         "cpu_extensions": True,
     }
 
-    implements = ["auto_shared_fpic", "auto_language"]
+    implements = ["auto_shared_fpic"]
     languages = "C"
 
     def layout(self):
