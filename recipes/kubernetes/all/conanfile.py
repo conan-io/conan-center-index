@@ -31,8 +31,8 @@ class kubernetesRecipe(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def validate(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(f"{self.ref} can not be used on Windows.")
+        if self.settings.compiler == "msvc":
+            raise ConanInvalidConfiguration(f"{self.ref} can not be used on msvc.")
 
     def requirements(self):
         self.requires("libcurl/[>=7.78.0 <9]", transitive_headers=True)
