@@ -81,7 +81,7 @@ class DateConan(ConanFile):
             tc.cache_variables["MANUAL_TZ_DB"] = bool(self.options.tz_db in ["embedded", "manual"])
             tc.cache_variables["BUILD_TZ_LIB"] = True
             if self.options.tz_db == "embedded":
-                tc.preprocessor_definitions["INSTALL"] = self.source_folder.replace("\\", "/")
+                tc.preprocessor_definitions["INSTALL"] = self.package_folder.replace("\\", "/")
             # workaround for gcc 7 and clang 5 not having string_view
             if Version(self.version) >= "3.0.0" and \
                 ((self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "7.0") or \
@@ -106,7 +106,10 @@ class DateConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
             rmdir(self, os.path.join(self.package_folder, "CMake"))
         copy(self, "*.h", dst=os.path.join(self.package_folder, "include", "date"),
-                src=os.path.join(self.source_folder, "include", "date"))
+             src=os.path.join(self.source_folder, "include", "date"))
+        if self.options.tz_db == "embedded":
+            copy(self, "*", dst=os.path.join(self.package_folder, "tzdata"),
+                src=os.path.join(self.source_folder, "tzdata"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "date")
