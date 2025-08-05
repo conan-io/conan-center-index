@@ -143,7 +143,7 @@ class wxWidgetsConan(ConanFile):
             self.requires("libcurl/[>=7.78.0 <9]")
 
         if self.options.jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/9f")
         elif self.options.jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.2")
         elif self.options.jpeg == "mozjpeg":
