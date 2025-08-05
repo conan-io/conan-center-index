@@ -46,6 +46,10 @@ class GnConan(ConanFile):
         # default to `c++` executable, which is the system default on most systems
         replace_in_file(self, os.path.join(self.source_folder, "build/gen.py"), "'clang++'", "'c++'")
 
+        # support windows arm64
+        replace_in_file(self, os.path.join(self.source_folder, "src", "util", "build_config.h"),
+                        "defined(__aarch64__)", "defined(__aarch64__) || defined(_M_ARM64)")
+
     def generate(self):
 
         if is_msvc(self):
