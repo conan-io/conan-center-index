@@ -978,7 +978,7 @@ class FFMpegConan(ConanFile):
             if self.options.get_safe("with_openapv"):
                 avcodec.requires.append("openapv::openapv")
             if self.options.get_safe("with_libvpl"):
-                avcodec.requires.append("VPL::dispatcher")
+                avcodec.requires.append("libvpl::dispatcher")
             if self.options.get_safe("with_nvcodec"):
                 avcodec.requires.append("nv-codec-headers::nv-codec-headers")
 
