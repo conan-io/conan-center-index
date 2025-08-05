@@ -946,8 +946,8 @@ class BoostConan(ConanFile):
     @property
     def _python_inc(self):
         """
-        obtain the result of the "distutils.sysconfig.get_python_inc()" call
-        :return: result of the "distutils.sysconfig.get_python_inc()" execution
+        obtain the attribute value for Python sysconfig
+        :return: result of the sysconfig.get_path
         """
         return self._run_python_script("from __future__ import print_function; "
                                        "import sysconfig; "
