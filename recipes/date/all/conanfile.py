@@ -23,13 +23,22 @@ class DateConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "header_only": [True, False],
-        "tz_db": ["embedded", "system", "manual"]
+        "tz_db": ["download", "system", "manual"],
+        "use_tz_db_in_dot": [True, False]
+    }
+    options_description = {
+        "tz_db": """Select how to consume the tz database.
+                    - download: The latest database is downloaded in runtime using curl.
+                    - system: Use the system database.
+                    - manual: The consumer  should indicate the path to the database with set_install()""",
+        "use_tz_db_in_dot": "Describe the purpose and functionality of 'option2'. ",
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "header_only": False,
-        "tz_db": "embedded"
+        "tz_db": "download",
+        "use_tz_db_in_dot": False
     }
 
     def export_sources(self):
@@ -47,6 +56,7 @@ class DateConan(ConanFile):
         if self.options.header_only:
             del self.options.shared
             del self.options.tz_db
+            del self.options.use_tz_db_in_dot
             self.package_type = "header-library"
 
     def layout(self):
@@ -61,9 +71,11 @@ class DateConan(ConanFile):
             check_min_cppstd(self, 11)
         if self.options.get_safe("tz_db") == "system" and self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Using system tz database is not supported on Windows")
+        if self.options.get_safe("tz_db") != "download" and self.options.get_safe("use_tz_db_in_dot"):
+            raise ConanInvalidConfiguration("Option 'use_tz_db_in_dot'=True cannot be used with 'tz_db' != 'download'")
 
     def requirements(self):
-        if self.version == "2.4.1" and self.options.get_safe("tz_db") != "system":
+        if self.version == "2.4.1" or self.options.get_safe("tz_db") == "download":
             self.requires("libcurl/[>=7.78 <9]")
 
     def source(self):
@@ -78,10 +90,11 @@ class DateConan(ConanFile):
             tc.cache_variables["BUILD_TZ_LIB"] = False
         else:
             tc.cache_variables["USE_SYSTEM_TZ_DB"] = bool(self.options.tz_db == "system")
-            tc.cache_variables["MANUAL_TZ_DB"] = bool(self.options.tz_db in ["embedded", "manual"])
+            tc.cache_variables["MANUAL_TZ_DB"] = bool(self.options.tz_db == "manual")
+            tc.cache_variables["USE_TZ_DB_IN_DOT"] = self.options.use_tz_db_in_dot
             tc.cache_variables["BUILD_TZ_LIB"] = True
-            if self.options.tz_db == "embedded":
-                tc.preprocessor_definitions["INSTALL"] = self.package_folder.replace("\\", "/")
+            if self.options.get_safe("use_tz_db_in_dot"):
+                tc.preprocessor_definitions["INSTALL"] = "."
             # workaround for gcc 7 and clang 5 not having string_view
             if Version(self.version) >= "3.0.0" and \
                 ((self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "7.0") or \
@@ -107,9 +120,6 @@ class DateConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "CMake"))
         copy(self, "*.h", dst=os.path.join(self.package_folder, "include", "date"),
              src=os.path.join(self.source_folder, "include", "date"))
-        if self.options.tz_db == "embedded":
-            copy(self, "*", dst=os.path.join(self.package_folder, "tzdata"),
-                src=os.path.join(self.source_folder, "tzdata"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "date")
@@ -143,5 +153,5 @@ class DateConan(ConanFile):
 
             self.cpp_info.components["date-tz"].defines.extend(defines)
 
-            if self.version == "2.4.1" and self.options.tz_db != "system":
+            if self.version == "2.4.1" or self.options.get_safe("tz_db") == "download":
                 self.cpp_info.components["date-tz"].requires.append("libcurl::libcurl")
