@@ -53,6 +53,10 @@ class ManifoldConan(ConanFile):
         tc.cache_variables["MANIFOLD_TEST"] = False
         tc.cache_variables["MANIFOLD_CBIND"] = False
         tc.cache_variables["MANIFOLD_PYBIND"] = False
+        # Introduced in 3.2.0 release but provokes error like:
+        # src/disjoint_sets.h:99:10: error: 'size_t' was not declared in this scope; did you mean 'std::size_t'
+        # Then disable it
+        tc.variables["MANIFOLD_STRICT"] = False
         tc.cache_variables["MANIFOLD_PAR"] = self.options.with_parallel_acceleration
         tc.generate()
 
