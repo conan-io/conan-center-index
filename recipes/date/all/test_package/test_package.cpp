@@ -8,13 +8,6 @@ int main() {
     std::cout << "Conan was released on: " << conan_two << std::endl;
 
 #ifndef DATE_HEADER_ONLY
-    try {
-        const date::time_zone* tz = date::current_zone();
-    }
-    catch (const std::exception & e) {
-        return EXIT_FAILURE;
-    }
+    const date::time_zone* tz = date::current_zone();
 #endif
-
-    return EXIT_SUCCESS;
 }
