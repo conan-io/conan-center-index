@@ -41,6 +41,7 @@ class GnConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
+        apply_conandata_patches(self)
 
         # if compiler is not defined via Conan config (e.g. CXX buildenv flag, or compiler config),
         # default to `c++` executable, which is the system default on most systems
@@ -77,11 +78,7 @@ class GnConan(ConanFile):
             configure_args.append("-d")
         save(self, os.path.join(self.source_folder, "configure_args"), " ".join(configure_args))
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_sources()
         with chdir(self, self.source_folder):
             # Generate dummy header to be able to run `build/gen.py` with `--no-last-commit-position`.
             # This allows running the script without the tree having to be a git checkout.
@@ -93,10 +90,17 @@ class GnConan(ConanFile):
                     """),
             )
 
+            build_gen_py = os.path.join(self.source_folder, "build/gen.py")
+
             # Disable GenerateLastCommitPosition()
-            replace_in_file(self, os.path.join(self.source_folder, "build/gen.py"),
+            replace_in_file(self, build_gen_py,
                             "def GenerateLastCommitPosition(host, header):",
                             "def GenerateLastCommitPosition(host, header):\n  return")
+            
+            if is_msvc(self):
+                if self.settings.build_type not in ["Debug", "RelWithDebInfo"]:
+                    replace_in_file(self, build_gen_py, "'/DEBUG', ", "")
+                    replace_in_file(self, build_gen_py, "'/MACHINE:x64', ", "")
 
             python = "python" if self.settings_build.os == "Windows" else "python3"
             self.run(f"{python} build/gen.py " + load(self, "configure_args"))
