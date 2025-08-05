@@ -137,7 +137,7 @@ class DateConan(ConanFile):
 
             defines = []
             if self.options.tz_db == "system":
-                defines = defines.append("USE_OS_TZDB=1")
+                defines.append("USE_OS_TZDB=1")
 
             if self.settings.os == "Windows" and self.options.shared:
                 defines.append("DATE_BUILD_DLL=1")
