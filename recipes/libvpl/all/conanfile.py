@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
 import os
 
@@ -32,8 +32,9 @@ class LibvplConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def requirements(self):
         if self.settings.os == "Linux":
@@ -49,6 +50,10 @@ class LibvplConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
+
+        # INFO: Honor fPIC option. The upstream sets fPIC to ON always
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_POSITION_INDEPENDENT_CODE true)", "")
+
 
     def generate(self):
         tc = CMakeToolchain(self)
