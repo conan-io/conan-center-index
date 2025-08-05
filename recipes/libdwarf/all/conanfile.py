@@ -106,6 +106,8 @@ class LibdwarfConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["dwarf"]
-
         if self.options.with_dwarfgen:
             self.cpp_info.libs.append("dwarfp")
+        # It could be applied for all the versions and avoid those patches when #ifndef LIBDWARF_STATIC
+        if Version(self.version) >= "2.1.0" and not self.options.shared:
+            self.cpp_info.defines = ["LIBDWARF_STATIC=1"]

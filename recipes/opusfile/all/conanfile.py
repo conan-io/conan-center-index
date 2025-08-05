@@ -102,9 +102,13 @@ class OpusFileConan(ConanFile):
         apply_conandata_patches(self)
         if is_msvc(self):
             sln_folder = os.path.join(self.source_folder, "win32", "VS2015")
+            sln = os.path.join(sln_folder, "opusfile.sln")
             vcxproj = os.path.join(sln_folder, "opusfile.vcxproj")
             if not self.options.http:
                 replace_in_file(self, vcxproj, "OP_ENABLE_HTTP;", "")
+            if self.settings.arch == "armv8":
+                for file in [sln, vcxproj]:
+                    replace_in_file(self, file, "x64", "ARM64")
 
             #==============================
             # TODO: to remove once https://github.com/conan-io/conan/pull/12817 available in conan client
@@ -133,7 +137,7 @@ class OpusFileConan(ConanFile):
             msbuild = MSBuild(self)
             msbuild.build_type = self._msbuild_configuration
             msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
-            msbuild.build(os.path.join(sln_folder, "opusfile.sln"), targets=["opusfile"])
+            msbuild.build(sln, targets=["opusfile"])
         else:
             if self.settings.os == "Android":
                 # See https://github.com/conan-io/conan-center-index/pull/26245#pullrequestreview-2825164395
