@@ -943,8 +943,7 @@ class BoostConan(ConanFile):
             raise ConanInvalidConfiguration(f"detected python version {version} doesn't match conan option {self.options.python_version}")
         return version
 
-    @property
-    def _python_inc(self):
+    def _python_inc(self, name):
         """
         obtain the attribute value for Python sysconfig
         :return: result of the sysconfig.get_path
@@ -973,7 +972,7 @@ class BoostConan(ConanFile):
         plat_include = self._get_python_path("platinclude")
         include_py = self._get_python_var("INCLUDEPY")
         include_dir = self._get_python_var("INCLUDEDIR")
-        python_inc = self._python_inc
+        python_inc = self._python_inc("include")
 
         candidates = [include,
                       plat_include,
