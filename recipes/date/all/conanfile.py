@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import download, get, rmdir, apply_conandata_patches, export_conandata_patches, copy
+from conan.tools.files import get, rmdir, apply_conandata_patches, export_conandata_patches, copy
 from conan.tools.scm import Version
 
 import os
@@ -79,9 +79,7 @@ class DateConan(ConanFile):
             self.requires("libcurl/[>=7.78 <9]")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
-        get(self, **self.conan_data["sources"][self.version]["tz_db"], destination="tzdata", strip_root=True)
-        download(self, **self.conan_data["sources"][self.version]["windows_zones"], filename=os.path.join("tzdata", "windowsZones.xml"))
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
