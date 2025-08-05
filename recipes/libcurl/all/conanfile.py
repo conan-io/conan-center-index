@@ -154,9 +154,6 @@ class LibcurlConan(ConanFile):
         if Version(self.version) < "8.11.0":
             del self.options.with_websockets
 
-        # Default options
-        self.options.with_ssl = "darwinssl" if is_apple_os(self) else "openssl"
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -200,7 +197,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_ssl == "schannel" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("schannel only suppported on Windows.")
         if self.options.with_ssl == "darwinssl" and not is_apple_os(self):
-            raise ConanInvalidConfiguration("darwinssl only suppported on Apple like OS (Macos, iOS, watchOS or tvOS).")
+            raise ConanInvalidConfiguration("darwinssl (Secure Transport) is no longer supported as of libcurl 8.15.0 - please choose a different SSL backend.")
         if self.options.with_ssl == "openssl":
             openssl = self.dependencies["openssl"]
             if self.options.with_ntlm and openssl.options.no_des:
@@ -452,7 +449,6 @@ class LibcurlConan(ConanFile):
             f"--with-libpsl={self._yes_no(self.options.with_libpsl)}",
             f"--with-libgsasl={self._yes_no(self.options.with_libgsasl)}",
             f"--with-schannel={self._yes_no(self.options.with_ssl == 'schannel')}",
-            f"--with-secure-transport={self._yes_no(self.options.with_ssl == 'darwinssl')}",
             f"--with-brotli={self._yes_no(self.options.with_brotli)}",
             f"--enable-shared={self._yes_no(self.options.shared)}",
             f"--enable-static={self._yes_no(not self.options.shared)}",
