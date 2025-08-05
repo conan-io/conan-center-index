@@ -40,8 +40,8 @@ class CmaesConan(ConanFile):
 
     def validate_build(self):
         if Version(self.version) == "0.10.0":
-          if self.settings.compiler == "msvc":
-              raise ConanInvalidConfiguration("cmaes does not support MSVC")
+            if self.settings.compiler == "msvc":
+                raise ConanInvalidConfiguration("cmaes does not support MSVC")
 
     def validate(self):
         check_min_cppstd(self, 11)
@@ -65,7 +65,7 @@ class CmaesConan(ConanFile):
         tc.cache_variables["LIBCMAES_BUILD_PYTHON"] = False
         tc.cache_variables["LIBCMAES_BUILD_TESTS"] = False
         if Version(self.version) == "0.10.0":
-          tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
