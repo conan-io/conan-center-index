@@ -950,8 +950,8 @@ class BoostConan(ConanFile):
         :return: result of the "distutils.sysconfig.get_python_inc()" execution
         """
         return self._run_python_script("from __future__ import print_function; "
-                                       "import distutils.sysconfig; "
-                                       "print(distutils.sysconfig.get_python_inc())")
+                                       "import sysconfig; "
+                                       f"print(sysconfig.get_path('{name}'))")
 
     @property
     def _python_abiflags(self):
