@@ -685,6 +685,9 @@ class FFMpegConan(ConanFile):
         ld = buildenv_vars.get("LD")
         if ld:
             args.append(f"--ld={unix_path(self, ld)}")
+        elif str(self.settings.os) in ["Linux", "FreeBSD"]:
+            cxx = compilers_from_conf.get("cpp", buildenv_vars.get("CXX", self._default_compilers.get("cxx")))
+            args.append(f"--ld={unix_path(self, cxx)}")
         ranlib = buildenv_vars.get("RANLIB")
         if ranlib:
             args.append(f"--ranlib={unix_path(self, ranlib)}")
