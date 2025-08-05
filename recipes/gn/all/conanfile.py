@@ -49,10 +49,8 @@ class GnConan(ConanFile):
             vcvars = VCVars(self)
             vcvars.generate()
         else:
-            # gen.py listens to CXX, LD, CFLAGS, CXXFLAGS,
-            # which are defined by AutotoolsToolchain,
-            # this will handle compiler where defined as other than the default
-            # and crossbuild flags on macOS
+            # gen.py listens to CXX, LD, CFLAGS, CXXFLAGS, which are defined by AutotoolsToolchain,
+            # this handles compiler (if other than default) and cross-compilation flags (e.g. macOS)
             tc = AutotoolsToolchain(self)
             tc.generate()
 
@@ -92,7 +90,8 @@ class GnConan(ConanFile):
             python = "python" if self.settings_build.os == "Windows" else "python3"
             self.run(f"{python} build/gen.py " + load(self, "configure_args"))
             build_jobs = self.conf.get("tools.build:jobs", default=os.cpu_count())
-            self.run(f"ninja -C out -j{build_jobs}")
+            verbose = "-v" if self.conf.get("tools.compilation:verbosity") == "verbose" else ""
+            self.run(f"ninja -C out -j{build_jobs} {verbose}")
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))

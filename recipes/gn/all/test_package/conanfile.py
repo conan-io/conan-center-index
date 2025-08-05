@@ -1,11 +1,8 @@
 import os
 
 from conan import ConanFile
-from conan.tools.apple import is_apple_os
-from conan.tools.build import can_run, cross_building
-from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
+from conan.tools.build import can_run
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import unix_path
 
 
 class TestPackageConan(ConanFile):
