@@ -30,8 +30,8 @@ class DateConan(ConanFile):
         "tz_db": """Select how to consume the tz database.
                     - download: The latest database is downloaded in runtime using curl.
                     - system: Use the system database.
-                    - manual: The consumer  should indicate the path to the database with set_install()""",
-        "use_tz_db_in_dot": "Describe the purpose and functionality of 'option2'. ",
+                    - manual: The consumer should indicate the path to the database with set_install()""",
+        "use_tz_db_in_dot": "Download the tz database in the current folder"
     }
     default_options = {
         "shared": False,
