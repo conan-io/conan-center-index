@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
@@ -50,13 +49,12 @@ class LibwebpConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if Version(self.version) >= "1.3.0" and is_apple_os(self):
-            self.tool_requires("cmake/[>=3.17 <5]")
-        elif Version(self.version) >= "1.6.0":
-            self.tool_requires("cmake/[>=3.16 <5]")
+        if Version(self.version) >= "1.3.0":
+            self.tool_requires("cmake/[>=3.17]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -86,7 +84,6 @@ class LibwebpConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
