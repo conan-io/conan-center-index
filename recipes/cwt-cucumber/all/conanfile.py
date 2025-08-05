@@ -6,7 +6,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches, rmdir
 from conan.tools.scm import Version
 
-required_conan_version = ">=2"
+required_conan_version = ">=2.0.9"
 
 
 class CwtCucumberRecipe(ConanFile):

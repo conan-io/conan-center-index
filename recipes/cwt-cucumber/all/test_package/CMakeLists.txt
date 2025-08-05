@@ -1,12 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
-project(cwt-cucumber-test)
+project(test_package LANGUAGES CXX)
 
+find_package(cwt-cucumber REQUIRED CONFIG)
+
+add_executable(${PROJECT_NAME} test_package.cpp)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
-
-find_package(cwt-cucumber REQUIRED)
-
-set(target test_package)
-
-add_executable(${target} test_package.cpp)
-
-target_link_libraries(${target} cwt::cucumber)
+target_link_libraries(${PROJECT_NAME} PRIVATE cwt::cucumber)
