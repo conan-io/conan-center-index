@@ -1,0 +1,18 @@
+
+---
+
+## ✅ Next Step
+
+Let’s now begin functionality-by-functionality, and for each:
+
+1. **Explain the logic**
+2. **Explain new syntax**
+3. **Implement it**
+4. **Test with `main.cpp`**
+
+---
+
+Shall we go ahead with the **`getFrequency<T>` function** (to count how many times each item appears in a vector)?  
+It’s very useful in CP and a good way to introduce `template`, `map`, and iteration.
+
+Type `yes` or `start` and I’ll walk you through line by line.
