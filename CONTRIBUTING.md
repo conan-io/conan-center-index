@@ -23,7 +23,7 @@ To contribute follow the next steps:
 
 1. Comment in the corresponding issue that you want to contribute the package/fix proposed. If there is no open issue, we strongly suggest
    opening one to gather feedback.
-2. Read the [contributor licenses agreement](https://cla-assistant.io/conan-io/conan-center-index) and agree to it.
+2. Please review the [Contributor License Agreement (CLA)](https://cla-assistant.io/conan-io/conan-center-index). A signed CLA is required before a pull request is accepted.
 3. Get setup by following the [Developing Recipes](docs/developing_recipes_locally.md) guide and learn the basic commands.
 4. Check the [How To Add Packages](docs/adding_packages/README.md) page for the break down of ConanCenterIndex specific conventions and practices.
 5. In your fork create a `package/xxx` branch from the `master` branch and develop
