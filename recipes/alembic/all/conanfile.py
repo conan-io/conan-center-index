@@ -70,7 +70,6 @@ class AlembicConan(ConanFile):
         tc.variables["ALEMBIC_SHARED_LIBS"] = self.options.shared
         tc.variables["ALEMBIC_USING_IMATH_3"] = False
         tc.variables["ALEMBIC_ILMBASE_FOUND"] = 1
-        # tc.variables["ALEMBIC_ILMBASE_LIBS"] = "OpenEXR::OpenEXR"
         if Version(self.version) >= "1.8.4":
             tc.variables["ALEMBIC_DEBUG_WARNINGS_AS_ERRORS"] = False
         tc.generate()
