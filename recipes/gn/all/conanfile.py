@@ -1,5 +1,4 @@
 import os
-import shutil
 import textwrap
 
 from conan import ConanFile
@@ -33,8 +32,7 @@ class GnConan(ConanFile):
         export_conandata_patches(self)
     
     def validate_build(self):
-        min_cppstd = 17 if self.version == "cci.20210429" else 20
-        check_min_cppstd(self, min_cppstd)
+        check_min_cppstd(self, 20)
 
     def build_requirements(self):
         self.tool_requires("ninja/[>=1.11.1 <2]")
