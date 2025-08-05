@@ -35,7 +35,7 @@ class CwtCucumberRecipe(ConanFile):
         export_conandata_patches(self)
 
     def requirements(self):
-        self.requires("nlohmann_json/3.10.5")
+        self.requires("nlohmann_json/[~3.11]")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")

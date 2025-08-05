@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(cwt-cucumber-test)
 
-set(CMAKE_CXX_STANDARD 20)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 find_package(cwt-cucumber REQUIRED)
 
