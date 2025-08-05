@@ -70,20 +70,39 @@ class LibvplConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "vpl")
-        self.cpp_info.set_property("cmake_target_name", "VPL::VPL")
-        self.cpp_info.set_property("cmake_target_aliases", ["VPL::dispatcher"])
+        self.cpp_info.set_property("cmake_file_name", "VPL")
         self.cpp_info.set_property("pkg_config_name", "vpl")
 
-        # Handle debug suffix (only on Windows)
+        # Headers might be included without vpl prefix for backward compatibility to mfx
+        self.cpp_info.includedirs = ["include", "include/vpl"]
+
         debug_suffix = ""
         if self.settings.os == "Windows" and self.settings.build_type == "Debug":
             debug_suffix = "d"
-        self.cpp_info.libs = [f"vpl{debug_suffix}"]
 
-        # Add system libraries if needed
+        # ------------------------------------------------------------------
+        # dispatcher component (the only one that actually links a .lib/.so)
+        # ------------------------------------------------------------------
+        disp = self.cpp_info.components["dispatcher"]
+        disp.set_property("cmake_target_name", "VPL::dispatcher")
+        disp.libs = [f"vpl{debug_suffix}"]
+
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["dl", "pthread"]
+            disp.system_libs = ["dl", "pthread"]
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["advapi32"]
+            disp.system_libs = ["advapi32"]
+
+        # ------------------------------------------------------------------
+        # api component (headers for the C API)
+        # ------------------------------------------------------------------
+        api = self.cpp_info.components["api"]
+        api.set_property("cmake_target_name", "VPL::api")
+        api.requires = ["dispatcher"]
+
+        # ------------------------------------------------------------------
+        # cppapi component (headers for the C++ wrapper API)
+        # ------------------------------------------------------------------
+        cppapi = self.cpp_info.components["cppapi"]
+        cppapi.set_property("cmake_target_name", "VPL::cppapi")
+        cppapi.requires = ["api"]
 
