@@ -374,7 +374,7 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_libdrm"):
             self.requires("libdrm/2.4.119")
         if self.options.with_libvpl:
-            self.requires("libvpl/2.15.0")
+            self.requires("libvpl/[>=2.6 <3]")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
