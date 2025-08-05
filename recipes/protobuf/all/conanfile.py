@@ -36,7 +36,6 @@ class ProtobufConan(ConanFile):
         "with_zlib": True,
         "with_rtti": True,
         "lite": False,
-        "upb": False,
         "debug_suffix": True,
     }
 
@@ -62,6 +61,9 @@ class ProtobufConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        if self.options.upb == None:
+            self.options.upb = self._protobuf_release >= "31.1" and self.settings.os != "tvOS"
 
     def configure(self):
         if self.options.shared:
@@ -121,6 +123,9 @@ class ProtobufConan(ConanFile):
             abseil_cppstd = self.dependencies.host['abseil'].info.settings.compiler.cppstd
             if abseil_cppstd != self.settings.compiler.cppstd:
                 raise ConanInvalidConfiguration(f"Protobuf and abseil must be built with the same compiler.cppstd setting")
+
+        if self._protobuf_release >= "31.1" and self.settings.os != "tvOS" and not self.options.get_safe("upb"):
+            raise ConanInvalidConfiguration("upb must be build as it is a dependency of libprotoc.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
