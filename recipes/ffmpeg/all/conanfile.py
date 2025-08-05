@@ -397,7 +397,7 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_openapv"):
             self.requires("openapv/0.2.0.4")
         if self.options.with_libvpl:
-            self.requires("libvpl/2.15.0")
+            self.requires("libvpl/[>=2.6 <3]")
         if self.options.get_safe("with_nvcodec"):
             self.requires("nv-codec-headers/[>=11.1.5.3 <12.0 || >=12.0.16.1 <12.1 || >=12.1.14.0 <14]")
             
