@@ -37,12 +37,7 @@ class LibvplConan(ConanFile):
         export_conandata_patches(self)
 
     def requirements(self):
-        if self.settings.os == "Linux":
-            self.requires("libdrm/2.4.124")
-            self.requires("libva/2.21.0")
-            self.requires("xorg/system")
-            self.requires("wayland/1.22.0")
-            self.requires("wayland-protocols/1.45")
+        pass
 
     def layout(self):
         cmake_layout(self, src_folder="src")
