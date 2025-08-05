@@ -1,5 +1,3 @@
-import os
-
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.layout import basic_layout
