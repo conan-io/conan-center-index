@@ -130,7 +130,6 @@ class SentryNativeConan(ConanFile):
                 self.requires("breakpad/cci.20210521")
         if self.options.get_safe("qt"):
             self.requires("qt/[>=5.15.16 <7]")
-            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
@@ -206,7 +205,7 @@ class SentryNativeConan(ConanFile):
         if self.options.transport == "curl":
             self.cpp_info.components["sentry"].requires.extend(["libcurl::libcurl"])
         if self.options.get_safe("qt"):
-            self.cpp_info.components["sentry"].requires.extend(["qt::qt", "openssl::openssl"])
+            self.cpp_info.components["sentry"].requires.append("qt::qt")
 
         if not self.options.shared:
             self.cpp_info.components["sentry"].defines = ["SENTRY_BUILD_STATIC"]
