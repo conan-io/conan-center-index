@@ -948,7 +948,7 @@ class FFMpegConan(ConanFile):
             if self.options.get_safe("with_libdav1d"):
                 avcodec.requires.append("dav1d::dav1d")
             if self.options.get_safe("with_libvpl"):
-                avcodec.requires.append("VPL::dispatcher")
+                avcodec.requires.append("libvpl::dispatcher")
 
         if self.options.avformat:
             if self.options.with_bzip2:
