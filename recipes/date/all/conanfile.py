@@ -93,8 +93,9 @@ class DateConan(ConanFile):
             tc.cache_variables["BUILD_TZ_LIB"] = True
             if self.options.get_safe("use_tz_db_in_dot"):
                 tc.preprocessor_definitions["INSTALL"] = "."
-            if Version(self.version) >= "3.0.0" and not valid_min_cppstd(self, 17):
-                tc.cache_variables["DISABLE_STRING_VIEW"] = True
+            if Version(self.version) >= "3.0.0":
+                if not valid_min_cppstd(self, 17):
+                    tc.cache_variables["DISABLE_STRING_VIEW"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -139,10 +140,11 @@ class DateConan(ConanFile):
             if self.settings.os == "Windows" and self.options.shared:
                 defines.append("DATE_BUILD_DLL=1")
 
-            if Version(self.version) >= "3.0.0" and not valid_min_cppstd(self, 17):
-                defines.append("HAS_STRING_VIEW=0")
-            else:
-                defines.append("HAS_STRING_VIEW=1")
+            if Version(self.version) >= "3.0.0":
+                if not valid_min_cppstd(self, 17):
+                    defines.append("HAS_STRING_VIEW=0")
+                else:
+                    defines.append("HAS_STRING_VIEW=1")
 
             self.cpp_info.components["date-tz"].defines.extend(defines)
 
