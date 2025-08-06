@@ -1,29 +1,3 @@
-diff --git a/src/osgEarthDrivers/lerc/CMakeLists.txt b/src/osgEarthDrivers/lerc/CMakeLists.txt
-index e8d0f8c..9ca5a21 100644
---- a/src/osgEarthDrivers/lerc/CMakeLists.txt
-+++ b/src/osgEarthDrivers/lerc/CMakeLists.txt
-@@ -1,15 +1,7 @@
--include_directories(BEFORE ../../third_party/lerc/include )
-+include_directories(BEFORE ${lerc_INCLUDE_DIR} )
- 
- add_osgearth_plugin(
-     TARGET osgdb_lerc
--    SOURCES
--        ReaderWriterLERC.cpp
--        ../../third_party/lerc/src/LercLib/BitMask.cpp
--        ../../third_party/lerc/src/LercLib/BitStuffer2.cpp
--        ../../third_party/lerc/src/LercLib/Huffman.cpp
--        ../../third_party/lerc/src/LercLib/Lerc.cpp
--        ../../third_party/lerc/src/LercLib/Lerc_c_api_impl.cpp
--        ../../third_party/lerc/src/LercLib/Lerc2.cpp
--        ../../third_party/lerc/src/LercLib/RLE.cpp
--        ../../third_party/lerc/src/LercLib/Lerc1Decode/BitStuffer.cpp
--        ../../third_party/lerc/src/LercLib/Lerc1Decode/CntZImage.cpp )
-\ No newline at end of file
-+    SOURCES ReaderWriterLERC.cpp
-+    LIBRARIES ${lerc_LIBRARIES}
-+ )
-\ No newline at end of file
 diff --git a/src/osgEarthProcedural/GroundCoverLayer.cpp b/src/osgEarthProcedural/GroundCoverLayer.cpp
 index 75bbc7c..b6c6e6d 100644
 --- a/src/osgEarthProcedural/GroundCoverLayer.cpp

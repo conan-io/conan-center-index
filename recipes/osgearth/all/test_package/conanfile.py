@@ -7,25 +7,13 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "CMakeToolchain"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
 
     def layout(self):
         cmake_layout(self)
-
-    def generate(self):
-        toolchain = CMakeToolchain(self)
-
-        osgearth_version = Version(self.dependencies["osgearth"].ref.version)
-        minimum_cxx_standard = (11 if osgearth_version < "3.7.2" else 14)
-
-        toolchain.variables["TEST_PACKAGE_CXX_STANDARD"] = minimum_cxx_standard
-
-        toolchain.generate()
-
-        deps = CMakeDeps(self)
-        deps.generate()
 
     def build(self):
         cmake = CMake(self)

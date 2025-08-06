@@ -16,5 +16,5 @@ target_compile_features(
     ${PROJECT_NAME}
 
     PRIVATE
-        "cxx_std_${TEST_PACKAGE_CXX_STANDARD}"
+        cxx_std_14
 )

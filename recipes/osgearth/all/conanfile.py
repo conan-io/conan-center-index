@@ -4,7 +4,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.files import apply_conandata_patches, copy, get, rename, rmdir
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.33.0"
@@ -25,24 +24,17 @@ class OsgearthConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
 
-        # osgearth has support for an imgui integration, but it is honestly a mess:
+        # osgearth has support for an imgui integration in the form of a separate nodekit. Embedded versions of both
+        # imgui and imnodes are included with osgearth v3.7.2, but in order to build the imgui nodekit, all of the
+        # following conditions must be met:
         #
-        #   - osgearth v3.2 includes an embedded version of imgui (and imnodes) which is used to build the imgui
-        #     nodekit, but only if GLEW exists as a dependency.
+        #   - GLEW must exist as a dependency.
         #
-        #   - osgearth v3.3 removes the embedded version of imgui (and imnodes), effectively rendering the imgui nodekit
-        #     unusable (that is, unless the user actually copies their own version of imgui into the source directory).
+        #   - The OSGEARTH_BUILD_IMGUI_NODEKIT CMake variable must be set.
         #
-        #   - osgearth v3.7.2 yet again includes an embedded version of imgui (and imnodes), and yet again, GLEW must
-        #     exist as a dependency in order to build the imgui nodekit. This time, however, there is an additional
-        #     requirement: the OSGEARTH_BUILD_IMGUI_NODEKIT CMake variable must also be set.
-        #
-        # It should be possible to patch osgearth to ensure consistency between all of our supported versions by doing
-        # the following:
+        # It should be possible to patch osgearth to perform the following tasks:
         #
         #   - Replace the embedded versions of imgui and imnodes with their corresponding ConanFile.requires dependency.
-        #
-        #   - Ensure that the OSGEARTH_BUILD_IMGUI_NODEKIT CMake variable is respected across every osgearth version.
         #
         #   - Remove the explicit dependency on GLEW. (NOTE: This would be ideal, since osgearth only ever depends on
         #     GLEW to support its embedded version of imgui. However, it probably isn't required that we do this.)
@@ -54,13 +46,13 @@ class OsgearthConan(ConanFile):
         "build_procedural_nodekit": [True, False],
         # "build_triton_nodekit": [True, False],
         # "build_silverlining_nodekit": [True, False],
-        "build_leveldb_cache": [True, False],
+        "build_leveldb_cache": [True, False, "deprecated"],
         "build_rocksdb_cache": [True, False],
         "build_zip_plugin": [True, False],
         "enable_geocoder": [True, False],
         "with_geos": [True, False],
         "with_sqlite3": [True, False],
-        "with_draco": [True, False],
+        "with_draco": [True, False, "deprecated"],
         # "with_basisu": [True, False],
         "with_protobuf": [True, False],
         "with_webp": [True, False],
@@ -76,13 +68,13 @@ class OsgearthConan(ConanFile):
         "build_procedural_nodekit": True,
         # "build_triton_nodekit": False,
         # "build_silverlining_nodekit": False,
-        "build_leveldb_cache": False,
+        "build_leveldb_cache": "deprecated",
         "build_rocksdb_cache": False,
         "build_zip_plugin": True,
         "enable_geocoder": False,
         "with_geos": True,
         "with_sqlite3": True,
-        "with_draco": False,
+        "with_draco": "deprecated",
         # "with_basisu": False,
         "with_protobuf": True,
         "with_webp": True,
@@ -92,15 +84,11 @@ class OsgearthConan(ConanFile):
     }
 
     short_paths = True
-    exports_sources = "CMakeLists.txt", "patches/*.patch"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    exports_sources = "patches/*.patch"
 
     @property
     def _minimum_cpp_standard(self):
-        return (11 if Version(self.version) < "3.7.2" else 14)
+        return 14
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -119,24 +107,19 @@ class OsgearthConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+        def check_unused_deprecated_option(option_name: str):
+            if self.options.get_safe(option_name) != "deprecated":
+                self.output.warning(f'The "{option_name}" option is deprecated, and has no effect on the build.')
+
+        check_unused_deprecated_option("build_leveldb_cache")
+        check_unused_deprecated_option("with_draco")
+
     def config_options(self):
         if self.settings.os != "Windows":
             self.options.enable_wininet_for_http = False
 
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
-
-        if is_msvc(self) and Version(self.version) < "3.7.2":
-            self.options.build_procedural_nodekit = False
-
-        if Version(self.version) < "3.7.2":
-            if self.settings.compiler == "gcc" and self.settings.compiler.version == "11":
-                # need draco >= 1.4.0 for gcc11
-                # https://github.com/google/draco/issues/635
-                self.options.rm_safe("with_draco")
-        else:
-            self.options.rm_safe("build_leveldb_cache")
-            self.options.rm_safe("with_draco")
 
     def requirements(self):
         self.requires("opengl/system")
@@ -151,8 +134,6 @@ class OsgearthConan(ConanFile):
         # if self.options.build_silverlining_nodekit:
         #     self.requires("silverlining_nodekit")
 
-        if self.options.get_safe("build_leveldb_cache"):
-            self.requires("leveldb/1.22")
         if self.options.build_rocksdb_cache:
             self.requires("rocksdb/6.29.5")
         if self.options.build_zip_plugin:
@@ -161,8 +142,6 @@ class OsgearthConan(ConanFile):
             self.requires("geos/3.11.1")
         if self.options.with_sqlite3:
             self.requires("sqlite3/[>=3.42 <4]")
-        if self.options.get_safe("with_draco"):
-            self.requires("draco/1.4.3")
         # if self.options.with_basisu:
         #     self.requires("basisu")
         if self.options.with_protobuf:
@@ -174,8 +153,7 @@ class OsgearthConan(ConanFile):
         apply_conandata_patches(self)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _get_library_postfix(self, build_type: str) -> str:
         # We want our library postfix (that is, the value of the CMAKE_*_POSTFIX CMake variable for
@@ -218,28 +196,20 @@ class OsgearthConan(ConanFile):
         #
         # See the comments for the (hypothetical) "build_imgui_nodekit" option for more details on why we always
         # disable this nodekit.
-        if Version(self.version) >= "3.7.2":
-            toolchain.variables["OSGEARTH_BUILD_IMGUI_NODEKIT"] = False
+        toolchain.variables["OSGEARTH_BUILD_IMGUI_NODEKIT"] = False
 
         toolchain.variables["OSGEARTH_BUILD_PROCEDURAL_NODEKIT"] = self.options.build_procedural_nodekit
         # toolchain.variables["OSGEARTH_BUILD_TRITON_NODEKIT"] = self.options.build_triton_nodekit
         # toolchain.variables["OSGEARTH_BUILD_SILVERLINING_NODEKIT"] = self.options.build_silverlining_nodekit
 
-        if Version(self.version) < "3.7.2":
-            toolchain.variables["OSGEARTH_BUILD_LEVELDB_CACHE"] = self.options.build_leveldb_cache
-
-            # In osgEarth v3.7.2, the RocksDB plugin is always built if find_package(RocksDB QUIET) succeeds. In older
-            # versions, we may need to set a CMake variable for it.
-            toolchain.variables["OSGEARTH_BUILD_ROCKSDB_CACHE"] = self.options.build_rocksdb_cache
+        # In osgearth v3.7.2, the RocksDB plugin is always built if find_package(RocksDB QUIET) succeeds. There is
+        # thus no need to set a particular CMake variable based on the value of self.options.build_rocksdb_cache.
 
         toolchain.variables["OSGEARTH_BUILD_ZIP_PLUGIN"] = self.options.build_zip_plugin
         toolchain.variables["OSGEARTH_ENABLE_GEOCODER"] = self.options.enable_geocoder
 
         toolchain.variables["WITH_EXTERNAL_DUKTAPE"] = False
         toolchain.variables["WITH_EXTERNAL_TINYXML"] = False
-
-        if Version(self.version) < "3.7.2":
-            toolchain.variables["CURL_IS_STATIC"] = not self.dependencies["libcurl"].options.shared
 
         toolchain.variables["OSGEARTH_INSTALL_SHADERS"] = self.options.install_shaders
         toolchain.variables["OSGEARTH_ENABLE_NVTT_CPU_MIPMAPS"] = self.options.enable_nvtt_cpu_mipmaps
@@ -270,22 +240,20 @@ class OsgearthConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self._source_subfolder)
+        copy(self, pattern="LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
         cmake = CMake(self)
         cmake.install()
 
         if self.options.install_shaders:
-            relative_resources_root = ("resources" if Version(self.version) < "3.7.2" else "share")
-            rename(self, os.path.join(self.package_folder, relative_resources_root), os.path.join(self.package_folder, "res"))
+            rename(self, os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
 
-        if Version(self.version) < "3.7.2":
-            rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
-            if self.settings.os == "Linux":
-                rename(self, os.path.join(self.package_folder, "lib64"), os.path.join(self.package_folder, "lib"))
-        else:
-            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+    def package_id(self):
+        # Remove the deprecated options from the package ID calculation.
+        del self.info.options.build_leveldb_cache
+        del self.info.options.with_draco
 
     def package_info(self):
         postfix = self._get_library_postfix(str(self.settings.build_type))
@@ -336,9 +304,6 @@ class OsgearthConan(ConanFile):
         setup_plugin("osgearth_bumpmap")
         setup_plugin("osgearth_cache_filesystem")
 
-        if self.options.get_safe("build_leveldb_cache"):
-            setup_plugin("osgearth_cache_leveldb").requires.append("leveldb::leveldb")
-
         if self.options.build_rocksdb_cache:
             setup_plugin("osgearth_cache_rocksdb").requires.append("rocksdb::rocksdb")
 
@@ -352,11 +317,6 @@ class OsgearthConan(ConanFile):
         setup_plugin("gltf").requires.append("rapidjson::rapidjson")
         setup_plugin("kml")
         setup_plugin("lerc").requires.append("lerc::lerc")
-
-        if Version(self.version) < "3.7.2":
-            setup_plugin("osgearth_mapinspector")
-            setup_plugin("osgearth_monitor")
-
         setup_plugin("osgearth_scriptengine_javascript")
         setup_plugin("osgearth_sky_gl")
         setup_plugin("osgearth_sky_simple")
