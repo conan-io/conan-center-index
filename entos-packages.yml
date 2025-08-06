@@ -1,3 +1,6 @@
+abseil:
+  versions:
+    - '20250127.0'
 autoconf:
   versions:
     - '2.71'
@@ -73,6 +76,9 @@ launchdarkly:
 libbacktrace:
   versions:
     - 'cci.20210118'
+libcurl:
+  versions:
+    - '8.0.1'
 libffi:
   versions:
     - '3.4.4'
@@ -128,6 +134,9 @@ openssl:
 opentelemetry-cpp:
   versions:
     - '1.21.0'
+opentelemetry-proto:
+  versions:
+    - '1.7.0'
 pact_ffi:
   versions:
     - '0.4.28'
@@ -148,6 +157,9 @@ pkgconf:
   versions:
     - '2.1.0'
     - '2.2.0'
+protobuf:
+  versions:
+    - '5.27.0'
 spdlog:
   versions:
     - '1.15.3'
