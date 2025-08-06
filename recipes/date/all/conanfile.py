@@ -144,7 +144,7 @@ class DateConan(ConanFile):
 
             if Version(self.version) >= "3.0.0" and \
                 ((self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "7.0") or \
-                (self.settings.compiler == "clang" and Version(self.settings.compiler.version) <= "5.0")):
+                (self.settings.compiler == "clang" and Version(self.settings.compiler.version) <= "5.0")) or self.settings.os == "Windows":
                 defines.append("HAS_STRING_VIEW=0")
             else:
                 defines.append("HAS_STRING_VIEW=1")
