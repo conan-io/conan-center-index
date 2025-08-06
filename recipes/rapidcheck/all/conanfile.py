@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, save
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from os.path import join
@@ -69,6 +69,10 @@ class RapidcheckConan(ConanFile):
         if self.options.enable_gmock and not self.dependencies["gtest"].options.build_gmock:
             raise ConanInvalidConfiguration("The option `rapidcheck:enable_gmock` requires `gtest/*:build_gmock=True`")
 
+    def build_requirements(self):
+        if Version(self.version) >= "cci.20231215":
+            self.tool_requires("cmake/[>=3.16 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -97,17 +101,7 @@ class RapidcheckConan(ConanFile):
         cmake.install()
 
         rmdir(self, join(self.package_folder, "share"))
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            join(self.package_folder, self._module_file_rel_path),
-            {
-                "rapidcheck": "rapidcheck::rapidcheck_rapidcheck",
-                "rapidcheck_catch":"rapidcheck::rapidcheck_catch",
-                "rapidcheck_gmock": "rapidcheck::rapidcheck_gmock",
-                "rapidcheck_gtest": "rapidcheck::rapidcheck_gtest",
-            }
-        )
+        rm(self, "*.pc", self.package_folder, recursive=True)
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
@@ -149,16 +143,3 @@ class RapidcheckConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["rapidcheck_rapidcheck"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["rapidcheck_rapidcheck"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.enable_catch:
-            self.cpp_info.components["rapidcheck_catch"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components["rapidcheck_catch"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.enable_gmock:
-            self.cpp_info.components["rapidcheck_gmock"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components["rapidcheck_gmock"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.enable_gtest:
-            self.cpp_info.components["rapidcheck_gtest"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components["rapidcheck_gtest"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
