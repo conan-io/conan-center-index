@@ -18,11 +18,13 @@ class UvgRTPConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_crypto": [True, False],
+        "disable_logging": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_crypto": True,
+        "disable_logging": False,
     }
     package_type = "library"
     exports_sources = "patches/*"
@@ -52,8 +54,10 @@ class UvgRTPConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["UVGRTP_DISABLE_CRYPTO"] = not self.options.with_crypto
+        tc.variables["UVGRTP_DISABLE_PRINTS"] = self.options.disable_logging
         tc.variables["UVGRTP_DISABLE_TESTS"] = True
         tc.variables["UVGRTP_DISABLE_EXAMPLES"] = True
+        tc.variables["UVGRTP_RELEASE_COMMIT"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
