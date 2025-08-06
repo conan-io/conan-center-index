@@ -96,7 +96,7 @@ class DateConan(ConanFile):
             # workaround for gcc 7 and clang 5 not having string_view
             if Version(self.version) >= "3.0.0" and \
                 ((self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "7.0") or \
-                (self.settings.compiler == "clang" and Version(self.settings.compiler.version) <= "5.0")):
+                (self.settings.compiler == "clang" and Version(self.settings.compiler.version) <= "5.0")) or self.settings.os == "Windows":
                 tc.cache_variables["DISABLE_STRING_VIEW"] = True
         tc.generate()
         deps = CMakeDeps(self)
