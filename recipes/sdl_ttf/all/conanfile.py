@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2"
 
 
 class SdlttfConan(ConanFile):
@@ -53,7 +53,7 @@ class SdlttfConan(ConanFile):
     def requirements(self):
         self.requires("freetype/2.13.2")
         # https://github.com/conan-io/conan-center-index/pull/18366#issuecomment-1625464996
-        self.requires("sdl/2.28.3", transitive_headers=True, transitive_libs=True)
+        self.requires("sdl/2.32.2", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_harfbuzz"):
             self.requires("harfbuzz/8.3.0")
 
@@ -73,6 +73,7 @@ class SdlttfConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -98,7 +99,6 @@ class SdlttfConan(ConanFile):
                         "find_package(Freetype REQUIRED MODULE)")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -130,9 +130,3 @@ class SdlttfConan(ConanFile):
             self.cpp_info.components["_sdl2_ttf"].frameworks = [
                 "AppKit", "CoreGraphics", "CoreFoundation", "CoreServices"
         ]
-
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "SDL2_ttf"
-        self.cpp_info.names["cmake_find_package_multi"] = "SDL2_ttf"
-        self.cpp_info.components["_sdl2_ttf"].names["cmake_find_package"] = f"SDL2_ttf{suffix}"
-        self.cpp_info.components["_sdl2_ttf"].names["cmake_find_package_multi"] = f"SDL2_ttf{suffix}"
