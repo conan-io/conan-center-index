@@ -91,13 +91,13 @@ class SDLImageConan(ConanFile):
         if self.options.with_libtiff:
             self.requires("libtiff/4.6.0")
         if self.options.with_libjpeg:
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         if self.options.with_libpng:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.3.2")
+            self.requires("libwebp/[>=1.3.2 <2]")
         if self.options.get_safe("with_avif"):
-            self.requires("libavif/1.0.1")
+            self.requires("libavif/[>=1.0.1 <2]")
 
     def validate(self):
         if self.options.shared and not self.dependencies["sdl"].options.shared:
