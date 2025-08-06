@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.4"
@@ -49,8 +50,6 @@ class S2nConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         tc.variables["UNSAFE_TREAT_WARNINGS_AS_ERRORS"] = False
         tc.variables["SEARCH_LIBCRYPTO"] = False # see CMakeLists wrapper
-        # When adding new version, check if they updated their minimum CMake version and make this conditional
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
