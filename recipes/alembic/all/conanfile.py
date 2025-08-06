@@ -44,7 +44,7 @@ class AlembicConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("imath/[>=3.1.12 <4]", transitive_headers=True)
+        self.requires("imath/[>=3.1.9 <4]", transitive_headers=True)
         if self.options.with_hdf5:
             self.requires("hdf5/[>=1.14.3 <2]")
 
