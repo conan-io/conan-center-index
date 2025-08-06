@@ -181,15 +181,8 @@ class B2Conan(ConanFile):
         if cxxflags:
             command += f' --cxxflags="{cxxflags}"'
 
-        defines = " ".join(self.conf.get("tools.build:defines", check_type=list, default=[]))
-        if defines:
-            command += f' defines="{defines}"'
-
-        exelinkflags = " ".join(self.conf.get("tools.build:exelinkflags", check_type=list, default=[]))
-        if exelinkflags:
-            command += f' linkflags="{exelinkflags}"'
-
-        command += " --verbose"
+        if self.conf.get("tools.build:verbosity", check_type=str, default="quiet") == "verbose":
+            command += " --verbose"
 
         if b2_toolset != 'auto':
             command += " "+str(b2_toolset)
