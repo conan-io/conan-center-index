@@ -78,7 +78,7 @@ libbacktrace:
     - 'cci.20210118'
 libcurl:
   versions:
-    - '8.0.1'
+    - '8.12.1'
 libffi:
   versions:
     - '3.4.4'
