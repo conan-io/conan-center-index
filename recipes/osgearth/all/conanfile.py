@@ -125,7 +125,7 @@ class OsgearthConan(ConanFile):
         self.requires("opengl/system")
         self.requires("gdal/3.4.3")
         self.requires("openscenegraph/3.6.5", transitive_headers=True)
-        self.requires("libcurl/8.12.1")
+        self.requires("libcurl/[>=7.78.0 <9]")
         self.requires("lerc/2.2")
         self.requires("rapidjson/1.1.0")
 
@@ -147,7 +147,7 @@ class OsgearthConan(ConanFile):
         if self.options.with_protobuf:
             self.requires("protobuf/3.21.12")
         if self.options.with_webp:
-            self.requires("libwebp/1.3.1")
+            self.requires("libwebp/[>=1.3.2 <2]")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
