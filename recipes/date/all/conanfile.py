@@ -68,7 +68,7 @@ class DateConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, 17)
         if self.options.get_safe("tz_db") == "system" and self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Using system tz database is not supported on Windows")
         if self.options.get_safe("tz_db") != "download" and self.options.get_safe("use_tz_db_in_dot"):
@@ -96,7 +96,7 @@ class DateConan(ConanFile):
             # workaround for gcc 7 and clang 5 not having string_view
             if Version(self.version) >= "3.0.0" and \
                 ((self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "7.0") or \
-                (self.settings.compiler == "clang" and Version(self.settings.compiler.version) <= "5.0")) or self.settings.os == "Windows":
+                (self.settings.compiler == "clang" and Version(self.settings.compiler.version) <= "5.0")):
                 tc.cache_variables["DISABLE_STRING_VIEW"] = True
         tc.generate()
         deps = CMakeDeps(self)
@@ -144,7 +144,7 @@ class DateConan(ConanFile):
 
             if Version(self.version) >= "3.0.0" and \
                 ((self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "7.0") or \
-                (self.settings.compiler == "clang" and Version(self.settings.compiler.version) <= "5.0")) or self.settings.os == "Windows":
+                (self.settings.compiler == "clang" and Version(self.settings.compiler.version) <= "5.0")):
                 defines.append("HAS_STRING_VIEW=0")
             else:
                 defines.append("HAS_STRING_VIEW=1")
