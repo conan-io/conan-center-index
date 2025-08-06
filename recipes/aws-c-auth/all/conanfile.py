@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.4"
@@ -35,24 +34,12 @@ class AwsCAuth(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.version == "0.8.4":
-            self.requires("aws-c-common/0.11.0", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-cal/0.8.3")
-            # Are we overlinking? This has never been a requirement in upstream's CMakeLists.txt
-            self.requires("aws-c-io/0.15.4", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-http/0.9.3", transitive_headers=True)
-            self.requires("aws-c-sdkutils/0.2.3", transitive_headers=True)
-        if self.version == "0.7.16":
-            self.requires("aws-c-common/0.9.15", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-cal/0.6.14")
-            self.requires("aws-c-io/0.14.7", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-http/0.8.1", transitive_headers=True)
-            self.requires("aws-c-sdkutils/0.1.15", transitive_headers=True)
-        if self.version == "0.6.4":
-            self.requires("aws-c-common/0.6.11", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-cal/0.5.12")
-            self.requires("aws-c-io/0.10.9", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-http/0.6.7", transitive_headers=True)
+        self.requires("aws-c-common/0.12.3", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-cal/0.9.2")
+        # Are we overlinking? This has never been a requirement in upstream's CMakeLists.txt
+        self.requires("aws-c-io/0.21.0", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-http/0.10.2", transitive_headers=True)
+        self.requires("aws-c-sdkutils/0.2.4", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -60,8 +47,6 @@ class AwsCAuth(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
-        if Version(self.version) < "0.8.4":
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
 
         deps = CMakeDeps(self)

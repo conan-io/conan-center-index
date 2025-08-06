@@ -3,7 +3,6 @@ from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.4"
@@ -49,8 +48,6 @@ class AwsCCommon(ConanFile):
         tc.variables["AWS_WARNINGS_ARE_ERRORS"] = False
         if is_msvc(self):
             tc.variables["STATIC_CRT"] = is_msvc_static_runtime(self)
-        if Version(self.version) < "0.11.0":
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.variables["USE_CPU_EXTENSIONS"] = self.options.get_safe("cpu_extensions", False)
         tc.generate()
 
@@ -73,15 +70,8 @@ class AwsCCommon(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "m", "pthread", "rt"]
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["bcrypt", "ws2_32", "kernel32"]
-            if Version(self.version) >= "0.6.13":
-                self.cpp_info.system_libs.append("shlwapi")
-            if Version(self.version) >= "0.9.15":
-                self.cpp_info.system_libs.append("psapi")
+            self.cpp_info.system_libs = ["bcrypt", "ws2_32", "kernel32", "shlwapi", "psapi"]
         if not self.options.shared:
             if is_apple_os(self):
                 self.cpp_info.frameworks = ["CoreFoundation"]
-        if Version(self.version) >= "0.11.0":
-            self.cpp_info.builddirs.append(os.path.join("lib", "cmake", "aws-c-common", "modules"))
-        else:
-            self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake", "aws-c-common", "modules"))
