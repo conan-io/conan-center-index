@@ -9,7 +9,7 @@ from contextlib import contextmanager
 import os
 from io import StringIO
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=2.0.4"
 
 
 class B2Conan(ConanFile):
@@ -169,9 +169,27 @@ class B2Conan(ConanFile):
             cxxflags_env = envvars.get("CXXFLAGS")
             if cxxflags_env:
                 cxxflags = f"{cxxflags} {cxxflags_env}"
+        else:
+            cxx_conf = self.conf.get("tools.build:compiler_executables", check_type=dict, default={"cpp": None})["cpp"]
+            if cxx_conf:
+                command += f" --cxx={cxx_conf}"
+                self._write_project_config(cxx_conf)
+            cxxflags_conf = " ".join(self.conf.get("tools.build:cxxflags", check_type=list, default=[]))
+            if cxxflags_conf:
+                cxxflags = f"{cxxflags} {cxxflags_conf}"
 
         if cxxflags:
             command += f' --cxxflags="{cxxflags}"'
+
+        defines = " ".join(self.conf.get("tools.build:defines", check_type=list, default=[]))
+        if defines:
+            command += f' defines="{defines}"'
+
+        exelinkflags = " ".join(self.conf.get("tools.build:exelinkflags", check_type=list, default=[]))
+        if exelinkflags:
+            command += f' linkflags="{exelinkflags}"'
+
+        command += " --verbose"
 
         if b2_toolset != 'auto':
             command += " "+str(b2_toolset)
