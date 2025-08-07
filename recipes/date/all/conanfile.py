@@ -68,7 +68,7 @@ class DateConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 17)
+            check_min_cppstd(self, 11)
         if self.options.get_safe("tz_db") == "system" and self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Using system tz database is not supported on Windows")
         if self.options.get_safe("tz_db") != "download" and self.options.get_safe("use_tz_db_in_dot"):
