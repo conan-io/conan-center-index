@@ -124,6 +124,18 @@ class GetTextConan(ConanFile):
             if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
                (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler.version) >= "180"):
                 tc.extra_cflags += ["-FS"]
+           
+            if cross_building(self) or self.settings.arch == "armv8":
+                # override guesses with known good values from a native build
+                tc.configure_args.extend([
+                    "gl_cv_func_frexpl_works=yes",
+                    "gl_cv_func_mbrtowc_empty_input=no",
+                    "gl_cv_func_snprintf_truncation_c99=yes",
+                    'gl_cv_func_printf_flag_zero=yes',
+                    'gl_cv_func_printf_precision=yes',
+                    'gl_cv_func_swprintf_works=yes',
+                    'gl_cv_func_swprintf_C_locale_sans_EILSEQ=yes',
+                ])
 
             if self.settings.build_type == "Debug":
                 # Skip checking for the 'n' printf format directly

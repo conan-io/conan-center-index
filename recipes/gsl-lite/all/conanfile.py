@@ -1,9 +1,10 @@
-from conan import ConanFile
-from conan.tools.files import get, copy
-from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.50.0"
+from conan import ConanFile
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+
+required_conan_version = ">=2.0.9"
 
 
 class GslLiteConan(ConanFile):
@@ -23,11 +24,12 @@ class GslLiteConan(ConanFile):
     #  2. GSL_THROW_ON_CONTRACT_VIOLATION: a gsl::fail_fast exception will be thrown
     #  3. GSL_UNENFORCED_ON_CONTRACT_VIOLATION: nothing happens
     #
-    options = {
-        "on_contract_violation": ["terminate", "throw", "unenforced"]
-    }
+    options = {"on_contract_violation": [None, "terminate", "throw", "unenforced"]}
     default_options = {
-        "on_contract_violation": "terminate",
+        "on_contract_violation": None,
+    }
+    options_description = {
+        "on_contract_violation": "Select the behavior when pre/post conditions on the GSL types are violated"
     }
 
     no_copy_source = True
@@ -59,15 +61,9 @@ class GslLiteConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["gsllite"].defines = [self._contract_map[str(self.options.on_contract_violation)]]
+        if self.options.on_contract_violation:
+            self.cpp_info.components["gsllite"].defines = [self._contract_map[str(self.options.on_contract_violation)]]
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "gsl-lite"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "gsl-lite"
-        self.cpp_info.names["cmake_find_package"] = "gsl"
-        self.cpp_info.names["cmake_find_package_multi"] = "gsl"
-        self.cpp_info.components["gsllite"].names["cmake_find_package"] = "gsl-lite"
-        self.cpp_info.components["gsllite"].names["cmake_find_package_multi"] = "gsl-lite"
         self.cpp_info.components["gsllite"].set_property("cmake_target_name", "gsl::gsl-lite")
         self.cpp_info.components["gsllite"].bindirs = []
         self.cpp_info.components["gsllite"].libdirs = []

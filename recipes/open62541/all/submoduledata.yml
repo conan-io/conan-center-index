@@ -1,9 +1,18 @@
 submodules:
+  "1.4.13":
+    deps/ua-nodeset:
+      url: "https://github.com/OPCFoundation/UA-Nodeset/archive/Machinery-1.03.0-2023-08-01.zip"
+      sha256: "b1677e7114004f44103159ae7a2fb220958e6f645177c9d140f6acfe469b8eb8"
+      archive_pattern: "UA-Nodeset-{version}"
   "1.4.11.1":
     deps/ua-nodeset:
       url: "https://github.com/OPCFoundation/UA-Nodeset/archive/Machinery-1.03.0-2023-08-01.zip"
       sha256: "b1677e7114004f44103159ae7a2fb220958e6f645177c9d140f6acfe469b8eb8"
       archive_pattern: "UA-Nodeset-{version}"
+    deps/nodesetLoader:
+      url: "https://github.com/open62541/open62541-nodeset-loader/archive/a6ef45054ff74e0d798fccc257e4646355dadb6a.tar.gz"
+      sha256: "cce4c7c64a9e12f9bcbe6e5402c3515572c66fcc85ffa057e3e35e9397021cbb"
+      archive_pattern: "open62541-nodeset-loader-{sha256}"
   "1.4.6":
     deps/ua-nodeset:
       url: "https://github.com/OPCFoundation/UA-Nodeset/archive/Machinery-1.03.0-2023-08-01.zip"
