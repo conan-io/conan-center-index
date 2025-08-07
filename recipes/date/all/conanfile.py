@@ -70,7 +70,7 @@ class DateConan(ConanFile):
 
     def validate(self):
         if self.options.use_system_tz_db != "deprecated":
-            self.output.warning(f"The '{self.ref}/*:with_libgcrypt' option is deprecated. Use '{self.ref}/*:tz_db=system' instead.")
+            self.output.warning(f"The '{self.ref}/*:use_system_tz_db' option is deprecated. Use '{self.ref}/*:tz_db=system' instead.")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
         if self.options.get_safe("tz_db") == "system" and self.settings.os == "Windows":
