@@ -44,11 +44,6 @@ class FastDDSConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def configure(self):
-        self.options["fast-cdr"].shared = self.options.shared
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -64,6 +59,11 @@ class FastDDSConan(ConanFile):
         # fast-dds requires C++11
         check_min_cppstd(self, 11)
         check_min_vs(self, "192")
+
+        if self.options.shared and not self.dependencies["fast-cdr"].options.shared:
+            raise ConanInvalidConfiguration(
+                f"Cannot use {self.name} shared library with fast-cdr static library. Please set fast-cdr/*:shared=True."
+            )
 
         if self.options.shared and is_msvc(self) and "MT" in msvc_runtime_flag(self):
             # This combination leads to an fast-dds error when linking
