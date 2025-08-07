@@ -142,7 +142,7 @@ class DateConan(ConanFile):
 
             if Version(self.version) >= "3.0.0":
                 if not valid_min_cppstd(self, 17):
-                    defines.append("HAS_STRING_VIEW=0")
+                    defines.extend(["HAS_STRING_VIEW=0", "HAS_DEDUCTION_GUIDES=0"])
                 else:
                     defines.append("HAS_STRING_VIEW=1")
 
