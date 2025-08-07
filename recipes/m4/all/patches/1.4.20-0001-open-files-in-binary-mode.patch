@@ -1,0 +1,13 @@
+diff --git a/src/path.c b/src/path.c
+index af5e7cf..388c303 100644
+--- a/src/path.c
++++ b/src/path.c
+@@ -111,7 +111,7 @@ add_include_directory (const char *dir)
+ static FILE *
+ m4_fopen (const char *file, bool binary)
+ {
+-  FILE *fp = fopen (file, binary ? "rbe" : "re");
++  FILE *fp = fopen (file, "rbe");
+   if (fp)
+     {
+       struct stat st;
