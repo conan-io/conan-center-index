@@ -65,9 +65,9 @@ class DateConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def package_id(self):
+        del self.info.options.use_system_tz_db
         if self.info.options.header_only:
             self.info.clear()
-        del self.info.options.use_system_tz_db
 
     def validate(self):
         if self.options.use_system_tz_db != "deprecated":
