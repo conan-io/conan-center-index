@@ -125,7 +125,6 @@ class DateConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "date")
         self.cpp_info.set_property("cmake_target_name", "date::date")
 
-        # date-tz
         if self.options.header_only:
             self.cpp_info.bindirs = []
             self.cpp_info.defines.append("DATE_HEADER_ONLY")
