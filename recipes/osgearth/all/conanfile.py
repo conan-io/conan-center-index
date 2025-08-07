@@ -22,63 +22,28 @@ class OsgearthConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-
-        # osgearth has support for an imgui integration in the form of a separate nodekit. Embedded versions of both
-        # imgui and imnodes are included with osgearth v3.7.2, but in order to build the imgui nodekit, all of the
-        # following conditions must be met:
-        #
-        #   - GLEW must exist as a dependency.
-        #
-        #   - The OSGEARTH_BUILD_IMGUI_NODEKIT CMake variable must be set.
-        #
-        # It should be possible to patch osgearth to perform the following tasks:
-        #
-        #   - Replace the embedded versions of imgui and imnodes with their corresponding ConanFile.requires dependency.
-        #
-        #   - Remove the explicit dependency on GLEW. (NOTE: This would be ideal, since osgearth only ever depends on
-        #     GLEW to support its embedded version of imgui. However, it probably isn't required that we do this.)
-        #
-        # For now, we simply disable the imgui nodekit.
-        #
-        # "build_imgui_nodekit": [True, False],
-
         "build_procedural_nodekit": [True, False],
-        # "build_triton_nodekit": [True, False],
-        # "build_silverlining_nodekit": [True, False],
-        "build_leveldb_cache": [True, False, "deprecated"],
         "build_rocksdb_cache": [True, False],
         "build_zip_plugin": [True, False],
         "enable_geocoder": [True, False],
         "with_geos": [True, False],
-        "with_sqlite3": [True, False],
-        "with_draco": [True, False, "deprecated"],
-        # "with_basisu": [True, False],
         "with_protobuf": [True, False],
         "with_webp": [True, False],
         "install_shaders": [True, False],
-        "enable_nvtt_cpu_mipmaps": [True, False],
         "enable_wininet_for_http": [True, False],
     }
 
     default_options = {
         "shared": False,
         "fPIC": True,
-        # "build_imgui_nodekit": False,
         "build_procedural_nodekit": True,
-        # "build_triton_nodekit": False,
-        # "build_silverlining_nodekit": False,
-        "build_leveldb_cache": "deprecated",
         "build_rocksdb_cache": False,
         "build_zip_plugin": True,
         "enable_geocoder": False,
         "with_geos": True,
-        "with_sqlite3": True,
-        "with_draco": "deprecated",
-        # "with_basisu": False,
         "with_protobuf": True,
         "with_webp": True,
         "install_shaders": True,
-        "enable_nvtt_cpu_mipmaps": False,
         "enable_wininet_for_http": False,
     }
 
@@ -106,13 +71,6 @@ class OsgearthConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-        def check_unused_deprecated_option(option_name: str):
-            if self.options.get_safe(option_name) != "deprecated":
-                self.output.warning(f'The "{option_name}" option is deprecated, and has no effect on the build.')
-
-        check_unused_deprecated_option("build_leveldb_cache")
-        check_unused_deprecated_option("with_draco")
-
     def config_options(self):
         if self.settings.os != "Windows":
             self.options.enable_wininet_for_http = False
@@ -127,11 +85,7 @@ class OsgearthConan(ConanFile):
         self.requires("libcurl/[>=7.78.0 <9]")
         self.requires("lerc/2.2")
         self.requires("rapidjson/1.1.0")
-
-        # if self.options.build_triton_nodekit:
-        #     self.requires("triton_nodekit")
-        # if self.options.build_silverlining_nodekit:
-        #     self.requires("silverlining_nodekit")
+        self.requires("sqlite3/[>=3.42 <4]")
 
         if self.options.build_rocksdb_cache:
             self.requires("rocksdb/6.29.5")
@@ -139,10 +93,6 @@ class OsgearthConan(ConanFile):
             self.requires("libzip/1.7.3")
         if self.options.with_geos:
             self.requires("geos/3.11.1")
-        if self.options.with_sqlite3:
-            self.requires("sqlite3/[>=3.42 <4]")
-        # if self.options.with_basisu:
-        #     self.requires("basisu")
         if self.options.with_protobuf:
             self.requires("protobuf/3.21.12")
         if self.options.with_webp:
@@ -187,20 +137,20 @@ class OsgearthConan(ConanFile):
         toolchain.variables["OSGEARTH_BUILD_EXAMPLES"] = False
         toolchain.variables["OSGEARTH_BUILD_TESTS"] = False
 
-        # Ideally, we would have this:
-        #
-        # toolchain.variables["OSGEARTH_BUILD_IMGUI_NODEKIT"] = self.options.build_imgui_nodekit
-        #
-        # See the comments for the (hypothetical) "build_imgui_nodekit" option for more details on why we always
-        # disable this nodekit.
+        # Several of the optional osgearth nodekits are currently unsupported by this recipe, and are always
+        # disabled.
+        toolchain.variables["OSGEARTH_BUILD_CESIUM_NODEKIT"] = False
         toolchain.variables["OSGEARTH_BUILD_IMGUI_NODEKIT"] = False
-
         toolchain.variables["OSGEARTH_BUILD_PROCEDURAL_NODEKIT"] = self.options.build_procedural_nodekit
-        # toolchain.variables["OSGEARTH_BUILD_TRITON_NODEKIT"] = self.options.build_triton_nodekit
-        # toolchain.variables["OSGEARTH_BUILD_SILVERLINING_NODEKIT"] = self.options.build_silverlining_nodekit
+        toolchain.variables["OSGEARTH_BUILD_SILVERLINING_NODEKIT"] = False
+        toolchain.variables["OSGEARTH_BUILD_TRITON_NODEKIT"] = False
 
-        # In osgearth v3.7.2, the RocksDB plugin is always built if find_package(RocksDB QUIET) succeeds. There is
-        # thus no need to set a particular CMake variable based on the value of self.options.build_rocksdb_cache.
+        # In osgearth v3.7.2, the following plugins do not have a specific CMake variable:
+        #
+        #   - osgdb_osgearth_cache_rocksdb (find_package(RocksDB QUIET))
+        #   - osgdb_webp (find_package(WebP QUIET))
+        #
+        # Instead, they are always built if their corresponding find_package(...) command call succeeds.
 
         toolchain.variables["OSGEARTH_BUILD_ZIP_PLUGIN"] = self.options.build_zip_plugin
         toolchain.variables["OSGEARTH_ENABLE_GEOCODER"] = self.options.enable_geocoder
@@ -209,13 +159,7 @@ class OsgearthConan(ConanFile):
         toolchain.variables["WITH_EXTERNAL_TINYXML"] = False
 
         toolchain.variables["OSGEARTH_INSTALL_SHADERS"] = self.options.install_shaders
-        toolchain.variables["OSGEARTH_ENABLE_NVTT_CPU_MIPMAPS"] = self.options.enable_nvtt_cpu_mipmaps
         toolchain.variables["OSGEARTH_ENABLE_WININET_FOR_HTTP"] = self.options.enable_wininet_for_http
-
-        # our own defines for using in our top-level CMakeLists.txt
-        toolchain.variables["OSGEARTH_WITH_GEOS"] = self.options.with_geos
-        toolchain.variables["OSGEARTH_WITH_SQLITE3"] = self.options.with_sqlite3
-        toolchain.variables["OSGEARTH_WITH_WEBP"] = self.options.with_webp
 
         # Set the CMAKE_*_POSTFIX variables in the CMake cache here for consistency. There are some oddities with how
         # osgearth typically defines these, especially when compared to the defaults used by OpenSceneGraph.
@@ -245,11 +189,6 @@ class OsgearthConan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
-    def package_id(self):
-        # Remove the deprecated options from the package ID calculation.
-        del self.info.options.build_leveldb_cache
-        del self.info.options.with_draco
-
     def package_info(self):
         postfix = self._get_library_postfix(str(self.settings.build_type))
 
@@ -268,6 +207,7 @@ class OsgearthConan(ConanFile):
                          "libcurl": ["libcurl"],
                          "gdal": ["gdal"],
                          "opengl": ["opengl"],
+                         "sqlite3": ["sqlite3"]
                          }
 
         osgearth = setup_lib("osgEarth", required_libs)
@@ -276,8 +216,6 @@ class OsgearthConan(ConanFile):
             osgearth.defines += ["OSGEARTH_LIBRARY_STATIC"]
         if self.options.with_geos:
             osgearth.requires += ["geos::geos"]
-        if self.options.with_sqlite3:
-            osgearth.requires += ["sqlite3::sqlite3"]
         if self.options.with_protobuf:
             osgearth.requires += ["protobuf::protobuf"]
 
