@@ -12,7 +12,7 @@ int main() {
     }
     catch (const std::exception & e) {
     }
+#endif
 
     return EXIT_SUCCESS;
-#endif
 }
