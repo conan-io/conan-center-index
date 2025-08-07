@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd, valid_min_cppstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get, rmdir, apply_conandata_patches, export_conandata_patches, copy
 from conan.tools.scm import Version
@@ -23,7 +23,7 @@ class DateConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "header_only": [True, False],
-        "use_system_tz_db": ["deprecated", True, False]
+        "use_system_tz_db": ["deprecated", True, False],
         "tz_db": ["download", "system", "manual"],
         "use_tz_db_in_dot": [True, False]
     }
@@ -38,7 +38,7 @@ class DateConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "header_only": False,
-        "use_system_tz_db": "deprecated"
+        "use_system_tz_db": "deprecated",
         "tz_db": "download",
         "use_tz_db_in_dot": False
     }
@@ -67,6 +67,7 @@ class DateConan(ConanFile):
     def package_id(self):
         if self.info.options.header_only:
             self.info.clear()
+        del self.info.options.use_system_tz_db
 
     def validate(self):
         if self.options.use_system_tz_db != "deprecated":
@@ -77,9 +78,6 @@ class DateConan(ConanFile):
             raise ConanInvalidConfiguration("Using system tz database is not supported on Windows")
         if self.options.get_safe("tz_db") != "download" and self.options.get_safe("use_tz_db_in_dot"):
             raise ConanInvalidConfiguration("Option 'use_tz_db_in_dot'=True cannot be used with 'tz_db' != 'download'")
-
-    def package_id(self)
-        del self.info.options.use_system_tz_db
 
     def requirements(self):
         if self.version == "2.4.1" or self.options.get_safe("tz_db") == "download":
