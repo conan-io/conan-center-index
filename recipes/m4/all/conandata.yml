@@ -16,7 +16,7 @@ sources:
     sha256: "f2c1e86ca0a404ff281631bdc8377638992744b175afb806e25871a24a934e07"
 patches:
   "1.4.20":
-    - patch_file: "patches/1.4.20-0001-open-files-in-binary-mode.patch"
+    - patch_file: "patches/1.4.20-0001-fix-obstack-typo-msvc.patch"
     - patch_file: "patches/1.4.19-0002-ar-lib.patch"
     - patch_file: "patches/1.4.20-0003-msvc-debug-assertion.patch"
     - patch_file: "patches/1.4.20-0004-disable-hardening-in-source.patch"
