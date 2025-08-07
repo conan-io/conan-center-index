@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.files import apply_conandata_patches, copy, get, rename, rmdir
-from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.33.0"
@@ -149,11 +148,9 @@ class OsgearthConan(ConanFile):
         if self.options.with_webp:
             self.requires("libwebp/[>=1.3.2 <2]")
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def _get_library_postfix(self, build_type: str) -> str:
         # We want our library postfix (that is, the value of the CMAKE_*_POSTFIX CMake variable for
@@ -233,8 +230,6 @@ class OsgearthConan(ConanFile):
         deps.generate()
 
     def build(self):
-        self._patch_sources()
-
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
