@@ -31,3 +31,8 @@ sources:
   "2.19.5":
     url: "https://github.com/randombit/botan/archive/2.19.5.tar.gz"
     sha256: "8d4a3826787f9febbdc225172ad2d39d7d3960346c5721fe46cb27d480d7e1de"
+patches:
+  "3.5.0":
+    - patch_file: "patches/botan-3-5-missing-std-string-include.patch"
+      patch_description: "Fixes a build issue in MSVC where std::string was not included"
+      patch_type: "portability"
