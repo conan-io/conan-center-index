@@ -22,7 +22,6 @@ patches:
     - patch_file: "patches/0004-include-iphlpapi.patch"
       patch_description: "Include iphlpapi.h for SecureZeroMemory"
       patch_type: "conan"
-      patch_type: "portability"
     - patch_file: "patches/0008-fix-posix-qnx.patch"
       patch_description: "Ensure posix is default architecture"
       patch_type: "portability"
