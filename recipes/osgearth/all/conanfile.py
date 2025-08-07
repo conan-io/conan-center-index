@@ -184,9 +184,6 @@ class OsgearthConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        if self.options.install_shaders:
-            rename(self, os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
-
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
