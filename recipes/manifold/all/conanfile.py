@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, check_max_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 import os
@@ -28,6 +28,10 @@ class ManifoldConan(ConanFile):
         "with_parallel_acceleration": False,
     }
     implements = ["auto_shared_fpic"]
+    
+    @property
+    def _min_cppstd(self):
+        return "11"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -39,7 +43,9 @@ class ManifoldConan(ConanFile):
             self.requires("onetbb/2022.0.0")
 
     def validate(self):
-        check_min_cppstd(self, 17)
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+            check_max_cppstd(self, "13")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.18 <4]")
