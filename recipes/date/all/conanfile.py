@@ -84,8 +84,6 @@ class DateConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["ENABLE_DATE_TESTING"] = False
-        if Version(self.version) < 3:
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         if self.options.header_only:
             tc.cache_variables["BUILD_TZ_LIB"] = False
         else:
