@@ -1748,6 +1748,7 @@ class BoostConan(ConanFile):
 
         if self.options.header_only:
             self.cpp_info.libdirs = []
+            self.cpp_info.bindirs = []
 
         # - Use 'headers' component for all includes + defines
         # - Use '_libboost' component to attach extra system_libs, ...
