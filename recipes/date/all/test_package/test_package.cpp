@@ -1,7 +1,6 @@
 #include "date/date.h"
 #include "date/tz.h"
 #include <iostream>
-#include <chrono>
 
 int main() {
     const date::year_month_day conan_two(date::year(2023), date::month(2), date::day(22));
@@ -13,5 +12,7 @@ int main() {
     }
     catch (const std::exception & e) {
     }
+
+    return EXIT_SUCCESS;
 #endif
 }
