@@ -172,9 +172,6 @@ class GdalConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        # gdal doesn't build in C++20 mode with latest MSVC, clamp to 17.
-        if is_msvc(self) and int(self.settings.get_safe("compiler.cppstd")) > 17:
-            self.settings.compiler.cppstd = 17
 
     def configure(self):
         if self.options.shared:
@@ -237,7 +234,7 @@ class GdalConan(ConanFile):
         # if self.options.with_pcidsk:
         #     self.requires("pcidsk/x.x.x")
         if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9f")
+            self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.0")
         elif self.options.with_jpeg == "mozjpeg":
@@ -287,7 +284,7 @@ class GdalConan(ConanFile):
         # if self.options.with_spatialite:
         #     self.requires("libspatialite/4.3.0a")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/[>=3.44 <4]")
+            self.requires("sqlite3/3.44.2")
         # if self.options.with_rasterlite2:
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
