@@ -31,7 +31,7 @@ class ManifoldConan(ConanFile):
     
     @property
     def _min_cppstd(self):
-        return "11"
+        return "17"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -45,7 +45,6 @@ class ManifoldConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-            check_max_cppstd(self, "13")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.18 <4]")
