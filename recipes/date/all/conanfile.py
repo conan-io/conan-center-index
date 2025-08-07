@@ -23,6 +23,7 @@ class DateConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "header_only": [True, False],
+        "use_system_tz_db": ["deprecated", True, False]
         "tz_db": ["download", "system", "manual"],
         "use_tz_db_in_dot": [True, False]
     }
@@ -37,6 +38,7 @@ class DateConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "header_only": False,
+        "use_system_tz_db": "deprecated"
         "tz_db": "download",
         "use_tz_db_in_dot": False
     }
@@ -67,12 +69,17 @@ class DateConan(ConanFile):
             self.info.clear()
 
     def validate(self):
+        if self.options.use_system_tz_db != "deprecated":
+            self.output.warning(f"The '{self.ref}/*:with_libgcrypt' option is deprecated. Use '{self.ref}/*:tz_db=system' instead.")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
         if self.options.get_safe("tz_db") == "system" and self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Using system tz database is not supported on Windows")
         if self.options.get_safe("tz_db") != "download" and self.options.get_safe("use_tz_db_in_dot"):
             raise ConanInvalidConfiguration("Option 'use_tz_db_in_dot'=True cannot be used with 'tz_db' != 'download'")
+
+    def package_id(self)
+        del self.info.options.use_system_tz_db
 
     def requirements(self):
         if self.version == "2.4.1" or self.options.get_safe("tz_db") == "download":
