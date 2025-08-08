@@ -1,9 +1,9 @@
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd, check_max_cppstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.scm import Version
 import os
-
 
 required_conan_version = ">=2.0.9"
 
@@ -32,10 +32,6 @@ class ManifoldConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
         
-    @property
-    def _min_cppstd(self):
-        return "17"
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -46,8 +42,7 @@ class ManifoldConan(ConanFile):
             self.requires("onetbb/2022.0.0")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 17)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.18 <4]")
@@ -62,10 +57,8 @@ class ManifoldConan(ConanFile):
         tc.cache_variables["MANIFOLD_TEST"] = False
         tc.cache_variables["MANIFOLD_CBIND"] = False
         tc.cache_variables["MANIFOLD_PYBIND"] = False
-        # Introduced in 3.2.0 release but provokes error like:
-        # src/disjoint_sets.h:99:10: error: 'size_t' was not declared in this scope; did you mean 'std::size_t'
-        # Then disable it
-        tc.variables["MANIFOLD_STRICT"] = False
+        if Version(self.version) >= "3.1.0":
+            tc.variables["MANIFOLD_STRICT"] = False # no -Werror
         tc.cache_variables["MANIFOLD_PAR"] = self.options.with_parallel_acceleration
         tc.generate()
 
