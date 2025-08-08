@@ -48,7 +48,7 @@ class JasperConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libjpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.with_libjpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.2")
         elif self.options.with_libjpeg == "mozjpeg":
@@ -56,7 +56,7 @@ class JasperConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "4.1.1":
-            self.tool_requires("cmake/[>=3.20 <4]")
+            self.tool_requires("cmake/[>=3.20]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
