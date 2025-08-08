@@ -1,0 +1,5 @@
+sources:
+  "1.1.2":
+    url: "https://github.com/RippeR37/libbase/archive/refs/tags/v1.1.2.tar.gz"
+    sha256: "cee3263a62c9c632cc7fe5103f88321039535b793a5f2da7d606ca442e85110b"
+    strip_root: true
