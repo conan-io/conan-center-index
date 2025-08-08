@@ -77,8 +77,10 @@ class DrogonConan(ConanFile):
     def requirements(self):
         if Version(self.version) < "1.9.7":
             self.requires("trantor/1.5.19", transitive_headers=True, transitive_libs=True)
-        else:
+        elif Version(self.version) <= "1.9.10":
             self.requires("trantor/1.5.21", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("trantor/[>=1.5.21]", transitive_headers=True, transitive_libs=True)
         self.requires("jsoncpp/1.9.5", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/[>=1.2.11 <2]")
