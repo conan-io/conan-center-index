@@ -14,7 +14,3 @@ foreach(flag "-march=native" "-mtune=native")
     target_compile_options(${PROJECT_NAME} PRIVATE ${flag})
   endif()
 endforeach()
-
-if (xtensor_VERSION VERSION_LESS "0.26.0")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE "XTENSOR_VERSION_LESS_0_26_0")
-endif()
