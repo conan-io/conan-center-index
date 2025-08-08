@@ -1,5 +1,8 @@
-# Only keep the most recent 4.x and 3.x versions
+# Only keep the most recent versions of CMake supported versions.
+# CMake currently supports three releases.
 versions:
+  "4.1.0":
+    folder: "binary"
   "4.0.3":
     folder: "binary"
   "3.31.8":
