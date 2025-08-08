@@ -205,7 +205,7 @@ class SentryNativeConan(ConanFile):
         if self.options.transport == "curl":
             self.cpp_info.components["sentry"].requires.extend(["libcurl::libcurl"])
         if self.options.get_safe("qt"):
-            self.cpp_info.components["sentry"].requires.extend(["qt::qt", "openssl::openssl"])
+            self.cpp_info.components["sentry"].requires.append("qt::qtCore")
 
         if not self.options.shared:
             self.cpp_info.components["sentry"].defines = ["SENTRY_BUILD_STATIC"]
