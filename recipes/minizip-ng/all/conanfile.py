@@ -139,8 +139,6 @@ class MinizipNgConan(ConanFile):
         minizip_dir = "minizip" if self.options.mz_compatibility else "minizip-ng"
         self.cpp_info.components["minizip"].includedirs.append(os.path.join(self.package_folder, "include", minizip_dir))
 
-        self.cpp_info.components["minizip"].names["cmake_find_package"] = "minizip"
-        self.cpp_info.components["minizip"].names["cmake_find_package_multi"] = "minizip"
         self.cpp_info.components["minizip"].set_property("cmake_target_name", "MINIZIP::minizip")
         self.cpp_info.components["minizip"].set_property("cmake_target_aliases", ["minizip::minizip"])
         self.cpp_info.components["minizip"].set_property("pkg_config_name", "minizip")
