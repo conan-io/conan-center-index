@@ -2,13 +2,14 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
-from conan.tools.files import apply_conandata_patches, copy, get, rename, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=2.0"
 
 class OsgearthConan(ConanFile):
     name = "osgearth"
+    package_type = "library"
     license = "LGPL-3.0"
     url = "https://github.com/conan-io/conan-center-index"
     description = "osgEarth is a C++ geospatial SDK and terrain engine. \
@@ -48,7 +49,6 @@ class OsgearthConan(ConanFile):
     }
 
     short_paths = True
-    exports_sources = "patches/*.patch"
 
     @property
     def _minimum_cpp_standard(self):
@@ -101,6 +101,9 @@ class OsgearthConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def _get_library_postfix(self, build_type: str) -> str:
         # We want our library postfix (that is, the value of the CMAKE_*_POSTFIX CMake variable for
