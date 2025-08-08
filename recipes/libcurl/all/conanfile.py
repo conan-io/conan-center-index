@@ -202,6 +202,7 @@ class LibcurlConan(ConanFile):
             if self._is_win_x_android:
                 self.tool_requires("ninja/[>=1.10.2 <2]")
         else:
+            self.tool_requires("autoconf/2.71")
             self.tool_requires("libtool/2.4.7")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
                 self.tool_requires("pkgconf/[>=2.2 <3]")
