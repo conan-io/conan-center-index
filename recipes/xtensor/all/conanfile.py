@@ -42,6 +42,12 @@ class XtensorConan(ConanFile):
         if self.options.tbb:
             self.requires("onetbb/2021.10.0")
 
+    def build_requirements(self):
+        # Older versions of xtensor require CMake < 3.5,
+        # so use this to both avoid CMake 4 support,
+        # and support newer versions of xtensor having 3.29
+        self.tool_requires("cmake/[>=3.29 <4]")
+
     def package_id(self):
         self.info.clear()
 
