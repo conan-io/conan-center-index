@@ -139,11 +139,6 @@ class MinizipNgConan(ConanFile):
         minizip_dir = "minizip" if self.options.mz_compatibility else "minizip-ng"
         self.cpp_info.components["minizip"].includedirs.append(os.path.join(self.package_folder, "include", minizip_dir))
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "minizip"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "minizip"
-        self.cpp_info.names["cmake_find_package"] = "MINIZIP"
-        self.cpp_info.names["cmake_find_package_multi"] = "MINIZIP"
         self.cpp_info.components["minizip"].names["cmake_find_package"] = "minizip"
         self.cpp_info.components["minizip"].names["cmake_find_package_multi"] = "minizip"
         self.cpp_info.components["minizip"].set_property("cmake_target_name", "MINIZIP::minizip")
