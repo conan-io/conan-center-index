@@ -176,16 +176,16 @@ class AssimpConan(ConanFile):
     def requirements(self):
         # TODO: unvendor others libs:
         # - Open3DGC
-        self.requires("minizip/1.2.13")
-        self.requires("pugixml/1.14")
-        self.requires("utfcpp/4.0.1")
+        self.requires("minizip/1.3.1")
+        self.requires("pugixml/1.15")
+        self.requires("utfcpp/4.0.5")
         self.requires("zlib/[>=1.2.11 <2]")
         if self._depends_on_kuba_zip:
-            self.requires("kuba-zip/0.3.0")
+            self.requires("kuba-zip/0.3.2")
         if self._depends_on_poly2tri:
             self.requires("poly2tri/cci.20130502")
         if self._depends_on_rapidjson:
-            self.requires("rapidjson/cci.20230929")
+            self.requires("rapidjson/1.1.0")
         if self._depends_on_draco:
             self.requires("draco/1.5.6")
         if self._depends_on_clipper:
@@ -194,7 +194,7 @@ class AssimpConan(ConanFile):
             else:
                 self.requires("clipper/4.10.0")
         if self._depends_on_stb:
-            self.requires("stb/cci.20230920")
+            self.requires("stb/cci.20240531")
         if self._depends_on_openddlparser:
             self.requires("openddl-parser/0.5.1")
 
