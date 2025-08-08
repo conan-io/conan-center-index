@@ -7,13 +7,13 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class ZlibNgConan(ConanFile):
     name = "zlib-ng"
     description = "zlib data compression library for the next generation systems"
-    license ="Zlib"
+    license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zlib-ng/zlib-ng/"
     topics = ("zlib", "compression")
@@ -41,7 +41,7 @@ class ZlibNgConan(ConanFile):
         "with_reduced_mem": False,
         "with_runtime_cpu_detection": True,
     }
-    
+
     @property
     def _is_windows(self):
         return self.settings.os in ["Windows", "WindowsStore"]
@@ -111,8 +111,8 @@ class ZlibNgConan(ConanFile):
         if self._is_windows:
             # The library name of zlib-ng is complicated in zlib-ng>=2.0.4:
             # https://github.com/zlib-ng/zlib-ng/blob/2.0.4/CMakeLists.txt#L994-L1016
-            base = "zlib" if is_msvc(self) or Version(self.version) < "2.0.4" or self.options.shared else "z"
-            static_flag = "static" if is_msvc(self) and not self.options.shared and Version(self.version) >= "2.0.4" else ""
+            base = "zlib" if is_msvc(self) or self.options.shared else "z"
+            static_flag = "static" if is_msvc(self) and not self.options.shared else ""
             build_type = "d" if self.settings.build_type == "Debug" else ""
             self.cpp_info.libs = [f"{base}{static_flag}{suffix}{build_type}"]
         else:
@@ -123,8 +123,6 @@ class ZlibNgConan(ConanFile):
             self.cpp_info.set_property("cmake_find_mode", "both")
             self.cpp_info.set_property("cmake_file_name", "ZLIB")
             self.cpp_info.set_property("cmake_target_name", "ZLIB::ZLIB")
-            self.cpp_info.names["cmake_find_package"] = "ZLIB"
-            self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
         if self.options.with_gzfileop:
             self.cpp_info.defines.append("WITH_GZFILEOP")
         if not self.options.with_new_strategies:
