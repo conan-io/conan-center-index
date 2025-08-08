@@ -1,0 +1,27 @@
+version: 28.0
+#----------------------------------------------------------------------------
+requirements:
+    BACKWARD:   ["backward-cpp/1.6"]
+    UNWIND:     ["libunwind/1.6.2"]
+    BerkeleyDB: ["libdb/5.3.28"]
+    BZ2:        ["bzip2/1.0.8"]
+    GIF:        ["giflib/5.2.1"]
+    GRPC:       ["grpc/1.50.1", "protobuf/3.21.12", "abseil/[>=20230125.3]"]
+    JPEG:       ["libjpeg/9e"]
+    LMDB:       ["lmdb/0.9.29"]
+    LZO:        ["lzo/2.10"]
+    NGHTTP2:    ["libnghttp2/1.54.0"]
+    PCRE:       ["pcre/8.45"]
+    PNG:        ["libpng/1.6.39"]
+    SQLITE3:    ["sqlite3/3.42.0"]
+    TIFF:       ["libtiff/4.5.0"]
+    XML:        ["libxml2/2.11.6"]
+    XSLT:       ["libxslt/1.1.34"]
+    UV:         ["libuv/1.46.0"]
+    Z:          ["zlib/1.2.13"]
+    ZSTD:       ["zstd/1.5.5"]
+
+disabled:
+    BACKWARD:   ["Windows", "Macos"]
+    UNWIND:     ["Windows", "Macos"]
+    BerkeleyDB: ["Windows"]
