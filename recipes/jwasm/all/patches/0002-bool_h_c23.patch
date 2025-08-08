@@ -1,0 +1,35 @@
+diff --git a/H/bool.h b/H/bool.h
+index a9ed26f..1334d05 100644
+--- a/H/bool.h
++++ b/H/bool.h
+@@ -30,7 +30,7 @@
+ ****************************************************************************/
+ 
+ 
+-#if !defined( BOOL_DEFINED )  &&  !defined( bool ) && !(__WATCOMC__ >= 1070 && defined(__cplusplus))
++#if ( __STDC_VERSION__ < 202311L ) && !defined( BOOL_DEFINED )  &&  !defined( bool ) && !( __WATCOMC__ >= 1070 && defined(__cplusplus) )
+     #define BOOL_DEFINED
+     typedef unsigned char bool;
+ #endif
+diff --git a/listing.c b/listing.c
+index 99062ea..44486d6 100644
+--- a/listing.c
++++ b/listing.c
+@@ -108,6 +108,8 @@ static void log_segment( const struct asym *, const struct asym *group );
+ static void log_group(   const struct asym *, const struct dsym * );
+ static void log_proc(    const struct asym * );
+ 
++typedef void (*log_struct_type)(const struct asym *, const char *, int_32);
++
+ static const struct print_item cr[] = {
+     { LQ_MACROS,          0, maccap, log_macro   },
+     { LQ_STRUCTS,         0, strcap, log_struct  },
+@@ -1126,7 +1128,7 @@ void LstWriteCRef( void )
+                 }
+             }
+             for( dir = queues[cr[idx].type].head; dir ; dir = dir->next ) {
+-                cr[idx].function( &dir->sym, ( cr[idx].flags & PRF_ADDSEG ) ? queues[LQ_SEGS].head : NULL, 0 );
++                ((log_struct_type)(cr[idx].function))( &dir->sym, ( cr[idx].flags & PRF_ADDSEG ) ? queues[LQ_SEGS].head : NULL, 0 );
+             }
+         }
+     }
