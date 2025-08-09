@@ -4,7 +4,6 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2"
@@ -49,10 +48,6 @@ class ZlibNgConan(ConanFile):
     def config_options(self):
         if self._is_windows:
             del self.options.fPIC
-        if Version(self.version) < "2.1.0":
-            del self.options.with_reduced_mem
-        if Version(self.version) < "2.2.1":
-            del self.options.with_runtime_cpu_detection
 
     def configure(self):
         if self.options.shared:
@@ -82,10 +77,8 @@ class ZlibNgConan(ConanFile):
         tc.variables["WITH_OPTIM"] = self.options.with_optim
         tc.variables["WITH_NEW_STRATEGIES"] = self.options.with_new_strategies
         tc.variables["WITH_NATIVE_INSTRUCTIONS"] = self.options.with_native_instructions
-        if Version(self.version) >= "2.1.0":
-            tc.variables["WITH_REDUCED_MEM"] = self.options.with_reduced_mem
-        if Version(self.version) >= "2.2.1":
-            tc.variables["WITH_RUNTIME_CPU_DETECTION"] = self.options.with_runtime_cpu_detection
+        tc.variables["WITH_REDUCED_MEM"] = self.options.with_reduced_mem
+        tc.variables["WITH_RUNTIME_CPU_DETECTION"] = self.options.with_runtime_cpu_detection
         tc.generate()
 
     def build(self):
