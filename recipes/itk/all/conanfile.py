@@ -60,13 +60,13 @@ class ITKConan(ConanFile):
         self.requires("eigen/[>=3.4.0 <4]")
         self.requires("expat/[>=2.6.2 <3]")
         self.requires("fftw/3.3.10")
-        self.requires("gdcm/3.0.23")
-        self.requires("hdf5/1.14.3")
+        self.requires("gdcm/3.0.24")
+        self.requires("hdf5/1.14.6")
         self.requires("libjpeg/[>=9f]")
         self.requires("libpng/[>=1.6 <2]")
-        self.requires("libtiff/4.6.0")
+        self.requires("libtiff/4.7.0")
         self.requires("openjpeg/[>=2.5.2 <3]")
-        self.requires("onetbb/2021.9.0")
+        self.requires("onetbb/2022.2.0")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_opencv:
             self.requires("opencv/[>=4.10.0 <5]")
@@ -75,7 +75,8 @@ class ITKConan(ConanFile):
         self.tool_requires("cmake/[>=3.16.3]")
 
     def validate(self):
-        check_min_cppstd(self, 11)
+        min_cppstd = 17 if Version(self.version) >= '5.4.0' else 14
+        check_min_cppstd(self, min_cppstd)
         if self.options.shared and not self.dependencies["hdf5"].options.shared:
             raise ConanInvalidConfiguration("When building a shared itk, hdf5 needs to be shared too (or not linked to by the consumer).\n"
                                             "This is because H5::DataSpace::ALL might get initialized twice, which will cause a H5::DataSpaceIException to be thrown).")
@@ -88,6 +89,7 @@ class ITKConan(ConanFile):
         tc = CMakeToolchain(self)
         #call find_package on top level
         tc.cache_variables["CMAKE_PROJECT_ITK_INCLUDE"] = os.path.join(self.source_folder, "conan_cmake_project_include.cmake")
+        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_DOCUMENTATION"] = False
@@ -219,10 +221,6 @@ class ITKConan(ConanFile):
 
         # Disabled because Vxl vidl is not built anymore
         tc.variables["Module_ITKVideoBridgeVXL"] = False
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if Version(self.version) > "5.3.0": # pylint: disable=conan-unreachable-upper-version
-            # in a PR adding a new version, check if the new version still needs this for CMake 4
-            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
         tc = CMakeDeps(self)
