@@ -45,7 +45,7 @@ class ManifoldConan(ConanFile):
         check_min_cppstd(self, 17)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.18 <4]")
+        self.tool_requires("cmake/[>=3.18]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -57,8 +57,7 @@ class ManifoldConan(ConanFile):
         tc.cache_variables["MANIFOLD_TEST"] = False
         tc.cache_variables["MANIFOLD_CBIND"] = False
         tc.cache_variables["MANIFOLD_PYBIND"] = False
-        if Version(self.version) >= "3.1.0":
-            tc.variables["MANIFOLD_STRICT"] = False # no -Werror
+        tc.cache_variables["MANIFOLD_STRICT"] = False # no -Werror
         tc.cache_variables["MANIFOLD_PAR"] = self.options.with_parallel_acceleration
         tc.generate()
 
