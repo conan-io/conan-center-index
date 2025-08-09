@@ -23,6 +23,9 @@ brotli:
 bzip2:
   versions:
     - '1.0.8'
+c-ares:
+  versions:
+    - '1.34.5'
 certify:
   versions:
     - 'cci.20201114'
@@ -64,6 +67,9 @@ gnu-config:
 gperf:
   versions:
     - '3.1'
+grpc:
+  versions:
+    - '1.67.1'
 gtest:
   versions:
     - '1.14.0'
@@ -160,6 +166,9 @@ pkgconf:
 protobuf:
   versions:
     - '5.27.0'
+re2:
+  versions:
+    - '20230301'
 spdlog:
   versions:
     - '1.15.3'
