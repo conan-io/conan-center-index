@@ -1,3 +1,18 @@
+--- Modules/ThirdParty/Expat/CMakeLists.txt
++++ Modules/ThirdParty/Expat/CMakeLists.txt
+@@ -6,9 +6,9 @@
+ 
+ if(ITK_USE_SYSTEM_EXPAT)
+   find_package(EXPAT REQUIRED)
+-  set(ITKExpat_INCLUDE_DIRS ${ITKExpat_BINARY_DIR}/src )
+-  set(ITKExpat_SYSTEM_INCLUDE_DIRS "${EXPAT_INCLUDE_DIR}")
+-  set(ITKExpat_LIBRARIES "${EXPAT_LIBRARY}")
++  set(ITKExpat_INCLUDE_DIRS ${EXPAT_INCLUDE_DIRECTORIES})
++  set(ITKExpat_SYSTEM_INCLUDE_DIRS ${EXPAT_INCLUDE_DIRECTORIES})
++  set(ITKExpat_LIBRARIES EXPAT::EXPAT)
+   set(ITKExpat_NO_SRC 1)
+ else()
+   set(ITKExpat_INCLUDE_DIRS
 --- Modules/ThirdParty/DoubleConversion/CMakeLists.txt
 +++ Modules/ThirdParty/DoubleConversion/CMakeLists.txt
 @@ -8,8 +8,8 @@
