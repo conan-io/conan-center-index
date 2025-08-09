@@ -82,6 +82,9 @@ launchdarkly:
 libbacktrace:
   versions:
     - 'cci.20210118'
+libcap:
+  versions:
+    - '2.69'
 libcurl:
   versions:
     - '8.12.1'
@@ -95,18 +98,33 @@ libiconv:
 libjpeg-turbo:
   versions:
     - '3.0.2'
+libmount:
+  versions:
+    - '2.39.2'
 libpng:
   versions:
     - '1.6.44'
+libselinux:
+  versions:
+    - '3.6'
+libsystemd:
+  versions:
+    - '255.10'
 libtool:
   versions:
     - '2.4.7'
+libxcrypt:
+  versions:
+    - '4.4.36'
 libwebp:
   versions:
     - '1.4.0'
 libxml2:
   versions:
     - '2.13.4'
+lz4:
+  versions:
+    - '1.9.4'
 m4:
   versions:
     - '1.4.19'
@@ -159,6 +177,7 @@ parallel-hashmap:
 pcre2:
   versions:
     - '10.44'
+    - '10.42'
 pkgconf:
   versions:
     - '2.1.0'
@@ -228,6 +247,7 @@ zlib:
 zstd:
   versions:
     - '1.5.7'
+    - '1.5.5'
 zxing-cpp:
   versions:
     - '2.2.1'
