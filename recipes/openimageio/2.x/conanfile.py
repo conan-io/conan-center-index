@@ -219,8 +219,6 @@ class OpenImageIOConan(ConanFile):
     def _add_component(self, name):
         component = self.cpp_info.components[self._conan_comp(name)]
         component.set_property("cmake_target_name", f"OpenImageIO::{name}")
-        component.names["cmake_find_package"] = name
-        component.names["cmake_find_package_multi"] = name
         return component
 
     def package_info(self):

@@ -1,5 +1,5 @@
 diff --git CMakeLists.txt CMakeLists.txt
-index a07b027cd..80a70aa8b 100644
+index ec17a5838..48bf5d74a 100644
 --- CMakeLists.txt
 +++ CMakeLists.txt
 @@ -42,7 +42,7 @@ endif ()
@@ -499,7 +499,7 @@ index fcce7930f..445ea5c81 100644
  if (WIN32)
      target_link_libraries (OpenImageIO PRIVATE psapi)
 diff --git src/libutil/CMakeLists.txt src/libutil/CMakeLists.txt
-index f6ad5d838..71cc83927 100644
+index d8927804c..c2d39c6e0 100644
 --- src/libutil/CMakeLists.txt
 +++ src/libutil/CMakeLists.txt
 @@ -64,6 +64,8 @@ function (setup_oiio_util_library targetname)
@@ -511,8 +511,8 @@ index f6ad5d838..71cc83927 100644
              PRIVATE
                  $<TARGET_NAME_IF_EXISTS:TBB::tbb>
                  ${CMAKE_DL_LIBS}
-@@ -75,13 +77,6 @@ function (setup_oiio_util_library targetname)
-                                PRIVATE stdc++_libbacktrace)
+@@ -78,13 +80,6 @@ function (setup_oiio_util_library targetname)
+         target_link_libraries (${targetname} PRIVATE stdc++exp)
      endif ()
  
 -    if (OIIO_INTERNALIZE_FMT OR fmt_LOCAL_BUILD)
