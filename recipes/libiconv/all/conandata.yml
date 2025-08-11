@@ -1,13 +1,13 @@
 sources:
   "1.18":
     url:
-    - "https://ftpmirror.gnu.org/gnu/libiconv/libiconv-1.18.tar.gz"
-    - "https://ftp.gnu.org/gnu/libiconv/libiconv-1.18.tar.gz"
+    - "http://ftpmirror.gnu.org/gnu/libiconv/libiconv-1.18.tar.gz"
+    - "http://ftp.gnu.org/gnu/libiconv/libiconv-1.18.tar.gz"
     sha256: "3b08f5f4f9b4eb82f151a7040bfd6fe6c6fb922efe4b1659c66ea933276965e8"
   "1.17":
     url:
-    - "https://ftpmirror.gnu.org/gnu/libiconv/libiconv-1.17.tar.gz"
-    - "https://ftp.gnu.org/gnu/libiconv/libiconv-1.17.tar.gz"
+    - "http://ftpmirror.gnu.org/gnu/libiconv/libiconv-1.17.tar.gz"
+    - "http://ftp.gnu.org/gnu/libiconv/libiconv-1.17.tar.gz"
     sha256: "8f74213b56238c85a50a5329f77e06198771e70dd9a739779f4c02f65d971313"
 patches:
   "1.17":
