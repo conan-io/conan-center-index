@@ -40,54 +40,65 @@ jobs:
                 continue;
               }
               const [, package, folder] = filepath;
-              const fileContent = await fs.readFile(`recipes/${package}/config.yml`, 'utf8');
-              const config = yaml.load(fileContent);
               core.debug(`file: ${filepath}`);
               const path = filepath.join("/");
               if (path === `recipes/${package}/${folder}/conandata.yml`) {
                 core.debug("conandata detected");
-                const newconandata = yaml.load(await fs.readFile(path, 'utf8'));
                 const response = await fetch(`${{ github.server_url }}/${{ github.event.pull_request.base.repo.owner.login }}/${{ github.event.pull_request.base.repo.name }}/raw/refs/heads/${{ github.event.pull_request.base.ref }}/${path}`);
                 if (response.ok) {
                   core.debug("got old conandata successfully");
-                  const oldconandata = yaml.load(await response.text());
-                  Object.entries(newconandata.sources)
-                    .filter(([version, info]) => 
-                      !(version in oldconandata.sources) || 
-                      JSON.stringify(info) !== JSON.stringify(oldconandata.sources[version])
-                    )
-                    .map(([version]) => JSON.stringify({ package, version }))
-                    .forEach(ref => references.add(ref));
+                  try {
+                    const newconandata = yaml.load(await fs.readFile(path, 'utf8'), { filename: path });
+                    const oldconandata = yaml.load(await response.text(), { filename: "conandata.yml" });
+                    Object.entries(newconandata.sources)
+                      .filter(([version, info]) => 
+                        !(version in oldconandata.sources) || 
+                        JSON.stringify(info) !== JSON.stringify(oldconandata.sources[version])
+                      )
+                      .map(([version]) => JSON.stringify({ package, version }))
+                      .forEach(ref => references.add(ref));
 
-                  const newPatches = newconandata.patches || {};
-                  const oldPatches = oldconandata.patches || {};
-                  Object.entries(newPatches)
-                    .filter(([version, info]) => 
-                      !(version in oldPatches) || 
-                      JSON.stringify(info) !== JSON.stringify(oldPatches[version])
-                    )
-                    .map(([version]) => JSON.stringify({ package, version }))
-                    .forEach(ref => references.add(ref));
-                    continue;
+                    const newPatches = newconandata.patches || {};
+                    const oldPatches = oldconandata.patches || {};
+                    Object.entries(newPatches)
+                      .filter(([version, info]) => 
+                        !(version in oldPatches) || 
+                        JSON.stringify(info) !== JSON.stringify(oldPatches[version])
+                      )
+                      .map(([version]) => JSON.stringify({ package, version }))
+                      .forEach(ref => references.add(ref));
+                      continue;
+                  } catch (e) {
+                    core.error(`error parsing ${path}: ${e}`)
+                  }
                 } else {
                   core.error(`error getting old conandata: ${response.status} ${response.statusText} ${response.body}`);
                 }
               } else if (path.startsWith(`recipes/${package}/${folder}/patches/`)) {
                 const patchName = filepath.slice(3).join("/")
                 core.debug(`patch detected: ${patchName}`)
-                const newconandata = yaml.load(await fs.readFile(`recipes/${package}/${folder}/conandata.yml`, 'utf8'))
-                const newPatches = newconandata.patches || {};
-                Object.entries(newPatches)
-                  .filter(([version, patches]) => patches.some((patch) => patch.patch_file === patchName))
+                try {
+                  const newconandata = yaml.load(await fs.readFile(`recipes/${package}/${folder}/conandata.yml`, 'utf8'), { filename: `recipes/${package}/${folder}/conandata.yml` })
+                  const newPatches = newconandata.patches || {};
+                  Object.entries(newPatches)
+                    .filter(([version, patches]) => patches.some((patch) => patch.patch_file === patchName))
+                    .map(([version]) => JSON.stringify({ package, version }))
+                    .forEach(ref => references.add(ref));
+                  continue;
+                } catch (e) {
+                    core.error(`error parsing recipes/${package}/${folder}/conandata.yml: ${e}`)
+                }
+              }
+              try {
+                const fileContent = await fs.readFile(`recipes/${package}/config.yml`, 'utf8');
+                const config = yaml.load(fileContent, { filename: `recipes/${package}/config.yml` });
+                Object.entries(config.versions)
+                  .filter(([_, info]) => info.folder === folder)
                   .map(([version]) => JSON.stringify({ package, version }))
                   .forEach(ref => references.add(ref));
-                continue;
+              } catch (e) {
+                  core.error(`error parsing recipes/${package}/config.yml: ${e}`)
               }
-
-              Object.entries(config.versions)
-                .filter(([_, info]) => info.folder === folder)
-                .map(([version]) => JSON.stringify({ package, version }))
-                .forEach(ref => references.add(ref));
             }
             return Array.from(references).map(JSON.parse);
 
