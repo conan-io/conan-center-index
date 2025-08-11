@@ -15,7 +15,14 @@ runs:
       run: echo "CONAN_HOME=${{ runner.temp }}\\.c2" >> $GITHUB_ENV
       shell: bash
 
-    - run: conan profile detect --force
+    - run: conan profile detect --name autodetected --force
+      shell: bash
+    
+    - run: |
+        DEFAULT_PROFILE="$(conan config home)/profiles/default"
+        echo "include(autodetected)" > "$DEFAULT_PROFILE"
+        echo "[replace_requires]" >> "$DEFAULT_PROFILE"
+        # echo "libiconv/1.17: libiconv/1.18" >> "$DEFAULT_PROFILE"
       shell: bash
 
     - run: conan remote remove "*"

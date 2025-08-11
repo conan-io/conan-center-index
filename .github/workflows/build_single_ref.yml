@@ -135,7 +135,7 @@ jobs:
 
       - run: |
           CONAN_PATH=$(conan config home)
-          PROFILE_PATH=$(conan profile path default)
+          PROFILE_PATH=$(conan profile path autodetected)
           COMPILER=$(awk -F "=" '/^compiler=/ {print $2}' $PROFILE_PATH)
           CPP_STDS=$(python3 -c "import yaml;import sys;print(*yaml.safe_load(sys.stdin)['compiler']['$COMPILER']['cppstd'])" < $CONAN_PATH/settings.yml)
           for cpp_std in $CPP_STDS; do
