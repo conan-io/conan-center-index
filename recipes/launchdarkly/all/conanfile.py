@@ -57,7 +57,7 @@ class LaunchDarklyConan(ConanFile):
     def requirements(self):
         self.requires("boost/[>=1.81.0 <2]", force=True, transitive_headers=True)
         self.requires("certify/cci.20201114")
-        self.requires("openssl/[>=3.2.1 <4]", transitive_headers=True)
+        self.requires("openssl/[>=3 <4]", transitive_headers=True)
         self.requires("tl-expected/1.1.0", transitive_headers=True)
 
     def validate(self):
