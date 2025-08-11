@@ -35,10 +35,16 @@ class XtensorConan(ConanFile):
 
     def requirements(self):
         # https://github.com/xtensor-stack/xtensor?tab=readme-ov-file#dependencies
-        self.requires("xtl/0.8.0")
+        if Version(self.version) < "0.26.0":
+            self.requires("xtl/0.7.5")
+        else:
+            self.requires("xtl/0.8.0")
         self.requires("nlohmann_json/3.11.3")
         if self.options.xsimd:
-            self.requires("xsimd/13.2.0")
+            if Version(self.version) < "0.26.0":
+                self.requires("xsimd/13.0.0")
+            else:
+                self.requires("xsimd/13.2.0")
         if self.options.tbb:
             self.requires("onetbb/2021.10.0")
 
