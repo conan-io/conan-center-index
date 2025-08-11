@@ -155,6 +155,7 @@ opengl:
 openssl:
   versions:
     - '3.2.2'
+    - '3.0.5'
 opentelemetry-cpp:
   versions:
     - '1.21.0'
