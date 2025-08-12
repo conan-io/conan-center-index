@@ -35,6 +35,9 @@ class SbgEComConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.generate()
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16]")
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
