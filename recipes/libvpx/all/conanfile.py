@@ -6,14 +6,12 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import stdcpp_library
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, \
-    rename
+from conan.tools.files import copy, get, rmdir, replace_in_file, rename
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2.0"
 
 
 class LibVPXConan(ConanFile):
@@ -44,9 +42,6 @@ class LibVPXConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -70,8 +65,6 @@ class LibVPXConan(ConanFile):
     def validate(self):
         if str(self.settings.compiler) not in ["Visual Studio", "msvc", "gcc", "clang", "apple-clang"]:
             raise ConanInvalidConfiguration(f"Unsupported compiler {self.settings.compiler}")
-        if self.settings.os == "Macos" and self.settings.arch == "armv8" and Version(self.version) < "1.10.0":
-            raise ConanInvalidConfiguration("M1 only supported since 1.10, please upgrade")
         if self.settings.os == "iOS" and (self.settings.os.sdk != "iphonesimulator" and self.settings.arch in ["x86_64", "x86"]):
             raise ConanInvalidConfiguration("iOS platform with x86/x86_64 architectures only supports 'iphonesimulator' SDK option")
 
@@ -189,7 +182,6 @@ class LibVPXConan(ConanFile):
         tc.generate(env)
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # Disable LTO for Visual Studio when CFLAGS doesn't contain -GL
         if is_msvc(self):
             cflags = " ".join(self.conf.get("tools.build:cflags", default=[], check_type=list))
@@ -245,9 +237,10 @@ class LibVPXConan(ConanFile):
         if is_msvc(self):
             # Libs are still in the build folder, get from there directly.
             # The makefile cannot correctly install the debug libs (see note about --enable-debug_libs)
+            system = {"x86": "Win32", "armv8": "ARM64", "arm64ec": "ARM64EC"}
             libs_from = os.path.join(
                     self.build_folder,
-                    "Win32" if self.settings.arch == "x86" else "x64",
+                    system.get(str(self.settings.arch), "x64"),
                     "Debug" if self.settings.build_type == "Debug" else "Release"
                     )
             # Copy for msvc, as it will generate a release and debug library, so take what we want
