@@ -1,9 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
 required_conan_version = ">=2.0.9"
@@ -37,8 +36,11 @@ class PackageConan(ConanFile):
         self.requires("tsl-robin-map/1.2.1")
 
     def validate(self):
-        if self.settings.compiler not in ("apple-clang", "clang"):
+        if self.settings.compiler != "clang":
             raise ConanInvalidConfiguration("libobjc2 supports clang only.")
+
+        if is_apple_os(self):
+            raise ConanInvalidConfiguration("libobjc2 does not support macOS.")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
