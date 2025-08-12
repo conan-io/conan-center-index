@@ -1,4 +1,4 @@
 sources:
-  "5.2.590":
-    url: "https://github.com/SBG-Systems/sbgECom/archive/refs/tags/5.2.590-stable.tar.gz"
-    sha256: "1f5355834d05de794184658368ab9ff507f808fd3fd8fc1ef1d54e02b41f2d36"
+  "5.3.2276":
+    url: "https://github.com/SBG-Systems/sbgECom/archive/refs/tags/5.3.2276-stable.tar.gz"
+    sha256: "c97b0baeea3725d406484d209486d7b6d5482e9675dd5b3323b104b3c2c12eb7"
