@@ -20,6 +20,7 @@ class SbgEComConan(ConanFile):
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
 
+    implements = ["auto_shared_fpic"]
     languages = "C"
     
     def layout(self):
