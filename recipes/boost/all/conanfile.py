@@ -944,16 +944,6 @@ class BoostConan(ConanFile):
         return version
 
     @property
-    def _python_inc(self):
-        """
-        obtain the result of the "sysconfig.get_python_inc()" call
-        :return: result of the "sysconfig.get_python_inc()" execution
-        """
-        return self._run_python_script("from __future__ import print_function; "
-                                       "import sysconfig; "
-                                       "print(sysconfig.get_python_inc())")
-
-    @property
     def _python_abiflags(self):
         """
         obtain python ABI flags, see https://www.python.org/dev/peps/pep-3149/ for the details
@@ -973,13 +963,11 @@ class BoostConan(ConanFile):
         plat_include = self._get_python_path("platinclude")
         include_py = self._get_python_var("INCLUDEPY")
         include_dir = self._get_python_var("INCLUDEDIR")
-        python_inc = self._python_inc
 
         candidates = [include,
                       plat_include,
                       include_py,
-                      include_dir,
-                      python_inc]
+                      include_dir,]
         for candidate in candidates:
             if candidate:
                 python_h = os.path.join(candidate, 'Python.h')
