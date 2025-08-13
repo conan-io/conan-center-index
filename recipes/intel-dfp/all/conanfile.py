@@ -1,11 +1,11 @@
 import os
 from conan import ConanFile
-from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps
+from conan.tools.cmake import CMakeToolchain, CMake
 from conan.tools.files import (get, copy, apply_conandata_patches,
                                export_conandata_patches)
 
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.4"
 
 
 class IntelDfpConan(ConanFile):
@@ -16,6 +16,7 @@ class IntelDfpConan(ConanFile):
     homepage = ("https://www.intel.com/content/www/us/en/developer/articles/"
                 "tool/intel-decimal-floating-point-math-library.html")
     topics = ("decimal", "dfp", "ieee-754", "intel")
+
     package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -33,29 +34,23 @@ class IntelDfpConan(ConanFile):
         "global_exception": False
     }
 
+    implements = ["auto_shared_fpic"]
+    languages = "C"
+
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, "CMakeLists.txt", self.recipe_folder,
              dst=self.export_sources_folder)
-
-    def config_options(self):
-        if self.settings.get_safe("os") == "Windows":
-            self.options.rm_safe("fPIC")
-
-    def configure(self):
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
-
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.12.0]")
+    
+    def validate(self):
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("Recipe does not currently support Macos, PR welcomed")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
         apply_conandata_patches(self)
 
     def generate(self):
-        deps = CMakeDeps(self)
-        deps.generate()
         tc = CMakeToolchain(self)
         tc.variables["CALL_BY_REF"] = self.options.call_by_reference
         tc.variables["GLOBAL_RND"] = self.options.global_rounding
