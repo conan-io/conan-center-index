@@ -3,6 +3,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake
 from conan.tools.files import (get, copy, apply_conandata_patches,
                                export_conandata_patches)
+from conan.errors import ConanInvalidConfiguration
 
 
 required_conan_version = ">=2.4"
