@@ -16,6 +16,7 @@ class OutcomeConan(ConanFile):
     homepage = "https://github.com/ned14/outcome"
     topics = ("result", "header-only")
     package_type = "header-library"
+    settings = "compiler"
     no_copy_source = True
 
     def layout(self):
