@@ -42,6 +42,9 @@ patches:
       patch_description: "Fix C++20 compilation issues in TreeEnsembleAggregator"
       patch_source: "https://github.com/microsoft/onnxruntime/pull/22062"
       patch_type: "portability"
+    - patch_file: "patches/1.18.1-0011-cpuinfo.patch"
+      patch_description: "Fix target name for cpuinfo"
+      patch_type: "conan"
   "1.17.3":
     - patch_file: "patches/1.17.3-0001-patch-macos-cpp20-date-compat.patch"
       patch_description: "allow to build with macos c++20 support"
