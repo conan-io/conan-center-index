@@ -107,7 +107,7 @@ class OnnxRuntimeConan(ConanFile):
             self.requires("wil/1.0.240803.1")
         if self.options.with_xnnpack:
             if Version(self.version) >= "1.17.0":
-                self.requires("xnnpack/cci.20230715")
+                self.requires("xnnpack/cci.20231026")
             else:
                 self.requires("xnnpack/cci.20220801")
         if self.options.with_cuda:
