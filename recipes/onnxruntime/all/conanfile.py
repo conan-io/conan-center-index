@@ -220,8 +220,12 @@ class OnnxRuntimeConan(ConanFile):
         if self.options.shared:
             self.cpp_info.libs = ["onnxruntime"]
         else:
-            onnxruntime_libs = [
-                "session",
+            #order is important
+            #https://github.com/microsoft/onnxruntime/blob/v1.18.1/cmake/onnxruntime.cmake#L178C1-L206C2
+            onnxruntime_libs = ["session"]
+            if self.options.with_xnnpack:
+                onnxruntime_libs.append("providers_xnnpack")
+            onnxruntime_libs.extend([
                 "optimizer",
                 "providers",
                 "framework",
@@ -230,9 +234,7 @@ class OnnxRuntimeConan(ConanFile):
                 "mlas",
                 "common",
                 "flatbuffers",
-            ]
-            if self.options.with_xnnpack:
-                onnxruntime_libs.append("providers_xnnpack")
+            ])
             self.cpp_info.libs = [f"onnxruntime_{lib}" for lib in onnxruntime_libs]
 
         if Version(self.version) < "1.16.0" or not self.options.shared:
