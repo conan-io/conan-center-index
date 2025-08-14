@@ -1,4 +1,4 @@
-#include "QtAwesome.h"
+#include "QtAwesome/QtAwesome.h"
 
 int main(void) {
     fa::QtAwesome awesome(nullptr);
