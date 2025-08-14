@@ -1,6 +1,8 @@
 sources:
   "1.35":
-    url: "https://ftp.gnu.org/gnu/tar/tar-1.35.tar.xz"
+    url:
+      - "http://ftpmirror.gnu.org/gnu/tar/tar-1.35.tar.xz"
+      - "http://ftp.gnu.org/gnu/tar/tar-1.35.tar.xz"
     sha256: "4d62ff37342ec7aed748535323930c7cf94acf71c3591882b26a7ea50f3edc16"
   "1.32.90":
     url: "https://alpha.gnu.org/gnu/tar/tar-1.32.90.tar.gz"
