@@ -31,6 +31,9 @@ patches:
     - patch_file: "patches/1.18.1-0007-xnnpack-proper-linkage.patch"
       patch_description: "Fix target name for xnnpack"
       patch_type: "conan"
+    - patch_file: "patches/1.18.1-0008-cmake-cxx-standard.patch"
+      patch_description: "Remove hardcoded CMAKE_CXX_STANDARD"
+      patch_type: "conan"
   "1.17.3":
     - patch_file: "patches/1.17.3-0001-patch-macos-cpp20-date-compat.patch"
       patch_description: "allow to build with macos c++20 support"
