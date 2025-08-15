@@ -38,6 +38,7 @@ class libjwtRecipe(ConanFile):
         tc.cache_variables["USE_INSTALLED_JANSSON"] = True
         tc.cache_variables["ENABLE_PIC"] = False # let Conan handle it via the toolchain
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["BUILD_EXAMPLES"] = False
         tc.generate()
 
         cmakeDeps = CMakeDeps(self)
