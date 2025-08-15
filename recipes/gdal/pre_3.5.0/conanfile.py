@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library, valid_min_cppstd
+from conan.tools.build import check_max_cppstd, check_min_cppstd, cross_building, stdcpp_library, valid_min_cppstd
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
@@ -234,7 +234,7 @@ class GdalConan(ConanFile):
         # if self.options.with_pcidsk:
         #     self.requires("pcidsk/x.x.x")
         if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.0")
         elif self.options.with_jpeg == "mozjpeg":
@@ -284,7 +284,7 @@ class GdalConan(ConanFile):
         # if self.options.with_spatialite:
         #     self.requires("libspatialite/4.3.0a")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.44.2")
+            self.requires("sqlite3/[>=3.44.2 <4]")
         # if self.options.with_rasterlite2:
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
@@ -357,6 +357,11 @@ class GdalConan(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.ref} with mongo-cxx-driver < 3.0.0 not yet supported in this recipe.")
             if mongocxx_version < "3.4.0":
                 raise ConanInvalidConfiguration(f"{self.ref} with mongo-cxx-driver v3 requires 3.4.0 at least.")
+
+    def validate_build(self):
+        # GDAL does not appear to build in C++20 with the latest MSVC.
+        if is_msvc(self) and self.settings.compiler.get_safe("cppstd"):
+            check_max_cppstd(self, 17)
 
     def build_requirements(self):
         if not is_msvc(self):
