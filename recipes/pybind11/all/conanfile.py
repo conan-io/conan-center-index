@@ -53,9 +53,10 @@ class PyBind11Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
         checked_target = "lto" if self.version < Version("2.11.0") else "pybind11"
-        replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Common.cmake"),
-                              f"if(TARGET pybind11::{checked_target})",
-                              "if(FALSE)")
+        if self.version < Version("3.0.0"):
+            replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Common.cmake"),
+                                  f"if(TARGET pybind11::{checked_target})",
+                                  "if(FALSE)")
         replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Common.cmake"),
                               "add_library(",
                               "# add_library(")
