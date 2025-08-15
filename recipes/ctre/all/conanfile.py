@@ -1,11 +1,8 @@
 import os
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
-from conan.tools.layout import basic_layout
-from conan.tools.files import get, copy
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import get, copy, rmdir
 
 required_conan_version = ">=2"
 
@@ -18,28 +15,22 @@ class CtreConan(ConanFile):
     homepage = "https://github.com/hanickadot/compile-time-regular-expressions"
     topics = ("cpp17", "regex", "compile-time-regular-expressions", "header-only")
     package_type = "header-library"
-    settings = "compiler"
-    no_copy_source = True
+    settings = "os", "compiler", "arch", "build_type"
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
-        compiler = self.settings.compiler
-        compiler_version = Version(self.settings.compiler.version)
-
         check_min_cppstd(self, "17")
-        if is_msvc(self):
-            if compiler_version < 16:
-                raise ConanInvalidConfiguration(f"{self.ref} doesn't support MSVC < 16")
-        elif compiler == "gcc" and compiler_version < 8:
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 8")
-        elif compiler == "clang":
-            if compiler_version < "6.0":
-                raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 6.0")
-        elif compiler == "apple-clang":
-            if compiler_version < "10.0":
-                raise ConanInvalidConfiguration(f"{self.ref} doesn't support Apple clang < 10.0")
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["CTRE_BUILD_TESTS"] = False
+        tc.cache_variables["CTRE_BUILD_PACKAGE"] = False
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def package_id(self):
         self.info.clear()
@@ -47,9 +38,17 @@ class CtreConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],  strip_root=True)
 
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
     def package(self):
-        copy(self, pattern="*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        cmake = CMake(self)
+        cmake.install()
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkg-config"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
