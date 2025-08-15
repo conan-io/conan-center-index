@@ -77,7 +77,7 @@ class LibgeotiffConan(ConanFile):
         self.cpp_info.set_property("cmake_module_file_name", "GeoTIFF")
         self.cpp_info.set_property("cmake_additional_variables_prefixes", ["GEOTIFF"])
         self.cpp_info.set_property("cmake_file_name", "geotiff")
-        self.cpp_info.set_property("cmake_target_name", "geotiff::geotiff")
+        self.cpp_info.set_property("cmake_target_name", "geotiff_library")
 
         self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
