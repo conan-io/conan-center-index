@@ -49,10 +49,8 @@ class XtensorConan(ConanFile):
             self.requires("onetbb/2021.10.0")
 
     def build_requirements(self):
-        # Older versions of xtensor require CMake < 3.5,
-        # so use this to both avoid CMake 4 support,
-        # and support newer versions of xtensor having 3.29
-        self.tool_requires("cmake/[>=3.29 <4]")
+        # required by newer versions of xtensor
+        self.tool_requires("cmake/[>=3.29]")
 
     def package_id(self):
         self.info.clear()
@@ -80,9 +78,7 @@ class XtensorConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure()
-        # This generates a xtensor.hpp file that includes all the headers
-        # Otherwise, this is still a header-only library,
-        # no need to set specific build flags
+        cmake.build()
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
