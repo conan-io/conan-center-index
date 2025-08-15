@@ -1,4 +1,4 @@
 sources:
   "2.11":
-    url: "https://github.com/userver-framework/userver/archive/refs/tags/v2.11.zip"
-    sha256: "1b042ab4d38226cfed96796d1d693366a7de80d5caa23a8d0857b374207a0cfa"
+    url: "https://github.com/userver-framework/userver/archive/refs/tags/v2.11.tar.gz"
+    sha256: "6fe7bd8c1f0f725268362493b477f14cac05d9e2b26240a9e1e04b75a7fcc421"
