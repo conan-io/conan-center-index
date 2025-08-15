@@ -20,6 +20,11 @@ class CtreConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        # https://github.com/hanickadot/compile-time-regular-expressions/blob/main/CMakeLists.txt#L122
+        # https://discourse.cmake.org/t/how-to-find-current-interface-library-property-whitelist/4784
+        self.tool_requires("cmake/[>=3.19]")
+
     def validate(self):
         check_min_cppstd(self, "17")
 
