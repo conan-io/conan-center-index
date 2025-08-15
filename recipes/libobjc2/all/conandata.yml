@@ -1,0 +1,4 @@
+sources:
+  "2.2.1":
+    url: "https://github.com/gnustep/libobjc2/archive/v2.2.1.zip"
+    sha256: "b0afc1d98a6f7208fb5ce1fc8b5848b5ba6dba1f4fcd755fbe3fc78b5e4b3308"
