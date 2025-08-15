@@ -1,4 +1,7 @@
 sources:
+  "3.4.0+git-1d8b82":
+    url: "https://github.com/eigen-mirror/eigen/archive/1d8b82b0740839c0de7f1242a3585e3390ff5f33/eigen-1d8b82b0740839c0de7f1242a3585e3390ff5f33.zip"
+    sha256: "6a60d76351f97132669daeeb721d6bf14b008101883ad2d687a3201c5c461eb0"
   "3.4.0":
     url: "https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.bz2"
     sha256: "b4c198460eba6f28d34894e3a5710998818515104d6e74e5cc331ce31e46e626"
