@@ -50,12 +50,11 @@ class SAILConan(ConanFile):
     def requirements(self):
         if self.options.with_highest_priority_codecs:
             self.requires("giflib/5.2.2")
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
             self.requires("libpng/[>=1.6 <2]")
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.6.0 <5]")
         if self.options.with_high_priority_codecs:
-            if Version(self.version) >= "0.9.1":
-                self.requires("nanosvg/cci.20231025")
+            self.requires("nanosvg/cci.20231025")
         if self.options.with_medium_priority_codecs:
             self.requires("libavif/1.1.1")
             self.requires("jasper/4.2.0")
@@ -91,9 +90,6 @@ class SAILConan(ConanFile):
         tc.variables["SAIL_COMBINE_CODECS"] = True
         tc.variables["SAIL_ENABLE_OPENMP"]  = False
         tc.variables["SAIL_ONLY_CODECS"]    = ";".join(only_codecs)
-        # SVG with nanosvg is supported in >= 0.9.1
-        if Version(self.version) < "0.9.1":
-            tc.variables["SAIL_DISABLE_CODECS"] = "svg"
         tc.variables["SAIL_INSTALL_PDB"]    = False
         tc.variables["SAIL_THREAD_SAFE"]    = self.options.thread_safe
         # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
@@ -140,8 +136,7 @@ class SAILConan(ConanFile):
             self.cpp_info.components["sail-codecs"].requires.append("libjpeg::libjpeg")
             self.cpp_info.components["sail-codecs"].requires.append("libpng::libpng")
             self.cpp_info.components["sail-codecs"].requires.append("libtiff::libtiff")
-            if Version(self.version) >= "0.9.1":
-                self.cpp_info.components["sail-codecs"].requires.append("nanosvg::nanosvg")
+            self.cpp_info.components["sail-codecs"].requires.append("nanosvg::nanosvg")
         if self.options.with_medium_priority_codecs:
             self.cpp_info.components["sail-codecs"].requires.append("libavif::libavif")
             self.cpp_info.components["sail-codecs"].requires.append("jasper::jasper")
