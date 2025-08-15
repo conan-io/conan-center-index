@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rmdir
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class ImathConan(ConanFile):
@@ -29,9 +29,6 @@ class ImathConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -92,13 +89,3 @@ class ImathConan(ConanFile):
         imath_lib.requires = ["imath_config"]
         if self.settings.os == "Windows" and self.options.shared:
             imath_lib.defines.append("IMATH_DLL")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Imath"
-        self.cpp_info.names["cmake_find_package_multi"] = "Imath"
-        self.cpp_info.names["pkg_config"] = "Imath"
-        imath_config.names["cmake_find_package"] = "ImathConfig"
-        imath_config.names["cmake_find_package_multi"] = "ImathConfig"
-        imath_lib.names["cmake_find_package"] = "Imath"
-        imath_lib.names["cmake_find_package_multi"] = "Imath"
-        imath_lib.names["pkg_config"] = "Imath"
