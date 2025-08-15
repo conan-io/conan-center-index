@@ -52,6 +52,7 @@ class CtreConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "share", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkg-config"))
 
