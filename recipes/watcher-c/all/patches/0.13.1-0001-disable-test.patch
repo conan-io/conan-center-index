@@ -1,0 +1,38 @@
+diff --git a/meson.build b/meson.build
+index a1ff4c6..caecc5f 100644
+--- a/meson.build
++++ b/meson.build
+@@ -5,4 +5,4 @@ project(
+   default_options : ['c_std=c99', 'cpp_std=c++17'],
+ )
+ subdir('watcher-c')
+-subdir('watcher-py')
++# subdir('watcher-py')
+diff --git a/watcher-c/meson.build b/watcher-c/meson.build
+index 38aa9c5..6af98e3 100644
+--- a/watcher-c/meson.build
++++ b/watcher-c/meson.build
+@@ -32,14 +32,14 @@ libwatcher_c = library(
+   version : meson.project_version(),
+ )
+ 
+-test_libwatcher_c = executable(
+-  'test-watcher-c',
+-  ['src/test-watcher-c.c'],
+-  include_directories : ['include'],
+-  link_with : [libwatcher_c],
+-  build_rpath : '/usr/local/lib',
+-  install_rpath : '/usr/local/lib',
+-  install : false,
+-)
++# test_libwatcher_c = executable(
++#   'test-watcher-c',
++#   ['src/test-watcher-c.c'],
++#   include_directories : ['include'],
++#   link_with : [libwatcher_c],
++#   build_rpath : '/usr/local/lib',
++#   install_rpath : '/usr/local/lib',
++#   install : false,
++# )
+ 
+ subdir('include')
