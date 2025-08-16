@@ -176,6 +176,11 @@ class NCursesConan(ConanFile):
         if host:
             tc.configure_args.append(f"ac_cv_host={host}")
             tc.configure_args.append(f"ac_cv_target={host}")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) >= 15:
+            # FIXME: Workaround to allow building with with GCC15
+            # Upstream has proper but huge patches: https://invisible-island.net/ncurses/NEWS.html#index-t20241207
+            tc.extra_cflags.append("-std=gnu17")
+
         # Allow ncurses to set the include dir with an appropriate subdir
         tc.configure_args.remove("--includedir=${prefix}/include")
         tc.generate()
