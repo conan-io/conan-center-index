@@ -1,4 +1,7 @@
 sources:
+  "5.5.5":
+    url: "https://github.com/stephenberry/glaze/archive/v5.5.5.tar.gz"
+    sha256: "c2ae536d634aa12f49ac7521f169d2891af55b3376648cbb0053daadb78b6ef1"
   "5.4.1":
     url: "https://github.com/stephenberry/glaze/archive/v5.4.1.tar.gz"
     sha256: "a5d578e58fa0e0930eb02bf99ebcb0cb732ce04ce427ec608d773c6f5258e545"
