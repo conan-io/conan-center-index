@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import copy
+from conan.tools.files import copy, get
 import os
 
 class VStatsConan(ConanFile):
@@ -12,12 +12,15 @@ class VStatsConan(ConanFile):
     topics = ("timing", "monitoring", "metrics", "header-only", "c++")
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
-    exports_sources = "include/*"
     package_type = "header-library"
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, "*.hpp", self.source_folder, os.path.join(self.package_folder, "include"))
         copy(self, "*.h", self.source_folder, os.path.join(self.package_folder, "include"))
+        copy(self, "LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.includedirs = ["include"]
