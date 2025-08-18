@@ -52,7 +52,7 @@ jobs:
       folder: ${{ steps.get_folder.outputs.result }}
       matrix: ${{ steps.search_shared_option.outputs.result }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           sparse-checkout: |
             .github
@@ -116,7 +116,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           sparse-checkout: |
             .github
