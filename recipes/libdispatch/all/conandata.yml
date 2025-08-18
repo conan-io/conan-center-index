@@ -1,12 +1,11 @@
 sources:
-  "5.3.2":
-    sha256: d18ad8f24e3461108d8e2e0c838c8fca671f808ab8d06a2c32a7065f321995a1
-    url: https://github.com/apple/swift-corelibs-libdispatch/archive/swift-5.3.2-RELEASE.tar.gz
-
   "6.2.1":
     url: "https://github.com/swiftlang/swift-corelibs-libdispatch/archive/refs/tags/swift-6.1.1-RELEASE.tar.gz"
     sha256: "6fc6f8b1767a1348e1d960647b2bfbc52fd7074b7aeab97bd0f4b21af58baa47"
-
+  "5.3.2":
+    sha256: d18ad8f24e3461108d8e2e0c838c8fca671f808ab8d06a2c32a7065f321995a1
+    url: https://github.com/apple/swift-corelibs-libdispatch/archive/swift-5.3.2-RELEASE.tar.gz
 patches:
-  - patch_file: "0001-Use-CMAKE_C_COMPILER_FRONTEND_VARIANT-to-detect-msvc.patch"
-  - patch_file: "0002-Fix-Windows-compatibility.patch"
+  "6.2.1":
+    - patch_file: "patches/0001-Use-CMAKE_C_COMPILER_FRONTEND_VARIANT-to-detect-msvc.patch"
+    - patch_file: "patches/0002-Fix-Windows-compatibility.patch"
