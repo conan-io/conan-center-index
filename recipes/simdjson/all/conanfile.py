@@ -50,11 +50,8 @@ class SimdjsonConan(ConanFile):
         tc.cache_variables["SIMDJSON_ENABLE_THREADS"] = self.options.threads
         tc.cache_variables["SIMDJSON_DEVELOPER_MODE"] = False
 
-        cppstd = str(self.settings.get_safe("compiler.cppstd"))
-        if cppstd.startswith("gnu"):
-            cppstd = cppstd[3:]
-        if cppstd:
-            tc.cache_variables["SIMDJSON_CXX_STANDARD"] = cppstd
+        cppstd = str(self.settings.compiler.cppstd).replace("gnu", "")
+        tc.cache_variables["SIMDJSON_CXX_STANDARD"] = cppstd
 
         tc.generate()
 
