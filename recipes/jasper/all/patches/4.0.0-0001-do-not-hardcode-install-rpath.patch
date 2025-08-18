@@ -1,3 +1,5 @@
+See https://github.com/jasper-software/jasper/pull/347
+
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -793,19 +793,15 @@ if(JAS_ENABLE_SHARED)
