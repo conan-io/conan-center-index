@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime, msvc_runtime_flag
 from conan.tools.scm import Version
 import os
@@ -54,9 +54,9 @@ class GTestConan(ConanFile):
             "11": {
                 "Visual Studio": "14",
                 "msvc": "190",
-                "gcc": "4.8.1" if Version(self.version) < "1.11.0" else "5",
-                "clang": "3.3" if Version(self.version) < "1.11.0" else "5",
-                "apple-clang": "5.0" if Version(self.version) < "1.11.0" else "9.1",
+                "gcc": "5",
+                "clang": "5",
+                "apple-clang": "9.1",
             },
             # Sinse 1.13.0, gtest requires C++14 and Google's Foundational C++ Support Policy
             # https://github.com/google/oss-policies-info/blob/603a042ce2ee8f165fac46721a651d796ce59cb6/foundational-cxx-support-matrix.md
@@ -151,19 +151,19 @@ class GTestConan(ConanFile):
             self.cpp_info.components["gtest_main"].set_property("cmake_target_name", "GTest::gtest_main")
             self.cpp_info.components["gtest_main"].set_property("cmake_target_aliases", ["GTest::Main"])
             self.cpp_info.components["gtest_main"].set_property("pkg_config_name", "gtest_main")
-            self.cpp_info.components["gtest_main"].libs = [f"gtest_main{self._postfix}"]
+            self.cpp_info.components["gtest_main"].libs = ["gtest_main"]
             self.cpp_info.components["gtest_main"].requires = ["libgtest"]
 
         # gmock
         if self.options.build_gmock:
             self.cpp_info.components["gmock"].set_property("cmake_target_name", "GTest::gmock")
             self.cpp_info.components["gmock"].set_property("pkg_config_name", "gmock")
-            self.cpp_info.components["gmock"].libs = [f"gmock{self._postfix}"]
+            self.cpp_info.components["gmock"].libs = ["gmock"]
             self.cpp_info.components["gmock"].requires = ["libgtest"]
 
             # gmock_main
             if not self.options.no_main:
                 self.cpp_info.components["gmock_main"].set_property("cmake_target_name", "GTest::gmock_main")
                 self.cpp_info.components["gmock_main"].set_property("pkg_config_name", "gmock_main")
-                self.cpp_info.components["gmock_main"].libs = [f"gmock_main{self._postfix}"]
+                self.cpp_info.components["gmock_main"].libs = ["gmock_main"]
                 self.cpp_info.components["gmock_main"].requires = ["gmock"]
