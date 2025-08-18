@@ -1,0 +1,17 @@
+diff --git a/source/plutovg-font.c b/source/plutovg-font.c
+index 66856e8..bf88880 100644
+--- a/source/plutovg-font.c
++++ b/source/plutovg-font.c
+@@ -3,6 +3,12 @@
+ 
+ #include <stdio.h>
+ #include <assert.h>
++#if !defined(_WIN32)
++    #if defined(__linux__)
++        #define __USE_POSIX
++    #endif
++    #include <limits.h>
++#endif
+ 
+ #define STBTT_STATIC
+ #define STB_TRUETYPE_IMPLEMENTATION

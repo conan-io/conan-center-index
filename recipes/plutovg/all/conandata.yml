@@ -1,4 +1,7 @@
 sources:
+  "1.3.0":
+    url: "https://github.com/sammycage/plutovg/archive/refs/tags/v1.3.0.tar.gz"
+    sha256: "4b08587d782f6858e6cb815b455fd7238f45190a57094857a3123883ecb595eb"
   "1.0.0":
     url: "https://github.com/sammycage/plutovg/archive/refs/tags/v1.0.0.tar.gz"
     sha256: "d4a8015aee9eefc29b01e6dabfd3d4b371ae12f9d5e9be09798deb77a528a794"
@@ -21,6 +24,10 @@ sources:
     url: "https://github.com/sammycage/plutovg/archive/refs/tags/v0.0.1.tar.gz"
     sha256: "593653d226dd54dc322bc0874c19bd0a80314b5471ae4da6b9cd9e12211e3261"
 patches:
+  "1.3.0":
+    - patch_file: "patches/1.3.0-0001-include-limits.patch"
+      patch_description: "include limits.h"
+      patch_type: "portability"
   "0.0.1":
     - patch_file: "patches/0.0.1-0001-include-stdint.patch"
       patch_description: "include stdint.h"
