@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rename, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
@@ -89,14 +89,14 @@ class AutomakeConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share", "man"))
         rmdir(self, os.path.join(self.package_folder, "share", "doc"))
 
-        # TODO: consider whether the following is still necessary on Windows
         if self.settings.os == "Windows":
+            # TODO: consider whether the following is still necessary on Windows
             binpath = os.path.join(self.package_folder, "bin")
             for filename in os.listdir(binpath):
                 fullpath = os.path.join(binpath, filename)
                 if not os.path.isfile(fullpath):
                     continue
-                os.rename(fullpath, fullpath + ".exe")
+                rename(self, fullpath, fullpath + ".exe")
 
     def package_info(self):
         self.cpp_info.libdirs = []
