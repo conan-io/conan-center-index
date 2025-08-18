@@ -3,8 +3,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.files import copy, get, rmdir
-from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=2.1"
