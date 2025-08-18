@@ -180,14 +180,6 @@ class LibpqConan(ConanFile):
                 replace_in_file(self,config_default_pl,
                                       openssl_entry,
                                       "openssl   => '%s'" % openssl.package_folder.replace("\\", "/"))
-            if "zlib" in self.dependencies.host:
-                zlib = self.dependencies["zlib"]
-                replace_in_file(self, solution_pm, "zdll.lib", f"{zlib.cpp_info.libs[0]}.lib")
-                zlib_entry = "zlib => undef" if Version(self.version) >= "16.0" else "zlib      => undef"
-                replace_in_file(self, config_default_pl,
-                                zlib_entry,
-                                "zlib   => '%s'" % zlib.package_folder.replace("\\", "/"))
-
             if self.options.with_icu:
                 libicu = self.dependencies["icu"]
                 iculibdir = libicu.cpp_info.components["icu"].libdirs[0]
