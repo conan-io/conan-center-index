@@ -3,7 +3,7 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import copy, get, replace_in_file, rmdir
 import os
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=2.4"
 class libjwtRecipe(ConanFile):
     name = "libjwt"
     package_type = "library"
@@ -16,7 +16,7 @@ class libjwtRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-
+    languages = "C"
     implements = ["auto_shared_fpic"]
 
     def source(self):
