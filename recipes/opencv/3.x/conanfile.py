@@ -101,7 +101,7 @@ class OpenCVConan(ConanFile):
             self.requires("libwebp/[>=1.3.2 <5]")
         if self.options.contrib:
             self.requires("freetype/2.13.2")
-            self.requires("harfbuzz/8.3.0")
+            self.requires("harfbuzz/[>=8.3.0]")
             self.requires("gflags/2.2.2")
             self.requires("glog/0.6.0")
         if self.options.get_safe("with_gtk"):
