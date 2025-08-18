@@ -70,10 +70,6 @@ class TracyConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 11)
 
-        # libunwind_backtrace is not supported in 0.11.0. https://github.com/wolfpld/tracy/pull/841
-        if Version(self.version) == "0.11.0" and self.options.libunwind_backtrace:
-            raise ConanInvalidConfiguration(f"libunwind_backtrace is not supported in {self.ref}")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -129,8 +125,7 @@ class TracyConan(ConanFile):
         # Starting at 0.12.0, upstream has added an extra "tracy" directory for the include directory
         # include/tracy/tracy/Tracy.hpp
         # but upstream still generates info for including headers as #include <tracy/Tracy.hpp>
-        if Version(self.version) >= "0.12.0":
-            self.cpp_info.components["tracyclient"].includedirs = ['include/tracy']
+        self.cpp_info.components["tracyclient"].includedirs = ['include/tracy']
 
         # Tracy CMake adds options set to ON as public
         for opt in self._tracy_options.keys():
