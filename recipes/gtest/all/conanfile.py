@@ -25,7 +25,6 @@ class GTestConan(ConanFile):
         "build_gmock": [True, False],
         "no_main": [True, False],
         "hide_symbols": [True, False],
-        "debug_postfix": ["ANY"],
         "disable_pthreads": [True, False],
     }
     default_options = {
@@ -34,13 +33,12 @@ class GTestConan(ConanFile):
         "build_gmock": True,
         "no_main": False,
         "hide_symbols": False,
-        "debug_postfix": "d",
         "disable_pthreads": False,
     }
     # disallow cppstd compatibility, as it affects the ABI in this library
     # see https://github.com/conan-io/conan-center-index/issues/23854
-    # Requires Conan >=1.53.0 <2 || >=2.1.0 to work
     extension_properties = {"compatibility_cppstd": False}
+    implements = ["auto_shared_fpic"]
 
     @property
     def _min_cppstd(self):
@@ -74,16 +72,6 @@ class GTestConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-        if Version(self.version) >= "1.12.0" or self.settings.build_type != "Debug":
-            del self.options.debug_postfix
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -112,16 +100,9 @@ class GTestConan(ConanFile):
         tc.variables["BUILD_GMOCK"] = bool(self.options.build_gmock)
         tc.variables["gtest_hide_internal_symbols"] = bool(self.options.hide_symbols)
 
-        if self.settings.build_type == "Debug" and Version(self.version) < "1.12.0":
-            tc.cache_variables["CUSTOM_DEBUG_POSTFIX"] = str(self.options.debug_postfix)
-
         if self.settings.compiler.get_safe("runtime"):
             tc.variables["gtest_force_shared_crt"] = "MD" in msvc_runtime_flag(self)
         tc.variables["gtest_disable_pthreads"] = self.options.disable_pthreads
-        if Version(self.version) < "1.12.0":
-            # Relocatable shared lib on Macos
-            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def _patch_sources(self):
@@ -129,8 +110,6 @@ class GTestConan(ConanFile):
         # No warnings as errors
         internal_utils = os.path.join(self.source_folder, "googletest", "cmake", "internal_utils.cmake")
         replace_in_file(self, internal_utils, "-WX", "")
-        if Version(self.version) < "1.12.0":
-            replace_in_file(self, internal_utils, "-Werror", "")
 
     def build_requirements(self):
         if Version(self.version) >= "1.17.0":
@@ -149,10 +128,6 @@ class GTestConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
-    @property
-    def _postfix(self):
-        return self.options.get_safe("debug_postfix", "")
-
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "GTest")
@@ -161,7 +136,7 @@ class GTestConan(ConanFile):
         self.cpp_info.components["libgtest"].set_property("cmake_target_name", "GTest::gtest")
         self.cpp_info.components["libgtest"].set_property("cmake_target_aliases", ["GTest::GTest"])
         self.cpp_info.components["libgtest"].set_property("pkg_config_name", "gtest")
-        self.cpp_info.components["libgtest"].libs = [f"gtest{self._postfix}"]
+        self.cpp_info.components["libgtest"].libs = ["gtest"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libgtest"].system_libs.append("m")
             if not self.options.disable_pthreads:
