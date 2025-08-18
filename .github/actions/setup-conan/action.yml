@@ -11,10 +11,6 @@ runs:
     - run: pip3 install -r requirements.txt
       shell: bash
 
-    - if: ${{ runner.os == 'Windows' }}
-      run: echo "CONAN_HOME=${{ runner.temp }}\\.c2" >> $GITHUB_ENV
-      shell: bash
-
     - run: conan profile detect --name autodetected --force
       shell: bash
     
