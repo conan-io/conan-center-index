@@ -5,8 +5,9 @@ from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rename, rm, rmdir, replace_in_file, save, chdir, mkdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, NMakeDeps, NMakeToolchain
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
 from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
 import itertools
@@ -94,6 +95,7 @@ class Libxml2Conan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.zlib:
@@ -120,10 +122,11 @@ class Libxml2Conan(ConanFile):
 
     def generate(self):
         if is_msvc(self):
-            tc = NMakeToolchain(self)
+            tc = CMakeToolchain(self)
+            tc.variables["LIBXML2_WITH_ICONV"] = "ON" if self.options.iconv else "OFF"
+            tc.variables["LIBXML2_WITH_PYTHON"] = "ON" if self.options.python else "OFF"
+            tc.variables["LIBXML2_WITH_ZLIB"] = "ON" if self.options.zlib else "OFF"
             tc.generate()
-            deps = NMakeDeps(self)
-            deps.generate()
         elif self._is_mingw_windows:
             pass # nothing to do for mingw?  it calls mingw-make directly
         else:
@@ -136,7 +139,8 @@ class Libxml2Conan(ConanFile):
 
             tc = AutotoolsToolchain(self)
 
-            yes_no = lambda v: "yes" if v else "no"
+            def yes_no(v):
+                return "yes" if v else "no"
             tc.configure_args.extend([
                 f"--enable-shared={yes_no(self.options.shared)}",
                 f"--enable-static={yes_no(not self.options.shared)}",
@@ -210,17 +214,11 @@ class Libxml2Conan(ConanFile):
             if self.options.include_utils:
                 self.run("nmake /f Makefile.msvc utils")
 
-    def _package_msvc(self):
-        with chdir(self, os.path.join(self.source_folder, 'win32')):
-            self.run("nmake /f Makefile.msvc install-libs")
-
-            if self.options.include_utils:
-                self.run("nmake /f Makefile.msvc install-dist")
-
     def _build_mingw(self):
         with chdir(self, os.path.join(self.source_folder, "win32")):
             # configuration
-            yes_no = lambda v: "yes" if v else "no"
+            def yes_no(v):
+                return "yes" if v else "no"
             args = [
                 "cscript",
                 "configure.js",
@@ -281,7 +279,9 @@ class Libxml2Conan(ConanFile):
     def build(self):
         self._patch_sources()
         if is_msvc(self):
-            self._build_msvc()
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
         elif self._is_mingw_windows:
             self._build_mingw()
         else:
@@ -297,13 +297,8 @@ class Libxml2Conan(ConanFile):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"), ignore_case=True, keep_path=False)
         copy(self, "Copyright", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"), ignore_case=True, keep_path=False)
         if is_msvc(self):
-            self._package_msvc()
-            # remove redundant libraries to avoid confusion
-            if not self.options.shared:
-                rm(self, "libxml2.dll", os.path.join(self.package_folder, "bin"))
-            rm(self, "libxml2_a_dll.lib", os.path.join(self.package_folder, "lib"))
-            rm(self, "libxml2_a.lib" if self.options.shared else "libxml2.lib", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+            cmake = CMake(self)
+            cmake.install()
         elif self._is_mingw_windows:
             self._package_mingw()
             if self.options.shared:
