@@ -34,7 +34,10 @@ class TestPackageConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    def _python_interpreter(self):
+        return "python" if self.settings.os == "Windows" else "python3"
+
     def test(self):
         if can_run(self):
             module_path = os.path.join(self.source_folder, "test.py")
-            self.run(f"python \"{module_path}\"", env="conanrun")
+            self.run(f"{self._python_interpreter()} \"{module_path}\"", env="conanrun")
