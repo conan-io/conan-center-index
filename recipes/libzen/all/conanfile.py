@@ -1,11 +1,12 @@
 from conan import ConanFile
+from conan.errors import ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.scm import Version
 import os
-import textwrap
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class LibzenConan(ConanFile):
@@ -55,6 +56,9 @@ class LibzenConan(ConanFile):
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         # To install relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "0.4.41": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
     def _patch_sources(self):
@@ -77,27 +81,6 @@ class LibzenConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {"zen": "ZenLib::ZenLib"}
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ZenLib")
         self.cpp_info.set_property("cmake_target_name", "zen")
@@ -115,9 +98,3 @@ class LibzenConan(ConanFile):
             self.cpp_info.defines.extend(["UNICODE", "_UNICODE"])
         if self.options.shared:
             self.cpp_info.defines.append("LIBZEN_SHARED")
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "ZenLib"
-        self.cpp_info.names["cmake_find_package_multi"] = "ZenLib"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

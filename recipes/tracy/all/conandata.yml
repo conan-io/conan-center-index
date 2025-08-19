@@ -1,25 +1,10 @@
 sources:
+  "0.12.1":
+    url: "https://github.com/wolfpld/tracy/archive/refs/tags/v0.12.1.tar.gz"
+    sha256: "03580b01df3c435f74eec165193d6557cdbf3a84d39582ca30969ef5354560aa"
   "0.11.1":
     url: "https://github.com/wolfpld/tracy/archive/refs/tags/v0.11.1.tar.gz"
     sha256: "2c11ca816f2b756be2730f86b0092920419f3dabc7a7173829ffd897d91888a1"
   "0.11.0":
     url: "https://github.com/wolfpld/tracy/archive/refs/tags/v0.11.0.tar.gz"
     sha256: "b591ef2820c5575ccbf17e2e7a1dc1f6b9a2708f65bfd00f4ebefad2a1ccf830"
-  "0.10":
-    url: "https://github.com/wolfpld/tracy/archive/refs/tags/v0.10.tar.gz"
-    sha256: "a76017d928f3f2727540fb950edd3b736caa97b12dbb4e5edce66542cbea6600"
-  "0.9.1":
-    url: "https://github.com/wolfpld/tracy/archive/refs/tags/v0.9.1.tar.gz"
-    sha256: "c2de9f35ab2a516a9689ff18f5b62a55b73b93b66514bd09ba013d7957993cd7"
-  "0.9":
-    url: "https://github.com/wolfpld/tracy/archive/refs/tags/v0.9.tar.gz"
-    sha256: "93a91544e3d88f3bc4c405bad3dbc916ba951cdaadd5fcec1139af6fa56e6bfc"
-  "0.8.2.1":
-    url: "https://github.com/wolfpld/tracy/archive/v0.8.2.1.tar.gz"
-    sha256: "97f478579efa1f5ce4c8619014a20327010fea122c21248701fe2bbb46ec1c1f"
-  "0.8.1":
-    url: "https://github.com/wolfpld/tracy/archive/refs/tags/v0.8.1.tar.gz"
-    sha256: "004992012b2dc879a9f6d143cbf94d7ea30e88135db3ef08951605d214892891"
-  "cci.20220130":
-    url: "https://github.com/wolfpld/tracy/archive/361782f3fdbeaefb9697f8fabe9d14e6b5d18f75.tar.gz"
-    sha256: "9267964f39be6bf419318ab5ac01c8a2b8dd921696c18164f133ee7b18bcb00b"

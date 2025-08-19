@@ -57,8 +57,8 @@ class CrashpadConan(ConanFile):
             self.options.http_transport = "socket"
 
     def build_requirements(self):
-        self.tool_requires("ninja/1.10.2")
-        self.tool_requires("gn/cci.20210429")
+        self.tool_requires("ninja/[>=1.10.2 <2]")
+        self.tool_requires("gn/[>=cci.20210429]")
 
     def requirements(self):
         # FIXME: use mini_chromium conan package instead of embedded package (if possible)

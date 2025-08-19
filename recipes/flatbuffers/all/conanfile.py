@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd, valid_min_cppstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, collect_libs, copy, get, replace_in_file, rmdir
 from conan.tools.scm import Version
@@ -90,6 +90,8 @@ class FlatbuffersConan(ConanFile):
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         # Relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if Version(self.version) < "2.0.8":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         # Fix iOS/tvOS/watchOS
         if is_apple_os(self):
             tc.variables["CMAKE_MACOSX_BUNDLE"] = False
@@ -153,6 +155,3 @@ class FlatbuffersConan(ConanFile):
             os.path.join(self._module_path, "BuildFlatBuffers.cmake"),
         ]
         self.cpp_info.set_property("cmake_build_modules", build_modules)
-
-        if self._has_flatc():
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
