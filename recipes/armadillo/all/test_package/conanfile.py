@@ -19,7 +19,7 @@ class FooTestConan(ConanFile):
         tested_version = self.tested_reference_str.split('/')[1].split('@')[0]
         # using armadillo > 12.x requires the consumer to explicitly depend on hdf5
         if Version(tested_version) > "12":
-            self.requires("hdf5/1.14.3")
+            self.requires("hdf5/1.14.0")
 
     def generate(self):
         tc = CMakeToolchain(self)
