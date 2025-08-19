@@ -7,7 +7,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=2"
 
 class GlazeConan(ConanFile):
     name = "glaze"
@@ -26,33 +26,6 @@ class GlazeConan(ConanFile):
         "with_ssl": False,
     }
 
-    @property
-    def _min_cppstd(self):
-        return "20" if Version(self.version) < "3.0.0" else "23"
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "20": {
-                "Visual Studio": "17",
-                "msvc": "193",
-                "gcc": "11" if Version(self.version) < "2.6.3" else "12",
-                "clang": "14",
-                "apple-clang": "13.1",
-            },
-            "23": {
-                "Visual Studio": "17",
-                "msvc": "193",
-                "gcc": "12",
-                "clang": "15",
-                "apple-clang": "14",
-            },
-        }.get(self._min_cppstd, {})
-
-    def configure(self):
-        if Version(self.version) < "5.5.5":
-            self.options.rm_safe("with_ssl")
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -60,19 +33,12 @@ class GlazeConan(ConanFile):
         self.info.clear()
 
     def requirements(self):
-        if Version(self.version) >= "5.5.5":
-            self.requires("asio/1.34.2", transitive_headers=True)
-            if self.options.with_ssl:
-                self.requires("openssl/[>=1.1 <4]")
+        self.requires("asio/1.34.2", transitive_headers=True)
+        if self.options.with_ssl:
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 23)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -91,8 +57,7 @@ class GlazeConan(ConanFile):
         self.cpp_info.libdirs = []
         if is_msvc(self):
             self.cpp_info.cxxflags.append("/Zc:preprocessor")
-        if Version(self.version) >= "5.5.5":
-            self.cpp_info.requires.append("asio::asio")
-            if self.options.with_ssl:
-                self.cpp_info.defines.append("GLAZE_WITH_SSL")
-                self.cpp_info.requires.append("openssl::openssl")
+        self.cpp_info.requires.append("asio::asio")
+        if self.options.with_ssl:
+            self.cpp_info.defines.append("GLAZE_WITH_SSL")
+            self.cpp_info.requires.append("openssl::openssl")
