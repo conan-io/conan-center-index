@@ -114,7 +114,7 @@ The C++ ecosystem has a lot of rare, unique and obscure build systems. Some of t
 The recipe is expected to encode the specifics of the build system, mapping the `settings`, `options` for the binary configuration, and also mapping `self.dependencies` so the build system can locate the dependencies libraries as required.
 For these cases, contributors are asked to help reviewers as much as possible as it's likely we will not have expertise.
 
-In Conan 2.x is possible to use [custom generatros](https://docs.conan.io/2/reference/extensions/custom_generators.html). But this feature is not allowed in conan-center-index.
+In Conan 2.x is possible to use [custom generators](https://docs.conan.io/2/reference/extensions/custom_generators.html). But this feature is not allowed in conan-center-index.
 
 For quality assurance the build service is expected to be green and the hooks will ensure the package contents match what is expected given the options. These recipes are more likely to have
 inconsistency with other recipes but make for excellent contributions.
