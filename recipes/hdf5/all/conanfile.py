@@ -9,7 +9,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 
 class Hdf5Conan(ConanFile):
@@ -96,8 +96,7 @@ class Hdf5Conan(ConanFile):
             raise ConanInvalidConfiguration("with_zlib and with_zlibng cannot be enabled at the same time")
         if self.options.get_safe("with_zlibng") and Version(self.version) < "1.14.5":
             raise ConanInvalidConfiguration("with_zlibng=True is incompatible with versions prior to v1.14.5")
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, "11")
+        check_min_cppstd(self, "11")
 
     def validate_build(self):
         if cross_building(self) and Version(self.version) < "1.14.4.3":
@@ -121,8 +120,6 @@ class Hdf5Conan(ConanFile):
         cmakedeps.generate()
 
         tc = CMakeToolchain(self)
-        if not valid_min_cppstd(self, "11"):
-            tc.variables["CMAKE_CXX_STANDARD"] = "11"
         if self.settings.get_safe("compiler.libcxx"):
             tc = self._inject_stdlib_flag(tc)
         if self.options.szip_support == "with_libaec":
