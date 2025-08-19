@@ -82,7 +82,7 @@ class PangoConan(ConanFile):
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         self.requires("fribidi/1.0.13")
         # "pango/pango-coverage.h" includes "hb.h"
-        self.requires("[>=8.3.0]", transitive_headers=True)
+        self.requires("harfbuzz/[>=8.3.0]", transitive_headers=True)
 
     def validate(self):
         if (
