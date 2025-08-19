@@ -3,7 +3,7 @@ import glob
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get, rename, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
@@ -12,7 +12,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.60.0 <2 || >=2.0.5"
+required_conan_version = ">=2.1"
 
 
 class PangoConan(ConanFile):
@@ -182,8 +182,10 @@ class PangoConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
         if self.options.with_introspection:
-            os.rename(os.path.join(self.package_folder, "share"),
+            rename(self, os.path.join(self.package_folder, "share"),
                       os.path.join(self.package_folder, "res"))
+
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.components["pango_"].libs = ["pango-1.0"]
@@ -281,13 +283,3 @@ class PangoConan(ConanFile):
             ]
 
         self.runenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
-
-        # TODO: remove the following when only Conan 2.0 is supported
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.cpp_info.components["pango_"].names["pkg_config"] = "pango"
-        self.cpp_info.components["pangoft2"].names["pkg_config"] = "pangoft2"
-        self.cpp_info.components["pangofc"].names["pkg_config"] = "pangofc"
-        self.cpp_info.components["pangoroot"].names["pkg_config"] = "pangoroot"
-        self.cpp_info.components["pangoxft"].names["pkg_config"] = "pangoxft"
-        self.cpp_info.components["pangowin32"].names["pkg_config"] = "pangowin32"
-        self.cpp_info.components["pangocairo"].names["pkg_config"] = "pangocairo"

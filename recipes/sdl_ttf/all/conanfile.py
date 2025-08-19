@@ -10,12 +10,12 @@ required_conan_version = ">=2.4"
 
 class SdlttfConan(ConanFile):
     name = "sdl_ttf"
+    package_type = "library"
     description = "A TrueType font library for SDL"
     license = "Zlib"
     topics = ("sdl2", "sdl2_ttf", "sdl", "sdl_ttf", "ttf", "font")
     homepage = "https://www.libsdl.org/projects/SDL_ttf"
     url = "https://github.com/conan-io/conan-center-index"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
