@@ -19,13 +19,6 @@ class TestPackageConan(ConanFile):
         toolchain = CMakeToolchain(self)
         toolchain.generate()
 
-        env = Environment()
-        env.append_path("PYTHONPATH", os.path.join(self.build_folder, self.cpp.build.libdirs[0]))
-        env.vars(self, scope="run").save_script("testrun")
-
-        run = VirtualRunEnv(self)
-        run.generate()
-
     def layout(self):
         cmake_layout(self)
 
@@ -34,10 +27,7 @@ class TestPackageConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    def _python_interpreter(self):
-        return "python" if self.settings.os == "Windows" else "python3"
-
     def test(self):
         if can_run(self):
-            module_path = os.path.join(self.source_folder, "test.py")
-            self.run(f"{self._python_interpreter()} \"{module_path}\"", env="conanrun")
+            cmake = CMake(self)
+            cmake.ctest(cli_args=["--verbose"])
