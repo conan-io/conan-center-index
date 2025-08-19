@@ -3,6 +3,7 @@ from conan.tools.build import cross_building
 from conan.tools.files import chdir, copy, get
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 
 import os
 
@@ -56,7 +57,7 @@ class B2Conan(ConanFile):
         # that dir doesn't change if/when vsvars runs to set the msvc compile
         # env.
         self.output.info("Build engine...")
-        command =  "./build.sh cxx"
+        command =  "build.bat msvc" if is_msvc(self) else "./build.sh cxx"
         with chdir(self, self._b2_engine_dir):
             self.run(command)
 
