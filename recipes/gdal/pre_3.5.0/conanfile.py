@@ -252,7 +252,7 @@ class GdalConan(ConanFile):
         if self.options.with_hdf4:
             self.requires("hdf4/4.2.15")
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.0")
+            self.requires("hdf5/1.14.3")
         if self.options.with_kea:
             self.requires("kealib/1.4.14")
         if self.options.with_netcdf:

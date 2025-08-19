@@ -60,15 +60,7 @@ class NetcdfConan(ConanFile):
 
     def requirements(self):
         if self._with_hdf5:
-            if self.version == "4.7.4" and self.options.byterange:
-                # 4.7.4 was built and tested with hdf5/1.12.0
-                # It would be nice to upgrade to 1.12.1,
-                # but when the byterange feature is enabled,
-                # it triggers a compile error that was later patched in 4.8.x
-                # So we will require the older hdf5 to keep the older behaviour.
-                self.requires("hdf5/1.12.0")
-            else:
-                self.requires("hdf5/1.14.1")
+            self.requires("hdf5/1.14.3")
 
         if self.options.dap or self.options.byterange:
             self.requires("libcurl/[>=7.78.0 <9]")
@@ -132,11 +124,3 @@ class NetcdfConan(ConanFile):
         elif self.settings.os == "Windows":
             if self.options.shared:
                 self.cpp_info.components["libnetcdf"].defines.append("DLL_NETCDF")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "netCDF"
-        self.cpp_info.names["cmake_find_package_multi"] = "netCDF"
-        self.cpp_info.components["libnetcdf"].names["cmake_find_package"] = "netcdf"
-        self.cpp_info.components["libnetcdf"].names["cmake_find_package_multi"] = "netcdf"
-        self.cpp_info.components["libnetcdf"].set_property("cmake_target_name", "netCDF::netcdf")
-        self.cpp_info.components["libnetcdf"].set_property("pkg_config_name", "netcdf")
