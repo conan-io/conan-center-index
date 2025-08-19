@@ -1,37 +1,4 @@
 sources:
-  "4.8.2":
-    url: "https://github.com/bfgroup/b2/archive/4.8.2.tar.gz"
-    sha256: "220edfbd5022394c5dc264dfdd8bf6d3ec53b784db87461026bb23ea9d9ec4bd"
-  "4.9.6":
-    url: "https://github.com/bfgroup/b2/releases/download/4.9.6/b2-4.9.6.tar.bz2"
-    sha256: "10c1344c751fcf5a1f9ec6f52c02626cfbf78a4806f7817949b115e107bbbc5f"
-  "4.10.0":
-    url: "https://github.com/bfgroup/b2/releases/download/4.10.0/b2-4.10.0.tar.bz2"
-    sha256: "aee0185473141d4acb56e39c78758b1016e66393ea5ca86ef29403bd9258f2e2"
-  "4.10.1":
-    url: "https://github.com/bfgroup/b2/releases/download/4.10.1/b2-4.10.1.tar.bz2"
-    sha256: "d0818276955c3351eac26e4aa1e61046cfded88773232d76f2833c93bb917633"
-  "5.0.0":
-    url: "https://github.com/bfgroup/b2/releases/download/5.0.0/b2-5.0.0.tar.bz2"
-    sha256: "1ef867f7d374345a948baca025ed277dadda05a68439aa383a06aceb9911f7d3"
-  "5.1.0":
-    url: "https://github.com/bfgroup/b2/releases/download/5.1.0/b2-5.1.0.tar.bz2"
-    sha256: "8429a2e7c9c4484f6a4bd7fb18743f0ea1dba41eb024479a9b23381bcb813623"
-  "5.2.0":
-    url: "https://github.com/bfgroup/b2/releases/download/5.2.0/b2-5.2.0.tar.bz2"
-    sha256: "c27adfb4e667d748bb7d3e18657938fa8bcf185b74a29bf091113299f532ed6d"
-  "5.2.1":
-    url: "https://github.com/bfgroup/b2/releases/download/5.2.1/b2-5.2.1.tar.bz2"
-    sha256: "6428edec31731aa479b4e7d8f83898831a0919352ec7d7f9874145abe165a578"
-  "5.3.0":
-    url: "https://github.com/bfgroup/b2/releases/download/5.3.0/b2-5.3.0.tar.bz2"
-    sha256: "89e851b6c8e596665afc6cc7054dca80178dc69d901fa71489fe26bb8fe147e5"
-  "5.3.1":
-    url: "https://github.com/bfgroup/b2/releases/download/5.3.1/b2-5.3.1.tar.bz2"
-    sha256: "55dbbb6fa42065ca7fae2671a8d37d2fb594b5845b5c28d8813e559825c2a398"
-  "5.3.2":
-    url: "https://github.com/bfgroup/b2/releases/download/5.3.2/b2-5.3.2.tar.bz2"
-    sha256: "881827649356dfa59caa30e169931424993c72a1626a502abb7ea474484eac26"
   "5.3.3":
     url: "https://github.com/bfgroup/b2/releases/download/5.3.3/b2-5.3.3.tar.bz2"
     sha256: "7eb278af94c3800d2369e7e6fdce733cd39736808c5bc0cec5c51a34339f8fcb"
