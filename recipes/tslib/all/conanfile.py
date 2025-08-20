@@ -4,7 +4,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, replace_in_file
 import os
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.4"
 
 
 class TslibConan(ConanFile):
@@ -14,7 +14,8 @@ class TslibConan(ConanFile):
     topics = ("touchscreen", "input")
     homepage = "https://github.com/kergoth/tslib"
     url = "https://github.com/conan-io/conan-center-index"
-
+    languages = ["C"]
+    implements = ["auto_shared_fpic"]
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -25,12 +26,6 @@ class TslibConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
