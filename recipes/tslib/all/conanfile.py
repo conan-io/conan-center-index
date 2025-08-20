@@ -20,12 +20,10 @@ class TslibConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "enable_tools": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "enable_tools": True
     }
 
     def configure(self):
@@ -49,7 +47,6 @@ class TslibConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["ENABLE_TOOLS"] = self.options.enable_tools
         tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
