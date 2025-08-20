@@ -177,7 +177,7 @@ class AssimpConan(ConanFile):
         # TODO: unvendor others libs:
         # - Open3DGC
         self.requires("minizip/1.3.1")
-        self.requires("pugixml/1.15")
+        self.requires("pugixml/>=1.14 <2]")
         self.requires("utfcpp/4.0.5")
         self.requires("zlib/[>=1.2.11 <2]")
         if self._depends_on_kuba_zip:
