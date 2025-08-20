@@ -1,9 +1,10 @@
+import os
+
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
-import os
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.4"
 
 
 class NetcdfConan(ConanFile):
@@ -18,6 +19,8 @@ class NetcdfConan(ConanFile):
     homepage = "https://github.com/Unidata/netcdf-c"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "library"
+    languages = "C"
+    implements = ["auto_shared_fpic"]
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -44,16 +47,6 @@ class NetcdfConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -113,14 +106,13 @@ class NetcdfConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "netCDF")
         self.cpp_info.set_property("cmake_target_name", "netCDF::netcdf")
         self.cpp_info.set_property("pkg_config_name", "netcdf")
-        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["libnetcdf"].libs = ["netcdf"]
+        self.cpp_info.libs = ["netcdf"]
         if self._with_hdf5:
-            self.cpp_info.components["libnetcdf"].requires.append("hdf5::hdf5")
+            self.cpp_info.requires.append("hdf5::hdf5")
         if self.options.dap or self.options.byterange:
-            self.cpp_info.components["libnetcdf"].requires.append("libcurl::libcurl")
+            self.cpp_info.requires.append("libcurl::libcurl")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["libnetcdf"].system_libs = ["dl", "m"]
+            self.cpp_info.system_libs = ["dl", "m"]
         elif self.settings.os == "Windows":
             if self.options.shared:
-                self.cpp_info.components["libnetcdf"].defines.append("DLL_NETCDF")
+                self.cpp_info.defines.append("DLL_NETCDF")
