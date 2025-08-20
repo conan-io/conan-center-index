@@ -16,7 +16,7 @@
 -  if(FIND_PACKAGE2_${name}_ENABLED)
 -    find_package2(${name} QUIET OUT_DEPENDENCY _find_dependency)
 -  else()
-+  find_package2(${name} QUIET)
++  find_package2(${name})
 +  if(FALSE)
      set(_find_package_args)
      # For some reason passing the HDF5 version requirement cause a linking error of the libkea driver on Conda Windows builds...

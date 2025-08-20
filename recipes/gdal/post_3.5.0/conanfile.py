@@ -161,11 +161,6 @@ class GdalConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "3.7":
-            # Latest versions of Arrow are no longer compatible with GDAL 3.5
-            self.options.with_arrow = False
-        if Version(self.version) < "3.8":
-            del self.options.with_libaec
 
     def configure(self):
         if self.options.shared:
@@ -173,7 +168,7 @@ class GdalConan(ConanFile):
 
         # Newer gdal requires this flag for
         # ogr/ogrsf_frmts/parquet build correctly
-        if self.options.with_arrow and Version(self.version) >= "3.10.0":
+        if self.options.with_arrow:
             self.options["arrow"].filesystem_layer = True
 
     def layout(self):
@@ -241,7 +236,7 @@ class GdalConan(ConanFile):
         if self.options.with_libarchive:
             self.requires("libarchive/3.7.2")
         if self.options.with_libdeflate:
-            self.requires("libdeflate/[>=1.19 <=1.22]") #tested with these
+            self.requires("libdeflate/[>=1.19 <=1.23]") #tested with these
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
         if self.options.with_libkml:
@@ -307,17 +302,11 @@ class GdalConan(ConanFile):
 
     def build_requirements(self):
         # https://github.com/conan-io/conan/issues/3482#issuecomment-662284561
-        self.tool_requires("cmake/[>=3.18 <4]")
+        self.tool_requires("cmake/[>=3.18]")
 
     def validate(self):
-        if Version(self.version) >= "3.10.0":
-            check_min_cppstd(self, 17)
-        else:
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 17)
 
-        for option in ["crypto", "zlib", "proj", "libtiff"]:
-            if self.options.get_safe(f"with_{option}") != "deprecated":
-                self.output.warning(f"{self.ref}:with_{option} option is deprecated. The {option} dependecy is always enabled now.")
         if self.options.with_pcre and self.options.with_pcre2:
             raise ConanInvalidConfiguration("Enable either pcre or pcre2, not both")
 
@@ -338,7 +327,7 @@ class GdalConan(ConanFile):
             self.output.error(msg)
             raise ConanInvalidConfiguration(msg)
 
-        if self.options.with_arrow and Version(self.version) >= "3.10.0" and not self.dependencies["arrow"].options.filesystem_layer:
+        if self.options.with_arrow and not self.dependencies["arrow"].options.filesystem_layer:
             raise ConanInvalidConfiguration("Gdal[>=3.10.0] requires -o arrow/*:filesystem_layer=True")
 
     def source(self):
@@ -584,7 +573,7 @@ class GdalConan(ConanFile):
             deps.set_property(conan_name, "cmake_file_name", cmake_name)
 
         renamed_targets = {
-            "arrow::libarrow":            "Arrow::arrow_shared" if Version(self.version) >= "3.7" else "arrow_shared",
+            "arrow::libarrow":            "Arrow::arrow_shared",
             "arrow::dataset":             "ArrowDataset::arrow_dataset_shared",
             "arrow::libparquet":          "Parquet::parquet_shared",
             "brunsli::brunslidec-c":      "BRUNSLI::DECODE",
@@ -641,18 +630,11 @@ class GdalConan(ConanFile):
         apply_conandata_patches(self)
         # Fix Deflate::Deflate not being correctly propagated internally.
         replace_in_file(self, os.path.join(self.source_folder, "port", "CMakeLists.txt"),
-                        "PRIVATE Deflate::Deflate",
-                        "PUBLIC Deflate::Deflate")
+                        "target_sources(${GDAL_LIB_TARGET_NAME} PRIVATE $<TARGET_OBJECTS:cpl>)",
+                        "target_link_libraries(${GDAL_LIB_TARGET_NAME} PRIVATE cpl)")
         # Workaround for JXL_THREADS being provided by the JXL package on CCI.
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
                         "JXL_THREADS", "JXL", strict=False)
-        # Workaround for Parquet and ArrowDataset being provided by Arrow on CCI.
-        if Version(self.version) < "3.10.0":
-            replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
-                            "gdal_check_package(Parquet", "# gdal_check_package(Parquet")
-        if Version(self.version) >= "3.6.0" and Version(self.version) < "3.10.0":
-            replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
-                            "gdal_check_package(ArrowDataset", "# gdal_check_package(ArrowDataset")
 
     def build(self):
         self._patch_sources()
