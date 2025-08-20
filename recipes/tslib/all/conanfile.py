@@ -65,7 +65,5 @@ class TslibConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "etc"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_target_name", "tslib::tslib")
-        self.cpp_info.set_property("pkg_config_name", "tslib")
         self.cpp_info.libs = ["ts"]
         self.cpp_info.system_libs.append("dl")
