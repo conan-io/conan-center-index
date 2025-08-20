@@ -114,11 +114,7 @@ class Nghttp2Conan(ConanFile):
             tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_ZLIB"] = True  # Examples only
 
 
-        if Version(self.version) < "1.60.0":
-            tc.variables["ENABLE_SHARED_LIB"] = self.options.shared
-            tc.variables["ENABLE_STATIC_LIB"] = not self.options.shared
-        else:
-            tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
+        tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["ENABLE_HPACK_TOOLS"] = self.options.with_hpack
         tc.variables["ENABLE_APP"] = self.options.with_app
         tc.variables["ENABLE_EXAMPLES"] = False
@@ -126,7 +122,7 @@ class Nghttp2Conan(ConanFile):
         # disable unneeded auto-picked dependencies
         tc.variables["WITH_JEMALLOC"] = self.options.get_safe("with_jemalloc", False)
         # To avoid overwriting dll import lib by static lib
-        if Version(self.version) >= "1.60.0" and self.options.shared:
+        if self.options.shared:
             tc.variables["STATIC_LIB_SUFFIX"] = "-static"
         if is_apple_os(self):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
@@ -154,13 +150,6 @@ class Nghttp2Conan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        if not self.options.shared and Version(self.version) < "1.60.0":
-            # easier to patch here rather than have patch 'nghttp_static_include_directories' for each version
-            save(self, os.path.join(self.source_folder, "lib", "CMakeLists.txt"),
-                       "target_include_directories(nghttp2_static INTERFACE\n"
-                       "${CMAKE_CURRENT_BINARY_DIR}/includes\n"
-                       "${CMAKE_CURRENT_SOURCE_DIR}/includes)\n",
-                       append=True)
         target_libnghttp2 = "nghttp2" if self.options.shared else "nghttp2_static"
         replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
                               "\n"
