@@ -130,7 +130,7 @@ class Libxml2Conan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines.append("LIBXML_STATIC")
 
-        self.cpp_info.set_property["cmake_file_name"] = "libxml2"
+        self.cpp_info.set_property("cmake_file_name", "libxml2")
         self.cpp_info.set_property("cmake_target_name", "LibXml2::LibXml2")
         self.cpp_info.set_property("cmake_additional_variables_prefixes", ["LIBXML2"])
         self.cpp_info.set_property("pkg_config_name", "libxml-2.0")
