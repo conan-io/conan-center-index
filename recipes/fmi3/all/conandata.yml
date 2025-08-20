@@ -3,3 +3,7 @@ sources:
     url:
       - https://github.com/modelica/fmi-standard/releases/download/v3.0.1/FMI-Standard-3.0.1.zip
     sha256: "181a8a377ccfafa92167019bd3099227f8bf44192444bcb1a2d42aba65fbffe2"
+  "3.0.2":
+    url:
+      - https://github.com/modelica/fmi-standard/releases/download/v3.0.2/FMI-Standard-3.0.2.zip
+    sha256: "454a12f40069db7efc38faee1c8899fabe74086c0b052f88133b16f256c444bd"

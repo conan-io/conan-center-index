@@ -5,7 +5,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 import glob
 import os
 import textwrap
@@ -25,26 +25,15 @@ class ITKConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_opencv": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_opencv": False,
     }
 
     short_paths = True
-
-    @property
-    def _min_cppstd(self):
-        return 11
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "14",
-            "gcc": "4.8.1",
-            "clang": "3.3",
-            "apple-clang": "9",
-        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -65,45 +54,35 @@ class ITKConan(ConanFile):
         # TODO: Some packages can be added as optional, but they are not in CCI:
         # - mkl
         # - vtk
-        # - opencv
         #todo: enable after fixing dcmtk compatibility with openssl on Windows
         #self.requires("dcmtk/3.6.7")
         self.requires("double-conversion/3.3.0")
-        self.requires("eigen/3.4.0")
+        self.requires("eigen/[>=3.4.0 <4]")
         self.requires("expat/[>=2.6.2 <3]")
         self.requires("fftw/3.3.10")
         self.requires("gdcm/3.0.23")
         self.requires("hdf5/1.14.3")
-        self.requires("libjpeg/9e")
+        self.requires("libjpeg/[>=9f]")
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/4.6.0")
-        self.requires("openjpeg/2.5.2")
+        self.requires("openjpeg/[>=2.5.2 <3]")
         self.requires("onetbb/2021.9.0")
         self.requires("zlib/[>=1.2.11 <2]")
+        if self.options.with_opencv:
+            self.requires("opencv/[>=4.10.0 <5]")
 
     def build_requirements(self):
-        if Version(self.version) >= "5.3.0":
-            self.tool_requires("cmake/[>=3.16.3 <4]")
+        self.tool_requires("cmake/[>=3.16.3]")
 
     def validate(self):
+        check_min_cppstd(self, 11)
         if self.options.shared and not self.dependencies["hdf5"].options.shared:
             raise ConanInvalidConfiguration("When building a shared itk, hdf5 needs to be shared too (or not linked to by the consumer).\n"
                                             "This is because H5::DataSpace::ALL might get initialized twice, which will cause a H5::DataSpaceIException to be thrown).")
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        check_min_vs(self, 190)
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
-        if Version(self.version) < "5.2" and self.settings.os == "Macos":
-            raise ConanInvalidConfiguration(f"{self.ref} fails to compile in {self.settings.os}, fixed in 5.2.0")
-
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -141,7 +120,7 @@ class ITKConan(ConanFile):
         tc.variables["Module_ITKMINC"] = False
         tc.variables["Module_ITKIOMINC"] = False
 
-        tc.variables["Module_ITKVideoBridgeOpenCV"] = False
+        tc.variables["Module_ITKVideoBridgeOpenCV"] = self.options.with_opencv
 
         #todo: enable after fixing dcmtk compatibility with openssl on Windows
         tc.variables["Module_ITKDCMTK"] = False
@@ -240,7 +219,10 @@ class ITKConan(ConanFile):
 
         # Disabled because Vxl vidl is not built anymore
         tc.variables["Module_ITKVideoBridgeVXL"] = False
-
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "5.3.0": # pylint: disable=conan-unreachable-upper-version
+            # in a PR adding a new version, check if the new version still needs this for CMake 4
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
         tc = CMakeDeps(self)
@@ -258,7 +240,6 @@ class ITKConan(ConanFile):
                         "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -287,7 +268,7 @@ class ITKConan(ConanFile):
         def libdl():
             return ["dl"] if self.settings.os in ["Linux", "FreeBSD"] else []
 
-        return {
+        components = {
             "itksys": {"system_libs": libdl()},
             "itkvcl": {"system_libs": libm()},
             "itkv3p_netlib": {"system_libs": libm()},
@@ -469,6 +450,14 @@ class ITKConan(ConanFile):
             },
             "ITKVideoCore": {"requires": ["ITKCommon"]},
         }
+        
+        if self.options.with_opencv:
+            components.update({
+                "ITKVideoIO": {"requires": ["ITKVideoCore", "ITKIOImageBase"]},
+                "ITKVideoBridgeOpenCV": {"requires": ["ITKVideoIO", "opencv::opencv_core"]},
+            })
+        
+        return components
 
     def _create_cmake_module_variables(self):
         content = 'set(ITK_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}")'
@@ -532,14 +521,3 @@ class ITKConan(ConanFile):
                 self.cpp_info.components[name].libs = [f"{name}{lib_suffix}"]
             self.cpp_info.components[name].system_libs = system_libs
             self.cpp_info.components[name].requires = requires
-
-            # TODO: to remove in conan v2 once cmake_find_package* generators removed
-            for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-                self.cpp_info.components[name].names[generator] = name
-                self.cpp_info.components[name].build_modules[generator].extend([self._module_file_rel_path, self._module_variables_file_rel_path])
-                self.cpp_info.components[name].build_modules[generator].extend(
-                    [os.path.join(self._cmake_module_dir, f) for f in self._itk_modules_files])
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-            self.cpp_info.names[generator] = "ITK"

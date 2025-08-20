@@ -1,0 +1,17 @@
+diff --git a/cmake/OpenCVFindLibsGrfmt.cmake b/cmake/OpenCVFindLibsGrfmt.cmake
+index 287db25..1c85c9e 100644
+--- a/cmake/OpenCVFindLibsGrfmt.cmake
++++ b/cmake/OpenCVFindLibsGrfmt.cmake
+@@ -175,7 +175,11 @@ if(WITH_WEBP)
+     ocv_clear_vars(WEBP_FOUND WEBP_LIBRARY WEBP_LIBRARIES WEBP_INCLUDE_DIR)
+   else()
+     ocv_clear_internal_cache_vars(WEBP_LIBRARY WEBP_INCLUDE_DIR)
+-    include(cmake/OpenCVFindWebP.cmake)
++    #include(cmake/OpenCVFindWebP.cmake)
++    find_package(WebP CONFIG)
++    if(WebP_FOUND)
++      set(WEBP_FOUND 1)
++    endif()
+     if(WEBP_FOUND)
+       set(HAVE_WEBP 1)
+     endif()

@@ -1,14 +1,13 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, copy, rmdir
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class Z3Conan(ConanFile):
@@ -34,29 +33,7 @@ class Z3Conan(ConanFile):
         "use_gmp": False
     }
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        # Z3 requires C++17, and it is recommended to use VS2019 or later
-        # Compiling z3 with GCC 7 results in a segfault
-        return {
-            "gcc": "8",
-            "clang": "5",
-            "apple-clang": "9",
-            "msvc": "192",
-            "Visual Studio": "16",
-        }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -66,14 +43,10 @@ class Z3Conan(ConanFile):
             self.requires("gmp/6.3.0")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 11)
 
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+    def validate_build(self):
+        check_min_cppstd(self, 17 if Version(self.version) < "4.14" else 20)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
@@ -82,9 +55,6 @@ class Z3Conan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        venv = VirtualBuildEnv(self)
-        venv.generate()
-
         tc = CMakeToolchain(self)
         tc.variables["Z3_USE_LIB_GMP"] = self.options.use_gmp
         tc.variables["Z3_SINGLE_THREADED"] = not self.options.multithreaded
@@ -126,12 +96,5 @@ class Z3Conan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libz3"].system_libs.extend(["pthread", "m"])
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "Z3"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Z3"
-        self.cpp_info.names["cmake_find_package"] = "z3"
-        self.cpp_info.names["cmake_find_package_multi"] = "z3"
-        self.cpp_info.components["libz3"].names["cmake_find_package"] = "libz3"
-        self.cpp_info.components["libz3"].names["cmake_find_package_multi"] = "libz3"
         self.cpp_info.components["libz3"].set_property("cmake_target_name", "z3::libz3")
         self.cpp_info.components["libz3"].requires = ["gmp::gmp"] if self.options.use_gmp else []

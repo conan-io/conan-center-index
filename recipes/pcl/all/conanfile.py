@@ -9,7 +9,7 @@ from conan.tools.scm import Version
 from conan.tools.system import package_manager
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 class PclConan(ConanFile):
     name = "pcl"
@@ -367,7 +367,7 @@ class PclConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.83.0", transitive_headers=True)
-        self.requires("eigen/3.4.0", transitive_headers=True)
+        self.requires("eigen/[>=3.4.0 <4]", transitive_headers=True)
         if self._is_enabled("flann"):
             self.requires("flann/1.9.2", transitive_headers=True)
         if self._is_enabled("png"):
@@ -375,7 +375,7 @@ class PclConan(ConanFile):
         if self._is_enabled("qhull"):
             self.requires("qhull/8.0.1", transitive_headers=True)
         if self._is_enabled("qt"):
-            self.requires("qt/6.6.1")
+            self.requires("qt/[>=6.6 <7]")
         if self._is_enabled("libusb"):
             self.requires("libusb/1.0.26", transitive_headers=True)
         if self._is_enabled("pcap"):
@@ -390,7 +390,7 @@ class PclConan(ConanFile):
             else:
                 self.requires("mesa-glu/9.0.3", transitive_headers=True)
         if self._is_enabled("opencv"):
-            self.requires("opencv/4.8.1", transitive_headers=True)
+            self.requires("opencv/[>=4.8.1 <5]", transitive_headers=True)
         if self._is_enabled("zlib"):
             self.requires("zlib/[>=1.2.11 <2]")
         # TODO:

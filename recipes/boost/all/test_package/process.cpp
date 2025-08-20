@@ -4,14 +4,21 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 // This comes from the following Boost example:
-// https://github.com/boostorg/process/blob/boost-1.86.0/example/v2/intro.cpp
+// https://github.com/boostorg/process/blob/boost-1.88.0/example/intro.cpp
 
 // clang-format: off
 #include <boost/asio/read.hpp>
 #include <boost/asio/readable_pipe.hpp>
 // clang-format: on
 
+#include <boost/version.hpp>
+#define BOOST_PROCESS_V2_DEFAULT (BOOST_VERSION / 100 % 1000 >= 88)
+
+#if BOOST_PROCESS_V2_DEFAULT
+#include <boost/process.hpp>
+#else
 #include <boost/process/v2.hpp>
+#endif
 #include <boost/system/error_code.hpp>
 
 #include <string>
@@ -21,8 +28,12 @@
 namespace boost = BOOST_NAMESPACE;
 #endif
 
-namespace proc   = boost::process::v2;
-namespace asio   = boost::asio;
+#if BOOST_PROCESS_V2_DEFAULT
+namespace proc  = boost::process;
+#else
+namespace proc  = boost::process::v2;
+#endif
+namespace asio  = boost::asio;
 
 int main()
 {
