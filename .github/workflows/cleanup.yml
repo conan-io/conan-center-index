@@ -25,3 +25,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: conan remove '*/*#*:*#~latest' -c -r community
+      - name: Collect logs
+        if: failure()
+        run: cat process.log || echo "No log file found"
+        shell: bash

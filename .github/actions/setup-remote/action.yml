@@ -28,7 +28,7 @@ runs:
     - run: |
         for i in {1..10}
         do
-          bun run --bun cocoserver --owner ${{ github.repository_owner }} --repo ${GITHUB_REPOSITORY#*/} --folder cocoremote >process.log &
+          bun run --bun cocoserver --owner ${{ github.repository_owner }} --repo ${GITHUB_REPOSITORY#*/} --folder cocoremote > process.log 2>&1 &
           pid=$!
           for j in {1..30}
           do

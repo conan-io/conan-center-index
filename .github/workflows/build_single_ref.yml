@@ -100,6 +100,10 @@ jobs:
         run: |
           conan export --version=$VERSION --no-remote recipes/$PACKAGE/${{ steps.get_folder.outputs.result }}
           conan upload -r community $REF --confirm --only-recipe
+      - name: Collect logs
+        if: failure()
+        run: cat process.log || echo "No log file found"
+        shell: bash
 
   build:
     needs: [prepare-matrix]
@@ -170,3 +174,7 @@ jobs:
         if: ${{ steps.conan_install.outputs.CODE != 6 }}
       - run: conan upload -r community $REF --confirm
         if: ${{ steps.conan_install.outputs.CODE != 6 && inputs.upload }}
+      - name: Collect logs
+        if: failure()
+        run: cat process.log || echo "No log file found"
+        shell: bash
