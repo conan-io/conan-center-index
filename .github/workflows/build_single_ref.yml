@@ -116,7 +116,7 @@ jobs:
       FOLDER: recipes/${{ inputs.package || 'zlib' }}/${{ needs.prepare-matrix.outputs.folder }}
       SHARED: ${{ matrix.shared }}
       BUILD_TYPE: ${{ matrix.build_type }}
-      CLI_ARGS: -sbuild_type=${{ matrix.build_type }} ${{ matrix.shared }} -c:a tools.system.package_manager:mode=install -c:a tools.system.package_manager:sudo=True -s:a msys2/*:arch=x86_64 -s:a strawberryperl/*:arch=x86_64
+      CLI_ARGS: -sbuild_type=${{ matrix.build_type }} ${{ matrix.shared }} -c:a tools.system.package_manager:mode=install -c:a tools.system.package_manager:sudo=True
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -143,33 +143,16 @@ jobs:
       - run: conan export --version=$VERSION --no-remote ${{ env.FOLDER }}
 
       - run: |
-          CONAN_PATH=$(conan config home)
-          PROFILE_PATH=$(conan profile path autodetected)
-          COMPILER=$(awk -F "=" '/^compiler=/ {print $2}' $PROFILE_PATH)
-          CPP_STDS=$(python3 -c "import yaml;import sys;print(*yaml.safe_load(sys.stdin)['compiler']['$COMPILER']['cppstd'])" < $CONAN_PATH/settings.yml)
-          for cpp_std in $CPP_STDS; do
-            if [ "$cpp_std" = "None" ]; then
-              ARG=""
-            else
-              ARG="-s compiler.cppstd=$cpp_std"
-            fi
-            if ! conan profile show $ARG ${{ env.CLI_ARGS }}
-            then
-              continue
-            fi
-            set +e
-            conan install $ARG --require=$REF --build=missing --build=$REF --format=json > create.json  ${{ env.CLI_ARGS }}
-            code=$?
-            set -e
-            echo "CODE=$code" >> "$GITHUB_OUTPUT"
+          conan profile show ${{ env.CLI_ARGS }}
+          set +e
+          conan install --require=$REF --build=compatible --format=json > create.json  ${{ env.CLI_ARGS }}
+          code=$?
+          set -e
+          echo "CODE=$code" >> "$GITHUB_OUTPUT"
 
-            if [ $code -ne 6 ]; then
-              if [ "$cpp_std" != "None" ]; then
-                echo "compiler.cppstd=$cpp_std" >> $PROFILE_PATH
-              fi
-              exit "$code"
-            fi
-          done
+          if [ $code -ne 6 ]; then
+            exit "$code"
+          fi
               
         id: conan_install
         name: Conan Install
