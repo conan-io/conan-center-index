@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, apply_conandata_patches
+from conan.tools.files import export_conandata_patches, copy, get, apply_conandata_patches
 import os
 
 required_conan_version = ">=2.1.0"
@@ -25,7 +25,7 @@ class KissIcpConan(ConanFile):
     implements = ["auto_shared_fpic"]
 
     def export_sources(self):
-        apply_conandata_patches(self)
+        export_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self)
