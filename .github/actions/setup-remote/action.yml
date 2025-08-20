@@ -48,6 +48,11 @@ runs:
         FILEN_PASSWORD: ${{ inputs.filen-password }}
       shell: bash
 
+    - run: gh api rate_limit || echo "could not get gh rate limits"
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+
     - run: |
         conan remote add community http://localhost:9595
         conan remote auth community --format=json | jq ".community | has(\"error\")" | grep -q "false"
