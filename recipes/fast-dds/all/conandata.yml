@@ -13,6 +13,9 @@ patches:
     - patch_file: "patches/3.2.1-0002-fix-tool-paths.patch"
       patch_type: "conan"
       patch_description: "Fixup paths in tools to match conan package structure"
+    - patch_file: "patches/3.2.1-0002-remove-werror.patch"
+      patch_type: "conan"
+      patch_description: "Remove werror which fixes kIOMainPortDefault not defined in MacOS < 12"
   "2.14.3":
     - patch_file: "patches/2.14.3-0001-fix-find-asio-and-tinyxml2.patch"
       patch_type: "conan"
