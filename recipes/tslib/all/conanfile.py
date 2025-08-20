@@ -31,8 +31,9 @@ class TslibConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("tslib is only supported on Linux")
+        if self.settings.os not in ["Linux", "FreeBSD", "Android"]:
+            # https://github.com/libts/tslib/tree/1.23?tab=readme-ov-file#install-tslib
+            raise ConanInvalidConfiguration(f"{self.ref} is only supported on Linux, FreeBSD, and Android.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
