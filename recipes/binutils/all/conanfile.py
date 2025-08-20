@@ -5,13 +5,12 @@ import unittest
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2"
 
 # This recipe includes a selftest to test conversion of os/arch to triplets (and vice verse)
 # Run it using `python -m unittest conanfile.py`
@@ -25,7 +24,7 @@ class BinutilsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index/"
     homepage = "https://www.gnu.org/software/binutils"
     topics = ("gnu", "ld", "linker", "as", "assembler", "objcopy", "objdump")
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "arch", "build_type"
 
     options = {
         "multilib": [True, False],
@@ -47,10 +46,6 @@ class BinutilsConan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     @property
     def _settings_target(self):
@@ -121,9 +116,6 @@ class BinutilsConan(ConanFile):
             if self.options.target_os != settings_target.os:
                 raise ConanInvalidConfiguration(f"binutils:target_os={self.options.target_os} does not match target os={settings_target.os}")
 
-    def package_id(self):
-        del self.info.settings.compiler
-
     def _raise_unsupported_configuration(self, key, value):
         raise ConanInvalidConfiguration(f"This configuration is unsupported by this conan recip. Please consider adding support. ({key}={value})")
 
@@ -140,15 +132,13 @@ class BinutilsConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     @property
     def _exec_prefix(self):
         return os.path.join("bin", "exec_prefix")
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         def yes_no(opt): return "yes" if opt else "no"
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--disable-nls")
@@ -160,7 +150,6 @@ class BinutilsConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
