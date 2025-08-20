@@ -18,7 +18,7 @@ class GperfConan(ConanFile):
     topics = ("hash-generator", "hash")
     package_type = "application"
 
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "arch", "build_type"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -26,9 +26,6 @@ class GperfConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
         self.folders.build = self.folders.source
-
-    def package_id(self):
-        del self.info.settings.compiler
 
     def build_requirements(self):
         if self.settings_build.os == "Windows":
