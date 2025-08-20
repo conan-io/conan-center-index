@@ -1,0 +1,11 @@
+sources:
+  "1.2.3":
+    url:
+      - "https://github.com/PRBonn/kiss-icp/archive/refs/tags/v1.2.3.tar.gz"
+    sha256: "087A9745C5B2CC304E72BF87929371ECB102C8B75C026162C58D643D6AF8849C"
+
+patches:
+  "1.2.3":
+    - patch_file: "patches/build_type.patch"
+      patch_type: "portability"
+      patch_description: "Remove hardcoded build type"
