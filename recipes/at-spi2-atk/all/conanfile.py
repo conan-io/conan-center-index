@@ -5,7 +5,7 @@ from conan.tools.files import get, rmdir
 from conans import Meson
 import os
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=1.33.0"
 
 class AtSPI2AtkConan(ConanFile):
     name = "at-spi2-atk"
@@ -62,7 +62,7 @@ class AtSPI2AtkConan(ConanFile):
         self.requires("at-spi2-core/2.44.1")
         self.requires("atk/2.38.0")
         self.requires("glib/2.76.3")
-        self.requires("libxml2/[>=2.11.4 <3]")
+        self.requires("libxml2/2.11.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -90,3 +90,4 @@ class AtSPI2AtkConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ['atk-bridge-2.0']
         self.cpp_info.includedirs = [os.path.join('include', 'at-spi2-atk', '2.0')]
+        self.cpp_info.names['pkg_config'] = 'atk-bridge-2.0'
