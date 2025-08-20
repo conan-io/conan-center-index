@@ -1,9 +1,8 @@
 #include "tslib.h"
-#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-int main()
-{
-    struct tsdev *ts;
-    ts = ts_setup(NULL, 0);
-    return ts != NULL;
+int main(void) {
+    printf("tslib version: %s\n", tslib_version());
+    return EXIT_SUCCESS;
 }
