@@ -1,4 +1,5 @@
 name: Build all versions of package
+run-name: Build ${{ inputs.package || 'zlib' }}
 
 on:
   push:
