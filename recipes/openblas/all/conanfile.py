@@ -126,6 +126,10 @@ class OpenblasConan(ConanFile):
                 self.output.warning(f'Setting OpenBLAS TARGET={target} based on settings.arch. This may result in suboptimal performance. Set the "{self.name}/*:target=XXX" option to silence this warning.')
                 self.options.target = target
 
+    def build_requirements(self):
+        if Version(self.version) >= "0.3.29":
+            self.tool_requires("cmake/[>=3.16 <4]")
+
     def validate(self):
         if Version(self.version) < "0.3.24" and self.settings.arch == "armv8":
             # OpenBLAS fails to detect the appropriate target architecture for armv8 for versions < 0.3.24, as it matches the 32 bit variant instead of 64.
