@@ -106,13 +106,16 @@ class NetcdfConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "netCDF")
         self.cpp_info.set_property("cmake_target_name", "netCDF::netcdf")
         self.cpp_info.set_property("pkg_config_name", "netcdf")
-        self.cpp_info.libs = ["netcdf"]
+        # Component libnetcdf is deprecated. Keeping it just for backward compatible.
+        self.cpp_info.components["libnetcdf"].libs = ["netcdf"]
         if self._with_hdf5:
-            self.cpp_info.requires.append("hdf5::hdf5")
+            self.cpp_info.components["libnetcdf"].requires.append("hdf5::hdf5")
         if self.options.dap or self.options.byterange:
-            self.cpp_info.requires.append("libcurl::libcurl")
+            self.cpp_info.components["libnetcdf"].requires.append("libcurl::libcurl")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["dl", "m"]
+            self.cpp_info.components["libnetcdf"].system_libs = ["dl", "m"]
         elif self.settings.os == "Windows":
             if self.options.shared:
-                self.cpp_info.defines.append("DLL_NETCDF")
+                self.cpp_info.components["libnetcdf"].defines.append("DLL_NETCDF")
+        self.cpp_info.components["libnetcdf"].set_property("cmake_target_name", "netCDF::netcdf")
+        self.cpp_info.components["libnetcdf"].set_property("pkg_config_name", "netcdf")
