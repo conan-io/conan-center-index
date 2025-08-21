@@ -35,7 +35,7 @@ class GperfConan(ConanFile):
 
         # gperf makefile relies on GNU Make behaviour
         if self.settings_build.os == "FreeBSD":
-            self.tool_requires("make/4.4.1")
+            self.tool_requires("make/[*]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -44,10 +44,6 @@ class GperfConan(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
-        if is_msvc(self) and check_min_vs(self, "180", raise_invalid=False):
-            tc.extra_cflags.append("-FS")
-            tc.extra_cxxflags.append("-FS")
-        tc.generate()
 
         if is_msvc(self):
             env = Environment()
@@ -68,6 +64,8 @@ class GperfConan(ConanFile):
             env.define("MSYS2_ARG_CONV_EXCL", "-Tp")
             env.vars(self).save_script("conanbuild_gperf_msvc")
 
+        tc.generate(env)
+
     def build(self):
         autotools = Autotools(self)
         with chdir(self, self.source_folder):
@@ -78,8 +76,7 @@ class GperfConan(ConanFile):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         with chdir(self, self.source_folder):
-            # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-            autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+            autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
