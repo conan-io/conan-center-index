@@ -353,6 +353,10 @@ class SDLConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "libdata"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        if self.settings.os == "Android":
+            copy(self, pattern="*",
+                src=os.path.join(self.source_folder, "android-project", "app", "src", "main", "java"),
+                dst=os.path.join(self.package_folder, "share", "java", "SDL2"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SDL2")

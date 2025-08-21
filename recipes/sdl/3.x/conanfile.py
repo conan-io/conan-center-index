@@ -437,7 +437,6 @@ class SDLConan(ConanFile):
             if self.options.get_safe("camera"):
                 if self.settings.os in ("Macos", "iOS"):
                     self.cpp_info.components["sdl3"].frameworks.append("CoreMedia")
-                if Version(self.version) >= "3.2.14":
                     self.cpp_info.components["sdl3"].frameworks.append("AVFoundation")
 
             if self.options.get_safe("joystick"):

@@ -1,14 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, VCVars
-from conan.tools.scm import Version
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag
 from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
 from collections import namedtuple
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class PocoConan(ConanFile):
@@ -84,39 +84,6 @@ class PocoConan(ConanFile):
     del comp
 
     @property
-    def _min_cppstd(self):
-        # Since 1.10.0, poco officially requires C++14
-        # https://github.com/pocoproject/poco/releases/tag/poco-1.10.0-release
-        # But poco uses C++11 features only until 1.12.5
-        # https://github.com/pocoproject/poco/commit/886b76f4faa2007cc0c09dad81f8dcdee6fcb4ac
-        if Version(self.version) < "1.12.5":
-            return "11"
-        # Since 1.13.0, poco requires C++17
-        # https://github.com/pocoproject/poco/releases/tag/poco-1.13.0-release
-        if Version(self.version) < "1.13.0":
-            return "14"
-        return "17"
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "14": {
-                "gcc": "6",
-                "clang": "5",
-                "apple-clang": "10",
-                "Visual Studio": "15",
-                "msvc": "191",
-            },
-            "17": {
-                "gcc": "8",
-                "clang": "7",
-                "apple-clang": "12",
-                "Visual Studio": "16",
-                "msvc": "192",
-            },
-        }.get(self._min_cppstd, {})
-
-    @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
@@ -129,10 +96,6 @@ class PocoConan(ConanFile):
             del self.options.enable_fork
         else:
             del self.options.enable_netssl_win
-        if Version(self.version) < "1.12.0":
-            del self.options.enable_prometheus
-        if Version(self.version) < "1.13.0":
-            del self.options.with_sql_parser
         if self.settings.build_type != "Debug":
             del self.options.comp_foundation_sharedlibrary_debug_suffix
 
@@ -147,18 +110,19 @@ class PocoConan(ConanFile):
         if not self.options.enable_json:
             util_dependencies = self._poco_component_tree["Util"].dependencies
             self._poco_component_tree["Util"] = self._poco_component_tree["Util"]._replace(dependencies = [x for x in util_dependencies if x != "JSON"])
-        if Version(self.version) >= "1.12.0":
-            foundation_external_dependencies = self._poco_component_tree["Foundation"].external_dependencies
-            self._poco_component_tree["Foundation"] = self._poco_component_tree["Foundation"]._replace(external_dependencies = list(map(lambda x: 'pcre2::pcre2' if x == 'pcre::pcre' else x, foundation_external_dependencies)))
+
+        foundation_external_dependencies = self._poco_component_tree["Foundation"].external_dependencies
+        self._poco_component_tree["Foundation"] = self._poco_component_tree["Foundation"]._replace(external_dependencies = list(map(lambda x: 'pcre2::pcre2' if x == 'pcre::pcre' else x, foundation_external_dependencies)))
+        if Version(self.version) >= "1.14.0":
+            self._poco_component_tree["Foundation"].external_dependencies.append("utf8proc::utf8proc")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) < "1.12.0":
-            self.requires("pcre/8.45")
-        else:
-            self.requires("pcre2/10.42")
+        self.requires("pcre2/[>=10.42 <11]")
+        if Version(self.version) >= "1.14.0":
+            self.requires("utf8proc/[>=2.8.0 <3]")
         self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
         if self.options.enable_xml:
             self.requires("expat/[>=2.6.2 <3]", transitive_headers=True)
@@ -181,14 +145,13 @@ class PocoConan(ConanFile):
         del self.info.options.enable_active_record
         del self.info.options.log_debug
 
+    def validate_build(self):
+        check_min_cppstd(self, 17)
+
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        #  1.13.3: https://github.com/pocoproject/poco/blob/d6bd48a94c5f03e3c69cac1b024fdad5120e3a7b/Foundation/CMakeLists.txt#L125-L128
+        #  1.14.2: https://github.com/pocoproject/poco/blob/96d182a99303fb068575294b36f0cc20da2e7b25/Foundation/CMakeLists.txt#L130
+        check_min_cppstd(self, 14)
 
         if self.options.enable_apacheconnector:
             # FIXME: missing apache2 recipe + few issues
@@ -212,16 +175,7 @@ class PocoConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def _dep_include_paths(self, dep_name):
-        dep = self.dependencies[dep_name]
-        dep_cpp_info = dep.cpp_info.aggregated_components()
-        return [os.path.join(dep.package_folder, dir).replace("\\", "/") for dir in dep_cpp_info.includedirs]
-
-    def _dep_lib_paths(self, dep_name):
-        dep = self.dependencies[dep_name]
-        dep_cpp_info = dep.cpp_info.aggregated_components()
-        return [os.path.join(dep.package_folder, dir).replace("\\", "/") for dir in dep_cpp_info.libdirs]
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -233,22 +187,10 @@ class PocoConan(ConanFile):
         tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
         if is_msvc(self):
             tc.variables["POCO_MT"] = is_msvc_static_runtime(self)
-        if self.options.get_safe("enable_data_postgresql", False):
-            tc.variables["PostgreSQL_ROOT_DIR"] = self.dependencies["libpq"].package_folder.replace("\\", "/")
-            tc.variables["PostgreSQL_ROOT_INCLUDE_DIRS"] = ";".join(self._dep_include_paths("libpq"))
-            tc.variables["PostgreSQL_ROOT_LIBRARY_DIRS"] = ";".join(self._dep_lib_paths("libpq"))
-        if self.options.get_safe("enable_data_mysql", False):
-            tc.variables["MYSQL_ROOT_DIR"] = self.dependencies["libmysqlclient"].package_folder.replace("\\", "/")
-            tc.variables["MYSQL_ROOT_INCLUDE_DIRS"] = ";".join(self._dep_include_paths("libmysqlclient"))
-            tc.variables["MYSQL_INCLUDE_DIR"] = ";".join(self._dep_include_paths("libmysqlclient"))
-            tc.variables["MYSQL_ROOT_LIBRARY_DIRS"] = ";".join(self._dep_lib_paths("libmysqlclient"))
-        if self.options.enable_apacheconnector:
-            tc.variables["APR_ROOT_DIR"] = self.dependencies["apr"].package_folder.replace("\\", "/")
-            tc.variables["APR_ROOT_INCLUDE_DIRS"] = ";".join(self._dep_include_paths("apr"))
-            tc.variables["APR_ROOT_LIBRARY_DIRS"] = ";".join(self._dep_lib_paths("apr"))
-            tc.variables["APRUTIL_ROOT_DIR"] = self.dependencies["apr-util"].package_folder.replace("\\", "/")
-            tc.variables["APRUTIL_ROOT_INCLUDE_DIRS"] = ";".join(self._dep_include_paths("apr-util"))
-            tc.variables["APRUTIL_ROOT_LIBRARY_DIRS"] = ";".join(self._dep_lib_paths("apr-util"))
+        if not self.options.enable_apacheconnector:
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_APR"] = True
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_APRUTIL"] = True
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Apache2"] = True
         # Disable fork
         if not self.options.get_safe("enable_fork", True):
             tc.variables["POCO_NO_FORK_EXEC"] = True
@@ -261,60 +203,29 @@ class PocoConan(ConanFile):
         # Disable SharedLibrary::suffix() including "d" as part of the platform-specific filename suffix
         if not self.options.get_safe("comp_foundation_sharedlibrary_debug_suffix", True):
             tc.preprocessor_definitions["POCO_NO_SHARED_LIBRARY_DEBUG_SUFFIX"] = "1"
+
+        if self.options.get_safe("enable_data_mysql"):
+            tc.cache_variables["MYSQL_FOUND"] = True
+        if self.options.get_safe("enable_data_postgresql"):
+            tc.cache_variables["POSTGRESQL_FOUND"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("expat", "cmake_file_name", "EXPAT")
+        deps.set_property("expat", "cmake_target_name", "EXPAT::EXPAT")
+        deps.set_property("expat", "cmake_find_mode", "config")
+        deps.set_property("libmysqlclient", "cmake_file_name", "mysql")
+        deps.set_property("libmysqlclient", "cmake_target_name", "MySQL::client")
+        deps.set_property("libmysqlclient", "cmake_additional_variables_prefixes", ["MYSQL"])
+        deps.set_property("libmysqlclient", "cmake_find_mode", "config")
+        deps.set_property("libpq", "cmake_target_name", "PostgreSQL::PostgreSQL")
+        deps.set_property("libpq", "cmake_target_aliases", ["PostgreSQL::client"])
+        deps.set_property("libpq", "cmake_file_name", "PostgreSQL")
+        deps.set_property("pcre2::pcre2-8", "cmake_target_name", "Pcre2::Pcre2")
+        deps.set_property("utf8proc", "cmake_target_name", "Utf8Proc::Utf8Proc")
         deps.generate()
 
-        if is_msvc(self):
-            # On Windows, Poco needs a message (MC) compiler.
-            vcvars = VCVars(self)
-            vcvars.generate()
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # mysql
-        if self.options.get_safe("enable_data_mysql"):
-            mysql_cpp_info = self.dependencies["libmysqlclient"].cpp_info
-            mysql_config_file = mysql_cpp_info.get_property("cmake_file_name") or "libmysqlclient"
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "CMakeLists.txt"),
-                "find_package(MySQL REQUIRED)",
-                f"find_package({mysql_config_file} REQUIRED CONFIG)\nset(MYSQL_FOUND TRUE)",
-            )
-            mysql_target_name = mysql_cpp_info.get_property("cmake_target_name") or "libmysqlclient::libmysqlclient"
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "Data", "MySQL", "CMakeLists.txt"),
-                "MySQL::client",
-                mysql_target_name,
-            )
-        # libpq
-        if self.options.get_safe("enable_data_postgresql"):
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "CMakeLists.txt"),
-                "find_package(PostgreSQL REQUIRED)",
-                "find_package(PostgreSQL REQUIRED)\nset(POSTGRESQL_FOUND TRUE)",
-            )
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "Data", "PostgreSQL", "CMakeLists.txt"),
-                "PostgreSQL::client",
-                "PostgreSQL::PostgreSQL",
-            )
-        # Ensure to use FindEXPAT.cmake instead of expat-config.cmake
-        # (side effect of CMAKE_FIND_PACKAGE_PREFER_CONFIG ON, see https://github.com/conan-io/conan/issues/10387)
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "XML", "CMakeLists.txt"),
-            "find_package(EXPAT REQUIRED)",
-            "find_package(EXPAT REQUIRED MODULE)",
-        )
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -339,11 +250,6 @@ class PocoConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Poco")
         self.cpp_info.set_property("cmake_target_name", "Poco::Poco")
 
-        self.cpp_info.filenames["cmake_find_package"] = "Poco"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Poco"
-        self.cpp_info.names["cmake_find_package"] = "Poco"
-        self.cpp_info.names["cmake_find_package_multi"] = "Poco"
-
         suffix = msvc_runtime_flag(self).lower() \
                  if is_msvc(self) and not self.options.shared \
                  else ("d" if self.settings.build_type == "Debug" else "")
@@ -354,8 +260,6 @@ class PocoConan(ConanFile):
                 requires = [f"poco_{dependency.lower()}" for dependency in comp.dependencies] + comp.external_dependencies
                 self.cpp_info.components[conan_component].set_property("cmake_target_name", f"Poco::{compname}")
                 self.cpp_info.components[conan_component].set_property("cmake_file_name", compname)
-                self.cpp_info.components[conan_component].names["cmake_find_package"] = compname
-                self.cpp_info.components[conan_component].names["cmake_find_package_multi"] = compname
                 if comp.is_lib:
                     self.cpp_info.components[conan_component].libs = [f"Poco{compname}{suffix}"]
                 self.cpp_info.components[conan_component].requires = requires
@@ -373,7 +277,7 @@ class PocoConan(ConanFile):
             if self.settings.os == "Windows":
                 self.cpp_info.components["poco_foundation"].system_libs.extend(["ws2_32", "iphlpapi", "crypt32"])
         if self.options.enable_net:
-            if not self.options.shared and self._is_mingw and Version(self.version) >= "1.13.0":
+            if not self.options.shared and self._is_mingw:
                 self.cpp_info.components["poco_net"].system_libs.extend(["mswsock"])
         if self.options.enable_data_odbc:
             if self.settings.os == "Windows":
