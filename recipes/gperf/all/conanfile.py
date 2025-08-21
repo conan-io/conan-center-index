@@ -1,9 +1,8 @@
 from conan import ConanFile
-from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, check_min_vs, unix_path
+from conan.tools.microsoft import is_msvc, unix_path
 import os
 
 required_conan_version = ">=2"
