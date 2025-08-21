@@ -5,7 +5,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.premake import Premake, PremakeDeps, PremakeToolchain
 
 
-required_conan_version = ">=2.18.0"
+required_conan_version = ">=2.19.0"
 
 
 class YojimboConan(ConanFile):
