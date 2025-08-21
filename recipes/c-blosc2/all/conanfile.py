@@ -1,15 +1,12 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, copy, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
 import os
 import glob
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class CBlosc2Conan(ConanFile):
@@ -68,28 +65,20 @@ class CBlosc2Conan(ConanFile):
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_zlib in ["zlib-ng", "zlib-ng-compat"]:
-            self.requires("zlib-ng/2.2.5")
+            self.requires("zlib-ng/[>=2.2 <3]")
         elif self.options.with_zlib == "zlib":
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
-
-    def validate(self):
-        if Version(self.version) < "2.11.0" \
-           and self.info.settings.arch in ["x86", "x86_64"] \
-           and self.options.simd_intrinsics == "avx512":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support 'avx512' SIMD intrinsics")
+            self.requires("zstd/[>=1.5 <1.6]")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16.3 <4]")
+        self.tool_requires("cmake/[>=3.16.3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = CMakeToolchain(self)
         tc.cache_variables["BLOSC_IS_SUBPROJECT"] = False
         tc.cache_variables["BLOSC_INSTALL"] = True
@@ -111,8 +100,7 @@ class CBlosc2Conan(ConanFile):
         tc.cache_variables["BUILD_PLUGINS"] = bool(self.options.with_plugins)
         if self.options.with_zlib == "zlib-ng-compat":
             tc.preprocessor_definitions["ZLIB_COMPAT"] = "1"
-        if Version(self.version) >= "2.15.2":
-            tc.cache_variables["WITH_ZLIB_OPTIM"] = self.settings.arch != "wasm"
+        tc.cache_variables["WITH_ZLIB_OPTIM"] = self.settings.arch != "wasm"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -135,7 +123,6 @@ class CBlosc2Conan(ConanFile):
                 rm(self, os.path.basename(filename), os.path.join(self.source_folder, "cmake"))
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
