@@ -64,11 +64,11 @@ class OpenSlideConan(ConanFile):
         self.requires("sqlite3/3.45.3")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.2")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         elif self.options.jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.5")
+            self.requires("mozjpeg/[>=4.1.5 <5]")
 
     def validate(self):
         if is_msvc(self):
