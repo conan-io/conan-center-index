@@ -7,6 +7,7 @@ import os
 
 required_conan_version = ">=2.0"
 
+
 class OsgearthConan(ConanFile):
     name = "osgearth"
     package_type = "library"
@@ -48,15 +49,11 @@ class OsgearthConan(ConanFile):
         "enable_wininet_for_http": False,
     }
 
-    short_paths = True
-
-    @property
-    def _minimum_cpp_standard(self):
-        return 14
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+        check_min_cppstd(self, 14)
 
         # The official Conan recipe for rocksdb will delete all of the C++ headers from the packaged include directory
         # in a shared build. osgearth assumes that these headers are available, however. What this means is that we
@@ -80,10 +77,10 @@ class OsgearthConan(ConanFile):
 
     def requirements(self):
         self.requires("opengl/system")
-        self.requires("gdal/3.4.3")
+        self.requires("gdal/3.10.3")
         self.requires("openscenegraph/3.6.5", transitive_headers=True)
         self.requires("libcurl/[>=7.78.0 <9]")
-        self.requires("lerc/2.2")
+        self.requires("lerc/4.0.1")
         self.requires("rapidjson/1.1.0")
         self.requires("sqlite3/[>=3.42 <4]")
 
@@ -92,7 +89,7 @@ class OsgearthConan(ConanFile):
         if self.options.build_zip_plugin:
             self.requires("libzip/1.7.3")
         if self.options.with_geos:
-            self.requires("geos/3.11.1")
+            self.requires("geos/3.12.0")
         if self.options.with_protobuf:
             self.requires("protobuf/3.21.12")
         if self.options.with_webp:
@@ -101,9 +98,6 @@ class OsgearthConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def _get_library_postfix(self, build_type: str) -> str:
         # We want our library postfix (that is, the value of the CMAKE_*_POSTFIX CMake variable for
