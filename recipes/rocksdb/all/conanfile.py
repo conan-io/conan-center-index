@@ -63,6 +63,11 @@ class RocksDBConan(ConanFile):
         # https://github.com/facebook/rocksdb/commit/be09943fb58a2dd3f70e6e30781ebfa3fcbcb8fa
         return Version(self.version) >= "7.7.2"
 
+    @property
+    def _has_lite(self):
+        # https://github.com/facebook/rocksdb/commit/4720ba4391eb016b05a30d09a8275624c3a4a87e
+        return Version(self.version) < "8.0.0"
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -75,12 +80,12 @@ class RocksDBConan(ConanFile):
             self.options.use_rtti = True  # Rtti are used in asserts for debug mode...
         if not self._has_folly:
             del self.options.with_folly
+        if not self._has_lite:
+            del self.options.lite
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if Version(self.version) >= "8.0.0":
-            self.options.rm_safe("lite") # RocksDB Lite was removed in 8.0.0
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -133,7 +138,7 @@ class RocksDBConan(ConanFile):
         if is_msvc(self):
             tc.variables["WITH_MD_LIBRARY"] = not is_msvc_static_runtime(self)
         tc.variables["ROCKSDB_INSTALL_ON_WINDOWS"] = self.settings.os == "Windows"
-        if Version(self.version) < "8.0.0":
+        if self._has_lite:
             tc.variables["ROCKSDB_LITE"] = self.options.lite
         tc.variables["WITH_GFLAGS"] = self.options.with_gflags
         tc.variables["WITH_SNAPPY"] = self.options.with_snappy
@@ -213,7 +218,7 @@ class RocksDBConan(ConanFile):
                 self.cpp_info.components["librocksdb"].defines = ["ROCKSDB_DLL"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["librocksdb"].system_libs = ["pthread", "m"]
-        if Version(self.version) < "8.0.0" and self.options.lite:
+        if self.options.get_safe("lite"):
             self.cpp_info.components["librocksdb"].defines.append("ROCKSDB_LITE")
 
         self.cpp_info.components["librocksdb"].set_property("cmake_target_name", f"RocksDB::{cmake_target}")
