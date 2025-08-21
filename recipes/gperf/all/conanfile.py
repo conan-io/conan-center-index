@@ -44,9 +44,9 @@ class GperfConan(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
+        env = tc.environment()
 
         if is_msvc(self):
-            env = Environment()
             compile_wrapper = unix_path(self, os.path.join(self.source_folder, "build-aux", "compile"))
             ar_wrapper = unix_path(self, os.path.join(self.source_folder, "build-aux", "ar-lib"))
             env.define("CC", f"{compile_wrapper} cl -nologo")
