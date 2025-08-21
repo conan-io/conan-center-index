@@ -35,7 +35,7 @@ class ValueTypesConan(ConanFile):
 
     def package(self):
         copy(self, "indirect.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
-        copy(self, "polymorphic*.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
+        copy(self, "polymorphic.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
