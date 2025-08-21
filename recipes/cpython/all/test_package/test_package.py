@@ -151,7 +151,7 @@ def test_sqlite3():
 def test_decimal():
     # Check whether the _decimal package was built successfully
     import _decimal as decimal
-    
+
     decimal.getcontext().prec = 6
     print("1/7 =", decimal.Decimal(1) / decimal.Decimal(7))
     decimal.getcontext().prec = 40

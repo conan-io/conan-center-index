@@ -12,7 +12,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuildDeps, MSBuildToolchain, MSBuild, is_msvc, is_msvc_static_runtime, msvc_runtime_flag, msvs_toolset
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.58.0"
+required_conan_version = ">=2.0.9"
 
 
 class CPythonConan(ConanFile):
@@ -62,6 +62,7 @@ class CPythonConan(ConanFile):
         "env_vars": True,
     }
     short_paths = True
+    languages = ["C"]
 
     @property
     def _supports_modules(self):
@@ -86,9 +87,6 @@ class CPythonConan(ConanFile):
             del self.options.with_curses
             del self.options.with_gdbm
             del self.options.with_nis
-
-        self.settings.compiler.rm_safe("libcxx")
-        self.settings.compiler.rm_safe("cppstd")
 
     def configure(self):
         if self.options.shared:
@@ -636,7 +634,7 @@ class CPythonConan(ConanFile):
             name, version = get_name_version(fn)
             add = True
             if name in packages:
-                pname, pversion = get_name_version(packages[name])
+                _, pversion = get_name_version(packages[name])
                 add = Version(version) > Version(pversion)
             if add:
                 packages[name] = fn
@@ -890,54 +888,23 @@ class CPythonConan(ConanFile):
             self.runenv_info.append_path("PATH", bindir)
             self.buildenv_info.append_path("PATH", bindir)
 
-            # TODO remove once Conan 1.x is no longer supported
-            self.output.info(f"Appending PATH environment variable: {bindir}")
-            self.env_info.PATH.append(bindir)
-
         python = self._cpython_interpreter_path
         self.conf_info.define("user.cpython:python", python)
-        self.user_info.python = python
         if self.options.env_vars:
             self.runenv_info.append_path("PYTHON", python)
             self.buildenv_info.append_path("PYTHON", python)
-
-            # TODO remove once Conan 1.x is no longer supported
-            self.output.info(f"Appending PYTHON environment variable: {python}")
-            self.env_info.PYTHON = python
 
         if is_msvc(self):
             pythonhome = os.path.join(self.package_folder, "bin")
         else:
             pythonhome = self.package_folder
         self.conf_info.define("user.cpython:pythonhome", pythonhome)
-        self.user_info.pythonhome = pythonhome
 
         pythonhome_required = is_msvc(self) or is_apple_os(self)
         self.conf_info.define("user.cpython:module_requires_pythonhome", pythonhome_required)
-        self.user_info.module_requires_pythonhome = pythonhome_required
-
-        if is_msvc(self):
-            if self.options.env_vars:
-                # FIXME: On Windows, defining this breaks the packaged Python executable, but fixes
-                # separately built executables with an embedded interpreter trying to run standard Python
-                # modules. However, NOT defining this reverses the situation, normal Python executables
-                #work, but embedded interpreters break.
-                # The docs at https://python.readthedocs.io/en/latest/using/cmdline.html#envvar-PYTHONHOME
-                # seem to not be accurate to Windows (https://discuss.python.org/t/the-document-on-pythonhome-might-be-wrong/19614/5)
-                #self.runenv_info.append_path("PYTHONHOME", pythonhome)
-                #self.buildenv_info.append_path("PYTHONHOME", pythonhome)
-
-                # TODO remove once Conan 1.x is no longer supported
-                self.output.info(f"Setting PYTHONHOME environment variable: {pythonhome}")
-                self.env_info.PYTHONHOME = pythonhome
 
         python_root = self.package_folder
         if self.options.env_vars:
             self.runenv_info.append_path("PYTHON_ROOT", python_root)
             self.buildenv_info.append_path("PYTHON_ROOT", python_root)
-
-            # TODO remove once Conan 1.x is no longer supported
-            self.output.info(f"Setting PYTHON_ROOT environment variable: {python_root}")
-            self.env_info.PYTHON_ROOT = python_root
         self.conf_info.define("user.cpython:python_root", python_root)
-        self.user_info.python_root = python_root
