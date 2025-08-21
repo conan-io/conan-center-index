@@ -32,10 +32,10 @@ class RocksDBConan(ConanFile):
         "with_zlib": [True, False],
         "with_zstd": [True, False],
         "with_tbb": [True, False],
+        "with_folly": [True, False],
         "with_jemalloc": [True, False],
         "enable_sse": [False, "sse42", "avx2"],
         "use_rtti": [True, False],
-        "use_folly": [True, False],
     }
     default_options = {
         "shared": False,
@@ -48,9 +48,9 @@ class RocksDBConan(ConanFile):
         "with_gflags": False,
         "with_tbb": False,
         "with_jemalloc": False,
+        "with_folly": False,
         "enable_sse": False,
         "use_rtti": False,
-        "use_folly": False,
     }
 
     @property
@@ -92,7 +92,7 @@ class RocksDBConan(ConanFile):
             self.requires("onetbb/2021.10.0")
         if self.options.with_jemalloc:
             self.requires("jemalloc/5.3.0")
-        if self.options.use_folly:
+        if self.options.with_folly:
             self.requires("folly/[>=2024.08.12.00]")
 
     def validate(self):
@@ -104,7 +104,7 @@ class RocksDBConan(ConanFile):
         if is_msvc(self) and Version(self.settings.compiler.version) < "191":
             raise ConanInvalidConfiguration("Rocksdb requires MSVC version >= 191")
         
-        if self.options.shared and self.options.use_folly:
+        if self.options.shared and self.options.with_folly:
             raise ConanInvalidConfiguration(f"{self.ref} does not support a shared build with folly")
 
     def source(self):
@@ -119,11 +119,11 @@ class RocksDBConan(ConanFile):
         tc.variables["WITH_BENCHMARK_TOOLS"] = False
         tc.variables["WITH_TRACE_TOOLS"] = False
         if Version(self.version) >= "7.7.0":
-            tc.variables["USE_FOLLY_LITE"] = False # Folly Lite would download dependencies through a python script; I'm assuming we do not want that on CC
+            tc.variables["with_folly_LITE"] = False # Folly Lite would download dependencies through a python script; I'm assuming we do not want that on CC
         if Version(self.version) < "7.2.0":
             tc.variables["WITH_FOLLY_DISTRIBUTED_MUTEX"] = False # This option was removed in 7.2.0; no reason to apply it
         else:
-            tc.variables["USE_FOLLY"] = self.options.use_folly
+            tc.variables["with_folly"] = self.options.with_folly
         if is_msvc(self):
             tc.variables["WITH_MD_LIBRARY"] = not is_msvc_static_runtime(self)
         tc.variables["ROCKSDB_INSTALL_ON_WINDOWS"] = self.settings.os == "Windows"
@@ -223,5 +223,5 @@ class RocksDBConan(ConanFile):
             self.cpp_info.components["librocksdb"].requires.append("onetbb::onetbb")
         if self.options.with_jemalloc:
             self.cpp_info.components["librocksdb"].requires.append("jemalloc::jemalloc")
-        if self.options.use_folly:
+        if self.options.with_folly:
             self.cpp_info.components["librocksdb"].requires.append("folly::folly")
