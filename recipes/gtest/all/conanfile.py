@@ -40,38 +40,6 @@ class GTestConan(ConanFile):
     extension_properties = {"compatibility_cppstd": False}
     implements = ["auto_shared_fpic"]
 
-    @property
-    def _min_cppstd(self):
-        if Version(self.version) < "1.13.0":
-            return 11
-        elif Version(self.version) < "1.17.0":
-            return "14"
-        return "17"
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "11": {
-                "Visual Studio": "14",
-                "msvc": "190",
-                "gcc": "5",
-                "clang": "5",
-                "apple-clang": "9.1",
-            },
-            # Sinse 1.13.0, gtest requires C++14 and Google's Foundational C++ Support Policy
-            # https://github.com/google/oss-policies-info/blob/603a042ce2ee8f165fac46721a651d796ce59cb6/foundational-cxx-support-matrix.md
-            "14": {
-                "Visual Studio": "15",
-                "msvc": "191",
-                "gcc": "7.3.1",
-                "clang": "6",
-                "apple-clang": "12",
-            },
-        }.get(self._min_cppstd, {})
-
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -82,18 +50,13 @@ class GTestConan(ConanFile):
         if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("gtest shared is not compatible with static vc runtime")
 
-        check_min_cppstd(self, self._min_cppstd)
-
-        compiler = self.settings.compiler
-        min_version = self._minimum_compilers_version.get(str(compiler))
-        if min_version and Version(compiler.version) < min_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17 if Version(self.version) >= "1.17.0" else 14)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
+
+        internal_utils = os.path.join(self.source_folder, "googletest", "cmake", "internal_utils.cmake")
+        replace_in_file(self, internal_utils, "-WX", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -105,15 +68,10 @@ class GTestConan(ConanFile):
         tc.variables["gtest_disable_pthreads"] = self.options.disable_pthreads
         tc.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # No warnings as errors
-        internal_utils = os.path.join(self.source_folder, "googletest", "cmake", "internal_utils.cmake")
-        replace_in_file(self, internal_utils, "-WX", "")
 
     def build_requirements(self):
         if Version(self.version) >= "1.17.0":
-            self.tool_requires("cmake/[>=3.16 <4]")
+            self.tool_requires("cmake/[>=3.16]")
 
     def build(self):
         cmake = CMake(self)
