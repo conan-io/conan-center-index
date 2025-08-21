@@ -21,7 +21,7 @@ class BinutilsConan(ConanFile):
     description = "The GNU Binutils are a collection of binary tools."
     package_type = "application"
     license = "GPL-2.0-or-later"
-    url = "https://github.com/conan-io/conan-center-index/"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/binutils"
     topics = ("gnu", "ld", "linker", "as", "assembler", "objcopy", "objdump")
     settings = "os", "arch", "build_type"
@@ -174,16 +174,7 @@ class BinutilsConan(ConanFile):
 
         absolute_target_bindir = os.path.join(self.package_folder, target_bindir)
 
-        # v1 exports
         bindir = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bindir)
-        self.env_info.PATH.append(absolute_target_bindir)
-        self.output.info(f"GNU triplet={self.options.target_triplet}")
-        self.user_info.gnu_triplet = self.options.target_triplet
-        self.user_info.prefix = self.options.prefix
-        self.output.info(f"executable prefix={self.options.prefix}")
-
-        # v2 exports
         self.buildenv_info.append_path("PATH", bindir)
         self.buildenv_info.append_path("PATH", absolute_target_bindir)
 
