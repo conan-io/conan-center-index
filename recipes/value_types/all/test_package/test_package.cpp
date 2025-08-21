@@ -21,7 +21,6 @@ public:
 int main()
 {
     xyz::indirect initial(EXIT_SUCCESS);
-    int value = *initial;
-    xyz::polymorphic<Base> result(std::in_place_type<Derived>, value);
+    xyz::polymorphic<Base> result(std::in_place_type<Derived>, *initial);
     return result->getValue();
 }
