@@ -24,7 +24,7 @@ class BinutilsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/binutils"
     topics = ("gnu", "ld", "linker", "as", "assembler", "objcopy", "objdump")
-    settings = "os", "arch", "build_type"
+    settings = "os", "arch", "compiler", "build_type"
 
     options = {
         "multilib": [True, False],
