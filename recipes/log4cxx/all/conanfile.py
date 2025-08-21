@@ -5,7 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class Log4cxxConan(ConanFile):
@@ -71,7 +71,7 @@ class Log4cxxConan(ConanFile):
     def requirements(self):
         self.requires("apr/1.7.4")
         self.requires("apr-util/1.6.1")
-        self.requires("expat/2.6.4")
+        self.requires("expat/[>=2.6.2 <3]")
         if self.options.get_safe("with_odbc_appender") and self.settings.os != "Windows":
             self.requires("odbc/2.3.11")
         if self.options.get_safe("with_smtp_appender"):
