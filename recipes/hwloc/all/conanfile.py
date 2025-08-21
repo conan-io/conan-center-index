@@ -19,20 +19,10 @@ class HwlocConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "with_libxml2": [True, False]
-    }
-    default_options = {
-        "with_libxml2": False
-    }
 
     def configure(self):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-
-    def requirements(self):
-        if self.options.with_libxml2:
-            self.requires("libxml2/[>=2.12.5 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -55,14 +45,13 @@ class HwlocConan(ConanFile):
             tc.cache_variables["HWLOC_WITH_OPENCL"] = 'OFF'
             tc.cache_variables["HWLOC_WITH_CUDA"] = 'OFF'
             tc.cache_variables["HWLOC_BUILD_SHARED_LIBS"] = True
-            tc.cache_variables["HWLOC_WITH_LIBXML2"] = self.options.with_libxml2
+            tc.cache_variables["HWLOC_WITH_LIBXML2"] = False
             tc.generate()
         else:
             deps = PkgConfigDeps(self)
             deps.generate()
             tc = AutotoolsToolchain(self)
-            if not self.options.with_libxml2:
-                tc.configure_args.extend(["--disable-libxml2"])
+            tc.configure_args.extend(["--disable-libxml2"])
             tc.configure_args.extend(["--disable-io", "--disable-cairo"])
             tc.configure_args.extend(["--enable-shared", "--disable-static"])
             tc.generate()
