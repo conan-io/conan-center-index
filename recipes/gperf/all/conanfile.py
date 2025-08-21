@@ -26,6 +26,9 @@ class GperfConan(ConanFile):
         basic_layout(self, src_folder="src")
         self.folders.build = self.folders.source
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def build_requirements(self):
         if self.settings_build.os == "Windows":
             self.win_bash = True
