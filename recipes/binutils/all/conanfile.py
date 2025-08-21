@@ -116,6 +116,9 @@ class BinutilsConan(ConanFile):
             if self.options.target_os != settings_target.os:
                 raise ConanInvalidConfiguration(f"binutils:target_os={self.options.target_os} does not match target os={settings_target.os}")
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def _raise_unsupported_configuration(self, key, value):
         raise ConanInvalidConfiguration(f"This configuration is unsupported by this conan recip. Please consider adding support. ({key}={value})")
 
