@@ -146,6 +146,12 @@ class Libxml2Conan(ConanFile):
 
         if self.options.icu:
             self.cpp_info.requires.extend(["icu::icu-uc", "icu::icu-data", "icu::icu-i18n"])
+        if self.options.iconv:
+            self.cpp_info.requires.append("libiconv::libiconv")
+        if self.options.lzma:
+            self.cpp_info.requires.append("xz_utils::xz_utils")
+        if self.options.zlib:
+            self.cpp_info.requires.append("zlib::zlib")
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("Bcrypt")
             self.cpp_info.system_libs.append("ws2_32") # http
