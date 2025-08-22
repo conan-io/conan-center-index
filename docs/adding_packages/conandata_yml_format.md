@@ -140,7 +140,7 @@ patches:
 
 ### Patches fields
 
-Only the `patch_field` is required for the recipe to work properly.
+Only the `patch_file` field is required for the recipe to work properly.
 Additional information to motivate and justify the patch should be provided in the PR that introduces is. Optionally, consider adding a more thorough description as described below if deemed necessary.
 
 #### patch_file
