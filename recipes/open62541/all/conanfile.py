@@ -362,7 +362,8 @@ class Open62541Conan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         rm(self, "FindPython3.cmake", os.path.join(self.source_folder, "tools", "cmake"))
-        replace_in_file(self, os.path.join(self.source_folder, "deps", "nodesetLoader", "CMakeLists.txt"),
+        if Version(self.version) >= "1.4.11.1":
+            replace_in_file(self, os.path.join(self.source_folder, "deps", "nodesetLoader", "CMakeLists.txt"),
                         "find_package(LibXml2 REQUIRED QUIET)", "find_package(LibXml2 REQUIRED GLOBAL)")
 
     def build(self):
