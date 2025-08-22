@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, rename
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -82,4 +81,3 @@ class PlutoVGConan(ConanFile):
             self.cpp_info.system_libs = ["m"]
         if is_msvc(self) and not self.options.shared:
             self.cpp_info.defines.append("PLUTOVG_BUILD_STATIC")
-
