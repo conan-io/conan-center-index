@@ -118,7 +118,12 @@ class RocksDBConan(ConanFile):
             raise ConanInvalidConfiguration("Rocksdb requires MSVC version >= 191")
         
         if self.options.shared and self.options.get_safe("with_folly"):
+            # https://github.com/facebook/rocksdb/blob/v10.5.1/CMakeLists.txt#L603
             raise ConanInvalidConfiguration(f"{self.ref} does not support a shared build with folly")
+
+        if self.settings.compiler in ["apple-clang", "clang"] and self.options.get_safe("with_folly"):
+            # https://github.com/facebook/rocksdb/issues/13895
+            raise ConanInvalidConfiguration(f"{self.ref} does not support folly with {self.settings.compiler}.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
