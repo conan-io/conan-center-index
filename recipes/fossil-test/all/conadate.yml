@@ -1,0 +1,4 @@
+sources:
+  "1.2.8":
+    url: "https://github.com/fossillogic/fossil-test/archive/refs/tags/v1.2.8.tar.gz"
+    sha256: "4ce943bc7395a3a5287b1cc68c12802be360d109506238c1657dc7fba1a98a92"
