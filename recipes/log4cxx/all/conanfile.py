@@ -78,7 +78,7 @@ class Log4cxxConan(ConanFile):
         if self.options.get_safe("with_fmt_layout"):
             self.requires("fmt/10.2.1")
         if self.options.get_safe("with_qt"):
-            self.requires("qt/[~5.15]")
+            self.requires("qt/[>=5.15.16 <7]")
 
     def validate(self):
         if self.options.get_safe("with_multiprocess_rolling_file_appender"):
