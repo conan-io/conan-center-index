@@ -115,9 +115,6 @@ class Log4cxxConan(ConanFile):
         deps.set_property("apr", "cmake_file_name", "APR")
         deps.set_property("apr-util", "cmake_file_name", "APR-Util")
         deps.set_property("apr-util", "cmake_additional_variables_prefixes", ["APR_UTIL"])
-        deps.set_property("expat", "cmake_file_name", "EXPAT")
-        deps.set_property("expat", "cmake_find_mode", "config")
-        deps.set_property("expat", "cmake_target_name", "EXPAT::EXPAT")
         deps.generate()
 
     def build(self):
