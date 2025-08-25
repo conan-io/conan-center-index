@@ -1,23 +1,23 @@
 sources:
-  "0.11.0":
+  "0.12.0":
     "Windows":
       "x86_64":
-        url: "https://github.com/foxglove/foxglove-sdk/releases/download/sdk%2Fv0.11.0/foxglove-v0.11.0-cpp-x86_64-pc-windows-msvc.zip"
-        sha256: "03ea4614bee05a0e100ed5ea44753726572657499494aaf81954d2a4826292a9"
+        url: "https://github.com/foxglove/foxglove-sdk/releases/download/sdk%2Fv0.12.0/foxglove-v0.12.0-cpp-x86_64-pc-windows-msvc.zip"
+        sha256: "0cbba2c3227906a7fc8b8f2745d04330d89d84564dbdf101e7da90e2969feca3"
       "armv8":
-        url: "https://github.com/foxglove/foxglove-sdk/releases/download/sdk%2Fv0.11.0/foxglove-v0.11.0-cpp-aarch64-pc-windows-msvc.zip"
-        sha256: "ed4c8675ab7b7ca3c52887cb7ad5069faf6bcaa0e1abccc04fa413b646f28f6a"
+        url: "https://github.com/foxglove/foxglove-sdk/releases/download/sdk%2Fv0.12.0/foxglove-v0.12.0-cpp-aarch64-pc-windows-msvc.zip"
+        sha256: "6672c67a423568be76b3bab07b210f10494f60e07ffa647c17211568e4ceba58"
     "Linux":
       "x86_64":
-        url: "https://github.com/foxglove/foxglove-sdk/releases/download/sdk%2Fv0.11.0/foxglove-v0.11.0-cpp-x86_64-unknown-linux-gnu.zip"
-        sha256: "da778da2de6688ba3a7ebcafb1813bfafa7cbc7a931d49f9fa90c77c538ca3a0"
+        url: "https://github.com/foxglove/foxglove-sdk/releases/download/sdk%2Fv0.12.0/foxglove-v0.12.0-cpp-x86_64-unknown-linux-gnu.zip"
+        sha256: "69256eb61239b7e933f4f21b8a610dfa0e012d586811d58f1f336d13f37553d3"
       "armv8":
-        url: "https://github.com/foxglove/foxglove-sdk/releases/download/sdk%2Fv0.11.0/foxglove-v0.11.0-cpp-aarch64-unknown-linux-gnu.zip"
-        sha256: "28807d1a02d4afe613afe1229b298ca1c48ee1d881c496686d93da08897b6a25"
+        url: "https://github.com/foxglove/foxglove-sdk/releases/download/sdk%2Fv0.12.0/foxglove-v0.12.0-cpp-aarch64-unknown-linux-gnu.zip"
+        sha256: "a9d0c6c8acc24b5aaaf6d8d57a39e0de9b6de4b09f52e0199a0bad88fca7e81c"
     "Macos":
       "x86_64":
-        url: "https://github.com/foxglove/foxglove-sdk/releases/download/sdk%2Fv0.11.0/foxglove-v0.11.0-cpp-x86_64-apple-darwin.zip"
-        sha256: "3a0c9a6ef445adcc6ecb8337b03b1e6c87b7423eaf156b896376619ea826fa30"
+        url: "https://github.com/foxglove/foxglove-sdk/releases/download/sdk%2Fv0.12.0/foxglove-v0.12.0-cpp-x86_64-apple-darwin.zip"
+        sha256: "ecc44e699da5e44423de169366ae0c8fa92e51bd85629c6ceed21238411cc72d"
       "armv8":
-        url: "https://github.com/foxglove/foxglove-sdk/releases/download/sdk%2Fv0.11.0/foxglove-v0.11.0-cpp-aarch64-apple-darwin.zip"
-        sha256: "4a928eb3bf53c695d6e4ae718592ddac463f138f262cb4fe85d74754df127dab"
+        url: "https://github.com/foxglove/foxglove-sdk/releases/download/sdk%2Fv0.12.0/foxglove-v0.12.0-cpp-aarch64-apple-darwin.zip"
+        sha256: "cca41a06722bef6fcc78457c5010f393edf95515fca24573bc086ffb40ddbef4"
