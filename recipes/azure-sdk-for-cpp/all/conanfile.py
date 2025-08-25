@@ -90,9 +90,16 @@ class AzureSDKForCppConan(ConanFile):
             tc.cache_variables["BUILD_TRANSPORT_CURL"] = not self.options.get_safe("win_http_transport")
             tc.cache_variables["BUILD_TRANSPORT_WINHTTP"] = self.options.get_safe("win_http_transport")
         else:
-            tc.cache_variables["BUILD_WINDOWS_UWP"] = "OFF"
+            if self.version < "1.16.0":
+                # in older versions, BUILD_WINDOWS_UWP disables DISABLE_AMQP
+                # on POSIX platforms...
+                tc.cache_variables["BUILD_WINDOWS_UWP"] = "ON"
+            else:
+                tc.cache_variables["BUILD_WINDOWS_UWP"] = "OFF"
+
             tc.cache_variables["BUILD_TRANSPORT_CURL"] = "ON"
             tc.cache_variables["BUILD_TRANSPORT_WINHTTP"] = "OFF"
+
 
         tc.cache_variables["BUILD_DOCUMENTATION"] = "OFF"
         tc.cache_variables["BUILD_SAMPLES"] = "OFF"
