@@ -36,6 +36,9 @@ class UvgRTPConan(ConanFile):
         if self.options.with_crypto:
             self.requires("cryptopp/[>=8.7.0 <9]")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.20]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
