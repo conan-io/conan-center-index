@@ -1,18 +1,14 @@
-import pathlib
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.apple import is_apple_os
-from conan.tools.files import apply_conandata_patches, get, copy, rm
+from conan.tools.microsoft import check_min_vs
+from conan.tools.files import get, copy, rm
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class PackageConan(ConanFile):
@@ -26,110 +22,59 @@ class PackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
+        "fPIC": [True, False],
         "with_python": [True, False],
     }
     default_options = {
         "shared": False,
+        "fPIC": True,
         "with_python": True,
     }
+    implements = ["auto_shared_fpic"]
     short_paths = True
-
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "9",
-            "clang": "12",
-            "apple-clang": "12",
-        }
-
-    def configure(self):
-        if self.options.with_python:
-            if is_msvc(self):
-                # Required to create import .lib for building extension module.
-                self.options["cpython"].shared = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("tomlplusplus/3.2.0")
+        self.requires("ada/2.7.4")
+        self.requires("pcre2/10.42")
+        self.requires("fmt/9.1.0", options={"header_only": True})
         if self.options.with_python:
-            # TODO: cpython requires ncurses/6.2 but no pre-built package exists.
-            self.requires("ncurses/6.3")
-            self.requires("cpython/3.9.7")
-            self.requires("pybind11/2.10.1")
+            self.requires("pybind11/2.10.4")
+            # self.requires("cpython/3.12.7")
 
     def validate(self):
-        if is_apple_os(self):
-            raise ConanInvalidConfiguration(
-                f"{self.ref} does not support MacOS at this time"
-            )
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-
-        if is_msvc(self) and not self.dependencies["cpython"].options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} requires cpython:shared=True when using MSVC compiler")
-
+        check_min_cppstd(self, 17)
         check_min_vs(self, 191)
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.25.3")
+        self.tool_requires("cmake/[>=3.27 <5]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = CMakeToolchain(self)
-
-        tc.variables["OPENASSETIO_ENABLE_TESTS"] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
-
-        tc.variables["OPENASSETIO_GLIBCXX_USE_CXX11_ABI"] = self.settings.get_safe("compiler.libcxx") == "libstdc++11"
-
-        tc.variables["OPENASSETIO_ENABLE_PYTHON"] = self.options.with_python
-        if self.options.with_python:
-            tc.variables["Python_EXECUTABLE"] = self._python_exe
-            if is_msvc(self):
-                tc.variables["Python_LIBRARY"] = self._python_windows_lib
-
-        tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
+
+        tc = CMakeToolchain(self)
+        tc.variables["OPENASSETIO_ENABLE_TESTS"] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
+        tc.variables["OPENASSETIO_GLIBCXX_USE_CXX11_ABI"] = self.settings.get_safe("compiler.libcxx") == "libstdc++11"
+        tc.variables["OPENASSETIO_ENABLE_PYTHON"] = self.options.with_python
+        if self.options.with_python:
+            tc.cache_variables["OPENASSETIO_ENABLE_PYTHON_STUBGEN"] = False
+        tc.generate()
+
         tc = VirtualBuildEnv(self)
         tc.generate()
 
-    @property
-    def _python_exe(self):
-        # TODO: update to V2 once cpython is updated
-        return pathlib.Path(self.deps_user_info["cpython"].python).as_posix()
-
-    @property
-    def _python_windows_lib(self):
-        pth = pathlib.Path(
-            self.dependencies["cpython"].package_folder,
-            self.dependencies["cpython"].cpp_info.components["embed"].libdirs[0],
-            self.dependencies["cpython"].cpp_info.components["embed"].libs[0])
-        pth = pth.with_suffix(".lib")
-        return pth.as_posix()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-
-    def package_id(self):
-        if self.options.with_python:
-            self.info.requires["cpython"].minor_mode()
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
@@ -154,7 +99,3 @@ class PackageConan(ConanFile):
             self.cpp_info.components["openassetio-python-bridge"].set_property("cmake_target_name", "OpenAssetIO::openassetio-python-bridge")
             self.cpp_info.components["openassetio-python-bridge"].requires = ["openassetio-core"]
             self.cpp_info.components["openassetio-python-bridge"].libs = ["openassetio-python"]
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "OpenAssetIO"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenAssetIO"
