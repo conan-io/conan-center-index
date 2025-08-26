@@ -53,7 +53,6 @@ class TreeGenConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
-        tc.variables["TREE_GEN_BUILD_TESTS"] = self._should_build_test
         tc.generate()
         env = VirtualBuildEnv(self)
         env.generate()
