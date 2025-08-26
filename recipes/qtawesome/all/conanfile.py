@@ -88,3 +88,4 @@ class QtAwesomeConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["QtAwesome"]
+        self.cpp_info.includedirs = [os.path.join(self.package_folder, "include", "QtAwesome")]
