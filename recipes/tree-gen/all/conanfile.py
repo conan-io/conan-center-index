@@ -3,7 +3,6 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get
 
 required_conan_version = ">=2.1"
@@ -39,8 +38,12 @@ class TreeGenConan(ConanFile):
             self.tool_requires("flex/2.6.4")
             self.tool_requires("bison/3.8.2")
 
-    def validate(self):
+    def validate_build(self):
         check_min_cppstd(self, 17)
+
+    def validate(self):
+        if self.context == "host":
+            check_min_cppstd(self, 17)
 
     def requirements(self):
         self.requires("fmt/11.0.2", transitive_headers=True)
@@ -54,8 +57,6 @@ class TreeGenConan(ConanFile):
         deps.generate()
         tc = CMakeToolchain(self)
         tc.generate()
-        env = VirtualBuildEnv(self)
-        env.generate()
 
     def build(self):
         cmake = CMake(self)
