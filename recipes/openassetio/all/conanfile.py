@@ -6,6 +6,7 @@ from conan.tools.files import get, copy, rm
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
+from conan.errors import ConanInvalidConfiguration
 
 
 required_conan_version = ">=2.0.9"
@@ -22,12 +23,10 @@ class PackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
         "with_python": [True, False],
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
         "with_python": True,
     }
     implements = ["auto_shared_fpic"]
@@ -43,14 +42,17 @@ class PackageConan(ConanFile):
         self.requires("fmt/9.1.0", options={"header_only": True})
         if self.options.with_python:
             self.requires("pybind11/2.10.4")
-            # self.requires("cpython/3.12.7")
 
     def validate(self):
         check_min_cppstd(self, 17)
         check_min_vs(self, 191)
+        if not self.options.shared and self.options.with_python:
+            raise ConanInvalidConfiguration("Building openassetio as static library with Python bindings is not supported.")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.27 <5]")
+        if self.options.with_python:
+            self.tool_requires("cpython/3.12.7")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -95,6 +97,13 @@ class PackageConan(ConanFile):
 
         self.cpp_info.components["openassetio-core"].set_property("cmake_target_name", "OpenAssetIO::openassetio-core")
         self.cpp_info.components["openassetio-core"].libs = ["openassetio"]
+        self.cpp_info.components["openassetio-core"].requires = [
+            "tomlplusplus::tomlplusplus",
+            "ada::ada",
+            "pcre2::pcre2",
+            "fmt::fmt-header-only",
+            "pybind11::pybind11",
+        ]
         if self.options.with_python:
             self.cpp_info.components["openassetio-python-bridge"].set_property("cmake_target_name", "OpenAssetIO::openassetio-python-bridge")
             self.cpp_info.components["openassetio-python-bridge"].requires = ["openassetio-core"]

@@ -5,16 +5,17 @@ from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "VirtualRunEnv"
-
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.27 <5]")
-
-    def requirements(self):
-        self.requires(self.tested_reference_str)
 
     def layout(self):
         cmake_layout(self)
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+        self.requires("cpython/3.12.7")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.27 <5]")
+        self.tool_requires("cpython/<host_version>")
 
     def generate(self):
         tc = CMakeDeps(self)
