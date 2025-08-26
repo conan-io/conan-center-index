@@ -1,15 +1,13 @@
 versions:
   "3.13.7":
-    folder: "minimal"
-  "3.12.7":
     folder: "all"
-  "3.12.2":
+  "3.12.11":
     folder: "all"
-  "3.11.9":
+  "3.11.12":
     folder: "all"
-  "3.10.14":
+  "3.10.17":
     folder: "all"
-  "3.9.19":
+  "3.9.21":
     folder: "all"
-  "3.8.19":
+  "3.8.20":
     folder: "all"
