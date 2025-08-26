@@ -24,13 +24,6 @@ next sections with more detail:
     * [Patches fields](#patches-fields)
       * [patch_file](#patch_file)
       * [patch_description](#patch_description)
-      * [patch_type](#patch_type)
-        * [official](#official)
-        * [vulnerability](#vulnerability)
-        * [portability](#portability)
-        * [conan](#conan)
-        * [bugfix](#bugfix)
-      * [patch_source](#patch_source)<!-- endToc -->
 
 ## sources
 
@@ -133,8 +126,8 @@ If you're using linux you can run `wget -q -O - url | sha256sum` to get the hash
 
 Sometimes sources provided by project require patching for various reasons. The `conandata.yml` file is the right place to indicate this information as well.
 
-> **Note**: Under our mission to ensure quality, patches undergo extra scrutiny. **Make sure to review** our
-> [Patching Policy](sources_and_patches.md#policy-about-patching) to understand the requirements before adding any.
+> **Note**: All patches introduced in PR will be merged under strict review by maintainers. 
+> Before adding a patch, **make sure to read** our [Policy on Patches](sources_and_patches.md#policy-about-patching)
 
 This section follows the same pattern as the `sources` above - one entry per version with a list of patches to apply.
 
@@ -143,14 +136,12 @@ patches:
   "1.2.0":
     - patch_file: "patches/1.2.0-002-link-core-with-find-library.patch"
       patch_description: "Link CoreFoundation and CoreServices with find_library"
-      patch_type: "portability"
-      patch_source: "https://a-url-to-a-pull-request-mail-list-topic-issue-or-question"
 ```
 
 ### Patches fields
 
-Theres are necessary for Conan to work as well as provide key information to reviewers and consumers which need to understand
-the reasoning behind patches.
+Only the `patch_file` field is required for the recipe to work properly.
+Additional information to motivate and justify the patch should be provided in the PR that introduces is. Optionally, consider adding a more thorough description as described below if deemed necessary.
 
 #### patch_file
 
@@ -160,77 +151,26 @@ Patch file that are committed to the ConanCenterIndex, go into the `patches` sub
 
 #### patch_description
 
-_Required_
+_Optional_
 
-`patch_description` is an arbitrary text describing the following aspects of the patch:
+`patch_description` is an arbitrary text describing what the patch does.
 
-* What does patch do (example - `add missing unistd.h header`)
-* Why is it necessary (example - `port to Android`)
-* How exactly does patch achieve that (example - `update configure.ac`)
-
-An example of a full patch description could be: `port to Android: update configure.ac adding missing unistd.h header`.
-
-#### patch_type
-
-_Recommended_
-
-The `patch_type` field specifies the type of the patch. In ConanCenterIndex we currently accept only several kind of patches:
-
-##### official
-
-`patch_type: official` indicates the patch is distributed with source code itself. usually, this happens if release managers
-failed to include a critical fix to the release, but it's too much burden for them to make a new release just because of that single fix.
-[example](https://www.boost.org/users/history/version_1_72_0.html) (notice the `coroutine` patch). The [`patch_source`](#patch_source)
-field shall point to the official distribution of the patch.
-
-##### vulnerability
-
-`patch_type: vulnerability`: Indicates a patch that addresses the security issue. The patch description should include the index of CVE
-or CWE the patch addresses. Usually, original library projects do new releases fixing vulnerabilities for this kind of issues, but in some
-cases they are either abandoned or inactive. The [`patch_source`](#patch_source) must be a commit to the official fix of the vulnerability.
-
-##### portability
-
-`patch_type: portability`: Indicates a patch that improves the portability of the library, e.g. adding supports of new architectures (ARM, Sparc, etc.), operating systems (FreeBSD, Android, etc.), compilers (Intel, MinGW, etc.), and other types of configurations which are not originally supported by the project.
-In such cases, the patch could be adopted from another package repository (e.g. MSYS packages, Debian packages, Homebrew, FreeBSD ports, etc.).
-Patches of this kind are preferred to be submitted upstream to the original project repository first, but it's not always possible.
-Some projects simply do not accept patches for platforms they don't have a build/test infrastructure, or maybe they are just either abandoned or inactive.
-
-##### conan
-
-`patch_type: conan`: Indicates a patch that is Conan-specific, patches of such kind are usually not welcomed upstream at all, because they provide zero value outside of Conan.
-Examples of such a patches may include modifications of build system files to allow dependencies provided by Conan instead of dependencies provided by projects themselves (e.g. as submodule or just 3rd-party sub-directory) or by the system package manager (rpm/deb).
-Such patches may contain variables and targets generated only by Conan, but not generated normally by the build system (e.g. `CONAN_INCLUDE_DIRS`).
-
-##### bugfix
-
-> **Warning**: These will undergo extra scrutiny during review as they may modify the source code.
-
-`patch_type: bugfix`: Indicates a patch that backports an existing bug fix from the newer release or master branch (or equivalent, such as main/develop/trunk/etc). The [`patch_source`](#patch_source) may be a pull request, or bug within the project's issue tracker.
-Backports are accepted only for bugs that break normal execution flow, never for feature requests.
-Usually, the following kind of problems are good candidates for backports:
-
-* Program doesn't start at all.
-* Crash (segmentation fault or access violation).
-* Hang up or deadlock.
-* Memory leak or resource leak in general.
-* Garbage output.
-* Abnormal termination without a crash (e.g. just exit code 1 at very beginning of the execution).
-* Data corruption.
-* Use of outdated or deprecated API or library.
+This is optional. Please **only** use it if the description adds relevant information that is not already present in the `patch_file` name.
 
 
-#### patch_source
+✅
+Example:
+```
+    - patch_file: "patches/8.9.0-0001-cve-2023-50980.patch"
+      patch_description: "Validate PolynomialMod2 coefficients (CVE-2023-50980)"
+```
 
-_Recommended_
+❌ Avoid the following, as it doesn't add any new information:
+```
+    - patch_file: "patches/1.1.2-0001-fix-windows-static.patch"
+      patch_description: "Fix windows static"
+```
 
-`patch_source` is the URL from where patch was taken from. https scheme is preferred, but other URLs (e.g. git/svn/hg) are also accepted if there is no alternative. Types of patch sources are:
-
-* Link to the public commit in project hosting like GitHub/GitLab/BitBucket/Savanha/SourceForge/etc.
-* Link to the Pull Request or equivalent (e.g. gerrit review).
-* Link to the bug tracker (such as JIRA, BugZilla, etc.).
-* Link to the mail list discussion.
-* Link to the patch itself in another repository (e.g. MSYS, Debian, etc.).
-
-For the `patch_type: portability` there might be no patch source matching the definition above. Although we encourage contributors to submit all such portability fixes upstream first, it's not always possible (e.g. for projects no longer maintained). In that case, a link to the Conan issue is a valid patch source (if there is no issue, you may [create](https://github.com/conan-io/conan-center-index/issues/new/choose) one).
-For the `patch_type: conan`, it doesn't make sense to submit patch upstream, so there will be no patch source.
+If a patch requires additional information, please:
+- Make sure new patches are properly explained and motivated in the PR description
+- Consider using the header preamble of the patch for a more thorough description (example [here](https://github.com/conan-io/conan-center-index/blob/52a6bf00682053907708e08a44c514f42bcc7d00/recipes/anyrpc/all/patches/0002-fix-shared-library-1.0.2.patch#L1-L6)) or to add a reference to a pre-existing upstream patch (example [here](https://github.com/conan-io/conan-center-index/blob/52a6bf00682053907708e08a44c514f42bcc7d00/recipes/civetweb/all/patches/0002-1.14-fix-option-handling.patch#L1-L8)).

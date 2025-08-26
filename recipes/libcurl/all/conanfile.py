@@ -168,7 +168,7 @@ class LibcurlConan(ConanFile):
         elif self.options.with_ssl == "mbedtls":
             self.requires("mbedtls/3.5.0")
         if self.options.with_nghttp2:
-            self.requires("libnghttp2/1.59.0")
+            self.requires("libnghttp2/[>=1.59.0 <2]")
         if self.options.with_libssh2:
             self.requires("libssh2/1.11.0")
         if self.options.with_zlib:
@@ -689,8 +689,10 @@ class LibcurlConan(ConanFile):
             self.cpp_info.components["curl"].system_libs = ["ws2_32", "bcrypt", "iphlpapi"]
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("wldap32")
-            if self.options.with_ssl in ("schannel", "libressl"):
+            if self.options.with_ssl == "libressl":
                 self.cpp_info.components["curl"].system_libs.append("crypt32")
+            if self.options.with_ssl == "schannel":
+                self.cpp_info.components["curl"].system_libs.extend(["crypt32", "secur32"])
         elif is_apple_os(self):
             self.cpp_info.components["curl"].frameworks.append("CoreFoundation")
             self.cpp_info.components["curl"].frameworks.append("CoreServices")

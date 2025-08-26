@@ -5,13 +5,13 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.env import Environment
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.files import copy, get
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, unix_path
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class NCursesConan(ConanFile):
@@ -50,15 +50,10 @@ class NCursesConan(ConanFile):
     }
 
     @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     def export_sources(self):
-        export_conandata_patches(self)
         copy(self, "*.cmake", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
@@ -90,7 +85,7 @@ class NCursesConan(ConanFile):
                 self.requires("naive-tsearch/0.1.1")
 
     def validate(self):
-        if cross_building(self) and ("arm" in str(self.settings.arch) or "arm" in str(self._settings_build.arch)):
+        if cross_building(self) and ("arm" in str(self.settings.arch) or "arm" in str(self.settings_build.arch)):
             # FIXME: Cannot build ncurses from x86_64 to armv8 (Apple M1).  Cross building from Linux/x86_64 to Mingw/x86_64 works flawless.
             # FIXME: Need access to environment of build profile to set build compiler (BUILD_CC/CC_FOR_BUILD)
             raise ConanInvalidConfiguration("Cross building to/from arm is (currently) not supported")
@@ -103,7 +98,7 @@ class NCursesConan(ConanFile):
                 raise ConanInvalidConfiguration("ticlib cannot be built separately as a shared library on Windows")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -176,6 +171,11 @@ class NCursesConan(ConanFile):
         if host:
             tc.configure_args.append(f"ac_cv_host={host}")
             tc.configure_args.append(f"ac_cv_target={host}")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) >= 15:
+            # FIXME: Workaround to allow building with with GCC15
+            # Upstream has proper but huge patches: https://invisible-island.net/ncurses/NEWS.html#index-t20241207
+            tc.extra_cflags.append("-std=gnu17")
+
         # Allow ncurses to set the include dir with an appropriate subdir
         tc.configure_args.remove("--includedir=${prefix}/include")
         tc.generate()
@@ -223,20 +223,15 @@ class NCursesConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
-
-    @property
-    def _major_version(self):
-        return Version(self.version).major
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
-        os.unlink(os.path.join(self.package_folder, "bin", f"ncurses{self._suffix}{self._major_version}-config"))
+        os.unlink(os.path.join(self.package_folder, "bin", f"ncurses{self._suffix}{Version(self.version).major}-config"))
         copy(self, "*.cmake",
              src=os.path.join(self.export_sources_folder, "cmake"),
              dst=os.path.join(self.package_folder, self._module_subfolder))
@@ -330,11 +325,3 @@ class NCursesConan(ConanFile):
         self.buildenv_info.define_path("TERMINFO", terminfo)
         self.runenv_info.define_path("TERMINFO", terminfo)
         self.conf_info.define("user.ncurses:lib_suffix", self._lib_suffix)
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        self.cpp_info.names["cmake_find_package"] = "Curses"
-        self.cpp_info.names["cmake_find_package_multi"] = "Curses"
-        self.cpp_info.components["libcurses"].build_modules["cmake_find_package"] = [module_rel_path]
-        self.cpp_info.components["libcurses"].build_modules["cmake_find_package_multi"] = [module_rel_path]
-        self.env_info.TERMINFO = terminfo
-        self.user_info.lib_suffix = self._lib_suffix
