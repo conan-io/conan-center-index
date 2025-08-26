@@ -42,8 +42,6 @@ dependencies:
   - context
   cobalt_io:
   - cobalt
-  cobalt_io_ssl:
-  - cobalt
   container: []
   context: []
   contract:
@@ -116,6 +114,7 @@ dependencies:
   - test
   process:
   - filesystem
+  - context
   program_options: []
   python: []
   random: []
@@ -170,8 +169,6 @@ libs:
   - boost_cobalt
   cobalt_io:
   - boost_cobalt_io
-  cobalt_io_ssl:
-  - boost_cobalt_io_ssl
   container:
   - boost_container
   context:
@@ -278,6 +275,7 @@ requirements:
   - zlib
   - zstd
   locale:
+  - iconv
   - icu
   python:
   - python
