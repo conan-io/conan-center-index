@@ -1,22 +1,22 @@
 sources:
   "6.3.0":
     url:
-      - "https://ftpmirror.gnu.org/gnu/gmp/gmp-6.3.0.tar.gz"
-      - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.gz"
+      - "https://ftpmirror.gnu.org/gnu/gmp/gmp-6.3.0.tar.bz2"
+      - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.bz2"
       - "https://gmplib.org/download/gmp/gmp-6.3.0.tar.bz2"
       - "https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.bz2"
     sha256: "ac28211a7cfb609bae2e2c8d6058d66c8fe96434f740cf6fe2e47b000d1c20cb"
   "6.2.1":
     url:
-      - "https://ftpmirror.gnu.org/gnu/gmp/gmp-6.2.1.tar.gz"
-      - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.gz"
+      - "https://ftpmirror.gnu.org/gnu/gmp/gmp-6.2.1.tar.bz2"
+      - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.bz2"
       - "https://gmplib.org/download/gmp/gmp-6.2.1.tar.bz2"
       - "https://ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.bz2"
     sha256: "eae9326beb4158c386e39a356818031bd28f3124cf915f8c5b1dc4c7a36b4d7c"
   "6.1.2":
     url:
-      - "https://ftpmirror.gnu.org/gnu/gmp/gmp-6.1.2.tar.gz"
-      - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.gz"
+      - "https://ftpmirror.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2"
+      - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2"
       - "https://gmplib.org/download/gmp/gmp-6.1.2.tar.bz2"
       - "https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2"
     sha256: "5275bb04f4863a13516b2f39392ac5e272f5e1bb8057b18aec1c9b79d73d8fb2"
