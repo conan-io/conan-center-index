@@ -35,14 +35,17 @@ class IntelDfpConan(ConanFile):
         "global_exception": False
     }
 
-    implements = ["auto_shared_fpic"]
     languages = "C"
 
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, "CMakeLists.txt", self.recipe_folder,
              dst=self.export_sources_folder)
-    
+
+    def configure(self):
+        if self.settings.compiler == "msvc":
+            self.options.rm_safe("fPIC")
+
     def validate(self):
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration("Recipe does not currently support Macos, PR welcomed")
