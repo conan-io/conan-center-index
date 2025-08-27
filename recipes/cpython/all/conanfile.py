@@ -12,7 +12,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuildDeps, MSBuildToolchain, MSBuild, is_msvc, is_msvc_static_runtime, msvc_runtime_flag, msvs_toolset
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.1"
 
 
 class CPythonConan(ConanFile):
@@ -110,20 +110,23 @@ class CPythonConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
             self.requires("expat/[>=2.6.2 <3]")
             self.requires("libffi/3.4.4")
-            if Version(self.version) < "3.10" or is_apple_os(self):
+            if Version(self.version) < "3.10": # or is_apple_os(self):
                 # FIXME: mpdecimal > 2.5.0 on MacOS causes the _decimal module to not be importable
                 self.requires("mpdecimal/2.5.0")
-            else:
+            elif Version(self.version) < "3.13":
                 self.requires("mpdecimal/2.5.1")
+            else:
+                self.requires("mpdecimal/4.0.0")
         if self.settings.os != "Windows":
             if not is_apple_os(self):
                 self.requires("util-linux-libuuid/2.39.2")
-            # In <3.9 and lower patch versions of 3.9/10/11, crypt.h was exposed in Python.h
-            # This was removed in 3.11 and backported: https://github.com/python/cpython/issues/88914
-            # For the sake of this recipe, we only have later patch versions, so this version check
-            # may be slightly inaccurate if a lower patch version is desired.
-            transitive_crypt = Version(self.version) < "3.9"
-            self.requires("libxcrypt/4.4.36", transitive_headers=transitive_crypt, transitive_libs=transitive_crypt)
+            if Version(self.version) < "3.13":
+                # In <3.9 and lower patch versions of 3.9/10/11, crypt.h was exposed in Python.h
+                # This was removed in 3.11 and backported: https://github.com/python/cpython/issues/88914
+                # For the sake of this recipe, we only have later patch versions, so this version check
+                # may be slightly inaccurate if a lower patch version is desired.
+                transitive_crypt = Version(self.version) < "3.9"
+                self.requires("libxcrypt/4.4.36", transitive_headers=transitive_crypt, transitive_libs=transitive_crypt)
         if self.options.get_safe("with_bz2"):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_gdbm", False):
@@ -298,20 +301,31 @@ class CPythonConan(ConanFile):
             replace_in_file(self, self._msvc_project_path("_ctypes"), '<Import Project="libffi.props" />', "")
             if Version(self.version) < "3.11":
                 # Don't add this define, it should be added conditionally by the libffi package
-                replace_in_file(self, self._msvc_project_path("_ctypes"), "FFI_BUILDING;", "")
+                # Instead, add this define to fix duplicate symbols (goes along with the ffi patches)
+                # See https://github.com/python/cpython/commit/38f331d4656394ae0f425568e26790ace778e076#diff-6f6b7f83e2fb49775efdfa41b4aa4f8fadcf71f43c4f3bcf9f37743acafd3fdfR97
+                replace_in_file(self, self._msvc_project_path("_ctypes"), "FFI_BUILDING;", "USING_MALLOC_CLOSURE_DOT_C=1;")
 
         # Don't import vendored openssl
         replace_in_file(self, self._msvc_project_path("_hashlib"), '<Import Project="openssl.props" />', "")
         replace_in_file(self, self._msvc_project_path("_ssl"), '<Import Project="openssl.props" />', "")
 
         # For mpdecimal, we need to remove all headers and all c files *except* the main module file, _decimal.c
-        self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\.*\.h.*', "")
-        self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\libmpdec\\.*\.c.*', "")
+        if Version(self.version) < "3.13":
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\.*\.h.*', "")
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\libmpdec\\.*\.c.*', "")
+            # Remove extra include directory
+            replace_in_file(self, self._msvc_project_path("_decimal"), r"..\Modules\_decimal\libmpdec;", "")
+        else:
+            # https://github.com/python/cpython/commit/849e0716d378d6f9f724d1b3c386f6613d52a49d
+            # changed _decimal.vcxproj enough that we need different patching code.
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\windows\\.*\.h.*', "")
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\$\(mpdecimalDir\)\\libmpdec\\.*\.h.*', "")
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\$\(mpdecimalDir\)\\libmpdec\\.*\.c.*', "")
+            replace_in_file(self, self._msvc_project_path("_decimal"), r"..\Modules\_decimal\windows;$(mpdecimalDir)\libmpdec;", "")
+
         # There is also an assembly file with a complicated build step as part of the mpdecimal build
         replace_in_file(self, self._msvc_project_path("_decimal"), "<CustomBuild", "<!--<CustomBuild")
         replace_in_file(self, self._msvc_project_path("_decimal"), "</CustomBuild>", "</CustomBuild>-->")
-        # Remove extra include directory
-        replace_in_file(self, self._msvc_project_path("_decimal"), r"..\Modules\_decimal\libmpdec;", "")
 
         # Don't include vendored sqlite3
         replace_in_file(self, self._msvc_project_path("_sqlite3"),
@@ -372,10 +386,11 @@ class CPythonConan(ConanFile):
                             "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"$(Configuration) == 'Debug' or $(Configuration) == 'Release'\"",
                             "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"False\"")
 
-        # Remove vendored openssl file
-        replace_in_file(self, self._msvc_project_path("_ssl"),
-                        r'<ClCompile Include="$(opensslIncludeDir)\applink.c">',
-                        r'<ClCompile Include="$(opensslIncludeDir)\applink.c" Condition="False">')
+        if Version(self.version) < "3.12.11":
+            # Remove vendored openssl file
+            replace_in_file(self, self._msvc_project_path("_ssl"),
+                            r'<ClCompile Include="$(opensslIncludeDir)\applink.c">',
+                            r'<ClCompile Include="$(opensslIncludeDir)\applink.c" Condition="False">')
 
         self._inject_conan_props_file("_bz2", "bzip2", self.options.get_safe("with_bz2"))
         self._inject_conan_props_file("_elementtree", "expat", self._supports_modules)
@@ -578,6 +593,7 @@ class CPythonConan(ConanFile):
             "--include-pip",
             "--include-venv",
             "--include-dev",
+            "--include-stable",
         ]
         if self.options.with_tkinter:
             layout_args.append("--include-tcltk")
@@ -816,7 +832,7 @@ class CPythonConan(ConanFile):
                     ["pathcch", "shlwapi", "version", "ws2_32"]
                 )
         self.cpp_info.components["python"].requires = ["zlib::zlib"]
-        if self.settings.os != "Windows":
+        if self.settings.os != "Windows" and Version(self.version) < "3.13":
             self.cpp_info.components["python"].requires.append("libxcrypt::libxcrypt")
         self.cpp_info.components["python"].set_property(
             "pkg_config_name", f"python-{py_version.major}.{py_version.minor}"
@@ -857,7 +873,8 @@ class CPythonConan(ConanFile):
             if self.settings.os != "Windows":
                 if not is_apple_os(self):
                     self.cpp_info.components["_hidden"].requires.append("util-linux-libuuid::util-linux-libuuid")
-                self.cpp_info.components["_hidden"].requires.append("libxcrypt::libxcrypt")
+                if Version(self.version) < "3.13":
+                    self.cpp_info.components["_hidden"].requires.append("libxcrypt::libxcrypt")
             if self.options.with_bz2:
                 self.cpp_info.components["_hidden"].requires.append("bzip2::bzip2")
             if self.options.get_safe("with_gdbm", False):
