@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 13330ea3..9b86072d 100644
+index 9877cd70..91834211 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -47,7 +47,7 @@ if (WITH_ZLIB)
@@ -56,40 +56,15 @@ index 8765dc6e..f454d325 100644
  if (CMAKE_USE_PTHREADS_INIT)
      set(HAVE_PTHREAD 1)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 199acbd9..3e715a96 100644
+index e0243bb0..d17f6b59 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -12,27 +12,13 @@ if (TARGET OpenSSL::Crypto)
-   list(APPEND LIBSSH_LINK_LIBRARIES OpenSSL::Crypto)
+@@ -18,7 +18,7 @@ if (TARGET MbedTLS::mbedcrypto)
  endif ()
  
--if (MBEDTLS_CRYPTO_LIBRARY)
--    set(LIBSSH_PRIVATE_INCLUDE_DIRS
--      ${LIBSSH_PRIVATE_INCLUDE_DIRS}
--      ${MBEDTLS_INCLUDE_DIR}
--    )
--  set(LIBSSH_LINK_LIBRARIES
--    ${LIBSSH_LINK_LIBRARIES}
--    ${MBEDTLS_CRYPTO_LIBRARY}
--  )
--endif (MBEDTLS_CRYPTO_LIBRARY)
--
--if (GCRYPT_LIBRARIES)
--  set(LIBSSH_PRIVATE_INCLUDE_DIRS
--    ${LIBSSH_PRIVATE_INCLUDE_DIRS}
--    ${GCRYPT_INCLUDE_DIR}
--  )
-+if (TARGET MbedTLS::mbedcrypto)
-+  list(APPEND LIBSSH_LINK_LIBRARIES MbedTLS::mbedcrypto)
-+endif ()
- 
--  set(LIBSSH_LINK_LIBRARIES
--    ${LIBSSH_LINK_LIBRARIES}
--    ${GCRYPT_LIBRARIES})
--endif()
-+if (TARGET libgcrypt::libgcrypt)
+ if (TARGET libgcrypt::libgcrypt)
+-  list(APPEND LIBSSH_LINK_LIBRARIES ${GCRYPT_LIBRARIES})
 +  list(APPEND LIBSSH_LINK_LIBRARIES libgcrypt::libgcrypt)
-+endif ()
+ endif ()
  
  if (WITH_ZLIB)
-   list(APPEND LIBSSH_LINK_LIBRARIES ZLIB::ZLIB)
