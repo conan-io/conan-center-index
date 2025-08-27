@@ -39,6 +39,9 @@ class XkeyboardConfigConan(ConanFile):
         pacman = package_manager.PacMan(self)
         pacman.install(["xkeyboard-config"], update=True, check=True)
 
+        apk = package_manager.Apk(self)
+        apk.install(["xkeyboard-config-dev"], update=True, check=True)
+
         package_manager.Pkg(self).install(["xkeyboard-config"], update=True, check=True)
 
     def package_info(self):
