@@ -840,8 +840,8 @@ class BoostConan(ConanFile):
             del self.info.options.python_executable  # PATH to the interpreter is not important, only version matters
             if self.info.options.without_python:
                 del self.info.options.python_version
-        if Version(self.version) >= "1.89.0":
-            del self.info.options.system_use_utf8
+            if Version(self.version) >= "1.89.0":
+                del self.info.options.system_use_utf8
 
     def build_requirements(self):
         if not self.options.header_only:
@@ -1382,7 +1382,7 @@ class BoostConan(ConanFile):
             flags.append("define=BOOST_FILESYSTEM_NO_DEPRECATED=1")
         if self.options.filesystem_use_std_fs:
             flags.append("define=BOOST_DLL_USE_STD_FS=1")
-        if self.options.system_use_utf8 and Version(self.version) < "1.89.0":
+        if self.options.system_use_utf8:
             flags.append("define=BOOST_SYSTEM_USE_UTF8=1")
         if self.options.segmented_stacks:
             flags.extend(["segmented-stacks=on",
