@@ -52,15 +52,17 @@ class ReductCppConan(ConanFile):
         return self.options.get_safe("with_chrono", True)
 
     def requirements(self):
-        self.requires("fmt/11.0.2", transitive_headers=True, transitive_libs=True)
-        self.requires("cpp-httplib/0.14.1")
-        self.requires("nlohmann_json/3.11.3")
         self.requires(
-            "openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True
+            "fmt/[>=11.0.2 <12]", transitive_headers=True, transitive_libs=True
         )
-        self.requires("concurrentqueue/1.0.4")
+        self.requires("cpp-httplib/[>=0.16.0 <1]")
+        self.requires("nlohmann_json/[>=3.11.3 <4]")
+        self.requires(
+            "openssl/[>=3.0.13 <4]", transitive_headers=True, transitive_libs=True
+        )
+        self.requires("concurrentqueue/[>=1.0.4 <4]")
         if not self._with_chrono:
-            self.requires("date/3.0.1")
+            self.requires("date/[>=3.0.1 <4]")
 
     def validate(self):
         check_min_cppstd(self, 20)
