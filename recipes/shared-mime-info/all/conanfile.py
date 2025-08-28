@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.meson import Meson, MesonToolchain
 from conan.errors import ConanInvalidConfiguration
 
@@ -29,15 +28,18 @@ class SharedMimeInfoConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/1.4.0")
+        self.tool_requires("libxml2/[>=2.12.5 <3]")
+        self.tool_requires("gettext/0.22.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = MesonToolchain(self)
+        tc.project_options['update-mimedb'] = "false"
+        tc.project_options['build-tools'] = "false"
+        tc.project_options['build-translations'] = "false"
+        tc.project_options['build-tests'] = "false"
         tc.generate()
 
     def build(self):
