@@ -32,7 +32,7 @@ class MinizipNgConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "mz_compatibility": False,
+        "mz_compatibility": True,
         "with_zlib": True,
         "with_bzip2": True,
         "with_lzma": True,
