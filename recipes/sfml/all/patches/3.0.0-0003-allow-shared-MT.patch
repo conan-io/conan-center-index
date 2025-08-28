@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8a11523e..889e4372 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -139,7 +139,7 @@ if(SFML_OS_WINDOWS)
+     sfml_set_option(SFML_USE_STATIC_STD_LIBS OFF BOOL "ON to statically link to the standard libraries, OFF to use them as DLLs")
+ 
+     # the following combination of flags is not valid
+-    if(BUILD_SHARED_LIBS AND SFML_USE_STATIC_STD_LIBS)
++    if(0)
+         message(FATAL_ERROR "BUILD_SHARED_LIBS and SFML_USE_STATIC_STD_LIBS cannot be used together")
+     endif()
+ 
