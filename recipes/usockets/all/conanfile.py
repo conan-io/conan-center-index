@@ -191,6 +191,13 @@ class UsocketsConan(ConanFile):
                     # Otherwise AutotoolsDeps should suffice
                     libuv_includes = self.dependencies["libuv"].cpp_info.aggregated_components().includedirs
                     env.append("CPPFLAGS", " ".join([f"-I{unix_path(self, p)}" for p in libuv_includes]))
+
+                if self.options.with_ssl != False:
+                    # Workaround for: https://github.com/conan-io/conan/issues/12784
+                    # Otherwise AutotoolsDeps should suffice
+                    libssl_includes = self.dependencies[str(self.options.with_ssl)].cpp_info.aggregated_components().includedirs
+                    env.append("CPPFLAGS", " ".join([f"-I{unix_path(self, p)}" for p in libssl_includes]))
+
             tc.generate(env)
 
             deps = AutotoolsDeps(self)
