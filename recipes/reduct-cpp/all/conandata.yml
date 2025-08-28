@@ -1,8 +1,4 @@
 sources:
-  "1.15.0":
-    url: "https://github.com/reductstore/reduct-cpp/archive/refs/tags/v1.15.0.tar.gz"
-    sha256: "120caa687389b6a0f9d05b1d1b8670640e63aaeaf2463714427d7cd353220b86"
-patches:
-  "1.15.0":
-    - patch_file: "patches/0001-1.15.0-disable-conan-lookup.patch"
-      patch_type: "conan"
+  "1.16.0":
+    url: "https://github.com/reductstore/reduct-cpp/archive/refs/tags/v1.16.0.tar.gz"
+    sha256: "5d00de16f6a4ab46d2ec0672307dab62f9de5f1af4cabeb4303922789e19b058"
