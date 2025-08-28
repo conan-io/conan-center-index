@@ -1,0 +1,4 @@
+sources:
+  "0.0.1.2":
+    url: "https://github.com/little-bear-labs/ipfs-chromium/archive/refs/tags/0.0.1.2.tar.gz"
+    sha256: "8cd28a3cda7145b9f9d0dd1ae8bcda7e505c3d9eda59c23846916a2d8d2d2b6d"
