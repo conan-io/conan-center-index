@@ -4,7 +4,13 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import (
+    apply_conandata_patches,
+    copy,
+    export_conandata_patches,
+    get,
+    rmdir,
+)
 
 required_conan_version = ">=2"
 
@@ -45,7 +51,9 @@ class ReductCppConan(ConanFile):
         self.requires("fmt/11.0.2", transitive_headers=True, transitive_libs=True)
         self.requires("cpp-httplib/0.14.1")
         self.requires("nlohmann_json/3.11.3")
-        self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
+        self.requires(
+            "openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True
+        )
         self.requires("concurrentqueue/1.0.4")
         if not self._with_chrono:
             self.requires("date/3.0.1")
@@ -66,11 +74,11 @@ class ReductCppConan(ConanFile):
             if not date.options.header_only:
                 raise ConanInvalidConfiguration("date must be built as header-only")
 
-        if self.settings.os != "Windows" and self.settings.get_safe("compiler") == "gcc":
-            if (
-                self.settings.get_safe("compiler.version") < "14"
-                and self._with_chrono
-            ):
+        if (
+            self.settings.os != "Windows"
+            and self.settings.get_safe("compiler") == "gcc"
+        ):
+            if self.settings.get_safe("compiler.version") < "14" and self._with_chrono:
                 raise ConanInvalidConfiguration(
                     "ReductCpp with chrono requires GCC 14 or higher. "
                 )
