@@ -1,0 +1,25 @@
+From 71e5f301a86ab94e0d3b77fb9ba0f62f071ca7b9 Mon Sep 17 00:00:00 2001
+From: Tomas Krupa <tomas.krupa@innovatrics.com>
+Date: Sun, 30 Mar 2025 23:10:47 +0200
+Subject: [PATCH 2/2] added support for older qt 5
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 241432b..cc09cb2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4,7 +4,7 @@ project (QtMockWebServer)
+ find_package(QT NAMES Qt6 Qt5 COMPONENTS Core QUIET)
+ find_package(Qt6 COMPONENTS Core Network Test QUIET)
+ if (NOT Qt6_FOUND)
+-    find_package(Qt5 5.15 COMPONENTS Core Network Test REQUIRED)
++    find_package(Qt5 COMPONENTS Core Network Test REQUIRED)
+ endif()
+ 
+ # All build libraries are moved to this directory
+-- 
+2.34.1
+
