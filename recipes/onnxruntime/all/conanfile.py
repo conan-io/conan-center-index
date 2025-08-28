@@ -7,7 +7,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.env import VirtualBuildEnv
 import os
-import sys
 
 
 required_conan_version = ">=1.53.0"
@@ -101,9 +100,9 @@ class OnnxRuntimeConan(ConanFile):
             self.requires("cpuinfo/cci.20231129")
         else:
             self.requires("cpuinfo/cci.20220618")  # Newer versions are not compatible
-        if self.settings.os != "Windows":
+        if self.settings.os != "Windows" and Version(self.version) < "1.22.0":
             self.requires("nsync/1.26.0")
-        else:
+        if self.settings.os == "Windows":
             self.requires("wil/1.0.240803.1")
         if self.options.with_xnnpack:
             if Version(self.version) >= "1.17.0":
@@ -127,17 +126,15 @@ class OnnxRuntimeConan(ConanFile):
             )
 
     def validate_build(self):
-        if self.version >= Version("1.15.0") and self.options.shared and sys.version_info[:2] < (3, 8):
-            # https://github.com/microsoft/onnxruntime/blob/638146b79ea52598ece514704d3f592c10fab2f1/cmake/CMakeLists.txt#LL500C12-L500C12
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires Python 3.8+ to be built as shared."
-            )
         if self.settings.os == "Windows" and self.dependencies["abseil"].options.shared:
             raise ConanInvalidConfiguration("Using abseil shared on Windows leads to link errors.")
 
     def build_requirements(self):
         # Required by upstream https://github.com/microsoft/onnxruntime/blob/v1.16.1/cmake/CMakeLists.txt#L5
         self.tool_requires("cmake/[>=3.26 <4]")
+        if self.version >= Version("1.15.0") and self.options.shared:
+            # https://github.com/microsoft/onnxruntime/blob/f217402897f40ebba457e2421bc0a4702771968e/cmake/CMakeLists.txt#L687
+            self.tool_requires("cpython/[>=3.10 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -146,9 +143,6 @@ class OnnxRuntimeConan(ConanFile):
         tc = CMakeToolchain(self)
         # disable downloading dependencies to ensure conan ones are used
         tc.variables["FETCHCONTENT_FULLY_DISCONNECTED"] = True
-        if self.version >= Version("1.15.0") and self.options.shared:
-            # Need to replace windows path separators with linux path separators to keep CMake from crashing
-            tc.variables["Python_EXECUTABLE"] = sys.executable.replace("\\", "/")
 
         tc.variables["onnxruntime_BUILD_SHARED_LIB"] = self.options.shared
         tc.variables["onnxruntime_USE_FULL_PROTOBUF"] = not self.dependencies["protobuf"].options.lite
@@ -193,10 +187,10 @@ class OnnxRuntimeConan(ConanFile):
         if Version(self.version) >= "15.0":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "CMakeLists.txt"),
                             "if (Git_FOUND)", "if (FALSE)")
-        if Version(self.version) >= "1.17":
+        if Version(self.version) >= "1.17" and Version(self.version) < "1.19":
             # https://github.com/microsoft/onnxruntime/commit/5bfca1dc576720627f3af8f65e25af408271079b
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "onnxruntime_providers_cuda.cmake"),
-                            'option(onnxruntime_NVCC_THREADS "Number of threads that NVCC can use for compilation." 1)', 
+                            'option(onnxruntime_NVCC_THREADS "Number of threads that NVCC can use for compilation." 1)',
                             'set(onnxruntime_NVCC_THREADS "1" CACHE STRING "Number of threads that NVCC can use for compilation.")')
 
     def build(self):
@@ -264,9 +258,9 @@ class OnnxRuntimeConan(ConanFile):
             "ms-gsl::ms-gsl",
             "cpuinfo::cpuinfo"
         ]
-        if self.settings.os != "Windows":
+        if self.settings.os != "Windows" and Version(self.version) < "1.22.0":
             self.cpp_info.requires.append("nsync::nsync")
-        else:
+        if self.settings.os == "Windows":
             self.cpp_info.requires.append("wil::wil")
         if self.options.with_xnnpack:
             self.cpp_info.requires.append("xnnpack::xnnpack")
