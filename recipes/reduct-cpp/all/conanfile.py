@@ -101,7 +101,6 @@ class ReductCppConan(ConanFile):
         tc = CMakeToolchain(self)
         if self._with_chrono:
             tc.cache_variables["REDUCT_CPP_USE_STD_CHRONO"] = True
-        tc.cache_variables["REDUCT_CPP_USE_CONAN"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
