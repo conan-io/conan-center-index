@@ -22,16 +22,20 @@ class ReductCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.reduct.store/docs/getting-started/with-cpp"
     topics = ("reduct-storage", "http-client", "http-api")
-    package_type = "static-library"
+    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
         "with_chrono": [True, False],
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
         "with_chrono": False,
     }
+
+    implements = ["auto_shared_fpic"]
 
     def config_options(self):
         if self.settings.os == "Windows":
