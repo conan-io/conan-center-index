@@ -11,13 +11,13 @@ sources:
 patches:
   "8.0.1":
     - patch_file: "patches/0002-fix-cmake-minimum-required-location-8.0.1.patch"
-      patch_description: "Fix cmake_minimum_required() position"
+      patch_description: "Fix cmake_minimum_required() position and CMake 4 support"
       patch_type: "backport"
       patch_source: "https://github.com/qhull/qhull/pull/120"
     - patch_file: "patches/0003-fix-cmake-8.0.x.patch"
   "8.0.0":
     - patch_file: "patches/0002-fix-cmake-minimum-required-location-8.0.0.patch"
-      patch_description: "Fix cmake_minimum_required() position"
+      patch_description: "Fix cmake_minimum_required() position and CMake 4 support"
       patch_type: "backport"
       patch_source: "https://github.com/qhull/qhull/pull/120"
     - patch_file: "patches/0003-fix-cmake-8.0.x.patch"
@@ -28,7 +28,7 @@ patches:
       patch_type: "backport"
       patch_source: "https://github.com/qhull/qhull/pull/49"
     - patch_file: "patches/0002-fix-cmake-minimum-required-location-7.3.2.patch"
-      patch_description: "Fix cmake_minimum_required() position"
+      patch_description: "Fix cmake_minimum_required() position and CMake 4 support"
       patch_type: "backport"
       patch_source: "https://github.com/qhull/qhull/pull/120"
     - patch_file: "patches/0003-fix-cmake-7.3.2.patch"

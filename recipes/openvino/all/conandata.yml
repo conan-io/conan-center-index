@@ -1,20 +1,23 @@
 sources:
-  "2025.0.0":
+  "2025.2.0":
     "openvino":
-      url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2025.0.0.tar.gz"
-      sha256: "d2cbff5a0ac1bc738c33ba103569f8daf20d3a17d3db94da11ae207ffb9e4395"
+      url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2025.2.0.tar.gz"
+      sha256: "15cd5c9beb320a8feadd18bcae40970608de154d5057277281dc53dd7023e383"
     "arm_compute":
-      url: "https://github.com/ARM-software/ComputeLibrary/archive/refs/tags/v24.09.tar.gz"
-      sha256: "49b8620f21cbbe49e825a131d9eacd548532646289b50e070b83860bd88087fe"
+      url: "https://github.com/ARM-software/ComputeLibrary/archive/refs/tags/v25.03.tar.gz"
+      sha256: "30f83cea6d338a0e33495c33c547b7b720027baff4c3eea66014709fdd52aaac"
+    "arm_kleidiai":
+      url: "https://github.com/ARM-software/kleidiai/archive/eaf63a6ae9a903fb4fa8a4d004a974995011f444.tar.gz"
+      sha256: "756fa3040ff23f78a4c3f4c1984a3814d78d302b0b5dc3f0b255322368aefc58"
     "onednn_cpu":
-      url: "https://github.com/openvinotoolkit/oneDNN/archive/1789b1e0ae441de15d793123003a900a35d1dc71.tar.gz"
-      sha256: "551070032ce5d2ed6adc2216e9b061782da097b1ce28c403eaa16b230b09f6a7"
+      url: "https://github.com/openvinotoolkit/oneDNN/archive/793dd02883483385fb7ee3b1af1e4273ce833444.tar.gz"
+      sha256: "f6ae708f5b78361cab2c544a976d66bd7ccd74b4b6df7710d4d86a383f6916f9"
     "mlas":
       url: "https://github.com/openvinotoolkit/mlas/archive/d1bc25ec4660cddd87804fcf03b2411b5dfb2e94.tar.gz"
       sha256: "0a44fbfd4b13e8609d66ddac4b11a27c90c1074cde5244c91ad197901666004c"
     "onednn_gpu":
-      url: "https://github.com/oneapi-src/oneDNN/archive/706a3ce3b391cf1d8a904a8efa981c70078719eb.tar.gz"
-      sha256: "1a656eb32f383cef82b703c355d762b2162f5aaa7b6f54b2c1e47995a9cee1f2"
+      url: "https://github.com/oneapi-src/oneDNN/archive/c7d59a12849295c8bdf6401b8ea3968f4346ee0c.tar.gz"
+      sha256: "05bc693ee788768f18397bd235ad40f55261e4336a683469a50072bfddbf9f98"
   "2024.6.0":
     "openvino":
       url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2024.6.0.tar.gz"
@@ -47,3 +50,6 @@ sources:
     "onednn_gpu":
       url: "https://github.com/oneapi-src/oneDNN/archive/cb77937ffcf5e83b5d1cf2940c94e8b508d8f7b4.tar.gz"
       sha256: "2ca304c033786aa5c3ec1ec6f8fc3936ae5c6874d5964b586311da11bec2ec4a"
+patches:
+  "2025.2.0":
+    - patch_file: "patches/2025.2.0-dont-disable-macos-adhoc-codesign.patch"
