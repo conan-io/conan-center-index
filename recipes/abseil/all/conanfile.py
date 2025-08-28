@@ -45,7 +45,8 @@ class AbseilConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def validate(self):
-        check_min_cppstd(self, 14)
+        minimum_cppstd = 17 if self.version >= Version("20250512.1") else 14
+        check_min_cppstd(self, minimum_cppstd)
 
         if self.options.shared and is_msvc(self) and Version(self.version) < "20230802.1":
             # upstream tries its best to export symbols, but it's broken for the moment
