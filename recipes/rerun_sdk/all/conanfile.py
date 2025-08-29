@@ -8,7 +8,8 @@ import os
 class Package(ConanFile):
     name = "rerun_sdk"
 
-    homepage = "https://github.com/rerun-io/rerun"
+    homepage = "https://rerun.io/"
+    url = "https://github.com/rerun-io/rerun"
     description = "Visualize streams of multimodal data. Free, fast, easy to use, and simple to integrate. Built in Rust."
     topics = ("visualization", "computer-vision", "robotics", "multimodal")
     license = ("Apache-2.0", "MIT")
