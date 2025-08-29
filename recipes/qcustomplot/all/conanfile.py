@@ -48,7 +48,7 @@ class QCustomPlotConan(ConanFile):
     def requirements(self):
         if Version(self.version) >= "2.0.0":
             # INFO: Public header qcustomplot.h includes QObject
-            self.requires("qt/[>=6.5 <7]", transitive_headers=True, options={"widgets": True, "gui": True})
+            self.requires("qt/[>=6.4.1 <7]", transitive_headers=True, options={"widgets": True, "gui": True})
         else:
             # INFO: Public header qcustomplot.h includes QObject
             self.requires("qt/[~5.15]", transitive_headers=True, options={"widgets": True, "gui": True})
