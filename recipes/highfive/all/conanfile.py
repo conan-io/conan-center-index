@@ -2,16 +2,17 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.54.0"
 
 class HighFiveConan(ConanFile):
     name = "highfive"
-    description = "HighFive is a modern header-only C++11 friendly interface for libhdf5."
+    description = "User-friendly, header-only, C++14 wrapper for HDF5."
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/BlueBrain/HighFive"
+    homepage = "https://github.com/highfive-devs/highfive"
     topics = ("hdf5", "hdf", "data", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
@@ -48,17 +49,22 @@ class HighFiveConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        check_min_cppstd(self, 11)
+        if Version(self.version) < "3.0.0":
+            check_min_cppstd(self, 11)
+        else:
+            check_min_cppstd(self, 14)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["USE_BOOST"] = self.options.with_boost
-        tc.cache_variables["USE_EIGEN"] = self.options.with_eigen
-        tc.cache_variables["USE_XTENSOR"] = self.options.with_xtensor
-        tc.cache_variables["USE_OPENCV"] = self.options.with_opencv
+        if Version(self.version) < "3.0.0":
+            tc.cache_variables["USE_BOOST"] = self.options.with_boost
+            tc.cache_variables["USE_EIGEN"] = self.options.with_eigen
+            tc.cache_variables["USE_XTENSOR"] = self.options.with_xtensor
+            tc.cache_variables["USE_OPENCV"] = self.options.with_opencv
+
         tc.cache_variables["HIGHFIVE_UNIT_TESTS"] = False
         tc.cache_variables["HIGHFIVE_EXAMPLES"] = False
         tc.cache_variables["HIGHFIVE_BUILD_DOCS"] = False
@@ -85,7 +91,11 @@ class HighFiveConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "HighFive")
-        self.cpp_info.set_property("cmake_target_name", "HighFive")
+        if Version(self.version) < "3.0.0":
+            self.cpp_info.set_property("cmake_target_name", "HighFive")
+        else:
+            self.cpp_info.set_property("cmake_target_name", "HighFive::HighFive")
+
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.requires = ["hdf5::hdf5"]
