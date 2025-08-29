@@ -30,7 +30,7 @@ class Libnetfilter_logConan(ConanFile):
         self.requires("libnfnetlink/1.0.2")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, verify=False)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
