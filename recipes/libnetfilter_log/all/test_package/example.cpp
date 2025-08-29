@@ -1,14 +1,13 @@
 #include <iostream>
 #include <cstdlib>
 #include <libnetfilter_log/libnetfilter_log.h>
+#include <libnetfilter_log/libipulog.h>
 
 int main() {
-    struct nflog_handle *nl = nflog_open();
-    if (nl == NULL) {
-        std::cerr << "nflog_open\n";
-        return EXIT_FAILURE;
-    }
-    nflog_close(nl);
+    std::cout << "IPU Log: " << ipulog_strerror(IPULOG_ERR_NONE) << std::endl;
+
+    (void*) nflog_open;
+    (void*) nflog_close;
 
     return EXIT_SUCCESS;
 }
