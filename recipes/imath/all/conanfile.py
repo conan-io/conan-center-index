@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, collect_libs
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -78,8 +78,7 @@ class ImathConan(ConanFile):
         imath_lib = self.cpp_info.components["imath_lib"]
         imath_lib.set_property("cmake_target_name", "Imath::Imath")
         imath_lib.set_property("pkg_config_name", "Imath")
-        version = Version(self.version)
-        imath_lib.libs = [f"Imath-{version.major}_{version.minor}"]
+        imath_lib.libs = collect_libs(self)
         imath_lib.requires = ["imath_config"]
         if self.settings.os == "Windows" and self.options.shared:
             imath_lib.defines.append("IMATH_DLL")
