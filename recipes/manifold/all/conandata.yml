@@ -1,0 +1,8 @@
+sources:
+  "3.2.1":
+    url: "https://github.com/elalish/manifold/archive/refs/tags/v3.2.1.tar.gz"
+    sha256: "c2fddb0f4b2289caff660b29677883f0324415a9901f8f2aed4c83851f994c13"
+patches:
+  "3.2.1":
+    - patch_file: "patches/3.2.1-add-missing-headers-to-compile-on-macos-with-clang.patch"
+      patch_source: "https://github.com/elalish/manifold/pull/1332"

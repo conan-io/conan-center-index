@@ -18,7 +18,7 @@ class LibsodiumConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://doc.libsodium.org/"
     topics = "encryption", "signature", "hashing"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -92,9 +92,10 @@ class LibsodiumConan(ConanFile):
             if self._is_mingw:
                 tc.extra_ldflags.append("-lssp")
             if self.settings.os == "Emscripten":
-                # FIXME: this is an old comment/test, has not been re-tested with conan2 upgrade
-                self.output.warn("os=Emscripten is not tested/supported by this recipe")
-                # FIXME: ./dist-build/emscripten.sh does not respect options of this recipe
+                tc.configure_args.append("--enable-minimal")
+                tc.configure_args.append("--without-pthreads")
+                tc.configure_args.append("--disable-ssp")
+                tc.configure_args.append("--disable-asm")
             tc.generate()
 
     @property

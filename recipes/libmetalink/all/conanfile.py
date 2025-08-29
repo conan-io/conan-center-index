@@ -43,6 +43,7 @@ class LibmetalinkConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        self.output.warning("libmetalink does not appear to be actively maintained")
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
@@ -60,6 +61,9 @@ class LibmetalinkConan(ConanFile):
     def validate(self):
         if is_msvc(self):
             raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio yet")
+
+        if self.options.xml_backend == "libxml2":
+            raise ConanInvalidConfiguration("please use expat as the xml_backend, libxml2 never worked for this recipe")
 
     def build_requirements(self):
         self.tool_requires("gnu-config/cci.20210814")

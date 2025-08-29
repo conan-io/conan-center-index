@@ -1,0 +1,4 @@
+sources:
+  "0.0.0.cci20250710":
+    url: "https://raw.githubusercontent.com/FFmpeg/gas-preprocessor/a120373ba30de06675d8c47617b315beef16c88e/gas-preprocessor.pl"
+    sha256: "0c56e6f495bf49b58c71bf755837ebcac7b537d9489c2bab49255d4d7f4448ae"

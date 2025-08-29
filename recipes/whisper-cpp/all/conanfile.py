@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm
 from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
@@ -192,15 +192,22 @@ class WhisperCppConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rm(self, "*.cmake", self.package_folder, recursive=True)
+        rm(self, "*.pc", self.package_folder, recursive=True)
         copy(self, "*", os.path.join(self.source_folder, "models"), os.path.join(self.package_folder, "res", "models"))
 
     def package_info(self):
         self.cpp_info.libs = ["whisper"]
         if Version(self.version) >= "1.7.0":
             self.cpp_info.libs.append("ggml")
+        if Version(self.version) >= "1.7.3":
+            self.cpp_info.libs.extend(["ggml-base", "ggml-cpu"])
         self.cpp_info.resdirs = ["res"]
-        self.cpp_info.libdirs = ["lib", "lib/static"]
+        if Version(self.version) < "1.7.0":
+            self.cpp_info.libdirs = ["lib", "lib/static"]
 
+        if self.options.get_safe("with_blas"):
+            self.cpp_info.requires = ["ggml-blas"]
         if self.options.get_safe("with_openvino"):
             self.cpp_info.requires = ["openvino::Runtime"]
 
@@ -211,5 +218,7 @@ class WhisperCppConan(ConanFile):
                 self.cpp_info.frameworks.append("CoreML")
             if self.options.get_safe("metal"):
                 self.cpp_info.frameworks.extend(["CoreFoundation", "Foundation", "Metal", "MetalKit"])
+                if Version(self.version) >= "1.7.3":
+                    self.cpp_info.libs.extend(["ggml-metal", "ggml-blas"])
         elif self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
