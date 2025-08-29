@@ -1305,9 +1305,21 @@ Prefix = ..""")
             self.cpp_info.components["qtUiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
             self.cpp_info.components["qtUiPlugin"].libdirs = []
             _create_module("UiTools", ["UiPlugin", "Gui", "Widgets"])
-            if not cross_building(self):
-                _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
             _create_module("Help", ["Gui", "Sql", "Widgets"])
+
+            # it's possible to cross-compile e.g. macOS x86_64 -> armv8 or Windows x86_64 -> armv8, but Designer lib won't be created in such case
+            # see https://github.com/conan-io/conan-center-index/issues/28204 and https://github.com/conan-io/conan-center-index/pull/12477
+            designerModuleName = "Designer"
+            libPrefix = "" if self.settings.os == "Windows" else "lib"
+            libExtension = ""
+            if self.settings.os == "Windows":
+                libExtension = "lib"
+            elif is_apple_os(self):
+                libExtension = "dylib" if self.options.shared else "a"
+            else:
+                libExtension = "so" if self.options.shared else "a"
+            if os.path.exists(os.path.join(self.package_folder, self.cpp_info.libdir, f"{libPrefix}Qt5{designerModuleName}.{libExtension}")):
+                _create_module(designerModuleName, ["Gui", "UiPlugin", "Widgets", "Xml"])
 
         if self.options.qtquick3d and self.options.gui:
             _create_module("Quick3DUtils", ["Gui"])
