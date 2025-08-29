@@ -6,7 +6,7 @@ from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=2.4.0" # for attribute languages
+required_conan_version = ">=2.18.0"
 
 class Libnetfilter_logConan(ConanFile):
     name = "libnetfilter_log"
@@ -14,7 +14,7 @@ class Libnetfilter_logConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://netfilter.org/projects/libnetfilter_log/index.html"
     description = "Library providing interface to packets that have been logged by the kernel packet filter"
-    topics = ("libnfnetlink_log", "nftables")
+    topics = ("networking", "linux", "nftables")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -27,7 +27,6 @@ class Libnetfilter_logConan(ConanFile):
 
     def requirements(self):
         self.requires("libmnl/1.0.4")
-        self.requires("libnetfilter_conntrack/1.0.9")
         self.requires("libnfnetlink/1.0.2")
 
     def source(self):
@@ -35,7 +34,7 @@ class Libnetfilter_logConan(ConanFile):
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("libnetfilter_log is only supported on Linux")
+            raise ConanInvalidConfiguration(f"{self.ref} is only supported on Linux and FreeBSD.")
 
     def generate(self):
         tc = AutotoolsToolchain(self)
@@ -56,12 +55,13 @@ class Libnetfilter_logConan(ConanFile):
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "etc"))
-        #rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_name", "libnetfilter_log")
+        self.cpp_info.set_property("pkg_config_name", "none")
+        self.cpp_info.components["log"].set_property("pkg_config_name", "libnetfilter_log")
         self.cpp_info.components["log"].libs = ["netfilter_log"]
         self.cpp_info.components["log"].requires = ["libnfnetlink::libnfnetlink", "libmnl::libmnl"]
-        #self.cpp_info.components["log"].set_property("pkg_config_name", "libnetfilter_log")
+        self.cpp_info.components["ipulog"].set_property("pkg_config_name", "libnetfilter_log_libipulog")
         self.cpp_info.components["ipulog"].libs = ["netfilter_log_libipulog"]
         self.cpp_info.components["ipulog"].requires = ["log", "libnfnetlink::libnfnetlink"]
