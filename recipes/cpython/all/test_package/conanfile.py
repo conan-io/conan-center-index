@@ -1,7 +1,7 @@
 import os
 from io import StringIO
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run
@@ -10,8 +10,6 @@ from conan.tools.env import Environment, VirtualRunEnv
 from conan.tools.gnu import AutotoolsDeps
 from conan.tools.microsoft import is_msvc, VCVars
 from conan.tools.scm import Version
-
-conan2 = conan_version.major >= 2
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
@@ -32,26 +30,14 @@ class TestPackageConan(ConanFile):
 
     @property
     def _python(self):
-        if conan2:
-            return self.dependencies["cpython"].conf_info.get("user.cpython:python", check_type=str)
-        else:
-            return self.deps_user_info["cpython"].python
+        return self.dependencies["cpython"].conf_info.get("user.cpython:python", check_type=str)
 
     def _cpython_option(self, name):
-        if conan2:
-            return self.dependencies["cpython"].options.get_safe(name, False)
-        else:
-            try:
-                return getattr(self.options["cpython"], name, False)
-            except ConanException:
-                return False
+        return self.dependencies["cpython"].options.get_safe(name, False)
 
     @property
     def _py_version(self):
-        if conan2:
-            return Version(self.dependencies["cpython"].ref.version)
-        else:
-            return Version(self.deps_cpp_info["cpython"].version)
+        return Version(self.dependencies["cpython"].ref.version)
 
     @property
     def _test_setuptools(self):
@@ -177,9 +163,6 @@ class TestPackageConan(ConanFile):
 
             # MSVC builds need PYTHONHOME set. Linux and Mac don't require it to be set if tested after building,
             # but if the package is relocated then it needs to be set.
-            if conan2:
-                os.environ["PYTHONHOME"] = self.dependencies["cpython"].conf_info.get("user.cpython:pythonhome", check_type=str)
-            else:
-                os.environ["PYTHONHOME"] = self.deps_user_info["cpython"].pythonhome
+            os.environ["PYTHONHOME"] = self.dependencies["cpython"].conf_info.get("user.cpython:pythonhome", check_type=str)
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
