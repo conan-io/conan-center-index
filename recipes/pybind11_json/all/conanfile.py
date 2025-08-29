@@ -45,3 +45,4 @@ class Pybind11JsonConan(ConanFile):
         self.cpp_info.libdirs = []
 
         self.cpp_info.set_property("cmake_target_aliases", ["pybind11_json"])
+        self.cpp_info.components["pybind11_json"].requires = ["pybind11::pybind11_", "nlohmann_json::nlohmann_json"]
