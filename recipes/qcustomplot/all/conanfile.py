@@ -56,7 +56,7 @@ class QCustomPlotConan(ConanFile):
             self.requires("opengl/system")
 
     def validate(self):
-        min_cppstd = "11" if Version(self.dependencies["qt"].ref.version) < "6" else "17"
+        min_cppstd = "11" if Version(self.version) < "2.0.0" else "17"
         check_min_cppstd(self, min_cppstd)
         if self.info.options.with_opengl and self.dependencies["qt"].options.opengl == "no":
             raise ConanInvalidConfiguration(f"{self.ref} with opengl requires Qt with opengl enabled: -o 'qt/*:opengl=desktop/dynamic'")
