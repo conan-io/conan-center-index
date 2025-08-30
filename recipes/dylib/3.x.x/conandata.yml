@@ -1,0 +1,9 @@
+sources:
+  "3.0.0":
+    url: "https://github.com/martin-olivier/dylib/archive/refs/tags/v3.0.0.tar.gz"
+    sha256: "6ed5374ca78a48820910f629a89acafc4509fd3e7ee8ea80669b302167e87f62"
+
+patches:
+  "3.0.0":
+    - patch_file: "patches/3.0.0-0001-add_install.patch"
+      base_path: "."

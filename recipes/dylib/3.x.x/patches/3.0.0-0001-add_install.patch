@@ -1,0 +1,32 @@
+From 782302428b4a2d71b3687abd4222b8886f74cc20 Mon Sep 17 00:00:00 2001
+From: Martin Olivier <martin.olivier@live.fr>
+Date: Sat, 30 Aug 2025 23:43:04 +0200
+Subject: [PATCH] fix installation
+
+Signed-off-by: Martin Olivier <martin.olivier@live.fr>
+---
+ CMakeLists.txt | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 625d879..c1a2ca7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -21,6 +21,14 @@ if(UNIX)
+     target_link_libraries(dylib PRIVATE dl)
+ endif()
+ 
++install(TARGETS dylib
++    ARCHIVE DESTINATION lib
++    LIBRARY DESTINATION lib
++    RUNTIME DESTINATION bin
++    INCLUDES DESTINATION include
++)
++install(DIRECTORY include/ DESTINATION include)
++
+ option(DYLIB_BUILD_TESTS "When set to ON, build unit tests" OFF)
+ option(DYLIB_WARNING_AS_ERRORS "Treat warnings as errors" OFF)
+ 
+-- 
+2.39.5 (Apple Git-154)
+
