@@ -1,4 +1,7 @@
 sources:
+  "2.09.12.cci.20240818":
+    url: "https://github.com/electronicarts/EABase/archive/123363eb82e132c0181ac53e43226d8ee76dea12.tar.gz"
+    sha256: "eff0503085ab144f4a24e29ff1d2401aece6e0f680d82bdcc6018182d5d1e0b3"
   "2.09.12":
     url: "https://github.com/electronicarts/EABase/archive/d1be0a1d0fc01a9bf8f3f2cea75018df0d2410ee.zip"
     sha256: "53b72d188aa17c7b23aa6bef9a4767854e82eac46a027dec233d12fd3dfbc677"
