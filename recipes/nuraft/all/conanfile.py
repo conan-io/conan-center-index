@@ -40,6 +40,10 @@ class NuRaftConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        if Version(self.version) > 3:
+            self.tool_requires("cmake/[>=3.26]")
+
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
         if self.options.asio == "boost":
