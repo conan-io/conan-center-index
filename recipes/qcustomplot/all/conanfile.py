@@ -75,9 +75,12 @@ class QCustomPlotConan(ConanFile):
         tc.cache_variables["QCUSTOMPLOT_VERSION_MAJOR"] = str(Version(self.version).major)
         tc.cache_variables["QT_VERSION"] = str(self.dependencies["qt"].ref.version)
         tc.cache_variables["QCUSTOMPLOT_USE_OPENGL"] = self.options.with_opengl
-        qt_tools_rootdir = self.conf.get("user.qt:tools_directory", self.dependencies["qt"].cpp_info.bindirs[0])
-        tc.cache_variables["CMAKE_AUTOMOC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "moc.exe" if self.settings_build.os == "Windows" else "moc")
-        tc.cache_variables["CMAKE_AUTORCC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "rcc.exe" if self.settings_build.os == "Windows" else "rcc")
+        if Version(self.version) >= "2.0.0":  # Qt6.x only
+            # user.qt:tools_directory is defined by qt6.x recipe
+            qt_tools_rootdir = self.conf.get("user.qt:tools_directory")
+            suffix = ".exe" if self.settings_build.os == "Windows" else ""
+            for tool in ["moc", "rcc"]:
+                tc.cache_variables[f"CMAKE_AUTO{tool.upper()}_EXECUTABLE"] = os.path.join(qt_tools_rootdir, f"{tool}{suffix}")
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
