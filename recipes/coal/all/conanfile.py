@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rm
 from conan.errors import ConanInvalidConfiguration
@@ -33,6 +34,7 @@ class CoalConan(ConanFile):
             self.requires("qhull/8.0.2")
 
     def validate(self):
+        check_min_cppstd(self, 14)
         if self.options.with_qhull and (
             self.dependencies["qhull"].options.shared or not self.dependencies["qhull"].options.reentrant
         ):
