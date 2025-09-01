@@ -42,7 +42,6 @@ class NuRaftConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.asio == "boost":
             self.requires("boost/1.81.0")
         else:
