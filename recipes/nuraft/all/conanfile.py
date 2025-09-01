@@ -82,3 +82,8 @@ class NuRaftConan(ConanFile):
         self.cpp_info.libs = ["nuraft"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
+        self.cpp_info.set_property("cmake_file_name", "NuRaft")
+        if self.options.shared:
+            self.cpp_info.set_property("cmake_target_name", "NuRaft::shared_lib")
+        else:
+            self.cpp_info.set_property("cmake_target_name", "NuRaft::static_lib")
