@@ -21,3 +21,6 @@ versions:
     folder: all
   "6.0.1":
     folder: all
+  "6.1-beta1":
+    folder: all
+
