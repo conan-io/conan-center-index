@@ -59,8 +59,9 @@ class NuRaftConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["WITH_CONAN"] = True
-        tc.variables["BOOST_ASIO"] = self.options.asio == "boost"
+        tc.cache_variables["WITH_CONAN"] = True
+        tc.cache_variables["BOOST_ASIO"] = self.options.asio == "boost"
+        tc.cache_variables["BUILD_EXAMPLES"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
