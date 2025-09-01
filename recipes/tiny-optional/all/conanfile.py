@@ -17,6 +17,7 @@ class TinyOptionalConan(ConanFile):
     topics = ("optional", "memory-efficiency", "cache-friendly", "header-only")
     package_type = "header-library"
     no_copy_source = True
+    settings = "compiler"
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -31,12 +32,12 @@ class TinyOptionalConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         copy(self, "*.h", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
 
+    def package_id(self):
+        self.info.clear()
+
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
-        self.cpp_info.set_property("cmake_file_name", "tiny-optional")
-        self.cpp_info.set_property("cmake_target_name", "tiny-optional::tiny-optional")
 
         # Users should define TINY_OPTIONAL_USE_SEPARATE_BOOL_INSTEAD_OF_UB_TRICKS if non x86/64 arch
         # to avoid UB, but it's not necessary for the library to work so don't force it
