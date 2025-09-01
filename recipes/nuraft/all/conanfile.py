@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 import os
 
 required_conan_version = ">=1.53.0"
@@ -72,6 +72,14 @@ class NuRaftConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        if self.options.shared:
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.lib", os.path.join(self.package_folder, "lib"))
+        else:
+            rm(self, "*.so", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
