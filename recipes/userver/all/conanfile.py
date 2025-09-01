@@ -93,24 +93,23 @@ class UserverConan(ConanFile):
     }
 
     def source(self):
-        known_version = self.conan_data.get("sources", {}).get(self.version)
+        known_version = (self.conan_data or {}).get("sources", {}).get(self.version)
         if known_version:
             get(self, **known_version, strip_root=True)
         else:
-            pass  # Running from userver-framework/userver
+            Git(self).clone('https://github.com/userver-framework/userver.git', target='.')
 
     def export_sources(self):
-        known_version = self.conan_data.get("sources", {}).get(self.version)
+        known_version = (self.conan_data or {}).get("sources", {}).get(self.version)
         if known_version:
-                export_conandata_patches(self)
+            export_conandata_patches(self)
         else:
-            pass  # Running from userver-framework/userver
+            pass  # Running from develop branch, no patches
 
     def set_version(self):
         if self.version:
             return
 
-        # Building from userver-framework/userver
         content = load(
             self,
             os.path.join(
@@ -289,4 +288,3 @@ class UserverConan(ConanFile):
             package_manager.Yum(self).install(['libpq-devel'])
             package_manager.PacMan(self).install(['libpq-dev'])
             package_manager.Zypper(self).install(['libpq-devel'])
-
