@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -60,9 +61,10 @@ class NuRaftConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["WITH_CONAN"] = True
-        tc.cache_variables["BOOST_ASIO"] = self.options.asio == "boost"
-        tc.cache_variables["BUILD_EXAMPLES"] = False
+        if Version(self.version) >= 3:
+            tc.cache_variables["WITH_CONAN"] = True
+            tc.cache_variables["BOOST_ASIO"] = self.options.asio == "boost"
+            tc.cache_variables["BUILD_EXAMPLES"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -90,8 +92,9 @@ class NuRaftConan(ConanFile):
         self.cpp_info.libs = ["nuraft"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
-        self.cpp_info.set_property("cmake_file_name", "NuRaft")
-        if self.options.shared:
-            self.cpp_info.set_property("cmake_target_name", "NuRaft::shared_lib")
-        else:
-            self.cpp_info.set_property("cmake_target_name", "NuRaft::static_lib")
+        if Version(self.version) >= 3:
+            self.cpp_info.set_property("cmake_file_name", "NuRaft")
+            if self.options.shared:
+                self.cpp_info.set_property("cmake_target_name", "NuRaft::shared_lib")
+            else:
+                self.cpp_info.set_property("cmake_target_name", "NuRaft::static_lib")
