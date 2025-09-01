@@ -54,8 +54,9 @@ class NuRaftConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support Windows")
-        if self.settings.os == "Macos" and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} shared not supported for Macos")
+        if Version(self.version) < 3:
+            if self.settings.os == "Macos" and self.options.shared:
+                raise ConanInvalidConfiguration(f"{self.ref} shared not supported for Macos")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
@@ -77,6 +78,11 @@ class NuRaftConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
+
+    def package(self):
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         if self.options.shared:
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
@@ -85,11 +91,6 @@ class NuRaftConan(ConanFile):
             rm(self, "*.so", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
-
-    def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        cmake = CMake(self)
-        cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["nuraft"]
