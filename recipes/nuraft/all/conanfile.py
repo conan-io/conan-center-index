@@ -41,7 +41,7 @@ class NuRaftConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if Version(self.version) > 3:
+        if Version(self.version) >= 3:
             self.tool_requires("cmake/[>=3.26]")
 
     def requirements(self):
