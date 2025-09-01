@@ -43,7 +43,7 @@ class QCustomPlotConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("qt/<host_version>")
-        self.tool_requires("cmake/[>=3.27 <4]") # to be able to use CMAKE_AUTOMOC_EXECUTABLE
+        self.tool_requires("cmake/[>=3.27]") # to be able to use CMAKE_AUTOMOC_EXECUTABLE
 
     def requirements(self):
         if Version(self.version) >= "2.0.0":
