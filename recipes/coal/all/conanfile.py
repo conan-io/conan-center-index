@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file
+from conan.tools.files import copy, get, replace_in_file, rm
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -16,15 +16,8 @@ class CoalConan(ConanFile):
     topics = ("geometry", "collision")
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "fPIC": [True, False],
-        "with_qhull": [True, False],
-    }
-    default_options = {
-        "fPIC": True,
-        "with_qhull": False,
-    }
-    implements = ["auto_shared_fpic"]
+    options = {"with_qhull": [True, False]}
+    default_options = {"with_qhull": False}
 
     short_paths = True
 
@@ -43,7 +36,9 @@ class CoalConan(ConanFile):
         if self.options.with_qhull and (
             self.dependencies["qhull"].options.shared or not self.dependencies["qhull"].options.reentrant
         ):
-            raise ConanInvalidConfiguration("coal:with_qhull=True requires qhull/*:shared=False and qhull/*:reentrant=True")
+            raise ConanInvalidConfiguration(
+                "coal:with_qhull=True requires qhull/*:shared=False and qhull/*:reentrant=True"
+            )
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.22 <5]")
@@ -86,6 +81,8 @@ class CoalConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rm(self, "*.cmake", self.package_folder, recursive=True)
+        rm(self, "*.pc", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_target_aliases", ["coal"])
