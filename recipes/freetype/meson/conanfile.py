@@ -158,8 +158,9 @@ class FreetypeConan(ConanFile):
             # Duplicate DLL name for backwards compatibility with earlier recipe revisions
             # See https://github.com/conan-io/conan-center-index/issues/23768
             suffix = "d" if self.settings.build_type == "Debug" else ""
-            src = os.path.join(self.package_folder, "bin", "freetype-6.dll")
-            dst = os.path.join(self.package_folder, "bin", f"freetype{suffix}.dll")
+            prefix = "lib" if self.settings.compiler == "gcc" else ""  # For MinGW
+            src = os.path.join(self.package_folder, "bin", f"{prefix}freetype-6.dll")
+            dst = os.path.join(self.package_folder, "bin", f"{prefix}freetype{suffix}.dll")
             shutil.copyfile(src, dst)
 
         libtool_version = self._extract_libtool_version()
