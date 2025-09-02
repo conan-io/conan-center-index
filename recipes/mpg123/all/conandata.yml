@@ -1,4 +1,9 @@
 sources:
+  "1.33.0":
+    url:
+      - "https://sourceforge.net/projects/mpg123/files/mpg123/1.33.0/mpg123-1.33.0.tar.bz2"
+      - "https://www.mpg123.de/download/mpg123-1.33.0.tar.bz2"
+    sha256: "2290e3aede6f4d163e1a17452165af33caad4b5f0948f99429cfa2d8385faa9d"
   "1.31.2":
     url:
       - "https://sourceforge.net/projects/mpg123/files/mpg123/1.31.2/mpg123-1.31.2.tar.bz2"
@@ -9,16 +14,9 @@ sources:
       - "https://sourceforge.net/projects/mpg123/files/mpg123/1.29.3/mpg123-1.29.3.tar.bz2"
       - "https://www.mpg123.de/download/mpg123-1.29.3.tar.bz2"
     sha256: "963885d8cc77262f28b77187c7d189e32195e64244de2530b798ddf32183e847"
-  "1.26.4":
-    url:
-      - "https://sourceforge.net/projects/mpg123/files/mpg123/1.26.4/mpg123-1.26.4.tar.bz2"
-      - "https://www.mpg123.de/download/mpg123-1.26.4.tar.bz2"
-    sha256: "081991540df7a666b29049ad870f293cfa28863b36488ab4d58ceaa7b5846454"
 
 patches:
   "1.31.2":
-    - patch_file: "patches/0001-msvc-export-symbols.patch"
-  "1.26.4":
     - patch_file: "patches/0001-msvc-export-symbols.patch"
   "1.29.3":
     - patch_file: "patches/0001-msvc-export-symbols.patch"

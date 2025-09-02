@@ -21,6 +21,10 @@ sources:
     url: "https://github.com/martinus/robin-hood-hashing/archive/refs/tags/3.7.0.tar.gz"
     sha256: "1c4a107865becbabc0da337f9cf06f3aa6112f733efcbed0703238362a25b330"
 patches:
+  "3.11.5":
+    - patch_file: "patches/3.11.5-0001-fix-missing-stdint-include.patch"
+      patch_description: "Add missing stdint include"
+      patch_type: "portability"
   "3.11.1":
     - patch_file: "patches/3.11.1-0001-fix-missing-limits-include.patch"
       patch_description: "Add missing limits include"

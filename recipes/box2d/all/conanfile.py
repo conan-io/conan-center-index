@@ -6,7 +6,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class Box2dConan(ConanFile):
@@ -55,7 +55,7 @@ class Box2dConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "3.0.0":
+        if "3.0.0" <= Version(self.version) < "3.1.0":
             self.requires("simde/0.8.2")
 
     def validate(self):
@@ -74,6 +74,7 @@ class Box2dConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -92,7 +93,6 @@ class Box2dConan(ConanFile):
             deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -106,9 +106,10 @@ class Box2dConan(ConanFile):
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "box2d"
-        self.cpp_info.names["cmake_find_package_multi"] = "box2d"
-        self.cpp_info.libs = ["box2d"]
+        postfix = ""
+        if Version(self.version) >= "3.1.0" and self.settings.build_type == "Debug":
+            postfix = "d"
+        self.cpp_info.libs = [f"box2d{postfix}"]
         if Version(self.version) >= "3.0.0" and is_msvc(self) and self.options.shared:
             self.cpp_info.defines.append("BOX2D_DLL")
         elif Version(self.version) >= "2.4.1" and self.options.shared:

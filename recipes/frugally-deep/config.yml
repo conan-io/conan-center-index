@@ -1,9 +1,7 @@
 versions:
-  "0.16.0":
+  "0.18.2":
     folder: all
-  "0.15.31":
+  "0.17.1":
     folder: all
-  "0.15.30":
-    folder: all
-  "0.15.29":
+  "0.16.2":
     folder: all
