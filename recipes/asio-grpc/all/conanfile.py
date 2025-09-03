@@ -28,14 +28,11 @@ class AsioGrpcConan(ConanFile):
     no_copy_source = True
 
     def requirements(self):
-        use_latest = Version(self.version) > "2.8"
         self.requires("grpc/1.67.1", transitive_headers=True, transitive_libs=True)
         if self.options.backend == "boost":
-            version = "1.88.0" if use_latest else "1.83.0"
-            self.requires(f"boost/{version}", transitive_headers=True)
+            self.requires(f"boost/1.88.0", transitive_headers=True)
         if self.options.backend == "asio":
-            version = "1.32.0" if use_latest else "1.29.0"
-            self.requires(f"asio/{version}", transitive_headers=True)
+            self.requires(f"asio/1.32.0", transitive_headers=True)
         if self.options.backend == "unifex":
             self.requires("libunifex/0.4.0", transitive_headers=True, transitive_libs=True)
 
