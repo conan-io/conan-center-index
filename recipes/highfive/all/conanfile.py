@@ -29,13 +29,17 @@ class HighFiveConan(ConanFile):
         "with_opencv": False,
     }
 
+    def config_options(self):
+        if Version(self.version) >= 3:
+            del self.options.with_boost
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("hdf5/1.14.3")
 
-        if self.options.with_boost:
+        if Version(self.version) >= 3 or self.options.get_safe("with_boost"):
             self.requires("boost/1.85.0")
         if self.options.with_xtensor:
             self.requires("xtensor/0.24.7")
@@ -99,7 +103,7 @@ class HighFiveConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.requires = ["hdf5::hdf5"]
-        if self.options.with_boost:
+        if self.options.get_safe("with_boost"):
             self.cpp_info.requires.append("boost::headers")
             self.cpp_info.defines.append("H5_USE_BOOST")
         if self.options.with_eigen:
