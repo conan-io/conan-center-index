@@ -138,7 +138,3 @@ class AsioGrpcConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "asio-grpc")
         self.cpp_info.set_property("cmake_target_name", "asio-grpc::asio-grpc")
         self.cpp_info.set_property("cmake_build_modules", build_modules)
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.build_modules["cmake_find_package"] = build_modules
-        self.cpp_info.build_modules["cmake_find_package_multi"] = build_modules
