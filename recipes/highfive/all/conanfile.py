@@ -39,7 +39,7 @@ class HighFiveConan(ConanFile):
     def requirements(self):
         self.requires("hdf5/1.14.3")
 
-        if Version(self.version) >= 3 or self.options.get_safe("with_boost"):
+        if self.options.get_safe("with_boost"):
             self.requires("boost/1.85.0")
         if self.options.with_xtensor:
             self.requires("xtensor/0.24.7")
@@ -64,7 +64,7 @@ class HighFiveConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         if Version(self.version) < "3.0.0":
-            tc.cache_variables["USE_BOOST"] = self.options.with_boost
+            tc.cache_variables["USE_BOOST"] = self.options.get_safe("with_boost")
             tc.cache_variables["USE_EIGEN"] = self.options.with_eigen
             tc.cache_variables["USE_XTENSOR"] = self.options.with_xtensor
             tc.cache_variables["USE_OPENCV"] = self.options.with_opencv
@@ -103,10 +103,9 @@ class HighFiveConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.requires = ["hdf5::hdf5"]
-        if Version(self.version) >= 3 or self.options.get_safe("with_boost"):
+        if self.options.get_safe("with_boost"):
             self.cpp_info.requires.append("boost::headers")
-            if Version(self.version) < 3:
-                self.cpp_info.defines.append("H5_USE_BOOST")
+            self.cpp_info.defines.append("H5_USE_BOOST")
         if self.options.with_eigen:
             self.cpp_info.requires.append("eigen::eigen")
             self.cpp_info.defines.append("H5_USE_EIGEN")
