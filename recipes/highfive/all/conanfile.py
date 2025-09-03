@@ -69,12 +69,11 @@ class HighFiveConan(ConanFile):
             tc.cache_variables["USE_XTENSOR"] = self.options.with_xtensor
             tc.cache_variables["USE_OPENCV"] = self.options.with_opencv
             tc.cache_variables["HIGHFIVE_USE_INSTALL_DEPS"] = False
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
 
         tc.cache_variables["HIGHFIVE_UNIT_TESTS"] = False
         tc.cache_variables["HIGHFIVE_EXAMPLES"] = False
         tc.cache_variables["HIGHFIVE_BUILD_DOCS"] = False
-
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
 
         tc.generate()
         deps = CMakeDeps(self)
