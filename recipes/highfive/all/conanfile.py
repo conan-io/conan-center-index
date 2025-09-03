@@ -103,9 +103,10 @@ class HighFiveConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.requires = ["hdf5::hdf5"]
-        if self.options.get_safe("with_boost"):
+        if Version(self.version) >= 3 or self.options.get_safe("with_boost"):
             self.cpp_info.requires.append("boost::headers")
-            self.cpp_info.defines.append("H5_USE_BOOST")
+            if Version(self.version) < 3:
+                self.cpp_info.defines.append("H5_USE_BOOST")
         if self.options.with_eigen:
             self.cpp_info.requires.append("eigen::eigen")
             self.cpp_info.defines.append("H5_USE_EIGEN")
