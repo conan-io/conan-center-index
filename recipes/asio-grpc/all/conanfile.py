@@ -27,20 +27,6 @@ class AsioGrpcConan(ConanFile):
     }
     no_copy_source = True
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "Visual Studio": "15.7",
-            "msvc": "191",
-            "clang": "6",
-            "apple-clang": "11",
-        }
-
     def requirements(self):
         use_latest = Version(self.version) > "2.8"
         self.requires("grpc/1.67.1", transitive_headers=True, transitive_libs=True)
@@ -60,18 +46,7 @@ class AsioGrpcConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        compiler_version = Version(self.settings.compiler.version)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.name} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
-        if Version(self.version) == "2.7.0" and self.settings.compiler == "gcc" and compiler_version.major == "11" and \
-                compiler_version < "11.3":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support gcc 11.0-11.2")
+        check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
