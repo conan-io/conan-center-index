@@ -1,11 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2"
@@ -265,7 +264,10 @@ class SDLConan(ConanFile):
 
         if self.options.hidapi:
             tc.cache_variables["SDL_HIDAPI_LIBUSB"] = self.options.get_safe("libusb")
-            tc.cache_variables["SDL_HIDAPI_LIBUSB_SHARED"] = self.options.get_safe("libusb") and self.dependencies["libusb"].options.shared
+            # Prevent loading shared libusb during runtime
+            # This just means it will be linked traditionally, even when libusb is shared
+            # See https://github.com/libsdl-org/SDL/blob/96292a5b464258a2b926e0a3d72f8b98c2a81aa6/cmake/sdlchecks.cmake#L1107-L1113
+            tc.cache_variables["SDL_HIDAPI_LIBUSB_SHARED"] = False
 
         tc.variables["SDL_VULKAN"] = self.options.get_safe("vulkan")
         tc.variables["SDL_METAL"] = self.options.get_safe("metal")
@@ -281,11 +283,6 @@ class SDLConan(ConanFile):
             tc.cache_variables["SDL_SNDIO"] = True
             tc.cache_variables["SDL_SNDIO_SHARED"] = True  # sndio is always shared
         tc.cache_variables["SDL_LIBUDEV"] = self.options.get_safe("libudev", False)
-
-        # Prevent loading shared libusb during runtime
-        # This just means it will be linked traditionally, even when libusb is shared
-        # See https://github.com/libsdl-org/SDL/blob/96292a5b464258a2b926e0a3d72f8b98c2a81aa6/cmake/sdlchecks.cmake#L1107-L1113
-        tc.cache_variables["SDL_HIDAPI_LIBUSB_SHARED"] = False
 
         # X11 and wayland configuration
         with_x11 = self.options.get_safe("x11", False)
