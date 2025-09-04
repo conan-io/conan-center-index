@@ -1,6 +1,6 @@
 sources:
-  "2.18.2":
-    url: "https://github.com/danmar/cppcheck/archive/2.18.2.tar.gz"
+  "2.18.3":
+    url: "https://github.com/danmar/cppcheck/archive/2.18.3.tar.gz"
     sha256: "81dcb33767b4a6959698901d7a63e52e13923f90c6a37f60645ae92917e2fa20"
   "2.18.0":
     url: "https://github.com/danmar/cppcheck/archive/2.18.0.tar.gz"
