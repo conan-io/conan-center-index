@@ -175,7 +175,7 @@ class ArrowConan(ConanFile):
             else:
                 self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_opentelemetry"):
-            self.requires("opentelemetry-cpp/1.7.0")
+            self.requires("opentelemetry-cpp/1.21.0")
         if self.options.with_s3:
             self.requires("aws-sdk-cpp/1.9.234")
         if self.options.with_brotli:
