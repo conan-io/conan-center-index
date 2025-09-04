@@ -267,6 +267,7 @@ class OpenTelemetryCppConan(ConanFile):
             self.cpp_info.components[lib].set_property("cmake_target_name", f"opentelemetry-cpp::{unprefixed_name}")
 
         self.cpp_info.components["api"].libs = []
+        self.cpp_info.components["api"].defines.append(f"OPENTELEMETRY_ABI_VERSION_NO={2 if self.options.with_abi_v2 else 1}")
         self.cpp_info.components["opentelemetry_common"].requires.append("api")
         if self.options.with_stl:
             stl = str(self.settings.compiler.cppstd).replace("gnu", "")
