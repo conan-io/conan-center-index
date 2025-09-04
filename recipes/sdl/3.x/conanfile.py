@@ -175,12 +175,6 @@ class SDLConan(ConanFile):
                         raise ConanInvalidConfiguration(f'-o="&:{subsystem}=True" subsystem requires -o="&:{dependency}=True"')
 
     def validate_build(self):
-        # TODO: Remove this one new CMakeDeps is default
-        if self.options.get_safe("libusb") and self.dependencies["libusb"].options.shared \
-            and not self.conf.get("tools.cmake.cmakedeps:new"):
-            # https://docs.conan.io/2/incubating.html#new-cmakeconfigdeps-generator 
-            raise ConanInvalidConfiguration("SDL with shared libusb requires new CMakeDeps generator, please see https://docs.conan.io/2/incubating.html#new-cmakeconfigdeps-generator")
-
         if self.settings.os == "Android" and not self.conf.get("user.sdl:android", False):
             raise ConanInvalidConfiguration("SDL builds on android require extra configuration on the user's side. "
                                             "Set -c user.sdl:android=True if you understand it and want to build it")
@@ -190,6 +184,12 @@ class SDLConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+        # Prevent inspecting target properties for libusb to derive the name of the .so/.dll
+        # instead, just link the library normally, see
+        # https://github.com/libsdl-org/SDL/blob/96292a5b464258a2b926e0a3d72f8b98c2a81aa6/cmake/sdlchecks.cmake#L1107-L1113
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "sdlchecks.cmake"),
+                        "target_get_dynamic_library(dynamic_libusb", "#target_get_dynamic_library(dynamic_libusb")
 
     @property
     def _is_unix_sys(self):
@@ -281,6 +281,11 @@ class SDLConan(ConanFile):
             tc.cache_variables["SDL_SNDIO"] = True
             tc.cache_variables["SDL_SNDIO_SHARED"] = True  # sndio is always shared
         tc.cache_variables["SDL_LIBUDEV"] = self.options.get_safe("libudev", False)
+
+        # Prevent loading shared libusb during runtime
+        # This just means it will be linked traditionally, even when libusb is shared
+        # See https://github.com/libsdl-org/SDL/blob/96292a5b464258a2b926e0a3d72f8b98c2a81aa6/cmake/sdlchecks.cmake#L1107-L1113
+        tc.cache_variables["SDL_HIDAPI_LIBUSB_SHARED"] = False
 
         # X11 and wayland configuration
         with_x11 = self.options.get_safe("x11", False)
