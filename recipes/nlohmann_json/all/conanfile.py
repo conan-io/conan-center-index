@@ -24,6 +24,7 @@ class NlohmannJsonConan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
+        self.cpp.source.includedirs = [ "include" ]
 
     def package_id(self):
         self.info.clear()
