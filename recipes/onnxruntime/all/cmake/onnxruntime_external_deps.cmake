@@ -36,6 +36,12 @@ if (TARGET cpuinfo::clog)
   list(APPEND onnxruntime_EXTERNAL_LIBRARIES cpuinfo::clog)
 endif()
 set(CPUINFO_SUPPORTED ${cpuinfo_FOUND})
+if(CPUINFO_SUPPORTED)
+  #https://github.com/microsoft/onnxruntime/blob/v1.18.1/cmake/external/onnxruntime_external_deps.cmake#L307C1-L311C10
+  if (NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    string(APPEND CMAKE_CXX_FLAGS " -DCPUINFO_SUPPORTED")
+  endif()
+endif()
 # Add a dummy targets for onnxruntime CMakelists.txt to depend on
 add_library(clog INTERFACE)
 add_library(cpuinfo INTERFACE)
