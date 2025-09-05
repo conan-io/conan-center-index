@@ -21,11 +21,13 @@ class CAresConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "tools": [True, False],
+        "multithreading": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "tools": True,
+        "multithreading": True,
     }
 
     def export_sources(self):
@@ -54,6 +56,7 @@ class CAresConan(ConanFile):
         tc.variables["CARES_BUILD_TESTS"] = False
         tc.variables["CARES_MSVC_STATIC_RUNTIME"] = False
         tc.variables["CARES_BUILD_TOOLS"] = self.options.tools
+        tc.variables["CARES_THREADS"] = self.options.multithreading
         tc.generate()
 
     def build(self):
