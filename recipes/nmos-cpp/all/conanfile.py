@@ -7,7 +7,7 @@ import json
 import os
 import re
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.0.0"
 
 class NmosCppConan(ConanFile):
     name = "nmos-cpp"
@@ -57,8 +57,7 @@ class NmosCppConan(ConanFile):
         self.requires("openssl/[>=1.1 <4]")
         self.requires("json-schema-validator/2.3.0")
         self.requires("nlohmann_json/3.11.3")
-        if Version(self.version) >= "cci.20240222":
-            self.requires("jwt-cpp/0.7.0")
+        self.requires("jwt-cpp/0.7.0")
 
         if self.options.get_safe("with_dnssd") == "mdnsresponder":
             self.requires("mdnsresponder/878.200.35")
@@ -73,8 +72,8 @@ class NmosCppConan(ConanFile):
         self.tool_requires("cmake/[>=3.17 <4]")
 
     def validate(self):
-        if self.info.settings.os in ["Macos"]:
-            raise ConanInvalidConfiguration(f"{self.ref} is not currently supported on {self.info.settings.os}. Contributions welcomed.")
+        if self.info.settings.os in ["Macos"] and Version(self.version) < "cci.20250901":
+            raise ConanInvalidConfiguration(f"{self.ref} is not currently supported on {self.info.settings.os}. Use cci.20250904 or newer to get macOS support.")
         if self.info.settings.compiler.get_safe("cppstd"):
             build.check_min_cppstd(self, 11)
 
@@ -211,11 +210,6 @@ class NmosCppConan(ConanFile):
                             components[component_name].setdefault("linkflags", []).append(property_value)
                     else:
                         self.output.warn(f"{self.name} recipe does not handle {property_type} (yet)")
-
-        # until https://github.com/sony/nmos-cpp/commit/9489d84098ddc8cc514b7e4d5afe740dee4518ee
-        # direct dependency on nlohmann_json was missing
-        if Version(self.version) < "cci.20221203":
-            components["json_schema_validator"].setdefault("requires", []).append("nlohmann_json::nlohmann_json")
 
         # Save components informations in json file
         with open(self._components_helper_filepath, "w", encoding="utf-8") as json_file:
