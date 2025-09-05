@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.apple import is_apple_os
 import os
 
 
@@ -92,18 +93,20 @@ class bgfxConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "bgfx")
         bgfx_tools_utils = os.path.join(self.package_folder, "lib", "cmake", "bgfx", "bgfxToolUtils.cmake")
         self.cpp_info.set_property("cmake_build_modules", [bgfx_tools_utils])
-        
+
         self.cpp_info.components["bx"].set_property("cmake_target_name", "bgfx::bx")
         self.cpp_info.components["bx"].libs = ["bx"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["bx"].system_libs = ["dl", "rt"]
             self.cpp_info.includedirs.append(os.path.join("include", "bx", "compat", "linux"))
         self.cpp_info.components["bx"].defines = [f"BX_CONFIG_DEBUG={1 if self.settings.build_type == 'Debug' else 0}"]
+        if is_apple_os(self):
+            self.cpp_info.frameworks = ["Foundation"]
 
         self.cpp_info.components["bimg"].set_property("cmake_target_name", "bgfx::bimg")
         self.cpp_info.components["bimg"].libs = ["bimg"]
         self.cpp_info.components["bimg"].requires = ["bx", "miniz::miniz"]
-    
+
         self.cpp_info.components["decode"].set_property("cmake_target_name", "bgfx::bimg_decode")
         self.cpp_info.components["decode"].libs = ["bimg_decode"]
         self.cpp_info.components["decode"].requires = ["bx", "miniz::miniz", "tinyexr::tinyexr"]
@@ -117,13 +120,15 @@ class bgfxConan(ConanFile):
         self.cpp_info.components["bgfx"].requires = ["bx", "bimg"]
         if self.settings.os == "Linux":
             self.cpp_info.components["bgfx"].requires.extend(["xorg::xorg", "opengl::opengl", "wayland::wayland"])
+        if is_apple_os(self):
+            self.cpp_info.frameworks = ["Cocoa", "Metal", "QuartzCore", "IOKit", "CoreFoundation"]
         # multithreaded rendering is enabled by default via BGFX_CONFIG_MULTITHREADED
         self.cpp_info.components["bgfx"].defines = ["BGFX_CONFIG_MULTITHREADED=1",
                                                    f"BGFX_CONFIG_DEBUG_ANNOTATION={1 if self.settings.build_type == 'Debug' else 0}",]
 
-        # FIXME: bgfx::bin2c target points to bin/bin2c
-        # FIXME: bgfx::texturec target points to bin/texturec
-        # FIXME: bgfx::texturev target points to bin/texturev
-        # FIXME: bgfx::geometryc target points to bin/geometryc
-        # FIXME: bgfx::geometryv target points to bin/geometryv
-        # FIXME: bgfx::shaderc target points to bin/shaderc
+        for tool in ["bin2c", "texturec", "texturev", "geometryc", "geometryv", "shaderc"]:
+            self.cpp_info.components[tool].set_property("cmake_target_name", f"bgfx::{tool}")
+            # INFO: .exe requires CMakeConfigDeps generator
+            self.cpp_info.components[tool].exe = os.path.join(self.package_folder, "bin", tool)
+            self.cpp_info.components[tool].libdirs = []
+            self.cpp_info.components[tool].includedirs = []
