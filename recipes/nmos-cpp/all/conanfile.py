@@ -53,6 +53,7 @@ class NmosCppConan(ConanFile):
             self.options.with_dnssd = "avahi"
         elif self.settings.os == "Windows":
             self.options.with_dnssd = "mdnsresponder"
+        # a last one to being able to github this ...
 
     def requirements(self):
         # for now, consistent with project's conanfile.txt
