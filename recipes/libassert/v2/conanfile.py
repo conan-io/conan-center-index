@@ -52,7 +52,7 @@ class LibassertConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) >= "2.1.2":
-            self.requires("cpptrace/0.7.2", transitive_headers=True, transitive_libs=True)
+            self.requires("cpptrace/1.0.3", transitive_headers=True, transitive_libs=True)
         else:
             self.requires("cpptrace/0.7.1", transitive_headers=True, transitive_libs=True)
 
