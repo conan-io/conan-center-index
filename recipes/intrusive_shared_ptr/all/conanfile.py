@@ -19,7 +19,7 @@ class IsptrRecipe(ConanFile):
     topics = ("smart-pointer", "intrusive", "header-only", "header-library")
 
     generators = "CMakeToolchain"
-    settings = "compiler"
+    settings = "os", "arch", "build_type", "compiler"
     package_type = "header-library"
     no_copy_source = True
 
