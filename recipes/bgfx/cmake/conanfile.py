@@ -86,8 +86,8 @@ class bgfxConan(ConanFile):
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "bgfxTargets*", os.path.join(self.package_folder, "lib", "cmake"))
-        rm(self, "bgfxConfig*", os.path.join(self.package_folder, "lib", "cmake"))
+        rm(self, "bgfxTargets*", os.path.join(self.package_folder, "lib", "cmake", "bgfx"))
+        rm(self, "bgfxConfig*", os.path.join(self.package_folder, "lib", "cmake", "bgfx"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "bgfx")
