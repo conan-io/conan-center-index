@@ -1,16 +1,21 @@
 sources:
+  "3.4.0":
+    url: "https://github.com/AcademySoftwareFoundation/openexr/releases/download/v3.4.0/openexr-3.4.0.tar.gz"
+    sha256: "1d4bddda2d22571f63db5f067c5741b50c8d41231f360ab17063176eb710a670"
   "3.3.5":
     url: "https://github.com/AcademySoftwareFoundation/openexr/releases/download/v3.3.5/openexr-3.3.5.tar.gz"
     sha256: "8f9241f0e9d6b7aec7e9509cf2a9224416b9cd9d41740deab3827b1f2d01c662"
-  "3.3.2":
-    url: "https://github.com/AcademySoftwareFoundation/openexr/releases/download/v3.3.2/openexr-3.3.2.tar.gz"
-    sha256: "4fb4c643b39f04b67e8f4138e4d5a7804b62fdc15b8f6bcdd32ccc8ecd515683"
   "3.2.4":
     url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.2.4.tar.gz"
     sha256: "81e6518f2c4656fdeaf18a018f135e96a96e7f66dbe1c1f05860dd94772176cc"
 patches:
+  "3.4.0":
+    - patch_file: "patches/3.4.0-openjph-include-fixes.patch"
+      patch_description: "Patch to correctly include openjph headers"
+      patch_type: "portability"
+      patch_source: "https://github.com/AcademySoftwareFoundation/openexr/pull/2122"
   "3.2.4":
-    - patch_file: "patches/3.2.1-gcc5-bug-workaround.patch"
+    - patch_file: "patches/3.2.4-gcc5-bug-workaround.patch"
       patch_description: "Workaround for GCC 5 bug"
       patch_type: "portability"
       patch_source: "https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82336"

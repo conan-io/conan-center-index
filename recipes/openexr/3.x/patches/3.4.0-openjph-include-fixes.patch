@@ -1,0 +1,36 @@
+diff --git cmake/OpenEXRSetup.cmake cmake/OpenEXRSetup.cmake
+index 522228e0..d7bf43e3 100644
+--- cmake/OpenEXRSetup.cmake
++++ cmake/OpenEXRSetup.cmake
+@@ -266,7 +266,7 @@ if (NOT OPENEXR_FORCE_INTERNAL_OPENJPH)
+         message(FATAL_ERROR "OpenJPH >= 0.21.0 required, but found ${openjph_VERSION}")
+     endif()
+     message(STATUS "Using OpenJPH ${openjph_VERSION} from ${openjph_DIR}")
+-    set(EXR_OPENJPH_LIB openjph)
++    set(EXR_OPENJPH_LIB openjph::openjph)
+   else()
+     # If not found, try pkgconfig
+     find_package(PkgConfig)
+diff --git src/lib/OpenEXRCore/internal_ht.cpp src/lib/OpenEXRCore/internal_ht.cpp
+index 14d1940f..c4385ef5 100644
+--- src/lib/OpenEXRCore/internal_ht.cpp
++++ src/lib/OpenEXRCore/internal_ht.cpp
+@@ -7,12 +7,12 @@
+ #include <string>
+ #include <fstream>
+ 
+-#include <ojph_arch.h>
+-#include <ojph_file.h>
+-#include <ojph_params.h>
+-#include <ojph_mem.h>
+-#include <ojph_codestream.h>
+-#include <ojph_message.h>
++#include <openjph/ojph_arch.h>
++#include <openjph/ojph_file.h>
++#include <openjph/ojph_params.h>
++#include <openjph/ojph_mem.h>
++#include <openjph/ojph_codestream.h>
++#include <openjph/ojph_message.h>
+ 
+ #include "openexr_decode.h"
+ #include "openexr_encode.h"
