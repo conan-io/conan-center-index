@@ -40,8 +40,15 @@ class NmosCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        # Simple change as github doesn't allow review comments on unchanged lines that are outside the +/- 3 lines of the changes.
+        # To be removed in the review process.
         if self.settings.os == "Macos":
             del self.options.with_dnssd
+        # The removal on macos makes sense as the mdnsresponder (which is by apple) comes with the OS/Xcode SDK I guess,
+        # but why override the default. Took me (luckily only a few minutes) time to see why it wanted to get avahi despite the default_options and like thousands of
+        # dependencies. mdnsresponder is just itself, avahi really has a large sets of dependencies and many of them LGPL infested...
+        # Also getting the `conan graph info ... --format=html` for avahi and mdnsresponder and opening both in the browser is eye-opening. If there is a reason
+        # why mdnsresponder isn't cutting it, would be nice to be noted. I'd prefer it with the two elif cases removed to have some consistency.
         elif self.settings.os == "Linux":
             self.options.with_dnssd = "avahi"
         elif self.settings.os == "Windows":
