@@ -3,6 +3,7 @@ from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.apple import is_apple_os
+from conan.tools.microsoft import is_msvc
 import os
 
 
@@ -40,6 +41,7 @@ class bgfxConan(ConanFile):
         self.requires("miniz/3.0.2")
         self.requires("tinyexr/1.0.7")
         self.requires("libsquish/1.15")
+        # INFO: glflags and spirv-tools are vendored only
 
     def validate(self):
         check_min_cppstd(self, 17)
@@ -101,7 +103,10 @@ class bgfxConan(ConanFile):
             self.cpp_info.includedirs.append(os.path.join("include", "bx", "compat", "linux"))
         self.cpp_info.components["bx"].defines = [f"BX_CONFIG_DEBUG={1 if self.settings.build_type == 'Debug' else 0}"]
         if is_apple_os(self):
-            self.cpp_info.frameworks = ["Foundation"]
+            self.cpp_info.components["bx"].frameworks = ["Foundation"]
+        elif is_msvc(self):
+            # INFO: \bx\platform.h(432): fatal error C1189: #error:  "When using MSVC you must set /Zc:__cplusplus compiler option."
+            self.cpp_info.components["bx"].cxxflags = ["/Zc:__cplusplus", "/Zc:preprocessor"]
 
         self.cpp_info.components["bimg"].set_property("cmake_target_name", "bgfx::bimg")
         self.cpp_info.components["bimg"].libs = ["bimg"]
@@ -121,7 +126,7 @@ class bgfxConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.components["bgfx"].requires.extend(["xorg::xorg", "opengl::opengl", "wayland::wayland"])
         if is_apple_os(self):
-            self.cpp_info.frameworks = ["Cocoa", "Metal", "QuartzCore", "IOKit", "CoreFoundation"]
+            self.cpp_info.components["bgfx"].frameworks = ["Cocoa", "Metal", "QuartzCore", "IOKit", "CoreFoundation"]
         # multithreaded rendering is enabled by default via BGFX_CONFIG_MULTITHREADED
         self.cpp_info.components["bgfx"].defines = ["BGFX_CONFIG_MULTITHREADED=1",
                                                    f"BGFX_CONFIG_DEBUG_ANNOTATION={1 if self.settings.build_type == 'Debug' else 0}",]
