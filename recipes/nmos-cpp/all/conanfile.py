@@ -241,8 +241,6 @@ class NmosCppConan(ConanFile):
             components = json.loads(components_json_file)
             for component_name, values in components.items():
                 cmake_target = values["cmake_target"]
-                self.cpp_info.components[component_name].names["cmake_find_package"] = cmake_target
-                self.cpp_info.components[component_name].names["cmake_find_package_multi"] = cmake_target
                 self.cpp_info.components[component_name].bindirs = [bindir] if values.get("exe") else []
                 self.cpp_info.components[component_name].libs = values.get("libs", [])
                 self.cpp_info.components[component_name].libdirs = [libdir]
@@ -258,7 +256,3 @@ class NmosCppConan(ConanFile):
                 #self.cpp_info.components[component_name].requires.extend([(r, "private") for r in values.get("requires_private", [])])
                 self.cpp_info.components[component_name].requires.extend(values.get("requires_private", []))
         _register_components()
-
-        # add nmos-cpp-registry and nmos-cpp-node to the path
-        bin_path = os.path.join(self.package_folder, bindir)
-        self.env_info.PATH.append(bin_path)
