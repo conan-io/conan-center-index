@@ -23,6 +23,9 @@ class IsptrRecipe(ConanFile):
     package_type = "header-library"
     no_copy_source = True
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.25]")
+
     def validate(self):
         check_min_cppstd(self, 17)
 
