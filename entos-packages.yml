@@ -210,9 +210,6 @@ xz_utils:
 vulkan-headers:
   versions:
     - '1.4.313.0'
-vulkan-hpp:
-  versions:
-    - '1.4.313'
 vulkan-loader:
   versions:
     - '1.4.313.0'
