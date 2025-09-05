@@ -7,7 +7,7 @@ import json
 import os
 import re
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.0.0"
 
 class NmosCppConan(ConanFile):
     name = "nmos-cpp"
@@ -40,12 +40,20 @@ class NmosCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        # Simple change as github doesn't allow review comments on unchanged lines that are outside the +/- 3 lines of the changes.
+        # To be removed in the review process.
         if self.settings.os == "Macos":
             del self.options.with_dnssd
+        # The removal on macos makes sense as the mdnsresponder (which is by apple) comes with the OS/Xcode SDK I guess,
+        # but why override the default. Took me (luckily only a few minutes) time to see why it wanted to get avahi despite the default_options and like thousands of
+        # dependencies. mdnsresponder is just itself, avahi really has a large sets of dependencies and many of them LGPL infested...
+        # Also getting the `conan graph info ... --format=html` for avahi and mdnsresponder and opening both in the browser is eye-opening. If there is a reason
+        # why mdnsresponder isn't cutting it, would be nice to be noted. I'd prefer it with the two elif cases removed to have some consistency.
         elif self.settings.os == "Linux":
             self.options.with_dnssd = "avahi"
         elif self.settings.os == "Windows":
             self.options.with_dnssd = "mdnsresponder"
+        # a last one to being able to github this ...
 
     def requirements(self):
         # for now, consistent with project's conanfile.txt
@@ -57,8 +65,7 @@ class NmosCppConan(ConanFile):
         self.requires("openssl/[>=1.1 <4]")
         self.requires("json-schema-validator/2.3.0")
         self.requires("nlohmann_json/3.11.3")
-        if Version(self.version) >= "cci.20240222":
-            self.requires("jwt-cpp/0.7.0")
+        self.requires("jwt-cpp/0.7.0")
 
         if self.options.get_safe("with_dnssd") == "mdnsresponder":
             self.requires("mdnsresponder/878.200.35")
@@ -73,8 +80,8 @@ class NmosCppConan(ConanFile):
         self.tool_requires("cmake/[>=3.17 <4]")
 
     def validate(self):
-        if self.info.settings.os in ["Macos"]:
-            raise ConanInvalidConfiguration(f"{self.ref} is not currently supported on {self.info.settings.os}. Contributions welcomed.")
+        if self.info.settings.os in ["Macos"] and Version(self.version) < "cci.20250901":
+            raise ConanInvalidConfiguration(f"{self.ref} is not currently supported on {self.info.settings.os}. Use cci.20250904 or newer to get macOS support.")
         if self.info.settings.compiler.get_safe("cppstd"):
             build.check_min_cppstd(self, 11)
 
@@ -212,11 +219,6 @@ class NmosCppConan(ConanFile):
                     else:
                         self.output.warn(f"{self.name} recipe does not handle {property_type} (yet)")
 
-        # until https://github.com/sony/nmos-cpp/commit/9489d84098ddc8cc514b7e4d5afe740dee4518ee
-        # direct dependency on nlohmann_json was missing
-        if Version(self.version) < "cci.20221203":
-            components["json_schema_validator"].setdefault("requires", []).append("nlohmann_json::nlohmann_json")
-
         # Save components informations in json file
         with open(self._components_helper_filepath, "w", encoding="utf-8") as json_file:
             json.dump(components, json_file, indent=4)
@@ -240,9 +242,6 @@ class NmosCppConan(ConanFile):
             components_json_file = files.load(self, self._components_helper_filepath)
             components = json.loads(components_json_file)
             for component_name, values in components.items():
-                cmake_target = values["cmake_target"]
-                self.cpp_info.components[component_name].names["cmake_find_package"] = cmake_target
-                self.cpp_info.components[component_name].names["cmake_find_package_multi"] = cmake_target
                 self.cpp_info.components[component_name].bindirs = [bindir] if values.get("exe") else []
                 self.cpp_info.components[component_name].libs = values.get("libs", [])
                 self.cpp_info.components[component_name].libdirs = [libdir]
@@ -258,7 +257,3 @@ class NmosCppConan(ConanFile):
                 #self.cpp_info.components[component_name].requires.extend([(r, "private") for r in values.get("requires_private", [])])
                 self.cpp_info.components[component_name].requires.extend(values.get("requires_private", []))
         _register_components()
-
-        # add nmos-cpp-registry and nmos-cpp-node to the path
-        bin_path = os.path.join(self.package_folder, bindir)
-        self.env_info.PATH.append(bin_path)
