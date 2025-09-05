@@ -1,4 +1,4 @@
-#include <bx/bx.h>
+#include <bx/math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
