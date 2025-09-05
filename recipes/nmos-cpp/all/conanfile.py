@@ -242,7 +242,6 @@ class NmosCppConan(ConanFile):
             components_json_file = files.load(self, self._components_helper_filepath)
             components = json.loads(components_json_file)
             for component_name, values in components.items():
-                cmake_target = values["cmake_target"]
                 self.cpp_info.components[component_name].bindirs = [bindir] if values.get("exe") else []
                 self.cpp_info.components[component_name].libs = values.get("libs", [])
                 self.cpp_info.components[component_name].libdirs = [libdir]
