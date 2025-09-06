@@ -1,0 +1,35 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index aa64a8a..8e5c9e5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,20 +12,20 @@ else()
+     link_libraries(pthread)
+ endif()
+ 
+-link_directories(.)
+-include_directories(fmt/include)
+-
++find_package(fmt REQUIRED CONFIG)
++if(BUILD_SHARED_LIBS)
+ add_library(fmtlog-shared SHARED fmtlog.cc)
+-if(MSVC)
+-  target_link_libraries(fmtlog-shared fmt)
++if(1)
++  target_link_libraries(fmtlog-shared PUBLIC fmt::fmt)
+ endif()
++set_property(TARGET fmtlog-shared PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ install(TARGETS fmtlog-shared)
+-
++else()
+ add_library(fmtlog-static fmtlog.cc)
+-if(MSVC)
+-  target_link_libraries(fmtlog-static fmt)
++if(1)
++  target_link_libraries(fmtlog-static PUBLIC fmt::fmt)
+ endif()
+ install(TARGETS fmtlog-static)
++endif()
+ 
+-add_subdirectory(fmt)
+-add_subdirectory(test)
++install(FILES fmtlog.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/fmtlog)
