@@ -71,19 +71,19 @@ class TestPackageConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-        try:
-            # CMakeToolchain might generate VCVars, but we need it
-            # unconditionally for the setuptools build.
-            VCVars(self).generate()
-        except ConanException:
-            pass
-
         # The build also needs access to the run environment to run the python executable
         VirtualRunEnv(self).generate(scope="run")
         VirtualRunEnv(self).generate(scope="build")
 
         if self._test_setuptools:
-            # Just for the distutils build
+            try:
+                # CMakeToolchain might generate VCVars, but we need it
+                # unconditionally for the setuptools build.
+                VCVars(self).generate()
+            except ConanException:
+                pass
+    
+            # Just for the setuptools build
             AutotoolsDeps(self).generate(scope="build")
 
     def build(self):
@@ -92,8 +92,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
         if self._test_setuptools:
-            os.environ["DISTUTILS_USE_SDK"] = "1"
-            os.environ["MSSdk"] = "1"
             setup_args = [
                 os.path.join(self.source_folder, "setup.py"),
                 "build",
@@ -109,7 +107,11 @@ class TestPackageConan(ConanFile):
             if self.settings.build_type == "Debug":
                 setup_args.append("--debug")
             args = " ".join(f'"{a}"' for a in setup_args)
-            self.run(f"{self._python} {args}")
+            env = Environment()
+            env.define("DISTUTILS_USE_SDK", "1")
+            env.define("MSSdk", "1")
+            with env.vars(self).apply():
+                self.run(f"{self._python} {args}")
 
     def _test_module(self, module, should_work):
         try:
@@ -144,8 +146,10 @@ class TestPackageConan(ConanFile):
                 self._test_module("bz2", self._cpython_option("with_bz2"))
                 self._test_module("lzma", self._cpython_option("with_lzma"))
                 self._test_module("tkinter", self._cpython_option("with_tkinter"))
-                os.environ["TERM"] = "ansi"
-                self._test_module("curses", self._cpython_option("with_curses"))
+                env = Environment()
+                env.define("TERM", "ansi")
+                with env.vars(self).apply():
+                    self._test_module("curses", self._cpython_option("with_curses"))
                 self._test_module("expat", True)
                 self._test_module("sqlite3", self._cpython_option("with_sqlite3"))
                 self._test_module("decimal", True)
@@ -164,22 +168,25 @@ class TestPackageConan(ConanFile):
                 # FIXME: find out why cpython on apple does not allow to use modules linked against a static python
             else:
                 if self._supports_modules:
-                    os.environ["PYTHONPATH"] = os.path.join(self.build_folder, self.cpp.build.libdirs[0])
+                    env = Environment()
+                    env.define_path("PYTHONPATH", os.path.join(self.build_folder, self.cpp.build.libdirs[0]))
                     self.output.info("Testing module (spam) using cmake built module")
-                    self._test_module("spam", True)
-
-                    if self._test_setuptools:
-                        os.environ["PYTHONPATH"] = os.path.join(self.build_folder, "lib_setuptools")
-                        self.output.info("Testing module (spam) using setup.py built module")
+                    with env.vars(self).apply():
                         self._test_module("spam", True)
 
-                    del os.environ["PYTHONPATH"]
+                    if self._test_setuptools:
+                        env.define_path("PYTHONPATH", os.path.join(self.build_folder, "lib_setuptools"))
+                        self.output.info("Testing module (spam) using setup.py built module")
+                        with env.vars(self).apply():
+                            self._test_module("spam", True)
 
             # MSVC builds need PYTHONHOME set. Linux and Mac don't require it to be set if tested after building,
             # but if the package is relocated then it needs to be set.
+            env = Environment()
             if conan2:
-                os.environ["PYTHONHOME"] = self.dependencies["cpython"].conf_info.get("user.cpython:pythonhome", check_type=str)
+                env.define_path("PYTHONHOME", self.dependencies["cpython"].conf_info.get("user.cpython:pythonhome", check_type=str))
             else:
-                os.environ["PYTHONHOME"] = self.deps_user_info["cpython"].pythonhome
+                env.define_path("PYTHONHOME", self.deps_user_info["cpython"].pythonhome)
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            self.run(bin_path, env="conanrun")
+            with env.vars(self).apply():
+                self.run(bin_path, env="conanrun")
