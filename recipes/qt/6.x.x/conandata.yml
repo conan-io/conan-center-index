@@ -1,4 +1,26 @@
 sources:
+  "6.8.3":
+    url:
+      - "https://download.qt.io/official_releases/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://download.qt.io/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://mirrors.ukfast.co.uk/sites/qt.io/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://mirrors.20i.com/pub/qt.io/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://ftp.nluug.nl/languages/qt/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://mirror.netcologne.de/qtproject/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://qt-mirror.dannhauer.de/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://ftp.fau.de/qtproject/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://mirrors.dotsrc.org/qtproject/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://ftp.icm.edu.pl/packages/qt/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://ftp.acc.umu.se/mirror/qt.io/qtproject/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://www.nic.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://qt.mirror.constant.com/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://mirrors.sau.edu.cn/qt/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://mirrors.cloud.tencent.com/qt/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://mirror.bjtu.edu.cn/qt/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://mirrors.sjtug.sjtu.edu.cn/qt/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://ftp.jaist.ac.jp/pub/qtproject/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+      - "https://ftp.yz.yamagata-u.ac.jp/pub/qtproject/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
+    sha256: "cdd3a69967208276bb01af7ace7dba0ba53e679f886a4cbe624225c60fb73f2c"
   "6.7.3":
     url:
       - "https://download.qt.io/official_releases/qt/6.7/6.7.3/single/qt-everywhere-src-6.7.3.tar.xz"
@@ -65,6 +87,12 @@ sources:
       - "https://ftp.yz.yamagata-u.ac.jp/pub/qtproject/archive/qt/6.5/6.5.3/single/qt-everywhere-src-6.5.3.tar.xz"
     sha256: "7cda4d119aad27a3887329cfc285f2aba5da85601212bcb0aea27bd6b7b544cb"
 patches:
+  "6.8.3":
+    - "base_path": "qtwebengine"
+      "patch_description": "Workaround for too long .rps file name"
+      "patch_file": "patches/c72097e_6.8.3.diff"
+      "patch_source": "https://codereview.qt-project.org/c/yocto/meta-qt5/+/192172"
+      "patch_type": "bugfix"
   "6.7.3":
     - "base_path": "qtwebengine"
       "patch_description": "Workaround for too long .rps file name"

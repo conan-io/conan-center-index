@@ -46,6 +46,10 @@ class FFMpegConan(ConanFile):
         "with_lzma": [True, False],
         "with_libiconv": [True, False],
         "with_freetype": [True, False],
+        "with_libxml2": [True, False],
+        "with_fontconfig": [True, False],
+        "with_fribidi": [True, False],
+        "with_harfbuzz": [True, False],
         "with_openjpeg": [True, False],
         "with_openh264": [True, False],
         "with_opus": [True, False],
@@ -131,6 +135,10 @@ class FFMpegConan(ConanFile):
         "with_lzma": True,
         "with_libiconv": True,
         "with_freetype": True,
+        "with_libxml2": False,
+        "with_fontconfig": False,
+        "with_fribidi": False,
+        "with_harfbuzz": False,
         "with_openjpeg": True,
         "with_openh264": True,
         "with_opus": True,
@@ -216,6 +224,7 @@ class FFMpegConan(ConanFile):
             "with_zlib": ["avcodec"],
             "with_lzma": ["avcodec"],
             "with_libiconv": ["avcodec"],
+            "with_libxml2": ["avcodec"],
             "with_openjpeg": ["avcodec"],
             "with_openh264": ["avcodec"],
             "with_vorbis": ["avcodec"],
@@ -227,6 +236,9 @@ class FFMpegConan(ConanFile):
             "with_libfdk_aac": ["avcodec"],
             "with_libwebp": ["avcodec"],
             "with_freetype": ["avfilter"],
+            "with_fontconfig": ["avfilter"],
+            "with_fribidi": ["avfilter"],
+            "with_harfbuzz": ["avfilter"],
             "with_zeromq": ["avfilter", "avformat"],
             "with_libalsa": ["avdevice"],
             "with_xcb": ["avdevice"],
@@ -244,12 +256,19 @@ class FFMpegConan(ConanFile):
     def _version_supports_libsvtav1(self):
         return Version(self.version) >= "5.1.0"
 
+    @property
+    def _version_supports_harfbuzz(self):
+        # https://github.com/FFmpeg/FFmpeg/compare/n6.0.1...n6.1#diff-90d08e583c4c9c6f391b2ae90f819f600a6326928ea9512c9e0c6d98e9f29ac2R235
+        return Version(self.version) >= "6.1"
+
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            if is_msvc(self) and self.settings.arch == "armv8":
+                self.options.with_libsvtav1 = False
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_vaapi
             del self.options.with_vdpau
@@ -272,6 +291,8 @@ class FFMpegConan(ConanFile):
             del self.options.with_mediacodec
         if not self._version_supports_libsvtav1:
             self.options.rm_safe("with_libsvtav1")
+        if not self._version_supports_harfbuzz:
+            self.options.rm_safe("with_harfbuzz")
         if self.settings.os == "Android":
             del self.options.with_libfdk_aac
 
@@ -288,17 +309,25 @@ class FFMpegConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_bzip2:
-            self.requires("bzip2/1.0.8")
+            self.requires("bzip2/[>=1.0.8 <2]")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
-        if self.options.with_freetype:
+        if self.options.get_safe("with_freetype"):
             self.requires("freetype/2.13.2")
+        if self.options.with_libxml2:
+            self.requires("libxml2/[>=2.12.5 <3]")
+        if self.options.get_safe("with_fontconfig"):
+            self.requires("fontconfig/2.15.0")
+        if self.options.get_safe("with_fribidi"):
+            self.requires("fribidi/1.0.13")
+        if self.options.get_safe("with_harfbuzz"):
+            self.requires("harfbuzz/[>=8.3.0]")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.5.2")
+            self.requires("openjpeg/[>=2.5.2 <3]")
         if self.options.with_openh264:
-            self.requires("openh264/2.4.1")
+            self.requires("openh264/[>=2.4.1 <3]")
         if self.options.with_vorbis:
             self.requires("vorbis/1.3.7")
         if self.options.with_opus:
@@ -310,15 +339,15 @@ class FFMpegConan(ConanFile):
         if self.options.with_libx264:
             self.requires("libx264/cci.20240224")
         if self.options.with_libx265:
-            self.requires("libx265/3.4")
+            self.requires("libx265/[>=3.4 <4]")
         if self.options.with_libvpx:
-            self.requires("libvpx/1.14.1")
+            self.requires("libvpx/[>=1.15.2 <2]")
         if self.options.with_libmp3lame:
             self.requires("libmp3lame/3.100")
         if self.options.get_safe("with_libfdk_aac"):
             self.requires("libfdk_aac/2.0.3")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.3.2")
+            self.requires("libwebp/[>=1.3.2 <2]")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_libalsa"):
@@ -340,7 +369,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libaom:
             self.requires("libaom-av1/3.6.1")
         if self.options.get_safe("with_libdav1d"):
-            self.requires("dav1d/1.4.3")
+            self.requires("dav1d/[>=1.4 <2]")
         if self.options.get_safe("with_libdrm"):
             self.requires("libdrm/2.4.119")
 
@@ -363,13 +392,6 @@ class FFMpegConan(ConanFile):
             # Linking fails with "Argument list too long" for some reason on Conan v1
             raise ConanInvalidConfiguration("MSVC shared build is not supported for Conan v1")
 
-        if Version(self.version) == "7.0.1" and self.settings.build_type == "Debug":
-            # FIXME: FFMpeg fails to build in Debug mode with the following error:
-            # ld: libavcodec/libavcodec.a(vvcdsp_init.o): in function `ff_vvc_put_pixels2_8_sse4':
-            # src/libavcodec/x86/vvc/vvcdsp_init.c:69: undefined reference to `ff_h2656_put_pixels2_8_sse4'
-            # May be related https://github.com/ffvvc/FFmpeg/issues/234
-            raise ConanInvalidConfiguration(f"{self.ref} Conan recipe does not support build_type=Debug. Contributions are welcome to fix this issue.")
-
     def build_requirements(self):
         if self.settings.arch in ("x86", "x86_64"):
             if Version(self.version) >= "7.0":
@@ -385,6 +407,8 @@ class FFMpegConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
+            if self.settings.arch == "armv8" and is_msvc(self):
+                self.tool_requires("gas-preprocessor/[*]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -501,8 +525,12 @@ class FFMpegConan(ConanFile):
             # Dependencies
             opt_enable_disable("bzlib", self.options.with_bzip2),
             opt_enable_disable("zlib", self.options.with_zlib),
+            opt_enable_disable("libxml2", self.options.with_libxml2),
             opt_enable_disable("lzma", self.options.with_lzma),
             opt_enable_disable("iconv", self.options.with_libiconv),
+            opt_enable_disable("libfreetype", self.options.get_safe("with_freetype")),
+            opt_enable_disable("libfontconfig", self.options.get_safe("with_fontconfig")),
+            opt_enable_disable("libfribidi", self.options.get_safe("with_fribidi")),
             opt_enable_disable("libopenjpeg", self.options.with_openjpeg),
             opt_enable_disable("libopenh264", self.options.with_openh264),
             opt_enable_disable("libvorbis", self.options.with_vorbis),
@@ -608,6 +636,8 @@ class FFMpegConan(ConanFile):
 
         if self._version_supports_libsvtav1:
             args.append(opt_enable_disable("libsvtav1", self.options.get_safe("with_libsvtav1")))
+        if self._version_supports_harfbuzz:
+            args.append(opt_enable_disable("libharfbuzz", self.options.get_safe("with_harfbuzz")))
         if is_apple_os(self):
             # relocatable shared libs
             args.append("--install-name-dir=@rpath")
@@ -876,6 +906,8 @@ class FFMpegConan(ConanFile):
                 avcodec.requires.append("xz_utils::xz_utils")
             if self.options.with_libiconv:
                 avcodec.requires.append("libiconv::libiconv")
+            if self.options.with_libxml2:
+                avcodec.requires.append("libxml2::libxml2")
             if self.options.with_openjpeg:
                 avcodec.requires.append("openjpeg::openjpeg")
             if self.options.with_openh264:
@@ -918,8 +950,14 @@ class FFMpegConan(ConanFile):
                 avformat.frameworks.append("Security")
 
         if self.options.avfilter:
-            if self.options.with_freetype:
+            if self.options.get_safe("with_freetype"):
                 avfilter.requires.append("freetype::freetype")
+            if self.options.get_safe("with_fontconfig"):
+                avfilter.requires.append("fontconfig::fontconfig")
+            if self.options.get_safe("with_fribidi"):
+                avfilter.requires.append("fribidi::fribidi")
+            if self.options.get_safe("with_harfbuzz"):
+                avfilter.requires.append("harfbuzz::harfbuzz")
             if self.options.with_zeromq:
                 avfilter.requires.append("zeromq::libzmq")
             if self.options.get_safe("with_appkit"):

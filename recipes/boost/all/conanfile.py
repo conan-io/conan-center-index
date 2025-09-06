@@ -944,16 +944,6 @@ class BoostConan(ConanFile):
         return version
 
     @property
-    def _python_inc(self):
-        """
-        obtain the result of the "sysconfig.get_python_inc()" call
-        :return: result of the "sysconfig.get_python_inc()" execution
-        """
-        return self._run_python_script("from __future__ import print_function; "
-                                       "import sysconfig; "
-                                       "print(sysconfig.get_python_inc())")
-
-    @property
     def _python_abiflags(self):
         """
         obtain python ABI flags, see https://www.python.org/dev/peps/pep-3149/ for the details
@@ -973,13 +963,11 @@ class BoostConan(ConanFile):
         plat_include = self._get_python_path("platinclude")
         include_py = self._get_python_var("INCLUDEPY")
         include_dir = self._get_python_var("INCLUDEDIR")
-        python_inc = self._python_inc
 
         candidates = [include,
                       plat_include,
                       include_py,
-                      include_dir,
-                      python_inc]
+                      include_dir,]
         for candidate in candidates:
             if candidate:
                 python_h = os.path.join(candidate, 'Python.h')
@@ -1183,7 +1171,7 @@ class BoostConan(ConanFile):
 
     @property
     def _b2_address_model(self):
-        if self.settings.arch in ("x86_64", "ppc64", "ppc64le", "mips64", "armv8", "armv8.3", "sparcv9", "s390x"):
+        if self.settings.arch in ("x86_64", "ppc64", "ppc64le", "mips64", "armv8", "armv8.3", "sparcv9", "s390x", "riscv64"):
             return "64"
 
         return "32"
@@ -1219,6 +1207,8 @@ class BoostConan(ConanFile):
             return "mips1"
         if str(self.settings.arch).startswith("s390"):
             return "s390x"
+        if str(self.settings.arch).startswith("riscv"):
+            return "riscv"
 
         return None
 
@@ -1232,6 +1222,8 @@ class BoostConan(ConanFile):
             return "aapcs"
         if str(self.settings.arch).startswith("mips"):
             return "o32"
+        if str(self.settings.arch).startswith("riscv"):
+            return "sysv"
 
         return None
 
@@ -1252,7 +1244,9 @@ class BoostConan(ConanFile):
 
     @property
     def _build_flags(self):
-        flags = self._build_cross_flags
+        flags = []
+        if self._build_cross_flags:
+            flags.append(f'compileflags="{" ".join(self._build_cross_flags)}"')
 
         # Stop at the first error. No need to continue building.
         flags.append("-q")
@@ -1474,6 +1468,8 @@ class BoostConan(ConanFile):
             pass
         elif arch.startswith("mips"):
             pass
+        elif arch.startswith("riscv"):
+            pass
         else:
             self.output.warning(f"Unable to detect the appropriate ABI for {arch} architecture.")
         self.output.info(f"Cross building flags: {flags}")
@@ -1595,8 +1591,10 @@ class BoostConan(ConanFile):
             contents += f'<cxxflags>"{cxxflags.strip()}" '
         if cflags.strip():
             contents += f'<cflags>"{cflags.strip()}" '
-        if cppflags.strip():
-            contents += f'<compileflags>"{cppflags.strip()}" '
+        if cppflags.strip() or self._build_cross_flags:
+            compiler_flags = cppflags.strip() + " "
+            compiler_flags += " ".join(self._build_cross_flags)
+            contents += f'<compileflags>"{compiler_flags}" '
         if ldflags.strip():
             contents += f'<linkflags>"{ldflags.strip()}" '
         if asflags.strip():
@@ -1709,6 +1707,11 @@ class BoostConan(ConanFile):
                 rename(self, bin_file, os.path.join(self.package_folder, "bin", os.path.basename(bin_file)))
 
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        if (is_apple_os(self) or self.settings.os == "Linux") and not self._shared and Version(self.version) >= "1.88.0":
+            # FIXME: Boost 1.88 installs both .a and .dylib files for static libraries
+            # https://github.com/boostorg/boost/issues/1051
+            rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
 
     def _create_emscripten_libs(self):
         # Boost Build doesn't create the libraries, but it gets close,
@@ -1929,7 +1932,7 @@ class BoostConan(ConanFile):
                 for name in names:
                     if name in ("boost_stacktrace_windbg", "boost_stacktrace_windbg_cached") and self.settings.os != "Windows":
                         continue
-                    if name in ("boost_math_c99l", "boost_math_tr1l") and str(self.settings.arch).startswith("ppc"):
+                    if name in ("boost_math_c99l", "boost_math_tr1l") and (str(self.settings.arch).startswith("ppc") or (Version(self.version) >= "1.87.0" and self.settings.os == "Emscripten")):
                         continue
                     if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic") and self.settings.os == "Windows":
                         continue

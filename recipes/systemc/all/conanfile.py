@@ -9,7 +9,7 @@ import os
 
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class SystemcConan(ConanFile):
@@ -91,6 +91,8 @@ class SystemcConan(ConanFile):
         tc.variables["ENABLE_PTHREADS"] = self.options.get_safe("enable_pthreads", False)
         tc.variables["ENABLE_PHASE_CALLBACKS"] = self.options.get_safe("enable_phase_callbacks", False)
         tc.variables["ENABLE_PHASE_CALLBACKS_TRACING"] = self.options.get_safe("enable_phase_callbacks_tracing", False)
+        if Version(self.version) < "3.0.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):
@@ -125,13 +127,6 @@ class SystemcConan(ConanFile):
                 self.cpp_info.components["_systemc"].defines = ["SC_WIN_DLL"]
                 self.cpp_info.components["_systemc"].libs = [f"systemc-{self.version}"]
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "SystemCLanguage"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "SystemCLanguage"
-        self.cpp_info.names["cmake_find_package"] = "SystemC"
-        self.cpp_info.names["cmake_find_package_multi"] = "SystemC"
-        self.cpp_info.components["_systemc"].names["cmake_find_package"] = "systemc"
-        self.cpp_info.components["_systemc"].names["cmake_find_package_multi"] = "systemc"
         self.cpp_info.components["_systemc"].set_property("cmake_target_name", "SystemC::systemc")
         if Version(self.version) >= "3" and self.settings.os == "Macos":
             # INFO: sanitizer methods are undefined on Mac, need to force linker to ignore them
