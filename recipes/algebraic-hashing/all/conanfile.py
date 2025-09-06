@@ -57,6 +57,7 @@ class AlgebraicHashingConan(ConanFile):
         
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = False
         tc.variables["ALGEBRAIC_HASHING_BUILD_TESTS"] = False
         tc.variables["ALGEBRAIC_HASHING_BUILD_EXAMPLES"] = False  
         tc.variables["ALGEBRAIC_HASHING_BUILD_BENCHMARKS"] = False
@@ -66,13 +67,13 @@ class AlgebraicHashingConan(ConanFile):
         deps.generate()
         
     def build(self):
-        cmake = CMake(self)
-        cmake.configure()
+        # Header-only library - no build step required
+        pass
         
     def package(self):
         copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        cmake = CMake(self)
-        cmake.install()
+        copy(self, "*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"), keep_path=True)
+        copy(self, "*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"), keep_path=True)
         
     def package_info(self):
         self.cpp_info.bindirs = []
