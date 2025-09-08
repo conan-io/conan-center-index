@@ -5,7 +5,7 @@ index 9f56666..7db4652 100644
 @@ -48,4 +48,4 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/config/realsense2.pc"
          DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
  )
-
+ 
 -install(CODE "execute_process(COMMAND ldconfig)")
 +#install(CODE "execute_process(COMMAND ldconfig)")
 diff --git a/CMake/libusb_config.cmake b/CMake/libusb_config.cmake
@@ -37,8 +37,8 @@ index 3bd808b..70117eb 100644
 @@ -47,7 +47,7 @@ macro(os_set_flags)
      set(DOTNET_VERSION_LIBRARY "3.5" CACHE STRING ".Net Version, defaulting to '3.5', the Unity wrapper currently supports only .NET 3.5")
      set(DOTNET_VERSION_EXAMPLES "4.0" CACHE STRING ".Net Version, defaulting to '4.0'")
-
--    # Windows.h will define the min/max macros which will
+ 
+-    # Windows.h will define the min/max macros which will 
 +    # Windows.h will define the min/max macros which will
      # collide with std's min/max templates, which we want to use.
      add_definitions(-DNOMINMAX)
@@ -61,7 +61,7 @@ index c77973c..064543c 100644
 +++ b/CMakeLists.txt
 @@ -10,7 +10,7 @@ set(REPO_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
  include_directories(${REPO_ROOT})
-
+ 
  include(CMake/lrs_options.cmake)
 -include(CMake/connectivity_check.cmake)
 +set(INTERNET_CONNECTION ON)
@@ -73,7 +73,7 @@ index c9a009c..972e3c3 100644
 --- a/common/fw/CMakeLists.txt
 +++ b/common/fw/CMakeLists.txt
 @@ -39,16 +39,16 @@ set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER Resources)
-
+ 
  function(target_binary url version sha1 symbol ext)
    set(binary "${CMAKE_CURRENT_BINARY_DIR}/${symbol}-${version}${ext}")
 -  message(STATUS "... ${url}/${symbol}-${version}${ext}")
