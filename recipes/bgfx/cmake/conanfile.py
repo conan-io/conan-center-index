@@ -4,7 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.apple import is_apple_os
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
+from conan.tools.scm import Version, XCRun
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -49,9 +49,13 @@ class bgfxConan(ConanFile):
         check_min_cppstd(self, 17)
         if is_apple_os(self):
             sdk_version = self.settings.get_safe("os.sdk_version")
+            visible_sdk_version = XCRun(self).sdk_version
+            sdk_version = sdk_version or visible_sdk_version
             if sdk_version and Version(sdk_version) < 13:
                 # INFO: https://github.com/bkaradzic/bgfx.cmake/blob/v1.129.8930-495/cmake/bgfx/bgfx.cmake#L163
                 raise ConanInvalidConfiguration(f"{self.ref} requires Apple SDK version >=13 due to Metal requirement (MTLBinding).")
+            elif sdk_version is None:
+                self.output.warning("Could not detect the Apple SDK version, assuming it is >=13.")
         # FIXME: On Linux:
         # bx/include/bx/platform.h:473:29: error: static assertion failed
         # Minimum supported GLIBC version is 2.31.0 (February 1, 2020)
