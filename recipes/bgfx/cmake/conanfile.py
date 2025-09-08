@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
@@ -47,13 +47,6 @@ class bgfxConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
-        if self.settings.compiler == "apple-clang":
-            sdk_version = self.settings.get_safe("os.sdk_version")
-            if sdk_version and Version(sdk_version) < 13:
-                # INFO: https://github.com/bkaradzic/bgfx.cmake/blob/v1.129.8930-495/cmake/bgfx/bgfx.cmake#L163
-                raise ConanInvalidConfiguration(f"{self.ref} requires Apple SDK version >=13 due to Metal requirement (MTLBinding).")
-            elif Version(self.settings.compiler.version) < 14:
-                raise ConanInvalidConfiguration(f"{self.ref} requires apple-clang >=14 and Apple SDK >=13 due to Metal requirement (MTLBinding).")
 
         # FIXME: On Linux:
         # bx/include/bx/platform.h:473:29: error: static assertion failed
@@ -79,6 +72,14 @@ class bgfxConan(ConanFile):
         if self.settings.os == "Linux":
             wayland_libdir = self.dependencies["wayland"].cpp_info.libdir
             tc.extra_exelinkflags.append(f"-L{wayland_libdir}")
+        elif is_apple_os(self):
+            # INFO: It requires Apple SDK version >=13 due to Metal requirement (MTLBinding)
+            # Otherwise, disable Metal renderer
+            sdk_version = self.settings.get_safe("os.sdk_version")
+            if not sdk_version:
+                sdk_version = XCRun(self).sdk_version
+            if not sdk_version and Version(self.settings.compiler.version) < 14:
+                tc.preprocessor_definitions["BGFX_CONFIG_RENDERER_METAL"] = 0
         tc.generate()
         deps = CMakeDeps(self)
         if self.settings.os == "Linux":
