@@ -36,6 +36,7 @@ class WhisperCppConan(ConanFile):
         "coreml_allow_fallback": [True, False],
         "with_blas": [True, False],
         "with_openvino": [True, False],
+        "with_cuda": [True, False],
     }
     default_options = {
         "shared": False,
@@ -54,6 +55,7 @@ class WhisperCppConan(ConanFile):
         "coreml_allow_fallback": False,
         "with_blas": False,
         "with_openvino": False,
+        "with_cuda": False,
     }
     package_type = "library"
 
@@ -155,6 +157,14 @@ class WhisperCppConan(ConanFile):
         # TODO: Implement OpenMP support
         tc.variables["GGML_OPENMP"] = False
 
+        if self.options.with_cuda:
+            if Version(self.version) >= "1.7.0":
+                tc.variables["GGML_CUDA"] = True
+            elif Version(self.version) >= "1.5.5":
+                tc.variables["WHISPER_CUDA"] = True
+            else:
+                tc.variables["WHISPER_CUBLAS"] = True
+
         if self.options.get_safe("with_openvino"):
             tc.variables["WHISPER_OPENVINO"] = True
             # TODO: remove with Conan 1.x support
@@ -202,6 +212,8 @@ class WhisperCppConan(ConanFile):
             self.cpp_info.libs.append("ggml")
         if Version(self.version) >= "1.7.3":
             self.cpp_info.libs.extend(["ggml-base", "ggml-cpu"])
+            if self.options.get_safe("with_cuda"):
+                self.cpp_info.libs.append("ggml-cuda")
         self.cpp_info.resdirs = ["res"]
         if Version(self.version) < "1.7.0":
             self.cpp_info.libdirs = ["lib", "lib/static"]
