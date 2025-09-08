@@ -47,7 +47,7 @@ class bgfxConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
-        if is_apple_os(self):
+        if self.settings.compiler == "apple-clang":
             sdk_version = self.settings.get_safe("os.sdk_version")
             visible_sdk_version = XCRun(self).sdk_version
             sdk_version = sdk_version or visible_sdk_version
