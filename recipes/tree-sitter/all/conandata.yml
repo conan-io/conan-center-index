@@ -1,7 +1,7 @@
 sources:
-  "0.25.6":
-    url: "https://github.com/tree-sitter/tree-sitter/archive/refs/tags/v0.25.6.tar.gz"
-    sha256: "ac6ed919c6d849e8553e246d5cd3fa22661f6c7b6497299264af433f3629957c"
+  "0.25.9":
+    url: "https://github.com/tree-sitter/tree-sitter/archive/refs/tags/v0.25.9.tar.gz"
+    sha256: "024a2478579acebbb8882d7c2c0f0e07fc0aa19a459b48d10469e4abb96cf16e"
   "0.25.1":
     url: "https://github.com/tree-sitter/tree-sitter/archive/refs/tags/v0.25.1.tar.gz"
     sha256: "99a2446075c2edf60e82755c48415d5f6e40f2d9aacb3423c6ca56809b70fe59"
