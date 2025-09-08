@@ -57,7 +57,7 @@ jobs:
         with:
           node-version: '20.x'
       - run: npm ci
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v8
         id: find_versions
         with:
           script: |
