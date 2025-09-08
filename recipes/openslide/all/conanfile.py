@@ -60,15 +60,15 @@ class OpenSlideConan(ConanFile):
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/4.6.0")
         self.requires("libxml2/[>=2.12.5 <3]")
-        self.requires("openjpeg/2.5.2")
-        self.requires("sqlite3/3.45.3")
+        self.requires("openjpeg/[>=2.5.2 <3]")
+        self.requires("sqlite3/[>=3.45.3 <4]")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.2")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         elif self.options.jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.5")
+            self.requires("mozjpeg/[>=4.1.5 <5]")
 
     def validate(self):
         if is_msvc(self):
