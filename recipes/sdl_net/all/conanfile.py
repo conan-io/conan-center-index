@@ -36,7 +36,7 @@ class SdlnetConan(ConanFile):
 
     def requirements(self):
         # SDL_net.h includes SDL.h, SDL_endian.h and SDL_version.h
-        self.requires("sdl/2.32.2", transitive_headers=True, transitive_libs=True)
+        self.requires("sdl/[>=2.32 <3]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if Version(self.version).major != Version(self.dependencies["sdl"].ref.version).major:
@@ -58,8 +58,7 @@ class SdlnetConan(ConanFile):
         cmake.build()
 
     def package(self):
-        license_file = "COPYING.txt" if Version(self.version) < "2.2.0" else "LICENSE.txt"
-        copy(self, license_file, self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 

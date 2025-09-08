@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -66,9 +66,6 @@ class SDLImageConan(ConanFile):
         "wic": False,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -88,7 +85,7 @@ class SDLImageConan(ConanFile):
 
     def requirements(self):
         # Headers are exposed https://github.com/conan-io/conan-center-index/pull/16167#issuecomment-1508347351
-        self.requires("sdl/2.32.2", transitive_headers=True)
+        self.requires("sdl/[>=2.32 <3]", transitive_headers=True)
         if self.options.with_libtiff:
             self.requires("libtiff/4.6.0")
         if self.options.with_libjpeg:
@@ -113,7 +110,6 @@ class SDLImageConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
