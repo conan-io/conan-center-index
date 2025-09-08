@@ -78,6 +78,7 @@ class TreeSitterConan(ConanFile):
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = ["tree-sitter"]
