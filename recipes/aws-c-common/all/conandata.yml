@@ -1,10 +1,4 @@
 sources:
-  "0.11.0":
-    url: "https://github.com/awslabs/aws-c-common/archive/v0.11.0.tar.gz"
-    sha256: "88115d6f3e4f79d8b2544ed8a95d8a9699985aed38aeb4779d7c9fffde1fee58"
-  "0.9.15":
-    url: "https://github.com/awslabs/aws-c-common/archive/v0.9.15.tar.gz"
-    sha256: "8f36c7a6a5d2e17365759d15591f800d3e76dcaa34a226389b92647cbd92393a"
-  "0.6.11":
-    url: "https://github.com/awslabs/aws-c-common/archive/v0.6.11.tar.gz"
-    sha256: "86159bd1128eee2813f705c275d319e14d1b77017fab46f6ca5dafcc66edaea9"
+  "0.12.3":
+    url: "https://github.com/awslabs/aws-c-common/archive/v0.12.3.tar.gz"
+    sha256: "a4e7ac6c6f840cb6ab56b8ee0bcd94a61c59d68ca42570bca518432da4c94273"

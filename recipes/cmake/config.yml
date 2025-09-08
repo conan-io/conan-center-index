@@ -1,6 +1,7 @@
-# Only keep the most recent 4.x and 3.x versions
+# List only the most recent 4.x version, and the most recent 3.x
+# older versions remain available in the Conan Center remote
 versions:
-  "4.0.3":
+  "4.1.1":
     folder: "binary"
   "3.31.8":
     folder: "binary"

@@ -1,4 +1,7 @@
 sources:
+  "1.7.0":
+    sha256: 2a4cbf23e4a4b9c33dd25df11e5017e0647575b45b8b4a42349ab754f670b853
+    url: https://github.com/bfgroup/Lyra/releases/download/1.7.0/lyra-1.7.0.tar.bz2
   "1.6.1":
     sha256: a93f247ed89eba11ca36eb24c4f8ba7be636bf24e74aaaa8e1066e0954bec7e3
     url: https://github.com/bfgroup/Lyra/archive/1.6.1.tar.gz
