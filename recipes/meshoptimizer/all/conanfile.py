@@ -78,5 +78,8 @@ class MeshOptimizerConan(ConanFile):
             libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
-        if self.options.shared and self.settings.os == "Windows":
-            self.cpp_info.defines = ["MESHOPTIMIZER_API=__declspec(dllimport)"]
+        if self.options.shared:
+            if Version(self.version) >= "0.25":
+                self.cpp_info.defines = ["MESHOPTIMIZER_ALLOC_EXPORT"]
+            if self.settings.os == "Windows":
+                self.cpp_info.defines.append("MESHOPTIMIZER_API=__declspec(dllimport)")
