@@ -20,7 +20,7 @@ class GladConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "no_loader": [True, False],
-        "extensions": [None, "ANY"],
+        "extensions": ["ANY"],
         "debug_layer": [True, False],
         "multicontext": [True, False],
         "gl_profile": ["compatibility", "core"],
@@ -44,7 +44,7 @@ class GladConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "no_loader": False,
-        "extensions": None,
+        "extensions": "",
         "debug_layer": False,
         "multicontext": False,
         "gl_profile": "compatibility",
@@ -122,15 +122,6 @@ class GladConan(ConanFile):
         cmake.build()
 
     def _get_api(self):
-        def api(spec):
-            for api_name, api_version in spec.items():
-                if api_version == "None":
-                    continue
-                if api_name == "gl":
-                    yield f"{api_name}:{self.options.gl_profile}={api_version}"
-                else:
-                    yield f"{api_name}={api_version}"
-
         spec_api = {
             "gl": self.options.gl_version,
             "gles1": self.options.gles1_version,
@@ -138,13 +129,13 @@ class GladConan(ConanFile):
             "glsc2": self.options.glsc2_version,
             "egl": self.options.egl_version,
             "glx": self.options.glx_version,
+            "wgl": self.options.get_safe("wgl_version", "None")
         }
-
-        wgl_version = self.options.get_safe("wgl_version")
-        if wgl_version:
-            spec_api["wgl"] = wgl_version
-
-        return ";".join(api(spec_api))
+        return ";".join(
+            f"{name}:{self.options.gl_profile}={version}" if name == "gl" else f"{name}={version}"
+            for name, version in spec_api.items()
+            if version != "None"
+        )
 
     def package(self):
         CMake(self).install()
