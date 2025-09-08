@@ -142,7 +142,7 @@ class GladConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["glad"]
         if self.options.shared:
             self.cpp_info.defines = ["GLAD_API_CALL_EXPORT"]
         if self.settings.os == "Linux":
