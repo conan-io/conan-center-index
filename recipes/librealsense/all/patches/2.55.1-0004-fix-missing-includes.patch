@@ -46,6 +46,18 @@ index bc70bfd..c9d9b91 100644
  
  namespace librealsense
  {
+diff --git a/src/platform/platform-utils.cpp b/src/platform/platform-utils.cpp
+index 0cfa3a7..51690d7 100644
+--- a/src/platform/platform-utils.cpp
++++ b/src/platform/platform-utils.cpp
+@@ -7,6 +7,7 @@
+ #include "hid-device-info.h"
+ #include <src/librealsense-exception.h>
+ 
++#include <algorithm>
+ 
+ namespace librealsense {
+ namespace platform {
 diff --git a/third-party/rsutils/src/special-folder.cpp b/third-party/rsutils/src/special-folder.cpp
 index 79bc45d..c06afa6 100644
 --- a/third-party/rsutils/src/special-folder.cpp
