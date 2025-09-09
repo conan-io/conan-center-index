@@ -1,0 +1,8 @@
+sources:
+  "0.39.0":
+    sdk:
+      url: "https://github.com/mavlink/MAVSDK/archive/refs/tags/v0.39.0.tar.gz"
+      sha256: "b7e4ff1fcce37ed88990d1bb27a754ede9575f52dcdf4d92b8f3bc7b4d8006d0"
+    mavlink:
+      url: "https://github.com/mavlink/c_library_v2.git"
+      commit: "87d55c503a52f8623d9fee34c1b6a2585bc0a236"
