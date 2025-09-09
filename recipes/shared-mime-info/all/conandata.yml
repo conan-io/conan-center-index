@@ -1,0 +1,5 @@
+sources:
+  "2.4":
+    url:
+      - https://gitlab.freedesktop.org/xdg/shared-mime-info/-/archive/2.4/shared-mime-info-2.4.zip
+    sha256: "12d08cfadf3877712fde08ba26d96931b1cbc8250cdfe00b19ab50da3c6c67eb"
