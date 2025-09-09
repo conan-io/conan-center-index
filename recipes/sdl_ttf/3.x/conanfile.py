@@ -5,7 +5,7 @@ from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=2"
+required_conan_version = ">=2.4"
 
 
 class SdlttfConan(ConanFile):
@@ -15,7 +15,6 @@ class SdlttfConan(ConanFile):
     topics = ("sdl3", "sdl3_ttf", "sdl", "ttf", "font")
     homepage = "https://www.libsdl.org/projects/SDL_ttf"
     url = "https://github.com/conan-io/conan-center-index"
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -24,14 +23,12 @@ class SdlttfConan(ConanFile):
         "with_harfbuzz": [True, False],
         "with_plutosvg": [True, False],
     }
-
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_harfbuzz": True,
         "with_plutosvg": True,
     }
-
     implements = ["auto_shared_fpic"]
     languages = "C"
 
@@ -40,10 +37,9 @@ class SdlttfConan(ConanFile):
 
     def requirements(self):
         self.requires("freetype/2.13.2")
-        # https://github.com/conan-io/conan-center-index/pull/18366#issuecomment-1625464996
-        self.requires("sdl/3.2.6", transitive_headers=True, transitive_libs=True)
+        self.requires("sdl/[>=3.2.6 <4]", transitive_headers=True, transitive_libs=True)
         if self.options.with_harfbuzz:
-            self.requires("harfbuzz/8.3.0")
+            self.requires("harfbuzz/[>=8.3.0]")
         if self.options.with_plutosvg:
             self.requires("plutosvg/0.0.7")
 
@@ -57,9 +53,8 @@ class SdlttfConan(ConanFile):
         if self.options.shared != self.dependencies["sdl"].options.shared:
             raise ConanInvalidConfiguration("sdl & sdl_ttf must be built with the same 'shared' option value")
 
-
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.17 <4]")
+        self.tool_requires("cmake/[>=3.17]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -91,7 +86,6 @@ class SdlttfConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "SDL2_ttf.framework"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
