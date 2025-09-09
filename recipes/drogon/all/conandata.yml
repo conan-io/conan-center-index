@@ -1,4 +1,7 @@
 sources:
+  "1.9.11":
+    url: "https://github.com/drogonframework/drogon/archive/v1.9.11.tar.gz"
+    sha256: "f50098bb21bd0013f8da16b796313816bf79b0ecb1d74bfe33216d5400ab2002"
   "1.9.10":
     url: "https://github.com/drogonframework/drogon/archive/v1.9.10.tar.gz"
     sha256: "5de93fe16682388f363bb4b26ab00b0253d39108d8e7f53d5637c1b7da59a48f"
@@ -6,6 +9,10 @@ sources:
     url: "https://github.com/drogonframework/drogon/archive/v1.8.7.tar.gz"
     sha256: "d2d80d35becd69bf80d74bf09b69425193f1b7be3926bd44f3ac7b951e54465d"
 patches:
+  "1.9.11":
+    - patch_file: "patches/1.9.11-0001-find-cci-packages.patch"
+      patch_description: "Fix jsoncpp cmake target name"
+      patch_type: "conan"
   "1.9.10":
     - patch_file: "patches/1.9.7-0002-find-cci-packages.patch"
       patch_description: "Fix jsoncpp cmake target name"
