@@ -20,20 +20,14 @@ class AzureSDKForCppConan(ConanFile):
 
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
-        "win_http_transport" : [True, False],
-        "disable_rust": [True, False],
-        "windows_uwp" : [True, False]
+        "fPIC": [True, False]
     }
 
     default_options = {"shared": False, "fPIC": True}
 
     default_options = {
         "shared": False,
-        "fPIC": True,
-        "win_http_transport": False,
-        "disable_rust": True,
-        "windows_uwp": False
+        "fPIC": True
     }
 
     def export_sources(self):
@@ -82,24 +76,10 @@ class AzureSDKForCppConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
-        tc.cache_variables["BUILD_TESTING"] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
-        tc.cache_variables["ENABLE_PROXY_TESTS"] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
-
-        if self.settings.os == "Windows":
-            tc.cache_variables["BUILD_WINDOWS_UWP"] = self.options.get_safe("windows_uwp")
-            tc.cache_variables["BUILD_TRANSPORT_CURL"] = not self.options.get_safe("win_http_transport")
-            tc.cache_variables["BUILD_TRANSPORT_WINHTTP"] = self.options.get_safe("win_http_transport")
-        else:
-            if self.version < "1.16.0":
-                # in older versions, BUILD_WINDOWS_UWP disables AMQP on POSIX platforms...
-                # DISABLE_AMQP doesn't exist before 1.16.0
-                tc.cache_variables["BUILD_WINDOWS_UWP"] = "ON"
-            else:
-                tc.cache_variables["BUILD_WINDOWS_UWP"] = "OFF"
-
-            tc.cache_variables["BUILD_TRANSPORT_CURL"] = "ON"
-            tc.cache_variables["BUILD_TRANSPORT_WINHTTP"] = "OFF"
-
+        tc.cache_variables["BUILD_TESTING"] = "OFF"
+        tc.cache_variables["ENABLE_PROXY_TESTS"] = "OFF"
+        tc.cache_variables["BUILD_TRANSPORT_CURL"] = "ON"
+        tc.cache_variables["BUILD_TRANSPORT_WINHTTP"] = "OFF"
 
         tc.cache_variables["BUILD_DOCUMENTATION"] = "OFF"
         tc.cache_variables["BUILD_SAMPLES"] = "OFF"
@@ -112,10 +92,9 @@ class AzureSDKForCppConan(ConanFile):
 
         tc.cache_variables["DISABLE_AZURE_CORE_OPENTELEMETRY"] = "ON"
 
-        if self.version >= "1.16.0":
-            tc.cache_variables["DISABLE_AMQP"] = "ON"
+        tc.cache_variables["DISABLE_AMQP"] = "ON"
 
-        tc.cache_variables["DISABLE_RUST_IN_BUILD"] = self.options.get_safe("disable_rust")
+        tc.cache_variables["DISABLE_RUST_IN_BUILD"] = "ON"
 
         tc.generate()
 
@@ -158,9 +137,6 @@ class AzureSDKForCppConan(ConanFile):
         self.cpp_info.components["azure-storage-blobs"].set_property("cmake_target_name", "Azure::azure-storage-blobs")
         self.cpp_info.components["azure-storage-blobs"].libs = ["azure-storage-blobs"]
         self.cpp_info.components["azure-storage-blobs"].requires = ["azure-core", "azure-storage-common"]
-
-        if not self.conf.get("tools.build:skip_test", default=True, check_type=bool):
-            self.cpp_info.components["azure-storage-blobs"].requires.append("azure-identity")
 
         self.cpp_info.components["azure-storage-files-shares"].set_property("cmake_target_name", "Azure::azure-storage-files-shares")
         self.cpp_info.components["azure-storage-files-shares"].libs = ["azure-storage-files-shares"]
