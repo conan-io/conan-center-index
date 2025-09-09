@@ -20,14 +20,16 @@ class AzureSDKForCppConan(ConanFile):
 
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
+        "win_http_transport": [True, False]
     }
 
     default_options = {"shared": False, "fPIC": True}
 
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
+        "win_http_transport": False
     }
 
     def export_sources(self):
@@ -39,6 +41,8 @@ class AzureSDKForCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        else:
+            del self.options.win_http_transport
 
     def configure(self):
         if self.options.get_safe("shared"):
@@ -54,7 +58,9 @@ class AzureSDKForCppConan(ConanFile):
             # doesn't currently support that build option...
             self.requires("wil/[>=1.0.231028.1]")
 
-        if not self.options.get_safe("win_http_transport"):
+            if not self.options.get_safe("win_http_transport"):
+                self.requires("libcurl/[>=7.78 <9]")
+        else:
             self.requires("libcurl/[>=7.78 <9]")
 
     def layout(self):
