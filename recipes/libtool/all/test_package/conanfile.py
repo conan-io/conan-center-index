@@ -67,7 +67,7 @@ class TestPackageConan(ConanFile):
         env = tc.environment()
         if is_msvc(self):
             for key, value in msvc_vars.items():
-                env.append(key, value)
+                env.define(key, value)
         tc.generate(env)
 
         # "sis" subfder: project to test building shared library using libtool
@@ -79,7 +79,7 @@ class TestPackageConan(ConanFile):
         env = tc.environment()
         if is_msvc(self):
             for key, value in msvc_vars.items():
-                env.append(key, value)
+                env.define(key, value)
         tc.generate(env)
 
         # Note: Using AutotoolsDeps causes errors on Windows when configure tries to determine compiler

@@ -27,7 +27,7 @@ int main() {
     size_t i;
     for (i=0; i<sizeof(expected_data); ++i) {
         if (expected_data[i] != buffer[i]) {
-            fprintf(stderr, "Error at index %u!\n", i);
+            fprintf(stderr, "Error at index %zu!\n", i);
         }
     }
 

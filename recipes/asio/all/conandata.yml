@@ -1,4 +1,10 @@
 sources:
+  "1.36.0":
+    url: "https://github.com/chriskohlhoff/asio/archive/asio-1-36-0.tar.gz"
+    sha256: "0310a76b27e1854f09f696b30de57dc490b5e1b17faed1eb8c9a2891f956e52b"
+  "1.34.2":
+    url: "https://github.com/chriskohlhoff/asio/archive/asio-1-34-2.tar.gz"
+    sha256: "f3bac015305fbb700545bd2959fbc52d75a1ec2e05f9c7f695801273ceb78cf5"
   "1.32.0":
     url: "https://github.com/chriskohlhoff/asio/archive/asio-1-32-0.tar.gz"
     sha256: "f1b94b80eeb00bb63a3c8cef5047d4e409df4d8a3fe502305976965827d95672"

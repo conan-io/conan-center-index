@@ -7,7 +7,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class Libx265Conan(ConanFile):
@@ -51,6 +51,9 @@ class Libx265Conan(ConanFile):
         # Indeed, apple-clang is not able to understand some asm instructions of libx265
         # FIXME: Disable assembly by default if host is Android for the moment. It fails to build
         if (self.settings.compiler == "apple-clang" and "arm" in self.settings.arch) or self.settings.os == "Android":
+            self.options.assembly = False
+        if is_msvc(self) and self.settings.arch == "armv8":
+            # Build errors, possibly unsupported
             self.options.assembly = False
 
     def configure(self):
@@ -109,6 +112,7 @@ class Libx265Conan(ConanFile):
         tc.variables["ENABLE_SVT_HEVC"] = self.options.SVG_HEVC_encoder
         if is_msvc(self):
             tc.variables["STATIC_LINK_CRT"] = is_msvc_static_runtime(self)
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
         if self.settings.os == "Linux":
             tc.variables["PLATFORM_LIBS"] = "dl"
         if "arm" in self.settings.arch:

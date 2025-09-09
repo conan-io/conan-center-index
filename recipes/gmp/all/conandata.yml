@@ -1,24 +1,30 @@
 sources:
   "6.3.0":
     url:
-      - "https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.bz2"
+      - "https://ftpmirror.gnu.org/gnu/gmp/gmp-6.3.0.tar.bz2"
+      - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.bz2"
       - "https://gmplib.org/download/gmp/gmp-6.3.0.tar.bz2"
+      - "https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.bz2"
     sha256: "ac28211a7cfb609bae2e2c8d6058d66c8fe96434f740cf6fe2e47b000d1c20cb"
   "6.2.1":
     url:
-      - "https://ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.bz2"
+      - "https://ftpmirror.gnu.org/gnu/gmp/gmp-6.2.1.tar.bz2"
+      - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.bz2"
       - "https://gmplib.org/download/gmp/gmp-6.2.1.tar.bz2"
+      - "https://ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.bz2"
     sha256: "eae9326beb4158c386e39a356818031bd28f3124cf915f8c5b1dc4c7a36b4d7c"
-  "6.2.0":
-    url: "https://gmplib.org/download/gmp/gmp-6.2.0.tar.bz2"
-    sha256: "f51c99cb114deb21a60075ffb494c1a210eb9d7cb729ed042ddb7de9534451ea"
   "6.1.2":
-    url: "https://gmplib.org/download/gmp/gmp-6.1.2.tar.bz2"
+    url:
+      - "https://ftpmirror.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2"
+      - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2"
+      - "https://gmplib.org/download/gmp/gmp-6.1.2.tar.bz2"
+      - "https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2"
     sha256: "5275bb04f4863a13516b2f39392ac5e272f5e1bb8057b18aec1c9b79d73d8fb2"
 patches:
   "6.3.0":
     - patch_file: "patches/0001-msvc-dumpbin-yasm-wrapper.patch"
     - patch_file: "patches/6.x.x-0001-fix-MSVC-next-prime-error.patch"
+    - patch_file: "patches/cpp23-unprototyped-functions.patch"
     - patch_file: "patches/emscripten/0001-configure.patch"
       patch_os: "Emscripten"
       patch_source: "https://github.com/fpelliccioni"
@@ -28,17 +34,6 @@ patches:
       patch_source: "https://github.com/fpelliccioni"
       patch_type: "portability"
   "6.2.1":
-    - patch_file: "patches/0001-msvc-dumpbin-yasm-wrapper.patch"
-    - patch_file: "patches/6.x.x-0001-fix-MSVC-next-prime-error.patch"
-    - patch_file: "patches/emscripten/0001-configure.patch"
-      patch_os: "Emscripten"
-      patch_source: "https://github.com/fpelliccioni"
-      patch_type: "portability"
-    - patch_file: "patches/emscripten/0002-gmp-mparam.h.patch"
-      patch_os: "Emscripten"
-      patch_source: "https://github.com/fpelliccioni"
-      patch_type: "portability"
-  "6.2.0":
     - patch_file: "patches/0001-msvc-dumpbin-yasm-wrapper.patch"
     - patch_file: "patches/6.x.x-0001-fix-MSVC-next-prime-error.patch"
     - patch_file: "patches/emscripten/0001-configure.patch"

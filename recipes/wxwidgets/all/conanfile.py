@@ -1,14 +1,14 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.tools.system import package_manager
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
+required_conan_version = ">=2.0.6"
 
 
 class wxWidgetsConan(ConanFile):
@@ -21,6 +21,7 @@ class wxWidgetsConan(ConanFile):
     license = "wxWidgets"
     settings = "os", "arch", "compiler", "build_type"
 
+    package_type = "library"
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"],
@@ -76,9 +77,6 @@ class wxWidgetsConan(ConanFile):
                "custom_disables": ""
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
@@ -92,12 +90,15 @@ class wxWidgetsConan(ConanFile):
 
     @property
     def _gtk_version(self):
-        return f"gtk{self.dependencies['gtk'].options.version}"
+        if self.settings.os == "Linux":
+            return f"gtk{self.dependencies['gtk'].options.version}"
 
     def system_requirements(self):
         apt = package_manager.Apt(self)
         packages = []
         if self.options.get_safe("secretstore"):
+            # TODO: Move to Conan libsecret package after using GTK from Conan
+            # libsecret and GTK need glib, which mixes with system deps from GTK
             packages.append("libsecret-1-dev")
         if self.options.webview:
             if self._gtk_version == "gtk2":
@@ -122,8 +123,8 @@ class wxWidgetsConan(ConanFile):
         yum.install(packages)
 
     def build_requirements(self):
-        self.tool_requires("ninja/1.11.1")
-        self.tool_requires("cmake/[>=3.17]")
+        self.tool_requires("ninja/[>=1.10.2 <2]")
+        self.tool_requires("cmake/[>=3.17 <4]")
 
     # TODO: add support for gtk non system version when it's ready for Conan 2
     def requirements(self):
@@ -133,7 +134,7 @@ class wxWidgetsConan(ConanFile):
             if self.options.get_safe("opengl", default=False):
                 self.requires("opengl/system")
             self.requires("xkbcommon/1.6.0", options={"with_x11": True})
-            # TODO: Does not work right now
+            # FIXME: Conan Cairo result in linkage errors due mixed system deps from GTK
             # if self.options.get_safe("cairo"):
             #    self.requires("cairo/1.18.0")
             if self.options.mediactrl:
@@ -142,11 +143,11 @@ class wxWidgetsConan(ConanFile):
             self.requires("libcurl/[>=7.78.0 <9]")
 
         if self.options.jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.2")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         elif self.options.jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.5")
+            self.requires("mozjpeg/[>=4.1.5 <5]")
 
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/4.6.0")
@@ -165,23 +166,6 @@ class wxWidgetsConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # Don't change library names when cross-compiling
-        replace_in_file(self, os.path.join(self.source_folder, "build", "cmake", "functions.cmake"),
-                        'set(cross_target "-${CMAKE_SYSTEM_NAME}")',
-                        'set(cross_target)')
-        # Don't override Conan's toolchain
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "CMAKE_OSX_DEPLOYMENT_TARGET",
-                        "CMAKE_OSX_DEPLOYMENT_TARGET_IGNORED")
-        # Fix for strcpy_s (fix upstream?)
-        if is_apple_os(self):
-            cmake_version = "3.0"
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            f'cmake_minimum_required(VERSION {cmake_version})',
-                            f'cmake_minimum_required(VERSION {cmake_version})\nadd_definitions(-D__STDC_WANT_LIB_EXT1__)')
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -250,6 +234,8 @@ class wxWidgetsConan(ConanFile):
             if len(item) > 0:
                 tc.variables[item] = False
 
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
+
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -258,6 +244,25 @@ class wxWidgetsConan(ConanFile):
         deps.set_property("nanosvg", "cmake_file_name", "NanoSVG")
         deps.set_property("nanosvg", "cmake_target_name", "NanoSVG::nanosvg")
         deps.generate()
+
+    def _patch_sources(self):
+        # Don't change library names when cross-compiling
+        replace_in_file(self, os.path.join(self.source_folder, "build", "cmake", "functions.cmake"),
+                        'set(cross_target "-${CMAKE_SYSTEM_NAME}")',
+                        'set(cross_target)')
+        # Don't override Conan's toolchain
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "CMAKE_OSX_DEPLOYMENT_TARGET",
+                        "CMAKE_OSX_DEPLOYMENT_TARGET_IGNORED")
+
+        # Fix for strcpy_s on Apple platforms (fix upstream?)
+        if is_apple_os(self):
+            cmake_version = "3.0"
+            if Version(self.version) >= "3.2.7":
+                cmake_version = "3.0...3.31"
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            f'cmake_minimum_required(VERSION {cmake_version})',
+                            f'cmake_minimum_required(VERSION {cmake_version})\nadd_definitions(-D__STDC_WANT_LIB_EXT1__)')
 
     def build(self):
         self._patch_sources()
