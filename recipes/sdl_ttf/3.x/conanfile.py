@@ -13,7 +13,7 @@ class SdlttfConan(ConanFile):
     description = "A TrueType font library for SDL"
     license = "Zlib"
     topics = ("sdl3", "sdl3_ttf", "sdl", "ttf", "font")
-    homepage = "https://www.libsdl.org/projects/SDL_ttf"
+    homepage = "https://github.com/libsdl-org/SDL_ttf"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -46,10 +46,6 @@ class SdlttfConan(ConanFile):
     def validate(self):
         if Version(self.version).major != Version(self.dependencies["sdl"].ref.version).major:
             raise ConanInvalidConfiguration("sdl & sdl_ttf must have the same major version")
-
-        if self.options.shared:
-            raise ConanInvalidConfiguration("This recipe does not support shared libraries for now, contributions welcome")
-
         if self.options.shared != self.dependencies["sdl"].options.shared:
             raise ConanInvalidConfiguration("sdl & sdl_ttf must be built with the same 'shared' option value")
 
