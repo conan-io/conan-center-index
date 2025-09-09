@@ -41,6 +41,7 @@ patches:
     - patch_file: "patches/2.55.1-0001-fix-cmake.patch"
     - patch_file: "patches/2.55.1-0002-fix-avx-check.patch"
     - patch_file: "patches/2.55.1-0003-fix-os-flags-arm64.patch"
+    - patch_file: "patches/2.55.1-0004-fix-stdexcept-include.patch"
   "2.53.1":
     - patch_file: "patches/2.53.1-0001-fix-cmake.patch"
     - patch_file: "patches/2.53.1-0002-fix-avx-check.patch"
