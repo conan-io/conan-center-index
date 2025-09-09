@@ -58,9 +58,7 @@ class AzureSDKForCppConan(ConanFile):
             # doesn't currently support that build option...
             self.requires("wil/[>=1.0.231028.1]")
 
-            if not self.options.get_safe("win_http_transport"):
-                self.requires("libcurl/[>=7.78 <9]")
-        else:
+        if not self.options.get_safe("win_http_transport"):
             self.requires("libcurl/[>=7.78 <9]")
 
     def layout(self):
@@ -84,8 +82,13 @@ class AzureSDKForCppConan(ConanFile):
 
         tc.cache_variables["BUILD_TESTING"] = "OFF"
         tc.cache_variables["ENABLE_PROXY_TESTS"] = "OFF"
-        tc.cache_variables["BUILD_TRANSPORT_CURL"] = "ON"
-        tc.cache_variables["BUILD_TRANSPORT_WINHTTP"] = "OFF"
+
+        if self.options.get_safe("win_http_transport"):
+            tc.cache_variables["BUILD_TRANSPORT_CURL"] = "OFF"
+            tc.cache_variables["BUILD_TRANSPORT_WINHTTP"] = "ON"
+        else:
+            tc.cache_variables["BUILD_TRANSPORT_CURL"] = "ON"
+            tc.cache_variables["BUILD_TRANSPORT_WINHTTP"] = "OFF"
 
         tc.cache_variables["BUILD_DOCUMENTATION"] = "OFF"
         tc.cache_variables["BUILD_SAMPLES"] = "OFF"
