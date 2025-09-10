@@ -15,6 +15,7 @@ class GladConan(ConanFile):
     homepage = "https://github.com/Dav1dde/glad"
     license = "MIT"
     settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
 
     options = {
         "shared": [True, False],
