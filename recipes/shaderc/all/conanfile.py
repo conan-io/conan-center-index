@@ -85,7 +85,7 @@ class ShadercConan(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("glslang::glslang-core", "cmake_target_name", "glslang")
         deps.set_property("glslang::osdependent", "cmake_target_name", "OSDependent")
-        if Version(self.version) < Version("2025.2"):
+        if Version(self.version) < Version("2024.1"):
             deps.set_property("glslang::oglcompiler", "cmake_target_name", "OGLCompiler")
             deps.set_property("glslang::hlsl", "cmake_target_name", "HLSL")
         deps.set_property("glslang::spirv", "cmake_target_name", "SPIRV")
@@ -121,7 +121,7 @@ class ShadercConan(ConanFile):
         self.cpp_info.requires = [
             "glslang::glslang-core",
             "glslang::osdependent",
-            *(["glslang::oglcompiler", "glslang::hlsl"] if Version(self.version) < Version("2025.2") else []),
+            *(["glslang::oglcompiler", "glslang::hlsl"] if Version(self.version) < Version("2024.1") else []),
             "glslang::spirv",
             "spirv-tools::spirv-tools-core",
             "spirv-tools::spirv-tools-opt",
