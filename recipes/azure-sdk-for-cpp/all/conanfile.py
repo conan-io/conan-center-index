@@ -47,8 +47,6 @@ class AzureSDKForCppConan(ConanFile):
     def configure(self):
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
-        if self.settings.os != "Windows":
-            self.options.rm_safe("win_http_transport")
 
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
@@ -58,7 +56,7 @@ class AzureSDKForCppConan(ConanFile):
             # wil is always required on windows since azure-identity can't be disabled via cmake.
             # azure-identity and wil are not necessary for storage if skip_test=True, but MS
             # doesn't currently support that build option...
-            self.requires("wil/[>=1.0.231028.1]")
+            self.requires("wil/1.0.250325.1")
 
         if not self.options.get_safe("win_http_transport"):
             self.requires("libcurl/[>=7.78 <9]")
@@ -69,9 +67,6 @@ class AzureSDKForCppConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 14)
-
-        if self.settings.compiler == 'msvc' and Version(self.settings.compiler.version) < "193":
-            raise ConanInvalidConfiguration("Building requires msvc >= 193")
 
         if self.settings.compiler == 'gcc' and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration("Building requires GCC >= 6")
