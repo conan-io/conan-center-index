@@ -147,6 +147,8 @@ class DuckdbConan(ConanFile):
             tc.preprocessor_definitions["DUCKDB_API"] = ""
         if Version(self.version) >= "0.10.0" and cross_building(self):
             tc.variables["DUCKDB_EXPLICIT_PLATFORM"] = f"{self.settings.os}_{self.settings.arch}"
+        if is_msvc(self):
+            tc.extra_cxxflags.append("/bigobj")
         tc.generate()
 
         dpes = CMakeDeps(self)
