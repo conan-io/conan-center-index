@@ -25,9 +25,7 @@ class SdlnetConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
     exports_sources = "CMakeLists.txt"
-
     implements = ["auto_shared_fpic"]
     languages = "C"
 

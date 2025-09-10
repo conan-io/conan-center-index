@@ -7,7 +7,7 @@ from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2.1"
 
 
 class SDLMixerConan(ConanFile):
