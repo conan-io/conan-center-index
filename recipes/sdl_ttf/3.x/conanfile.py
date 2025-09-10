@@ -65,8 +65,6 @@ class SdlttfConan(ConanFile):
 
         tc.generate()
         deps = CMakeDeps(self)
-        deps.set_property("freetype", "cmake_file_name", "Freetype")
-        deps.set_property("freetype", "cmake_target_name", "Freetype::Freetype")
         deps.generate()
 
     def build(self):
