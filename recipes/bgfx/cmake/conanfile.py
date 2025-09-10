@@ -113,13 +113,15 @@ class bgfxConan(ConanFile):
         self.cpp_info.components["bx"].libs = ["bx"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["bx"].system_libs = ["dl", "rt"]
-            self.cpp_info.includedirs.append(os.path.join("include", "bx", "compat", "linux"))
+            self.cpp_info.components["bx"].includedirs.append(os.path.join("include", "bx", "compat", "linux"))
         self.cpp_info.components["bx"].defines = [f"BX_CONFIG_DEBUG={1 if self.settings.build_type == 'Debug' else 0}"]
         if is_apple_os(self):
             self.cpp_info.components["bx"].frameworks = ["Foundation"]
         elif is_msvc(self):
             # INFO: \bx\platform.h(432): fatal error C1189: #error:  "When using MSVC you must set /Zc:__cplusplus compiler option."
             self.cpp_info.components["bx"].cxxflags = ["/Zc:__cplusplus", "/Zc:preprocessor"]
+            self.cpp_info.components["bx"].includedirs.append(os.path.join("include", "bx", "compat", "msvc"))
+            self.cpp_info.components["bx"].defines.extend(["__STDC_LIMIT_MACROS", "__STDC_FORMAT_MACROS", "__STDC_CONSTANT_MACROS"])
 
         self.cpp_info.components["bimg"].set_property("cmake_target_name", "bgfx::bimg")
         self.cpp_info.components["bimg"].libs = ["bimg"]
