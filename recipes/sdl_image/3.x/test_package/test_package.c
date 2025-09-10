@@ -4,6 +4,5 @@
 
 int main(int argc, char *argv[])
 {
-    printf("SDL Version: %i\n", SDL_GetVersion());
     printf("SDL_image Version: %i\n", IMG_Version());
 }

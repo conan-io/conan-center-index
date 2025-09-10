@@ -21,48 +21,48 @@ class SDLImageConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "bmp": [True, False],
-        "gif": [True, False],
-        "lbm": [True, False],
-        "pcx": [True, False],
-        "pnm": [True, False],
-        "svg": [True, False],
-        "tga": [True, False],
-        "qoi": [True, False],
-        "xcf": [True, False],
-        "xpm": [True, False],
-        "xv": [True, False],
+        "with_bmp": [True, False],
+        "with_gif": [True, False],
+        "with_lbm": [True, False],
+        "with_pcx": [True, False],
+        "with_pnm": [True, False],
+        "with_svg": [True, False],
+        "with_tga": [True, False],
+        "with_qoi": [True, False],
+        "with_xcf": [True, False],
+        "with_xpm": [True, False],
+        "with_xv": [True, False],
         "with_libjpeg": [True, False],
         "with_libtiff": [True, False],
         "with_libpng": [True, False],
         "with_libwebp": [True, False],
         "with_avif": [True, False],
         "with_jxl": [True, False],
-        "imageio": [True, False],
-        "wic": [True, False],
+        "with_imageio": [True, False],
+        "with_wic": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "bmp": True,
-        "gif": True,
-        "lbm": True,
-        "pcx": True,
-        "pnm": True,
-        "svg": True,
-        "tga": True,
-        "qoi": True,
-        "xcf": True,
-        "xpm": True,
-        "xv": True,
+        "with_bmp": True,
+        "with_gif": True,
+        "with_lbm": True,
+        "with_pcx": True,
+        "with_pnm": True,
+        "with_svg": True,
+        "with_tga": True,
+        "with_qoi": True,
+        "with_xcf": True,
+        "with_xpm": True,
+        "with_xv": True,
         "with_libjpeg": True,
         "with_libtiff": True,
         "with_libpng": True,
         "with_libwebp": True,
-        "with_avif": False,
+        "with_avif": True,
         "with_jxl": False,
-        "imageio": False,
-        "wic": False,
+        "with_imageio": True,
+        "with_wic": False,
     }
     implements = ["auto_shared_fpic"]
     languages = "C"
@@ -71,15 +71,14 @@ class SDLImageConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if not is_apple_os(self):
-            del self.options.imageio
+            del self.options.with_imageio
         if self.settings.os != "Windows":
-            del self.options.wic
+            del self.options.with_wic
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # Headers are exposed https://github.com/conan-io/conan-center-index/pull/16167#issuecomment-1508347351
         self.requires("sdl/[>=3.2.20 <4]", transitive_headers=True)
         if self.options.with_libtiff:
             self.requires("libtiff/4.6.0")
@@ -89,10 +88,10 @@ class SDLImageConan(ConanFile):
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_libwebp:
             self.requires("libwebp/[>=1.3.2 <2]")
-        if self.options.get_safe("with_avif"):
-            self.requires("libjxl/0.11.1")
+        if self.options.with_avif:
             self.requires("libavif/[>=1.0.1 <2]")
-
+        if self.options.with_jxl:
+            self.requires("libjxl/0.11.1")
 
     def validate(self):
         if self.options.shared and not self.dependencies["sdl"].options.shared:
@@ -111,25 +110,25 @@ class SDLImageConan(ConanFile):
         tc.cache_variables["SDLIMAGE_VENDORED"] = False
         tc.cache_variables["SDLIMAGE_DEPS_SHARED"] = False
         tc.cache_variables["SDLIMAGE_SAMPLES"] = False
-        tc.cache_variables["SDLIMAGE_AVIF"] = self.options.get_safe("with_avif")
-        tc.cache_variables["SDLIMAGE_BMP"] = self.options.bmp
-        tc.cache_variables["SDLIMAGE_GIF"] = self.options.gif
+        tc.cache_variables["SDLIMAGE_AVIF"] = self.options.with_avif
+        tc.cache_variables["SDLIMAGE_BMP"] = self.options.with_bmp
+        tc.cache_variables["SDLIMAGE_GIF"] = self.options.with_gif
         tc.cache_variables["SDLIMAGE_JPG"] = self.options.with_libjpeg
-        tc.cache_variables["SDLIMAGE_JXL"] = self.options.get_safe("with_jxl")
-        tc.cache_variables["SDLIMAGE_LBM"] = self.options.lbm
-        tc.cache_variables["SDLIMAGE_PCX"] = self.options.pcx
+        tc.cache_variables["SDLIMAGE_JXL"] = self.options.with_jxl
+        tc.cache_variables["SDLIMAGE_LBM"] = self.options.with_lbm
+        tc.cache_variables["SDLIMAGE_PCX"] = self.options.with_pcx
         tc.cache_variables["SDLIMAGE_PNG"] = self.options.with_libpng
-        tc.cache_variables["SDLIMAGE_PNM"] = self.options.pnm
-        tc.cache_variables["SDLIMAGE_QOI"] = self.options.get_safe("qoi")
-        tc.cache_variables["SDLIMAGE_SVG"] = self.options.svg
-        tc.cache_variables["SDLIMAGE_TGA"] = self.options.tga
+        tc.cache_variables["SDLIMAGE_PNM"] = self.options.with_pnm
+        tc.cache_variables["SDLIMAGE_QOI"] = self.options.with_qoi
+        tc.cache_variables["SDLIMAGE_SVG"] = self.options.with_svg
+        tc.cache_variables["SDLIMAGE_TGA"] = self.options.with_tga
         tc.cache_variables["SDLIMAGE_TIF"] = self.options.with_libtiff
         tc.cache_variables["SDLIMAGE_WEBP"] = self.options.with_libwebp
-        tc.cache_variables["SDLIMAGE_XCF"] = self.options.xcf
-        tc.cache_variables["SDLIMAGE_XPM"] = self.options.xpm
-        tc.cache_variables["SDLIMAGE_XV"] = self.options.xv
-        tc.cache_variables["SDLIMAGE_BACKEND_WIC"] = self.options.get_safe("wic")
-        tc.cache_variables["SDLIMAGE_BACKEND_IMAGEIO"] = self.options.get_safe("imageio")
+        tc.cache_variables["SDLIMAGE_XCF"] = self.options.with_xcf
+        tc.cache_variables["SDLIMAGE_XPM"] = self.options.with_xpm
+        tc.cache_variables["SDLIMAGE_XV"] = self.options.with_xv
+        tc.cache_variables["SDLIMAGE_BACKEND_WIC"] = self.options.get_safe("with_wic")
+        tc.cache_variables["SDLIMAGE_BACKEND_IMAGEIO"] = self.options.get_safe("with_imageio")
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
@@ -165,12 +164,12 @@ class SDLImageConan(ConanFile):
             self.cpp_info.set_property("cmake_target_aliases", ["SDL3_image::SDL3_image-static"])
         self.cpp_info.libs = [f"SDL3_image{lib_postfix}"]
 
-        if self.options.get_safe("imageio") and not self.options.shared:
+        if self.options.get_safe("with_imageio") and not self.options.shared:
             # IMG_ImageIO.m: https://github.com/libsdl-org/SDL_image/blob/release-3.2.4/src/IMG_ImageIO.m#L17-L26
             # Need for CoreGraphics: https://discourse.libsdl.org/t/sdl-image-issue-470-add-coregraphics-imageio-and-mobilecoreservices-required-from-img-imageio-mm-for-ios-specific-builds-e2923/59516
             if self.settings.os == "Macos":
                 self.cpp_info.frameworks = ["ApplicationServices", "Foundation"]
             else:
                 self.cpp_info.frameworks = ["CoreGraphics", "ImageIO", "MobileCoreServices", "UIKit", "Foundation"]
-        if self.options.get_safe("wic"):
+        if self.options.get_safe("with_wic"):
             self.cpp_info.system_libs.extend(["windowscodecs"])
