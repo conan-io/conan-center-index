@@ -59,6 +59,7 @@ class FFMpegConan(ConanFile):
         "with_libx264": [True, False],
         "with_libx265": [True, False],
         "with_libvpx": [True, False],
+        "with_libvpl": [True, False],
         "with_libmp3lame": [True, False],
         "with_libfdk_aac": [True, False],
         "with_libwebp": [True, False],
@@ -148,6 +149,7 @@ class FFMpegConan(ConanFile):
         "with_libx264": True,
         "with_libx265": True,
         "with_libvpx": True,
+        "with_libvpl": False,
         "with_libmp3lame": True,
         "with_libfdk_aac": True,
         "with_libwebp": True,
@@ -232,6 +234,7 @@ class FFMpegConan(ConanFile):
             "with_libx264": ["avcodec"],
             "with_libx265": ["avcodec"],
             "with_libvpx": ["avcodec"],
+            "with_libvpl": ["avcodec"],
             "with_libmp3lame": ["avcodec"],
             "with_libfdk_aac": ["avcodec"],
             "with_libwebp": ["avcodec"],
@@ -372,6 +375,8 @@ class FFMpegConan(ConanFile):
             self.requires("dav1d/[>=1.4 <2]")
         if self.options.get_safe("with_libdrm"):
             self.requires("libdrm/2.4.119")
+        if self.options.with_libvpl:
+            self.requires("libvpl/[>=2.6 <3]")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -540,6 +545,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("libx264", self.options.with_libx264),
             opt_enable_disable("libx265", self.options.with_libx265),
             opt_enable_disable("libvpx", self.options.with_libvpx),
+            opt_enable_disable("libvpl", self.options.get_safe("with_libvpl")),
             opt_enable_disable("libmp3lame", self.options.with_libmp3lame),
             opt_enable_disable("libfdk-aac", self.options.get_safe("with_libfdk_aac")),
             opt_enable_disable("libwebp", self.options.with_libwebp),
@@ -676,6 +682,9 @@ class FFMpegConan(ConanFile):
         ld = buildenv_vars.get("LD")
         if ld:
             args.append(f"--ld={unix_path(self, ld)}")
+        elif str(self.settings.os) in ["Linux", "FreeBSD"]:
+            cxx = compilers_from_conf.get("cpp", buildenv_vars.get("CXX", self._default_compilers.get("cxx")))
+            args.append(f"--ld={unix_path(self, cxx)}")
         ranlib = buildenv_vars.get("RANLIB")
         if ranlib:
             args.append(f"--ranlib={unix_path(self, ranlib)}")
@@ -938,6 +947,8 @@ class FFMpegConan(ConanFile):
                 avcodec.requires.append("libaom-av1::libaom-av1")
             if self.options.get_safe("with_libdav1d"):
                 avcodec.requires.append("dav1d::dav1d")
+            if self.options.get_safe("with_libvpl"):
+                avcodec.requires.append("libvpl::dispatcher")
 
         if self.options.avformat:
             if self.options.with_bzip2:
@@ -982,3 +993,4 @@ class FFMpegConan(ConanFile):
 
         if self.options.get_safe("with_vulkan"):
             avutil.requires.append("vulkan-loader::vulkan-loader")
+
