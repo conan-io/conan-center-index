@@ -112,6 +112,8 @@ class CyrusSaslConan(ConanFile):
     def build_requirements(self):
         if not is_msvc(self):
             self.tool_requires("gnu-config/cci.20210814")
+            self.tool_requires("autoconf/2.72")
+
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -168,6 +170,8 @@ class CyrusSaslConan(ConanFile):
     def _build_autotools(self):
         self._patch_sources_autotools()
         autotools = Autotools(self)
+        # INFO: Reconfigure due patch for missing time.h include
+        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
