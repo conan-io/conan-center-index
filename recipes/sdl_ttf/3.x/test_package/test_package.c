@@ -3,12 +3,7 @@
 #include <stdio.h>
 
 int main(int argc, char **argv) {
-    if (!TTF_Init()) {
-        fprintf(stderr, "Failed to initialize TTF: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    printf("SDL3_ttf is working!\n");
+    printf("SDL3_ttf version: %i", TTF_Version());
 
     return 0;
 }
