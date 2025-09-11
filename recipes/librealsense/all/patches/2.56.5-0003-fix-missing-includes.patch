@@ -58,6 +58,18 @@ index 0cfa3a72aa..51690d7140 100644
  
  namespace librealsense {
  namespace platform {
+diff --git a/third-party/rsutils/src/control-c-handler.cpp b/third-party/rsutils/src/control-c-handler.cpp
+index 7d73013ce7..ff534155ce 100644
+--- a/third-party/rsutils/src/control-c-handler.cpp
++++ b/third-party/rsutils/src/control-c-handler.cpp
+@@ -6,6 +6,7 @@
+ 
+ #include <signal.h>
+ #include <atomic>
++#include <stdexcept>
+ 
+ 
+ namespace rsutils {
 diff --git a/third-party/rsutils/src/special-folder.cpp b/third-party/rsutils/src/special-folder.cpp
 index 3717faa560..b2fd5f07a9 100644
 --- a/third-party/rsutils/src/special-folder.cpp
