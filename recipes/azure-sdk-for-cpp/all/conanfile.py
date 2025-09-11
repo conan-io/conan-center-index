@@ -49,6 +49,8 @@ class AzureSDKForCppConan(ConanFile):
     def configure(self):
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
+        if self.settings.os == "Windows":
+            self.options.curl_http_transport = False
 
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
