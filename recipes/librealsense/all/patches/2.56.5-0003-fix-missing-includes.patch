@@ -70,6 +70,20 @@ index 7d73013ce7..ff534155ce 100644
  
  
  namespace rsutils {
+diff --git a/third-party/rsutils/src/network-adapter-watcher.cpp b/third-party/rsutils/src/network-adapter-watcher.cpp
+index 407f70b4c2..25fa947890 100644
+--- a/third-party/rsutils/src/network-adapter-watcher.cpp
++++ b/third-party/rsutils/src/network-adapter-watcher.cpp
+@@ -26,6 +26,9 @@
+ #endif
+ #endif  // ! __APPLE__ && ! __ANDROID__
+ 
++#include <thread>
++#include <cstring>
++
+ 
+ namespace rsutils {
+ namespace os {
 diff --git a/third-party/rsutils/src/special-folder.cpp b/third-party/rsutils/src/special-folder.cpp
 index 3717faa560..b2fd5f07a9 100644
 --- a/third-party/rsutils/src/special-folder.cpp
