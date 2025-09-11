@@ -5,6 +5,3 @@ sources:
   "1.33":
     url: "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/1.33/downloads/wayland-protocols-1.33.tar.xz"
     sha256: "94f0c50b090d6e61a03f62048467b19abbe851be4e11ae7b36f65f8b98c3963a"
-  "1.25":
-    url: "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/archive/1.25/wayland-protocols-1.25.tar.bz2"
-    sha256: "633c9bed0efb8e773c5780d4442051264d179c154b7d1896ca3b56b5d4da4718"
