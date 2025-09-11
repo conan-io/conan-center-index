@@ -63,6 +63,9 @@ class ReductCppConan(ConanFile):
             if not date.options.header_only:
                 raise ConanInvalidConfiguration("date must be built as header-only")
 
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "15":
+            raise ConanInvalidConfiguration("Apple-clang versions prior to 15 have missing C++20 support")
+
         if (
             self.settings.os != "Windows"
             and self.settings.get_safe("compiler") == "gcc"
