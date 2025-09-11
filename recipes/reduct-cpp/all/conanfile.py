@@ -44,8 +44,8 @@ class ReductCppConan(ConanFile):
         if not self.options.with_chrono:
             self.requires("date/[>=3.0.1 <4]")
 
-        def build_requirements(self):
-            self.tool_requires("cmake/[>=3.23]")
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.23]")
 
     def validate(self):
         check_min_cppstd(self, 20)
