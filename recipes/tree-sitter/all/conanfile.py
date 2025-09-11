@@ -28,6 +28,7 @@ class TreeSitterConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            self.package_type = "static-library"
 
     def configure(self):
         if self.settings.os == "Windows":
