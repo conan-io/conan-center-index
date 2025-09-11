@@ -1,0 +1,72 @@
+diff --git a/src/core/matcher-factory.cpp b/src/core/matcher-factory.cpp
+index ea9420903b..615d16d5ed 100644
+--- a/src/core/matcher-factory.cpp
++++ b/src/core/matcher-factory.cpp
+@@ -7,6 +7,7 @@
+ 
+ #include <src/sync.h>
+ 
++#include <stdexcept>
+ 
+ namespace librealsense {
+ 
+diff --git a/src/core/options-registry.cpp b/src/core/options-registry.cpp
+index d22b142ded..68c62d5b06 100644
+--- a/src/core/options-registry.cpp
++++ b/src/core/options-registry.cpp
+@@ -7,6 +7,7 @@
+ #include <vector>
+ #include <mutex>
+ #include <map>
++#include <stdexcept>
+ 
+ 
+ namespace librealsense {
+diff --git a/src/librealsense-exception.h b/src/librealsense-exception.h
+index c9ce838c04..a8963f28db 100644
+--- a/src/librealsense-exception.h
++++ b/src/librealsense-exception.h
+@@ -10,6 +10,7 @@
+ #include <exception>
+ #include <string>
+ 
++#include <cstring>
+ 
+ namespace librealsense {
+ 
+diff --git a/src/linux/backend-hid.h b/src/linux/backend-hid.h
+index f8bfbb793b..231045b19c 100644
+--- a/src/linux/backend-hid.h
++++ b/src/linux/backend-hid.h
+@@ -7,6 +7,7 @@
+ 
+ #include <limits.h>
+ #include <list>
++#include <fstream>
+ 
+ namespace librealsense
+ {
+diff --git a/src/platform/platform-utils.cpp b/src/platform/platform-utils.cpp
+index 0cfa3a72aa..51690d7140 100644
+--- a/src/platform/platform-utils.cpp
++++ b/src/platform/platform-utils.cpp
+@@ -7,6 +7,7 @@
+ #include "hid-device-info.h"
+ #include <src/librealsense-exception.h>
+ 
++#include <algorithm>
+ 
+ namespace librealsense {
+ namespace platform {
+diff --git a/third-party/rsutils/src/special-folder.cpp b/third-party/rsutils/src/special-folder.cpp
+index 3717faa560..b2fd5f07a9 100644
+--- a/third-party/rsutils/src/special-folder.cpp
++++ b/third-party/rsutils/src/special-folder.cpp
+@@ -19,6 +19,7 @@
+ 
+ #endif
+ 
++#include <stdexcept>
+ 
+ namespace rsutils {
+ namespace os {
