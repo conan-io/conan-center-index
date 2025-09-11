@@ -9,6 +9,7 @@ from conan.tools.files import (
     get,
     rmdir,
 )
+from conan.tools.scm import Version
 
 required_conan_version = ">=2"
 
