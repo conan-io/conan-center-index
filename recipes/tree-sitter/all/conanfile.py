@@ -14,7 +14,7 @@ class TreeSitterConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tree-sitter.github.io/tree-sitter"
     topics = ("parser", "incremental", "rust")
-    package_type = "static-library"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
