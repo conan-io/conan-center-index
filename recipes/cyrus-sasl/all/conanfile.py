@@ -113,7 +113,7 @@ class CyrusSaslConan(ConanFile):
         if not is_msvc(self):
             self.tool_requires("gnu-config/cci.20210814")
             self.tool_requires("autoconf/2.72")
-
+            self.tool_requires("pkgconf/2.2.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
