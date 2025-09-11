@@ -1,10 +1,13 @@
 from conan import ConanFile
+from conan.errors import ConanException
+from conan.tools.apple import is_apple_os
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, rmdir
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class NsyncConan(ConanFile):
@@ -50,6 +53,9 @@ class NsyncConan(ConanFile):
             tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         # Relocatable shared libs on macOS
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "1.29.2": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
     def _patch_sources(self):
@@ -73,6 +79,14 @@ class NsyncConan(ConanFile):
                 f"{ar_dest})",
                 f"{ar_dest}\n{rt_dest})"
             )
+
+        if is_apple_os(self):
+            # Following the Darwin codepath when the OS is an apple OS (e.g. iOS)
+            # matches https://github.com/google/nsync/blob/99e0e9e1e32db42e88b98b96e874f4884620b755/BUILD#L131
+            # (this is best effort)
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+             'elseif ("${CMAKE_SYSTEM_NAME}X" STREQUAL "DarwinX")',
+             'elseif(1)')
 
     def build(self):
         self._patch_sources()

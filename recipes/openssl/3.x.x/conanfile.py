@@ -380,20 +380,29 @@ class OpenSSLConan(ConanFile):
         if not self.options.no_zlib:
             zlib_cpp_info = self.dependencies["zlib"].cpp_info.aggregated_components()
             include_path = self._adjust_path(zlib_cpp_info.includedirs[0])
+            is_shared_zlib = self.dependencies["zlib"].options.shared
+
+
+            # the --with-zlib-lib flag takes a different value depending on platform and if ZLIB is shared
+            # From https://github.com/openssl/openssl/blob/openssl-3.4.1/INSTALL.md#with-zlib-lib
+            # On Unix: the directory where the zlib library is (for -L flag)
+            # On Windows with static zlib: the path to the static library to link (assumed)
+            # On Windows with shared zlib: the leaf name of the dll (its loaded with LoadLibrary)
             if self._use_nmake:
+                # notes: consider where this should be "if on windows"
+                #        zlib1 is assumed to be the name of the zlib1.dll for all windows configurations
                 lib_path = self._adjust_path(os.path.join(zlib_cpp_info.libdirs[0], f"{zlib_cpp_info.libs[0]}.lib"))
+                zlib_lib_flag = "zlib1" if is_shared_zlib else lib_path
             else:
                 # Just path, GNU like compilers will find the right file
-                lib_path = self._adjust_path(zlib_cpp_info.libdirs[0])
+                zlib_lib_flag = self._adjust_path(zlib_cpp_info.libdirs[0])
 
-            if self.dependencies["zlib"].options.shared:
-                args.append("zlib-dynamic")
-            else:
-                args.append("zlib")
+            zlib_configure_arg = "zlib-dynamic" if is_shared_zlib else "zlib"
+            args.append(zlib_configure_arg)
 
             args.extend([
                 f'--with-zlib-include="{include_path}"',
-                f'--with-zlib-lib="{lib_path}"',
+                f'--with-zlib-lib="{zlib_lib_flag}"',
             ])
 
         for option_name in self.default_options.keys():
@@ -410,6 +419,11 @@ class OpenSSLConan(ConanFile):
             xcrun = XCRun(self)
             env.define_path("CROSS_SDK", os.path.basename(xcrun.sdk_path))
             env.define_path("CROSS_TOP", os.path.dirname(os.path.dirname(xcrun.sdk_path)))
+
+        if is_apple_os(self) and self.options.shared:
+            # Inject -headerpad_max_install_names for shared library, otherwise fix_apple_shared_install_name() may fail.
+            # See https://github.com/conan-io/conan-center-index/issues/27424
+            tc.extra_ldflags.append("-headerpad_max_install_names")
 
         self._create_targets(tc.cflags, tc.cxxflags, tc.defines, tc.ldflags)
         tc.generate(env)

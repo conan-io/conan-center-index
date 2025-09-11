@@ -1,5 +1,8 @@
 # Add only the SDK release versions from https://github.com/KhronosGroup/SPIRV-Tools/tags for consistency
 sources:
+  "1.4.313.0":
+    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/vulkan-sdk-1.4.313.0.tar.gz"
+    sha256: "6b60f723345ceed5291cceebbcfacf7fea9361a69332261fa08ae57e2a562005"
   "1.4.309.0":
     url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/vulkan-sdk-1.4.309.0.tar.gz"
     sha256: "6b8577054c575573ead3ad71cb6a2c0b3397b64c746cc3c99e48cc5e324c1b55"
@@ -21,3 +24,20 @@ sources:
   "1.2.198.0":
     url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/sdk-1.2.198.0.tar.gz"
     sha256: "e8a9fec946f8473129374ad6b98ee690ac9a4574ace7cb3b46bbeb4eddfdc33b"
+patches:
+  "1.4.313.0":
+    - patch_file: "patches/0001-fix-clang-20-build-issue.patch"
+      patch_description: "fix clang-20 build issue"
+      patch_type: "backport"
+  "1.4.309.0":
+    - patch_file: "patches/0001-fix-clang-20-build-issue.patch"
+      patch_description: "fix clang-20 build issue"
+      patch_type: "backport"
+  "1.3.268.0":
+    - patch_file: "patches/0001-fix-clang-20-build-issue.patch"
+      patch_description: "fix clang-20 build issue"
+      patch_type: "backport"
+  "1.3.261.1":
+    - patch_file: "patches/0001-fix-clang-20-build-issue.patch"
+      patch_description: "fix clang-20 build issue"
+      patch_type: "backport"
