@@ -2,15 +2,3 @@ sources:
   "0.25":
     url: "https://github.com/zeux/meshoptimizer/archive/refs/tags/v0.25.tar.gz"
     sha256: "68b2fef4e4eaad98e00c657c1e7f8982a7176e61dd7efdeaec67a025b8519be9"
-  "0.23":
-    url: "https://github.com/zeux/meshoptimizer/archive/refs/tags/v0.23.tar.gz"
-    sha256: "ac574107dd7e532ecfbea208fff9cd18fbcd1687f1d540ff8a798624ada453e0"
-  "0.15":
-    url: "https://github.com/zeux/meshoptimizer/archive/v0.15.tar.gz"
-    sha256: "89d350067c254cc737672600cb74c1ad6a70d2868398d430150ba7834be0b834"
-  "0.14":
-    url: "https://github.com/zeux/meshoptimizer/archive/v0.14.tar.gz"
-    sha256: "5a6e429ecf72325131b439a46297a690f0cab833c7563efdadab26c0a6cf8490"
-patches:
-  "0.14":
-    - patch_file: "patches/0.14/0001-fix-build-on-old-AppleClang-versions.patch"
