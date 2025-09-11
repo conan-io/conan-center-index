@@ -21,7 +21,8 @@ class AzureSDKForCppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "win_http_transport": [True, False]
+        "win_http_transport": [True, False],
+        "curl_http_transport": [True, False]
     }
 
     default_options = {"shared": False, "fPIC": True}
@@ -29,7 +30,8 @@ class AzureSDKForCppConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "win_http_transport": False
+        "win_http_transport": True,
+        "curl_transport": True
     }
 
     def export_sources(self):
@@ -58,7 +60,7 @@ class AzureSDKForCppConan(ConanFile):
             # doesn't currently support that build option...
             self.requires("wil/1.0.250325.1")
 
-        if not self.options.get_safe("win_http_transport"):
+        if self.options.get_safe("curl_http_transport"):
             self.requires("libcurl/[>=7.78 <9]")
 
     def layout(self):
@@ -67,6 +69,9 @@ class AzureSDKForCppConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 14)
+
+        if self.settings.os != "Windows" and not self.options.get_safe("curl_transport"):
+            raise ConanInvalidConfiguration("curl_transport must be enabled.")
 
         if self.settings.compiler == 'gcc' and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration("Building requires GCC >= 6")
@@ -80,12 +85,11 @@ class AzureSDKForCppConan(ConanFile):
         tc.cache_variables["BUILD_TESTING"] = "OFF"
         tc.cache_variables["ENABLE_PROXY_TESTS"] = "OFF"
 
-        if self.options.get_safe("win_http_transport"):
-            tc.cache_variables["BUILD_TRANSPORT_CURL"] = "OFF"
-            tc.cache_variables["BUILD_TRANSPORT_WINHTTP"] = "ON"
+        if self.settings.os == "Windows"
+            tc.cache_variables["BUILD_TRANSPORT_CURL"] = self.options.get_safe("curl_transport")
+            tc.cache_variables["BUILD_TRANSPORT_WINHTTP"] = self.options.get_safe("win_http_transport")
         else:
             tc.cache_variables["BUILD_TRANSPORT_CURL"] = "ON"
-            tc.cache_variables["BUILD_TRANSPORT_WINHTTP"] = "OFF"
 
         tc.cache_variables["BUILD_DOCUMENTATION"] = "OFF"
         tc.cache_variables["BUILD_SAMPLES"] = "OFF"
