@@ -85,7 +85,7 @@ class ShadercConan(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("glslang::glslang-core", "cmake_target_name", "glslang")
         deps.set_property("glslang::osdependent", "cmake_target_name", "OSDependent")
-        if Version(self.version) < Version("2024.1"):
+        if Version(self.version) < Version("2023.8"):  # The change was made here :https://github.com/google/shaderc/commit/40bced4e1e205ecf44630d2dfa357655b6dabd04
             deps.set_property("glslang::oglcompiler", "cmake_target_name", "OGLCompiler")
             deps.set_property("glslang::hlsl", "cmake_target_name", "HLSL")
         deps.set_property("glslang::spirv", "cmake_target_name", "SPIRV")
