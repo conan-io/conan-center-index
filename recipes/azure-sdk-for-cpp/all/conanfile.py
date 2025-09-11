@@ -94,7 +94,6 @@ class AzureSDKForCppConan(ConanFile):
 
         if self.settings.os == "Windows"
             # if curl_transport and win_http_transport are both enabled, the SDK uses win_http (which is the default).
-            # both transports are built, but only the unit tests uses curl in the default configuration.
 
             tc.cache_variables["BUILD_TRANSPORT_WINHTTP"] = self.options.get_safe("win_http_transport")
 
