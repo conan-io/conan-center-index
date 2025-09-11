@@ -1,5 +1,5 @@
 From 266f0acf7f5e029afbb3e263437039e50cd6c262 Mon Sep 17 00:00:00 2001
-From: Sam James <sam@gentoo.org>
+From: Sam James <>
 Date: Wed, 23 Feb 2022 00:45:15 +0000
 Subject: [PATCH] Fix <time.h> check
 MIME-Version: 1.0
@@ -21,8 +21,7 @@ This fixes a bunch of implicit declaration warnings:
  * cyrus-sasl-2.1.28/plugins/cram.c:132:7: warning: implicit declaration of function ‘time’ [-Wimplicit-function-declaration]
 ```
 
-Upstream-Status: Backport [https://github.com/cyrusimap/cyrus-sasl/commit/266f0acf7f5e029afbb3e263437039e50cd6c262]
-Signed-off-by: Sam James <sam@gentoo.org>
+https://github.com/cyrusimap/cyrus-sasl/commit/266f0acf7f5e029afbb3e263437039e50cd6c262
 ---
  configure.ac   | 2 +-
  plugins/cram.c | 4 ++++
