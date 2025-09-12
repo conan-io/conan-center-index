@@ -121,7 +121,7 @@ class ShadercConan(ConanFile):
         self.cpp_info.requires = [
             "glslang::glslang-core",
             "glslang::osdependent",
-            *(["glslang::oglcompiler", "glslang::hlsl"] if Version(self.version) < Version("2024.1") else []),
+            *(["glslang::oglcompiler", "glslang::hlsl"] if Version(self.version) < Version("2023.8") else []),
             "glslang::spirv",
             "spirv-tools::spirv-tools-core",
             "spirv-tools::spirv-tools-opt",
