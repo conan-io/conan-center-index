@@ -36,6 +36,12 @@ class ReductCppConan(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+            del self.options.shared
+            self.package_type = "static-library"
+
     def requirements(self):
         self.requires("fmt/[>=11.0.2 <12]")
         self.requires("cpp-httplib/[>=0.16.0 <1]")
