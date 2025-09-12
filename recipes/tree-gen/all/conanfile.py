@@ -50,7 +50,7 @@ class TreeGenConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) <= "1.0.7":
-            self.requires("fmt/[<11.0.2]", transitive_headers=True)
+            self.requires("fmt/[<11]", transitive_headers=True)
         else:
             self.requires("fmt/[>=10.2.1]", transitive_headers=True)
 
