@@ -56,7 +56,7 @@ class PistacheConan(ConanFile):
         self.requires("date/3.0.1")
         if self.options.with_ssl:
             self.requires("openssl/[>=1.1 <4]")
-        if self.options.get_safe("with_libevent", True):
+        if self.options.get_safe("with_libevent"):
             self.requires("libevent/2.1.12")
 
     def validate(self):
@@ -64,7 +64,7 @@ class PistacheConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} is only support on Linux.")
         if self.settings.compiler == "clang" and Version(self.version) < "0.4.25":
             raise ConanInvalidConfiguration(f"{self.ref}'s clang support is broken. See pistacheio/pistache#835.")
-        
+
         if Version(self.version) == "0.4.25" and self.settings.os == "Windows":
             # See https://github.com/conan-io/conan-center-index/pull/26463#issuecomment-2962541819
             raise ConanInvalidConfiguration("Windows builds are broken - contributions welcome")
@@ -88,7 +88,7 @@ class PistacheConan(ConanFile):
         tc.project_options["PISTACHE_BUILD_TESTS"] = False
         tc.project_options["PISTACHE_BUILD_DOCS"] = False
         if self._supports_libevent:
-            tc.project_options["PISTACHE_FORCE_LIBEVENT"] = self.options.get_safe("with_libevent", True)
+            tc.project_options["PISTACHE_FORCE_LIBEVENT"] = self.options.get_safe("with_libevent", False)
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
@@ -121,7 +121,7 @@ class PistacheConan(ConanFile):
 
         self.cpp_info.components["libpistache"].libs = collect_libs(self)
         self.cpp_info.components["libpistache"].requires = ["rapidjson::rapidjson"]
-        if self.options.get_safe("with_libevent", True):
+        if self.options.get_safe("with_libevent"):
             self.cpp_info.components["libpistache"].requires.append("libevent::libevent")
         self.cpp_info.components["libpistache"].requires.append("date::date")
         if self.options.with_ssl:
