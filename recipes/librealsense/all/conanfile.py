@@ -95,9 +95,8 @@ class LibrealsenseConan(ConanFile):
         tc.variables["BUILD_CV_KINFU_EXAMPLE"] = False
         if self.settings.os == "Windows":
             tc.variables["FORCE_RSUSB_BACKEND"] = self.options.rsusb_backend
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if Version(self.version) > "2.53.1": # pylint: disable=conan-unreachable-upper-version
-            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
+
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" if Version(self.version) <= "2.55.1" else "3.8"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -124,18 +123,23 @@ class LibrealsenseConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "realsense2")
 
         postfix = "d" if is_msvc(self) and self.settings.build_type == "Debug" else ""
+        static_extension_libs = ["realsense-file", "fw"]
         if not self.options.shared:
             self.cpp_info.components["fw"].set_property("cmake_target_name", "realsense2::fw")
             self.cpp_info.components["fw"].libs = [f"fw{postfix}"]
             self.cpp_info.components["realsense-file"].set_property("cmake_target_name", "realsense2::realsense-file")
             self.cpp_info.components["realsense-file"].libs = [f"realsense-file{postfix}"]
+            if Version(self.version) >= "2.55.1":
+                self.cpp_info.components["rsutils"].set_property("cmake_target_name", "realsense2::rsutils")
+                self.cpp_info.components["rsutils"].libs = [f"rsutils{postfix}"]
+                static_extension_libs.append("rsutils")
 
         self.cpp_info.components["realsense2"].set_property("cmake_target_name", "realsense2::realsense2")
         self.cpp_info.components["realsense2"].set_property("pkg_config_name", "realsense2")
         self.cpp_info.components["realsense2"].libs = [f"realsense2{postfix}"]
         self.cpp_info.components["realsense2"].requires = ["libusb::libusb"]
         if not self.options.shared:
-            self.cpp_info.components["realsense2"].requires.extend(["realsense-file", "fw"])
+            self.cpp_info.components["realsense2"].requires.extend(static_extension_libs)
         if self.settings.os == "Linux":
             self.cpp_info.components["realsense2"].system_libs.extend(["m", "pthread", "udev"])
         elif self.settings.os == "Windows":
