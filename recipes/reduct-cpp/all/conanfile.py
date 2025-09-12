@@ -4,11 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import (
-    copy,
-    get,
-    rmdir,
-)
+from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=2"
@@ -43,11 +39,11 @@ class ReductCppConan(ConanFile):
             self.package_type = "static-library"
 
     def requirements(self):
-        self.requires("fmt/[>=11.0.2 <12]")
-        self.requires("cpp-httplib/[>=0.16.0 <1]")
-        self.requires("nlohmann_json/[>=3.11.3 <4]")
+        self.requires("fmt/[>=10 <12]")
+        self.requires("cpp-httplib/[>=0.20 <0.21]")
+        self.requires("nlohmann_json/[>=3.11 <3.12]")
         self.requires("openssl/[>=3.0.13 <4]")
-        self.requires("concurrentqueue/[>=1.0.4 <4]")
+        self.requires("concurrentqueue/1.0.4")
         if not self.options.with_chrono:
             self.requires("date/[>=3.0.1 <4]")
 
@@ -65,29 +61,11 @@ class ReductCppConan(ConanFile):
         if not httplib.options.with_zlib:
             raise ConanInvalidConfiguration("cpp-httplib must be built with zlib")
 
-        if not self.options.with_chrono:
-            date = self.dependencies["date"]
-            if not date.options.header_only:
-                raise ConanInvalidConfiguration("date must be built as header-only")
-
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "15":
             raise ConanInvalidConfiguration("Apple-clang versions prior to 15 have missing C++20 support")
 
-        if (
-            self.settings.os != "Windows"
-            and self.settings.get_safe("compiler") == "gcc"
-        ):
-            if self.settings.get_safe("compiler.version") < "14" and self.options.with_chrono:
-                raise ConanInvalidConfiguration(
-                    "ReductCpp with chrono requires GCC 14 or higher. "
-                )
-            elif (
-                self.settings.get_safe("compiler.version") >= "14"
-                and not self.options.with_chrono
-            ):
-                raise ConanInvalidConfiguration(
-                    "ReductCpp requires chrono with GCC 14 or higher. "
-                )
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "14" and self.options.with_chrono:
+            raise ConanInvalidConfiguration("ReductCpp with chrono requires GCC 14 or higher. ")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -110,12 +88,7 @@ class ReductCppConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(
-            self,
-            "LICENSE",
-            src=self.source_folder,
-            dst=os.path.join(self.package_folder, "licenses"),
-        )
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
