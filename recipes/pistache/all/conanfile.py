@@ -84,12 +84,12 @@ class PistacheConan(ConanFile):
 
     def generate(self):
         tc = MesonToolchain(self)
-        tc.project_options["PISTACHE_USE_SSL"] = self.options.with_ssl
+        tc.project_options["PISTACHE_USE_SSL"] = bool(self.options.with_ssl)
         tc.project_options["PISTACHE_BUILD_EXAMPLES"] = False
         tc.project_options["PISTACHE_BUILD_TESTS"] = False
         tc.project_options["PISTACHE_BUILD_DOCS"] = False
         if self.settings.os == "Linux" and self._supports_libevent:
-            tc.project_options["PISTACHE_FORCE_LIBEVENT"] = self.options.with_libevent
+            tc.project_options["PISTACHE_FORCE_LIBEVENT"] = bool(self.options.with_libevent)
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
