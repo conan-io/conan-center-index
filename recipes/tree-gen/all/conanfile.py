@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.files import copy, get
+from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
 
@@ -48,7 +49,11 @@ class TreeGenConan(ConanFile):
             check_min_cppstd(self, 17)
 
     def requirements(self):
-        self.requires("fmt/11.0.2", transitive_headers=True)
+        if Version(self.version) <= "1.0.7":
+            self.requires("fmt/[<11.0.2]", transitive_headers=True)
+        else:
+            self.requires("fmt/[>=10.2.1]", transitive_headers=True)
+
         self.requires("range-v3/0.12.0", transitive_headers=True)
 
     def source(self):
