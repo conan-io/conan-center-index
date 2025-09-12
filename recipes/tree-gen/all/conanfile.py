@@ -42,6 +42,8 @@ class TreeGenConan(ConanFile):
         check_min_cppstd(self, 17)
 
     def validate(self):
+        # A recipe that can be used both as an application (tool_requires) and as a library (requires), we do not
+        # want the check_min_cppstd to run in the validate method when the recipe is being used as an application.
         if self.context == "host":
             check_min_cppstd(self, 17)
 
