@@ -81,8 +81,8 @@ class RsyncConan(ConanFile):
             f"--enable-acl-support={yes_no(self.options.enable_acl)}",
             f"--with-included-zlib={yes_no(not self.options.with_zlib)}",            
             "--disable-openssl" if not self.options.with_openssl else "--enable-openssl",
-            f"--with-zstd={yes_no(self.options.with_zstd)}",
-            f"--with-lz4={yes_no(self.options.with_lz4)}",
+            "--disable-zstd" if not self.options.with_zstd else "--enable-zstd",
+            "--disable-lz4" if not self.options.with_lz4 else "--enable-lz4",
             f"--with-xxhash={yes_no(self.options.with_xxhash)}",
 
             "--enable-manpages=no",
