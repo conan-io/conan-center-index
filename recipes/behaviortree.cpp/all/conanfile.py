@@ -135,6 +135,10 @@ class BehaviorTreeCPPConan(ConanFile):
             return self.options.enable_groot_interface
         return Version(self.version) >= "4.0.0"
 
+    @property
+    def _with_flatbuffers(self):
+        return Version(self.version) >= "4.7.0"
+
     def requirements(self):
         if self._with_boost:
             self.requires("boost/1.83.0")
@@ -152,12 +156,14 @@ class BehaviorTreeCPPConan(ConanFile):
             self.requires("zeromq/4.3.5")
         if self._with_minicoro:
             self.requires("minicoro/0.1.3")
+        if self._with_flatbuffers:
+            self.requires("flatbuffers/24.12.23")
 
         # TODO: other vendored dependencies
         # - cppzmq is customized and not compatible with Conan version
-        # - cpp-sqlite
-        # - wildcards
-        # - flatbuffers
+        # - cpp-sqlite: https://github.com/ToniLipponen/cpp-sqlite (no recipe available on CCI)
+        # - wildcards: it currently uses single-header mode, the conan package does not work.
+
 
     def validate(self):
         if self.info.settings.os == "Windows" and self.info.options.shared:
@@ -196,6 +202,7 @@ class BehaviorTreeCPPConan(ConanFile):
         tc.variables["WITH_MINITRACE"] = self._with_minitrace
         tc.variables["WITH_TINYXML2"] = self._with_tinyxml2
         tc.variables["WITH_MINICORO"] = self._with_minicoro
+        tc.variables["WITH_FLATBUFFERS"] = self._with_flatbuffers
         if not self.options.get_safe("enable_manual_selector"):
             # Avoid accidental use of system ncurses
             tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Curses"] = True
@@ -255,6 +262,9 @@ class BehaviorTreeCPPConan(ConanFile):
             rmdir(self, os.path.join(self.source_folder, "3rdparty", "minicoro"))
             replace_in_file(self, os.path.join(self.source_folder, "src", "action_node.cpp"),
                             "minicoro/minicoro.h", "minicoro.h")
+        # Unvendor flatbuffers
+        if self._with_flatbuffers:
+            rmdir(self, os.path.join(self.source_folder, "3rdparty", "flatbuffers"))
 
         # Ensure ZeroMQ and other packages are provided by Conan
         rm(self, "Find*.cmake", os.path.join(self.source_folder, "cmake"))
@@ -300,7 +310,8 @@ class BehaviorTreeCPPConan(ConanFile):
             requires.append("zeromq::zeromq")
         if self._with_minicoro:
             requires.append("minicoro::minicoro")
-
+        if self._with_flatbuffers:
+            requires.append("flatbuffers::flatbuffers")
 
         postfix = "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
