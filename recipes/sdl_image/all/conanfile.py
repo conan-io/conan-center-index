@@ -2,10 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=2"
+required_conan_version = ">=2.4"
 
 
 class SDLImageConan(ConanFile):
@@ -64,9 +65,8 @@ class SDLImageConan(ConanFile):
         "imageio": False,
         "wic": False,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
+    implements = ["auto_shared_fpic"]
+    languages = "C"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -76,18 +76,11 @@ class SDLImageConan(ConanFile):
         if self.settings.os != "Windows":
             del self.options.wic
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # Headers are exposed https://github.com/conan-io/conan-center-index/pull/16167#issuecomment-1508347351
-        self.requires("sdl/2.28.3", transitive_headers=True)
+        self.requires("sdl/[>=2.32 <3]", transitive_headers=True)
         if self.options.with_libtiff:
             self.requires("libtiff/4.6.0")
         if self.options.with_libjpeg:
@@ -96,38 +89,38 @@ class SDLImageConan(ConanFile):
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_libwebp:
             self.requires("libwebp/[>=1.3.2 <2]")
-        if self.options.get_safe("with_avif"):
+        if self.options.with_avif:
             self.requires("libavif/[>=1.0.1 <2]")
+        if self.options.with_jxl:
+            self.requires("libjxl/0.11.1")
 
     def validate(self):
         if self.options.shared and not self.dependencies["sdl"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} shared requires sdl shared")
-        # TODO: libjxl doesn't support conan v2(yet)
-        if self.options.get_safe("with_jxl"):
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support with_jxl (yet)")
+        if Version(self.version).major != Version(self.dependencies["sdl"].ref.version).major:
+            raise ConanInvalidConfiguration(f"{self.ref} and sdl must have the same major version")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["SDL2IMAGE_VENDORED"] = False
         tc.cache_variables["SDL2IMAGE_DEPS_SHARED"] = False
         tc.cache_variables["SDL2IMAGE_SAMPLES"] = False
-        tc.cache_variables["SDL2IMAGE_AVIF"] = self.options.get_safe("with_avif")
+        tc.cache_variables["SDL2IMAGE_AVIF"] = self.options.with_avif
         tc.cache_variables["SDL2IMAGE_BMP"] = self.options.bmp
         tc.cache_variables["SDL2IMAGE_GIF"] = self.options.gif
         tc.cache_variables["SDL2IMAGE_JPG"] = self.options.with_libjpeg
-        tc.cache_variables["SDL2IMAGE_JXL"] = self.options.get_safe("with_jxl")
+        tc.cache_variables["SDL2IMAGE_JXL"] = self.options.with_jxl
         tc.cache_variables["SDL2IMAGE_LBM"] = self.options.lbm
         tc.cache_variables["SDL2IMAGE_PCX"] = self.options.pcx
         tc.cache_variables["SDL2IMAGE_PNG"] = self.options.with_libpng
         tc.cache_variables["SDL2IMAGE_PNM"] = self.options.pnm
-        tc.cache_variables["SDL2IMAGE_QOI"] = self.options.get_safe("qoi")
+        tc.cache_variables["SDL2IMAGE_QOI"] = self.options.qoi
         tc.cache_variables["SDL2IMAGE_SVG"] = self.options.svg
         tc.cache_variables["SDL2IMAGE_TGA"] = self.options.tga
         tc.cache_variables["SDL2IMAGE_TIF"] = self.options.with_libtiff
@@ -190,8 +183,10 @@ class SDLImageConan(ConanFile):
             self.cpp_info.components["_sdl_image"].requires.append("libpng::libpng")
         if self.options.with_libwebp:
             self.cpp_info.components["_sdl_image"].requires.append("libwebp::libwebp")
-        if self.options.get_safe("with_avif"):
+        if self.options.with_avif:
             self.cpp_info.components["_sdl_image"].requires.append("libavif::libavif")
+        if self.options.with_jxl:
+            self.cpp_info.components["_sdl_image"].requires.append("libjxl::libjxl")
         if self.options.get_safe("imageio") and not self.options.shared:
             self.cpp_info.components["_sdl_image"].frameworks = [
                 "CoreFoundation",
