@@ -236,6 +236,8 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_NCC_STYLE"] = False
         toolchain.cache_variables["ENABLE_SAMPLES"] = False
         toolchain.cache_variables["ENABLE_TEMPLATE"] = False
+        if self.settings.os == "Macos" and Version(self.version) >= "2025.3.0":
+            toolchain.cache_variables["OV_FORCE_ADHOC_SIGN"] = True
         toolchain.generate()
 
     def validate_build(self):
