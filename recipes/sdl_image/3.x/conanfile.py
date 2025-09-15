@@ -21,17 +21,6 @@ class SDLImageConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_bmp": [True, False],
-        "with_gif": [True, False],
-        "with_lbm": [True, False],
-        "with_pcx": [True, False],
-        "with_pnm": [True, False],
-        "with_svg": [True, False],
-        "with_tga": [True, False],
-        "with_qoi": [True, False],
-        "with_xcf": [True, False],
-        "with_xpm": [True, False],
-        "with_xv": [True, False],
         "with_libjpeg": [True, False],
         "with_libtiff": [True, False],
         "with_libpng": [True, False],
@@ -44,17 +33,6 @@ class SDLImageConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_bmp": True,
-        "with_gif": True,
-        "with_lbm": True,
-        "with_pcx": True,
-        "with_pnm": True,
-        "with_svg": True,
-        "with_tga": True,
-        "with_qoi": True,
-        "with_xcf": True,
-        "with_xpm": True,
-        "with_xv": True,
         "with_libjpeg": True,
         "with_libtiff": True,
         "with_libpng": True,
@@ -100,7 +78,7 @@ class SDLImageConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} and sdl must have the same major version")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16 <4]")
+        self.tool_requires("cmake/[>=3.16 <5]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -111,22 +89,11 @@ class SDLImageConan(ConanFile):
         tc.cache_variables["SDLIMAGE_DEPS_SHARED"] = False
         tc.cache_variables["SDLIMAGE_SAMPLES"] = False
         tc.cache_variables["SDLIMAGE_AVIF"] = self.options.with_avif
-        tc.cache_variables["SDLIMAGE_BMP"] = self.options.with_bmp
-        tc.cache_variables["SDLIMAGE_GIF"] = self.options.with_gif
         tc.cache_variables["SDLIMAGE_JPG"] = self.options.with_libjpeg
         tc.cache_variables["SDLIMAGE_JXL"] = self.options.with_jxl
-        tc.cache_variables["SDLIMAGE_LBM"] = self.options.with_lbm
-        tc.cache_variables["SDLIMAGE_PCX"] = self.options.with_pcx
         tc.cache_variables["SDLIMAGE_PNG"] = self.options.with_libpng
-        tc.cache_variables["SDLIMAGE_PNM"] = self.options.with_pnm
-        tc.cache_variables["SDLIMAGE_QOI"] = self.options.with_qoi
-        tc.cache_variables["SDLIMAGE_SVG"] = self.options.with_svg
-        tc.cache_variables["SDLIMAGE_TGA"] = self.options.with_tga
         tc.cache_variables["SDLIMAGE_TIF"] = self.options.with_libtiff
         tc.cache_variables["SDLIMAGE_WEBP"] = self.options.with_libwebp
-        tc.cache_variables["SDLIMAGE_XCF"] = self.options.with_xcf
-        tc.cache_variables["SDLIMAGE_XPM"] = self.options.with_xpm
-        tc.cache_variables["SDLIMAGE_XV"] = self.options.with_xv
         tc.cache_variables["SDLIMAGE_BACKEND_WIC"] = self.options.get_safe("with_wic")
         tc.cache_variables["SDLIMAGE_BACKEND_IMAGEIO"] = self.options.get_safe("with_imageio")
         tc.generate()
