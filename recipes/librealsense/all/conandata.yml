@@ -6,13 +6,6 @@ sources:
     firmware:
       - url: "https://librealsense.intel.com/Releases/RS4xx/FW/D4XX_FW_Image-5.17.0.10.bin"
         sha256: "a7e10cf7b011929df2bfc6347d87471372621cc937c96cb529c3846f26b60f1c"
-  "2.55.1":
-    source:
-      url: "https://github.com/IntelRealSense/librealsense/archive/refs/tags/v2.55.1.tar.gz"
-      sha256: "54546d834ff5d8b35d9955319ad2e428f6d9ae4c61b932d1bd716ed81ad135f7"
-    firmware:
-      - url: "https://librealsense.intel.com/Releases/RS4xx/FW/D4XX_FW_Image-5.16.0.1.bin"
-        sha256: "a481376ac2d072de1d057fe73d74fcc00ab5da17aa63fa92c18bb8f65adf909c"
   "2.53.1":
     source:
       url: "https://github.com/IntelRealSense/librealsense/archive/refs/tags/v2.53.1.tar.gz"
@@ -48,11 +41,6 @@ patches:
     - patch_file: "patches/2.56.5-0001-fix-cmake.patch"
     - patch_file: "patches/2.56.5-0002-fix-avx-check.patch"
     - patch_file: "patches/2.56.5-0003-fix-missing-includes.patch"
-  "2.55.1":
-    - patch_file: "patches/2.55.1-0001-fix-cmake.patch"
-    - patch_file: "patches/2.55.1-0002-fix-avx-check.patch"
-    - patch_file: "patches/2.55.1-0003-fix-os-flags-arm64.patch"
-    - patch_file: "patches/2.55.1-0004-fix-missing-includes.patch"
   "2.53.1":
     - patch_file: "patches/2.53.1-0001-fix-cmake.patch"
     - patch_file: "patches/2.53.1-0002-fix-avx-check.patch"

@@ -96,7 +96,7 @@ class LibrealsenseConan(ConanFile):
         if self.settings.os == "Windows":
             tc.variables["FORCE_RSUSB_BACKEND"] = self.options.rsusb_backend
 
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" if Version(self.version) <= "2.55.1" else "3.8"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" if Version(self.version) < "2.56.5" else "3.8"
         tc.generate()
 
         deps = CMakeDeps(self)
