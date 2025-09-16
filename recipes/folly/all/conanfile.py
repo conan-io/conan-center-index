@@ -35,6 +35,7 @@ class FollyConan(ConanFile):
     @property
     def _min_cppstd(self):
         if Version(self.version) >= "2025.08.18.00":
+            # https://github.com/facebook/folly/commit/97f90a3c2488132dbba27e6d2287dc8c39612325
             return 20
         else:
             return 17
@@ -69,34 +70,36 @@ class FollyConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/[>=1.85.0 <2]", transitive_headers=True, transitive_libs=True)
-        self.requires("bzip2/[>=1.0.8 <2]")
-        self.requires("double-conversion/[>=3.3.0 <4]", transitive_headers=True, transitive_libs=True)
+        self.requires("boost/1.85.0", transitive_headers=True, transitive_libs=True)
+        self.requires("bzip2/1.0.8")
+        self.requires("double-conversion/3.3.0", transitive_headers=True, transitive_libs=True)
         if Version(self.version) > "2024.08.26.00":
-            self.requires("fast_float/[>8.0.0 <9]")
-        self.requires("gflags/[>=2.2.2 <3]")
-        self.requires("glog/[>=0.7.1 <1]", transitive_headers=True, transitive_libs=True)
-        self.requires("libevent/[>=2.1.12 <3]", transitive_headers=True, transitive_libs=True)
+            self.requires("fast_float/8.0.2")
+        self.requires("gflags/2.2.2")
+        self.requires("glog/0.7.1", transitive_headers=True, transitive_libs=True)
+        self.requires("libevent/2.1.12", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("lz4/[>=1.10.0 <2]", transitive_libs=True)
-        self.requires("snappy/[>=1.2.1 <2]")
+        self.requires("lz4/1.10.0", transitive_libs=True)
+        self.requires("snappy/1.2.1")
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("zstd/[>=1.5.5 <2]", transitive_libs=True)
+        self.requires("zstd/[~1.5]", transitive_libs=True)
         if not is_msvc(self):
-            self.requires("libdwarf/[>=0.9.1 <1]")
-        self.requires("libsodium/[>=1.0.20 <2]")
+            self.requires("libdwarf/0.9.1")
+        self.requires("libsodium/1.0.20")
         self.requires("xz_utils/[>=5.4.5 <6]")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("libiberty/[>=9.1.0 <10]")
-            self.requires("libunwind/[>=1.8.0 <2]")
+            self.requires("libiberty/9.1.0")
+            self.requires("libunwind/1.8.1")
         if self.settings.os == "Linux":
-            self.requires("liburing/[>=2.6 <3]")
+            self.requires("liburing/2.6")
+            self.requires("libaio/0.3.113")
         if Version(self.version) < "2024.10.07.00":
-            # INFO: Folly does not support fmt 11 on MSVC: https://github.com/facebook/folly/issues/2250
+            # INFO: Folly does not support fmt 11 on MSVC
             self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
         else:
             # MSVC-fmt weirdness was fixed with fmt 11.1 and/or folly 2024.10.07.00
-            self.requires("fmt/[>=11.1.0 <12]", transitive_headers=True, transitive_libs=True)
+            # # https://github.com/facebook/folly/commit/1cc9a3aeb8099104ba0297601d3e56b6e61e2f96
+            self.requires("fmt/11.2.0", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         # INFO: Required due ZIP_LISTS CMake feature in conan_deps.cmake
@@ -146,8 +149,8 @@ class FollyConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_PROJECT_folly_INCLUDE"] = "conan_deps.cmake"
         # fast_float is only needed on newer folly versions
-        if Version(self.version) > "2024.08.26.00":
-            tc.variables["CONAN_CMAKE_FOLLY_NEEDS_FAST_FLOAT"] = True
+        # if Version(self.version) > "2024.08.26.00":
+        #     tc.variables["CONAN_CMAKE_FOLLY_NEEDS_FAST_FLOAT"] = True
         # Folly fails to check Gflags: https://github.com/conan-io/conan/issues/12012
         tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
 
@@ -198,6 +201,7 @@ class FollyConan(ConanFile):
         deps.set_property("libsodium", "cmake_file_name", "Libsodium")
         deps.set_property("libunwind", "cmake_file_name", "LibUnwind")
         deps.set_property("liburing", "cmake_file_name", "LibUring")
+        deps.set_property("libaio", "cmake_file_name", "LibAIO")
         deps.set_property("lz4", "cmake_file_name", "LZ4")
         deps.set_property("openssl", "cmake_file_name", "OpenSSL")
         deps.set_property("snappy", "cmake_file_name", "Snappy")
