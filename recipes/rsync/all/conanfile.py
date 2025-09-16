@@ -6,7 +6,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.apple import is_apple_os
 import os
 
-required_conan_version = ">=1.60.0"
+required_conan_version = ">=2.4"
 
 class RsyncConan(ConanFile):
     name = "rsync"
@@ -34,10 +34,7 @@ class RsyncConan(ConanFile):
         "with_lz4": True,
         "enable_acl": False
     }
-    
-    def configure(self):
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
+    languages = "C"
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -83,8 +80,7 @@ class RsyncConan(ConanFile):
             "--disable-openssl" if not self.options.with_openssl else "--enable-openssl",
             "--disable-zstd" if not self.options.with_zstd else "--enable-zstd",
             "--disable-lz4" if not self.options.with_lz4 else "--enable-lz4",
-            f"--with-xxhash={yes_no(self.options.with_xxhash)}",
-
+            "--disable-xxhash" if not self.options.with_xxhash else "--enable-xxhash",
             "--enable-manpages=no",
         ])        
 
