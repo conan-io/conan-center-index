@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools import build, files
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 import json
@@ -23,37 +24,21 @@ class NmosCppConan(ConanFile):
     # for now, no "shared" option support
     options = {
         "fPIC": [True, False],
-        "with_dnssd": ["mdnsresponder", "avahi"],
+        # Option auto is recommended and selects the current best option for the given OS.
+        # auto: System library for dnssd on macOS, mDNSResponder on Windows and avahi on Linux.
+        "with_dnssd": ["auto", "mdnsresponder", "avahi"],
     }
     # "fPIC" is handled automatically by Conan, injecting CMAKE_POSITION_INDEPENDENT_CODE
     default_options = {
         "fPIC": True,
-        "with_dnssd": "mdnsresponder",
+        "with_dnssd": "auto",
     }
 
     short_paths = True
 
-    def export_sources(self):
-        files.export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-        # Simple change as github doesn't allow review comments on unchanged lines that are outside the +/- 3 lines of the changes.
-        # To be removed in the review process.
-        if self.settings.os == "Macos":
-            del self.options.with_dnssd
-        # The removal on macos makes sense as the mdnsresponder (which is by apple) comes with the OS/Xcode SDK I guess,
-        # but why override the default. Took me (luckily only a few minutes) time to see why it wanted to get avahi despite the default_options and like thousands of
-        # dependencies. mdnsresponder is just itself, avahi really has a large sets of dependencies and many of them LGPL infested...
-        # Also getting the `conan graph info ... --format=html` for avahi and mdnsresponder and opening both in the browser is eye-opening. If there is a reason
-        # why mdnsresponder isn't cutting it, would be nice to be noted. I'd prefer it with the two elif cases removed to have some consistency.
-        elif self.settings.os == "Linux":
-            self.options.with_dnssd = "avahi"
-        elif self.settings.os == "Windows":
-            self.options.with_dnssd = "mdnsresponder"
-        # a last one to being able to github this ...
 
     def requirements(self):
         # for now, consistent with project's conanfile.txt
@@ -67,23 +52,27 @@ class NmosCppConan(ConanFile):
         self.requires("nlohmann_json/3.11.3")
         self.requires("jwt-cpp/0.7.0")
 
-        if self.options.get_safe("with_dnssd") == "mdnsresponder":
+        if self._dnssd_option == "mdnsresponder":
             self.requires("mdnsresponder/878.200.35")
             # The option mdnsresponder:with_opt_patches=True is recommended in order to permit the
             # over-long service type _nmos-registration._tcp used in IS-04 v1.2, and also to enable
             # support for unicast DNS-SD on Linux, since NMOS recommends this in preference to mDNS.
             # See https://specs.amwa.tv/is-04/releases/v1.3.1/docs/3.1._Discovery_-_Registered_Operation.html#dns-sd-advertisement
-        elif self.options.get_safe("with_dnssd") == "avahi":
+        elif self._dnssd_option == "avahi":
             self.requires("avahi/0.8")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.17 <4]")
 
     def validate(self):
-        if self.info.settings.os in ["Macos"] and Version(self.version) < "cci.20250901":
+        if is_apple_os(self) and Version(self.version) < "cci.20250901":
             raise ConanInvalidConfiguration(f"{self.ref} is not currently supported on {self.info.settings.os}. Use cci.20250904 or newer to get macOS support.")
+
         if self.info.settings.compiler.get_safe("cppstd"):
             build.check_min_cppstd(self, 11)
+
+        if is_apple_os(self) and not self.options.with_dnssd == "auto":
+            raise ConanInvalidConfiguration(f"{self.ref} is currently only supporting the auto option for mDNS.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -102,7 +91,7 @@ class NmosCppConan(ConanFile):
         # between this recipe and project's conanfile.txt
         tc.cache_variables["CONAN_EXPORTED"] = True
         # (on Linux) select Avahi or mDNSResponder
-        tc.variables["NMOS_CPP_USE_AVAHI"] = self.options.get_safe("with_dnssd") == "avahi"
+        tc.variables["NMOS_CPP_USE_AVAHI"] = self._dnssd_option == "avahi"
         # (on Windows) use the Conan package for DNSSD (mdnsresponder), not the project's own DLL stub library
         tc.variables["NMOS_CPP_USE_BONJOUR_SDK"] = True
         # no need to build unit tests
@@ -127,6 +116,20 @@ class NmosCppConan(ConanFile):
         self._create_components_file_from_cmake_target_file(os.path.join(cmake_folder, "nmos-cpp", "nmos-cpp-targets.cmake"))
         # remove the project's own generated config-file package
         files.rmdir(self, cmake_folder)
+
+    @property
+    def _dnssd_option(self):
+        if not self.options.with_dnssd == "auto":
+            return self.options.with_dnssd
+
+        if is_apple_os(self):
+            return None
+        elif self.settings.os == "Windows":
+            return 'mdnsresponder'
+        elif self.settings.os in ["Linux", "FreeBSD"]:
+            return 'avahi'
+        else:
+            raise ConanInvalidConfiguration('Unknown operating system')
 
     def _create_components_file_from_cmake_target_file(self, target_file_path):
         components = {}
