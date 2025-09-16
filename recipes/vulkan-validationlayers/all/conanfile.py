@@ -203,7 +203,7 @@ class VulkanValidationLayersConan(ConanFile):
         if self.settings.os == "Android":
             # INFO: libVkLayer_utils.a: error: undefined symbol: __android_log_print
             # https://github.com/KhronosGroup/Vulkan-ValidationLayers/commit/a26638ae9fdd8c40b56d4c7b72859a5b9a0952c9
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+            replace_in_file(self, os.path.join(self.source_folder, "layers", "CMakeLists.txt"),
                         "VkLayer_utils PUBLIC Vulkan::Headers", "VkLayer_utils PUBLIC Vulkan::Headers -landroid -llog")
         if not self.options.get_safe("fPIC"):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
