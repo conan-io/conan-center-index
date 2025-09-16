@@ -1,5 +1,3 @@
-diff --git a/CMake/install_config.cmake b/CMake/install_config.cmake
-index 9f56666117..7db465227a 100644
 --- a/CMake/install_config.cmake
 +++ b/CMake/install_config.cmake
 @@ -48,4 +48,4 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/config/realsense2.pc"
@@ -8,8 +6,6 @@ index 9f56666117..7db465227a 100644
  
 -install(CODE "execute_process(COMMAND ldconfig)")
 +#install(CODE "execute_process(COMMAND ldconfig)")
-diff --git a/CMake/libusb_config.cmake b/CMake/libusb_config.cmake
-index ca221ca66d..3f86806449 100644
 --- a/CMake/libusb_config.cmake
 +++ b/CMake/libusb_config.cmake
 @@ -1,14 +1,5 @@
@@ -30,59 +26,8 @@ index ca221ca66d..3f86806449 100644
 +    add_library(usb INTERFACE IMPORTED)
 +    set_property(TARGET usb PROPERTY INTERFACE_LINK_LIBRARIES libusb::libusb)
  endif()
-diff --git a/CMake/windows_config.cmake b/CMake/windows_config.cmake
-index 4debf1a814..b2ed2847cf 100644
 --- a/CMake/windows_config.cmake
 +++ b/CMake/windows_config.cmake
-@@ -51,30 +51,30 @@ macro(os_set_flags)
-             # Release only:
-             # /WX: Treats all warnings as errors.
-             # /sdl: Enables additional security checks.
--            
-+
-             # Release only linker flags:
-             # /LTCG (/GL): Enables Link Time Code Generation to improve performance.
--            # /NXCOMPAT: Enables Data Execution Prevention (DEP) to prevent code execution in data areas.	
--            
-+            # /NXCOMPAT: Enables Data Execution Prevention (DEP) to prevent code execution in data areas.
-+
-             # see https://readthedocs.intel.com/SecureCodingStandards/2023.Q2.0/compiler/c-cpp/ for more details
- 
-             set(SECURITY_COMPILER_FLAGS "/Gy /DYNAMICBASE /GS /wd4101")
--            
-+
-             if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-                 message(STATUS "Configuring for Debug build")
-             else() # Release, RelWithDebInfo, or multi configuration generator is being used (aka not specifing build type, or building with VS)
-                 message(STATUS "Configuring for Release build")
--                set(SECURITY_COMPILER_FLAGS "${SECURITY_COMPILER_FLAGS} /WX /sdl") 
-+                set(SECURITY_COMPILER_FLAGS "${SECURITY_COMPILER_FLAGS} /WX /sdl")
-             endif()
--            
-+
-             push_security_flags()
--            
-+
-             if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-                 set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} /INCREMENTAL:NO /LTCG /NXCOMPAT") # ignoring '/INCREMENTAL' due to '/LTCG' specification
-             endif()
--		
-+
-         endif()
--        
-+
-         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj /wd4819")
-         set(LRS_TRY_USE_AVX true)
-         add_definitions(-D_UNICODE)
-@@ -82,7 +82,7 @@ macro(os_set_flags)
-     set(DOTNET_VERSION_LIBRARY "3.5" CACHE STRING ".Net Version, defaulting to '3.5', the Unity wrapper currently supports only .NET 3.5")
-     set(DOTNET_VERSION_EXAMPLES "4.0" CACHE STRING ".Net Version, defaulting to '4.0'")
- 
--    # Windows.h will define the min/max macros which will 
-+    # Windows.h will define the min/max macros which will
-     # collide with std's min/max templates, which we want to use.
-     add_definitions(-DNOMINMAX)
- endmacro()
 @@ -94,8 +94,9 @@ macro(os_target_config)
          if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
              message("Preparing Windows 7 drivers" )
@@ -95,8 +40,6 @@ index 4debf1a814..b2ed2847cf 100644
                  message("Copying ${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/${item} to ${CMAKE_CURRENT_BINARY_DIR}/drivers/" )
                  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/${item}" "${CMAKE_CURRENT_BINARY_DIR}/drivers/${item}" COPYONLY)
              endforeach()
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index ae063e69d8..e626b0c179 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -9,7 +9,7 @@ set(REPO_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
@@ -108,8 +51,6 @@ index ae063e69d8..e626b0c179 100644
  #Deprecation message, should be removed in future releases
  if(${FORCE_LIBUVC} OR ${FORCE_WINUSB_UVC} OR ${ANDROID_USB_HOST_UVC})
      MESSAGE(DEPRECATION "FORCE_LIBUVC, FORCE_WINUSB_UVC and ANDROID_USB_HOST_UVC are deprecated, use FORCE_RSUSB_BACKEND instead")
-diff --git a/common/fw/CMakeLists.txt b/common/fw/CMakeLists.txt
-index 735f4d6b34..1e73dd90a1 100644
 --- a/common/fw/CMakeLists.txt
 +++ b/common/fw/CMakeLists.txt
 @@ -39,16 +39,17 @@ set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER Resources)

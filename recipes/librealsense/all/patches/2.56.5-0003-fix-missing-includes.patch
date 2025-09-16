@@ -1,5 +1,3 @@
-diff --git a/src/core/matcher-factory.cpp b/src/core/matcher-factory.cpp
-index ea9420903b..615d16d5ed 100644
 --- a/src/core/matcher-factory.cpp
 +++ b/src/core/matcher-factory.cpp
 @@ -7,6 +7,7 @@
@@ -10,8 +8,6 @@ index ea9420903b..615d16d5ed 100644
  
  namespace librealsense {
  
-diff --git a/src/core/options-registry.cpp b/src/core/options-registry.cpp
-index d22b142ded..68c62d5b06 100644
 --- a/src/core/options-registry.cpp
 +++ b/src/core/options-registry.cpp
 @@ -7,6 +7,7 @@
@@ -22,8 +18,6 @@ index d22b142ded..68c62d5b06 100644
  
  
  namespace librealsense {
-diff --git a/src/librealsense-exception.h b/src/librealsense-exception.h
-index c9ce838c04..a8963f28db 100644
 --- a/src/librealsense-exception.h
 +++ b/src/librealsense-exception.h
 @@ -10,6 +10,7 @@
@@ -34,8 +28,6 @@ index c9ce838c04..a8963f28db 100644
  
  namespace librealsense {
  
-diff --git a/src/linux/backend-hid.h b/src/linux/backend-hid.h
-index f8bfbb793b..231045b19c 100644
 --- a/src/linux/backend-hid.h
 +++ b/src/linux/backend-hid.h
 @@ -7,6 +7,7 @@
@@ -46,8 +38,6 @@ index f8bfbb793b..231045b19c 100644
  
  namespace librealsense
  {
-diff --git a/src/platform/platform-utils.cpp b/src/platform/platform-utils.cpp
-index 0cfa3a72aa..51690d7140 100644
 --- a/src/platform/platform-utils.cpp
 +++ b/src/platform/platform-utils.cpp
 @@ -7,6 +7,7 @@
@@ -58,8 +48,16 @@ index 0cfa3a72aa..51690d7140 100644
  
  namespace librealsense {
  namespace platform {
-diff --git a/third-party/rsutils/src/control-c-handler.cpp b/third-party/rsutils/src/control-c-handler.cpp
-index 7d73013ce7..ff534155ce 100644
+--- a/src/types.cpp
++++ b/src/types.cpp
+@@ -6,6 +6,7 @@
+ #include "librealsense-exception.h"
+ #include <librealsense2/hpp/rs_processing.hpp>
+ #include <ostream>
++#include <cmath>
+ 
+ 
+ std::ostream & operator<<( std::ostream & out, rs2_extrinsics const & e )
 --- a/third-party/rsutils/src/control-c-handler.cpp
 +++ b/third-party/rsutils/src/control-c-handler.cpp
 @@ -6,6 +6,7 @@
@@ -70,8 +68,6 @@ index 7d73013ce7..ff534155ce 100644
  
  
  namespace rsutils {
-diff --git a/third-party/rsutils/src/network-adapter-watcher.cpp b/third-party/rsutils/src/network-adapter-watcher.cpp
-index 407f70b4c2..25fa947890 100644
 --- a/third-party/rsutils/src/network-adapter-watcher.cpp
 +++ b/third-party/rsutils/src/network-adapter-watcher.cpp
 @@ -26,6 +26,9 @@
@@ -84,8 +80,6 @@ index 407f70b4c2..25fa947890 100644
  
  namespace rsutils {
  namespace os {
-diff --git a/third-party/rsutils/src/special-folder.cpp b/third-party/rsutils/src/special-folder.cpp
-index 3717faa560..b2fd5f07a9 100644
 --- a/third-party/rsutils/src/special-folder.cpp
 +++ b/third-party/rsutils/src/special-folder.cpp
 @@ -19,6 +19,7 @@
