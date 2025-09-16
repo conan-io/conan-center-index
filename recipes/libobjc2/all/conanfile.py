@@ -5,7 +5,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir
 import os
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.1"
 
 class PackageConan(ConanFile):
     name = "libobjc2"
@@ -24,10 +24,7 @@ class PackageConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -43,7 +40,7 @@ class PackageConan(ConanFile):
             raise ConanInvalidConfiguration("libobjc2 does not support macOS.")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16 <4]")
+        self.tool_requires("cmake/[>=3.16 <5]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -51,7 +48,7 @@ class PackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         # Prevent picking up a default install location through gnustep-config
-        tc.variables["GNUSTEP_INSTALL_TYPE"] = "NONE"
+        tc.cache_variables["GNUSTEP_INSTALL_TYPE"] = "NONE"
         tc.generate()
 
         deps = CMakeDeps(self)
