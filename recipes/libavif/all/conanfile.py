@@ -101,7 +101,9 @@ class LibAVIFConan(ConanFile):
         apply_conandata_patches(self)
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         if Version(self.version) < "1.1.0":
+            replace_in_file(self, cmakelists, "find_package(libyuv QUIET)", "find_package(libyuv REQUIRED CONFIG)")
             replace_in_file(self, cmakelists, "${LIBYUV_LIBRARY}", "libyuv::libyuv")
+            replace_in_file(self, cmakelists, "find_package(dav1d REQUIRED)", "find_package(dav1d REQUIRED CONFIG)")
             replace_in_file(self, cmakelists, "${DAV1D_LIBRARY}", "dav1d::dav1d")
 
     def build(self):
