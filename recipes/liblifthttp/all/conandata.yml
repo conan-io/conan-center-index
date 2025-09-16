@@ -2,10 +2,3 @@ sources:
   "4.4.2":
     url: "https://github.com/jbaldwin/liblifthttp/archive/refs/tags/v4.4.2.tar.gz"
     sha256: "093ad71d95853ea6006ccefba0e68de945493d8a320e23fd5dbf64eecb1aacc5"
-  "4.4.0":
-    url: "https://github.com/jbaldwin/liblifthttp/archive/refs/tags/v4.4.0.tar.gz"
-    sha256: "496fdcff197955a3cba11adcc8f186d415b018c4b64fe1565e8372d559cb3685"
-patches:
-  "4.4.0":
-    - patch_file: "patches/0001-fix-msvc.patch"
-    - patch_file: "patches/0002-add-support-for-shared-build.patch"
