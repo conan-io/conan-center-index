@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4358df3..2f531b2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -57,9 +57,9 @@ set(LIBLIFTHTTP_SOURCE_FILES
+     inc/lift/resolve_host.hpp src/resolve_host.cpp
+     inc/lift/response.hpp src/response.cpp
+ )
+ 
+-add_library(${PROJECT_NAME} STATIC ${LIBLIFTHTTP_SOURCE_FILES})
++add_library(${PROJECT_NAME} ${LIBLIFTHTTP_SOURCE_FILES})
+ set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+ target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+ 
+ target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${LIFT_CURL_INCLUDE})
