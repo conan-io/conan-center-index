@@ -1,4 +1,7 @@
 sources:
+  "4.4.0":
+    url: "https://github.com/KhronosGroup/KTX-Software/archive/refs/tags/v4.4.0.tar.gz"
+    sha256: "3585d76edcdcbe3a671479686f8c81c1c10339f419e4b02a9a6f19cc6e4e0612"
   "4.3.2":
     url: "https://github.com/KhronosGroup/KTX-Software/archive/refs/tags/v4.3.2.tar.gz"
     sha256: "74a114f465442832152e955a2094274b446c7b2427c77b1964c85c173a52ea1f"
@@ -6,6 +9,9 @@ sources:
     url: "https://github.com/KhronosGroup/KTX-Software/archive/refs/tags/v4.0.0.tar.gz"
     sha256: "6091f5064d0cfd54c6155bb6c0d2ba7287f312d109010e9b702839ac78529fd3"
 patches:
+  "4.4.0":
+    - patch_file: "patches/4.4.0/0004-unvendor-dependencies.patch"
+    - patch_file: "patches/4.4.0/0005-disable-Gz-for-win32debug.patch"
   "4.3.2":
     - patch_file: "patches/4.3.2/0001-objutil-cxx-std.patch"
     - patch_file: "patches/4.3.2/0004-unvendor-dependencies.patch"
