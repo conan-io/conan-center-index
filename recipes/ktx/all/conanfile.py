@@ -129,7 +129,7 @@ class KtxConan(ConanFile):
         if Version(self.version) >= "4.4.0":
             replace_in_file(self, os.path.join(self.source_folder, "external", "astc-encoder", "Source", "cmake_core.cmake"),
                             "-Werror", "")
-        elif Version(self.version) > "4.3.2":
+        elif Version(self.version) >= "4.3.2":
             replace_in_file(self, os.path.join(self.source_folder, "lib", "astc-encoder", "Source", "cmake_core.cmake"),
                             "-Werror", "")
 
