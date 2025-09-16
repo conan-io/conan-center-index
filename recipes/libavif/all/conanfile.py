@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=2.4"
+required_conan_version = ">=2.1"
 
 
 class LibAVIFConan(ConanFile):
@@ -34,8 +34,6 @@ class LibAVIFConan(ConanFile):
         "with_metav1": False,
         "with_sample_transform": False,
     }
-    implements = ["auto_shared_fpic"]
-    languages = "C"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -49,6 +47,11 @@ class LibAVIFConan(ConanFile):
             del self.options.with_metav1
             del self.options.with_sample_transform
 
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -69,7 +72,6 @@ class LibAVIFConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -86,9 +88,6 @@ class LibAVIFConan(ConanFile):
             tc.variables["AVIF_ENABLE_EXPERIMENTAL_METAV1"] = self.options.with_metav1
         if "with_sample_transform" in self.options:
             tc.variables["AVIF_ENABLE_EXPERIMENTAL_SAMPLE_TRANSFORM"] = self.options.with_sample_transform
-        if Version(self.version) < "1.1.0":
-            tc.cache_variables["LIBYUV_LIBRARY"] = "libyuv::libyuv"
-            tc.cache_variables["DAV1D_LIBRARY"] = "dav1d::dav1d"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -98,8 +97,15 @@ class LibAVIFConan(ConanFile):
         if Version(self.version) >= "1.1.0":
             deps.set_property("libyuv", "cmake_target_name", "yuv::yuv")
         deps.generate()
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        if Version(self.version) < "1.1.0":
+            replace_in_file(self, cmakelists, "${LIBYUV_LIBRARY}", "libyuv::libyuv")
+            replace_in_file(self, cmakelists, "${DAV1D_LIBRARY}", "dav1d::dav1d")
 
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
