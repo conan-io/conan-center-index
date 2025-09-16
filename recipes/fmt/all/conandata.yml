@@ -59,3 +59,5 @@ sources:
 patches:
   "5.3.0":
     - patch_file: "patches/fix-install-5.3.0.patch"
+  "11.2.0":
+    - patch_file: "patches/fix-malloc-free-11.2.0.patch"
