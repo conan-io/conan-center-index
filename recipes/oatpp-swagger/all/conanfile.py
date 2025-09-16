@@ -30,10 +30,7 @@ class OatppSwaggerConan(ConanFile):
 
     @property
     def _version(self):
-        version = str(self.version)
-        if version.endswith(".latest"):
-            version = version[:-len(".latest")]
-        return version
+        return self.version.split(".latest")[0]
 
     def config_options(self):
         if self.settings.os == "Windows":
