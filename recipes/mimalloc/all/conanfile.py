@@ -167,8 +167,14 @@ class MimallocConan(ConanFile):
                 copy(self, "mimalloc-redirect.dll",
                     src=os.path.join(self.source_folder, "bin"),
                     dst=os.path.join(self.package_folder, "bin"))
+                copy(self, "minject.exe",
+                    src=os.path.join(self.source_folder, "bin"),
+                    dst=os.path.join(self.package_folder, "bin"))
             elif self.settings.arch == "x86":
                 copy(self, "mimalloc-redirect32.dll",
+                    src=os.path.join(self.source_folder, "bin"),
+                    dst=os.path.join(self.package_folder, "bin"))
+                copy(self, "minject32.exe",
                     src=os.path.join(self.source_folder, "bin"),
                     dst=os.path.join(self.package_folder, "bin"))
 

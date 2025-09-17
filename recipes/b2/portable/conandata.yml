@@ -32,3 +32,6 @@ sources:
   "5.3.2":
     url: "https://github.com/bfgroup/b2/releases/download/5.3.2/b2-5.3.2.tar.bz2"
     sha256: "881827649356dfa59caa30e169931424993c72a1626a502abb7ea474484eac26"
+  "5.3.3":
+    url: "https://github.com/bfgroup/b2/releases/download/5.3.3/b2-5.3.3.tar.bz2"
+    sha256: "7eb278af94c3800d2369e7e6fdce733cd39736808c5bc0cec5c51a34339f8fcb"
