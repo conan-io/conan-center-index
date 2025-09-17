@@ -1,0 +1,71 @@
+name: Re export from conan-center to community
+run-name: Re-Export ${{ inputs.package || 'zlib' }}/${{ inputs.version || '1.3.1' }} from conan-center to community
+
+on:
+  push:
+    paths-ignore:
+      - 'recipes/**'
+  pull_request:
+    paths-ignore:
+      - 'recipes/**'
+  workflow_call:
+    inputs:
+      package:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+    secrets:
+      FILEN_EMAIL:
+        description: 'Email to authenticate with FileN'
+        required: false
+      FILEN_PASSWORD:
+        description: 'Password to authenticate with FileN'
+        required: false
+
+  workflow_dispatch:
+    inputs:
+      package:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+
+env:
+  PACKAGE: ${{ inputs.package || 'zlib' }}
+  VERSION: ${{ inputs.version || '1.3.1' }}
+  REF: ${{ inputs.package || 'zlib' }}/${{ inputs.version || '1.3.1' }}
+
+jobs:  
+  re_export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github
+            requirements.txt
+
+      - uses: ./.github/actions/setup-conan
+
+      - uses: ./.github/actions/setup-remote
+        with:
+          filen-email: ${{ secrets.FILEN_EMAIL }}
+          filen-password: ${{ secrets.FILEN_PASSWORD }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+
+      - run: |
+          conan remote add conan-center https://center2.conan.io
+          conan download $REF -r conan-center --only-recipe
+          conan upload -r community $REF --confirm --only-recipe
+      - name: Collect logs
+        if: failure()
+        run: cat process.log || echo "No log file found"
+        shell: bash
+      - run: gh api rate_limit || echo "could not get gh rate limits"
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
