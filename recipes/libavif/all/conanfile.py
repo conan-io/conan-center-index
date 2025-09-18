@@ -2,10 +2,9 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.scm import Version
-from conan.tools.env import VirtualBuildEnv
 import os
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.1"
 
 
 class LibAVIFConan(ConanFile):
@@ -67,7 +66,7 @@ class LibAVIFConan(ConanFile):
         self.requires("libwebp/[>=1.3.2 <2]")
         if self._has_dav1d:
             self.requires("dav1d/[>=1.4 <2]")
-           
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.19]")
 
@@ -90,14 +89,14 @@ class LibAVIFConan(ConanFile):
         if "with_sample_transform" in self.options:
             tc.variables["AVIF_ENABLE_EXPERIMENTAL_SAMPLE_TRANSFORM"] = self.options.with_sample_transform
         tc.generate()
+
         deps = CMakeDeps(self)
+        deps.set_property("libaom-av1", "cmake_file_name", "aom")
+        deps.set_property("libaom-av1", "cmake_target_name", "aom")
+        deps.set_property("libaom-av1", "cmake_additional_variables_prefixes", ["AOM"])
         if Version(self.version) >= "1.1.0":
             deps.set_property("libyuv", "cmake_target_name", "yuv::yuv")
         deps.generate()
-        venv = VirtualBuildEnv(self)
-        venv.generate(scope="build")
-
-
     def _patch_sources(self):
         apply_conandata_patches(self)
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
@@ -106,18 +105,12 @@ class LibAVIFConan(ConanFile):
             replace_in_file(self, cmakelists, "${LIBYUV_LIBRARY}", "libyuv::libyuv")
             replace_in_file(self, cmakelists, "find_package(dav1d REQUIRED)", "find_package(dav1d REQUIRED CONFIG)")
             replace_in_file(self, cmakelists, "${DAV1D_LIBRARY}", "dav1d::dav1d")
-            replace_in_file(self, cmakelists, "find_package(aom REQUIRED)", "find_package(libaom-av1 REQUIRED CONFIG)")
-            replace_in_file(self, cmakelists, "${AOM_LIBRARIES}", "libaom-av1::libaom-av1")
 
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-
-    @property
-    def _alias_path(self):
-        return os.path.join("lib", "conan-official-avif-targets.cmake")
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -144,5 +137,4 @@ class LibAVIFConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "libavif")
         self.cpp_info.set_property("cmake_target_name", "avif")
         self.cpp_info.set_property("pkg_config_name", "libavif")
-
 
