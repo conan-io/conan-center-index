@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
@@ -42,6 +42,8 @@ class KDAlgorithmsConan(ConanFile):
         copy(self, "LICENSES/*", dst=os.path.join(self.package_folder,"licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+
 
     def package_info(self):
         self.cpp_info.bindirs = []
