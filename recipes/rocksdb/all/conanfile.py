@@ -6,7 +6,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -32,6 +32,7 @@ class RocksDBConan(ConanFile):
         "with_zlib": [True, False],
         "with_zstd": [True, False],
         "with_tbb": [True, False],
+        "with_folly": [True, False],
         "with_jemalloc": [True, False],
         "enable_sse": [False, "sse42", "avx2"],
         "use_rtti": [True, False],
@@ -47,6 +48,7 @@ class RocksDBConan(ConanFile):
         "with_gflags": False,
         "with_tbb": False,
         "with_jemalloc": False,
+        "with_folly": False,
         "enable_sse": False,
         "use_rtti": False,
     }
@@ -54,6 +56,17 @@ class RocksDBConan(ConanFile):
     @property
     def _min_cppstd(self):
         return "11" if Version(self.version) < "8.8.1" else "17"
+
+    @property
+    def _has_folly(self):
+        # Folly became unvendored in 7.7.2
+        # https://github.com/facebook/rocksdb/commit/be09943fb58a2dd3f70e6e30781ebfa3fcbcb8fa
+        return Version(self.version) >= "7.7.2"
+
+    @property
+    def _has_lite(self):
+        # https://github.com/facebook/rocksdb/commit/4720ba4391eb016b05a30d09a8275624c3a4a87e
+        return Version(self.version) < "8.0.0"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -65,6 +78,10 @@ class RocksDBConan(ConanFile):
             del self.options.with_tbb
         if self.settings.build_type == "Debug":
             self.options.use_rtti = True  # Rtti are used in asserts for debug mode...
+        if not self._has_folly:
+            del self.options.with_folly
+        if not self._has_lite:
+            del self.options.lite
 
     def configure(self):
         if self.options.shared:
@@ -77,17 +94,19 @@ class RocksDBConan(ConanFile):
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
         if self.options.with_snappy:
-            self.requires("snappy/1.1.10")
+            self.requires("snappy/[>=1.1.10 <2]")
         if self.options.with_lz4:
-            self.requires("lz4/1.9.4")
+            self.requires("lz4/[>=1.9.4 <2]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[~1.5]")
         if self.options.get_safe("with_tbb"):
             self.requires("onetbb/2021.10.0")
         if self.options.with_jemalloc:
             self.requires("jemalloc/5.3.0")
+        if self.options.get_safe("with_folly"):
+            self.requires("folly/2024.08.12.00")
 
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
@@ -97,6 +116,10 @@ class RocksDBConan(ConanFile):
 
         if is_msvc(self) and Version(self.settings.compiler.version) < "191":
             raise ConanInvalidConfiguration("Rocksdb requires MSVC version >= 191")
+
+        if self.options.shared and self.options.get_safe("with_folly"):
+            # https://github.com/facebook/rocksdb/blob/v10.5.1/CMakeLists.txt#L603
+            raise ConanInvalidConfiguration(f"{self.ref} does not support a shared build with folly")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -108,11 +131,16 @@ class RocksDBConan(ConanFile):
         tc.variables["WITH_TOOLS"] = False
         tc.variables["WITH_CORE_TOOLS"] = False
         tc.variables["WITH_BENCHMARK_TOOLS"] = False
-        tc.variables["WITH_FOLLY_DISTRIBUTED_MUTEX"] = False
+        if Version(self.version) < "7.2.0":
+            # https://github.com/facebook/rocksdb/commit/efd035164b443e0ae552a82ad8b47a8048e652ca
+            tc.variables["WITH_FOLLY_DISTRIBUTED_MUTEX"] = False
+        if self._has_folly:
+            tc.variables["USE_FOLLY"] = self.options.with_folly
         if is_msvc(self):
             tc.variables["WITH_MD_LIBRARY"] = not is_msvc_static_runtime(self)
         tc.variables["ROCKSDB_INSTALL_ON_WINDOWS"] = self.settings.os == "Windows"
-        tc.variables["ROCKSDB_LITE"] = self.options.lite
+        if self._has_lite:
+            tc.variables["ROCKSDB_LITE"] = self.options.lite
         tc.variables["WITH_GFLAGS"] = self.options.with_gflags
         tc.variables["WITH_SNAPPY"] = self.options.with_snappy
         tc.variables["WITH_LZ4"] = self.options.with_lz4
@@ -120,6 +148,7 @@ class RocksDBConan(ConanFile):
         tc.variables["WITH_ZSTD"] = self.options.with_zstd
         tc.variables["WITH_TBB"] = self.options.get_safe("with_tbb", False)
         tc.variables["WITH_JEMALLOC"] = self.options.with_jemalloc
+
         tc.variables["ROCKSDB_BUILD_SHARED"] = self.options.shared
         tc.variables["ROCKSDB_LIBRARY_EXPORTS"] = self.settings.os == "Windows" and self.options.shared
         tc.variables["ROCKSDB_DLL" ] = self.settings.os == "Windows" and self.options.shared
@@ -143,10 +172,20 @@ class RocksDBConan(ConanFile):
             deps.set_property("jemalloc", "cmake_target_name", "JeMalloc::JeMalloc")
         if self.options.with_zstd:
             deps.set_property("zstd", "cmake_target_name", "zstd::zstd")
+        if self.options.get_safe("with_folly"):
+            deps.set_property("folly", "cmake_additional_variables_prefixes", ["FOLLY",])
         deps.generate()
+
+    def _patch_sources(self):
+        # INFO: --copy-dt-needed-entries is only needed for ld.bfd and breaks other linkers like ld.gold and lld
+        # https://github.com/facebook/rocksdb/issues/13895
+        if self._has_folly:
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                         'set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--copy-dt-needed-entries")', "")
 
     def build(self):
         apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -188,7 +227,7 @@ class RocksDBConan(ConanFile):
                 self.cpp_info.components["librocksdb"].defines = ["ROCKSDB_DLL"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["librocksdb"].system_libs = ["pthread", "m"]
-        if self.options.lite:
+        if self.options.get_safe("lite"):
             self.cpp_info.components["librocksdb"].defines.append("ROCKSDB_LITE")
 
         self.cpp_info.components["librocksdb"].set_property("cmake_target_name", f"RocksDB::{cmake_target}")
@@ -206,3 +245,5 @@ class RocksDBConan(ConanFile):
             self.cpp_info.components["librocksdb"].requires.append("onetbb::onetbb")
         if self.options.with_jemalloc:
             self.cpp_info.components["librocksdb"].requires.append("jemalloc::jemalloc")
+        if self.options.get_safe("with_folly"):
+            self.cpp_info.components["librocksdb"].requires.append("folly::folly")
