@@ -99,8 +99,8 @@ class FollyConan(ConanFile):
             self.requires("fmt/[>=11.1.0 <12]", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
-        # INFO: Required due ZIP_LISTS CMake feature in conan_deps.cmake
-        self.tool_requires("cmake/[>=3.5 <5]")
+        # INFO: Required due ZIP_LISTS CMake (3.17) feature in conan_deps.cmake
+        self.tool_requires("cmake/[>=3.17]")
 
     @property
     def _required_boost_components(self):
