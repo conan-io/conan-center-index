@@ -6,6 +6,8 @@ from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
 
+required_conan_version = ">=2.0"
+
 class KDAlgorithmsConan(ConanFile):
     name = "kdalgorithmns"
     license = "MIT"
