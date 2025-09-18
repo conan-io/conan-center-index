@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanException
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get, rm, rmdir
@@ -33,8 +32,6 @@ class LibrealsenseConan(ConanFile):
         "rsusb_backend": True, # TODO: change to False when CI gets MSVC ATL support
     }
 
-    short_paths = True
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -53,10 +50,13 @@ class LibrealsenseConan(ConanFile):
 
     def requirements(self):
         self.requires("libusb/1.0.26")
+        if Version(self.version) >= "2.56.5":
+            self.requires("nlohmann_json/[~3.11]")
+            self.requires("lz4/1.9.4")
+            # TODO: unvendor xxhash
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 14)
+        check_min_cppstd(self, 14)
 
     def source(self):
         sources = self.conan_data["sources"][self.version]
@@ -97,7 +97,8 @@ class LibrealsenseConan(ConanFile):
             tc.variables["FORCE_RSUSB_BACKEND"] = self.options.rsusb_backend
         if Version(self.version) < "2.56.5":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW" # MSVC runtime library
+        else:
+            tc.cache_variables["USE_EXTERNAL_LZ4"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -133,6 +134,7 @@ class LibrealsenseConan(ConanFile):
             if Version(self.version) >= "2.55.1":
                 self.cpp_info.components["rsutils"].set_property("cmake_target_name", "realsense2::rsutils")
                 self.cpp_info.components["rsutils"].libs = [f"rsutils{postfix}"]
+                self.cpp_info.components["rsutils"].requires = ["nlohmann_json::nlohmann_json", "lz4::lz4"]
                 static_extension_libs.append("rsutils")
 
         self.cpp_info.components["realsense2"].set_property("cmake_target_name", "realsense2::realsense2")

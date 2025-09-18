@@ -90,3 +90,13 @@
  
  namespace rsutils {
  namespace os {
+--- a/src/algo.cpp
++++ b/src/algo.cpp
+@@ -4,6 +4,7 @@
+ #include "algo.h"
+ #include "option.h"
+ #include "core/video-frame.h"
++#include <algorithm>
+ 
+ using namespace librealsense;
+ 
