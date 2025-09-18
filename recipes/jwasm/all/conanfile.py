@@ -14,7 +14,6 @@ class JwasmConan(ConanFile):
     homepage = "https://github.com/JWasm/JWasm"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "application"
-    languages = "C"
     settings = "os", "arch", "compiler", "build_type"
 
     def export_sources(self):
@@ -37,7 +36,7 @@ class JwasmConan(ConanFile):
         tc = CMakeToolchain(self)
         # INFO: Upstream recommends using C99 to avoid errors with C23
         # https://github.com/Baron-von-Riedesel/JWasm/issues/39#issuecomment-2823163402
-        if not self.settings.get_safe("compiler.cstd") and self.settings.compiler in ["gcc", "clang", "apple-clang"]:
+        if self.settings.compiler in ["gcc", "clang", "apple-clang"]:
             tc.extra_cflags = ["-std=gnu99"]
         tc.generate()
 
