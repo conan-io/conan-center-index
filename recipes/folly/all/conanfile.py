@@ -89,7 +89,7 @@ class FollyConan(ConanFile):
         self.requires("xz_utils/[>=5.4.5 <6]")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("libiberty/9.1.0")
-            self.requires("libunwind/1.8.1")
+            self.requires("libunwind/1.8.0")
         if self.settings.os == "Linux":
             self.requires("liburing/2.6")
             self.requires("libaio/0.3.113")
