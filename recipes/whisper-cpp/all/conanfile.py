@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, save
+from conan.tools.files import copy, apply_conandata_patches, export_conandata_patches, get, rm, save
 from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
@@ -169,6 +169,8 @@ class WhisperCppConan(ConanFile):
         tc.variables["GGML_CUDA"] = bool(self.options.get_safe("with_cuda"))
 
         tc.variables["GGML_BLAS"] = bool(self.options.get_safe("with_blas", False))
+        if self.options.get_safe("with_blas"):
+            tc.variables["GGML_BLAS_VENDOR"] = "OpenBLAS"            
 
         if self.options.get_safe("with_openvino"):
             tc.variables["WHISPER_OPENVINO"] = True
