@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
-from conan.tools.layout import basic_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
 required_conan_version = ">=2.0"
@@ -18,8 +18,7 @@ class KDAlgorithmsConan(ConanFile):
     no_copy_source = True
 
     def layout(self):
-        # src_folder must use the same source folder name than the project
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -30,9 +29,19 @@ class KDAlgorithmsConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, "14")
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+
     def package(self):
-        copy(self, "*.h", os.path.join(self.source_folder, "src"), os.path.join(self.package_folder, "include", "kdalgorithmns"))
         copy(self, "LICENSES/*", dst=os.path.join(self.package_folder,"licenses"), src=self.source_folder)
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.bindirs = []
