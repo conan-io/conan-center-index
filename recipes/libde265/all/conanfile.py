@@ -82,10 +82,9 @@ class Libde265Conan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libde265")
         self.cpp_info.set_property("cmake_target_name", "de265")
-        self.cpp_info.set_property("cmake_target_aliases", ["libde265"]) # official imported target before 1.0.10
+        self.cpp_info.set_property("cmake_target_aliases", ["libde265"])  # official imported target before 1.0.10
         self.cpp_info.set_property("pkg_config_name", "libde265")
-        version = Version(self.version)
-        prefix = "lib" if (version < "1.0.10" or (version > "1.0.11" and self.settings.os == "Windows" and not self.options.shared)) else ""
+        prefix = "lib" if self.settings.os == "Windows" and not self.options.shared else ""
         self.cpp_info.libs = [f"{prefix}de265"]
         if not self.options.shared:
             self.cpp_info.defines = ["LIBDE265_STATIC_BUILD"]
