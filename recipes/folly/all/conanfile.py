@@ -34,7 +34,7 @@ class FollyConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        if Version(self.version) >= "2025.08.18.00":
+        if Version(self.version) >= "2025.07.14.00":
             # https://github.com/facebook/folly/commit/97f90a3c2488132dbba27e6d2287dc8c39612325
             return 20
         else:
