@@ -1,5 +1,5 @@
 diff --git CMakeLists.txt CMakeLists.txt
-index ec17a5838..48bf5d74a 100644
+index f9a39f578..517af57f7 100644
 --- CMakeLists.txt
 +++ CMakeLists.txt
 @@ -42,7 +42,7 @@ endif ()
@@ -11,7 +11,7 @@ index ec17a5838..48bf5d74a 100644
        "${PROJECT_SOURCE_DIR}/src/cmake")
  
  # Utilities
-@@ -274,7 +274,7 @@ if (OIIO_BUILD_TOOLS AND NOT BUILD_OIIOUTIL_ONLY)
+@@ -276,7 +276,7 @@ if (OIIO_BUILD_TOOLS AND NOT BUILD_OIIOUTIL_ONLY)
      add_subdirectory (src/iinfo)
      add_subdirectory (src/maketx)
      add_subdirectory (src/oiiotool)
@@ -34,7 +34,7 @@ index f66bf756e..6cea07a17 100644
              install_targets (${_plugin_NAME})
          endif ()
 diff --git src/cmake/externalpackages.cmake src/cmake/externalpackages.cmake
-index e31331175..2b44ea872 100644
+index ba6f3411b..95de8eb98 100644
 --- src/cmake/externalpackages.cmake
 +++ src/cmake/externalpackages.cmake
 @@ -73,16 +73,15 @@ set (OPENIMAGEIO_CONFIG_DO_NOT_FIND_IMATH OFF CACHE BOOL
@@ -90,7 +90,7 @@ index e31331175..2b44ea872 100644
  if (USE_PYTHON)
      checked_find_package (pybind11 REQUIRED VERSION_MIN 2.7)
  endif ()
-@@ -125,77 +126,105 @@ endif ()
+@@ -125,79 +126,107 @@ endif ()
  # Dependencies for optional formats and features. If these are not found,
  # we will continue building, but the related functionality will be disabled.
  
@@ -184,6 +184,8 @@ index e31331175..2b44ea872 100644
 -# Note: Recent OpenJPEG versions have exported cmake configs, but we don't
 -# find them reliable at all, so we stick to our FindOpenJPEG.cmake module.
 -
+-checked_find_package (openjph VERSION_MIN 0.21.2)
+-
 -checked_find_package (OpenVDB
 -                      VERSION_MIN  9.0
 -                      DEPS         TBB
@@ -215,6 +217,8 @@ index e31331175..2b44ea872 100644
 +    # Note: Recent OpenJPEG versions have exported cmake configs, but we don't
 +    # find them reliable at all, so we stick to our FindOpenJPEG.cmake module.
 +endif()
++
++#checked_find_package (openjph VERSION_MIN 0.21.2)
 +
 +if (USE_OPENVDB)
 +    checked_find_package (OpenVDB REQUIRED
@@ -251,7 +255,7 @@ index e31331175..2b44ea872 100644
  
  if (FFmpeg_FOUND OR FREETYPE_FOUND)
      checked_find_package (BZip2)   # Used by ffmpeg and freetype
-@@ -207,10 +236,10 @@ endif()
+@@ -209,10 +238,10 @@ endif()
  
  # Qt -- used for iv
  option (USE_QT "Use Qt if found" ON)
@@ -265,7 +269,7 @@ index e31331175..2b44ea872 100644
      checked_find_package (Qt6 COMPONENTS Core Gui Widgets OpenGLWidgets)
      if (NOT Qt6_FOUND)
          checked_find_package (Qt5 COMPONENTS Core Gui Widgets OpenGL)
-@@ -223,18 +252,13 @@ endif ()
+@@ -225,18 +254,13 @@ endif ()
  
  
  # Tessil/robin-map

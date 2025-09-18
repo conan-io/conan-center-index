@@ -90,6 +90,7 @@ class OpenImageIOConan(ConanFile):
         self.requires("libtiff/4.7.0")
         self.requires("imath/3.1.12", transitive_headers=True)
         self.requires("openexr/3.3.5")
+        self.requires("openjph/0.23.1")
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9f", force=True)
         elif self.options.with_libjpeg == "libjpeg-turbo":
@@ -279,6 +280,7 @@ class OpenImageIOConan(ConanFile):
             "imath::imath",
             "openexr::openexr",
             "opencolorio::opencolorio",
+            "openjph::openjph",
         ]
 
         if self.options.with_libjxl:

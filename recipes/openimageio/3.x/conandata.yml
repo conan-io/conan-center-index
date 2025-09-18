@@ -1,9 +1,9 @@
 sources:
-  "3.0.9.1":
-    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/releases/download/v3.0.9.1/OpenImageIO-3.0.9.1.tar.gz"
-    sha256: "fe78d1a1e596f073e29b1d42dc632135ed1da9f3a4b065fa33f6162a0f0f15bf"
+  "3.0.10.1":
+    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/releases/download/v3.0.10.1/OpenImageIO-3.0.10.1.tar.gz"
+    sha256: "8d34414dba1e299fe6a8559550a4560c95294c539bbd12faba23577364a0b74b"
 patches:
-  "3.0.9.1":
-    - patch_file: "patches/3.0.9.1-cmake-targets.patch"
+  "3.0.10.1":
+    - patch_file: "patches/3.0.10.1-cmake-targets.patch"
       patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
       patch_type: "conan"
