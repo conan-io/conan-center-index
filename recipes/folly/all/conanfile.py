@@ -154,9 +154,6 @@ class FollyConan(ConanFile):
         env.generate()
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_PROJECT_folly_INCLUDE"] = "conan_deps.cmake"
-        # fast_float is only needed on newer folly versions
-        # if Version(self.version) > "2024.08.26.00":
-        #     tc.variables["CONAN_CMAKE_FOLLY_NEEDS_FAST_FLOAT"] = True
         # Folly fails to check Gflags: https://github.com/conan-io/conan/issues/12012
         tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
 
@@ -272,7 +269,7 @@ class FollyConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libfolly"].requires.extend(["libiberty::libiberty", "libunwind::libunwind"])
         if self.settings.os == "Linux":
-            self.cpp_info.components["libfolly"].requires.append("liburing::liburing")
+            self.cpp_info.components["libfolly"].requires.extend(["liburing::liburing", "libaio::libaio"])
             self.cpp_info.components["libfolly"].system_libs.extend(["pthread", "dl", "rt"])
             self.cpp_info.components["libfolly"].defines.extend(["FOLLY_HAVE_ELF", "FOLLY_HAVE_DWARF"])
         elif self.settings.os == "Windows":
