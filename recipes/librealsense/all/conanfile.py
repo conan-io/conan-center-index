@@ -61,6 +61,10 @@ class LibrealsenseConan(ConanFile):
         if self.settings.os == "Windows" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("librealsense does not support Windows on ARM due to lack of SSSE3 support")
 
+        # TODO: remove this -> temporary, working with CI
+        if self.options.shared:
+            raise ConanInvalidConfiguration("librealsense does not support Windows on ARM due to lack of SSSE3 support")
+
     def source(self):
         sources = self.conan_data["sources"][self.version]
         get(self, **sources["source"], strip_root=True)
@@ -130,28 +134,26 @@ class LibrealsenseConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "realsense2")
 
         postfix = "d" if is_msvc(self) and self.settings.build_type == "Debug" else ""
-        static_extension_libs = ["realsense-file", "fw"]
         if not self.options.shared:
             self.cpp_info.components["fw"].set_property("cmake_target_name", "realsense2::fw")
             self.cpp_info.components["fw"].libs = [f"fw{postfix}"]
             self.cpp_info.components["realsense-file"].set_property("cmake_target_name", "realsense2::realsense-file")
             self.cpp_info.components["realsense-file"].libs = [f"realsense-file{postfix}"]
 
-        if Version(self.version) >= "2.56.5":
-            self.cpp_info.components["rsutils"].type = "static-library"
-            self.cpp_info.components["rsutils"].set_property("cmake_target_name", "realsense2::rsutils")
-            self.cpp_info.components["rsutils"].libs = [f"rsutils{postfix}"]
-            self.cpp_info.components["rsutils"].requires = ["nlohmann_json::nlohmann_json", "lz4::lz4"]
-
         self.cpp_info.components["realsense2"].set_property("cmake_target_name", "realsense2::realsense2")
         self.cpp_info.components["realsense2"].set_property("pkg_config_name", "realsense2")
         self.cpp_info.components["realsense2"].libs = [f"realsense2{postfix}"]
         self.cpp_info.components["realsense2"].requires = ["libusb::libusb"]
-
-        self.cpp_info.components["realsense2"].requires.append("rsutils")
-
         if not self.options.shared:
-            self.cpp_info.components["realsense2"].requires.extend(static_extension_libs)
+            self.cpp_info.components["realsense2"].requires.extend(["realsense-file", "fw"])
+
+        # rsutils component
+        if Version(self.version) >= "2.56.5":
+            # self.cpp_info.components["rsutils"].type = "static-library"
+            self.cpp_info.components["rsutils"].set_property("cmake_target_name", "realsense2::rsutils")
+            self.cpp_info.components["rsutils"].libs = [f"rsutils{postfix}"]
+            self.cpp_info.components["rsutils"].requires = ["nlohmann_json::nlohmann_json", "lz4::lz4"]
+            self.cpp_info.components["realsense2"].requires.append("rsutils")
 
         if self.settings.os == "Linux":
             self.cpp_info.components["realsense2"].system_libs.extend(["m", "pthread", "udev"])
