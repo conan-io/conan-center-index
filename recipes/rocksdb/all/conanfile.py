@@ -179,7 +179,7 @@ class RocksDBConan(ConanFile):
     def _patch_sources(self):
         # INFO: --copy-dt-needed-entries is only needed for ld.bfd and breaks other linkers like ld.gold and lld
         # https://github.com/facebook/rocksdb/issues/13895
-        if Version(self.version) >= "7.7.2":
+        if self._has_folly:
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                          'set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--copy-dt-needed-entries")', "")
 
