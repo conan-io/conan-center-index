@@ -34,6 +34,10 @@ class JwasmConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        # INFO: Upstream recommends using C99 to avoid errors with C23
+        # https://github.com/Baron-von-Riedesel/JWasm/issues/39#issuecomment-2823163402
+        if not self.settings.compiler.get_safe("cstd") and self.settings.compiler in ["gcc", "clang", "apple-clang"]:
+            tc.extra_cflags = ["-std=gnu99"]
         tc.generate()
 
     def build(self):
