@@ -51,6 +51,8 @@ class CryptoPPConan(ConanFile):
     def validate(self):
         if self.options.shared and Version(self.version) >= "8.7.0":
             raise ConanInvalidConfiguration("cryptopp 8.7.0 and higher do not support shared builds")
+        if Version(self.version) < "8.9.0" and self.settings.os == "Windows" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("Older releases do not support Windows ARM")
 
     def build_requirements(self):
         if Version(self.version) >= "8.7.0":
