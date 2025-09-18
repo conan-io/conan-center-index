@@ -34,7 +34,7 @@ index f66bf756e..6cea07a17 100644
              install_targets (${_plugin_NAME})
          endif ()
 diff --git src/cmake/externalpackages.cmake src/cmake/externalpackages.cmake
-index ba6f3411b..95de8eb98 100644
+index ba6f3411b..e134c19a9 100644
 --- src/cmake/externalpackages.cmake
 +++ src/cmake/externalpackages.cmake
 @@ -73,16 +73,15 @@ set (OPENIMAGEIO_CONFIG_DO_NOT_FIND_IMATH OFF CACHE BOOL
@@ -90,7 +90,7 @@ index ba6f3411b..95de8eb98 100644
  if (USE_PYTHON)
      checked_find_package (pybind11 REQUIRED VERSION_MIN 2.7)
  endif ()
-@@ -125,79 +126,107 @@ endif ()
+@@ -125,79 +126,109 @@ endif ()
  # Dependencies for optional formats and features. If these are not found,
  # we will continue building, but the related functionality will be disabled.
  
@@ -218,6 +218,8 @@ index ba6f3411b..95de8eb98 100644
 +    # find them reliable at all, so we stick to our FindOpenJPEG.cmake module.
 +endif()
 +
++# Comment out for now in conan patch as this was accidentially added when patches have been backported.
++# OpenJPH usage is not intended for 3.0.x releases: https://github.com/AcademySoftwareFoundation/OpenImageIO/issues/4893
 +#checked_find_package (openjph VERSION_MIN 0.21.2)
 +
 +if (USE_OPENVDB)
@@ -255,7 +257,7 @@ index ba6f3411b..95de8eb98 100644
  
  if (FFmpeg_FOUND OR FREETYPE_FOUND)
      checked_find_package (BZip2)   # Used by ffmpeg and freetype
-@@ -209,10 +238,10 @@ endif()
+@@ -209,10 +240,10 @@ endif()
  
  # Qt -- used for iv
  option (USE_QT "Use Qt if found" ON)
@@ -269,7 +271,7 @@ index ba6f3411b..95de8eb98 100644
      checked_find_package (Qt6 COMPONENTS Core Gui Widgets OpenGLWidgets)
      if (NOT Qt6_FOUND)
          checked_find_package (Qt5 COMPONENTS Core Gui Widgets OpenGL)
-@@ -225,18 +254,13 @@ endif ()
+@@ -225,18 +256,13 @@ endif ()
  
  
  # Tessil/robin-map
