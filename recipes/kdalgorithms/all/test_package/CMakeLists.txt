@@ -4,12 +4,4 @@ project(test_package LANGUAGES CXX)
 find_package(KDAlgorithms REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} main.cpp)
-
-target_link_libraries(${PROJECT_NAME} PRIVATE KDAB::KDAlgorithms)
-
-set_target_properties(${PROJECT_NAME}
-    PROPERTIES
-        CMAKE_INCLUDE_CURRENT_DIRS ON
-        CXX_STANDARD 14
-        CXX_STANDARD_REQUIRED ON
-)
+target_link_libraries(${PROJECT_NAME} PRIVATE KDAB::kdalgorithms)
