@@ -7,7 +7,7 @@ import os
 required_conan_version = ">=2.0"
 
 class KDAlgorithmsConan(ConanFile):
-    name = "kdalgorithmns"
+    name = "kdalgorithms"
     license = "MIT"
     description = "C++ Algorithm wrappers"
     url = "https://github.com/conan-io/conan-center-index"
