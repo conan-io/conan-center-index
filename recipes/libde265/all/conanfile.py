@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanException
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
@@ -57,9 +56,8 @@ class Libde265Conan(ConanFile):
         tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         tc.variables["ENABLE_SDL"] = False
         tc.variables["DISABLE_SSE"] = not self.options.get_safe("sse", False)
-        if Version(self.version) > "1.0.15":
-            raise ConanException("CHeck if CMAKE_POLICY_VERSION_MINIMUM can be removed in new version, currently hardcoded to 3.5")
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
+        if Version(self.version) < "1.0.16":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
     def _patch_sources(self):
