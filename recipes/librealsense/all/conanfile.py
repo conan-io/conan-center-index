@@ -131,18 +131,23 @@ class LibrealsenseConan(ConanFile):
             self.cpp_info.components["fw"].libs = [f"fw{postfix}"]
             self.cpp_info.components["realsense-file"].set_property("cmake_target_name", "realsense2::realsense-file")
             self.cpp_info.components["realsense-file"].libs = [f"realsense-file{postfix}"]
-            if Version(self.version) >= "2.55.1":
-                self.cpp_info.components["rsutils"].set_property("cmake_target_name", "realsense2::rsutils")
-                self.cpp_info.components["rsutils"].libs = [f"rsutils{postfix}"]
-                self.cpp_info.components["rsutils"].requires = ["nlohmann_json::nlohmann_json", "lz4::lz4"]
-                static_extension_libs.append("rsutils")
+
+        if Version(self.version) >= "2.56.5":
+            self.cpp_info.components["rsutils"].type = "static-library"
+            self.cpp_info.components["rsutils"].set_property("cmake_target_name", "realsense2::rsutils")
+            self.cpp_info.components["rsutils"].libs = [f"rsutils{postfix}"]
+            self.cpp_info.components["rsutils"].requires = ["nlohmann_json::nlohmann_json", "lz4::lz4"]
 
         self.cpp_info.components["realsense2"].set_property("cmake_target_name", "realsense2::realsense2")
         self.cpp_info.components["realsense2"].set_property("pkg_config_name", "realsense2")
         self.cpp_info.components["realsense2"].libs = [f"realsense2{postfix}"]
         self.cpp_info.components["realsense2"].requires = ["libusb::libusb"]
+
+        self.cpp_info.components["realsense2"].requires.append("rsutils")
+
         if not self.options.shared:
             self.cpp_info.components["realsense2"].requires.extend(static_extension_libs)
+
         if self.settings.os == "Linux":
             self.cpp_info.components["realsense2"].system_libs.extend(["m", "pthread", "udev"])
         elif self.settings.os == "Windows":
