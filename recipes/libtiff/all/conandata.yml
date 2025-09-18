@@ -10,7 +10,7 @@ sources:
     sha256: "88b3979e6d5c7e32b50d7ec72fb15af724f6ab2cbf7e10880c360a77e4b5d99a"
 patches:
   "4.7.1":
-    - patch_file: "patches/4.5.1-0001-cmake-dependencies.patch"
+    - patch_file: "patches/4.7.1-0001-cmake-dependencies.patch"
       patch_description: "CMake: robust handling of dependencies"
       patch_type: "conan"
   "4.7.0":
