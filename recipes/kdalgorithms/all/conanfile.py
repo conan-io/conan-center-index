@@ -46,7 +46,5 @@ class KDAlgorithmsConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.includedirs = ["include/kdalgorithmns"]
         self.cpp_info.set_property("cmake_file_name", "KDAlgorithms")
-        self.cpp_info.set_property("cmake_target_name", "KDAB::KDAlgorithms")
-        self.cpp_info.set_property("cmake_target_aliases", ["KDAlgorithms"])
+        self.cpp_info.set_property("cmake_target_name", "KDAB::kdalgorithms")
