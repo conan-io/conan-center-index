@@ -166,7 +166,7 @@ class WhisperCppConan(ConanFile):
         # TODO: Implement OpenMP support
         tc.variables["GGML_OPENMP"] = False
 
-        tc.variables["GGML_CUDA"] = bool(self.options.get_safe("with_cuda"))
+        tc.variables["GGML_CUDA"] = bool(self.options.get_safe("with_cuda", False))
 
         tc.variables["GGML_BLAS"] = bool(self.options.get_safe("with_blas", False))
         if self.options.get_safe("with_blas"):
