@@ -91,7 +91,13 @@ class FollyConan(ConanFile):
             self.requires("libiberty/9.1.0")
             self.requires("libunwind/1.8.0")
         if self.settings.os == "Linux":
-            self.requires("liburing/2.6")
+            if Version(self.version) >= "2025.02.24.00":
+                # folly/io/async/IoUringZeroCopyBufferPool.h:57
+                # Requires io_uring_zcrx_cqe (liburing >= 2.10)
+                self.requires("liburing/2.11")
+            else:
+                self.requires("liburing/2.6")
+
             self.requires("libaio/0.3.113")
         if Version(self.version) < "2024.10.07.00":
             # INFO: Folly does not support fmt 11 on MSVC
