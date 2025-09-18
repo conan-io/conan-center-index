@@ -4,6 +4,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get, rm, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 import urllib
 
@@ -53,10 +54,12 @@ class LibrealsenseConan(ConanFile):
         if Version(self.version) >= "2.56.5":
             self.requires("nlohmann_json/[~3.11]")
             self.requires("lz4/1.9.4")
-            # TODO: unvendor xxhash
+            # TODO: unvendor xxhash, tclap, etc
 
     def validate(self):
         check_min_cppstd(self, 14)
+        if self.settings.os == "Windows" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("librealsense does not support Windows on ARM due to lack of SSSE3 support")
 
     def source(self):
         sources = self.conan_data["sources"][self.version]
@@ -99,6 +102,8 @@ class LibrealsenseConan(ConanFile):
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         else:
             tc.cache_variables["USE_EXTERNAL_LZ4"] = True
+            if self.settings.arch == "armv8":
+                tc.preprocessor_definitions["USE_SOFT_INTRINSICS"] = "1"
         tc.generate()
 
         deps = CMakeDeps(self)
