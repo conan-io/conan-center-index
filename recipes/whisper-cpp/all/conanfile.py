@@ -84,9 +84,9 @@ class WhisperCppConan(ConanFile):
             find_dependency(CUDAToolkit REQUIRED)
             if (WIN32)
                 # As of CUDA 12.3.1, Windows does not offer a static cublas library
-                target_link_libraries(ggml-cuda INTERFACE CUDA::cudart_static CUDA::cublas CUDA::cublasLt CUDA::cuda_driver)
+                target_link_libraries(whisper-cpp::whisper-cpp INTERFACE CUDA::cudart_static CUDA::cublas CUDA::cublasLt CUDA::cuda_driver)
             else ()
-                target_link_libraries(ggml-cuda INTERFACE CUDA::cudart_static CUDA::cublas_static CUDA::cublasLt_static CUDA::cuda_driver)
+                target_link_libraries(whisper-cpp::whisper-cpp INTERFACE CUDA::cudart_static CUDA::cublas_static CUDA::cublasLt_static CUDA::cuda_driver)
             endif()
         """)
 
