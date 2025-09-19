@@ -2045,11 +2045,15 @@ class BoostConan(ConanFile):
 
             if not self.options.without_python:
                 pyversion = Version(self._python_version)
-                self.cpp_info.components[f"python{pyversion.major}{pyversion.minor}"].requires = ["python"]
+                python_versioned_component_name = f"python{pyversion.major}{pyversion.minor}"
+                self.cpp_info.components[python_versioned_component_name].requires = ["python"]
+                self.cpp_info.components[python_versioned_component_name].set_property("cmake_target_name", "Boost::" + python_versioned_component_name)
                 if not self._shared:
                     self.cpp_info.components["python"].defines.append("BOOST_PYTHON_STATIC_LIB")
 
-                self.cpp_info.components[f"numpy{pyversion.major}{pyversion.minor}"].requires = ["numpy"]
+                numpy_versioned_component_name = f"numpy{pyversion.major}{pyversion.minor}"
+                self.cpp_info.components[numpy_versioned_component_name].requires = ["numpy"]
+                self.cpp_info.components[numpy_versioned_component_name].set_property("cmake_target_name", "Boost::" + numpy_versioned_component_name)
 
             if not self.options.get_safe("without_process"):
                 if self.settings.os == "Windows":
