@@ -1,0 +1,4 @@
+sources:
+  "2.0.0":
+    url: "https://github.com/queelius/algebraic_hashing/archive/refs/tags/v2.0.0.tar.gz"
+    sha256: "b1be443aae80efd81bbfe0ca04cedfbbfd33c0b9bf5a976329db0b7c81054c8d"
