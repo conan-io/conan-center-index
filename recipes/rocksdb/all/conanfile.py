@@ -52,12 +52,7 @@ class RocksDBConan(ConanFile):
         "enable_sse": False,
         "use_rtti": False,
     }
-
-    @property
-    def _has_lite(self):
-        # https://github.com/facebook/rocksdb/commit/4720ba4391eb016b05a30d09a8275624c3a4a87e
-        return Version(self.version) < "8.0.0"
-
+    
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -68,8 +63,6 @@ class RocksDBConan(ConanFile):
             del self.options.with_tbb
         if self.settings.build_type == "Debug":
             self.options.use_rtti = True  # Rtti are used in asserts for debug mode...
-        if not self._has_lite:
-            del self.options.lite
 
     def configure(self):
         if self.options.shared:
@@ -120,15 +113,10 @@ class RocksDBConan(ConanFile):
         tc.variables["WITH_TOOLS"] = False
         tc.variables["WITH_CORE_TOOLS"] = False
         tc.variables["WITH_BENCHMARK_TOOLS"] = False
-        if Version(self.version) < "7.2.0":
-            # https://github.com/facebook/rocksdb/commit/efd035164b443e0ae552a82ad8b47a8048e652ca
-            tc.variables["WITH_FOLLY_DISTRIBUTED_MUTEX"] = False
         tc.variables["USE_FOLLY"] = self.options.with_folly
         if is_msvc(self):
             tc.variables["WITH_MD_LIBRARY"] = not is_msvc_static_runtime(self)
         tc.variables["ROCKSDB_INSTALL_ON_WINDOWS"] = self.settings.os == "Windows"
-        if self._has_lite:
-            tc.variables["ROCKSDB_LITE"] = self.options.lite
         tc.variables["WITH_GFLAGS"] = self.options.with_gflags
         tc.variables["WITH_SNAPPY"] = self.options.with_snappy
         tc.variables["WITH_LZ4"] = self.options.with_lz4
