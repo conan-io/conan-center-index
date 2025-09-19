@@ -27,6 +27,7 @@ class FltkConan(ConanFile):
         "with_threads": [True, False],
         "with_gdiplus": [True, False],
         "abi_version": ["ANY"],
+        "with_xft": [True, False],
     }
     default_options = {
         "shared": False,
@@ -34,6 +35,7 @@ class FltkConan(ConanFile):
         "with_gl": True,
         "with_threads": True,
         "with_gdiplus": True,
+        "with_xft": False,
     }
 
     def export_sources(self):
