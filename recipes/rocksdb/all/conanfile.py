@@ -6,7 +6,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -163,15 +163,8 @@ class RocksDBConan(ConanFile):
             deps.set_property("folly", "cmake_additional_variables_prefixes", ["FOLLY",])
         deps.generate()
 
-    def _patch_sources(self):
-        # INFO: --copy-dt-needed-entries is only needed for ld.bfd and breaks other linkers like ld.gold and lld
-        # https://github.com/facebook/rocksdb/issues/13895
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        'set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--copy-dt-needed-entries")', "")
-
     def build(self):
         apply_conandata_patches(self)
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
