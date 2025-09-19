@@ -6,7 +6,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.apple import is_apple_os
 import os
 
-required_conan_version = ">=2.4"
+required_conan_version = ">=1.60.0"
 
 class RsyncConan(ConanFile):
     name = "rsync"
@@ -36,6 +36,10 @@ class RsyncConan(ConanFile):
     }
     languages = "C"
 
+    def configure(self):
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -53,7 +57,7 @@ class RsyncConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
 
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[>=1.5.5 <1.6]")
 
         if self.options.with_lz4:
             self.requires("lz4/1.9.2")
