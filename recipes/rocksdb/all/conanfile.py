@@ -25,7 +25,6 @@ class RocksDBConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "lite": [True, False],
         "with_gflags": [True, False],
         "with_snappy": [True, False],
         "with_lz4": [True, False],
@@ -40,7 +39,6 @@ class RocksDBConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "lite": False,
         "with_snappy": False,
         "with_lz4": False,
         "with_zlib": False,
@@ -186,31 +184,27 @@ class RocksDBConan(ConanFile):
         cmake_target = "rocksdb-shared" if self.options.shared else "rocksdb"
         self.cpp_info.set_property("cmake_file_name", "RocksDB")
         self.cpp_info.set_property("cmake_target_name", f"RocksDB::{cmake_target}")
-        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["librocksdb"].libs = collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         if self.settings.os == "Windows":
-            self.cpp_info.components["librocksdb"].system_libs = ["shlwapi", "rpcrt4"]
+            self.cpp_info.system_libs = ["shlwapi", "rpcrt4"]
             if self.options.shared:
-                self.cpp_info.components["librocksdb"].defines = ["ROCKSDB_DLL"]
+                self.cpp_info.defines = ["ROCKSDB_DLL"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["librocksdb"].system_libs = ["pthread", "m"]
-        if self.options.get_safe("lite"):
-            self.cpp_info.components["librocksdb"].defines.append("ROCKSDB_LITE")
+            self.cpp_info.system_libs = ["pthread", "m"]
 
-        self.cpp_info.components["librocksdb"].set_property("cmake_target_name", f"RocksDB::{cmake_target}")
         if self.options.with_gflags:
-            self.cpp_info.components["librocksdb"].requires.append("gflags::gflags")
+            self.cpp_info.requires.append("gflags::gflags")
         if self.options.with_snappy:
-            self.cpp_info.components["librocksdb"].requires.append("snappy::snappy")
+            self.cpp_info.requires.append("snappy::snappy")
         if self.options.with_lz4:
-            self.cpp_info.components["librocksdb"].requires.append("lz4::lz4")
+            self.cpp_info.requires.append("lz4::lz4")
         if self.options.with_zlib:
-            self.cpp_info.components["librocksdb"].requires.append("zlib::zlib")
+            self.cpp_info.requires.append("zlib::zlib")
         if self.options.with_zstd:
-            self.cpp_info.components["librocksdb"].requires.append("zstd::zstd")
+            self.cpp_info.requires.append("zstd::zstd")
         if self.options.get_safe("with_tbb"):
-            self.cpp_info.components["librocksdb"].requires.append("onetbb::onetbb")
+            self.cpp_info.requires.append("onetbb::onetbb")
         if self.options.with_jemalloc:
-            self.cpp_info.components["librocksdb"].requires.append("jemalloc::jemalloc")
+            self.cpp_info.requires.append("jemalloc::jemalloc")
         if self.options.with_folly:
-            self.cpp_info.components["librocksdb"].requires.append("folly::folly")
+            self.cpp_info.requires.append("folly::folly")
