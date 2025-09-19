@@ -1,9 +1,11 @@
 #include <cstdlib>
-#include <iostream>
 #include "rocksdb/db.h"
+#include "rocksdb/c.h"
 
 
 int main() {
-  std::cout << "RocksDB version: " << rocksdb::GetRocksVersionAsString() << std::endl;
-  return EXIT_SUCCESS;
+    rocksdb_options_t *options = rocksdb_options_create();
+    rocksdb_free(options);
+
+    return EXIT_SUCCESS;
 }
