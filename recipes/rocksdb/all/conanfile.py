@@ -54,16 +54,6 @@ class RocksDBConan(ConanFile):
     }
 
     @property
-    def _min_cppstd(self):
-        return "11" if Version(self.version) < "8.8.1" else "17"
-
-    @property
-    def _has_folly(self):
-        # Folly became unvendored in 7.7.2
-        # https://github.com/facebook/rocksdb/commit/be09943fb58a2dd3f70e6e30781ebfa3fcbcb8fa
-        return Version(self.version) >= "7.7.2"
-
-    @property
     def _has_lite(self):
         # https://github.com/facebook/rocksdb/commit/4720ba4391eb016b05a30d09a8275624c3a4a87e
         return Version(self.version) < "8.0.0"
@@ -78,8 +68,6 @@ class RocksDBConan(ConanFile):
             del self.options.with_tbb
         if self.settings.build_type == "Debug":
             self.options.use_rtti = True  # Rtti are used in asserts for debug mode...
-        if not self._has_folly:
-            del self.options.with_folly
         if not self._has_lite:
             del self.options.lite
 
@@ -109,7 +97,7 @@ class RocksDBConan(ConanFile):
             self.requires("folly/2024.08.12.00")
 
     def validate(self):
-        check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 17)
 
         if self.settings.arch not in ["x86_64", "ppc64le", "ppc64", "mips64", "armv8"]:
             raise ConanInvalidConfiguration("Rocksdb requires 64 bits")
@@ -134,8 +122,7 @@ class RocksDBConan(ConanFile):
         if Version(self.version) < "7.2.0":
             # https://github.com/facebook/rocksdb/commit/efd035164b443e0ae552a82ad8b47a8048e652ca
             tc.variables["WITH_FOLLY_DISTRIBUTED_MUTEX"] = False
-        if self._has_folly:
-            tc.variables["USE_FOLLY"] = self.options.with_folly
+        tc.variables["USE_FOLLY"] = self.options.with_folly
         if is_msvc(self):
             tc.variables["WITH_MD_LIBRARY"] = not is_msvc_static_runtime(self)
         tc.variables["ROCKSDB_INSTALL_ON_WINDOWS"] = self.settings.os == "Windows"
@@ -179,9 +166,8 @@ class RocksDBConan(ConanFile):
     def _patch_sources(self):
         # INFO: --copy-dt-needed-entries is only needed for ld.bfd and breaks other linkers like ld.gold and lld
         # https://github.com/facebook/rocksdb/issues/13895
-        if self._has_folly:
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                         'set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--copy-dt-needed-entries")', "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--copy-dt-needed-entries")', "")
 
     def build(self):
         apply_conandata_patches(self)
