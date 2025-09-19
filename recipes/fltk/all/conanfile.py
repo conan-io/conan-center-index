@@ -27,11 +27,6 @@ class FltkConan(ConanFile):
         "with_threads": [True, False],
         "with_gdiplus": [True, False],
         "abi_version": ["ANY"],
-        "with_xft": [True, False],
-        "with_gtk": [True, False],
-        "with_wayland": [True, False],
-        "with_xkb": [True, False],
-        "with_dbus": [True, False],
     }
     default_options = {
         "shared": False,
@@ -39,11 +34,6 @@ class FltkConan(ConanFile):
         "with_gl": True,
         "with_threads": True,
         "with_gdiplus": True,
-        "with_xft": False,
-        "with_gtk": False,
-        "with_wayland": False,
-        "with_xkb": False,
-        "with_dbus": False,
     }
 
     def export_sources(self):
@@ -86,17 +76,6 @@ class FltkConan(ConanFile):
             self.requires("xorg/system")
             if self.options.with_xft:
                 self.requires("libxft/2.3.8")
-            if Version(self.version) >= "1.4.0":
-                if self.options.with_gtk:
-                    self.requires("gtk/system", options={"version": "3"})
-                if self.options.with_wayland:
-                    self.requires("wayland/1.22.0")
-                if self.options.with_wayland:
-                    self.requires("wayland/1.22.0")
-                if self.options.with_xkb:
-                    self.requires("xkbcommon/1.6.0")
-                if self.options.with_dbus:
-                    self.requires("dbus/1.15.8")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
