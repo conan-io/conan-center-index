@@ -1,6 +1,5 @@
 import glob
 import os
-import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -161,14 +160,6 @@ class RocksDBConan(ConanFile):
             if not lib.endswith(".dll.a"):
                 os.remove(lib)
 
-    def _remove_cpp_headers(self):
-        for path in glob.glob(os.path.join(self.package_folder, "include", "rocksdb", "*")):
-            if path != os.path.join(self.package_folder, "include", "rocksdb", "c.h"):
-                if os.path.isfile(path):
-                    os.remove(path)
-                else:
-                    shutil.rmtree(path)
-
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -176,7 +167,6 @@ class RocksDBConan(ConanFile):
         cmake.install()
         if self.options.shared:
             self._remove_static_libraries()
-            self._remove_cpp_headers() # Force stable ABI for shared libraries
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
