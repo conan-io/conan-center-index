@@ -86,7 +86,7 @@ class RocksDBConan(ConanFile):
             self.requires("onetbb/2021.10.0")
         if self.options.with_jemalloc:
             self.requires("jemalloc/5.3.0")
-        if self.options.get_safe("with_folly"):
+        if self.options.with_folly:
             self.requires("folly/2024.08.12.00")
 
     def validate(self):
@@ -98,7 +98,7 @@ class RocksDBConan(ConanFile):
         if is_msvc(self) and Version(self.settings.compiler.version) < "191":
             raise ConanInvalidConfiguration("Rocksdb requires MSVC version >= 191")
 
-        if self.options.shared and self.options.get_safe("with_folly"):
+        if self.options.shared and self.options.with_folly:
             # https://github.com/facebook/rocksdb/blob/v10.5.1/CMakeLists.txt#L603
             raise ConanInvalidConfiguration(f"{self.ref} does not support a shared build with folly")
 
@@ -148,7 +148,7 @@ class RocksDBConan(ConanFile):
             deps.set_property("jemalloc", "cmake_target_name", "JeMalloc::JeMalloc")
         if self.options.with_zstd:
             deps.set_property("zstd", "cmake_target_name", "zstd::zstd")
-        if self.options.get_safe("with_folly"):
+        if self.options.with_folly:
             deps.set_property("folly", "cmake_additional_variables_prefixes", ["FOLLY",])
         deps.generate()
 
@@ -212,5 +212,5 @@ class RocksDBConan(ConanFile):
             self.cpp_info.components["librocksdb"].requires.append("onetbb::onetbb")
         if self.options.with_jemalloc:
             self.cpp_info.components["librocksdb"].requires.append("jemalloc::jemalloc")
-        if self.options.get_safe("with_folly"):
+        if self.options.with_folly:
             self.cpp_info.components["librocksdb"].requires.append("folly::folly")
