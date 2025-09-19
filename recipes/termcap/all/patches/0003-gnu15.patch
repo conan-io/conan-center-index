@@ -1,0 +1,293 @@
+diff --git a/termcap.c b/termcap.c
+index 1a9075129..49346d074 100644
+--- a/termcap.c
++++ b/termcap.c
+@@ -40,9 +40,9 @@ Boston, MA 02111-1307, USA.  */
+ #include <stdlib.h>
+ #include <string.h>
+ #else
+-char *getenv ();
+-char *malloc ();
+-char *realloc ();
++char *getenv (const char *);
++char *malloc (unsigned long long __size);
++char *realloc (const void *, unsigned long long __size);
+ #endif
+ 
+ /* Do this after the include, in case string.h prototypes bcopy.  */
+@@ -97,8 +97,7 @@ memory_out ()
+ }
+ 
+ static char *
+-xmalloc (size)
+-     unsigned size;
++xmalloc (unsigned size)
+ {
+   register char *tem = malloc (size);
+ 
+@@ -108,9 +107,7 @@ xmalloc (size)
+ }
+ 
+ static char *
+-xrealloc (ptr, size)
+-     char *ptr;
+-     unsigned size;
++xrealloc (char *ptr, unsigned size)
+ {
+   register char *tem = realloc (ptr, size);
+ 
+@@ -126,15 +123,14 @@ xrealloc (ptr, size)
+    for tgetnum, tgetflag and tgetstr to find.  */
+ static char *term_entry;
+ 
+-static char *tgetst1 ();
++static char *tgetst1 (char *ptr, char **area);
+ 
+ /* Search entry BP for capability CAP.
+    Return a pointer to the capability (in BP) if found,
+    0 if not found.  */
+ 
+ static char *
+-find_capability (bp, cap)
+-     register char *bp, *cap;
++find_capability (register char *bp, register char *cap)
+ {
+   for (; *bp; bp++)
+     if (bp[0] == ':'
+@@ -145,8 +141,7 @@ find_capability (bp, cap)
+ }
+ 
+ int
+-tgetnum (cap)
+-     char *cap;
++tgetnum (char *cap)
+ {
+   register char *ptr = find_capability (term_entry, cap);
+   if (!ptr || ptr[-1] != '#')
+@@ -155,8 +150,7 @@ tgetnum (cap)
+ }
+ 
+ int
+-tgetflag (cap)
+-     char *cap;
++tgetflag (char *cap)
+ {
+   register char *ptr = find_capability (term_entry, cap);
+   return ptr && ptr[-1] == ':';
+@@ -168,9 +162,7 @@ tgetflag (cap)
+    If AREA is null, space is allocated with `malloc'.  */
+ 
+ char *
+-tgetstr (cap, area)
+-     char *cap;
+-     char **area;
++tgetstr (char *cap, char **area)
+ {
+   register char *ptr = find_capability (term_entry, cap);
+   if (!ptr || (ptr[-1] != '=' && ptr[-1] != '~'))
+@@ -208,9 +200,7 @@ static char esctab[]
+    or NULL if PTR is NULL.  */
+ 
+ static char *
+-tgetst1 (ptr, area)
+-     char *ptr;
+-     char **area;
++tgetst1 (char *ptr, char **area)
+ {
+   register char *p, *r;
+   register int c;
+@@ -314,10 +304,7 @@ static int speeds[] =
+ #endif /* not emacs */
+ 
+ void
+-tputs (str, nlines, outfun)
+-     register char *str;
+-     int nlines;
+-     register int (*outfun) ();
++tputs (register char* str, int nlines, register int (*outfun) (int))
+ {
+   register int padcount = 0;
+   register int speed;
+@@ -389,10 +376,10 @@ struct termcap_buffer
+ 
+ /* Forward declarations of static functions.  */
+ 
+-static int scan_file ();
+-static char *gobble_line ();
+-static int compare_contin ();
+-static int name_match ();
++static int scan_file (char *str,int fd,register struct termcap_buffer *bufp);
++static char *gobble_line (int fd, register struct termcap_buffer *bufp, char *append_end);
++static int compare_contin (register char *str1, register char *str2);
++static int name_match (char *line, char *name);
+ 
+ #ifdef VMS
+ 
+@@ -446,8 +433,7 @@ valid_filename_p (fn)
+    in it, and some other value otherwise.  */
+ 
+ int
+-tgetent (bp, name)
+-     char *bp, *name;
++tgetent (char *bp, char *name)
+ {
+   register char *termcap_name;
+   register int fd;
+@@ -611,10 +597,7 @@ tgetent (bp, name)
+    or 0 if no entry is found in the file.  */
+ 
+ static int
+-scan_file (str, fd, bufp)
+-     char *str;
+-     int fd;
+-     register struct termcap_buffer *bufp;
++scan_file (char *str,int fd,register struct termcap_buffer *bufp)
+ {
+   register char *end;
+ 
+@@ -651,9 +634,7 @@ scan_file (str, fd, bufp)
+    by termcap entry LINE.  */
+ 
+ static int
+-name_match (line, name)
+-     char *line, *name;
+-{
++name_match (char *line, char *name) {
+   register char *tem;
+ 
+   if (!compare_contin (line, name))
+@@ -667,9 +648,7 @@ name_match (line, name)
+ }
+ 
+ static int
+-compare_contin (str1, str2)
+-     register char *str1, *str2;
+-{
++compare_contin (register char *str1, register char*str2) {
+   register int c1, c2;
+   while (1)
+     {
+@@ -708,10 +687,7 @@ compare_contin (str1, str2)
+    thing as one line.  The caller decides when a line is continued.  */
+ 
+ static char *
+-gobble_line (fd, bufp, append_end)
+-     int fd;
+-     register struct termcap_buffer *bufp;
+-     char *append_end;
++gobble_line (int fd, register struct termcap_buffer *bufp, char *append_end)
+ {
+   register char *end;
+   register int nread;
+@@ -763,9 +739,7 @@ gobble_line (fd, bufp, append_end)
+ 
+ #include <stdio.h>
+ 
+-main (argc, argv)
+-     int argc;
+-     char **argv;
++main (int argc, char **argv)
+ {
+   char *term;
+   char *buf;
+@@ -789,8 +763,7 @@ main (argc, argv)
+   printf ("am: %d\n", tgetflag ("am"));
+ }
+ 
+-tprint (cap)
+-     char *cap;
++tprint (char *cap)
+ {
+   char *x = tgetstr (cap, 0);
+   register char *y;
+
+diff --git a/tparam.c b/tparam.c
+index 09ef456a5..39fd42fb7 100644
+--- a/tparam.c
++++ b/tparam.c
+@@ -29,8 +29,8 @@ Boston, MA 02111-1307, USA.  */
+ #include <stdlib.h>
+ #include <string.h>
+ #else
+-char *malloc ();
+-char *realloc ();
++char *malloc (unsigned);
++char *realloc (const void *, unsigned);
+ #endif
+ 
+ /* Do this after the include, in case string.h prototypes bcopy.  */
+@@ -57,8 +57,7 @@ memory_out ()
+ }
+ 
+ static char *
+-xmalloc (size)
+-     unsigned size;
++xmalloc (unsigned size)
+ {
+   register char *tem = malloc (size);
+ 
+@@ -68,9 +67,7 @@ xmalloc (size)
+ }
+ 
+ static char *
+-xrealloc (ptr, size)
+-     char *ptr;
+-     unsigned size;
++xrealloc (char *ptr, unsigned size)
+ {
+   register char *tem = realloc (ptr, size);
+ 
+@@ -92,15 +89,11 @@ xrealloc (ptr, size)
+ 
+    The fourth and following args to tparam serve as the parameter values.  */
+ 
+-static char *tparam1 ();
++static char *tparam1 (char *string, char *outstring, int len, char* up, char* left, register int *argp);
+ 
+ /* VARARGS 2 */
+ char *
+-tparam (string, outstring, len, arg0, arg1, arg2, arg3)
+-     char *string;
+-     char *outstring;
+-     int len;
+-     int arg0, arg1, arg2, arg3;
++tparam (char *string, char* outstring, int len, int arg0, int arg1,int  arg2, int arg3)
+ {
+   int arg[4];
+ 
+@@ -117,9 +110,7 @@ char *UP;
+ static char tgoto_buf[50];
+ 
+ char *
+-tgoto (cm, hpos, vpos)
+-     char *cm;
+-     int hpos, vpos;
++tgoto (char *cm, int hpos, int vpos)
+ {
+   int args[2];
+   if (!cm)
+@@ -130,12 +121,7 @@ tgoto (cm, hpos, vpos)
+ }
+ 
+ static char *
+-tparam1 (string, outstring, len, up, left, argp)
+-     char *string;
+-     char *outstring;
+-     int len;
+-     char *up, *left;
+-     register int *argp;
++tparam1 (char *string, char *outstring, int len, char* up, char* left, register int *argp)
+ {
+   register int c;
+   register char *p = string;
+@@ -319,9 +305,7 @@ tparam1 (string, outstring, len, up, left, argp)
+ 
+ #ifdef DEBUG
+ 
+-main (argc, argv)
+-     int argc;
+-     char **argv;
++main (int argc, char **argv)
+ {
+   char buf[50];
+   int args[3];
