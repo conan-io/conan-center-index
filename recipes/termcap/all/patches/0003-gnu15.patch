@@ -211,8 +211,8 @@ index 09ef456a5..39fd42fb7 100644
  #else
 -char *malloc ();
 -char *realloc ();
-+char *malloc (unsigned);
-+char *realloc (const void *, unsigned);
++char *malloc (unsigned long long);
++char *realloc (const void *, unsigned long long);
  #endif
  
  /* Do this after the include, in case string.h prototypes bcopy.  */
