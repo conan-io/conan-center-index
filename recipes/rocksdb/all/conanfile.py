@@ -6,7 +6,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -184,27 +184,11 @@ class RocksDBConan(ConanFile):
         cmake_target = "rocksdb-shared" if self.options.shared else "rocksdb"
         self.cpp_info.set_property("cmake_file_name", "RocksDB")
         self.cpp_info.set_property("cmake_target_name", f"RocksDB::{cmake_target}")
-        self.cpp_info.libs = collect_libs(self)
+        lib_suffix = "-shared" if is_msvc(self) and self.options.shared else ""
+        self.cpp_info.libs = [f"rocksdb{lib_suffix}"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["shlwapi", "rpcrt4"]
             if self.options.shared:
                 self.cpp_info.defines = ["ROCKSDB_DLL"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "m"]
-
-        if self.options.with_gflags:
-            self.cpp_info.requires.append("gflags::gflags")
-        if self.options.with_snappy:
-            self.cpp_info.requires.append("snappy::snappy")
-        if self.options.with_lz4:
-            self.cpp_info.requires.append("lz4::lz4")
-        if self.options.with_zlib:
-            self.cpp_info.requires.append("zlib::zlib")
-        if self.options.with_zstd:
-            self.cpp_info.requires.append("zstd::zstd")
-        if self.options.get_safe("with_tbb"):
-            self.cpp_info.requires.append("onetbb::onetbb")
-        if self.options.with_jemalloc:
-            self.cpp_info.requires.append("jemalloc::jemalloc")
-        if self.options.with_folly:
-            self.cpp_info.requires.append("folly::folly")
