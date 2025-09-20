@@ -58,7 +58,7 @@ class CppRestSDKConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.83.0")
+        self.requires("boost/[>=1.82.0 <=1.83.0]")
         self.requires("openssl/[>=1.1 <4]")
         if self.options.with_compression:
             self.requires("zlib/[>=1.2.11 <2]")
@@ -78,6 +78,7 @@ class CppRestSDKConan(ConanFile):
         tc.variables["WERROR"] = False
         tc.variables["CPPREST_EXCLUDE_WEBSOCKETS"] = not self.options.with_websockets
         tc.variables["CPPREST_EXCLUDE_COMPRESSION"] = not self.options.with_compression
+        tc.variables["CPPREST_USE_CONAN_BOOST"] = True
         if self.options.get_safe("pplx_impl"):
             tc.variables["CPPREST_PPLX_IMPL"] = self.options.pplx_impl
         if self.options.get_safe("http_client_impl"):

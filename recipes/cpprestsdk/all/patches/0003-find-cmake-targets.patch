@@ -125,3 +125,20 @@ index 94ea81a..f83a777 100644
 +        target_link_libraries(cpprestsdk_websocketpp_internal INTERFACE "websocketpp::websocketpp")
 +    endif()
  endfunction()
+diff --git a/Release/cmake/cpprest_find_boost.cmake b/Release/cmake/cpprest_find_boost.cmake
+index 3c857ba..9e7077e 100644
+--- a/Release/cmake/cpprest_find_boost.cmake
++++ b/Release/cmake/cpprest_find_boost.cmake
+@@ -51,9 +51,11 @@ function(cpprest_find_boost)
+     find_package(Boost REQUIRED COMPONENTS system date_time regex)
+   endif()
+
++  set(CPPREST_USE_CONAN_BOOST OFF CACHE BOOL "If ON, Boost is provided by Conan.")
++
+   add_library(cpprestsdk_boost_internal INTERFACE)
+   # FindBoost continually breaks imported targets whenever boost updates.
+-  if(1)
++  if(NOT CPPREST_USE_CONAN_BOOST)
+     target_include_directories(cpprestsdk_boost_internal INTERFACE "$<BUILD_INTERFACE:${Boost_INCLUDE_DIR}>")
+     set(_prev)
+     set(_libs)
