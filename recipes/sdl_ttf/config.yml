@@ -1,13 +1,5 @@
 versions:
+  "3.2.2":
+    folder: 3.x
   "2.24.0":
-    folder: all
-  "2.22.0":
-    folder: all
-  "2.20.2":
-    folder: all
-  "2.20.1":
-    folder: all
-  "2.0.18":
-    folder: all
-  "2.0.15":
     folder: all

@@ -38,14 +38,6 @@ class FltkConan(ConanFile):
         "with_xft": False,
     }
 
-    @property
-    def _is_cl_like(self):
-        return self.settings.compiler.get_safe("runtime") is not None
-
-    @property
-    def _is_cl_like_static_runtime(self):
-        return self._is_cl_like and "MT" in msvc_runtime_flag(self)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -58,12 +50,8 @@ class FltkConan(ConanFile):
         if self.options.abi_version == None:
             _version_token = self.version.split(".")
             _version_major = int(_version_token[0])
-            if len(_version_token) >= 3:
-                _version_minor = int(_version_token[1])
-                _version_patch = int(_version_token[2])
-            elif len(_version_token) >= 2:
-                _version_minor = int(_version_token[1])
-                _version_patch = 0
+            _version_minor = int(_version_token[1])
+            _version_patch = int(_version_token[2]) if len(_version_token) >= 3 else 0
             self.options.abi_version = str(
                 int(_version_major) * 10000 + int(_version_minor) * 100 + int(_version_patch)
             )
@@ -79,11 +67,14 @@ class FltkConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("libjpeg/9e")
         self.requires("libpng/[>=1.6 <2]")
+        # If Version >= 1.4.1, it also depends on FLTK_BACKEND_X11, but it's not introduced
+        # in the recipe for now
+        if not is_apple_os(self):
+            self.requires("fontconfig/2.15.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.with_gl:
                 self.requires("opengl/system")
                 self.requires("glu/system")
-            self.requires("fontconfig/2.15.0")
             self.requires("xorg/system")
             if self.options.with_xft:
                 self.requires("libxft/2.3.8")
@@ -95,6 +86,7 @@ class FltkConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -125,14 +117,13 @@ class FltkConan(ConanFile):
             tc.variables["FLTK_USE_SYSTEM_ZLIB"] = True
             tc.variables["FLTK_USE_SYSTEM_LIBPNG"] = True
             tc.variables["FLTK_BUILD_FLUID"] = False
-        if Version(self.version) >= "1.3.9" and self._is_cl_like:
-            tc.variables["FLTK_MSVC_RUNTIME_DLL"] = not self._is_cl_like_static_runtime
+        if self.settings.compiler.get_safe("runtime") is not None:
+            tc.variables["FLTK_MSVC_RUNTIME_DLL"] = "MT" not in msvc_runtime_flag(self)
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

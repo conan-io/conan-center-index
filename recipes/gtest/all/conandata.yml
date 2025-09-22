@@ -1,35 +1,7 @@
 sources:
+  "1.17.0":
+    url: "https://github.com/google/googletest/archive/v1.17.0.tar.gz"
+    sha256: "65fab701d9829d38cb77c14acdc431d2108bfdbf8979e40eb8ae567edf10b27c"
   "1.16.0":
     url: "https://github.com/google/googletest/archive/v1.16.0.tar.gz"
     sha256: "78c676fc63881529bf97bf9d45948d905a66833fbfa5318ea2cd7478cb98f399"
-  "1.15.0":
-    url: "https://github.com/google/googletest/releases/download/v1.15.0/googletest-1.15.0.tar.gz"
-    sha256: "7315acb6bf10e99f332c8a43f00d5fbb1ee6ca48c52f6b936991b216c586aaad"
-  "1.14.0":
-    url: "https://github.com/google/googletest/archive/refs/tags/v1.14.0.tar.gz"
-    sha256: "8ad598c73ad796e0d8280b082cebd82a630d73e73cd3c70057938a6501bba5d7"
-  "1.13.0":
-    url: "https://github.com/google/googletest/archive/refs/tags/v1.13.0.tar.gz"
-    sha256: "ad7fdba11ea011c1d925b3289cf4af2c66a352e18d4c7264392fead75e919363"
-  "1.12.1":
-    url: "https://github.com/google/googletest/archive/release-1.12.1.tar.gz"
-    sha256: "81964fe578e9bd7c94dfdb09c8e4d6e6759e19967e397dbea48d1c10e45d0df2"
-  "1.10.0":
-    url: "https://github.com/google/googletest/archive/release-1.10.0.tar.gz"
-    sha256: "9dc9157a9a1551ec7a7e43daea9a694a0bb5fb8bec81235d8a1e6ef64c716dcb"
-  "1.8.1":
-    url: "https://github.com/google/googletest/archive/release-1.8.1.tar.gz"
-    sha256: "9bf1fe5182a604b4135edc1a425ae356c9ad15e9b23f9f12a02e80184c3a249c"
-patches:
-  "1.10.0":
-    - patch_file: "patches/gtest-1.10.0.patch"
-      patch_description: "add CUSTOM_DEBUG_POSTFIX option"
-      patch_type: "conan"
-    - patch_file: "patches/gtest-1.10.0-override.patch"
-      patch_description: "prevent compiler from complaining while compiling"
-      patch_type: "bugfix"
-      patch_source: "https://github.com/google/googletest/pull/2507"
-  "1.8.1":
-    - patch_file: "patches/gtest-1.8.1.patch"
-      patch_description: "add CUSTOM_DEBUG_POSTFIX option"
-      patch_type: "conan"
