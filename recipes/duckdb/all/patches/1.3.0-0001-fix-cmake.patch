@@ -5,7 +5,7 @@ index a51fbdc..1b24c05 100644
 @@ -986,12 +986,12 @@ function(build_loadable_extension_directory NAME ABI_TYPE OUTPUT_DIRECTORY EXTEN
      set(FOOTER_VERSION_VALUE ${CAPI_VERSION})
    endif()
-
+ 
 -  add_custom_command(
 -    TARGET ${TARGET_NAME}
 -    POST_BUILD
@@ -28,26 +28,22 @@ index a51fbdc..1b24c05 100644
 -  target_link_libraries(${NAME}_extension duckdb_static)
 +  # target_link_libraries(${NAME}_extension duckdb_static)
  endfunction()
-
+ 
  # Internal extension register function
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 56b6ef9..7ed9a22 100644
+index 56b6ef9..bc3b804 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -104,11 +104,10 @@ else()
-       duckdb_utf8proc
-       duckdb_hyperloglog
-       duckdb_fastpforlib
--      duckdb_skiplistlib
+@@ -108,7 +108,7 @@ else()
        duckdb_mbedtls
        duckdb_yyjson
        duckdb_zstd)
 -
 +  if(BUILD_SHARED_LIBS)
    add_library(duckdb SHARED ${ALL_OBJECT_FILES})
-
+ 
    if(WIN32 AND NOT MINGW)
-@@ -134,16 +133,17 @@ else()
+@@ -134,16 +134,17 @@ else()
    target_link_libraries(duckdb PUBLIC ${DUCKDB_LINK_LIBS})
    link_threads(duckdb PUBLIC)
    link_extension_libraries(duckdb PRIVATE)
@@ -68,10 +64,10 @@ index 56b6ef9..7ed9a22 100644
    target_include_directories(
      duckdb_static PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-@@ -160,9 +160,18 @@ else()
-
+@@ -160,9 +161,18 @@ else()
+ 
  endif()
-
+ 
 +if(BUILD_SHARED_LIBS)
  install(
 -  TARGETS duckdb duckdb_static
@@ -95,7 +91,7 @@ index 59d4a69..3278adb 100644
 @@ -26,13 +26,13 @@ if(NOT AMALGAMATION_BUILD)
  endif()
  link_threads(sqlite3_api_wrapper_static "")
-
+ 
 -if(NOT WIN32 AND NOT ZOS)
 +if(BUILD_SHARED_LIBS AND NOT WIN32 AND NOT ZOS)
    add_library(sqlite3_api_wrapper SHARED ${SQLITE_API_WRAPPER_FILES})
@@ -106,7 +102,7 @@ index 59d4a69..3278adb 100644
 -
 +if(0)
  include_directories(../../third_party/catch)
-
+ 
  include_directories(test/include)
 @@ -44,3 +44,4 @@ if(WIN32 OR ZOS)
  else()
