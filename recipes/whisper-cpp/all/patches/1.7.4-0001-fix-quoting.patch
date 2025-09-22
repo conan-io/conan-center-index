@@ -1,0 +1,24 @@
+From e0505a3f2363926c4d58a648700beb50c3133a38 Mon Sep 17 00:00:00 2001
+Date: Thu, 18 Sep 2025 13:12:05 +0200
+Subject: [PATCH] fix quoting
+
+---
+ ggml/src/ggml-blas/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ggml/src/ggml-blas/CMakeLists.txt b/ggml/src/ggml-blas/CMakeLists.txt
+index 0bf3c05d..a2624487 100644
+--- a/ggml/src/ggml-blas/CMakeLists.txt
++++ b/ggml/src/ggml-blas/CMakeLists.txt
+@@ -74,7 +74,7 @@ if (BLAS_FOUND)
+ 
+     target_compile_options(ggml-blas PRIVATE ${BLAS_LINKER_FLAGS})
+ 
+-    if (${BLAS_INCLUDE_DIRS} MATCHES "mkl" AND (${GGML_BLAS_VENDOR} MATCHES "Generic" OR ${GGML_BLAS_VENDOR} MATCHES "Intel"))
++    if ("${BLAS_INCLUDE_DIRS}" MATCHES "mkl" AND (${GGML_BLAS_VENDOR} MATCHES "Generic" OR ${GGML_BLAS_VENDOR} MATCHES "Intel"))
+         add_compile_definitions(GGML_BLAS_USE_MKL)
+     endif()
+ 
+-- 
+2.39.5 (Apple Git-154)
+
