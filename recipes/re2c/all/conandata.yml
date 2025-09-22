@@ -1,10 +1,4 @@
 sources:
-  "4.0.2":
-    url: "https://github.com/skvadrik/re2c/releases/download/4.0.2/re2c-4.0.2.tar.xz"
-    sha256: "5e52ce0e26326115e41bc45d34dc2d5e10f2e44ed3a413fa2a826aa3500c8d56"
-  "3.1":
-    url: "https://github.com/skvadrik/re2c/releases/download/3.1/re2c-3.1.tar.xz"
-    sha256: "0ac299ad359e3f512b06a99397d025cfff81d3be34464ded0656f8a96676c029"
-  "2.2":
-    url: "https://github.com/skvadrik/re2c/releases/download/2.2/re2c-2.2.tar.xz"
-    sha256: "0fc45e4130a8a555d68e230d1795de0216dfe99096b61b28e67c86dfd7d86bda"
+  "4.3":
+    url: "https://github.com/skvadrik/re2c/releases/download/4.3/re2c-4.3.tar.xz"
+    sha256: "51e88d6d6b6ab03eb7970276aca7e0db4f8e29c958b84b561d2fdcb8351c7150"
