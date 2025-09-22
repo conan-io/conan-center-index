@@ -34,8 +34,9 @@ class FollyConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        if Version(self.version) >= "2025.07.14.00":
+        if Version(self.version) >= "2025.07.14.00" or (is_msvc(self) and Version(self.settings.compiler.version) >= 194):
             # https://github.com/facebook/folly/commit/97f90a3c2488132dbba27e6d2287dc8c39612325
+            # https://github.com/conan-io/conan-center-index/pull/27995#issuecomment-3317452387
             return 20
         else:
             return 17
