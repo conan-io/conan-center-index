@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
@@ -40,6 +41,9 @@ class FaissConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
+
+    def validate(self):
+        check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
