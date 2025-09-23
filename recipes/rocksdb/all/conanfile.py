@@ -174,11 +174,28 @@ class RocksDBConan(ConanFile):
         cmake_target = "rocksdb-shared" if self.options.shared else "rocksdb"
         self.cpp_info.set_property("cmake_file_name", "RocksDB")
         self.cpp_info.set_property("cmake_target_name", f"RocksDB::{cmake_target}")
+        # INFO: Component librocksdb is legacy due cmake_find_package but may break a few users in case removed
         lib_suffix = "-shared" if is_msvc(self) and self.options.shared else ""
-        self.cpp_info.libs = [f"rocksdb{lib_suffix}"]
+        self.cpp_info.components["librocksdb"].libs = [f"rocksdb{lib_suffix}"]
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["shlwapi", "rpcrt4"]
+            self.cpp_info.components["librocksdb"].system_libs = ["shlwapi", "rpcrt4"]
             if self.options.shared:
-                self.cpp_info.defines = ["ROCKSDB_DLL"]
+                self.cpp_info.components["librocksdb"].defines = ["ROCKSDB_DLL"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread", "m"]
+            self.cpp_info.components["librocksdb"].system_libs = ["pthread", "m"]
+        if self.options.with_gflags:
+            self.cpp_info.components["librocksdb"].requires.append("gflags::gflags")
+        if self.options.with_snappy:
+            self.cpp_info.components["librocksdb"].requires.append("snappy::snappy")
+        if self.options.with_lz4:
+            self.cpp_info.components["librocksdb"].requires.append("lz4::lz4")
+        if self.options.with_zlib:
+            self.cpp_info.components["librocksdb"].requires.append("zlib::zlib")
+        if self.options.with_zstd:
+            self.cpp_info.components["librocksdb"].requires.append("zstd::zstd")
+        if self.options.get_safe("with_tbb"):
+            self.cpp_info.components["librocksdb"].requires.append("onetbb::onetbb")
+        if self.options.with_jemalloc:
+            self.cpp_info.components["librocksdb"].requires.append("jemalloc::jemalloc")
+        if self.options.with_folly:
+            self.cpp_info.components["librocksdb"].requires.append("folly::folly")

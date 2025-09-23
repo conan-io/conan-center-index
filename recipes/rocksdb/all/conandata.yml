@@ -6,5 +6,3 @@ patches:
   "10.5.1":
     - patch_file: "patches/9.x.x-0001-exclude-thirdparty.patch"
       patch_description: "Do not include thirdparty.inc"
-      patch_type: "portability"
-    - patch_file: "patches/0002-avoid-linker-flag.patch"
