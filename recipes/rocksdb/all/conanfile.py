@@ -5,7 +5,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -99,9 +99,16 @@ class RocksDBConan(ConanFile):
             # https://github.com/facebook/rocksdb/blob/v10.5.1/CMakeLists.txt#L603
             raise ConanInvalidConfiguration(f"{self.ref} does not support a shared build with folly")
 
+    def _patch_sources(self):
+        # INFO: Avoid enforcing all linkers to use copy-dt-needed-entries
+        # https://github.com/facebook/rocksdb/issues/13895
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                         'set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--copy-dt-needed-entries")', "")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
