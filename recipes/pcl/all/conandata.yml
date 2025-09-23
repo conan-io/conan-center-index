@@ -13,6 +13,10 @@ patches:
     - patch_file: "patches/1.14.1-0002-fix-FindOpenNI-bug.patch"
       patch_description: "Fix a libusb detection bug in FindOpenNI.cmake"
       patch_type: "bugfix"
+    - patch_file: "patches/1.14.1-0003-Compatibility-with-clang-19.patch"
+      patch_description: "Compatibility with clang-19"
+      patch_source: "https://github.com/PointCloudLibrary/pcl/pull/6113"
+      patch_type: "portability"
   "1.13.1":
     - patch_file: "patches/1.13.1-0001-cmake_use_conan_targets.patch"
       patch_description: "Update PCL CMake files to work with Conan"
