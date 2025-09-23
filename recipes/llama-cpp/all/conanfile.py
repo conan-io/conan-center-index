@@ -65,6 +65,9 @@ class LlamaCppConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 17 if self._is_new_llama else 11)
 
+        if Version(self.version) >= "b6529" and self.settings.os == "Macos" and Version(self.settings.os.version) < 13:
+            raise ConanInvalidConfiguration(f"{self.ref} requires OSX >=13.")
+
     def validate_build(self):
         if self._is_new_llama and self.settings.compiler == "msvc" and "arm" in self.settings.arch:
             raise ConanInvalidConfiguration("llama-cpp does not support ARM architecture on msvc, it recommends to use clang instead")
