@@ -28,7 +28,6 @@ class SDLImageConan(ConanFile):
         "with_avif": [True, False],
         "with_jxl": [True, False],
         "with_imageio": [True, False],
-        "with_wic": [True, False],
     }
     default_options = {
         "shared": False,
@@ -40,7 +39,6 @@ class SDLImageConan(ConanFile):
         "with_avif": True,
         "with_jxl": False,
         "with_imageio": True,
-        "with_wic": False,
     }
     implements = ["auto_shared_fpic"]
     languages = "C"
@@ -50,8 +48,6 @@ class SDLImageConan(ConanFile):
             del self.options.fPIC
         if not is_apple_os(self):
             del self.options.with_imageio
-        if self.settings.os != "Windows":
-            del self.options.with_wic
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -95,7 +91,6 @@ class SDLImageConan(ConanFile):
         tc.cache_variables["SDLIMAGE_PNG"] = self.options.with_libpng
         tc.cache_variables["SDLIMAGE_TIF"] = self.options.with_libtiff
         tc.cache_variables["SDLIMAGE_WEBP"] = self.options.with_libwebp
-        tc.cache_variables["SDLIMAGE_BACKEND_WIC"] = self.options.get_safe("with_wic")
         tc.cache_variables["SDLIMAGE_BACKEND_IMAGEIO"] = self.options.get_safe("with_imageio")
         tc.generate()
         cd = CMakeDeps(self)
@@ -136,5 +131,3 @@ class SDLImageConan(ConanFile):
                 self.cpp_info.frameworks = ["ApplicationServices", "Foundation"]
             else:
                 self.cpp_info.frameworks = ["CoreGraphics", "ImageIO", "MobileCoreServices", "UIKit", "Foundation"]
-        if self.options.get_safe("with_wic"):
-            self.cpp_info.system_libs.extend(["windowscodecs"])
