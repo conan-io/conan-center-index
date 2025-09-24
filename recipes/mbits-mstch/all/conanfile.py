@@ -5,6 +5,7 @@ from conan.tools.files import export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 
 
@@ -50,7 +51,8 @@ class MBitsMstchConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[~3]")
+        if Version(self.version) <= Version("1.0.4"):
+            self.tool_requires("cmake/[~3]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
