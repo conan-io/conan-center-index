@@ -1,0 +1,24 @@
+From 92557823c507780cf3fad2bfe83fedfa36fe844a Mon Sep 17 00:00:00 2001
+From: Frederik Carlier <frederik.carlier@keysight.com>
+Date: Tue, 1 Jul 2025 13:23:49 +0200
+Subject: [PATCH 2/3] Fix Windows compatibility
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ca03e57..b5f117f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -18,7 +18,7 @@ if("${CMAKE_C_SIMULATE_ID}" STREQUAL "MSVC")
+ endif()
+ 
+ if(CMAKE_SYSTEM_NAME STREQUAL Windows)
+-  if(NOT MINGW)
++  if("${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "MSVC")
+     include(DispatchWindowsSupport)
+     dispatch_windows_arch_spelling(${CMAKE_SYSTEM_PROCESSOR} DISPATCH_MSVC_ARCH)
+     dispatch_windows_include_for_arch(${DISPATCH_MSVC_ARCH} DISPATCH_INCLUDES)
+-- 
+2.43.0
