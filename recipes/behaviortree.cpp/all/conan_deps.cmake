@@ -19,8 +19,3 @@ if(WITH_MINICORO)
     find_package(minicoro REQUIRED CONFIG)
     link_libraries(minicoro::minicoro)
 endif()
-
-if(WITH_FLATBUFFERS)
-    find_package(flatbuffers REQUIRED CONFIG)
-    link_libraries(flatbuffers::flatbuffers)
-endif()
