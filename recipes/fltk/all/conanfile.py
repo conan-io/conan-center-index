@@ -78,11 +78,6 @@ class FltkConan(ConanFile):
             self.requires("xorg/system")
             if self.options.with_xft:
                 self.requires("libxft/2.3.8")
-            if Version(self.version) >= "1.4.0":
-                self.requires("gtk/system", options={"version": "3"})
-                self.requires("wayland/1.22.0")
-                self.requires("xkbcommon/1.6.0")
-                self.requires("dbus/1.15.8")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
