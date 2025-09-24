@@ -88,6 +88,7 @@ class SDLImageConan(ConanFile):
         tc.cache_variables["SDLIMAGE_VENDORED"] = False
         tc.cache_variables["SDLIMAGE_DEPS_SHARED"] = False
         tc.cache_variables["SDLIMAGE_SAMPLES"] = False
+        tc.cache_variables["SDLIMAGE_STRICT"] = True
         tc.cache_variables["SDLIMAGE_AVIF"] = self.options.with_avif
         tc.cache_variables["SDLIMAGE_JPG"] = self.options.with_libjpeg
         tc.cache_variables["SDLIMAGE_JXL"] = self.options.with_jxl
@@ -106,10 +107,6 @@ class SDLImageConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
-
     def package(self):
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
@@ -127,9 +124,10 @@ class SDLImageConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "SDL3_image")
         self.cpp_info.set_property("cmake_target_name", "SDL3_image::SDL3_image")
-        if not self.options.shared:
-            self.cpp_info.set_property("cmake_target_aliases", ["SDL3_image::SDL3_image-static"])
+        alias = "shared" if self.options.shared else "static"
+        self.cpp_info.set_property("cmake_target_aliases", [f"SDL3_image::SDL3_image-{alias}"])
         self.cpp_info.libs = [f"SDL3_image{lib_postfix}"]
+        self.cpp_info.set_property("pkg_config_name", "sdl3-image")
 
         if self.options.get_safe("with_imageio") and not self.options.shared:
             # IMG_ImageIO.m: https://github.com/libsdl-org/SDL_image/blob/release-3.2.4/src/IMG_ImageIO.m#L17-L26
