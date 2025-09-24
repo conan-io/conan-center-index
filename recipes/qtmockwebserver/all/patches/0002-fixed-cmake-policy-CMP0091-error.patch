@@ -1,0 +1,23 @@
+From 59f09287ab46572243406dfbaf5b88c581812f5c Mon Sep 17 00:00:00 2001
+From: Tomas Krupa <tomas.krupa@innovatrics.com>
+Date: Sun, 30 Mar 2025 23:06:39 +0200
+Subject: [PATCH 2/2] fixed cmake policy CMP0091 error
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e7f7a74..241432b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,5 +1,5 @@
+-project (QtMockWebServer)
+ cmake_minimum_required(VERSION 2.8.11)
++project (QtMockWebServer)
+ 
+ find_package(QT NAMES Qt6 Qt5 COMPONENTS Core QUIET)
+ find_package(Qt6 COMPONENTS Core Network Test QUIET)
+-- 
+2.34.1
+
