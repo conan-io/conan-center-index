@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-set(FLEX_EXECUTABLE "" CACHE PATH "Path to the flex executable")
 find_package(FLEX REQUIRED)
 flex_target(flex_scanner basic_nr.l ${PROJECT_BINARY_DIR}/basic_nr.cpp)
 

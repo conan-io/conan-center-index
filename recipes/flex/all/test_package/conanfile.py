@@ -49,7 +49,7 @@ class TestPackageConan(ConanFile):
         
 
     def test(self):
-        if can_run(self):            
+        if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             txt_file = os.path.join(self.source_folder, "basic_nr.txt")
             self.run(f"{bin_path} {txt_file}", env="conanrun")
