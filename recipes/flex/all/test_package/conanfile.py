@@ -3,13 +3,14 @@ import re
 from io import StringIO
 
 from conan import ConanFile
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, cmake_layout
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeToolchain", "VirtualBuildEnv", "VirtualRunEnv", "CMakeDeps"
+    generators = "CMakeToolchain", "CMakeDeps"
     test_type = "explicit"
 
     def requirements(self):
@@ -28,8 +29,9 @@ class TestPackageConan(ConanFile):
             return tokens[0].split("/", 1)[1]
 
         output = StringIO()
-        self.run("flex --version", output)
-        output_str = str(output.getvalue()) 
+        flex = VirtualBuildEnv(self).vars().get("LEX")
+        self.run(f"{flex} --version", output)
+        output_str = str(output.getvalue())
         self.output.info("Installed version: {}".format(output_str))
         expected_version = tested_reference_version()
         self.output.info("Expected version: {}".format(expected_version))
