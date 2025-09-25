@@ -14,3 +14,8 @@ if(WITH_TINYXML2)
     find_package(tinyxml2 REQUIRED CONFIG)
     link_libraries(tinyxml2::tinyxml2)
 endif()
+
+if(WITH_MINICORO)
+    find_package(minicoro REQUIRED CONFIG)
+    link_libraries(minicoro::minicoro)
+endif()
