@@ -31,6 +31,10 @@ class OatppOpenSSLConan(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
+    @property
+    def _version(self):
+        return self.version.split(".latest")[0]
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -79,11 +83,11 @@ class OatppOpenSSLConan(ConanFile):
 
         # TODO: back to global scope in conan v2 once legacy generators removed
         self.cpp_info.components["_oatpp-openssl"].includedirs = [
-            os.path.join("include", f"oatpp-{self.version}", "oatpp-openssl")
+            os.path.join("include", f"oatpp-{self._version}", "oatpp-openssl")
         ]
-        self.cpp_info.components["_oatpp-openssl"].libdirs = [os.path.join("lib", f"oatpp-{self.version}")]
+        self.cpp_info.components["_oatpp-openssl"].libdirs = [os.path.join("lib", f"oatpp-{self._version}")]
         if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.components["_oatpp-openssl"].bindirs = [os.path.join("bin", f"oatpp-{self.version}")]
+            self.cpp_info.components["_oatpp-openssl"].bindirs = [os.path.join("bin", f"oatpp-{self._version}")]
         else:
             self.cpp_info.components["_oatpp-openssl"].bindirs = []
         self.cpp_info.components["_oatpp-openssl"].libs = ["oatpp-openssl"]
