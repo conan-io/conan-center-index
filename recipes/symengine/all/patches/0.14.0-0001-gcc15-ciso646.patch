@@ -1,3 +1,4 @@
+Backported from https://github.com/symengine/symengine/pull/2102
 diff --git a/symengine/prime_sieve.cpp b/symengine/prime_sieve.cpp
 index 22058a25d..c5f564f64 100644
 --- a/symengine/prime_sieve.cpp
