@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanException
 from conan.tools.build import can_run
 from io import StringIO
 
@@ -21,4 +22,4 @@ class TestPackage(ConanFile):
             version_info = output.getvalue()
             self.output.info(f"java --version returned: \n{version_info}")
             if "Zulu" not in version_info:
-                raise Exception("java call seems not use the Zulu bin")
+                raise ConanException("zulu-openjdk test package failed: 'Zulu' not found in java --version output")
