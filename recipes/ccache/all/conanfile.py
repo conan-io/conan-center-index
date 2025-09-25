@@ -48,11 +48,15 @@ class CcacheConan(ConanFile):
     def requirements(self):
         self.requires("zstd/[>=1.5 <1.6]")
         if self.options.redis_storage_backend:
-            self.requires("hiredis/1.2.0")
+            if Version(self.version) >= "4.12":
+                self.requires("hiredis/1.3.0")
+            else:
+                self.requires("hiredis/1.2.0")
 
         if Version(self.version) >= "4.10":
             self.requires("fmt/[>=10.2.1 <=11.1.1]") # Explicitly tested with all versions in this range
             self.requires("xxhash/[~0.8]")
+
 
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
@@ -71,7 +75,7 @@ class CcacheConan(ConanFile):
             raise ConanInvalidConfiguration("ccache does not support ARMv8 on Windows before version 4.10")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.15 <4]")
+        self.tool_requires("cmake/[>=3.18]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder,
