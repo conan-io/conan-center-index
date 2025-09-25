@@ -373,7 +373,7 @@ class PclConan(ConanFile):
         if self._is_enabled("png"):
             self.requires("libpng/[>=1.6 <2]")
         if self._is_enabled("qhull"):
-            self.requires("qhull/8.0.1", transitive_headers=True)
+            self.requires("qhull/8.0.2", transitive_headers=True)
         if self._is_enabled("qt"):
             self.requires("qt/[>=6.6 <7]")
         if self._is_enabled("libusb"):
