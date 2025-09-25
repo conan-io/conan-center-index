@@ -27,7 +27,6 @@ class SDLImageConan(ConanFile):
         "with_libwebp": [True, False],
         "with_avif": [True, False],
         "with_jxl": [True, False],
-        "with_imageio": [True, False],
     }
     default_options = {
         "shared": False,
@@ -38,16 +37,9 @@ class SDLImageConan(ConanFile):
         "with_libwebp": True,
         "with_avif": True,
         "with_jxl": False,
-        "with_imageio": True,
     }
     implements = ["auto_shared_fpic"]
     languages = "C"
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-        if not is_apple_os(self):
-            del self.options.with_imageio
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -91,7 +83,7 @@ class SDLImageConan(ConanFile):
         tc.cache_variables["SDLIMAGE_PNG"] = self.options.with_libpng
         tc.cache_variables["SDLIMAGE_TIF"] = self.options.with_libtiff
         tc.cache_variables["SDLIMAGE_WEBP"] = self.options.with_libwebp
-        tc.cache_variables["SDLIMAGE_BACKEND_IMAGEIO"] = self.options.get_safe("with_imageio")
+        tc.cache_variables["SDLIMAGE_BACKEND_IMAGEIO"] = False
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
@@ -123,11 +115,3 @@ class SDLImageConan(ConanFile):
         self.cpp_info.set_property("cmake_target_aliases", [f"SDL3_image::SDL3_image-{alias}"])
         self.cpp_info.libs = [f"SDL3_image{lib_postfix}"]
         self.cpp_info.set_property("pkg_config_name", "sdl3-image")
-
-        if self.options.get_safe("with_imageio") and not self.options.shared:
-            # IMG_ImageIO.m: https://github.com/libsdl-org/SDL_image/blob/release-3.2.4/src/IMG_ImageIO.m#L17-L26
-            # Need for CoreGraphics: https://discourse.libsdl.org/t/sdl-image-issue-470-add-coregraphics-imageio-and-mobilecoreservices-required-from-img-imageio-mm-for-ios-specific-builds-e2923/59516
-            if self.settings.os == "Macos":
-                self.cpp_info.frameworks = ["ApplicationServices", "Foundation"]
-            else:
-                self.cpp_info.frameworks = ["CoreGraphics", "ImageIO", "MobileCoreServices", "UIKit", "Foundation"]
