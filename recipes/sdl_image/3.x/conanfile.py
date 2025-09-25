@@ -70,6 +70,7 @@ class SDLImageConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        rmdir(self, os.path.join(self.source_folder, "external"))
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -89,7 +90,6 @@ class SDLImageConan(ConanFile):
         cd.generate()
 
     def build(self):
-        rmdir(self, os.path.join(self.source_folder, "external"))
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
