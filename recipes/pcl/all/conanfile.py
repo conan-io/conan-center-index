@@ -373,7 +373,7 @@ class PclConan(ConanFile):
         if self._is_enabled("png"):
             self.requires("libpng/[>=1.6 <2]")
         if self._is_enabled("qhull"):
-            self.requires("qhull/8.0.1", transitive_headers=True)
+            self.requires("qhull/8.0.2", transitive_headers=True)
         if self._is_enabled("qt"):
             self.requires("qt/[>=6.6 <7]")
         if self._is_enabled("libusb"):
@@ -500,7 +500,9 @@ class PclConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         for mod in ["Eigen", "FLANN", "GLEW", "Pcap", "Qhull", "libusb"]:
-            os.remove(os.path.join(self.source_folder, "cmake", "Modules", f"Find{mod}.cmake"))
+            find_module_path = os.path.join(self.source_folder, "cmake", "Modules", f"Find{mod}.cmake")
+            if os.path.exists(find_module_path):
+                os.remove(find_module_path)
 
     def build(self):
         self._patch_sources()
