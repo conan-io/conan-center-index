@@ -1,4 +1,7 @@
 sources:
+  "1.0.6":
+    url: "https://github.com/dfleury2/beauty/archive/refs/tags/1.0.6.tar.gz"
+    sha256: "291552cb566d7e238df5f9ebb3b7d3a3c933e8136ef844116e49df7bd33a6aea"
   "1.0.4":
     url: "https://github.com/dfleury2/beauty/archive/refs/tags/1.0.4.tar.gz"
     sha256: "8bfd3718470bdbed05b6b9253543d6ab9b33e21e25028e53fa513c67893a39f3"
