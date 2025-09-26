@@ -5,6 +5,7 @@ import platform
 import textwrap
 
 from conan import ConanFile
+from conan.tools.android import android_abi
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -40,7 +41,7 @@ class QtConan(ConanFile):
 
     options = {
         "shared": [True, False],
-        "opengl": ["no", "desktop", "dynamic"],
+        "opengl": ["no", "desktop", "dynamic", "es2"],
         "with_vulkan": [True, False],
         "openssl": [True, False],
         "with_pcre2": [True, False],
@@ -71,6 +72,7 @@ class QtConan(ConanFile):
         "gui": [True, False],
         "widgets": [True, False],
 
+        "android_sdk": [None, "ANY"],
         "device": [None, "ANY"],
         "cross_compile": [None, "ANY"],
         "sysroot": [None, "ANY"],
@@ -116,6 +118,7 @@ class QtConan(ConanFile):
         "gui": True,
         "widgets": True,
 
+        "android_sdk": None,
         "device": None,
         "cross_compile": None,
         "sysroot": None,
@@ -166,11 +169,12 @@ class QtConan(ConanFile):
 
     def config_options(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
-            del self.options.with_icu
-            del self.options.with_fontconfig
             self.options.with_glib = False
             del self.options.with_libalsa
             del self.options.with_x11
+        if self.settings.os not in ["Linux", "FreeBSD", "Android"]:
+            del self.options.with_icu
+            del self.options.with_fontconfig
             del self.options.with_egl
 
         if self.settings.os == "Windows":
@@ -178,6 +182,8 @@ class QtConan(ConanFile):
             del self.options.with_gssapi
         if self.settings.os != "Linux":
             self.options.qtwayland = False
+        if self.settings.os != "Android":
+            del self.options.android_sdk
 
         for submodule in self._submodules:
             if submodule not in self._get_module_tree:
@@ -307,8 +313,13 @@ class QtConan(ConanFile):
         if self.options.widgets and not self.options.gui:
             raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
                                             "You can either disable qt:widgets or enable qt:gui")
+
         if self.settings.os == "Android" and self.options.get_safe("opengl", "no") == "desktop":
             raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android.")
+        if self.settings.os == "Android" and not self.options.get_safe("android_sdk", ""):
+            raise ConanInvalidConfiguration("Path to Android SDK is required to build Qt.")
+        if self.settings.os == "Android" and not self.options.get_safe("with_egl", False):
+            raise ConanInvalidConfiguration("Qt for Android can't be built without EGL, see https://bugreports.qt.io/browse/QTBUG-140536")
 
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") == "dynamic":
             raise ConanInvalidConfiguration("Dynamic OpenGL is supported only on Windows.")
@@ -392,7 +403,7 @@ class QtConan(ConanFile):
             self.requires("xkbcommon/1.5.0")
         if self.options.get_safe("with_x11", False):
             self.requires("xorg/system")
-        if self.options.get_safe("with_egl"):
+        if self.options.get_safe("with_egl") and self.settings.os != "Android":
             self.requires("egl/system")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
@@ -441,6 +452,10 @@ class QtConan(ConanFile):
             self.tool_requires("wayland/1.22.0")
         if cross_building(self):
             self.tool_requires(f"qt/{self.version}")
+
+    @property
+    def _is_mobile_os(self):
+        return self.settings.os == "Android" or (is_apple_os(self) and self.settings.os != "Macos")
 
     def generate(self):
         ms = VirtualBuildEnv(self)
@@ -609,11 +624,8 @@ class QtConan(ConanFile):
         if self.settings.os == "Macos":
             tc.variables["FEATURE_framework"] = "OFF"
         elif self.settings.os == "Android":
+            tc.variables["ANDROID_SDK_ROOT"] = self.options.android_sdk
             tc.variables["CMAKE_ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
-            tc.variables["ANDROID_ABI"] = {"armv7": "armeabi-v7a",
-                                           "armv8": "arm64-v8a",
-                                           "x86": "x86",
-                                           "x86_64": "x86_64"}.get(str(self.settings.arch))
 
         if self.options.sysroot:
             tc.variables["CMAKE_SYSROOT"] = self.options.sysroot
@@ -633,8 +645,8 @@ class QtConan(ConanFile):
             tc.cache_variables["QT_HOST_PATH"] = self.dependencies.direct_build["qt"].package_folder
             # Stand-in for Qt6CoreTools - which is loaded for the executable targets
             tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = os.path.join(self.dependencies.direct_build["qt"].package_folder, self._cmake_executables_file)
-            # Ensure tools for host are always built
-            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = True
+            # Ensure tools for non-mobile host are always built
+            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = not self._is_mobile_os
 
         tc.variables["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
@@ -673,6 +685,8 @@ class QtConan(ConanFile):
                     self.info.settings.compiler.runtime = "MT/MTd"
             elif self.info.settings.compiler == "msvc":
                 self.info.settings.compiler.runtime_type = "Release/Debug"
+        if self.info.settings.os == "Android":
+            del self.info.options.android_sdk
 
     def source(self):
         destination = self.source_folder
@@ -875,7 +889,9 @@ class QtConan(ConanFile):
         filecontents += f"set(QT_VERSION_PATCH {ver.patch})\n"
         if self.settings.os == "Macos":
             filecontents += 'set(__qt_internal_cmake_apple_support_files_path "${CMAKE_CURRENT_LIST_DIR}/../../../lib/cmake/Qt6/macos")\n'
-        targets = ["moc", "qlalr", "rcc", "tracegen", "cmake_automoc_parser", "qmake", "qtpaths", "syncqt", "tracepointgen"]
+
+        executables_base_path = self.dependencies.direct_build["qt"].package_folder if self._is_mobile_os else self.package_folder
+        targets = ["moc", "qlalr", "rcc", "tracegen", "cmake_automoc_parser", "qmake", "qtpaths", "syncqt", "tracepointgen", "androiddeployqt", "androidtestrunner"]
         if self.options.with_dbus:
             targets.extend(["qdbuscpp2xml", "qdbusxml2cpp"])
         if self.options.gui:
@@ -904,13 +920,14 @@ class QtConan(ConanFile):
             for path_ in [f"bin/{target}{extension}",
                           f"lib/{target}{extension}",
                           f"libexec/{target}{extension}"]:
-                if os.path.isfile(os.path.join(self.package_folder, path_)):
+                if os.path.isfile(os.path.join(executables_base_path, path_)):
                     exe_path = path_
                     break
             else:
                 assert False, f"Could not find executable {target}{extension} in {self.package_folder}"
             if not exe_path:
                 self.output.warning(f"Could not find path to {target}{extension}")
+            # TODO: IMPORTED_LOCATION must come from Qt host path
             filecontents += textwrap.dedent(f"""\
                 if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{target})
                     add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} IMPORTED)
@@ -1012,7 +1029,10 @@ class QtConan(ConanFile):
         self.runenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "plugins"))
         self.buildenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "plugins"))
 
-        self.buildenv_info.define("QT_HOST_PATH", self.package_folder)
+        # TODO
+        # qt_host_path = self.dependencies.direct_build["qt"].package_folder if self._is_mobile_os else self.package_folder
+        qt_host_path = self.package_folder
+        self.buildenv_info.define("QT_HOST_PATH", qt_host_path)
 
         build_modules = {}
         def _add_build_module(component, module):
@@ -1020,7 +1040,7 @@ class QtConan(ConanFile):
                 build_modules[component] = []
             build_modules[component].append(module)
 
-        libsuffix = ""
+        libsuffix = f"_{android_abi(self)}" if self.settings.os == "Android" else ""
         if self.settings.build_type == "Debug":
             if is_msvc(self):
                 libsuffix = "d"
@@ -1625,4 +1645,4 @@ class QtConan(ConanFile):
 
         self.cpp_info.set_property("cmake_build_modules", build_modules_list)
 
-        self.conf_info.define("user.qt:tools_directory", os.path.join(self.package_folder, "bin" if self.settings.os == "Windows" else "libexec"))
+        self.conf_info.define("user.qt:tools_directory", os.path.join(qt_host_path, "bin" if self.settings.os == "Windows" else "libexec"))
