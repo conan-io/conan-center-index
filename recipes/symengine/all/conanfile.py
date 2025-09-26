@@ -3,8 +3,10 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
 from conan.tools.files import (
+    apply_conandata_patches,
     collect_libs,
     copy,
+    export_conandata_patches,
     get,
     rm,
     rmdir,
@@ -39,6 +41,9 @@ class SymengineConan(ConanFile):
     }
     short_paths = True
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -49,7 +54,7 @@ class SymengineConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-    
+
     def validate(self):
         min_cppstd = "11"
         check_min_cppstd(self, min_cppstd)
@@ -77,6 +82,7 @@ class SymengineConan(ConanFile):
             strip_root=True,
             destination=self.source_folder,
         )
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
