@@ -80,8 +80,10 @@ class ProtobufConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
 
-        if self._protobuf_release >= "22.0":
+        if self._protobuf_release >= "30.1":
             self.requires("abseil/[>=20230802.1 <=20250814.0]", transitive_headers=True)
+        elif self._protobuf_release >= "22.0":
+            self.requires("abseil/[>=20230802.1 <=20250127.0]", transitive_headers=True)
 
     @property
     def _compilers_minimum_version(self):
