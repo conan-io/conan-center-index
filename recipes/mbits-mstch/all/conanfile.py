@@ -50,10 +50,6 @@ class MBitsMstchConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def build_requirements(self):
-        if Version(self.version) <= Version("1.0.4"):
-            self.tool_requires("cmake/[~3]")
-
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
@@ -75,6 +71,8 @@ class MBitsMstchConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if Version(self.version) <= Version("1.0.4"):
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):
