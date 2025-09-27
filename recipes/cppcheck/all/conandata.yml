@@ -1,4 +1,10 @@
 sources:
+  "2.18.3":
+    url: "https://github.com/danmar/cppcheck/archive/2.18.3.tar.gz"
+    sha256: "e37c94e190cdddc65682649b02b72939761585bddd8ada595f922e190a26a2be"
+  "2.18.0":
+    url: "https://github.com/danmar/cppcheck/archive/2.18.0.tar.gz"
+    sha256: "dc74e300ac59f2ef9f9c05c21d48ae4c8dd1ce17f08914dd30c738ff482e748f"
   "2.17.1":
     url: "https://github.com/danmar/cppcheck/archive/2.17.1.tar.gz"
     sha256: "bfd681868248ec03855ca7c2aea7bcb1f39b8b18860d76aec805a92a967b966c"

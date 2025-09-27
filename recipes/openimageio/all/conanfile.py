@@ -3,11 +3,10 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class OpenImageIOConan(ConanFile):
@@ -22,7 +21,7 @@ class OpenImageIOConan(ConanFile):
     license = "Apache-2.0", "BSD-3-Clause"
     homepage = "http://www.openimageio.org/"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -81,19 +80,16 @@ class OpenImageIOConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("boost/1.84.0")
         self.requires("libtiff/4.6.0")
-        self.requires("imath/3.1.9", transitive_headers=True)
-        self.requires("openexr/3.2.3")
+        self.requires("imath/[>3.1.9 <4]", transitive_headers=True)
+        self.requires("openexr/[>=3.2.3 <4]")
         if self.options.with_libjpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9f]")
         elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.2")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         self.requires("pugixml/1.14")
         self.requires("libsquish/1.15")
         self.requires("tsl-robin-map/1.2.1")
-        if Version(self.version) >= "2.4.17.0":
-            self.requires("fmt/10.2.1", transitive_headers=True)
-        else:
-            self.requires("fmt/9.1.0", transitive_headers=True)
+        self.requires("fmt/10.2.1", transitive_headers=True)
 
         # Optional libraries
         if self.options.with_libpng:
@@ -103,30 +99,30 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_hdf5:
             self.requires("hdf5/1.14.3")
         if self.options.with_opencolorio:
-            self.requires("opencolorio/2.3.1")
+            self.requires("opencolorio/[>=2.3.1 <4]")
         if self.options.with_opencv:
-            self.requires("opencv/4.8.1")
+            self.requires("opencv/[>=4.8.1 <5]")
         if self.options.with_tbb:
             self.requires("onetbb/2021.10.0")
         if self.options.with_dicom:
             self.requires("dcmtk/3.6.7")
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/6.1")
+            self.requires("ffmpeg/[>=6.1 <8.0]")
         # TODO: Field3D dependency
         if self.options.with_giflib:
             self.requires("giflib/5.2.1")
         if self.options.with_libheif:
-            self.requires("libheif/1.16.2")
+            self.requires("libheif/[>=1.16.2 <2]")
         if self.options.with_raw:
             self.requires("libraw/0.21.2")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.5.2")
+            self.requires("openjpeg/[>=2.5.2 <3]")
         if self.options.with_openvdb:
             self.requires("openvdb/8.0.1")
         if self.options.with_ptex:
             self.requires("ptex/2.4.2")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.3.2")
+            self.requires("libwebp/[>=1.3.2 <2]")
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
 
@@ -190,7 +186,11 @@ class OpenImageIOConan(ConanFile):
         tc.variables["USE_FREETYPE"] = self.options.with_freetype
         tc.variables["USE_LIBWEBP"] = self.options.with_libwebp
         tc.variables["USE_OPENJPEG"] = self.options.with_openjpeg
-
+        if self.settings.os == "Linux":
+            # Workaround for: https://github.com/conan-io/conan/issues/13560
+            # note: should not be needed if CMakeConfigDeps is used
+            libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
+            tc.cache_variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
@@ -226,9 +226,6 @@ class OpenImageIOConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenImageIO")
         self.cpp_info.set_property("pkg_config_name", "OpenImageIO")
-
-        self.cpp_info.names["cmake_find_package"] = "OpenImageIO"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenImageIO"
 
         # OpenImageIO::OpenImageIO_Util
         open_image_io_util = self._add_component("OpenImageIO_Util")
@@ -303,6 +300,5 @@ class OpenImageIOConan(ConanFile):
             open_image_io.requires.append("libwebp::libwebp")
         if self.settings.os in ["Linux", "FreeBSD"]:
             open_image_io.system_libs.extend(["dl", "m", "pthread"])
-
         if not self.options.shared:
             open_image_io.defines.append("OIIO_STATIC_DEFINE")
