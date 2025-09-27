@@ -14,6 +14,7 @@ class OpenfbxConan(ConanFile):
     topics = ("openfbx", "fbx", "importer")
     homepage = "https://github.com/nem0/OpenFBX"
     url = "https://github.com/conan-io/conan-center-index"
+    version = "0.9"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -40,6 +41,7 @@ class OpenfbxConan(ConanFile):
 
     def requirements(self):
         self.requires("miniz/3.0.1")
+        self.requires("libdeflate/1.23")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):

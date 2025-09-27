@@ -7,7 +7,7 @@
 int main(int argc, char **argv) {
 
     std::vector<ofbx::u8> content(13);
-    ofbx::IScene *g_scene = ofbx::load(&content[0], 13, static_cast<ofbx::u64>(ofbx::LoadFlags::TRIANGULATE));
+    ofbx::IScene *g_scene = ofbx::load(&content[0], 13, static_cast<ofbx::u64>(ofbx::LoadFlags::NONE));
 
     std::cout << "Test: " << g_scene << std::endl;
 
