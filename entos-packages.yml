@@ -186,6 +186,9 @@ pkgconf:
 protobuf:
   versions:
     - '5.27.0'
+qt:
+  versions:
+    - '5.15.7'
 re2:
   versions:
     - '20230301'

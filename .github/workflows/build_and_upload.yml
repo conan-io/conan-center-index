@@ -17,16 +17,17 @@ on:
 jobs:
   export-recipes:
     runs-on: comcast-ubuntu-latest
-    container: ghcr.io/entos-xe/desktop-linux-gcc-rust:sha-4354cf4
+    container: ghcr.io/entos-xe/desktop-linux-gcc-rust:sha-bd6547a
+
+    env:
+      CONAN_PASSWORD: ${{ secrets.CONAN_ACCESS_KEY }}
+      CONAN_LOGIN_USERNAME: svc-entos-iui-prod
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Setup conan and config
-        env:
-          CONAN_PASSWORD: ${{ secrets.CONAN_ACCESS_KEY }}
-          CONAN_LOGIN_USERNAME: svc-entos-iui-prod
         uses: entos-xe/conan-setup-action@main
         with:
           config: "https://${{ secrets.XE_ORG_TOKEN }}@github.com/entos-xe/conan-config.git"
