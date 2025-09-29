@@ -1,0 +1,30 @@
+diff --git a/configure b/configure
+index b6c9b462f2..9911c38dd5 100755
+--- a/configure
++++ b/configure
+@@ -302,7 +302,7 @@ UNAME_RELEASE=`(uname -r) 2>/dev/null` || UNAME_RELEASE=unknown
+ UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
+ 
+ BUILD_ON_MAC=no
+-if [ -d /System/Library/Frameworks/Cocoa.framework ]; then
++if [ -d /System/Library/Frameworks/Cocoa.framework ] && [ -z "${OSXCROSS_SDK}" ]; then
+     BUILD_ON_MAC=yes
+ fi
+ if [ "$OSTYPE" = "msys" ]; then
+diff --git a/mkspecs/features/mac/default_pre.prf b/mkspecs/features/mac/default_pre.prf
+index e3534561a5..8bec7613d4 100644
+--- a/mkspecs/features/mac/default_pre.prf
++++ b/mkspecs/features/mac/default_pre.prf
+@@ -17,8 +17,10 @@ isEmpty(QMAKE_XCODEBUILD_PATH): \
+ 
+ !isEmpty(QMAKE_XCODEBUILD_PATH) {
+     # Make sure Xcode is set up properly
+-    !system("/usr/bin/xcrun xcodebuild -license check 2>/dev/null"): \
+-        error("Xcode not set up properly. You need to confirm the license agreement by running 'sudo xcrun xcodebuild -license accept'.")
++    !exists($$(OSXCROSS_SDK)) {
++        !system("/usr/bin/xcrun xcodebuild -license check 2>/dev/null"): \
++            error("Xcode not set up properly. You need to confirm the license agreement by running 'sudo xcrun xcodebuild -license accept'.")
++    }
+ 
+     isEmpty(QMAKE_XCODE_VERSION) {
+         # Extract Xcode version using xcodebuild

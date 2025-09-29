@@ -1,0 +1,59 @@
+From f2055fa430a18896e85fcf109f2d14688664579e Mon Sep 17 00:00:00 2001
+From: Michal Klocek <michal.klocek@qt.io>
+Date: Thu, 31 Aug 2023 18:54:43 +0200
+Subject: [PATCH] Fix undefined symbol qt_version_tag with lld(16.0) for non core lib
+
+The symbol qt_version_tag is only defined in libcore rather than
+the library being linked, therefore skip it.
+
+Delas with:
+ld.lld: error: version script assignment of 'Qt_5.15' to
+symbol 'qt_version_tag' failed: symbol not defined"
+
+Task-number: QTBUG-111514
+Change-Id: Ie4fdb444549e2655d323aefdc7cbdc85e1e2a819
+Reviewed-by: Joerg Bornemann <joerg.bornemann@qt.io>
+---
+
+diff --git a/mkspecs/features/qt_module.prf b/mkspecs/features/qt_module.prf
+index a9c3572..79187cb 100644
+--- a/mkspecs/features/qt_module.prf
++++ b/mkspecs/features/qt_module.prf
+@@ -233,15 +233,8 @@
+ 
+         current = Qt_$$QT_MAJOR_VERSION
+         verscript_content += "$$current { *; };"
+-        isEmpty(QT_NAMESPACE): tag_symbol = qt_version_tag
+-        else:                  tag_symbol = qt_version_tag_$$QT_NAMESPACE
+ 
+-        for(i, 0..$$QT_MINOR_VERSION) {
+-            previous = $$current
+-            current = Qt_$${QT_MAJOR_VERSION}.$$i
+-            equals(i, $$QT_MINOR_VERSION): verscript_content += "$$current { $$tag_symbol; } $$previous;"
+-            else:                          verscript_content += "$$current {} $$previous;"
+-        }
++        !isEmpty(MODULE_VERSCRIPT_CONTENT_EXT): verscript_content += $$MODULE_VERSCRIPT_CONTENT_EXT
+ 
+         # Add a post-processing step to replace the @FILE:filename@
+         verscript_in = $${verscript}.in
+diff --git a/src/corelib/corelib.pro b/src/corelib/corelib.pro
+index 7d057e0..22e3748 100644
+--- a/src/corelib/corelib.pro
++++ b/src/corelib/corelib.pro
+@@ -29,6 +29,16 @@
+     android.permission.INTERNET \
+     android.permission.WRITE_EXTERNAL_STORAGE
+ 
++current = Qt_$$QT_MAJOR_VERSION
++isEmpty(QT_NAMESPACE): tag_symbol = qt_version_tag
++else: tag_symbol = qt_version_tag_$$QT_NAMESPACE
++for(i, 0..$$QT_MINOR_VERSION) {
++   previous = $$current
++   current = Qt_$${QT_MAJOR_VERSION}.$$i
++   equals(i, $$QT_MINOR_VERSION): MODULE_VERSCRIPT_CONTENT_EXT += "$$current { $$tag_symbol; } $$previous;"
++   else: MODULE_VERSCRIPT_CONTENT_EXT += "$$current {} $$previous;"
++}
++
+ # QtCore can't be compiled with -Wl,-no-undefined because it uses the "environ"
+ # variable and on FreeBSD and OpenBSD, this variable is in the final executable itself.
+ # OpenBSD 6.0 will include environ in libc.
