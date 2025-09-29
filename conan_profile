@@ -1,0 +1,2 @@
+[options]
+qt/*:with_libjpeg=libjpeg-turbo
