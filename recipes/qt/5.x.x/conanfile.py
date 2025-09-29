@@ -795,8 +795,7 @@ class QtConan(ConanFile):
             args.append("-psql_config \"%s\"" % os.path.join(self.dependencies["libpq"].package_folder, "bin", "pg_config"))
         if self.settings.os == "Macos":
             args += ["-no-framework"]
-            if cross_building(self):
-                args.append(f"QMAKE_APPLE_DEVICE_ARCHS={to_apple_arch(self)}")
+            args.append(f"QMAKE_APPLE_DEVICE_ARCHS={to_apple_arch(self)}")
             args.append("QMAKE_CXXFLAGS+=-mmacosx-version-min=10.13")
         elif self.settings.os == "Android":
             args += [f"-android-ndk-platform android-{self.settings.os.api_level}"]
