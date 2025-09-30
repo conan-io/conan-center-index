@@ -21,7 +21,7 @@ class GeographiclibConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://geographiclib.sourceforge.io"
     license = "MIT"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -98,7 +98,9 @@ class GeographiclibConan(ConanFile):
             raise ConanInvalidConfiguration("extended, quadruple and variable precisions not yet supported in this recipe")
 
     def build_requirements(self):
-        if Version(self.version) >= "2.4":
+        if Version(self.version) >= "2.5":
+            self.tool_requires("cmake/[>=3.17 <4]")
+        elif Version(self.version) >= "2.4":
             self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
