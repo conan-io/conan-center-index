@@ -1,20 +1,3 @@
-diff --git CMakeLists.txt CMakeLists.txt
-index 2151f57..8087192 100644
---- CMakeLists.txt
-+++ CMakeLists.txt
-@@ -119,9 +119,9 @@ message(STATUS "Building ${CMAKE_BUILD_TYPE}")
- 
- ## C++ version and flags
- # C++14 is needed for gtest, otherwise, C++11 is sufficient for the library
--if (NOT CMAKE_CXX_STANDARD)
--  set(CMAKE_CXX_STANDARD 14)
--endif()
-+# if (NOT CMAKE_CXX_STANDARD)
-+#   set(CMAKE_CXX_STANDARD 14)
-+# endif()
- message(STATUS "C++ Standard is set to ${CMAKE_CXX_STANDARD}")
- 
- if (MSVC)
 diff --git src/apps/ojph_stream_expand/CMakeLists.txt src/apps/ojph_stream_expand/CMakeLists.txt
 index 61e8603..85c1d99 100644
 --- src/apps/ojph_stream_expand/CMakeLists.txt
