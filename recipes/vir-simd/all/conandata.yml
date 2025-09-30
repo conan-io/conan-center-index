@@ -1,4 +1,7 @@
 sources:
+  "0.4.0":
+    url: "https://github.com/mattkretz/vir-simd/archive/refs/tags/v0.4.0.tar.gz"
+    sha256: "e21f2fc6353e22f62f341f09eba20215bee5d821591788c025e2bbff60218bf6"
   "0.3.1":
     url: "https://github.com/mattkretz/vir-simd/archive/refs/tags/v0.3.1.tar.gz"
     sha256: "552b80773a72db2ec2c82fd8fa70211c0fe8a7a3aa9dd7003541d99ff886a360"
