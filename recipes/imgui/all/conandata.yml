@@ -1,20 +1,20 @@
 # this package's recipe relies on version suffixes to handle imgui's docking branch.
 # Suffix: -docking for docking branch sources
 sources:
-  "1.92.0":
+  "1.92.2b":
     core:
-      url: "https://github.com/ocornut/imgui/archive/v1.92.0.tar.gz"
-      sha256: "42250c45df2736bcef867ae4ff404d138e5135cd36466c63143b1ea3b1c81091"
+      url: "https://github.com/ocornut/imgui/archive/v1.92.2b.tar.gz"
+      sha256: "da3d453cce74e0fb3d67f8d798a2a8d04fcaf0b33ce0e0131d0695dfc4f64191"
     testengine:
-      url: "https://github.com/ocornut/imgui_test_engine/archive/v1.92.0.tar.gz"
-      sha256: "4e6390b2371936e52e24e7e0bfcfcc9e9115fd9288d738cb76a7ea691eaf64dd"
-  "1.92.0-docking":
+      url: "https://github.com/ocornut/imgui_test_engine/archive/v1.92.2.tar.gz"
+      sha256: "5914327269b2dd9ad66bead3be8577f99f5f572d196bbe4028f6812cf0356adb"
+  "1.92.2b-docking":
     core:
-      url: "https://github.com/ocornut/imgui/archive/v1.92.0-docking.tar.gz"
-      sha256: "6f2b483efba74a42ed3f9fe02a4b83f7611eb1f7aa66d33b01295d789d9e207c"
+      url: "https://github.com/ocornut/imgui/archive/v1.92.2b-docking.tar.gz"
+      sha256: "f6ad86e6f938fdda4d5e362b9a9b39158963dd3257fdc9902efc148c0c0c39f9"
     testengine:
-      url: "https://github.com/ocornut/imgui_test_engine/archive/v1.92.0.tar.gz"
-      sha256: "4e6390b2371936e52e24e7e0bfcfcc9e9115fd9288d738cb76a7ea691eaf64dd"
+      url: "https://github.com/ocornut/imgui_test_engine/archive/v1.92.2.tar.gz"
+      sha256: "5914327269b2dd9ad66bead3be8577f99f5f572d196bbe4028f6812cf0356adb"
   "1.91.8":
     core:
       url: "https://github.com/ocornut/imgui/archive/v1.91.8.tar.gz"
