@@ -21,11 +21,14 @@ on:
         required: false
         default: false
     secrets:
-      FILEN_EMAIL:
-        description: 'Email to authenticate with FileN'
+      ARTIFACTORY_URL:
+        description: 'Url of Artifactory instance'
         required: true
-      FILEN_PASSWORD:
-        description: 'Password to authenticate with FileN'
+      ARTIFACTORY_USER:
+        description: 'User to authenticate with Artifactory'
+        required: true
+      ARTIFACTORY_TOKEN:
+        description: 'API Key to authenticate with Artifactory'
         required: true
 
   workflow_dispatch:

@@ -20,9 +20,9 @@ jobs:
 
       - uses: ./.github/actions/setup-remote
         with:
-          filen-email: ${{ secrets.FILEN_EMAIL }}
-          filen-password: ${{ secrets.FILEN_PASSWORD }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          artifactory-url: ${{ secrets.ARTIFACTORY_URL }}
+          artifactory-user: ${{ secrets.ARTIFACTORY_USER }}
+          artifactory-token: ${{ secrets.ARTIFACTORY_TOKEN }}
 
       - run: conan remove '*/*#*:*#~latest' -c -r community
       - name: Collect logs

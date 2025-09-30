@@ -1,62 +1,22 @@
 inputs:
-  filen-email:
-    description: 'Email to authenticate with FileN'
+  artifactory-url:
+    description: 'Url of Artifactory instance'
     required: false
-  filen-password:
-    description: 'Password to authenticate with FileN'
+  artifactory-token:
+    description: 'Password to authenticate with Artifactory'
     required: false
-  github-token:
-    description: 'Token to authenticate with GitHub'
+  artifactory-user:
+    description: 'User to authenticate with Artifactory'
     required: false
 name: 'Setup Conan'
 runs:
   using: "composite"
   steps:
-    - uses: oven-sh/setup-bun@v2
-      with:
-        bun-version: latest
-        scope: ${{ github.repository_owner }}
-        registry-url: "https://npm.pkg.github.com/"
-        bun-download-url:  ${{ (runner.os == 'Windows' && runner.arch == 'ARM64') && 'https://github.com/oven-sh/bun/releases/latest/download/bun-windows-x64-baseline.zip' || '' }}
     - run: |
-        rm package*.json
-        bun install @ericlemanissier/cocoserver --production
-      shell: bash
-      env:
-        BUN_AUTH_TOKEN: ${{ inputs.github-token }}
-
-    - run: |
-        for i in {1..10}
-        do
-          bun run --bun cocoserver --owner ${{ github.repository_owner }} --repo ${GITHUB_REPOSITORY#*/} --folder cocoremote > process.log 2>&1 &
-          pid=$!
-          for j in {1..30}
-          do
-            if grep -qi "listening" process.log
-            then
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "Timeout waiting for 'listening'. Dumping log:"
-          cat process.log
-        done
-        echo "Failed to start server after 10 attempts."
-        exit 1
-      env:
-        FILEN_EMAIL: ${{ inputs.filen-email }}
-        FILEN_PASSWORD: ${{ inputs.filen-password }}
-      shell: bash
-
-    - run: gh api rate_limit || echo "could not get gh rate limits"
-      shell: bash
-      env:
-        GH_TOKEN: ${{ inputs.github-token }}
-
-    - run: |
-        conan remote add community http://localhost:9595
+        conan remote add community ${CONAN_ARTIFACTORY_URL}
         conan remote auth community --format=json | jq ".community | has(\"error\")" | grep -q "false"
       env:
-        CONAN_LOGIN_USERNAME_COMMUNITY: ${{ github.repository_owner }}
-        CONAN_PASSWORD_COMMUNITY: ${{ inputs.github-token }}
+        CONAN_LOGIN_USERNAME_COMMUNITY: ${{ inputs.artifactory-user }}
+        CONAN_PASSWORD_COMMUNITY: ${{ inputs.artifactory-token }}
+        CONAN_ARTIFACTORY_URL: ${{ inputs.artifactory-url }}
       shell: bash

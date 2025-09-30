@@ -21,12 +21,15 @@ on:
         required: false
         default: false
     secrets:
-      FILEN_EMAIL:
-        description: 'Email to authenticate with FileN'
-        required: false
-      FILEN_PASSWORD:
-        description: 'Password to authenticate with FileN'
-        required: false
+      ARTIFACTORY_URL:
+        description: 'Url of Artifactory instance'
+        required: true
+      ARTIFACTORY_USER:
+        description: 'User to authenticate with Artifactory'
+        required: true
+      ARTIFACTORY_TOKEN:
+        description: 'API Key to authenticate with Artifactory'
+        required: true
 
   workflow_dispatch:
     inputs:
@@ -70,9 +73,9 @@ jobs:
 
       - uses: ./.github/actions/setup-remote
         with:
-          filen-email: ${{ secrets.FILEN_EMAIL }}
-          filen-password: ${{ secrets.FILEN_PASSWORD }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          artifactory-url: ${{ secrets.ARTIFACTORY_URL }}
+          artifactory-user: ${{ secrets.ARTIFACTORY_USER }}
+          artifactory-token: ${{ secrets.ARTIFACTORY_TOKEN }}
         if: ${{ github.ref == 'refs/heads/community_index' }}
 
       - uses: actions/github-script@v8
@@ -136,9 +139,9 @@ jobs:
           
       - uses: ./.github/actions/setup-remote
         with:
-          filen-email: ${{ secrets.FILEN_EMAIL }}
-          filen-password: ${{ secrets.FILEN_PASSWORD }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          artifactory-url: ${{ secrets.ARTIFACTORY_URL }}
+          artifactory-user: ${{ secrets.ARTIFACTORY_USER }}
+          artifactory-token: ${{ secrets.ARTIFACTORY_TOKEN }}
 
       - run: conan export --version=$VERSION --no-remote ${{ env.FOLDER }}
 
