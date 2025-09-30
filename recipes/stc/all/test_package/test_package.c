@@ -40,6 +40,27 @@ int main(void) {
     return EXIT_SUCCESS;
 }
 
+#elif STC_VERSION == 5
+
+#define i_key int
+#define i_use_cmp
+#include <stc/vec.h>
+
+int main(void) {
+    vec_int vec = {0};
+    vec_int_push(&vec, 10);
+    vec_int_push(&vec, 20);
+    vec_int_push(&vec, 30);
+
+    c_foreach(i, vec_int, vec) {
+        printf(" %d", *i.ref);
+    }
+
+    vec_int_drop(&vec);
+
+    return EXIT_SUCCESS;
+}
+
 #else
 #error "invalid STC_VERSION"
 #endif
