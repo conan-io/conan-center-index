@@ -75,10 +75,4 @@ class Package(ConanFile):
         files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        arrow_cmake_suffix = "shared" if self.options["arrow/*"].shared else "static"
-
-        self.cpp_info.libs = [
-            "rerun_sdk",
-            self._get_additional_lib(),
-            f"Arrow::arrow_{arrow_cmake_suffix}",
-        ]
+        self.cpp_info.libs = ["rerun_sdk", self._get_additional_lib()]
