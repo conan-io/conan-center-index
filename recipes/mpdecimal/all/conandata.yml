@@ -11,11 +11,19 @@ sources:
 patches:
   "4.0.0":
     - patch_file: "patches/4.0.0-0001-msvc-fixes.patch"
-    - patch_file: "patches/4.0.0-0003-use-MPDECIMAL_DLL.patch"
+      patch_description: "Remove hardcoded MSVC runtime flags"
+      patch_type: "portability"
+    - patch_file: "patches/4.0.0-0002-use-MPDECIMAL_DLL.patch"
+      patch_description: "Allow a static lib to use a shared mpdecimal (and vice versa)"
+      patch_type: "portability"
   "2.5.1":
     - patch_file: "patches/2.5.1-0001-msvc-fixes.patch"
-    - patch_file: "patches/2.5.1-0002-add-mingw-to-configure-ac.patch"
-    - patch_file: "patches/2.5.1-0003-use-MPDECIMAL_DLL.patch"
+      patch_description: "Remove hardcoded MSVC runtime flags"
+      patch_type: "portability"
+    - patch_file: "patches/2.5.1-0002-use-MPDECIMAL_DLL.patch"
+      patch_description: "Allow a static lib to use a shared mpdecimal (and vice versa)"
+      patch_type: "portability"
   "2.5.0":
-    - patch_file: "patches/0001-2.5.0-msvc-fixes.patch"
-    - patch_file: "patches/0002-add-mingw-to-configure-ac.patch"
+    - patch_file: "patches/2.5.0-0001-msvc-fixes.patch"
+      patch_description: "Remove hardcoded MSVC runtime flags"
+      patch_type: "portability"
