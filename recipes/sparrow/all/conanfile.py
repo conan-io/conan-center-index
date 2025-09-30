@@ -24,12 +24,14 @@ class SparrowRecipe(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "use_date_polyfill": [True, False],
+        "export_json_reader": [True, False],
     }
 
     default_options = {
         "shared": False,
         "fPIC": True,
-        "use_date_polyfill": True
+        "use_date_polyfill": True,
+        "export_json_reader": False,
     }
 
     implements = ["auto_shared_fpic"]
@@ -46,9 +48,15 @@ class SparrowRecipe(ConanFile):
         # Not an option not to use it on Macos
         return self.options.get_safe("use_date_polyfill", True)
 
+    @property
+    def _export_json_reader(self):
+        return self.options.get_safe("export_json_reader", False)
+
     def requirements(self):
         if self._uses_date_polyfill:
             self.requires("date/3.0.3", transitive_headers=True)
+        if self._export_json_reader:
+            self.requires("nlohmann_json/3.12.0")
 
     @property
     def _compilers_minimum_version(self):
@@ -80,6 +88,7 @@ class SparrowRecipe(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["USE_DATE_POLYFILL"] = self._uses_date_polyfill
         tc.variables["SPARROW_BUILD_SHARED"] = self.options.shared
+        tc.variables["CREATE_JSON_READER_TARGET"] = self._export_json_reader
         if is_msvc(self):
             tc.variables["USE_LARGE_INT_PLACEHOLDERS"] = True
         tc.generate()
