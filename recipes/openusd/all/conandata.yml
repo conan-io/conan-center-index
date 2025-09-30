@@ -1,0 +1,4 @@
+sources:
+  "25.08":
+    url: "https://github.com/PixarAnimationStudios/OpenUSD/archive/refs/tags/v25.08.tar.gz"
+    sha256: "2a93c2390ae35a3e312f3fb66e6f403a0e046893e3f0d706be82963345a08cb3"
