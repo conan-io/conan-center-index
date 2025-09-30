@@ -48,16 +48,20 @@ class CppUTestConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["STD_C"] = True
-        tc.variables["STD_CPP"] = True
-        tc.variables["C++11"] = True
-        tc.variables["MEMORY_LEAK_DETECTION"] = self.options.with_leak_detection
-        tc.variables["EXTENSIONS"] = self.options.with_extensions
-        tc.variables["LONGLONG"] = True
-        tc.variables["COVERAGE"] = False
-        tc.variables["TESTS"] = False
         if Version(self.version) <= "4.0": # Master branch already support CMake 4 (not yet released)
+            tc.variables["STD_C"] = True
+            tc.variables["STD_CPP"] = True
+            tc.variables["C++11"] = True
+            tc.variables["MEMORY_LEAK_DETECTION"] = self.options.with_leak_detection
+            tc.variables["EXTENSIONS"] = self.options.with_extensions
+            tc.variables["LONGLONG"] = True
+            tc.variables["COVERAGE"] = False
+            tc.variables["TESTS"] = False
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        else:
+            tc.variables["CPPUTEST_EXTENSIONS"] = self.options.with_extensions
+            tc.variables["CPPUTEST_BUILD_TESTING"] = False
+            tc.variables["CPPUTEST_EXAMPLES"] = False
         tc.generate()
 
     def build(self):
