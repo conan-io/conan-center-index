@@ -2,4 +2,4 @@
 
 include("${CMAKE_CURRENT_LIST_DIR}/foxglove-sdkTargets.cmake")
 
-check_required_components(foxglove-sdk) 
+check_required_components(foxglove-sdk)
