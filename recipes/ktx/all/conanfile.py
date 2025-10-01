@@ -94,6 +94,10 @@ class KtxConan(ConanFile):
             # astcenc_vecmathlib_sse_4.h:809:41: error: the last argument must be a 4-bit immediate
             raise ConanInvalidConfiguration("GCC v6+ is required")
 
+    def build_requirements(self):
+        if Version(self.version) >= "4.4.0":
+            self.tool_requires("cmake/[>=3.22 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         # Avoid copying of 300 MB of test assets and third-party binaries
