@@ -47,8 +47,7 @@ class OpenJPH(ConanFile):
             self.requires("libtiff/[>=4.6.0 <5]")
 
     def validate(self):
-        required_cxx_version = 14 if self.options.with_stream_expand_tool else 11
-        check_min_cppstd(self, required_cxx_version)
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
