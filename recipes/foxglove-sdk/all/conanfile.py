@@ -10,6 +10,7 @@ required_conan_version = ">=2.0.9"
 
 class FoxgloveSdkConan(ConanFile):
     name = "foxglove-sdk"
+    version = "0.14.3"
     description = "Foxglove SDK"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
