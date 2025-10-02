@@ -60,7 +60,7 @@ class AzureSDKForCppConan(ConanFile):
             # doesn't currently support that build option...
             self.requires("wil/1.0.250325.1")
 
-        if self.options.get_safe("curl_transport"):
+        if self.options.curl_transport:
             self.requires("libcurl/[>=7.78 <9]")
 
     def layout(self):
