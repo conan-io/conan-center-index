@@ -30,13 +30,11 @@ class EigenConan(ConanFile):
         export_conandata_patches(self)
 
     def configure(self):
-        if Version(self.version) < "5.0.0" and not self.options.MPL2_only:
-            self.license = ("MPL-2.0", "LGPL-3.0-or-later")
-            return
-
+        self.license = "MPL-2.0"  # MPL-2 only
         if Version(self.version) >= "5.0.0":
-            self.options.rm_safe("MPL2_only")
-        self.license = "MPL-2.0"
+            del self.options.MPL2_only
+        elif not self.options.MPL2_only:  # < 5.0.0
+            self.license = ("MPL-2.0", "LGPL-3.0-or-later")
 
 
     def layout(self):
