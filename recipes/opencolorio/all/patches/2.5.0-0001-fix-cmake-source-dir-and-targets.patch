@@ -47,12 +47,14 @@ index 127ec9e7..8f5abb4a 100644
  include(CheckCXXCompilerFlag)
  
 diff --git src/OpenColorIO/CMakeLists.txt src/OpenColorIO/CMakeLists.txt
-index f56b6219..b7a582ff 100755
+index f56b6219..c25e3d71 100755
 --- src/OpenColorIO/CMakeLists.txt
 +++ src/OpenColorIO/CMakeLists.txt
-@@ -325,7 +325,7 @@ target_link_libraries(OpenColorIO
+@@ -324,8 +324,9 @@ target_link_libraries(OpenColorIO
+         "$<BUILD_INTERFACE:utils::from_chars>"
          "$<BUILD_INTERFACE:utils::strings>"
          "$<BUILD_INTERFACE:xxHash>"
++    PUBLIC
          yaml-cpp::yaml-cpp
 -        MINIZIP::minizip-ng
 +        MINIZIP::minizip
