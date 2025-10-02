@@ -43,7 +43,8 @@ class FaissConan(ConanFile):
         check_min_cppstd(self, 17)
 
         if self.settings.compiler == "apple-clang":
-            raise ConanInvalidConfiguration("OpenMP support is required, which is not available in Apple Clang")
+            raise ConanInvalidConfiguration("OpenMP support is required, which is not "
+                                            "available in Apple Clang")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
