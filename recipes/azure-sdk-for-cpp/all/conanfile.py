@@ -22,7 +22,7 @@ class AzureSDKForCppConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "win_http_transport": [True, False],
-        "curl_http_transport": [True, False]
+        "curl_transport": [True, False]
     }
 
     default_options = {"shared": False, "fPIC": True}
@@ -31,7 +31,7 @@ class AzureSDKForCppConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "win_http_transport": True,
-        "curl_http_transport": True
+        "curl_transport": True
     }
 
     def export_sources(self):
@@ -60,7 +60,7 @@ class AzureSDKForCppConan(ConanFile):
             # doesn't currently support that build option...
             self.requires("wil/1.0.250325.1")
 
-        if self.options.get_safe("curl_http_transport"):
+        if self.options.get_safe("curl_transport"):
             self.requires("libcurl/[>=7.78 <9]")
 
     def layout(self):
@@ -141,7 +141,8 @@ class AzureSDKForCppConan(ConanFile):
 
         if self.settings.os == "Windows" and self.options.get_safe("win_http_transport"):
             self.cpp_info.components["azure-core"].requires.append("wil::wil")
-        else:
+            self.cpp_info.components["azure-core"].system_libs = ["winhttp"]
+        if self.options.get_safe("curl_transport"):
             self.cpp_info.components["azure-core"].requires.append("libcurl::libcurl")
 
         self.cpp_info.components["azure-storage-common"].set_property("cmake_target_name", "Azure::azure-storage-common")
