@@ -31,7 +31,7 @@ class AzureSDKForCppConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "win_http_transport": True,
-        "curl_transport": True
+        "curl_http_transport": True
     }
 
     def export_sources(self):
