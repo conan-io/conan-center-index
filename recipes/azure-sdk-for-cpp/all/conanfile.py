@@ -73,7 +73,7 @@ class AzureSDKForCppConan(ConanFile):
         if self.settings.os == "Windows":
             if not self.options.get_safe("curl_transport") and not self.options.get_safe("win_http_transport"):
                 raise ConanInvalidConfiguration("win_http_transport or curl_transport must be enabled.")
-        elif not self.options.get_safe("curl_transport"):
+        elif not self.curl_transport:
                 raise ConanInvalidConfiguration("curl_transport must be enabled.")
 
         if self.settings.compiler == 'gcc' and Version(self.settings.compiler.version) < "6":
@@ -91,8 +91,8 @@ class AzureSDKForCppConan(ConanFile):
         tc.cache_variables["BUILD_TRANSPORT_CURL"] = self.options.get_safe("curl_transport")
 
         if self.settings.os == "Windows":
-            # if curl_transport and win_http_transport are both enabled, the SDK uses win_http (which is the default).
-
+            # if curl_transport and win_http_transport are both enabled, the SDK uses win_http by default
+            # when the transport is not manually overridden when the classes are instantiated
             tc.cache_variables["BUILD_TRANSPORT_WINHTTP"] = self.options.get_safe("win_http_transport")
 
         tc.cache_variables["BUILD_DOCUMENTATION"] = "OFF"
