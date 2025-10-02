@@ -34,7 +34,6 @@ class LightGBMConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_openmp": True,
     }
 
     def export_sources(self):
@@ -44,9 +43,10 @@ class LightGBMConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if conan_version.major == 1 and self.settings.compiler == "apple-clang":
-            # https://github.com/conan-io/conan-center-index/pull/18759#issuecomment-1817470331
-            del self.options.with_openmp
+
+        # apple-clang does not support OpenMP out of the box
+        # and externally provided headers and libraries are not guaranteed to work with future versions
+        self.options.with_openmp = self.settings.compiler != "apple-clang"
 
     def configure(self):
         if self.options.shared:
@@ -59,8 +59,6 @@ class LightGBMConan(ConanFile):
         self.requires("eigen/3.4.0")
         self.requires("fast_double_parser/0.7.0", transitive_headers=True, transitive_libs=True)
         self.requires("fmt/10.1.1", transitive_headers=True, transitive_libs=True)
-        if self.options.get_safe("with_openmp") and self.settings.compiler in ["clang", "apple-clang"]:
-            self.requires("llvm-openmp/17.0.4", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
