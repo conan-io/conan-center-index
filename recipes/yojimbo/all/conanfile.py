@@ -31,7 +31,7 @@ class YojimboConan(ConanFile):
         self.requires("libsodium/1.0.20")
 
     def build_requirements(self):
-        self.tool_requires("premake/5.0.0-beta7")
+        self.tool_requires("premake/[>=5 <6, include_prerelease]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
