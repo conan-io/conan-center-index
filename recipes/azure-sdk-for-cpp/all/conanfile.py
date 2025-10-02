@@ -31,7 +31,7 @@ class AzureSDKForCppConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "win_http_transport": True,
-        "curl_transport": True
+        "curl_http_transport": True
     }
 
     def export_sources(self):
@@ -49,8 +49,6 @@ class AzureSDKForCppConan(ConanFile):
     def configure(self):
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
-        if self.settings.os == "Windows":
-            self.options.curl_http_transport = False
 
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
@@ -92,7 +90,7 @@ class AzureSDKForCppConan(ConanFile):
 
         tc.cache_variables["BUILD_TRANSPORT_CURL"] = self.options.get_safe("curl_transport")
 
-        if self.settings.os == "Windows"
+        if self.settings.os == "Windows":
             # if curl_transport and win_http_transport are both enabled, the SDK uses win_http (which is the default).
 
             tc.cache_variables["BUILD_TRANSPORT_WINHTTP"] = self.options.get_safe("win_http_transport")
