@@ -142,7 +142,7 @@ class AzureSDKForCppConan(ConanFile):
         if self.settings.os == "Windows" and self.options.get_safe("win_http_transport"):
             self.cpp_info.components["azure-core"].requires.append("wil::wil")
             self.cpp_info.components["azure-core"].system_libs = ["winhttp"]
-        if self.options.get_safe("curl_transport"):
+        if self.options.curl_transport:
             self.cpp_info.components["azure-core"].requires.append("libcurl::libcurl")
 
         self.cpp_info.components["azure-storage-common"].set_property("cmake_target_name", "Azure::azure-storage-common")
