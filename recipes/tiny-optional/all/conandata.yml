@@ -2,3 +2,6 @@ sources:
   "1.4.0":
     url: "https://github.com/Sedeniono/tiny-optional/archive/refs/tags/v1.4.0.tar.gz"
     sha256: "e09f164b7a73f96d1e925b8f450749885b192b54ccce4f27f43bdf88a0021e33"
+  "1.5.2":
+    url: "https://github.com/Sedeniono/tiny-optional/archive/refs/tags/v1.5.2.tar.gz"
+    sha256: "df67c6311a03282d892aa0539131696b8c66eaccf080d68f96a030aa690ea334"
