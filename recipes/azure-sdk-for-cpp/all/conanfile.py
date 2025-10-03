@@ -22,7 +22,7 @@ class AzureSDKForCppConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "win_http_transport": [True, False],
-        "curl_transport": [True, False]
+        "curl_http_transport": [True, False]
     }
 
     default_options = {"shared": False, "fPIC": True}
