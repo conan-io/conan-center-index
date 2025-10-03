@@ -1,0 +1,11 @@
+sources:
+  "14.3.1":
+    "Windows":
+        url: "https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/arm-gnu-toolchain-14.3.rel1-mingw-w64-x86_64-arm-none-eabi.zip"
+        sha256: "864c0c8815857d68a1bbba2e5e2782255bb922845c71c97636004a3d74f60986"
+    "Linux":
+        url: "https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi.tar.xz"
+        sha256: "8f6903f8ceb084d9227b9ef991490413014d991874a1e34094443c2a72b14dbd"
+    "Macos":
+        url: "https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/arm-gnu-toolchain-14.3.rel1-darwin-x86_64-arm-none-eabi.pkg"
+        sha256: "b93712026cec9f98a5d98dfec84e8096d32be3759642381e1982c4a5d2aa020b"
