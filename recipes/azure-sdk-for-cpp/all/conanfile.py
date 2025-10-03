@@ -22,7 +22,7 @@ class AzureSDKForCppConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "win_http_transport": [True, False],
-        "curl_http_transport": [True, False]
+        "curl_transport": [True, False]
     }
 
     default_options = {"shared": False, "fPIC": True}
@@ -31,7 +31,7 @@ class AzureSDKForCppConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "win_http_transport": True,
-        "curl_http_transport": True
+        "curl_transport": True
     }
 
     def export_sources(self):
@@ -71,10 +71,10 @@ class AzureSDKForCppConan(ConanFile):
             check_min_cppstd(self, 14)
 
         if self.settings.os == "Windows":
-            if not self.options.curl_http_transport and not self.options.win_http_transport:
+            if not self.options.curl_transport and not self.options.get_safe("win_http_transport")
                 raise ConanInvalidConfiguration("On Windows, HTTP Transport options: win_http_transport or curl_transport must be enabled.")
-        elif not self.options.curl_http_transport:
-                raise ConanInvalidConfiguration("The HTTP Transport option curl_http_transport must be enabled.")
+        elif not self.options.curl_transport:
+                raise ConanInvalidConfiguration("The HTTP Transport option curl_transport must be enabled.")
 
         if self.settings.compiler == 'gcc' and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration("Building requires GCC >= 6")
@@ -88,7 +88,7 @@ class AzureSDKForCppConan(ConanFile):
         tc.cache_variables["BUILD_TESTING"] = "OFF"
         tc.cache_variables["ENABLE_PROXY_TESTS"] = "OFF"
 
-        tc.cache_variables["BUILD_TRANSPORT_CURL"] = self.options.get_safe("curl_transport")
+        tc.cache_variables["BUILD_TRANSPORT_CURL"] = self.options.curl_transport
 
         if self.settings.os == "Windows":
             # if curl_transport and win_http_transport are both enabled, the SDK uses win_http by default
