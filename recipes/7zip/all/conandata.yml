@@ -1,9 +1,9 @@
 sources:
-  "25.00":
+  "25.01":
     url:
-      - https://www.7-zip.org/a/7z2500-src.tar.xz
-      - https://sourceforge.net/projects/sevenzip/files/7-Zip/25.00/7z2500-src.tar.xz
-    sha256: "bff9e69b6ca73a5b8715d7623870a39dc90ad6ce1f4d1070685843987af1af9b"
+      - https://www.7-zip.org/a/7z2501-src.tar.xz
+      - https://sourceforge.net/projects/sevenzip/files/7-Zip/25.01/7z2501-src.tar.xz
+    sha256: "ed087f83ee789c1ea5f39c464c55a5c9d4008deb0efe900814f2df262b82c36e"
   "24.09":
     url:
       - https://www.7-zip.org/a/7z2409-src.tar.xz
