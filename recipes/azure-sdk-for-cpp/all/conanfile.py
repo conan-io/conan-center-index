@@ -71,7 +71,7 @@ class AzureSDKForCppConan(ConanFile):
             check_min_cppstd(self, 14)
 
         if self.settings.os == "Windows":
-            if not self.options.curl_transport and not self.options.get_safe("win_http_transport")
+            if not self.options.curl_transport and not self.options.get_safe("win_http_transport"):
                 raise ConanInvalidConfiguration("On Windows, HTTP Transport options: win_http_transport or curl_transport must be enabled.")
         elif not self.options.curl_transport:
                 raise ConanInvalidConfiguration("The HTTP Transport option curl_transport must be enabled.")
