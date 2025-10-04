@@ -59,7 +59,12 @@ class LibmodbusConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        if self.version == "3.1.11":
+            get(self, **self.conan_data["sources"][self.version])
+            copy(self, "*", src=os.path.join(self.source_folder,"libmodbus-3.1.11"), dst=self.source_folder)
+            rmdir(self, os.path.join(self.source_folder, "libmodbus-3.1.11"))
+        else:
+            get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
