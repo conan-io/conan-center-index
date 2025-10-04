@@ -12,7 +12,7 @@ valid_archs = ["armv6", "armv7", "armv7hf", "armv8", "armv8.1", "armv9"]
 class PackageConan(ConanFile):
     name = "arm-none-eabi-gcc"
     description = "embedded compiler for arm based microcontrollers on baremetal systems"
-    license = " GPL-2.0"
+    license = " GPL-3.0"
     url = "https://github.com/conan-io/conan-center-index/recipes/arm-none-eabi-gcc"
     homepage = "https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads"
     topics = ("arm", "embedded", "compiler suite", "pre-built")
@@ -22,11 +22,11 @@ class PackageConan(ConanFile):
     def layout(self):
         pass
 
-    def package_id(self):
-        self.info.settings_target = self.settings_target
-        self.info.settings_target.rm_safe("os")
-        self.info.settings_target.rm_safe("compiler")
-        self.info.settings_target.rm_safe("build_type")
+    # def package_id(self):
+    #     # self.info.settings_target = self.settings_target
+    #     self.info.settings.rm_safe("os")
+    #     self.info.settings.rm_safe("compiler")
+    #     self.info.settings.rm_safe("build_type")
 
     # in case some configuration is not supported
     def validate(self):
