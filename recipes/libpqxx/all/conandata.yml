@@ -46,6 +46,9 @@ patches:
     - patch_file: "patches/0001-cmake-fix-module.patch"
       patch_description: "Keep `CMAKE_MODULE_PATH` to be changed by conan."
       patch_type: "conan"
+    - patch_file: "patches/fix-cannot-build-c++17-msvc-7.10.2.patch"
+      patch_description: "Fix a bug cannot build with C++17 on MSVC"
+      patch_type: "bugfix"
   "7.10.1":
     - patch_file: "patches/0001-cmake-fix-module.patch"
       patch_description: "Keep `CMAKE_MODULE_PATH` to be changed by conan."
