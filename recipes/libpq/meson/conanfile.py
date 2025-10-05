@@ -24,12 +24,12 @@ class LibpqConan(ConanFile):
         "fPIC": [True, False],
         "with_openssl": [True, False],
         "with_icu": [True, False],
-        "with_zlib": [True, False],
-        "with_zstd": [True, False],
-        "with_libxml2": [True, False],
-        "with_lz4": [True, False],
-        "with_xslt": [True, False],
-        "with_readline": [True, False],
+        "with_zlib": [True, False, "deprecated"],
+        "with_zstd": [True, False, "deprecated"],
+        "with_libxml2": [True, False, "deprecated"],
+        "with_lz4": [True, False, "deprecated"],
+        "with_xslt": [True, False, "deprecated"],
+        "with_readline": [True, False, "deprecated"],
         "disable_rpath": [True, False],
     }
     default_options = {
@@ -45,6 +45,12 @@ class LibpqConan(ConanFile):
         "with_lz4": True,
         "with_xslt": False,
         "with_readline": False,
+        "with_zlib": "deprecated",
+        "with_zstd": "deprecated",
+        "with_libxml2": "deprecated",
+        "with_lz4": "deprecated",
+        "with_xslt": "deprecated",
+        "with_readline": "deprecated",
         "disable_rpath": False,
     }
 
@@ -58,8 +64,20 @@ class LibpqConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.compiler == "msvc":
-            del self.options.with_readline
+
+    def configure(self):
+        if self.options.with_zlib != "deprecated":
+            self.output.warn("with_zlib option is deprecated, do not use anymore")
+        if self.options.with_zstd != "deprecated":
+            self.output.warn("with_zstd option is deprecated, do not use anymore")
+        if self.options.with_libxml2 != "deprecated":
+            self.output.warn("with_libxml option is deprecated, do not use anymore")
+        if self.options.with_lz4 != "deprecated":
+            self.output.warn("with_lz4 option is deprecated, do not use anymore")
+        if self.options.with_xslt != "deprecated":
+            self.output.warn("with_xslt option is deprecated, do not use anymore")
+        if self.options.with_readline != "deprecated":
+            self.output.warn("with_readline option is deprecated, do not use anymore")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -69,18 +87,6 @@ class LibpqConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_icu:
             self.requires("icu/75.1")
-        if self.options.with_libxml2:
-            self.requires("libxml2/[>=2.12.5 <3]")
-        if self.options.with_zstd:
-            self.requires("zstd/[>=1.5 <1.6]")
-        if self.options.with_zlib:
-            self.requires("zlib/[>=1.2.11 <2]")
-        if self.options.with_lz4:
-            self.requires("lz4/1.9.4")
-        if self.options.with_xslt:
-            self.requires("libxslt/[^1.1]")
-        if self.options.get_safe("with_readline"):
-            self.requires("readline/8.2")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
@@ -107,13 +113,15 @@ class LibpqConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options["ssl"] = "openssl" if self.options.with_openssl else "none"
         tc.project_options["icu"] = feature(self.options.with_icu)
-        # Why did the old version disable this explicitly?
-        tc.project_options["zlib"] = feature(self.options.with_zlib)
-        tc.project_options["zstd"] = feature(self.options.with_zstd)
-        tc.project_options["libxml"] = feature(self.options.with_libxml2)
-        tc.project_options["lz4"] = feature(self.options.with_lz4)
-        tc.project_options["libxslt"] = feature(self.options.with_xslt)
-        tc.project_options["readline"] = feature(self.options.get_safe("with_readline"))
+        # The following options are disabled, because they anre only relevant
+        # for building the PostgreSQL server. Readlie is only used by the psql
+        # client executable. The libpq client library is not using any of these.
+        tc.project_options["zlib"] = "disabled"
+        tc.project_options["zstd"] = "disabled"
+        tc.project_options["libxml"] = "disabled"
+        tc.project_options["lz4"] = "disabled"
+        tc.project_options["libxslt"] = "disabled"
+        tc.project_options["readline"] = "disabled"
 
         tc.project_options["ldap"] = "disabled"
         tc.project_options["tap_tests"] = "disabled"
@@ -169,18 +177,6 @@ class LibpqConan(ConanFile):
             self.cpp_info.components["pq"].requires.append("openssl::openssl")
         if self.options.with_icu:
             self.cpp_info.components["pq"].requires.append("icu::icu")
-        if self.options.with_zlib:
-            self.cpp_info.components["pq"].requires.append("zlib::zlib")
-        if self.options.with_zstd:
-            self.cpp_info.components["pq"].requires.append("zstd::zstd")
-        if self.options.with_libxml2:
-            self.cpp_info.components["pq"].requires.append("libxml2::libxml2")
-        if self.options.with_lz4:
-            self.cpp_info.components["pq"].requires.append("lz4::lz4")
-        if self.options.with_xslt:
-            self.cpp_info.components["pq"].requires.append("libxslt::libxslt")
-        if self.options.get_safe("with_readline"):
-            self.cpp_info.components["pq"].requires.append("readline::readline")
 
         if not self.options.shared:
             self.cpp_info.components["pgport"].libs = ["pgport"]
