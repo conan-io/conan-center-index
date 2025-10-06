@@ -12,12 +12,12 @@ index a4350028..4cb01552 100644
      set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_SAVE})
  endif()
 diff --git a/cmake/JPEGCodec.cmake b/cmake/JPEGCodec.cmake
-index 8455a3e..b1576a0 100644
+index 8455a3ec..09fe975a 100644
 --- a/cmake/JPEGCodec.cmake
 +++ b/cmake/JPEGCodec.cmake
 @@ -42,25 +42,6 @@ endif()
  if (JPEG_SUPPORT)
-     # Check for jpeg12_read_scanlines() which has been added in libjpeg-turbo 2.2
+     # Check for jpeg12_read_scanlines() which has been added in libjpeg-turbo 3.0
      # for dual 8/12 bit mode.
 -    include(CheckCSourceCompiles)
 -    include(CMakePushCheckState)
