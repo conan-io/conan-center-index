@@ -15,7 +15,7 @@ diff --git a/cmake/JPEGCodec.cmake b/cmake/JPEGCodec.cmake
 index 8455a3ec..09fe975a 100644
 --- a/cmake/JPEGCodec.cmake
 +++ b/cmake/JPEGCodec.cmake
-@@ -42,25 +42,7 @@ endif()
+@@ -42,25 +42,6 @@ endif()
  if (JPEG_SUPPORT)
      # Check for jpeg12_read_scanlines() which has been added in libjpeg-turbo 3.0
      # for dual 8/12 bit mode.
@@ -38,7 +38,6 @@ index 8455a3ec..09fe975a 100644
 -        "
 -        HAVE_JPEGTURBO_DUAL_MODE_8_12)
 -    cmake_pop_check_state()
-+    set(HAVE_JPEGTURBO_DUAL_MODE_8_12 FALSE)
  endif()
  
  if (NOT HAVE_JPEGTURBO_DUAL_MODE_8_12)
