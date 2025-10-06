@@ -1,4 +1,7 @@
 sources:
+  "3.7":
+    url: "https://github.com/redorav/hlslpp/archive/refs/tags/3.7.tar.gz"
+    sha256: "819a3d20e5dcea27ee16903b6c96c309d1432c950f282791c06c8f27c2cb12f0"
   "3.3.1":
     url: "https://github.com/redorav/hlslpp/archive/3.3.1.tar.gz"
     sha256: "0756161beb8dd9eae377dc11e933d045618fea7ac93674f60eb8cffc04080499"

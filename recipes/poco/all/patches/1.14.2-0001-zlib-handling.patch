@@ -1,0 +1,16 @@
+diff --git a/Zip/CMakeLists.txt b/Zip/CMakeLists.txt
+index 796898cf6..d8a36096f 100644
+--- a/Zip/CMakeLists.txt
++++ b/Zip/CMakeLists.txt
+@@ -29,6 +29,11 @@ target_include_directories(Zip
+ 	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
+ )
+ 
++if(POCO_UNBUNDLED)
++	find_package(ZLIB REQUIRED)
++	target_link_libraries(Zip PRIVATE ZLIB::ZLIB)
++endif()
++
+ POCO_INSTALL(Zip)
+ POCO_GENERATE_PACKAGE(Zip)
+ 
