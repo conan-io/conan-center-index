@@ -4,6 +4,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.build import cross_building
 
 import os
 
@@ -127,6 +128,11 @@ class LibpqConan(ConanFile):
         tc.project_options["tap_tests"] = "disabled"
         tc.project_options["plpython"] = "disabled"
         tc.project_options["docs"] = "disabled"
+        if cross_building(self):
+            # when cross building, PostgreSQL fails to generate its
+            # timezone data file. To work around, provide just anything
+            # it's only used in the server and not in libpq
+            tc.project_options["system_tzdata"] = "/dev/null"
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
