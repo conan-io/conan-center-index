@@ -5,6 +5,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, MSBuild, MSBuildToolchain
+from conan.tools.cmake import CMakeToolchain, CMake
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -84,18 +85,22 @@ class XZUtilsConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        if self._use_msbuild:
-            tc = MSBuildToolchain(self)
-            tc.configuration = self._effective_msbuild_type
+        if Version(self.version) >= "5.8.1":
+            tc = CMakeToolchain(self)
             tc.generate()
         else:
-            env = VirtualBuildEnv(self)
-            env.generate()
-            tc = AutotoolsToolchain(self)
-            tc.configure_args.append("--disable-doc")
-            if self.settings.build_type == "Debug":
-                tc.configure_args.append("--enable-debug")
-            tc.generate()
+            if self._use_msbuild:
+                tc = MSBuildToolchain(self)
+                tc.configuration = self._effective_msbuild_type
+                tc.generate()
+            else:
+                env = VirtualBuildEnv(self)
+                env.generate()
+                tc = AutotoolsToolchain(self)
+                tc.configure_args.append("--disable-doc")
+                if self.settings.build_type == "Debug":
+                    tc.configure_args.append("--enable-debug")
+                tc.generate()
 
     @property
     def _msvc_sln_folder(self):
@@ -148,30 +153,39 @@ class XZUtilsConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        if self._use_msbuild:
-            self._build_msvc()
+        if Version(self.version) >= "5.8.1":
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
         else:
-            autotools = Autotools(self)
-            autotools.configure()
-            autotools.make()
+            if self._use_msbuild:
+                self._build_msvc()
+            else:
+                autotools = Autotools(self)
+                autotools.configure()
+                autotools.make()
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        if self._use_msbuild:
-            inc_dir = os.path.join(self.source_folder, "src", "liblzma", "api")
-            copy(self, "*.h", src=inc_dir, dst=os.path.join(self.package_folder, "include"))
-            output_dir = os.path.join(self.source_folder, "windows")
-            copy(self, "*.lib", src=output_dir, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-            copy(self, "*.dll", src=output_dir, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
-            rename(self, os.path.join(self.package_folder, "lib", "liblzma.lib"),
-                         os.path.join(self.package_folder, "lib", "lzma.lib"))
+        if Version(self.version) >= "5.8.1":
+            cmake = CMake(self)
+            cmake.install()
         else:
-            autotools = Autotools(self)
-            autotools.install()
-            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-            rmdir(self, os.path.join(self.package_folder, "share"))
-            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-            fix_apple_shared_install_name(self)
+            if self._use_msbuild:
+                inc_dir = os.path.join(self.source_folder, "src", "liblzma", "api")
+                copy(self, "*.h", src=inc_dir, dst=os.path.join(self.package_folder, "include"))
+                output_dir = os.path.join(self.source_folder, "windows")
+                copy(self, "*.lib", src=output_dir, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+                copy(self, "*.dll", src=output_dir, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+                rename(self, os.path.join(self.package_folder, "lib", "liblzma.lib"),
+                            os.path.join(self.package_folder, "lib", "lzma.lib"))
+            else:
+                autotools = Autotools(self)
+                autotools.install()
+                rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+                rmdir(self, os.path.join(self.package_folder, "share"))
+                rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+                fix_apple_shared_install_name(self)
 
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path),
