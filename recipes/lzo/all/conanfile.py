@@ -1,8 +1,6 @@
 from conan import ConanFile
-from conan.errors import ConanException
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.4"
@@ -40,8 +38,6 @@ class LZOConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_STATIC"] = not self.options.shared
         tc.variables["ENABLE_SHARED"] = self.options.shared
-        if Version(self.version) > "2.10":
-            raise ConanException("CMake Minimumversion hardcoded to 3.5, please check and update in newer versions")
         tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
