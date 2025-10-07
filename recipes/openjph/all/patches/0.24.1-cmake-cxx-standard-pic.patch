@@ -1,24 +1,13 @@
-diff --git CMakeLists.txt CMakeLists.txt
-index cb6abda..3eea032 100644
---- CMakeLists.txt
-+++ CMakeLists.txt
-@@ -119,7 +119,6 @@ message(STATUS "Building ${CMAKE_BUILD_TYPE}")
- 
- ## C++ version and flags
- # C++14 is needed for gtest, otherwise, C++11 is sufficient for the library
--set(CMAKE_CXX_STANDARD 14)
- if (MSVC)
-   add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
- endif()
 diff --git src/apps/ojph_stream_expand/CMakeLists.txt src/apps/ojph_stream_expand/CMakeLists.txt
-index 61e8603..65be4a3 100644
+index 61e8603..85c1d99 100644
 --- src/apps/ojph_stream_expand/CMakeLists.txt
 +++ src/apps/ojph_stream_expand/CMakeLists.txt
-@@ -1,7 +1,6 @@
+@@ -1,7 +1,7 @@
  ## building ojph_stream_expand
  ##############################
  
 -set(CMAKE_CXX_STANDARD 14)
++#set(CMAKE_CXX_STANDARD 14)
  
  file(GLOB OJPH_STREAM_EXPAND  "*.cpp" "*.h")
  file(GLOB OJPH_SOCKETS         "../others/ojph_sockets.cpp")

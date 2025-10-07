@@ -109,10 +109,12 @@ class LibtiffConan(ConanFile):
         tc.variables["tiff-tests"] = False
         tc.variables["tiff-contrib"] = False
         tc.variables["tiff-docs"] = False
-        tc.variables["cxx"] = self.options.cxx
+        cxx_option_name = "cxx" if Version(self.version) < "4.7.1" else "tiff-cxx"
+        tc.variables[cxx_option_name] = self.options.cxx
         # BUILD_SHARED_LIBS must be set in command line because defined upstream before project()
         tc.cache_variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
         tc.cache_variables["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = True
+        tc.cache_variables["HAVE_JPEGTURBO_DUAL_MODE_8_12"] = self.options.jpeg == "libjpeg-turbo"
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("jbig", "cmake_file_name", "JBIG")

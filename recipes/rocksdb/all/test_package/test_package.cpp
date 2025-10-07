@@ -1,16 +1,11 @@
 #include <cstdlib>
-#include <iostream>
 #include "rocksdb/db.h"
+#include "rocksdb/c.h"
+
 
 int main() {
-  rocksdb::DB* db;
-  rocksdb::Options options;
-  options.create_if_missing = true;
-  rocksdb::Status status = rocksdb::DB::Open(options, "testdb", &db);
-  
-  if (!status.ok()) {
-    std::cerr << "DB error: " << status.ToString() << std::endl;
-  }
-  delete db;
-  return EXIT_SUCCESS;
+    rocksdb_options_t *options = rocksdb_options_create();
+    rocksdb_free(options);
+
+    return EXIT_SUCCESS;
 }
