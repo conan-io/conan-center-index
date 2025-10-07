@@ -59,7 +59,8 @@ class OpenColorIOConan(ConanFile):
         # TODO: add GLUT (needed for ociodisplay tool)
 
     def validate(self):
-        check_min_cppstd(self, 11)
+        minimum_cppstd = 11 if Version(self.version) < "2.5" else 17
+        check_min_cppstd(self, minimum_cppstd)
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6.0":
             raise ConanInvalidConfiguration(f"{self.ref} requires gcc >= 6.0")
 
@@ -98,6 +99,11 @@ class OpenColorIOConan(ConanFile):
 
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
+
+        if self.settings.os == "Linux":
+            # Workaround for: https://github.com/conan-io/conan/issues/13560
+            libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
+            tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
 
         tc.generate()
 
