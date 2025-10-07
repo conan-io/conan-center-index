@@ -63,11 +63,6 @@ class DbusCXX(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "dbus-cxx-uv", "CMakeLists.txt"),
                             "target_link_libraries( dbus-cxx-uv PUBLIC ${LIBUV_LIBRARIES} )",
                             "target_link_libraries( dbus-cxx-uv PUBLIC PkgConfig::LIBUV )")
-        else:
-            # Version 2.6.0 or newer
-            replace_in_file(self, os.path.join(self.source_folder, "dbus-cxx-uv", "CMakeLists.txt"),
-                            "pkg_check_modules( libuv REQUIRED IMPORTED_TARGET ${LIBUV_PKG_NAME} )",
-                            "pkg_search_module( libuv IMPORTED_TARGET libuv )")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
