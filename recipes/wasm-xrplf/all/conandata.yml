@@ -1,0 +1,6 @@
+# Do not update. Maintained by programmability team.
+
+sources:
+  "2.4.1-xrplf":
+    sha256: ac7fc9f2d935a37c21de5d7d2e94efec332bdbe6e3ec3928bd89b1fca796a7e1
+    url: https://github.com/ripple/wasm-micro-runtime/archive/refs/tags/v2.4.1-xrplf.tar.gz
