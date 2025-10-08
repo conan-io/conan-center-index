@@ -40,6 +40,10 @@ patches:
     - patch_file: "patches/1.9.1-0001-fix-cmake.patch"
       patch_description: "use cci's packages"
       patch_type: "conan"
+  "1.8.4":
+    - patch_file: "patches/1.8.1-0001-fix-cmake.patch"
+      patch_description: "use cci's packages"
+      patch_type: "conan"
   "1.8.3":
     - patch_file: "patches/1.8.1-0001-fix-cmake.patch"
       patch_description: "use cci's packages"
