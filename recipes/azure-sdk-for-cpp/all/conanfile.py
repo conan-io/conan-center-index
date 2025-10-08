@@ -21,8 +21,8 @@ class AzureSDKForCppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "win_http_transport": [True, False],
-        "curl_transport": [True, False]
+        "transport_winhttp": [True, False],
+        "transport_curl": [True, False]
     }
 
     default_options = {"shared": False, "fPIC": True}
@@ -30,8 +30,8 @@ class AzureSDKForCppConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "win_http_transport": True,
-        "curl_transport": True
+        "transport_winhttp": True,
+        "transport_curl": True
     }
 
     def export_sources(self):
@@ -44,7 +44,7 @@ class AzureSDKForCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         else:
-            del self.options.win_http_transport
+            del self.options.transport_winhttp
 
     def configure(self):
         if self.options.get_safe("shared"):
@@ -60,7 +60,7 @@ class AzureSDKForCppConan(ConanFile):
             # doesn't currently support that build option...
             self.requires("wil/1.0.250325.1")
 
-        if self.options.curl_transport:
+        if self.options.transport_curl:
             self.requires("libcurl/[>=7.78 <9]")
 
     def layout(self):
@@ -71,10 +71,10 @@ class AzureSDKForCppConan(ConanFile):
             check_min_cppstd(self, 14)
 
         if self.settings.os == "Windows":
-            if not self.options.curl_transport and not self.options.get_safe("win_http_transport"):
-                raise ConanInvalidConfiguration("On Windows, HTTP Transport options: win_http_transport or curl_transport must be enabled.")
-        elif not self.options.curl_transport:
-                raise ConanInvalidConfiguration("The HTTP Transport option curl_transport must be enabled.")
+            if not self.options.transport_curl and not self.options.get_safe("transport_winhttp"):
+                raise ConanInvalidConfiguration("On Windows, HTTP Transport options: transport_winhttp or transport_curl must be enabled.")
+        elif not self.options.transport_curl:
+                raise ConanInvalidConfiguration("The HTTP Transport option transport_curl must be enabled.")
 
         if self.settings.compiler == 'gcc' and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration("Building requires GCC >= 6")
@@ -88,12 +88,12 @@ class AzureSDKForCppConan(ConanFile):
         tc.cache_variables["BUILD_TESTING"] = "OFF"
         tc.cache_variables["ENABLE_PROXY_TESTS"] = "OFF"
 
-        tc.cache_variables["BUILD_TRANSPORT_CURL"] = self.options.curl_transport
+        tc.cache_variables["BUILD_TRANSPORT_CURL"] = self.options.transport_curl
 
         if self.settings.os == "Windows":
-            # if curl_transport and win_http_transport are both enabled, the SDK uses win_http by default
+            # if transport_curl and transport_winhttp are both enabled, the SDK uses win_http by default
             # when the transport is not manually overridden when the classes are instantiated
-            tc.cache_variables["BUILD_TRANSPORT_WINHTTP"] = self.options.get_safe("win_http_transport")
+            tc.cache_variables["BUILD_TRANSPORT_WINHTTP"] = self.options.get_safe("transport_winhttp")
 
         tc.cache_variables["BUILD_DOCUMENTATION"] = "OFF"
         tc.cache_variables["BUILD_SAMPLES"] = "OFF"
@@ -139,10 +139,10 @@ class AzureSDKForCppConan(ConanFile):
 
         self.cpp_info.components["azure-core"].requires.extend(["openssl::openssl", "libxml2::libxml2"])
 
-        if self.settings.os == "Windows" and self.options.get_safe("win_http_transport"):
+        if self.settings.os == "Windows" and self.options.get_safe("transport_winhttp"):
             self.cpp_info.components["azure-core"].requires.append("wil::wil")
             self.cpp_info.components["azure-core"].system_libs = ["winhttp"]
-        if self.options.curl_transport:
+        if self.options.transport_curl:
             self.cpp_info.components["azure-core"].requires.append("libcurl::libcurl")
 
         self.cpp_info.components["azure-storage-common"].set_property("cmake_target_name", "Azure::azure-storage-common")
