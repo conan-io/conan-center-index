@@ -211,11 +211,17 @@ class OpenImageIOConan(ConanFile):
         tc.cache_variables["USE_NUKE"] = False
         tc.cache_variables["USE_R3DSDK"] = False
 
-        # Override variable for internal linking visibility of Imath otherwise not visible
-        # in the tools included in the build that consume the library.
-        tc.cache_variables["OPENIMAGEIO_IMATH_DEPENDENCY_VISIBILITY"] = "PUBLIC"
+        ## Override variable for internal linking visibility of Imath otherwise not visible
+        ## in the tools included in the build that consume the library.
+        #tc.cache_variables["OPENIMAGEIO_IMATH_DEPENDENCY_VISIBILITY"] = "PUBLIC"
+
+        if self.settings.os == "Linux":
+            # Workaround for: https://github.com/conan-io/conan/issues/13560
+            libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
+            tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
 
         tc.generate()
+
         deps = CMakeDeps(self)
         # Map the name of openexr for the target name expected in OIIO cmake
         deps.set_property("openexr", "cmake_target_name", "OpenEXR::OpenEXR")
