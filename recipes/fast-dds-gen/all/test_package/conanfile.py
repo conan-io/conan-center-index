@@ -11,7 +11,8 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def requirements(self):
-        self.requires("fast-dds/3.2.1")
+        fastdds_version = self.conf.get("user.fast-dds-gen:fastdds_version", default="3.2.1")
+        self.requires(f"fast-dds/{fastdds_version}")
 
     def layout(self):
         cmake_layout(self)
