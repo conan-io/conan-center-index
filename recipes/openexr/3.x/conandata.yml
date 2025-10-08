@@ -1,7 +1,7 @@
 sources:
-  "3.4.0":
-    url: "https://github.com/AcademySoftwareFoundation/openexr/releases/download/v3.4.0/openexr-3.4.0.tar.gz"
-    sha256: "1d4bddda2d22571f63db5f067c5741b50c8d41231f360ab17063176eb710a670"
+  "3.4.1":
+    url: "https://github.com/AcademySoftwareFoundation/openexr/releases/download/v3.4.1/openexr-3.4.1.tar.gz"
+    sha256: "55de71610ceb134b79c900e6aed3bf8994ec1972382395c1732f1b32da4c7527"
   "3.3.5":
     url: "https://github.com/AcademySoftwareFoundation/openexr/releases/download/v3.3.5/openexr-3.3.5.tar.gz"
     sha256: "8f9241f0e9d6b7aec7e9509cf2a9224416b9cd9d41740deab3827b1f2d01c662"
@@ -9,8 +9,8 @@ sources:
     url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.2.4.tar.gz"
     sha256: "81e6518f2c4656fdeaf18a018f135e96a96e7f66dbe1c1f05860dd94772176cc"
 patches:
-  "3.4.0":
-    - patch_file: "patches/3.4.0-openjph-include-fixes.patch"
+  "3.4.1":
+    - patch_file: "patches/3.4.1-openjph-include-fixes.patch"
       patch_description: "Patch to correctly include openjph headers"
       patch_type: "portability"
       patch_source: "https://github.com/AcademySoftwareFoundation/openexr/pull/2122"
