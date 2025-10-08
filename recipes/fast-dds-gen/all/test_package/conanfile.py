@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.files import copy
 
 
 class TestPackageConan(ConanFile):
@@ -23,18 +24,7 @@ class TestPackageConan(ConanFile):
     def build(self):
         self.run("fastddsgen -version")
 
-        test_idl_content = """
-module TestModule {
-    struct TestStruct {
-        string message;
-        long id;
-    };
-};
-"""
-        idl_path = os.path.join(self.build_folder, "test.idl")
-        with open(idl_path, "w") as f:
-            f.write(test_idl_content)
-
+        copy(self, "test.idl", src=self.source_folder, dst=self.build_folder)
         self.run("fastddsgen -replace test.idl", cwd=self.build_folder)
 
         expected_files = [
