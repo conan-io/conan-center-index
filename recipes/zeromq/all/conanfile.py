@@ -27,6 +27,10 @@ class ZeroMQConan(ConanFile):
         "with_draft_api": [True, False],
         "with_websocket": [True, False],
         "with_radix_tree": [True, False],
+        "with_asan": [True, False],
+        "with_tsan": [True, False],
+        "with_ubsan": [True, False],
+        "with_intrinsics": [True, False] 
     }
     default_options = {
         "shared": False,
@@ -37,6 +41,10 @@ class ZeroMQConan(ConanFile):
         "with_draft_api": False,
         "with_websocket": False,
         "with_radix_tree": False,
+        "with_asan": False,
+        "with_tsan": False,
+        "with_ubsan": False,
+        "with_intrinsics": False
     }
 
     def export_sources(self):
@@ -68,6 +76,9 @@ class ZeroMQConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Norm and ZeroMQ are not compatible on Windows yet"
             )
+        if self.options.with_tsan:
+            if self.options.with_ubsan:
+                raise ConanInvalidConfiguration("The ThreadSanitizer (TSan) option is incompatible with UndefinedBehaviorSanitizer (UBSan).")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -88,6 +99,10 @@ class ZeroMQConan(ConanFile):
         tc.variables["ENABLE_DRAFTS"] = self.options.with_draft_api
         tc.variables["ENABLE_WS"] = self.options.with_websocket
         tc.variables["ENABLE_RADIX_TREE"] = self.options.with_radix_tree
+        tc.variables["ENABLE_ASAN"] = self.options.with_asan
+        tc.variables["ENABLE_TSAN"] = self.options.with_tsan
+        tc.variables["ENABLE_UBSAN"] = self.options.with_ubsan
+        tc.variables["ENABLE_INTRINSICS"] = self.options.with_intrinsics
         if self.options.poller:
             tc.variables["POLLER"] = self.options.poller
         if is_msvc(self):
