@@ -119,5 +119,11 @@ class SparrowRecipe(ConanFile):
             self.cpp_info.defines.append("SPARROW_STATIC_LIB")
         if self._uses_date_polyfill:
             self.cpp_info.defines.append("SPARROW_USE_DATE_POLYFILL")
+            self.cpp_info.components["sparrow"].requires.append("date::date")
         if is_msvc(self):
             self.cpp_info.defines.append("SPARROW_USE_LARGE_INT_PLACEHOLDERS")
+    
+        if self._export_json_reader:
+            self.cpp_info.components["json_reader"].set_property("cmake_target_name", "sparrow::json_reader")
+            self.cpp_info.components["json_reader"].libs = ["json_reader"]
+            self.cpp_info.components["json_reader"].requires = ["sparrow", "nlohmann_json::nlohmann_json"]
