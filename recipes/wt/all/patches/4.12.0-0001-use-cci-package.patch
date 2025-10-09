@@ -1,0 +1,20 @@
+--- src/Wt/Dbo/backend/CMakeLists.txt	2025-07-23 14:46:08.000000000 +0200
++++ src.new/Wt/Dbo/backend/CMakeLists.txt	2025-10-09 18:04:12.405062968 +0200
+@@ -132,7 +132,7 @@
+     PUBLIC
+       wtdbo
+     PRIVATE
+-      ${POSTGRES_LIBRARIES}
++      PostgreSQL::PostgreSQL
+   )
+ 
+   IF(TARGET Boost::headers)
+@@ -312,7 +312,7 @@
+     PUBLIC
+       wtdbo
+     PRIVATE
+-      ${MYSQL_LIBRARIES}
++      libmysqlclient::libmysqlclient
+   )
+ 
+   INCLUDE_DIRECTORIES(${MYSQL_INCLUDE})
