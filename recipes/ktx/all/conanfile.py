@@ -94,6 +94,10 @@ class KtxConan(ConanFile):
             # astcenc_vecmathlib_sse_4.h:809:41: error: the last argument must be a 4-bit immediate
             raise ConanInvalidConfiguration("GCC v6+ is required")
 
+    def build_requirements(self):
+        if Version(self.version) >= "4.4.0":
+            self.tool_requires("cmake/[>=3.22 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         # Avoid copying of 300 MB of test assets and third-party binaries
@@ -126,7 +130,10 @@ class KtxConan(ConanFile):
         ## zstd
         rmdir(self, os.path.join(basisu_dir, "zstd"))
         # disable -Werror
-        if Version(self.version) >= "4.3.2":
+        if Version(self.version) >= "4.4.0":
+            replace_in_file(self, os.path.join(self.source_folder, "external", "astc-encoder", "Source", "cmake_core.cmake"),
+                            "-Werror", "")
+        elif Version(self.version) >= "4.3.2":
             replace_in_file(self, os.path.join(self.source_folder, "lib", "astc-encoder", "Source", "cmake_core.cmake"),
                             "-Werror", "")
 
