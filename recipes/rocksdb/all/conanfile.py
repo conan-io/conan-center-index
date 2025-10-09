@@ -89,7 +89,7 @@ class RocksDBConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 17)
 
-        if self.settings.arch not in ["x86_64", "ppc64le", "ppc64", "mips64", "armv8"]:
+        if self.settings.arch not in ["x86_64", "ppc64le", "ppc64", "mips64", "armv8", "riscv64"]:
             raise ConanInvalidConfiguration("Rocksdb requires 64 bits")
 
         if is_msvc(self) and Version(self.settings.compiler.version) < "191":
