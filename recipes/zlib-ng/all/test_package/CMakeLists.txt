@@ -7,7 +7,7 @@ else()
   set(zlib_name zlib-ng)
 endif()
 
-find_package(${zlib_name} REQUIRED CONFIG)
+find_package(${zlib_name} 1.3.1 EXACT REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${zlib_name}::${zlib_name})
