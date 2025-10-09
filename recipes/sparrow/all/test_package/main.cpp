@@ -1,10 +1,6 @@
 #include <cassert>
 
-#if SPARROW_MAJOR_VERSION == 0
-#include <sparrow/builder/builder.hpp>
-#else
-#include <sparrow/builder.hpp>
-#endif
+#include <sparrow.hpp>
 
 int main(int argc, char **argv) {
   // using initializer_list
