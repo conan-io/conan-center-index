@@ -1,6 +1,6 @@
 #include <cassert>
 
-#include <sparrow.hpp>
+#include <sparrow/builder.hpp>
 
 int main(int argc, char **argv) {
   // using initializer_list

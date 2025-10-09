@@ -112,17 +112,21 @@ class SparrowRecipe(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["sparrow"]
         self.cpp_info.set_property("cmake_file_name", "sparrow")
-        self.cpp_info.set_property("cmake_target_name", "sparrow::sparrow")
+        
+        # Main sparrow component
+        self.cpp_info.components["sparrow"].set_property("cmake_target_name", "sparrow::sparrow")
+        self.cpp_info.components["sparrow"].libs = ["sparrow"]
+        
         if not self.options.shared:
-            self.cpp_info.defines.append("SPARROW_STATIC_LIB")
+            self.cpp_info.components["sparrow"].defines.append("SPARROW_STATIC_LIB")
         if self._uses_date_polyfill:
-            self.cpp_info.defines.append("SPARROW_USE_DATE_POLYFILL")
+            self.cpp_info.components["sparrow"].defines.append("SPARROW_USE_DATE_POLYFILL")
             self.cpp_info.components["sparrow"].requires.append("date::date")
         if is_msvc(self):
-            self.cpp_info.defines.append("SPARROW_USE_LARGE_INT_PLACEHOLDERS")
+            self.cpp_info.components["sparrow"].defines.append("SPARROW_USE_LARGE_INT_PLACEHOLDERS")
     
+        # Optional json_reader component
         if self._export_json_reader:
             self.cpp_info.components["json_reader"].set_property("cmake_target_name", "sparrow::json_reader")
             self.cpp_info.components["json_reader"].libs = ["json_reader"]
