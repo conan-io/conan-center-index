@@ -98,8 +98,6 @@ class DaggyConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["DaggyCore"]
-        self.cpp_info.set_property("cmake_module_file_name", "DaggyCore")
-        self.cpp_info.set_property("cmake_module_target_name", "daggy::DaggyCore")
         self.cpp_info.set_property("cmake_file_name", "DaggyCore")
         self.cpp_info.set_property("cmake_target_name", "daggy::DaggyCore")
         
