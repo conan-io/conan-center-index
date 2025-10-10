@@ -1,0 +1,15 @@
+sources:
+  "0.21.1":
+    url: "https://github.com/tree-sitter-grammars/tree-sitter-cuda/archive/refs/tags/v0.21.1.tar.gz"
+    sha256: "8cb5f44b706cbefcb5b5bdad7cc7f8fd3e49aa14c37693895fd9f198c56ba4d9"
+patches:
+  "0.21.1":
+    - patch_file: "patches/0.21.1-disable-gencode-fpic.patch"
+      patch_description: "disable gencode and fPIC"
+      patch_type: "portability"
+# Each version of tree-sitter-cuda is tied to a specific range of versions of tree-sitter;
+# if the version of tree-sitter is wrong, tree-sitter-cuda compiles
+# but fails with no message, typically by 'ts_parser_set_language()'.
+# Hence, we list dependencies here explicitly
+tree-sitter-version:
+  "0.21.1": "0.25.9"
