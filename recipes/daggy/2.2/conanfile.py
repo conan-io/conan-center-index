@@ -42,12 +42,7 @@ class DaggyConan(ConanFile):
         check_min_cppstd(self, "17")
             
     def layout(self):
-        self.folders.source = "src"
-
-        self.cpp.libdirs = ["lib"]
-        self.cpp.bindirs = ["bin"]
-
-        cmake_layout(self, src_folder=self.folders.source)
+        cmake_layout(self, src_folder="src")
 
     def export_sources(self):
         export_conandata_patches(self)
