@@ -121,7 +121,7 @@ class GperftoolsConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("enable_libunwind", False):
-            self.requires("libunwind/1.6.2")
+            self.requires("libunwind/[>=1.6.2 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

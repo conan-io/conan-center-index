@@ -1,41 +1,24 @@
 #include <ctre.hpp>
 #include <string_view>
+#include <iostream>
 
-int main() {}
+static constexpr auto pattern = ctll::fixed_string{ "[a-z]+([0-9]+)" };
 
-using namespace std::string_view_literals;
-
-static inline constexpr auto pattern1 = ctll::fixed_string{"^[\\x30-\\x39]+?$"};
-static inline constexpr auto pattern2 = ctll::fixed_string{""};
-
-
-static_assert(ctre::re<pattern1>().match("123456789"sv));
-static_assert(ctre::re<pattern2>().match(""sv));
-
-template <auto & ptn> constexpr bool re() {
-#if (__cpp_nontype_template_parameter_class || (__cpp_nontype_template_args >= 201911L))
-	constexpr auto _ptn = ptn;
-#else
-	constexpr auto & _ptn = ptn;
-#endif
-	return ctll::parser<ctre::pcre, _ptn, ctre::pcre_actions>::template correct_with<ctre::pcre_context<>>;
+// Example from Readme
+constexpr std::optional<std::string_view> extract_number(std::string_view s) noexcept {
+    if (auto m = ctre::match<pattern>(s)) {
+        return m.get<1>().to_view();
+    } else {
+        return std::nullopt;
+    }
 }
 
-static_assert(re<pattern2>());
+int main() {
+	using namespace std::literals;
+    constexpr std::string_view text = "abc123";
+	
+	static_assert(extract_number(text) == "123"sv);
 
-static inline constexpr ctll::fixed_string pat = "hello";
-
-template <auto & ptn> constexpr bool re2() {
-#if (__cpp_nontype_template_parameter_class || (__cpp_nontype_template_args >= 201911L))
-	constexpr auto _ptn = ptn;
-#else
-	constexpr auto & _ptn = ptn;
-#endif
-	return ctll::parser<ctre::pcre, _ptn, ctre::pcre_actions>::template correct_with<ctre::pcre_context<>>;
+	std::cout << "ctre test package successful\n";
 }
 
-static_assert(re<pat>());
-
-static_assert(ctre::re<pat>().match("hello"sv));
-
-static_assert(ctre::match<pat>("hello"sv));
