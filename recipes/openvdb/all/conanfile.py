@@ -82,7 +82,7 @@ class OpenVDBConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 17 if Version(self.version) >= "10.0.0" else 14
+        return 17
 
     @property
     def _compilers_min_version(self):
@@ -113,9 +113,6 @@ class OpenVDBConan(ConanFile):
         if is_msvc(self):
             # Supported by GCC and Clang only
             del self.options.use_colored_output
-        if Version(self.version) < "10.0.0":
-            del self.options.use_explicit_instantiation
-            del self.options.use_delayed_loading
 
     def configure(self):
         if self.options.shared:
@@ -133,7 +130,7 @@ class OpenVDBConan(ConanFile):
         self.requires("boost/1.84.0", transitive_headers=True)
         self.requires("onetbb/2021.10.0", transitive_headers=True, transitive_libs=True)
         if self.options.use_imath_half:
-            self.requires("imath/3.1.9", transitive_headers=True, transitive_libs=True)
+            self.requires("imath/[>=3.1.9 <4]", transitive_headers=True, transitive_libs=True)
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_blosc:
@@ -293,9 +290,4 @@ class OpenVDBConan(ConanFile):
         if self.options.use_imath_half:
             main_component.requires.append("imath::imath")
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "OpenVDB"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenVDB"
-        main_component.names["cmake_find_package"] = "openvdb"
-        main_component.names["cmake_find_package_multi"] = "openvdb"
         main_component.set_property("cmake_target_name", "OpenVDB::openvdb")
