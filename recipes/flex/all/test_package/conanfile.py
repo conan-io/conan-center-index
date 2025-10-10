@@ -3,20 +3,16 @@ import re
 from io import StringIO
 
 from conan import ConanFile
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.cmake import CMake, cmake_layout, CMakeDeps, CMakeToolchain
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeToolchain", "VirtualBuildEnv", "VirtualRunEnv", "CMakeDeps"
-    test_type = "explicit"
 
     def requirements(self):
-        self.requires(self.tested_reference_str)
-
-    def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
+        self.requires(self.tested_reference_str, run=True)
 
     def layout(self):
         cmake_layout(self)
@@ -28,13 +24,21 @@ class TestPackageConan(ConanFile):
             return tokens[0].split("/", 1)[1]
 
         output = StringIO()
-        self.run("flex --version", output)
-        output_str = str(output.getvalue()) 
+        flex = VirtualBuildEnv(self).vars().get("LEX")
+        self.run(f"{flex} --version", output)
+        output_str = str(output.getvalue())
         self.output.info("Installed version: {}".format(output_str))
         expected_version = tested_reference_version()
         self.output.info("Expected version: {}".format(expected_version))
         assert_flex_version = "flex {}".format(expected_version)
         assert(assert_flex_version in output_str)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        # INFO: Pass flex path to CMake, otherwise will need to add tool_requires(flex) for FindFLEX.cmake
+        tc.cache_variables["FLEX_EXECUTABLE"] = os.path.join(self.dependencies["flex"].cpp_info.bindir, "flex")
+        tc.generate()
+        CMakeDeps(self).generate()
 
     def build(self):
         # Let's check flex version installed
@@ -42,6 +46,7 @@ class TestPackageConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
+        
 
     def test(self):
         if can_run(self):
