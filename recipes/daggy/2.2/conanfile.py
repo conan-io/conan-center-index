@@ -38,11 +38,6 @@ class DaggyConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <5]")
 
-    def config_options(self):
-        self.options["qt"].shared = self.options.shared
-        self.options["libssh2"].shared = self.options.shared
-        self.options["libyaml-cpp"].shared = self.options.shared
-
     @property
     def _minimum_compilers_version(self):
         return {
