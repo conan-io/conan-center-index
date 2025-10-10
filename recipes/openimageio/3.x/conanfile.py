@@ -129,7 +129,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.2")
         if self.options.with_openvdb:
-            self.requires("openvdb/11.0.0")
+            self.requires("openvdb/12.1.1")
         if self.options.with_ptex:
             self.requires("ptex/2.4.2")
         if self.options.with_libwebp:
