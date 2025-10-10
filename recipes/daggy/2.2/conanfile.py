@@ -53,7 +53,7 @@ class DaggyConan(ConanFile):
         export_conandata_patches(self)
 
     def requirements(self):
-        self.requires("qt/6.7.3", transitive_headers=True)
+        self.requires("qt/[>=6.7 <7]", transitive_headers=True)
         self.requires("kainjow-mustache/4.1")
 
         if self.options.with_yaml:
