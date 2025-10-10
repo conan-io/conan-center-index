@@ -36,7 +36,7 @@ class DaggyConan(ConanFile):
     }
 
     def build_requirements(self):
-        self.build_requires("cmake/4.0.1")
+        self.tool_requires("cmake/[>=3.24 <5]")
 
     def config_options(self):
         self.options["qt"].shared = self.options.shared
