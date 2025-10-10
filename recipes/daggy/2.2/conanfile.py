@@ -31,7 +31,7 @@ class DaggyConan(ConanFile):
         "with_ssh2": True,
         "with_yaml": True,
         "with_console": False,
-        "shared": True,
+        "shared": False,
         "fPIC": True
     }
 
