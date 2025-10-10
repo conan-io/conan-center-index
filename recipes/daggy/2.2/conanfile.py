@@ -59,8 +59,6 @@ class DaggyConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        # Using patches is always the last resort to fix issues. If possible, try to fix the issue in the upstream project.
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
