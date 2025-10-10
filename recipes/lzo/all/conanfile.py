@@ -9,10 +9,10 @@ required_conan_version = ">=1.53.0"
 class LZOConan(ConanFile):
     name = "lzo"
     description = "lzo is a portable lossless data compression library written in ANSI C"
-    license = "GPL-v2.0"
+    license = "GPL-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.oberhumer.com/opensource/lzo/"
-    topics = ("compression")
+    topics = ("compression",)
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -45,6 +45,7 @@ class LZOConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_STATIC"] = not self.options.shared
         tc.variables["ENABLE_SHARED"] = self.options.shared
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
     def build(self):
