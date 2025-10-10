@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, export_conandata_patches, get, patch, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -9,7 +8,7 @@ from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 import os
 import stat
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2"
 
 
 class GmpConan(ConanFile):
@@ -41,10 +40,6 @@ class GmpConan(ConanFile):
         "run_checks": False,
         "enable_cxx": True,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -78,7 +73,7 @@ class GmpConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("m4/1.4.19")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -90,9 +85,6 @@ class GmpConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.extend([
@@ -177,12 +169,3 @@ class GmpConan(ConanFile):
             self.cpp_info.components["gmpxx"].requires = ["libgmp"]
             if self.settings.os != "Windows":
                 self.cpp_info.components["gmpxx"].system_libs = ["m"]
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        #       GMP doesn't have any official CMake Find nor config file, do not port these names to CMakeDeps
-        self.cpp_info.names["pkg_config"] = "gmp-all-do-not-use"
-        self.cpp_info.components["libgmp"].names["cmake_find_package"] = "GMP"
-        self.cpp_info.components["libgmp"].names["cmake_find_package_multi"] = "GMP"
-        if self.options.enable_cxx:
-            self.cpp_info.components["gmpxx"].names["cmake_find_package"] = "GMPXX"
-            self.cpp_info.components["gmpxx"].names["cmake_find_package_multi"] = "GMPXX"

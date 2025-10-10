@@ -1,7 +1,7 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -99,8 +99,8 @@ include(CMakePackageConfigHelpers)
+@@ -116,8 +116,8 @@ include(CMakePackageConfigHelpers)
  include(CMakePackageConfigHelpers)
  include(GNUInstallDirs)
  
@@ -10,5 +10,5 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
 +set(concurrencpp_directory "concurrencpp")
 +set(concurrencpp_include_directory "${CMAKE_INSTALL_INCLUDEDIR}")
  
- install(TARGETS concurrencpp
-         EXPORT concurrencppTargets
+ install(
+   TARGETS concurrencpp

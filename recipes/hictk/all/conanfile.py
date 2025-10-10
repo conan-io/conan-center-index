@@ -7,7 +7,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2.0"
 
 
 class HictkConan(ConanFile):
@@ -28,29 +28,11 @@ class HictkConan(ConanFile):
         "with_eigen": True
     }
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "11",
-            "clang": "7",
-            "gcc": "8",
-            "Visual Studio": "16",
-            "msvc": "192",
-        }
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def config_options(self):
-        if Version(self.version) < "1.0.0":
-            del self.options.with_arrow
-
     def requirements(self):
-        if self.options.get_safe("with_arrow"):
+        if self.options.with_arrow:
             self.requires("arrow/16.1.0")
         if Version(self.version) < "2.0.0":
             self.requires("bshoshany-thread-pool/4.1.0")
@@ -59,10 +41,13 @@ class HictkConan(ConanFile):
         self.requires("concurrentqueue/1.0.4")
         self.requires("fast_float/6.1.1")
         if self.options.with_eigen:
-            self.requires("eigen/3.4.0")
+            self.requires("eigen/[>=3.4.0 <4]")
         self.requires("fmt/10.2.1")
         self.requires("hdf5/1.14.3")
-        self.requires("highfive/2.9.0")
+        if Version(self.version) < "2.1.5":
+            self.requires("highfive/[>=2.9.0 <3]")
+        else:
+            self.requires("highfive/[>=2.9.0 <4]")
         self.requires("libdeflate/1.22")
         self.requires("parallel-hashmap/1.3.12") # Note: v1.3.12 is more recent than v1.37
         self.requires("readerwriterqueue/1.0.6")
@@ -74,36 +59,29 @@ class HictkConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 17)
 
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
-
-        if self.info.options.get_safe("with_arrow"):
+        if self.info.options.with_arrow:
             arrow = self.dependencies["arrow"]
             if not arrow.options.compute:
                 raise ConanInvalidConfiguration(f"{self.ref} requires the dependency option arrow/*:compute=True")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.25 <4]")
+        self.tool_requires("cmake/[>=3.25]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["HICTK_BUILD_BENCHMARKS"] = "OFF"
-        tc.variables["HICTK_BUILD_EXAMPLES"] = "OFF"
-        tc.variables["HICTK_BUILD_TOOLS"] = "OFF"
-        tc.variables["HICTK_ENABLE_GIT_VERSION_TRACKING"] = "OFF"
-        tc.variables["HICTK_ENABLE_TESTING"] = "OFF"
-        tc.variables["HICTK_ENABLE_FUZZY_TESTING"] = "OFF"
-        tc.variables["HICTK_WITH_ARROW"] = self.options.get_safe("with_arrow", False)
-        tc.variables["HICTK_WITH_EIGEN"] = self.options.with_eigen
+        tc.cache_variables["HICTK_BUILD_BENCHMARKS"] = "OFF"
+        tc.cache_variables["HICTK_BUILD_EXAMPLES"] = "OFF"
+        tc.cache_variables["HICTK_BUILD_TOOLS"] = "OFF"
+        tc.cache_variables["HICTK_ENABLE_GIT_VERSION_TRACKING"] = "OFF"
+        tc.cache_variables["HICTK_ENABLE_TESTING"] = "OFF"
+        tc.cache_variables["HICTK_ENABLE_FUZZY_TESTING"] = "OFF"
+        tc.cache_variables["HICTK_WITH_ARROW"] = self.options.get_safe("with_arrow", False)
+        tc.cache_variables["HICTK_WITH_EIGEN"] = self.options.with_eigen
         tc.generate()
 
         cmakedeps = CMakeDeps(self)
