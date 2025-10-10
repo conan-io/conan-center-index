@@ -86,26 +86,15 @@ class OpenVDBConan(ConanFile):
 
     @property
     def _compilers_min_version(self):
-        if Version(self.version) >= "10.0.0":
-            # https://github.com/AcademySoftwareFoundation/openvdb/blob/v10.0.1/doc/dependencies.txt#L56-L84
-            return {
-                "msvc": "192.8",
-                "Visual Studio": "16",
-                "gcc": "9.3.1",
-                "clang": "5.0",
-                "apple-clang": "12.0",
-                "intel-cc": "19",
-            }
-        else:
-            # https://github.com/AcademySoftwareFoundation/openvdb/blob/v9.1.0/doc/dependencies.txt#L56-L84
-            return {
-                "msvc": "191.0",
-                "Visual Studio": "15",
-                "gcc": "6.3.1",
-                "clang": "3.8",
-                "apple-clang": "10.0",
-                "intel-cc": "17",
-            }
+        # https://github.com/AcademySoftwareFoundation/openvdb/blob/v10.0.1/doc/dependencies.txt#L56-L84
+        return {
+            "msvc": "192.8",
+            "Visual Studio": "16",
+            "gcc": "9.3.1",
+            "clang": "5.0",
+            "apple-clang": "12.0",
+            "intel-cc": "19",
+        }
 
     def config_options(self):
         if self.settings.os == "Windows":
