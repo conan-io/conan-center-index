@@ -52,14 +52,14 @@ class ProtobufCConan(ConanFile):
         # we want to make sure the protobuf dep is visible, but the visible param is only available in v2
         # TODO: Remove after dropping Conan 1.x
         if conan_version >= Version("2"):
-            self.tool_requires("protobuf/3.21.9", visible=True)
+            self.tool_requires("protobuf/[>=3.21.9 <=6.32.1]", visible=True)
         else:
-            self.tool_requires("protobuf/3.21.9")
+            self.tool_requires("protobuf/[>=3.21.9 <=6.32.1]")
         if Version(self.version) >= "1.5.0":
             self.tool_requires("cmake/[>=3.19 <4]")
 
     def requirements(self):
-        self.requires("protobuf/3.21.9")
+        self.requires("protobuf/[>=3.21.9 <=6.32.1]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
