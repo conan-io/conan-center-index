@@ -88,9 +88,9 @@ class OpenImageIOConan(ConanFile):
         # Required libraries
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("libtiff/4.7.0")
-        self.requires("imath/3.1.12", transitive_headers=True)
+        self.requires("imath/[>=3.1.9 <4]", transitive_headers=True)
         self.requires("openexr/3.3.5")
-        self.requires("openjph/0.23.1")
+        self.requires("openjph/[>=0.23.1 <1]")
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9f", force=True)
         elif self.options.with_libjpeg == "libjpeg-turbo":
@@ -98,7 +98,7 @@ class OpenImageIOConan(ConanFile):
         self.requires("pugixml/1.15")
         self.requires("tsl-robin-map/1.4.0")
         self.requires("fmt/11.2.0", transitive_headers=True)
-        self.requires("opencolorio/2.4.2")
+        self.requires("opencolorio/2.5.0")
 
         self.requires("lcms/2.17", override=True)
 
@@ -127,13 +127,13 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_raw:
             self.requires("libraw/0.21.4")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.5.3")
+            self.requires("openjpeg/2.5.2")
         if self.options.with_openvdb:
             self.requires("openvdb/11.0.0")
         if self.options.with_ptex:
             self.requires("ptex/2.4.2")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.5.0")
+            self.requires("libwebp/1.3.2")
         if self.options.with_libultrahdr:
             self.requires("libultrahdr/1.4.0")
 
@@ -150,12 +150,6 @@ class OpenImageIOConan(ConanFile):
         if is_msvc(self) and is_msvc_static_runtime(self) and self.options.shared:
             raise ConanInvalidConfiguration(
                 "Building shared library with static runtime is not supported!"
-            )
-
-        # https://github.com/conan-io/conan-center-index/issues/23421
-        if self.options.cci_hack and self.settings.os == "Linux" and self.options.shared:
-            raise ConanInvalidConfiguration(
-                "Bug in Linux linking!"
             )
 
     def layout(self):
