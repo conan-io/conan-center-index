@@ -34,6 +34,7 @@ class DaggyConan(ConanFile):
         "shared": False,
         "fPIC": True
     }
+    implements = ["auto_shared_fpic"]
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <5]")
