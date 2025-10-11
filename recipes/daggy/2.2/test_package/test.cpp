@@ -22,13 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <iostream>
 #include <DaggyCore/Core.hpp>
 #include <DaggyCore/Sources.hpp>
-#include <DaggyCore/aggregators/CFile.hpp>
-#include <DaggyCore/aggregators/CConsole.hpp>
-
-#include <QCoreApplication>
-#include <QTimer>
 
 namespace {
 constexpr const char* json_data = R"JSON(
@@ -54,33 +50,8 @@ constexpr const char* json_data = R"JSON(
 
 int main(int argc, char** argv) 
 {
-    QCoreApplication app(argc, argv);
     daggy::Core core(*daggy::sources::convertors::json(json_data));
-
-    daggy::aggregators::CFile file_aggregator("test");
-    daggy::aggregators::CConsole console_aggregator("test");
-
-    core.connectAggregator(&file_aggregator);
-    core.connectAggregator(&console_aggregator);
-
-    QObject::connect(&core, &daggy::Core::stateChanged, &core,
-    [&](DaggyStates state){
-        if(state == DaggyFinished)
-            app.quit();      
-    });
-
-    QTimer::singleShot(2000, &core, [&]()
-    {
-        core.stop();
-    });
-
-    QTimer::singleShot(5000, &core, [&]()
-    {
-        app.exit(-1);
-    });
-
-    core.prepare();
-    core.start();
-
-    return app.exec();
+    const auto& version = core.version();
+    std::cout << version.major << "." << version.minor << "." << version.patch << std::endl;
+    return 0;
 }
