@@ -87,7 +87,7 @@ class OpenImageIOConan(ConanFile):
     def requirements(self):
         # Required libraries
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("libtiff/4.7.0")
+        self.requires("libtiff/4.7.1")
         self.requires("imath/[>=3.1.9 <4]", transitive_headers=True)
         self.requires("openexr/3.3.5")
         self.requires("openjph/[>=0.23.1 <1]")
@@ -110,15 +110,15 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_freetype:
             self.requires("freetype/2.13.2")
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.5")
+            self.requires("hdf5/1.14.6")
         if self.options.with_opencv:
-            self.requires("opencv/4.10.0")
+            self.requires("opencv/4.12.0")
         if self.options.with_tbb:
             self.requires("onetbb/2021.12.0")
         if self.options.with_dicom:
-            self.requires("dcmtk/3.6.8")
+            self.requires("dcmtk/3.6.9")
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/7.0.1")
+            self.requires("ffmpeg/7.1.1")
         # TODO: Field3D dependency
         if self.options.with_giflib:
             self.requires("giflib/5.2.2")
@@ -133,7 +133,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_ptex:
             self.requires("ptex/2.4.2")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.3.2")
+            self.requires("libwebp/1.5.0")
         if self.options.with_libultrahdr:
             self.requires("libultrahdr/1.4.0")
 
@@ -142,7 +142,7 @@ class OpenImageIOConan(ConanFile):
 
     def build_requirements(self):
         # A minimum cmake version is now required that is reasonably new
-        self.build_requires("cmake/[>=3.18.2 <4]")
+        self.build_requires("cmake/[>=3.18.2 <5]")
 
     def validate(self):
         check_min_cppstd(self, 17)
