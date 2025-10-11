@@ -1,0 +1,11 @@
+--- a/outofcore/CMakeLists.txt
++++ b/outofcore/CMakeLists.txt
+@@ -82,7 +82,7 @@
+   target_link_libraries("${LIB_NAME}" pcl_common Boost::system Boost::filesystem)
+ endif()
+ if(HAVE_CJSON)
+-  target_link_libraries("${LIB_NAME}" ${CJSON_LIBRARIES})
++  target_link_libraries("${LIB_NAME}" cJSON::cJSON)
+ endif()
+ PCL_MAKE_PKGCONFIG(${LIB_NAME} COMPONENT ${SUBSYS_NAME} DESC ${SUBSYS_DESC} PCL_DEPS ${SUBSYS_DEPS})
+
