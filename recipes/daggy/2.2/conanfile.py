@@ -32,7 +32,7 @@ class DaggyConan(ConanFile):
         "with_yaml": True,
         "with_console": False,
         "shared": False,
-        "fPIC": True
+        "fPIC": False
     }
     implements = ["auto_shared_fpic"]
 
@@ -45,9 +45,6 @@ class DaggyConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def requirements(self):
         self.requires("qt/[>=6.7 <7]", transitive_headers=True)
         self.requires("kainjow-mustache/4.1")
@@ -59,7 +56,8 @@ class DaggyConan(ConanFile):
             self.requires("libssh2/1.11.1")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, pattern="*/src/**", destination=os.path.join(self.source_folder, ".."))
+
 
     def generate(self):
         tc = CMakeToolchain(self)
