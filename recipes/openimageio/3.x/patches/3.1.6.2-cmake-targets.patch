@@ -1,17 +1,17 @@
 diff --git CMakeLists.txt CMakeLists.txt
-index f9a39f578..517af57f7 100644
+index 3483b9e0a..d2e49a2cd 100644
 --- CMakeLists.txt
 +++ CMakeLists.txt
 @@ -42,7 +42,7 @@ endif ()
  
- # Set up module path for our own cmake modules and add some esential ones
+ # Set up module path for our own cmake modules and add some essential ones
  list (APPEND CMAKE_MODULE_PATH
 -      "${PROJECT_SOURCE_DIR}/src/cmake/modules"
 +      #"${PROJECT_SOURCE_DIR}/src/cmake/modules"
        "${PROJECT_SOURCE_DIR}/src/cmake")
  
  # Utilities
-@@ -276,7 +276,7 @@ if (OIIO_BUILD_TOOLS AND NOT BUILD_OIIOUTIL_ONLY)
+@@ -288,7 +288,7 @@ if (OIIO_BUILD_TOOLS AND NOT BUILD_OIIOUTIL_ONLY)
      add_subdirectory (src/iinfo)
      add_subdirectory (src/maketx)
      add_subdirectory (src/oiiotool)
@@ -20,24 +20,11 @@ index f9a39f578..517af57f7 100644
      add_subdirectory (src/iv)
  endif ()
  
-diff --git src/cmake/add_oiio_plugin.cmake src/cmake/add_oiio_plugin.cmake
-index f66bf756e..6cea07a17 100644
---- src/cmake/add_oiio_plugin.cmake
-+++ src/cmake/add_oiio_plugin.cmake
-@@ -75,7 +75,7 @@ macro (add_oiio_plugin)
-             target_compile_options (${_plugin_NAME} PRIVATE ${_plugin_COMPILE_OPTIONS})
-             target_include_directories (${_plugin_NAME} BEFORE PRIVATE ${_plugin_INCLUDE_DIRS})
-             target_link_libraries (${_plugin_NAME} PUBLIC OpenImageIO
--                                                   PRIVATE ${_plugin_LINK_LIBRARIES})
-+                                                   PUBLIC ${_plugin_LINK_LIBRARIES})
-             set_target_properties (${_plugin_NAME} PROPERTIES PREFIX "" FOLDER "Plugins")
-             install_targets (${_plugin_NAME})
-         endif ()
 diff --git src/cmake/externalpackages.cmake src/cmake/externalpackages.cmake
-index ba6f3411b..e134c19a9 100644
+index fc9cfc48d..127e86efc 100644
 --- src/cmake/externalpackages.cmake
 +++ src/cmake/externalpackages.cmake
-@@ -73,16 +73,15 @@ set (OPENIMAGEIO_CONFIG_DO_NOT_FIND_IMATH OFF CACHE BOOL
+@@ -73,16 +73,16 @@ set (OPENIMAGEIO_CONFIG_DO_NOT_FIND_IMATH OFF CACHE BOOL
       "Exclude find_dependency(Imath) from the exported OpenImageIOConfig.cmake")
  
  # JPEG -- prefer JPEG-Turbo to regular libjpeg
@@ -49,20 +36,20 @@ index ba6f3411b..e134c19a9 100644
 -    alias_library_if_not_exists (JPEG::JPEG libjpeg-turbo::jpeg)
 -    set (JPEG_FOUND TRUE)
 -else ()
--    # Try to find the non-turbo version
 +if (USE_JPEGTURBO)
 +    checked_find_package (libjpeg-turbo REQUIRED
 +                          DEFINITIONS -DUSE_JPEG_TURBO=1
 +                          PRINT libjpeg-turbo_INCLUDES libjpeg-turbo_LIBRARIES)
 +    add_library(JPEG::JPEG ALIAS libjpeg-turbo::libjpeg-turbo)
 +elseif (USE_JPEG) # Try to find the non-turbo version
+     # Try to find the non-turbo version
      checked_find_package (JPEG REQUIRED)
 +else ()
 +    message(FATAL_ERROR "JPEG library was not found!")
  endif ()
  
  
-@@ -96,9 +95,11 @@ alias_library_if_not_exists (TIFF::TIFF TIFF::tiff)
+@@ -96,9 +96,11 @@ alias_library_if_not_exists (TIFF::TIFF TIFF::tiff)
  
  # JPEG XL
  option (USE_JXL "Enable JPEG XL support" ON)
@@ -77,7 +64,7 @@ index ba6f3411b..e134c19a9 100644
  
  # Pugixml setup.  Normally we just use the version bundled with oiio, but
  # some linux distros are quite particular about having separate packages so we
-@@ -113,9 +114,9 @@ else ()
+@@ -113,9 +115,9 @@ else ()
  endif()
  
  # From pythonutils.cmake
@@ -90,7 +77,7 @@ index ba6f3411b..e134c19a9 100644
  if (USE_PYTHON)
      checked_find_package (pybind11 REQUIRED VERSION_MIN 2.7)
  endif ()
-@@ -125,79 +126,109 @@ endif ()
+@@ -125,16 +127,16 @@ endif ()
  # Dependencies for optional formats and features. If these are not found,
  # we will continue building, but the related functionality will be disabled.
  
@@ -100,42 +87,28 @@ index ba6f3411b..e134c19a9 100644
 -elseif (TARGET PNG::PNG)
 -    set (PNG_TARGET PNG::PNG)
 -endif ()
--
--checked_find_package (Freetype
--                      VERSION_MIN 2.10.0
--                      DEFINITIONS USE_FREETYPE=1 )
 +if (USE_LIBPNG)
 +    checked_find_package (PNG REQUIRED VERSION_MIN 1.6.0)
 +    set (PNG_TARGET PNG::PNG PARENT_SCOPE)
 +endif()
  
--checked_find_package (OpenColorIO REQUIRED
--                      VERSION_MIN 2.2
--                      VERSION_MAX 2.9
--                     )
--if (NOT OPENCOLORIO_INCLUDES)
--    get_target_property(OPENCOLORIO_INCLUDES OpenColorIO::OpenColorIO INTERFACE_INCLUDE_DIRECTORIES)
--endif ()
--include_directories(BEFORE ${OPENCOLORIO_INCLUDES})
+-checked_find_package (Freetype
+-                      VERSION_MIN 2.10.0
+-                      DEFINITIONS USE_FREETYPE=1 )
 +if (USE_FREETYPE)
 +    checked_find_package (Freetype REQUIRED
 +                          VERSION_MIN 2.10.0
 +                          DEFINITIONS USE_FREETYPE=1 )
 +endif()
  
+ checked_find_package (OpenColorIO REQUIRED
+                       VERSION_MIN 2.3
+@@ -145,59 +147,87 @@ if (NOT OPENCOLORIO_INCLUDES)
+ endif ()
+ include_directories(BEFORE ${OPENCOLORIO_INCLUDES})
+ 
 -checked_find_package (OpenCV 4.0
 -                      DEFINITIONS USE_OPENCV=1)
-+#if (USE_OPENCOLORIO)
-+    checked_find_package (OpenColorIO REQUIRED
-+                          VERSION_MIN 2.2
-+                          VERSION_MAX 2.9
-+                         )
-+#endif()
-+# if (NOT OPENCOLORIO_INCLUDES)
-+#     get_target_property(OPENCOLORIO_INCLUDES OpenColorIO::OpenColorIO INTERFACE_INCLUDE_DIRECTORIES)
-+# endif ()
-+# include_directories(BEFORE ${OPENCOLORIO_INCLUDES})
-+
 +if (USE_OPENCV)
 +    checked_find_package (OpenCV 4.0 REQUIRED
 +                          DEFINITIONS USE_OPENCV=1)
@@ -146,7 +119,7 @@ index ba6f3411b..e134c19a9 100644
 -checked_find_package (TBB 2017
 -                      SETVARIABLES OIIO_TBB
 -                      PREFER_CONFIG)
-+if (USE_TBCC)
++if (USE_TBB)
 +    set (TBB_USE_DEBUG_BUILD OFF)
 +    checked_find_package (TBB 2017 REQUIRED
 +                          SETVARIABLES OIIO_TBB
@@ -197,12 +170,14 @@ index ba6f3411b..e134c19a9 100644
 -    # disappear when we can 100% trust Ptex's exports.
 -    unset (Ptex_FOUND)
 -    checked_find_package (Ptex)
+-endif ()
 +if (USE_LIBHEIF)
 +    checked_find_package (libheif REQUIRED VERSION_MIN 1.11
 +                          RECOMMEND_MIN 1.16
 +                          RECOMMEND_MIN_REASON "for orientation support")
 +endif()
-+
+ 
+-checked_find_package (WebP VERSION_MIN 1.1)
 +if (USE_LIBRAW)
 +    checked_find_package (LibRaw REQUIRED
 +                          VERSION_MIN 0.20.0
@@ -236,9 +211,8 @@ index ba6f3411b..e134c19a9 100644
 +    #     # disappear when we can 100% trust Ptex's exports.
 +    #     unset (Ptex_FOUND)
 +    #     checked_find_package (Ptex)
- endif ()
- 
--checked_find_package (WebP VERSION_MIN 1.1)
++endif()
++
 +if (USE_LIBWEBP)
 +    checked_find_package (WebP REQUIRED VERSION_MIN 1.1)
 +endif()
@@ -257,7 +231,7 @@ index ba6f3411b..e134c19a9 100644
  
  if (FFmpeg_FOUND OR FREETYPE_FOUND)
      checked_find_package (BZip2)   # Used by ffmpeg and freetype
-@@ -209,10 +240,10 @@ endif()
+@@ -209,10 +239,10 @@ endif()
  
  # Qt -- used for iv
  option (USE_QT "Use Qt if found" ON)
@@ -271,7 +245,7 @@ index ba6f3411b..e134c19a9 100644
      checked_find_package (Qt6 COMPONENTS Core Gui Widgets OpenGLWidgets)
      if (NOT Qt6_FOUND)
          checked_find_package (Qt5 COMPONENTS Core Gui Widgets OpenGL)
-@@ -225,18 +256,13 @@ endif ()
+@@ -225,18 +255,18 @@ endif ()
  
  
  # Tessil/robin-map
@@ -279,34 +253,38 @@ index ba6f3411b..e134c19a9 100644
 -                      VERSION_MIN 1.2.0
 -                      BUILD_LOCAL missing
 -                     )
-+find_package (tsl-robin-map REQUIRED)
++checked_find_package (tsl-robin-map REQUIRED)
  
  # fmtlib
 -option (OIIO_INTERNALIZE_FMT "Copy fmt headers into <install>/include/OpenImageIO/detail/fmt" ON)
 +option (OIIO_INTERNALIZE_FMT "Copy fmt headers into <install>/include/OpenImageIO/detail/fmt" OFF)
  checked_find_package (fmt REQUIRED
--                      VERSION_MIN 7.0
--                      BUILD_LOCAL missing
--                     )
+                       VERSION_MIN 7.0
+                       BUILD_LOCAL missing
+                      )
 -get_target_property(FMT_INCLUDE_DIR fmt::fmt-header-only INTERFACE_INCLUDE_DIRECTORIES)
-+                      VERSION_MIN 7.0)
-+get_target_property(FMT_INCLUDE_DIR fmt::fmt INTERFACE_INCLUDE_DIRECTORIES)
++if (TARGET fmt::fmt AND NOT TARGET fmt::fmt-header-only)
++    add_library(fmt::fmt-header-only ALIAS fmt::fmt)
++endif ()
++#get_target_property(FMT_INCLUDE_DIR fmt::fmt-header-only INTERFACE_INCLUDE_DIRECTORIES)
  
  
  ###########################################################################
 diff --git src/ffmpeg.imageio/CMakeLists.txt src/ffmpeg.imageio/CMakeLists.txt
-index c84ef3c90..11da54bc2 100644
+index c84ef3c90..f21c49384 100644
 --- src/ffmpeg.imageio/CMakeLists.txt
 +++ src/ffmpeg.imageio/CMakeLists.txt
-@@ -2,7 +2,7 @@
+@@ -2,8 +2,8 @@
  # SPDX-License-Identifier: Apache-2.0
  # https://github.com/AcademySoftwareFoundation/OpenImageIO
  
 -if (FFmpeg_FOUND)
+-    if (LINKSTATIC)
 +if (USE_FFMPEG)
-     if (LINKSTATIC)
++    if (0)
          set (_static_suffixes .lib .a)
          set (_static_libraries_found 0)
+ 
 @@ -26,11 +26,9 @@ if (FFmpeg_FOUND)
      endif()
  
@@ -361,7 +339,7 @@ index 25606a139..5f520249a 100644
  else ()
      message (WARNING "heif plugin will not be built")
 diff --git src/ico.imageio/CMakeLists.txt src/ico.imageio/CMakeLists.txt
-index 31d205d53..6d6a5390f 100644
+index 31d205d53..1b9558a74 100644
 --- src/ico.imageio/CMakeLists.txt
 +++ src/ico.imageio/CMakeLists.txt
 @@ -2,11 +2,9 @@
@@ -374,52 +352,10 @@ index 31d205d53..6d6a5390f 100644
 -                     INCLUDE_DIRS ${PNG_INCLUDE_DIRS}
 -                     DEFINITIONS ${PNG_DEFINITIONS}
 -                     LINK_LIBRARIES ${PNG_LIBRARIES} ${PNG_TARGET} ZLIB::ZLIB)
-+                     LINK_LIBRARIES PNG::PNG ZLIB::ZLIB)
++                     LINK_LIBRARIES PNG::PNG ${PNG_TARGET} ZLIB::ZLIB)
  else ()
      message (WARNING "libpng not found, so ICO support will not work")
      set (format_plugin_definitions ${format_plugin_definitions} DISABLE_ICO=1 PARENT_SCOPE)
-diff --git src/iconvert/CMakeLists.txt src/iconvert/CMakeLists.txt
-index c83dbe0e8..8f5bb3b54 100644
---- src/iconvert/CMakeLists.txt
-+++ src/iconvert/CMakeLists.txt
-@@ -2,4 +2,4 @@
- # SPDX-License-Identifier: Apache-2.0
- # https://github.com/AcademySoftwareFoundation/OpenImageIO
- 
--fancy_add_executable (LINK_LIBRARIES OpenImageIO)
-\ No newline at end of file
-+fancy_add_executable (LINK_LIBRARIES OpenImageIO fmt::fmt)
-diff --git src/idiff/CMakeLists.txt src/idiff/CMakeLists.txt
-index c83dbe0e8..8f5bb3b54 100644
---- src/idiff/CMakeLists.txt
-+++ src/idiff/CMakeLists.txt
-@@ -2,4 +2,4 @@
- # SPDX-License-Identifier: Apache-2.0
- # https://github.com/AcademySoftwareFoundation/OpenImageIO
- 
--fancy_add_executable (LINK_LIBRARIES OpenImageIO)
-\ No newline at end of file
-+fancy_add_executable (LINK_LIBRARIES OpenImageIO fmt::fmt)
-diff --git src/igrep/CMakeLists.txt src/igrep/CMakeLists.txt
-index 735b88def..8f5bb3b54 100644
---- src/igrep/CMakeLists.txt
-+++ src/igrep/CMakeLists.txt
-@@ -2,4 +2,4 @@
- # SPDX-License-Identifier: Apache-2.0
- # https://github.com/AcademySoftwareFoundation/OpenImageIO
- 
--fancy_add_executable (LINK_LIBRARIES OpenImageIO)
-+fancy_add_executable (LINK_LIBRARIES OpenImageIO fmt::fmt)
-diff --git src/iinfo/CMakeLists.txt src/iinfo/CMakeLists.txt
-index 735b88def..8f5bb3b54 100644
---- src/iinfo/CMakeLists.txt
-+++ src/iinfo/CMakeLists.txt
-@@ -2,4 +2,4 @@
- # SPDX-License-Identifier: Apache-2.0
- # https://github.com/AcademySoftwareFoundation/OpenImageIO
- 
--fancy_add_executable (LINK_LIBRARIES OpenImageIO)
-+fancy_add_executable (LINK_LIBRARIES OpenImageIO fmt::fmt)
 diff --git src/include/CMakeLists.txt src/include/CMakeLists.txt
 index 3ab45a570..9b6511b78 100644
 --- src/include/CMakeLists.txt
@@ -434,22 +370,29 @@ index 3ab45a570..9b6511b78 100644
      foreach (header_name core.h format-inl.h format.h ostream.h printf.h
               std.h base.h chrono.h)
 diff --git src/jpeg2000.imageio/CMakeLists.txt src/jpeg2000.imageio/CMakeLists.txt
-index 2bce60968..4492f7550 100644
+index a989e4849..6632a64c5 100644
 --- src/jpeg2000.imageio/CMakeLists.txt
 +++ src/jpeg2000.imageio/CMakeLists.txt
-@@ -2,10 +2,9 @@
+@@ -2,7 +2,7 @@
  # SPDX-License-Identifier: Apache-2.0
  # https://github.com/AcademySoftwareFoundation/OpenImageIO
  
 -if (OPENJPEG_FOUND)
 +if (USE_OPENJPEG)
-     add_oiio_plugin (jpeg2000input.cpp jpeg2000output.cpp
--                     INCLUDE_DIRS ${OPENJPEG_INCLUDES}
--                     LINK_LIBRARIES ${OPENJPEG_LIBRARIES}
-+                     LINK_LIBRARIES openjp2
-                      DEFINITIONS "USE_OPENJPEG")
- else()
-     message (WARNING "Jpeg-2000 plugin will not be built")
+     set(_jpeg2000_includes ${OPENJPEG_INCLUDES})
+     set(_jpeg2000_lib_dirs ${OPENJPEG_LIBRARY_DIRS})
+     set(_jpeg2000_libs ${OPENJPEG_LIBRARIES})
+@@ -13,9 +13,7 @@ if (OPENJPEG_FOUND)
+     endif()
+ 
+     add_oiio_plugin(jpeg2000input.cpp jpeg2000output.cpp
+-        INCLUDE_DIRS ${_jpeg2000_includes}
+-        LINK_DIRECTORIES ${_jpeg2000_lib_dirs}
+-        LINK_LIBRARIES ${_jpeg2000_libs}
++        LINK_LIBRARIES openjp2
+                        $<TARGET_NAME_IF_EXISTS:openjph>
+         DEFINITIONS ${_jpeg2000_defs}
+     )
 diff --git src/jpegxl.imageio/CMakeLists.txt src/jpegxl.imageio/CMakeLists.txt
 index b8ccd8ac1..aec47621f 100644
 --- src/jpegxl.imageio/CMakeLists.txt
@@ -468,20 +411,10 @@ index b8ccd8ac1..aec47621f 100644
  else()
      message (WARNING "JPEG XL plugin will not be built")
 diff --git src/libOpenImageIO/CMakeLists.txt src/libOpenImageIO/CMakeLists.txt
-index fcce7930f..445ea5c81 100644
+index f2459b2d3..478b47d84 100644
 --- src/libOpenImageIO/CMakeLists.txt
 +++ src/libOpenImageIO/CMakeLists.txt
-@@ -159,18 +159,29 @@ target_link_libraries (OpenImageIO
-             OpenImageIO_Util
-             ${OPENIMAGEIO_IMATH_DEPENDENCY_VISIBILITY}
-             ${OPENIMAGEIO_IMATH_TARGETS}
--        PRIVATE
-             ${OPENIMAGEIO_OPENEXR_TARGETS}
-+            fmt::fmt
-+        PRIVATE
-+            #${OPENIMAGEIO_OPENEXR_TARGETS}
-             ${format_plugin_libs} # Add all the target link libraries from the plugins
-             OpenColorIO::OpenColorIO
+@@ -162,11 +162,20 @@ target_link_libraries (OpenImageIO
              $<TARGET_NAME_IF_EXISTS:OpenColorIO::OpenColorIOHeaders>
              $<TARGET_NAME_IF_EXISTS:pugixml::pugixml>
              $<TARGET_NAME_IF_EXISTS:TBB::tbb>
@@ -505,87 +438,103 @@ index fcce7930f..445ea5c81 100644
  if (WIN32)
      target_link_libraries (OpenImageIO PRIVATE psapi)
 diff --git src/libutil/CMakeLists.txt src/libutil/CMakeLists.txt
-index d8927804c..c2d39c6e0 100644
+index 526aa6f02..b71c641f1 100644
 --- src/libutil/CMakeLists.txt
 +++ src/libutil/CMakeLists.txt
-@@ -64,6 +64,8 @@ function (setup_oiio_util_library targetname)
-                 ${GCC_ATOMIC_LIBRARIES}
-                 ${OPENIMAGEIO_IMATH_DEPENDENCY_VISIBILITY}
-                 ${OPENIMAGEIO_IMATH_TARGETS}
-+                fmt::fmt
-+                tsl::robin_map
+@@ -55,8 +55,6 @@ function (setup_oiio_util_library targetname)
+             PUBLIC
+                 $<BUILD_INTERFACE:${OpenImageIO_LOCAL_DEPS_ROOT}/include>
+                 $<INSTALL_INTERFACE:include>
+-            PRIVATE
+-                ${ROBINMAP_INCLUDES}
+             )
+     target_link_libraries (${targetname}
+             PUBLIC
+@@ -67,6 +65,7 @@ function (setup_oiio_util_library targetname)
              PRIVATE
                  $<TARGET_NAME_IF_EXISTS:TBB::tbb>
                  ${CMAKE_DL_LIBS}
-@@ -78,13 +80,6 @@ function (setup_oiio_util_library targetname)
++                tsl::robin_map
+             )
+ 
+     if (GCC_VERSION VERSION_GREATER_EQUAL 12.0
+@@ -78,12 +77,12 @@ function (setup_oiio_util_library targetname)
          target_link_libraries (${targetname} PRIVATE stdc++exp)
      endif ()
  
 -    if (OIIO_INTERNALIZE_FMT OR fmt_LOCAL_BUILD)
 -        add_dependencies(${targetname} fmt_internal_target)
 -    else ()
--        target_link_libraries (${targetname}
--                               PUBLIC fmt::fmt-header-only)
++    #if (OIIO_INTERNALIZE_FMT OR fmt_LOCAL_BUILD)
++    #    add_dependencies(${targetname} fmt_internal_target)
++    #else ()
+         target_link_libraries (${targetname}
+                                PUBLIC fmt::fmt-header-only)
 -    endif ()
--
++    #endif ()
+ 
      if (WIN32)
          target_compile_definitions(${targetname} PRIVATE
-                                    WIN32_LEAN_AND_MEAN NOMINMAX
-diff --git src/maketx/CMakeLists.txt src/maketx/CMakeLists.txt
-index 735b88def..ab9732756 100644
---- src/maketx/CMakeLists.txt
-+++ src/maketx/CMakeLists.txt
-@@ -2,4 +2,5 @@
- # SPDX-License-Identifier: Apache-2.0
- # https://github.com/AcademySoftwareFoundation/OpenImageIO
- 
--fancy_add_executable (LINK_LIBRARIES OpenImageIO)
-+fancy_add_executable (LINK_LIBRARIES OpenImageIO
-+                                     fmt::fmt)
 diff --git src/oiiotool/CMakeLists.txt src/oiiotool/CMakeLists.txt
-index 87b6a3e78..acd0cb985 100644
+index 87b6a3e78..839207309 100644
 --- src/oiiotool/CMakeLists.txt
 +++ src/oiiotool/CMakeLists.txt
-@@ -9,4 +9,6 @@ fancy_add_executable (SYSTEM_INCLUDE_DIRS
+@@ -3,10 +3,10 @@
+ # https://github.com/AcademySoftwareFoundation/OpenImageIO
+ 
+ fancy_add_executable (SYSTEM_INCLUDE_DIRS
+-                        ${ROBINMAP_INCLUDES}
+                         ${OpenCV_INCLUDES}
+                       LINK_LIBRARIES
                          OpenImageIO
++                        tsl::robin_map
                          $<TARGET_NAME_IF_EXISTS:OpenEXR::OpenEXR>
                          ${OpenCV_LIBRARIES}
-+                        tsl::robin_map
-+                        fmt::fmt
                       )
 diff --git src/openvdb.imageio/CMakeLists.txt src/openvdb.imageio/CMakeLists.txt
-index 55178d451..f292934ba 100644
+index 55178d451..f13a6e80f 100644
 --- src/openvdb.imageio/CMakeLists.txt
 +++ src/openvdb.imageio/CMakeLists.txt
-@@ -1,10 +1,8 @@
--# Copyright Contributors to the OpenImageIO project.
+@@ -2,9 +2,8 @@
  # SPDX-License-Identifier: Apache-2.0
  # https://github.com/AcademySoftwareFoundation/OpenImageIO
  
- if (OpenVDB_FOUND)
+-if (OpenVDB_FOUND)
++if (USE_OPENVDB)
      add_oiio_plugin (openvdbinput.cpp
 -                     INCLUDE_DIRS  ${OPENVDB_INCLUDES} ${TBB_INCLUDE_DIRS}
 -                     LINK_LIBRARIES  ${OPENVDB_LIBRARIES}
 +                     LINK_LIBRARIES  OpenVDB::openvdb
                                       $<TARGET_NAME_IF_EXISTS:TBB::tbb>)
  endif()
+diff --git src/png.imageio/CMakeLists.txt src/png.imageio/CMakeLists.txt
+index 0cdeb4193..53082423a 100644
+--- src/png.imageio/CMakeLists.txt
++++ src/png.imageio/CMakeLists.txt
+@@ -2,11 +2,9 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # https://github.com/AcademySoftwareFoundation/OpenImageIO
+ 
+-if (PNG_TARGET OR PNG_LIBRARIES)
++if (USE_LIBPNG)
+     add_oiio_plugin (pnginput.cpp pngoutput.cpp
+-                     INCLUDE_DIRS ${PNG_INCLUDE_DIRS}
+-                     DEFINITIONS ${PNG_DEFINITIONS}
+-                     LINK_LIBRARIES ${PNG_LIBRARIES} ${PNG_TARGET} ZLIB::ZLIB)
++                     LINK_LIBRARIES PNG::PNG ZLIB::ZLIB)
+ else ()
+     message (WARNING "libpng not found, so PNG support will not work")
+     set (format_plugin_definitions ${format_plugin_definitions} DISABLE_PNG=1 PARENT_SCOPE)
 diff --git src/ptex.imageio/CMakeLists.txt src/ptex.imageio/CMakeLists.txt
-index 73e3ad843..da45e8c5f 100644
+index 73e3ad843..7d6a0def9 100644
 --- src/ptex.imageio/CMakeLists.txt
 +++ src/ptex.imageio/CMakeLists.txt
-@@ -2,12 +2,9 @@
+@@ -2,7 +2,7 @@
  # SPDX-License-Identifier: Apache-2.0
  # https://github.com/AcademySoftwareFoundation/OpenImageIO
  
 -if (Ptex_FOUND)
--    set(ptex_target Ptex::Ptex_dynamic)
--    if (TARGET Ptex::Ptex_static AND (NOT TARGET Ptex::Ptex_dynamic OR LINKSTATIC))
--        set(ptex_target Ptex::Ptex_static)
--    endif()
 +if (USE_PTEX)
-     add_oiio_plugin (ptexinput.cpp
--                     LINK_LIBRARIES ${ptex_target} ZLIB::ZLIB
-+                     LINK_LIBRARIES ${ptex_LIBRARIES} ZLIB::ZLIB
-+                     INCLUDE_DIRS ${ptex_INCLUDE_DIRS}
-                      DEFINITIONS "USE_PTEX")
- endif ()
+     set(ptex_target Ptex::Ptex_dynamic)
+     if (TARGET Ptex::Ptex_static AND (NOT TARGET Ptex::Ptex_dynamic OR LINKSTATIC))
+         set(ptex_target Ptex::Ptex_static)

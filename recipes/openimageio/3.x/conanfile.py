@@ -68,7 +68,7 @@ class OpenImageIOConan(ConanFile):
         "with_opencv": False,
         "with_ptex": True,
         "with_raw": False,  # libraw is available under CDDL-1.0 or LGPL-2.1, for this reason it is disabled by default
-        "with_tbb": False,
+        "with_tbb": True,
 
         "cci_hack": True,
     }
@@ -114,7 +114,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_opencv:
             self.requires("opencv/4.12.0")
         if self.options.with_tbb:
-            self.requires("onetbb/2021.12.0")
+            self.requires("onetbb/2021.10.0")
         if self.options.with_dicom:
             self.requires("dcmtk/3.6.9")
         if self.options.with_ffmpeg:
@@ -205,9 +205,10 @@ class OpenImageIOConan(ConanFile):
         tc.cache_variables["USE_NUKE"] = False
         tc.cache_variables["USE_R3DSDK"] = False
 
-        ## Override variable for internal linking visibility of Imath otherwise not visible
-        ## in the tools included in the build that consume the library.
-        #tc.cache_variables["OPENIMAGEIO_IMATH_DEPENDENCY_VISIBILITY"] = "PUBLIC"
+        # Override variable for internal linking visibility of Imath otherwise not visible
+        # in the tools included in the build that consume the library. Also it is part of central
+        # headers which is also why it is transitive_headers=True.
+        tc.cache_variables["OPENIMAGEIO_IMATH_DEPENDENCY_VISIBILITY"] = "PUBLIC"
 
         if self.settings.os == "Linux":
             # Workaround for: https://github.com/conan-io/conan/issues/13560
