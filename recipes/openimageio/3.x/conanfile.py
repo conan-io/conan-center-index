@@ -92,7 +92,7 @@ class OpenImageIOConan(ConanFile):
         self.requires("openexr/3.3.5")
         self.requires("openjph/[>=0.23.1 <1]")
         if self.options.with_libjpeg == "libjpeg":
-            self.requires("libjpeg/9f", force=True)
+            self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/[>=3.0.3 <4]")
         self.requires("pugixml/1.15")
@@ -100,7 +100,9 @@ class OpenImageIOConan(ConanFile):
         self.requires("fmt/11.2.0", transitive_headers=True)
         self.requires("opencolorio/2.5.0")
 
-        self.requires("lcms/2.17", override=True)
+        # Workaround to be removed:
+        # (libjxl requires lcms/2.16 and opencolorio has lcms/[>=2.16 <3])
+        self.requires("lcms/2.16", override=True)
 
         # Optional libraries
         if self.options.with_libjxl:
