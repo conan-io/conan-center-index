@@ -103,6 +103,11 @@ class BehaviorTreeCPPConan(ConanFile):
         return self.options.get_safe("with_coroutines", False)
 
     @property
+    def _with_minicoro(self):
+        # Boost was replaced by minicoro on version 4.1.0
+        return Version(self.version) >= "4.1.0"
+
+    @property
     def _with_lexy(self):
         # FIXME: using vendored version temporarily due to a missing CCI binary
         # return Version(self.version) >= "4.0.0"
@@ -130,6 +135,10 @@ class BehaviorTreeCPPConan(ConanFile):
             return self.options.enable_groot_interface
         return Version(self.version) >= "4.0.0"
 
+    @property
+    def _with_flatbuffers(self):
+        return Version(self.version) >= "4.7.0"
+
     def requirements(self):
         if self._with_boost:
             self.requires("boost/1.83.0")
@@ -145,12 +154,16 @@ class BehaviorTreeCPPConan(ConanFile):
             self.requires("tinyxml2/10.0.0")
         if self._with_zeromq:
             self.requires("zeromq/4.3.5")
+        if self._with_minicoro:
+            self.requires("minicoro/0.1.3")
+        if self._with_flatbuffers:
+            self.requires("flatbuffers/24.12.23")
 
         # TODO: other vendored dependencies
         # - cppzmq is customized and not compatible with Conan version
-        # - cpp-sqlite
-        # - minicoro
-        # - wildcards
+        # - cpp-sqlite: https://github.com/ToniLipponen/cpp-sqlite (no recipe available on CCI)
+        # - wildcards: it currently uses single-header mode, the conan package does not work.
+
 
     def validate(self):
         if self.info.settings.os == "Windows" and self.info.options.shared:
@@ -188,6 +201,8 @@ class BehaviorTreeCPPConan(ConanFile):
         tc.variables["WITH_LEXY"] = self._with_lexy
         tc.variables["WITH_MINITRACE"] = self._with_minitrace
         tc.variables["WITH_TINYXML2"] = self._with_tinyxml2
+        tc.variables["WITH_MINICORO"] = self._with_minicoro
+        tc.variables["WITH_FLATBUFFERS"] = self._with_flatbuffers
         if not self.options.get_safe("enable_manual_selector"):
             # Avoid accidental use of system ncurses
             tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Curses"] = True
@@ -242,6 +257,15 @@ class BehaviorTreeCPPConan(ConanFile):
             replace_in_file(self, cmakelists, "3rdparty/tinyxml2/tinyxml2.cpp", "")
             replace_in_file(self, os.path.join(self.source_folder, "src", "xml_parsing.cpp"),
                             "tinyxml2/tinyxml2.h", "tinyxml2.h")
+        # Unvendor minicoro
+        if self._with_minicoro:
+            rmdir(self, os.path.join(self.source_folder, "3rdparty", "minicoro"))
+            replace_in_file(self, os.path.join(self.source_folder, "src", "action_node.cpp"),
+                            "minicoro/minicoro.h", "minicoro.h")
+        # Unvendor flatbuffers
+        if self._with_flatbuffers:
+            rmdir(self, os.path.join(self.source_folder, "3rdparty", "flatbuffers"))
+
         # Ensure ZeroMQ and other packages are provided by Conan
         rm(self, "Find*.cmake", os.path.join(self.source_folder, "cmake"))
 
@@ -284,6 +308,10 @@ class BehaviorTreeCPPConan(ConanFile):
             requires.append("tinyxml2::tinyxml2")
         if self._with_zeromq:
             requires.append("zeromq::zeromq")
+        if self._with_minicoro:
+            requires.append("minicoro::minicoro")
+        if self._with_flatbuffers:
+            requires.append("flatbuffers::flatbuffers")
 
         postfix = "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
