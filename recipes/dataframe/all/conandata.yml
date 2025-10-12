@@ -1,7 +1,7 @@
 sources:
   "3.7.0":
     url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/3.7.0.tar.gz"
-    sha256: "2406352ba8691d1b8d1e07a421fba214d8fd35162b41d8a0b95adfb5bc636ec9"
+    sha256: "2406352ba8691d1b8d1e07a421fba214d8fd35162b41d8a0b95adfb5bc636ec9 "
   "3.6.0":
     url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/3.6.0.tar.gz"
     sha256: "23366522d8e0f0d4f8405bfda435be0d408782b3309a46be522b060b7393ef4f"
