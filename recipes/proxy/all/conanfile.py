@@ -52,11 +52,17 @@ class ProxyConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        copy(self, "proxy.h", self.source_folder, os.path.join(self.package_folder, "include", "proxy"))
+        if Version(self.version) >= "3.4.0":
+            copy(self, "*", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
+        else:
+            copy(self, "proxy.h", self.source_folder, os.path.join(self.package_folder, "include", "proxy"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "proxy")
-        self.cpp_info.set_property("cmake_target_name", "msft_proxy")
+        if Version(self.version) >= "4.0.0":
+            self.cpp_info.set_property("cmake_target_name", "msft_proxy4::proxy")
+        else:
+            self.cpp_info.set_property("cmake_target_name", "msft_proxy")
 
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
