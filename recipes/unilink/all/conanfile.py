@@ -3,6 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 import os
+import yaml
 
 
 class UnilinkConan(ConanFile):
@@ -41,6 +42,16 @@ class UnilinkConan(ConanFile):
     # CMake configuration
     generators = "CMakeToolchain"
     exports_sources = "CMakeLists.txt", "cmake/*", "unilink/*", "examples/*", "test/*", "docs/*", "package/*", "LICENSE", "NOTICE", "README.md"
+    
+    def export_sources(self):
+        copy(self, "conandata.yml", src=self.recipe_folder, dst=self.export_sources_folder)
+    
+    def _load_conandata(self):
+        conandata_path = os.path.join(self.recipe_folder, "conandata.yml")
+        if os.path.exists(conandata_path):
+            with open(conandata_path, 'r') as f:
+                return yaml.safe_load(f)
+        return {}
     
     def config_options(self):
         if self.settings.os == "Windows":

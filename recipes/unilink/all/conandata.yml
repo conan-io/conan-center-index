@@ -1,0 +1,5 @@
+sources:
+  "0.1.0":
+    url: "https://github.com/jwsung91/unilink/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "PLACEHOLDER_SHA256"
+    strip_dir: true
