@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy, get
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
@@ -26,9 +25,6 @@ class UnilinkConan(ConanFile):
         "enable_memory_tracking": True,
     }
     
-    # CMake configuration
-    generators = "CMakeToolchain"
-    
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             from conan.tools.build import check_min_cppstd
@@ -46,9 +42,6 @@ class UnilinkConan(ConanFile):
     def requirements(self):
         # Boost system library - use stable version
         self.requires("boost/1.74.0")
-    
-    def layout(self):
-        cmake_layout(self, src_folder="src")
     
     def package(self):
         # Copy license files
