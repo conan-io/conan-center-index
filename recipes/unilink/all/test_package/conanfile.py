@@ -1,4 +1,3 @@
-import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
 

@@ -15,7 +15,7 @@ class UnilinkConan(ConanFile):
     homepage = "https://github.com/jwsung91/unilink"
     topics = ("async", "communication", "tcp", "serial", "networking", "c++17")
     package_type = "header-library"
-    settings = "os", "arch", "compiler", "build_type"
+    settings = None
     options = {
         "enable_config": [True, False],
         "enable_memory_tracking": [True, False],
