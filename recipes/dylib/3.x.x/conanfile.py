@@ -16,9 +16,19 @@ class DylibConan(ConanFile):
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     generators = "CMakeToolchain"
+    options = {
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+    }
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         check_min_cppstd(self, 11)
