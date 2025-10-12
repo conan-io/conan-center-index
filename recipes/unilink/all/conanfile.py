@@ -2,8 +2,10 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
-import yaml
+
+required_conan_version = ">=1.54.0"
 
 
 class UnilinkConan(ConanFile):
@@ -11,12 +13,10 @@ class UnilinkConan(ConanFile):
     version = "0.1.0"
     description = "Unified async communication library for TCP and Serial communication"
     license = "Apache-2.0"
-    url = "https://github.com/jwsung91/unilink"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jwsung91/unilink"
     topics = ("async", "communication", "tcp", "serial", "networking", "c++17")
-    
-    # Package metadata
-    author = "Jinwoo Sung <jwsung91@example.com>"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -41,17 +41,6 @@ class UnilinkConan(ConanFile):
     
     # CMake configuration
     generators = "CMakeToolchain"
-    exports_sources = "CMakeLists.txt", "cmake/*", "unilink/*", "examples/*", "test/*", "docs/*", "package/*", "LICENSE", "NOTICE", "README.md"
-    
-    def export_sources(self):
-        copy(self, "conandata.yml", src=self.recipe_folder, dst=self.export_sources_folder)
-    
-    def _load_conandata(self):
-        conandata_path = os.path.join(self.recipe_folder, "conandata.yml")
-        if os.path.exists(conandata_path):
-            with open(conandata_path, 'r') as f:
-                return yaml.safe_load(f)
-        return {}
     
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,34 +50,31 @@ class UnilinkConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
     
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            from conan.tools.build import check_min_cppstd
+            check_min_cppstd(self, 17)
+        
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
+            raise ConanInvalidConfiguration(f"{self.ref} requires at least GCC 7")
+        
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "5":
+            raise ConanInvalidConfiguration(f"{self.ref} requires at least Clang 5")
+    
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+    
     def requirements(self):
-        # Boost system library - version compatibility based on platform
-        if self.settings.os == "Linux":
-            # Ubuntu version-specific Boost requirements
-            if self.settings.compiler.version and Version(self.settings.compiler.version) < "11.0":
-                # Ubuntu 20.04: GCC 9-10, Boost 1.65+
-                self.requires("boost/1.65.1")
-            elif self.settings.compiler.version and Version(self.settings.compiler.version) < "13.0":
-                # Ubuntu 22.04: GCC 11-12, Boost 1.74+
-                self.requires("boost/1.74.0")
-            else:
-                # Ubuntu 24.04+: GCC 13+, try Boost 1.83+ first, fallback to 1.74+
-                try:
-                    self.requires("boost/1.83.0")
-                except:
-                    self.requires("boost/1.74.0")
-        else:
-            # Non-Linux platforms: use latest Boost
-            self.requires("boost/1.70.0")
+        # Boost system library - use stable version
+        self.requires("boost/1.74.0")
     
     def build_requirements(self):
-        if self.options.build_tests:
-            self.tool_requires("cmake/[>=3.12]")
+        self.tool_requires("cmake/[>=3.12]")
         if self.options.build_docs:
             self.tool_requires("doxygen/1.9.8")
     
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
     
     def generate(self):
         deps = CMakeDeps(self)
@@ -168,9 +154,6 @@ class UnilinkConan(ConanFile):
         if self.options.enable_memory_tracking:
             self.cpp_info.defines.append("UNILINK_ENABLE_MEMORY_TRACKING=1")
         
-        # Set C++ standard
-        self.cpp_info.cxxflags = ["-std=c++17"]
-        
         # Set pkg-config name
         if self.options.enable_pkgconfig:
             self.cpp_info.set_property("pkg_config_name", "unilink")
@@ -180,7 +163,6 @@ class UnilinkConan(ConanFile):
         self.cpp_info.components["unilink"].libs = self.cpp_info.libs
         self.cpp_info.components["unilink"].system_libs = self.cpp_info.system_libs
         self.cpp_info.components["unilink"].defines = self.cpp_info.defines
-        self.cpp_info.components["unilink"].cxxflags = self.cpp_info.cxxflags
         
         # Add Boost dependency
         self.cpp_info.components["unilink"].requires = ["boost::boost"]
