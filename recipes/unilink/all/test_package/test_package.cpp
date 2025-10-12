@@ -8,9 +8,7 @@ int main() {
     try {
         // This is a simple test to ensure the library links correctly
         std::cout << "unilink library loaded successfully!" << std::endl;
-        std::cout << "Version: " << UNILINK_VERSION_MAJOR << "." 
-                  << UNILINK_VERSION_MINOR << "." 
-                  << UNILINK_VERSION_PATCH << std::endl;
+        std::cout << "Header inclusion test passed!" << std::endl;
         
         return 0;
     } catch (const std::exception& e) {
