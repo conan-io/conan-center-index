@@ -12,12 +12,8 @@ class DaggyTestConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
-    def build_requirenments(self):
-        self.tool_requires(self.tested_reference_str)
-
     def requirements(self):
         self.requires(self.tested_reference_str)
-        self.requires("qt/6.8.3")
 
     def build(self):
         cmake = CMake(self)
