@@ -84,7 +84,7 @@ class DaggyConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder="src")
         cmake.build()
 
     def package(self):
