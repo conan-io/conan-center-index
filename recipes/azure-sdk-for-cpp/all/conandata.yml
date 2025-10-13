@@ -2,3 +2,8 @@ sources:
   "1.16.1":
     url: "https://github.com/Azure/azure-sdk-for-cpp/archive/refs/tags/azure-core_1.16.1.tar.gz"
     sha256: "4d2a85be0a5b7ced9a75cb89434fa6c0712784fb3dfd5d378514197bf9d21e96"
+patches:
+  "1.16.1":
+    - patch_file: "patches/0001-llvm-linux-datetime-portability.patch"
+      patch_type: "portability"
+      patch_description: "DateTime::clock::duration::rep portability"

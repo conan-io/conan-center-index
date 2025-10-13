@@ -1,0 +1,13 @@
+diff --git a/sdk/core/azure-core/src/datetime.cpp b/sdk/core/azure-core/src/datetime.cpp
+index 288705b3d..06488dfa0 100644
+--- a/sdk/core/azure-core/src/datetime.cpp
++++ b/sdk/core/azure-core/src/datetime.cpp
+@@ -50,7 +50,7 @@ DateTime GetMaxDateTime()
+ #pragma warning(disable : 6326)
+ #endif
+   static_assert(
+-      std::is_same<DateTime::clock::duration::rep, std::chrono::system_clock::duration::rep>::value,
++      sizeof(DateTime::clock::duration::rep) == sizeof(std::chrono::system_clock::duration::rep),
+       "DateTime::clock::duration::rep must be the same as "
+       "std::chrono::system_clock::duration::rep");
+ 
