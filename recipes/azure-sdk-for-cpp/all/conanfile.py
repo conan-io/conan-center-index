@@ -99,7 +99,6 @@ class AzureSDKForCppConan(ConanFile):
         tc.cache_variables["BUILD_SAMPLES"] = "OFF"
         tc.cache_variables["BUILD_PERFORMANCE_TESTS"] = "OFF"
 
-        tc.cache_variables["AZ_ALL_LIBRARIES"] = "OFF"
         tc.cache_variables["FETCH_SOURCE_DEPS"] = "OFF"
 
         tc.cache_variables["WARNINGS_AS_ERRORS"] = "OFF"
