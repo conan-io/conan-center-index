@@ -858,6 +858,8 @@ class QtConan(ConanFile):
                 continue
             if glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake")):
                 continue
+            if glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "Qt6QmlPublic*Helpers.cmake")):
+                continue
             if m.endswith("Tools"):
                 if os.path.isfile(os.path.join(self.package_folder, "lib", "cmake", m, f"{m[:-5]}Macros.cmake")):
                     continue
@@ -893,7 +895,8 @@ class QtConan(ConanFile):
             targets.append("qsb")
         if self.options.qtdeclarative:
             targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
-            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview"])
+            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmlaotstats"])
+
             # Note: consider "qmltestrunner", see https://github.com/conan-io/conan-center-index/issues/24276
         if self.options.get_safe("qtremoteobjects"):
             targets.append("repc")
@@ -958,6 +961,8 @@ class QtConan(ConanFile):
             _create_private_module("Qml", ["CorePrivate", "Qml"])
             save(self, os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_policies.cmake"), textwrap.dedent("""\
                     set(QT_KNOWN_POLICY_QTP0001 TRUE)
+                    set(QT_KNOWN_POLICY_QTP0004 TRUE)
+                    set(QT_KNOWN_POLICY_QTP0005 TRUE)
                     """))
             if self.options.gui and self.options.qtshadertools:
                 _create_private_module("Quick", ["CorePrivate", "GuiPrivate", "QmlPrivate", "Quick"])
@@ -1588,6 +1593,8 @@ class QtConan(ConanFile):
                     _add_build_module(component_name, module)
 
                 for helper_modules in glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake")):
+                    _add_build_module(component_name, helper_modules)
+                for helper_modules in glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "Qt6QmlPublic*Helpers.cmake")):
                     _add_build_module(component_name, helper_modules)
                 self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
 
