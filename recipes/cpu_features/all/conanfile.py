@@ -70,14 +70,17 @@ class CpuFeaturesConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.components["libcpu_features"].set_property("cmake_file_name", "CpuFeatures")
-        self.cpp_info.components["libcpu_features"].set_property("cmake_target_name", "CpuFeatures::cpu_features")
+        self.cpp_info.set_property("cmake_file_name", "CpuFeatures")
+        self.cpp_info.set_property("cmake_target_name", "CpuFeatures::cpu_features")
+
         self.cpp_info.components["libcpu_features"].libs = ["cpu_features"]
         self.cpp_info.components["libcpu_features"].includedirs = [os.path.join("include", "cpu_features")]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libcpu_features"].system_libs = ["dl"]
 
         if self.settings.os == "Android":
+            # FIXME: cpu_features generates CpuFeaturesNdkCompat.cmake too, but CMakeDeps still can not do it
+            # See https://github.com/conan-io/conan/pull/18821
             self.cpp_info.components["ndk_compat"].libs = ["ndk_compat"]
             self.cpp_info.components["ndk_compat"].set_property("cmake_file_name", "CpuFeaturesNdkCompat")
             self.cpp_info.components["ndk_compat"].set_property("cmake_target_name", "CpuFeatures::ndk_compat")
