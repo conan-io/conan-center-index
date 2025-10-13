@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import copy, get, rm, rmdir, replace_in_file
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -37,6 +37,9 @@ class libdatachannelConan(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def requirements(self):
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
@@ -67,23 +70,10 @@ class libdatachannelConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
         # Let Conan handle fpic
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
-        # Remove TARGET_PDB_FILE as it breaks static builds. This only affects windows.
-        # https://github.com/paullouisageneau/libdatachannel/blob/d7719c3/CMakeLists.txt#L518-L521
-        # https://github.com/paullouisageneau/libdatachannel/pull/1464
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            (
-                "install(FILES $<TARGET_PDB_FILE:datachannel>\r\n"
-                "    DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)"
-            ),
-            "",
-            # Due to the use of \r\n this will always fail on non-windows platforms.
-            strict=False,
-        )
 
     def generate(self):
         tc = CMakeToolchain(self)
