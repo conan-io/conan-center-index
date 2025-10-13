@@ -160,6 +160,10 @@ class AzureSDKForCppConan(ConanFile):
         self.cpp_info.components["azure-identity"].set_property("cmake_target_name", "Azure::azure-identity")
         self.cpp_info.components["azure-identity"].libs = ["azure-identity"]
         self.cpp_info.components["azure-identity"].requires = ["azure-core"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["azure-identity"].system_requires = ["bcrypt", "crypt32"]
+        else:
+            self.cpp_info.components["azure-identity"].requires.append("openssl::openssl")
 
         self.cpp_info.components["azure-storage-files-datalake"].set_property("cmake_target_name", "Azure::azure-storage-files-datalake")
         self.cpp_info.components["azure-storage-files-datalake"].libs = ["azure-storage-files-datalake"]
