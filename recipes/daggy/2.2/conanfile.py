@@ -77,7 +77,6 @@ class DaggyConan(ConanFile):
         if self.options.shared:
             tc.cache_variables["CMAKE_C_VISIBILITY_PRESET"] = "hidden"
             tc.cache_variables["CMAKE_CXX_VISIBILITY_PRESET"] = "hidden"
-            tc.cache_variables["CMAKE_VISIBILITY_INLINES_HIDDEN"] = 1
         tc.generate() 
 
         deps = CMakeDeps(self)
