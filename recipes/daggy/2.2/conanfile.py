@@ -32,7 +32,7 @@ class DaggyConan(ConanFile):
         "with_yaml": True,
         "with_console": False,
         "shared": False,
-        "fPIC": False
+        "fPIC": True
     }
     implements = ["auto_shared_fpic"]
 
