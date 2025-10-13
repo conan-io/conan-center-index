@@ -169,7 +169,7 @@ class AzureSDKForCppConan(ConanFile):
 
         self.cpp_info.components["azure-storage-files-datalake"].set_property("cmake_target_name", "Azure::azure-storage-files-datalake")
         self.cpp_info.components["azure-storage-files-datalake"].libs = ["azure-storage-files-datalake"]
-        self.cpp_info.components["azure-storage-files-datalake"].requires = ["azure-core", "azure-storage-common"]
+        self.cpp_info.components["azure-storage-files-datalake"].requires = ["azure-core", "azure-storage-common", "azure-storage-blobs"]
 
         if self.settings.os == "Windows":
             self.cpp_info.components["azure-identity"].requires.append("wil::wil")
