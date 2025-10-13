@@ -56,7 +56,7 @@ class DaggyConan(ConanFile):
             self.requires("libssh2/1.11.1")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, pattern="*/src/**", destination=os.path.join(self.source_folder, ".."))
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
 
     def generate(self):
