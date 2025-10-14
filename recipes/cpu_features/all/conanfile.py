@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -47,10 +46,7 @@ class CpuFeaturesConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) < "0.7.0":
-            tc.variables["BUILD_PIC"] = self.options.get_safe("fPIC", True)
-        if Version(self.version) >= "0.7.0":
-            tc.variables["BUILD_TESTING"] = False
+        tc.variables["BUILD_TESTING"] = False
         # TODO: should be handled by CMake helper
         if is_apple_os(self) and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
             tc.variables["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
