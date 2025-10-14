@@ -11,7 +11,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, NMakeToolchain, NMakeDeps
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class PDCursesConan(ConanFile):
@@ -59,7 +59,7 @@ class PDCursesConan(ConanFile):
 
     def requirements(self):
         if self.options.with_sdl:
-            self.requires("sdl/2.28.5", transitive_libs=True)
+            self.requires("sdl/[>=2.32 <3]", transitive_libs=True)
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
 
