@@ -24,18 +24,17 @@ class DPPConan(ConanFile):
         self.requires("nlohmann_json/3.11.2", transitive_libs=True, transitive_headers=True)
         self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("opus/1.4")
+        self.requires("opus/[>=1.4 <2]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16 <4]")
+        self.tool_requires("cmake/[>=3.16 <5]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-  
+
     def generate(self):
         deps = CMakeDeps(self)
         deps.generate()
