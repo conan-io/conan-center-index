@@ -1,0 +1,12 @@
+diff --git a/llvm/include/llvm/ADT/STLExtras.h b/llvm/include/llvm/ADT/STLExtras.h
+index 3346de9..d1be41e 100644
+--- a/llvm/include/llvm/ADT/STLExtras.h
++++ b/llvm/include/llvm/ADT/STLExtras.h
+@@ -26,6 +26,7 @@
+ #include <iterator>
+ #include <memory>
+ #include <utility> // for std::pair
++#include <cstdint>
+ 
+ namespace llvm_ks {
+ 
