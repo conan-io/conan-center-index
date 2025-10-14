@@ -97,3 +97,4 @@ class FlexConan(ConanFile):
         lex_path = os.path.join(bindir, "flex").replace("\\", "/")
         self.output.info("Setting LEX environment variable: {}".format(lex_path))
         self.env_info.LEX = lex_path
+        self.buildenv_info.define("LEX", lex_path)
