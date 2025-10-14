@@ -157,7 +157,6 @@ class ReflectCppConan(ConanFile):
         )
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["reflectcpp"]
