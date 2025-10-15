@@ -66,7 +66,7 @@ class BehaviorTreeCPPConan(ConanFile):
         self.requires("foonathan-lexy/2025.05.0")
         self.requires("minicoro/0.1.3")
         self.requires("minitrace/cci.20230905")
-        self.requires("tinyxml2/10.0.0")
+        self.requires("tinyxml2/11.0.0")
         if self.options.enable_groot_interface:
             self.requires("cppzmq/4.11.0")
         if self.options.enable_sqlite_logging:
