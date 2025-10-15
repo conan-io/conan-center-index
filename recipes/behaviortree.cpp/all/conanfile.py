@@ -89,9 +89,6 @@ class BehaviorTreeCPPConan(ConanFile):
         if self.settings.compiler == "clang" and str(self.settings .compiler.libcxx) == "libstdc++":
             raise ConanInvalidConfiguration(f"{self.ref} needs recent libstdc++ with charconv. please switch to gcc, or to libc++")
 
-        if self.settings.compiler == "apple-clang" and cross_building(self) and self.settings.arch in ["x86", "x86_64"]:
-            raise ConanInvalidConfiguration(f"Cross-compiling for {self.settings.arch} with apple-clang is not yet supported. Contributions are welcome!")
-
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16.3 <4]")
 
