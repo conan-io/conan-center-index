@@ -70,7 +70,7 @@ class BehaviorTreeCPPConan(ConanFile):
         if self.options.enable_groot_interface:
             self.requires("cppzmq/4.11.0")
         if self.options.enable_sqlite_logging:
-            self.requires("sqlite3/3.40.1")
+            self.requires("sqlite3/3.50.4")
 
     def validate(self):
         if self.info.settings.os == "Windows" and self.info.options.shared:
