@@ -52,11 +52,11 @@ class Libxml2Conan(ConanFile):
 
     def requirements(self):
         if self.options.iconv:
-            self.requires("libiconv/1.17")
+            self.requires("libiconv/1.18")
         if self.options.get_safe("lzma"):
             self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.icu:
-            self.requires("icu/73.2")
+            self.requires("icu/77.1")
         if self.options.zlib:
             self.requires("zlib/[>=1.3.1 <2]")
 
