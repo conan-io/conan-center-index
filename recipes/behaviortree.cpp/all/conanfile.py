@@ -120,6 +120,8 @@ class BehaviorTreeCPPConan(ConanFile):
         tc.generate()
 
         cmd = CMakeDeps(self)
+        # Override flatbuffer's target name since it could also be  flatbuffers::flatbuffers_shared
+        cmd.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
         cmd.generate()
 
     def _patch_sources(self):
