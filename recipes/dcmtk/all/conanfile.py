@@ -327,7 +327,7 @@ class DCMTKConan(ConanFile):
         components = {
             "ofstd"   : charset_conversion(),
             "oflog"   : ["ofstd"],
-            "dcmdata" : ["ofstd", "oflog"] + zlib(),
+            "dcmdata" : ["ofstd", "oflog"] + zlib() + xml2(),
             "i2d"     : ["dcmdata"],
             "dcmimgle": ["ofstd", "oflog", "dcmdata"],
             "dcmimage": ["oflog", "dcmdata", "dcmimgle"] + png() + tiff(),
