@@ -65,7 +65,6 @@ class DaggyConan(ConanFile):
         tc.cache_variables["SSH2_SUPPORT"] = self.options.with_ssh2
         tc.cache_variables["YAML_SUPPORT"] = self.options.with_yaml
         tc.cache_variables["CONSOLE"] = self.options.with_console
-        tc.cache_variables["PACKAGE_DEPS"] = False
         tc.cache_variables["VERSION"] = "{}.0".format(self.version)
         tc.cache_variables["CONAN_BUILD"] = True
         tc.cache_variables["BUILD_TESTING"] = False
