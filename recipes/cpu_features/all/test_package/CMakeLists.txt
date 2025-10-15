@@ -4,7 +4,6 @@ project(test_package LANGUAGES C)
 find_package(CpuFeatures REQUIRED CONFIG)
 
 if (ANDROID)
-    find_package(CpuFeaturesNdkCompat CONFIG)
     if (NOT TARGET CpuFeatures::ndk_compat)
         message(FATAL_ERROR "CpuFeatures::ndk_compat target not found")
     endif()
