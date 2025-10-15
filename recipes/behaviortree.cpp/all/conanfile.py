@@ -63,7 +63,7 @@ class BehaviorTreeCPPConan(ConanFile):
 
     def requirements(self):
         self.requires("flatbuffers/24.12.23")
-        self.requires("foonathan-lexy/2022.12.1")
+        self.requires("foonathan-lexy/2025.05.0")
         self.requires("minicoro/0.1.3")
         self.requires("minitrace/cci.20230905")
         self.requires("tinyxml2/10.0.0")
