@@ -43,6 +43,8 @@ class BehaviorTreeCPPConan(ConanFile):
         "use_v3_compatible_names": "Use v3 compatible names",
     }
 
+    implements = ["auto_shared_fpic"]
+
     @property
     def _minimum_cppstd_required(self):
         return 17
@@ -56,10 +58,6 @@ class BehaviorTreeCPPConan(ConanFile):
             "msvc": "192",
             "Visual Studio": "16",
         }
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
