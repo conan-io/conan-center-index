@@ -57,6 +57,12 @@ freetype:
 frozen:
   versions:
     - '1.2.0'
+glad:
+  versions:
+    - '2.0.8'
+glfw:
+  versions:
+    - '3.4'
 glslang:
   versions:
     - '1.3.268.0'
