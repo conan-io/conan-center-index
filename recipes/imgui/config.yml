@@ -1,7 +1,7 @@
 versions:
-  "1.92.4b":
+  "1.92.4":
     folder: all
-  "1.92.4b-docking":
+  "1.92.4-docking":
     folder: all
   "1.92.2b":
     folder: all
