@@ -109,7 +109,10 @@ class CfitsioConan(ConanFile):
         cmake.build()
 
     def package(self):
-        if Version(self.version) == "4.4.0":
+        if Version(self.version) >= "4.4.1":
+            copy(self, "License.txt", src=os.path.join(self.source_folder, "licenses"),
+                 dst=os.path.join(self.package_folder, "licenses"))
+        elif Version(self.version) >= "4.4.0":
             copy(self, "NASA*", src=os.path.join(self.source_folder, "licenses"),
                  dst=os.path.join(self.package_folder, "licenses"))
         else:
