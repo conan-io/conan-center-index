@@ -147,22 +147,10 @@ class BehaviorTreeCPPConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "BehaviorTree")
         self.cpp_info.set_property("cmake_target_name", "BT::behaviortree_cpp")
 
-        requires = ["foonathan-lexy::foonathan-lexy", "tinyxml2::tinyxml2", "flatbuffers::flatbuffers", "minicoro::minicoro", "minitrace::minitrace"]  
-        if self.options.enable_sqlite_logging:
-            requires.append("sqlite3::sqlite3")
-        if self.options.enable_groot_interface:
-            requires.append("cppzmq::cppzmq")
-
         postfix = "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
-        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["behaviortree_cpp"].libs = [f"behaviortree_cpp{postfix}"]
-        self.cpp_info.components["behaviortree_cpp"].requires = requires
+        self.cpp_info.libs = [f"behaviortree_cpp{postfix}"]
+
         if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.components["behaviortree_cpp"].system_libs.extend(["pthread", "dl"])
+            self.cpp_info.system_libs.extend(["pthread", "dl"])
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
-            self.cpp_info.components["behaviortree_cpp"].system_libs.append("stdc++fs")
-
-        if self.options.with_tools:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.env_info.PATH.append(bin_path)
-
+            self.cpp_info.system_libs.append("stdc++fs")
