@@ -119,7 +119,7 @@ jobs:
       FOLDER: recipes/${{ inputs.package || 'zlib' }}/${{ needs.prepare-matrix.outputs.folder }}
       SHARED: ${{ matrix.shared }}
       BUILD_TYPE: ${{ matrix.build_type }}
-      CLI_ARGS: -sbuild_type=${{ matrix.build_type }} ${{ matrix.shared }} -c:a tools.system.package_manager:mode=install -c:a tools.system.package_manager:sudo=True -s:b msys2/*:arch=x86_64 -s:b strawberryperl/*:arch=x86_64
+      CLI_ARGS: -sbuild_type=${{ matrix.build_type }} ${{ matrix.shared }} -c:a tools.system.package_manager:mode=install -c:a tools.system.package_manager:sudo=True -s:b msys2/*:arch=x86_64 -s:b strawberryperl/*:arch=x86_64 -c:a tools.cmake.cmaketoolchain:generator=Ninja  -c:a user.openssl:windows_use_jom=True
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -178,7 +178,16 @@ jobs:
         name: Conan Install
 
       - run: |
-          conan test ${{ env.FOLDER }}/test_package/conanfile.py $REF ${{ env.CLI_ARGS }}
+          echo $PATH
+          IFS=':' read -ra DIRS <<< "$PATH"
+          for d in "${DIRS[@]}"; do
+            find "$d" -maxdepth 1 -type f -iname '*ssl*.dll' 2>/dev/null || true
+            find "$d" -maxdepth 1 -type f -iname '*crypto*.dll' 2>/dev/null || true
+          done
+        continue-on-error: true
+        if: ${{ runner.os == 'Windows' }}
+
+      - run: conan test ${{ env.FOLDER }}/test_package/conanfile.py $REF ${{ env.CLI_ARGS }}
         if: ${{ steps.conan_install.outputs.CODE != 6 }}
       - run: conan upload -r community $REF --confirm
         if: ${{ steps.conan_install.outputs.CODE != 6 && inputs.upload }}
