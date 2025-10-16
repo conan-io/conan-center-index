@@ -290,12 +290,11 @@ class OpenImageIOConan(ConanFile):
         open_image_io_util = self._add_component("OpenImageIO_Util")
         open_image_io_util.libs = ["OpenImageIO_Util"]
         boost_deps = ["boost::filesystem", "boost::thread", "boost::system", "boost::regex"]
-        if Version(self.version) < "3.0":
-            open_image_io_util.requires = boost_deps
-        open_image_io_util.requires.extend([
+        open_image_io_util.requires = [
+            *(boost_deps if Version(self.version) < "3.0" else []),
             "imath::imath",
             "openexr::openexr",
-        ])
+        ]
         if self.settings.os in ["Linux", "FreeBSD"]:
             open_image_io_util.system_libs.extend(
                 ["dl", "m", "pthread"]
@@ -308,10 +307,8 @@ class OpenImageIOConan(ConanFile):
         open_image_io.libs = ["OpenImageIO"]
         open_image_io.requires = [
             "openimageio_openimageio_util",
-            "zlib::zlib"]
-        if Version(self.version) < "3.0":
-            open_image_io.requires.extend(boost_deps)
-        open_image_io.requires.extend([
+            "zlib::zlib",
+            *(boost_deps if Version(self.version) < "3.0" else []),
             "libtiff::libtiff",
             "pugixml::pugixml",
             "tsl-robin-map::tsl-robin-map",
@@ -319,7 +316,7 @@ class OpenImageIOConan(ConanFile):
             "fmt::fmt",
             "imath::imath",
             "openexr::openexr",
-        ])
+        ]
 
         if self.options.with_libjpeg == "libjpeg":
             open_image_io.requires.append("libjpeg::libjpeg")
