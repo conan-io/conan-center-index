@@ -12,10 +12,12 @@ def recipe_config(recipes):
             for version in data["versions"]:
                 available_versions = config["versions"]
                 if version not in available_versions:
-                    print(f"::warning ::Version '{version}' for '{recipe}' not in available versions. It may have been remved upstream")
+                    print(
+                        f"::warning ::Version '{version}' for '{recipe}' not in available versions. It may have been removed upstream"
+                    )
                     continue
                 folder = config["versions"][version]["folder"]
-                yield { "recipe": recipe, "version": version, "folder": folder}
+                yield {"recipe": recipe, "version": version, "folder": folder}
 
 
 def affected_recipes(changeset):
@@ -26,20 +28,26 @@ def affected_recipes(changeset):
 
 
 def load_packages() -> dict:
-    with open("entos-packages.yml", 'r') as fp:
+    with open("entos-packages.yml", "r") as fp:
         return yaml.safe_load(fp)
 
 
 def main():
     parser = ArgumentParser(description="package tools for the entos conan repository")
-    parser.add_argument("--export", help="export all packages to the local cache", action="store_true")
-    parser.add_argument("--build", help="build the packages affected by the given change set")
+    parser.add_argument(
+        "--export", help="export all packages to the local cache", action="store_true"
+    )
+    parser.add_argument(
+        "--build", help="build the packages affected by the given change set"
+    )
     args = parser.parse_args()
 
     configs = list(recipe_config(load_packages()))
     if args.export:
         for config in configs:
-            cmd = "conan export recipes/{recipe}/{folder} --version={version}".format(**config)
+            cmd = "conan export recipes/{recipe}/{folder} --version={version}".format(
+                **config
+            )
             run(cmd.split(), check=True)
         return
 
@@ -54,10 +62,14 @@ def main():
         recipe = recipes.pop()
         recipes_to_build = [config for config in configs if config["recipe"] == recipe]
         if len(recipes_to_build) == 0:
-            raise RuntimeError(f"updated recipe '{recipe}' is not in the entos package list")
+            raise RuntimeError(
+                f"updated recipe '{recipe}' is not in the entos package list"
+            )
 
         for recipe_to_build in recipes_to_build:
-            cmd = "conan create recipes/{recipe}/{folder} --version={version} --build=missing".format(**recipe_to_build)
+            cmd = "conan create recipes/{recipe}/{folder} --version={version} --build=missing".format(
+                **recipe_to_build
+            )
             cmd += " --profile=default --profile=conan_profile"
             cmd += " -c tools.system.package_manager:mode=install"
             run(cmd.split(), check=True)

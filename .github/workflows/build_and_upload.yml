@@ -4,6 +4,7 @@ env:
   FORCE_COLOR: 1
   CMAKE_COLOR_DIAGNOSTICS: ON
   CONAN_REMOTE: ${{ github.ref_name == 'master' && 'entos-iui-prod' || 'entos-iui-dev' }}
+  XDG_RUNTIME_DIR: /tmp/runtime-root
 
 on:
   workflow_dispatch:
