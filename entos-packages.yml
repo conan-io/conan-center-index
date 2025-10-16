@@ -23,12 +23,18 @@ brotli:
 bzip2:
   versions:
     - '1.0.8'
+catch2:
+  versions:
+    - '3.11.0'
 c-ares:
   versions:
     - '1.34.5'
 certify:
   versions:
     - 'cci.20201114'
+cli11:
+  versions:
+    - '2.4.2'
 cmake:
   versions:
     - '4.0.3'
@@ -48,6 +54,7 @@ flex:
 fmt:
   versions:
     - '11.2.0'
+    - '2.0.0'
 fontconfig:
   versions:
     - '2.15.0'
@@ -97,6 +104,7 @@ libcurl:
 libffi:
   versions:
     - '3.4.4'
+    - '3.4.8'
 libiconv:
   versions:
     - '1.17'
@@ -192,6 +200,9 @@ pkgconf:
 protobuf:
   versions:
     - '5.27.0'
+pugixml:
+  versions:
+    - '1.15'
 qt:
   versions:
     - '5.15.7'
@@ -201,6 +212,7 @@ re2:
 spdlog:
   versions:
     - '1.15.3'
+    - '1.16.0'
 spirv-headers:
   versions:
     - '1.4.313.0'
@@ -232,6 +244,10 @@ wayland:
   versions:
     - '1.22.0'
     - '1.23.0'
+    - '1.23.92'
+waylandpp:
+  versions:
+    - '1.0.1.cci.20251006'
 wayland-protocols:
   versions:
     - '1.33'
