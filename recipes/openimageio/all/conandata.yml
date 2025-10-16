@@ -4,6 +4,4 @@ sources:
     sha256: "adb73f270f2eaae81c3c7cde311239944ae9faf6d206552da4ee12d746628b26"
 patches:
   "2.5.19.1":
-    - patch_file: "patches/2.5.19.1-cmake-targets.patch"
-      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
-      patch_type: "conan"
+    - patch_file: "patches/2.5.19.1-conan-fixes.patch"
