@@ -44,11 +44,11 @@ class LibultrahdrConan(ConanFile):
 
     def requirements(self):
         if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
+            self.requires("libjpeg-turbo/[>=3.0.0 <4]")
         elif self.options.with_jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.3")
+            self.requires("mozjpeg/[>=4.1.3 <5]")
 
     def build_requirements(self):
         # The project requires cmake 3.15 but the use of CMAKE_REQUIRE_FIND_PACKAGE_JPEG below
