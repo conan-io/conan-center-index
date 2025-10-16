@@ -90,7 +90,7 @@ class BehaviorTreeCPPConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} needs recent libstdc++ with charconv. please switch to gcc, or to libc++")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16.3 <4]")
+        self.tool_requires("cmake/[>=3.16.3 <5]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
