@@ -3,6 +3,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -42,6 +43,7 @@ class OpenImageIOConan(ConanFile):
         "with_openvdb": [True, False],
         "with_ptex": [True, False],
         "with_libwebp": [True, False],
+        "with_libultrahdr": [True, False]
     }
     default_options = {
         "shared": False,
@@ -62,6 +64,7 @@ class OpenImageIOConan(ConanFile):
         "with_openvdb": False,  # FIXME: broken on M1
         "with_ptex": True,
         "with_libwebp": True,
+        "with_libultrahdr": True
     }
 
     def export_sources(self):
@@ -70,6 +73,8 @@ class OpenImageIOConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "3.0":
+            del self.options.with_libultrahdr
 
     def configure(self):
         if self.options.shared:
@@ -78,7 +83,8 @@ class OpenImageIOConan(ConanFile):
     def requirements(self):
         # Required libraries
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("boost/1.84.0")
+        if Version(self.version) < "3.0":
+            self.requires("boost/1.84.0")
         self.requires("libtiff/4.6.0")
         self.requires("imath/[>3.1.9 <4]", transitive_headers=True)
         self.requires("openexr/[>=3.2.3 <4]")
@@ -123,12 +129,14 @@ class OpenImageIOConan(ConanFile):
             self.requires("ptex/2.4.2")
         if self.options.with_libwebp:
             self.requires("libwebp/[>=1.3.2 <2]")
+        if self.options.get_safe("with_libultrahdr"):
+            self.requires("libultrahdr/1.4.0")
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
+        self.tool_requires("cmake/[>=3.18]")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 14)
+        check_min_cppstd(self, 14 if Version(self.version) < "3.0" else 17)
         if is_msvc(self) and is_msvc_static_runtime(self) and self.options.shared:
             raise ConanInvalidConfiguration(
                 "Building shared library with static runtime is not supported!"
@@ -192,12 +200,15 @@ class OpenImageIOConan(ConanFile):
             tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_FFmpeg"] = True
             tc.cache_variables["FFMPEG_VERSION"] = f'"{str(self.dependencies["ffmpeg"].ref.version)}"'
 
-        tc.cache_variables["Boost_USE_STATIC_LIBS"] = not self.dependencies["boost"].options.shared
+        if Version(self.version) < "3.0":
+            tc.cache_variables["Boost_USE_STATIC_LIBS"] = not self.dependencies["boost"].options.shared
         tc.cache_variables["BUILD_MISSING_ROBINMAP"] = False
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_Robinmap"] = True
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_pugixml"] = True
         tc.cache_variables["INTERNALIZE_FMT"] = False
         tc.cache_variables["ROBINMAP_INCLUDES"] = self.dependencies["tsl-robin-map"].cpp_info.includedirs[0].replace("\\", "/")
+        tc.cache_variables["IMATH_INCLUDES"] = self.dependencies["imath"].cpp_info.includedirs[0].replace("\\", "/")
+        tc.cache_variables["OPENEXR_INCLUDES"] = self.dependencies["openexr"].cpp_info.includedirs[0].replace("\\", "/")
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_PNG"] = self.options.with_libpng
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_Freetype"] = self.options.with_freetype
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_OpenColorIO"] = self.options.with_opencolorio
@@ -210,6 +221,8 @@ class OpenImageIOConan(ConanFile):
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_OpenJPEG"] = self.options.with_openjpeg
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_Ptex"] = self.options.with_ptex
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_WebP"] = self.options.with_libwebp
+
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_libjpeg-turbo"] = self.options.with_libjpeg != "libjpeg-turbo"
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_R3DSDK"] = True
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Nuke"] = True
 
@@ -227,6 +240,10 @@ class OpenImageIOConan(ConanFile):
         deps.set_property("libheif", "cmake_additional_variables_prefixes", ["LIBHEIF"])
         deps.set_property("tsl-robin-map", "cmake_file_name", "Robinmap")
         deps.set_property("tsl-robin-map", "cmake_additional_variables_prefixes", ["ROBINMAP"])
+        if Version(self.version) >= "3.0":
+            deps.set_property("openexr", "cmake_target_name", "OpenEXR::OpenEXR")
+            deps.set_property("libultrahdr", "cmake_file_name", "libuhdr")
+            deps.set_property("libultrahdr", "cmake_target_name", "libuhdr::libuhdr")
         deps.generate()
 
     def build(self):
@@ -263,14 +280,13 @@ class OpenImageIOConan(ConanFile):
         # OpenImageIO::OpenImageIO_Util
         open_image_io_util = self._add_component("OpenImageIO_Util")
         open_image_io_util.libs = ["OpenImageIO_Util"]
-        open_image_io_util.requires = [
-            "boost::filesystem",
-            "boost::thread",
-            "boost::system",
-            "boost::regex",
+        boost_deps = ["boost::filesystem", "boost::thread", "boost::system", "boost:regex"]
+        if Version(self.version) < "3.0":
+            open_image_io_util.requires = boost_deps
+        open_image_io_util.requires.extend([
             "imath::imath",
             "openexr::openexr",
-        ]
+        ])
         if self.settings.os in ["Linux", "FreeBSD"]:
             open_image_io_util.system_libs.extend(
                 ["dl", "m", "pthread"]
@@ -283,11 +299,10 @@ class OpenImageIOConan(ConanFile):
         open_image_io.libs = ["OpenImageIO"]
         open_image_io.requires = [
             "openimageio_openimageio_util",
-            "zlib::zlib",
-            "boost::thread",
-            "boost::system",
-            "boost::container",
-            "boost::regex",
+            "zlib::zlib"]
+        if Version(self.version) < "3.0":
+            open_image_io.requires = boost_deps
+        open_image_io.requires.extend([
             "libtiff::libtiff",
             "pugixml::pugixml",
             "tsl-robin-map::tsl-robin-map",
@@ -295,7 +310,7 @@ class OpenImageIOConan(ConanFile):
             "fmt::fmt",
             "imath::imath",
             "openexr::openexr",
-        ]
+        ])
 
         if self.options.with_libjpeg == "libjpeg":
             open_image_io.requires.append("libjpeg::libjpeg")
@@ -331,6 +346,8 @@ class OpenImageIOConan(ConanFile):
             open_image_io.requires.append("ptex::ptex")
         if self.options.with_libwebp:
             open_image_io.requires.append("libwebp::libwebp")
+        if self.options.get_safe("with_libultrahdr"):
+            open_image_io.requires.append("libultrahdr::libultrahdr")
         if self.settings.os in ["Linux", "FreeBSD"]:
             open_image_io.system_libs.extend(["dl", "m", "pthread"])
         if not self.options.shared:
