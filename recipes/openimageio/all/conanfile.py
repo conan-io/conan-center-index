@@ -310,7 +310,7 @@ class OpenImageIOConan(ConanFile):
             "openimageio_openimageio_util",
             "zlib::zlib"]
         if Version(self.version) < "3.0":
-            open_image_io.requires = boost_deps
+            open_image_io.requires.extend(boost_deps)
         open_image_io.requires.extend([
             "libtiff::libtiff",
             "pugixml::pugixml",
