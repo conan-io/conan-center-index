@@ -19,6 +19,7 @@ required_conan_version = ">=2.0.9"
 class WaylandppConan(ConanFile):
     name = "waylandpp"
     description = "An easy to use C++ API for Wayland"
+    package_type = "library"
     license = "DocumentRef-LICENSE:LicenseRef-waylandpp"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/NilsBrause/waylandpp"
@@ -45,7 +46,6 @@ class WaylandppConan(ConanFile):
     def requirements(self):
         self.requires("wayland/1.23.92", transitive_headers=True)
         self.requires("wayland-protocols/1.45")
-        self.requires("pugixml/1.15")
 
     def validate(self):
         check_min_cppstd(self, 11)
@@ -57,9 +57,16 @@ class WaylandppConan(ConanFile):
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
+        self.tool_requires(f"waylandpp-scanner/{self.version}")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    @property
+    def waylandpp_scanner_path(self):
+        wayland_scanner = self.dependencies.build["waylandpp-scanner"]
+        wayland_bin_dir = wayland_scanner.cpp_info.bindirs[0]
+        return os.path.join(wayland_bin_dir, "wayland-scanner++")
 
     def generate(self):
         pkg_config_deps = PkgConfigDeps(self)
@@ -71,7 +78,10 @@ class WaylandppConan(ConanFile):
                 "BUILD_DOCUMENTATION": False,
                 "INSTALL_EXPERIMENTAL_PROTOCOLS": False,
                 "USE_SYSTEM_PROTOCOLS": True,
+                "BUILD_LIBRARIES": True,
+                "BUILD_SCANNER": False,
                 "BUILD_SERVER": self.options.with_server,
+                "WAYLAND_SCANNERPP": self.waylandpp_scanner_path,
             }
         )
         tc.generate()
@@ -101,28 +111,6 @@ class WaylandppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "waylandpp")
-
-        self.cpp_info.components["wayland-scanner++"].set_property(
-            "pkg_config_name", "wayland-scanner++"
-        )
-        self.cpp_info.components["wayland-scanner++"].set_property(
-            "component_version", self.version
-        )
-        self.cpp_info.components["wayland-scanner++"].includedirs = []
-        self.cpp_info.components["wayland-scanner++"].libdirs = []
-        self.cpp_info.components["wayland-scanner++"].requires = ["pugixml::pugixml"]
-
-        pkgconfig_variables = {
-            "datarootdir": "${prefix}/share",
-            "pkgdatadir": "${prefix}/share/waylandpp",
-            "wayland_scannerpp": "${prefix}/bin/wayland-scannerpp",
-        }
-
-        self.cpp_info.components["wayland-scanner++"].set_property(
-            "pkg_config_custom_content",
-            "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items()),
-        )
-
         client_components = [
             {
                 "name": "wayland-client++",
