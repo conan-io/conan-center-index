@@ -368,6 +368,13 @@ class OpenvinoConan(ConanFile):
             ])
             if Version(self.version) >= "2025.1.0":
                 openvino_runtime.libs.append(f"openvino_common_translators{lib_suffix}")
+            # set 'openvino' once again for transformations objects files (cyclic dependency)
+            # openvino_runtime.libs.append("openvino")
+            full_openvino_lib_path = os.path.join(self.package_folder, "lib", f"openvino{lib_suffix}.lib").replace("\\", "/") if self.settings.os == "Windows" else \
+                                     os.path.join(self.package_folder, "lib", f"libopenvino{lib_suffix}.a")
+            openvino_runtime.system_libs.insert(0, full_openvino_lib_path)
+            # Add definition to prevent symbols importing
+            openvino_runtime.defines = ["OPENVINO_STATIC_LIBRARY"]
         if self.options.get_safe("enable_gpu"):
             openvino_runtime.requires.extend(["opencl-icd-loader::opencl-icd-loader", "rapidjson::rapidjson"])
             if self.settings.os == "Windows":
