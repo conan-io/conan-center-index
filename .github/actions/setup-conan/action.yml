@@ -45,6 +45,9 @@ runs:
           "/c/Program Files/OpenSSL-Win64"
           "/c/Program Files (x86)/OpenSSL"
           "/c/Strawberry"
+          "/c/Program Files/MySQL"
+          "/c/Program Files/Amazon"
+          "/c/tools/php"
         )
         
         for path in "${paths[@]}"; do

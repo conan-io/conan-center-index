@@ -187,7 +187,7 @@ jobs:
         continue-on-error: true
         if: ${{ runner.os == 'Windows' }}
 
-      - run: conan test ${{ env.FOLDER }}/test_package/conanfile.py $REF ${{ env.CLI_ARGS }}
+      - run: conan test ${{ env.FOLDER }}/test_package/conanfile.py ${{ env.REF }} ${{ env.CLI_ARGS }}
         if: ${{ steps.conan_install.outputs.CODE != 6 }}
       - run: conan upload -r community $REF --confirm
         if: ${{ steps.conan_install.outputs.CODE != 6 && inputs.upload }}
