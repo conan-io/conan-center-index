@@ -289,7 +289,7 @@ class OpenImageIOConan(ConanFile):
         # OpenImageIO::OpenImageIO_Util
         open_image_io_util = self._add_component("OpenImageIO_Util")
         open_image_io_util.libs = ["OpenImageIO_Util"]
-        boost_deps = ["boost::filesystem", "boost::thread", "boost::system", "boost:regex"]
+        boost_deps = ["boost::filesystem", "boost::thread", "boost::system", "boost::regex"]
         if Version(self.version) < "3.0":
             open_image_io_util.requires = boost_deps
         open_image_io_util.requires.extend([
