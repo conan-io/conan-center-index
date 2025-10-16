@@ -28,6 +28,7 @@ class OpenImageIOConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_libjpeg": ["libjpeg", "libjpeg-turbo"],
+        "with_libjxl": [True, False],
         "with_libpng": [True, False],
         "with_freetype": [True, False],
         "with_hdf5": [True, False],
@@ -49,6 +50,7 @@ class OpenImageIOConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_libjpeg": "libjpeg",
+        "with_libjxl": True,
         "with_libpng": True,
         "with_freetype": True,
         "with_hdf5": True,
@@ -75,6 +77,7 @@ class OpenImageIOConan(ConanFile):
             del self.options.fPIC
         if Version(self.version) < "3.0":
             del self.options.with_libultrahdr
+            del self.options.with_libjxl
 
     def configure(self):
         if self.options.shared:
@@ -92,6 +95,8 @@ class OpenImageIOConan(ConanFile):
             self.requires("libjpeg/[>=9f]")
         elif self.options.with_libjpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/[>=3.0.2 <4]")
+        if self.options.get_safe("with_libjxl"):
+            self.requires("libjxl/0.11.1")
         self.requires("pugixml/1.14")
         self.requires("libsquish/1.15")
         self.requires("tsl-robin-map/1.2.1")
@@ -175,6 +180,7 @@ class OpenImageIOConan(ConanFile):
         tc.variables[
             "USE_JPEG"
         ] = True  # Needed for jpeg.imageio plugin, libjpeg/libjpeg-turbo selection still works
+        tc.cache_variables["USE_JXL"] = self.options.get_safe("with_libjxl", False)
         tc.variables["USE_HDF5"] = self.options.with_hdf5
         tc.variables["USE_OPENCOLORIO"] = self.options.with_opencolorio
         tc.variables["USE_OPENCV"] = self.options.with_opencv
@@ -221,10 +227,12 @@ class OpenImageIOConan(ConanFile):
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_OpenJPEG"] = self.options.with_openjpeg
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_Ptex"] = self.options.with_ptex
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_WebP"] = self.options.with_libwebp
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_JXL"] = self.options.get_safe("with_libjxl", False)
 
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_libjpeg-turbo"] = self.options.with_libjpeg != "libjpeg-turbo"
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_R3DSDK"] = True
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Nuke"] = True
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_JXL"] = not self.options.get_safe("with_libjxl", False)
 
 
         if self.settings.os == "Linux":
@@ -244,6 +252,7 @@ class OpenImageIOConan(ConanFile):
             deps.set_property("openexr", "cmake_target_name", "OpenEXR::OpenEXR")
             deps.set_property("libultrahdr", "cmake_file_name", "libuhdr")
             deps.set_property("libultrahdr", "cmake_target_name", "libuhdr::libuhdr")
+            deps.set_property("libjxl", "cmake_file_name", "JXL")
         deps.generate()
 
     def build(self):
@@ -348,6 +357,8 @@ class OpenImageIOConan(ConanFile):
             open_image_io.requires.append("libwebp::libwebp")
         if self.options.get_safe("with_libultrahdr"):
             open_image_io.requires.append("libultrahdr::libultrahdr")
+        if self.options.get_safe("with_libjxl"):
+            open_image_io.requires.extend(["libjxl::libjxl", "libjxl::jxl_threads"])
         if self.settings.os in ["Linux", "FreeBSD"]:
             open_image_io.system_libs.extend(["dl", "m", "pthread"])
         if not self.options.shared:
