@@ -37,8 +37,8 @@ cli11:
     - '2.4.2'
 cmake:
   versions:
-    - '4.0.3'
-    - '3.31.8'
+    - '4.1.2'
+    - '3.31.9'
 cpp-httplib:
   versions:
     - '0.15.3'
@@ -85,7 +85,7 @@ grpc:
     - '1.67.1'
 gtest:
   versions:
-    - '1.14.0'
+    - '1.17.0'
 icu:
   versions:
     - '74.2'
@@ -100,7 +100,7 @@ libcap:
     - '2.69'
 libcurl:
   versions:
-    - '8.12.1'
+    - '8.16.0'
 libffi:
   versions:
     - '3.4.4'
@@ -150,10 +150,7 @@ md4c:
     - '0.5.2'
 meson:
   versions:
-    - '1.2.2'
-    - '1.3.0'
     - '1.3.2'
-    - '1.4.0'
 nasm:
   versions:
     - '2.15.05'
@@ -243,7 +240,6 @@ vulkan-validationlayers:
 wayland:
   versions:
     - '1.22.0'
-    - '1.23.0'
     - '1.23.92'
 waylandpp:
   versions:
@@ -251,7 +247,7 @@ waylandpp:
 wayland-protocols:
   versions:
     - '1.33'
-    - '1.42'
+    - '1.45'
 xkbcommon:
   versions:
     - '1.5.0'
