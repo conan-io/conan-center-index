@@ -166,11 +166,3 @@ class BehaviorTreeCPPConan(ConanFile):
             bin_path = os.path.join(self.package_folder, "bin")
             self.env_info.PATH.append(bin_path)
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "BehaviorTree"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "BehaviorTree"
-        self.cpp_info.names["cmake_find_package"] = "BT"
-        self.cpp_info.names["cmake_find_package_multi"] = "BT"
-        self.cpp_info.components["behaviortree_cpp"].names["cmake_find_package"] = "behaviortree_cpp"
-        self.cpp_info.components["behaviortree_cpp"].names["cmake_find_package_multi"] = "behaviortree_cpp"
-        self.cpp_info.components["behaviortree_cpp"].set_property("cmake_target_name", "BT::behaviortree_cpp")
