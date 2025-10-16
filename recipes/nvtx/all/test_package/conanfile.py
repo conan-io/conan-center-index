@@ -17,7 +17,8 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        variables = {"NVTX_3_0_1": "True"} if "nvtx/3.0.1" in self.tested_reference_str else {}
+        cmake.configure(variables=variables)
         cmake.build()
 
     def test(self):
