@@ -139,6 +139,7 @@ class OpenImageIOConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -171,7 +172,6 @@ class OpenImageIOConan(ConanFile):
         tc.variables["USE_OPENCV"] = self.options.with_opencv
         tc.variables["USE_TBB"] = self.options.with_tbb
         tc.variables["USE_DCMTK"] = self.options.with_dicom
-        tc.variables["USE_FFMPEG"] = self.options.with_ffmpeg
         tc.variables["USE_FIELD3D"] = False
         tc.variables["USE_GIF"] = self.options.with_giflib
         tc.variables["USE_LIBHEIF"] = self.options.with_libheif
@@ -186,17 +186,50 @@ class OpenImageIOConan(ConanFile):
         tc.variables["USE_FREETYPE"] = self.options.with_freetype
         tc.variables["USE_LIBWEBP"] = self.options.with_libwebp
         tc.variables["USE_OPENJPEG"] = self.options.with_openjpeg
+
+        if self.options.with_ffmpeg:
+            tc.cache_variables["USE_FFMPEG"] = self.options.with_ffmpeg
+            tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_FFmpeg"] = True
+            tc.cache_variables["FFMPEG_VERSION"] = f'"{str(self.dependencies["ffmpeg"].ref.version)}"'
+
+        tc.cache_variables["Boost_USE_STATIC_LIBS"] = not self.dependencies["boost"].options.shared
+        tc.cache_variables["BUILD_MISSING_ROBINMAP"] = False
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_Robinmap"] = True
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_pugixml"] = True
+        tc.cache_variables["INTERNALIZE_FMT"] = False
+        tc.cache_variables["ROBINMAP_INCLUDES"] = self.dependencies["tsl-robin-map"].cpp_info.includedirs[0].replace("\\", "/")
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_PNG"] = self.options.with_libpng
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_Freetype"] = self.options.with_freetype
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_OpenColorIO"] = self.options.with_opencolorio
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_OpenCV"] = self.options.with_opencv
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_TBB"] = self.options.with_tbb
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_DCMTK"] = self.options.with_dicom
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_GIF"] = self.options.with_giflib
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_Libheif"] = self.options.with_libheif
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_LibRaw"] = self.options.with_raw
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_OpenJPEG"] = self.options.with_openjpeg
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_Ptex"] = self.options.with_ptex
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_WebP"] = self.options.with_libwebp
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_R3DSDK"] = True
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Nuke"] = True
+
+
         if self.settings.os == "Linux":
             # Workaround for: https://github.com/conan-io/conan/issues/13560
             # note: should not be needed if CMakeConfigDeps is used
             libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
             tc.cache_variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
         tc.generate()
-        cd = CMakeDeps(self)
-        cd.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("fmt", "cmake_additional_variables_prefixes", ["FMT"])
+        deps.set_property("ffmpeg", "cmake_additional_variables_prefixes", ["FFMPEG"])
+        deps.set_property("ffmpeg", "cmake_file_name", "FFmpeg")
+        deps.set_property("libheif", "cmake_additional_variables_prefixes", ["LIBHEIF"])
+        deps.set_property("tsl-robin-map", "cmake_file_name", "Robinmap")
+        deps.set_property("tsl-robin-map", "cmake_additional_variables_prefixes", ["ROBINMAP"])
+        deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
