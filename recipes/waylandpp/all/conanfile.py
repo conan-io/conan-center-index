@@ -43,7 +43,7 @@ class WaylandppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("wayland/1.23.92")
+        self.requires("wayland/1.23.92", transitive_headers=True)
         self.requires("wayland-protocols/1.45")
         self.requires("pugixml/1.15")
 
