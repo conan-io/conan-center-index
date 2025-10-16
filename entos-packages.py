@@ -12,7 +12,8 @@ def recipe_config(recipes):
             for version in data["versions"]:
                 available_versions = config["versions"]
                 if version not in available_versions:
-                    raise KeyError(f"Version '{version}' for '{recipe}' not in available versions")
+                    print(f"::warning ::Version '{version}' for '{recipe}' not in available versions. It may have been remved upstream")
+                    continue
                 folder = config["versions"][version]["folder"]
                 yield { "recipe": recipe, "version": version, "folder": folder}
 

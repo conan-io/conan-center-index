@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.4"
@@ -32,26 +31,12 @@ class AwsCS3(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.version == "0.7.11":
-            self.requires("aws-c-common/0.11.0", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-cal/0.8.3")
-            self.requires("aws-c-auth/0.8.4", transitive_headers=True)
-            self.requires("aws-c-http/0.9.3")
-            self.requires("aws-c-io/0.15.4", transitive_headers=True)
-            self.requires("aws-checksums/0.2.3")
-        if self.version == "0.5.5":
-            self.requires("aws-c-common/0.9.15", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-cal/0.6.14")
-            self.requires("aws-c-auth/0.7.16", transitive_headers=True)
-            self.requires("aws-c-http/0.8.1")
-            self.requires("aws-c-io/0.14.7", transitive_headers=True)
-            self.requires("aws-checksums/0.1.18")
-        if self.version == "0.1.26":
-            self.requires("aws-c-common/0.6.11", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-cal/0.5.12")
-            self.requires("aws-c-auth/0.6.4", transitive_headers=True)
-            self.requires("aws-c-http/0.6.7")
-            self.requires("aws-c-io/0.10.9", transitive_headers=True)
+        self.requires("aws-c-common/0.12.3", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-cal/0.9.2")
+        self.requires("aws-c-auth/0.9.0", transitive_headers=True)
+        self.requires("aws-c-http/0.10.2")
+        self.requires("aws-c-io/0.21.0", transitive_headers=True)
+        self.requires("aws-checksums/0.2.6")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -59,8 +44,6 @@ class AwsCS3(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
-        if Version(self.version) < "0.7.11":
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
 
         deps = CMakeDeps(self)
