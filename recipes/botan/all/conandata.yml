@@ -1,7 +1,21 @@
 sources:
+  "3.9.0":
+    url: "https://github.com/randombit/botan/archive/3.9.0.tar.gz"
+    sha256: "89dabf2e9bdb889242f73e579ac7e25e095e28e549bf83a00357602bc47f2618"
   "3.8.1":
     url: "https://github.com/randombit/botan/archive/3.8.1.tar.gz"
     sha256: "8eb79a49c1a3f7e5e7563c13752a37557de935cdac48d9221ea4b580158e8965"
+  "3.7.1+rscs1":
+    # This is functionally equivalent to the vanilla Botan 3.7.1 release with two
+    # backported patches to comply with the technical guidelines published by the
+    # German Federal Office for Information Security (BSI).
+    # See this pull request: https://github.com/randombit/botan/pull/4794
+    #
+    # BSI recommends the usage of Botan 3.7.1-RSCS1 in security products that aim
+    # for an official BSI approval for classified communication (VS-NfD) in Germany.
+    # See: https://www.bsi.bund.de/EN/Themen/Unternehmen-und-Organisationen/Informationen-und-Empfehlungen/Kryptografie/Kryptobibliothek-Botan/kryptobibliothek-botan_node.html
+    url: "https://github.com/Rohde-Schwarz/botan/archive/refs/tags/3.7.1-RSCS1.tar.gz"
+    sha256: "ee7263493bf5fbbda1061415fac824e5d797370df649d458e2b83b304d338792"
   "3.6.1":
     url: "https://github.com/randombit/botan/archive/3.6.1.tar.gz"
     sha256: "a6c4e8dcb6c7f4b9b67e2c8b43069d65b548970ca17847e3b1e031d3ffdd874a"
@@ -17,3 +31,8 @@ sources:
   "2.19.5":
     url: "https://github.com/randombit/botan/archive/2.19.5.tar.gz"
     sha256: "8d4a3826787f9febbdc225172ad2d39d7d3960346c5721fe46cb27d480d7e1de"
+patches:
+  "3.5.0":
+    - patch_file: "patches/botan-3-5-missing-std-string-include.patch"
+      patch_description: "Fixes a build issue in MSVC where std::string was not included"
+      patch_type: "portability"

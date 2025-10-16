@@ -1,4 +1,7 @@
 sources:
+  "2.2.1":
+    url: "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.2.1.tar.gz"
+    sha256: a7882ff2922c6d57f955f5ea9418014619e0855e936eb92e5443914dd1a8f724
   "2.1.4":
     url: "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.1.4.tar.gz"
     sha256: "9fa5f5b69e24d020a72b706f05802bf0028587b93a43b59bc99b5bef305b0c72"
@@ -24,15 +27,18 @@ patches:
   "2.1.0":
     - patch_file: "patches/2.1.0/0001-msvc-ice.patch"
       patch_type: "portability"
-      patch_source: https://github.com/jeremy-rifkin/libassert/commit/aff047da702316b10219a967f78da352f847b8d0
+      patch_source: 
+        https://github.com/jeremy-rifkin/libassert/commit/aff047da702316b10219a967f78da352f847b8d0
       patch_description: "Handle an ICE in old MSVC"
   "2.0.1":
     - patch_file: "patches/2.0.1/0001-fix-string_view-detection.patch"
       patch_type: "portability"
-      patch_source: https://github.com/jeremy-rifkin/libassert/commit/1825976ebc7ccb34687d75aaaaf2a961dafc5450
+      patch_source: 
+        https://github.com/jeremy-rifkin/libassert/commit/1825976ebc7ccb34687d75aaaaf2a961dafc5450
       patch_description: "Update #if checks for string_view support"
   "2.0.0":
     - patch_file: "patches/2.0.0/0001-fix-export-and-include.patch"
       patch_type: "bugfix"
-      patch_source: https://github.com/jeremy-rifkin/libassert/commit/25c1f3e43737ab18490a0d9430cb1c70f976a662
+      patch_source: 
+        https://github.com/jeremy-rifkin/libassert/commit/25c1f3e43737ab18490a0d9430cb1c70f976a662
       patch_description: "Fix export header and an incorrect #include"

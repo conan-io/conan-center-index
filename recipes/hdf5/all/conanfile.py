@@ -9,7 +9,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 
 class Hdf5Conan(ConanFile):
@@ -47,12 +47,6 @@ class Hdf5Conan(ConanFile):
         "parallel": False,
         "enable_unsupported": False
     }
-
-    @property
-    def _min_cppstd(self):
-        if Version(self.version) < "1.14.0":
-            return "98"
-        return "11"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -102,8 +96,8 @@ class Hdf5Conan(ConanFile):
             raise ConanInvalidConfiguration("with_zlib and with_zlibng cannot be enabled at the same time")
         if self.options.get_safe("with_zlibng") and Version(self.version) < "1.14.5":
             raise ConanInvalidConfiguration("with_zlibng=True is incompatible with versions prior to v1.14.5")
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        if self.options.enable_cxx:
+            check_min_cppstd(self, "11")
 
     def validate_build(self):
         if cross_building(self) and Version(self.version) < "1.14.4.3":
@@ -111,8 +105,7 @@ class Hdf5Conan(ConanFile):
             raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
 
     def build_requirements(self):
-        if Version(self.version) >= "1.14.0":
-            self.tool_requires("cmake/[>=3.18 <4]")
+        self.tool_requires("cmake/[>=3.18 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -128,8 +121,6 @@ class Hdf5Conan(ConanFile):
         cmakedeps.generate()
 
         tc = CMakeToolchain(self)
-        if not valid_min_cppstd(self, self._min_cppstd):
-            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         if self.settings.get_safe("compiler.libcxx"):
             tc = self._inject_stdlib_flag(tc)
         if self.options.szip_support == "with_libaec":
@@ -139,16 +130,13 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_USE_FOLDERS"] = False
         tc.variables["HDF5_NO_PACKAGES"] = True
         tc.variables["ALLOW_UNSUPPORTED"] = False
-        if Version(self.version) >= "1.10.6":
-            tc.variables["ONLY_SHARED_LIBS"] = self.options.shared
+        tc.variables["ONLY_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["BUILD_STATIC_EXECS"] = False
         tc.variables["HDF5_ENABLE_COVERAGE"] = False
         tc.variables["HDF5_ENABLE_USING_MEMCHECKER"] = False
-        if Version(self.version) >= "1.10.0":
-            tc.variables["HDF5_MEMORY_ALLOC_SANITY_CHECK"] = False
-        if Version(self.version) >= "1.10.5":
-            tc.variables["HDF5_ENABLE_PREADWRITE"] = True
+        tc.variables["HDF5_MEMORY_ALLOC_SANITY_CHECK"] = False
+        tc.variables["HDF5_ENABLE_PREADWRITE"] = True
         tc.variables["HDF5_ENABLE_DEPRECATED_SYMBOLS"] = True
         tc.variables["HDF5_BUILD_GENERATORS"] = False
         tc.variables["HDF5_ENABLE_TRACE"] = False
@@ -171,8 +159,7 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_BUILD_HL_LIB"] = self.options.hl
         tc.variables["HDF5_BUILD_FORTRAN"] = False
         tc.variables["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
-        if Version(self.version) >= "1.10.0":
-            tc.variables["HDF5_BUILD_JAVA"] = False
+        tc.variables["HDF5_BUILD_JAVA"] = False
         tc.variables["ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
         tc.generate()
 

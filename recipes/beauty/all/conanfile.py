@@ -99,8 +99,12 @@ class BeautyConan(ConanFile):
     def generate(self):
         VirtualBuildEnv(self).generate()
         tc = CMakeToolchain(self)
-        tc.variables["CONAN"] = False
         tc.variables["BEAUTY_ENABLE_OPENSSL"] = self.options.with_openssl
+        if Version(self.version) < "1.0.6":
+            tc.variables["CONAN"] = False
+        else:
+            tc.variables["BEAUTY_BUILD_EXAMPLES"] = False
+            tc.variables["BUILD_TESTING"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

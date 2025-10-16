@@ -4,16 +4,15 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class ZlibNgConan(ConanFile):
     name = "zlib-ng"
     description = "zlib data compression library for the next generation systems"
-    license ="Zlib"
+    license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zlib-ng/zlib-ng/"
     topics = ("zlib", "compression")
@@ -41,7 +40,7 @@ class ZlibNgConan(ConanFile):
         "with_reduced_mem": False,
         "with_runtime_cpu_detection": True,
     }
-    
+
     @property
     def _is_windows(self):
         return self.settings.os in ["Windows", "WindowsStore"]
@@ -49,10 +48,6 @@ class ZlibNgConan(ConanFile):
     def config_options(self):
         if self._is_windows:
             del self.options.fPIC
-        if Version(self.version) < "2.1.0":
-            del self.options.with_reduced_mem
-        if Version(self.version) < "2.2.1":
-            del self.options.with_runtime_cpu_detection
 
     def configure(self):
         if self.options.shared:
@@ -82,10 +77,8 @@ class ZlibNgConan(ConanFile):
         tc.variables["WITH_OPTIM"] = self.options.with_optim
         tc.variables["WITH_NEW_STRATEGIES"] = self.options.with_new_strategies
         tc.variables["WITH_NATIVE_INSTRUCTIONS"] = self.options.with_native_instructions
-        if Version(self.version) >= "2.1.0":
-            tc.variables["WITH_REDUCED_MEM"] = self.options.with_reduced_mem
-        if Version(self.version) >= "2.2.1":
-            tc.variables["WITH_RUNTIME_CPU_DETECTION"] = self.options.with_runtime_cpu_detection
+        tc.variables["WITH_REDUCED_MEM"] = self.options.with_reduced_mem
+        tc.variables["WITH_RUNTIME_CPU_DETECTION"] = self.options.with_runtime_cpu_detection
         tc.generate()
 
     def build(self):
@@ -111,8 +104,8 @@ class ZlibNgConan(ConanFile):
         if self._is_windows:
             # The library name of zlib-ng is complicated in zlib-ng>=2.0.4:
             # https://github.com/zlib-ng/zlib-ng/blob/2.0.4/CMakeLists.txt#L994-L1016
-            base = "zlib" if is_msvc(self) or Version(self.version) < "2.0.4" or self.options.shared else "z"
-            static_flag = "static" if is_msvc(self) and not self.options.shared and Version(self.version) >= "2.0.4" else ""
+            base = "zlib" if is_msvc(self) or self.options.shared else "z"
+            static_flag = "static" if is_msvc(self) and not self.options.shared else ""
             build_type = "d" if self.settings.build_type == "Debug" else ""
             self.cpp_info.libs = [f"{base}{static_flag}{suffix}{build_type}"]
         else:
@@ -123,8 +116,6 @@ class ZlibNgConan(ConanFile):
             self.cpp_info.set_property("cmake_find_mode", "both")
             self.cpp_info.set_property("cmake_file_name", "ZLIB")
             self.cpp_info.set_property("cmake_target_name", "ZLIB::ZLIB")
-            self.cpp_info.names["cmake_find_package"] = "ZLIB"
-            self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
         if self.options.with_gzfileop:
             self.cpp_info.defines.append("WITH_GZFILEOP")
         if not self.options.with_new_strategies:

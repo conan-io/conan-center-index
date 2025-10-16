@@ -1,8 +1,7 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -43,13 +42,6 @@ class LibheifConan(ConanFile):
         "with_openh264": False,
     }
 
-    @property
-    def _min_cppstd(self):
-        return "20" if Version(self.version) >= "1.19.0" else "11"
-
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -70,59 +62,67 @@ class LibheifConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libde265:
-            self.requires("libde265/1.0.12")
+            self.requires("libde265/[>=1.0.12 <2]")
         if self.options.with_x265:
-            self.requires("libx265/3.4")
+            self.requires("libx265/[>=3.4 <4]")
         if self.options.with_libaomav1:
-            self.requires("libaom-av1/3.6.1")
+            self.requires("libaom-av1/[>=3.6.1 <4]")
         if self.options.with_dav1d:
-            self.requires("dav1d/1.2.1")
+            self.requires("dav1d/[>=1.4 <2]")
         if self.options.get_safe("with_jpeg"):
-            self.requires("libjpeg/9f")
+            self.requires("libjpeg/[>=9f]")
         if self.options.get_safe("with_openjpeg"):
-            self.requires("openjpeg/2.5.2")
+            self.requires("openjpeg/[>=2.5.2 <3]")
         if self.options.get_safe("with_openjph"):
-            self.requires("openjph/0.16.0", transitive_headers=False)
+            self.requires("openjph/[>=0.16.0 <1]", transitive_headers=False)
         if self.options.get_safe("with_openh264"):
-            self.requires("openh264/2.4.1")
+            self.requires("openh264/[>=2.4.1 <3]")
+
+    def validate_build(self):
+        check_min_cppstd(self, "20" if Version(self.version) >= "1.19.0" else "11")
 
     def validate(self):
-        check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, "11")
 
     def build_requirements(self):
         if Version(self.version) >= "1.18.0":
-            self.tool_requires("cmake/[>=3.16 <4]")
+            self.tool_requires("cmake/[>=3.16]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_POSITION_INDEPENDENT_CODE", "#set(CMAKE_POSITION_INDEPENDENT_CODE")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["WITH_LIBSHARPYUV"] = False
-        tc.variables["WITH_LIBDE265"] = self.options.with_libde265
-        tc.variables["WITH_X265"] = self.options.with_x265
-        tc.variables["WITH_AOM"] = self.options.with_libaomav1
-        tc.variables["WITH_AOM_DECODER"] = self.options.with_libaomav1
-        tc.variables["WITH_AOM_ENCODER"] = self.options.with_libaomav1
-        tc.variables["WITH_RAV1E"] = False
-        tc.variables["WITH_DAV1D"] = self.options.with_dav1d
-        tc.variables["WITH_EXAMPLES"] = False
-        tc.variables["WITH_GDK_PIXBUF"] = False
-        tc.variables["BUILD_TESTING"] = False
-        tc.variables["WITH_JPEG_DECODER"] = self.options.get_safe("with_jpeg", False)
-        tc.variables["WITH_JPEG_ENCODER"] = self.options.get_safe("with_jpeg", False)
-        tc.variables["WITH_OpenJPEG_DECODER"] = self.options.get_safe("with_openjpeg", False)
-        tc.variables["WITH_OpenJPEG_ENCODER"] = self.options.get_safe("with_openjpeg", False)
-        tc.variables["WITH_OPENJPH_ENCODER"] = self.options.get_safe("with_openjph", False)
-        tc.variables["WITH_OPENH264_DECODER"] = self.options.get_safe("with_openh264", False)
+        tc.cache_variables["WITH_LIBSHARPYUV"] = False
+        tc.cache_variables["WITH_LIBDE265"] = self.options.with_libde265
+        tc.cache_variables["WITH_X265"] = self.options.with_x265
+        tc.cache_variables["WITH_AOM"] = self.options.with_libaomav1
+        tc.cache_variables["WITH_AOM_DECODER"] = self.options.with_libaomav1
+        tc.cache_variables["WITH_AOM_ENCODER"] = self.options.with_libaomav1
+        tc.cache_variables["WITH_RAV1E"] = False
+        tc.cache_variables["WITH_DAV1D"] = self.options.with_dav1d
+        tc.cache_variables["WITH_EXAMPLES"] = False
+        tc.cache_variables["WITH_GDK_PIXBUF"] = False
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["WITH_JPEG_DECODER"] = self.options.get_safe("with_jpeg", False)
+        tc.cache_variables["WITH_JPEG_ENCODER"] = self.options.get_safe("with_jpeg", False)
+        tc.cache_variables["WITH_OpenJPEG_DECODER"] = self.options.get_safe("with_openjpeg", False)
+        tc.cache_variables["WITH_OpenJPEG_ENCODER"] = self.options.get_safe("with_openjpeg", False)
+        tc.cache_variables["WITH_OPENJPH_ENCODER"] = self.options.get_safe("with_openjph", False)
+        tc.cache_variables["WITH_OPENH264_DECODER"] = self.options.get_safe("with_openh264", False)
+        
+        if Version(self.version) == "1.16.2":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         # Disable finding possible Doxygen in system, so no docs are built
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
         tc.cache_variables["CMAKE_COMPILE_WARNING_AS_ERROR"] = False
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("dav1d", "cmake_additional_variables_prefixes", ["DAV1D"])
+        deps.set_property("libde265", "cmake_file_name", "LIBDE265")
         if Version(self.version) >= "1.18.0":
-            deps.set_property("libde265", "cmake_file_name", "LIBDE265")
             deps.set_property("openjph", "cmake_file_name", "OPENJPH")
         if Version(self.version) >= "1.19.0":
             deps.set_property("openh264", "cmake_file_name", "OpenH264")

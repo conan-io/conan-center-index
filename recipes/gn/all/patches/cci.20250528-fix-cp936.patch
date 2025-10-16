@@ -1,0 +1,12 @@
+diff -Naur a/src/gn/escape.h b/src/gn/escape.h
+--- a/src/gn/escape.h	2025-06-03 15:39:30.000000000 +0800
++++ b/src/gn/escape.h	2025-06-03 15:51:59.207281500 +0800
+@@ -34,7 +34,7 @@
+   ESCAPE_NINJA_PREFORMATTED_COMMAND,
+ 
+   // Shell escaping as described by JSON Compilation Database spec:
+-  // Parameters use shell quoting and shell escaping of quotes, with ‘"’ and ‘\’
++  // Parameters use shell quoting and shell escaping of quotes, with '"' and '\'
+   // being the only special characters.
+   ESCAPE_COMPILATION_DATABASE,
+ };

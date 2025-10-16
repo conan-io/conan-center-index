@@ -1,4 +1,7 @@
 sources:
+  "1.5.7":
+    url: "https://github.com/google/draco/archive/refs/tags/1.5.7.tar.gz"
+    sha256: "bf6b105b79223eab2b86795363dfe5e5356050006a96521477973aba8f036fe1"
   "1.5.6":
     url: "https://github.com/google/draco/archive/refs/tags/1.5.6.tar.gz"
     sha256: "0280888e5b8e4c4fb93bf40e65e4e8a1ba316a0456f308164fb5c2b2b0c282d6"

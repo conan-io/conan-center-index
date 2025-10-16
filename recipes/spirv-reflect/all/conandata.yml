@@ -1,0 +1,4 @@
+sources:
+  "1.4.313.0":
+    url: "https://github.com/KhronosGroup/SPIRV-Reflect/archive/refs/tags/vulkan-sdk-1.4.313.0.tar.gz"
+    sha256: "a72129e23ffdf98978b0e60fcf24a14039503383cb077462677a1c59ffd168f0"

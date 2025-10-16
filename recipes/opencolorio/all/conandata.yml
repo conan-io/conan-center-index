@@ -1,43 +1,16 @@
 sources:
+  "2.5.0":
+    url: "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/v2.5.0.tar.gz"
+    sha256: "124e2bfa8a9071959d6ddbb64ffbf78d3f6fe3c923ae23e96a6bbadde1af55b6"
   "2.4.2":
     url: "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/v2.4.2.tar.gz"
     sha256: "2d8f2c47c40476d6e8cea9d878f6601d04f6d5642b47018eaafa9e9f833f3690"
-  "2.4.1":
-    url: "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/v2.4.1.tar.gz"
-    sha256: "d4eb15408b33dffd6ba0bba9a53328085b40bdd9319fa3d0d7348d06a8cbe842"
-  "2.3.2":
-    url: "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/v2.3.2.tar.gz"
-    sha256: "6bbf4e7fa4ea2f743a238cb22aff44890425771a2f57f62cece1574e46ceec2f"
-  "2.2.1":
-    url: "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/v2.2.1.tar.gz"
-    sha256: "36f27c5887fc4e5c241805c29b8b8e68725aa05520bcaa7c7ec84c0422b8580e"
-  "1.1.1":
-    url: "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/v1.1.1.tar.gz"
-    sha256: "c9b5b9def907e1dafb29e37336b702fff22cc6306d445a13b1621b8a754c14c8"
 patches:
+  "2.5.0":
+    - patch_file: "patches/2.5.0-0001-fix-cmake-source-dir-and-targets.patch"
+      patch_description: "use cci package, use PROJECT_BINARY_DIR/PROJECT_SOURCE_DIR"
+      patch_type: "conan"
   "2.4.2":
     - patch_file: "patches/2.4.2-0001-fix-cmake-source-dir-and-targets.patch"
-      patch_description: "use cci package, use PROJECT_BINARY_DIR/PROJECT_SOURCE_DIR"
-      patch_type: "conan"
-  "2.4.1":
-    - patch_file: "patches/2.4.0-0001-fix-cmake-source-dir-and-targets.patch"
-      patch_description: "use cci package, use PROJECT_BINARY_DIR/PROJECT_SOURCE_DIR"
-      patch_type: "conan"
-  "2.3.2":
-    - patch_file: "patches/2.3.1-0001-fix-cmake-source-dir-and-targets.patch"
-      patch_description: "use cci package, use PROJECT_BINARY_DIR/PROJECT_SOURCE_DIR"
-      patch_type: "conan"
-  "2.2.1":
-    - patch_file: "patches/2.2.1-0001-fix-cmake-source-dir-and-targets.patch"
-      patch_description: "use cci package, use PROJECT_BINARY_DIR/PROJECT_SOURCE_DIR"
-      patch_type: "conan"
-    - patch_file: "patches/2.2.1-0002-fix-pystring.patch"
-      patch_description: "fix include path for pystring"
-      patch_type: "conan"
-    - patch_file: "patches/2.2.1-0003-strlen.patch"
-      patch_description: "add std namespace for strlen"
-      patch_type: "portability"
-  "1.1.1":
-    - patch_file: "patches/1.1.1-fix-cmake.patch"
       patch_description: "use cci package, use PROJECT_BINARY_DIR/PROJECT_SOURCE_DIR"
       patch_type: "conan"

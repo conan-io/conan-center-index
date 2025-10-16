@@ -3,8 +3,6 @@ versions:
     folder: meson
   "2.13.2":
     folder: meson
-  "2.13.0":
-    folder: meson
   "2.12.1":
     folder: all
   "2.11.1":
