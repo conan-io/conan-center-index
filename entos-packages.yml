@@ -54,7 +54,7 @@ flex:
 fmt:
   versions:
     - '11.2.0'
-    - '2.0.0'
+    - '12.0.0'
 fontconfig:
   versions:
     - '2.15.0'
@@ -135,7 +135,7 @@ libwebp:
     - '1.4.0'
 libxml2:
   versions:
-    - '2.13.4'
+    - '2.13.8'
 lz4:
   versions:
     - '1.9.4'
