@@ -203,7 +203,7 @@ class VulkanValidationLayersConan(ConanFile):
         if self.settings.os == "Android":
             # INFO: 1.3.236 tries to do `find_package(PkgConfig REQUIRED QUIET)` on Android, which fails the build
             # https://github.com/KhronosGroup/Vulkan-ValidationLayers/blob/sdk-1.3.236/CMakeLists.txt#L148
-            if Version(self.version) == '1.3.236':
+            if Version(self.version) < '1.3.238':
                 replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "if (UNIX AND NOT APPLE)",
                             "if (UNIX AND NOT APPLE AND NOT ANDROID)")
