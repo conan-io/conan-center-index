@@ -205,8 +205,8 @@ class VulkanValidationLayersConan(ConanFile):
             # https://github.com/KhronosGroup/Vulkan-ValidationLayers/blob/sdk-1.3.236/CMakeLists.txt#L148
             if Version(self.version) < '1.3.238':
                 replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "if (UNIX AND NOT APPLE)",
-                            "if (UNIX AND NOT APPLE AND NOT ANDROID)")
+                            "(UNIX AND NOT APPLE)",
+                            "(UNIX AND NOT APPLE AND NOT ANDROID)")
 
             # INFO: libVkLayer_utils.a: error: undefined symbol: __android_log_print
             # https://github.com/KhronosGroup/Vulkan-ValidationLayers/commit/a26638ae9fdd8c40b56d4c7b72859a5b9a0952c9
