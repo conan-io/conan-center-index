@@ -1,0 +1,4 @@
+sources:
+  "1.0.0-rc1":
+    url: "https://github.com/cycraft-corp/hakka_json/archive/refs/tags/v1.0.0-rc1.tar.gz"
+    sha256: "5071fed67f8749112d04af3dfbd77fac2096482a8be01462bbffd5532a13e616"
