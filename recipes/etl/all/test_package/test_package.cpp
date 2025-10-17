@@ -1,6 +1,7 @@
-#include <etl/array.h>
+#include <etl/version.h>
+#include <iostream>
 
 int main() {
-  const etl::array<int, 10> data = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-  return (data.size() == 10)?0:1;
+  std::cout << "etl version: " << etl::traits::version_string << std::endl;
+  return 0;
 }
