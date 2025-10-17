@@ -12,7 +12,8 @@ from conan.tools.microsoft import is_msvc, unix_path
 import os
 import re
 
-required_conan_version = ">=2.1.0"
+# INFO: Requires CMakeDeps cmake_extra_variables feature (Conan 2.21)
+required_conan_version = ">=2.21.0"
 
 
 class LibcurlConan(ConanFile):
