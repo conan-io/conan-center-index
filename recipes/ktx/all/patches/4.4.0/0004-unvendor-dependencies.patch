@@ -1,0 +1,32 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2f141ac9..3327c961 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -383,7 +383,6 @@ set(KTX_MAIN_SRC
+     external/basisu/transcoder/basisu_transcoder.cpp
+     external/basisu/transcoder/basisu_transcoder.h
+     external/basisu/transcoder/basisu.h
+-    external/basisu/zstd/zstd.c
+     lib/checkheader.c
+     external/dfdutils/createdfd.c
+     external/dfdutils/colourspaces.c
+@@ -838,6 +837,10 @@ PRIVATE
+     BASISD_SUPPORT_KTX2=0
+ )
+ 
++find_package(zstd REQUIRED CONFIG)
++target_link_libraries(ktx PUBLIC zstd::libzstd)
++target_link_libraries(ktx_read PUBLIC zstd::libzstd)
++
+ # Turn off these warnings until Rich fixes the occurences.
+ # It it not clear to me if generator expressions can be used here
+ # hence the long-winded way.
+@@ -1274,7 +1277,7 @@ if((KTX_FEATURE_TOOLS OR KTX_FEATURE_TESTS) AND NOT TARGET fmt::fmt)
+     set(BUILD_SHARED_LIBS OFF)
+     set(FMT_INSTALL OFF)
+     set(FMT_SYSTEM_HEADERS ON)
+-    add_subdirectory(external/fmt)
++    find_package(fmt)
+     set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_RESET})
+ endif()
+ if(KTX_FEATURE_TOOLS AND NOT TARGET cxxopts::cxxopts)
