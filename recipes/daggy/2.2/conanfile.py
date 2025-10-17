@@ -35,7 +35,8 @@ class DaggyConan(ConanFile):
     implements = ["auto_shared_fpic"]
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.24 <5]")
+        self.tool_requires("cmake/[>=3.27 <5]")
+        self.tool_requires("qt/<host_version>") # For Qt automoc
 
     def validate(self):
         check_min_cppstd(self, "17")
@@ -44,6 +45,7 @@ class DaggyConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # INFO: Qt transitive libs is needed for QVariantMap in Sources.hpp
         self.requires("qt/[>=6.7 <7]", transitive_headers=True, transitive_libs=True)
         self.requires("kainjow-mustache/4.1")
 
@@ -59,7 +61,8 @@ class DaggyConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        
+        qt_tools_rootdir = self.conf.get("user.qt:tools_directory", None)
+        tc.cache_variables["CMAKE_AUTOMOC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "moc.exe" if self.settings_build.os == "Windows" else "moc")
         tc.cache_variables["SSH2_SUPPORT"] = self.options.with_ssh2
         tc.cache_variables["YAML_SUPPORT"] = self.options.with_yaml
         tc.cache_variables["CONSOLE"] = self.options.with_console
