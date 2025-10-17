@@ -41,6 +41,7 @@ class OpenImageIOConan(ConanFile):
         "with_libheif": [True, False],
         "with_raw": [True, False],
         "with_openjpeg": [True, False],
+        "with_openjph": [True, False],
         "with_openvdb": [True, False],
         "with_ptex": [True, False],
         "with_libwebp": [True, False],
@@ -63,6 +64,7 @@ class OpenImageIOConan(ConanFile):
         "with_libheif": True,
         "with_raw": False,  # libraw is available under CDDL-1.0 or LGPL-2.1, for this reason it is disabled by default
         "with_openjpeg": True,
+        "with_openjph": True,
         "with_openvdb": False,  # FIXME: broken on M1
         "with_ptex": True,
         "with_libwebp": True,
@@ -78,6 +80,7 @@ class OpenImageIOConan(ConanFile):
         if Version(self.version) < "3.0":
             del self.options.with_libultrahdr
             del self.options.with_libjxl
+            del self.options.with_openjph
 
     def configure(self):
         if self.options.shared:
@@ -128,6 +131,8 @@ class OpenImageIOConan(ConanFile):
             self.requires("libraw/0.21.2")
         if self.options.with_openjpeg:
             self.requires("openjpeg/[>=2.5.2 <3]")
+        if self.options.get_safe("with_openjph", False):
+            self.requires("openjph/[>=0.16.0 <1]")
         if self.options.with_openvdb:
             self.requires("openvdb/8.0.1")
         if self.options.with_ptex:
@@ -145,6 +150,11 @@ class OpenImageIOConan(ConanFile):
         if is_msvc(self) and is_msvc_static_runtime(self) and self.options.shared:
             raise ConanInvalidConfiguration(
                 "Building shared library with static runtime is not supported!"
+            )
+
+        if self.options.get_safe("with_openjph", False) and not self.options.with_openjpeg:
+            raise ConanInvalidConfiguration(
+                "openjph(with_openjph) can only be used when the JPEG 2000 module is build which requires openjpeg(with_openjpeg=True)"
             )
 
     def layout(self):
@@ -225,6 +235,7 @@ class OpenImageIOConan(ConanFile):
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_Libheif"] = self.options.with_libheif
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_LibRaw"] = self.options.with_raw
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_OpenJPEG"] = self.options.with_openjpeg
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_openjph"] = self.options.get_safe("with_openjph", False)
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_Ptex"] = self.options.with_ptex
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_WebP"] = self.options.with_libwebp
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_JXL"] = self.options.get_safe("with_libjxl", False)
@@ -253,6 +264,7 @@ class OpenImageIOConan(ConanFile):
             deps.set_property("libultrahdr", "cmake_file_name", "libuhdr")
             deps.set_property("libultrahdr", "cmake_target_name", "libuhdr::libuhdr")
             deps.set_property("libjxl", "cmake_file_name", "JXL")
+            deps.set_property("openjph", "cmake_target_name", "openjph")
         deps.generate()
 
     def build(self):
@@ -346,6 +358,8 @@ class OpenImageIOConan(ConanFile):
             open_image_io.requires.append("libraw::libraw")
         if self.options.with_openjpeg:
             open_image_io.requires.append("openjpeg::openjpeg")
+        if self.options.get_safe("with_openjph", False):
+            open_image_io.requires.append("openjph::openjph")
         if self.options.with_openvdb:
             open_image_io.requires.append("openvdb::openvdb")
         if self.options.with_ptex:
