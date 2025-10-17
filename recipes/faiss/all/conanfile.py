@@ -56,6 +56,7 @@ class FaissConan(ConanFile):
         tc.cache_variables["FAISS_ENABLE_GPU"] = False
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["FAISS_ENABLE_PYTHON"] = False
+        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
 
         tc.generate()
 
