@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 
 import os
 
