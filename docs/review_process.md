@@ -25,7 +25,7 @@ It requires a bit of patience, because there are many PRs running and we're buil
 Keep attention to the error messages from the check tab on your PR, and address all the build failures.
 The checks tries to provide all the helpful information needed to understand and reproduce an issue.
 
-If you struggle to fix build errors yourself, you may want to ask for help from other users by mentioning (`@conan-io/barbarians`) group in the pull request comments.
+If you struggle to fix build errors yourself, you may want to ask for help from other users by mentioning (`@conan-io/barbarians`) group in the pull request comments. Be aware `@conan-io/barbarians` is a group and Github interface may not auto-complete when typing it, but the group exists and will notify all its members.
 
 ### Unexpected error
 
