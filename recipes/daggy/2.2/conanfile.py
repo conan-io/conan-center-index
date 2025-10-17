@@ -70,9 +70,6 @@ class DaggyConan(ConanFile):
         tc.cache_variables["CONAN_BUILD"] = True
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["PORTABLE_BUILD"] = False
-
-        if is_msvc(self):
-            tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.generate() 
 
         deps = CMakeDeps(self)
