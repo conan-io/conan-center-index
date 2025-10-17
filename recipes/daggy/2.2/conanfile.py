@@ -70,10 +70,6 @@ class DaggyConan(ConanFile):
 
         if is_msvc(self):
             tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-
-        if self.options.shared:
-            tc.cache_variables["CMAKE_C_VISIBILITY_PRESET"] = "hidden"
-            tc.cache_variables["CMAKE_CXX_VISIBILITY_PRESET"] = "hidden"
         tc.generate() 
 
         deps = CMakeDeps(self)
