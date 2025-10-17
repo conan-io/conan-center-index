@@ -1,10 +1,10 @@
+import os
+
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file
-from conan.tools.microsoft import is_msvc
-import os
-
 
 required_conan_version = ">=2.0.9"
 
@@ -36,14 +36,15 @@ class FaissConan(ConanFile):
         self.requires("openblas/0.3.27")
         self.requires("gflags/2.2.2")
 
-        if not is_msvc(self):
-            self.requires("llvm-openmp/17.0.6")
-
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
 
     def validate(self):
         check_min_cppstd(self, 17)
+
+        if self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration("OpenMP support is required, which is not "
+                                            "available in Apple Clang")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -55,6 +56,7 @@ class FaissConan(ConanFile):
         tc.cache_variables["FAISS_ENABLE_GPU"] = False
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["FAISS_ENABLE_PYTHON"] = False
+        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
 
         tc.generate()
 
@@ -84,3 +86,7 @@ class FaissConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "dl"]
+
+        if not self.options.shared and self.settings.compiler in ("clang", "gcc"):
+            self.cpp_info.exelinkflags.append("-fopenmp")
+            self.cpp_info.sharedlinkflags.append("-fopenmp")
