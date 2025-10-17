@@ -323,7 +323,7 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_fribidi"):
             self.requires("fribidi/1.0.13")
         if self.options.get_safe("with_harfbuzz"):
-            self.requires("harfbuzz/8.3.0")
+            self.requires("harfbuzz/[>=8.3.0]")
         if self.options.with_openjpeg:
             self.requires("openjpeg/[>=2.5.2 <3]")
         if self.options.with_openh264:
