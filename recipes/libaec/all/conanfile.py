@@ -28,6 +28,9 @@ class LibaecConan(ConanFile):
         "fPIC": True,
     }
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.26]")
+
     def export_sources(self):
         copy(self, "set_runtime_output_dir.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
