@@ -24,10 +24,10 @@ constexpr const char* json_data = R"JSON(
 )JSON";
 }
 
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
     daggy::Core core(*daggy::sources::convertors::json(json_data));
     const auto& version = core.version();
-    std::cout << version.major << "." << version.minor << "." << version.patch << std::endl;
+    std::cout << "Daggy Version: " << version.major << "." << version.minor << "." << version.patch << std::endl;
     return 0;
 }
