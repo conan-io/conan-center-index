@@ -623,7 +623,7 @@ class LibcurlConan(ConanFile):
         deps.set_property("wolfssl", "cmake_additional_variables_prefixes", ["WolfSSL", "WOLFSSL"])
         deps.set_property("wolfssl", "cmake_file_name", "WolfSSL")
 
-        if self.options.brotli:
+        if self.options.with_brotli:
             deps.set_property("brotli", "cmake_file_name", "Brotli")
             deps.set_property("brotli", "cmake_additional_variables_prefixes", ["BROTLI",])
             deps.set_property("brotli", "cmake_extra_variables", {"BROTLI_FOUND": "1"})
@@ -633,7 +633,7 @@ class LibcurlConan(ConanFile):
             deps.set_property("zstd", "cmake_additional_variables_prefixes", ["ZSTD",])
             deps.set_property("zstd", "cmake_extra_variables", {"ZSTD_FOUND": "1", "ZSTD_VERSION": str(self.dependencies["zstd"].ref.version)})
 
-        if self.options.c_ares:
+        if self.options.with_c_ares:
             deps.set_property("c-ares", "cmake_file_name", "Cares")
 
         if self.options.with_libidn:
