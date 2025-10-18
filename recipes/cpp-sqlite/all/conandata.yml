@@ -1,0 +1,7 @@
+sources:
+  "cci.20241111":
+    url: "https://github.com/ToniLipponen/cpp-sqlite/archive/21be8b5e40c66659456358555af1f980f6b56300.tar.gz"
+    sha256: "b7af147a6ffdcabc99253d64ff6d0fdeb3c2613e019c934731a4cf8f273c3111"
+  "cci.20230222":
+    url: "https://github.com/ToniLipponen/cpp-sqlite/archive/7f931c4e72727332ca2918a6e28b984fd54d7d2d.tar.gz"
+    sha256: "1ff909ccec2b88abb5858fe42c650c34e973d46ca9f6fab8cae5bbab7fcb9007"
