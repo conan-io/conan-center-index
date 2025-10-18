@@ -269,6 +269,8 @@ class FFMpegConan(ConanFile):
             del self.options.fPIC
             if is_msvc(self) and self.settings.arch == "armv8":
                 self.options.with_libsvtav1 = False
+        if Version(self.version) >= "8.0":
+            del self.options.postproc
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_vaapi
             del self.options.with_vdpau
@@ -449,11 +451,17 @@ class FFMpegConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "libavcodec", "libx264.c"),
                                   "#define X264_API_IMPORTS 1", "")
         if self.options.with_ssl == "openssl":
-            # https://trac.ffmpeg.org/ticket/5675
-            openssl_libs = load(self, os.path.join(self.build_folder, "openssl_libs.list"))
-            replace_in_file(self, os.path.join(self.source_folder, "configure"),
-                                  "check_lib openssl openssl/ssl.h SSL_library_init -lssl -lcrypto -lws2_32 -lgdi32 ||",
-                                  f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libs} || ")
+                # https://trac.ffmpeg.org/ticket/5675
+            if Version(self.version) >= "8.0":
+                openssl_libs = load(self, os.path.join(self.build_folder, "openssl_libs.list"))
+                replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                                    "check_lib openssl openssl/ssl.h OPENSSL_init_ssl -lssl -lcrypto -lws2_32 -lgdi32 ||",
+                                    f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libs} || ")
+            else:
+                openssl_libs = load(self, os.path.join(self.build_folder, "openssl_libs.list"))
+                replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                                    "check_lib openssl openssl/ssl.h SSL_library_init -lssl -lcrypto -lws2_32 -lgdi32 ||",
+                                    f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libs} || ")
 
         replace_in_file(self, os.path.join(self.source_folder, "configure"), "echo libx264.lib", "echo x264.lib")
 
@@ -519,7 +527,6 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("avformat", self.options.avformat),
             opt_enable_disable("swresample", self.options.swresample),
             opt_enable_disable("swscale", self.options.swscale),
-            opt_enable_disable("postproc", self.options.postproc),
             opt_enable_disable("avfilter", self.options.avfilter),
 
             # Dependencies
@@ -570,9 +577,13 @@ class FFMpegConan(ConanFile):
             "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
             opt_enable_disable("nonfree", self.options.get_safe("with_libfdk_aac") or (self.options.with_ssl and (
-                self.options.with_libx264 or self.options.with_libx265 or self.options.postproc))),
-            opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
+                self.options.with_libx264 or self.options.with_libx265 or self.options.get_safe("postproc")))),
+            opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.get_safe("postproc"))
         ]
+
+        # Version specific options
+        if Version(self.version) < "8.0":
+            args.append(opt_enable_disable("postproc", self.options.get_safe("postproc")))
 
         # Individual Component Options
         opt_append_disable_if_set(args, "everything", self.options.disable_everything)
@@ -847,7 +858,7 @@ class FFMpegConan(ConanFile):
             swresample = _add_component("swresample", [])
             if self.options.get_safe("with_soxr"):
                 swresample.requires.append("soxr::soxr")
-        if self.options.postproc:
+        if self.options.get_safe("postproc"):
             _add_component("postproc", [])
 
         if self.settings.os in ("FreeBSD", "Linux"):
