@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, replace_in_file
+#from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -69,6 +70,21 @@ class IMGUIConan(ConanFile):
             "#ifdef IMGUI_USER_CONFIG",
             "#include \"imgui_export_headers.h\"\n\n#ifdef IMGUI_USER_CONFIG"
         )
+
+        if self.version.startswith('1.92.4'):
+            # This functions are called from the backends but as we include the platform specific backend
+            # on the consumer side, this needs to be exported.
+            # Upstream PR: https://github.com/ocornut/imgui/pull/9016
+            replace_in_file(self,
+                os.path.join(self.source_folder, "imgui.h"),
+                "    void    ClearPlatformHandlers();    // Clear all Platform_XXX fields. Typically called on Platform Backend shutdown.",
+                "    IMGUI_API  void    ClearPlatformHandlers();    // Clear all Platform_XXX fields. Typically called on Platform Backend shutdown."
+            )
+            replace_in_file(self,
+                os.path.join(self.source_folder, "imgui.h"),
+                "    void    ClearRendererHandlers();    // Clear all Renderer_XXX fields. Typically called on Renderer Backend shutdown.",
+                "    IMGUI_API  void    ClearRendererHandlers();    // Clear all Renderer_XXX fields. Typically called on Renderer Backend shutdown."
+            )
 
     def build(self):
         cmake = CMake(self)
