@@ -339,7 +339,7 @@ class FFMpegConan(ConanFile):
             self.requires("fribidi/1.0.13")
         if self.options.get_safe("with_harfbuzz"):
             self.requires("harfbuzz/[>=8.3.0]")
-        if self.options.with_libjxl:
+        if self.options.get_safe('with_libjxl'):
             self.requires("libjxl/0.11.1")
         if self.options.with_openjpeg:
             self.requires("openjpeg/[>=2.5.2 <3]")
