@@ -68,6 +68,7 @@ class FFMpegConan(ConanFile):
         "with_vaapi": [True, False],
         "with_vdpau": [True, False],
         "with_vulkan": [True, False],
+        "with_whisper": [True, False],
         "with_xcb": [True, False],
         "with_soxr": [True, False],
         "with_appkit": [True, False],
@@ -157,6 +158,7 @@ class FFMpegConan(ConanFile):
         "with_vaapi": True,
         "with_vdpau": True,
         "with_vulkan": False,
+        "with_whisper": False,
         "with_xcb": True,
         "with_soxr": False,
         "with_appkit": True,
@@ -250,6 +252,7 @@ class FFMpegConan(ConanFile):
             "with_libdav1d": ["avcodec"],
             "with_mediacodec": ["with_jni"],
             "with_xlib": ["avdevice"],
+            "with_whisper": ["avfilter"],
         }
 
     @property
@@ -269,8 +272,12 @@ class FFMpegConan(ConanFile):
             del self.options.fPIC
             if is_msvc(self) and self.settings.arch == "armv8":
                 self.options.with_libsvtav1 = False
+
         if Version(self.version) >= "8.0":
             del self.options.postproc
+        else:
+            del self.options.with_whisper
+
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_vaapi
             del self.options.with_vdpau
@@ -374,6 +381,8 @@ class FFMpegConan(ConanFile):
             self.requires("dav1d/[>=1.4 <2]")
         if self.options.get_safe("with_libdrm"):
             self.requires("libdrm/2.4.119")
+        if self.options.get_safe("with_whisper"):
+            self.requires("whisper-cpp/1.7.6")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -644,6 +653,9 @@ class FFMpegConan(ConanFile):
             "enable-filter", self.options.enable_filters))
         args.extend(self._split_and_format_options_string(
             "disable-filter", self.options.disable_filters))
+
+        if "with_whisper" in self.options:
+            args.append(opt_enable_disable("whisper", self.options.with_whisper))
 
         if self._version_supports_libsvtav1:
             args.append(opt_enable_disable("libsvtav1", self.options.get_safe("with_libsvtav1")))
@@ -977,6 +989,8 @@ class FFMpegConan(ConanFile):
                 avfilter.frameworks.append("CoreImage")
             if Version(self.version) >= "5.0" and is_apple_os(self):
                 avfilter.frameworks.append("Metal")
+            if self.options.get_safe("with_whisper"):
+                avfilter.requires.append("whisper-cpp::whisper-cpp")
 
         if self.options.get_safe("with_libdrm"):
             avutil.requires.append("libdrm::libdrm_libdrm")
