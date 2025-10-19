@@ -770,6 +770,7 @@ class FFMpegConan(ConanFile):
             deps.generate()
 
         deps = PkgConfigDeps(self)
+        deps.set_property("whisper-cpp", "pkg_config_name", "whisper")
         deps.generate()
 
         if self.options.with_ssl == "openssl":
