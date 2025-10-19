@@ -50,6 +50,7 @@ class FFMpegConan(ConanFile):
         "with_fontconfig": [True, False],
         "with_fribidi": [True, False],
         "with_harfbuzz": [True, False],
+        "with_libjxl": [True, False],
         "with_openjpeg": [True, False],
         "with_openh264": [True, False],
         "with_opus": [True, False],
@@ -140,6 +141,7 @@ class FFMpegConan(ConanFile):
         "with_fontconfig": False,
         "with_fribidi": False,
         "with_harfbuzz": False,
+        "with_libjxl": True,
         "with_openjpeg": True,
         "with_openh264": True,
         "with_opus": True,
@@ -227,6 +229,7 @@ class FFMpegConan(ConanFile):
             "with_lzma": ["avcodec"],
             "with_libiconv": ["avcodec"],
             "with_libxml2": ["avcodec"],
+            "with_libjxl": ["avcodec"],
             "with_openjpeg": ["avcodec"],
             "with_openh264": ["avcodec"],
             "with_vorbis": ["avcodec"],
@@ -277,6 +280,9 @@ class FFMpegConan(ConanFile):
             del self.options.postproc
         else:
             del self.options.with_whisper
+
+        if Version(self.version) < "5.1":
+            del self.options.with_libjxl
 
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_vaapi
@@ -333,6 +339,8 @@ class FFMpegConan(ConanFile):
             self.requires("fribidi/1.0.13")
         if self.options.get_safe("with_harfbuzz"):
             self.requires("harfbuzz/[>=8.3.0]")
+        if self.options.with_libjxl:
+            self.requires("libjxl/0.11.1")
         if self.options.with_openjpeg:
             self.requires("openjpeg/[>=2.5.2 <3]")
         if self.options.with_openh264:
@@ -654,6 +662,8 @@ class FFMpegConan(ConanFile):
         args.extend(self._split_and_format_options_string(
             "disable-filter", self.options.disable_filters))
 
+        if "with_libjxl" in self.options:
+            args.append(opt_enable_disable("libjxl", self.options.with_libjxl))
         if "with_whisper" in self.options:
             args.append(opt_enable_disable("whisper", self.options.with_whisper))
 
@@ -931,6 +941,8 @@ class FFMpegConan(ConanFile):
                 avcodec.requires.append("libiconv::libiconv")
             if self.options.with_libxml2:
                 avcodec.requires.append("libxml2::libxml2")
+            if self.options.get_safe("with_libjxl"):
+                avfilter.requires.append("libjxl::libjxl")
             if self.options.with_openjpeg:
                 avcodec.requires.append("openjpeg::openjpeg")
             if self.options.with_openh264:
