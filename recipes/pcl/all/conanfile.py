@@ -1,13 +1,16 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm
+from conan.tools.files import (apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm,
+                               replace_in_file)
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.tools.system import package_manager
-import os
 
 required_conan_version = ">=2.0"
 
@@ -92,6 +95,7 @@ class PclConan(ConanFile):
         # Whether to append a ''/d/rd/s postfix to executables on Windows depending on the build type
         "add_build_type_postfix": [True, False],
         "use_sse": [True, False],
+        "use_avx": [True, False]
     }
     default_options = {
         "shared": False,
@@ -153,6 +157,7 @@ class PclConan(ConanFile):
         "precompile_only_core_point_types": True,
         "add_build_type_postfix": False,
         "use_sse": True,
+        "use_avx": True
     }
 
     short_paths = True
@@ -337,6 +342,7 @@ class PclConan(ConanFile):
             del self.options.fPIC
         if self.settings.arch not in ["x86", "x86_64"]:
             del self.options.use_sse
+            del self.options.use_avx
 
     def configure(self):
         if self.options.shared:
@@ -438,6 +444,7 @@ class PclConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -458,7 +465,10 @@ class PclConan(ConanFile):
         tc.cache_variables["BUILD_CUDA"] = self._is_enabled("cuda")
         tc.cache_variables["BUILD_GPU"] = self._is_enabled("cuda")
         tc.cache_variables["WITH_SYSTEM_ZLIB"] = True
-        tc.cache_variables["PCL_ONLY_CORE_POINT_TYPES"] = self.options.precompile_only_core_point_types
+        if not is_msvc(self):
+            # PCL_ONLY_CORE_POINT_TYPES is always defined for MSVC and MinGW
+            # Avoid warning C4005: 'PCL_ONLY_CORE_POINT_TYPES': macro redefinition message
+            tc.cache_variables["PCL_ONLY_CORE_POINT_TYPES"] = self.options.precompile_only_core_point_types
         # The default False setting breaks OpenGL detection in CMake
         tc.cache_variables["PCL_ALLOW_BOTH_SHARED_AND_STATIC_DEPENDENCIES"] = True
         tc.variables["OpenGL_GL_PREFERENCE"] = "GLVND"
@@ -482,6 +492,7 @@ class PclConan(ConanFile):
             tc.cache_variables[f"BUILD_{comp}"] = False
 
         tc.cache_variables["PCL_ENABLE_SSE"] = self.options.get_safe("use_sse", False)
+        tc.cache_variables["PCL_ENABLE_AVX"] = self.options.get_safe("use_avx", False)
 
         tc.generate()
 
@@ -501,9 +512,16 @@ class PclConan(ConanFile):
         apply_conandata_patches(self)
         for mod in ["Eigen", "FLANN", "GLEW", "Pcap", "Qhull", "libusb"]:
             os.remove(os.path.join(self.source_folder, "cmake", "Modules", f"Find{mod}.cmake"))
+        # Let users activate/deactivate the AVX/SSE optimizations without depending on extra flags
+        # added by Conan or downstream
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'if(PCL_ENABLE_AVX AND "${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")',
+                        'if(PCL_ENABLE_AVX)')
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'if(PCL_ENABLE_SSE AND "${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")',
+                        'if(PCL_ENABLE_SSE)')
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -569,6 +587,11 @@ class PclConan(ConanFile):
             component.requires = self._internal_optional_deps["tools"]
             for dep in self._external_optional_deps["tools"]:
                 component.requires += self._ext_dep_to_conan_target(dep)
+
+        if self.options.get_safe("use_sse"):
+            self.cpp_info.defines.extend(["__SSE4_2__", "__SSE4_1__", "__SSSE3__", "__SSE3__", "__SSE2__", "__SSE__"])
+        if self.options.get_safe("use_avx"):
+            self.cpp_info.defines.extend(["__AVX2__", "__AVX__"])
 
         common = self.cpp_info.components["common"]
         if not self.options.shared:
