@@ -251,9 +251,5 @@ class OsgearthConan(ConanFile):
         if self.options.build_zip_plugin:
             setup_plugin("zip").requires.append("libzip::_libzip")
 
-        if self.settings.os == "Windows":
-            self.runenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
-            self.runenv_info.append_path("PATH", os.path.join(self.package_folder, "bin/osgPlugins-{}"
-                                                              .format(self.dependencies["openscenegraph"].ref.version)))
-        elif self.settings.os == "Linux":
-            self.runenv_info.append_path("LD_LIBRARY_PATH", os.path.join(self.package_folder, "lib"))
+        self.runenv_info.append_path("PATH", os.path.join(self.package_folder, "bin/osgPlugins-{}"
+                                                          .format(self.dependencies["openscenegraph"].ref.version)))  
