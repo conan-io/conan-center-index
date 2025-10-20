@@ -1,4 +1,7 @@
 sources:
+  "26":
+    url: "https://developer.apple.com/metal/cpp/files/metal-cpp_26.zip"
+    sha256: "4df3c078b9aadcb516212e9cb03004cbc5ce9a3e9c068fa3144d021db585a3a4"
   "15.2":
     url: "https://developer.apple.com/metal/cpp/files/metal-cpp_macOS15.2_iOS18.2.zip"
     sha256: "3437e4abfbd3d45217f34772ef3502f31ba3358e5fb6ac9d0ca952a047bcfe25"
@@ -18,6 +21,10 @@ sources:
     url: "https://developer.apple.com/metal/cpp/files/metal-cpp_macOS13_iOS16.zip"
     sha256: "6f741894229e9c750add1afc3797274fc008c7507e2ae726370c17c34b7c6a68"
 minimum_os_version:
+  "26":
+    "Macos": "26"
+    "iOS": "26"
+    "tvOS": "26"
   "15.2":
     "Macos": "15.2"
     "iOS": "18.2"

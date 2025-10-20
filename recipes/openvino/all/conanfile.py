@@ -9,7 +9,7 @@ import functools
 import os
 import yaml
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.8"
+required_conan_version = ">=2.1"
 
 
 class OpenvinoConan(ConanFile):
@@ -24,7 +24,6 @@ class OpenvinoConan(ConanFile):
               "generative-ai", "llm-inference", "optimize-ai", "deploy-ai")
     package_id_non_embed_mode = "patch_mode"
     package_type = "library"
-    short_paths = True
     no_copy_source = True
 
     # Binary configuration
@@ -112,10 +111,6 @@ class OpenvinoConan(ConanFile):
     def _preprocessing_available(self):
         return "ade" in self._dependencies_versions
 
-    @property
-    def _is_legacy_one_profile(self):
-        return not hasattr(self, "settings_build")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["openvino"], strip_root=True)
         get(self, **self.conan_data["sources"][self.version]["onednn_cpu"], strip_root=True,
@@ -154,13 +149,11 @@ class OpenvinoConan(ConanFile):
     def build_requirements(self):
         if self._target_arm:
             self.tool_requires("scons/4.3.0")
-        if not self._is_legacy_one_profile:
-            if self._protobuf_required:
-                self.tool_requires("protobuf/<host_version>")
-            if self.options.enable_tf_lite_frontend:
-                self.tool_requires("flatbuffers/<host_version>")
-        if not self.options.shared:
-            self.tool_requires("cmake/[>=3.18 <4]")
+        if self._protobuf_required:
+            self.tool_requires("protobuf/<host_version>")
+        if self.options.enable_tf_lite_frontend:
+            self.tool_requires("flatbuffers/<host_version>")
+        self.tool_requires("cmake/[>=3.18 <4]")
 
     def requirements(self):
         self.requires("onetbb/2021.10.0")
@@ -187,12 +180,6 @@ class OpenvinoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-        if self._is_legacy_one_profile:
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
-
         deps = CMakeDeps(self)
         deps.generate()
 
@@ -249,6 +236,8 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_NCC_STYLE"] = False
         toolchain.cache_variables["ENABLE_SAMPLES"] = False
         toolchain.cache_variables["ENABLE_TEMPLATE"] = False
+        if self.settings.os == "Macos" and Version(self.version) >= "2025.3.0":
+            toolchain.cache_variables["OV_FORCE_ADHOC_SIGN"] = True
         toolchain.generate()
 
     def validate_build(self):
