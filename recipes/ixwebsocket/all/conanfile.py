@@ -95,9 +95,10 @@ class IXWebSocketConan(ConanFile):
         if Version(self.version) < "9.8.5":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         # Set the mbedTLS version flag to ensure compatibility with mbedTLS 3.x+
-        if self.options.tls == "mbedtls":
-            mbedtls_ref = self.dependencies["mbedtls"]
-            tc.variables["MBEDTLS_VERSION_GREATER_THAN_3"] = Version(mbedtls_ref.ref.version) >= "3.0.0"
+        if Version(self.version) >= "11.3.1":
+            if self.options.tls == "mbedtls":
+                mbedtls_ref = self.dependencies["mbedtls"]
+                tc.variables["MBEDTLS_VERSION_GREATER_THAN_3"] = Version(mbedtls_ref.ref.version) >= "3.0.0"
 
         tc.generate()
         deps = CMakeDeps(self)
