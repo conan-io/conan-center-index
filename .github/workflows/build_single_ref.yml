@@ -124,9 +124,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.prepare-matrix.outputs.matrix) }}
-    defaults:
-      run:
-        shell: bash
     steps:
       - uses: actions/checkout@v5
         with:
@@ -143,7 +140,7 @@ jobs:
           artifactory-user: ${{ secrets.ARTIFACTORY_USER }}
           artifactory-token: ${{ secrets.ARTIFACTORY_TOKEN }}
 
-      - run: conan export --version=$VERSION --no-remote ${{ env.FOLDER }}
+      - run: conan export --version=${{ env.VERSION }} --no-remote ${{ env.FOLDER }}
 
       - run: |
           CONAN_PATH=$(conan config home)
@@ -160,22 +157,26 @@ jobs:
             then
               continue
             fi
-            set +e
-            conan install $ARG --require=$REF --build=missing --build=$REF --format=json > create.json  ${{ env.CLI_ARGS }}
-            code=$?
-            set -e
-            echo "CODE=$code" >> "$GITHUB_OUTPUT"
-
-            if [ $code -ne 6 ]; then
-              if [ "$cpp_std" != "None" ]; then
+            conan graph info $ARG --require=$REF ${{ env.CLI_ARGS }} --format=json > graph.json
+            if jq -e 'any(.graph.nodes[]; .binary == "Invalid")' graph.json
+            then
+              continue
+            else
+              if [ "$cpp_std" != "None" ]
+              then
                 echo "compiler.cppstd=$cpp_std" >> $PROFILE_PATH
               fi
-              exit "$code"
+              exit 0
             fi
           done
-              
+          exit 6
         id: conan_install
+        name: Conan Graph
+        shell: bash
+
+      - run: conan install --require=${{ env.REF }} --build=missing --build=${{ env.REF }} ${{ env.CLI_ARGS }}
         name: Conan Install
+        if: ${{ steps.conan_install.outputs.CODE != 6 }}
 
       - run: |
           echo $PATH
@@ -186,10 +187,15 @@ jobs:
           done
         continue-on-error: true
         if: ${{ runner.os == 'Windows' }}
+        shell: bash
+
+      - run: echo $env:path
+        continue-on-error: true
+        if: ${{ runner.os == 'Windows' }}
 
       - run: conan test ${{ env.FOLDER }}/test_package/conanfile.py ${{ env.REF }} ${{ env.CLI_ARGS }}
         if: ${{ steps.conan_install.outputs.CODE != 6 }}
-      - run: conan upload -r community $REF --confirm
+      - run: conan upload -r community ${{ env.REF }} --confirm
         if: ${{ steps.conan_install.outputs.CODE != 6 && inputs.upload }}
       - name: Collect logs
         if: failure()
