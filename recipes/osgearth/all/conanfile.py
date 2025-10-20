@@ -55,15 +55,6 @@ class OsgearthConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 14)
 
-        # The official Conan recipe for rocksdb will delete all of the C++ headers from the packaged include directory
-        # in a shared build. osgearth assumes that these headers are available, however. What this means is that we
-        # cannot currently support shared builds of rocksdb.
-        if self.options.build_rocksdb_cache:
-            is_rocksdb_shared = self.dependencies["rocksdb"].options.shared
-
-            if is_rocksdb_shared:
-                raise ConanInvalidConfiguration('The "build_rocksdb_cache" option cannot be used with a shared build of rocksdb.')
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -85,7 +76,7 @@ class OsgearthConan(ConanFile):
         self.requires("sqlite3/[>=3.42 <4]")
 
         if self.options.build_rocksdb_cache:
-            self.requires("rocksdb/6.29.5")
+            self.requires("rocksdb/10.5.1")
         if self.options.build_zip_plugin:
             self.requires("libzip/1.7.3")
         if self.options.with_geos:
