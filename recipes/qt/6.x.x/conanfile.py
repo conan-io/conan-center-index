@@ -479,8 +479,10 @@ class QtConan(ConanFile):
         if not cross_building(self):
             vre = VirtualRunEnv(self)
             vre.generate(scope="build")
-        # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
         env = Environment()
+        # Tell Python to assume UTF-8 encoding to work around character encoding issues while building Qt WebEngine on Polish locale on Windows.
+        env.define("PYTHONUTF8", "1")
+        # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
         env.unset("VCPKG_ROOT")
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         env.vars(self).save_script("conanbuildenv_pkg_config_path")
