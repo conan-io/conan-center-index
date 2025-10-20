@@ -58,9 +58,9 @@ class IXWebSocketConan(ConanFile):
         if self.options.get_safe("with_zlib", True):
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.tls == "openssl":
-            self.requires("openssl/1.1.1w")
+            self.requires("openssl/[>=1.1 <4]")
         elif self.options.tls == "mbedtls":
-            self.requires("mbedtls/2.25.0")
+            self.requires("mbedtls/[>=2.25.0 <4]")
 
     @property
     def _can_use_openssl(self):
@@ -94,6 +94,11 @@ class IXWebSocketConan(ConanFile):
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if Version(self.version) < "9.8.5":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        # Set the mbedTLS version flag to ensure compatibility with mbedTLS 3.x+
+        if self.options.tls == "mbedtls":
+            mbedtls_ref = self.dependencies["mbedtls"]
+            tc.variables["MBEDTLS_VERSION_GREATER_THAN_3"] = Version(mbedtls_ref.ref.version) >= "3.0.0"
+
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
