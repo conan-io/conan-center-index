@@ -39,6 +39,7 @@ class NVTXConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "nvtx")
+        # This name does not match upstream, but consumers might be relying on it
         self.cpp_info.set_property("cmake_target_name", "nvtx::nvtx")
         self.cpp_info.set_property("cmake_target_aliases", ["nvtx3::nvtx3-cpp", "nvtx3::nvtx3-c"])
         self.cpp_info.bindirs = []

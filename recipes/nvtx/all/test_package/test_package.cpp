@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#ifdef NVTX_3_0_1
+#ifdef OLD_COMPAT
 #include <nvtx3/nvToolsExt.h>
 #else
 #include <nvtx3/nvtx3.hpp>
@@ -10,7 +10,7 @@ int main()
 {
     nvtxInitialize(NULL);
 
-#ifndef NVTX_3_0_1
+#ifndef OLD_COMPAT
     NVTX3_FUNC_RANGE();
 #endif
 
