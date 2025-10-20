@@ -555,8 +555,6 @@ class PclConan(ConanFile):
 
         for name in sorted(self._enabled_components()):
             component = self.cpp_info.components[name]
-            component.names["cmake_find_package"] = name
-            component.names["cmake_find_package_multi"] = name
             component.set_property("cmake_file_name", name)
             component.set_property("cmake_module_file_name", name)
             component.set_property("cmake_target_name", f"PCL::{name}")
@@ -589,9 +587,12 @@ class PclConan(ConanFile):
                 component.requires += self._ext_dep_to_conan_target(dep)
 
         if self.options.get_safe("use_sse"):
-            self.cpp_info.defines.extend(["__SSE4_2__", "__SSE4_1__", "__SSSE3__", "__SSE3__", "__SSE2__", "__SSE__"])
+            # Assuming SSE4.2 extensions
+            if not is_msvc(self):
+                self.cpp_info.cxxflags.append("-msse4.2")
         if self.options.get_safe("use_avx"):
-            self.cpp_info.defines.extend(["__AVX2__", "__AVX__"])
+            # Assuming AVX2
+            self.cpp_info.cxxflags.append("/arch:AVX2" if is_msvc(self) else "-mavx2")
 
         common = self.cpp_info.components["common"]
         if not self.options.shared:
@@ -609,7 +610,3 @@ class PclConan(ConanFile):
                         common.system_libs.append("gomp")
         if self.settings.os == "Windows":
             common.system_libs.append("ws2_32")
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        self.cpp_info.names["cmake_find_package"] = "PCL"
-        self.cpp_info.names["cmake_find_package_multi"] = "PCL"
