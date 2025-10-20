@@ -63,7 +63,9 @@ class OpenEXRConan(ConanFile):
         tc.variables["BUILD_WEBSITE"] = False
         tc.variables["DOCS"] = False
         tc.generate()
+
         cd = CMakeDeps(self)
+        cd.set_property("openjph", "cmake_target_name", "openjph")
         cd.generate()
 
     def _patch_sources(self):
