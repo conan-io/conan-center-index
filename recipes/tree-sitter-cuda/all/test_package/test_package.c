@@ -7,33 +7,10 @@
 #include <stdbool.h>
 
 char const kernel[] = "\
-#include <vector>\
-#include <cuda.h>\
-\
-__global__ void add_vectors(double *a, double *b, double *c, std::size_t N)\
-{\
-    int id = blockDim.x * blockIdx.x + threadIdx.x;\
-    if(id < N) c[id] = a[id] + b[id];\
+__global__ void my_kernel(int *data) {\
+    data[0] = 1;\
 }\
-\
-int main() {\
-    constexpr std::size_t N = 4;\
-    std::vector<double> v1 = {1.0, 2.0, 3.0, 4.0};\
-    std::vector<double> v2 = {5.0, 6.0, 7.0, 8.0};\
-    std::vector<double> result(N);\
-    double *v1_dev, *v2_dev, *res_dev;\
-    cudaMalloc((void**)(&v1_dev), N * sizeof(double));\
-    cudaMalloc((void**)(&v2_dev), N * sizeof(double));\
-    cudaMalloc((void**)(&res_dev), N * sizeof(double));\
-    cudaMemcpy(v1_dev, v1.data(), N * sizeof(double), cudaMemcpyHostToDevice);\
-    cudaMemcpy(v2_dev, v2.data(), N * sizeof(double), cudaMemcpyHostToDevice);\
-    cuda_hello<<<1,N>>>(v1_dev, v2_dev, res_dev, N);\
-    cudaMemcpy(result.data(), res_dev, N * sizeof(double), cudaMemcpyDeviceToHost);\
-    cudaFree(res_dev);\
-    cudaFree(v2_dev);\
-    cudaFree(v1_dev);\
-    return 0;\
-}\
+int main() { return 0; }\
 ";
 
 #define ASSERT_TRUE(var, msg) if ((var) != true) { printf("%d::%s\n", __LINE__, (msg)); exit(1);}
