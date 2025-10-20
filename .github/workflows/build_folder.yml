@@ -56,7 +56,7 @@ jobs:
       references: ${{ steps.find_versions.outputs.result }}
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: '22.x'
       - run: npm ci
