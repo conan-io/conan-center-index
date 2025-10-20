@@ -11,7 +11,7 @@ class TreeSitterCUDAConan(ConanFile):
     description = "CUDA C++ grammar for tree-sitter"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://tree-sitter.github.io/tree-sitter"
+    homepage = "https://github.com/tree-sitter-grammars/tree-sitter-cuda"
     topics = ("tree-sitter", "parser", "cuda")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
