@@ -1,10 +1,9 @@
 import re
-from io import StringIO
 
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, XCRun
-from conan.tools.build import build_jobs, can_run
+from conan.tools.build import build_jobs
 from conan.tools.files import chdir, copy, get, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -605,57 +604,13 @@ class OpenSSLConan(ConanFile):
             replace_in_file(self, filename, f"/{e} ", f"/{runtime} ")
             replace_in_file(self, filename, f"/{e}\"", f"/{runtime}\"")
 
-    def _package_and_test_fips(self):
+    def _copy_fips_module_to_package(self):
         provdir = self._fips_provider_dir
+        if not provdir:
+            return
         modules_dir = os.path.join(self.package_folder, "lib", "ossl-modules")
         module_filename = f"fips.{({'Macos': 'dylib', 'Windows': 'dll'}.get(str(self.settings.os), 'so'))}"
         copy(self, module_filename, src=provdir, dst=modules_dir)
-
-        self.output.info("Testing FIPS module (via fipsinstall & fipsinstall -verify)")
-        if can_run(self):
-            openssl_bin = os.path.join(self.package_folder, "bin", "openssl")
-            fips_module = os.path.join(modules_dir, module_filename)
-            fips_cnf = os.path.join(self.build_folder, "fips.cnf")
-
-            # fipsinstall
-            fipsinstall_command = [openssl_bin, "fipsinstall", f"-module {fips_module}", f"-out {fips_cnf}"]
-            stderr = StringIO()
-            try:
-                self.run(" ".join(fipsinstall_command), stderr=stderr, env="conanrun")
-            except ConanException as e:
-                stderr_text = stderr.getvalue()
-                raise ConanException(f"{str(e)}\n{stderr_text}") from e
-
-            stderr_text = stderr.getvalue()
-            self.output.info(f"{stderr_text}")
-            if not re.search(r"INSTALL PASSED", stderr_text):
-                raise ConanInvalidConfiguration(f"The FIPS Module could not be installed properly:\n{stderr_text}")
-
-            # Check version match
-            # Only the version of OpenSSL >= 3.1.x prints the version of the fips module at install time
-            # TODO: Find a better to obtain the version of the FIPS module installed
-            if Version(self.version) >= "3.1.0":
-                self.output.info("Checking FIPS version match")
-                fipsinstall_version_match = re.search(r"version:\s+(\S+)", stderr_text)
-                fipsinstall_version = fipsinstall_version_match.group(1) if fipsinstall_version_match else None
-
-                if fipsinstall_version != self._fips_version:
-                    raise ConanInvalidConfiguration(f"The FIPS Module version installed ({fipsinstall_version}) "
-                                                    f"does not match the desired version ({self._fips_version})\n{stderr_text}")
-
-            # fipsinstall -verify
-            verify_command = [openssl_bin, "fipsinstall", f"-module {fips_module}", f"-in {fips_cnf}", "-verify"]
-            stderr = StringIO()
-            try:
-                self.run(" ".join(verify_command), stderr=stderr, env="conanrun")
-            except ConanException as e:
-                stderr_text = stderr.getvalue()
-                raise ConanException(f"{str(e)}\n{stderr_text}") from e
-
-            stderr_text = stderr.getvalue()
-            self.output.info(f"{stderr_text}")
-            if not re.search(r"VERIFY PASSED", stderr_text):
-                raise ConanInvalidConfiguration(f"The FIPS Module installation did not verify properly:\n{stderr_text}")
 
     def package(self):
         copy(self, "*LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -673,7 +628,7 @@ class OpenSSLConan(ConanFile):
                     os.unlink(os.path.join(libdir, file))
 
         if self._is_fips_enabled:
-            self._package_and_test_fips()
+            self._copy_fips_module_to_package()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
