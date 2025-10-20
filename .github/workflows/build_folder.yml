@@ -59,6 +59,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '22.x'
+          cache: 'npm'
       - run: npm ci
       - uses: actions/github-script@v8
         id: find_versions
