@@ -147,8 +147,8 @@ class FltkConan(ConanFile):
                 "AppKit", "ApplicationServices", "Carbon", "Cocoa", "CoreFoundation", "CoreGraphics",
                 "CoreText", "CoreVideo", "Foundation", "IOKit",
             ]
-            if "Cocoa" in self.cpp_info.frameworks and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "13":
-                self.cpp_info.frameworks.append("ScreenCaptureKit")
+            self.cpp_info.sharedlinkflags.append("-Wl,-weak_framework,ScreenCaptureKit")
+            self.cpp_info.exelinkflags.append("-Wl,-weak_framework,ScreenCaptureKit")
             if self.options.with_gl:
                 self.cpp_info.frameworks.append("OpenGL")
         elif self.settings.os == "Windows":
