@@ -166,10 +166,11 @@ jobs:
               then
                 echo "compiler.cppstd=$cpp_std" >> $PROFILE_PATH
               fi
+              echo "CODE=0" >> "$GITHUB_OUTPUT"
               exit 0
             fi
           done
-          exit 6
+          echo "CODE=6" >> "$GITHUB_OUTPUT"
         id: conan_install
         name: Conan Graph
         shell: bash
