@@ -1,0 +1,12 @@
+diff -Naur grpc-1.50.0-orig/src/core/lib/promise/detail/basic_seq.h grpc-1.50.0-fixed/src/core/lib/promise/detail/basic_seq.h
+--- a/src/core/lib/promise/detail/basic_seq.h	2022-10-11 18:49:25.000000000 +0000
++++ b/src/core/lib/promise/detail/basic_seq.h	2025-10-08 13:40:56.030009213 +0000
+@@ -496,7 +496,7 @@
+           cur_ = next;
+           state_.~State();
+           Construct(&state_,
+-                    Traits::template CallSeqFactory(f_, *cur_, std::move(arg)));
++                    Traits::template CallSeqFactory<>(f_, *cur_, std::move(arg)));
+           return PollNonEmpty();
+         });
+   }
