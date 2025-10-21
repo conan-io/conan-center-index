@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 import os
 
 required_conan_version = ">=2.0"
@@ -89,6 +89,9 @@ class OsgearthConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_CXX_STANDARD 17)",
+                        "# set(CMAKE_CXX_STANDARD 17)")
 
     def _get_library_postfix(self, build_type: str) -> str:
         # We want our library postfix (that is, the value of the CMAKE_*_POSTFIX CMake variable for
