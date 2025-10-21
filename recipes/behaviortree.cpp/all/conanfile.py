@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, copy, rmdir, replace_in_file, rm
+from conan.tools.files import get, copy, rmdir, replace_in_file, rm, apply_conandata_patches, export_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -58,6 +58,9 @@ class BehaviorTreeCPPConan(ConanFile):
             "Visual Studio": "16",
         }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -71,6 +74,9 @@ class BehaviorTreeCPPConan(ConanFile):
             self.requires("cppzmq/4.11.0")
         if self.options.enable_sqlite_logging:
             self.requires("sqlite3/3.50.4")
+        if self.options.with_tools:
+            self.requires("zeromq/4.3.5")
+
 
     def validate(self):
         if self.info.settings.os == "Windows" and self.info.options.shared:
@@ -119,9 +125,12 @@ class BehaviorTreeCPPConan(ConanFile):
         cmd = CMakeDeps(self)
         # Override flatbuffer's target name since it could also be  flatbuffers::flatbuffers_shared
         cmd.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
+        # Override zeromq's target name since it could also be libzmq-static
+        cmd.set_property("zeromq", "cmake_target_name", "libzmq")
         cmd.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         # Let Conan handle -fPIC
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_POSITION_INDEPENDENT_CODE ON)\n", "")
         # Remove vendored code, just in case
