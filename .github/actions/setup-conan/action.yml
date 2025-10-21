@@ -48,6 +48,7 @@ runs:
           "/c/Program Files/MySQL"
           "/c/Program Files/Amazon"
           "/c/tools/php"
+          "/c/mingw64"
         )
         rm -f /c/Windows/System32/libssl-*.dll
         rm -f /c/Windows/System32/libcrypto-*.dll
