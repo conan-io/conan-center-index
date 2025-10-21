@@ -53,7 +53,7 @@ class OsgearthConan(ConanFile):
         export_conandata_patches(self)
 
     def validate(self):
-        check_min_cppstd(self, 14)
+        check_min_cppstd(self, 17)
 
     def configure(self):
         if self.options.shared:
