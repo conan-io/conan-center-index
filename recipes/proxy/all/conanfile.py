@@ -51,6 +51,9 @@ class ProxyConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.28 <5]")
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_TESTING"] = False
