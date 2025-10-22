@@ -48,7 +48,13 @@ class WaylandppScannerConan(ConanFile):
         pkg_config_deps.generate()
 
         tc = CMakeToolchain(self)
-        tc.cache_variables.update({"BUILD_SCANNER": True, "BUILD_LIBRARIES": False})
+        tc.cache_variables.update(
+            {
+                "BUILD_SCANNER": True,
+                "BUILD_LIBRARIES": False,
+                "BUILD_DOCUMENTATION": False,
+            }
+        )
         tc.generate()
 
         deps = CMakeDeps(self)
