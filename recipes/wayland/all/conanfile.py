@@ -37,6 +37,12 @@ class WaylandConan(ConanFile):
         "enable_dtd_validation": True,
     }
 
+    def config_options(self):
+        if self.settings.os not in ("Linux", "Android"):
+            # wayland scanner is still useful for
+            # cross compilation
+            self.options.rm_safe("enable_libraries")
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -47,15 +53,11 @@ class WaylandConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.enable_libraries:
+        if self.options.get_safe("enable_libraries"):
             self.requires("libffi/[>=3.4.4 <4]")
         if self.options.enable_dtd_validation:
             self.requires("libxml2/[>=2.12.5 <3]")
         self.requires("expat/[>=2.6.2 <3]")
-
-    def validate(self):
-      if self.settings.os not in ("Linux", "Android"):
-            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux or Android")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.4.0 <2]")
@@ -84,8 +86,8 @@ class WaylandConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options["libdir"] = "lib"
         tc.project_options["datadir"] = "res"
-        tc.project_options["libraries"] = self.options.enable_libraries
-        tc.project_options["dtd_validation"] = self.options.enable_dtd_validation
+        tc.project_options["libraries"] = self.options.get_safe("enable_libraries", False)
+        tc.project_options["dtd_validation"] = bool(self.options.enable_dtd_validation)
         tc.project_options["documentation"] = False
         if not can_run(self):
             tc.project_options["build.pkg_config_path"] = self.generators_folder
@@ -128,7 +130,7 @@ class WaylandConan(ConanFile):
             "pkg_config_custom_content",
             "\n".join(f"{key}={value}" for key,value in pkgconfig_variables.items()))
 
-        if self.options.enable_libraries:
+        if self.options.get_safe("enable_libraries"):
             self.cpp_info.components["wayland-server"].libs = ["wayland-server"]
             self.cpp_info.components["wayland-server"].set_property("pkg_config_name", "wayland-server")
             self.cpp_info.components["wayland-server"].requires = ["libffi::libffi"]
