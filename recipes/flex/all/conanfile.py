@@ -68,6 +68,7 @@ class FlexConan(ConanFile):
             # https://github.com/easybuilders/easybuild-easyconfigs/pull/5792
             "ac_cv_func_reallocarray=no",
         ])
+        at.extra_ldflags.append("-headerpad_max_install_names")
         at.generate()
 
     def build(self):
@@ -90,10 +91,5 @@ class FlexConan(ConanFile):
         # Avoid CMakeDeps messing with Conan targets
         self.cpp_info.set_property("cmake_find_mode", "none")
 
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
-
-        lex_path = os.path.join(bindir, "flex").replace("\\", "/")
-        self.output.info("Setting LEX environment variable: {}".format(lex_path))
-        self.env_info.LEX = lex_path
+        lex_path = os.path.join(self.package_folder, "bin", "flex").replace("\\", "/")
+        self.buildenv_info.define("LEX", lex_path)
