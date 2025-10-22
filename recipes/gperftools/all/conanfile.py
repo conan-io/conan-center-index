@@ -255,12 +255,10 @@ class GperftoolsConan(ConanFile):
         if not self.options.shared:
             replace_in_file(self, vcxproj_file,
                 "<ConfigurationType>DynamicLibrary</ConfigurationType>",
-                "<ConfigurationType>StaticLibrary</ConfigurationType>", strict=False
+                "<ConfigurationType>StaticLibrary</ConfigurationType>"
             )
         #dont override config in MSBuildToolchain
-        replace_in_file(self, vcxproj_file, "<WindowsTargetPlatformVersion>10</WindowsTargetPlatformVersion>", "", strict=False)
-        replace_in_file(self, vcxproj_file, "<RuntimeLibrary>MultiThreaded</RuntimeLibrary>", "", strict=False)
-        replace_in_file(self, vcxproj_file, "<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>", "", strict=False)
+        replace_in_file(self, vcxproj_file, "<RuntimeLibrary>MultiThreaded</RuntimeLibrary>", "")
         replace_in_file(self, vcxproj_file, "<PlatformToolset>v142</PlatformToolset>", "")
 
     def build(self):
