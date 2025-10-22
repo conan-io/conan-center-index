@@ -33,10 +33,6 @@ class WaylandppScannerConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 11)
-        if self.settings.os not in ("Linux", "Android"):
-            raise ConanInvalidConfiguration(
-                f"{self.ref} only supports Linux or Android"
-            )
 
     def build_requirements(self):
         # https://github.com/NilsBrause/waylandpp/issues/97
