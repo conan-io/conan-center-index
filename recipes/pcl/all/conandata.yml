@@ -17,6 +17,7 @@ patches:
       patch_description: "Compatibility with clang-19"
       patch_source: "https://github.com/PointCloudLibrary/pcl/pull/6113"
       patch_type: "portability"
+    - patch_file: "patches/1.14.1-0007-improve-sse-avx-detection-arm.patch"
   "1.13.1":
     - patch_file: "patches/1.13.1-0001-cmake_use_conan_targets.patch"
       patch_description: "Update PCL CMake files to work with Conan"
