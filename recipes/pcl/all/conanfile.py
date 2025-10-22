@@ -595,8 +595,12 @@ class PclConan(ConanFile):
             # Assuming SSE4.2 extensions
             if not is_msvc(self):
                 self.cpp_info.cxxflags.append("-msse4.2")
+            else:
+                # we do not need cxxflags, but SSE defines
+                self.cpp_info.defines.extend(["__SSE4_2__", "__SSE4_1__", "__SSSE3__",
+                                              "__SSE3__", "__SSE2__", "__SSE__"])
         if self.options.get_safe("use_avx"):
-            # Assuming AVX2
+            # Assuming AVX2 and modern MSVC/GCC versions
             self.cpp_info.cxxflags.append("/arch:AVX2" if is_msvc(self) else "-mavx2")
 
         common = self.cpp_info.components["common"]
