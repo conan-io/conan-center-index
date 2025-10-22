@@ -41,6 +41,7 @@ class FlexConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("m4/1.4.19")
+        self.tool_requires("gnu-config/cci.20210814")
         if hasattr(self, "settings_build") and cross_building(self):
             self.tool_requires(f"{self.name}/{self.version}")
 
@@ -71,8 +72,19 @@ class FlexConan(ConanFile):
         at.extra_ldflags.append("-headerpad_max_install_names")
         at.generate()
 
+    def _patch_sources_autotools(self):
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                copy(self, os.path.basename(gnu_config),
+                     src=os.path.dirname(gnu_config),
+                     dst=os.path.join(self.source_folder, "config"))
+
     def build(self):
         apply_conandata_patches(self)
+        self._patch_sources_autotools()
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
