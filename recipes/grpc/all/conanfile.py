@@ -108,6 +108,9 @@ class GrpcConan(ConanFile):
         elif Version(self.version) >= "1.62.0" and Version(self.version) <= "1.65.0":
             self.requires("protobuf/5.27.0", transitive_headers=True)
             self.requires("abseil/[>=20240116.1 <20240117.0]", transitive_headers=True, transitive_libs=True)
+        elif Version(self.version) >= "1.59.1":
+            self.requires("protobuf/4.25.3", transitive_headers=True)
+            self.requires("abseil/20250127.0", transitive_headers=True, transitive_libs=True)
         else:
             self.requires("abseil/[>=20230125.3 <=20230802.1]", transitive_headers=True, transitive_libs=True)
             self.requires("protobuf/3.21.12", transitive_headers=True)
@@ -160,7 +163,7 @@ class GrpcConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
-        
+
         # Let Conan define CMAKE_MSVC_RUNTIME_LIBRARY
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(cmake/msvc_static_runtime.cmake)", "")
 
