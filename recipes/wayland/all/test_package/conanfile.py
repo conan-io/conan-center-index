@@ -27,10 +27,15 @@ class TestPackageConan(ConanFile):
         pkg_config_deps = PkgConfigDeps(self)
         pkg_config_deps.generate()
 
+    @property
+    def _has_libraries(self):
+        return self.dependencies["wayland"].options.get_safe("enable_libraries")
+
     def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        if self._has_libraries:
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
         pkg_config = PkgConfig(self, "wayland-scanner", self.generators_folder)
         wayland_scanner = pkg_config.variables["wayland_scanner"]
@@ -38,6 +43,6 @@ class TestPackageConan(ConanFile):
             self.run(f"{wayland_scanner} --version", env="conanrun")
 
     def test(self):
-        if can_run(self):
+        if can_run(self) and self._has_libraries:
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
