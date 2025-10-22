@@ -147,6 +147,12 @@ class GperftoolsConan(ConanFile):
         if Version(self.version) >= "2.11.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration(f"{self.ref} does not support gcc < 7.")
 
+        if self.settings.os == "Windows" and Version(self.version) < "2.17.0":
+            #the tcmalloc.h need to recieve extra configuration prior to 2.17.0
+            raise ConanInvalidConfiguration(
+                f"{self.ref} does not currently support Windows. Contributions are welcome."
+            )
+
     def requirements(self):
         if self.options.get_safe("enable_libunwind", False):
             self.requires("libunwind/[>=1.6.2 <2]")
