@@ -52,7 +52,7 @@ class PackageConan(ConanFile):
                         "set(CMAKE_CXX_STANDARD 20)", "")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.20 <4]")
+        self.tool_requires("cmake/[>=3.20]")
 
     def generate(self):
         tc = CMakeToolchain(self)
