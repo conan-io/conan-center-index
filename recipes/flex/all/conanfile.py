@@ -69,7 +69,7 @@ class FlexConan(ConanFile):
             # https://github.com/easybuilders/easybuild-easyconfigs/pull/5792
             "ac_cv_func_reallocarray=no",
         ])
-        at.extra_ldflags.append("-headerpad_max_install_names")
+        at.extra_ldflags.append("-Wl,-headerpad_max_install_names")
         at.generate()
 
     def _patch_sources_autotools(self):
