@@ -1125,12 +1125,6 @@ class BoostConan(ConanFile):
             except ConanException:
                 pass
 
-        if Version(self.version) < "1.81.0" and \
-            self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= 17:
-            # boost/mpl/aux_/integral_wrapper.hpp:73:31: error:
-            # integer value -1 is outside the valid range of values [0, 3] for the enumeration type 'int_float_mixture_enum'
-            cxx_flags.append("-Wno-enum-constexpr-conversion")
-
         if self.options.error_code_header_only:
             flags.append("define=BOOST_ERROR_CODE_HEADER_ONLY=1")
         if self.options.system_no_deprecated:
