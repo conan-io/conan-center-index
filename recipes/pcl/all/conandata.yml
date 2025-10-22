@@ -40,3 +40,4 @@ patches:
       patch_source: "https://github.com/PointCloudLibrary/pcl/pull/6113"
       patch_type: "portability"
     - patch_file: "patches/1.13.1-0007-fix-move-bigobj-flag-msvc.patch"
+    - patch_file: "patches/1.13.1-0007-improve-sse-avx-detection-arm.patch"
