@@ -29,13 +29,9 @@ class OmathConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "avx2": False,
-        "imgui": True,
+        "imgui": False,
     }
     implements = ["auto_shared_fpic"]
-
-    @property
-    def _min_cppstd(self):
-        return 23
 
     @property
     def _compilers_minimum_version(self):
@@ -68,15 +64,7 @@ class OmathConan(ConanFile):
             self.requires("imgui/1.91.8")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
-
+        check_min_cppstd(self, 23)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
