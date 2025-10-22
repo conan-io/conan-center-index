@@ -591,18 +591,6 @@ class PclConan(ConanFile):
             for dep in self._external_optional_deps["tools"]:
                 component.requires += self._ext_dep_to_conan_target(dep)
 
-        if self.options.get_safe("use_sse"):
-            # Assuming SSE4.2 extensions
-            if not is_msvc(self):
-                self.cpp_info.cxxflags.append("-msse4.2")
-            else:
-                # we do not need cxxflags, but SSE defines
-                self.cpp_info.defines.extend(["__SSE4_2__", "__SSE4_1__", "__SSSE3__",
-                                              "__SSE3__", "__SSE2__", "__SSE__"])
-        if self.options.get_safe("use_avx"):
-            # Assuming AVX2 and modern MSVC/GCC versions
-            self.cpp_info.cxxflags.append("/arch:AVX2" if is_msvc(self) else "-mavx2")
-
         common = self.cpp_info.components["common"]
         if not self.options.shared:
             if self.settings.os in ["Linux", "FreeBSD"]:
@@ -619,3 +607,15 @@ class PclConan(ConanFile):
                         common.system_libs.append("gomp")
         if self.settings.os == "Windows":
             common.system_libs.append("ws2_32")
+
+        if self.options.get_safe("use_sse"):
+            # Assuming SSE4.2 extensions
+            if not is_msvc(self):
+                common.cxxflags.append("-msse4.2")
+            else:
+                # MSVC: we do not need cxxflags, but SSE defines
+                common.defines.extend(["__SSE4_2__", "__SSE4_1__", "__SSSE3__",
+                                       "__SSE3__", "__SSE2__", "__SSE__"])
+        if self.options.get_safe("use_avx"):
+            # Assuming AVX2 and modern MSVC/GCC versions
+            common.cxxflags.append("/arch:AVX2" if is_msvc(self) else "-mavx2")
