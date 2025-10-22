@@ -1,0 +1,4 @@
+sources:
+  "3.9.4":
+    url: "https://github.com/orange-cpp/omath/archive/refs/tags/v3.9.4.tar.gz"
+    sha256: "7e4409ac40dc44f3c587067063bc66ecfa81ee9b1eeeb23a33f3952371b4eccf"
