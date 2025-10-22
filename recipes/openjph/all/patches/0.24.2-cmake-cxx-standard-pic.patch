@@ -1,16 +1,3 @@
-diff --git src/apps/ojph_stream_expand/CMakeLists.txt src/apps/ojph_stream_expand/CMakeLists.txt
-index 61e8603..85c1d99 100644
---- src/apps/ojph_stream_expand/CMakeLists.txt
-+++ src/apps/ojph_stream_expand/CMakeLists.txt
-@@ -1,7 +1,7 @@
- ## building ojph_stream_expand
- ##############################
- 
--set(CMAKE_CXX_STANDARD 14)
-+#set(CMAKE_CXX_STANDARD 14)
- 
- file(GLOB OJPH_STREAM_EXPAND  "*.cpp" "*.h")
- file(GLOB OJPH_SOCKETS         "../others/ojph_sockets.cpp")
 diff --git src/core/CMakeLists.txt src/core/CMakeLists.txt
 index ea19aea..132a619 100644
 --- src/core/CMakeLists.txt
