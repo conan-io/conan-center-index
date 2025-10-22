@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, to_apple_arch, XCRun
-from conan.tools.build import build_jobs, cross_building, valid_min_cppstd, cppstd_flag, check_max_cppstd
+from conan.tools.build import build_jobs, cross_building, valid_min_cppstd, cppstd_flag
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches, chdir, collect_libs, copy, export_conandata_patches,
@@ -525,11 +525,6 @@ class BoostConan(ConanFile):
         # TODO: Revisit on Boost 1.87.0. Remove in case Process is fixed.
         if Version(self.version) == "1.86.0" and is_msvc(self) and self.options.get_safe("shared") and self.options.get_safe("without_process", None) == False:
             raise ConanInvalidConfiguration(f"{self.ref} Boost.Process will fail to be consumed as shared library on MSVC. See https://github.com/boostorg/process/issues/408.")
-
-        if Version(self.version) < "1.80.0":
-            # ./boost/container_hash/hash.hpp:132:33: error: no template named 'unary_function'
-            # std::unary_function is removed in C++17
-            check_max_cppstd(self, 14)
 
     def _with_dependency(self, dependency):
         """
@@ -1130,11 +1125,11 @@ class BoostConan(ConanFile):
             except ConanException:
                 pass
 
-        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= 17:
-            if Version(self.version) < "1.81.0":
-                # boost/mpl/aux_/integral_wrapper.hpp:73:31: error:
-                # integer value -1 is outside the valid range of values [0, 3] for the enumeration type 'int_float_mixture_enum'
-                cxx_flags.append("-Wno-enum-constexpr-conversion")
+        if Version(self.version) < "1.81.0" and \
+            self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= 17:
+            # boost/mpl/aux_/integral_wrapper.hpp:73:31: error:
+            # integer value -1 is outside the valid range of values [0, 3] for the enumeration type 'int_float_mixture_enum'
+            cxx_flags.append("-Wno-enum-constexpr-conversion")
 
         if self.options.error_code_header_only:
             flags.append("define=BOOST_ERROR_CODE_HEADER_ONLY=1")
