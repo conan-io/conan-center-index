@@ -1,7 +1,4 @@
 inputs:
-  artifactory-url:
-    description: 'Url of Artifactory instance'
-    required: false
   artifactory-token:
     description: 'Password to authenticate with Artifactory'
     required: false
@@ -12,11 +9,13 @@ name: 'Setup Conan'
 runs:
   using: "composite"
   steps:
+    - run: conan remote add community http://vps-313ae7f5.vps.ovh.net/artifactory/api/conan/conan-local -vtrace
+      shell: bash
+
     - run: |
-        conan remote add community ${CONAN_ARTIFACTORY_URL}
-        conan remote auth community --format=json | jq ".community | has(\"error\")" | grep -q "false"
+        conan remote auth community --format=json -vtrace --force | jq ".community | has(\"error\")" | grep -q "false"
       env:
         CONAN_LOGIN_USERNAME_COMMUNITY: ${{ inputs.artifactory-user }}
         CONAN_PASSWORD_COMMUNITY: ${{ inputs.artifactory-token }}
-        CONAN_ARTIFACTORY_URL: ${{ inputs.artifactory-url }}
       shell: bash
+      if: ${{ inputs.artifactory-user && inputs.artifactory-token }}

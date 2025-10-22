@@ -21,9 +21,6 @@ on:
         required: false
         default: false
     secrets:
-      ARTIFACTORY_URL:
-        description: 'Url of Artifactory instance'
-        required: true
       ARTIFACTORY_USER:
         description: 'User to authenticate with Artifactory'
         required: true
@@ -73,7 +70,6 @@ jobs:
 
       - uses: ./.github/actions/setup-remote
         with:
-          artifactory-url: ${{ secrets.ARTIFACTORY_URL }}
           artifactory-user: ${{ secrets.ARTIFACTORY_USER }}
           artifactory-token: ${{ secrets.ARTIFACTORY_TOKEN }}
         if: ${{ github.ref == 'refs/heads/community_index' }}
@@ -136,7 +132,6 @@ jobs:
           
       - uses: ./.github/actions/setup-remote
         with:
-          artifactory-url: ${{ secrets.ARTIFACTORY_URL }}
           artifactory-user: ${{ secrets.ARTIFACTORY_USER }}
           artifactory-token: ${{ secrets.ARTIFACTORY_TOKEN }}
 

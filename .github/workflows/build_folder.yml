@@ -21,9 +21,6 @@ on:
         required: false
         default: false
     secrets:
-      ARTIFACTORY_URL:
-        description: 'Url of Artifactory instance'
-        required: true
       ARTIFACTORY_USER:
         description: 'User to authenticate with Artifactory'
         required: true

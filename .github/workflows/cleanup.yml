@@ -20,7 +20,6 @@ jobs:
 
       - uses: ./.github/actions/setup-remote
         with:
-          artifactory-url: ${{ secrets.ARTIFACTORY_URL }}
           artifactory-user: ${{ secrets.ARTIFACTORY_USER }}
           artifactory-token: ${{ secrets.ARTIFACTORY_TOKEN }}
 
