@@ -1,10 +1,12 @@
+import glob
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, XCRun
+from conan.tools.microsoft import MSBuild, MSBuildToolchain, vs_layout, VCVars
 from conan.tools.build import cross_building, check_min_cppstd, stdcpp_library
 from conan.tools.cmake import cmake_layout
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import get, copy, rm, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, mkdir
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
 from conan.tools.scm import Version
 import os
@@ -62,6 +64,13 @@ class GperftoolsConan(ConanFile):
         return "11" if Version(self.version) < "2.16" else "17"
 
     @property
+    def _msbuild(self):
+        msbuild = MSBuild(self)
+        if msbuild.build_type == "Release":
+            msbuild.build_type = "Release-Patch"
+        return msbuild
+
+    @property
     def _compilers_minimum_version(self):
         return {
             "17": {
@@ -99,8 +108,32 @@ class GperftoolsConan(ConanFile):
             # enable_stacktrace_via_backtrace has no effect if libunwind is enabled
             self.options.rm_safe("enable_stacktrace_via_backtrace")
 
+        if self.settings.os == "Windows":
+            #we support only the minimum on windows and default config
+            self.options.rm_safe("fPIC")
+            self.options.rm_safe("build_cpu_profiler")
+            self.options.rm_safe("build_heap_profiler")
+            self.options.rm_safe("build_heap_checker")
+            self.options.rm_safe("build_debugalloc")
+            self.options.rm_safe("dynamic_sized_delete_support")
+            self.options.rm_safe("emergency_malloc")
+            self.options.rm_safe("enable_aggressive_decommit_by_default")
+            self.options.rm_safe("enable_frame_pointers")
+            self.options.rm_safe("enable_large_alloc_report")
+            self.options.rm_safe("enable_libunwind")
+            self.options.rm_safe("enable_stacktrace_via_backtrace")
+            self.options.rm_safe("sized_delete")
+            self.options.rm_safe("tcmalloc_alignment")
+            self.options.rm_safe("tcmalloc_pagesize")
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        if self.settings.os == "Windows":
+            vs_layout(self)
+        else:
+            cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -114,19 +147,23 @@ class GperftoolsConan(ConanFile):
         if Version(self.version) >= "2.11.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration(f"{self.ref} does not support gcc < 7.")
 
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(
-                f"{self.ref} does not currently support Windows. Contributions are welcome."
-            )
-
     def requirements(self):
         if self.options.get_safe("enable_libunwind", False):
             self.requires("libunwind/[>=1.6.2 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
+        if self.settings.os == "Windows":
+            ms = VCVars(self)
+            ms.generate()
+            tc = MSBuildToolchain(self)
+            tc.configuration = self._msbuild.build_type
+            tc.generate()
+            return
+        
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
@@ -185,6 +222,12 @@ class GperftoolsConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
+        if self.settings.os == "Windows":
+            self._patch_sources_msvc()
+        else:
+            self._patch_sources_unix()
+
+    def _patch_sources_unix(self):
         # Disable building of tests and benchmarks in Makefile
         for pattern in ["noinst_PROGRAMS = ", "TESTS = "]:
             replace_in_file(
@@ -194,21 +237,61 @@ class GperftoolsConan(ConanFile):
                 f"{pattern}\n_{pattern}",
             )
 
+    def _patch_sources_msvc(self):
+        conan_toolchain_path = os.path.join(self.generators_folder, "conantoolchain.props")
+        conan_toolchain_import = f'<Import Project="{conan_toolchain_path}"/>'
+        vcxproj_file = os.path.join(self.source_folder, "vsprojects", "libtcmalloc_minimal", "libtcmalloc_minimal.vcxproj")
+
+        replace_in_file(self, vcxproj_file,
+                        '<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />',
+                        f'{conan_toolchain_import}<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>')
+
+        if not self.options.shared:
+            replace_in_file(self, vcxproj_file,
+                "<ConfigurationType>DynamicLibrary</ConfigurationType>",
+                "<ConfigurationType>StaticLibrary</ConfigurationType>", strict=False
+            )
+        #dont override config in MSBuildToolchain
+        replace_in_file(self, vcxproj_file, "<WindowsTargetPlatformVersion>10</WindowsTargetPlatformVersion>", "", strict=False)
+        replace_in_file(self, vcxproj_file, "<RuntimeLibrary>MultiThreaded</RuntimeLibrary>", "", strict=False)
+        replace_in_file(self, vcxproj_file, "<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>", "", strict=False)
+        replace_in_file(self, vcxproj_file, "<PlatformToolset>v142</PlatformToolset>", "")
+
     def build(self):
         self._patch_sources()
-        autotools = Autotools(self)
-        autotools.configure()
-        autotools.make()
+
+        if self.settings.os == "Windows":
+            self._msbuild.build("gperftools.sln", targets=["libtcmalloc_minimal"])
+        else:
+            autotools = Autotools(self)
+            autotools.configure()
+            autotools.make()
 
     def package(self):
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        autotools = Autotools(self)
-        autotools.install()
 
-        rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        fix_apple_shared_install_name(self)
+        if self.settings.os == "Windows":
+            build_dir = os.path.join(self.build_folder, self._msbuild.platform, self._msbuild.build_type)
+            if self.options.shared:
+                copy(self, "*.dll", build_dir, os.path.join(self.package_folder, "bin"))
+            copy(self, "*.lib", build_dir, os.path.join(self.package_folder, "lib"))
+            copy(self, "*.pdb", build_dir, os.path.join(self.package_folder, "lib"))
+            copy(self, "*.exp", build_dir, os.path.join(self.package_folder, "lib"))
+
+            header_source_dir = os.path.join(self.build_folder, "src", "gperftools")
+            header_gperftools_install_dir =  os.path.join(self.package_folder, "include", "gperftools")
+
+            mkdir(self, header_gperftools_install_dir)
+            copy(self, "*.h", header_source_dir, header_gperftools_install_dir)
+
+        else:
+            autotools = Autotools(self)
+            autotools.install()
+
+            rmdir(self, os.path.join(self.package_folder, "share"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            fix_apple_shared_install_name(self)
 
     def _add_component(self, lib):
         self.cpp_info.components[lib].libs = [lib]
@@ -218,24 +301,25 @@ class GperftoolsConan(ConanFile):
 
     def package_info(self):
         self._add_component("tcmalloc_minimal")
-        if self.options.build_debugalloc:
-            self._add_component("tcmalloc_minimal_debug")
-        if self.options.build_heap_profiler or self.options.build_heap_checker:
-            self._add_component("tcmalloc")
+        if self.settings.os != "Windows":
             if self.options.build_debugalloc:
-                self._add_component("tcmalloc_debug")
-        if self.options.build_cpu_profiler:
-            self._add_component("profiler")
-            if "tcmalloc" in self.cpp_info.components:
-                self._add_component("tcmalloc_and_profiler")
+                self._add_component("tcmalloc_minimal_debug")
+            if self.options.build_heap_profiler or self.options.build_heap_checker:
+                self._add_component("tcmalloc")
+                if self.options.build_debugalloc:
+                    self._add_component("tcmalloc_debug")
+            if self.options.build_cpu_profiler:
+                self._add_component("profiler")
+                if "tcmalloc" in self.cpp_info.components:
+                    self._add_component("tcmalloc_and_profiler")
 
-        for component in self.cpp_info.components.values():
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                component.system_libs.extend(["pthread", "m"])
-                component.cflags.append("-pthread")
-                component.cxxflags.append("-pthread")
-            if self.options.get_safe("enable_libunwind"):
-                component.requires.append("libunwind::libunwind")
+            for component in self.cpp_info.components.values():
+                if self.settings.os in ["Linux", "FreeBSD"]:
+                    component.system_libs.extend(["pthread", "m"])
+                    component.cflags.append("-pthread")
+                    component.cxxflags.append("-pthread")
+                if self.options.get_safe("enable_libunwind"):
+                    component.requires.append("libunwind::libunwind")
 
         # Select the preferred library to link against by default
         main_component = self.cpp_info.components["gperftools"]
@@ -251,3 +335,7 @@ class GperftoolsConan(ConanFile):
                 if lib != "tcmalloc_and_profiler" and "profiler" in self.cpp_info.components:
                     main_component.requires.append("profiler")
                 break
+
+        if self.settings.os == "Windows" and not self.options.shared:
+            for component in self.cpp_info.components.values():
+                component.defines.append("PERFTOOLS_DLL_DECL=")
