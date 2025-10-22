@@ -152,7 +152,7 @@ jobs:
             then
               continue
             fi
-            conan graph info $ARG --require=$REF ${{ env.CLI_ARGS }} --format=json > graph.json
+            conan graph info $ARG --require=${{ env.REF }} --build=missing --build=${{ env.REF }} ${{ env.CLI_ARGS }} --format=json > graph.json
             if jq -e 'any(.graph.nodes[]; .binary == "Invalid")' graph.json
             then
               continue
