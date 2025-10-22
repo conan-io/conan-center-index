@@ -18,14 +18,12 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def _assert_expected_version(self):
-
         def tested_reference_version():
             tokens = re.split('[@#]', self.tested_reference_str)
             return tokens[0].split("/", 1)[1]
 
         output = StringIO()
-        flex = VirtualBuildEnv(self).vars().get("LEX")
-        self.run(f"{flex} --version", output)
+        self.run(f"flex --version", output, env="conanrun")
         output_str = str(output.getvalue())
         self.output.info("Installed version: {}".format(output_str))
         expected_version = tested_reference_version()
@@ -35,21 +33,19 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # INFO: Pass flex path to CMake, otherwise will need to add tool_requires(flex) for FindFLEX.cmake
         tc.cache_variables["FLEX_EXECUTABLE"] = os.path.join(self.dependencies["flex"].cpp_info.bindir, "flex")
         tc.generate()
-        CMakeDeps(self).generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        # Let's check flex version installed
-        self._assert_expected_version()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-        
 
     def test(self):
         if can_run(self):
+            self._assert_expected_version()
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             txt_file = os.path.join(self.source_folder, "basic_nr.txt")
             self.run(f"{bin_path} {txt_file}", env="conanrun")
