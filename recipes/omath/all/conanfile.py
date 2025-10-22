@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, apply_conandata_patches
+from conan.tools.files import copy, get
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -55,7 +55,7 @@ class OmathConan(ConanFile):
 
     def configure(self):
         if is_msvc(self):
-            del self.options.shared
+            self.options.rm_safe("shared")
             self.package_type = "static-library"
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -80,7 +80,6 @@ class OmathConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -91,7 +90,7 @@ class OmathConan(ConanFile):
         tc.variables["OMATH_THREAT_WARNING_AS_ERROR"] = False
         tc.variables["OMATH_BUILD_BENCHMARK"] = False
         tc.variables["OMATH_BUILD_EXAMPLES"] = False
-        tc.variables["OMATH_BUILD_AS_SHARED_LIBRARY"] = self.options.shared
+        tc.variables["OMATH_BUILD_AS_SHARED_LIBRARY"] = self.options.get_safe("shared")
         tc.generate()
         
         deps = CMakeDeps(self)
