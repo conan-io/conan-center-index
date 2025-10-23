@@ -128,6 +128,12 @@ class BoringSSLConan(ConanFile):
                 "boringssl_prefix and boringssl_prefix_symbols must be specified together."
             )
 
+        # Block shared builds on Windows (avoid C4251 / unstable ABI surface)
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration(
+                "Shared builds on Windows are not supported for BoringSSL in this recipe."
+            )
+
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)], strip_root=True)
         apply_conandata_patches(self)
