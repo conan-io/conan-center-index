@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.files import get, rmdir, copy, rm, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import AutotoolsToolchain, Autotools
