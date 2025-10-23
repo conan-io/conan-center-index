@@ -71,7 +71,8 @@ class OpenAPVConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "OpenAPV")
         self.cpp_info.set_property("pkg_config_name", "OpenAPV")
 
-        self.cpp_info.libdirs = ["lib/oapv"]
+        if not self.options.shared:
+            self.cpp_info.libdirs = ["lib/oapv"]
         self.cpp_info.libs = ["oapv"]
 
         if not self.options.shared:
