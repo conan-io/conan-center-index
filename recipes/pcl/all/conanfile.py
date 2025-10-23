@@ -526,6 +526,9 @@ class PclConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         'if(PCL_ENABLE_SSE AND "${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")',
                         'if(PCL_ENABLE_SSE)')
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'if("${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")',
+                        'if(1)')
 
     def build(self):
         cmake = CMake(self)
