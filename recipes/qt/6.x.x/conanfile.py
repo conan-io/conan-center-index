@@ -80,9 +80,6 @@ class QtConan(ConanFile):
     options.update({module: [True, False] for module in _submodules})
     options.update({f"{status}_modules": [True, False] for status in _module_statuses})
 
-    # this significantly speeds up windows builds
-    no_copy_source = True
-
     default_options = {
         "shared": False,
         "opengl": "desktop",
@@ -263,6 +260,10 @@ class QtConan(ConanFile):
 
         for option in self.options.items():
             self.output.debug(f"qt6 option: {option}")
+
+        # no_copy_source slightly speeds up Linux builds.
+        # no_copy_source causes long relative paths, hitting Window's PATH limit when building Qt WebEngine.
+        self.no_copy_source = not (self.settings_build.os == "Windows" and self.options.get_safe("qtwebengine"))
 
     def validate_build(self):
         check_min_cppstd(self, 17)
@@ -479,8 +480,10 @@ class QtConan(ConanFile):
         if not cross_building(self):
             vre = VirtualRunEnv(self)
             vre.generate(scope="build")
-        # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
         env = Environment()
+        # Tell Python to assume UTF-8 encoding to work around character encoding issues while building Qt WebEngine on Polish locale on Windows.
+        env.define("PYTHONUTF8", "1")
+        # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
         env.unset("VCPKG_ROOT")
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         env.vars(self).save_script("conanbuildenv_pkg_config_path")
