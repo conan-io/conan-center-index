@@ -48,6 +48,9 @@ class LibmemConan(ConanFile):
             if api_level and Version(api_level) < "24":
                 raise ConanInvalidConfiguration(f"{self.ref} requires Android NDK API level >= 24")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.22 <4]")
+
     def requirements(self):
         self.requires("capstone/5.0.6")
         self.requires("keystone/0.9.2")
