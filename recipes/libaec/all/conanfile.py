@@ -89,8 +89,10 @@ class LibaecConan(ConanFile):
         copy(self, "*.h", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
         copy(self, "libaec.h", os.path.join(self.build_folder, "include"), os.path.join(self.package_folder, "include"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))              # top-level (just in case)
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))       # <-- remove lib/cmake tree
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libaec")
