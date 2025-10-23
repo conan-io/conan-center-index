@@ -20,7 +20,8 @@ class OpenVDBConan(ConanFile):
         "structure and a large suite of tools for the efficient storage and "
         "manipulation of sparse volumetric data discretized on three-dimensional grids."
     )
-    license = "MPL-2.0"
+    # The license is defined in the config_options as it depends on the package version.
+    # (openvdb < 12 is MPL-2.0 licensed, openvdb >= 12 is Apache-2 licensed.)
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/AcademySoftwareFoundation/openvdb"
     topics = ("voxel", "voxelizer", "volume-rendering", "fx", "vdb")
@@ -97,6 +98,9 @@ class OpenVDBConan(ConanFile):
         }
 
     def config_options(self):
+        # Setting license conditionally as OpenVDB 12.0.0 switched from MPL 2 to Apache 2.
+        self.license = "Apache-2.0" if Version(self.version) >= "12.0" else "MPL-2.0"
+
         if self.settings.os == "Windows":
             del self.options.fPIC
         if is_msvc(self):
