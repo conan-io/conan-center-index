@@ -492,6 +492,7 @@ class PclConan(ConanFile):
             tc.cache_variables[f"BUILD_{comp}"] = False
 
         tc.cache_variables["PCL_ENABLE_SSE"] = self.options.get_safe("use_sse", False)
+        tc.cache_variables["PCL_ENABLE_MARCHNATIVE"] = False
         tc.cache_variables["PCL_ENABLE_AVX"] = self.options.get_safe("use_avx", False)
         # Let's skip the AVX2 check as it fails when cross-building from ARM to AMD
         # because of the -march=native flag, but -mavx2 actually works
