@@ -1,9 +1,4 @@
 sources:
-  "0.2.0.3":
-    url: "https://github.com/AcademySoftwareFoundation/openapv/archive/refs/tags/v0.2.0.3.tar.gz"
-    sha256: "9da0f758534d6243cd6e5c5ca46404e6fdd7e298a17da50b676b71c53ce6a083"
-patches:
-  "0.2.0.3":
-    - patch_file: "patches/0.2.0.3_conan-cmake.patch"
-      patch_description: "Ensure project builds correctly with Conan (small fixes for CMake not to use project specific target folders etc.)"
-      patch_type: "conan"
+  "0.2.0.4":
+    url: "https://github.com/AcademySoftwareFoundation/openapv/archive/refs/tags/v0.2.0.4.tar.gz"
+    sha256: "1d8d31b0758d4b968d9b2ab483b3edb6de3440edcb27f14801ef42d6f2368e55"

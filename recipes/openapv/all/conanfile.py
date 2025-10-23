@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
+from conan.tools.files import copy, get, rm, rmdir
 
 import os
 
@@ -25,8 +25,8 @@ class OpenAPVConan(ConanFile):
         "fPIC": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
+    # def export_sources(self):
+    #     export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -41,7 +41,7 @@ class OpenAPVConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
+        # apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -63,11 +63,15 @@ class OpenAPVConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "msvcp*.dll", os.path.join(self.package_folder, "bin"))
+        rm(self, "concrt*.dll", os.path.join(self.package_folder, "bin"))
+        rm(self, "vcruntime*.dll", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenAPV")
         self.cpp_info.set_property("pkg_config_name", "OpenAPV")
 
+        self.cpp_info.libdirs = ["lib/oapv"]
         self.cpp_info.libs = ["oapv"]
 
         if not self.options.shared:
