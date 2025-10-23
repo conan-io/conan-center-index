@@ -140,7 +140,7 @@ class Open62541Conan(ConanFile):
         "hardening": True,
         "cpp_compatible": False,
         "readable_statuscodes": True,
-        "parsing": False,
+        "parsing": True,
         "nodeset_loader": False,
     }
 
