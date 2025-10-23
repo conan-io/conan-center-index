@@ -25,9 +25,6 @@ class OpenAPVConan(ConanFile):
         "fPIC": True,
     }
 
-    # def export_sources(self):
-    #     export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -41,7 +38,6 @@ class OpenAPVConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        # apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -71,9 +67,11 @@ class OpenAPVConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "OpenAPV")
         self.cpp_info.set_property("pkg_config_name", "OpenAPV")
 
-        if not self.options.shared:
-            self.cpp_info.libdirs = ["lib/oapv"]
         self.cpp_info.libs = ["oapv"]
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.libdirs = ["lib/oapv/import"]
+        elif not self.options.shared:
+            self.cpp_info.libdirs = ["lib/oapv"]
 
         if not self.options.shared:
             self.cpp_info.defines.append("OAPV_STATIC_DEFINE")
