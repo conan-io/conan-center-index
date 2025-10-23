@@ -611,7 +611,7 @@ class PclConan(ConanFile):
         if self.options.get_safe("use_sse"):
             # Assuming SSE4.2 extensions
             if not is_msvc(self):
-                common.cxxflags.append("-msse4.2")
+                common.cxxflags.extend(["-msse4.2", "-mfpmath=sse"])
             else:
                 # MSVC: we do not need cxxflags, but SSE defines
                 common.defines.extend(["__SSE4_2__", "__SSE4_1__", "__SSSE3__",
