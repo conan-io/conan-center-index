@@ -36,8 +36,8 @@ class ArrowConan(ConanFile):
         "filesystem_layer":  [True, False],
         "hdfs_bridgs": [True, False],
         "plasma": [True, False, "deprecated"],
-        "simd_level": [None, "default", "sse4_2", "avx2", "avx512", "neon", ],
-        "runtime_simd_level": [None, "sse4_2", "avx2", "avx512", "max"],
+        "simd_level": ["default", "sse4_2", "avx2", "avx512", "neon", "disabled"],
+        "runtime_simd_level": ["sse4_2", "avx2", "avx512", "max", "disabled"],
         "with_backtrace": [True, False],
         "with_boost": ["auto", True, False],
         "with_csv": [True, False],
@@ -83,8 +83,8 @@ class ArrowConan(ConanFile):
         "filesystem_layer": True,
         "hdfs_bridgs": False,
         "plasma": "deprecated",
-        "simd_level": "default",
-        "runtime_simd_level": "max",
+        #"simd_level": "default", # see config_options
+        # "runtime_simd_level": "max", # see config_options
         "with_backtrace": False,
         "with_boost": True,
         "with_brotli": False,
@@ -134,6 +134,16 @@ class ArrowConan(ConanFile):
         if Version(self.version) >= "19.0.0":
             self.options.with_mimalloc = True
 
+        if is_msvc(self) and self.settings.arch == "armv8":
+            # xsimd does not yet support msvc+arm64
+            # see: https://github.com/xtensor-stack/xsimd/issues/611
+            # see: https://github.com/xtensor-stack/xsimd/pull/612
+            self.options.simd_level = "disabled"
+            self.options.runtime_simd_level = "disabled"
+        else:
+            self.options.simd_level = "default"
+            self.options.runtime_simd_level = "max"
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -153,9 +163,9 @@ class ArrowConan(ConanFile):
         if self.options.with_jemalloc:
             self.requires("jemalloc/5.3.0")
         if self.options.with_mimalloc:
-            self.requires("mimalloc/1.7.6")
+            self.requires("mimalloc/[>=1.7.6 <3]")
         if self.options.with_boost:
-            self.requires("boost/1.85.0")
+            self.requires("boost/[>=1.85.0 <=1.88.0]")
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
         if self.options.with_glog:
@@ -165,7 +175,7 @@ class ArrowConan(ConanFile):
         if self.options.with_grpc:
             self.requires("grpc/1.50.0")
         if self._requires_rapidjson():
-            self.requires("rapidjson/1.1.0")
+            self.requires("rapidjson/[>=cci.20230929]")
         if self.options.with_llvm:
             self.requires("llvm-core/13.0.0")
         if self.options.with_openssl:
@@ -186,9 +196,8 @@ class ArrowConan(ConanFile):
             self.requires("lz4/1.9.4")
         if self.options.with_snappy:
             self.requires("snappy/1.1.9")
-        if self.options.get_safe("simd_level") != None or \
-                self.options.get_safe("runtime_simd_level") != None:
-                self.requires("xsimd/13.0.0")
+        if self.options.simd_level != "disabled" or self.options.runtime_simd_level != "disabled":
+            self.requires("xsimd/13.0.0")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
@@ -339,8 +348,10 @@ class ArrowConan(ConanFile):
         tc.variables["xsimd_SOURCE"] = "SYSTEM"
         tc.variables["ARROW_WITH_ZSTD"] = bool(self.options.with_zstd)
         tc.variables["zstd_SOURCE"] = "SYSTEM"
-        tc.variables["ARROW_SIMD_LEVEL"] = str(self.options.simd_level).upper()
-        tc.variables["ARROW_RUNTIME_SIMD_LEVEL"] = str(self.options.runtime_simd_level).upper()
+        simd_level = self.options.simd_level
+        runtime_simd_level = self.options.runtime_simd_level
+        tc.cache_variables["ARROW_SIMD_LEVEL"] = str(simd_level).upper() if simd_level != "disabled" else "NONE"
+        tc.cache_variables["ARROW_RUNTIME_SIMD_LEVEL"] = str(runtime_simd_level).upper() if runtime_simd_level != "disabled" else "NONE"
         if self.options.with_zstd:
             tc.variables["ARROW_ZSTD_USE_SHARED"] = bool(self.dependencies["zstd"].options.shared)
         tc.variables["ORC_SOURCE"] = "SYSTEM"
@@ -546,7 +557,7 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("lz4::lz4")
         if self.options.with_snappy:
             self.cpp_info.components["libarrow"].requires.append("snappy::snappy")
-        if self.options.get_safe("simd_level") != None or self.options.get_safe("runtime_simd_level") != None:
+        if self.options.simd_level != "disabled" or self.options.runtime_simd_level != "disabled":
             self.cpp_info.components["libarrow"].requires.append("xsimd::xsimd")
         if self.options.with_zlib:
             self.cpp_info.components["libarrow"].requires.append("zlib::zlib")
