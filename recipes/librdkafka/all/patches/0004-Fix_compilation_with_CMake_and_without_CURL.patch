@@ -1,3 +1,5 @@
+From https://github.com/confluentinc/librdkafka/pull/5136
+
 diff --git a/src/rdkafka_conf.c b/src/rdkafka_conf.c
 --- a/src/rdkafka_conf.c	(revision 69b1865efdc0118cd017760d038d34e52fb3f0d0)
 +++ b/src/rdkafka_conf.c	(date 1755856167319)
