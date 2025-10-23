@@ -48,14 +48,10 @@ class SparrowRecipe(ConanFile):
         # Not an option not to use it on Macos
         return self.options.get_safe("use_date_polyfill", True)
 
-    @property
-    def _export_json_reader(self):
-        return self.options.get_safe("export_json_reader", False)
-
     def requirements(self):
         if self._uses_date_polyfill:
             self.requires("date/3.0.3", transitive_headers=True)
-        if self._export_json_reader:
+        if self.options.export_json_reader:
             self.requires("nlohmann_json/3.12.0")
 
     @property
@@ -88,7 +84,7 @@ class SparrowRecipe(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["USE_DATE_POLYFILL"] = self._uses_date_polyfill
         tc.variables["SPARROW_BUILD_SHARED"] = self.options.shared
-        tc.variables["CREATE_JSON_READER_TARGET"] = self._export_json_reader
+        tc.variables["CREATE_JSON_READER_TARGET"] = self.options.export_json_reader
         if is_msvc(self):
             tc.variables["USE_LARGE_INT_PLACEHOLDERS"] = True
         tc.generate()
@@ -127,7 +123,7 @@ class SparrowRecipe(ConanFile):
             self.cpp_info.components["sparrow"].defines.append("SPARROW_USE_LARGE_INT_PLACEHOLDERS")
     
         # Optional json_reader component
-        if self._export_json_reader:
+        if self.options.export_json_reader:
             self.cpp_info.components["json_reader"].set_property("cmake_target_name", "sparrow::json_reader")
-            self.cpp_info.components["json_reader"].libs = ["json_reader"]
+            self.cpp_info.components["json_reader"].libs = ["sparrow_json_reader"]
             self.cpp_info.components["json_reader"].requires = ["sparrow", "nlohmann_json::nlohmann_json"]
