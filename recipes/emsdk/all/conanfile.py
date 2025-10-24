@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 import json
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.0"
 
 
 class EmSDKConan(ConanFile):
@@ -29,7 +29,10 @@ class EmSDKConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("nodejs/16.3.0")
+        if Version(self.version) < "4.0.16":
+            self.requires("nodejs/16.3.0")
+        else:
+            self.requires("nodejs/22.20.0")
         # self.requires("python")  # FIXME: Not available as Conan package
         # self.requires("wasm")  # FIXME: Not available as Conan package
 
