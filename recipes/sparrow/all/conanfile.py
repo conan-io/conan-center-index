@@ -108,11 +108,12 @@ class SparrowRecipe(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share", "cmake"))
 
     def package_info(self):
+        postfix = "d" if (self.settings.build_type == "Debug" and Version(self.version) >= "1.3.0") else ""
         self.cpp_info.set_property("cmake_file_name", "sparrow")
         
         # Main sparrow component
         self.cpp_info.components["sparrow"].set_property("cmake_target_name", "sparrow::sparrow")
-        self.cpp_info.components["sparrow"].libs = ["sparrow"]
+        self.cpp_info.components["sparrow"].libs = [f"sparrow{postfix}"]
         
         if not self.options.shared:
             self.cpp_info.components["sparrow"].defines.append("SPARROW_STATIC_LIB")
@@ -125,5 +126,5 @@ class SparrowRecipe(ConanFile):
         # Optional json_reader component
         if self.options.export_json_reader:
             self.cpp_info.components["json_reader"].set_property("cmake_target_name", "sparrow::json_reader")
-            self.cpp_info.components["json_reader"].libs = ["sparrow_json_reader"]
+            self.cpp_info.components["json_reader"].libs = [f"sparrow_json_reader{postfix}"]
             self.cpp_info.components["json_reader"].requires = ["sparrow", "nlohmann_json::nlohmann_json"]
