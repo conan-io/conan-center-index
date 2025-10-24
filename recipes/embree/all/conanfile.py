@@ -126,4 +126,4 @@ class EmbreeConan(ConanFile):
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
 
         if self.settings.os != "Emscripten":
-            self.requires = ["onetbb::libtbb"]
+            self.cpp_info.requires = ["onetbb::libtbb"]

@@ -86,4 +86,4 @@ class ManifoldConan(ConanFile):
 
         self.cpp_info.requires = ["clipper2::clipper2"]
         if self.options.with_parallel_acceleration:
-            self.cpp_info.requires.append["onetbb::libtbb"]
+            self.cpp_info.requires.append("onetbb::libtbb")
