@@ -1,0 +1,12 @@
+diff -Naur a/src/core/lib/promise/detail/basic_seq.h b/src/core/lib/promise/detail/basic_seq.h
+--- a/src/core/lib/promise/detail/basic_seq.h	2023-10-06 23:44:58.000000000 +0000
++++ b/src/core/lib/promise/detail/basic_seq.h	2025-10-22 18:28:03.234560817 +0000
+@@ -100,7 +100,7 @@
+           cur_ = next;
+           state_.~State();
+           Construct(&state_,
+-                    Traits::template CallSeqFactory(f_, *cur_, std::move(arg)));
++                    Traits::template CallSeqFactory<>(f_, *cur_, std::move(arg)));
+           return PollNonEmpty();
+         });
+   }
