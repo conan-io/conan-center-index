@@ -1,4 +1,8 @@
 sources:
+  "1.5.0-rc1":
+    # TODO: REPLACE WITH TAGGED RELEASE WHEN AVAILABLE
+    url: "https://github.com/open62541/open62541/archive/88a8731a657415f5cf74c263ef3e9518fb698203.tar.gz"
+    sha256: "e84787827362a23a6555bafaa9035fbe3b073c0a7f34e7d5c713558a1011cd68"
   "1.4.13":
     url: "https://github.com/open62541/open62541/archive/v1.4.13.tar.gz"
     sha256: "491F8C526ECD6F2240F29CF3A00B0498587474B8F0CED1B074589F54533542AA"
@@ -15,6 +19,17 @@ sources:
     url: "https://github.com/open62541/open62541/archive/v1.3.8.tar.gz"
     sha256: "b6943b564787c4953b77ca8d7f987c4b896b3f3e91f45d9f13e9056b6148bc1d"
 patches:
+  # TODO: REPLACE WITH TAGGED RELEASE WHEN AVAILABLE, RENAME AND REGENERATE PATCHES
+  "1.5.0-rc1":
+    - patch_file: "patches/0001-disable-sanitizers-1_5_0-rc1.patch"
+      patch_description: "Disable static code analysis"
+      patch_type: "conan"
+    - patch_file: "patches/0004-include-iphlpapi-1.5.0-rc1.patch"
+      patch_description: "Include iphlpapi.h for SecureZeroMemory"
+      patch_type: "conan"
+    - patch_file: "patches/1.5.0-rc1-0001-use-external-mdnsd.patch"
+      patch_description: "Consume mdnsd as external dependency provided by Conan"
+      patch_type: "conan"
   "1.4.13":
     - patch_file: "patches/0001-disable-sanitizers-1_4_13.patch"
       patch_description: "Disable static code analysis"

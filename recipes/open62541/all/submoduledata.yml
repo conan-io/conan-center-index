@@ -1,4 +1,15 @@
 submodules:
+  "1.5.0-rc1":
+    # TODO: UPDATE WHEN TAGGES RELEASE IS AVAILABLE
+    deps/ua-nodeset:
+      url: "https://github.com/OPCFoundation/UA-Nodeset/archive/Woodworking-1.01.0-2023-01-31.zip"
+      sha256: "e9603dae4cc20f660dff81f7f0f325e5592e1154f7918d8978b226bb46201b3e"
+      archive_pattern: "UA-Nodeset-{version}"
+    # TODO: UPDATE WHEN TAGGES RELEASE IS AVAILABLE
+    deps/nodesetLoader:
+      url: "https://github.com/open62541/open62541-nodeset-loader/archive/5d010764402929474fdc16571af6d0b37cd03be0.tar.gz"
+      sha256: "ae5fc9b2e011d6fb2ff0b6c90d33163ae70753d5114181e715249c8ef605d2c2"
+      archive_pattern: "open62541-nodeset-loader-{sha256}"
   "1.4.13":
     deps/ua-nodeset:
       url: "https://github.com/OPCFoundation/UA-Nodeset/archive/Machinery-1.03.0-2023-08-01.zip"
