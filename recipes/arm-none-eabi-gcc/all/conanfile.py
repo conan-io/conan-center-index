@@ -22,13 +22,6 @@ class PackageConan(ConanFile):
     def layout(self):
         pass
 
-    # def package_id(self):
-    #     # self.info.settings_target = self.settings_target
-    #     self.info.settings.rm_safe("os")
-    #     self.info.settings.rm_safe("compiler")
-    #     self.info.settings.rm_safe("build_type")
-
-    # in case some configuration is not supported
     def validate(self):
         if self.settings.os != "Macos" and self.settings.os != "Windows" and self.settings.os != "Linux":
             raise ConanInvalidConfiguration("your operating system is not supported")
