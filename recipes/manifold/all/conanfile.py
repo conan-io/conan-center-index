@@ -28,10 +28,10 @@ class ManifoldConan(ConanFile):
         "with_parallel_acceleration": False,
     }
     implements = ["auto_shared_fpic"]
-    
+
     def export_sources(self):
         export_conandata_patches(self)
-        
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -83,3 +83,7 @@ class ManifoldConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+
+        self.cpp_info.requires = ["clipper2::clipper2"]
+        if self.options.with_parallel_acceleration:
+            self.cpp_info.requires.append["onetbb::libtbb"]

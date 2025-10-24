@@ -175,7 +175,7 @@ class OpenSubdivConan(ConanFile):
         self.cpp_info.components["osdcpu"].set_property("cmake_target_name", f"OpenSubdiv::osdcpu{target_suffix}")
         self.cpp_info.components["osdcpu"].libs = ["osdCPU"]
         if self.options.with_tbb:
-            self.cpp_info.components["osdcpu"].requires = ["onetbb::onetbb"]
+            self.cpp_info.components["osdcpu"].requires = ["onetbb::libtbb"]
 
         if self._osd_gpu_enabled:
             self.cpp_info.components["osdgpu"].set_property("cmake_target_name", f"OpenSubdiv::osdgpu{target_suffix}")

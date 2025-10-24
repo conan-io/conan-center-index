@@ -280,7 +280,7 @@ class OpenVDBConan(ConanFile):
         main_component.requires = [
             "boost::iostreams",
             "boost::system",
-            "onetbb::onetbb",
+            "onetbb::libtbb",
         ]
         if self.settings.os == "Windows":
             main_component.requires.append("boost::disable_autolinking")

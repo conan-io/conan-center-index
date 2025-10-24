@@ -124,3 +124,6 @@ class EmbreeConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
+
+        if self.settings.os != "Emscripten":
+            self.requires = ["onetbb::libtbb"]
