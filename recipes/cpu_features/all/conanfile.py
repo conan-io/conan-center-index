@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -47,10 +46,7 @@ class CpuFeaturesConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) < "0.7.0":
-            tc.variables["BUILD_PIC"] = self.options.get_safe("fPIC", True)
-        if Version(self.version) >= "0.7.0":
-            tc.variables["BUILD_TESTING"] = False
+        tc.variables["BUILD_TESTING"] = False
         # TODO: should be handled by CMake helper
         if is_apple_os(self) and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
             tc.variables["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
@@ -73,18 +69,17 @@ class CpuFeaturesConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "CpuFeatures")
         self.cpp_info.set_property("cmake_target_name", "CpuFeatures::cpu_features")
 
-        # TODO: back to global scope once cmake_find_package* generators removed
         self.cpp_info.components["libcpu_features"].libs = ["cpu_features"]
         self.cpp_info.components["libcpu_features"].includedirs = [os.path.join("include", "cpu_features")]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libcpu_features"].system_libs = ["dl"]
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "CpuFeatures"
-        self.cpp_info.names["cmake_find_package_multi"] = "CpuFeatures"
-        self.cpp_info.components["libcpu_features"].names["cmake_find_package"] = "cpu_features"
-        self.cpp_info.components["libcpu_features"].names["cmake_find_package_multi"] = "cpu_features"
-        self.cpp_info.components["libcpu_features"].set_property("cmake_target_name", "CpuFeatures::cpu_features")
+        if self.settings.os == "Android":
+            # FIXME: cpu_features generates CpuFeaturesNdkCompat.cmake too, but CMakeDeps still can not do it
+            # See https://github.com/conan-io/conan/pull/18821
+            self.cpp_info.components["ndk_compat"].libs = ["ndk_compat"]
+            self.cpp_info.components["ndk_compat"].set_property("cmake_file_name", "CpuFeaturesNdkCompat")
+            self.cpp_info.components["ndk_compat"].set_property("cmake_target_name", "CpuFeatures::ndk_compat")
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
