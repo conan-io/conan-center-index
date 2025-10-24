@@ -1,4 +1,7 @@
 sources:
+  "1.4.14":
+    url: "https://github.com/open62541/open62541/archive/v1.4.14.tar.gz"
+    sha256: "0a0a8830e4e5f720e901579f826c788fdbc3d49f44a9515ab15a06e877b59416"
   "1.4.13":
     url: "https://github.com/open62541/open62541/archive/v1.4.13.tar.gz"
     sha256: "491F8C526ECD6F2240F29CF3A00B0498587474B8F0CED1B074589F54533542AA"
@@ -15,6 +18,19 @@ sources:
     url: "https://github.com/open62541/open62541/archive/v1.3.8.tar.gz"
     sha256: "b6943b564787c4953b77ca8d7f987c4b896b3f3e91f45d9f13e9056b6148bc1d"
 patches:
+  "1.4.14":
+    - patch_file: "patches/0001-disable-sanitizers-1_4_14.patch"
+      patch_description: "Disable static code analysis"
+      patch_type: "conan"
+    - patch_file: "patches/0004-include-iphlpapi.patch"
+      patch_description: "Include iphlpapi.h for SecureZeroMemory"
+      patch_type: "conan"
+    - patch_file: "patches/0008-fix-posix-qnx.patch"
+      patch_description: "Ensure posix is default architecture"
+      patch_type: "portability"
+    - patch_file: "patches/1.4.14-0001-use-external-mdnsd.patch"
+      patch_description: "Consume mdnsd as external dependency provided by Conan"
+      patch_type: "conan"
   "1.4.13":
     - patch_file: "patches/0001-disable-sanitizers-1_4_13.patch"
       patch_description: "Disable static code analysis"
