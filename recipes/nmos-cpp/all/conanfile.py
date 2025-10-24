@@ -1,13 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools import build, files
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 import json
 import os
 import re
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.0.0"
 
 class NmosCppConan(ConanFile):
     name = "nmos-cpp"
@@ -23,29 +24,21 @@ class NmosCppConan(ConanFile):
     # for now, no "shared" option support
     options = {
         "fPIC": [True, False],
-        "with_dnssd": ["mdnsresponder", "avahi"],
+        # Option auto is recommended and selects the current best option for the given OS.
+        # auto: System library for dnssd on macOS, mDNSResponder on Windows and avahi on Linux.
+        "with_dnssd": ["auto", "mdnsresponder", "avahi"],
     }
     # "fPIC" is handled automatically by Conan, injecting CMAKE_POSITION_INDEPENDENT_CODE
     default_options = {
         "fPIC": True,
-        "with_dnssd": "mdnsresponder",
+        "with_dnssd": "auto",
     }
 
     short_paths = True
 
-    def export_sources(self):
-        files.export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-        if self.settings.os == "Macos":
-            del self.options.with_dnssd
-        elif self.settings.os == "Linux":
-            self.options.with_dnssd = "avahi"
-        elif self.settings.os == "Windows":
-            self.options.with_dnssd = "mdnsresponder"
 
     def requirements(self):
         # for now, consistent with project's conanfile.txt
@@ -57,26 +50,29 @@ class NmosCppConan(ConanFile):
         self.requires("openssl/[>=1.1 <4]")
         self.requires("json-schema-validator/2.3.0")
         self.requires("nlohmann_json/3.11.3")
-        if Version(self.version) >= "cci.20240222":
-            self.requires("jwt-cpp/0.7.0")
+        self.requires("jwt-cpp/0.7.0")
 
-        if self.options.get_safe("with_dnssd") == "mdnsresponder":
+        if self._dnssd_option == "mdnsresponder":
             self.requires("mdnsresponder/878.200.35")
             # The option mdnsresponder:with_opt_patches=True is recommended in order to permit the
             # over-long service type _nmos-registration._tcp used in IS-04 v1.2, and also to enable
             # support for unicast DNS-SD on Linux, since NMOS recommends this in preference to mDNS.
             # See https://specs.amwa.tv/is-04/releases/v1.3.1/docs/3.1._Discovery_-_Registered_Operation.html#dns-sd-advertisement
-        elif self.options.get_safe("with_dnssd") == "avahi":
+        elif self._dnssd_option == "avahi":
             self.requires("avahi/0.8")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.17 <4]")
 
     def validate(self):
-        if self.info.settings.os in ["Macos"]:
-            raise ConanInvalidConfiguration(f"{self.ref} is not currently supported on {self.info.settings.os}. Contributions welcomed.")
+        if is_apple_os(self) and Version(self.version) < "cci.20250901":
+            raise ConanInvalidConfiguration(f"{self.ref} is not currently supported on {self.info.settings.os}. Use cci.20250904 or newer to get macOS support.")
+
         if self.info.settings.compiler.get_safe("cppstd"):
             build.check_min_cppstd(self, 11)
+
+        if is_apple_os(self) and not self.options.with_dnssd == "auto":
+            raise ConanInvalidConfiguration(f"{self.ref} is currently only supporting the auto option for mDNS.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -95,7 +91,7 @@ class NmosCppConan(ConanFile):
         # between this recipe and project's conanfile.txt
         tc.cache_variables["CONAN_EXPORTED"] = True
         # (on Linux) select Avahi or mDNSResponder
-        tc.variables["NMOS_CPP_USE_AVAHI"] = self.options.get_safe("with_dnssd") == "avahi"
+        tc.variables["NMOS_CPP_USE_AVAHI"] = self._dnssd_option == "avahi"
         # (on Windows) use the Conan package for DNSSD (mdnsresponder), not the project's own DLL stub library
         tc.variables["NMOS_CPP_USE_BONJOUR_SDK"] = True
         # no need to build unit tests
@@ -120,6 +116,20 @@ class NmosCppConan(ConanFile):
         self._create_components_file_from_cmake_target_file(os.path.join(cmake_folder, "nmos-cpp", "nmos-cpp-targets.cmake"))
         # remove the project's own generated config-file package
         files.rmdir(self, cmake_folder)
+
+    @property
+    def _dnssd_option(self):
+        if not self.options.with_dnssd == "auto":
+            return self.options.with_dnssd
+
+        if is_apple_os(self):
+            return None
+        elif self.settings.os == "Windows":
+            return 'mdnsresponder'
+        elif self.settings.os in ["Linux", "FreeBSD"]:
+            return 'avahi'
+        else:
+            raise ConanInvalidConfiguration('Unknown operating system')
 
     def _create_components_file_from_cmake_target_file(self, target_file_path):
         components = {}
@@ -212,11 +222,6 @@ class NmosCppConan(ConanFile):
                     else:
                         self.output.warn(f"{self.name} recipe does not handle {property_type} (yet)")
 
-        # until https://github.com/sony/nmos-cpp/commit/9489d84098ddc8cc514b7e4d5afe740dee4518ee
-        # direct dependency on nlohmann_json was missing
-        if Version(self.version) < "cci.20221203":
-            components["json_schema_validator"].setdefault("requires", []).append("nlohmann_json::nlohmann_json")
-
         # Save components informations in json file
         with open(self._components_helper_filepath, "w", encoding="utf-8") as json_file:
             json.dump(components, json_file, indent=4)
@@ -240,9 +245,6 @@ class NmosCppConan(ConanFile):
             components_json_file = files.load(self, self._components_helper_filepath)
             components = json.loads(components_json_file)
             for component_name, values in components.items():
-                cmake_target = values["cmake_target"]
-                self.cpp_info.components[component_name].names["cmake_find_package"] = cmake_target
-                self.cpp_info.components[component_name].names["cmake_find_package_multi"] = cmake_target
                 self.cpp_info.components[component_name].bindirs = [bindir] if values.get("exe") else []
                 self.cpp_info.components[component_name].libs = values.get("libs", [])
                 self.cpp_info.components[component_name].libdirs = [libdir]
@@ -258,7 +260,3 @@ class NmosCppConan(ConanFile):
                 #self.cpp_info.components[component_name].requires.extend([(r, "private") for r in values.get("requires_private", [])])
                 self.cpp_info.components[component_name].requires.extend(values.get("requires_private", []))
         _register_components()
-
-        # add nmos-cpp-registry and nmos-cpp-node to the path
-        bin_path = os.path.join(self.package_folder, bindir)
-        self.env_info.PATH.append(bin_path)
