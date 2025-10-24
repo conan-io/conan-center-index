@@ -1,0 +1,5 @@
+sources:
+  "0.5.0":
+    url:
+    - "https://github.com/BestITUserEUW/chron-cpp/archive/refs/tags/v0.5.0.tar.gz"
+    sha256: "a4095205f55cb0ededf8331a05d4d37202f3c39a5057eee3f21321b60b79f07a"
