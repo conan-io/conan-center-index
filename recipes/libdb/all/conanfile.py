@@ -190,6 +190,8 @@ class LibdbConan(ConanFile):
                 # https://releases.llvm.org/15.0.0/tools/clang/docs/ReleaseNotes.html#improvements-to-clang-s-diagnostics
                 # https://releases.llvm.org/16.0.0/tools/clang/docs/ReleaseNotes.html#potentially-breaking-changes
                 tc.extra_cflags.append("-Wno-error=implicit-function-declaration")
+            if str(self.settings.arch).startswith("arm"):
+                tc.extra_cflags.append("-Wno-error=implicit-int")
 
             tc.generate()
 
