@@ -11,6 +11,7 @@ required_conan_version = ">=1.53.0"
 
 class FoxgloveWebSocketConan(ConanFile):
     name = "foxglove-websocket"
+    deprecated = "foxglove-sdk"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/foxglove/ws-protocol"
     description = "A C++ server implementation of the Foxglove WebSocket Protocol"
