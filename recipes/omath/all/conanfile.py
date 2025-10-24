@@ -51,7 +51,7 @@ class OmathConan(ConanFile):
         if is_msvc(self):
             self.options.rm_safe("shared")
             self.package_type = "static-library"
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def layout(self):
