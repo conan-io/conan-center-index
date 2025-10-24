@@ -12,7 +12,7 @@ Changes to recipe:  **lib/[version]**
 ---
 - [ ] Read the [contributing guidelines](https://github.com/conan-io/conan-center-index/blob/master/CONTRIBUTING.md)
 - [ ] Checked that this PR is not a duplicate: [list of PRs by recipe](https://github.com/conan-io/conan-center-index/discussions/24240)
-- [ ] If this is a bug fix, please link related issue or provide bug detail
+- [ ] If this is a bug fix, please link related issue or provide bug details
 - [ ] Tested locally with at least one configuration using a recent version of Conan
 
 ---
