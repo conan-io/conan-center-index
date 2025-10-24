@@ -1,4 +1,7 @@
 sources:
+  "1.1.0":
+    url: "https://github.com/Compaile/ctrack/archive/refs/tags/v1.1.0.tar.gz"
+    sha256: "cbcfb44386cbae24b69c6fd7ad8be9e1416676aa39c024c1b3161205bf0269c2"
   "1.0.2":
     url: "https://github.com/Compaile/ctrack/releases/download/v1.0.2/ctrack-main.zip"
     sha256: "1a41a831c28977504b49b6966c46e65939271eca90fbe297e248a3e0bf05ac5a"
