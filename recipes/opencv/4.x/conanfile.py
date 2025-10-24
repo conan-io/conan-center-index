@@ -364,7 +364,7 @@ class OpenCVConan(ConanFile):
             return []
 
         def parallel():
-            return ["onetbb::onetbb"] if self.options.parallel == "tbb" else []
+            return ["onetbb::libtbb"] if self.options.parallel == "tbb" else []
 
         def protobuf():
             return ["protobuf::protobuf"] if self.options.get_safe("with_protobuf") else []

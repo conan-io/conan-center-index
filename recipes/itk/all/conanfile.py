@@ -283,7 +283,7 @@ class ITKConan(ConanFile):
             "ITKCommon": {
                 "requires": [
                     "itksys", "ITKVNLInstantiation", "eigen::eigen",
-                    "onetbb::onetbb", "double-conversion::double-conversion",
+                    "onetbb::libtbb", "double-conversion::double-conversion",
                 ],
                 "system_libs": libm(),
             },
@@ -450,13 +450,13 @@ class ITKConan(ConanFile):
             },
             "ITKVideoCore": {"requires": ["ITKCommon"]},
         }
-        
+
         if self.options.with_opencv:
             components.update({
                 "ITKVideoIO": {"requires": ["ITKVideoCore", "ITKIOImageBase"]},
                 "ITKVideoBridgeOpenCV": {"requires": ["ITKVideoIO", "opencv::opencv_core"]},
             })
-        
+
         return components
 
     def _create_cmake_module_variables(self):
