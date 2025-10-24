@@ -1,13 +1,12 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.tools.build import cross_building
-from conan.tools.env import Environment
-from conan.tools.files import chdir, copy, get, replace_in_file
+from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.files import chdir, copy, get
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
-import json
+from pathlib import Path
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.1"
 
 
 class EmSDKConan(ConanFile):
@@ -15,27 +14,15 @@ class EmSDKConan(ConanFile):
     description = "Emscripten SDK. Emscripten is an Open Source LLVM to JavaScript compiler"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kripken/emscripten"
-    topics = ("emsdk", "emscripten", "sdk")
+    topics = ("emsdk", "emscripten", "sdk", "emcc", "em++", "nodejs")
     license = "MIT"
-    settings = "os", "arch", "compiler", "build_type"
-
-    short_paths = True
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    package_type = "application"
+    settings = "os", "arch"
+    upload_policy = "skip"
+    build_policy = "missing"
 
     def layout(self):
         basic_layout(self, src_folder="src")
-
-    def requirements(self):
-        self.requires("nodejs/16.3.0")
-        # self.requires("python")  # FIXME: Not available as Conan package
-        # self.requires("wasm")  # FIXME: Not available as Conan package
-
-    def package_id(self):
-        del self.info.settings.compiler
-        del self.info.settings.build_type
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -65,6 +52,13 @@ class EmSDKConan(ConanFile):
     def _em_cache(self):
         return os.path.join(self.package_folder, "bin", ".emscripten_cache")
 
+    @property
+    def _node_path(self):
+        subfolders = [path for path in (Path(self.package_folder) / "bin" / "node").iterdir() if path.is_dir()]
+        if len(subfolders) != 1:
+            return None
+        return os.path.join("bin", "node", subfolders[0].name, "bin")
+
     def generate(self):
         env = Environment()
         env.prepend_path("PATH", self._paths)
@@ -74,70 +68,35 @@ class EmSDKConan(ConanFile):
         env.define_path("EM_CACHE", self._em_cache)
         env.vars(self, scope="emsdk").save_script("emsdk_env_file")
 
-    @staticmethod
-    def _chmod_plus_x(filename):
-        if os.name == "posix":
-            os.chmod(filename, os.stat(filename).st_mode | 0o111)
-
-    def _tools_for_version(self):
-        ret = {}
-        # Select release-upstream from version (wasm-binaries)
-        with open(os.path.join(self.source_folder, "emscripten-releases-tags.json"), "r") as f:
-            data = json.load(f)
-            ret["wasm"] = f"releases-upstream-{data['releases'][self.version]}-64bit"
-        # Select python and node versions
-        with open(os.path.join(self.source_folder, "emsdk_manifest.json"), "r") as f:
-            data = json.load(f)
-            tools = data["tools"]
-            if self.settings.os == "Windows":
-                python = next((it for it in tools if (it["id"] == "python" and not it.get("is_old", False))), None)
-                ret["python"] = f"python-{python['version']}-64bit"
-            node = next((it for it in tools if (it["id"] == "node" and not it.get("is_old", False))), None)
-            ret["nodejs"] = f"node-{node['version']}-64bit"
-        return ret
+        # To avoid issues when cross-compiling or with not common arch in profiles we need to set EMSDK_ARCH
+        # This is important for the emsdk install command
+        env = VirtualBuildEnv(self)
+        # Special consideration for armv8 as emsdk expects "arm64"
+        arch = "arm64" if str(self.settings.arch) == "armv8" else str(self.settings.arch)
+        env.environment().define("EMSDK_ARCH", arch)
+        env.generate()
 
     def build(self):
         with chdir(self, self.source_folder):
-            emsdk = "emsdk.bat" if self._settings_build.os == "Windows" else "./emsdk"
-            self._chmod_plus_x("emsdk")
-
-            # Install required tools
-            required_tools = self._tools_for_version()
-            for key, value in required_tools.items():
-                if key != 'nodejs':
-                    self.run(f"{emsdk} install {value}")
-                    self.run(f"{emsdk} activate {value}")
+            emsdk = "emsdk.bat" if self.settings_build.os == "Windows" else "./emsdk"
+            self.run(f"{emsdk} install latest")
+            self.run(f"{emsdk} activate latest")
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"))
-        emscripten = os.path.join(self.package_folder, "bin", "upstream", "emscripten")
-        toolchain = os.path.join(emscripten, "cmake", "Modules", "Platform", "Emscripten.cmake")
-        # FIXME: conan should add the root of conan package requirements to CMAKE_PREFIX_PATH (LIBRARY/INCLUDE -> ONLY; PROGRAM -> NEVER)
-        # allow to find conan libraries
-        replace_in_file(self, toolchain,
-                              "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)",
-                              "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)")
-        replace_in_file(self, toolchain,
-                              "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)",
-                              "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)")
-        replace_in_file(self, toolchain,
-                              "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)",
-                              "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)")
         if not cross_building(self):
             self.run("embuilder build MINIMAL", env=["conanemsdk", "conanrun"]) # force cache population
-            # the line below forces emscripten to accept the cache as-is, even after re-location
-            # https://github.com/emscripten-core/emscripten/issues/15053#issuecomment-920950710
+            # Avoid cache failures in case this package is uploaded as paths in sanity.txt are absolute
             os.remove(os.path.join(self._em_cache, "sanity.txt"))
 
     def _define_tool_var(self, value):
         suffix = ".bat" if self.settings.os == "Windows" else ""
         path = os.path.join(self._emscripten, f"{value}{suffix}")
-        self._chmod_plus_x(path)
         return path
 
     def package_info(self):
-        self.cpp_info.bindirs = self._relative_paths
+        self.cpp_info.bindirs = self._relative_paths + [self._node_path]
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
@@ -180,17 +139,3 @@ class EmSDKConan(ConanFile):
             os.path.join("bin", "upstream", "emscripten", "tests", "cmake", "target_library"),
             os.path.join("bin", "upstream", "lib", "cmake", "llvm"),
         ]
-
-        if Version(conan_version).major < 2:
-            self.env_info.PATH.extend(self._paths)
-            self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = toolchain
-            self.env_info.EMSDK = self._emsdk
-            self.env_info.EMSCRIPTEN = self._emscripten
-            self.env_info.EM_CONFIG = self._em_config
-            self.env_info.EM_CACHE = self._em_cache
-            self.env_info.CC = compiler_executables["c"]
-            self.env_info.CXX = compiler_executables["cpp"]
-            self.env_info.AR = self._define_tool_var("emar")
-            self.env_info.NM = self._define_tool_var("emnm")
-            self.env_info.RANLIB = self._define_tool_var("emranlib")
-            self.env_info.STRIP = self._define_tool_var("emstrip")
