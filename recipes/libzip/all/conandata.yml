@@ -42,8 +42,6 @@ sources:
 patches:
   "1.11.4":
     - patch_file: "patches/1.11.4-0002-remove-rpath.patch"
-      patch_description: "remove rpath feature"
-      patch_type: "conan"
   "1.11.3":
     - patch_file: "patches/1.11.3-0002-remove-rpath.patch"
       patch_description: "remove rpath feature"
