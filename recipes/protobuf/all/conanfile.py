@@ -63,7 +63,7 @@ class ProtobufConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        if Version(self.version) >= "6.32.1":
+        if Version(self.version) >= "6.31.1":
             del self.options.upb
 
     def configure(self):
