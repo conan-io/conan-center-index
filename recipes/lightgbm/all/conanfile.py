@@ -58,8 +58,12 @@ class LightGBMConan(ConanFile):
 
     def requirements(self):
         self.requires("eigen/3.4.0")
-        self.requires("fast_double_parser/0.7.0", transitive_headers=True, transitive_libs=True)
-        self.requires("fmt/10.1.1", transitive_headers=True, transitive_libs=True)
+        if Version(self.version) >= "4.6.0":
+            self.requires("fast_double_parser/0.8.0", transitive_headers=True, transitive_libs=True)
+            self.requires("fmt/11.1.2", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("fast_double_parser/0.7.0", transitive_headers=True, transitive_libs=True)
+            self.requires("fmt/10.1.1", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
