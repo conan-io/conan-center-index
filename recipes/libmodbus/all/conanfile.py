@@ -59,7 +59,7 @@ class LibmodbusConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, excludes=["._libmodbus-*"])
 
     def generate(self):
         env = VirtualBuildEnv(self)
