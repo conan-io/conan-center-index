@@ -67,15 +67,13 @@ class bgfxConan(ConanFile):
         tc.cache_variables["BX_AMALGAMATED"] = True
         tc.cache_variables["BGFX_AMALGAMATED"] = True
         tc.cache_variables["BGFX_OPENGLES_VERSION"] = 30
-        if self.settings.os == "Linux":
-            wayland_libdir = self.dependencies["wayland"].cpp_info.libdir
-            tc.extra_exelinkflags.append(f"-L{wayland_libdir}")
         tc.generate()
         deps = CMakeDeps(self)
         if self.settings.os == "Linux":
             deps.set_property("miniz", "cmake_additional_variables_prefixes", ["MINIZ",])
             deps.set_property("tinyexr", "cmake_additional_variables_prefixes", ["TINYEXR",])
             deps.set_property("libsquish", "cmake_additional_variables_prefixes", ["LIBSQUISH",])
+            deps.set_property("wayland", "cmake_target_name", "wayland-egl")
         deps.generate()
 
     def build(self):
