@@ -4,7 +4,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.apple import is_apple_os
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -50,13 +49,6 @@ class bgfxConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
-        if self.settings.compiler == "apple-clang":
-            sdk_version = self.settings.get_safe("os.sdk_version")
-            if sdk_version and Version(sdk_version) < 13:
-                # INFO: https://github.com/bkaradzic/bgfx.cmake/blob/v1.129.8930-495/cmake/bgfx/bgfx.cmake#L163
-                raise ConanInvalidConfiguration(f"{self.ref} requires Apple SDK version >=13 due to Metal requirement (MTLBinding).")
-            elif Version(self.settings.compiler.version) < 14:
-                raise ConanInvalidConfiguration(f"{self.ref} requires apple-clang >=14 and Apple SDK >=13 due to Metal requirement (MTLBinding).")
 
         skip_ci_reason = self.conf.get("user.conancenter:skip_ci_build", check_type=str)
         if skip_ci_reason:
