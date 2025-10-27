@@ -138,9 +138,10 @@ class bgfxConan(ConanFile):
         self.cpp_info.components["bgfx"].defines.extend(["BGFX_CONFIG_MULTITHREADED=1",
                                                    f"BGFX_CONFIG_DEBUG_ANNOTATION={1 if self.settings.build_type == 'Debug' else 0}",])
 
-        for tool in ["bin2c", "texturec", "texturev", "geometryc", "geometryv", "shaderc"]:
-            self.cpp_info.components[tool].set_property("cmake_target_name", f"bgfx::{tool}")
-            # INFO: .exe requires CMakeConfigDeps generator
-            self.cpp_info.components[tool].exe = os.path.join(self.package_folder, "bin", tool)
-            self.cpp_info.components[tool].libdirs = []
-            self.cpp_info.components[tool].includedirs = []
+        if self.options.tools:
+            for tool in ["bin2c", "texturec", "texturev", "geometryc", "geometryv", "shaderc"]:
+                self.cpp_info.components[tool].set_property("cmake_target_name", f"bgfx::{tool}")
+                # INFO: .exe requires CMakeConfigDeps generator
+                self.cpp_info.components[tool].exe = os.path.join(self.package_folder, "bin", tool)
+                self.cpp_info.components[tool].libdirs = []
+                self.cpp_info.components[tool].includedirs = []
