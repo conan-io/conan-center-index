@@ -1,4 +1,6 @@
 versions:
+  "5.0.0":
+    folder: all
   "3.4.90-unstable+git.2025.08.15":
     folder: all
   "3.4.0":

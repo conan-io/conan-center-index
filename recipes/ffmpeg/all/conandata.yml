@@ -2,16 +2,12 @@ sources:
   "7.1.1":
     url: "https://ffmpeg.org//releases/ffmpeg-7.1.1.tar.bz2"
     sha256: "0c8da2f11579a01e014fc007cbacf5bb4da1d06afd0b43c7f8097ec7c0f143ba"
-  "4.4.4":
-    url: "https://ffmpeg.org/releases/ffmpeg-4.4.4.tar.bz2"
-    sha256: "47b1fbf70a2c090d9c0fae5910da11c6406ca92408bb69d8c935cd46c622c7ce"
+  "4.4.6":
+    url: "https://ffmpeg.org/releases/ffmpeg-4.4.6.tar.bz2"
+    sha256: "822c980717470a2a576e5adba4e8a40977d15c3312b89dcd121547262b730d11"
 patches:
-  "4.4.4":
+  "4.4.6":
     - patch_file: "patches/4.4-0001-fix-aom_codec_av1_dx_algo.patch"
       patch_description: "Compatibility with shared libaom"
       patch_type: "portability"
       patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/d92fdc714496d43234733c315894abe0beeb3529"
-    - patch_file: "patches/5.1-0004-fix-binutils.patch"
-      patch_description: "Compatibility with binutils >= 2.41"
-      patch_type: "portability"
-      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commitdiff/effadce6c756247ea8bae32dc13bb3e6f464f0eb"

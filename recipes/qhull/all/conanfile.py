@@ -92,7 +92,7 @@ class QhullConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.components["libqhullcpp"].libs = [self._qhullcpp_lib_name]
             self.cpp_info.components["libqhullcpp"].set_property("cmake_target_name", "Qhull::qhullcpp")
-            self.cpp_info.components["libqhullcpp"].set_property("pkg_config_name", "Qhull::qhullcpp")
+            self.cpp_info.components["libqhullcpp"].set_property("pkg_config_name", "qhullcpp")
 
     @property
     def _qhull_cmake_name(self):
