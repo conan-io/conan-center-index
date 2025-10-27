@@ -155,7 +155,7 @@ class ArrowConan(ConanFile):
 
     def requirements(self):
         if self.options.with_thrift:
-            self.requires("thrift/0.20.0")
+            self.requires("thrift/0.22.0")
         if self.options.with_protobuf:
             self.requires("protobuf/3.21.12")
         if self.options.with_jemalloc:
