@@ -364,7 +364,7 @@ class OpenCVConan(ConanFile):
             return []
 
         def parallel():
-            return ["onetbb::onetbb"] if self.options.parallel == "tbb" else []
+            return ["onetbb::libtbb"] if self.options.parallel == "tbb" else []
 
         def protobuf():
             return ["protobuf::protobuf"] if self.options.get_safe("with_protobuf") else []
@@ -1079,7 +1079,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_openexr"):
             self.requires("openexr/[>=3.2.3 <4]")
         if self.options.get_safe("with_tiff"):
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.6.0 <5]")
         if self.options.get_safe("with_webp"):
             self.requires("libwebp/[>=1.3.2 <5]")
         if self.options.get_safe("with_gdal"):
