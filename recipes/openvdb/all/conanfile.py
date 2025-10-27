@@ -155,8 +155,7 @@ class OpenVDBConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if Version(self.version) >= "10.0.0":
-            self.tool_requires("cmake/[>=3.18 <4]")
+        self.tool_requires("cmake/[>=3.20]")
         if self.options.build_ax:
             if self._settings_build.os == "Windows":
                 self.tool_requires("winflexbison/2.5.25")
