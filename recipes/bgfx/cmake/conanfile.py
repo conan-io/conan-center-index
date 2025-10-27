@@ -50,13 +50,6 @@ class bgfxConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 17)
 
-        skip_ci_reason = self.conf.get("user.conancenter:skip_ci_build", check_type=str)
-        if skip_ci_reason:
-            # FIXME: Currently failing on CI for gcc11, see conan-io/conan-center-index#13472
-            # bx/include/bx/platform.h:473:29: error: static assertion failed
-            # Minimum supported GLIBC version is 2.31.0 (February 1, 2020)
-            raise ConanInvalidConfiguration(skip_ci_reason)
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
