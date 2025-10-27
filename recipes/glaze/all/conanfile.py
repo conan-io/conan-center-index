@@ -1,8 +1,6 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 import os
@@ -19,23 +17,12 @@ class GlazeConan(ConanFile):
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-    options = {
-        "with_ssl": [True, False],
-    }
-    default_options = {
-        "with_ssl": False,
-    }
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
-
-    def requirements(self):
-        self.requires("asio/1.34.2", transitive_headers=True)
-        if self.options.with_ssl:
-            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         check_min_cppstd(self, 23)
@@ -57,7 +44,3 @@ class GlazeConan(ConanFile):
         self.cpp_info.libdirs = []
         if is_msvc(self):
             self.cpp_info.cxxflags.append("/Zc:preprocessor")
-        self.cpp_info.requires.append("asio::asio")
-        if self.options.with_ssl:
-            self.cpp_info.defines.append("GLAZE_WITH_SSL")
-            self.cpp_info.requires.append("openssl::openssl")
