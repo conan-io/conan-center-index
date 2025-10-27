@@ -42,6 +42,9 @@ cmake:
 cpp-httplib:
   versions:
     - '0.15.3'
+dbus:
+  versions:
+    - '1.15.8'
 double-conversion:
   versions:
     - '3.3.0'
