@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.files import get, rmdir, copy, rm, export_conandata_patches, apply_conandata_patches
+from conan.tools.layout import basic_layout
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 
 required_conan_version = ">=1.53.0"
@@ -33,6 +34,9 @@ class FlexConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         # Flex requires M4 to be compiled. If consumer does not have M4
@@ -81,7 +85,7 @@ class FlexConan(ConanFile):
             if gnu_config:
                 copy(self, os.path.basename(gnu_config),
                      src=os.path.dirname(gnu_config),
-                     dst=os.path.join(self.source_folder, "config"))
+                     dst=os.path.join(self.source_folder, "build-aux"))
 
     def build(self):
         apply_conandata_patches(self)
