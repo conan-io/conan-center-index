@@ -189,10 +189,7 @@ class Open62541Conan(ConanFile):
         if self.options.web_socket:
             self.requires("libwebsockets/4.3.2")
         if self.options.discovery == "With Multicast" or "multicast" in str(self.options.discovery):
-            if Version(self.version) >= "1.3.13":
-                self.requires("pro-mdnsd/0.8.4.1")
-            else:
-                self.requires("pro-mdnsd/0.8.4")
+            self.requires("pro-mdnsd/0.8.4")
         if self.options.get_safe("nodeset_loader"):
             # version 1.4.11.1 with libxml2 2.14.x doesnt work because open62541 uses deprecated/remove APIs
             self.requires("libxml2/[>=2.12.5 <=2.13.8]")
