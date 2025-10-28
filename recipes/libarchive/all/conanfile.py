@@ -168,6 +168,8 @@ class LibarchiveConan(ConanFile):
         if Version(self.version) >= "3.7.3":
             tc.variables["ENABLE_PCRE2POSIX"] = self.options.with_pcre2
         tc.variables["ENABLE_XATTR"] = self.options.with_xattr
+        if Version(self.version) >= "3.8.0":
+            tc.cache_variables["ENABLE_WIN32_XMLLITE "] = False
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
 
