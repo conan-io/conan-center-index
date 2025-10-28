@@ -49,6 +49,9 @@ class LibCborStackConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
+    def requirements(self):
+        self.tool_requires("cmake/[>=3.21]") # for C23 support
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["WITH_EXAMPLES"] = False
