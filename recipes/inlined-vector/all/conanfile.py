@@ -6,7 +6,7 @@ import os
 
 class InlinedVectorConan(ConanFile):
     name = "inlined-vector"
-    version = "5.7.0"
+    version = "5.7.1"
     license = "MIT"
     author = "lloyal.ai <noreply@lloyal.ai>"
     url = "https://github.com/lloyal-ai/inlined-vector"
