@@ -142,6 +142,9 @@ class ArrowConan(ConanFile):
             self.options.simd_level = "default"
             self.options.runtime_simd_level = "max"
 
+        if Version(self.version) >= "22.0.0":
+            del self.options.skyhook
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -262,7 +265,9 @@ class ArrowConan(ConanFile):
             raise ConanInvalidConfiguration("arrow:parquet requires arrow:with_thrift")
 
     def build_requirements(self):
-        if Version(self.version) >= "20.0.0":
+        if Version(self.version) >= "22.0.0":
+            self.tool_requires("cmake/[>=3.26 <4]")
+        elif Version(self.version) >= "20.0.0":
             self.tool_requires("cmake/[>=3.25 <4]")
         else:
             self.tool_requires("cmake/[>=3.16 <4]")
@@ -449,7 +454,7 @@ class ArrowConan(ConanFile):
 
         if self.options.acero:
             self.cpp_info.components["libacero"].set_property("pkg_config_name", "acero")
-            self.cpp_info.components["libacero"].set_property("cmake_target_name", f"Acero::arrow_acero_{cmake_suffix}")
+            self.cpp_info.components["libacero"].set_property("cmake_target_name", f"ArrowAcero::arrow_acero_{cmake_suffix}")
             self.cpp_info.components["libacero"].libs = [f"arrow_acero{suffix}"]
             self.cpp_info.components["libacero"].requires = ["libarrow"]
             if Version(self.version) >= "21.0.0" and self.options.compute:
