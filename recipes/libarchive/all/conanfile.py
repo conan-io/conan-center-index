@@ -195,5 +195,7 @@ class LibarchiveConan(ConanFile):
         self.cpp_info.libs = collect_libs(self)
         if self.settings.os == "Windows" and self.options.with_cng:
             self.cpp_info.system_libs.append("bcrypt")
+        if Version(self.version) >= "3.8.0" and self.settings.os == "Windows" and not self.options.with_libxml2 and not self.options.with_expat:
+            self.cpp_info.system_libs.append("xmllite")
         if is_msvc(self) and not self.options.shared:
             self.cpp_info.defines = ["LIBARCHIVE_STATIC"]
