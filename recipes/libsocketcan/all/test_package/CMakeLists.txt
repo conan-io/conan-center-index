@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
-project(test_package LANGUAGES CXX)
+project(test_package LANGUAGES C)
 
-find_package(socketcan CONFIG REQUIRED)
+find_package(libsocketcan CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE socketcan::socketcan)
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE libsocketcan::libsocketcan)
