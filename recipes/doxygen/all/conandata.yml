@@ -1,19 +1,4 @@
 sources:
-  "1.14.0":
-    url: "https://github.com/doxygen/doxygen/releases/download/Release_1_14_0/doxygen-1.14.0.src.tar.gz"
-    sha256: "d4536d11ab13037327d8d026b75f5a86b7ccb2093e2f546235faf61fd86e6b5d"
-  "1.13.2":
-    url: "https://github.com/doxygen/doxygen/releases/download/Release_1_13_2/doxygen-1.13.2.src.tar.gz"
-    sha256: "3a25e3386c26ea5494c784e946327225debfbc5dbfa8b13549010a315aace66d"
-  "1.12.0":
-    url: "https://github.com/doxygen/doxygen/releases/download/Release_1_12_0/doxygen-1.12.0.src.tar.gz"
-    sha256: "a3a3dba2018ef409d83d81a2fc42a0d19bdbe087252ef342bf214b51b8b01634"
-  "1.9.4":
-    url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.9.4.src.tar.gz"
-    sha256: "a15e9cd8c0d02b7888bc8356eac200222ecff1defd32f3fe05257d81227b1f37"
-patches:
-  "1.9.4":
-    - patch_file: "patches/1.9.4-0001-enable-modern-compilers.patch"
-      patch_description: "Enable modern compilers"
-      patch_type: "portability"
-      patch_source: "https://github.com/doxygen/doxygen/commit/5198966c8d5fec89116d025c74934ac03ea511fa"
+  "1.15.0":
+    url: "https://github.com/doxygen/doxygen/releases/download/Release_1_15_0/doxygen-1.15.0.src.tar.gz"
+    sha256: "a8cafe605867ad475aaf288a3852783076e1df83aabf16488bbfa958062e7440"
