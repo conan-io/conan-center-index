@@ -39,7 +39,8 @@ class PackageConan(ConanFile):
             raise ConanInvalidConfiguration("Only supported on Linux, FreeBSD and Android.")
 
     def build_requirements(self):
-        self.tool_requires("autoconf/[>=2.72 <3]")
+        self.tool_requires("libtool/2.4.7")
+        self.tool_requires("autoconf/2.71")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
 
