@@ -28,6 +28,9 @@ class CppMemberAccessorConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
+    def requirements(self):
+        self.tool_requires("cmake/[>=3.16]")
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.generate()
