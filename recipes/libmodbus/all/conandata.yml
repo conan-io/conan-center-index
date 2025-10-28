@@ -14,7 +14,7 @@ sources:
 patches:
   "3.1.11":
     - patch_file: "patches/3.1.11-0001-msvc-fixes.patch"
-    - patch_file: "patches/3.1.11-0002-cflags-fixes.patch"
+    - patch_file: "patches/3.1.11-0002-configure-fixes.patch"
   "3.1.10":
     - patch_file: "patches/3.1.10-0001-msvc-fixes.patch"
   "3.1.8":

@@ -1,0 +1,27 @@
+--- a/configure
++++ b/configure
+@@ -18765,15 +18765,6 @@ esac
+ fi
+ printf "%s\n" "#define HAVE_DECL_TIOCM_RTS $ac_have_decl" >>confdefs.h
+ 
+-
+-WARNING_CFLAGS="-Wall \
+--Wmissing-declarations -Wmissing-prototypes \
+--Wnested-externs -Wpointer-arith \
+--Wsign-compare -Wchar-subscripts \
+--Wstrict-prototypes -Wshadow \
+--Wformat-security"
+-
+-
+ # Build options
+ # Check whether --enable-tests was given.
+ if test ${enable_tests+y}
+@@ -18808,7 +18799,7 @@ esac
+ fi
+ 
+ 
+-if test "x$enable_debug" = "xyes"
++test "$CFLAGS" || if test "x$enable_debug" = "xyes"
+ then :
+ 
+   CFLAGS="-g -O0"
