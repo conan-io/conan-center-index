@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/hliberacki/cpp-member-accessor/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "10f9ceedc96d2ff3dc95ed0dba50708739107ccbe659d5ca4e0250f8c0ac824d"
