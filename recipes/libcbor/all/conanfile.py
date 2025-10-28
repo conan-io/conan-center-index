@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -61,7 +62,8 @@ class LibCborStackConan(ConanFile):
         tc.variables["CBOR_BUFFER_GROWTH"] = self.options.buffer_growth_factor
         # Relocatable shared libs on macOS
         tc.variables["CMAKE_MACOSX_RPATH"] = True
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
+        if Version(self.version) < "0.13.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
 
     def build(self):
