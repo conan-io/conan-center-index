@@ -142,6 +142,9 @@ class ArrowConan(ConanFile):
             self.options.simd_level = "default"
             self.options.runtime_simd_level = "max"
 
+        if Version(self.version) >= "22.0.0":
+            del self.options.skyhook
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -245,10 +248,7 @@ class ArrowConan(ConanFile):
         check_min_cppstd(self, self._min_cppstd)
 
         if self.options.get_safe("skyhook", False):
-            if Version(self.version) >= "22.0.0":
-                del self.options.skyhook
-            else:
-                raise ConanInvalidConfiguration("CCI has no librados recipe (yet)")
+            raise ConanInvalidConfiguration("CCI has no librados recipe (yet)")
         if self.options.with_cuda:
             raise ConanInvalidConfiguration("CCI has no cuda recipe (yet)")
         if self.options.with_s3 and not self.dependencies["aws-sdk-cpp"].options.config:
