@@ -96,7 +96,7 @@ class ArrowConan(ConanFile):
         "with_gcs": False,
         "with_gflags": False,
         "with_jemalloc": False,
-        "with_mimalloc": False,
+        "with_mimalloc": True,
         "with_glog": False,
         "with_grpc": False,
         "with_json": False,
@@ -131,8 +131,6 @@ class ArrowConan(ConanFile):
             del self.options.fPIC
         if is_msvc(self):
             self.options.with_boost = True
-        if Version(self.version) >= "19.0.0":
-            self.options.with_mimalloc = True
 
         if is_msvc(self) and self.settings.arch == "armv8":
             # xsimd does not yet support msvc+arm64
@@ -453,9 +451,6 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libacero"].set_property("pkg_config_name", "acero")
             self.cpp_info.components["libacero"].set_property("cmake_target_name", f"Acero::arrow_acero_{cmake_suffix}")
             self.cpp_info.components["libacero"].libs = [f"arrow_acero{suffix}"]
-            self.cpp_info.components["libacero"].names["cmake_find_package"] = "acero"
-            self.cpp_info.components["libacero"].names["cmake_find_package_multi"] = "acero"
-            self.cpp_info.components["libacero"].names["pkg_config"] = "acero"
             self.cpp_info.components["libacero"].requires = ["libarrow"]
             if Version(self.version) >= "21.0.0" and self.options.compute:
                 # libacero depends on compute
@@ -481,7 +476,7 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow_flight"].libs = [f"arrow_flight{suffix}"]
             self.cpp_info.components["libarrow_flight"].requires = ["libarrow"]
             # https://github.com/apache/arrow/pull/43137#pullrequestreview-2267476893
-            if Version(self.version) >= "18.0.0" and self.options.with_openssl:
+            if self.options.with_openssl:
                 self.cpp_info.components["libarrow_flight"].requires.append("openssl::openssl")
 
         if self.options.get_safe("with_flight_sql"):
@@ -494,19 +489,14 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["dataset"].libs = ["arrow_dataset"]
             if self.options.parquet:
                 self.cpp_info.components["dataset"].requires = ["libparquet"]
-            if self.options.acero and Version(self.version) >= "19.0.0":
+            if self.options.acero:
                 self.cpp_info.components["dataset"].requires = ["libacero"]
-
-        if self.options.cli and (self.options.with_cuda or self.options.with_flight_rpc or self.options.parquet):
-            binpath = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH env var: {binpath}")
-            self.env_info.PATH.append(binpath)
 
         if self.options.with_boost:
             if self.options.gandiva:
                 # FIXME: only filesystem component is used
                 self.cpp_info.components["libgandiva"].requires.append("boost::boost")
-            if self.options.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < Version("4.9"):
+            if self.options.parquet and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < Version("4.9"):
                 self.cpp_info.components["libparquet"].requires.append("boost::boost")
             # FIXME: only headers components is used
             self.cpp_info.components["libarrow"].requires.append("boost::boost")
