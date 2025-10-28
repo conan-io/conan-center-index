@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, replace_in_file
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -46,8 +47,13 @@ class LibavrocppConan(ConanFile):
         
     def requirements(self):
         # boost upper to 1.81.0 requires C++14 minimum
-        self.requires("boost/1.81.0", transitive_headers=True)
-        self.requires("snappy/1.1.9")
+        if Version(self.version) >= Version("1.11.0"): 
+            self.requires("boost/[>=1.81.0 <=1.87.0]", transitive_headers=True)
+        else:
+            # Old fixed version of boost
+            self.requires("boost/1.81.0", transitive_headers=True)
+
+        self.requires("snappy/[>=1.1.9 <=1.2.1]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
