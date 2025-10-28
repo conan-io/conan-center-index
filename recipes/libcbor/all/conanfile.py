@@ -61,6 +61,7 @@ class LibCborStackConan(ConanFile):
         tc.variables["CBOR_BUFFER_GROWTH"] = self.options.buffer_growth_factor
         # Relocatable shared libs on macOS
         tc.variables["CMAKE_MACOSX_RPATH"] = True
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
 
     def build(self):
