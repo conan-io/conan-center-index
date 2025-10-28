@@ -1,0 +1,11 @@
+--- a/configure
++++ b/configure
+@@ -18808,7 +18808,7 @@
+ fi
+ 
+ 
+-if test "x$enable_debug" = "xyes"
++test "$CFLAGS" || if test "x$enable_debug" = "xyes"
+ then :
+ 
+   CFLAGS="-g -O0"

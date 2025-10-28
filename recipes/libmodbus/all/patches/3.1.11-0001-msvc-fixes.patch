@@ -1,3 +1,14 @@
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -287,7 +287,7 @@ SET_MAKE = @SET_MAKE@
+ SHELL = @SHELL@
+ STRIP = @STRIP@
+ VERSION = @VERSION@
+-WARNING_CFLAGS = @WARNING_CFLAGS@
++WARNING_CFLAGS =
+ abs_builddir = @abs_builddir@
+ abs_srcdir = @abs_srcdir@
+ abs_top_builddir = @abs_top_builddir@
 --- src/modbus-private.h
 +++ src/modbus-private.h
 @@ -14,5 +14,5 @@
@@ -7,14 +18,3 @@
 -typedef int ssize_t;
 +//typedef int ssize_t;
  #endif
---- a/configure
-+++ b/configure
-@@ -18808,7 +18808,7 @@
- fi
- 
- 
--if test "x$enable_debug" = "xyes"
-+test "$CFLAGS" || if test "x$enable_debug" = "xyes"
- then :
- 
-   CFLAGS="-g -O0"
