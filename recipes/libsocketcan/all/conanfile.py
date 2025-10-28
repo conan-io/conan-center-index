@@ -50,7 +50,7 @@ class PackageConan(ConanFile):
         if not cross_building(self):
             VirtualRunEnv(self).generate(scope="build")
         tc = AutotoolsToolchain(self)
-        tc.generate()        
+        tc.generate()
 
     def build(self):
         autotools = Autotools(self)
