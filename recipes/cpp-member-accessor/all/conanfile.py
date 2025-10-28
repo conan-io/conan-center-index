@@ -7,7 +7,7 @@ from conan.tools.files import get, copy, rmdir
 
 class CppMemberAccessorConan(ConanFile):
     name = "cpp-member-accessor"
-    version = "1.0.0"
+    description = "Library providing legal access to C++ private members"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/hliberacki/cpp-member-accessor"
@@ -23,7 +23,7 @@ class CppMemberAccessorConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
