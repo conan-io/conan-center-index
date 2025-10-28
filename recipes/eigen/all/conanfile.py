@@ -44,7 +44,7 @@ class EigenConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if Version(self.version) >= "3.4.1":
+        if Version(self.version) >= "3.4.90-":
             check_min_cppstd(self, 14)
 
     def source(self):
