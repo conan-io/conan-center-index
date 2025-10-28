@@ -1,3 +1,5 @@
 versions:
+  "1.129.8930-495":
+    folder: cmake
   "cci.20230216":
     folder: all
