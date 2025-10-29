@@ -1,8 +1,7 @@
 #include <nanobind/nanobind.h>
 
-namespace nb = nanobind;
-using namespace nb::literals;
+int add(int a, int b) { return a + b; }
 
-NB_MODULE(test_module, m) {
-    m.def("add", [](int a, int b) { return a + b; }, "a"_a, "b"_a);
+NB_MODULE(conan_test_package, m) {
+    m.def("add", &add);
 }
