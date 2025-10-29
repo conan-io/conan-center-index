@@ -105,7 +105,7 @@ class QtConan(ConanFile):
         "with_openal": True,
         "with_gstreamer": False,
         "with_pulseaudio": False,
-        "with_gssapi": False,
+        "with_gssapi": True,
         "with_md4c": True,
         "with_x11": True,
         "with_egl": False,
@@ -325,9 +325,6 @@ class QtConan(ConanFile):
         if not self.options.with_pcre2:
             raise ConanInvalidConfiguration("pcre2 is actually required by qt (QTBUG-92454). please use option qt:with_pcre2=True")
 
-        if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
-            raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
-
         if self.options.get_safe("with_x11", False) and not self.dependencies.direct_host["xkbcommon"].options.with_x11:
             raise ConanInvalidConfiguration("The 'with_x11' option for the 'xkbcommon' package must be enabled when the 'with_x11' option is enabled")
         if self.options.get_safe("qtwayland", False) and not self.dependencies.direct_host["xkbcommon"].options.with_wayland:
@@ -418,7 +415,7 @@ class QtConan(ConanFile):
         if self.options.with_dbus:
             self.requires("dbus/1.15.8")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
-            self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
+            self.requires("krb5/1.21.2")
         if self.options.get_safe("with_md4c", False):
             self.requires("md4c/0.4.8")
 
