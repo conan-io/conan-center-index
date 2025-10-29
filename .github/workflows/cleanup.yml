@@ -2,6 +2,11 @@ name: Clean old binaries
 
 on:
   push:
+    paths-ignore:
+      - 'recipes/**'
+  pull_request:
+    paths-ignore:
+      - 'recipes/**'
   workflow_dispatch:
   schedule:
     - cron: '15 14 * * *'
