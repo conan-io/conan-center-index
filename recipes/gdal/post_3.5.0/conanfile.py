@@ -188,7 +188,7 @@ class GdalConan(ConanFile):
         if self.options.with_armadillo:
             self.requires("armadillo/12.6.4")
         if self.options.with_arrow:
-            self.requires("arrow/14.0.2")
+            self.requires("arrow/[>=14.0.2 <20]")
         if self.options.with_basisu:
             self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
@@ -310,9 +310,6 @@ class GdalConan(ConanFile):
         else:
             check_min_cppstd(self, 11)
 
-        for option in ["crypto", "zlib", "proj", "libtiff"]:
-            if self.options.get_safe(f"with_{option}") != "deprecated":
-                self.output.warning(f"{self.ref}:with_{option} option is deprecated. The {option} dependecy is always enabled now.")
         if self.options.with_pcre and self.options.with_pcre2:
             raise ConanInvalidConfiguration("Enable either pcre or pcre2, not both")
 
