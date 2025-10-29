@@ -69,8 +69,9 @@ class AbseilConan(ConanFile):
         tc.cache_variables["ABSL_ENABLE_INSTALL"] = True
         tc.cache_variables["ABSL_PROPAGATE_CXX_STD"] = True
         tc.cache_variables["BUILD_TESTING"] = False
-        if is_msvc(self):
-            tc.cache_variables["ABSL_MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+        if self.settings.os == "Windows" and self.settings.compiler in ["msvc", "clang"] and self.settings.get_safe("compiler.runtime"):
+            runtime = str(self.settings.compiler.runtime)
+            tc.cache_variables["ABSL_MSVC_STATIC_RUNTIME"] = runtime == "static"
         tc.generate()
 
     def build(self):
