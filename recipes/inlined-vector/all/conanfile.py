@@ -7,8 +7,7 @@ import os
 class InlinedVectorConan(ConanFile):
     name = "inlined-vector"
     license = "MIT"
-    author = "lloyal.ai <noreply@lloyal.ai>"
-    url = "https://github.com/lloyal-ai/inlined-vector"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lloyal-ai/inlined-vector"
     description = ("A C++17/20 header-only vector-like container with Small Buffer "
                    "Optimization (SBO) and full allocator support. Zero external dependencies.")
@@ -43,8 +42,7 @@ class InlinedVectorConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        cmake = CMake(self)
-        cmake.install()
+        copy(self, "*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"), keep_path=True)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "inlined-vector")
