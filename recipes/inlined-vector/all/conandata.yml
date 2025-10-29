@@ -2,3 +2,6 @@ sources:
   "5.7.1":
     url: "https://github.com/lloyal-ai/inlined-vector/archive/refs/tags/v5.7.1.tar.gz"
     sha256: "5236a8db61d610eee164d4b4199ff4ccdaa1d80cdc4609b3c320259d7c3a4805"
+  "5.7.0":
+    url: "https://github.com/lloyal-ai/inlined-vector/archive/refs/tags/v5.7.0.tar.gz"
+    sha256: "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed"
