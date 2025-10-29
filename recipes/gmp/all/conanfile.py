@@ -66,10 +66,13 @@ class GmpConan(ConanFile):
         del self.info.options.run_checks  # run_checks doesn't affect package's ID
 
     def validate(self):
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} cannot be built as a shared library using Visual Studio: some error occurs at link time",
-            )
+        if is_msvc(self):
+            if self.options.shared:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} cannot be built as a shared library using Visual Studio: some error occurs at link time",
+                )
+            if self.settings.arch == "armv8":
+                raise ConanInvalidConfiguration(f"{self.ref} cannot be built on windows ARM, because yasm does not target ARM")
 
     def build_requirements(self):
         self.tool_requires("m4/1.4.19")
