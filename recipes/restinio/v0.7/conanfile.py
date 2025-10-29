@@ -35,7 +35,7 @@ class RestinioConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("llhttp/9.1.3")
+        self.requires("llhttp/9.3.0")
 
         if Version(self.version) >= "0.7.3":
             self.requires("fmt/[>=11.0.2]")
@@ -46,7 +46,7 @@ class RestinioConan(ConanFile):
 
         if self.options.asio == "standalone":
             if Version(self.version) >= "0.7.4":
-                self.requires("asio/1.34.2")
+                self.requires("asio/1.36.0")
             else:
                 self.requires("asio/1.31.0")
         else:
