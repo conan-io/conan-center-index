@@ -6,7 +6,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class ClhepConan(ConanFile):
@@ -57,6 +57,7 @@ class ClhepConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["CLHEP_SINGLE_THREAD"] = False
         tc.variables["CLHEP_BUILD_DOCS"] = False
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):
@@ -112,19 +113,7 @@ class ClhepConan(ConanFile):
             self.cpp_info.components[conan_comp].libs = [lib_name]
             self.cpp_info.components[conan_comp].system_libs = system_libs
             self.cpp_info.components[conan_comp].requires = requires
-
-            # TODO: to remove in conan v2 once cmake_find_package* generators removed
-            self.cpp_info.components[conan_comp].names["cmake_find_package"] = cmake_target
-            self.cpp_info.components[conan_comp].names["cmake_find_package_multi"] = cmake_target
-            self.cpp_info.components[conan_comp].names["pkg_config"] = pkg_config_name
             self.cpp_info.components["clheplib"].requires.append(conan_comp)
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "CLHEP"
-        self.cpp_info.names["cmake_find_package_multi"] = "CLHEP"
-        self.cpp_info.names["pkg_config"] = "clhep"
-        self.cpp_info.components["clheplib"].names["cmake_find_package"] = f"CLHEP{suffix}"
-        self.cpp_info.components["clheplib"].names["cmake_find_package_multi"] = f"CLHEP{suffix}"
         self.cpp_info.components["clheplib"].set_property("cmake_target_name", f"CLHEP::CLHEP{suffix}")
-        self.cpp_info.components["clheplib"].names["pkg_config"] = "clhep"
         self.cpp_info.components["clheplib"].set_property("pkg_config_name", "clhep")

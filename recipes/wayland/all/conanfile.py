@@ -48,14 +48,14 @@ class WaylandConan(ConanFile):
 
     def requirements(self):
         if self.options.enable_libraries:
-            self.requires("libffi/3.4.4")
+            self.requires("libffi/[>=3.4.4 <4]")
         if self.options.enable_dtd_validation:
             self.requires("libxml2/[>=2.12.5 <3]")
         self.requires("expat/[>=2.6.2 <3]")
 
     def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
+      if self.settings.os not in ("Linux", "Android"):
+            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux or Android")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.4.0 <2]")
@@ -89,8 +89,7 @@ class WaylandConan(ConanFile):
         tc.project_options["documentation"] = False
         if not can_run(self):
             tc.project_options["build.pkg_config_path"] = self.generators_folder
-        if Version(self.version) >= "1.18.91":
-            tc.project_options["scanner"] = True
+        tc.project_options["scanner"] = True
         tc.generate()
 
     def _patch_sources(self):
@@ -133,9 +132,11 @@ class WaylandConan(ConanFile):
             self.cpp_info.components["wayland-server"].libs = ["wayland-server"]
             self.cpp_info.components["wayland-server"].set_property("pkg_config_name", "wayland-server")
             self.cpp_info.components["wayland-server"].requires = ["libffi::libffi"]
-            self.cpp_info.components["wayland-server"].system_libs = ["pthread", "m"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["wayland-server"].system_libs = ["pthread", "m"]
+
             self.cpp_info.components["wayland-server"].resdirs = ["res"]
-            if self.version >= Version("1.21.0") and self.settings.os == "Linux":
+            if self.settings.os == "Linux":
                 self.cpp_info.components["wayland-server"].system_libs += ["rt"]
             self.cpp_info.components["wayland-server"].set_property("component_version", self.version)
             pkgconfig_variables = {
@@ -149,9 +150,10 @@ class WaylandConan(ConanFile):
             self.cpp_info.components["wayland-client"].libs = ["wayland-client"]
             self.cpp_info.components["wayland-client"].set_property("pkg_config_name", "wayland-client")
             self.cpp_info.components["wayland-client"].requires = ["libffi::libffi"]
-            self.cpp_info.components["wayland-client"].system_libs = ["pthread", "m"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["wayland-client"].system_libs = ["pthread", "m"]
             self.cpp_info.components["wayland-client"].resdirs = ["res"]
-            if self.version >= Version("1.21.0") and self.settings.os == "Linux":
+            if self.settings.os == "Linux":
                 self.cpp_info.components["wayland-client"].system_libs += ["rt"]
             self.cpp_info.components["wayland-client"].set_property("component_version", self.version)
             pkgconfig_variables = {

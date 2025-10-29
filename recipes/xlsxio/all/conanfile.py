@@ -1,11 +1,11 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class XlsxioConan(ConanFile):
@@ -38,8 +38,6 @@ class XlsxioConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "0.2.34":
-            del self.options.with_minizip_ng
 
     def configure(self):
         if self.options.shared:
@@ -59,7 +57,7 @@ class XlsxioConan(ConanFile):
         if self.options.with_libzip:
             self.requires("libzip/1.10.1")
         elif Version(self.version) >= "0.2.34" and self.options.with_minizip_ng :
-            self.requires("minizip-ng/4.0.1")
+            self.requires("minizip-ng/[>=4.0.1 <5]")
         else:
             self.requires("minizip/1.2.13")
         self.requires("expat/[>=2.6.2 <3]")
@@ -77,11 +75,13 @@ class XlsxioConan(ConanFile):
         tc.variables["BUILD_STATIC"] = not self.options.shared
         tc.variables["BUILD_SHARED"] = self.options.shared
         tc.variables["WITH_LIBZIP"] = self.options.with_libzip
-        if Version(self.version) >= "0.2.34":
-            tc.variables["WITH_MINIZIP_NG"] = self.options.with_minizip_ng
+        tc.variables["WITH_MINIZIP_NG"] = self.options.with_minizip_ng
         tc.variables["WITH_WIDE"] = self.options.with_wide
         # Relocatable shared lib on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "0.2.34": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
         tc = CMakeDeps(self)
@@ -140,15 +140,3 @@ class XlsxioConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["xlsxio_readw"].system_libs.append("pthread")
             self.cpp_info.components["xlsxio_readw"].defines.append(xlsxio_macro)
-
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "xlsxio"
-        self.cpp_info.names["cmake_find_package_multi"] = "xlsxio"
-        self.cpp_info.components["xlsxio_read"].names["cmake_find_package"] = "xlsxio_read"
-        self.cpp_info.components["xlsxio_read"].names["cmake_find_package_multi"] = "xlsxio_read"
-        self.cpp_info.components["xlsxio_write"].names["cmake_find_package"] = "xlsxio_write"
-        self.cpp_info.components["xlsxio_write"].names["cmake_find_package_multi"] = "xlsxio_write"
-        if self.options.with_wide:
-            self.cpp_info.components["xlsxio_readw"].names["cmake_find_package"] = "xlsxio_readw"
-            self.cpp_info.components["xlsxio_readw"].names["cmake_find_package_multi"] = "xlsxio_readw"
-

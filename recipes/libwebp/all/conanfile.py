@@ -48,8 +48,13 @@ class LibwebpConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        if Version(self.version) >= "1.3.0":
+            self.tool_requires("cmake/[>=3.17]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -79,7 +84,6 @@ class LibwebpConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -94,6 +98,7 @@ class LibwebpConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "WebP")
         self.cpp_info.set_property("pkg_config_name", "libwebp-all-do-not-use")
+        self.cpp_info.set_property("cmake_additional_variables_prefixes", ["WEBP"])
 
         # webpdecoder
         self.cpp_info.components["webpdecoder"].set_property("cmake_target_name", "WebP::webpdecoder")
@@ -139,9 +144,3 @@ class LibwebpConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             self.cpp_info.components["webpmux"].system_libs = ["m"]
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "WebP"
-        self.cpp_info.names["cmake_find_package_multi"] = "WebP"
-        self.cpp_info.names["pkg_config"] = "libwebp-all-do-not-use"
-        self.cpp_info.components["webpmux"].names["cmake_find_package"] = "libwebpmux"
-        self.cpp_info.components["webpmux"].names["cmake_find_package_multi"] = "libwebpmux"

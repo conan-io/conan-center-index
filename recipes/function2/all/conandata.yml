@@ -1,4 +1,7 @@
 sources:
+  "4.2.5":
+    url: "https://github.com/Naios/function2/archive/refs/tags/4.2.5.tar.gz"
+    sha256: "a1f15327c542fb0d3e5affed352784d1126dc0b109e611fca93df804b8f19241"
   "4.2.4":
     url: "https://github.com/Naios/function2/archive/refs/tags/4.2.4.tar.gz"
     sha256: "6081d0f7011ddb8555bd846caf1245d4bce62d83fee1403b9d247b66ed617a67"

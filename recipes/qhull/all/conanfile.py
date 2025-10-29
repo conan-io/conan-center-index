@@ -4,7 +4,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class QhullConan(ConanFile):
@@ -30,24 +30,25 @@ class QhullConan(ConanFile):
         "fPIC": True,
         "reentrant": True,
     }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
+            # Qhull does not compile C++ library when building shared
+            # https://github.com/qhull/qhull/blob/master/CMakeLists.txt#L451-L456
+            self.settings.rm_safe("compiler.cppstd")
+            self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def package_id(self):
+        # qhull_r and qhullstatic_r are always built together, so they are ABI compatible
+        # This option is only used to decide the target name and the library name
         del self.info.options.reentrant
 
     def source(self):
@@ -55,6 +56,7 @@ class QhullConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.generate()
 
     def build(self):
@@ -78,23 +80,19 @@ class QhullConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", f"Qhull::{self._qhull_cmake_name}")
         self.cpp_info.set_property("pkg_config_name", self._qhull_pkgconfig_name)
 
-        # TODO: back to global scope once cmake_find_package* generators removed
         self.cpp_info.components["libqhull"].libs = [self._qhull_lib_name]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libqhull"].system_libs.append("m")
         if is_msvc(self) and self.options.shared:
             self.cpp_info.components["libqhull"].defines.extend(["qh_dllimport"])
 
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "Qhull"
-        self.cpp_info.names["cmake_find_package_multi"] = "Qhull"
-        self.cpp_info.names["pkg_config"] = self._qhull_pkgconfig_name
-        self.cpp_info.components["libqhull"].names["cmake_find_package"] = self._qhull_cmake_name
-        self.cpp_info.components["libqhull"].names["cmake_find_package_multi"] = self._qhull_cmake_name
-        self.cpp_info.components["libqhull"].names["pkg_config"] = self._qhull_pkgconfig_name
         self.cpp_info.components["libqhull"].set_property("cmake_target_name", f"Qhull::{self._qhull_cmake_name}")
         self.cpp_info.components["libqhull"].set_property("pkg_config_name", self._qhull_pkgconfig_name)
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+
+        if not self.options.shared:
+            self.cpp_info.components["libqhullcpp"].libs = [self._qhullcpp_lib_name]
+            self.cpp_info.components["libqhullcpp"].set_property("cmake_target_name", "Qhull::qhullcpp")
+            self.cpp_info.components["libqhullcpp"].set_property("pkg_config_name", "qhullcpp")
 
     @property
     def _qhull_cmake_name(self):
@@ -125,4 +123,11 @@ class QhullConan(ConanFile):
                 name += "r"
             if self.settings.build_type == "Debug":
                 name += "d"
+        return name
+
+    @property
+    def _qhullcpp_lib_name(self):
+        name = "qhullcpp"
+        if self.settings.build_type == "Debug":
+            name += "_d"
         return name
