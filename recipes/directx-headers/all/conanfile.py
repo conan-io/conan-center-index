@@ -20,6 +20,12 @@ class DirectXHeadersConan(ConanFile):
     homepage = "https://github.com/microsoft/DirectX-Headers"
     topics = ("3d", "d3d", "d3d12", "direct", "direct3d", "directx", "graphics")
     package_type = "static-library"
+    options = {
+        "header_only": [True, False]
+    }
+    default_options = {
+        "header_only": False
+    }
     settings = "os", "arch", "compiler", "build_type"
 
     @property
@@ -51,37 +57,49 @@ class DirectXHeadersConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.2")
+        if not self.options.header_only:
+            self.tool_requires("meson/1.2.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = MesonToolchain(self)
-        tc.project_options["build-test"] = False
-        tc.generate()
-        virtual_build_env = VirtualBuildEnv(self)
-        virtual_build_env.generate()
+        if not self.options.header_only:
+            tc = MesonToolchain(self)
+            tc.project_options["build-test"] = False
+            tc.generate()
+            virtual_build_env = VirtualBuildEnv(self)
+            virtual_build_env.generate()
 
     def build(self):
-        meson = Meson(self)
-        meson.configure()
-        meson.build()
+        if not self.options.header_only:
+            meson = Meson(self)
+            meson.configure()
+            meson.build()
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        meson = Meson(self)
-        meson.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.options.header_only:
+            # Copy all headers
+            include_src = os.path.join(self.source_folder, "include")
+            include_dst = os.path.join(self.package_folder, "include")
+            copy(self, "*.h", include_src, include_dst)
+            copy(self, "*.hpp", include_src, include_dst)
+        else:
+            meson = Meson(self)
+            meson.install()
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        if self.settings.os == "Linux" or self.settings.get_safe("os.subsystem") == "wsl":
-            self.cpp_info.includedirs.append(os.path.join("include", "wsl", "stubs"))
-        self.cpp_info.libs = ["d3dx12-format-properties", "DirectX-Guids"]
+        self.cpp_info.libs = []
         self.cpp_info.set_property("cmake_file_name", "DirectX-Headers")
         self.cpp_info.set_property("cmake_target_name", "Microsoft::DirectX-Headers")
         self.cpp_info.set_property("pkg_config_name", "DirectX-Headers")
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("d3d12")
-        if self.settings.compiler == "msvc":
-            self.cpp_info.system_libs.append("dxcore")
+        if self.settings.os == "Linux" or self.settings.get_safe("os.subsystem") == "wsl":
+            self.cpp_info.includedirs.append(os.path.join("include", "wsl", "stubs"))
+        if not self.options.header_only:
+            self.cpp_info.libs = ["d3dx12-format-properties", "DirectX-Guids"]
+            if self.settings.os == "Windows":
+                self.cpp_info.system_libs.append("d3d12")
+            if self.settings.compiler == "msvc":
+                self.cpp_info.system_libs.append("dxcore")
