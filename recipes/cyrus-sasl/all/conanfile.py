@@ -102,8 +102,11 @@ class CyrusSaslConan(ConanFile):
             self.requires("sqlite3/3.44.2")
 
     def validate(self):
-        if is_msvc(self) and not self.options.shared:
-            raise ConanInvalidConfiguration("Static library output is not supported when building with MSVC")
+        if is_msvc(self):
+            if not self.options.shared:
+                raise ConanInvalidConfiguration("Static library output is not supported when building with MSVC")
+            if self.settings.arch == "armv8":
+                raise ConanInvalidConfiguration(f"{self.ref} cannot be built on windows ARM")
         if self.options.with_gssapi:
             raise ConanInvalidConfiguration(
                 f"{self.name}:with_gssapi=True requires krb5 recipe, not yet available in conan-center",
