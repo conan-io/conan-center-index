@@ -127,11 +127,6 @@ class OnnxRuntimeConan(ConanFile):
             )
 
     def validate_build(self):
-        if self.version >= Version("1.15.0") and self.options.shared and sys.version_info[:2] < (3, 8):
-            # https://github.com/microsoft/onnxruntime/blob/638146b79ea52598ece514704d3f592c10fab2f1/cmake/CMakeLists.txt#LL500C12-L500C12
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires Python 3.8+ to be built as shared."
-            )
         if self.settings.os == "Windows" and self.dependencies["abseil"].options.shared:
             raise ConanInvalidConfiguration("Using abseil shared on Windows leads to link errors.")
 
@@ -196,7 +191,7 @@ class OnnxRuntimeConan(ConanFile):
         if Version(self.version) >= "1.17":
             # https://github.com/microsoft/onnxruntime/commit/5bfca1dc576720627f3af8f65e25af408271079b
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "onnxruntime_providers_cuda.cmake"),
-                            'option(onnxruntime_NVCC_THREADS "Number of threads that NVCC can use for compilation." 1)', 
+                            'option(onnxruntime_NVCC_THREADS "Number of threads that NVCC can use for compilation." 1)',
                             'set(onnxruntime_NVCC_THREADS "1" CACHE STRING "Number of threads that NVCC can use for compilation.")')
 
     def build(self):
