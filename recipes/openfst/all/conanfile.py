@@ -3,10 +3,11 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.build import check_min_cppstd, cross_building, check_max_cppstd
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 
 required_conan_version = ">=2.0.9"
 
@@ -83,6 +84,10 @@ class OpenFstConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f'Using {self.name} with Clang requires either "compiler.libcxx=libstdc++11" or "compiler.libcxx=libc++"'
             )
+        if (Version(self.version) == "1.8.2" and
+                self.settings.compiler == "apple-clang" and self.settings.compiler.version >= "17"):
+            # Old version uses removed std::shared_ptr::unique(), removed in C++20
+            check_max_cppstd(self, 20)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
