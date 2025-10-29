@@ -78,11 +78,7 @@ class OnnxRuntimeConan(ConanFile):
         self.requires("protobuf/3.21.12")
         self.requires("date/3.0.1")
         self.requires("re2/20231101")
-        if Version(self.version) >= "1.18":
-            self.requires("flatbuffers/23.5.26")
-        else:
-            # v1.* is required, newer versions are not compatible
-            self.requires("flatbuffers/1.12.0")
+        self.requires("flatbuffers/23.5.26")
         # using 1.84.0+ fails on CCI as it prevents the cpp 17 version to be picked up when building with cpp 20
         self.requires("boost/1.83.0", headers=True, libs=False)  # for mp11, header only, no need for libraries
         self.requires("safeint/3.0.28")

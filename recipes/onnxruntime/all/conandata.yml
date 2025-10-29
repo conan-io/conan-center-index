@@ -2,9 +2,6 @@ sources:
   "1.18.1":
     url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.18.1.tar.gz"
     sha256: "480ff5d2450ff18d02db48908c9c0c6a602993942cb47866b8effe32d0469a2c"
-  "1.17.3":
-    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.17.3.tar.gz"
-    sha256: "4112f6552c17216311be013b9a2621a3c1a17ed9e1268a1142599b6a494517c2"
 patches:
   "1.18.1":
     - patch_file: "patches/1.17.3-0002-missing-include.patch"
@@ -36,26 +33,8 @@ patches:
     - patch_file: "patches/1.18.1-0011-cpuinfo.patch"
       patch_description: "Fix target name for cpuinfo"
       patch_type: "conan"
-  "1.17.3":
-    - patch_file: "patches/1.17.3-0001-patch-macos-cpp20-date-compat.patch"
-      patch_description: "allow to build with macos c++20 support"
-      patch_type: "portability"
-      patch_source: "https://github.com/microsoft/onnxruntime/commit/7303a90f4916dcf6f66236d40b8917344c27420a.patch"
-    - patch_file: "patches/1.17.3-0002-missing-include.patch"
-      patch_description: "add missing '<optional>' include when abseil is built without c++17 support"
-      patch_type: "portability"
-    - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
-      patch_description: "allow to build with abseil built without c++17 support"
-      patch_type: "portability"
-    - patch_file: "patches/1.17.3-0003-fix-cutlass-cuda-provider.patch"
-      patch_description: "use cutlass from Conan"
-      patch_type: "portability"
-    - patch_file: "patches/1.15.1-0006-ort-mutex-include.patch"
-      patch_description: "Add missing chrono include to ort_mutex.h"
-      patch_type: "portability"
 
 # ONNX versions are based on the minor version used at
 # https://github.com/microsoft/onnxruntime/tree/main/cmake/external
 onnx_version_map:
   "1.18.1": "1.16.2"
-  "1.17.3": "1.15.0"
