@@ -186,8 +186,8 @@ class OnnxRuntimeConan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        pkg_config_dir = os.path.join(self.package_folder, "lib", "pkgconfig")
-        rmdir(self, pkg_config_dir)
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         if self.options.shared:
