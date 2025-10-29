@@ -72,6 +72,8 @@ class ThriftConan(ConanFile):
         if self.options.with_qt5:
             self.requires("qt/5.15.13")
 
+        self.tool_requires("cmake/[>=3.16]")
+
     def build_requirements(self):
         if self.settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.25")
