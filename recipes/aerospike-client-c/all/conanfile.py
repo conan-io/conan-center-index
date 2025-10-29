@@ -95,8 +95,6 @@ class AerospikeConan(ConanFile):
         event_library = ""
         if self.options.event_library:
             event_library = f"EVENT_LIB={self.options.event_library}"
-            includes.append(self.dependencies[str(
-                self.options.event_library)].package_folder)
         include_flags = ' '.join([f'-I{i}' for i in includes])
 
         ld_flags = ""
