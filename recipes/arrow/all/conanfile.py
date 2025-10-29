@@ -159,8 +159,10 @@ class ArrowConan(ConanFile):
     def requirements(self):
         if self.options.with_thrift:
             self.requires("thrift/0.20.0")
+        if self.options.with_grpc:
+            self.requires("grpc/[>=1.50.0 <2]")
         if self.options.with_protobuf:
-            self.requires("protobuf/3.21.12")
+            self.requires("protobuf/[>=3.21.12 <7]")
         if self.options.with_jemalloc:
             self.requires("jemalloc/5.3.0")
         if self.options.with_mimalloc:
@@ -173,8 +175,6 @@ class ArrowConan(ConanFile):
             self.requires("glog/0.6.0")
         if self.options.get_safe("with_gcs"):
             self.requires("google-cloud-cpp/1.40.1")
-        if self.options.with_grpc:
-            self.requires("grpc/1.50.0")
         if self._requires_rapidjson():
             self.requires("rapidjson/[>=cci.20230929]")
         if self.options.with_llvm:
@@ -204,7 +204,7 @@ class ArrowConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/[>=1.5 <1.6]")
         if self.options.with_re2:
-            self.requires("re2/20230301")
+            self.requires("re2/[>=20230301]")
         if self.options.with_utf8proc:
             self.requires("utf8proc/2.8.0")
         if self.options.with_backtrace:
