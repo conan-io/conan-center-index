@@ -53,7 +53,7 @@ class CyrusSaslConan(ConanFile):
         "with_scram": True,
         "with_otp": True,
         "with_krb4": True,
-        "with_gssapi": False, # FIXME: should be True
+        "with_gssapi": True,
         "with_plain": True,
         "with_anon": True,
         "with_postgresql": False,
@@ -78,6 +78,7 @@ class CyrusSaslConan(ConanFile):
             del self.options.with_postgresql
             del self.options.with_mysql
             del self.options.with_sqlite3
+            del self.options.with_gssapi
 
     def configure(self):
         if self.options.shared:
@@ -97,6 +98,8 @@ class CyrusSaslConan(ConanFile):
             self.requires("libmysqlclient/8.1.0")
         if self.options.get_safe("with_sqlite3"):
             self.requires("sqlite3/3.44.2")
+        if self.options.get_safe("with_gssapi"):
+            self.requires("krb5/1.21.2")
 
     def validate(self):
         if is_msvc(self) and not self.options.shared:
@@ -217,7 +220,7 @@ class CyrusSaslConan(ConanFile):
         msbuild.build(sln=os.path.join(self.source_folder, "win32", "cyrus-sasl-core.sln"))
         # TODO: add sasldb support
         # msbuild.build(sln=os.path.join(self.source_folder, "win32", "cyrus-sasl-sasldb.sln"))
-        if self.options.with_gssapi:
+        if self.options.get_safe("with_gssapi"):
             msbuild.build(sln=os.path.join(self.source_folder, "win32", "cyrus-sasl-gssapiv2.sln"))
 
     def generate(self):
