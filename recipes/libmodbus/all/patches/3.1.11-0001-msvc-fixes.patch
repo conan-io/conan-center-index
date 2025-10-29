@@ -1,3 +1,14 @@
+--- src/Makefile.in
++++ src/Makefile.in
+@@ -287,7 +287,7 @@
+ SHELL = @SHELL@
+ STRIP = @STRIP@
+ VERSION = @VERSION@
+-WARNING_CFLAGS = @WARNING_CFLAGS@
++WARNING_CFLAGS =
+ abs_builddir = @abs_builddir@
+ abs_srcdir = @abs_srcdir@
+ abs_top_builddir = @abs_top_builddir@
 --- src/modbus-private.h
 +++ src/modbus-private.h
 @@ -14,5 +14,5 @@
