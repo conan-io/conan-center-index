@@ -84,10 +84,6 @@ class OpenFstConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f'Using {self.name} with Clang requires either "compiler.libcxx=libstdc++11" or "compiler.libcxx=libc++"'
             )
-        if (Version(self.version) == "1.8.2" and
-                self.settings.compiler == "apple-clang" and self.settings.compiler.version >= "17"):
-            # Old version uses removed std::shared_ptr::unique(), removed in C++20
-            check_max_cppstd(self, 20)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
