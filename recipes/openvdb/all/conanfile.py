@@ -20,7 +20,8 @@ class OpenVDBConan(ConanFile):
         "structure and a large suite of tools for the efficient storage and "
         "manipulation of sparse volumetric data discretized on three-dimensional grids."
     )
-    license = "MPL-2.0"
+    # The license is defined in the config_options as it depends on the package version.
+    # (openvdb < 12 is MPL-2.0 licensed, openvdb >= 12 is Apache-2 licensed.)
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/AcademySoftwareFoundation/openvdb"
     topics = ("voxel", "voxelizer", "volume-rendering", "fx", "vdb")
@@ -82,40 +83,29 @@ class OpenVDBConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 17 if Version(self.version) >= "10.0.0" else 14
+        return 17
 
     @property
     def _compilers_min_version(self):
-        if Version(self.version) >= "10.0.0":
-            # https://github.com/AcademySoftwareFoundation/openvdb/blob/v10.0.1/doc/dependencies.txt#L56-L84
-            return {
-                "msvc": "192.8",
-                "Visual Studio": "16",
-                "gcc": "9.3.1",
-                "clang": "5.0",
-                "apple-clang": "12.0",
-                "intel-cc": "19",
-            }
-        else:
-            # https://github.com/AcademySoftwareFoundation/openvdb/blob/v9.1.0/doc/dependencies.txt#L56-L84
-            return {
-                "msvc": "191.0",
-                "Visual Studio": "15",
-                "gcc": "6.3.1",
-                "clang": "3.8",
-                "apple-clang": "10.0",
-                "intel-cc": "17",
-            }
+        # https://github.com/AcademySoftwareFoundation/openvdb/blob/v10.0.1/doc/dependencies.txt#L56-L84
+        return {
+            "msvc": "192.8",
+            "Visual Studio": "16",
+            "gcc": "9.3.1",
+            "clang": "5.0",
+            "apple-clang": "12.0",
+            "intel-cc": "19",
+        }
 
     def config_options(self):
+        # Setting license conditionally as OpenVDB 12.0.0 switched from MPL 2 to Apache 2.
+        self.license = "Apache-2.0" if Version(self.version) >= "12.0" else "MPL-2.0"
+
         if self.settings.os == "Windows":
             del self.options.fPIC
         if is_msvc(self):
             # Supported by GCC and Clang only
             del self.options.use_colored_output
-        if Version(self.version) < "10.0.0":
-            del self.options.use_explicit_instantiation
-            del self.options.use_delayed_loading
 
     def configure(self):
         if self.options.shared:
@@ -133,7 +123,7 @@ class OpenVDBConan(ConanFile):
         self.requires("boost/1.84.0", transitive_headers=True)
         self.requires("onetbb/2021.10.0", transitive_headers=True, transitive_libs=True)
         if self.options.use_imath_half:
-            self.requires("imath/3.1.9", transitive_headers=True, transitive_libs=True)
+            self.requires("imath/[>=3.1.9 <4]", transitive_headers=True, transitive_libs=True)
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_blosc:
@@ -165,8 +155,7 @@ class OpenVDBConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if Version(self.version) >= "10.0.0":
-            self.tool_requires("cmake/[>=3.18 <4]")
+        self.tool_requires("cmake/[>=3.20]")
         if self.options.build_ax:
             if self._settings_build.os == "Windows":
                 self.tool_requires("winflexbison/2.5.25")
@@ -293,9 +282,4 @@ class OpenVDBConan(ConanFile):
         if self.options.use_imath_half:
             main_component.requires.append("imath::imath")
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "OpenVDB"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenVDB"
-        main_component.names["cmake_find_package"] = "openvdb"
-        main_component.names["cmake_find_package_multi"] = "openvdb"
         main_component.set_property("cmake_target_name", "OpenVDB::openvdb")
