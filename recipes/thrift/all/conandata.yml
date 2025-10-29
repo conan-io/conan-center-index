@@ -1,7 +1,4 @@
 sources:
-  "0.22.0":
-    url: "http://archive.apache.org/dist/thrift/0.22.0/thrift-0.22.0.tar.gz"
-    sha256: "794a0e455787960d9f27ab92c38e34da27e8deeda7a5db0e59dc64a00df8a1e5"
   "0.21.0":
     url: "http://archive.apache.org/dist/thrift/0.21.0/thrift-0.21.0.tar.gz"
     sha256: "9a24f3eba9a4ca493602226c16d8c228037db3b9291c6fc4019bfe3bd39fc67c"
@@ -27,16 +24,6 @@ sources:
     url: "https://archive.apache.org/dist/thrift/0.14.1/thrift-0.14.1.tar.gz"
     sha256: "13da5e1cd9c8a3bb89778c0337cc57eb0c29b08f3090b41cf6ab78594b410ca5"
 patches:
-  "0.22.0":
-    - patch_file: "patches/cmake-0.21.0-001-install-dir.patch"
-      patch_description: "Patch install dir on MSVC"
-      patch_type: "conan"
-    - patch_file: "patches/cmake-0.22.0-002-conan-libs.patch"
-      patch_description: "Parts of cmake-0.16.0.patch that does not need changing"
-      patch_type: "conan"
-    - patch_file: "patches/cmake-0.21.0-003-conan-libs.patch"
-      patch_description: "Patch conan libs in the thrift lib cmake"
-      patch_type: "conan"
   "0.21.0":
     - patch_file: "patches/cmake-0.21.0-001-install-dir.patch"
       patch_description: "Patch install dir on MSVC"
