@@ -90,6 +90,8 @@ class LibmodbusConan(ConanFile):
         if not self.options.shared:
             for decl in ("__declspec(dllexport)", "__declspec(dllimport)"):
                 replace_in_file(self, os.path.join(self.source_folder, "src", "modbus.h"), decl, "")
+        if self.settings.os == "Windows":
+            replace_in_file(self, os.path.join(self.source_folder, "src", "configure.ac"), 'WARNING_CFLAGS="-Wall', 'test -n "$WARNING_CFLAGS" || WARNING_CFLAGS="-Wall')
 
     def build(self):
         self._patch_sources()
