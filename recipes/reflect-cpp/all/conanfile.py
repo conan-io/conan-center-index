@@ -112,7 +112,7 @@ class ReflectCppConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++20 features, which your compiler does not fully support.")
-        if self.settings.compiler == "msvc" and self.options.shared:
+        if Version(self.version) < "0.22" and self.settings.compiler == "msvc" and self.options.shared:
             raise ConanInvalidConfiguration("Old versions of this library do not support MSVC-shared builds")
     
     def layout(self):
