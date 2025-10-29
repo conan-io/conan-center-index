@@ -1,5 +1,5 @@
 diff --git a/blosc/CMakeLists.txt b/blosc/CMakeLists.txt
-index 8bd56d5..12615c1 100644
+index cf05eba..58e5242 100644
 --- a/blosc/CMakeLists.txt
 +++ b/blosc/CMakeLists.txt
 @@ -103,7 +103,7 @@ endif()
@@ -8,15 +8,15 @@ index 8bd56d5..12615c1 100644
  #   manually add includes / libs for others
 -if(LZ4_FOUND)
 +if(lz4_FOUND)
-     if (TARGET LZ4::lz4)
+     if(TARGET LZ4::lz4)
          list(APPEND LIBS LZ4::lz4)
      else()
-@@ -133,7 +133,7 @@ if(NOT DEACTIVATE_ZLIB)
+@@ -138,7 +138,7 @@ if(NOT DEACTIVATE_ZLIB)
  endif()
  
  if(NOT DEACTIVATE_ZSTD)
 -    if(ZSTD_FOUND)
 +    if(zstd_FOUND)
-         if (TARGET zstd::libzstd)
+         if(TARGET zstd::libzstd)
              list(APPEND LIBS zstd::libzstd)
          else()
