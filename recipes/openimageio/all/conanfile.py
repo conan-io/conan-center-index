@@ -300,7 +300,7 @@ class OpenImageIOConan(ConanFile):
                 ["dl", "m", "pthread"]
             )
         if self.options.with_tbb:
-            open_image_io_util.requires.append("onetbb::onetbb")
+            open_image_io_util.requires.append("onetbb::libtbb")
 
         # OpenImageIO::OpenImageIO
         open_image_io = self._add_component("OpenImageIO")
