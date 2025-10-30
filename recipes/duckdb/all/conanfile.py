@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
+from conan.tools.files import get, copy, rm, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
@@ -65,9 +65,6 @@ class DuckdbConan(ConanFile):
     @property
     def _min_cppstd(self):
         return 11
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -153,7 +150,6 @@ class DuckdbConan(ConanFile):
         dpes.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         if is_msvc(self) and not self.options.shared:
             replace_in_file(self, os.path.join(self.source_folder, "src", "include", "duckdb.h"),
                             "#define DUCKDB_API __declspec(dllimport)",
