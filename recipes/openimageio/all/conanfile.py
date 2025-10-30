@@ -92,7 +92,7 @@ class OpenImageIOConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         if Version(self.version) < "3.0":
             self.requires("boost/1.84.0")
-        self.requires("libtiff/4.6.0")
+        self.requires("libtiff/[>=4.6.0 <5]")
         self.requires("imath/[>3.1.9 <4]", transitive_headers=True)
         self.requires("openexr/[>=3.2.3 <4]")
         if self.options.with_libjpeg == "libjpeg":
