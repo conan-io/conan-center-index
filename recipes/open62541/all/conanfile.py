@@ -129,7 +129,7 @@ class Open62541Conan(ConanFile):
         "discovery_semaphore": True,
         "query": False,
         "encryption": False,
-        "json_support": False,
+        "json_support": True,
         "pub_sub": False,
         "pub_sub_encryption": False,
         "data_access": True,
@@ -140,7 +140,7 @@ class Open62541Conan(ConanFile):
         "hardening": True,
         "cpp_compatible": False,
         "readable_statuscodes": True,
-        "parsing": False,
+        "parsing": True,
         "nodeset_loader": False,
     }
 

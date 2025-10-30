@@ -1,0 +1,35 @@
+Backport https://codereview.qt-project.org/c/qt/qtbase/+/652022
+
+From 927df66724d98e21795acefe50b60f43072d4f76 Mon Sep 17 00:00:00 2001
+From: Tor Arne Vestbø
+Date: Tue, 10 Jun 2025 07:26:19 -0700
+Subject: [PATCH] macOS: Explicitly link the platform plugin to Foundation
+
+In the macOS 26 SDK the NSUserActivityTypeBrowsingWeb is claimed to come
+from both Foundation (as in earlier SDKS), as well as CoreServices.
+
+However the latter is not the case on macOS 15, resulting into load
+errors with missing symbol.
+
+By explicitly linking to Foundation, and putting it first in the
+framework list, we trigger the linker to use the right reference
+for the symbol.
+
+Reported upstream as FB17876148.
+
+Pick-to: 6.10 6.9 6.8 6.5
+Change-Id: I0c3203f92851ad9fa862aed237823f0e1e28f6ff
+---
+
+diff --git a/src/plugins/platforms/cocoa/CMakeLists.txt b/src/plugins/platforms/cocoa/CMakeLists.txt
+index cb77476..26f061b 100644
+--- a/src/plugins/platforms/cocoa/CMakeLists.txt
++++ b/src/plugins/platforms/cocoa/CMakeLists.txt
+@@ -48,6 +48,7 @@
+     DEFINES
+         QT_NO_FOREACH
+     LIBRARIES
++        ${FWFoundation}
+         ${FWAppKit}
+         ${FWCarbon}
+         ${FWCoreServices}

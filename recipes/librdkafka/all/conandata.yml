@@ -1,16 +1,9 @@
 sources:
-  "2.11.1":
-    url: "https://github.com/edenhill/librdkafka/archive/v2.11.1.tar.gz"
-    sha256: "a2c87186b081e2705bb7d5338d5a01bc88d43273619b372ccb7bb0d264d0ca9f"
+  "2.12.1":
+    url: "https://github.com/edenhill/librdkafka/archive/v2.12.1.tar.gz"
+    sha256: "ec103fa05cb0f251e375f6ea0b6112cfc9d0acd977dc5b69fdc54242ba38a16f"
 patches:
-  "2.11.1":
+  "2.12.1":
     - patch_file: patches/0001-Change-library-names-1-9-1.patch
-      patch_description: "find_package conan packages"
-      patch_type: "conan"
     - patch_file: patches/0002-Change-library-targets-and-result-variables-2-5-0.patch
-      patch_description: "refer conan package names"
-      patch_type: "conan"
     - patch_file: patches/0004-Fix_compilation_with_CMake_and_without_CURL.patch
-      patch_description: "Fix OAuthBearer OIDC preprocessor directive when using CMake without CUR"
-      patch_type: "official"
-      patch_source: "https://github.com/confluentinc/librdkafka/pull/5136"

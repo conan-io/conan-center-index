@@ -80,9 +80,6 @@ class QtConan(ConanFile):
     options.update({module: [True, False] for module in _submodules})
     options.update({f"{status}_modules": [True, False] for status in _module_statuses})
 
-    # this significantly speeds up windows builds
-    no_copy_source = True
-
     default_options = {
         "shared": False,
         "opengl": "desktop",
@@ -263,6 +260,10 @@ class QtConan(ConanFile):
 
         for option in self.options.items():
             self.output.debug(f"qt6 option: {option}")
+
+        # no_copy_source slightly speeds up Linux builds.
+        # no_copy_source causes long relative paths, hitting Window's PATH limit when building Qt WebEngine.
+        self.no_copy_source = not (self.settings_build.os == "Windows" and self.options.get_safe("qtwebengine"))
 
     def validate_build(self):
         check_min_cppstd(self, 17)
@@ -479,8 +480,10 @@ class QtConan(ConanFile):
         if not cross_building(self):
             vre = VirtualRunEnv(self)
             vre.generate(scope="build")
-        # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
         env = Environment()
+        # Tell Python to assume UTF-8 encoding to work around character encoding issues while building Qt WebEngine on Polish locale on Windows.
+        env.define("PYTHONUTF8", "1")
+        # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
         env.unset("VCPKG_ROOT")
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         env.vars(self).save_script("conanbuildenv_pkg_config_path")
@@ -895,7 +898,9 @@ class QtConan(ConanFile):
             targets.append("qsb")
         if self.options.qtdeclarative:
             targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
-            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmlaotstats"])
+            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview"])
+            if Version(self.version) >= "6.8.3":
+                targets.extend(["qmlaotstats"])
 
             # Note: consider "qmltestrunner", see https://github.com/conan-io/conan-center-index/issues/24276
         if self.options.get_safe("qtremoteobjects"):
@@ -1172,8 +1177,6 @@ class QtConan(ConanFile):
                 if Version(self.version) >= "6.7.0":
                     # https://github.com/qt/qtbase/blob/v6.7.0-beta1/src/gui/CMakeLists.txt#L430
                     self.cpp_info.components["qtGui"].system_libs.append("uxtheme")
-                if self.settings.compiler == "gcc":
-                    self.cpp_info.components["qtGui"].system_libs.append("uuid")
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/direct2d/CMakeLists.txt#L60-L82
                 self.cpp_info.components["qtGui"].system_libs += [
                     "advapi32", "d2d1", "d3d11", "dwmapi", "dwrite", "dxgi", "dxguid", "gdi32", "imm32", "ole32",
@@ -1191,6 +1194,9 @@ class QtConan(ConanFile):
                     "advapi32", "dwmapi", "gdi32", "imm32", "ole32", "oleaut32", "setupapi", "shell32", "shlwapi",
                     "user32", "winmm", "winspool", "wtsapi32", "shcore", "comdlg32", "d3d9", "runtimeobject"
                 ]
+                if Version(self.version) >= "6.8.0" and is_msvc(self):
+                    # https://github.com/qt/qtbase/blob/6.8.3/src/plugins/platforms/windows/CMakeLists.txt#L204
+                    self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs.append("uiautomationcore")
             elif self.settings.os == "Android":
                 _create_plugin("QAndroidIntegrationPlugin", "qtforandroid", "platforms", ["Core", "Gui"])
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/android/CMakeLists.txt#L68-L70
@@ -1198,9 +1204,6 @@ class QtConan(ConanFile):
             elif is_apple_os(self):
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/gui/CMakeLists.txt#L388-L394
                 self.cpp_info.components["qtGui"].frameworks = ["CoreFoundation", "CoreGraphics", "CoreText", "Foundation", "ImageIO"]
-                if self.options.get_safe("opengl", "no") != "no":
-                    # https://github.com/qt/qtbase/commit/2ed63e587eefb246dba9e69aa01fdb2abb2def13
-                    self.cpp_info.components["qtGui"].frameworks.append("AGL")
                 if self.settings.os == "Macos":
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/gui/CMakeLists.txt#L362-L370
                     self.cpp_info.components["qtGui"].frameworks += ["AppKit", "Carbon"]
