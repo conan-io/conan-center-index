@@ -90,15 +90,15 @@ class DlibConan(ConanFile):
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
         if self.options.with_jpeg:
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         if self.options.with_png:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.get_safe("with_webp"):
             self.requires("libwebp/1.3.2")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.45.0")
+            self.requires("sqlite3/[>=3.45.0 <4]")
         if self.options.with_openblas:
-            self.requires("openblas/0.3.26")
+            self.requires("openblas/0.3.30")
 
     def validate(self):
         if self.settings.compiler.cppstd:
