@@ -1,0 +1,4 @@
+sources:
+  "2.2.4":
+    url: "https://github.com/synacker/daggy/archive/refs/tags/v2.2.4.tar.gz"
+    sha256: "66a81b3b4d560102d00d858d4ad31a051b9e28981e341fd05ae301c12099d1fd"
