@@ -208,18 +208,23 @@ class OpenImageIOConan(ConanFile):
         tc.variables["USE_FREETYPE"] = self.options.with_freetype
         tc.variables["USE_LIBWEBP"] = self.options.with_libwebp
         tc.variables["USE_OPENJPEG"] = self.options.with_openjpeg
+        tc.cache_variables["USE_OPENJPH"] = self.options.get_safe("with_openjph", False)
 
+        tc.cache_variables["USE_FFMPEG"] = self.options.with_ffmpeg
         if self.options.with_ffmpeg:
-            tc.cache_variables["USE_FFMPEG"] = self.options.with_ffmpeg
             tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_FFmpeg"] = True
             tc.cache_variables["FFMPEG_VERSION"] = f'"{str(self.dependencies["ffmpeg"].ref.version)}"'
 
         if Version(self.version) < "3.0":
             tc.cache_variables["Boost_USE_STATIC_LIBS"] = not self.dependencies["boost"].options.shared
+
         tc.cache_variables["BUILD_MISSING_ROBINMAP"] = False
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_Robinmap"] = True
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_pugixml"] = True
-        tc.cache_variables["INTERNALIZE_FMT"] = False
+        if Version(self.version) < "3.0":
+            tc.cache_variables["INTERNALIZE_FMT"] = False
+        else: # Variable renamed with 3.0
+            tc.cache_variables["OIIO_INTERNALIZE_FMT"] = False
         tc.cache_variables["ROBINMAP_INCLUDES"] = self.dependencies["tsl-robin-map"].cpp_info.includedirs[0].replace("\\", "/")
         tc.cache_variables["IMATH_INCLUDES"] = self.dependencies["imath"].cpp_info.includedirs[0].replace("\\", "/")
         tc.cache_variables["OPENEXR_INCLUDES"] = self.dependencies["openexr"].cpp_info.includedirs[0].replace("\\", "/")
@@ -233,6 +238,7 @@ class OpenImageIOConan(ConanFile):
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_Libheif"] = self.options.with_libheif
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_LibRaw"] = self.options.with_raw
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_OpenJPEG"] = self.options.with_openjpeg
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_openjph"] = self.options.get_safe("with_openjph", False)
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_Ptex"] = self.options.with_ptex
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_WebP"] = self.options.with_libwebp
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_JXL"] = self.options.get_safe("with_libjxl", False)
