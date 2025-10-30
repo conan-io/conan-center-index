@@ -40,7 +40,7 @@ class InjaConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("nlohmann_json/3.11.3")
+        self.requires("nlohmann_json/[^3.8]")
 
     def package_id(self):
         self.info.clear()

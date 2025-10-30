@@ -144,6 +144,10 @@ class GrpcConan(ConanFile):
                 "Please, use `protobuf:shared=True`.",
             )
 
+        abseil_cppstd = self.dependencies.host['abseil'].info.settings.compiler.cppstd
+        if abseil_cppstd != self.settings.compiler.cppstd:
+            raise ConanInvalidConfiguration(f"grpc and abseil must be built with the same compiler.cppstd setting")
+
     def build_requirements(self):
         # cmake >=3.25 required to use `cmake -E env --modify` below
         # note: grpc 1.69.0 requires cmake >=3.16
@@ -155,6 +159,10 @@ class GrpcConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        
+        # Let Conan define CMAKE_MSVC_RUNTIME_LIBRARY
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(cmake/msvc_static_runtime.cmake)", "")
 
     def generate(self):
         # This doesn't work yet as one would expect, because the install target builds everything
@@ -218,8 +226,6 @@ class GrpcConan(ConanFile):
         cmake_deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
-
         # Management of shared libs when grpc has shared dependencies (like protobuf)
         # As the grpc_cpp_plugin that executes during the build will need those packages shared libs
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")

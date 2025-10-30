@@ -2,9 +2,10 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.files import get, rmdir, copy, rm, export_conandata_patches, apply_conandata_patches
+from conan.tools.layout import basic_layout
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 
 required_conan_version = ">=1.53.0"
@@ -34,6 +35,9 @@ class FlexConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
         # Flex requires M4 to be compiled. If consumer does not have M4
         # installed, Conan will need to know that Flex requires it.
@@ -41,6 +45,7 @@ class FlexConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("m4/1.4.19")
+        self.tool_requires("gnu-config/cci.20210814")
         if hasattr(self, "settings_build") and cross_building(self):
             self.tool_requires(f"{self.name}/{self.version}")
 
@@ -68,10 +73,23 @@ class FlexConan(ConanFile):
             # https://github.com/easybuilders/easybuild-easyconfigs/pull/5792
             "ac_cv_func_reallocarray=no",
         ])
+        if is_apple_os(self):
+            at.extra_ldflags.append("-headerpad_max_install_names")
         at.generate()
+
+    def _patch_sources_autotools(self):
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                copy(self, os.path.basename(gnu_config),
+                     src=os.path.dirname(gnu_config),
+                     dst=os.path.join(self.source_folder, "build-aux"))
 
     def build(self):
         apply_conandata_patches(self)
+        self._patch_sources_autotools()
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
@@ -90,10 +108,5 @@ class FlexConan(ConanFile):
         # Avoid CMakeDeps messing with Conan targets
         self.cpp_info.set_property("cmake_find_mode", "none")
 
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
-
-        lex_path = os.path.join(bindir, "flex").replace("\\", "/")
-        self.output.info("Setting LEX environment variable: {}".format(lex_path))
-        self.env_info.LEX = lex_path
+        lex_path = os.path.join(self.package_folder, "bin", "flex").replace("\\", "/")
+        self.buildenv_info.define("LEX", lex_path)
