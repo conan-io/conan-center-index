@@ -69,3 +69,4 @@ class PackageConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["objc"]
+        self.cpp_info.set_property("pkg_config_name", "libobjc")
