@@ -47,8 +47,6 @@ class PackageConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        if not cross_building(self):
-            VirtualRunEnv(self).generate(scope="build")
         tc = AutotoolsToolchain(self)
         tc.generate()
 
