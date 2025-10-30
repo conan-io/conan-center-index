@@ -175,6 +175,7 @@ class DuckdbConan(ConanFile):
             rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
             rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dylib*", os.path.join(self.package_folder, "lib"))
+            rm(self, "duckdb.lib", os.path.join(self.package_folder, "lib"))
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
