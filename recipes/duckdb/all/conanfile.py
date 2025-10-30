@@ -134,6 +134,13 @@ class DuckdbConan(ConanFile):
             tc.preprocessor_definitions["DUCKDB_API"] = ""
         if cross_building(self):
             tc.variables["DUCKDB_EXPLICIT_PLATFORM"] = f"{self.settings.os}_{self.settings.arch}"
+        # INFO: third_party/re2/CMakeLists.txt:32 (CMake version 3.4)
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
+        if is_msvc(self):
+            # INFO: Need for MSVC to set correct __cplusplus value
+            # Otherwise, fails with: error C2039: 'uncaught_exception': is not a member of 'std' (dropped in C++20)
+            # https://github.com/duckdb/duckdb/issues/2805#issuecomment-1013889896
+            tc.extra_cxxflags.append("/Zc:__cplusplus")
         tc.generate()
 
         dpes = CMakeDeps(self)
@@ -141,13 +148,14 @@ class DuckdbConan(ConanFile):
 
     def build(self):
         if is_msvc(self) and not self.options.shared:
+            decorator = "DUCKDB_C_API" if Version(self.version) >= "1.3.0" else "DUCKDB_API"
             replace_in_file(self, os.path.join(self.source_folder, "src", "include", "duckdb.h"),
-                            "#define DUCKDB_API __declspec(dllimport)",
-                            "#define DUCKDB_API"
+                            f"#define {decorator} __declspec(dllimport)",
+                            f"#define {decorator}"
                             )
             replace_in_file(self, os.path.join(self.source_folder, "src", "include", "duckdb", "common", "winapi.hpp"),
-                            "#define DUCKDB_API __declspec(dllimport)",
-                            "#define DUCKDB_API"
+                            f"#define DUCKDB_API __declspec(dllimport)",
+                            f"#define DUCKDB_API"
                             )
 
         cmake = CMake(self)
