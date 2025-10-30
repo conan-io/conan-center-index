@@ -55,7 +55,8 @@ class JerryScriptStackConan(ConanFile):
         "system_allocator": [True, False],
         "valgrind": [True, False],
         "gc_before_each_alloc": [True, False],
-        "vm_exec_stop": [True, False],
+        "vm_exec_stop": [True, False], 
+        "vm_halt": [True, False],
     }
     default_options = {
         "shared": False,
@@ -92,6 +93,7 @@ class JerryScriptStackConan(ConanFile):
         "valgrind": False,
         "gc_before_each_alloc": False,
         "vm_exec_stop": False,
+        "vm_halt": False,
     }
 
     @property
@@ -210,11 +212,17 @@ class JerryScriptStackConan(ConanFile):
         tc.variables["JERRY_SYSTEM_ALLOCATOR"] = self.options.system_allocator
         tc.variables["JERRY_VALGRIND"] = self.options.valgrind
         tc.variables["JERRY_MEM_GC_BEFORE_EACH_ALLOC"] = self.options.gc_before_each_alloc
-        tc.variables["JERRY_VM_EXEC_STOP"] = self.options.vm_exec_stop
+        
+        #Name of the cmake option changed in the meanwhile
+        if Version(self.version) < "3.0.0":
+            tc.variables["JERRY_VM_EXEC_STOP"] = self.options.vm_exec_stop
+        else:        
+            tc.variables["JERRY_VM_HALT"] = self.options.vm_halt
+
         if Version(self.version) < "3.0.0": # pylint: disable=conan-condition-evals-to-constant
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        
         tc.generate()
-
         tc = CMakeDeps(self)
         tc.generate()
 
@@ -235,8 +243,11 @@ class JerryScriptStackConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.components["libjerry-port-default"].set_property("pkg_config_name", "libjerry-port-default")
-        self.cpp_info.components["libjerry-port-default"].libs = ["jerry-port-default"]
+
+        #Only export when the default port is part of the build
+        if self.options.default_port_implementation:
+            self.cpp_info.components["libjerry-port-default"].set_property("pkg_config_name", "libjerry-port-default")
+            self.cpp_info.components["libjerry-port-default"].libs = ["jerry-port-default"]
 
         if self._jerry_math:
             mathlibname = "jerry-libm" if Version(self.version) < "2.4.0" else "jerry-math"
@@ -252,8 +263,11 @@ class JerryScriptStackConan(ConanFile):
 
         self.cpp_info.components["libjerry-core"].set_property("pkg_config_name", "libjerry-core")
         self.cpp_info.components["libjerry-core"].libs = ["jerry-core"]
+        
         # The pc file does not explicitly add the port. But it's needed for the test
-        self.cpp_info.components["libjerry-core"].requires = ["libjerry-port-default"]
+        if self.options.default_port_implementation:
+            self.cpp_info.components["libjerry-core"].requires = ["libjerry-port-default"]
+        
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["libjerry-core"].system_libs.append("m")
 
