@@ -148,10 +148,9 @@ class DuckdbConan(ConanFile):
 
     def build(self):
         if is_msvc(self) and not self.options.shared:
-            decorator = "DUCKDB_C_API" if Version(self.version) >= "1.3.0" else "DUCKDB_API"
             replace_in_file(self, os.path.join(self.source_folder, "src", "include", "duckdb.h"),
-                            f"#define {decorator} __declspec(dllimport)",
-                            f"#define {decorator}"
+                            f"#define DUCKDB_C_API __declspec(dllimport)",
+                            f"#define DUCKDB_C_API"
                             )
             replace_in_file(self, os.path.join(self.source_folder, "src", "include", "duckdb", "common", "winapi.hpp"),
                             f"#define DUCKDB_API __declspec(dllimport)",
