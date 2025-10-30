@@ -183,6 +183,13 @@ class ICUConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
 
+        replace_in_file(
+                self,
+                os.path.join(self.source_folder, "source", "configure"),
+                "if test -z \"$PYTHON\"",
+                "if true",
+        )
+
         if self._settings_build.os == "Windows":
             # https://unicode-org.atlassian.net/projects/ICU/issues/ICU-20545
             makeconv_cpp = os.path.join(self.source_folder, "source", "tools", "makeconv", "makeconv.cpp")
