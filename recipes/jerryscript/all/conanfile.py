@@ -56,7 +56,6 @@ class JerryScriptStackConan(ConanFile):
         "valgrind": [True, False],
         "gc_before_each_alloc": [True, False],
         "vm_exec_stop": [True, False], 
-        "vm_halt": [True, False],
     }
     default_options = {
         "shared": False,
@@ -93,7 +92,6 @@ class JerryScriptStackConan(ConanFile):
         "valgrind": False,
         "gc_before_each_alloc": False,
         "vm_exec_stop": False,
-        "vm_halt": False,
     }
 
     @property
@@ -182,10 +180,18 @@ class JerryScriptStackConan(ConanFile):
         if Version(self.version) < "2.4.0":
             amalgamation_definition = "ENABLE_ALL_IN_ONE"
             libmath_definition = "JERRY_LIBM"
+
+        jerry_default_port_definition = "JERRY_PORT"
+        vm_exec_stop_definition = "JERRY_VM_HALT"
+        if Version(self.version) < "3.0.0":
+            jerry_default_port_definition = "JERRY_PORT_DEFAULT"
+            vm_exec_stop_definition = "JERRY_VM_EXEC_STOP"
+            
+        
         tc.variables["JERRY_CMDLINE"] = self.options.tool_cmdline
         tc.variables["JERRY_CMDLINE_TEST"] = self.options.tool_cmdline_test
         tc.variables["JERRY_CMDLINE_SNAPSHOT"] = self.options.tool_cmdline_snapshot
-        tc.variables["JERRY_PORT_DEFAULT"] = self.options.default_port_implementation
+        tc.variables[jerry_default_port_definition] = self.options.default_port_implementation
         tc.variables["JERRY_EXT"] = self.options.jerry_ext
         tc.variables[libmath_definition] = self._jerry_math
         tc.variables["ENABLE_STRIP"] = self.options.get_safe("jerry_strip", False)
@@ -212,12 +218,8 @@ class JerryScriptStackConan(ConanFile):
         tc.variables["JERRY_SYSTEM_ALLOCATOR"] = self.options.system_allocator
         tc.variables["JERRY_VALGRIND"] = self.options.valgrind
         tc.variables["JERRY_MEM_GC_BEFORE_EACH_ALLOC"] = self.options.gc_before_each_alloc
-        
-        #Name of the cmake option changed in the meanwhile
-        if Version(self.version) < "3.0.0":
-            tc.variables["JERRY_VM_EXEC_STOP"] = self.options.vm_exec_stop
-        else:        
-            tc.variables["JERRY_VM_HALT"] = self.options.vm_halt
+        tc.variables[vm_exec_stop_definition] = self.options.vm_exec_stop
+    
 
         if Version(self.version) < "3.0.0": # pylint: disable=conan-condition-evals-to-constant
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
@@ -246,8 +248,12 @@ class JerryScriptStackConan(ConanFile):
 
         #Only export when the default port is part of the build
         if self.options.default_port_implementation:
-            self.cpp_info.components["libjerry-port-default"].set_property("pkg_config_name", "libjerry-port-default")
-            self.cpp_info.components["libjerry-port-default"].libs = ["jerry-port-default"]
+            if Version(self.version) < "3.0.0":
+                self.cpp_info.components["libjerry-port-default"].set_property("pkg_config_name", "libjerry-port-default")
+                self.cpp_info.components["libjerry-port-default"].libs = ["jerry-port-default"]
+            else:
+                self.cpp_info.components["libjerry-port"].set_property("pkg_config_name", "libjerry-port")
+                self.cpp_info.components["libjerry-port"].libs = ["jerry-port"]
 
         if self._jerry_math:
             mathlibname = "jerry-libm" if Version(self.version) < "2.4.0" else "jerry-math"
@@ -266,7 +272,10 @@ class JerryScriptStackConan(ConanFile):
         
         # The pc file does not explicitly add the port. But it's needed for the test
         if self.options.default_port_implementation:
-            self.cpp_info.components["libjerry-core"].requires = ["libjerry-port-default"]
+            if Version(self.version) < "3.0.0":
+                self.cpp_info.components["libjerry-core"].requires = ["libjerry-port-default"]
+            else:
+                self.cpp_info.components["libjerry-core"].requires = ["libjerry-port"]
         
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["libjerry-core"].system_libs.append("m")
