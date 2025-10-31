@@ -88,6 +88,11 @@ class Log4cplusConan(ConanFile):
         tc.variables["WITH_ICONV"] = self.options.with_iconv
         tc.variables["LOG4CPLUS_WORKING_LOCALE"] = self.options.working_locale
         tc.variables["LOG4CPLUS_WORKING_C_LOCALE"] = self.options.working_c_locale
+
+        # Prevent linking against unused found library
+        # https://github.com/log4cplus/log4cplus/blob/de729f76b256b8f55ced3a246434f7280be2a20d/ConfigureChecks.cmake#L51
+        tc.cache_variables["LIBNSL"] = "LIBNSL-NOTFOUND"
+
         tc.generate()
 
         dpes = CMakeDeps(self)
