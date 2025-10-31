@@ -17,7 +17,7 @@ class PkgConfConan(ConanFile):
     package_type = "application"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("build", "configuration")
-    homepage = "https://github.com/pkgconf/pkgconf"
+    homepage = "https://git.sr.ht/~kaniini/pkgconf"
     license = "ISC"
     description = "package compiler and linker metadata toolkit"
     settings = "os", "arch", "compiler", "build_type"
