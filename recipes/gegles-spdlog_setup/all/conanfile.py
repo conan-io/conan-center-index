@@ -59,7 +59,7 @@ class SpdlogSetupConan(ConanFile):
         self.requires("cpptoml/0.1.1")
         self.requires("spdlog/[>=1.15 <2]")
         if not self.options.get_safe("use_std_fmt"):
-            self.requires("fmt/[>=10 <=12]")
+            self.requires("fmt/[*]")
 
     def configure(self):
         # Configure spdlog to be header-only to match this library's nature
