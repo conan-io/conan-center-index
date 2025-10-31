@@ -14,3 +14,6 @@ sources:
   "19.19":
     url: "https://github.com/davisking/dlib/archive/v19.19.tar.gz"
     sha256: "7af455bb422d3ae5ef369c51ee64e98fa68c39435b0fa23be2e5d593a3d45b87"
+patches:
+  "19.24.2":
+    - patch_file: "patches/19.24.2-0001-fix-template-arg-error.patch"
