@@ -17,3 +17,5 @@ sources:
 patches:
   "19.24.2":
     - patch_file: "patches/19.24.2-0001-fix-template-arg-error.patch"
+  "19.24":
+    - patch_file: "patches/19.24.2-0001-fix-template-arg-error.patch"
