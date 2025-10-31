@@ -118,7 +118,7 @@ class Log4cplusConan(ConanFile):
         if self.options.unicode:
             self.cpp_info.defines = ["UNICODE", "_UNICODE"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["dl", "m", "rt", "nsl"]
+            self.cpp_info.system_libs = ["dl", "m", "rt"]
             if not self.options.single_threaded:
                 self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Windows":
