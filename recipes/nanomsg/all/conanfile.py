@@ -95,7 +95,6 @@ class NanomsgConan(ConanFile):
             self.cpp_info.system_libs.append("pthread")
             self.cpp_info.system_libs.append("anl")
             self.cpp_info.system_libs.append("rt")
-            self.cpp_info.system_libs.append("nsl")
 
         if not self.options.shared:
             self.cpp_info.defines.append("NN_STATIC_LIB")
