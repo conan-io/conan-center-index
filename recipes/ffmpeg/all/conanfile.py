@@ -242,6 +242,7 @@ class FFMpegConan(ConanFile):
             "with_libx264": ["avcodec"],
             "with_libx265": ["avcodec"],
             "with_libvpx": ["avcodec"],
+            "with_nvenc": ["avcodec"],
             "with_libmp3lame": ["avcodec"],
             "with_libfdk_aac": ["avcodec"],
             "with_libwebp": ["avcodec"],
@@ -381,7 +382,7 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_openapv"):
             self.requires("openapv/0.2.0.4")
         if self.options.with_nvenc:
-            self.requires("nv-codec-headers/13.0.19.0")
+            self.requires("nv-codec-headers/[>=13 <14]")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -566,6 +567,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("jni", self.options.get_safe("with_jni")),
             opt_enable_disable("mediacodec", self.options.get_safe("with_mediacodec")),
             opt_enable_disable("xlib", self.options.get_safe("with_xlib")),
+            opt_enable_disable("nvenc", self.options.get_safe("with_nvenc")),
             "--disable-cuda",  # FIXME: CUDA support
             "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
@@ -637,9 +639,6 @@ class FFMpegConan(ConanFile):
             "enable-filter", self.options.enable_filters))
         args.extend(self._split_and_format_options_string(
             "disable-filter", self.options.disable_filters))
-            
-        if self.options.get_safe("with_nvenc"):
-            args.append("--enable-nvenc")
 
         if "with_libjxl" in self.options:
             args.append(opt_enable_disable("libjxl", self.options.with_libjxl))
@@ -956,6 +955,8 @@ class FFMpegConan(ConanFile):
                 avcodec.requires.append("libjxl::libjxl")
             if self.options.get_safe("with_openapv"):
                 avcodec.requires.append("openapv::openapv")
+            if self.options.get_safe("with_nvenc"):
+                avcodec.requires.append("nv-codec-headers::nv-codec-headers")
 
         if self.options.avformat:
             if self.options.with_bzip2:
@@ -1003,8 +1004,3 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_vulkan"):
             avutil.requires.append("vulkan-loader::vulkan-loader")
 
-        if self.options.get_safe("with_nvenc"):
-            try:
-                self.cpp_info.requires.append("nv-codec-headers::nv-codec-headers")
-            except Exception:
-                self.cpp_info.requires.append("nv-codec-headers")
