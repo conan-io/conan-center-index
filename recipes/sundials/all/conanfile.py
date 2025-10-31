@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, mkdir
+from conan.tools.files import copy, get, mkdir, rmdir
 import glob
 import os
 import shutil
@@ -84,6 +84,7 @@ class SundialsConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         if self.settings.os == "Windows" and self.options.shared:
             mkdir(self, os.path.join(self.package_folder, "bin"))
             for dll_path in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
@@ -93,33 +94,40 @@ class SundialsConan(ConanFile):
 
         def _add_library(name):
             # SundialsAddLibrary.cmake#377, where the first branch is always taken.
-            suffix = "_static" if not self.options.shared and self.settings.compiler == "msvc" else ""
-            self.cpp_info.components[name].libs = [name + suffix]
+            library_suffix = "_static" if not self.options.shared and self.settings.compiler == "msvc" else ""
+            self.cpp_info.components[name].libs = ["sundials_" + name + library_suffix]
+            target_suffix = "_shared" if self.options.shared else "_static"
+            self.cpp_info.components[name].set_property("cmake_target_name", f"SUNDIALS::{name}{target_suffix}")
             if self.settings.os in ["Linux", "FreeBSD"]:
                 comp.system_libs.append("m")
             return self.cpp_info.components[name]
 
-        _add_library("sundials_core")
-        _add_library("sundials_nvecserial").requires = ["sundials_core"]
-        _add_library("sundials_nvecmanyvector").requires = ["sundials_nvecserial"]
-        _add_library("sundials_sunmatrixdense").requires = ["sundials_nvecserial", "sundials_core"]
-        _add_library("sundials_sunmatrixband").requires = ["sundials_nvecserial", "sundials_core"]
-        _add_library("sundials_sunmatrixsparse").requires = ["sundials_nvecserial", "sundials_core"]
-        _add_library("sundials_sunlinsoldense").requires = ["sundials_sunmatrixdense", "sundials_nvecserial"]
-        _add_library("sundials_sunlinsolband").requires = ["sundials_sunmatrixband", "sundials_nvecserial"]
-        _add_library("sundials_sunlinsolpcg").requires = ["sundials_nvecserial"]
-        _add_library("sundials_sunnonlinsolfixedpoint").requires = ["sundials_nvecserial"]
-        _add_library("sundials_sunnonlinsolnewton").requires = ["sundials_nvecserial"]
+        _add_library("core")
+        _add_library("nvecserial").requires = ["core"]
+        _add_library("nvecmanyvector").requires = ["core"]
+        _add_library("sunmatrixdense").requires = ["core"]
+        _add_library("sunmatrixband").requires = ["core"]
+        _add_library("sunmatrixsparse").requires = ["core"]
+        _add_library("sundomeigestpower").requires = ["core"]
+        _add_library("sunlinsoldense").requires = ["core"]
+        _add_library("sunlinsolband").requires = ["core"]
+        _add_library("sunlinsolpcg").requires = ["core"]
+        _add_library("sunlinsolspbcgs").requires = ["core"]
+        _add_library("sunlinsolspfgmr").requires = ["core"]
+        _add_library("sunlinsolspgmr").requires = ["core"]
+        _add_library("sunlinsolsptfqmr").requires = ["core"]
+        _add_library("sunnonlinsolfixedpoint").requires = ["core"]
+        _add_library("sunnonlinsolnewton").requires = ["core"]
 
         if self.options.build_arkode:
-            _add_library("sundials_arkode").requires = ["sundials_nvecserial"]
+            _add_library("arkode").requires = ["core"]
         if self.options.build_cvode:
-            _add_library("sundials_cvode").requires = ["sundials_nvecserial"]
+            _add_library("cvode").requires = ["core"]
         if self.options.build_cvodes:
-            _add_library("sundials_cvodes").requires = ["sundials_nvecserial"]
+            _add_library("cvodes").requires = ["core"]
         if self.options.build_ida:
-            _add_library("sundials_ida").requires = ["sundials_nvecserial"]
+            _add_library("ida").requires = ["core"]
         if self.options.build_idas:
-            _add_library("sundials_idas").requires = ["sundials_nvecserial"]
+            _add_library("idas").requires = ["core"]
         if self.options.build_kinsol:
-            _add_library("sundials_kinsol").requires = ["sundials_nvecserial", "sundials_sunmatrixdense"]
+            _add_library("kinsol").requires = ["core"]
