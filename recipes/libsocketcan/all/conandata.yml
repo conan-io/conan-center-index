@@ -1,0 +1,4 @@
+sources:
+  "0.0.12":
+    url: "https://github.com/linux-can/libsocketcan/archive/refs/tags/v0.0.12.tar.gz"
+    sha256: "e4432d32afa6f34d34521ae8c65d237cd175ae4510372792cb7952b62a4ea44c"
