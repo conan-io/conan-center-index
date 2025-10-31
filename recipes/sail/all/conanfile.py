@@ -36,11 +36,11 @@ class SAILConan(ConanFile):
         "with_lowest_priority_codecs": True,
     }
     options_description = {
-        "with_highest_priority_codecs": "Enable codecs: GIF, JPEG, PNG, TIFF",
-        "with_high_priority_codecs": "Enable codecs: BMP, SVG",
-        "with_medium_priority_codecs": "Enable codecs: AVIF, JPEG2000, JPEGXL, WEBL",
-        "with_low_priority_codecs": "Enable codecs: ICO, PCX, PNM, PSD, QOI, TGA",
-        "with_lowest_priority_codecs": "Enable codecs: WAL, XBM",
+        "with_highest_priority_codecs": "Enable codecs: GIF, JPEG, PNG, SVG, WEBP",
+        "with_high_priority_codecs": "Enable codecs: AVIF, ICO",
+        "with_medium_priority_codecs": "Enable codecs: HEIF, OPENEXR, PSD, TIFF",
+        "with_low_priority_codecs": "Enable codecs: BMP, HDR, JPEG2000, JPEGXL, PNM, QOI, TGA",
+        "with_lowest_priority_codecs": "Enable codecs: JBIG, PCX, WAL, XBM, XPM, XWD",
     }
     implements = ["auto_shared_fpic"]
 
@@ -50,17 +50,20 @@ class SAILConan(ConanFile):
     def requirements(self):
         if self.options.with_highest_priority_codecs:
             self.requires("giflib/5.2.2")
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/9f")
             self.requires("libpng/[>=1.6 <2]")
-            self.requires("libtiff/4.6.0")
-        if self.options.with_high_priority_codecs:
             if Version(self.version) >= "0.9.1":
                 self.requires("nanosvg/cci.20231025")
+            self.requires("libwebp/1.6.0")
+        if self.options.with_high_priority_codecs:
+            self.requires("libavif/1.3.0")
         if self.options.with_medium_priority_codecs:
-            self.requires("libavif/1.1.1")
-            self.requires("jasper/4.2.0")
-            self.requires("libjxl/0.8.2")
-            self.requires("libwebp/1.3.2")
+            self.requires("libheif/1.20.1")
+            self.requires("openexr/3.4.2")
+            self.requires("libtiff/4.7.1")
+        if self.options.with_low_priority_codecs:
+            self.requires("openjpeg/2.5.4")
+            self.requires("libjxl/0.10.3")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -139,14 +142,17 @@ class SAILConan(ConanFile):
             self.cpp_info.components["sail-codecs"].requires.append("giflib::giflib")
             self.cpp_info.components["sail-codecs"].requires.append("libjpeg::libjpeg")
             self.cpp_info.components["sail-codecs"].requires.append("libpng::libpng")
-            self.cpp_info.components["sail-codecs"].requires.append("libtiff::libtiff")
             if Version(self.version) >= "0.9.1":
                 self.cpp_info.components["sail-codecs"].requires.append("nanosvg::nanosvg")
-        if self.options.with_medium_priority_codecs:
-            self.cpp_info.components["sail-codecs"].requires.append("libavif::libavif")
-            self.cpp_info.components["sail-codecs"].requires.append("jasper::jasper")
-            self.cpp_info.components["sail-codecs"].requires.append("libjxl::libjxl")
             self.cpp_info.components["sail-codecs"].requires.append("libwebp::libwebp")
+        if self.options.with_high_priority_codecs:
+            self.cpp_info.components["sail-codecs"].requires.append("libavif::libavif")
+        if self.options.with_medium_priority_codecs:
+            self.cpp_info.components["sail-codecs"].requires.append("libheif::libheif")
+            self.cpp_info.components["sail-codecs"].requires.append("openexr::openexr")
+            self.cpp_info.components["sail-codecs"].requires.append("libtiff::libtiff")
+        if self.options.with_low_priority_codecs:
+            self.cpp_info.components["sail-codecs"].requires.append("libjxl::libjxl")
 
         self.cpp_info.components["libsail"].set_property("cmake_target_name", "SAIL::Sail")
         self.cpp_info.components["libsail"].set_property("pkg_config_name", "libsail")
