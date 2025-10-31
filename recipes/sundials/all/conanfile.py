@@ -99,7 +99,7 @@ class SundialsConan(ConanFile):
             target_suffix = "_shared" if self.options.shared else "_static"
             self.cpp_info.components[name].set_property("cmake_target_name", f"SUNDIALS::{name}{target_suffix}")
             if self.settings.os in ["Linux", "FreeBSD"]:
-                comp.system_libs.append("m")
+                self.cpp_info.components.system_libs.append("m")
             return self.cpp_info.components[name]
 
         _add_library("core")
@@ -109,8 +109,8 @@ class SundialsConan(ConanFile):
         _add_library("sunmatrixband").requires = ["core"]
         _add_library("sunmatrixsparse").requires = ["core"]
         _add_library("sundomeigestpower").requires = ["core"]
-        _add_library("sunlinsoldense").requires = ["core"]
-        _add_library("sunlinsolband").requires = ["core"]
+        _add_library("sunlinsoldense").requires = ["core", "sunmatrixdense"]
+        _add_library("sunlinsolband").requires = ["core", "sunmatrixband"]
         _add_library("sunlinsolpcg").requires = ["core"]
         _add_library("sunlinsolspbcgs").requires = ["core"]
         _add_library("sunlinsolspfgmr").requires = ["core"]
