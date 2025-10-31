@@ -68,6 +68,7 @@ class FFMpegConan(ConanFile):
         "with_vaapi": [True, False],
         "with_vdpau": [True, False],
         "with_vulkan": [True, False],
+        "with_whisper": [True, False],
         "with_xcb": [True, False],
         "with_soxr": [True, False],
         "with_appkit": [True, False],
@@ -157,6 +158,7 @@ class FFMpegConan(ConanFile):
         "with_vaapi": True,
         "with_vdpau": True,
         "with_vulkan": False,
+        "with_whisper": False,
         "with_xcb": True,
         "with_soxr": False,
         "with_appkit": True,
@@ -250,6 +252,7 @@ class FFMpegConan(ConanFile):
             "with_libdav1d": ["avcodec"],
             "with_mediacodec": ["with_jni"],
             "with_xlib": ["avdevice"],
+            "with_whisper": ["avfilter"],
         }
 
     @property
@@ -269,6 +272,12 @@ class FFMpegConan(ConanFile):
             del self.options.fPIC
             if is_msvc(self) and self.settings.arch == "armv8":
                 self.options.with_libsvtav1 = False
+
+        if Version(self.version) >= "8.0":
+            del self.options.postproc
+        else:
+            del self.options.with_whisper
+
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_vaapi
             del self.options.with_vdpau
@@ -331,7 +340,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_vorbis:
             self.requires("vorbis/1.3.7")
         if self.options.with_opus:
-            self.requires("opus/1.4")
+            self.requires("opus/[>=1.4 <2]")
         if self.options.with_zeromq:
             self.requires("zeromq/4.3.5")
         if self.options.with_sdl:
@@ -372,6 +381,8 @@ class FFMpegConan(ConanFile):
             self.requires("dav1d/[>=1.4 <2]")
         if self.options.get_safe("with_libdrm"):
             self.requires("libdrm/2.4.119")
+        if self.options.get_safe("with_whisper"):
+            self.requires("whisper-cpp/1.7.6")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -449,11 +460,17 @@ class FFMpegConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "libavcodec", "libx264.c"),
                                   "#define X264_API_IMPORTS 1", "")
         if self.options.with_ssl == "openssl":
-            # https://trac.ffmpeg.org/ticket/5675
-            openssl_libs = load(self, os.path.join(self.build_folder, "openssl_libs.list"))
-            replace_in_file(self, os.path.join(self.source_folder, "configure"),
-                                  "check_lib openssl openssl/ssl.h SSL_library_init -lssl -lcrypto -lws2_32 -lgdi32 ||",
-                                  f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libs} || ")
+                # https://trac.ffmpeg.org/ticket/5675
+            if Version(self.version) >= "8.0":
+                openssl_libs = load(self, os.path.join(self.build_folder, "openssl_libs.list"))
+                replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                                    "check_lib openssl openssl/ssl.h OPENSSL_init_ssl -lssl -lcrypto -lws2_32 -lgdi32 ||",
+                                    f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libs} || ")
+            else:
+                openssl_libs = load(self, os.path.join(self.build_folder, "openssl_libs.list"))
+                replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                                    "check_lib openssl openssl/ssl.h SSL_library_init -lssl -lcrypto -lws2_32 -lgdi32 ||",
+                                    f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libs} || ")
 
         replace_in_file(self, os.path.join(self.source_folder, "configure"), "echo libx264.lib", "echo x264.lib")
 
@@ -519,7 +536,6 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("avformat", self.options.avformat),
             opt_enable_disable("swresample", self.options.swresample),
             opt_enable_disable("swscale", self.options.swscale),
-            opt_enable_disable("postproc", self.options.postproc),
             opt_enable_disable("avfilter", self.options.avfilter),
 
             # Dependencies
@@ -570,9 +586,13 @@ class FFMpegConan(ConanFile):
             "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
             opt_enable_disable("nonfree", self.options.get_safe("with_libfdk_aac") or (self.options.with_ssl and (
-                self.options.with_libx264 or self.options.with_libx265 or self.options.postproc))),
-            opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
+                self.options.with_libx264 or self.options.with_libx265 or self.options.get_safe("postproc")))),
+            opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.get_safe("postproc"))
         ]
+
+        # Version specific options
+        if Version(self.version) < "8.0":
+            args.append(opt_enable_disable("postproc", self.options.get_safe("postproc")))
 
         # Individual Component Options
         opt_append_disable_if_set(args, "everything", self.options.disable_everything)
@@ -634,6 +654,9 @@ class FFMpegConan(ConanFile):
         args.extend(self._split_and_format_options_string(
             "disable-filter", self.options.disable_filters))
 
+        if "with_whisper" in self.options:
+            args.append(opt_enable_disable("whisper", self.options.with_whisper))
+
         if self._version_supports_libsvtav1:
             args.append(opt_enable_disable("libsvtav1", self.options.get_safe("with_libsvtav1")))
         if self._version_supports_harfbuzz:
@@ -690,9 +713,6 @@ class FFMpegConan(ConanFile):
             if not check_min_vs(self, "190", raise_invalid=False):
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
                 tc.extra_defines.append("inline=__inline")
-        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "15":
-            # Workaround for link error "ld: building exports trie: duplicate symbol '_av_ac3_parse_header'"
-            tc.extra_ldflags.append("-Wl,-ld_classic")
         if cross_building(self):
             args.append(f"--target-os={self._target_os}")
             if is_apple_os(self) and self.options.with_audiotoolbox:
@@ -727,7 +747,6 @@ class FFMpegConan(ConanFile):
 
             env = Environment()
             env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in includedirs] + [f"-D{d}" for d in defines])
-            env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in libs])
             env.append("LDFLAGS", [f"-LIBPATH:{unix_path(self, p)}" for p in libdirs] + linkflags)
             env.append("CXXFLAGS", cxxflags)
             env.append("CFLAGS", cflags)
@@ -737,6 +756,7 @@ class FFMpegConan(ConanFile):
             deps.generate()
 
         deps = PkgConfigDeps(self)
+        deps.set_property("whisper-cpp", "pkg_config_name", "whisper")
         deps.generate()
 
         if self.options.with_ssl == "openssl":
@@ -847,7 +867,7 @@ class FFMpegConan(ConanFile):
             swresample = _add_component("swresample", [])
             if self.options.get_safe("with_soxr"):
                 swresample.requires.append("soxr::soxr")
-        if self.options.postproc:
+        if self.options.get_safe("postproc"):
             _add_component("postproc", [])
 
         if self.settings.os in ("FreeBSD", "Linux"):
@@ -966,6 +986,8 @@ class FFMpegConan(ConanFile):
                 avfilter.frameworks.append("CoreImage")
             if Version(self.version) >= "5.0" and is_apple_os(self):
                 avfilter.frameworks.append("Metal")
+            if self.options.get_safe("with_whisper"):
+                avfilter.requires.append("whisper-cpp::whisper-cpp")
 
         if self.options.get_safe("with_libdrm"):
             avutil.requires.append("libdrm::libdrm_libdrm")
