@@ -340,7 +340,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_vorbis:
             self.requires("vorbis/1.3.7")
         if self.options.with_opus:
-            self.requires("opus/1.4")
+            self.requires("opus/[>=1.4 <2]")
         if self.options.with_zeromq:
             self.requires("zeromq/4.3.5")
         if self.options.with_sdl:
