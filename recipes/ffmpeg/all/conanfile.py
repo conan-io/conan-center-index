@@ -50,7 +50,6 @@ class FFMpegConan(ConanFile):
         "with_fontconfig": [True, False],
         "with_fribidi": [True, False],
         "with_harfbuzz": [True, False],
-        "with_libjxl": [True, False],
         "with_openjpeg": [True, False],
         "with_openh264": [True, False],
         "with_opus": [True, False],
@@ -141,7 +140,6 @@ class FFMpegConan(ConanFile):
         "with_fontconfig": False,
         "with_fribidi": False,
         "with_harfbuzz": False,
-        "with_libjxl": False,  # Deactivate to test CI run without JXL
         "with_openjpeg": True,
         "with_openh264": True,
         "with_opus": True,
@@ -229,7 +227,6 @@ class FFMpegConan(ConanFile):
             "with_lzma": ["avcodec"],
             "with_libiconv": ["avcodec"],
             "with_libxml2": ["avcodec"],
-            "with_libjxl": ["avcodec"],
             "with_openjpeg": ["avcodec"],
             "with_openh264": ["avcodec"],
             "with_vorbis": ["avcodec"],
@@ -280,9 +277,6 @@ class FFMpegConan(ConanFile):
             del self.options.postproc
         else:
             del self.options.with_whisper
-
-        if Version(self.version) < "5.1":
-            del self.options.with_libjxl
 
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_vaapi
@@ -339,8 +333,6 @@ class FFMpegConan(ConanFile):
             self.requires("fribidi/1.0.13")
         if self.options.get_safe("with_harfbuzz"):
             self.requires("harfbuzz/[>=8.3.0]")
-        if self.options.get_safe('with_libjxl'):
-            self.requires("libjxl/0.11.1")
         if self.options.with_openjpeg:
             self.requires("openjpeg/[>=2.5.2 <3]")
         if self.options.with_openh264:
@@ -662,8 +654,6 @@ class FFMpegConan(ConanFile):
         args.extend(self._split_and_format_options_string(
             "disable-filter", self.options.disable_filters))
 
-        if "with_libjxl" in self.options:
-            args.append(opt_enable_disable("libjxl", self.options.with_libjxl))
         if "with_whisper" in self.options:
             args.append(opt_enable_disable("whisper", self.options.with_whisper))
 
@@ -723,7 +713,7 @@ class FFMpegConan(ConanFile):
             if not check_min_vs(self, "190", raise_invalid=False):
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
                 tc.extra_defines.append("inline=__inline")
-        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "15":
+        if Version(self.version) < "5.0" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "15":
             # Workaround for link error "ld: building exports trie: duplicate symbol '_av_ac3_parse_header'"
             tc.extra_ldflags.append("-Wl,-ld_classic")
         if cross_building(self):
@@ -760,7 +750,6 @@ class FFMpegConan(ConanFile):
 
             env = Environment()
             env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in includedirs] + [f"-D{d}" for d in defines])
-            env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in libs])
             env.append("LDFLAGS", [f"-LIBPATH:{unix_path(self, p)}" for p in libdirs] + linkflags)
             env.append("CXXFLAGS", cxxflags)
             env.append("CFLAGS", cflags)
@@ -942,8 +931,6 @@ class FFMpegConan(ConanFile):
                 avcodec.requires.append("libiconv::libiconv")
             if self.options.with_libxml2:
                 avcodec.requires.append("libxml2::libxml2")
-            if self.options.get_safe("with_libjxl"):
-                avfilter.requires.append("libjxl::libjxl")
             if self.options.with_openjpeg:
                 avcodec.requires.append("openjpeg::openjpeg")
             if self.options.with_openh264:
