@@ -4,7 +4,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import (
     apply_conandata_patches, copy, export_conandata_patches,
-    get, rm, rmdir, replace_in_file
+    get, rm, rmdir
     )
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
@@ -53,10 +53,8 @@ class PackageConan(ConanFile):
         self.requires("expat/2.7.3")
         self.requires("minizip/[>1.2.13 <2]")
         self.requires("zlib/[>1.2.13 <2]")
-        # c99_snprintf -> should be externalised
 
     def build_requirements(self):
-        # only if with tests too?
         if self.options.with_fmus:
             self.test_requires("catch2/2.13.8")
 
@@ -81,7 +79,6 @@ class PackageConan(ConanFile):
 
         tc.generate()
 
-        # In case there are dependencies listed under requirements, CMakeDeps should be used
         deps = CMakeDeps(self)
         deps.set_property("expat", "cmake_file_name", "EXPAT")
         deps.set_property("minizip", "cmake_file_name", "MiniZip")
@@ -96,9 +93,7 @@ class PackageConan(ConanFile):
         vre = VirtualRunEnv(self)
         vre.generate(scope="build")
 
-
     def build(self):
-
         copy(self, "fmiModel*.h", self.dependencies["fmi1"].cpp_info.components["modex"].includedirs[0],
              os.path.join(self.source_folder, "src", "fmis", "FMI1"))
         copy(self, "fmiPlatformTypes.h", self.dependencies["fmi1"].cpp_info.components["cosim"].includedirs[0],
@@ -113,11 +108,6 @@ class PackageConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-
-        # TODO: remove before merging, used for some runtime tests
-        if not self.conf.get("tools.build:skip_test", default=True, check_type=bool):
-            if self.options.with_fmus:
-                cmake.test()
 
     def package(self):
         copy(self, "LICENSE.md", self.source_folder, os.path.join(self.package_folder, "licenses"))
@@ -138,7 +128,6 @@ class PackageConan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "doc"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-
 
     def package_info(self):
         if self.options.shared:
