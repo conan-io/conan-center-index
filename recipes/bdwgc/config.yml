@@ -11,3 +11,5 @@ versions:
     folder: all
   "8.2.8":
     folder: all
+  "8.2.10":
+    folder: all
