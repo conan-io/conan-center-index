@@ -99,7 +99,7 @@ class SundialsConan(ConanFile):
             target_suffix = "_shared" if self.options.shared else "_static"
             self.cpp_info.components[name].set_property("cmake_target_name", f"SUNDIALS::{name}{target_suffix}")
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components.system_libs.append("m")
+                self.cpp_info.components[name].system_libs.append("m")
             return self.cpp_info.components[name]
 
         _add_library("core")
