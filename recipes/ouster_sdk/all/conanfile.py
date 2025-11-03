@@ -119,6 +119,9 @@ class OusterSdkConan(ConanFile):
     def build_requirements(self):
         if self.options.build_osf:
             self.tool_requires("flatbuffers/<host_version>")
+        # ouster_mapping requires CMake 3.16.3+
+        if Version(self.version) >= "0.15.0" and self.options.build_mapping:
+            self.tool_requires("cmake/[>=3.16.3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
