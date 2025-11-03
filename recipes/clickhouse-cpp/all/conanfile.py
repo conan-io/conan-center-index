@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 class ClickHouseCppConan(ConanFile):
     name = "clickhouse-cpp"
@@ -27,19 +27,7 @@ class ClickHouseCppConan(ConanFile):
         "fPIC": True,
         "with_openssl": False,
     }
-
-    @property
-    def _min_cppstd(self):
-        return "17"
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "15",
-            "msvc": "191",
-            "gcc": "7",
-            "clang": "6",
-        }
+    implements = ["auto_shared_fpic"]
 
     @property
     def _requires_compiler_rt(self):
@@ -47,30 +35,18 @@ class ClickHouseCppConan(ConanFile):
             ((self.settings.compiler.libcxx in ["libstdc++", "libstdc++11"] and not self.options.shared) or \
              self.settings.compiler.libcxx == "libc++")
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("lz4/1.9.4")
-        self.requires("abseil/20230125.3", transitive_headers=True)
+        self.requires("abseil/[>=20230125.3 <=20250127.0]", transitive_headers=True)
         self.requires("cityhash/1.0.1")
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
+        check_min_cppstd(self, 17)
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared library on Windows.")
             # look at https://github.com/ClickHouse/clickhouse-cpp/pull/226
@@ -85,9 +61,9 @@ class ClickHouseCppConan(ConanFile):
         tc.cache_variables["WITH_SYSTEM_ABSEIL"] = True
         tc.cache_variables["WITH_SYSTEM_LZ4"] = True
         tc.cache_variables["WITH_SYSTEM_CITYHASH"] = True
-        # TODO: enable DEBUG_DEPENDENCIES on >= 2.5.0
-        if Version(self.version) >= "2.5.0":
-            tc.cache_variables["DEBUG_DEPENDENCIES"] = False
+        tc.cache_variables["DEBUG_DEPENDENCIES"] = False
+        if Version(self.version) <= "2.5.1":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         cd = CMakeDeps(self)
@@ -115,9 +91,3 @@ class ClickHouseCppConan(ConanFile):
 
         if self.settings.os == 'Windows':
             self.cpp_info.system_libs = ['ws2_32', 'wsock32']
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "clickhouse-cpp"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "clickhouse-cpp"
-        self.cpp_info.names["cmake_find_package"] = "clickhouse-cpp-lib"
-        self.cpp_info.names["cmake_find_package_multi"] = "clickhouse-cpp-lib"

@@ -2,14 +2,14 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import get, save, replace_in_file, rmdir, copy
+from conan.tools.files import get, replace_in_file, rmdir, copy
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class Nghttp2Conan(ConanFile):
@@ -27,7 +27,6 @@ class Nghttp2Conan(ConanFile):
         "with_app": [True, False],
         "with_hpack": [True, False],
         "with_jemalloc": [True, False],
-        "with_asio": [True, False],
     }
     default_options = {
         "shared": False,
@@ -35,46 +34,37 @@ class Nghttp2Conan(ConanFile):
         "with_app": False,
         "with_hpack": False,
         "with_jemalloc": False,
-        "with_asio": False,
     }
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    implements = ["auto_shared_fpic"]
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if not (self.options.with_app or self.options.with_hpack or self.options.with_asio):
-            self.settings.rm_safe("compiler.cppstd")
-            self.settings.rm_safe("compiler.libcxx")
         if not self.options.with_app:
             del self.options.with_jemalloc
-        if Version(self.version) >= "1.52.0":
-            del self.options.with_asio
+        if not (self.options.with_app or self.options.with_hpack):
+            self.settings.rm_safe("compiler.cppstd")
+            self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_app or self.options.get_safe("with_asio"):
+        if self.options.with_app or self.options.with_hpack:
             self.requires("openssl/[>=1.1 <4]")
-        if self.options.with_app:
-            self.requires("c-ares/1.25.0")
-            self.requires("libev/4.33")
-            self.requires("libevent/2.1.12")
-            self.requires("libxml2/2.12.4")
             self.requires("zlib/[>=1.2.11 <2]")
+        if self.options.with_app:
+            self.requires("libev/4.33")
+            self.requires("c-ares/[>=1.27 <2]")
+            self.requires("libxml2/[>=2.12.5 <3]")
+            self.requires("brotli/1.1.0")
             if self.options.with_jemalloc:
                 self.requires("jemalloc/5.3.0")
         if self.options.with_hpack:
             self.requires("jansson/2.14")
-        if self.options.get_safe("with_asio"):
-            self.requires("boost/1.84.0")
 
     def validate(self):
-        if self.options.get_safe("with_asio") and is_msvc(self):
-            raise ConanInvalidConfiguration("Build with asio and MSVC is not supported yet, see upstream bug #589")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration(f"{self.ref} requires GCC >= 6.0")
 
@@ -83,24 +73,56 @@ class Nghttp2Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) < "1.60.0":
-            tc.variables["ENABLE_SHARED_LIB"] = self.options.shared
-            tc.variables["ENABLE_STATIC_LIB"] = not self.options.shared
-        else:
-            tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
+
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["ENABLE_DOC"] = False
+        if self.options.with_app:
+            tc.cache_variables["LIBEV_FOUND"] = True
+            tc.cache_variables["LIBCARES_FOUND"] = True
+            tc.cache_variables["LIBBROTLIENC_FOUND"] = True
+            tc.cache_variables["LIBBROTLIDEC_FOUND"] = True
+            tc.cache_variables["LIBXML2_FOUND"] = True
+            if self.options.with_jemalloc:
+                tc.cache_variables["JEMALLOC_FOUND"] = True
+        if self.options.with_hpack:
+            tc.cache_variables["JANSSON_FOUND"] = True
+
+        # Disable Python finding so we don't build docs
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Python3"] = True
+        if not self.options.with_app:
+            # Disable find_package to not scare the user with system libs being picked
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Libevent"] = True  # Examples only
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Libbrotlienc"] = True  # Examples only
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Libbrotlidec"] = True  # Examples only
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Libngtcp2"] = True  # Examples only
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Libngtcp2_crypto_quictls"] = True  # Examples only
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Libnghttp3"] = True  # Examples only
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Libbpf"] = True  # Examples only
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Systemd"] = True  # Examples only
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_LibXml2"] = True  # Examples only
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Libev"] = True  # Examples only
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Libcares"] = True  # Examples only
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Libbrotli"] = True  # Examples only
+        elif not self.options.get_safe("with_jemalloc"):
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Jemalloc"] = True
+
+        if not self.options.with_hpack:
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Jansson"] = True  # Examples only
+
+        if not self.options.with_app and not self.options.with_hpack:
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_OpenSSL"] = True  # Examples only
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_ZLIB"] = True  # Examples only
+
+
+        tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["ENABLE_HPACK_TOOLS"] = self.options.with_hpack
         tc.variables["ENABLE_APP"] = self.options.with_app
         tc.variables["ENABLE_EXAMPLES"] = False
-        if Version(self.version) < "1.52.0":
-            tc.variables["ENABLE_PYTHON_BINDINGS"] = False
         tc.variables["ENABLE_FAILMALLOC"] = False
         # disable unneeded auto-picked dependencies
-        tc.variables["WITH_LIBXML2"] = False
         tc.variables["WITH_JEMALLOC"] = self.options.get_safe("with_jemalloc", False)
-        if Version(self.version) < "1.52.0":
-            tc.variables["ENABLE_ASIO_LIB"] = self.options.with_asio
         # To avoid overwriting dll import lib by static lib
-        if Version(self.version) >= "1.60.0" and self.options.shared:
+        if self.options.shared:
             tc.variables["STATIC_LIB_SUFFIX"] = "-static"
         if is_apple_os(self):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
@@ -108,18 +130,26 @@ class Nghttp2Conan(ConanFile):
         tc.generate()
 
         tc = CMakeDeps(self)
+        if self.options.with_app:
+            tc.set_property("libev", "cmake_file_name", "Libev")
+            tc.set_property("libev", "cmake_additional_variables_prefixes", ["LIBEV"])
+            tc.set_property("c-ares", "cmake_file_name", "Libcares")
+            tc.set_property("c-ares", "cmake_additional_variables_prefixes", ["LIBCARES"])
+            tc.set_property("brotli", "cmake_file_name", "Libbrotlienc")
+            tc.set_property("brotli", "cmake_additional_variables_prefixes", ["LIBBROTLIENC", "LIBBROTLIDEC"])
+            tc.set_property("libxml2", "cmake_file_name", "LibXml2")
+            tc.set_property("libxml2", "cmake_additional_variables_prefixes", ["LIBXML2"])
+            if self.options.with_jemalloc:
+                tc.set_property("jemalloc", "cmake_file_name", "Jemalloc")
+                tc.set_property("jemalloc", "cmake_additional_variables_prefixes", ["JEMALLOC"])
+        if self.options.with_hpack:
+            tc.set_property("jansson", "cmake_file_name", "Jansson")
+            tc.set_property("jansson", "cmake_additional_variables_prefixes", ["JANSSON"])
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
 
     def _patch_sources(self):
-        if not self.options.shared and Version(self.version) < "1.60.0":
-            # easier to patch here rather than have patch 'nghttp_static_include_directories' for each version
-            save(self, os.path.join(self.source_folder, "lib", "CMakeLists.txt"),
-                       "target_include_directories(nghttp2_static INTERFACE\n"
-                       "${CMAKE_CURRENT_BINARY_DIR}/includes\n"
-                       "${CMAKE_CURRENT_SOURCE_DIR}/includes)\n",
-                       append=True)
         target_libnghttp2 = "nghttp2" if self.options.shared else "nghttp2_static"
         replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
                               "\n"
@@ -128,19 +158,6 @@ class Nghttp2Conan(ConanFile):
                               "\n"
                               "link_libraries(\n"
                               "  {} ${{CONAN_LIBS}}\n".format(target_libnghttp2))
-        if not self.options.shared and Version(self.version) < "1.52.0":
-            replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
-                                  "\n"
-                                  "  add_library(nghttp2_asio SHARED\n",
-                                  "\n"
-                                  "  add_library(nghttp2_asio\n")
-            replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
-                                  "\n"
-                                  "  target_link_libraries(nghttp2_asio\n"
-                                  "    nghttp2\n",
-                                  "\n"
-                                  "  target_link_libraries(nghttp2_asio\n"
-                                 f"    {target_libnghttp2}\n")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(examples)", "")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(tests)", "")
 
@@ -164,26 +181,22 @@ class Nghttp2Conan(ConanFile):
         if is_msvc(self) and not self.options.shared:
             self.cpp_info.components["nghttp2"].defines.append("NGHTTP2_STATICLIB")
 
-        if self.options.get_safe("with_asio"):
-            self.cpp_info.components["nghttp2_asio"].set_property("pkg_config_name", "libnghttp2_asio")
-            self.cpp_info.components["nghttp2_asio"].libs = ["nghttp2_asio"]
-            self.cpp_info.components["nghttp2_asio"].requires = [
-                "nghttp2", "boost::headers", "openssl::openssl",
-            ]
-
         if self.options.with_app:
             self.cpp_info.components["nghttp2_app"].requires = [
                 "openssl::openssl", "c-ares::c-ares", "libev::libev",
-                "libevent::libevent", "libxml2::libxml2", "zlib::zlib",
+                "libxml2::libxml2", "zlib::zlib", "brotli::brotli"
             ]
             if self.options.with_jemalloc:
                 self.cpp_info.components["nghttp2_app"].requires.append("jemalloc::jemalloc")
 
+            if self.settings.os in ("Linux", "FreeBSD"):
+                self.cpp_info.components["nghttp2_app"].system_libs.append("pthread")
+
         if self.options.with_hpack:
-            self.cpp_info.components["nghttp2_hpack"].requires = ["jansson::jansson"]
+            self.cpp_info.components["nghttp2_hpack"].requires = ["jansson::jansson", "openssl::openssl", "zlib::zlib"]
 
         if self.options.with_app or self.options.with_hpack:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+            self.runenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
 
         # trick for internal conan usage to pick up in downsteam pc files the pc file including all libs components
-        self.cpp_info.set_property("pkg_config_name", "libnghttp2_asio" if self.options.get_safe("with_asio") else "libnghttp2")
+        self.cpp_info.set_property("pkg_config_name", "libnghttp2")

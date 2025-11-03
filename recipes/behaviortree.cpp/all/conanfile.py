@@ -207,6 +207,8 @@ class BehaviorTreeCPPConan(ConanFile):
             tc.variables["BTCPP_GROOT_INTERFACE"] = self.options.get_safe("enable_groot_interface", False)
             tc.variables["BTCPP_SQLITE_LOGGING"] = self.options.get_safe("enable_sqlite_logging", False)
             tc.variables["USE_V3_COMPATIBLE_NAMES"] = self.options.use_v3_compatible_names
+        if Version(self.version) >= "4.7.0":
+            tc.variables["BUILD_TESTING"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 

@@ -1,4 +1,10 @@
 sources:
+  "20250814.0":
+    url: "https://github.com/abseil/abseil-cpp/archive/20250814.0.tar.gz"
+    sha256: "9b2b72d4e8367c0b843fa2bcfa2b08debbe3cee34f7aaa27de55a6cbb3e843db"
+  "20250512.1":
+    url: "https://github.com/abseil/abseil-cpp/archive/20250512.1.tar.gz"
+    sha256: "9b7a064305e9fd94d124ffa6cc358592eb42b5da588fb4e07d09254aa40086db"
   "20250127.0":
     url: "https://github.com/abseil/abseil-cpp/archive/20250127.0.tar.gz"
     sha256: "16242f394245627e508ec6bb296b433c90f8d914f73b9c026fddb905e27276e8"
@@ -20,12 +26,6 @@ sources:
   "20230125.3":
     url: "https://github.com/abseil/abseil-cpp/archive/20230125.3.tar.gz"
     sha256: "5366D7E7FA7BA0D915014D387B66D0D002C03236448E1BA9EF98122C13B35C36"
-  "20220623.1":
-    url: "https://github.com/abseil/abseil-cpp/archive/20220623.1.tar.gz"
-    sha256: "91ac87d30cc6d79f9ab974c51874a704de9c2647c40f6932597329a282217ba8"
-  "20211102.0":
-    url: "https://github.com/abseil/abseil-cpp/archive/20211102.0.tar.gz"
-    sha256: "dcf71b9cba8dc0ca9940c4b316a0c796be8fab42b070bb6b7cab62b48f0e66c4"
 patches:
   "20240722.1":
     - patch_file: "patches/0003-absl-string-libm-20240116.patch"
@@ -84,17 +84,3 @@ patches:
       patch_type: "portability"
     - patch_file: "patches/0006-backport-arm-compilation-fix.patch"
       patch_source: "https://github.com/abseil/abseil-cpp/pull/1710"
-  "20220623.1":
-    - patch_file: "patches/0003-absl-string-libm.patch"
-      patch_description: "link libm to absl string"
-      patch_type: "portability"
-    - patch_file: "patches/0005-has-unique-object-representations.patch"
-      patch_description: "Workaround bug in GCC 7.2"
-      patch_source: "https://github.com/abseil/abseil-cpp/pull/1250"
-      patch_type: "portability"
-    - patch_file: "patches/0006-backport-arm-compilation-fix.patch"
-      patch_source: "https://github.com/abseil/abseil-cpp/pull/1710"
-  "20211102.0":
-    - patch_file: "patches/0003-absl-string-libm.patch"
-      patch_description: "link libm to absl string"
-      patch_type: "portability"

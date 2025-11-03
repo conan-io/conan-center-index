@@ -1,0 +1,15 @@
+Apply fix commit from https://github.com/openscenegraph/OpenSceneGraph/commit/3e7bdc07abdf1a8bf02ac062d42e0e9f111107dd
+
+diff --git a/src/osgPlugins/x/types.h b/src/osgPlugins/x/types.h
+index 33768c5308a..48cbf24640d 100644
+--- a/src/osgPlugins/x/types.h
++++ b/src/osgPlugins/x/types.h
+@@ -38,7 +38,7 @@ namespace DX {
+      */
+
+     // Vector
+-    typedef struct {
++    typedef struct Vector_struct {
+         float x,y,z;
+
+         inline void normalize() {

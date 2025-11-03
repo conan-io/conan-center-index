@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import (
@@ -7,7 +6,6 @@ from conan.tools.files import (
     get,
     rmdir,
 )
-from conan.tools.scm import Version
 import os
 
 
@@ -34,7 +32,7 @@ class PackageConan(ConanFile):
         check_min_cppstd(self, 14)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.24 <4]")
+        self.tool_requires("cmake/[>=3.27]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

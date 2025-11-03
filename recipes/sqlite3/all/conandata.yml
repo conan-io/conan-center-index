@@ -1,16 +1,10 @@
 sources:
-  "3.49.1":
-    url: "https://sqlite.org/2025/sqlite-amalgamation-3490100.zip"
-    sha256: "6cebd1d8403fc58c30e93939b246f3e6e58d0765a5cd50546f16c00fd805d2c3"
-  "3.48.0":
-    url: "https://sqlite.org/2025/sqlite-amalgamation-3480000.zip"
-    sha256: "d9a15a42db7c78f88fe3d3c5945acce2f4bfe9e4da9f685cd19f6ea1d40aa884"
-  "3.47.2":
-    url: "https://sqlite.org/2024/sqlite-amalgamation-3470200.zip"
-    sha256: "aa73d8748095808471deaa8e6f34aa700e37f2f787f4425744f53fdd15a89c40"
-  "3.46.1":
-    url: "https://sqlite.org/2024/sqlite-amalgamation-3460100.zip"
-    sha256: "77823cb110929c2bcb0f5d48e4833b5c59a8a6e40cdea3936b99e199dbbe5784"
+  "3.50.4":
+    url: "https://sqlite.org/2025/sqlite-amalgamation-3500400.zip"
+    sha256: "1d3049dd0f830a025a53105fc79fd2ab9431aea99e137809d064d8ee8356b032"
+  "3.49.2":
+    url: "https://sqlite.org/2025/sqlite-amalgamation-3490200.zip"
+    sha256: "921fc725517a694df7df38a2a3dfede6684024b5788d9de464187c612afb5918"
   "3.45.3":
     url: "https://sqlite.org/2024/sqlite-amalgamation-3450300.zip"
     sha256: "ea170e73e447703e8359308ca2e4366a3ae0c4304a8665896f068c736781c651"

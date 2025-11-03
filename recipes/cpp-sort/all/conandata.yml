@@ -1,4 +1,10 @@
 sources:
+  "2.0.0":
+    url: "https://github.com/Morwenn/cpp-sort/archive/refs/tags/v2.0.0.tar.gz"
+    sha256: "050c32d397c095b76b6f6583d4a49266b9965db51064c00b8bb0e8c4c4437037"
+  "1.17.0":
+    url: "https://github.com/Morwenn/cpp-sort/archive/1.17.0.tar.gz"
+    sha256: "df6cbb805ff71e1b0a30fc1ed55696a2d8c70c3ab87447bee2b749e02415432e"
   "1.16.0":
     url: "https://github.com/Morwenn/cpp-sort/archive/1.16.0.tar.gz"
     sha256: "54eb65de5655ce58719d45616f29e4b9060135b9cc8b526bcfc9f5434975ea8c"

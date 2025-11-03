@@ -23,7 +23,7 @@ class CvPlotConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("opencv/4.5.5")
+        self.requires("opencv/[>=4.5.5 <5]")
 
     def package_id(self):
         self.info.clear()
@@ -54,6 +54,3 @@ class CvPlotConan(ConanFile):
         self.cpp_info.set_property("cmake_find_mode", "both")
 
         self.cpp_info.defines.append("CVPLOT_HEADER_ONLY")
-
-        self.cpp_info.names["cmake_find_package"] = "CvPlot"
-        self.cpp_info.names["cmake_find_package_multi"] = "CvPlot"

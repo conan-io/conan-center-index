@@ -1,4 +1,15 @@
 sources:
+  "25.01":
+    url:
+      - https://www.7-zip.org/a/7z2501-src.tar.xz
+      - https://github.com/ip7z/7zip/releases/download/25.01/7z2501-src.tar.xz
+      - https://sourceforge.net/projects/sevenzip/files/7-Zip/25.01/7z2501-src.tar.xz
+    sha256: "ed087f83ee789c1ea5f39c464c55a5c9d4008deb0efe900814f2df262b82c36e"
+  "24.09":
+    url:
+      - https://www.7-zip.org/a/7z2409-src.tar.xz
+      - https://sourceforge.net/projects/sevenzip/files/7-Zip/24.09/7z2409-src.tar.xz
+    sha256: "49c05169f49572c1128453579af1632a952409ced028259381dac30726b6133a"
   "23.01":
     url:
       - https://www.7-zip.org/a/7z2301-src.tar.xz

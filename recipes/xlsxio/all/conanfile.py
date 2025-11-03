@@ -38,8 +38,6 @@ class XlsxioConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "0.2.34":
-            del self.options.with_minizip_ng
 
     def configure(self):
         if self.options.shared:
@@ -59,7 +57,7 @@ class XlsxioConan(ConanFile):
         if self.options.with_libzip:
             self.requires("libzip/1.10.1")
         elif Version(self.version) >= "0.2.34" and self.options.with_minizip_ng :
-            self.requires("minizip-ng/4.0.1")
+            self.requires("minizip-ng/[>=4.0.1 <5]")
         else:
             self.requires("minizip/1.2.13")
         self.requires("expat/[>=2.6.2 <3]")
@@ -77,8 +75,7 @@ class XlsxioConan(ConanFile):
         tc.variables["BUILD_STATIC"] = not self.options.shared
         tc.variables["BUILD_SHARED"] = self.options.shared
         tc.variables["WITH_LIBZIP"] = self.options.with_libzip
-        if Version(self.version) >= "0.2.34":
-            tc.variables["WITH_MINIZIP_NG"] = self.options.with_minizip_ng
+        tc.variables["WITH_MINIZIP_NG"] = self.options.with_minizip_ng
         tc.variables["WITH_WIDE"] = self.options.with_wide
         # Relocatable shared lib on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"

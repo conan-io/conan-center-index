@@ -1,13 +1,13 @@
 import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2"
 
 
 class PcapplusplusConan(ConanFile):
@@ -30,31 +30,19 @@ class PcapplusplusConan(ConanFile):
         "immediate_mode": False,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 11
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    implements = ["auto_shared_fpic"]
 
     def requirements(self):
         if self.settings.os == "Windows":
             self.requires("npcap/1.70")
         else:
             self.requires("libpcap/1.10.1")
-    
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def validate(self):
-        if Version(self.version) <= "24.09" and self.options.shared and self.settings.os == "Windows":
+        if Version(self.version) <= "25.05" and self.options.shared and self.settings.os == "Windows":
             # https://github.com/seladb/PcapPlusPlus/issues/1396
             raise ConanInvalidConfiguration(f"{self.ref} does not support Windows shared builds for now")
-        if self.settings.compiler.cppstd:
-            # popen()/pclose() usage
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 11)
         if self.settings.os not in ("FreeBSD", "Linux", "Macos", "Windows"):
             raise ConanInvalidConfiguration(f"{self.settings.os} is not supported")
 
@@ -65,14 +53,15 @@ class PcapplusplusConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
+        deps = CMakeDeps(self)
+        deps.generate()
         tc = CMakeToolchain(self)
-        tc.variables["PCAPPP_BUILD_TESTS"] = False
-        tc.variables["PCAPPP_BUILD_EXAMPLES"] = False
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
-        if not self.settings.compiler.cppstd:
-            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        tc.cache_variables["PCAPPP_BUILD_TESTS"] = False
+        tc.cache_variables["PCAPPP_BUILD_EXAMPLES"] = False
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.generate()
 
     def layout(self):
@@ -88,7 +77,6 @@ class PcapplusplusConan(ConanFile):
                             "")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -101,12 +89,26 @@ class PcapplusplusConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = ["Pcap++", "Packet++", "Common++"]
-        if self.settings.os == "Macos":
-            self.cpp_info.frameworks = ["CoreFoundation", "SystemConfiguration"]
-        elif self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["ws2_32", "iphlpapi"]
-        elif self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.system_libs = ["pthread"]
         self.cpp_info.set_property("cmake_file_name", "PcapPlusPlus")
         self.cpp_info.set_property("cmake_target_name", "PcapPlusPlus::PcapPlusPlus")
+
+        self.cpp_info.components["common"].libs = ["Common++"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["common"].system_libs = ["ws2_32", "iphlpapi"]
+
+        self.cpp_info.components["packet"].libs = ["Packet++"]
+        self.cpp_info.components["packet"].requires = ["common"]
+
+        self.cpp_info.components["pcap"].libs = ["Pcap++"]
+        self.cpp_info.components["pcap"].requires = ["common", "packet"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["pcap"].requires.append("npcap::npcap")
+            self.cpp_info.components["pcap"].system_libs = ["ws2_32", "iphlpapi"]
+            self.cpp_info.components["pcap"].defines = ["WPCAP", "HAVE_REMOTE"]
+        else:
+            self.cpp_info.components["pcap"].requires.append("libpcap::libpcap")
+
+        if self.settings.os == "Macos":
+            self.cpp_info.components["pcap"].frameworks = ["CoreFoundation", "SystemConfiguration"]
+        elif self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["pcap"].system_libs = ["pthread"]

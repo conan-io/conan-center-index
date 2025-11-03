@@ -113,6 +113,7 @@ class LibjpegTurboConan(ConanFile):
         tc.variables["WITH_JPEG8"] = self.options.libjpeg8_compatibility
         tc.variables["WITH_TURBOJPEG"] = self.options.get_safe("turbojpeg", False)
         tc.variables["WITH_JAVA"] = self.options.get_safe("java", False)
+        tc.cache_variables["WITH_TOOLS"] = False
         if Version(self.version) < "3.0.0":
             tc.variables["WITH_MEM_SRCDST"] = self.options.get_safe("mem_src_dst", False)
             tc.variables["WITH_12BIT"] = self.options.enable12bit

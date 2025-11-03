@@ -1,5 +1,14 @@
 sources:
+# Note: bundles from googlesource.com are typically not sha stable
+  "cci.20250528":
+    url:
+      - "https://gn.googlesource.com/gn/+archive/afd24ed11bc5fbef775a3ffe46c72e6bdca0fa60.tar.gz"
   "cci.20240611":
     url: "https://gn.googlesource.com/gn/+archive/b2afae122eeb6ce09c52d63f67dc53fc517dbdc8.tar.gz"
-  "cci.20210429":
-    url: "https://gn.googlesource.com/gn/+archive/6771ce569fb4803dad7a427aa2e2c23e960b917e.tar.gz"
+patches:
+  "cci.20250528":
+    - patch_file: "patches/cci.20250528-fix-cp936.patch"
+      patch_description: "fix cp936 can not recognize"
+  "cci.20240611":
+    - patch_file: "patches/cci.20240611-fix-cp936.patch"
+      patch_description: "fix cp936 can not recognize"

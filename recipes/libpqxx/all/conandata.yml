@@ -1,4 +1,10 @@
 sources:
+  "7.10.3":
+    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.10.3.tar.gz"
+    sha256: "c5ba455e4f28901297c18a76e533c466cbe8908d4b2ff6313235954bb37cef25"
+  "7.10.2":
+    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.10.2.tar.gz"
+    sha256: "9e109ffe12daa7b689da41dac05509f41b803f8405e38b1687b54e09df19000f"
   "7.10.1":
     url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.10.1.tar.gz"
     sha256: "cfbbb1d93a0a3d81319ec71d9a3db80447bb033c4f6cee088554a88862fd77d7"
@@ -39,6 +45,17 @@ sources:
     url: "https://github.com/jtv/libpqxx/archive/6.4.8.tar.gz"
     sha256: "3f7aba951822e01f1b9f9f353702954773323dd9f9dc376ffb57cb6bbd9a7a2f"
 patches:
+  "7.10.3":
+    - patch_file: "patches/0001-cmake-fix-module.patch"
+      patch_description: "Keep `CMAKE_MODULE_PATH` to be changed by conan."
+      patch_type: "conan"
+  "7.10.2":
+    - patch_file: "patches/0001-cmake-fix-module.patch"
+      patch_description: "Keep `CMAKE_MODULE_PATH` to be changed by conan."
+      patch_type: "conan"
+    - patch_file: "patches/fix-cannot-build-c++17-msvc-7.10.2.patch"
+      patch_description: "Fix a bug cannot build with C++17 on MSVC"
+      patch_type: "bugfix"
   "7.10.1":
     - patch_file: "patches/0001-cmake-fix-module.patch"
       patch_description: "Keep `CMAKE_MODULE_PATH` to be changed by conan."

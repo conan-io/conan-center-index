@@ -1,4 +1,7 @@
 sources:
+  "2.2.1":
+    url: "https://archive.apache.org/dist/orc/orc-2.2.1/orc-2.2.1.tar.gz"
+    sha256: "52fc762332442e8b05d7182f8c035f9e04d945b9a52be22ab69f28b3f37d4500"
   "2.1.1":
     url: "https://archive.apache.org/dist/orc/orc-2.1.1/orc-2.1.1.tar.gz"
     sha256: "15af8baeee322bab0298559a14a09cf8c14cf2008e35d8a78d3cc8a4c98d1e59"

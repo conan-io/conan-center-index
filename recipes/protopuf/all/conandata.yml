@@ -1,4 +1,7 @@
 sources:
+  "3.1.0":
+    url: "https://github.com/PragmaTwice/protopuf/archive/v3.1.0.tar.gz"
+    sha256: "094ead00fe10c52725ae8c6871da907215e0ae752ed017d98907a9b410e52318"
   "3.0.0":
     url: "https://github.com/PragmaTwice/protopuf/archive/v3.0.0.tar.gz"
     sha256: "62f89b78989eb054bc52e80cc1517274f5621e32eda4758f123c66c7a3521ee3"
@@ -8,3 +11,24 @@ sources:
   "2.2.0":
     url: "https://github.com/PragmaTwice/protopuf/archive/refs/tags/v2.2.0.tar.gz"
     sha256: "f19aed66c7ff44fee2ae980f869746e2000fb484893f53f2e4ea021352444ea9"
+patches:
+  "3.1.0":
+    - patch_file: "patches/0001-fix-msvc.patch"
+      patch_description: "add missing header to make MSVC happy"
+      patch_type: "backport"
+      patch_source: "https://github.com/PragmaTwice/protopuf/commit/d6a65bab60bb1b45075fa41ecdaf6b458aadfb67"
+  "3.0.0":
+    - patch_file: "patches/0001-fix-msvc.patch"
+      patch_description: "add missing header to make MSVC happy"
+      patch_type: "backport"
+      patch_source: "https://github.com/PragmaTwice/protopuf/commit/d6a65bab60bb1b45075fa41ecdaf6b458aadfb67"
+  "2.2.1":
+    - patch_file: "patches/0001-fix-msvc.patch"
+      patch_description: "add missing header to make MSVC happy"
+      patch_type: "backport"
+      patch_source: "https://github.com/PragmaTwice/protopuf/commit/d6a65bab60bb1b45075fa41ecdaf6b458aadfb67"
+  "2.2.0":
+    - patch_file: "patches/0001-fix-msvc.patch"
+      patch_description: "add missing header to make MSVC happy"
+      patch_type: "backport"
+      patch_source: "https://github.com/PragmaTwice/protopuf/commit/d6a65bab60bb1b45075fa41ecdaf6b458aadfb67"

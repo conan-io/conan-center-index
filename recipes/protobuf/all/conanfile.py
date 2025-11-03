@@ -63,6 +63,9 @@ class ProtobufConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        if Version(self.version) >= "6.32.1":
+            del self.options.upb
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -77,7 +80,9 @@ class ProtobufConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
 
-        if self._protobuf_release >= "22.0":
+        if self._protobuf_release >= "30.1":
+            self.requires("abseil/[>=20230802.1 <=20250814.0]", transitive_headers=True)
+        elif self._protobuf_release >= "22.0":
             self.requires("abseil/[>=20230802.1 <=20250127.0]", transitive_headers=True)
 
     @property
@@ -116,6 +121,11 @@ class ProtobufConan(ConanFile):
         if self.settings.compiler == "clang":
             if Version(self.settings.compiler.version) < "4":
                 raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 4")
+
+        if "abseil" in self.dependencies.host:
+            abseil_cppstd = self.dependencies.host['abseil'].info.settings.compiler.cppstd
+            if abseil_cppstd != self.settings.compiler.cppstd:
+                raise ConanInvalidConfiguration(f"Protobuf and abseil must be built with the same compiler.cppstd setting")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

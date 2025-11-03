@@ -1,4 +1,7 @@
 sources:
+  "2.6.0":
+    url: "https://github.com/dbus-cxx/dbus-cxx/archive/refs/tags/2.6.0.tar.gz"
+    sha256: "ca22380ec04a1f10154fca76d41e8ce4a8a6351ce86546b297bda5f7eefbc108"
   "2.5.2":
     url: "https://github.com/dbus-cxx/dbus-cxx/archive/refs/tags/2.5.2.tar.gz"
     sha256: "a739a29efc9ad42ba6518b38e13bb44c12947d4f7503d211c12823233e277987"

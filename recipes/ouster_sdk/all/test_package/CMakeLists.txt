@@ -1,8 +1,16 @@
 cmake_minimum_required(VERSION 3.15)
- project(test_package CXX)
+project(test_package CXX)
 
 find_package(OusterSDK REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE OusterSDK::OusterSDK)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+
+if (OUSTER_SDK_SHARED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE OusterSDK::shared_library)
+else()
+    target_link_libraries(${PROJECT_NAME} PRIVATE OusterSDK::ouster_client
+        $<$<TARGET_EXISTS:OusterSDK::ouster_pcap>:OusterSDK::ouster_pcap>
+        $<$<TARGET_EXISTS:OusterSDK::ouster_osf>:OusterSDK::ouster_osf>
+        $<$<TARGET_EXISTS:OusterSDK::ouster_viz>:OusterSDK::ouster_viz>
+    )
+endif()

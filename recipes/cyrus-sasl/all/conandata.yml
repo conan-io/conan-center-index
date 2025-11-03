@@ -7,12 +7,7 @@ sources:
     sha256: "26866b1549b00ffd020f188a43c258017fa1c382b3ddadd8201536f72efb05d5"
 patches:
   "2.1.28":
+    - patch_file: "patches/0001-Fix-time.h.patch"
     - patch_file: "patches/0001-use-attr-on-gnu.patch"
-      patch_source: https://github.com/cyrusimap/cyrus-sasl/commit/06f41c41e5c0f62ed5c1d703a9e2da42dfdb71f6
-      patch_description: "Fix https://github.com/cyrusimap/cyrus-sasl/issues/831"
-      patch_type: "official"
   "2.1.27":
     - patch_file: "patches/0001-use-attr-on-gnu.patch"
-      patch_source: https://github.com/cyrusimap/cyrus-sasl/commit/06f41c41e5c0f62ed5c1d703a9e2da42dfdb71f6
-      patch_description: "Fix https://github.com/cyrusimap/cyrus-sasl/issues/831"
-      patch_type: "official"

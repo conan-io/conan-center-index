@@ -1,12 +1,12 @@
 import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rm, rmdir, copy
+from conan.tools.files import get, rm, rmdir, copy
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class Box2dConan(ConanFile):
@@ -37,9 +37,6 @@ class Box2dConan(ConanFile):
             "Visual Studio": "17",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
@@ -55,7 +52,7 @@ class Box2dConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "3.0.0":
+        if "3.0.0" <= Version(self.version) < "3.1.0":
             self.requires("simde/0.8.2")
 
     def validate(self):
@@ -70,7 +67,7 @@ class Box2dConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "3.0.0":
-            self.tool_requires("cmake/[>=3.22 <4]")
+            self.tool_requires("cmake/[>=3.22 <5]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -92,7 +89,6 @@ class Box2dConan(ConanFile):
             deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -106,12 +102,13 @@ class Box2dConan(ConanFile):
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "box2d"
-        self.cpp_info.names["cmake_find_package_multi"] = "box2d"
-        self.cpp_info.libs = ["box2d"]
+        postfix = ""
+        if Version(self.version) >= "3.1.0" and self.settings.build_type == "Debug":
+            postfix = "d"
+        self.cpp_info.libs = [f"box2d{postfix}"]
         if Version(self.version) >= "3.0.0" and is_msvc(self) and self.options.shared:
             self.cpp_info.defines.append("BOX2D_DLL")
-        elif Version(self.version) >= "2.4.1" and self.options.shared:
+        elif self.options.shared:
             self.cpp_info.defines.append("B2_SHARED")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
