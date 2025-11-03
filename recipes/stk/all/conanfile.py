@@ -10,7 +10,8 @@ class stkRecipe(ConanFile):
 
     # Optional metadata
     license = "MIT"
-    url = "https://ccrma.stanford.edu/software/stk/"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://ccrma.stanford.edu/software/stk/"
     description = "The Synthesis ToolKit in C++"
     topics = ("audio", "synthesis")
 
