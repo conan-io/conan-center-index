@@ -77,16 +77,16 @@ class H5ppConan(ConanFile):
         self.cpp_info.components["h5pp_flags"].bindirs = []
         self.cpp_info.components["h5pp_flags"].libdirs = []
 
-        if self.options.get_safe("with_eigen"):
+        if self.options.with_eigen:
             self.cpp_info.components["h5pp_deps"].requires.append("eigen::eigen")
             self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_EIGEN3")
-        if self.options.get_safe("with_spdlog"):
+        if self.options.with_spdlog:
             self.cpp_info.components["h5pp_deps"].requires.append("spdlog::spdlog")
             self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_SPDLOG")
             self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_FMT")
-        if self.options.get_safe("with_zlib"):
+        if self.options.with_zlib:
             self.cpp_info.components["h5pp_deps"].requires.append("zlib::zlib")
-        if self.options.get_safe("with_quadmath"):
+        if self.options.with_quadmath:
             self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_FLOAT128")
             self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_QUADMATH")
             self.cpp_info.system_libs.append('quadmath')
