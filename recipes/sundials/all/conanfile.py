@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, mkdir, rmdir
+from conan.tools.apple import fix_apple_shared_install_name
 import glob
 import os
 import shutil
@@ -89,6 +90,7 @@ class SundialsConan(ConanFile):
             mkdir(self, os.path.join(self.package_folder, "bin"))
             for dll_path in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
                 shutil.move(dll_path, os.path.join(self.package_folder, "bin", os.path.basename(dll_path)))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
 
