@@ -1,24 +1,24 @@
 sources:
-  "5.15.17":
+  "5.15.18":
     url:
-      - "https://download.qt.io/official_releases/qt/5.15/5.15.17/single/qt-everywhere-opensource-src-5.15.17.tar.xz"
-      - "https://download.qt.io/archive/qt/5.15/5.15.17/single/qt-everywhere-opensource-src-5.15.17.tar.xz"
-      - "https://qt-mirror.dannhauer.de/archive/qt/5.15/5.15.17/single/qt-everywhere-opensource-src-5.15.17.tar.xz"
-      - "https://ftp.fau.de/qtproject/archive/qt/5.15/5.15.17/single/qt-everywhere-opensource-src-5.15.17.tar.xz"
-      - "https://mirrors.dotsrc.org/qtproject/archive/qt/5.15/5.15.17/single/qt-everywhere-opensource-src-5.15.17.tar.xz"
-      - "https://mirrors.20i.com/pub/qt.io/archive/qt/5.15/5.15.17/single/qt-everywhere-opensource-src-5.15.17.tar.xz"
-      - "https://mirrors.ukfast.co.uk/sites/qt.io/archive/qt/5.15/5.15.17/single/qt-everywhere-opensource-src-5.15.17.tar.xz"
-      - "https://mirror.accum.se/mirror/qt.io/qtproject/archive/qt/5.15/5.15.17/single/qt-everywhere-opensource-src-5.15.17.tar.xz"
-      - "https://www.nic.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/5.15/5.15.17/single/qt-everywhere-opensource-src-5.15.17.tar.xz"
-      - "https://qtproject.mirror.liquidtelecom.com/archive/qt/5.15/5.15.17/single/qt-everywhere-opensource-src-5.15.17.tar.xz"
-      - "https://qt.mirror.constant.com/archive/qt/5.15/5.15.17/single/qt-everywhere-opensource-src-5.15.17.tar.xz"
-      - "https://mirrors.sau.edu.cn/qt/archive/qt/5.15/5.15.17/single/qt-everywhere-opensource-src-5.15.17.tar.xz"
-      - "https://mirror.bjtu.edu.cn/qt/archive/qt/5.15/5.15.17/single/qt-everywhere-opensource-src-5.15.17.tar.xz"
-      - "https://ftp.jaist.ac.jp/pub/qtproject/archive/qt/5.15/5.15.17/single/qt-everywhere-opensource-src-5.15.17.tar.xz"
-      - "https://mirror.aarnet.edu.au/pub/qtproject/archive/qt/5.15/5.15.17/single/qt-everywhere-opensource-src-5.15.17.tar.xz"
+      - "https://download.qt.io/official_releases/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://download.qt.io/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://qt-mirror.dannhauer.de/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://ftp.fau.de/qtproject/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://mirrors.dotsrc.org/qtproject/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://mirrors.20i.com/pub/qt.io/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://mirrors.ukfast.co.uk/sites/qt.io/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://mirror.accum.se/mirror/qt.io/qtproject/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://www.nic.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://qtproject.mirror.liquidtelecom.com/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://qt.mirror.constant.com/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://mirrors.sau.edu.cn/qt/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://mirror.bjtu.edu.cn/qt/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://ftp.jaist.ac.jp/pub/qtproject/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://mirror.aarnet.edu.au/pub/qtproject/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
     sha256: "5c34b2e8054d23cbd6c98715af8766a61c7f346ac687aa2d80edd73f8073d2d2"
 patches:
-  "5.15.17":
+  "5.15.18":
     - "base_path": "qt5/qtbase"
       "patch_file": "patches/aa2a39dea5.diff"
     - "base_path": "qt5/qtwebengine"
