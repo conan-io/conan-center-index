@@ -6,7 +6,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, copy, rmdir, rm, save, replace_in_file, export_conandata_patches, apply_conandata_patches
-from conan.tools.scm import Version
 
 required_conan_version = ">=2.0.6"
 
@@ -63,17 +62,10 @@ class OusterSdkConan(ConanFile):
         self.requires("libcurl/[>=7.78 <9]")
         # Replaces vendored optional-lite
         self.requires("optional-lite/3.6.0", transitive_headers=True)
-        if Version(self.version) < "0.14.0":
-            # Used in ouster/sensor_http.h
-            # 0.14.0+ replaced jsoncpp by vendorized jsoncons
-            self.requires("jsoncpp/1.9.5", transitive_headers=True, transitive_libs=True)
-            # 0.14.0+ vendorized spdlog instead of external dependency
-            self.requires("spdlog/[>=1.12.0 <1.15]")
 
         if self.options.build_pcap:
             self.requires("libtins/4.5")
-            if Version(self.version) >= "0.14.0":
-                self.requires("libpcap/1.10.5")
+            self.requires("libpcap/1.10.5")
 
         if self.options.build_osf:
             # Used in fb_generated/*.h
@@ -84,9 +76,6 @@ class OusterSdkConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]", transitive_libs=True)
 
         if self.options.build_viz:
-            if Version(self.version) < "0.14.0":
-                # 0.14.0+ vendorized glad
-                self.requires("glad/0.1.36")
             self.requires("glfw/3.4")
 
     def validate(self):
@@ -115,8 +104,7 @@ class OusterSdkConan(ConanFile):
         tc.cache_variables["BUILD_OSF"] = self.options.build_osf
         tc.cache_variables["OUSTER_USE_EIGEN_MAX_ALIGN_BYTES_32"] = self.options.eigen_max_align_bytes
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-        if Version(self.version) >= "0.14.0":
-            tc.cache_variables["BUILD_SHARED_LIBRARY"] = self.options.shared
+        tc.cache_variables["BUILD_SHARED_LIBRARY"] = self.options.shared
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
@@ -134,13 +122,6 @@ class OusterSdkConan(ConanFile):
              "target_link_libraries(ouster_client PUBLIC nonstd::optional-lite)\n",
              append=True)
 
-        if Version(self.version) < "0.14.0":
-            # Allow non-static ouster_osf for consistency with other components
-            # FIXME: This was applied previously in the recipe, but does not follow the upstream
-            #        in 0.14.0, it breaks because shared_library.dylib expects static ouster_osf
-            replace_in_file(self, os.path.join(self.source_folder, "ouster_osf", "CMakeLists.txt"),
-                            "add_library(ouster_osf STATIC", "add_library(ouster_osf")
-
 
     def build(self):
         cmake = CMake(self)
@@ -154,14 +135,14 @@ class OusterSdkConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
-        if Version(self.version) >= "0.14.0" and self.options.shared:
+        if self.options.shared:
             # INFO: Version 0.14.0+ produces both shared and static libraries when shared=True
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OusterSDK")
         self.cpp_info.set_property("cmake_target_name", "OusterSDK::OusterSDK")
-        produce_library = Version(self.version) < "0.14.0" or not self.options.shared
+        produce_library = not self.options.shared
 
         self.cpp_info.components["ouster_client"].set_property("cmake_target_name", "OusterSDK::ouster_client")
         self.cpp_info.components["ouster_client"].libs = ["ouster_client"] if produce_library else []
@@ -172,11 +153,8 @@ class OusterSdkConan(ConanFile):
         ]
         if self.settings.os == "Windows":
             self.cpp_info.components["ouster_client"].system_libs = ["ws2_32"]
-        if Version(self.version) >= "0.14.0":
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["ouster_client"].system_libs = ["pthread"]
-        else:
-            self.cpp_info.components["ouster_client"].requires.extend(["jsoncpp::jsoncpp", "spdlog::spdlog",])
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["ouster_client"].system_libs = ["pthread"]
         if self.options.eigen_max_align_bytes:
             self.cpp_info.components["ouster_client"].defines = ["EIGEN_MAX_ALIGN_BYTES=32"]
 
@@ -198,25 +176,21 @@ class OusterSdkConan(ConanFile):
             self.cpp_info.components["ouster_pcap"].requires = [
                 "ouster_client",
                 "libtins::libtins",
+                "libpcap::libpcap",
             ]
-            if Version(self.version) >= "0.14.0":
-                self.cpp_info.components["ouster_pcap"].requires.append("libpcap::libpcap")
             if self.settings.os == "Windows":
                 self.cpp_info.components["ouster_pcap"].system_libs = ["ws2_32"]
 
         if self.options.build_viz:
             self.cpp_info.components["ouster_viz"].set_property("cmake_target_name", "OusterSDK::ouster_viz")
             self.cpp_info.components["ouster_viz"].libs = ["ouster_viz"] if produce_library else []
+            self.cpp_info.components["ouster_viz"].libs.append("glad")
             self.cpp_info.components["ouster_viz"].requires = [
                 "ouster_client",
                 "glfw::glfw",
             ]
-            if Version(self.version) >= "0.14.0":
-                self.cpp_info.components["ouster_viz"].libs.append("glad")
-            else:
-                self.cpp_info.components["ouster_viz"].requires.append("glad::glad")
 
-        if Version(self.version) >= "0.14.0" and self.options.shared:
+        if self.options.shared:
             self.cpp_info.components["shared_library"].set_property("cmake_target_name", "OusterSDK::shared_library")
             self.cpp_info.components["shared_library"].libs = ["shared_library"]
             self.cpp_info.components["shared_library"].requires = ["ouster_client"]
