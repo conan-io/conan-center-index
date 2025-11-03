@@ -24,12 +24,6 @@ class stkRecipe(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
     
-    def config_options(self):
-        pass
-
-    def configure(self):
-        pass
-
     def layout(self):
         cmake_layout(self, src_folder="src")
     
