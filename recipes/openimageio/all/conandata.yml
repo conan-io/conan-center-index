@@ -2,9 +2,6 @@ sources:
   "3.1.7.0":
     url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/releases/download/v3.1.7.0/OpenImageIO-3.1.7.0.tar.gz"
     sha256: "d9b49b568c36993f6b3849bfafd9ac3178a56ff57efd8bd2c1dd81f7ae3ee318"
-  "3.1.6.2":
-    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/releases/download/v3.1.6.2/OpenImageIO-3.1.6.2.tar.gz"
-    sha256: "a78156112c03b669827115ac34102b358569dc6d6872a45db719617eff33360b"
   "2.5.19.1":
     url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.5.19.1.tar.gz"
     sha256: "adb73f270f2eaae81c3c7cde311239944ae9faf6d206552da4ee12d746628b26"
