@@ -31,7 +31,7 @@ class stkRecipe(ConanFile):
         pass
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
     
     def generate(self):
         deps = CMakeDeps(self)
