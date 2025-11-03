@@ -1,4 +1,7 @@
 sources:
+  "2.5.0":
+    url: "https://github.com/lexbor/lexbor/archive/v2.5.0.zip"
+    sha256: "460c6ee1396568078dc45b96dd55c9e92909deaff27cd6421c25dc8dfc8608b5"
   "2.4.0":
     url: "https://github.com/lexbor/lexbor/archive/v2.4.0.zip"
     sha256: "8cfaf8783f736ce784f5fbdf284a6db8c0943d6589d5a0c10257ba948ae2e7b1"

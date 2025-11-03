@@ -1,0 +1,11 @@
+--- a/cmake/onnxruntime_mlas.cmake
++++ b/cmake/onnxruntime_mlas.cmake
+@@ -689,7 +689,7 @@ if (NOT onnxruntime_ORT_MINIMAL_BUILD)
+ 
+   target_link_libraries(onnxruntime_mlas_q4dq PRIVATE ${ONNXRUNTIME_MLAS_LIBS} onnxruntime_common)
+   if (CPUINFO_SUPPORTED AND NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+-    target_link_libraries(onnxruntime_mlas_q4dq PRIVATE cpuinfo)
++    target_link_libraries(onnxruntime_mlas_q4dq PRIVATE cpuinfo::cpuinfo)
+   endif()
+   if(NOT WIN32)
+     target_link_libraries(onnxruntime_mlas_q4dq PRIVATE nsync::nsync_cpp ${CMAKE_DL_LIBS})

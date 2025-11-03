@@ -1,4 +1,7 @@
 sources:
+  "22.0.0":
+    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-22.0.0/apache-arrow-22.0.0.tar.gz?action=download"
+    sha256: "131250cd24dec0cddde04e2ad8c9e2bc43edc5e84203a81cf71cf1a33a6e7e0f"
   "21.0.0":
     url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-21.0.0/apache-arrow-21.0.0.tar.gz?action=download"
     sha256: "5d3f8db7e72fb9f65f4785b7a1634522e8d8e9657a445af53d4a34a3849857b5"
@@ -8,62 +11,16 @@ sources:
   "19.0.1":
     url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-19.0.1/apache-arrow-19.0.1.tar.gz?action=download"
     sha256: "acb76266e8b0c2fbb7eb15d542fbb462a73b3fd1e32b80fad6c2fafd95a51160"
-  "18.1.0":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-18.1.0/apache-arrow-18.1.0.tar.gz?action=download"
-    sha256: "2dc8da5f8796afe213ecc5e5aba85bb82d91520eff3cf315784a52d0fa61d7fc"
-  "18.0.0":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-18.0.0/apache-arrow-18.0.0.tar.gz?action=download"
-    sha256: "abcf1934cd0cdddd33664e9f2d9a251d6c55239d1122ad0ed223b13a583c82a9"
-  "17.0.0":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-17.0.0/apache-arrow-17.0.0.tar.gz?action=download"
-    sha256: "9d280d8042e7cf526f8c28d170d93bfab65e50f94569f6a790982a878d8d898d"
-  "16.1.0":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-16.1.0/apache-arrow-16.1.0.tar.gz?action=download"
-    sha256: "c9e60c7e87e59383d21b20dc874b17153729ee153264af6d21654b7dff2c60d7"
-  "15.0.0":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-15.0.0/apache-arrow-15.0.0.tar.gz?action=download"
-    sha256: "01dd3f70e85d9b5b933ec92c0db8a4ef504a5105f78d2d8622e84279fb45c25d"
-  "14.0.2":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-14.0.2/apache-arrow-14.0.2.tar.gz?action=download"
-    sha256: "1304dedb41896008b89fe0738c71a95d9b81752efc77fa70f264cb1da15d9bc2"
 patches:
+  "22.0.0":
+    - patch_file: "patches/22.0.0-0001-fix-downloaded-mimalloc.patch"
+    - patch_file: "patches/22.0.0-0002-fix-msvc-arm64.patch"
   "21.0.0":
     - patch_file: "patches/21.0.0-0001-fix-downloaded-mimalloc.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
+    - patch_file: "patches/21.0.0-0002-fix-msvc-arm64.patch"
   "20.0.0":
     - patch_file: "patches/20.0.0-0001-fix-downloaded-mimalloc.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
   "19.0.1":
     - patch_file: "patches/19.0.1-0001-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
     - patch_file: "patches/19.0.1-0002-fix-downloaded-mimalloc.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "18.1.0":
-    - patch_file: "patches/18.0.0-0001-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "18.0.0":
-    - patch_file: "patches/18.0.0-0001-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "17.0.0":
-    - patch_file: "patches/16.0.0-0001-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "16.1.0":
-    - patch_file: "patches/16.0.0-0001-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "15.0.0":
-    - patch_file: "patches/11.0.0-0001-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "14.0.2":
-    - patch_file: "patches/11.0.0-0001-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
 
