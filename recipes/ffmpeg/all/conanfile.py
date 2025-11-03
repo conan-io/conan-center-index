@@ -141,7 +141,7 @@ class FFMpegConan(ConanFile):
         "with_fontconfig": False,
         "with_fribidi": False,
         "with_harfbuzz": False,
-        "with_libjxl": True,
+        "with_libjxl": False,
         "with_openjpeg": True,
         "with_openh264": True,
         "with_opus": True,
