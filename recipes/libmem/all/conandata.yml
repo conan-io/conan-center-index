@@ -4,6 +4,6 @@ sources:
     sha256: "9f61b53ce86fd59afb13bc4f48db40e8c8dc156f56879b9e9929014924f95495"
 patches:
   "5.1.0":
-    - patch_file: "patches/5.1.0/fix-cmake.patch"
+    - patch_file: "patches/5.1.0-001-fix-cmake.patch"
       patch_description: "Debundle dependencies"
       patch_type: "portability"

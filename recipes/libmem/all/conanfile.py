@@ -9,6 +9,9 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.scm import Version
 
 
+required_conan_version = ">=2"
+
+
 class LibmemConan(ConanFile):
     name = "libmem"
     description = "Cross-platform game hacking library for C, C++, Rust, and Python, supporting process/memory hacking, hooking, detouring, and DLL/SO injection."
@@ -31,10 +34,6 @@ class LibmemConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -49,7 +48,7 @@ class LibmemConan(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.ref} requires Android NDK API level >= 24")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.22 <4]")
+        self.tool_requires("cmake/[>=3.22]")
 
     def requirements(self):
         self.requires("capstone/5.0.6")
@@ -58,6 +57,9 @@ class LibmemConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        # Remove PreLoad.cmake to avoid forcing the generator
+        rm(self, "PreLoad.cmake", self.source_folder)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -69,12 +71,7 @@ class LibmemConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        rm(self, "PreLoad.cmake", self.source_folder)
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -86,11 +83,6 @@ class LibmemConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["libmem"]
-        self.cpp_info.requires = ["capstone::capstone", "keystone::keystone", "llvm-core::llvm-core"]
-
-        self.cpp_info.set_property("cmake_file_name", "libmem")
-        self.cpp_info.set_property("cmake_target_name", "libmem::libmem")
-        self.cpp_info.set_property("pkg_config_name", "libmem")
 
         if self.settings.os == "Windows":
             if self.options.shared:
