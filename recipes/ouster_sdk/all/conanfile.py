@@ -24,6 +24,7 @@ class OusterSdkConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "build_sensor": [True, False],
         "build_osf": [True, False],
         "build_pcap": [True, False],
         "build_viz": [True, False],
@@ -33,13 +34,15 @@ class OusterSdkConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "build_sensor": True,
         "build_osf": True,
         "build_pcap": True,
         "build_viz": False,
-        "build_mapping": False,
+        "build_mapping": True,
         "eigen_max_align_bytes": False,
     }
     options_description = {
+        "build_sensor": "Build Ouster Sensor library.",
         "build_osf": "Build Ouster OSF library.",
         "build_pcap": "Build pcap utils.",
         "build_viz": "Build Ouster visualizer.",
@@ -53,6 +56,10 @@ class OusterSdkConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        # build_sensor and build_mapping are only available in 0.15.0+
+        if Version(self.ref.version) < "0.15.0":
+            del self.options.build_sensor
+            del self.options.build_mapping
 
     def configure(self):
         if self.options.shared:
@@ -64,20 +71,30 @@ class OusterSdkConan(ConanFile):
     def requirements(self):
         # Used in ouster/types.h
         self.requires("eigen/3.4.0", transitive_headers=True)
-        self.requires("libcurl/[>=7.78 <9]")
         # Replaces vendored optional-lite
         self.requires("optional-lite/3.6.0", transitive_headers=True)
+
+        # libcurl moved to ouster_sensor in 0.15.0+
+        if Version(self.version) >= "0.15.0":
+            if self.options.build_sensor:
+                self.requires("libcurl/[>=7.78 <9]")
+        else:
+            self.requires("libcurl/[>=7.78 <9]")
 
         if self.options.build_pcap:
             self.requires("libtins/4.5")
             self.requires("libpcap/1.10.5")
+
+        # libpng is required by both ouster_osf and ouster_viz (0.15.0+)
+        needs_libpng = self.options.build_osf or (Version(self.version) >= "0.15.0" and self.options.build_viz)
+        if needs_libpng:
+            self.requires("libpng/[>=1.6 <2]", transitive_libs=True)
 
         if self.options.build_osf:
             # Used in fb_generated/*.h
             self.requires("flatbuffers/24.3.7", transitive_headers=True)
             # 0.12.0+ shared_library uses private libpng in ouster_osf and result in missing symbols
             # 0.11.0 and earlier used private libpng in ouster_osf
-            self.requires("libpng/[>=1.6 <2]", transitive_libs=True)
             self.requires("zlib/[>=1.2.11 <2]", transitive_libs=True)
 
         if self.options.build_viz:
@@ -85,9 +102,11 @@ class OusterSdkConan(ConanFile):
 
         if Version(self.version) >= "0.15.0" and self.options.build_mapping:
             # Required for ouster_mapping module (0.15.0+)
-            self.requires("ceres-solver/[>=1.14.0 <3]")
+            self.requires("ceres-solver/2.2.0")
             # Required by kiss-icp (used in ouster_mapping)
-            self.requires("onetbb/[>=2020.0]")
+            self.requires("onetbb/2022.3.0")
+            # kiss-icp is vendorized but uses tsl-robin-map from Conan
+            self.requires("tsl-robin-map/1.4.0")
 
     def validate(self):
         check_min_cppstd(self, 14)
@@ -114,6 +133,7 @@ class OusterSdkConan(ConanFile):
         tc.cache_variables["BUILD_PCAP"] = self.options.build_pcap
         tc.cache_variables["BUILD_OSF"] = self.options.build_osf
         if Version(self.version) >= "0.15.0":
+            tc.cache_variables["BUILD_SENSOR"] = self.options.build_sensor
             tc.cache_variables["BUILD_MAPPING"] = self.options.build_mapping
         tc.cache_variables["OUSTER_USE_EIGEN_MAX_ALIGN_BYTES_32"] = self.options.eigen_max_align_bytes
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
@@ -121,6 +141,9 @@ class OusterSdkConan(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
+        if Version(self.version) >= "0.15.0" and self.options.build_mapping:
+            # kiss-icp's robinMapConfig.cmake looks for "robinMap" but we provide "tsl::robin_map"
+            deps.set_property("tsl-robin-map", "cmake_target_name", "robinMap")
         deps.generate()
 
     def _patch_sources(self):
@@ -161,15 +184,31 @@ class OusterSdkConan(ConanFile):
         self.cpp_info.components["ouster_client"].libs = ["ouster_client"] if produce_library else []
         self.cpp_info.components["ouster_client"].requires = [
             "eigen::eigen",
-            "libcurl::libcurl",
             "optional-lite::optional-lite",
         ]
+        # libcurl moved to ouster_sensor in 0.15.0+
+        if Version(self.version) < "0.15.0":
+            self.cpp_info.components["ouster_client"].requires.append("libcurl::libcurl")
         if self.settings.os == "Windows":
             self.cpp_info.components["ouster_client"].system_libs = ["ws2_32"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["ouster_client"].system_libs = ["pthread"]
         if self.options.eigen_max_align_bytes:
             self.cpp_info.components["ouster_client"].defines = ["EIGEN_MAX_ALIGN_BYTES=32"]
+
+        # ouster_sensor component (0.15.0+)
+        if Version(self.version) >= "0.15.0" and self.options.build_sensor:
+            self.cpp_info.components["ouster_sensor"].set_property("cmake_target_name", "OusterSDK::ouster_sensor")
+            self.cpp_info.components["ouster_sensor"].libs = ["ouster_sensor"] if produce_library else []
+            self.cpp_info.components["ouster_sensor"].requires = [
+                "ouster_client",
+                "eigen::eigen",
+                "libcurl::libcurl",
+            ]
+            if self.settings.os == "Windows":
+                self.cpp_info.components["ouster_sensor"].system_libs = ["ws2_32"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["ouster_sensor"].system_libs = ["pthread"]
 
         if self.options.build_osf:
             self.cpp_info.components["ouster_osf"].set_property("cmake_target_name", "OusterSDK::ouster_osf")
@@ -202,20 +241,27 @@ class OusterSdkConan(ConanFile):
                 "ouster_client",
                 "glfw::glfw",
             ]
+            # 0.15.0+ ouster_viz requires PNG
+            if Version(self.version) >= "0.15.0":
+                self.cpp_info.components["ouster_viz"].requires.append("libpng::libpng")
 
         if Version(self.version) >= "0.15.0" and self.options.build_mapping:
             self.cpp_info.components["ouster_mapping"].set_property("cmake_target_name", "OusterSDK::ouster_mapping")
             self.cpp_info.components["ouster_mapping"].libs = ["ouster_mapping"] if produce_library else []
             self.cpp_info.components["ouster_mapping"].requires = [
                 "ouster_client",
-                "ceres::ceres",
+                "ouster_osf",  # ouster_mapping requires ouster_osf
+                "ceres-solver::ceres",
                 "onetbb::onetbb",
+                "tsl-robin-map::tsl-robin-map",
             ]
 
         if self.options.shared:
             self.cpp_info.components["shared_library"].set_property("cmake_target_name", "OusterSDK::shared_library")
             self.cpp_info.components["shared_library"].libs = ["shared_library"]
             self.cpp_info.components["shared_library"].requires = ["ouster_client"]
+            if Version(self.version) >= "0.15.0" and self.options.build_sensor:
+                self.cpp_info.components["shared_library"].requires.append("ouster_sensor")
             if self.options.build_osf:
                 self.cpp_info.components["shared_library"].requires.append("ouster_osf")
             if self.options.build_pcap:
