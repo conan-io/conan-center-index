@@ -4,7 +4,6 @@ from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, cmake_layout, CMakeDeps, CMakeToolchain
 from conan.tools.gnu import PkgConfig, PkgConfigDeps
-from conan.tools.env import VirtualBuildEnv
 
 
 class TestPackageConan(ConanFile):
@@ -37,9 +36,6 @@ class TestPackageConan(ConanFile):
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
-
-        env = VirtualBuildEnv(self)
-        env.generate()
 
         pkg_config = PkgConfig(self, "wayland-scanner", self.generators_folder)
         wayland_scanner = pkg_config.variables["wayland_scanner"]
