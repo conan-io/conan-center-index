@@ -50,8 +50,8 @@ class InfluxdbCppRestConan(ConanFile):
         deps.generate()
         tc = CMakeToolchain(self)
         # Disable tests and demo for packaging
-        tc.variables["BUILD_TESTING"] = False
-        tc.variables["BUILD_DEMO"] = False
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_DEMO"] = False
         tc.generate()
 
     def build(self):
