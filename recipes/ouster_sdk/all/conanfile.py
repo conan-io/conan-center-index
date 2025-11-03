@@ -1,4 +1,5 @@
 import os
+import re
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -6,6 +7,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, copy, rmdir, rm, save, replace_in_file, export_conandata_patches, apply_conandata_patches
+from conan.tools.scm import Version
 
 required_conan_version = ">=2.0.6"
 
@@ -25,6 +27,7 @@ class OusterSdkConan(ConanFile):
         "build_osf": [True, False],
         "build_pcap": [True, False],
         "build_viz": [True, False],
+        "build_mapping": [True, False],
         "eigen_max_align_bytes": [True, False],
     }
     default_options = {
@@ -33,12 +36,14 @@ class OusterSdkConan(ConanFile):
         "build_osf": True,
         "build_pcap": True,
         "build_viz": False,
+        "build_mapping": False,
         "eigen_max_align_bytes": False,
     }
     options_description = {
         "build_osf": "Build Ouster OSF library.",
         "build_pcap": "Build pcap utils.",
         "build_viz": "Build Ouster visualizer.",
+        "build_mapping": "Build Ouster mapping library.",
         "eigen_max_align_bytes": "Force maximum alignment of Eigen data to 32 bytes.",
     }
 
@@ -78,6 +83,12 @@ class OusterSdkConan(ConanFile):
         if self.options.build_viz:
             self.requires("glfw/3.4")
 
+        if Version(self.version) >= "0.15.0" and self.options.build_mapping:
+            # Required for ouster_mapping module (0.15.0+)
+            self.requires("ceres-solver/[>=1.14.0 <3]")
+            # Required by kiss-icp (used in ouster_mapping)
+            self.requires("onetbb/[>=2020.0]")
+
     def validate(self):
         check_min_cppstd(self, 14)
 
@@ -102,6 +113,8 @@ class OusterSdkConan(ConanFile):
         tc.cache_variables["BUILD_VIZ"] = self.options.build_viz
         tc.cache_variables["BUILD_PCAP"] = self.options.build_pcap
         tc.cache_variables["BUILD_OSF"] = self.options.build_osf
+        if Version(self.version) >= "0.15.0":
+            tc.cache_variables["BUILD_MAPPING"] = self.options.build_mapping
         tc.cache_variables["OUSTER_USE_EIGEN_MAX_ALIGN_BYTES_32"] = self.options.eigen_max_align_bytes
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.cache_variables["BUILD_SHARED_LIBRARY"] = self.options.shared
@@ -190,6 +203,15 @@ class OusterSdkConan(ConanFile):
                 "glfw::glfw",
             ]
 
+        if Version(self.version) >= "0.15.0" and self.options.build_mapping:
+            self.cpp_info.components["ouster_mapping"].set_property("cmake_target_name", "OusterSDK::ouster_mapping")
+            self.cpp_info.components["ouster_mapping"].libs = ["ouster_mapping"] if produce_library else []
+            self.cpp_info.components["ouster_mapping"].requires = [
+                "ouster_client",
+                "ceres::ceres",
+                "onetbb::onetbb",
+            ]
+
         if self.options.shared:
             self.cpp_info.components["shared_library"].set_property("cmake_target_name", "OusterSDK::shared_library")
             self.cpp_info.components["shared_library"].libs = ["shared_library"]
@@ -200,3 +222,5 @@ class OusterSdkConan(ConanFile):
                 self.cpp_info.components["shared_library"].requires.append("ouster_pcap")
             if self.options.build_viz:
                 self.cpp_info.components["shared_library"].requires.append("ouster_viz")
+            if Version(self.version) >= "0.15.0" and self.options.build_mapping:
+                self.cpp_info.components["shared_library"].requires.append("ouster_mapping")
