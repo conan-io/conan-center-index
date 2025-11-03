@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
-from conan.tools.files import copy, export_conandata_patches, get, patch, rm, rmdir
+from conan.tools.build import cross_building
+from conan.tools.files import copy, export_conandata_patches, get, patch, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
@@ -144,6 +145,11 @@ class GmpConan(ConanFile):
         self._patch_sources()
         autotools = Autotools(self)
         autotools.configure()
+        if self.settings.os == "Macos" and cross_building(self):
+            # LD flags are not passed properly by the scripts - in particular '-arch x86_64' when crossbuilding
+            # and invoking libtool to generate one of the libraries. Being conservative here, but there's a chance
+            # this may need to be generalised
+            replace_in_file(self, os.path.join(self.build_folder, "libtool"), 'archive_cmds="\$CC ', 'archive_cmds="\$CC $LDFLAGS ')
         autotools.make()
         # INFO: According to the gmp readme file, make check should not be omitted, but it causes timeouts on the CI server.
         if self.options.run_checks:
