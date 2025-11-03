@@ -1081,6 +1081,7 @@ class QtConan(ConanFile):
 
         # https://github.com/qt/qtbase/blob/v6.7.3/cmake/QtPlatformTargetHelpers.cmake
         self.cpp_info.components["qtPlatform"].set_property("cmake_target_name", "Qt6::Platform")
+        self.cpp_info.components["qtPlatform"].set_property("cmake_target_aliases", ["Qt::Platform"])
         self.cpp_info.components["qtPlatform"].includedirs = [os.path.join("mkspecs", self._xplatform())]
         if self.settings.os == "Android":
             self.cpp_info.components["qtPlatform"].system_libs.append("log")
@@ -1119,9 +1120,6 @@ class QtConan(ConanFile):
         if is_msvc(self):
             self.cpp_info.components["qtCore"].system_libs.append("synchronization")
             self.cpp_info.components["qtCore"].system_libs.append("runtimeobject")
-        self.cpp_info.components["qtPlatform"].set_property("cmake_target_name", "Qt6::Platform")
-        self.cpp_info.components["qtPlatform"].set_property("cmake_target_aliases", ["Qt::Platform"])
-        self.cpp_info.components["qtPlatform"].includedirs = [os.path.join("mkspecs", self._xplatform())]
         if self.options.with_dbus:
             _create_module("DBus", ["dbus::dbus"])
             if self.settings.os == "Windows":
