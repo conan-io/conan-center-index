@@ -142,8 +142,8 @@ class OusterSdkConan(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
         if Version(self.version) >= "0.15.0" and self.options.build_mapping:
-            # kiss-icp's robinMapConfig.cmake looks for "robinMap" but we provide "tsl::robin_map"
-            deps.set_property("tsl-robin-map", "cmake_target_name", "robinMap")
+            # kiss-icp's expects robinMapConfig.cmake
+            deps.set_property("tsl-robin-map", "cmake_file_name", "robinMap")
         deps.generate()
 
     def _patch_sources(self):
