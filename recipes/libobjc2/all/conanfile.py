@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 import os
 
 required_conan_version = ">=2.1"
@@ -30,7 +30,7 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("tsl-robin-map/1.2.1")
+        self.requires("tsl-robin-map/[>=1.2.1 <2]")
 
     def validate(self):
         if self.settings.compiler != "clang":
@@ -40,7 +40,7 @@ class PackageConan(ConanFile):
             raise ConanInvalidConfiguration("libobjc2 does not support macOS.")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16 <5]")
+        self.tool_requires("cmake/[>=3.16]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
