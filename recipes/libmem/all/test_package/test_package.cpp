@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <optional>
+#include <string>
 
 using namespace libmem;
 
@@ -14,10 +15,17 @@ int main() {
     }
     std::optional<std::vector<Thread>> threads = EnumThreads();
     if (threads.has_value()) {
-        std::cout << "libmem C++ API test: Successfully enumerated threads, count: " 
+        std::cout << "libmem C++ API test: Successfully enumerated threads, count: "
                     << threads->size() << std::endl;
     } else {
         std::cout << "libmem C++ API test: Failed to enumerate threads" << std::endl;
+    }
+    std::optional<std::string> demangled = DemangleSymbol("_ZSt4cout");
+    if (demangled.has_value()) {
+        std::cout << "libmem C++ API test: Successfully demangled symbol: "
+                    << *demangled << std::endl;
+    } else {
+        std::cout << "libmem C++ API test: Failed to demangle symbol" << std::endl;
     }
     return 0;
 }
