@@ -289,7 +289,7 @@ class AssimpConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "code", "CMakeLists.txt"), pattern, "")
 
         # Make sure vendored libs are not used by accident by removing their subdirs
-        allow_vendored = ["Open3DGC"]
+        allow_vendored = ["Open3DGC", "earcut-hpp"]
         for contrib_dir in self.source_path.joinpath("contrib").iterdir():
             if contrib_dir.is_dir() and contrib_dir.name not in allow_vendored:
                 rmdir(self, contrib_dir)
