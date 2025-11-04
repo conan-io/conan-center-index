@@ -95,3 +95,14 @@ sources:
     core:
       url: "https://github.com/ocornut/imgui/archive/v1.85.tar.gz"
       sha256: "7ed49d1f4573004fa725a70642aaddd3e06bb57fcfe1c1a49ac6574a3e895a77"
+patches:
+  "1.92.4":
+    - patch_file: "patches/1.92.4-0001-static-linking-bugfix-backport.patch"
+      patch_description: "Add missing export for a function needed by the backends"
+      patch_source: "https://github.com/ocornut/imgui/pull/9016"
+      patch_type: "backport"
+  "1.92.4-docking":
+    - patch_file: "patches/1.92.4-docking-0001-static-linking-bugfix-backport.patch"
+      patch_description: "Add missing export for a function needed by the backends"
+      patch_source: "https://github.com/ocornut/imgui/pull/9016"
+      patch_type: "backport"

@@ -447,6 +447,8 @@ class BoostConan(ConanFile):
             libraries.append("thread")
         if Version(self.version) >= "1.85.0":
             libraries.append("system")
+        if Version(self.version) >= "1.89.0":
+            libraries.append("atomic")
         libraries.sort()
         return list(filter(lambda library: f"without_{library}" in self.options, libraries))
 
@@ -593,6 +595,8 @@ class BoostConan(ConanFile):
             del self.info.options.python_executable  # PATH to the interpreter is not important, only version matters
             if self.info.options.without_python:
                 del self.info.options.python_version
+            if Version(self.version) >= "1.89.0":
+                del self.info.options.system_use_utf8
 
     def build_requirements(self):
         if not self.options.header_only:
