@@ -54,10 +54,11 @@ int main() {
 #endif
 
 #ifdef WITH_MAPPING
-    // Test PoseOptimizer - verify type exists
-    // Note: Construction requires kiss-icp vendorized library which may not link correctly
+    // Test PoseOptimizer - create with basic parameters
     using namespace ouster::mapping;
-    // Just verify the type exists without constructing to avoid kiss-icp linking issues
-    std::cout << "Successfully included ouster_mapping headers" << std::endl;
+    std::string osf_file = "test.osf";
+    double key_frame_dist = 1.0;
+    PoseOptimizer optimizer(osf_file, key_frame_dist);
+    std::cout << "Successfully created a mapping::PoseOptimizer object" << std::endl;
 #endif
 }

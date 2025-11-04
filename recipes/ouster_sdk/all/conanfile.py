@@ -106,8 +106,6 @@ class OusterSdkConan(ConanFile):
             self.requires("onetbb/2022.3.0")
             # kiss-icp is vendorized but uses tsl-robin-map from Conan
             self.requires("tsl-robin-map/1.3.0")
-            # kiss-icp requires sophus for Sophus::SE3 types
-            self.requires("sophus/1.22.10")
 
     def validate(self):
         check_min_cppstd(self, 14)
@@ -258,7 +256,6 @@ class OusterSdkConan(ConanFile):
                 "ceres-solver::ceres",
                 "onetbb::onetbb",
                 "tsl-robin-map::tsl-robin-map",
-                "sophus::sophus",
             ]
 
         if self.options.shared:
