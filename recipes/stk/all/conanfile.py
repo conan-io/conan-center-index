@@ -29,8 +29,8 @@ class stkRecipe(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def validate(self):
-            if self.info.settings.compiler == "msvc":
-                raise ConanInvalidConfiguration("This library is not supported on MSVC for now, contributions are welcome")
+        if self.info.settings.compiler == "msvc":
+            raise ConanInvalidConfiguration("This library is not supported on MSVC for now, contributions are welcome")
 
     def requirements(self):
         if self.settings.os == "Linux":
