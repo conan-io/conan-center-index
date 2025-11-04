@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -56,7 +57,11 @@ class XZUtilsConan(ConanFile):
         assume_clang_cl = (self.settings.os == "Windows"
                            and self.settings.compiler == "clang"
                            and self.settings.get_safe("compiler.runtime") is not None)
-        return is_msvc(self) or assume_clang_cl
+        return (is_msvc(self) or assume_clang_cl) and Version(self.version) < "5.8.1"
+    
+    @property
+    def _use_cmake(self):
+        return self.settings.os == "Windows" and Version(self.version) >= "5.8.1"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -75,10 +80,12 @@ class XZUtilsConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not self._use_msbuild:
+        if self._settings_build.os == "Windows" and not self._use_msbuild and Version(self.version) < "5.8.1":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
+        if self._use_cmake:
+            self.tool_requires("cmake/[>=3.20]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -87,6 +94,10 @@ class XZUtilsConan(ConanFile):
         if self._use_msbuild:
             tc = MSBuildToolchain(self)
             tc.configuration = self._effective_msbuild_type
+            tc.generate()
+        elif self._use_cmake:
+            tc = CMakeToolchain(self)
+            tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
             tc.generate()
         else:
             env = VirtualBuildEnv(self)
@@ -150,6 +161,11 @@ class XZUtilsConan(ConanFile):
         apply_conandata_patches(self)
         if self._use_msbuild:
             self._build_msvc()
+        elif self._use_cmake:
+            cmake = CMake(self)
+            rmdir(self, os.path.join(self.source_folder, "tests")) # optionally included
+            cmake.configure()
+            cmake.build()
         else:
             autotools = Autotools(self)
             autotools.configure()
@@ -165,6 +181,12 @@ class XZUtilsConan(ConanFile):
             copy(self, "*.dll", src=output_dir, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
             rename(self, os.path.join(self.package_folder, "lib", "liblzma.lib"),
                          os.path.join(self.package_folder, "lib", "lzma.lib"))
+        elif self._use_cmake:
+            cmake = CMake(self)
+            cmake.install()
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
         else:
             autotools = Autotools(self)
             autotools.install()
@@ -209,8 +231,3 @@ class XZUtilsConan(ConanFile):
             self.cpp_info.defines.append("LZMA_API_STATIC")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "LibLZMA"
-        self.cpp_info.names["cmake_find_package_multi"] = "LibLZMA"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
