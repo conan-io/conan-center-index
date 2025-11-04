@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.15)
-project(test_package LANGUAGES C CXX)
+cmake_minimum_required(VERSION 3.20)
+project(test_package LANGUAGES CXX)
 
 find_package(libmem REQUIRED CONFIG)
 
