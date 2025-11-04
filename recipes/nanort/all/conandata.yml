@@ -1,5 +1,5 @@
 sources:
-  "cci.20251104":
+  "cci.20241110":
     url: "https://github.com/lighttransport/nanort/archive/cdf474ae9176b87a9334c858bb06c9e028ed0e0d.zip"
     sha256: "53633f02460a5a02c0feeb509e0a8d8b21b4cc1e001bee65c461193889bf9245"
   "cci.20230207":
