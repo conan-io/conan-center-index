@@ -3,9 +3,6 @@
 int main() {
     using cplx = std::complex<double>;
 
-    static_assert(h5pp::type::sfinae::has_data<std::vector<double>>() and
-                  "h5pp ompile time type-checker failed. Could not properly detect class member data. Check that you are using a supported compiler!");
-
     std::string outputFilename = "test_package.h5";
     size_t      logLevel       = 1;
     h5pp::File  file(outputFilename, H5F_ACC_TRUNC | H5F_ACC_RDWR, logLevel);

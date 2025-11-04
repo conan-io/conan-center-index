@@ -37,7 +37,7 @@ class AvcppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("ffmpeg/[>=6.1 <8]", transitive_headers=True)
+        self.requires("ffmpeg/[>=6.1 <9]", transitive_headers=True)
 
     def validate(self):
         check_min_cppstd(self, 17)
