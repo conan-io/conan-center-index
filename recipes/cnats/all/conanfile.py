@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import get, copy, rmdir, rm
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.scm import Version
 import os
 
 
@@ -67,8 +66,6 @@ class PackageConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         tc.variables["NATS_BUILD_LIB_STATIC"] = not self.options.shared
         tc.variables["NATS_BUILD_LIB_SHARED"] = self.options.shared
-        if self.options.with_tls and self.version < "3.11.0":
-            tc.variables["NATS_BUILD_TLS_USE_OPENSSL_1_1_API"] = Version(self.dependencies["openssl"].ref.version) >= "1.1"
         tc.variables["NATS_BUILD_STREAMING"] = self.options.enable_streaming
         tc.variables["NATS_WITH_EXPERIMENTAL"] = self.options.with_experimental
         tc.generate()
