@@ -1,4 +1,6 @@
+#include <iostream>
 #include <libks/ks.h>
+
 
 int main() {
   ks_json_t *json = ks_json_create_object();
@@ -10,5 +12,6 @@ int main() {
   int result = strcmp(value, "value");
 
   ks_shutdown();
+  std::cout << "Test package successful\n";
   return result;
 }

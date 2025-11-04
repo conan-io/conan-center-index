@@ -1,11 +1,9 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.scm import Git
 from conan.tools.files import replace_in_file, get, rmdir, copy
 from conan.tools.apple import is_apple_os
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.gnu import PkgConfigDeps
 
 
 class LibksConan(ConanFile):
@@ -50,7 +48,7 @@ class LibksConan(ConanFile):
         if is_apple_os(self):
             raise ConanInvalidConfiguration("This is not apple compatible, https://github.com/signalwire/libks/issues/204")
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows do not use CMake")
+            raise ConanInvalidConfiguration("Recipes does not yet support Windows - still needs addressing")
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -59,6 +57,7 @@ class LibksConan(ConanFile):
         deps.generate()
 
         tc = CMakeToolchain(self)
+        tc.cache_variables["WITH_PACKAGING"] = False
         tc.generate()
 
     def build(self):
@@ -68,9 +67,6 @@ class LibksConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         'add_subdirectory(tests)',
                         '') # Do not build tests
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        'if("${CMAKE_OS_NAME}" STREQUAL "Debian")',
-                        'if(FALSE)') # Do not generate .deb
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
