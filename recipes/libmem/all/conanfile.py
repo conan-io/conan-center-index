@@ -66,6 +66,7 @@ class LibmemConan(ConanFile):
         tc.cache_variables["LIBMEM_BUILD_TESTS"] = False
         tc.cache_variables["LIBMEM_DEEP_TESTS"] = False
         tc.cache_variables["LIBMEM_BUILD_STATIC"] = not self.options.shared
+        tc.cache_variables["CONAN_LLVM_SHARED"] = self.dependencies["llvm-core"].options.shared
         tc.generate()
 
         deps = CMakeDeps(self)
