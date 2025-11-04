@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get
+from conan.tools.files import get, rmdir, copy
 from conan.errors import ConanInvalidConfiguration
+import os
 
 
 class stkRecipe(ConanFile):
@@ -20,6 +21,8 @@ class stkRecipe(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    implements = ["auto_shared_fpic"]
+
     # Sources are located in the same place as this recipe, copy them to the recipe
     #exports_sources = "CMakeLists.txt", "src/*", "include/*"
     def source(self):
@@ -32,10 +35,10 @@ class stkRecipe(ConanFile):
     def requirements(self):
         if self.settings.os == "Linux":
             self.requires("libalsa/1.2.10")
-    
+
     def layout(self):
         cmake_layout(self, src_folder="src")
-    
+
     def generate(self):
         deps = CMakeDeps(self)
         deps.generate()
@@ -54,6 +57,8 @@ class stkRecipe(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.build_folder)
 
     def package_info(self):
         self.cpp_info.libs = ["stk"]
