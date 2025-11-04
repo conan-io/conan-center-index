@@ -50,20 +50,20 @@ class SAILConan(ConanFile):
     def requirements(self):
         if self.options.with_highest_priority_codecs:
             self.requires("giflib/5.2.2")
-            self.requires("libjpeg/9f")
+            self.requires("libjpeg/[>=9e]")
             self.requires("libpng/[>=1.6 <2]")
             if Version(self.version) >= "0.9.1":
                 self.requires("nanosvg/cci.20231025")
-            self.requires("libwebp/1.6.0")
+            self.requires("libwebp/[>=1.3 <2]")
         if self.options.with_high_priority_codecs:
-            self.requires("libavif/1.3.0")
+            self.requires("libavif/[>=1 <2]")
         if self.options.with_medium_priority_codecs:
-            self.requires("libheif/1.20.1")
-            self.requires("openexr/3.4.2")
-            self.requires("libtiff/4.7.1")
+            self.requires("libheif/[>=1.16 <2]")
+            self.requires("openexr/[>=3.2.3 <4]")
+            self.requires("libtiff/[>=4.6.0 <5]")
         if self.options.with_low_priority_codecs:
-            self.requires("openjpeg/2.5.4")
-            self.requires("libjxl/0.10.3")
+            self.requires("openjpeg/[>=2.5 <3]")
+            self.requires("libjxl/0.11.1")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
