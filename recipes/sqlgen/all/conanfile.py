@@ -28,8 +28,8 @@ class SQLGenConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_mysql": False,
-        "with_postgres": False,
+        "with_mysql": True,
+        "with_postgres": True,
         "with_sqlite3": True,
     }
     implements = ["auto_shared_fpic"]
@@ -41,7 +41,7 @@ class SQLGenConan(ConanFile):
         if self.options.with_postgres:
             self.requires("libpq/[>=16.4 <18]", transitive_headers=True)
         if self.options.with_sqlite3:
-            self.requires("sqlite3/[>=3.49.1 <4]", transitive_headers=True)
+            self.requires("sqlite3/[>=3.49.1 <4]", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.23]")

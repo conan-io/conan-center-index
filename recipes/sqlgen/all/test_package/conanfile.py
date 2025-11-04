@@ -17,6 +17,14 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if self.dependencies[self.tested_reference_str].options.with_mysql:
+            tc.preprocessor_definitions["TEST_MYSQL_ENABLED"] = True
+
+        if self.dependencies[self.tested_reference_str].options.with_postgres:
+            tc.preprocessor_definitions["TEST_POSTGRES_ENABLED"] = True
+
+        if self.dependencies[self.tested_reference_str].options.with_sqlite3:
+            tc.preprocessor_definitions["TEST_SQLITE3_ENABLED"] = True
         tc.generate()
 
     def build(self):
