@@ -98,7 +98,6 @@ class OusterSdkConan(ConanFile):
 
         if self.options.build_viz:
             self.requires("glfw/3.4")
-            self.requires("glad/2.0.8")
 
         if Version(self.version) >= "0.15.0" and self.options.build_mapping:
             # Required for ouster_mapping module (0.15.0+)
@@ -239,9 +238,9 @@ class OusterSdkConan(ConanFile):
         if self.options.build_viz:
             self.cpp_info.components["ouster_viz"].set_property("cmake_target_name", "OusterSDK::ouster_viz")
             self.cpp_info.components["ouster_viz"].libs = ["ouster_viz"] if produce_library else []
+            self.cpp_info.components["ouster_viz"].libs.append("glad")
             self.cpp_info.components["ouster_viz"].requires = [
                 "ouster_client",
-                "glad::glad",
                 "glfw::glfw",
             ]
             # 0.15.0+ ouster_viz requires PNG
