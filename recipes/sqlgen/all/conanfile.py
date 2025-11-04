@@ -28,7 +28,7 @@ class SQLGenConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_mysql": True,
+        "with_mysql": False,
         "with_postgres": True,
         "with_sqlite3": True,
     }
