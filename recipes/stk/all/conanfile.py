@@ -58,7 +58,7 @@ class stkRecipe(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.build_folder)
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
     def package_info(self):
         self.cpp_info.libs = ["stk"]
