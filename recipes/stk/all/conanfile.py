@@ -24,6 +24,10 @@ class stkRecipe(ConanFile):
     #exports_sources = "CMakeLists.txt", "src/*", "include/*"
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def requirements(self):
+        if self.settings.os == "Linux":
+            self.requires("libalsa/1.2.10")
     
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -32,6 +36,7 @@ class stkRecipe(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
+        tc.cache_variables["ENABLE_JACK"] = False
         tc.generate()
 
     def build(self):
@@ -45,4 +50,9 @@ class stkRecipe(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["stk"]
+
+        if self.settings.os == "Macos":
+            self.cpp_info.frameworks.extend(["CoreAudio", "CoreFoundation", "CoreMIDI"])
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["winmm", "ole32", "wsock32"]
 
