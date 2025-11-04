@@ -1,10 +1,4 @@
 sources:
-  "1.2.0":
-    url: "https://github.com/VladimirShaleev/ipaddress/archive/v1.2.0.tar.gz"
-    sha256: "c3a52e5297d8f0b152c13b04ea2aead0bb9bc2a963188d740d87c78e770daba1"
-  "1.1.0":
-    url: "https://github.com/VladimirShaleev/ipaddress/archive/v1.1.0.tar.gz"
-    sha256: "e5084d83ebd712210882eb6dac14ed1b9b71584dede523b35c6181e0a06375f1"
-  "1.0.1":
-    url: "https://github.com/VladimirShaleev/ipaddress/archive/v1.0.1.tar.gz"
-    sha256: "49c16294f06fe95ffc66cae828dc08d116efb4a1ede3dddd21dcc182a2eceb03"
+  "1.2.1":
+    url: "https://github.com/VladimirShaleev/ipaddress/archive/v1.2.1.tar.gz"
+    sha256: "7ad9af8218ad3e96c348d100706b1f5a02706ff49be811913ee2a438ddfa61d2"
