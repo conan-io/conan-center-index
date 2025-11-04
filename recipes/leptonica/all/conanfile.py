@@ -177,7 +177,7 @@ class LeptonicaConan(ConanFile):
                 replace_in_file(self, cmakelists_src, "if (WEBP_FOUND)", "if(0)")
                 replace_in_file(self, cmake_configure, "if (WEBP_FOUND)", "if(0)")
         if Version(self.version) < "1.85.0":
-            if Version(self.version) >= "1.83.0" and self.options.with_webp:
+            if self.options.with_webp:
                 replace_in_file(self, cmakelists_src,
                                     "if (WEBP_FOUND)",
                                     "if (WEBP_FOUND)\n"
