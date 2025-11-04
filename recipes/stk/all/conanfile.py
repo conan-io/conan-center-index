@@ -26,8 +26,8 @@ class stkRecipe(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def validate(self):
-            if self.settings.os == "Windows":
-                raise ConanInvalidConfiguration("This library is not supported on Windows for now, contributions are welcome")
+            if self.info.settings.compiler == "msvc":
+                raise ConanInvalidConfiguration("This library is not supported on MSVC for now, contributions are welcome")
 
     def requirements(self):
         if self.settings.os == "Linux":
@@ -43,6 +43,7 @@ class stkRecipe(ConanFile):
         tc.cache_variables["ENABLE_JACK"] = False
         tc.cache_variables["BUILD_STATIC"] = not self.options.shared
         tc.cache_variables["BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["COMPILE_PROJECTS"] = False  # disable examples
         tc.generate()
 
     def build(self):
