@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import export_conandata_patches, get, copy, rm, rmdir, replace_in_file
+from conan.tools.files import get, copy, rm, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
@@ -24,9 +24,6 @@ class LibavrocppConan(ConanFile):
         "shared": False,
         "fPIC": True
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
