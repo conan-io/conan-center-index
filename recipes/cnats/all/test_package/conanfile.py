@@ -6,7 +6,7 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeDeps", "VirtualRunEnv", "CMakeToolchain"
     test_type = "explicit"
 
     def requirements(self):
@@ -14,17 +14,6 @@ class TestPackageConan(ConanFile):
 
     def layout(self):
         cmake_layout(self)
-
-    @property
-    def _nats_library_name(self):
-        suffix = "" if self.dependencies["cnats"].options.shared else "_static"
-        debug = "d" if self.dependencies["cnats"].settings.build_type == "Debug" else ""
-        return f"nats{suffix}{debug}"
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["CNATS_TARGET"] = self._nats_library_name
-        tc.generate()
 
     def build(self):
         cmake = CMake(self)

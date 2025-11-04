@@ -100,6 +100,8 @@ class PackageConan(ConanFile):
         self.cpp_info.libs = [self._nats_library_name]
         self.cpp_info.set_property("cmake_file_name", "cnats")
         self.cpp_info.set_property("cmake_target_name", f"cnats::{self._nats_library_name}")
+        # Let's have another target name without suffixes
+        self.cpp_info.set_property("cmake_target_aliases", ["cnats"])
         self.cpp_info.set_property("pkg_config_name", "libnats")
 
         if self.options.enable_streaming:
