@@ -160,7 +160,6 @@ class XZUtilsConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         if self._use_msbuild:
-            self.output.error("WHY THO")
             self._build_msvc()
         elif self._use_cmake:
             cmake = CMake(self)
