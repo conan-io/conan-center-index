@@ -1,14 +1,11 @@
 from conan import ConanFile
 from conan.tools.files import get, copy, rmdir
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-
-
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.build import check_min_cppstd
 
 import os
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.1"
 
 
 class SQLGenConan(ConanFile):
@@ -35,30 +32,22 @@ class SQLGenConan(ConanFile):
         "with_postgres": False,
         "with_sqlite3": True,
     }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def requirements(self):
         self.requires("reflect-cpp/0.22.0", transitive_headers=True)
         if self.options.with_mysql:
             self.requires("mariadb-connector-c/3.4.3", transitive_headers=True)
         if self.options.with_postgres:
-            self.requires("libpq/17.5", transitive_headers=True)
+            self.requires("libpq/[>=16.4 <18]", transitive_headers=True)
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.49.1", transitive_headers=True)
+            self.requires("sqlite3/[>=3.49.1 <4]", transitive_headers=True)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.23 <4]")
+        self.tool_requires("cmake/[>=3.23]")
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 20)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -67,12 +56,9 @@ class SQLGenConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
-        tc.cache_variables["SQLGEN_BUILD_SHARED"] = self.options.shared
         tc.cache_variables["SQLGEN_MYSQL"] = self.options.with_mysql
         tc.cache_variables["SQLGEN_POSTGRES"] = self.options.with_postgres
         tc.cache_variables["SQLGEN_SQLITE3"] = self.options.with_sqlite3
@@ -97,17 +83,5 @@ class SQLGenConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["sqlgen"]
-
-    @property
-    def _min_cppstd(self):
-        return 20
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "17",
-            "msvc": "1938",
-            "gcc": "11",
-            "clang": "13",
-            "apple-clang": "15",
-        }
+        if self.options.shared:
+            self.cpp_info.defines.append("SQLGEN_BUILD_SHARED")
