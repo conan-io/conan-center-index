@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get
+from conan.errors import ConanInvalidConfiguration
 
 
 class stkRecipe(ConanFile):
@@ -60,4 +61,5 @@ class stkRecipe(ConanFile):
             self.cpp_info.frameworks.extend(["CoreAudio", "CoreFoundation", "CoreMIDI"])
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["winmm", "ole32", "wsock32"]
+
 
