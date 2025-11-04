@@ -15,6 +15,9 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+
+    def build_requirements(self):
+        # required for cmake_path support
         self.tool_requires("cmake/[>=3.20]")
 
     def generate(self):
