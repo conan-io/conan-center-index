@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, rename, mkdir, rmdir
+from conan.tools.files import get, copy, rmdir, rm
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 import os
@@ -85,8 +85,8 @@ class PackageConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         if self.settings.os == "Windows" and self.options.shared:
-            mkdir(self, os.path.join(self.package_folder, "bin"))
-            rename(self, os.path.join(self.package_folder, "lib", f"{self._nats_library_name}.dll"), os.path.join(self.package_folder, "bin", f"{self._nats_library_name}.dll"))
+            copy(self, pattern="*.dll", dst=os.path.join(self.package_folder, "bin"), src=os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dll", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
