@@ -67,8 +67,6 @@ class LibmemConan(ConanFile):
         tc.cache_variables["LIBMEM_DEEP_TESTS"] = False
         tc.cache_variables["LIBMEM_BUILD_STATIC"] = not self.options.shared
         tc.cache_variables["CONAN_LLVM_SHARED"] = self.dependencies["llvm-core"].options.shared
-        if self.settings.os == "Linux":
-            tc.preprocessor_definitions["_GNU_SOURCE"] = "1"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -87,6 +85,7 @@ class LibmemConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["libmem"]
         self.cpp_info.defines.append("LM_EXPORT")
+        self.cpp_info.defines.append("_GNU_SOURCE=1")
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["user32", "psapi", "ntdll", "shell32", "ole32"])
