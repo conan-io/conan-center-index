@@ -5,7 +5,6 @@ from conan.tools.files import get
 
 class stkRecipe(ConanFile):
     name = "stk"
-    version = "5.0.1"
     package_type = "library"
 
     # Optional metadata
@@ -25,6 +24,10 @@ class stkRecipe(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def validate(self):
+            if self.settings.os == "Windows":
+                raise ConanInvalidConfiguration("This library is not supported on Windows for now, contributions are welcome")
+
     def requirements(self):
         if self.settings.os == "Linux":
             self.requires("libalsa/1.2.10")
@@ -37,6 +40,8 @@ class stkRecipe(ConanFile):
         deps.generate()
         tc = CMakeToolchain(self)
         tc.cache_variables["ENABLE_JACK"] = False
+        tc.cache_variables["BUILD_STATIC"] = not self.options.shared
+        tc.cache_variables["BUILD_SHARED"] = self.options.shared
         tc.generate()
 
     def build(self):
