@@ -33,7 +33,7 @@ index 43464c9..75e3c85 100644
  endif()
 +find_package(keystone CONFIG REQUIRED)
 +find_package(capstone CONFIG REQUIRED)
-+find_package(LLVM REQUIRED Demangle)
++find_package(LLVM REQUIRED COMPONENTS Demangle)
 +add_library(llvm INTERFACE)
 +if(CONAN_LLVM_SHARED)
 +	target_link_libraries(llvm INTERFACE LLVM)
