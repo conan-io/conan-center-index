@@ -102,10 +102,8 @@ class OusterSdkConan(ConanFile):
         if Version(self.version) >= "0.15.0" and self.options.build_mapping:
             # Required for ouster_mapping module (0.15.0+)
             self.requires("ceres-solver/2.1.0")
-            # Required by kiss-icp (used in ouster_mapping)
-            self.requires("onetbb/2022.3.0")
-            # kiss-icp is vendorized but uses tsl-robin-map from Conan
-            self.requires("tsl-robin-map/1.3.0")
+            self.requires("kiss-icp/1.2.3")
+            self.requires("sophus/1.22.10")
 
     def validate(self):
         check_min_cppstd(self, 14)
@@ -144,8 +142,7 @@ class OusterSdkConan(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
         if Version(self.version) >= "0.15.0" and self.options.build_mapping:
-            # kiss-icp's expects robinMapConfig.cmake
-            deps.set_property("tsl-robin-map", "cmake_file_name", "robinMap")
+            deps.set_property("kiss-icp", "cmake_file_name", "KissIcp")
         deps.generate()
 
     def _patch_sources(self):
@@ -254,8 +251,9 @@ class OusterSdkConan(ConanFile):
                 "ouster_client",
                 "ouster_osf",  # ouster_mapping requires ouster_osf
                 "ceres-solver::ceres",
-                "onetbb::onetbb",
-                "tsl-robin-map::tsl-robin-map",
+                "kiss-icp::core",
+                "kiss-icp::pipeline",
+                "sophus::sophus",
             ]
 
         if self.options.shared:

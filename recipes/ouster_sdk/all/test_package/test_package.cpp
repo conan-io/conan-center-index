@@ -15,6 +15,7 @@
 #endif
 #ifdef WITH_MAPPING
 #include "ouster/pose_optimizer.h"
+#include "ouster/impl/preprocessing.h"
 #endif
 
 #include <iostream>
@@ -54,11 +55,19 @@ int main() {
 #endif
 
 #ifdef WITH_MAPPING
-    // Test PoseOptimizer - create with basic parameters
-    using namespace ouster::mapping;
-    std::string osf_file = "test.osf";
-    double key_frame_dist = 1.0;
-    PoseOptimizer optimizer(osf_file, key_frame_dist);
-    std::cout << "Successfully created a mapping::PoseOptimizer object" << std::endl;
+    ouster::mapping::SolverConfig config;
+    config.key_frame_distance = 1.5;
+    config.loss_function = ouster::mapping::LossFunction::HuberLoss;
+    
+    ouster::Preprocessor preprocessor(100.0, 0.1, true, 4);
+    
+    std::vector<Eigen::Vector3d> test_frame = {
+        Eigen::Vector3d(1.0, 2.0, 3.0),
+        Eigen::Vector3d(4.0, 5.0, 6.0)
+    };
+    std::vector<double> test_timestamps = {0.0, 0.1};
+    auto processed = preprocessor.Preprocess(test_frame, test_timestamps, Eigen::Matrix4d::Identity());
+    
+    std::cout << "Successfully verified mapping component (SolverConfig, Preprocessor, dependencies)" << std::endl;
 #endif
 }
