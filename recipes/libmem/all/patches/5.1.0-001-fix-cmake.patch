@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 43464c9..75e3c85 100644
+index 43464c9..0ba90b1 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,6 +1,7 @@
@@ -27,13 +27,13 @@ index 43464c9..75e3c85 100644
  
  set(LIBMEM_DIR "${PROJECT_SOURCE_DIR}")
  set(LIBMEM_INC "${LIBMEM_DIR}/include")
-@@ -98,9 +101,18 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL FreeBSD)
+@@ -98,10 +101,19 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL FreeBSD)
  
  	file(GLOB LIBMEM_SRC ${LIBMEM_ARCH_SRC} "${LIBMEM_DIR}/src/freebsd/*.c" "${LIBMEM_DIR}/src/freebsd/ptrace/*.c" "${LIBMEM_DIR}/src/common/*.c" "${LIBMEM_DIR}/src/common/*.cpp" "${INTERNAL_DIR}/posixutils/*.c" "${INTERNAL_DIR}/elfutils/*.c" "${INTERNAL_DIR}/demangler/*.cpp")
  endif()
 +find_package(keystone CONFIG REQUIRED)
 +find_package(capstone CONFIG REQUIRED)
-+find_package(LLVM REQUIRED COMPONENTS Demangle)
++find_package(LLVM REQUIRED)
 +add_library(llvm INTERFACE)
 +if(CONAN_LLVM_SHARED)
 +	target_link_libraries(llvm INTERFACE LLVM)
@@ -43,11 +43,13 @@ index 43464c9..75e3c85 100644
  set(LIBMEM_DEPS
 -	capstone
 -	keystone
+-	llvm
 +	capstone::capstone
 +	keystone::keystone
- 	llvm
++	$<LINK_ONLY:llvm>
  )
  
+ if (LIBMEM_BUILD_STATIC)
 @@ -113,9 +125,6 @@ target_include_directories(libmem PRIVATE "${LIBMEM_DIR}/src" "${INTERNAL_DIR}"
  
  include_directories(${PROJECT_SOURCE_DIR}
