@@ -33,6 +33,9 @@ class KissIcpConan(ConanFile):
         self.requires("tsl-robin-map/1.3.0", transitive_headers=True)
         self.requires("onetbb/2022.3.0")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16]")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
