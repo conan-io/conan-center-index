@@ -18,3 +18,5 @@ patches:
       patch_description: "Use Conan Sophus instead of vendored version"
     - patch_file: "patches/004-0.15.0-unvendor-glad.patch"
       patch_description: "Unvendor glad"
+    - patch_file: "patches/005-0.15.0-include-mapping-in-shared-library.patch"
+      patch_description: "Include ouster_mapping object files and link dependencies in shared_library"
