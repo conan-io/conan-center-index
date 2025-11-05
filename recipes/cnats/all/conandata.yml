@@ -1,22 +1,4 @@
 sources:
-  "3.8.0":
-    url: "https://github.com/nats-io/nats.c/archive/refs/tags/v3.8.0.tar.gz"
-    sha256: "465811380cdc6eab3304e40536d03f99977a69c0e56fcf566000c29dd075e4dd"
-  "3.8.2":
-    url: "https://github.com/nats-io/nats.c/archive/refs/tags/v3.8.2.tar.gz"
-    sha256: "083ee03cf5a413629d56272e88ad3229720c5006c286e8180c9e5b745c10f37d"
-  "3.8.3":
-    url: "https://github.com/nats-io/nats.c/archive/refs/tags/v3.8.3.tar.gz"
-    sha256: "fe7e9ce7636446cc3fe0f47f6a235c4783299e00d5e5c4a1f8689d20707871db"
-  "3.9.1":
-    url: "https://github.com/nats-io/nats.c/archive/refs/tags/v3.9.1.tar.gz"
-    sha256: "56836bb30a2da93eaa6df0dfa27e796e6be0933b5b3d4d83b5c76d3b80304290"
-  "3.9.2":
-    url: "https://github.com/nats-io/nats.c/archive/refs/tags/v3.9.2.tar.gz"
-    sha256: "28c4f39b88f095d78d653e8d4fe4581163fe96ecde5f9683933f0d82fd889a57"
-  "3.9.3":
-    url: "https://github.com/nats-io/nats.c/archive/refs/tags/v3.9.3.tar.gz"
-    sha256: "b5dd3971b72fa5fc4c5b6d71c6900dc0a8a20465824fc23c0054f7f319e97952"
-  "3.10.1":
-    url: "https://github.com/nats-io/nats.c/archive/refs/tags/v3.10.1.tar.gz"
-    sha256: "1765533bbc1270ab7c89e3481b4778db7d1e7b4db2fa906b6602cd5c02846222"
+  "3.11.0":
+    url: "https://github.com/nats-io/nats.c/archive/refs/tags/v3.11.0.tar.gz"
+    sha256: "9ee45cd502a49dbd29bed491286a4926e5e53f14a8aacad413c0cf4a057abee0"    
