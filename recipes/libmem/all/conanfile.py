@@ -54,7 +54,7 @@ class LibmemConan(ConanFile):
         self.requires("capstone/5.0.6")
         self.requires("keystone/0.9.2")
         # Workaround for keystone repeating symbols
-        self.requires("llvm-core/19.1.7", options={"shared": self.settings.os != "Windows"})
+        self.requires("llvm-core/19.1.7", options={"components": "Demangle"})
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
