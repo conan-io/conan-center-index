@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, rename, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rename, replace_in_file
 import os
 
 required_conan_version = ">=2.0.9"
@@ -66,9 +66,14 @@ class SAILConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             strip_root=True, destination=self.source_folder)
+
+        apply_conandata_patches(self)
 
         #jbig codec not yet supported by recipe
         replace_in_file(self, os.path.join(self.source_folder, "src", "sail-codecs", "CMakeLists.txt"),
