@@ -257,6 +257,9 @@ class OusterSdkConan(ConanFile):
                 "sophus::sophus",
             ]
 
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["ouster_mapping"].system_libs = ["gomp"]
+
         if self.options.shared:
             self.cpp_info.components["shared_library"].set_property("cmake_target_name", "OusterSDK::shared_library")
             self.cpp_info.components["shared_library"].libs = ["shared_library"]
