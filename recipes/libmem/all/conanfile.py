@@ -38,7 +38,7 @@ class LibmemConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        check_min_cppstd(self, 17)
+        check_min_cppstd(self, 17, gnu_extensions=True)
         if is_apple_os(self):
             raise ConanInvalidConfiguration(f"{self.ref} does not support macOS")
         if self.settings.os == "Android":
