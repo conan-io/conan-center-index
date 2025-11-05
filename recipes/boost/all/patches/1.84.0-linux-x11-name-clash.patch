@@ -1,0 +1,217 @@
+From 4d20bfd0bf91341971d40285af009e7fede01ce8 Mon Sep 17 00:00:00 2001
+From: Matt Borland <matt@mattborland.com>
+Date: Wed, 27 Mar 2024 12:40:48 +0100
+Subject: [PATCH] Fix X11 naming clash in roots
+
+---
+ doc/roots/roots.qbk                |  4 +--
+ include/boost/math/tools/roots.hpp | 32 ++++++++---------
+ test/test_roots.cpp                | 56 +++++++++++++++++-------------
+ 3 files changed, 49 insertions(+), 43 deletions(-)
+
+diff --git a/doc/roots/roots.qbk b/doc/roots/roots.qbk
+index 61f6549e18..a229300690 100644
+--- a/doc/roots/roots.qbk
++++ b/doc/roots/roots.qbk
+@@ -29,8 +29,8 @@
+    template <class F, class T>
+    T schroder_iterate(F f, T guess, T min, T max, int digits, std::uintmax_t& max_iter);
+ 
+-   template <class F, class Complex>
+-   Complex complex_newton(F f, Complex guess, int max_iterations = std::numeric_limits<typename Complex::value_type>::digits);
++   template <class F, class ComplexType>
++   Complex complex_newton(F f, Complex guess, int max_iterations = std::numeric_limits<typename ComplexType::value_type>::digits);
+ 
+    template<class T>
+    auto quadratic_roots(T const & a, T const & b, T const & c);
+diff --git a/include/boost/math/tools/roots.hpp b/include/boost/math/tools/roots.hpp
+index 25b77529e7..97e67fae95 100644
+--- a/include/boost/math/tools/roots.hpp
++++ b/include/boost/math/tools/roots.hpp
+@@ -790,35 +790,35 @@ inline T schroeder_iterate(F f, T guess, T min, T max, int digits) noexcept(poli
+    * so this default should recover full precision even in this somewhat pathological case.
+    * For isolated roots, the problem is so rapidly convergent that this doesn't matter at all.
+    */
+-template<class Complex, class F>
+-Complex complex_newton(F g, Complex guess, int max_iterations = std::numeric_limits<typename Complex::value_type>::digits)
++template<class ComplexType, class F>
++ComplexType complex_newton(F g, ComplexType guess, int max_iterations = std::numeric_limits<typename ComplexType::value_type>::digits)
+ {
+-   typedef typename Complex::value_type Real;
++   typedef typename ComplexType::value_type Real;
+    using std::norm;
+    using std::abs;
+    using std::max;
+    // z0, z1, and z2 cannot be the same, in case we immediately need to resort to Muller's Method:
+-   Complex z0 = guess + Complex(1, 0);
+-   Complex z1 = guess + Complex(0, 1);
+-   Complex z2 = guess;
++   ComplexType z0 = guess + ComplexType(1, 0);
++   ComplexType z1 = guess + ComplexType(0, 1);
++   ComplexType z2 = guess;
+ 
+    do {
+       auto pair = g(z2);
+       if (norm(pair.second) == 0)
+       {
+          // Muller's method. Notation follows Numerical Recipes, 9.5.2:
+-         Complex q = (z2 - z1) / (z1 - z0);
++         ComplexType q = (z2 - z1) / (z1 - z0);
+          auto P0 = g(z0);
+          auto P1 = g(z1);
+-         Complex qp1 = static_cast<Complex>(1) + q;
+-         Complex A = q * (pair.first - qp1 * P1.first + q * P0.first);
+-
+-         Complex B = (static_cast<Complex>(2) * q + static_cast<Complex>(1)) * pair.first - qp1 * qp1 * P1.first + q * q * P0.first;
+-         Complex C = qp1 * pair.first;
+-         Complex rad = sqrt(B * B - static_cast<Complex>(4) * A * C);
+-         Complex denom1 = B + rad;
+-         Complex denom2 = B - rad;
+-         Complex correction = (z1 - z2) * static_cast<Complex>(2) * C;
++         ComplexType qp1 = static_cast<ComplexType>(1) + q;
++         ComplexType A = q * (pair.first - qp1 * P1.first + q * P0.first);
++
++         ComplexType B = (static_cast<ComplexType>(2) * q + static_cast<ComplexType>(1)) * pair.first - qp1 * qp1 * P1.first + q * q * P0.first;
++         ComplexType C = qp1 * pair.first;
++         ComplexType rad = sqrt(B * B - static_cast<ComplexType>(4) * A * C);
++         ComplexType denom1 = B + rad;
++         ComplexType denom2 = B - rad;
++         ComplexType correction = (z1 - z2) * static_cast<ComplexType>(2) * C;
+          if (norm(denom1) > norm(denom2))
+          {
+             correction /= denom1;
+diff --git a/test/test_roots.cpp b/test/test_roots.cpp
+index e4e68e24b8..2e08daba8d 100644
+--- a/test/test_roots.cpp
++++ b/test/test_roots.cpp
+@@ -6,6 +6,12 @@
+ #include <pch.hpp>
+ 
+ #define BOOST_TEST_MAIN
++
++// See: https://github.com/boostorg/math/issues/1115
++#if __has_include(<X11/X.h>)
++#  include <X11/X.h>
++#endif
++
+ #include <boost/test/unit_test.hpp>
+ #include <boost/test/tools/floating_point_comparison.hpp>
+ #include <boost/test/results_collector.hpp>
+@@ -438,10 +444,10 @@ void test_beta(T, const char* /* name */)
+ }
+ 
+ #if !defined(BOOST_NO_CXX11_AUTO_DECLARATIONS) && !defined(BOOST_NO_CXX11_UNIFIED_INITIALIZATION_SYNTAX) && !defined(BOOST_NO_CXX11_LAMBDAS)
+-template <class Complex>
++template <class ComplexType>
+ void test_complex_newton()
+ {
+-    typedef typename Complex::value_type Real;
++    typedef typename ComplexType::value_type Real;
+     std::cout << "Testing complex Newton's Method on type " << boost::typeindex::type_id<Real>().pretty_name() << "\n";
+     using std::abs;
+     using std::sqrt;
+@@ -451,11 +457,11 @@ void test_complex_newton()
+ 
+     Real tol = std::numeric_limits<Real>::epsilon();
+     // p(z) = z^2 + 1, roots: \pm i.
+-    polynomial<Complex> p{{1,0}, {0, 0}, {1,0}};
+-    Complex guess{1,1};
+-    polynomial<Complex> p_prime = p.prime();
+-    auto f = [&](Complex z) { return std::make_pair<Complex, Complex>(p(z), p_prime(z)); };
+-    Complex root = complex_newton(f, guess);
++    polynomial<ComplexType> p{{1,0}, {0, 0}, {1,0}};
++    ComplexType guess{1,1};
++    polynomial<ComplexType> p_prime = p.prime();
++    auto f = [&](ComplexType z) { return std::make_pair<ComplexType, ComplexType>(p(z), p_prime(z)); };
++    ComplexType root = complex_newton(f, guess);
+ 
+     BOOST_CHECK(abs(root.real()) <= tol);
+     BOOST_CHECK_CLOSE(root.imag(), (Real)1, tol);
+@@ -468,44 +474,44 @@ void test_complex_newton()
+     // Test that double roots are handled correctly-as correctly as possible.
+     // Convergence at a double root is not quadratic.
+     // This sets p = (z-i)^2:
+-    p = polynomial<Complex>({{-1,0}, {0,-2}, {1,0}});
++    p = polynomial<ComplexType>({{-1,0}, {0,-2}, {1,0}});
+     p_prime = p.prime();
+     guess = -guess;
+-    auto g = [&](Complex z) { return std::make_pair<Complex, Complex>(p(z), p_prime(z)); };
++    auto g = [&](ComplexType z) { return std::make_pair<ComplexType, ComplexType>(p(z), p_prime(z)); };
+     root = complex_newton(g, guess);
+     BOOST_CHECK(abs(root.real()) < 10*sqrt(tol));
+     BOOST_CHECK_CLOSE(root.imag(), (Real)1, tol);
+ 
+     // Test that zero derivatives are handled.
+     // p(z) = z^2 + iz + 1
+-    p = polynomial<Complex>({{1,0}, {0,1}, {1,0}});
++    p = polynomial<ComplexType>({{1,0}, {0,1}, {1,0}});
+     // p'(z) = 2z + i
+     p_prime = p.prime();
+-    guess = Complex(0,-boost::math::constants::half<Real>());
+-    auto g2 = [&](Complex z) { return std::make_pair<Complex, Complex>(p(z), p_prime(z)); };
++    guess = ComplexType(0,-boost::math::constants::half<Real>());
++    auto g2 = [&](ComplexType z) { return std::make_pair<ComplexType, ComplexType>(p(z), p_prime(z)); };
+     root = complex_newton(g2, guess);
+ 
+     // Here's the other root, in case code changes cause it to be found:
+-    //Complex expected_root1{0, half<Real>()*(sqrt(static_cast<Real>(5)) - static_cast<Real>(1))};
+-    Complex expected_root2{0, -half<Real>()*(sqrt(static_cast<Real>(5)) + static_cast<Real>(1))};
++    //ComplexType expected_root1{0, half<Real>()*(sqrt(static_cast<Real>(5)) - static_cast<Real>(1))};
++    ComplexType expected_root2{0, -half<Real>()*(sqrt(static_cast<Real>(5)) + static_cast<Real>(1))};
+ 
+     BOOST_CHECK_CLOSE(expected_root2.imag(),root.imag(), tol);
+     BOOST_CHECK(abs(root.real()) < tol);
+ 
+     // Does a zero root pass the termination criteria?
+-    p = polynomial<Complex>({{0,0}, {0,0}, {1,0}});
++    p = polynomial<ComplexType>({{0,0}, {0,0}, {1,0}});
+     p_prime = p.prime();
+-    guess = Complex(0, -boost::math::constants::half<Real>());
+-    auto g3 = [&](Complex z) { return std::make_pair<Complex, Complex>(p(z), p_prime(z)); };
++    guess = ComplexType(0, -boost::math::constants::half<Real>());
++    auto g3 = [&](ComplexType z) { return std::make_pair<ComplexType, ComplexType>(p(z), p_prime(z)); };
+     root = complex_newton(g3, guess);
+     BOOST_CHECK(abs(root.real()) < tol);
+ 
+     // Does a monstrous root pass?
+     Real x = -pow(static_cast<Real>(10), 20);
+-    p = polynomial<Complex>({{x, x}, {1,0}});
++    p = polynomial<ComplexType>({{x, x}, {1,0}});
+     p_prime = p.prime();
+-    guess = Complex(0, -boost::math::constants::half<Real>());
+-    auto g4 = [&](Complex z) { return std::make_pair<Complex, Complex>(p(z), p_prime(z)); };
++    guess = ComplexType(0, -boost::math::constants::half<Real>());
++    auto g4 = [&](ComplexType z) { return std::make_pair<ComplexType, ComplexType>(p(z), p_prime(z)); };
+     root = complex_newton(g4, guess);
+     BOOST_CHECK(abs(root.real() + x) < tol);
+     BOOST_CHECK(abs(root.imag() + x) < tol);
+@@ -607,24 +613,24 @@ void test_solve_int_quadratic()
+     BOOST_CHECK_CLOSE(p.second, double(7), tol);
+ }
+ 
+-template<class Complex>
++template<class ComplexType>
+ void test_solve_complex_quadratic()
+ {
+-    using Real = typename Complex::value_type;
++    using Real = typename ComplexType::value_type;
+     Real tol = std::numeric_limits<Real>::epsilon();
+     using boost::math::tools::quadratic_roots;
+-    auto [x0, x1] = quadratic_roots<Complex>({1,0}, {0,0}, {-1,0});
++    auto [x0, x1] = quadratic_roots<ComplexType>({1,0}, {0,0}, {-1,0});
+     BOOST_CHECK_CLOSE(x0.real(), Real(-1), tol);
+     BOOST_CHECK_CLOSE(x1.real(), Real(1), tol);
+     BOOST_CHECK_SMALL(x0.imag(), tol);
+     BOOST_CHECK_SMALL(x1.imag(), tol);
+ 
+-    auto p = quadratic_roots<Complex>({7,0}, {0,0}, {0,0});
++    auto p = quadratic_roots<ComplexType>({7,0}, {0,0}, {0,0});
+     BOOST_CHECK_SMALL(p.first.real(), tol);
+     BOOST_CHECK_SMALL(p.second.real(), tol);
+ 
+     // (x-7)^2 = x^2 - 14*x + 49:
+-    p = quadratic_roots<Complex>({1,0}, {-14,0}, {49,0});
++    p = quadratic_roots<ComplexType>({1,0}, {-14,0}, {49,0});
+     BOOST_CHECK_CLOSE(p.first.real(), Real(7), tol);
+     BOOST_CHECK_CLOSE(p.second.real(), Real(7), tol);
+ 

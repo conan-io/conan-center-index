@@ -96,6 +96,10 @@ patches:
       patch_description: "Fix compilation with cppstd=20 on libcxx platforms (e.g. MacOS)"
       patch_type: "official"
       patch_source: "https://github.com/boostorg/locale/commit/c5e8f02c903696a213fc4b710f6740ccd1f07f4e"
+    - patch_file: "patches/1.84.0-linux-x11-name-clash.patch"
+      patch_description: "Fix X11 naming clash in roots"
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/math/commit/4d20bfd0bf91341971d40285af009e7fede01ce8"
   "1.83.0":
     - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
       patch_description: "Optional flag to specify iconv from either libc of libiconv"
