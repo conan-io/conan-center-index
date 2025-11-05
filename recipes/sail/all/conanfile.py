@@ -75,11 +75,6 @@ class SAILConan(ConanFile):
 
         apply_conandata_patches(self)
 
-        #jbig codec not yet supported by recipe
-        replace_in_file(self, os.path.join(self.source_folder, "src", "sail-codecs", "CMakeLists.txt"),
-                    "LOWEST_PRIORITY_CODECS  jbig pcx wal xbm xpm xwd",
-                    "LOWEST_PRIORITY_CODECS  pcx wal xbm xpm xwd")
-
         # Fix libheif target usage
         replace_in_file(self, os.path.join(self.source_folder, "src", "sail-codecs", "heif", "CMakeLists.txt"),
                     "DEPENDENCY_LIBS heif",
@@ -108,6 +103,7 @@ class SAILConan(ConanFile):
         tc.variables["SAIL_ONLY_CODECS"]    = ";".join(only_codecs)
         tc.variables["SAIL_INSTALL_PDB"]    = False
         tc.variables["SAIL_THREAD_SAFE"]    = self.options.thread_safe
+        tc.cache_variables["SAIL_DISABLE_CODECS"] = "jbig" # not yet implemented in recipe
         # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
