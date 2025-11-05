@@ -1,5 +1,5 @@
 diff --git a/src/linux/thread.c b/src/linux/thread.c
-index 7613f3c..87f3d99 100644
+index 7613f3c..72c9040 100644
 --- a/src/linux/thread.c
 +++ b/src/linux/thread.c
 @@ -23,6 +23,15 @@
@@ -7,7 +7,7 @@ index 7613f3c..87f3d99 100644
  #define _GNU_SOURCE 1 /* Required for 'gettid' */
  #endif
 +
-+#if defined(__GLIBC__) && ((__GLIBC__ < 2) || ((__GLIBC__ == 2) && (__GLIBC_MINOR__ < 30)))
++#ifndef HAVE_GETTID
 +    #include <sys/syscall.h>
 +    #ifndef SYS_gettid
 +        #error "SYS_gettid unavailable on this system"

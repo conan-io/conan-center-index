@@ -1,15 +1,16 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 43464c9..6307a4b 100644
+index 43464c9..102b235 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -1,6 +1,5 @@
+@@ -1,6 +1,6 @@
  cmake_minimum_required(VERSION 3.22.1)
  
 -include(ExternalProject)
++include(CheckSymbolExists)
  
  project(libmem
  	LANGUAGES
-@@ -49,6 +48,7 @@ message(STATUS
+@@ -49,6 +49,7 @@ message(STATUS
  message(STATUS "CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
  message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
  
@@ -17,7 +18,7 @@ index 43464c9..6307a4b 100644
  # External dependencies
  set(EXTERNAL_DEPENDENCIES_DIR "${PROJECT_SOURCE_DIR}/external")
  set(CAPSTONE_DIR "${EXTERNAL_DEPENDENCIES_DIR}/capstone")
-@@ -66,6 +66,7 @@ set_target_properties(capstone PROPERTIES IMPORTED_LOCATION ${CAPSTONE_IMPORT_DI
+@@ -66,6 +67,7 @@ set_target_properties(capstone PROPERTIES IMPORTED_LOCATION ${CAPSTONE_IMPORT_DI
  add_library(keystone STATIC IMPORTED)
  set_target_properties(keystone PROPERTIES IMPORTED_LOCATION ${KEYSTONE_IMPORT_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}keystone${CMAKE_STATIC_LIBRARY_SUFFIX})
  # End of external dependencies
@@ -25,7 +26,7 @@ index 43464c9..6307a4b 100644
  
  set(LIBMEM_DIR "${PROJECT_SOURCE_DIR}")
  set(LIBMEM_INC "${LIBMEM_DIR}/include")
-@@ -98,9 +99,22 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL FreeBSD)
+@@ -98,9 +100,22 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL FreeBSD)
  
  	file(GLOB LIBMEM_SRC ${LIBMEM_ARCH_SRC} "${LIBMEM_DIR}/src/freebsd/*.c" "${LIBMEM_DIR}/src/freebsd/ptrace/*.c" "${LIBMEM_DIR}/src/common/*.c" "${LIBMEM_DIR}/src/common/*.cpp" "${INTERNAL_DIR}/posixutils/*.c" "${INTERNAL_DIR}/elfutils/*.c" "${INTERNAL_DIR}/demangler/*.cpp")
  endif()
@@ -50,7 +51,7 @@ index 43464c9..6307a4b 100644
  	llvm
  )
  
-@@ -113,9 +127,6 @@ target_include_directories(libmem PRIVATE "${LIBMEM_DIR}/src" "${INTERNAL_DIR}"
+@@ -113,9 +128,6 @@ target_include_directories(libmem PRIVATE "${LIBMEM_DIR}/src" "${INTERNAL_DIR}"
  
  include_directories(${PROJECT_SOURCE_DIR}
  	${LIBMEM_INC}
@@ -60,7 +61,7 @@ index 43464c9..6307a4b 100644
  )
  
  if (LIBMEM_BUILD_TESTS)
-@@ -125,10 +136,7 @@ endif()
+@@ -125,10 +137,11 @@ endif()
  
  set_target_properties(libmem PROPERTIES POSITION_INDEPENDENT_CODE True INCLUDES ${LIBMEM_INC})
  target_compile_definitions(libmem PUBLIC LM_EXPORT)
@@ -68,11 +69,15 @@ index 43464c9..6307a4b 100644
 -	capstone-engine
 -	keystone-engine
 -)
-+target_compile_definitions(libmem PRIVATE _GNU_SOURCE=1)
++target_compile_definitions(libmem PRIVATE _GNU_SOURCE)
++check_symbol_exists(gettid "unistd.h" HAVE_GETTID)
++if(HAVE_GETTID)
++	target_compile_definitions(libmem PRIVATE HAVE_GETTID)
++endif()
  
  if(${CMAKE_SYSTEM_NAME} STREQUAL Windows OR ${CMAKE_SYSTEM_NAME} STREQUAL CYGWIN)
  	set(LIBMEM_DEPS
-@@ -140,7 +148,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL Windows OR ${CMAKE_SYSTEM_NAME} STREQUAL CYGWIN
+@@ -140,7 +153,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL Windows OR ${CMAKE_SYSTEM_NAME} STREQUAL CYGWIN
  	)
  	target_compile_definitions(libmem PUBLIC alloca=_alloca)
  elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux OR ${CMAKE_SYSTEM_NAME} STREQUAL Android)
@@ -81,7 +86,7 @@ index 43464c9..6307a4b 100644
  		${LIBMEM_DEPS}
  		dl
  		stdc++
-@@ -161,7 +169,7 @@ else()
+@@ -161,7 +174,7 @@ else()
  endif()
  
  target_link_libraries(libmem ${LIBMEM_DEPS})
@@ -90,7 +95,7 @@ index 43464c9..6307a4b 100644
  	# Create a bundled static library containing all dependencies (to mimic the shared library behavior)
  	set_target_properties(libmem PROPERTIES OUTPUT_NAME "libmem_partial")
  	set(libmem_bundle_files "$<TARGET_FILE:libmem>")
-@@ -202,7 +210,7 @@ if(LIBMEM_BUILD_STATIC)
+@@ -202,7 +215,7 @@ if(LIBMEM_BUILD_STATIC)
  	endif()
  endif()
  
@@ -99,7 +104,7 @@ index 43464c9..6307a4b 100644
  	if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL CYGWIN)
  		cmake_path(SET CMAKE_INSTALL_PREFIX "$ENV{ProgramFiles}")
  	else()
-@@ -211,14 +219,13 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL Windows OR ${CMAKE_SYSTEM_NAME} STREQUAL CYGWIN
+@@ -211,14 +224,13 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL Windows OR ${CMAKE_SYSTEM_NAME} STREQUAL CYGWIN
  	endif()
  	set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/libmem")
  	execute_process(COMMAND mkdir "${CMAKE_INSTALL_PREFIX}")
