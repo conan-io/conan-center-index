@@ -55,6 +55,7 @@ class SAILConan(ConanFile):
         if self.options.with_medium_priority_codecs:
             self.requires("libheif/[>=1.16 <2]")
             self.requires("openexr/[>=3.2.3 <4]")
+            self.requires("imath/[*]") # used directly when openexr is used
             self.requires("libtiff/[>=4.6.0 <5]")
         if self.options.with_low_priority_codecs:
             self.requires("openjpeg/[>=2.5 <3]")
@@ -152,6 +153,7 @@ class SAILConan(ConanFile):
         if self.options.with_medium_priority_codecs:
             self.cpp_info.components["sail-codecs"].requires.append("libheif::libheif")
             self.cpp_info.components["sail-codecs"].requires.append("openexr::openexr")
+            self.cpp_info.components["sail-codecs"].requires.append("imath::imath")
             self.cpp_info.components["sail-codecs"].requires.append("libtiff::libtiff")
         if self.options.with_low_priority_codecs:
             self.cpp_info.components["sail-codecs"].requires.append("libjxl::libjxl")
