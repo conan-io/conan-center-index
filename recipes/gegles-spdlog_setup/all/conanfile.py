@@ -53,7 +53,7 @@ class SpdlogSetupConan(ConanFile):
             del self.options.use_std_fmt
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("cpptoml/0.1.1")
