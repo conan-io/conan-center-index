@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rename
-from conan.tools.scm import Version
+from conan.tools.files import copy, get, rmdir, rename
 import os
 
 required_conan_version = ">=2.0.9"
@@ -44,16 +43,12 @@ class SAILConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def requirements(self):
         if self.options.with_highest_priority_codecs:
             self.requires("giflib/5.2.2")
             self.requires("libjpeg/[>=9e]")
             self.requires("libpng/[>=1.6 <2]")
-            if Version(self.version) >= "0.9.1":
-                self.requires("nanosvg/cci.20231025")
+            self.requires("nanosvg/cci.20231025")
             self.requires("libwebp/[>=1.3 <2]")
         if self.options.with_high_priority_codecs:
             self.requires("libavif/[>=1 <2]")
@@ -71,7 +66,6 @@ class SAILConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             strip_root=True, destination=self.source_folder)
-        apply_conandata_patches(self)
 
     def generate(self):
         only_codecs = []
@@ -94,9 +88,6 @@ class SAILConan(ConanFile):
         tc.variables["SAIL_COMBINE_CODECS"] = True
         tc.variables["SAIL_ENABLE_OPENMP"]  = False
         tc.variables["SAIL_ONLY_CODECS"]    = ";".join(only_codecs)
-        # SVG with nanosvg is supported in >= 0.9.1
-        if Version(self.version) < "0.9.1":
-            tc.variables["SAIL_DISABLE_CODECS"] = "svg"
         tc.variables["SAIL_INSTALL_PDB"]    = False
         tc.variables["SAIL_THREAD_SAFE"]    = self.options.thread_safe
         # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
@@ -142,8 +133,7 @@ class SAILConan(ConanFile):
             self.cpp_info.components["sail-codecs"].requires.append("giflib::giflib")
             self.cpp_info.components["sail-codecs"].requires.append("libjpeg::libjpeg")
             self.cpp_info.components["sail-codecs"].requires.append("libpng::libpng")
-            if Version(self.version) >= "0.9.1":
-                self.cpp_info.components["sail-codecs"].requires.append("nanosvg::nanosvg")
+            self.cpp_info.components["sail-codecs"].requires.append("nanosvg::nanosvg")
             self.cpp_info.components["sail-codecs"].requires.append("libwebp::libwebp")
         if self.options.with_high_priority_codecs:
             self.cpp_info.components["sail-codecs"].requires.append("libavif::libavif")
