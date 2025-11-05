@@ -53,7 +53,21 @@ class LibmemConan(ConanFile):
     def requirements(self):
         self.requires("capstone/5.0.6")
         self.requires("keystone/0.9.2")
-        self.requires("llvm-core/19.1.7")
+        # Map architecture to minimal LLVM target to avoid conflicts with keystone's bundled LLVM
+        arch_to_target = {
+            "x86": "X86",
+            "x86_64": "X86",
+            "armv7": "ARM",
+            "armv8": "AArch64",
+            "mips": "Mips",
+            "mips64": "Mips",
+            "ppc32": "PowerPC",
+            "ppc64": "PowerPC",
+            "riscv32": "RISCV",
+            "riscv64": "RISCV",
+        }
+        target = arch_to_target.get(str(self.settings.arch), "X86")
+        self.requires("llvm-core/19.1.7", options={"targets": target})
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
