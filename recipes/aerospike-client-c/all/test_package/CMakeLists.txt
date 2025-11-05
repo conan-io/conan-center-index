@@ -5,3 +5,4 @@ find_package(aerospike-client-c REQUIRED)
 
 add_executable(test_package main.cpp)
 target_link_libraries(test_package aerospike-client-c::aerospike-client-c)
+
