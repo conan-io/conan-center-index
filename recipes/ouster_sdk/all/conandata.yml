@@ -16,3 +16,5 @@ patches:
       patch_description: "Add missing <stdexcept> include"
     - patch_file: "patches/003-0.15.0-use-conan-sophus.patch"
       patch_description: "Use Conan Sophus instead of vendored version"
+    - patch_file: "patches/004-0.15.0-unvendor-glad.patch"
+      patch_description: "Unvendor glad"
