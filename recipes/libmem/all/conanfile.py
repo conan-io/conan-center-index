@@ -85,7 +85,6 @@ class LibmemConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["libmem"]
         self.cpp_info.defines.append("LM_EXPORT")
-        self.cpp_info.defines.append("_GNU_SOURCE=1")
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["user32", "psapi", "ntdll", "shell32", "ole32"])

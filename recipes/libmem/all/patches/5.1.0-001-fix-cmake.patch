@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 43464c9..312fc84 100644
+index 43464c9..0021022 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,6 +1,5 @@
@@ -60,14 +60,16 @@ index 43464c9..312fc84 100644
  )
  
  if (LIBMEM_BUILD_TESTS)
-@@ -125,10 +136,6 @@ endif()
+@@ -124,11 +135,7 @@ if (LIBMEM_BUILD_TESTS)
+ endif()
  
  set_target_properties(libmem PROPERTIES POSITION_INDEPENDENT_CODE True INCLUDES ${LIBMEM_INC})
- target_compile_definitions(libmem PUBLIC LM_EXPORT)
+-target_compile_definitions(libmem PUBLIC LM_EXPORT)
 -add_dependencies(libmem
 -	capstone-engine
 -	keystone-engine
 -)
++target_compile_definitions(libmem PUBLIC LM_EXPORT PRIVATE _GNU_SOURCE=1)
  
  if(${CMAKE_SYSTEM_NAME} STREQUAL Windows OR ${CMAKE_SYSTEM_NAME} STREQUAL CYGWIN)
  	set(LIBMEM_DEPS
