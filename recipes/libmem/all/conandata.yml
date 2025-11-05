@@ -7,3 +7,6 @@ patches:
     - patch_file: "patches/5.1.0-001-fix-cmake.patch"
       patch_description: "Debundle dependencies"
       patch_type: "portability"
+    - patch_file: "patches/5.1.0-002-add-gettid.patch"
+      patch_description: "Add gettid() fallback implementation"
+      patch_type: "portability"

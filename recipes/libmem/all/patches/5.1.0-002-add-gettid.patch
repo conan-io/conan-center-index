@@ -1,0 +1,20 @@
+diff --git a/src/linux/thread.c b/src/linux/thread.c
+index 7613f3c..87f3d99 100644
+--- a/src/linux/thread.c
++++ b/src/linux/thread.c
+@@ -23,6 +23,15 @@
+ #ifndef _GNU_SOURCE
+ #define _GNU_SOURCE 1 /* Required for 'gettid' */
+ #endif
++
++#if defined(__GLIBC__) && ((__GLIBC__ > 2) || ((__GLIBC__ == 2) && (__GLIBC_MINOR__ <= 30)))
++    #include <sys/syscall.h>
++    #ifndef SYS_gettid
++        #error "SYS_gettid unavailable on this system"
++    #endif
++    #define gettid() ((pid_t)syscall(SYS_gettid))
++#endif
++
+ #include <libmem/libmem.h>
+ #include "consts.h"
+ #include "utils.h"
