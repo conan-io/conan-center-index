@@ -60,6 +60,8 @@ class SAILConan(ConanFile):
             self.requires("openjpeg/[>=2.5 <3]")
             self.requires("libjxl/0.11.1")
 
+        self.tool_requires("cmake/[>=3.18]")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
