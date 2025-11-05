@@ -36,10 +36,11 @@ class SQLGenConan(ConanFile):
 
     def requirements(self):
         self.requires("reflect-cpp/0.22.0", transitive_headers=True)
+        # All three dependencies fail with undefined symbols without transitive_libs
         if self.options.with_mysql:
-            self.requires("mariadb-connector-c/3.4.3", transitive_headers=True)
+            self.requires("mariadb-connector-c/3.4.3", transitive_headers=True, transitive_libs=True)
         if self.options.with_postgres:
-            self.requires("libpq/[>=16.4 <18]", transitive_headers=True)
+            self.requires("libpq/[>=16.4 <18]", transitive_headers=True, transitive_libs=True)
         if self.options.with_sqlite3:
             self.requires("sqlite3/[>=3.49.1 <4]", transitive_headers=True, transitive_libs=True)
 
