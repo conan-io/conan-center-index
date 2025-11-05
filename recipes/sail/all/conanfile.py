@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, rename
+from conan.tools.files import copy, get, rmdir, rename, replace_in_file
 import os
 
 required_conan_version = ">=2.0.9"
@@ -68,6 +68,16 @@ class SAILConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             strip_root=True, destination=self.source_folder)
+
+        #jbig codec not yet supported by recipe
+        replace_in_file(self, os.path.join(self.source_folder, "src", "sail-codecs", "CMakeLists.txt"),
+                    "LOWEST_PRIORITY_CODECS  jbig pcx wal xbm xpm xwd",
+                    "LOWEST_PRIORITY_CODECS  pcx wal xbm xpm xwd")
+
+        # Fix libheif target usage
+        replace_in_file(self, os.path.join(self.source_folder, "src", "sail-codecs", "heif", "CMakeLists.txt"),
+                    "DEPENDENCY_LIBS heif",
+                    "DEPENDENCY_LIBS libheif::heif")
 
     def generate(self):
         only_codecs = []
@@ -145,6 +155,7 @@ class SAILConan(ConanFile):
             self.cpp_info.components["sail-codecs"].requires.append("libtiff::libtiff")
         if self.options.with_low_priority_codecs:
             self.cpp_info.components["sail-codecs"].requires.append("libjxl::libjxl")
+            self.cpp_info.components["sail-codecs"].requires.append("openjpeg::openjpeg")
 
         self.cpp_info.components["libsail"].set_property("cmake_target_name", "SAIL::Sail")
         self.cpp_info.components["libsail"].set_property("pkg_config_name", "libsail")
