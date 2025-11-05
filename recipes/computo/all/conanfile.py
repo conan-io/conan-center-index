@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, copy, save
-from conan.tools.scm import Version
+from conan.tools.files import apply_conandata_patches, get, copy, mkdir, export_conandata_patches, replace_in_file
 import os
 
 
@@ -37,14 +36,18 @@ class ComputoConan(ConanFile):
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.3")
+        self.requires("readline/[>8 <9]")
+        self.test_requires("gtest/[>1 <2]")
 
-    def build_requirements(self):
-        # readline is system dependency for REPL - always required
-        pass
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], 
             destination=self.source_folder, strip_root=True)
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "-Werror", "")
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -68,39 +71,32 @@ class ComputoConan(ConanFile):
              dst=os.path.join(self.package_folder, "include"), 
              keep_path=True)
         
-        # Copy library
-        copy(self, "*.a", 
-             src=self.build_folder, 
-             dst=os.path.join(self.package_folder, "lib"))
-        copy(self, "*.lib", 
-             src=self.build_folder, 
-             dst=os.path.join(self.package_folder, "lib"))
-        copy(self, "*.so", 
-             src=self.build_folder, 
-             dst=os.path.join(self.package_folder, "lib"))
-        copy(self, "*.dylib", 
-             src=self.build_folder, 
-             dst=os.path.join(self.package_folder, "lib"))
+        # Copy libraries          
+        mkdir(self, os.path.join(self.package_folder, "lib"))
+
+        lib_extensions = [".a", ".lib", ".so", ".dylib"]
+        for ext in lib_extensions:
+            self.output.warning("Looking for library files with extension: " + ext)
+            copy(self, f"*{ext}", 
+                 src=self.build_folder, 
+                 dst=os.path.join(self.package_folder, "lib"))
+
         copy(self, "*.dll", 
              src=self.build_folder, 
              dst=os.path.join(self.package_folder, "bin"))
         
         # Copy both executables (always built in unified build system)
-        copy(self, "computo*", 
-             src=self.build_folder, 
-             dst=os.path.join(self.package_folder, "bin"))
+        executables = ["computo", "computo_repl"]
+        if self.settings.os == "Windows":
+            executables = [f"{exe}.exe" for exe in executables]
+        
+        for exe in executables:
+            copy(self, exe, 
+                 src=self.build_folder, 
+                 dst=os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "computo")
         self.cpp_info.set_property("cmake_target_name", "computo::computo")
         
         self.cpp_info.libs = ["computo"]
-        
-        # Both executables are always available
-        self.cpp_info.bindirs.append("bin")
-        if self.settings.os != "Windows":
-            self.cpp_info.system_libs.append("readline")
-
-    def package_id(self):
-        # No custom package ID handling needed - unified build always produces same output
-        pass
