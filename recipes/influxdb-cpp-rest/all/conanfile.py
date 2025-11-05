@@ -1,14 +1,16 @@
-from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get
 import os
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import get, replace_in_file
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class InfluxdbCppRestConan(ConanFile):
     name = "influxdb-cpp-rest"
     description = "A C++ client library for InfluxDB using C++ REST SDK"
+    package_type = "library"
     topics = ("influxdb", "cpprest", "http", "client")
     license = "MPL-2.0"
     homepage = "https://github.com/d-led/influxdb-cpp-rest"
@@ -38,12 +40,18 @@ class InfluxdbCppRestConan(ConanFile):
     def build_requirements(self):
         # Only for tests - not linked to the library
         self.test_requires("catch2/3.11.0")
+        self.tool_requires("cmake/[>=3.20]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_CXX_STANDARD", "#set(CMAKE_CXX_STANDARD")
+
+    def validate(self):
+        check_min_cppstd(self, 20)
 
     def generate(self):
         deps = CMakeDeps(self)
