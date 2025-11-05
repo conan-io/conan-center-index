@@ -497,7 +497,8 @@ class OpenSSLConan(ConanFile):
             command.extend(targets)
         if self._make_program in ["make", "jom"]:
             njobs = build_jobs(self)
-            command.append(f"-j{njobs}" if parallel and njobs>0 else "-j1")
+            if parallel and njobs > 0:
+                command.append(f"-j{njobs}")
         self.run(" ".join(command), env="conanbuild")
 
     @property
