@@ -1,0 +1,4 @@
+sources:
+  "0.4.0":
+    url: "https://github.com/getml/sqlgen/archive/refs/tags/v0.4.0.tar.gz"
+    sha256: "4db5316042b911ceeed5a5cd145b3259f9cd204e6db9faf92731be3c45602e63"

@@ -58,7 +58,7 @@ class TesseractConan(ConanFile):
         else:
             self.requires("leptonica/1.82.0")
         if self.settings.os == "Windows":
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.6.0 <5]")
         # libarchive is required for 4.x so default value is true
         if self.options.get_safe("with_libarchive", default=True):
             self.requires("libarchive/[>=3.7 <3.8]")
