@@ -25,7 +25,7 @@ class KissIcpConan(ConanFile):
     }
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("eigen/3.4.0", transitive_headers=True)   
