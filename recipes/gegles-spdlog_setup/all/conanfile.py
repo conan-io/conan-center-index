@@ -62,8 +62,6 @@ class SpdlogSetupConan(ConanFile):
             self.requires("fmt/[*]")
 
     def configure(self):
-        # Configure spdlog to be header-only to match this library's nature
-        self.options["spdlog"].header_only = True
         # Match spdlog's use_std_fmt with our own (only if the option exists)
         use_std_fmt = self.options.get_safe("use_std_fmt")
         if use_std_fmt is not None:
