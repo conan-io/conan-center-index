@@ -4,4 +4,4 @@ project(test_package LANGUAGES C)
 find_package(fmilib REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} PRIVATE fmilibrary::fmilibrary)
+target_link_libraries(${PROJECT_NAME} PRIVATE fmilib::fmilib)

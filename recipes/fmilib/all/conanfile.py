@@ -136,7 +136,6 @@ class PackageConan(ConanFile):
             self.cpp_info.libs = ["fmilib"]
 
         self.cpp_info.resdirs = ["res"]
-        self.cpp_info.set_property("cmake_target_aliases", ["fmilibrary::fmilibrary"])
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("dl")
