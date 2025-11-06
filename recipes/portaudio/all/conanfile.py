@@ -1,7 +1,8 @@
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get
-
+from conan.tools.files import get, rmdir
+import os
 
 class portaudioRecipe(ConanFile):
     name = "portaudio"
@@ -17,19 +18,14 @@ class portaudioRecipe(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    implements = ["auto_shared_fpic"]
+    languages = "C"
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-    
-    def config_options(self):
-        if self.settings.os == 'Windows':
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
     
     def generate(self):
         deps = CMakeDeps(self)
@@ -48,15 +44,24 @@ class portaudioRecipe(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+        #rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        suffix = "_static" if not self.options.shared else ""
+        suffix = ""
+        if not self.options.shared and self.settings.os == "Windows":
+            suffix = "_static"
         target_name = f"portaudio{suffix}"
 
-        if self.settings.arch in ("x86_64", "armv8"):
+        if self.settings.arch in ("x86_64", "armv8") and self.settings.os == "Windows":
             suffix += "_x64"
         
         libname = f"portaudio{suffix}"
         self.cpp_info.set_property("cmake_target_name", target_name)
         self.cpp_info.libs = [libname]
-
+        if is_apple_os(self):
+            self.cpp_info.frameworks = ["CoreAudio", "AudioToolbox", "AudioUnit", "CoreFoundation", "CoreServices"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["winmm", "dsound", "ole32", "uuid", "setupapi"]
+        elif self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread", "m"]
