@@ -14,9 +14,11 @@ patches:
   "0.15.0":
     - patch_file: "patches/002-0.15.0-add-stdexcept-include.patch"
       patch_description: "Add missing <stdexcept> include"
+      patch_source: "https://github.com/ouster-lidar/ouster-sdk/pull/677"
     - patch_file: "patches/003-0.15.0-use-conan-sophus.patch"
       patch_description: "Use Conan Sophus instead of vendored version"
     - patch_file: "patches/004-0.15.0-unvendor-glad.patch"
       patch_description: "Unvendor glad"
     - patch_file: "patches/005-0.15.0-include-mapping-in-shared-library.patch"
       patch_description: "Include ouster_mapping object files and link dependencies in shared_library"
+      patch_source: "https://github.com/ouster-lidar/ouster-sdk/pull/676"
