@@ -1,7 +1,8 @@
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
@@ -111,6 +112,13 @@ class LibrealsenseConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        if is_apple_os(self) and self.settings.arch in ("armv8", "x86_64"):
+            # When cross-building on macOS, prevent arm-specific flags to be passed to the compiler
+            # when CMake performs the try compile tests for find_package(Threads)
+            machine = "aarch64-apple-darwin" if self.settings.arch == "armv8" else "x86_64-apple-darwin"
+            replace_in_file(self, os.path.join(self.source_folder, "CMake", "unix_config.cmake"), 
+            "execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpmachine OUTPUT_VARIABLE MACHINE)",
+            f"set(MACHINE {machine})")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
