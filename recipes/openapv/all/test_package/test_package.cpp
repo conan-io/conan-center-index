@@ -1,13 +1,14 @@
 #include <iostream>
-#include <cstdlib>
+#include <string>
 
 #include <oapv/oapv.h>
 
 
 int main (int argc, char *argv[])
 {
-    // Validate at least the header is found
-    oapvd_cdesc testvar {1};
-    std::cout << "Test: " << testvar.threads << std::endl;
+    unsigned int version_num      = -1;
+    const std::string version_str = oapv_version(&version_num);
+    std::cout << "oapv_version reported version number: " << version_num << std::endl;
+    std::cout << "oapv_version reported version string: " << version_str << std::endl;
     return EXIT_SUCCESS;
 }
