@@ -74,11 +74,8 @@ class OusterSdkConan(ConanFile):
         self.requires("optional-lite/3.6.0", transitive_headers=True)
 
         # libcurl moved to ouster_sensor in 0.15.0+
-        if Version(self.version) >= "0.15.0":
-            if self.options.build_sensor:
+        if Version(self.version) < "0.15.0" or self.options.build_sensor:
                 self.requires("libcurl/[>=7.78 <9]")
-        else:
-            self.requires("libcurl/[>=7.78 <9]")
 
         if self.options.build_pcap:
             self.requires("libtins/4.5")
