@@ -1,5 +1,6 @@
 import os
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, replace_in_file
@@ -52,6 +53,38 @@ class InfluxdbCppRestConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 20)
+        # std::format requires:
+        # - GCC 13+ (not available in GCC 11-12)
+        # - Clang 14+
+        # - MSVC 19.29+ (VS 2019 16.10+)
+        if self.settings.compiler == "gcc":
+            # Extract major version number for comparison
+            gcc_version = str(self.settings.compiler.version)
+            gcc_major = int(gcc_version.split('.')[0])
+            if gcc_major < 13:
+                raise ConanInvalidConfiguration(
+                    f"influxdb-cpp-rest requires GCC 13+ for std::format support. "
+                    f"Current version: {self.settings.compiler.version}"
+                )
+        elif self.settings.compiler == "clang":
+            # Extract major version number for comparison
+            clang_version = str(self.settings.compiler.version)
+            clang_major = int(clang_version.split('.')[0])
+            if clang_major < 14:
+                raise ConanInvalidConfiguration(
+                    f"influxdb-cpp-rest requires Clang 14+ for std::format support. "
+                    f"Current version: {self.settings.compiler.version}"
+                )
+        elif self.settings.compiler == "msvc":
+            # MSVC version is stored as "191", "192", etc. (19.1 = 191, 19.29 = 1929)
+            # We need at least 192 (19.29)
+            msvc_version = str(self.settings.compiler.version)
+            msvc_numeric = int(msvc_version)
+            if msvc_numeric < 192:
+                raise ConanInvalidConfiguration(
+                    f"influxdb-cpp-rest requires MSVC 19.29+ (VS 2019 16.10+) for std::format support. "
+                    f"Current version: {self.settings.compiler.version}"
+                )
 
     def generate(self):
         deps = CMakeDeps(self)
