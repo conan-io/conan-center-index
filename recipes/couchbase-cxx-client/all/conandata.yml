@@ -2,3 +2,6 @@ sources:
   "1.2.0":
     url: "https://github.com/couchbase/couchbase-cxx-client/archive/refs/tags/1.2.0.tar.gz"
     sha256: "e251e7acc6b58660adc358c9f4ed2b3477b56c8fed2ed608f8dc8a0297a02180"
+patches:
+  "1.2.0":
+    - patch_file: "conan-1.2.0.patch"

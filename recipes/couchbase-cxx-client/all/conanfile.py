@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rm, rmdir, save, load, replace_in_file
+from conan.tools.files import get, copy, rm, rmdir, save, load, apply_conandata_patches
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -17,7 +17,7 @@ class CouchbaseCxxClientConan(ConanFile):
     homepage = "https://github.com/couchbase/couchbase-cxx-client"
     topics = ("couchbase", "database", "nosql", "sdk")
     package_type = "library"
-    
+    exports_sources = "*.patch"
     settings = "os", "arch", "compiler", "build_type"
     
     options = {
@@ -60,16 +60,15 @@ class CouchbaseCxxClientConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         self._patch_sources()
+        # point to our custom ThirdPartyDependencies.cmake that connects to conan dependencies
+        # also fix bug in original file where it assumes it will always be building snappy from source
+        apply_conandata_patches(self)
     
     def export_sources(self):
         # provide our custom ThirdPartyDependencies.cmake into the cmake folder to use later in patching
         copy(self, "ConanThirdPartyDependencies.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "cmake"))
 
     def _patch_sources(self):
-        # The cmakelists file includes ThirdPartyDependencies.cmake to find dependencies
-        # We will replace it with our own to boot strap the process of finding dependencies from conan
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "ThirdPartyDependencies", "ConanThirdPartyDependencies")
-
         # couchbase uses spdlog's bundled fmt rather than having fmt as a separate dependency. 
         # Conancenter does not have a spdlog recipe that includes the bundled fmt lib. 
         # Thus we need to rewrite the code to use the external fmt.
