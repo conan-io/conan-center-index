@@ -43,6 +43,8 @@ class OpenTimelineIOConan(ConanFile):
         self.requires("imath/[>=3.1.9 <4]", transitive_headers=True)
         self.requires("rapidjson/cci.20230929")
 
+        self.tool_requires("cmake/[>=3.18.2 <5]")
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["OTIO_PYTHON_INSTALL"] = False
