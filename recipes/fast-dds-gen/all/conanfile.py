@@ -74,6 +74,7 @@ class FastDdsGenConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = ["bin"]
         self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []
         self.cpp_info.set_property("cmake_file_name", "fastddsgen")
         self.cpp_info.set_property("cmake_target_name", "fastddsgen::fastddsgen")
 
