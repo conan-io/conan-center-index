@@ -30,7 +30,7 @@ class LielabConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("eigen/3.4.0", transitive_headers=True)
+        self.requires("eigen/[>=5.0.0 <6]", transitive_headers=True)
 
     def validate(self):
         check_min_cppstd(self, 20)
