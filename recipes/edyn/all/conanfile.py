@@ -56,10 +56,7 @@ class EdynConan(ConanFile):
         self.cpp.source.includedirs.append(f"build/{self.settings.build_type}/include")
 
     def requirements(self):
-        if self.version < Version("1.3"):
-            self.requires("entt/3.10.3", transitive_headers=True)
-        else:
-            self.requires("entt/3.14.0", transitive_headers=True)
+        self.requires("entt/[>=3.14.0 <4]", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
