@@ -37,8 +37,12 @@ class FastDdsGenConan(ConanFile):
 
     def build(self):
         with chdir(self, self.source_folder):
-            self.run("chmod +x gradlew")
-            self.run("./gradlew assemble")
+            run_prefix = ""
+            if self.settings_build.os != "Windows":
+                self.run("chmod +x gradlew")
+                run_prefix = "./"
+
+            self.run(f"{run_prefix}gradlew assemble")
 
     def package(self):
         copy(
