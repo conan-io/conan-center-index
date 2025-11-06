@@ -1,16 +1,16 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, rmdir
+from conan.tools.files import copy, get, rmdir
 import os
 
 class portaudioRecipe(ConanFile):
     name = "portaudio"
-    version = "19.7"
     package_type = "library"
 
     license = "MIT"
-    url = "http://www.portaudio.com"
+    homepage = "https://www.portaudio.com"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "A free, cross-platform, open source, audio I/O library."
     topics = ("audio",)
 
@@ -44,8 +44,10 @@ class portaudioRecipe(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        #rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "share"))
 
     def package_info(self):
         suffix = ""
