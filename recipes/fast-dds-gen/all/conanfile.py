@@ -28,7 +28,7 @@ class FastDdsGenConan(ConanFile):
         self.requires("openjdk/19.0.2")
 
     def build_requirements(self):
-        self.tool_requires("openjdk/19.0.2")
+        self.tool_requires("openjdk/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
@@ -73,6 +73,7 @@ class FastDdsGenConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = ["bin"]
+        self.cpp_info.libdirs = []
         self.cpp_info.set_property("cmake_file_name", "fastddsgen")
         self.cpp_info.set_property("cmake_target_name", "fastddsgen::fastddsgen")
 
