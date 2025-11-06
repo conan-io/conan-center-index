@@ -13,13 +13,10 @@ class portaudioRecipe(ConanFile):
     description = "A free, cross-platform, open source, audio I/O library."
     topics = ("audio",)
 
-    # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    # Sources are located in the same place as this recipe, copy them to the recipe
-    #exports_sources = "CMakeLists.txt", "src/*", "include/*"
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
     
@@ -38,6 +35,9 @@ class portaudioRecipe(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
+        tc.cache_variables["PA_BUILD_STATIC"] = not self.options.shared
+        tc.cache_variables["PA_BUILD_SHARED"] = self.options.shared
         tc.generate()
 
     def build(self):
@@ -50,5 +50,13 @@ class portaudioRecipe(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["portaudio"]
+        suffix = "_static" if not self.options.shared else ""
+        target_name = f"portaudio{suffix}"
+
+        if self.settings.arch in ("x86_64", "armv8"):
+            suffix += "_x64"
+        
+        libname = f"portaudio{suffix}"
+        self.cpp_info.set_property("cmake_target_name", target_name)
+        self.cpp_info.libs = [libname]
 
