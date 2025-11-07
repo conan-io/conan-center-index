@@ -1,8 +1,23 @@
 sources:
+  "1.14.1":
+    url: https://github.com/PointCloudLibrary/pcl/archive/refs/tags/pcl-1.14.1.tar.gz
+    sha256: 5dc5e09509644f703de9a3fb76d99ab2cc67ef53eaf5637db2c6c8b933b28af6
   "1.13.1":
     url: https://github.com/PointCloudLibrary/pcl/archive/refs/tags/pcl-1.13.1.tar.gz
     sha256: 8ab98a9db371d822de0859084a375a74bdc7f31c96d674147710cf4101b79621
 patches:
+  "1.14.1":
+    - patch_file: "patches/1.14.1-0001-cmake_use_conan_targets.patch"
+      patch_description: "Update PCL CMake files to work with Conan"
+      patch_type: "conan"
+    - patch_file: "patches/1.14.1-0002-fix-FindOpenNI-bug.patch"
+      patch_description: "Fix a libusb detection bug in FindOpenNI.cmake"
+      patch_type: "bugfix"
+    - patch_file: "patches/1.14.1-0003-Compatibility-with-clang-19.patch"
+      patch_description: "Compatibility with clang-19"
+      patch_source: "https://github.com/PointCloudLibrary/pcl/pull/6113"
+      patch_type: "portability"
+    - patch_file: "patches/1.14.1-0007-improve-sse-avx-detection-arm.patch"
   "1.13.1":
     - patch_file: "patches/1.13.1-0001-cmake_use_conan_targets.patch"
       patch_description: "Update PCL CMake files to work with Conan"
@@ -25,3 +40,5 @@ patches:
       patch_description: "Compatibility with clang-19"
       patch_source: "https://github.com/PointCloudLibrary/pcl/pull/6113"
       patch_type: "portability"
+    - patch_file: "patches/1.13.1-0007-fix-move-bigobj-flag-msvc.patch"
+    - patch_file: "patches/1.13.1-0007-improve-sse-avx-detection-arm.patch"
