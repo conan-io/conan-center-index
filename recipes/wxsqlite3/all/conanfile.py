@@ -32,7 +32,7 @@ class WxSqLite3Conan(ConanFile):
 
     def requirements(self):
         # https://github.com/utelle/wxsqlite3/blob/v4.10.8/premake/wxwidgets.lua#L146
-        self.requires("wxwidgets/[>=2.8.0 <3.3]", transitive_headers=True, transitive_libs=True)
+        self.requires("wxwidgets/[>=3.2.5 <3.3]", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         if self.settings.os == "Windows":
