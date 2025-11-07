@@ -13,7 +13,7 @@ class WxSqLite3Conan(ConanFile):
     name = "wxsqlite3"
     description = "wxSQLite3 is a C++ wrapper around the SQLite database designed for use in wxWidgets applications."
     license = "LGPL-3.0+ WITH WxWindows-exception-3.1"
-    url = "https://github.com/utelle/wxsqlite3"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://utelle.github.io/wxsqlite3/docs/html/index.html"
     topics = ("wxwidgets", "sqlite", "sqlite3", "sql", "database")
     settings = "os", "compiler", "build_type", "arch"
