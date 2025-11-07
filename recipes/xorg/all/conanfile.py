@@ -81,7 +81,7 @@ class XorgConan(ConanFile):
                             "libxinerama-dev", "libxkbfile-dev", "	libxmu-dev", "libxpm-dev", "libxrandr-dev", "libxrender-dev", "libxres-dev",
                             "libxscrnsaver-dev", "libxt-dev", "libxtst-dev", "libxv-dev", "libxxf86vm-dev",
                             "xcb-util-wm-dev", "xcb-util-image-dev", "xcb-util-keysyms-dev", "xcb-util-renderutil-dev",
-                            "libxinerama-dev", "libxcb-dev", "xcb-util-dev", "xcb-util-cursor-dev"], update=True, check=True)
+                            "libxinerama-dev", "libxcb-dev", "xcb-util-dev", "xcb-util-cursor-dev", "mesa-dev"], update=True, check=True)
 
     def package_info(self):
         if Version(conan_version) >= 2:
