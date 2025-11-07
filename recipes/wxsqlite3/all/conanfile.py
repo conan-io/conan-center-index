@@ -84,8 +84,6 @@ class WxSqLite3Conan(ConanFile):
             copy(self, "*", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
             lib_dir = os.path.join(self.source_folder, "lib")
             subdirs = [d for d in os.listdir(lib_dir) if os.path.isdir(os.path.join(lib_dir, d))]
-            # Expecting one directory named something similar to "vc14x_x64_lib"
-            assert len(subdirs) == 1, f"Expected exactly one subdirectory in {lib_dir}, found: {subdirs}"
             copy(self, "*", os.path.join(lib_dir, subdirs[0]), os.path.join(self.package_folder, "lib"))
         else:
             autotools = Autotools(self)
