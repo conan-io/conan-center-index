@@ -17,7 +17,6 @@ class WxSqLite3Conan(ConanFile):
     homepage = "https://utelle.github.io/wxsqlite3/docs/html/index.html"
     topics = ("wxwidgets", "sqlite", "sqlite3", "sql", "database")
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = '*'
     package_type = "library"
     options = { "shared": [True, False] }
     options = { "shared": [True, False], "fPIC": [True, False] }
