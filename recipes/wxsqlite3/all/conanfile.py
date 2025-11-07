@@ -89,6 +89,7 @@ class WxSqLite3Conan(ConanFile):
             autotools = Autotools(self)
             autotools.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
         license_files = [
             "COPYING.txt",
