@@ -63,6 +63,7 @@ class LibaecConan(ConanFile):
         tc.cache_variables["CMAKE_PROJECT_libaec_INCLUDE"] = "set_runtime_output_dir.cmake"
         tc.cache_variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.generate()
 
     def _patch_sources(self):
