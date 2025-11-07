@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import collect_libs, copy, get, rmdir
-from conan.tools.gnu import Autotools
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.premake import Premake, PremakeDeps, PremakeToolchain
 
@@ -22,7 +22,6 @@ class WxSqLite3Conan(ConanFile):
     options = { "shared": [True, False], "fPIC": [True, False] }
     default_options = { "shared": False, "fPIC": True }
     implements = ["auto_shared_fpic"]
-    generators = "AutotoolsDeps", "AutotoolsToolchain"
 
     def _arch_to_msbuild_platform(self, arch) -> str | None:
         platform_map = {
@@ -73,6 +72,14 @@ class WxSqLite3Conan(ConanFile):
             deps.generate()
             tc = PremakeToolchain(self)
             tc.generate()
+        else:
+            wxwidgets_root = self.dependencies["wxwidgets"].package_folder
+            wx_config = os.path.join(wxwidgets_root, "bin", "wx-config")
+            tc = AutotoolsToolchain(self)
+            tc.configure_args.append(f"--with-wx-config={wx_config}")
+            tc.generate()
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
     def build(self):
         if self.settings.os == "Windows":
@@ -83,9 +90,7 @@ class WxSqLite3Conan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.autoreconf()
-            wxwidgets_root = self.dependencies["wxwidgets"].package_folder
-            wx_config = os.path.join(wxwidgets_root, "bin", "wx-config")
-            autotools.configure(args=[f"--with-wx-config={wx_config}"])
+            autotools.configure()
             autotools.make()
 
     def package(self):
