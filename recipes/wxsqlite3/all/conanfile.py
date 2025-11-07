@@ -24,6 +24,35 @@ class WxSqLite3Conan(ConanFile):
     implements = ["auto_shared_fpic"]
     generators = "AutotoolsDeps", "AutotoolsToolchain"
 
+    def _arch_to_msbuild_platform(self, arch) -> str | None:
+        platform_map = {
+            "x86": "Win32",
+            "x86_64": "Win64",
+        }
+        platform = platform_map.get(str(arch))
+        return platform
+
+    def _msvc_version_str(self, compiler_version = None) -> str | None:
+        if compiler_version is None:
+            compiler_version = self.settings.compiler.version
+
+        version_map = {
+            "193": "vc17",
+            "194": "vc17",
+        }
+        version = version_map.get(str(compiler_version))
+        return version
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            platform = self._arch_to_msbuild_platform(self.settings.arch)
+            if not platform:
+                raise ConanInvalidConfiguration(f"Unsupported architecture: {self.settings.arch}")
+
+            version = self._msvc_version_str()
+            if not version:
+                raise ConanInvalidConfiguration(f"Unimplemented compiler version: {self.settings.compiler.version}")
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -44,26 +73,6 @@ class WxSqLite3Conan(ConanFile):
             deps.generate()
             tc = PremakeToolchain(self)
             tc.generate()
-
-    def _arch_to_msbuild_platform(self, arch) -> str:
-        platform_map = {
-            "x86": "Win32",
-            "x86_64": "Win64",
-        }
-        platform = platform_map.get(str(arch))
-        if not platform:
-            raise ConanInvalidConfiguration(f"Unsupported architecture: {arch}")
-        return platform
-
-    def _msvc_version_str(self) -> str:
-        version_map = {
-            "193": "vc17",
-            "194": "vc17",
-        }
-        version = version_map.get(str(self.settings.compiler.version))
-        if not version:
-            raise ConanInvalidConfiguration(f"Unimplemented compiler version: {self.settings.compiler.version}")
-        return version
 
     def build(self):
         if self.settings.os == "Windows":
