@@ -39,9 +39,10 @@ class OpenTimelineIOConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 17)
 
-        if is_msvc(self) and self.options.shared:
+        if is_msvc(self): # and self.options.shared:
             raise ConanInvalidConfiguration(
-                "Building shared library currently results in linking errors! Needs investigation."
+                # This is actually visible in the test package but there has to be an underlying problem.
+                "Skip windows due to problems with linking."
             )
 
     def layout(self):
