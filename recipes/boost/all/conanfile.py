@@ -1251,8 +1251,12 @@ class BoostConan(ConanFile):
     @property
     def _build_flags(self):
         flags = []
-        if self._build_cross_flags:
-            flags.append(f'compileflags="{" ".join(self._build_cross_flags)}"')
+        compile_flags = self._build_cross_flags
+        if self.conf.get("tools.compilation:verbosity", check_type=str) == "verbose":
+            compile_flags.append("-v")
+        if compile_flags:
+            flags.append(f'compileflags="{" ".join(compile_flags)}"')
+
 
         # Stop at the first error. No need to continue building.
         flags.append("-q")
@@ -1459,15 +1463,28 @@ class BoostConan(ConanFile):
 
     @property
     def _build_cross_flags(self):
-        flags = []
+        def extract_machine_flags(all_flags):
+            for flag in all_flags:
+                if flag.startswith("-m"):
+                    yield flag
+
+        flags = set()
         if not cross_building(self):
             return flags
         arch = self.settings.get_safe("arch")
         self.output.info("Cross building, detecting compiler...")
 
+        cflags = self.conf.get("tools.build:cflags", check_type=list)
+        if cflags:
+            flags.update(extract_machine_flags(cflags))
+
+        cxxflags = self.conf.get("tools.build:cxxflags", check_type=list)
+        if cxxflags:
+            flags.update(extract_machine_flags(cxxflags))
+
         if arch.startswith("arm"):
             if "hf" in arch:
-                flags.append("-mfloat-abi=hard")
+                flags.add("-mfloat-abi=hard")
         elif self.settings.os == "Emscripten":
             pass
         elif arch in ["x86", "x86_64"]:
@@ -1482,7 +1499,7 @@ class BoostConan(ConanFile):
             self.output.warning(f"Unable to detect the appropriate ABI for {arch} architecture.")
         self.output.info(f"Cross building flags: {flags}")
 
-        return flags
+        return list(flags)
 
     @property
     def _ar(self):
