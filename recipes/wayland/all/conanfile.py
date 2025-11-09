@@ -118,6 +118,8 @@ class WaylandConan(ConanFile):
         self.cpp_info.components["wayland-scanner"].libdirs = []
         self.cpp_info.components["wayland-scanner"].set_property("component_version", self.version)
         self.cpp_info.components["wayland-scanner"].requires = ["expat::expat"]
+        self.runenv_info.prepend_path("PATH", os.path.join(self.package_folder, "bin"))
+
         if self.options.enable_dtd_validation:
             self.cpp_info.components["wayland-scanner"].requires.append("libxml2::libxml2")
         pkgconfig_variables = {
