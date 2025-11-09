@@ -101,7 +101,7 @@ class LibdbConan(ConanFile):
                 props_path = os.path.join(self.generators_folder, props_file)
                 if os.path.exists(props_path):
                     import_conan_generators += f"<Import Project=\"{props_path}\" />"
-            projects = ["db", "db_sql", "db_stl"]
+            projects = ["db", "db_stl"]
             if self.options.with_tcl:
                 projects.append("db_tcl")
             for project in projects:
@@ -170,7 +170,6 @@ class LibdbConan(ConanFile):
             tc.configure_args.append("--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug")
             tc.configure_args.append("--enable-mingw" if self._mingw_build else "--disable-mingw")
             tc.configure_args.append("--enable-compat185")
-            tc.configure_args.append("--enable-sql")
             if self.options.with_cxx:
                 tc.configure_args.extend(["--enable-cxx", "--enable-stl"])
             else:
@@ -191,6 +190,8 @@ class LibdbConan(ConanFile):
                 # https://releases.llvm.org/15.0.0/tools/clang/docs/ReleaseNotes.html#improvements-to-clang-s-diagnostics
                 # https://releases.llvm.org/16.0.0/tools/clang/docs/ReleaseNotes.html#potentially-breaking-changes
                 tc.extra_cflags.append("-Wno-error=implicit-function-declaration")
+            if str(self.settings.arch).startswith("arm"):
+                tc.extra_cflags.append("-Wno-error=implicit-int")
 
             tc.generate()
 
@@ -214,7 +215,7 @@ class LibdbConan(ConanFile):
         self._patch_sources()
         if is_msvc(self):
             msbuild = MSBuild(self)
-            projects = ["db", "db_sql", "db_stl"]
+            projects = ["db", "db_stl"]
             if self.options.with_tcl:
                 projects.append("db_tcl")
             for project in projects:
@@ -295,7 +296,7 @@ class LibdbConan(ConanFile):
             libs.append("db_tcl")
         if self.options.get_safe("with_cxx"):
             libs.extend(["db_cxx", "db_stl"])
-        libs.extend(["db_sql", "db"])
+        libs.extend(["db"])
         if is_msvc(self):
             libs = [f"lib{libname}" for libname in libs]
         return libs

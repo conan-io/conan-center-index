@@ -45,7 +45,8 @@ class AbseilConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def validate(self):
-        check_min_cppstd(self, 14)
+        minimum_cppstd = 17 if self.version >= Version("20250512.1") else 14
+        check_min_cppstd(self, minimum_cppstd)
 
         if self.options.shared and is_msvc(self) and Version(self.version) < "20230802.1":
             # upstream tries its best to export symbols, but it's broken for the moment
@@ -68,8 +69,9 @@ class AbseilConan(ConanFile):
         tc.cache_variables["ABSL_ENABLE_INSTALL"] = True
         tc.cache_variables["ABSL_PROPAGATE_CXX_STD"] = True
         tc.cache_variables["BUILD_TESTING"] = False
-        if is_msvc(self):
-            tc.cache_variables["ABSL_MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+        if self.settings.os == "Windows" and self.settings.compiler in ["msvc", "clang"] and self.settings.get_safe("compiler.runtime"):
+            runtime = str(self.settings.compiler.runtime)
+            tc.cache_variables["ABSL_MSVC_STATIC_RUNTIME"] = runtime == "static"
         tc.generate()
 
     def build(self):

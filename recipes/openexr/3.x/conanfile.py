@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir, replace_in_file
@@ -28,10 +27,6 @@ class OpenEXRConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _with_libdeflate(self):
-        return Version(self.version) >= "3.2"
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -50,8 +45,10 @@ class OpenEXRConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         # Note: OpenEXR and Imath are versioned independently.
         self.requires("imath/[>=3.1.9 <4]", transitive_headers=True)
-        if self._with_libdeflate:
-            self.requires("libdeflate/[>=1.19 <2]")
+        self.requires("libdeflate/[>=1.19 <2]")
+
+        if Version(self.version) >= "3.4":
+            self.requires("openjph/[>=0.23.1 <1]")
 
     def validate(self):
         check_min_cppstd(self, 11)
@@ -66,17 +63,18 @@ class OpenEXRConan(ConanFile):
         tc.variables["BUILD_WEBSITE"] = False
         tc.variables["DOCS"] = False
         tc.generate()
+
         cd = CMakeDeps(self)
+        cd.set_property("openjph", "cmake_target_name", "openjph")
         cd.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-        if Version(self.version) >= "3.2":
-            # Even with BUILD_WEBSITE, Website target is compiled in 3.2
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "add_subdirectory(website/src)",
-                            "#  add_subdirectory(website/src)")
+        # Even with BUILD_WEBSITE = False, Website examples target is compiled in 3.2
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "add_subdirectory(website/src)",
+                        "#  add_subdirectory(website/src)")
 
     def build(self):
         self._patch_sources()
@@ -144,8 +142,9 @@ class OpenEXRConan(ConanFile):
         OpenEXRCore = self._add_component("OpenEXRCore")
         OpenEXRCore.libs = [f"OpenEXRCore{lib_suffix}"]
         OpenEXRCore.requires = [self._conan_comp("OpenEXRConfig"), "zlib::zlib"]
-        if self._with_libdeflate:
-            OpenEXRCore.requires.append("libdeflate::libdeflate")
+        OpenEXRCore.requires.append("libdeflate::libdeflate")
+        if Version(self.version) >= "3.4":
+            OpenEXRCore.requires.append("openjph::openjph")
         if self.settings.os in ["Linux", "FreeBSD"]:
             OpenEXRCore.system_libs = ["m"]
 

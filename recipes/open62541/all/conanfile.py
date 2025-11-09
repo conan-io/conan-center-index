@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.tools.scm import Version
-from conan.tools.files import apply_conandata_patches, collect_libs, export_conandata_patches, copy, rm, rmdir, get
+from conan.tools.files import apply_conandata_patches, collect_libs, export_conandata_patches, copy, rm, rmdir, get, replace_in_file
 from conan.errors import ConanInvalidConfiguration
 import glob
 import os
@@ -129,7 +129,7 @@ class Open62541Conan(ConanFile):
         "discovery_semaphore": True,
         "query": False,
         "encryption": False,
-        "json_support": False,
+        "json_support": True,
         "pub_sub": False,
         "pub_sub_encryption": False,
         "data_access": True,
@@ -140,7 +140,7 @@ class Open62541Conan(ConanFile):
         "hardening": True,
         "cpp_compatible": False,
         "readable_statuscodes": True,
-        "parsing": False,
+        "parsing": True,
         "nodeset_loader": False,
     }
 
@@ -191,7 +191,8 @@ class Open62541Conan(ConanFile):
         if self.options.discovery == "With Multicast" or "multicast" in str(self.options.discovery):
             self.requires("pro-mdnsd/0.8.4")
         if self.options.get_safe("nodeset_loader"):
-            self.requires("libxml2/[>=2.12.5 <3]")
+            # version 1.4.11.1 with libxml2 2.14.x doesnt work because open62541 uses deprecated/remove APIs
+            self.requires("libxml2/[>=2.12.5 <=2.13.8]")
 
     def validate(self):
         if not self.options.subscription:
@@ -229,6 +230,9 @@ class Open62541Conan(ConanFile):
         if self.options.get_safe("nodeset_loader") and not self.options.parsing:
             # NodesetLoader requires parsing to be enabled
             raise ConanInvalidConfiguration("When nodeset_loader is enabled, then parsing has to be enabled too.")
+
+        if self.options.get_safe("nodeset_loader") and Version(self.version) >= "1.4.13":
+            raise ConanInvalidConfiguration("nodeset_loader option does not work properly with this version - contributions welcome")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -358,6 +362,9 @@ class Open62541Conan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         rm(self, "FindPython3.cmake", os.path.join(self.source_folder, "tools", "cmake"))
+        if Version(self.version) >= "1.4.11.1":
+            replace_in_file(self, os.path.join(self.source_folder, "deps", "nodesetLoader", "CMakeLists.txt"),
+                        "find_package(LibXml2 REQUIRED QUIET)", "find_package(LibXml2 REQUIRED GLOBAL)")
 
     def build(self):
         cmake = CMake(self)

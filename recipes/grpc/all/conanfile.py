@@ -54,7 +54,7 @@ class GrpcConan(ConanFile):
         "ruby_plugin": True,
         "otel_plugin": False,
         "secure": False,
-        "with_libsystemd": True
+        "with_libsystemd": False
     }
 
     _target_info = None
@@ -159,6 +159,10 @@ class GrpcConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        
+        # Let Conan define CMAKE_MSVC_RUNTIME_LIBRARY
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(cmake/msvc_static_runtime.cmake)", "")
 
     def generate(self):
         # This doesn't work yet as one would expect, because the install target builds everything
@@ -222,8 +226,6 @@ class GrpcConan(ConanFile):
         cmake_deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
-
         # Management of shared libs when grpc has shared dependencies (like protobuf)
         # As the grpc_cpp_plugin that executes during the build will need those packages shared libs
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")

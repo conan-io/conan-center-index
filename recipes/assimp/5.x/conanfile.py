@@ -198,9 +198,11 @@ class AssimpConan(ConanFile):
         if self._depends_on_openddlparser:
             self.requires("openddl-parser/0.5.1")
 
+    def validate_build(self):
+        check_min_cppstd(self, self._min_cppstd)
+
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 11)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
@@ -287,7 +289,7 @@ class AssimpConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "code", "CMakeLists.txt"), pattern, "")
 
         # Make sure vendored libs are not used by accident by removing their subdirs
-        allow_vendored = ["Open3DGC"]
+        allow_vendored = ["Open3DGC", "earcut-hpp"]
         for contrib_dir in self.source_path.joinpath("contrib").iterdir():
             if contrib_dir.is_dir() and contrib_dir.name not in allow_vendored:
                 rmdir(self, contrib_dir)
