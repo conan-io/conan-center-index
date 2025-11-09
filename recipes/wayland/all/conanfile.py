@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import can_run
+from conan.tools.build import can_run, cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -37,6 +37,13 @@ class WaylandConan(ConanFile):
         "enable_dtd_validation": True,
     }
 
+    def config_options(self):
+        if self.settings.os not in ("Linux", "Android"):
+            # wayland scanner is still useful for
+            # cross compilation
+            self.options.rm_safe("enable_libraries")
+
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -47,15 +54,15 @@ class WaylandConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.enable_libraries:
+        if self.options.get_safe("enable_libraries"):
             self.requires("libffi/[>=3.4.4 <4]")
         if self.options.enable_dtd_validation:
             self.requires("libxml2/[>=2.12.5 <3]")
         self.requires("expat/[>=2.6.2 <3]")
 
     def validate(self):
-      if self.settings.os not in ("Linux", "Android"):
-            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux or Android")
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} cannot be built with MSVC")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.4.0 <2]")
@@ -81,16 +88,26 @@ class WaylandConan(ConanFile):
             # If wayland is the build_require, all its dependencies are treated as build_requires
             pkg_config_deps.build_context_activated = [dep.ref.name for _, dep in self.dependencies.host.items()]
         pkg_config_deps.generate()
+
+        def configure_meson_toolchain(meson):
+            meson.project_options["libdir"] = "lib"
+            meson.project_options["datadir"] = "res"
+            meson.project_options["libraries"] = self.options.get_safe("enable_libraries", False)
+            meson.project_options["dtd_validation"] = bool(self.options.enable_dtd_validation)
+            meson.project_options["documentation"] = False
+            meson.project_options["scanner"] = True
+            if not can_run(self):
+                meson.project_options["build.pkg_config_path"] = self.generators_folder
+
         tc = MesonToolchain(self)
-        tc.project_options["libdir"] = "lib"
-        tc.project_options["datadir"] = "res"
-        tc.project_options["libraries"] = self.options.enable_libraries
-        tc.project_options["dtd_validation"] = self.options.enable_dtd_validation
-        tc.project_options["documentation"] = False
-        if not can_run(self):
-            tc.project_options["build.pkg_config_path"] = self.generators_folder
-        tc.project_options["scanner"] = True
+        configure_meson_toolchain(tc)
         tc.generate()
+
+        if cross_building(self):
+            tc_cross = MesonToolchain(self, native=True)
+            configure_meson_toolchain(tc_cross)
+            tc_cross.generate()
+
 
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
@@ -116,6 +133,8 @@ class WaylandConan(ConanFile):
         self.cpp_info.components["wayland-scanner"].libdirs = []
         self.cpp_info.components["wayland-scanner"].set_property("component_version", self.version)
         self.cpp_info.components["wayland-scanner"].requires = ["expat::expat"]
+        self.buildenv_info.prepend_path("PATH", os.path.join(self.package_folder, "bin"))
+
         if self.options.enable_dtd_validation:
             self.cpp_info.components["wayland-scanner"].requires.append("libxml2::libxml2")
         pkgconfig_variables = {
@@ -128,7 +147,7 @@ class WaylandConan(ConanFile):
             "pkg_config_custom_content",
             "\n".join(f"{key}={value}" for key,value in pkgconfig_variables.items()))
 
-        if self.options.enable_libraries:
+        if self.options.get_safe("enable_libraries"):
             self.cpp_info.components["wayland-server"].libs = ["wayland-server"]
             self.cpp_info.components["wayland-server"].set_property("pkg_config_name", "wayland-server")
             self.cpp_info.components["wayland-server"].requires = ["libffi::libffi"]
