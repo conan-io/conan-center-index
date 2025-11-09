@@ -14,6 +14,12 @@ Where possible, package updates should still be commited to the upstream reposit
 Not all packages available in CCI will be provided by the
 [Comcast Artifactory](https://partners.artifactory.comcast.com) instance.
 
+### Branches
+
+* `entos-master`: the default branch for this repository.
+* `master`: the default branch for the upstream repository.
+* `upstream-update`: The branch used to merge updates from the upstream repository.
+
 ### Updating or providing a new package:
 
 1. Create a PR to update the repository.
@@ -38,7 +44,7 @@ recipe to be updated at a time.
 
 ### CI Notes
 
-* Only pushes to the `master` branch upload packages to the `conan-entos-iui-prod` repository. Other branches
+* Only pushes to the `entos-master` branch upload packages to the `conan-entos-iui-prod` repository. Other branches
   push to the `conan-entos-iui-dev` repository.
 
 * Only recipes (the python files) are uploaded. Binary packages should be built by the consuming application or library.
