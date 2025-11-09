@@ -1,4 +1,7 @@
 sources:
+  "1.8.2":
+    url: "https://github.com/ggerganov/whisper.cpp/archive/refs/tags/v1.8.2.tar.gz"
+    sha256: "bcee25589bb8052d9e155369f6759a05729a2022d2a8085c1aa4345108523077"
   "1.7.6":
     url: "https://github.com/ggerganov/whisper.cpp/archive/refs/tags/v1.7.6.tar.gz"
     sha256: "166140e9a6d8a36f787a2bd77f8f44dd64874f12dd8359ff7c1f4f9acb86202e"

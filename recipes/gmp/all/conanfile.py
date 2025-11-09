@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
-from conan.tools.files import copy, export_conandata_patches, get, patch, rm, rmdir
+from conan.tools.build import cross_building
+from conan.tools.files import copy, export_conandata_patches, get, patch, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
@@ -78,8 +79,9 @@ class GmpConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         if is_msvc(self):
-            self.tool_requires("yasm/1.3.0")  # Needed for determining 32-bit word size
             self.tool_requires("automake/1.16.5")  # Needed for lib-wrapper
+            if self.settings.arch in ["x86", "x86_64"]:
+                self.tool_requires("yasm/1.3.0")  # Needed for determining 32-bit word size
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -110,11 +112,12 @@ class GmpConan(ConanFile):
             yasm_machine = {
                 "x86": "x86",
                 "x86_64": "amd64",
-            }[str(self.settings.arch)]
+            }.get(str(self.settings.arch), None)
             ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper"))
             dumpbin_nm = unix_path(self, os.path.join(self.source_folder, "dumpbin_nm.py"))
             env.define("CC", "cl -nologo")
-            env.define("CCAS", f"{yasm_wrapper} -a x86 -m {yasm_machine} -p gas -r raw -f win32 -g null -X gnu")
+            if yasm_machine:
+                env.define("CCAS", f"{yasm_wrapper} -a x86 -m {yasm_machine} -p gas -r raw -f win32 -g null -X gnu")
             env.define("CXX", "cl -nologo")
             env.define("LD", "link -nologo")
             env.define("AR", f'{ar_wrapper} "lib -nologo"')
@@ -142,6 +145,11 @@ class GmpConan(ConanFile):
         self._patch_sources()
         autotools = Autotools(self)
         autotools.configure()
+        if self.settings.os == "Macos" and cross_building(self):
+            # LD flags are not passed properly by the scripts - in particular '-arch x86_64' when crossbuilding
+            # and invoking libtool to generate one of the libraries. Being conservative here, but there's a chance
+            # this may need to be generalised
+            replace_in_file(self, os.path.join(self.build_folder, "libtool"), r'archive_cmds="\$CC ', r'archive_cmds="\$CC $LDFLAGS ')
         autotools.make()
         # INFO: According to the gmp readme file, make check should not be omitted, but it causes timeouts on the CI server.
         if self.options.run_checks:

@@ -3,22 +3,22 @@ env:
   CLICOLOR_FORCE: 1
   FORCE_COLOR: 1
   CMAKE_COLOR_DIAGNOSTICS: ON
-  CONAN_REMOTE: ${{ github.ref_name == 'master' && 'entos-iui-prod' || 'entos-iui-dev' }}
+  CONAN_REMOTE: ${{ github.ref_name == 'entos-master' && 'entos-iui-prod' || 'entos-iui-dev' }}
   XDG_RUNTIME_DIR: /tmp/runtime-root
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - entos-master
   pull_request:
     branches:
-      - master
+      - entos-master
 
 jobs:
   export-recipes:
     runs-on: comcast-ubuntu-latest
-    container: ghcr.io/entos-xe/desktop-linux-gcc-rust:sha-bd6547a
+    container: ghcr.io/entos-xe/desktop-linux-gcc-14-rust:sha-c6f3c9c
 
     env:
       CONAN_PASSWORD: ${{ secrets.CONAN_ACCESS_KEY }}
