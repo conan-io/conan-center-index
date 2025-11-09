@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, replace_in_file, symlinks
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
@@ -105,6 +105,8 @@ class PkgConfConan(ConanFile):
                 rename(self, os.path.join(self.package_folder, "lib", "libpkgconf.a"),
                           os.path.join(self.package_folder, "lib", "pkgconf.lib"),)
 
+        else:
+            symlinks.
         if not self.options.enable_lib:
             rmdir(self, os.path.join(self.package_folder, "lib"))
             rmdir(self, os.path.join(self.package_folder, "include"))
@@ -133,6 +135,7 @@ class PkgConfConan(ConanFile):
         exesuffix = ".exe" if self.settings.os == "Windows" else ""
         pkg_config = os.path.join(bindir, "pkgconf" + exesuffix).replace("\\", "/")
         self.buildenv_info.define_path("PKG_CONFIG", pkg_config)
+        self.buildenv_info.prepend_path("PATH", pkg_config)
 
         pkgconf_aclocal = os.path.join(self.package_folder, "bin", "aclocal")
         self.buildenv_info.prepend_path("ACLOCAL_PATH", pkgconf_aclocal)

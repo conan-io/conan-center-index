@@ -17,6 +17,7 @@ class TestPackageConan(ConanFile):
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[2.2 <3]")
+        self.tool_requires(self.tested_reference_str)
 
     def layout(self):
         cmake_layout(self)
@@ -38,15 +39,15 @@ class TestPackageConan(ConanFile):
             cmake.configure()
             cmake.build()
 
+        buffer = StringIO()
+        self.run(f"wayland-scanner --version", env="conanbuild", stderr=buffer)
+        output = buffer.getvalue().strip()
+        self.output.info(f"Wayland scanner output: {output}")
+        actual_version = output.split()[-1]
+        self._assert_expected_version(actual_version)
+
     def test(self):
         if can_run(self):
             if self._has_libraries:
                 bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
                 self.run(bin_path, env="conanrun")
-
-            buffer = StringIO()
-            self.run(f"wayland-scanner --version", env="conanrun", stderr=buffer)
-            output = buffer.getvalue().strip()
-            self.output.info(f"Wayland scanner output: {output}")
-            actual_version = output.split()[-1]
-            self._assert_expected_version(actual_version)
