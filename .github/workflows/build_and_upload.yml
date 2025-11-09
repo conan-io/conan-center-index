@@ -18,7 +18,7 @@ on:
 jobs:
   export-recipes:
     runs-on: comcast-ubuntu-latest
-    container: ghcr.io/entos-xe/desktop-linux-gcc-rust:sha-bd6547a
+    container: ghcr.io/entos-xe/desktop-linux-gcc-14-rust:sha-c6f3c9c
 
     env:
       CONAN_PASSWORD: ${{ secrets.CONAN_ACCESS_KEY }}
