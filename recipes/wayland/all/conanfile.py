@@ -6,6 +6,7 @@ from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
@@ -43,6 +44,7 @@ class WaylandConan(ConanFile):
             # cross compilation
             self.options.rm_safe("enable_libraries")
 
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -58,6 +60,10 @@ class WaylandConan(ConanFile):
         if self.options.enable_dtd_validation:
             self.requires("libxml2/[>=2.12.5 <3]")
         self.requires("expat/[>=2.6.2 <3]")
+
+    def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} cannot be built with MSVC")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.4.0 <2]")
