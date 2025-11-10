@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches, copy, export_conandata_patches, get,
@@ -77,6 +78,16 @@ class FontconfigConan(ConanFile):
             "datadir": os.path.join("res", "share"),
         })
         tc.generate()
+
+        # Remove the troublesome sys_root parameter from the Meson cross file.
+        # It causes pkgconf to prepend the sysroot to the absolute path to the package in the Conan cache.
+        if cross_building(self):
+            with open(os.path.join(self.generators_folder, "conan_meson_cross.ini"), "r") as f:
+                lines = f.readlines()
+            with open(os.path.join(self.generators_folder, "conan_meson_cross.ini"), "w") as f:
+                for line in lines:
+                    if "sys_root = '" not in line:
+                        f.write(line)
 
     def _patch_files(self):
         apply_conandata_patches(self)
