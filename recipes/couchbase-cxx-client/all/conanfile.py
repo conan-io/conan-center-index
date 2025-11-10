@@ -49,6 +49,9 @@ class CouchbaseCxxClientConan(ConanFile):
         self.requires("taocpp-json/1.0.0-beta.14")
         self.requires("llhttp/9.3.0")
         self.requires("openssl/[>=1.1 <4]")
+    
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.19.0 <4.0]")
 
     def layout(self):
         cmake_layout(self)
