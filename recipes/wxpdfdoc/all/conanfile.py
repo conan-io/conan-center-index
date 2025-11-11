@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.premake import Premake, PremakeDeps, PremakeToolchain
@@ -106,6 +106,7 @@ class WxPdfDocConan(ConanFile):
             autotools = Autotools(self)
             autotools.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
         copy(self, "LICENCE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
