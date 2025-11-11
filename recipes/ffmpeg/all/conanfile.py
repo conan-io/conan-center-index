@@ -51,6 +51,7 @@ class FFMpegConan(ConanFile):
         "with_fribidi": [True, False],
         "with_harfbuzz": [True, False],
         "with_libjxl": [True, False],
+        "with_openapv": [True, False],
         "with_openjpeg": [True, False],
         "with_openh264": [True, False],
         "with_opus": [True, False],
@@ -142,6 +143,7 @@ class FFMpegConan(ConanFile):
         "with_fribidi": False,
         "with_harfbuzz": False,
         "with_libjxl": False,
+        "with_openapv": False,
         "with_openjpeg": True,
         "with_openh264": True,
         "with_opus": True,
@@ -230,6 +232,7 @@ class FFMpegConan(ConanFile):
             "with_libiconv": ["avcodec"],
             "with_libxml2": ["avcodec"],
             "with_libjxl": ["avcodec"],
+            "with_openapv": ["avcodec"],
             "with_openjpeg": ["avcodec"],
             "with_openh264": ["avcodec"],
             "with_vorbis": ["avcodec"],
@@ -280,6 +283,7 @@ class FFMpegConan(ConanFile):
             del self.options.postproc
         else:
             del self.options.with_whisper
+            del self.options.with_openapv
 
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_vaapi
@@ -390,6 +394,8 @@ class FFMpegConan(ConanFile):
             self.requires("libdrm/2.4.119")
         if self.options.get_safe("with_whisper"):
             self.requires("whisper-cpp/1.7.6")
+        if self.options.get_safe("with_openapv"):
+            self.requires("openapv/0.2.0.4")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -665,6 +671,8 @@ class FFMpegConan(ConanFile):
             args.append(opt_enable_disable("libjxl", self.options.with_libjxl))
         if "with_whisper" in self.options:
             args.append(opt_enable_disable("whisper", self.options.with_whisper))
+        if "with_openapv" in self.options:
+            args.append(opt_enable_disable("liboapv", self.options.with_openapv))
 
         if self._version_supports_libsvtav1:
             args.append(opt_enable_disable("libsvtav1", self.options.get_safe("with_libsvtav1")))
@@ -766,6 +774,7 @@ class FFMpegConan(ConanFile):
 
         deps = PkgConfigDeps(self)
         deps.set_property("whisper-cpp", "pkg_config_name", "whisper")
+        deps.set_property("openapv", "pkg_config_name", "oapv")
         deps.generate()
 
         if self.options.with_ssl == "openssl":
@@ -969,6 +978,8 @@ class FFMpegConan(ConanFile):
                 avcodec.requires.append("dav1d::dav1d")
             if self.options.get_safe("with_libjxl"):
                 avcodec.requires.append("libjxl::libjxl")
+            if self.options.get_safe("with_openapv"):
+                avcodec.requires.append("openapv::openapv")
 
         if self.options.avformat:
             if self.options.with_bzip2:
