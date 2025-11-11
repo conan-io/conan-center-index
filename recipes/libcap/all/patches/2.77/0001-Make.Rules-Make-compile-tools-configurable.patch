@@ -1,9 +1,9 @@
 From b1c65354a8321e0288882b03b3313f26ed484d93 Mon Sep 17 00:00:00 2001
-From: Sergey Bobrenok <bobrofon@gmail.com>
+From: Sergey Bobrenok
 Date: Sun, 22 Dec 2024 20:52:43 +0700
 Subject: [PATCH] Make.Rules: Make compile tools configurable
 
-Signed-off-by: Sergey Bobrenok <bobrofon@gmail.com>
+Signed-off-by: Sergey Bobrenok
 ---
  Make.Rules | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)
