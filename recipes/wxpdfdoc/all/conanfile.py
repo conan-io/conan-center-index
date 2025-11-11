@@ -14,7 +14,7 @@ class WxPdfDocConan(ConanFile):
     name = "wxpdfdoc"
     description = "wxPdfDocument allows wxWidgets applications to generate PDF documents."
     license = "WxWindows-exception-3.1"
-    url = "https://github.com/utelle/wxpdfdoc"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://utelle.github.io/wxpdfdoc/"
     topics = ("wxwidgets", "pdf")
     settings = "os", "compiler", "build_type", "arch"
