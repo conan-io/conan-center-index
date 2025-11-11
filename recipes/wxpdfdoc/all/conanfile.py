@@ -84,8 +84,6 @@ class WxPdfDocConan(ConanFile):
             copy(self, "*", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
             lib_dir = os.path.join(self.source_folder, "lib")
             subdirs = [d for d in os.listdir(lib_dir) if os.path.isdir(os.path.join(lib_dir, d))]
-            # Expecting one directory named something similar to "vc14x_x64_lib" and "fonts"
-            assert len(subdirs) == 2, f"Expected exactly two subdirectories in {lib_dir}, found: {subdirs}"
             subdirs = sorted([d for d in subdirs if d.endswith("_lib")])
             copy(self, "*", os.path.join(self.source_folder, "lib", subdirs[0]), os.path.join(self.package_folder, "lib"))
             platform = self._arch_to_msbuild_platform(self.settings.arch)
