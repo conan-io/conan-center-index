@@ -18,7 +18,6 @@ class WxPdfDocConan(ConanFile):
     homepage = "https://utelle.github.io/wxpdfdoc/"
     topics = ("wxwidgets", "pdf")
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = '*'
     package_type = "library"
     options = { "shared": [True, False], "fPIC": [True, False] }
     default_options = { "shared": False, "fPIC": True }
