@@ -13,3 +13,6 @@ patches:
     - patch_file: "patches/0003-cpp20-compat-alloc.patch"
       patch_description: "C++20 compatibility: remove usage of std::allocator<T>::construct & destroy"
       patch_type: "portability"
+    - patch_file: "patches/0004-cmake4-support.patch"
+      patch_description: "Remove deprecated CMake module FindPythonInterp"
+      patch_type: "portability"
