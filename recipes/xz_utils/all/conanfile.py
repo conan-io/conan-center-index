@@ -29,10 +29,12 @@ class XZUtilsConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_sandbox": [False, "auto", "capsicum", "pledge", "landlock"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_sandbox": "auto",
     }
 
     @property
@@ -98,6 +100,8 @@ class XZUtilsConan(ConanFile):
         elif self._use_cmake:
             tc = CMakeToolchain(self)
             tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+            if self.options.with_sandbox != 'auto':
+                tc.cache_variables["XZ_SANDBOX"] = self.options.with_sandbox or "no"
             tc.generate()
         else:
             env = VirtualBuildEnv(self)
@@ -106,6 +110,8 @@ class XZUtilsConan(ConanFile):
             tc.configure_args.append("--disable-doc")
             if self.settings.build_type == "Debug":
                 tc.configure_args.append("--enable-debug")
+            if self.options.with_sandbox != 'auto':
+                tc.configure_args.append("--with-sandbox={}".format(self.options.with_sandbox or "no"))
             tc.generate()
 
     @property
