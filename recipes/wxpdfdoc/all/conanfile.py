@@ -22,6 +22,7 @@ class WxPdfDocConan(ConanFile):
     options = { "shared": [True, False], "fPIC": [True, False] }
     default_options = { "shared": False, "fPIC": True }
     implements = ["auto_shared_fpic"]
+    exports_sources = '*'
 
     def _arch_to_msbuild_platform(self, arch):
         platform_map = {
@@ -103,7 +104,7 @@ class WxPdfDocConan(ConanFile):
             subdirs = sorted([d for d in subdirs if d.endswith("_lib")])
             copy(self, "*", os.path.join(self.source_folder, "lib", subdirs[0]), os.path.join(self.package_folder, "lib"))
             platform = self._arch_to_msbuild_platform(self.settings.arch)
-            copy(self, "*", os.path.join(self.source_folder, "build-release", "lib", self._msvc_version_str(), platform, str(self.settings.build_type)), os.path.join(self.package_folder, "lib"))
+            copy(self, "*", os.path.join(self.source_folder, "..", "build-release", "lib", self._msvc_version_str(), platform, str(self.settings.build_type)), os.path.join(self.package_folder, "lib"))
         else:
             autotools = Autotools(self)
             autotools.install()
@@ -114,6 +115,6 @@ class WxPdfDocConan(ConanFile):
 
     def package_info(self):
         if self.settings.os == "Windows":
-            self.cpp_info.libs = ["wxpdfdoc"]
+            self.cpp_info.libs = ["wxpdfdoc", "libwoff2", "libzint"]
         else:
             self.cpp_info.libs = ["wxcode_gtk2u_pdfdoc-3.2"]
