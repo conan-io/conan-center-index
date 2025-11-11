@@ -32,7 +32,7 @@ class WxPdfDocConan(ConanFile):
 
     def requirements(self):
         # Supports 3.0.x, 3.1.x and 3.2.x as defined in the repository readme
-        self.requires("wxwidgets/[>=3.0.0 <3.3]", transitive_headers=True, transitive_libs=True)
+        self.requires("wxwidgets/[>=3.2.5 <3.3]", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         if self.settings.os == "Windows":
