@@ -120,5 +120,7 @@ class WxSqLite3Conan(ConanFile):
     def package_info(self):
         if self.settings.os == "Windows":
             self.cpp_info.libs = ["wxsqlite3"]
+        if self.settings.os == "Macos":
+            self.cpp_info.libs = ["wxcode_osx_cocoau_wxsqlite3-3.2"]
         else:
             self.cpp_info.libs = ["wxcode_gtk2u_wxsqlite3-3.2"]
