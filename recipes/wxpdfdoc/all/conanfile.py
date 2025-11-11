@@ -57,6 +57,7 @@ class WxPdfDocConan(ConanFile):
     def _msvc_version_str(self) -> str:
         version_map = {
             "193": "vc17",
+            "194": "vc17",
         }
         version = version_map.get(str(self.settings.compiler.version))
         if not version:
