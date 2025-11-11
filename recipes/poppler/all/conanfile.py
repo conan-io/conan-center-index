@@ -57,6 +57,7 @@ class PopplerConan(ConanFile):
         # "with_gobject_introspection": True,
         # "float": False,
     }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
