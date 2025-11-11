@@ -105,7 +105,7 @@ class QtConan(ConanFile):
         "with_openal": True,
         "with_gstreamer": False,
         "with_pulseaudio": False,
-        "with_gssapi": True,
+        "with_gssapi": False,
         "with_md4c": True,
         "with_x11": True,
         "with_egl": False,
