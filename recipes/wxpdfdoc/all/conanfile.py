@@ -35,7 +35,8 @@ class WxPdfDocConan(ConanFile):
         self.requires("wxwidgets/[>=3.0.0 <3.3]", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
-        self.tool_requires("premake/5.0.0-beta7")
+        if self.settings.os == "Windows":
+            self.tool_requires("premake/5.0.0-beta7")
 
     def generate(self):
         if self.settings.os == "Windows":
