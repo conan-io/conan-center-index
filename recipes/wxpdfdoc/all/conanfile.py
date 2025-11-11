@@ -65,6 +65,8 @@ class WxPdfDocConan(ConanFile):
     def build_requirements(self):
         if self.settings.os == "Windows":
             self.tool_requires("premake/5.0.0-beta7")
+        else:
+            self.tool_requires("libtool/2.4.7")
 
     def generate(self):
         if self.settings.os == "Windows":
