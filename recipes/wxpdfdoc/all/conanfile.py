@@ -20,8 +20,9 @@ class WxPdfDocConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = '*'
     package_type = "library"
-    options = { "shared": [True, False] }
-    default_options = { "shared": False }
+    options = { "shared": [True, False], "fPIC": [True, False] }
+    default_options = { "shared": False, "fPIC": True }
+    implements = ["auto_shared_fpic"]
     generators = "AutotoolsDeps", "AutotoolsToolchain"
 
     def layout(self):
