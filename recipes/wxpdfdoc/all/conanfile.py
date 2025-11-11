@@ -99,5 +99,4 @@ class WxPdfDocConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.libs = ["wxpdfdoc", "libwoff2", "libzint"]
         else:
-            # Collect libraries with names like "wxcode_gtk2u_pdfdoc-3.2"
-            self.cpp_info.libs = collect_libs(self, folder="lib")
+            self.cpp_info.libs = ["wxcode_gtk2u_pdfdoc-3.2"]
