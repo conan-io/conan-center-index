@@ -23,7 +23,7 @@ class WxSqLite3Conan(ConanFile):
     default_options = { "shared": False, "fPIC": True }
     implements = ["auto_shared_fpic"]
 
-    def _arch_to_msbuild_platform(self, arch) -> str | None:
+    def _arch_to_msbuild_platform(self, arch):
         platform_map = {
             "x86": "Win32",
             "x86_64": "Win64",
@@ -31,7 +31,7 @@ class WxSqLite3Conan(ConanFile):
         platform = platform_map.get(str(arch))
         return platform
 
-    def _msvc_version_str(self, compiler_version = None) -> str | None:
+    def _msvc_version_str(self, compiler_version = None):
         if compiler_version is None:
             compiler_version = self.settings.compiler.version
 
