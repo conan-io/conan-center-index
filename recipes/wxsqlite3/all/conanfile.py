@@ -5,6 +5,7 @@ from conan.tools.files import copy, get, rmdir, rm, export_conandata_patches, ap
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.apple import fix_apple_shared_install_name
 
 required_conan_version = ">=2.1"
 
@@ -79,6 +80,7 @@ class WxSqLite3Conan(ConanFile):
             autotools.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            fix_apple_shared_install_name(self)
 
         license_files = [
             "COPYING.txt",
