@@ -108,7 +108,6 @@ class WaylandConan(ConanFile):
             configure_meson_toolchain(tc_cross)
             tc_cross.generate()
 
-
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
                         "subdir('tests')", "#subdir('tests')")
@@ -133,7 +132,9 @@ class WaylandConan(ConanFile):
         self.cpp_info.components["wayland-scanner"].libdirs = []
         self.cpp_info.components["wayland-scanner"].set_property("component_version", self.version)
         self.cpp_info.components["wayland-scanner"].requires = ["expat::expat"]
-        self.buildenv_info.prepend_path("PATH", os.path.join(self.package_folder, "bin"))
+        bin_dir = os.path.join(self.package_folder, "bin")
+        self.buildenv_info.prepend_path("PATH", bin_dir)
+        self.runenv_info.prepend_path("PATH", bin_dir)
 
         if self.options.enable_dtd_validation:
             self.cpp_info.components["wayland-scanner"].requires.append("libxml2::libxml2")

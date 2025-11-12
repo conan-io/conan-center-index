@@ -45,7 +45,7 @@ class TestPackageConan(ConanFile):
                 self.run(bin_path, env="conanrun")
 
             buffer = StringIO()
-            self.run(f"wayland-scanner --version", env="conanbuild", stderr=buffer)
+            self.run(f"wayland-scanner --version", env="conanrun", stderr=buffer)
             output = buffer.getvalue().strip()
             self.output.info(f"Wayland scanner output: {output}")
             actual_version = output.split()[-1]
