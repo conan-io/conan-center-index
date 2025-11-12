@@ -63,7 +63,7 @@ class WxSqLite3Conan(ConanFile):
         if self.settings.os == "Windows":
             cmake = CMake(self)
             cmake.configure(build_script_folder=os.path.join(self.source_folder, "build"))
-            cmake.build()
+            cmake.build(target="wxsqlite3")
         else:
             autotools = Autotools(self)
             autotools.autoreconf()
