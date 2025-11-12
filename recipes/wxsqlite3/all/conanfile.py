@@ -101,6 +101,7 @@ class WxSqLite3Conan(ConanFile):
             lib_dir = os.path.join(self.source_folder, "lib")
             subdirs = [d for d in os.listdir(lib_dir) if os.path.isdir(os.path.join(lib_dir, d))]
             copy(self, "*", os.path.join(lib_dir, subdirs[0]), os.path.join(self.package_folder, "lib"))
+            rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         else:
             autotools = Autotools(self)
             autotools.install()
@@ -122,7 +123,7 @@ class WxSqLite3Conan(ConanFile):
     def package_info(self):
         if self.settings.os == "Windows":
             self.cpp_info.libs = ["wxsqlite3"]
-        if self.settings.os == "Macos":
+        elif self.settings.os == "Macos":
             self.cpp_info.libs = ["wxcode_osx_cocoau_wxsqlite3-3.2"]
         else:
             self.cpp_info.libs = ["wxcode_gtk2u_wxsqlite3-3.2"]
