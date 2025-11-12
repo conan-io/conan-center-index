@@ -1,6 +1,8 @@
 from conan import ConanFile
+from conan.errors import ConanException
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
@@ -52,6 +54,9 @@ class CoinLemonConan(ConanFile):
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         # To install relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "1.3.1": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
     def _patch_sources(self):
@@ -63,6 +68,9 @@ class CoinLemonConan(ConanFile):
             "IF(${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR})",
             "if(0)",
         )
+        # Remove deprecated FindPythonInterp which is no longer supported by newer CMake versions
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "CMAKE_POLICY(SET CMP0048 OLD)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "INCLUDE(FindPythonInterp)", "")
 
     def build(self):
         self._patch_sources()
