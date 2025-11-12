@@ -1,13 +1,12 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import copy, get, rmdir, rm
+from conan.tools.files import copy, get, rmdir, rm, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
-from conan.tools.layout import basic_layout
-from conan.tools.premake import Premake, PremakeDeps, PremakeToolchain
+from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 
-required_conan_version = ">=2.19.0"
+required_conan_version = ">=2.1"
 
 class WxSqLite3Conan(ConanFile):
     name = "wxsqlite3"
@@ -23,56 +22,32 @@ class WxSqLite3Conan(ConanFile):
     default_options = { "shared": False, "fPIC": True }
     implements = ["auto_shared_fpic"]
 
-    def _arch_to_msbuild_platform(self, arch):
-        platform_map = {
-            "x86": "Win32",
-            "x86_64": "Win64",
-        }
-        platform = platform_map.get(str(arch))
-        return platform
-
-    def _msvc_version_str(self, compiler_version = None):
-        if compiler_version is None:
-            compiler_version = self.settings.compiler.version
-
-        version_map = {
-            "193": "vc17",
-            "194": "vc17",
-        }
-        version = version_map.get(str(compiler_version))
-        return version
-
-    def validate(self):
-        if self.settings.os == "Windows":
-            platform = self._arch_to_msbuild_platform(self.settings.arch)
-            if not platform:
-                raise ConanInvalidConfiguration(f"Unsupported architecture: {self.settings.arch}")
-
-            version = self._msvc_version_str()
-            if not version:
-                raise ConanInvalidConfiguration(f"Unimplemented compiler version: {self.settings.compiler.version}")
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def requirements(self):
         # https://github.com/utelle/wxsqlite3/blob/v4.10.8/premake/wxwidgets.lua#L146
         self.requires("wxwidgets/[>=3.2.5 <3.3]", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
-        if self.settings.os == "Windows":
-            self.tool_requires("premake/5.0.0-beta7")
-        else:
+        if self.settings.os != "Windows":
             self.tool_requires("libtool/2.4.7")
 
     def generate(self):
         if self.settings.os == "Windows":
-            deps = PremakeDeps(self)
+            deps = CMakeDeps(self)
             deps.generate()
-            tc = PremakeToolchain(self)
+            tc = CMakeToolchain(self)
+            tc.cache_variables["WXSQLITE3_BUILD_SHARED"] = self.options.shared
+            tc.cache_variables["STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+            tc.cache_variables["PEDANTIC_COMPILER_FLAGS"] = False
             tc.generate()
         else:
             wxwidgets_root = self.dependencies["wxwidgets"].package_folder
@@ -85,10 +60,9 @@ class WxSqLite3Conan(ConanFile):
 
     def build(self):
         if self.settings.os == "Windows":
-            premake = Premake(self)
-            premake.configure()
-            platform = self._arch_to_msbuild_platform(self.settings.arch)
-            premake.build(workspace=f"wxsqlite3_{self._msvc_version_str()}", targets=["wxsqlite3"], msbuild_platform=platform)
+            cmake = CMake(self)
+            cmake.configure(build_script_folder=os.path.join(self.source_folder, "build"))
+            cmake.build()
         else:
             autotools = Autotools(self)
             autotools.autoreconf()
@@ -98,10 +72,8 @@ class WxSqLite3Conan(ConanFile):
     def package(self):
         if self.settings.os == "Windows":
             copy(self, "*", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
-            lib_dir = os.path.join(self.source_folder, "lib")
-            subdirs = [d for d in os.listdir(lib_dir) if os.path.isdir(os.path.join(lib_dir, d))]
-            copy(self, "*", os.path.join(lib_dir, subdirs[0]), os.path.join(self.package_folder, "lib"))
-            rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+            copy(self, "*.lib", self.build_folder, os.path.join(self.package_folder, "lib"))
+            copy(self, "*.dll", self.build_folder, os.path.join(self.package_folder, "bin"))
         else:
             autotools = Autotools(self)
             autotools.install()
