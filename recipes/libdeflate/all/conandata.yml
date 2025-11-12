@@ -1,25 +1,7 @@
 sources:
-  "1.23":
-    url: "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.23.tar.gz"
-    sha256: "1ab18349b9fb0ce8a0ca4116bded725be7dcbfa709e19f6f983d99df1fb8b25f"
+  "1.25":
+    url: "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.25.tar.gz"
+    sha256: "d11473c1ad4c57d874695e8026865e38b47116bbcb872bfc622ec8f37a86017d"
   "1.22":
     url: "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.22.tar.gz"
     sha256: "7f343c7bf2ba46e774d8a632bf073235e1fd27723ef0a12a90f8947b7fe851d6"
-  "1.21":
-    url: "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.21.tar.gz"
-    sha256: "50827d312c0413fbd41b0628590cd54d9ad7ebf88360cba7c0e70027942dbd01"
-  "1.20":
-    url: "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.20.tar.gz"
-    sha256: "ed1454166ced78913ff3809870a4005b7170a6fd30767dc478a09b96847b9c2a"
-  "1.19":
-    url: "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.19.tar.gz"
-    sha256: "27bf62d71cd64728ff43a9feb92f2ac2f2bf748986d856133cc1e51992428c25"
-  "1.18":
-    url: "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.18.tar.gz"
-    sha256: "225d982bcaf553221c76726358d2ea139bb34913180b20823c782cede060affd"
-  "1.17":
-    url: "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.17.tar.gz"
-    sha256: "fa4615af671513fa2a53dc2e7a89ff502792e2bdfc046869ef35160fcc373763"
-  "1.15":
-    url: "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.15.tar.gz"
-    sha256: "58b95040df7383dc0413defb700d9893c194732474283cc4c8f144b00a68154b"

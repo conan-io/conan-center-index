@@ -128,9 +128,9 @@ class CairoConan(ConanFile):
                 )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.4.0")
+        self.tool_requires("meson/[>=1.4.0 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.1.0 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

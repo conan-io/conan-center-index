@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, replace_in_file, copy, rmdir, collect_libs, rm
+from conan.tools.files import get, replace_in_file, copy, rmdir, collect_libs, rm, apply_conandata_patches, export_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -69,6 +69,9 @@ class DlibConan(ConanFile):
     def _has_with_webp_option(self):
         return Version(self.version) >= "19.24"
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
@@ -90,15 +93,15 @@ class DlibConan(ConanFile):
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
         if self.options.with_jpeg:
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         if self.options.with_png:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.get_safe("with_webp"):
             self.requires("libwebp/1.3.2")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.45.0")
+            self.requires("sqlite3/[>=3.45.0 <4]")
         if self.options.with_openblas:
-            self.requires("openblas/0.3.26")
+            self.requires("openblas/0.3.30")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -113,6 +116,7 @@ class DlibConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def _patch_sources(self):
         dlib_cmakelists = os.path.join(self.source_folder, "dlib", "CMakeLists.txt")
@@ -209,6 +213,6 @@ class DlibConan(ConanFile):
         # INFO: Unix systems use dlib as library name, but on Windows it includes settings, e.g dlib19.24.0_release_64bit_msvc1933.lib
         self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread", "nsl"]
+            self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32", "winmm", "comctl32", "gdi32", "imm32"]

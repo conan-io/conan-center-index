@@ -372,10 +372,6 @@ class QtConan(ConanFile):
             # https://bugreports.qt.io/browse/QTBUG-95952
             raise ConanInvalidConfiguration("Pulseaudio needs to be built with glib option or qt's configure script won't detect it")
 
-        if self.settings.os in ['Linux', 'FreeBSD']:
-            if self.options.with_gssapi:
-                raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
-
         if self.options.get_safe("with_x11", False) and not self.dependencies.direct_host["xkbcommon"].options.with_x11:
             raise ConanInvalidConfiguration("The 'with_x11' option for the 'xkbcommon' package must be enabled when the 'with_x11' option is enabled")
         if self.options.get_safe("qtwayland", False) and not self.dependencies.direct_host["xkbcommon"].options.with_wayland:
@@ -460,7 +456,7 @@ class QtConan(ConanFile):
         if self.options.qtwayland:
             self.requires("wayland/1.22.0")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
-            self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
+            self.requires("krb5/1.21.2")
         if self.options.get_safe("with_atspi"):
             self.requires("at-spi2-core/2.51.0")
         if self.options.get_safe("with_md4c", False):
@@ -866,7 +862,7 @@ class QtConan(ConanFile):
         if self.settings.compiler == "apple-clang" and self.options.qtmultimedia:
             # XCode 14.3 finally removes std::unary_function, so compilation fails
             # when using newer SDKs when using C++17 or higher.
-            # This macro re-enables them. Should be safe to pass this macro even 
+            # This macro re-enables them. Should be safe to pass this macro even
             # in earlier versions, as it would have no effect.
             args += ['QMAKE_CXXFLAGS+="-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION=1"']
 
@@ -1058,6 +1054,7 @@ Prefix = ..""")
             componentname = f"qt{module}"
             assert componentname not in self.cpp_info.components, f"Module {module} already present in self.cpp_info.components"
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt5::{module}")
+            self.cpp_info.components[componentname].set_property("cmake_target_aliases", [f"Qt::{module}"])
             self.cpp_info.components[componentname].set_property("pkg_config_name", f"Qt5{module}")
             self.cpp_info.components[componentname].names["cmake_find_package"] = module
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = module
@@ -1084,6 +1081,7 @@ Prefix = ..""")
             componentname = f"qt{pluginname}"
             assert componentname not in self.cpp_info.components, f"Plugin {pluginname} already present in self.cpp_info.components"
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt5::{pluginname}")
+            self.cpp_info.components[componentname].set_property("cmake_target_aliases", [f"Qt::{pluginname}"])
             self.cpp_info.components[componentname].names["cmake_find_package"] = pluginname
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
             if not self.options.shared:
@@ -1120,6 +1118,7 @@ Prefix = ..""")
             module = "WinMain"
             componentname = f"qt{module}"
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt5::{module}")
+            self.cpp_info.components[componentname].set_property("cmake_target_aliases", [f"Qt::{module}"])
             self.cpp_info.components[componentname].names["cmake_find_package"] = module
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = module
             self.cpp_info.components[componentname].libs = [f"qtmain{libsuffix}"]
@@ -1285,6 +1284,7 @@ Prefix = ..""")
             _add_build_module("qtQml", self._cmake_qt5_private_file("Qml"))
             _create_module("QmlModels", ["Qml"])
             self.cpp_info.components["qtQmlImportScanner"].set_property("cmake_target_name", "Qt5::QmlImportScanner")
+            self.cpp_info.components["qtQmlImportScanner"].set_property("cmake_target_aliases", ["Qt::QmlImportScanner"])
             self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package"] = "QmlImportScanner" # this is an alias for Qml and there to integrate with existing consumers
             self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package_multi"] = "QmlImportScanner"
             self.cpp_info.components["qtQmlImportScanner"].requires = _get_corrected_reqs(["Qml"])
@@ -1299,6 +1299,7 @@ Prefix = ..""")
 
         if self.options.qttools and self.options.gui and self.options.widgets:
             self.cpp_info.components["qtLinguistTools"].set_property("cmake_target_name", "Qt5::LinguistTools")
+            self.cpp_info.components["qtLinguistTools"].set_property("cmake_target_aliases", ["Qt::LinguistTools"])
             self.cpp_info.components["qtLinguistTools"].names["cmake_find_package"] = "LinguistTools"
             self.cpp_info.components["qtLinguistTools"].names["cmake_find_package_multi"] = "LinguistTools"
             _create_module("UiPlugin", ["Gui", "Widgets"])

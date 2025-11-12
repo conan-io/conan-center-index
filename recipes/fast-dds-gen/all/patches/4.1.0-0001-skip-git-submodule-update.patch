@@ -1,0 +1,20 @@
+--- a/build.gradle
++++ b/build.gradle
+@@ -96,17 +96,11 @@ dependencies {
+     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.5.2')
+ }
+
+-task submodulesUpdate(type: Exec) {
+-    description 'Updates (and inits) git submodules'
+-    commandLine 'git', 'submodule', 'update', '--init'
+-}
+-
+ task buildIDLParser(type: GradleBuild) {
+     dir = 'thirdparty/idl-parser'
+     tasks = ['clean', 'build']
+ }
+-buildIDLParser.dependsOn submodulesUpdate
+
+ task copyResources {
+     // Copy platforms file
+     File outputDir = file(new File("${project.buildDir}", "resources/main"))

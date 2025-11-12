@@ -1,40 +1,8 @@
 sources:
-  "0.9.8":
-    url: "https://github.com/HappySeaFox/sail/archive/v0.9.8.tar.gz"
-    sha256: "ba2160f0825171ab3c41cbc5bb0834bf56439d2986e5aae5f586d5e2009dd9cd"
-  "0.9.6":
-    url: "https://github.com/HappySeaFox/sail/archive/v0.9.6.tar.gz"
-    sha256: "4e46b1a5cd0e23f78fbeef085340779c9d4a7d5dd731ffd1df8fdfb343befbc4"
-  "0.9.5":
-    url: "https://github.com/HappySeaFox/sail/archive/v0.9.5.tar.gz"
-    sha256: "28c601c0399be1940710afc150b5836f8b3f5f6a35b98d7ac1467e62bc568e20"
-  "0.9.4":
-    url: "https://github.com/HappySeaFox/sail/archive/v0.9.4.tar.gz"
-    sha256: "9a8b93c15c4a1afe07c760d2087895a18626034f55917f333aaabe9c9704438f"
-  "0.9.1":
-    url: "https://github.com/HappySeaFox/sail/archive/v0.9.1.tar.gz"
-    sha256: "d02ce889b70d9e237b64806df26b044753e3edf3e87c8af42c32ec9968133a88"
-  "0.9.0":
-    url: "https://github.com/HappySeaFox/sail/archive/v0.9.0.tar.gz"
-    sha256: "892738e0f56fed8c6387e1045bba2bfbf1b095024a495845d4879edb310cd1a7"
+  "0.9.10":
+    url: "https://github.com/HappySeaFox/sail/archive/v0.9.10.tar.gz"
+    sha256: "dc0d6fa87cb4fa8b514f450a3fb13cee6e3e60f03250f683564fabbec0f722e3"
 patches:
-  "0.9.6":
-    - patch_file: "patches/0.9.1-fix-libjxl-find.patch"
-      patch_description: "Fix find_package on libjxl dependency"
-      patch_type: "conan"
-  "0.9.5":
-    - patch_file: "patches/0.9.1-fix-libjxl-find.patch"
-      patch_description: "Fix find_package on libjxl dependency"
-      patch_type: "conan"
-  "0.9.4":
-    - patch_file: "patches/0.9.1-fix-libjxl-find.patch"
-      patch_description: "Fix find_package on libjxl dependency"
-      patch_type: "conan"
-  "0.9.1":
-    - patch_file: "patches/0.9.1-fix-libjxl-find.patch"
-      patch_description: "Fix find_package on libjxl dependency"
-      patch_type: "conan"
-  "0.9.0":
-    - patch_file: "patches/0.9.0-fix-libjxl-find.patch"
-      patch_description: "Fix find_package on libjxl dependency"
-      patch_type: "conan"
+  "0.9.10":
+    - patch_file: "patches/01-let-conan-handle-msvc-runtime.patch"
+    - patch_file: "patches/02-libjxl-use-find-package.patch"
