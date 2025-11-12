@@ -73,8 +73,8 @@ class WxSqLite3Conan(ConanFile):
     def package(self):
         if self.settings.os == "Windows":
             copy(self, "*", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
-            copy(self, "*.lib", self.build_folder, os.path.join(self.package_folder, "lib"))
-            copy(self, "*.dll", self.build_folder, os.path.join(self.package_folder, "bin"))
+            copy(self, "*.lib", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "*.dll", self.build_folder, os.path.join(self.package_folder, "bin"), keep_path=False)
         else:
             autotools = Autotools(self)
             autotools.install()
