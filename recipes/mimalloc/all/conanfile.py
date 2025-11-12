@@ -128,7 +128,7 @@ class MimallocConan(ConanFile):
         tc.variables["MI_OVERRIDE"] = "ON" if self.options.override else "OFF"
         tc.variables["MI_SECURE"] = "ON" if self.options.secure else "OFF"
         tc.variables["MI_WIN_REDIRECT"] = "ON" if self.options.get_safe("win_redirect") else "OFF"
-        tc.variables["MI_LOCAL_DYNAMIC_TLS"] = "ON" if self.options.get_safe("dynamic_tls") else "OFF"
+        tc.variables["MI_LOCAL_DYNAMIC_TLS"] = "ON" if self.options.dynamic_tls else "OFF"
         tc.variables["MI_INSTALL_TOPLEVEL"] = "ON"
         tc.variables["MI_GUARDED"] = self.options.get_safe("guarded", False)
         if Version(self.version) <= "1.7.6":
