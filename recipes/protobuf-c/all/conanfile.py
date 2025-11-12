@@ -58,7 +58,10 @@ class ProtobufCConan(ConanFile):
             self.tool_requires("cmake/[>=3.19 <4]")
 
     def requirements(self):
-        self.requires("protobuf/[>=3.21.9 <=6.32.1]")
+        if Version(self.version) >= "1.5.2":
+            self.requires("protobuf/[>=3.21.9 <=6.30.1]")
+        else:
+            self.requires("protobuf/[>=3.21.9 <=3.21.12]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
