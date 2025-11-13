@@ -1,17 +1,24 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f10f9b0..85b6df9 100644
+index f10f9b0..461ee6a 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -47,7 +47,7 @@ string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VER
+@@ -47,7 +47,6 @@ string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VER
  set(POPPLER_MICRO_VERSION "0")
  set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION_STRING}.${POPPLER_MICRO_VERSION}")
  
 -set(CMAKE_CXX_STANDARD 20)
-+
  set(CMAKE_CXX_STANDARD_REQUIRED ON)
  set(CMAKE_CXX_EXTENSIONS OFF)
  set(CMAKE_C_STANDARD 17)
-@@ -165,7 +165,7 @@ endif()
+@@ -94,7 +93,6 @@ else()
+ endif()
+ option(EXTRA_WARN "Enable extra compile warnings" OFF)
+ 
+-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+ 
+ set(TESTDATADIR "${CMAKE_SOURCE_DIR}/../test" CACHE STRING "Specify test data dir.")
+ if(NOT (EXISTS ${TESTDATADIR} AND EXISTS ${TESTDATADIR}/test-poppler.c))
+@@ -165,7 +163,7 @@ endif()
  
  macro(find_soft_mandatory_package _enable_option _package_name _package_version)
    if(${_enable_option})
