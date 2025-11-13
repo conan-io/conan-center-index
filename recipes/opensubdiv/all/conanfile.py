@@ -40,7 +40,7 @@ class OpenSubdivConan(ConanFile):
         "with_clew": False,
         "with_opencl": False,
         "with_dx": False,
-        "with_metal": True
+        "with_metal": False
     }
 
     short_paths = True
