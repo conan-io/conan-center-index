@@ -71,6 +71,8 @@ class OpenSubdivConan(ConanFile):
             del self.options.with_dx
         if self.settings.os != "Macos":
             del self.options.with_metal
+        if Version(self.version) >= "3.7.0":
+            self.license = "DocumentRef-LICENSE.txt:LicenseRef-Tomorrow-Open-Source-Technology"
 
     def configure(self):
         if self.options.shared:
