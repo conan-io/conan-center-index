@@ -3,6 +3,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
 
@@ -66,7 +67,10 @@ class PackageConan(ConanFile):
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.libdirs = [os.path.join("lib", "smtpclient")]
+        # For <=1.1.11 the libs were under lib/smtpclient
+        if Version(self.version) < "1.1.12":
+            self.cpp_info.libdirs = [os.path.join("lib", "smtpclient")]
+        # For 1.1.12+ use the default ("lib"), so no override needed.
         self.cpp_info.libs = ["smtpclient"]
         self.cpp_info.set_property("cmake_module_file_name", "smtpclient")
         self.cpp_info.set_property("cmake_module_target_name", "smtpclient::smtpclient")

@@ -11,11 +11,7 @@ This file is intended to provide all the commands you need to run in order to be
   * [Basic Commands](#basic-commands)
     * [Try it yourself](#try-it-yourself)
   * [Debugging Failed Builds](#debugging-failed-builds)
-  * [Running the Python Linters](#running-the-python-linters)
-  * [Running the YAML Linters](#running-the-yaml-linters)
-    * [Yamllint](#yamllint)
-    * [Yamlschema](#yamlschema)
-  * [Testing the different `test__package`](#testing-the-different-test__package)
+  * [Testing](#testing)
   * [Testing more environments](#testing-more-environments)
       * [Docker build images used by ConanCenterIndex](#docker-build-images-used-by-conancenterindex)<!-- endToc -->
 

@@ -1,0 +1,6 @@
+module TestModule {
+    struct TestStruct {
+        string message;
+        long id;
+    };
+};

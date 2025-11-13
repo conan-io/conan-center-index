@@ -1,28 +1,4 @@
 sources:
-  "3.10.0":
-    url: "https://github.com/catchorg/Catch2/archive/v3.10.0.tar.gz"
-    sha256: "fc4303a5c2738beaa727066e126b5a28837a812230a3c5826caa38e7ab99ca48"
-  "3.9.1":
-    url: "https://github.com/catchorg/Catch2/archive/v3.9.1.tar.gz"
-    sha256: "a215c2a723bd7483efd236dc86066842a389cb4e344c61119c978acdf24d39be"
-  "3.9.0":
-    url: "https://github.com/catchorg/Catch2/archive/v3.9.0.tar.gz"
-    sha256: "8061daf97429621bc62096841af02fc40070fad26cd04c93ee0b5a825cedb122"
-  "3.8.1":
-    url: "https://github.com/catchorg/Catch2/archive/v3.8.1.tar.gz"
-    sha256: "18b3f70ac80fccc340d8c6ff0f339b2ae64944782f8d2fca2bd705cf47cadb79"
-  "3.8.0":
-    url: "https://github.com/catchorg/Catch2/archive/v3.8.0.tar.gz"
-    sha256: "1ab2de20460d4641553addfdfe6acd4109d871d5531f8f519a52ea4926303087"
-  "3.7.1":
-    url: "https://github.com/catchorg/Catch2/archive/v3.7.1.tar.gz"
-    sha256: "c991b247a1a0d7bb9c39aa35faf0fe9e19764213f28ffba3109388e62ee0269c"
-  "3.6.0":
-    url: "https://github.com/catchorg/Catch2/archive/v3.6.0.tar.gz"
-    sha256: "485932259a75c7c6b72d4b874242c489ea5155d17efa345eb8cc72159f49f356"
-  "3.5.4":
-    url: "https://github.com/catchorg/Catch2/archive/v3.5.4.tar.gz"
-    sha256: "b7754b711242c167d8f60b890695347f90a1ebc95949a045385114165d606dbb"
-  "3.4.0":
-    url: "https://github.com/catchorg/Catch2/archive/v3.4.0.tar.gz"
-    sha256: "122928b814b75717316c71af69bd2b43387643ba076a6ec16e7882bfb2dfacbb"
+  "3.11.0":
+    url: "https://github.com/catchorg/Catch2/archive/v3.11.0.tar.gz"
+    sha256: "82fa1cb59dc28bab220935923f7469b997b259eb192fb9355db62da03c2a3137"
