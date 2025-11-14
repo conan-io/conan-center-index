@@ -61,6 +61,10 @@ sources:
     sha256: "8681f175d4bdb26c52222665793eef08490d7758529330f98d3b29dd0735bccc"
 patches:
   "1.89.0":
+    - patch_file: "patches/1.89.0-cobalt-io-include-guard.patch"
+      patch_description: "correct the include guard of random_access_device.hpp"
+      patch_type: "backport"
+      patch_source: "https://github.com/boostorg/cobalt/pull/248"
     - patch_file: "patches/1.88.0-locale-iconv-library-option.patch"
       patch_description: "Optional flag to specify iconv from either libc of libiconv"
       patch_type: "conan"
