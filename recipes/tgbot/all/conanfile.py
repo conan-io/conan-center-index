@@ -6,7 +6,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class TgbotConan(ConanFile):
