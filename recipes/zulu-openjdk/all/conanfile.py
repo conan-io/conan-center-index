@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy
 import os
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=1.53.0"
 
 class ZuluOpenJDK(ConanFile):
     name = "zulu-openjdk"
@@ -13,24 +13,32 @@ class ZuluOpenJDK(ConanFile):
     homepage = "https://www.azul.com"
     topics = ("java", "jdk", "openjdk")
     package_type = "application"
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler", "build_type"
+
+    @property
+    def _jni_folder(self):
+        folder = {"Linux": "linux", "Macos": "darwin",
+                  "Windows": "win32", "SunOS": "solaris"}.get(str(self.settings.os))
+        return os.path.join("include", folder)
+
+    def package_id(self):
+        del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def validate(self):
-        supported_archs = ["x86_64", "armv8"]
-        if self.settings.arch not in supported_archs:
-            raise ConanInvalidConfiguration(f"Unsupported Architecture ({self.settings.arch}). "
-                                            f"This version {self.version} currently only supports {supported_archs}.")
-        supported_os = ["Windows", "Macos", "Linux"]
-        if self.settings.os not in supported_os:
+        srcs = self.conan_data["sources"].get(self.version, {}).get(str(self.settings.os))
+        if srcs is None:
             raise ConanInvalidConfiguration(f"Unsupported os ({self.settings.os}). "
-                                            f"This package currently only support {supported_os}.")
-
-    def source(self):
-        # we don't have sources, and we can't download binaries here because they depend on settings
-        pass
+                                            f"This version {self.version} currently does not support"
+                                            f" {self.settings.arch} on {self.settings.os})")
+        if srcs.get(str(self.settings.arch)) is None:
+            raise ConanInvalidConfiguration(f"Unsupported Architecture ({self.settings.arch}). "
+                                            f"This version {self.version} currently does not support"
+                                            f" {self.settings.arch} on {self.settings.os})")
 
     def build(self):
-        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)]
+            [str(self.settings.arch)], strip_root=True, keep_permissions=True)
 
     def package(self):
         copy(self, pattern="*", dst=os.path.join(self.package_folder, "bin"),
@@ -53,10 +61,16 @@ class ZuluOpenJDK(ConanFile):
              src=os.path.join(self.source_folder, "jmods"))
 
     def package_info(self):
-        include_folder = {"Linux": "linux", "Macos": "darwin", "Windows": "win32"}.get(str(self.settings.os))
-        self.cpp_info.includedirs.append(os.path.join("include", include_folder))
+        self.cpp_info.includedirs.append(self._jni_folder)
         self.cpp_info.libdirs = []
 
         java_home = self.package_folder
+        bin_path = os.path.join(java_home, "bin")
+
+        self.output.info(f"Creating JAVA_HOME environment variable with : {java_home}")
+        self.env_info.JAVA_HOME = java_home
         self.buildenv_info.define_path("JAVA_HOME", java_home)
         self.runenv_info.define_path("JAVA_HOME", java_home)
+
+        self.output.info(f"Appending PATH environment variable with : {bin_path}")
+        self.env_info.PATH.append(bin_path)
