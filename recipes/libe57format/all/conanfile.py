@@ -71,6 +71,8 @@ class LibE57FormatConan(ConanFile):
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "POSITION_INDEPENDENT_CODE ON", "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "include( ccache )", "")
         if Version(self.version) >= "3.0":
             # Disable compiler warnings, which cause older versions of GCC to fail due to unrecognized flags
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "CompilerWarnings.cmake"),
