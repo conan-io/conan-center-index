@@ -96,3 +96,5 @@ class TgbotConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["ws2_32"])
