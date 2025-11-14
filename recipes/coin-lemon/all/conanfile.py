@@ -68,6 +68,9 @@ class CoinLemonConan(ConanFile):
             "IF(${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR})",
             "if(0)",
         )
+        # Remove deprecated FindPythonInterp which is no longer supported by newer CMake versions
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "CMAKE_POLICY(SET CMP0048 OLD)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "INCLUDE(FindPythonInterp)", "")
 
     def build(self):
         self._patch_sources()

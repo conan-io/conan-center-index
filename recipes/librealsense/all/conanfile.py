@@ -1,10 +1,11 @@
 from conan import ConanFile
-from conan.errors import ConanException
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 import urllib
 
@@ -33,8 +34,6 @@ class LibrealsenseConan(ConanFile):
         "rsusb_backend": True, # TODO: change to False when CI gets MSVC ATL support
     }
 
-    short_paths = True
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -53,10 +52,15 @@ class LibrealsenseConan(ConanFile):
 
     def requirements(self):
         self.requires("libusb/1.0.26")
+        if Version(self.version) >= "2.56.5":
+            self.requires("nlohmann_json/[~3.11]")
+            self.requires("lz4/1.9.4")
+            # TODO: unvendor xxhash, tclap, etc
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 14)
+        check_min_cppstd(self, 14)
+        if self.settings.os == "Windows" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("librealsense does not support Windows on ARM due to lack of SSSE3 support")
 
     def source(self):
         sources = self.conan_data["sources"][self.version]
@@ -95,9 +99,12 @@ class LibrealsenseConan(ConanFile):
         tc.variables["BUILD_CV_KINFU_EXAMPLE"] = False
         if self.settings.os == "Windows":
             tc.variables["FORCE_RSUSB_BACKEND"] = self.options.rsusb_backend
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if Version(self.version) > "2.53.1": # pylint: disable=conan-unreachable-upper-version
-            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
+        if Version(self.version) < "2.56.5":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
+        else:
+            tc.cache_variables["USE_EXTERNAL_LZ4"] = True
+            if self.settings.arch == "armv8":
+                tc.preprocessor_definitions["USE_SOFT_INTRINSICS"] = "1"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -105,6 +112,13 @@ class LibrealsenseConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        if is_apple_os(self) and self.settings.arch in ("armv8", "x86_64"):
+            # When cross-building on macOS, prevent arm-specific flags to be passed to the compiler
+            # when CMake performs the try compile tests for find_package(Threads)
+            machine = "aarch64-apple-darwin" if self.settings.arch == "armv8" else "x86_64-apple-darwin"
+            replace_in_file(self, os.path.join(self.source_folder, "CMake", "unix_config.cmake"), 
+            "execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpmachine OUTPUT_VARIABLE MACHINE)",
+            f"set(MACHINE {machine})")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -136,6 +150,14 @@ class LibrealsenseConan(ConanFile):
         self.cpp_info.components["realsense2"].requires = ["libusb::libusb"]
         if not self.options.shared:
             self.cpp_info.components["realsense2"].requires.extend(["realsense-file", "fw"])
+
+        # rsutils component
+        if Version(self.version) >= "2.56.5":
+            self.cpp_info.components["rsutils"].set_property("cmake_target_name", "realsense2::rsutils")
+            self.cpp_info.components["rsutils"].libs = [f"rsutils{postfix}"]
+            self.cpp_info.components["rsutils"].requires = ["nlohmann_json::nlohmann_json", "lz4::lz4"]
+            self.cpp_info.components["realsense2"].requires.append("rsutils")
+
         if self.settings.os == "Linux":
             self.cpp_info.components["realsense2"].system_libs.extend(["m", "pthread", "udev"])
         elif self.settings.os == "Windows":

@@ -1,4 +1,7 @@
 sources:
+  "13.0.19.0":
+    url: "https://github.com/FFmpeg/nv-codec-headers/archive/n13.0.19.0.tar.gz"
+    sha256: "86d15d1a7c0ac73a0eafdfc57bebfeba7da8264595bf531cf4d8db1c22940116"
   "12.1.14.0":
     url: "https://github.com/FFmpeg/nv-codec-headers/archive/n12.1.14.0.tar.gz"
     sha256: "2fefaa227d2a3b4170797796425a59d1dd2ed5fd231db9b4244468ba327acd0b"

@@ -1,0 +1,39 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3483b9e0a..a088ca758 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -288,7 +288,7 @@ if (OIIO_BUILD_TOOLS AND NOT BUILD_OIIOUTIL_ONLY)
+     add_subdirectory (src/iinfo)
+     add_subdirectory (src/maketx)
+     add_subdirectory (src/oiiotool)
+-    add_subdirectory (src/testtex)
++    # add_subdirectory (src/testtex) # only used for testing, no need to build it
+     add_subdirectory (src/iv)
+ endif ()
+ 
+diff --git a/src/cmake/externalpackages.cmake b/src/cmake/externalpackages.cmake
+index fc9cfc48d..b8717f864 100644
+--- a/src/cmake/externalpackages.cmake
++++ b/src/cmake/externalpackages.cmake
+@@ -237,7 +237,7 @@ checked_find_package (fmt REQUIRED
+                       VERSION_MIN 7.0
+                       BUILD_LOCAL missing
+                      )
+-get_target_property(FMT_INCLUDE_DIR fmt::fmt-header-only INTERFACE_INCLUDE_DIRECTORIES)
++#get_target_property(FMT_INCLUDE_DIR fmt::fmt-header-only INTERFACE_INCLUDE_DIRECTORIES)
+ 
+ 
+ ###########################################################################
+diff --git a/src/libutil/CMakeLists.txt b/src/libutil/CMakeLists.txt
+index 526aa6f02..a928252dc 100644
+--- a/src/libutil/CMakeLists.txt
++++ b/src/libutil/CMakeLists.txt
+@@ -82,7 +82,7 @@ function (setup_oiio_util_library targetname)
+         add_dependencies(${targetname} fmt_internal_target)
+     else ()
+         target_link_libraries (${targetname}
+-                               PUBLIC fmt::fmt-header-only)
++                               PUBLIC fmt::fmt)
+     endif ()
+ 
+     if (WIN32)

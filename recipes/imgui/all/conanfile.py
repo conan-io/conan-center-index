@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
 
 required_conan_version = ">=1.53.0"
 
@@ -30,6 +30,7 @@ class IMGUIConan(ConanFile):
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -63,6 +64,8 @@ class IMGUIConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
+
         # Ensure we take into account export_headers
         replace_in_file(self,
             os.path.join(self.source_folder, "imgui.h"),

@@ -1,0 +1,12 @@
+sources:
+  "1.1.9":
+    release:
+      # The release does not come with VS solution files, so we use the source archive
+      url: "https://github.com/WizardMac/ReadStat/archive/refs/tags/v1.1.9.tar.gz"
+      sha256: "89af7c785a7ae3d9a7af6e64a69028829a429f66a14b1b913be22816dc07ddca"
+patches:
+  "1.1.9":
+    - patch_file: "patches/0001-add-option-spawnv.patch"
+      patch_source: "https://github.com/WizardMac/ReadStat/pull/301"
+      patch_type: "official"
+      patch_description: "Helps UCRT mingw adding option to disable spawnv define"

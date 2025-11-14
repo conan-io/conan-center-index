@@ -1,14 +1,15 @@
+from pathlib import Path
+
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import stdcpp_library, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir, save
+from conan.tools.files import collect_libs, copy, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2"
 
 
 class AssimpConan(ConanFile):
@@ -105,28 +106,7 @@ class AssimpConan(ConanFile):
     options.update(dict.fromkeys(_format_option_map, [True, False]))
     default_options.update(dict.fromkeys(_format_option_map, True))
 
-    short_paths = True
-
-    @property
-    def _min_cppstd(self):
-        if Version(self.version) < "5.2.0":
-            return 11
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        if Version(self.version) < "5.2.0":
-            return {}
-        return {
-            "gcc": "7",
-            "clang": "6",
-            "apple-clang": "10",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-
     def export_sources(self):
-        export_conandata_patches(self)
         copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
@@ -189,33 +169,24 @@ class AssimpConan(ConanFile):
         if self._depends_on_draco:
             self.requires("draco/1.5.6")
         if self._depends_on_clipper:
-            if Version(self.version) >= "5.3.0":
-                self.requires("clipper/6.4.2")
-            else:
-                self.requires("clipper/4.10.0")
+            self.requires("clipper/6.4.2")
         if self._depends_on_stb:
             self.requires("stb/cci.20230920")
         if self._depends_on_openddlparser:
             self.requires("openddl-parser/0.5.1")
 
     def validate_build(self):
-        check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 17)
 
     def validate(self):
         check_min_cppstd(self, 11)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
-
-        if Version(self.version) < "5.3.0" and self._depends_on_clipper and Version(self.dependencies["clipper"].ref.version).major != "4":
-            raise ConanInvalidConfiguration("Only 'clipper/4.x' is supported")
 
     def build_requirements(self):
-        if Version(self.version) >= "5.4.0":
-            self.tool_requires("cmake/[>=3.22 <4]")
+        self.tool_requires("cmake/[>=3.22]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -242,7 +213,7 @@ class AssimpConan(ConanFile):
         tc.variables["ASSIMP_UBSAN"] = False
         tc.variables["ASSIMP_WARNINGS_AS_ERRORS"] = False
         tc.variables["USE_STATIC_CRT"] = is_msvc_static_runtime(self)
-        tc.variables["ASSIMP_BUILD_USE_CCACHE"] = False
+        tc.cache_variables["ASSIMP_BUILD_USE_CCACHE"] = False
 
         for option, (definition, _) in self._format_option_map.items():
             value = self.options.get_safe(option)
@@ -250,8 +221,6 @@ class AssimpConan(ConanFile):
                 tc.variables[definition] = value
         if self.settings.os == "Windows":
             tc.preprocessor_definitions["NOMINMAX"] = 1
-        if Version(self.version) < "5.4.0":
-            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
         tc.cache_variables["CMAKE_PROJECT_Assimp_INCLUDE"] = "conan_deps.cmake"
         tc.cache_variables["WITH_CLIPPER"] = self._depends_on_clipper
@@ -268,12 +237,7 @@ class AssimpConan(ConanFile):
         cd.set_property("utfcpp", "cmake_target_name", "utf8cpp::utf8cpp")
         cd.generate()
 
-        venv = VirtualBuildEnv(self)
-        venv.generate()
-
     def _patch_sources(self):
-        apply_conandata_patches(self)
-
         # Don't force several compiler and linker flags
         for pattern in [
             "-fPIC",
@@ -289,14 +253,14 @@ class AssimpConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "code", "CMakeLists.txt"), pattern, "")
 
         # Make sure vendored libs are not used by accident by removing their subdirs
-        allow_vendored = ["Open3DGC"]
-        for contrib_dir in self.source_path.joinpath("contrib").iterdir():
+        allow_vendored = ["Open3DGC", "earcut-hpp"]
+        for contrib_dir in Path(self.source_folder).joinpath("contrib").iterdir():
             if contrib_dir.is_dir() and contrib_dir.name not in allow_vendored:
                 rmdir(self, contrib_dir)
 
         # Do not include add vendored library sources to the build
         # https://github.com/assimp/assimp/blob/v5.3.1/code/CMakeLists.txt#L1151-L1159
-        code_cmakelists = self.source_path.joinpath("code", "CMakeLists.txt")
+        code_cmakelists = Path(self.source_folder).joinpath("code", "CMakeLists.txt")
         content = code_cmakelists.read_text(encoding="utf-8")
         for vendored_lib in [
             "unzip_compile",
@@ -321,8 +285,7 @@ class AssimpConan(ConanFile):
         ]:
             save(self, os.path.join(self.source_folder, "contrib", contrib_header),
                  f"#include <{include}>\n")
-        if Version(self.version) >= "5.4.0":
-            rmdir(self, self.source_path.joinpath("contrib", "utf8cpp"))
+        rmdir(self, os.path.join(self.source_folder, "contrib", "utf8cpp"))
 
         # minizip is provided via conan_deps.cmake, no need to use pkgconfig
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
@@ -335,7 +298,6 @@ class AssimpConan(ConanFile):
                         "INSTALL( TARGETS zlib", "set(_ #")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -351,11 +313,16 @@ class AssimpConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "assimp")
         self.cpp_info.set_property("cmake_target_name", "assimp::assimp")
         self.cpp_info.set_property("pkg_config_name", "assimp")
+        # Always ever just 1 library, but with some suffix variations
+        # that make it hard to map manually
         self.cpp_info.libs = collect_libs(self)
         if is_msvc(self) and self.options.shared:
             self.cpp_info.defines.append("ASSIMP_DLL")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["rt", "m", "pthread"]
+        elif self.settings.os == "WindowsStore":
+            self.cpp_info.system_libs.append("advapi32")
+            self.cpp_info.defines.append("WindowsStore")
         if not self.options.shared:
             libcxx = stdcpp_library(self)
             if libcxx:
