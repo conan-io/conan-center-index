@@ -69,7 +69,7 @@ class TgbotConan(ConanFile):
 
     def requirements(self):
         # tgbot/Api.h:#include <boost/property_tree/ptree.hpp>
-        self.requires("boost/1.83.0", transitive_headers=True, transitive_libs=True)
+        self.requires("boost/1.84.0", transitive_headers=True, transitive_libs=True)
         # tgbot/net/CurlHttpClient.h:#include <curl/curl.h>
         self.requires("libcurl/[>=7.78 <9]", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
