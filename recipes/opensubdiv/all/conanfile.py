@@ -67,6 +67,8 @@ class OpenSubdivConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.shared
+            self.package_type = "static-library"
         else:
             del self.options.with_dx
         if self.settings.os != "Macos":
@@ -75,7 +77,7 @@ class OpenSubdivConan(ConanFile):
             self.license = "DocumentRef-LICENSE.txt:LicenseRef-Tomorrow-Open-Source-Technology"
 
     def configure(self):
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def layout(self):
@@ -103,9 +105,6 @@ class OpenSubdivConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-
-        if self.options.shared and self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(f"{self.ref} shared not supported on Windows")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -167,12 +166,12 @@ class OpenSubdivConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenSubdiv")
-        target_suffix = "" if self.options.shared else "_static"
+        target_suffix = "" if self.options.get_safe("shared") else "_static"
 
         self.cpp_info.components["osdcpu"].set_property("cmake_target_name", f"OpenSubdiv::osdcpu{target_suffix}")
         self.cpp_info.components["osdcpu"].libs = ["osdCPU"]
