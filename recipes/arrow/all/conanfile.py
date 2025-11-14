@@ -4,7 +4,6 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
@@ -404,9 +403,6 @@ class ArrowConan(ConanFile):
         deps.set_property("mimalloc", "cmake_target_name", "mimalloc::mimalloc")
         deps.generate()
 
-        venv = VirtualBuildEnv(self)
-        venv.generate()
-
     def _patch_sources(self):
         apply_conandata_patches(self)
 
@@ -453,7 +449,10 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow_substrait"].set_property("pkg_config_name", "arrow_substrait")
             self.cpp_info.components["libarrow_substrait"].set_property("cmake_target_name", f"Arrow::arrow_substrait_{cmake_suffix}")
             self.cpp_info.components["libarrow_substrait"].libs = [f"arrow_substrait{suffix}"]
-            self.cpp_info.components["libarrow_substrait"].requires = ["libparquet", "dataset"]
+            self.cpp_info.components["libarrow_substrait"].requires = ["libparquet"]
+            if self.options.dataset_modules:
+                self.cpp_info.components["libarrow_substrait"].requires.append("dataset")
+
 
         # Plasma was deprecated in Arrow 12.0.0
         del self.options.plasma
