@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
@@ -265,6 +266,8 @@ class ArrowConan(ConanFile):
             raise ConanInvalidConfiguration("arrow:parquet requires arrow:with_thrift")
 
     def build_requirements(self):
+        if self.options.with_protobuf:
+            self.tool_requires("protobuf/<host_version>")
         if Version(self.version) >= "22.0.0":
             self.tool_requires("cmake/[>=3.26 <4]")
         elif Version(self.version) >= "20.0.0":
@@ -400,6 +403,9 @@ class ArrowConan(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("mimalloc", "cmake_target_name", "mimalloc::mimalloc")
         deps.generate()
+
+        venv = VirtualBuildEnv(self)
+        venv.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
