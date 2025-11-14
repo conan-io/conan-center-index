@@ -69,14 +69,10 @@ class TgbotConan(ConanFile):
 
     def requirements(self):
         # tgbot/Api.h:#include <boost/property_tree/ptree.hpp>
-        self.requires("boost/1.84.0", transitive_headers=True, transitive_libs=True)
+        self.requires("boost/1.87.0", transitive_headers=True)
         # tgbot/net/CurlHttpClient.h:#include <curl/curl.h>
         self.requires("libcurl/[>=7.78 <9]", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
-
-    @property
-    def _required_boost_components(self):
-        return ["system"]
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -85,16 +81,6 @@ class TgbotConan(ConanFile):
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
-
-        miss_boost_required_comp = any(
-            self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
-            for boost_comp in self._required_boost_components
-        )
-        if self.dependencies["boost"].options.header_only or miss_boost_required_comp:
-            raise ConanInvalidConfiguration(
-                f"{self.name} requires non header-only boost with these components: "
-                + ", ".join(self._required_boost_components)
             )
 
     def source(self):
