@@ -1,4 +1,7 @@
 sources:
+  "3.5.0":
+    url: "https://github.com/cginternals/glbinding/archive/v3.5.0.tar.gz"
+    sha256: "bb39a97d5d94f70fe6e9c2152e0d8d760758bb031b352e1707fa90f00a43fc69"
   "3.3.0":
     url: "https://github.com/cginternals/glbinding/archive/v3.3.0.tar.gz"
     sha256: "a0aa5e67b538649979a71705313fc2b2c3aa49cf9af62a97f7ee9a665fd30564"
@@ -6,6 +9,8 @@ sources:
     url: "https://github.com/cginternals/glbinding/archive/v3.1.0.tar.gz"
     sha256: "6729b260787108462ec6d8954f32a3f11f959ada7eebf1a2a33173b68762849e"
 patches:
+  "3.5.0":
+    - patch_file: "patches/3.5/cmake-install.patch"
   "3.3.0":
     - patch_file: "patches/3.3/cmake-install.patch"
   "3.1.0":
