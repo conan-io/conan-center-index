@@ -1,4 +1,7 @@
 sources:
+  "1.8.8":
+    url: "https://github.com/alembic/alembic/archive/refs/tags/1.8.8.tar.gz"
+    sha256: "ba1f34544608ef7d3f68cafea946ec9cc84792ddf9cda3e8d5590821df71f6c6"
   "1.8.6":
     url: "https://github.com/alembic/alembic/archive/refs/tags/1.8.6.tar.gz"
     sha256: "c572ebdea3a5f0ce13774dd1fceb5b5815265cd1b29d142cf8c144b03c131c8c"
@@ -12,6 +15,10 @@ sources:
     url: "https://github.com/alembic/alembic/archive/refs/tags/1.8.2.tar.gz"
     sha256: "3f1c466ee1600578689b32b1f2587066d3259704ec7ed1fcf80c324d01274f48"
 patches:
+  "1.8.8":
+    - patch_file: "patches/1.8.8-0001-fix-cmake.patch"
+      patch_description: "CMake: let conan specify fPIC, don't change rpath"
+      patch_type: "conan"
   "1.8.6":
     - patch_file: "patches/1.8.5-0001-fix-cmake.patch"
       patch_description: "CMake: fix install layout, don't link directly to zlib if hdf5, relocatable shared lib for macOS"
