@@ -25,6 +25,7 @@ class CycloneDDSConan(ConanFile):
         "fPIC": [True, False],
         "with_ssl": [True, False],
         "with_shm" : [True, False],
+        "with_lto": [True, False],
         "enable_security" : [True, False],
         "enable_discovery" : [True, False],
     }
@@ -33,6 +34,7 @@ class CycloneDDSConan(ConanFile):
         "fPIC": True,
         "with_ssl": False,
         "with_shm": False,
+        "with_lto": False,
         "enable_security": False,
         "enable_discovery": True,
     }
@@ -107,10 +109,10 @@ class CycloneDDSConan(ConanFile):
         tc.variables["BUILD_IDLC_TESTING"] = False
         tc.variables["BUILD_DDSPERF"] = False
         tc.variables["BUILD_IDLC_TESTING"] = False
-        tc.cache_variables["ENABLE_LTO"] = False
         # variables which effects build
         tc.variables["ENABLE_SSL"] = self.options.with_ssl
         tc.variables["ENABLE_SHM"] = self.options.with_shm
+        tc.variables["ENABLE_LTO"] = self.options.with_lto
         tc.variables["ENABLE_SECURITY"] = self.options.enable_security
         tc.variables["ENABLE_TYPE_DISCOVERY"] = self.options.enable_discovery
         tc.variables["ENABLE_TOPIC_DISCOVERY"] = self.options.enable_discovery
