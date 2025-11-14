@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES C)
 
-find_package(mongoc REQUIRED CONFIG)
+find_package(mongoc-1.0 REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
 if(TARGET mongo::mongoc_shared)
