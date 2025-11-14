@@ -163,7 +163,7 @@ class XmlSecConan(ConanFile):
                 f"static={yes_no(not self.options.shared)}",
                 "include=\"{}\"".format(";".join(deps_includedirs)),
                 "lib=\"{}\"".format(";".join(deps_libdirs)),
-                "with-dl={}".format(yes_no(Version(self.version) >= "1.2.35" and self.options.shared)),
+                "with-dl={}".format(yes_no(Version(self.version) >= "1.2.35" and Version(self.version) < "1.3.9" and self.options.shared)),
                 f"xslt={yes_no(self.options.with_xslt)}",
                 "iconv=no",
                 "crypto={}".format(",".join(crypto_engines)),
