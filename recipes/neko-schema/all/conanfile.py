@@ -6,7 +6,7 @@ import os
 
 class NekoSchemaConan(ConanFile):
     name = "neko-schema"
-    version = "1.0.3"
+    version = "1.0.4"
     license = "MIT OR Apache-2.0"
     author = "moehoshio"
     url = "https://github.com/moehoshio/NekoSchema"
@@ -56,18 +56,21 @@ class NekoSchemaConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         
+        # Set the CMake package file name to match the official CMake config
+        self.cpp_info.set_property("cmake_file_name", "NekoSchema")
+        
         # Main header-only target
-        self.cpp_info.components["neko-schema"].set_property("cmake_target_name", "Neko::Schema")
-        self.cpp_info.components["neko-schema"].includedirs = ["include"]
-        self.cpp_info.components["neko-schema"].requires = []
+        self.cpp_info.components["NekoSchema"].set_property("cmake_target_name", "Neko::Schema")
+        self.cpp_info.components["NekoSchema"].includedirs = ["include"]
+        self.cpp_info.components["NekoSchema"].requires = []
         
         # C++20 requirements
-        self.cpp_info.components["neko-schema"].cxxflags = []
+        self.cpp_info.components["NekoSchema"].cxxflags = []
         
         # Module support (if enabled)
         if self.options.enable_module:
-            self.cpp_info.components["neko-schema-module"].set_property("cmake_target_name", "Neko::Schema::Module")
-            self.cpp_info.components["neko-schema-module"].includedirs = ["include"]
+            self.cpp_info.components["NekoSchemaModule"].set_property("cmake_target_name", "Neko::Schema::Module")
+            self.cpp_info.components["NekoSchemaModule"].includedirs = ["include"]
     
     def package_id(self):
         self.info.clear()
