@@ -495,16 +495,16 @@ class AwsSdkCppConan(ConanFile):
         for module, dependencies in self._internal_requirements.items():
             if self.options.get_safe(module):
                 for dependency in dependencies:
-                    # Don't listen to the linter, get_safe should be compared like this to None
-                    # TODO: Remove str comparison when Conan 1 is disabled
-                    if str(self.options.get_safe(dependency)) == "None":
+                    # This returns a PackageOption object
+                    # and checking if it's None should be done this way
+                    if self.options.get_safe(dependency) == None:  # noqa
                         setattr(self.options, dependency, True)
 
         # - Otherwise set it to False
         # This way there are no None options past this method, and we can control default values
         # of the dependencies of the main modules but still give the user control over them
         for sdk_name in self._sdks:
-            if self.options.get_safe(sdk_name) == None:
+            if self.options.get_safe(sdk_name) == None:  # noqa
                 setattr(self.options, sdk_name, False)
 
     def layout(self):
