@@ -1209,10 +1209,10 @@ class QtConan(ConanFile):
             elif is_apple_os(self):
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/gui/CMakeLists.txt#L388-L394
                 self.cpp_info.components["qtGui"].frameworks = ["CoreFoundation", "CoreGraphics", "CoreText", "Foundation", "ImageIO"]
-                # https://github.com/qt/qtbase/blob/6.8.3/src/gui/configure.cmake#L841-L844
+                # https://github.com/qt/qtbase/blob/6.8.0/src/gui/configure.cmake#L834-L837
                 has_metal = "metal" not in disabled_features and self.settings.os in ["Macos", "iOS", "visionOS"]
-                if has_metal:
-                    # https://github.com/qt/qtbase/blob/6.8.3/src/gui/CMakeLists.txt#L434-L439
+                if Version(self.version) >= "6.8.0" and has_metal:
+                    # https://github.com/qt/qtbase/blob/6.8.0/src/gui/CMakeLists.txt#L432-L437
                     self.cpp_info.components["qtGui"].frameworks.append("QuartzCore")
                 if self.settings.os == "Macos":
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/gui/CMakeLists.txt#L362-L370
