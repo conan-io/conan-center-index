@@ -570,9 +570,8 @@ class AwsSdkCppConan(ConanFile):
         apply_conandata_patches(self)
 
     def _enabled_sdks(self):
-        for sdk in self._sdks:
-            if self.options.get_safe(sdk[0]):
-                yield sdk
+        return [sdk for sdk in self._sdks
+                if self.options.get_safe(sdk)]
 
     def generate(self):
         tc = CMakeToolchain(self)
