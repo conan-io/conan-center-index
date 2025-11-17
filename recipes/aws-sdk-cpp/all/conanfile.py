@@ -624,9 +624,9 @@ class AwsSdkCppConan(ConanFile):
             "cmake/utilities.cmake",
             "cmake/sdk_plugin_conf.cmake",
             "toolchains/cmakeProjectConfig.cmake",
-            "toolchains/pkg-config.pc.in"
+            "toolchains/pkg-config.pc.in",
+            "src/aws-cpp-sdk-core/include/aws/core/VersionConfig.h"
         ]
-        dependant_files.append("src/aws-cpp-sdk-core/include/aws/core/VersionConfig.h")
         for file in dependant_files:
             copy(self, file, src=self.source_folder, dst=os.path.join(self.package_folder, self._res_folder))
             replace_in_file(
@@ -684,8 +684,8 @@ class AwsSdkCppConan(ConanFile):
             "aws-c-sdkutils::aws-c-sdkutils",
         ])
 
-        # TODO: We might want to set cmake_components if the targets dont match the component names
-        for sdk, _ in self._enabled_sdks():
+        for sdk in self._enabled_sdks():
+            # TODO: We might want to set cmake_components if the targets dont match the component names
             self.cpp_info.components[sdk].set_property("cmake_target_name", f"AWS::aws-sdk-cpp-{sdk}")
             self.cpp_info.components[sdk].set_property("pkg_config_name", f"aws-sdk-cpp-{sdk}")
             self.cpp_info.components[sdk].requires = ["core"]
