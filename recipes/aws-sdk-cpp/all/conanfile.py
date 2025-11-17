@@ -433,7 +433,15 @@ class AwsSdkCppConan(ConanFile):
         "workspaces-instances",
         "workspaces-thin-client",
         "workspaces-web",
-        "xray"
+        "xray",
+        # Extra modules that are not generated but exist upstream
+        "access-management",
+        "text-to-speech",
+        "core",
+        "queues",
+        "s3-encryption",
+        "identity-management",
+        "transfer"
     )
     options = {
         **{
