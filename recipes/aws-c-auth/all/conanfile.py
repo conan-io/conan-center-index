@@ -34,11 +34,11 @@ class AwsCAuth(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("aws-c-common/0.12.3", transitive_headers=True, transitive_libs=True)
-        self.requires("aws-c-cal/0.9.2")
+        self.requires("aws-c-common/0.12.5", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-cal/0.9.8")
         # Are we overlinking? This has never been a requirement in upstream's CMakeLists.txt
-        self.requires("aws-c-io/0.21.0", transitive_headers=True, transitive_libs=True)
-        self.requires("aws-c-http/0.10.2", transitive_headers=True)
+        self.requires("aws-c-io/0.23.2", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-http/0.10.5", transitive_headers=True)
         self.requires("aws-c-sdkutils/0.2.4", transitive_headers=True)
 
     def source(self):

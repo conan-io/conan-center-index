@@ -1,7 +1,7 @@
 sources:
-  "1.11.619":
-    url: "https://github.com/aws/aws-sdk-cpp/archive/refs/tags/1.11.619.tar.gz"
-    sha256: "348a90cf69aa09df5f861f2a001b0fb8692e265292ea42fc839685e1a69e514e"
+  "1.11.691":
+    url: "https://github.com/aws/aws-sdk-cpp/archive/refs/tags/1.11.691.tar.gz"
+    sha256: "1904c0c0306944fdd7be55ff1d3337f272b5281bd7e7d967eb4b2ae1a99e2ae0"
 patches:
   "1.11.619":
     - patch_file: patches/1.11.352-0001-pulseaudio.patch
