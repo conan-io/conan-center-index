@@ -38,6 +38,7 @@ class AwsCSDKUtils(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables['AWS_STATIC_MSVC_RUNTIME_LIBRARY'] = self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime") == "static"
         tc.generate()
 
         deps = CMakeDeps(self)
