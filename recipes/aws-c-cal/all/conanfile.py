@@ -3,6 +3,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc_static_runtime
 import os
 
 required_conan_version = ">=2.4"
@@ -48,6 +49,8 @@ class AwsCCal(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["USE_OPENSSL"] = self._needs_openssl
+        if self.settings.compiler == "msvc":
+            tc.cache_variables["AWS_STATIC_MSVC_RUNTIME_LIBRARY"] = is_msvc_static_runtime(self)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

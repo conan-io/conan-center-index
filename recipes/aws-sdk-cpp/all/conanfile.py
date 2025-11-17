@@ -566,8 +566,6 @@ class AwsSdkCppConan(ConanFile):
             )
 
     def validate(self):
-        if is_msvc(self) and is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration("Static runtime is not working for more recent releases")
         if (is_msvc(self) and self.options.shared
                 and not self.dependencies["aws-c-common"].options.shared):
             raise ConanInvalidConfiguration(f"{self.ref} with shared is not supported with aws-c-common static")

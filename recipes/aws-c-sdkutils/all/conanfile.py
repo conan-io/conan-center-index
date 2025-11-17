@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir
+from conan.tools.microsoft import is_msvc_static_runtime
 import os
 
 required_conan_version = ">=2.4"
@@ -38,6 +39,8 @@ class AwsCSDKUtils(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if self.settings.compiler == "msvc":
+            tc.cache_variables["AWS_STATIC_MSVC_RUNTIME_LIBRARY"] = is_msvc_static_runtime(self)
         tc.generate()
 
         deps = CMakeDeps(self)
