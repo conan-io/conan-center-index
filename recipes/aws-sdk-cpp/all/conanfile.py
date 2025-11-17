@@ -437,7 +437,6 @@ class AwsSdkCppConan(ConanFile):
         # Extra modules that are not generated but exist upstream
         "access-management",
         "text-to-speech",
-        "core",
         "queues",
         "s3-encryption",
         "identity-management",
