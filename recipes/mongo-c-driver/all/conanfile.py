@@ -74,7 +74,7 @@ class MongoCDriverConan(ConanFile):
         if self.options.with_snappy:
             self.requires("snappy/1.1.10")
         if self.options.with_zlib:
-            self.requires("zlib/[>=1.3.1 <2]")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
             self.requires("zstd/[^1.5]")
         if self.options.with_icu:
@@ -178,6 +178,8 @@ class MongoCDriverConan(ConanFile):
                         'if(ENABLE_SNAPPY MATCHES "ON")\n  find_package(Snappy REQUIRED)')
         replace_in_file(self, libmongoc_cmake, "SNAPPY_LIBRARIES", "Snappy_LIBRARIES")
         replace_in_file(self, libmongoc_cmake, "SNAPPY_INCLUDE_DIRS", "Snappy_INCLUDE_DIRS")
+        if Version(self.version) < "1.25":
+            replace_in_file(self, libmongoc_cmake, "set (SSL_LIBRARIES -ltls -lcrypto)", "")
         # cleanup rpath
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                               "set (CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)", "")
@@ -202,22 +204,27 @@ class MongoCDriverConan(ConanFile):
         # but it can't be modeled right now.
         mongoc_target = "mongoc_shared" if self.options.shared else "mongoc_static"
 
-        self.cpp_info.set_property("cmake_file_name", "mongoc")
+        version_major = str(Version(self.version).major)
+
+        is_major_version_1 = version_major == "1"
+
+        cmake_name = "mongoc-1.0" if is_major_version_1 else "mongoc"
+
+        self.cpp_info.set_property("cmake_file_name", cmake_name)
         self.cpp_info.set_property("cmake_target_name", f"mongo::{mongoc_target}")
 
-        self.cpp_info.filenames["cmake_find_package"] = "mongoc"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "mongoc"
+        self.cpp_info.filenames["cmake_find_package"] = cmake_name
+        self.cpp_info.filenames["cmake_find_package_multi"] = cmake_name
         self.cpp_info.names["cmake_find_package"] = "mongo"
         self.cpp_info.names["cmake_find_package_multi"] = "mongo"
 
         # mongoc
-        self.cpp_info.components["mongoc"].set_property("cmake_file_name", "mongoc")
         self.cpp_info.components["mongoc"].set_property("cmake_target_name", f"mongo::{mongoc_target}")
 
-        version_major = str(Version(self.version).major)
+        lib_type_str = '' if self.options.shared else '-static'
 
         def make_pkg_config_name(component):
-            return f"lib{component}{version_major}{'' if self.options.shared else '-static'}"
+            return f"lib{component}{lib_type_str}-1.0" if is_major_version_1 else f"lib{component}{version_major}{lib_type_str}"
 
         self.cpp_info.components["mongoc"].set_property("pkg_config_name", make_pkg_config_name("mongoc"))
 
@@ -225,12 +232,12 @@ class MongoCDriverConan(ConanFile):
         self.cpp_info.components["mongoc"].names["cmake_find_package_multi"] = mongoc_target
 
         def make_include_subdir(component):
-            return f"{component}-{self.version}"
+            return f"lib{component}-1.0" if is_major_version_1 else f"{component}-{self.version}"
 
         self.cpp_info.components["mongoc"].includedirs = [os.path.join("include", make_include_subdir("mongoc"))]
 
         def make_component_lib(component):
-            return f"{component}{version_major}"
+            return f"{component}{lib_type_str}-1.0" if is_major_version_1 else f"{component}{version_major}"
 
         self.cpp_info.components["mongoc"].libs = [make_component_lib("mongoc")]
         if not self.options.shared:
@@ -262,8 +269,6 @@ class MongoCDriverConan(ConanFile):
             self.cpp_info.components["mongoc"].system_libs.append("dnsapi" if self.settings.os == "Windows" else "resolv")
 
         # bson
-        self.cpp_info.components["bson"].set_property("cmake_file_name", "bson")
-
         bson_target = "bson_shared" if self.options.shared else "bson_static"
         self.cpp_info.components["bson"].set_property("cmake_target_name", f"mongo::{bson_target}")
         self.cpp_info.components["bson"].set_property("pkg_config_name", make_pkg_config_name("bson"))
