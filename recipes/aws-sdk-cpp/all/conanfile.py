@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=2"
@@ -566,8 +566,6 @@ class AwsSdkCppConan(ConanFile):
             )
 
     def validate(self):
-        if is_msvc(self) and is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration("Static runtime is not working for more recent releases")
         if (is_msvc(self) and self.options.shared
                 and not self.dependencies["aws-c-common"].options.shared):
             raise ConanInvalidConfiguration(f"{self.ref} with shared is not supported with aws-c-common static")
@@ -608,8 +606,7 @@ class AwsSdkCppConan(ConanFile):
             tc.cache_variables["ENABLE_OPENSSL_ENCRYPTION"] = True
 
         tc.cache_variables["MINIMIZE_SIZE"] = self.options.min_size
-        if is_msvc(self):
-            tc.cache_variables["FORCE_SHARED_CRT"] = not is_msvc_static_runtime(self)
+        tc.cache_variables['AWS_STATIC_MSVC_RUNTIME_LIBRARY'] = self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime") == "static"
 
         if cross_building(self):
             tc.cache_variables["CURL_HAS_H2_EXITCODE"] = "0"

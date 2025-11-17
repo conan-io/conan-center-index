@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
@@ -53,9 +52,8 @@ class AwsCrtCpp(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if is_msvc(self):
-            tc.variables["AWS_STATIC_MSVC_RUNTIME_LIBRARY"] = is_msvc_static_runtime(self)
         tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables['AWS_STATIC_MSVC_RUNTIME_LIBRARY'] = self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime") == "static"
         tc.cache_variables["BUILD_DEPS"] = False
         tc.generate()
 

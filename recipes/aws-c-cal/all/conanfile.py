@@ -48,6 +48,7 @@ class AwsCCal(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["USE_OPENSSL"] = self._needs_openssl
+        tc.cache_variables['AWS_STATIC_MSVC_RUNTIME_LIBRARY'] = self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime") == "static"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
