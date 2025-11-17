@@ -578,9 +578,7 @@ class AwsSdkCppConan(ConanFile):
         # All option() are defined before project() in upstream CMakeLists,
         # therefore we must use cache_variables
 
-        build_only = ["core"]
-        for sdk_name, _ in self._enabled_sdks():
-            build_only.append(sdk_name)
+        build_only = ["core"] + self._enabled_sdks()
         tc.cache_variables["BUILD_ONLY"] = ";".join(build_only)
 
         tc.cache_variables["ENABLE_UNITY_BUILD"] = True
