@@ -76,6 +76,9 @@ class SpirvCrossConan(ConanFile):
                 self.options.cpp and self.options.reflect and self.options.get_safe("util", True)):
             raise ConanInvalidConfiguration("executable can't be built without glsl, hlsl, msl, cpp, reflect and util")
 
+    def requirements(self):
+        self.requires("spirv-headers/1.4.328.1")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
