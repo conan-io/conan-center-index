@@ -517,7 +517,7 @@ class AwsSdkCppConan(ConanFile):
         self.requires("aws-c-io/0.23.2")
         self.requires("aws-c-mqtt/0.13.3")
         if self.options.get_safe("s3-crt"):
-            self.requires("aws-c-s3/0.8.3")
+            self.requires("aws-c-s3/0.9.2")
         self.requires("aws-c-sdkutils/0.2.4")  # No mention of this in the code
         self.requires("aws-checksums/0.2.6")
         if self.settings.os != "Windows":

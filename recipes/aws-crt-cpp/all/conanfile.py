@@ -42,7 +42,7 @@ class AwsCrtCpp(ConanFile):
         self.requires("aws-c-mqtt/0.13.3", transitive_headers=True)
         self.requires("aws-checksums/0.2.6")
         self.requires("aws-c-event-stream/0.5.4")
-        self.requires("aws-c-s3/0.8.3")
+        self.requires("aws-c-s3/0.9.2")
 
     def validate(self):
         check_min_cppstd(self, 11)
