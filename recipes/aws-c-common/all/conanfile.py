@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
 required_conan_version = ">=2.4"
@@ -46,8 +45,7 @@ class AwsCCommon(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         tc.variables["AWS_ENABLE_LTO"] = False
         tc.variables["AWS_WARNINGS_ARE_ERRORS"] = False
-        if is_msvc(self):
-            tc.variables["STATIC_CRT"] = is_msvc_static_runtime(self)
+        tc.cache_variables['AWS_STATIC_MSVC_RUNTIME_LIBRARY'] = self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime") == "static"
         tc.variables["USE_CPU_EXTENSIONS"] = self.options.get_safe("cpu_extensions", False)
         tc.generate()
 
