@@ -52,7 +52,7 @@ class LibE57FormatConan(ConanFile):
             check_min_cppstd(self, "11")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16.3 <4]")
+        self.tool_requires("cmake/[>=3.16.3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -64,6 +64,7 @@ class LibE57FormatConan(ConanFile):
         tc.variables["E57_BUILD_SHARED"] = self.options.shared
         tc.variables["E57_BUILD_TEST"] = False
         tc.variables["USING_STATIC_XERCES"] = not self.dependencies["xerces-c"].options.shared
+        tc.cache_variables["CCACHE_PROGRAM"] = "CCACHE_PROGRAM-NOTFOUND" # avoid using ccache if found in PATH
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -119,11 +120,3 @@ class LibE57FormatConan(ConanFile):
         self.cpp_info.libs = [f"E57Format{suffix}"]
         if self.settings.os in ["Linux", "FreeBSD"] and not self.options.shared:
             self.cpp_info.system_libs.extend(["m", "pthread"])
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "e57format"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "e57format"
-        self.cpp_info.names["cmake_find_package"] = "E57Format"
-        self.cpp_info.names["cmake_find_package_multi"] = "E57Format"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
