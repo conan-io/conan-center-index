@@ -26,14 +26,9 @@ sources:
 patches:
   "0.21.0":
     - patch_file: "patches/cmake-0.21.0-001-install-dir.patch"
-      patch_description: "Patch install dir on MSVC"
-      patch_type: "conan"
     - patch_file: "patches/cmake-0.21.0-002-conan-libs.patch"
-      patch_description: "Parts of cmake-0.16.0.patch that does not need changing"
-      patch_type: "conan"
     - patch_file: "patches/cmake-0.21.0-003-conan-libs.patch"
-      patch_description: "Patch conan libs in the thrift lib cmake"
-      patch_type: "conan"
+    - patch_file: "patches/0.15.0-0002-include-cstdint.patch"
   "0.20.0":
     - patch_file: "patches/cmake-0.16.0.patch"
     - patch_file: "patches/0.15.0-0002-include-cstdint.patch"
