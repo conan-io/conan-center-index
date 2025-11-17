@@ -47,6 +47,9 @@ class ClickHouseCppConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
+        abseil_cppstd = self.dependencies.host['abseil'].info.settings.compiler.cppstd
+        if abseil_cppstd != self.settings.compiler.cppstd:
+            raise ConanInvalidConfiguration(f"abseil must be built with the same compiler.cppstd setting")
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared library on Windows.")
             # look at https://github.com/ClickHouse/clickhouse-cpp/pull/226
