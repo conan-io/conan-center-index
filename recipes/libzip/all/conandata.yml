@@ -1,4 +1,9 @@
 sources:
+  "1.11.4":
+    url:
+    - "https://libzip.org/download/libzip-1.11.4.tar.gz"
+    - "https://github.com/nih-at/libzip/releases/download/v1.11.4/libzip-1.11.4.tar.gz"
+    sha256: "82e9f2f2421f9d7c2466bbc3173cd09595a88ea37db0d559a9d0a2dc60dc722e"
   "1.11.3":
     url:
       - "https://libzip.org/download/libzip-1.11.3.tar.gz"
@@ -35,6 +40,8 @@ sources:
       - "https://github.com/nih-at/libzip/releases/download/v1.7.3/libzip-1.7.3.tar.gz"
     sha256: "0e2276c550c5a310d4ebf3a2c3dfc43fb3b4602a072ff625842ad4f3238cb9cc"
 patches:
+  "1.11.4":
+    - patch_file: "patches/1.11.4-0002-remove-rpath.patch"
   "1.11.3":
     - patch_file: "patches/1.11.3-0002-remove-rpath.patch"
       patch_description: "remove rpath feature"

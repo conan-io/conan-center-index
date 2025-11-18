@@ -1,7 +1,6 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, rename, mkdir, rmdir
+from conan.tools.files import get, copy, rmdir, rm
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.scm import Version
 import os
 
 
@@ -23,13 +22,15 @@ class PackageConan(ConanFile):
         "with_tls": [True, False],
         "with_sodium": [True, False],
         "enable_streaming": [True, False],
+        "with_experimental" : [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_tls": True,
         "with_sodium": False,
-        "enable_streaming": False
+        "enable_streaming": False,
+        "with_experimental" : False,
     }
 
     def config_options(self):
@@ -65,9 +66,8 @@ class PackageConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         tc.variables["NATS_BUILD_LIB_STATIC"] = not self.options.shared
         tc.variables["NATS_BUILD_LIB_SHARED"] = self.options.shared
-        if self.options.with_tls:
-            tc.variables["NATS_BUILD_TLS_USE_OPENSSL_1_1_API"] = Version(self.dependencies["openssl"].ref.version) >= "1.1"
         tc.variables["NATS_BUILD_STREAMING"] = self.options.enable_streaming
+        tc.variables["NATS_WITH_EXPERIMENTAL"] = self.options.with_experimental
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -82,25 +82,26 @@ class PackageConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         if self.settings.os == "Windows" and self.options.shared:
-            mkdir(self, os.path.join(self.package_folder, "bin"))
-            rename(self, os.path.join(self.package_folder, "lib", f"{self._nats_library_name}.dll"), os.path.join(self.package_folder, "bin", f"{self._nats_library_name}.dll"))
+            copy(self, pattern="*.dll", dst=os.path.join(self.package_folder, "bin"), src=os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dll", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
-    @property
-    def _nats_library_name(self):
-        suffix = "" if self.options.shared else "_static"
-        debug = "d" if self.settings.build_type == "Debug" else ""
-        return f"nats{suffix}{debug}"
-
     def package_info(self):
-        self.cpp_info.libs = [self._nats_library_name]
+        suffix = "" if self.options.shared else "_static"
+        lib_name = f"nats{suffix}"
+        debug = "d" if self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = [f"{lib_name}{debug}"]
         self.cpp_info.set_property("cmake_file_name", "cnats")
-        self.cpp_info.set_property("cmake_target_name", f"cnats::{self._nats_library_name}")
+        self.cpp_info.set_property("cmake_target_name", f"cnats::{lib_name}")
+        # Backward compatible with users using targets with debug suffix
+        self.cpp_info.set_property("cmake_target_aliases", [f"cnats::{lib_name}{debug}"])
         self.cpp_info.set_property("pkg_config_name", "libnats")
 
         if self.options.enable_streaming:
             self.cpp_info.defines.append("NATS_HAS_STREAMING")
+        if self.options.with_experimental:
+            self.cpp_info.defines.append("NATS_WITH_EXPERIMENTAL")
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("nats_IMPORTS")
 

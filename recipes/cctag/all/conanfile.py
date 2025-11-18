@@ -2,12 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class CCTagConan(ConanFile):
@@ -40,9 +39,6 @@ class CCTagConan(ConanFile):
         "cuda_cc_list": None, # e.g. "5.2;7.5;8.2", builds all up to 7.5 by default
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -59,15 +55,10 @@ class CCTagConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # boost/1.85.0 not compatible because of "error: 'numeric' is not a namespace-name" error
-        boost_version = "1.85.0" if Version(self.version) >= "1.0.4" else "1.84.0"
-        self.requires(f"boost/{boost_version}", transitive_headers=True, transitive_libs=True)
-        self.requires("eigen/3.4.0", transitive_headers=True)
-        if Version(self.version) >= "1.0.3":
-            self.requires("onetbb/2021.10.0")
-        else:
-            self.requires("onetbb/2020.3.3")
-        self.requires("opencv/4.9.0", transitive_headers=True, transitive_libs=True)
+        self.requires(f"boost/1.85.0", transitive_headers=True, transitive_libs=True)
+        self.requires("opencv/[>=4.9.0 <5]", transitive_headers=True, transitive_libs=True)
+        self.requires("onetbb/2021.10.0")
+        self.requires("eigen/[>=3.4.0 <4]", transitive_headers=True)
 
     @property
     def _required_boost_components(self):
@@ -119,7 +110,6 @@ class CCTagConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # Cleanup RPATH if Apple in shared lib of install tree
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                               "SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)",
@@ -128,12 +118,6 @@ class CCTagConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
                               "${OpenCV_LIBS}",
                               "opencv_core opencv_videoio opencv_imgproc opencv_imgcodecs")
-        # From https://github.com/alicevision/CCTag/pull/210/files CCTAG_CUDA_CC_LIST_INIT0 variable doesn't exists anymore in favor of a chooseCudaCC() cmake function
-        if Version(self.version) < "1.0.4":
-            # Remove very old CUDA compute capabilities
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                              "set(CCTAG_CUDA_CC_LIST_INIT0 3.5 3.7 5.0 5.2)",
-                              "set(CCTAG_CUDA_CC_LIST_INIT0 5.0 5.2)")
 
     def build(self):
         self._patch_sources()
@@ -179,7 +163,3 @@ class CCTagConan(ConanFile):
 
         # CCTag links against shared CUDA runtime by default and does not use it in headers,
         # so we don't need to explicitly link against it.
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "CCTag"
-        self.cpp_info.names["cmake_find_package_multi"] = "CCTag"

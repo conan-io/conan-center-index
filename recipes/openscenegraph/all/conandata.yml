@@ -36,3 +36,12 @@ patches:
       patch_source:
         - https://github.com/openscenegraph/OpenSceneGraph/pull/1296
         - https://github.com/openscenegraph/OpenSceneGraph/pull/951
+    - patch_file: patches/0012-fix-MSVC-_FPOSOFF-removal.patch
+      patch_description: _FPOSOFF identifier not found
+      patch_type: bugfix
+      patch_source:
+        - https://github.com/openscenegraph/OpenSceneGraph/issues/1323
+    - patch_file: patches/0013-fix-MSVC-unnamed-typedef-struct.patch
+      patch_description: fix MSVC unnamed typedef struct in C++20 standard
+      patch_type: bugfix
+      patch_source: https://github.com/openscenegraph/OpenSceneGraph/commit/3e7bdc07abdf1a8bf02ac062d42e0e9f111107dd

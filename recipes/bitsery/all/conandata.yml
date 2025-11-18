@@ -1,4 +1,7 @@
 sources:
+  "5.2.5":
+    url: "https://github.com/fraillt/bitsery/archive/refs/tags/v5.2.5.tar.gz"
+    sha256: "22a6d92ac030e999b53d57a0c9afe28723766595c6d00c91ab9c5637d4ed0eec"
   "5.2.4":
     url: "https://github.com/fraillt/bitsery/archive/v5.2.4.tar.gz"
     sha256: "ff741a3fee5420b31af31c7a8cefbcc3aaaf6f7f8c3ac49aa020f99b21d96020"

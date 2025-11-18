@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(test_package CXX)
 
 find_package(SOCI REQUIRED CONFIG)
@@ -9,4 +9,3 @@ if(TARGET SOCI::soci_core_static)
 else()
     target_link_libraries(${PROJECT_NAME} SOCI::soci_core)
 endif()
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)

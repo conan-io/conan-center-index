@@ -4,7 +4,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import functools
@@ -55,7 +55,8 @@ class VulkanValidationLayersConan(ConanFile):
 
     @property
     def _needs_wayland_for_build(self):
-        return self.options.get_safe("with_wsi_wayland") and Version(self.version) < "1.3.231"
+        return (self.options.get_safe("with_wsi_wayland") and
+                (Version(self.version) < "1.3.231" or Version(self.version) >= "1.3.243.0"))
 
     @property
     def _needs_pkg_config(self):
@@ -153,6 +154,8 @@ class VulkanValidationLayersConan(ConanFile):
         env.generate()
 
         tc = CMakeToolchain(self)
+        if Version(self.version) >= "1.3.239":
+            tc.cache_variables["VVL_CLANG_TIDY"] = False
         if Version(self.version) < "1.3.234":
             tc.variables["VULKAN_HEADERS_INSTALL_DIR"] = self.dependencies["vulkan-headers"].package_folder.replace("\\", "/")
         tc.variables["USE_CCACHE"] = False
@@ -169,10 +172,15 @@ class VulkanValidationLayersConan(ConanFile):
         tc.variables["INSTALL_TESTS"] = False
         tc.variables["BUILD_LAYERS"] = True
         tc.variables["BUILD_LAYER_SUPPORT_FILES"] = True
+        tc.cache_variables["SPIRV-Tools-opt_DIR"] = self.generators_folder.replace("\\", "/")
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
+
+        save(self, os.path.join(self.generators_folder, "SPIRV-Tools-optConfig.cmake"),
+             """include(CMakeFindDependencyMacro)
+             find_dependency(SPIRV-Tools)""")
 
         if self._needs_pkg_config:
             deps = PkgConfigDeps(self)
@@ -183,7 +191,8 @@ class VulkanValidationLayersConan(ConanFile):
         # Vulkan-ValidationLayers relies on Vulkan-Headers version from CMake config file
         # to set api_version in its manifest file, but this value MUST have format x.y.z (no extra number).
         # FIXME: find a way to force correct version in CMakeDeps of vulkan-headers recipe?
-        if Version(self.version) >= "1.3.235":
+        # NOTE: At version 1.3.239, the JSON_API_VERSION was removed from the cmakelists file, 
+        if Version(self.version) >= "1.3.235" and Version(self.version) < "1.3.239":
             vk_version = Version(self.dependencies["vulkan-headers"].ref.version)
             sanitized_vk_version = f"{vk_version.major}.{vk_version.minor}.{vk_version.patch}"
             replace_in_file(
@@ -191,18 +200,26 @@ class VulkanValidationLayersConan(ConanFile):
                 "set(JSON_API_VERSION ${VulkanHeaders_VERSION})",
                 f"set(JSON_API_VERSION \"{sanitized_vk_version}\")",
             )
-        # FIXME: two CMake module/config files should be generated (SPIRV-ToolsConfig.cmake and SPIRV-Tools-optConfig.cmake),
-        # but it can't be modeled right now in spirv-tools recipe
-        if not os.path.exists(os.path.join(self.generators_folder, "SPIRV-Tools-optConfig.cmake")):
-            shutil.copy(
-                os.path.join(self.generators_folder, "SPIRV-ToolsConfig.cmake"),
-                os.path.join(self.generators_folder, "SPIRV-Tools-optConfig.cmake"),
-            )
         if self.settings.os == "Android":
+            # INFO: 1.3.236 tries to do `find_package(PkgConfig REQUIRED QUIET)` on Android, which fails the build
+            # https://github.com/KhronosGroup/Vulkan-ValidationLayers/blob/sdk-1.3.236/CMakeLists.txt#L148
+            if Version(self.version) < '1.3.238':
+                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "(UNIX AND NOT APPLE)",
+                            "(UNIX AND NOT APPLE AND NOT ANDROID)")
+
             # INFO: libVkLayer_utils.a: error: undefined symbol: __android_log_print
             # https://github.com/KhronosGroup/Vulkan-ValidationLayers/commit/a26638ae9fdd8c40b56d4c7b72859a5b9a0952c9
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "VkLayer_utils PUBLIC Vulkan::Headers", "VkLayer_utils PUBLIC Vulkan::Headers -landroid -llog")
+            if Version(self.version) < "1.3.239":
+                cmake_path = os.path.join(self.source_folder, "CMakeLists.txt")
+            else:
+                cmake_path = os.path.join(self.source_folder, "layers", "CMakeLists.txt")
+                # FIXME: Since 1.3.261.0 (https://github.com/KhronosGroup/Vulkan-ValidationLayers/pull/5913), we need to fix the line to be replaced
+                #        Check the patch for newer versions
+            replace_in_file(self, cmake_path, 
+                        "VkLayer_utils PUBLIC Vulkan::Headers",
+                        "VkLayer_utils PUBLIC Vulkan::Headers -landroid -llog")
+
         if not self.options.get_safe("fPIC"):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "CMAKE_POSITION_INDEPENDENT_CODE ON", "CMAKE_POSITION_INDEPENDENT_CODE OFF")

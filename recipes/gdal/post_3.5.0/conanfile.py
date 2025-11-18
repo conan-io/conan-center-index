@@ -2,12 +2,13 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.0.5"
 
 
 class GdalConan(ConanFile):
@@ -66,7 +67,6 @@ class GdalConan(ConanFile):
         "with_openssl": [True, False],
         "with_pcre": [True, False],
         "with_pcre2": [True, False],
-        # "with_pdfium": [True, False],
         "with_pg": [True, False],
         "with_png": [True, False],
         "with_podofo": [True, False],
@@ -130,7 +130,6 @@ class GdalConan(ConanFile):
         "with_openssl": False,
         "with_pcre": False,
         "with_pcre2": False,
-        # "with_pdfium": False,
         "with_pg": False,
         "with_png": True,
         "with_podofo": False,
@@ -170,6 +169,11 @@ class GdalConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+        # Newer gdal requires this flag for
+        # ogr/ogrsf_frmts/parquet build correctly
+        if self.options.with_arrow and Version(self.version) >= "3.10.0":
+            self.options["arrow"].filesystem_layer = True
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -184,7 +188,7 @@ class GdalConan(ConanFile):
         if self.options.with_armadillo:
             self.requires("armadillo/12.6.4")
         if self.options.with_arrow:
-            self.requires("arrow/14.0.2")
+            self.requires("arrow/[>=14.0.2 <20]")
         if self.options.with_basisu:
             self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
@@ -264,9 +268,6 @@ class GdalConan(ConanFile):
             self.requires("pcre/8.45")
         if self.options.with_pcre2:
             self.requires("pcre2/10.42")
-        # TODO: pdfium recipe needs to be compatible with https://github.com/rouault/pdfium_build_gdal_3_8
-        # if self.options.with_pdfium:
-        #     self.requires("pdfium/95.0.4629")
         if self.options.with_pg:
             # libpq 15+ is not supported
             self.requires("libpq/14.9")
@@ -304,9 +305,11 @@ class GdalConan(ConanFile):
         self.tool_requires("cmake/[>=3.18 <4]")
 
     def validate(self):
-        for option in ["crypto", "zlib", "proj", "libtiff"]:
-            if self.options.get_safe(f"with_{option}") != "deprecated":
-                self.output.warning(f"{self.ref}:with_{option} option is deprecated. The {option} dependecy is always enabled now.")
+        if Version(self.version) >= "3.10.0":
+            check_min_cppstd(self, 17)
+        else:
+            check_min_cppstd(self, 11)
+
         if self.options.with_pcre and self.options.with_pcre2:
             raise ConanInvalidConfiguration("Enable either pcre or pcre2, not both")
 
@@ -326,6 +329,9 @@ class GdalConan(ConanFile):
             msg = "poppler:with_libjpeg and gdal:with_jpeg must be set to the same value, either libjpeg or libjpeg-turbo."
             self.output.error(msg)
             raise ConanInvalidConfiguration(msg)
+
+        if self.options.with_arrow and Version(self.version) >= "3.10.0" and not self.dependencies["arrow"].options.filesystem_layer:
+            raise ConanInvalidConfiguration("Gdal[>=3.10.0] requires -o arrow/*:filesystem_layer=True")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -409,7 +415,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_PARQUET"] = self.options.with_arrow and self.dependencies["arrow"].options.parquet
         tc.cache_variables["GDAL_USE_PCRE"] = self.options.with_pcre
         tc.cache_variables["GDAL_USE_PCRE2"] = self.options.with_pcre2
-        tc.cache_variables["GDAL_USE_PDFIUM"] = False  # self.options.with_pdfium
+        tc.cache_variables["GDAL_USE_PDFIUM"] = False
         tc.cache_variables["GDAL_USE_PNG"] = self.options.with_png
         tc.cache_variables["GDAL_USE_PNG_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_PODOFO"] = self.options.with_podofo
@@ -540,7 +546,6 @@ class GdalConan(ConanFile):
             "openssl": "OpenSSL",
             "pcre": "PCRE",
             "pcre2": "PCRE2",
-            "pdfium": "PDFIUM",
             "podofo": "Podofo",
             "poppler": "Poppler",
             "proj": "PROJ",
@@ -610,7 +615,6 @@ class GdalConan(ConanFile):
             "openjpeg":                   "OPENJPEG::OpenJPEG",
             "pcre":                       "PCRE::PCRE",
             "pcre2::pcre2-8":             "PCRE2::PCRE2-8",
-            "pdfium":                     "PDFIUM::PDFIUM",
             "podofo":                     "PODOFO::Podofo",
             "poppler":                    "Poppler::Poppler",
             "shapelib":                   "SHAPELIB::shp",
@@ -625,17 +629,14 @@ class GdalConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # Fix Deflate::Deflate not being correctly propagated internally.
-        replace_in_file(self, os.path.join(self.source_folder, "port", "CMakeLists.txt"),
-                        "PRIVATE Deflate::Deflate",
-                        "PUBLIC Deflate::Deflate")
         # Workaround for JXL_THREADS being provided by the JXL package on CCI.
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
                         "JXL_THREADS", "JXL", strict=False)
         # Workaround for Parquet and ArrowDataset being provided by Arrow on CCI.
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
-                        "gdal_check_package(Parquet", "# gdal_check_package(Parquet")
-        if Version(self.version) >= "3.6.0":
+        if Version(self.version) < "3.10.0":
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
+                            "gdal_check_package(Parquet", "# gdal_check_package(Parquet")
+        if Version(self.version) >= "3.6.0" and Version(self.version) < "3.10.0":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
                             "gdal_check_package(ArrowDataset", "# gdal_check_package(ArrowDataset")
 
@@ -762,8 +763,6 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["pcre::pcre"])
         if self.options.with_pcre2:
             self.cpp_info.requires.extend(["pcre2::pcre2-8"])
-        # if self.options.with_pdfium:
-        #     self.cpp_info.requires.extend(["pdfium::pdfium"])
         if self.options.with_pg:
             self.cpp_info.requires.extend(["libpq::pq"])
         if self.options.with_png:

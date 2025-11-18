@@ -15,7 +15,7 @@ from conan.tools.files import (
 from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.1"
 
 
 class EastlConan(ConanFile):
@@ -80,7 +80,7 @@ class EastlConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-        
+
         if is_msvc(self) and check_min_vs(self, "193", raise_invalid=False) and Version(self.version) < "3.21.12":
             raise ConanInvalidConfiguration(f"{self.ref} is not compatible with Visual Studio 2022, please use version >= 3.21.12")
 
@@ -92,6 +92,8 @@ class EastlConan(ConanFile):
         tc.variables["EASTL_BUILD_BENCHMARK"] = False
         tc.variables["EASTL_BUILD_TESTS"] = False
         tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        if Version(self.version) < "3.21.23": # pylint: disable=conan-condition-evals-to-constant
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         CMakeDeps(self).generate()
 
@@ -136,9 +138,3 @@ class EastlConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "EASTL")
         self.cpp_info.set_property("cmake_target_name", "EASTL::EASTL")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "EASTL"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "EASTL"
-        self.cpp_info.names["cmake_find_package"] = "EASTL"
-        self.cpp_info.names["cmake_find_package_multi"] = "EASTL"

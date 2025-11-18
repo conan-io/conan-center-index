@@ -1,4 +1,8 @@
 versions:
+  "20250814.0":
+    folder: all
+  "20250512.1":
+    folder: all
   "20250127.0":
     folder: all
   "20240722.1":
@@ -12,8 +16,4 @@ versions:
   "20230802.1":
     folder: all
   "20230125.3":
-    folder: all
-  "20220623.1":
-    folder: all
-  "20211102.0":
     folder: all

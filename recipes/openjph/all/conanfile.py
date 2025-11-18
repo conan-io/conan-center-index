@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
@@ -8,7 +7,7 @@ from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 class OpenJPH(ConanFile):
     name = "openjph"
@@ -35,72 +34,47 @@ class OpenJPH(ConanFile):
         "with_stream_expand_tool": False,
         "disable_simd": False,
     }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_executables and self.options.with_tiff:
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.6.0 <5]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            required_cpp_version = 11
-            if self.options.with_stream_expand_tool:
-                required_conan_version = 14
-            check_min_cppstd(self, required_cpp_version)
-
-        if self.settings.compiler == "gcc" and \
-            Version(self.settings.compiler.version) < "6.0":
-            raise ConanInvalidConfiguration(f"{self.ref} requires gcc >= 6.0")
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["OJPH_BUILD_EXECUTABLES"] = self.options.with_executables
-        tc.variables["OJPH_ENABLE_TIFF_SUPPORT"] = self.options.with_tiff
-        tc.variables["OJPH_BUILD_STREAM_EXPAND"] = self.options.with_stream_expand_tool
-        tc.variables["OJPH_DISABLE_SIMD"] = self.options.disable_simd
-
-        # Workaround for Conan 1 where the CXX standard version isn't set to a fallback to gnu98 happens
-        if not self.settings.get_safe("compiler.cppstd"):
-            tc.cache_variables["CMAKE_CXX_STANDARD"] = 14 if self.options.with_stream_expand_tool else 11
-
+        tc.cache_variables["OJPH_BUILD_EXECUTABLES"] = self.options.with_executables
+        tc.cache_variables["OJPH_ENABLE_TIFF_SUPPORT"] = self.options.with_tiff
+        tc.cache_variables["OJPH_BUILD_STREAM_EXPAND"] = self.options.with_stream_expand_tool
+        tc.cache_variables["OJPH_DISABLE_SIMD"] = self.options.disable_simd
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_sources()
-
         cm = CMake(self)
         cm.configure()
         cm.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-
         cm = CMake(self)
         cm.install()
 
-        # Cleanup package own pkgconfig
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
@@ -108,13 +82,10 @@ class OpenJPH(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "openjph::openjph")
         self.cpp_info.set_property("pkg_config_name", "openjph")
 
-        version_suffix = ""
+        version_suffix = "_d" if self.settings.build_type == "Debug" else ""
         if is_msvc(self):
             v = Version(self.version)
             version_suffix = f".{v.major}.{v.minor}"
+            if self.settings.build_type == "Debug":
+                version_suffix += "d"
         self.cpp_info.libs = ["openjph" + version_suffix]
-
-        # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "openjph"
-        self.cpp_info.names["cmake_find_package_multi"] = "openjph"
-        self.cpp_info.names["pkg_config"] = "openjph"

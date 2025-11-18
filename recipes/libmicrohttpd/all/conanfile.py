@@ -33,7 +33,7 @@ class LibmicrohttpdConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_https": False,  # FIXME: should be True, but gnutls is not yet available in cci
+        "with_https": True,
         "with_error_messages": True,
         "with_postprocessor": True,
         "with_digest_authentification": True,
@@ -72,12 +72,12 @@ class LibmicrohttpdConan(ConanFile):
     def requirements(self):
         if self.options.get_safe("with_zlib"):
             self.requires("zlib/[>=1.2.11 <2]")
+        if self.options.get_safe("with_https") and not is_msvc(self):
+            self.requires("gnutls/[>=3 <4]")  # tested with 3.8.2
 
     def validate(self):
         if is_msvc(self) and self.settings.arch not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration("Unsupported architecture (only x86 and x86_64 are supported)")
-        if self.options.get_safe("with_https"):
-            raise ConanInvalidConfiguration("gnutls is not (yet) available in cci")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not is_msvc(self):
