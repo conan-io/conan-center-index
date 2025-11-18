@@ -1,4 +1,4 @@
 sources:
-  "0.3.3":
-    url: "https://github.com/ada-url/idna/archive/refs/tags/0.3.3.tar.gz"
-    sha256: "5afa8194d7a2c5b78e4aa716d386e3a550c785efdd9478c04b7b91d57c945c80"
+  "0.3.4":
+    url: "https://github.com/ada-url/idna/archive/refs/tags/0.3.4.tar.gz"
+    sha256: "67d15822575ef4ea3c9b71e0dc72cead86c45e0ba51c11722f9166f1f595c613"
