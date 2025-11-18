@@ -202,16 +202,16 @@ class MongoCDriverConan(ConanFile):
     def package_info(self):
         # FIXME: two CMake module/config files should be generated (mongoc-1.0-config.cmake and bson-1.0-config.cmake),
         # but it can't be modeled right now.
-        mongoc_target = "mongoc_shared" if self.options.shared else "mongoc_static"
-
         version_major = str(Version(self.version).major)
-
         is_major_version_1 = version_major == "1"
 
         cmake_name = "mongoc-1.0" if is_major_version_1 else "mongoc"
 
         self.cpp_info.set_property("cmake_file_name", cmake_name)
-        self.cpp_info.set_property("cmake_target_name", f"mongo::{mongoc_target}")
+
+        lib_type = "shared" if self.options.shared else "static"
+
+        self.cpp_info.set_property("cmake_target_name", f"mongo::mongoc_{lib_type}")
 
         # mongo-c-driver 2.x makes changes to CMake target names. Use aliases for backward compatibility.
         # https://github.com/mongodb/mongo-c-driver/pull/1955
@@ -223,7 +223,6 @@ class MongoCDriverConan(ConanFile):
         for component in ["mongoc", "bson"]:
             # mongo-c-driver 2.x makes changes to CMake target names. Use aliases for backward compatibility.
             # https://github.com/mongodb/mongo-c-driver/pull/1955
-            lib_type = "shared" if self.options.shared else "static"
             target = f"{component}_{lib_type}"
 
             self.cpp_info.components[component].set_property("cmake_target_name", f"mongo::{target}")
