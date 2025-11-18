@@ -213,8 +213,7 @@ class MongoCDriverConan(ConanFile):
 
         self.cpp_info.set_property("cmake_target_name", f"mongo::mongoc_{lib_type}")
 
-        # mongo-c-driver 2.x makes changes to CMake target names. Use aliases for backward compatibility.
-        # https://github.com/mongodb/mongo-c-driver/pull/1955
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = cmake_name
         self.cpp_info.filenames["cmake_find_package_multi"] = cmake_name
         self.cpp_info.names["cmake_find_package"] = "mongo"
