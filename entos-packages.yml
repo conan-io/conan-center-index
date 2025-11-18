@@ -253,6 +253,9 @@ wayland:
 waylandpp:
   versions:
     - '1.0.1.cci.20251006'
+waylandpp-scanner:
+  versions:
+    - '1.0.1.cci.20251006'
 wayland-protocols:
   versions:
     - '1.33'
