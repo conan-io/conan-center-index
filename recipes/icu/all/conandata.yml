@@ -1,4 +1,7 @@
 sources:
+  "76.1":
+    url: "https://github.com/unicode-org/icu/releases/download/release-76-1/icu4c-76_1-src.tgz"
+    sha256: "dfacb46bfe4747410472ce3e1144bf28a102feeaa4e3875bac9b4c6cf30f4f3e"
   "75.1":
     url: "https://github.com/unicode-org/icu/releases/download/release-75-1/icu4c-75_1-src.tgz"
     sha256: "cb968df3e4d2e87e8b11c49a5d01c787bd13b9545280fc6642f826527618caef"
@@ -15,17 +18,32 @@ sources:
     url: "https://github.com/unicode-org/icu/releases/download/release-73-1/icu4c-73_1-src.tgz"
     sha256: "a457431de164b4aa7eca00ed134d00dfbf88a77c6986a10ae7774fc076bb8c45"
 patches:
+  "76.1":
+    - patch_file: "patches/0001-76.1-fix-mingw.patch"
+      patch_description: "support mingw"
+      patch_type: "portability"
+
   "75.1":
     - patch_file: "patches/0001-69.1-fix-mingw.patch"
+      patch_description: "support mingw"
+      patch_type: "portability"
   "74.2":
     - patch_file: "patches/0001-69.1-fix-mingw.patch"
+      patch_description: "support mingw"
+      patch_type: "portability"
     - patch_file: "patches/0002-74.2-fix-emscripten.patch"
       patch_description: "Add config file for wasm-emscripten platform"
       patch_type: "portability"
       patch_source: "https://gerrit.libreoffice.org/c/core/+/111130/9/external/icu/icu4c-emscripten-cross.patch.1"
   "74.1":
     - patch_file: "patches/0001-69.1-fix-mingw.patch"
+      patch_description: "support mingw"
+      patch_type: "portability"
   "73.2":
     - patch_file: "patches/0001-69.1-fix-mingw.patch"
+      patch_description: "support mingw"
+      patch_type: "portability"
   "73.1":
     - patch_file: "patches/0001-69.1-fix-mingw.patch"
+      patch_description: "support mingw"
+      patch_type: "portability"

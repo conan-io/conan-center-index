@@ -90,7 +90,6 @@ class QuillConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
-            if Version(self.version) >= "4.4.0":
-                self.cpp_info.system_libs.append("rt")
+            self.cpp_info.system_libs.append("rt")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
             self.cpp_info.system_libs.append("stdc++fs")

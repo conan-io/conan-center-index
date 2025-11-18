@@ -12,7 +12,7 @@ It's listed under [cmake_package](cmake_package) folder. It fits projects which 
 
 ####  Header only
 
-It's listed under [header_only](header_only) folder. It fits projects which only copy header and have the same package ID always.
+It's listed under [header_only](header_only) folder. It fits projects which only copy header and have the same package ID always. Please note that if the library in question does have a build system (e.g. CMake, Meson, Autotools) that contains install logic - that should be the preferred starting point for the recipe. Copying files directly into the package folder should be reserved for header only libraries where the upstream project does not provide this functionality.
 
 #### MSBuild package
 

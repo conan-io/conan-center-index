@@ -7,7 +7,7 @@ from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.1"
 
 
 class ProxyConan(ConanFile):
@@ -23,18 +23,14 @@ class ProxyConan(ConanFile):
     no_copy_source = True
 
     @property
-    def _min_cppstd(self):
-        return 20
-
-    @property
     def _compilers_minimum_version(self):
+        """ Actual compiler support based on upstream's README.md """
         return {
             # proxy/2.3.0 has an internal compilation error on gcc 11.
             "gcc": "11" if Version(self.version) < "2.3.0" else "12",
             "clang": "15",
             "apple-clang": "14",
             "msvc": "193",
-            "Visual Studio": "17",
         }
 
     def layout(self):
@@ -44,12 +40,11 @@ class ProxyConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 20)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                f"{self.ref} requires at least {self.settings.compiler} {minimum_version}"
             )
 
     def source(self):

@@ -4,6 +4,7 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -136,3 +137,5 @@ class WasmMicroRuntimeConan(ConanFile):
             self.cpp_info.system_libs.append("pthread")
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
+            if Version(self.version) >= "1.3.0":
+                self.cpp_info.system_libs.append("ntdll")

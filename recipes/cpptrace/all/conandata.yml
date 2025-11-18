@@ -1,4 +1,19 @@
 sources:
+  "0.8.2":
+    url: "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.8.2.tar.gz"
+    sha256: "618fb746174f76eb03c7ece059ebdcfe39b7b6adca6a5da0c9f9bc6a4764d7f9"
+  "0.7.5":
+    url: "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.7.5.tar.gz"
+    sha256: "7df0cae3d7da9be2dc82616292cc86a4a08a8209898716231aef80477a8ca35d"
+  "0.7.4":
+    url: "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.7.4.tar.gz"
+    sha256: "1241790cace5d59ddf21ce5d046f71cd26448a3c8c15d123157498ba81e3543d"
+  "0.7.3":
+    url: "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.7.3.tar.gz"
+    sha256: "8b83200860db148a7fd0b2594e7affc6a55809da256e132d6f0d5b202b2e26dd"
+  "0.7.2":
+    url: "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.7.2.tar.gz"
+    sha256: "62835abfd91a840e4d212c850695b576523fe6f9036bc5c3e52183b6eb9905c5"
   "0.7.1":
     url: "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.7.1.tar.gz"
     sha256: "63df54339feb0c68542232229777df057e1848fc8294528613971bbf42889e83"

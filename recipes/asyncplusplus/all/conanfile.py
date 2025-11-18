@@ -2,6 +2,8 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, save
+from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -12,9 +14,9 @@ class AsyncplusplusConan(ConanFile):
     name = "asyncplusplus"
     description = "Async++ concurrency framework for C++11"
     license = "MIT"
-    topics = ("async", "parallel", "task", "scheduler")
-    homepage = "https://github.com/Amanieu/asyncplusplus"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/Amanieu/asyncplusplus"
+    topics = ("async", "parallel", "task", "scheduler")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -89,6 +91,9 @@ class AsyncplusplusConan(ConanFile):
             self.cpp_info.defines = ["LIBASYNC_STATIC"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
+        
+        if Version(self.version) >= "1.2" and is_msvc(self) and check_min_vs(self, 191):
+            self.cpp_info.cxxflags.extend(["/Zc:__cplusplus"])
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "Async++"

@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -45,6 +46,7 @@ class TracyConan(ConanFile):
         "libunwind_backtrace": ([True, False], False),
         "symbol_offline_resolve": ([True, False], False),
         "libbacktrace_elf_dynload_support": ([True, False], False),
+        "verbose": ([True, False], False),
     }
     options = {
         "shared": [True, False],
@@ -81,12 +83,20 @@ class TracyConan(ConanFile):
             del self._tracy_options["symbol_offline_resolve"]
             del self._tracy_options["libbacktrace_elf_dynload_support"]
 
+        if Version(self.version) < "0.11.1":
+            self.options.rm_safe("verbose")
+            del self._tracy_options["verbose"]
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        if self.options.get_safe("libunwind_backtrace"):
+            self.requires("libunwind/1.8.1", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
@@ -97,8 +107,7 @@ class TracyConan(ConanFile):
             raise ConanInvalidConfiguration(f"libunwind_backtrace is not supported in {self.ref}")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -109,6 +118,9 @@ class TracyConan(ConanFile):
             opt = f"TRACY_{opt.upper()}"
             tc.variables[opt] = switch
         tc.generate()
+        if self.options.get_safe("libunwind_backtrace"):
+            deps = PkgConfigDeps(self)
+            deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -142,6 +154,8 @@ class TracyConan(ConanFile):
                 "dbghelp",
                 "ws2_32"
             ])
+        if self.options.get_safe("libunwind_backtrace"):
+            self.cpp_info.components["tracyclient"].requires.append("libunwind::libunwind")
 
         # Tracy CMake adds options set to ON as public
         for opt in self._tracy_options.keys():

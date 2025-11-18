@@ -23,6 +23,9 @@ class SysConfigOpenGLConan(ConanFile):
         self.info.clear()
 
     def system_requirements(self):
+        if self.settings.os not in ["Linux", "FreeBSD", "SunOS"]:
+            return
+
         dnf = package_manager.Dnf(self)
         dnf.install_substitutes(["libglvnd-devel"], ["mesa-libGL-devel"], update=True, check=True)
 
@@ -36,11 +39,14 @@ class SysConfigOpenGLConan(ConanFile):
         pacman.install(["libglvnd"], update=True, check=True)
 
         zypper = package_manager.Zypper(self)
-        zypper.install_substitutes(["Mesa-libGL-devel", "glproto-devel"], 
+        zypper.install_substitutes(["Mesa-libGL-devel", "glproto-devel"],
                                    ["Mesa-libGL-devel", "xorgproto-devel"], update=True, check=True)
 
         pkg = package_manager.Pkg(self)
         pkg.install(["libglvnd"], update=True, check=True)
+
+        pkg_util = package_manager.PkgUtil(self)
+        pkg_util.install(["mesalibs"], update=True, check=True)
 
     def package_info(self):
         # TODO: Workaround for #2311 until a better solution can be found
@@ -57,6 +63,6 @@ class SysConfigOpenGLConan(ConanFile):
             self.cpp_info.frameworks.append("OpenGL")
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["opengl32"]
-        elif self.settings.os in ["Linux", "FreeBSD"]:
+        elif self.settings.os in ["Linux", "FreeBSD", "SunOS"]:
             pkg_config = PkgConfig(self, 'gl')
             pkg_config.fill_cpp_info(self.cpp_info, is_system=self.settings.os != "FreeBSD")

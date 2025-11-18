@@ -9,3 +9,5 @@ versions:
     folder: all
   "23.09":
     folder: cmake
+  "24.09":
+    folder: cmake

@@ -42,6 +42,7 @@ class SfmlConan(ConanFile):
         "audio": True,
         "opengl": "desktop",
     }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -50,18 +51,18 @@ class SfmlConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        # As per CMakeLists.txt#L44, Android is always shared
-        if self.settings.os == "Android":
-            del self.options.shared
-            del self.options.fPIC
-            self.package_type = "shared-library"
-
     def configure(self):
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
         if not self.options.window:
             del self.options.opengl
+       
+        # As per CMakeLists.txt#L44, Android is always shared
+        if self.settings.os == "Android":
+            del self.options.shared
+            del self.options.fPIC
+            self.package_type = "shared-library"
 
     def layout(self):
         cmake_layout(self, src_folder="src")

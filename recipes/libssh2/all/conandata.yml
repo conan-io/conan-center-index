@@ -1,4 +1,7 @@
 sources:
+  "1.11.1":
+    sha256: 9954cb54c4f548198a7cbebad248bdc87dd64bd26185708a294b2b50771e3769
+    url: https://github.com/libssh2/libssh2/releases/download/libssh2-1.11.1/libssh2-1.11.1.tar.xz
   "1.11.0":
     sha256: a488a22625296342ddae862de1d59633e6d446eff8417398e06674a49be3d7c2
     url: https://github.com/libssh2/libssh2/releases/download/libssh2-1.11.0/libssh2-1.11.0.tar.xz

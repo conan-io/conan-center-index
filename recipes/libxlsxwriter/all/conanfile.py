@@ -82,6 +82,8 @@ class LibxlsxwriterConan(ConanFile):
             tc.variables["USE_STATIC_MSVC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.generate()
         deps = CMakeDeps(self)
+        if Version(self.version) >= "1.1.9":
+            deps.set_property("minizip", "cmake_additional_variables_prefixes", ["MINIZIP"])
         deps.generate()
 
     def build(self):

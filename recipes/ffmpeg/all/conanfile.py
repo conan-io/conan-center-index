@@ -65,6 +65,7 @@ class FFMpegConan(ConanFile):
         "with_vdpau": [True, False],
         "with_vulkan": [True, False],
         "with_xcb": [True, False],
+        "with_soxr": [True, False],
         "with_appkit": [True, False],
         "with_avfoundation": [True, False],
         "with_coreimage": [True, False],
@@ -149,6 +150,7 @@ class FFMpegConan(ConanFile):
         "with_vdpau": True,
         "with_vulkan": False,
         "with_xcb": True,
+        "with_soxr": False,
         "with_appkit": True,
         "with_avfoundation": True,
         "with_coreimage": True,
@@ -228,6 +230,7 @@ class FFMpegConan(ConanFile):
             "with_zeromq": ["avfilter", "avformat"],
             "with_libalsa": ["avdevice"],
             "with_xcb": ["avdevice"],
+            "with_soxr": ["swresample"],
             "with_pulse": ["avdevice"],
             "with_sdl": ["with_programs"],
             "with_libsvtav1": ["avcodec"],
@@ -322,6 +325,8 @@ class FFMpegConan(ConanFile):
             self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_xcb") or self.options.get_safe("with_xlib"):
             self.requires("xorg/system")
+        if self.options.get_safe("with_soxr"):
+            self.requires("soxr/0.1.3")
         if self.options.get_safe("with_pulse"):
             self.requires("pulseaudio/14.2")
         if self.options.get_safe("with_vaapi"):
@@ -373,8 +378,9 @@ class FFMpegConan(ConanFile):
                 self.tool_requires("nasm/2.16.01")
             else:
                 self.tool_requires("yasm/1.3.0")
-        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+        if self.settings.os != "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            # See https://github.com/conan-io/conan-center-index/pull/26447#discussion_r1926682155
+            self.tool_requires("pkgconf/[>=2.1 <3]")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -520,6 +526,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("libxcb-shm", self.options.get_safe("with_xcb")),
             opt_enable_disable("libxcb-shape", self.options.get_safe("with_xcb")),
             opt_enable_disable("libxcb-xfixes", self.options.get_safe("with_xcb")),
+            opt_enable_disable("libsoxr", self.options.get_safe("with_soxr")),
             opt_enable_disable("appkit", self.options.get_safe("with_appkit")),
             opt_enable_disable("avfoundation", self.options.get_safe("with_avfoundation")),
             opt_enable_disable("coreimage", self.options.get_safe("with_coreimage")),
@@ -642,11 +649,12 @@ class FFMpegConan(ConanFile):
         ranlib = buildenv_vars.get("RANLIB")
         if ranlib:
             args.append(f"--ranlib={unix_path(self, ranlib)}")
-        # for some reason pkgconf from conan can't find .pc files on Linux in the context of ffmpeg configure...
-        if self._settings_build.os != "Linux":
-            pkg_config = self.conf.get("tools.gnu:pkg_config", default=buildenv_vars.get("PKG_CONFIG"), check_type=str)
-            if pkg_config:
-                args.append(f"--pkg-config={unix_path(self, pkg_config)}")
+        pkg_config = self.conf.get("tools.gnu:pkg_config", default=buildenv_vars.get("PKG_CONFIG"), check_type=str)
+        if pkg_config:
+            # the ffmpeg configure script hardcodes the name of the executable,
+            # unlike other tools that use the PKG_CONFIG environment variable
+            # if we are aware the user has requested a specific pkg-config, we pass it to the configure script
+            args.append(f"--pkg-config={unix_path(self, pkg_config)}")
         if is_msvc(self):
             args.append("--toolchain=msvc")
             if not check_min_vs(self, "190", raise_invalid=False):
@@ -806,7 +814,9 @@ class FFMpegConan(ConanFile):
         if self.options.swscale:
             _add_component("swscale", [])
         if self.options.swresample:
-            _add_component("swresample", [])
+            swresample = _add_component("swresample", [])
+            if self.options.get_safe("with_soxr"):
+                swresample.requires.append("soxr::soxr")
         if self.options.postproc:
             _add_component("postproc", [])
 

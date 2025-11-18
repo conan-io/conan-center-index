@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
 find_package(lunasvg REQUIRED CONFIG)
@@ -9,6 +9,12 @@ if (lunasvg_VERSION VERSION_LESS_EQUAL "2.3.2")
     target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
 elseif (lunasvg_VERSION VERSION_LESS_EQUAL "2.3.8")
     target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+elseif (lunasvg_VERSION VERSION_GREATER_EQUAL "3.0.0")
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 else()
     target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+endif()
+
+if (lunasvg_VERSION VERSION_LESS "3.0.0")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE LUNASVG_BEFORE_3_0_0)
 endif()

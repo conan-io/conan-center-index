@@ -76,8 +76,10 @@ class VorbisConan(ConanFile):
         self.cpp_info.components["vorbismain"].set_property("cmake_target_name", "Vorbis::vorbis")
         self.cpp_info.components["vorbismain"].set_property("pkg_config_name", "vorbis")
         self.cpp_info.components["vorbismain"].libs = ["vorbis"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             self.cpp_info.components["vorbismain"].system_libs.append("m")
+        if self.settings.os == "Android":
+            self.cpp_info.components["vorbismain"].system_libs.append("log")
         self.cpp_info.components["vorbismain"].requires = ["ogg::ogg"]
 
         # TODO: Upstream VorbisConfig.cmake defines components 'Enc' and 'File',

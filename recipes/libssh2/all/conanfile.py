@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, collect_libs
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, collect_libs, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 
 class Libssh2Conan(ConanFile):
@@ -43,6 +43,11 @@ class Libssh2Conan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    @property
+    def _mbedtls_cmake_package_name(self):
+        pkg_name = "mbedTLS" if Version(self.version) < "1.11.1" else "MbedTLS"
+        return pkg_name
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["ENABLE_ZLIB_COMPRESSION"] = self.options.with_zlib
@@ -66,6 +71,8 @@ class Libssh2Conan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("mbedtls", "cmake_file_name", self._mbedtls_cmake_package_name)
+        deps.set_property("mbedtls", "cmake_additional_variables_prefixes", ["MBEDTLS"])
         deps.generate()
 
     def config_options(self):
@@ -90,9 +97,16 @@ class Libssh2Conan(ConanFile):
             else:
                 self.requires("mbedtls/2.28.4")
 
+    def build_requirements(self):
+        if Version(self.version) >= "1.11":
+            self.tool_requires("cmake/[>=3.20 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
+
+        cmakelists = os.path.join("src", "CMakeLists.txt") if Version(self.version) <= "1.10" else "CMakeLists.txt"
+        replace_in_file(self, os.path.join(self.source_folder, cmakelists), "MBEDTLS_FOUND", f"{self._mbedtls_cmake_package_name}_FOUND")
 
     def build(self):
         cmake = CMake(self)
@@ -120,10 +134,6 @@ class Libssh2Conan(ConanFile):
             self.cpp_info.components["_libssh2"].system_libs.extend(["pthread", "dl"])
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Libssh2"
-        self.cpp_info.names["cmake_find_package_multi"] = "Libssh2"
-        self.cpp_info.components["_libssh2"].names["cmake_find_package"] = "libssh2"
-        self.cpp_info.components["_libssh2"].names["cmake_find_package_multi"] = "libssh2"
         self.cpp_info.components["_libssh2"].set_property("cmake_target_name", "Libssh2::libssh2")
         self.cpp_info.components["_libssh2"].set_property("pkg_config_name", "libssh2")
         if self.options.with_zlib:

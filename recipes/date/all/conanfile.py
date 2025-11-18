@@ -73,9 +73,10 @@ class DateConan(ConanFile):
         tc.variables["USE_SYSTEM_TZ_DB"] = self.options.use_system_tz_db
         tc.variables["USE_TZ_DB_IN_DOT"] = self.options.use_tz_db_in_dot
         tc.variables["BUILD_TZ_LIB"] = not self.options.header_only
-        # workaround for clang 5 not having string_view
-        if Version(self.version) >= "3.0.0" and self.settings.compiler == "clang" \
-                and Version(self.settings.compiler.version) <= "5.0":
+        # workaround for gcc 7 and clang 5 not having string_view
+        if Version(self.version) >= "3.0.0" and \
+            ((self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "7.0") or \
+             (self.settings.compiler == "clang" and Version(self.settings.compiler.version) <= "5.0")):
             tc.cache_variables["DISABLE_STRING_VIEW"] = True
         tc.generate()
 

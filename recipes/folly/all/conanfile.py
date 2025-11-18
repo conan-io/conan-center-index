@@ -79,7 +79,7 @@ class FollyConan(ConanFile):
         self.requires("zstd/1.5.5", transitive_libs=True)
         if not is_msvc(self):
             self.requires("libdwarf/0.9.1")
-        self.requires("libsodium/1.0.19")
+        self.requires("libsodium/1.0.20")
         self.requires("xz_utils/[>=5.4.5 <6]")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("libiberty/9.1.0")

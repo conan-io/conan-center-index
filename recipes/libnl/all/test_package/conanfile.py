@@ -6,7 +6,7 @@ from conan.tools.cmake import CMake, cmake_layout
 
 class NetlinkTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv", "PkgConfigDeps", "VirtualBuildEnv"
     test_type = "explicit"
 
     def layout(self):
@@ -14,6 +14,10 @@ class NetlinkTestConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+
+    def build_requirements(self):
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def build(self):
         cmake = CMake(self)

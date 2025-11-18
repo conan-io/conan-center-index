@@ -1,0 +1,20 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c23a1a85c9..f288b2b89d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -133,11 +133,10 @@ if(SYM STREQUAL "bliss" OR SYM STREQUAL "sbliss")
+ 
+     find_package(Bliss CONFIG HINTS ${BLISS_DIR})
+     if(Bliss_FOUND)
+-        get_filename_component(BLISS_ABSOLUTE_PATH ${Bliss_DIR}/../../.. REALPATH)
+-        include_directories(${BLISS_ABSOLUTE_PATH}/include)
+-        set(SYM_LIBRARIES ${BLISS_ABSOLUTE_PATH}/lib/libbliss.a)
+-        set(SYM_PIC_LIBRARIES ${BLISS_ABSOLUTE_PATH}/lib/libbliss.a)
+-        message(STATUS "Found Bliss: ${BLISS_ABSOLUTE_PATH}")
++        include_directories("${bliss_INCLUDE_DIRS}")
++        set(SYM_LIBRARIES "bliss::bliss")
++        set(SYM_PIC_LIBRARIES "bliss::bliss")
++        message(STATUS "Found Bliss via Conan")
+     else()
+         # Utilities to automatically download missing dependencies
+         include(cmake/Dependencies.cmake)
