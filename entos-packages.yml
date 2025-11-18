@@ -193,6 +193,9 @@ pcre2:
   versions:
     - '10.44'
     - '10.42'
+perfetto:
+  versions:
+    - '52.0'
 pkgconf:
   versions:
     - '2.1.0'
