@@ -3,10 +3,8 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.android import android_abi
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy, replace_in_file
 from conan.tools.microsoft import is_msvc_static_runtime
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2"
@@ -31,7 +29,7 @@ class SfmlConan(ConanFile):
         "audio": [True, False],
         # window module options
         "opengl": ["es", "desktop"],
-        "use_drm": [True, False],  # Linux only
+        # "use_drm": [True, False],  # Linux only, no support for now, PR welcome
         # "use_mesa3d": [True, False],  # Windows only, not available in CCI
 
     }
@@ -43,17 +41,7 @@ class SfmlConan(ConanFile):
         "network": True,
         "audio": True,
         "opengl": "desktop",
-        "use_drm": False,
-        # "use_mesa3d": False,
     }
-
-    # TODO: Fill as needed, can't find an official source,
-    #  going by compilation failures right now
-    @property
-    def _min_compiler_versions(self):
-        return {
-            "gcc": 9
-        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -61,10 +49,6 @@ class SfmlConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        else:
-            pass
-            # TODO: Handle mesa3d
-            # del self.options.use_mesa3d
 
         # As per CMakeLists.txt#L44, Android is always shared
         if self.settings.os == "Android":
@@ -78,9 +62,6 @@ class SfmlConan(ConanFile):
 
         if not self.options.window:
             del self.options.opengl
-            del self.options.use_drm
-        elif self.settings.os != "Linux":
-            del self.options.use_drm  # For Window module but only available on Linux
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -88,12 +69,7 @@ class SfmlConan(ConanFile):
     def requirements(self):
         if self.options.window:
             if self.settings.os in ["Linux", "FreeBSD"]:
-                if self.options.get_safe("use_drm"):
-                    self.requires("libdrm/2.4.120")
-                    # TODO, for now this branch is validate()ed out
-                    # self.requires("libgbm/20.3.0")  # Missing in CCI?
-                else:
-                    self.requires("xorg/system")
+                self.requires("xorg/system")
                 if self.settings.os == "Linux":
                     self.requires("libudev/system")
 
@@ -112,14 +88,10 @@ class SfmlConan(ConanFile):
             self.requires("flac/1.4.3")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.24 <4]")
+        self.tool_requires("cmake/[>=3.24]")
 
     def validate(self):
         check_min_cppstd(self, 17)
-
-        compiler_version = self._min_compiler_versions.get(str(self.settings.compiler))
-        if compiler_version and (Version(self.settings.compiler.version) < compiler_version):
-            raise ConanInvalidConfiguration(f"{self.name} requires {self.settings.compiler} {compiler_version} or newer")
 
         if self.options.graphics and not self.options.window:
             raise ConanInvalidConfiguration(f"-o={self.ref}:graphics=True requires -o={self.ref}:window=True")
@@ -130,33 +102,30 @@ class SfmlConan(ConanFile):
         if self.settings.os not in ["Windows", "Linux", "FreeBSD", "Android", "Macos", "iOS"]:
             raise ConanInvalidConfiguration(f"{self.ref} not supported on {self.settings.os}")
 
-        # TODO: Mesa support, or another way to get gbm
-        if self.options.get_safe("use_drm"):
-            raise ConanInvalidConfiguration(f"{self.ref} does not support -o=use_drm=True, contributions are welcome")
-
     def validate_build(self):
         if self.settings.os == "Macos" and self.settings.compiler != "apple-clang":
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os} with {self.settings.compiler}")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
+        apply_conandata_patches(self)
+        # Remove cocoa example - xcode needed
+        # TODO: Remove once we no longer build examples
+        replace_in_file(self, os.path.join(self.source_folder, "examples", "CMakeLists.txt"),
+                        "add_subdirectory(cocoa)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
 
-        tc.variables["SFML_BUILD_WINDOW"] = self.options.window
-        tc.variables["SFML_BUILD_GRAPHICS"] = self.options.graphics
-        tc.variables["SFML_BUILD_NETWORK"] = self.options.network
-        tc.variables["SFML_BUILD_AUDIO"] = self.options.audio
+        tc.cache_variables["SFML_BUILD_WINDOW"] = self.options.window
+        tc.cache_variables["SFML_BUILD_GRAPHICS"] = self.options.graphics
+        tc.cache_variables["SFML_BUILD_NETWORK"] = self.options.network
+        tc.cache_variables["SFML_BUILD_AUDIO"] = self.options.audio
 
         if self.options.window:
-            tc.variables["SFML_OPENGL_ES"] = True if self.options.opengl == "es" else False
+            tc.cache_variables["SFML_OPENGL_ES"] = self.options.opengl == "es"
 
-            if self.settings.os == "Linux":
-                tc.variables["SFML_USE_DRM"] = self.options.use_drm
-
-        tc.variables["SFML_GENERATE_PDB"] = False  # PDBs not allowed in CCI
+        tc.cache_variables["SFML_GENERATE_PDB"] = False  # PDBs not allowed in CCI
 
         if self.settings.os == "Windows":
             tc.cache_variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
@@ -166,13 +135,13 @@ class SfmlConan(ConanFile):
         if self.settings.os == "Windows":
             tc.cache_variables["SFML_USE_MESA3D"] = False  # self.options.use_mesa3d
 
-        tc.variables["SFML_INSTALL_PKGCONFIG_FILES"] = False
+        tc.cache_variables["SFML_INSTALL_PKGCONFIG_FILES"] = False
         tc.cache_variables["SFML_WARNINGS_AS_ERRORS"] = False
 
         # Tip: You can use this locally to test the extras when adding a new version,
         # uncomment both to build examples, or run them manually
-        # tc.variables["SFML_CONFIGURE_EXTRAS"] = True
-        # tc.variables["SFML_BUILD_EXAMPLES"] = True
+        tc.cache_variables["SFML_CONFIGURE_EXTRAS"] = True
+        tc.cache_variables["SFML_BUILD_EXAMPLES"] = True
 
         tc.generate()
         deps = CMakeDeps(self)
@@ -180,13 +149,6 @@ class SfmlConan(ConanFile):
         deps.set_property("freetype", "cmake_file_name", "Freetype")
         deps.set_property("freetype", "cmake_target_name", "Freetype::Freetype")
         deps.generate()
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # Remove cocoa example - xcode needed
-        # TODO: Remove once we no longer build examples
-        replace_in_file(self, os.path.join(self.source_folder, "examples", "CMakeLists.txt"),
-                        "add_subdirectory(cocoa)", "")
 
     def build(self):
         cmake = CMake(self)
@@ -256,12 +218,7 @@ class SfmlConan(ConanFile):
             self.cpp_info.components["window"].requires = ["system"]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["window"].system_libs.append("dl")
-                if self.options.get_safe("use_drm"):
-                    self.cpp_info.components["window"].requires.append("libdrm::libdrm")
-                    # TODO
-                    # self.cpp_info.components["window"].requires.append("libgbm::libgbm")
-                else:
-                    self.cpp_info.components["window"].requires.extend(["xorg::x11", "xorg::xrandr", "xorg::xcursor", "xorg::xi"])
+                self.cpp_info.components["window"].requires.extend(["xorg::x11", "xorg::xrandr", "xorg::xcursor", "xorg::xi"])
 
             if self.settings.os == "iOS":
                 self.cpp_info.components["window"].frameworks = ["OpenGLES"]
