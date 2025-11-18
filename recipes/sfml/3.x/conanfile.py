@@ -57,7 +57,7 @@ class SfmlConan(ConanFile):
 
         if not self.options.window:
             del self.options.opengl
-       
+
         # As per CMakeLists.txt#L44, Android is always shared
         if self.settings.os == "Android":
             del self.options.shared
@@ -141,8 +141,8 @@ class SfmlConan(ConanFile):
 
         # Tip: You can use this locally to test the extras when adding a new version,
         # uncomment both to build examples, or run them manually
-        tc.cache_variables["SFML_CONFIGURE_EXTRAS"] = True
-        tc.cache_variables["SFML_BUILD_EXAMPLES"] = True
+        # tc.cache_variables["SFML_CONFIGURE_EXTRAS"] = True
+        # tc.cache_variables["SFML_BUILD_EXAMPLES"] = True
 
         tc.generate()
         deps = CMakeDeps(self)
