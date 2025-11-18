@@ -101,10 +101,14 @@ class WxPdfDocConan(ConanFile):
             copy(self, "*", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
             lib_dir = os.path.join(self.source_folder, "lib")
             subdirs = [d for d in os.listdir(lib_dir) if os.path.isdir(os.path.join(lib_dir, d))]
-            subdirs = sorted([d for d in subdirs if d.endswith("_lib")])
-            copy(self, "*", os.path.join(self.source_folder, "lib", subdirs[0]), os.path.join(self.package_folder, "lib"))
+            subdir = sorted([d for d in subdirs if d != "fonts"])[0]
+            copy(self, "*.lib", os.path.join(self.source_folder, "lib", subdir), os.path.join(self.package_folder, "lib"))
+
+            if self.options.shared:
+                copy(self, "*.dll", os.path.join(self.source_folder, "lib", subdir), os.path.join(self.package_folder, "bin"))
+
             platform = self._arch_to_msbuild_platform(self.settings.arch)
-            copy(self, "*", os.path.join(self.source_folder, "..", "build-release", "lib", self._msvc_version_str(), platform, str(self.settings.build_type)), os.path.join(self.package_folder, "lib"))
+            copy(self, "*.lib", os.path.join(self.source_folder, "..", f"build-{str(self.settings.build_type).lower()}", "lib", self._msvc_version_str(), platform, str(self.settings.build_type)), os.path.join(self.package_folder, "lib"))
         else:
             autotools = Autotools(self)
             autotools.install()
@@ -115,6 +119,10 @@ class WxPdfDocConan(ConanFile):
 
     def package_info(self):
         if self.settings.os == "Windows":
-            self.cpp_info.libs = ["wxpdfdoc", "libwoff2", "libzint"]
+            if self.settings.build_type == "Release":
+                self.cpp_info.libs = ["wxpdfdoc"]
+            elif self.settings.build_type == "Debug":
+                self.cpp_info.libs = ["wxpdfdocd"]
+            self.cpp_info.libs += ["libwoff2", "libzint"]
         else:
             self.cpp_info.libs = ["wxcode_gtk2u_pdfdoc-3.2"]
