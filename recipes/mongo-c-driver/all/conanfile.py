@@ -220,10 +220,10 @@ class MongoCDriverConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "mongo"
 
         for component in ["mongoc", "bson"]:
-            # mongo-c-driver 2.x makes changes to CMake target names. Use aliases for backward compatibility.
-            # https://github.com/mongodb/mongo-c-driver/pull/1955
             target = f"{component}_{lib_type}"
 
+            # mongo-c-driver 2.x makes changes to CMake target names. Use aliases for backward compatibility.
+            # https://github.com/mongodb/mongo-c-driver/pull/1955
             self.cpp_info.components[component].set_property("cmake_target_name", f"mongo::{target}")
             self.cpp_info.components[component].set_property("cmake_target_aliases", [f"{component}::{lib_type}"])
 
