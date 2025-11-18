@@ -55,6 +55,7 @@ class WxSqLite3Conan(ConanFile):
             wx_config = os.path.join(wxwidgets_root, "bin", "wx-config")
             tc = AutotoolsToolchain(self)
             tc.configure_args.append(f"--with-wx-config={wx_config}")
+            tc.configure_args.append(f"--with-wx-prefix={wxwidgets_root}")
             tc.generate()
             deps = AutotoolsDeps(self)
             deps.generate()
