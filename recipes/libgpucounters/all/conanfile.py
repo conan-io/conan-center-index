@@ -51,7 +51,6 @@ class LibGpuCountersConan(ConanFile):
                 "HWCPIPE_FRONTEND_ENABLE_TESTS": False,
                 "HWCPIPE_BUILD_EXAMPLES": False,
                 "HWCPIPE_WERROR": False,  # true by default in the package but could be annoying for consumers
-                "HWCPIPE_ENABLE_SYMBOLS_VISIBILITY": self.options.shared
             }
         )
         tc.generate()
@@ -68,20 +67,16 @@ class LibGpuCountersConan(ConanFile):
             self.source_folder,
             os.path.join(self.package_folder, "licenses"),
         )
-        lib_patterns = (
-            ["*.so*", "*.dll", "*.dylib*"] if self.options.shared else ["*.a"]
+        copy(
+            self,
+            "*.a",
+            self.build_folder,
+            os.path.join(self.package_folder, "lib"),
+            keep_path=False,
         )
-        for pattern in lib_patterns:
-            copy(
-                self,
-                pattern,
-                self.build_folder,
-                os.path.join(self.package_folder, "lib"),
-                keep_path=False,
-            )
+
         dest_include_dir = os.path.join(self.package_folder, "include")
-        header_patters = ["*.h", "*.hpp"]
-        for pattern in header_patters:
+        for pattern in ["*.h", "*.hpp"]:
             copy(
                 self,
                 pattern,
@@ -101,3 +96,4 @@ class LibGpuCountersConan(ConanFile):
             self.cpp_info.components[component].set_property(
                 "cmake_target_name", component
             )
+        self.cpp_info.components["hwcpipe"].requires = ["device"]
