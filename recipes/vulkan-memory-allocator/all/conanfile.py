@@ -29,7 +29,7 @@ class VulkanMemoryAllocatorConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("vulkan-headers/1.3.243.0")
+        self.requires("vulkan-headers/[~1]")
 
     def package_id(self):
         self.info.clear()
@@ -56,3 +56,6 @@ class VulkanMemoryAllocatorConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.set_property("cmake_file_name", "VulkanMemoryAllocator")
+        self.cpp_info.set_property("cmake_target_name", "GPUOpen::VulkanMemoryAllocator")
+        self.cpp_info.set_property("cmake_target_aliases", ["VulkanMemoryAllocator",])

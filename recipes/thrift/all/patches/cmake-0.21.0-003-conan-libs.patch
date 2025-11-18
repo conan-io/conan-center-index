@@ -1,0 +1,42 @@
+diff --git a/lib/cpp/CMakeLists.txt b/lib/cpp/CMakeLists.txt
+--- a/lib/cpp/CMakeLists.txt
++++ b/lib/cpp/CMakeLists.txt
+@@ -97,7 +97,8 @@
+ endif()
+
+ # If OpenSSL is not found or disabled just ignore the OpenSSL stuff
+-if(OPENSSL_FOUND AND WITH_OPENSSL)
++if(WITH_OPENSSL)
++    find_package(OpenSSL REQUIRED)
+     list(APPEND thriftcpp_SOURCES
+        src/thrift/transport/TSSLSocket.cpp
+        src/thrift/transport/TSSLServerSocket.cpp
+@@ -112,8 +113,7 @@
+             list(APPEND SYSLIBS OpenSSL::Crypto)
+         endif()
+     else()
+-        include_directories(SYSTEM "${OPENSSL_INCLUDE_DIR}")
+-        list(APPEND SYSLIBS "${OPENSSL_LIBRARIES}")
++        list(APPEND SYSLIBS OpenSSL::SSL OpenSSL::Crypto)
+     endif()
+ endif()
+
+@@ -168,16 +168,11 @@
+
+ if(WITH_LIBEVENT)
+     find_package(Libevent REQUIRED)  # Libevent comes with CMake support from upstream
+-    include_directories(SYSTEM ${LIBEVENT_INCLUDE_DIRS})
+
+     ADD_LIBRARY_THRIFT(thriftnb ${thriftcppnb_SOURCES})
+     target_link_libraries(thriftnb PUBLIC thrift)
+-    if(TARGET libevent::core AND TARGET libevent::extra)
+-        # libevent was found via its cmake config, use modern style targets
+-        target_link_libraries(thriftnb PUBLIC libevent::core libevent::extra)
+-    else()
+-        target_link_libraries(thriftnb PUBLIC ${LIBEVENT_LIBRARIES})
+-    endif()
++    # libevent was found via its cmake config, use modern style targets
++    target_link_libraries(thriftnb PUBLIC libevent::core libevent::extra)
+     ADD_PKGCONFIG_THRIFT(thrift-nb)
+ endif()
+

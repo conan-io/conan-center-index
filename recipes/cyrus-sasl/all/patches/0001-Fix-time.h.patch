@@ -1,0 +1,45 @@
+Backport https://github.com/cyrusimap/cyrus-sasl/pull/709
+
+diff --git a/configure b/configure
+index 71dff1b..96e41c5 100755
+--- a/configure
++++ b/configure
+@@ -20765,7 +20765,7 @@ $as_echo "#define HAVE_SYS_WAIT_H 1" >>confdefs.h
+ 
+ fi
+ 
+-for ac_header in crypt.h des.h dlfcn.h fcntl.h limits.h malloc.h paths.h strings.h sys/file.h sys/time.h syslog.h unistd.h inttypes.h sys/uio.h sys/param.h sysexits.h stdarg.h varargs.h krb5.h
++for ac_header in crypt.h des.h dlfcn.h fcntl.h limits.h malloc.h paths.h strings.h sys/file.h sys/time.h syslog.h time.h unistd.h inttypes.h sys/uio.h sys/param.h sysexits.h stdarg.h varargs.h krb5.h
+ do :
+   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+
+diff --git a/plugins/cram.c b/plugins/cram.c
+index d02e9baa..695aaa91 100644
+--- a/plugins/cram.c
++++ b/plugins/cram.c
+@@ -53,6 +53,10 @@
+ #endif
+ #include <fcntl.h>
+
++#ifdef HAVE_TIME_H
++#include <time.h>
++#endif
++
+ #include <sasl.h>
+ #include <saslplug.h>
+ #include <saslutil.h>
+
+index 8f2f1be..28f9c95 100644
+--- a/config.h.in
++++ b/config.h.in
+@@ -304,6 +304,9 @@
+ /* Define to 1 if you have the <string.h> header file. */
+ #undef HAVE_STRING_H
+ 
++/* Define to 1 if you have the <time.h> header file. */
++#undef HAVE_TIME_H
++
+ /* Define to 1 if you have the `strlcat' function. */
+ #undef HAVE_STRLCAT
+ 

@@ -4,9 +4,10 @@ from conan.tools.files import (
     apply_conandata_patches, collect_libs, copy, export_conandata_patches, get,
     replace_in_file, rmdir
 )
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class CppRestSDKConan(ConanFile):
@@ -57,7 +58,7 @@ class CppRestSDKConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.83.0")
+        self.requires("boost/1.83.0", transitive_headers=True)
         self.requires("openssl/[>=1.1 <4]")
         if self.options.with_compression:
             self.requires("zlib/[>=1.2.11 <2]")
@@ -83,6 +84,8 @@ class CppRestSDKConan(ConanFile):
             tc.variables["CPPREST_HTTP_CLIENT_IMPL"] = self.options.http_client_impl
         if self.options.get_safe("http_listener_impl"):
             tc.variables["CPPREST_HTTP_LISTENER_IMPL"] = self.options.http_listener_impl
+        if Version(self.version) <= "2.10.15":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

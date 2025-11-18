@@ -113,6 +113,10 @@ class LibarchiveConan(ConanFile):
         if self.options.get_safe("with_pcre2"):
             self.requires("pcre2/10.43")
 
+    def build_requirements(self):
+        if Version(self.version) >= "3.7.9":
+            self.tool_requires("cmake/[>=3.17]")
+
     def validate(self):
         if self.settings.os != "Windows" and self.options.with_cng:
             # TODO: add cng when available in CCI
@@ -122,11 +126,15 @@ class LibarchiveConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         cmake_deps = CMakeDeps(self)
         cmake_deps.generate()
         tc = CMakeToolchain(self)
+        # CMake 4 support
+        if Version(self.version) < "3.7.9":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         # turn off deps to avoid picking up them accidentally
         tc.variables["ENABLE_NETTLE"] = self.options.with_nettle
         tc.variables["ENABLE_OPENSSL"] = self.options.with_openssl
@@ -160,13 +168,10 @@ class LibarchiveConan(ConanFile):
         if Version(self.version) >= "3.7.3":
             tc.variables["ENABLE_PCRE2POSIX"] = self.options.with_pcre2
         tc.variables["ENABLE_XATTR"] = self.options.with_xattr
-        # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
-        if is_msvc(self):
-            tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -190,5 +195,7 @@ class LibarchiveConan(ConanFile):
         self.cpp_info.libs = collect_libs(self)
         if self.settings.os == "Windows" and self.options.with_cng:
             self.cpp_info.system_libs.append("bcrypt")
+        if Version(self.version) >= "3.8.0" and self.settings.os == "Windows" and not self.options.with_libxml2 and not self.options.with_expat:
+            self.cpp_info.system_libs.append("xmllite")
         if is_msvc(self) and not self.options.shared:
             self.cpp_info.defines = ["LIBARCHIVE_STATIC"]
