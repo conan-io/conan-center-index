@@ -12,7 +12,7 @@ quickly than can be guaranteed by the PR review process in the public upstream r
 Where possible, package updates should still be commited to the upstream repository as a PR.
 
 Not all packages available in CCI will be provided by the
-[Comcast Artifactory](https://partners.artifactory.comcast.com) instance.
+[Comcast Artifactory](https://partners.artifactory.comcast.com) instance, only those listed in the `entos-packages.yml` file.
 
 ### Branches
 

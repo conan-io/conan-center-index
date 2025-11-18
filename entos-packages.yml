@@ -108,6 +108,9 @@ libffi:
   versions:
     - '3.4.4'
     - '3.4.8'
+libgpucounters:
+  versions:
+    - '2.4.0'
 libiconv:
   versions:
     - '1.17'
