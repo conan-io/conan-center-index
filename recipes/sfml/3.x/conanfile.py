@@ -168,19 +168,12 @@ class SfmlConan(ConanFile):
         self.cpp_info.components[name].set_property("cmake_target_name", f"SFML::{name.capitalize()}")
 
         libname = f"sfml-{name}"
-        # main is always static as per SFML/Main/CMakeLists.txt#L16 STATIC definition
-        if name != "main" and (self.options.get_safe("shared") or self.settings.os == "Android"):
-            if self.settings.build_type == "Debug":
-                libname += "-d"
-            if self.settings.os == "Windows":
-                # TODO: Windows shared does set_target_properties(${target} PROPERTIES SUFFIX "-${PROJECT_VERSION_MAJOR}${CMAKE_SHARED_LIBRARY_SUFFIX}")
-                # Should we handle it here? It compiles either way
-                pass
-        else:
+
+        if not self.options.get_safe("shared") and name != "main":
             libname += "-s"
             self.cpp_info.components[name].defines = ["SFML_STATIC"]
-            if self.settings.build_type == "Debug":
-                libname += "-d"
+        if self.settings.build_type == "Debug":
+            libname += "-d"
         self.cpp_info.components[name].libs = [libname]
 
         # CMakeLists.txt#L87 - Android libs are in lib/<CMAKE_ANDROID_ARCH_ABI>
