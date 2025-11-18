@@ -20,14 +20,12 @@ class LibGpuCountersConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ARM-software/libGPUCounters"
     topics = ("gpu", "arm", "profiling")
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
     }
     implements = ["auto_shared_fpic"]
@@ -82,26 +80,24 @@ class LibGpuCountersConan(ConanFile):
                 keep_path=False,
             )
         dest_include_dir = os.path.join(self.package_folder, "include")
-        copy(
-            self,
-            "*.hpp",
-            os.path.join(self.source_folder, "backend", "device", "include"),
-            dest_include_dir,
-        )
-        copy(
-            self,
-            "*.hpp",
-            os.path.join(self.source_folder, "hwcpipe", "include"),
-            dest_include_dir,
-        )
+        header_patters = ["*.h", "*.hpp"]
+        for pattern in header_patters:
+            copy(
+                self,
+                pattern,
+                os.path.join(self.source_folder, "backend", "device", "include"),
+                dest_include_dir,
+            )
+            copy(
+                self,
+                pattern,
+                os.path.join(self.source_folder, "hwcpipe", "include"),
+                dest_include_dir,
+            )
 
     def package_info(self):
-        if self.options.shared:
-            self.cpp_info.libs = ["hwcpipe"]
-            self.cpp_info.set_property("cmake_target_name", "hwcpipe")
-        else:
-            for component in ["hwcpipe", "device"]:
-                self.cpp_info.components[component].libs = [component]
-                self.cpp_info.components[component].set_property(
-                    "cmake_target_name", component
-                )
+        for component in ["hwcpipe", "device"]:
+            self.cpp_info.components[component].libs = [component]
+            self.cpp_info.components[component].set_property(
+                "cmake_target_name", component
+            )
