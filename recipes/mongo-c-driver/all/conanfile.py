@@ -218,8 +218,21 @@ class MongoCDriverConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "mongo"
         self.cpp_info.names["cmake_find_package_multi"] = "mongo"
 
+        def set_component_cmake_target_names(component):
+            # mongo-c-driver 2.x makes changes to CMake target names. Use aliases for keep backward compatibility.
+            # https://github.com/mongodb/mongo-c-driver/pull/1955
+            shared_or_static = "shared" if self.options.shared else "static"
+            target = f"{component}_{shared_or_static}"
+
+            self.cpp_info.components[component].set_property("cmake_target_name", f"mongo::{target}")
+            self.cpp_info.components[component].set_property("cmake_target_aliases", [f"{component}::{shared_or_static}"])
+
+            # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+            self.cpp_info.components[component].names["cmake_find_package"] = target
+            self.cpp_info.components[component].names["cmake_find_package_multi"] = target
+
         # mongoc
-        self.cpp_info.components["mongoc"].set_property("cmake_target_name", f"mongo::{mongoc_target}")
+        set_component_cmake_target_names("mongoc")
 
         lib_type_str = '' if self.options.shared else '-static'
 
@@ -227,9 +240,6 @@ class MongoCDriverConan(ConanFile):
             return f"lib{component}{lib_type_str}-1.0" if is_major_version_1 else f"lib{component}{version_major}{lib_type_str}"
 
         self.cpp_info.components["mongoc"].set_property("pkg_config_name", make_pkg_config_name("mongoc"))
-
-        self.cpp_info.components["mongoc"].names["cmake_find_package"] = mongoc_target
-        self.cpp_info.components["mongoc"].names["cmake_find_package_multi"] = mongoc_target
 
         def make_include_subdir(component):
             return f"lib{component}-1.0" if is_major_version_1 else f"{component}-{self.version}"
@@ -269,13 +279,9 @@ class MongoCDriverConan(ConanFile):
             self.cpp_info.components["mongoc"].system_libs.append("dnsapi" if self.settings.os == "Windows" else "resolv")
 
         # bson
-        bson_target = "bson_shared" if self.options.shared else "bson_static"
-        self.cpp_info.components["bson"].set_property("cmake_target_name", f"mongo::{bson_target}")
+        set_component_cmake_target_names("bson")
+
         self.cpp_info.components["bson"].set_property("pkg_config_name", make_pkg_config_name("bson"))
-
-        self.cpp_info.components["bson"].names["cmake_find_package"] = bson_target
-        self.cpp_info.components["bson"].names["cmake_find_package_multi"] = bson_target
-
         self.cpp_info.components["bson"].includedirs = [os.path.join("include", make_include_subdir("bson"))]
         self.cpp_info.components["bson"].libs = [make_component_lib("bson")]
         if not self.options.shared:
