@@ -7,7 +7,9 @@ from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.premake import Premake, PremakeDeps, PremakeToolchain
 
-required_conan_version = ">=2.19.0"
+# @todo 2.23.0 is not yet released but we require the configuration setting for Premake
+# added in 86b5918763983683e4172fe21cb84d4fa98ec5fa
+required_conan_version = ">=2.23.0"
 
 
 class WxPdfDocConan(ConanFile):
@@ -43,6 +45,43 @@ class WxPdfDocConan(ConanFile):
         version = version_map.get(str(compiler_version))
         return version
 
+    # https://github.com/utelle/wxsqlite3/issues/129#issuecomment-3527826225
+    # The build files of wxSQLite3 contain 3 variations per Release resp Debug configuration:
+    #   - Release / Debug : wxSQlite3 and wxWidgets as static libraries
+    #   - Release DLL / Debug DLL : wxSQlite3 and wxWidgets as shared libraries
+    #   - Release wxDLL / Debug wxDLL : wxSQlite3 as static library and wxWidgets as shared libraries
+    def _get_configuration(self, wxwidgets_shared=None, wxpdfdoc_shared=None, build_type=None):
+        if wxwidgets_shared is None:
+            # @todo Why doesn't this properly work? I set '-o "wxwidgets/*:shared=True"' via the CLI
+            # during 'conan create# but this returns None here...
+            wxwidgets_shared = self.options["wxwidgets"].get_safe("shared")
+            # @todo This line does not work at all....
+            # wxwidgets_shared = self.options["wxwidgets"].shared
+            #   ConanException: option 'shared' doesn't exist
+        if wxpdfdoc_shared is None:
+            wxpdfdoc_shared = self.options.shared
+        if build_type is None:
+            build_type = self.settings.build_type
+
+        if wxpdfdoc_shared:
+            suffix = "DLL"
+        elif wxwidgets_shared:
+            suffix = "wxDLL"
+        else:
+            suffix = ""
+
+        config = f"{build_type} {suffix}".strip()
+        # @todo Adjust for testing purposes but remove later
+        config = "Release wxDLL"
+        print(f"---------------------------------------------------------------------------------------------- Using configuration: {config}")
+        return config
+
+    def configure(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            # There is no Premake configuration for building wxpdfdoc as shared library
+            # and wxwidgets as static library.
+            self.options["wxwidgets"].shared = True
+
     def validate(self):
         if self.settings.os == "Windows":
             platform = self._arch_to_msbuild_platform(self.settings.arch)
@@ -72,6 +111,7 @@ class WxPdfDocConan(ConanFile):
     def generate(self):
         if self.settings.os == "Windows":
             deps = PremakeDeps(self)
+            deps.configuration = self._get_configuration()
             deps.generate()
             tc = PremakeToolchain(self)
             tc.generate()
@@ -89,7 +129,7 @@ class WxPdfDocConan(ConanFile):
             premake = Premake(self)
             premake.configure()
             platform = self._arch_to_msbuild_platform(self.settings.arch)
-            premake.build(workspace=f"wxpdfdoc_{self._msvc_version_str()}", targets=["wxpdfdoc"], msbuild_platform=platform)
+            premake.build(workspace=f"wxpdfdoc_{self._msvc_version_str()}", targets=["wxpdfdoc"], msbuild_platform=platform, configuration=self._get_configuration())
         else:
             autotools = Autotools(self)
             autotools.autoreconf()
@@ -108,7 +148,7 @@ class WxPdfDocConan(ConanFile):
                 copy(self, "*.dll", os.path.join(self.source_folder, "lib", subdir), os.path.join(self.package_folder, "bin"))
 
             platform = self._arch_to_msbuild_platform(self.settings.arch)
-            copy(self, "*.lib", os.path.join(self.source_folder, "..", f"build-{str(self.settings.build_type).lower()}", "lib", self._msvc_version_str(), platform, str(self.settings.build_type)), os.path.join(self.package_folder, "lib"))
+            copy(self, "*.lib", os.path.join(self.source_folder, "..", f"build-{str(self.settings.build_type).lower()}", "lib", self._msvc_version_str(), platform, self._get_configuration()), os.path.join(self.package_folder, "lib"))
         else:
             autotools = Autotools(self)
             autotools.install()
@@ -126,3 +166,13 @@ class WxPdfDocConan(ConanFile):
             self.cpp_info.libs += ["libwoff2", "libzint"]
         else:
             self.cpp_info.libs = ["wxcode_gtk2u_pdfdoc-3.2"]
+
+# @todo Commands to test:
+# conan create recipes/wxpdfdoc/all --build missing --version 1.3.1 --options shared=False -o "wxwidgets/*:shared=False" --settings build_type=Debug   #  Debug
+# conan create recipes/wxpdfdoc/all --build missing --version 1.3.1 --options shared=False -o "wxwidgets/*:shared=False" --settings build_type=Release #  Release
+# conan create recipes/wxpdfdoc/all --build missing --version 1.3.1 --options shared=False -o "wxwidgets/*:shared=True"  --settings build_type=Debug   #  Debug wxDLL
+# conan create recipes/wxpdfdoc/all --build missing --version 1.3.1 --options shared=False -o "wxwidgets/*:shared=True"  --settings build_type=Release #  Release wxDLL
+# conan create recipes/wxpdfdoc/all --build missing --version 1.3.1 --options shared=True  -o "wxwidgets/*:shared=False" --settings build_type=Debug   #  Invalid
+# conan create recipes/wxpdfdoc/all --build missing --version 1.3.1 --options shared=True  -o "wxwidgets/*:shared=False" --settings build_type=Release #  Invalid
+# conan create recipes/wxpdfdoc/all --build missing --version 1.3.1 --options shared=True  -o "wxwidgets/*:shared=True"  --settings build_type=Debug   #  Debug DLL
+# conan create recipes/wxpdfdoc/all --build missing --version 1.3.1 --options shared=True  -o "wxwidgets/*:shared=True"  --settings build_type=Release #  Release DLL
