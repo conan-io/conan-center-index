@@ -23,8 +23,12 @@ class TestPackageConan(ConanFile):
             tc.preprocessor_definitions["WITH_PCAP"] = "1"
         if self.dependencies["ouster_sdk"].options.build_viz:
             tc.preprocessor_definitions["WITH_VIZ"] = "1"
-        tc.cache_variables["OUSTER_SDK_SHARED"] = self.dependencies["ouster_sdk"].options.shared \
-            and Version(self.dependencies["ouster_sdk"].ref.version) >= "0.14.0"
+        if Version(self.dependencies["ouster_sdk"].ref.version) >= "0.15.0":
+            if self.dependencies["ouster_sdk"].options.build_sensor:
+                tc.preprocessor_definitions["WITH_SENSOR"] = "1"
+            if self.dependencies["ouster_sdk"].options.build_mapping:
+                tc.preprocessor_definitions["WITH_MAPPING"] = "1"
+        tc.cache_variables["OUSTER_SDK_SHARED"] = self.dependencies["ouster_sdk"].options.shared
         tc.generate()
 
     def build(self):
