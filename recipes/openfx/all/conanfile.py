@@ -55,9 +55,6 @@ class Openfx(ConanFile):
         deps.generate()
 
         tc = CMakeToolchain(self)
-        if self.settings.os == "Windows":
-            tc.preprocessor_definitions["WINDOWS"] = 1
-            tc.preprocessor_definitions["NOMINMAX"] = 1
         tc.generate()
 
     def build(self):
@@ -81,11 +78,5 @@ class Openfx(ConanFile):
         self.cpp_info.components["Support"].includedirs = [os.path.join("include", "Support")]
         self.cpp_info.components["Support"].requires = ["Api"]
 
-        # TODO: Remove in newer versions once Windows define is removed
-        if self.settings.os == "Windows":
-            win_defines = ["WINDOWS"]
-            self.cpp_info.components["Api"].defines = win_defines
-            self.cpp_info.components["HostSupport"].defines = win_defines
-            self.cpp_info.components["Support"].defines = win_defines
-        elif self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["HostSupport"].system_libs = ["dl"]
