@@ -1,4 +1,4 @@
 sources:
-  "0.33.2":
-    url: "https://github.com/awslabs/aws-crt-cpp/archive/v0.33.2.tar.gz"
-    sha256: "3d8e15483c6e28575f2d1a30d04f509d028fddb647c948efdb980f21f6602b51"
+  "0.35.2":
+    url: "https://github.com/awslabs/aws-crt-cpp/archive/v0.35.2.tar.gz"
+    sha256: "9d53d7018994a5f7fc879d397032b72ad88b1585a8cc07e2c8c339ae427f0577"

@@ -37,7 +37,7 @@ class AwsCCal(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("aws-c-common/0.12.3", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-common/0.12.5", transitive_headers=True, transitive_libs=True)
         if self._needs_openssl:
             self.requires("openssl/[>=1.1 <4]")
 
