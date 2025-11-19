@@ -5,7 +5,9 @@ from conan.tools.files import copy, get, rmdir, rm, export_conandata_patches, ap
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.build import cross_building
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=2.1"
 
@@ -59,6 +61,11 @@ class WxSqLite3Conan(ConanFile):
             tc.generate()
             deps = AutotoolsDeps(self)
             deps.generate()
+
+    def validate(self):
+        if cross_building(self) and is_apple_os(self):
+            # FIXME: WxWidgets wx-config can not find the correct paths/libs when cross-building for Apple platforms
+            raise ConanInvalidConfiguration("Cross-building wxsqlite3 for Apple platforms is not supported yet. Contributions are welcome!")
 
     def build(self):
         if self.settings.os == "Windows":
