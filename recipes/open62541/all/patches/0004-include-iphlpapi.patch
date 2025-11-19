@@ -8,7 +8,7 @@ index 13eb0fb..d832f0a 100644
  
 +#if defined(_WIN32)
 +#  include <winsock2.h>
-+#  include <iphlpapi.h>
++#  include <windows.h>
 +#endif
  #include <open62541/types_generated_handling.h>
  #include <open62541/util.h>
