@@ -77,7 +77,7 @@ class TensorflowLiteConan(ConanFile):
         return Version(self.version) >= "2.12.0"
 
     def requirements(self):
-        self.requires("abseil/20230125.3")
+        self.requires("abseil/[>=20230125.3 <=20250127.0]")
         self.requires("eigen/3.4.0")
         self.requires("farmhash/cci.20190513")
         self.requires("fft/cci.20061228")
