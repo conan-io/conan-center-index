@@ -1,0 +1,6 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/pytorch/executorch/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "a13b379d7acd2470e643b4fd54a3bd4a68eea6032153aa3fd705ba34718a32dc"
+patches:
+  "1.0.0":
