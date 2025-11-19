@@ -32,7 +32,7 @@ class AwsCCompression(ConanFile):
 
     def requirements(self):
         # Don't bump this on its own, take into account aws-sdk-cpp graph
-        self.requires("aws-c-common/0.12.3", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-common/0.12.5", transitive_headers=True, transitive_libs=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

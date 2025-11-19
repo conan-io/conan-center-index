@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, rm
 import os
 
 required_conan_version = ">=2.4"
@@ -58,6 +58,7 @@ class AwsCCommon(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rm(self, "aws-c-common-config.cmake", os.path.join(self.package_folder, "lib", "cmake", "aws-c-common"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "aws-c-common")
