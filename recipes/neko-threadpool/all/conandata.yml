@@ -1,0 +1,8 @@
+﻿sources:
+  "1.0.0":
+    url: "https://github.com/moehoshio/NekoThreadPool/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "BD0311BE208CFCE7E42DB81DFB6F13918A94D97C0D4220B40025BBE6D3510A5F"
+
+  "1.0.1":
+    url: "https://github.com/moehoshio/NekoThreadPool/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: "EE14899135EA5B4A3EBF9979BAF5AB6BCBFF57B625562DF6FBE632358F57E5AC"
