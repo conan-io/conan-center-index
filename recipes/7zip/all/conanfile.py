@@ -8,7 +8,7 @@ from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=2"
 
 
 class SevenZipConan(ConanFile):
