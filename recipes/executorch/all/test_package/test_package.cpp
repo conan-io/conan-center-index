@@ -1,5 +1,5 @@
 #include <cstdlib>
-#include "package/foobar.hpp"
+#include <executorch/extension/tensor/tensor.h>
 
 
 int main(void) {
@@ -15,7 +15,8 @@ int main(void) {
      * The propose is testing the generated artifacts ONLY;
     */
 
-    foobar.print_version();
+    float input[1 * 3 * 224 * 224];
+    auto tensor = from_blob(input, {1, 3, 224, 224});
 
     return EXIT_SUCCESS;
 }
