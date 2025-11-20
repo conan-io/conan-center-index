@@ -1,12 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
-from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
+from conan.tools.files import copy, get, rmdir
+from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain, CMakeDeps
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2"
 
 
 class InjaConan(ConanFile):
@@ -18,26 +17,9 @@ class InjaConan(ConanFile):
     topics = ("jinja2", "string templates", "templates engine")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
-
-    @property
-    def _min_cppstd(self):
-        return 11 if Version(self.version) < "3.4.0" else 17
-
-    @property
-    def _compilers_minimum_version(self):
-        if self._min_cppstd == 11:
-            return {}
-        return {
-            "Visual Studio": "15",
-            "msvc": "191",
-            "gcc": "7",
-            "clang": "7",
-            "apple-clang": "10",
-        }
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("nlohmann_json/[^3.8]")
@@ -46,38 +28,35 @@ class InjaConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-        )
+        check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["INJA_BUILD_TESTS"] = False
+        tc.cache_variables["INJA_EXPORT"] = False
+        tc.cache_variables["INJA_USE_EMBEDDED_JSON"] = False
+        tc.cache_variables["INJA_INSTALL"] = True
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
+
     def build(self):
-        pass
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "inja")
         self.cpp_info.set_property("cmake_target_name", "pantor::inja")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
-        # TODO: to remove in conan v2 once legacy generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "inja"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "inja"
-        self.cpp_info.names["cmake_find_package"] = "pantor"
-        self.cpp_info.names["cmake_find_package_multi"] = "pantor"
-        self.cpp_info.components["libinja"].names["cmake_find_package"] = "inja"
-        self.cpp_info.components["libinja"].names["cmake_find_package_multi"] = "inja"
-        self.cpp_info.components["libinja"].set_property("cmake_target_name", "pantor::inja")
-        self.cpp_info.components["libinja"].requires = ["nlohmann_json::nlohmann_json"]
-        self.cpp_info.components["libinja"].bindirs = []
-        self.cpp_info.components["libinja"].libdirs = []

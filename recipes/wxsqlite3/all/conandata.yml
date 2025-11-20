@@ -1,0 +1,7 @@
+sources:
+  "4.11.0":
+    url: "https://github.com/utelle/wxsqlite3/archive/refs/tags/v4.11.0.tar.gz"
+    sha256: "559b5f4bcd72c0317bff136e53de1236a4829c4459b96d5bde0e302c37f5197b"
+patches:
+  "4.11.0":
+    - patch_file: "patches/0001-fix-static-link-macos.patch"

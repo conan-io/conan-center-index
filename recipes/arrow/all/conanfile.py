@@ -188,7 +188,7 @@ class ArrowConan(ConanFile):
         if self.options.get_safe("with_opentelemetry"):
             self.requires("opentelemetry-cpp/1.21.0")
         if self.options.with_s3:
-            self.requires("aws-sdk-cpp/1.9.234")
+            self.requires("aws-sdk-cpp/[~1.11]")
         if self.options.with_brotli:
             self.requires("brotli/1.1.0")
         if self.options.with_bz2:
@@ -265,6 +265,8 @@ class ArrowConan(ConanFile):
             raise ConanInvalidConfiguration("arrow:parquet requires arrow:with_thrift")
 
     def build_requirements(self):
+        if self.options.with_protobuf:
+            self.tool_requires("protobuf/<host_version>")
         if Version(self.version) >= "22.0.0":
             self.tool_requires("cmake/[>=3.26 <4]")
         elif Version(self.version) >= "20.0.0":
@@ -447,7 +449,10 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow_substrait"].set_property("pkg_config_name", "arrow_substrait")
             self.cpp_info.components["libarrow_substrait"].set_property("cmake_target_name", f"Arrow::arrow_substrait_{cmake_suffix}")
             self.cpp_info.components["libarrow_substrait"].libs = [f"arrow_substrait{suffix}"]
-            self.cpp_info.components["libarrow_substrait"].requires = ["libparquet", "dataset"]
+            self.cpp_info.components["libarrow_substrait"].requires = ["libparquet"]
+            if self.options.dataset_modules:
+                self.cpp_info.components["libarrow_substrait"].requires.append("dataset")
+
 
         # Plasma was deprecated in Arrow 12.0.0
         del self.options.plasma

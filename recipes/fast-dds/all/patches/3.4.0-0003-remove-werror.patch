@@ -1,0 +1,21 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index fd2c949..a511dda 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -188,16 +188,6 @@ endif()
+ ###############################################################################
+ # Set warnings as errors if the thread sanitizer is not being used
+ ###############################################################################
+-string(FIND ${CMAKE_CXX_FLAGS} "-fsanitize=thread" SANITIZER_THREAD)
+-if (${SANITIZER_THREAD} EQUAL -1)
+-    message(STATUS "Setting warnings as errors...")
+-    if(MSVC OR MSVC_IDE)
+-        add_compile_options(/WX)
+-    else()
+-        set(CMAKE_CXX_FLAGS
+-            "${CMAKE_CXX_FLAGS} -Werror")
+-    endif()
+-endif()
+ 
+ ###############################################################################
+ # Installation paths

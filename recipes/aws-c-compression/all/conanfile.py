@@ -32,7 +32,7 @@ class AwsCCompression(ConanFile):
 
     def requirements(self):
         # Don't bump this on its own, take into account aws-sdk-cpp graph
-        self.requires("aws-c-common/0.12.3", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-common/0.12.5", transitive_headers=True, transitive_libs=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -40,6 +40,7 @@ class AwsCCompression(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables['AWS_STATIC_MSVC_RUNTIME_LIBRARY'] = self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime") == "static"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
