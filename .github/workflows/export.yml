@@ -1,7 +1,13 @@
 name: Export
 
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/export.yml'
+      - 'recipes/**'
   push:
+    branches:
+      - main
     paths:
       - '.github/workflows/export.yml'
       - 'recipes/**'
@@ -27,6 +33,7 @@ jobs:
           conan remote add --index 0 ${{ vars.CONAN_REMOTE_NAME }} ${{ vars.CONAN_REMOTE_URL }}
           echo "Added new conan remote '${{ vars.CONAN_REMOTE_NAME }}' at ${{ vars.CONAN_REMOTE_URL }}."
       - name: Log into Conan remote
+        if: ${{ github.repository_owner == 'XRPLF' && github.event_name == 'push' }}
         run: |
           conan remote login ${{ vars.CONAN_REMOTE_NAME }} ${{ secrets.CONAN_REMOTE_USERNAME }} --password "${{ secrets.CONAN_REMOTE_PASSWORD }}"
           conan remote list-users
@@ -41,5 +48,5 @@ jobs:
       - name: Upload the recipes (dry run)
         run: conan upload '*' --confirm --check --only-recipe --remote ${{ vars.CONAN_REMOTE_NAME }} --dry-run
       - name: Upload the recipes
-        if: ${{ github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch }}
+        if: ${{ github.repository_owner == 'XRPLF' && github.event_name == 'push' }}
         run: conan upload '*' --confirm --check --only-recipe --remote ${{ vars.CONAN_REMOTE_NAME }}
