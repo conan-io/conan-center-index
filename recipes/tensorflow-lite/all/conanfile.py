@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.scm import Version
 from os.path import join
 import textwrap
@@ -133,12 +133,23 @@ class TensorflowLiteConan(ConanFile):
         if self.settings.arch == "armv8":
             # Not defined by Conan for Apple Silicon. See https://github.com/conan-io/conan/pull/8026
             tc.variables["CMAKE_SYSTEM_PROCESSOR"] = "arm64"
+        # INFO: Workaround for FlatBuffers GlobalLocale linkage error on Windows with MSVC shared
+        # https://github.com/google/flatbuffers/issues/7587
+        tc.preprocessor_definitions["FLATBUFFERS_LOCALE_INDEPENDENT"] = 0
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        lite_cmake = join(self.source_folder, "tensorflow", "lite", "CMakeLists.txt")
+        # INFO: Let Conan handle the C++ standard
+        replace_in_file(self, lite_cmake, "set(CMAKE_CXX_STANDARD 17)", "")
+        # INFO: Remove position independent code setting to let Conan handle it
+        replace_in_file(self, lite_cmake, "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=join("tensorflow", "lite"))
         cmake.build()
