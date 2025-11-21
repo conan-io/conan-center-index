@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/jbcoe/value_types/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "243a1ee7fbd8abed7050746b2ed671f31a4c4ae7a30bcc68f20846bc36e1eb5c"

@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.50.0"
@@ -26,7 +27,7 @@ class TslRobinMapConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, 17 if Version(self.version) >= "1.4.0" else 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

@@ -28,6 +28,10 @@ class OatppSwaggerConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _version(self):
+        return self.version.split(".latest")[0]
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -43,7 +47,7 @@ class OatppSwaggerConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"oatpp/{self.version}")
+        self.requires(f"oatpp/{self.version}", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
@@ -67,6 +71,8 @@ class OatppSwaggerConan(ConanFile):
             tc.variables["OATPP_MSVC_LINK_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        if Version(self.version) <= "1.3.0.latest":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -87,11 +93,11 @@ class OatppSwaggerConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "oatpp::oatpp-swagger")
         # TODO: back to global scope in conan v2 once legacy generators removed
         self.cpp_info.components["_oatpp-swagger"].includedirs = [
-            os.path.join("include", f"oatpp-{self.version}", "oatpp-swagger")
+            os.path.join("include", f"oatpp-{self._version}", "oatpp-swagger")
         ]
-        self.cpp_info.components["_oatpp-swagger"].libdirs = [os.path.join("lib", f"oatpp-{self.version}")]
+        self.cpp_info.components["_oatpp-swagger"].libdirs = [os.path.join("lib", f"oatpp-{self._version}")]
         if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.components["_oatpp-swagger"].bindirs = [os.path.join("bin", f"oatpp-{self.version}")]
+            self.cpp_info.components["_oatpp-swagger"].bindirs = [os.path.join("bin", f"oatpp-{self._version}")]
         else:
             self.cpp_info.components["_oatpp-swagger"].bindirs = []
         self.cpp_info.components["_oatpp-swagger"].libs = ["oatpp-swagger"]

@@ -60,6 +60,7 @@ class UchardetConan(ConanFile):
         tc.variables["CHECK_SSE2"] = self.options.get_safe("check_sse2", False)
         tc.variables["BUILD_BINARY"] = False
         tc.variables["BUILD_STATIC"] = not self.options.shared
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def _patch_sources(self):

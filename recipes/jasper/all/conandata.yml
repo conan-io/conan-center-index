@@ -5,9 +5,6 @@ sources:
   "4.2.0":
     url: "https://github.com/jasper-software/jasper/releases/download/version-4.2.0/jasper-4.2.0.tar.gz"
     sha256: "69f0b08a0cc281a06eaf7feed510736854bbff9af89ab1d01b77382ad57ec957"
-  "4.1.2":
-    url: "https://github.com/jasper-software/jasper/releases/download/version-4.1.2/jasper-4.1.2.tar.gz"
-    sha256: "22392e439b87c79aaf8689ec79a286a7147e811c4bee34edf3d0b239798d672b"
   "4.0.0":
     url: "https://github.com/jasper-software/jasper/releases/download/version-4.0.0/jasper-4.0.0.tar.gz"
     sha256: "39514e1b53a5333fcff817e19565371f016ea536c36fd2d13a9c4d8da8f0be0c"
@@ -20,19 +17,7 @@ patches:
     - patch_file: "patches/4.2.0-0003-deterministic-libname.patch"
       patch_description: "No generator dependent libname"
       patch_type: "conan"
-  "4.1.2":
-    - patch_file: "patches/4.1.1-0001-skip-rpath.patch"
-      patch_description: "Do not enforce rpath configuration"
-      patch_source: "https://github.com/jasper-software/jasper/pull/347"
-      patch_type: "conan"
-    - patch_file: "patches/4.1.1-0003-deterministic-libname.patch"
-      patch_description: "No generator dependent libname"
-      patch_type: "conan"
   "4.0.0":
-    - patch_file: "patches/4.0.0-0001-skip-rpath.patch"
-      patch_description: "Do not enforce rpath configuration"
-      patch_source: "https://github.com/jasper-software/jasper/pull/347"
-      patch_type: "conan"
-    - patch_file: "patches/4.0.0-0003-deterministic-libname.patch"
-      patch_description: "No generator dependent libname"
-      patch_type: "conan"
+    - patch_file: "patches/4.0.0-0001-do-not-hardcode-install-rpath.patch"
+    - patch_file: "patches/4.0.0-0002-deterministic-libname.patch"
+    - patch_file: "patches/4.0.0-0003-msvc-c11-atomics-detection.patch"

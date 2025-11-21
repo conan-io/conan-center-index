@@ -1,0 +1,33 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9b6d1eb..fd0e84f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -63,7 +63,7 @@
+ 
+ #---- Find other packages ----
+ find_package(Threads REQUIRED)
+-
++find_package(minitrace REQUIRED)
+ 
+ set(BEHAVIOR_TREE_LIBRARY ${PROJECT_NAME})
+ 
+@@ -94,10 +94,6 @@
+ 
+ add_subdirectory(3rdparty/lexy)
+ 
+-add_library(minitrace STATIC 3rdparty/minitrace/minitrace.cpp)
+-target_compile_definitions(minitrace PRIVATE MTR_ENABLED=True)
+-set_property(TARGET minitrace PROPERTY POSITION_INDEPENDENT_CODE ON)
+-
+ list(APPEND BT_SOURCE
+     src/action_node.cpp
+     src/basic_types.cpp
+@@ -180,7 +176,7 @@
+         Threads::Threads
+         ${CMAKE_DL_LIBS}
+         $<BUILD_INTERFACE:foonathan::lexy>
+-        $<BUILD_INTERFACE:minitrace>
++        minitrace::minitrace
+     PUBLIC
+         ${BTCPP_EXTRA_LIBRARIES}
+ )

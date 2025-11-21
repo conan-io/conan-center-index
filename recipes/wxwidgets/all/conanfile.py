@@ -90,12 +90,15 @@ class wxWidgetsConan(ConanFile):
 
     @property
     def _gtk_version(self):
-        return f"gtk{self.dependencies['gtk'].options.version}"
+        if self.settings.os == "Linux":
+            return f"gtk{self.dependencies['gtk'].options.version}"
 
     def system_requirements(self):
         apt = package_manager.Apt(self)
         packages = []
         if self.options.get_safe("secretstore"):
+            # TODO: Move to Conan libsecret package after using GTK from Conan
+            # libsecret and GTK need glib, which mixes with system deps from GTK
             packages.append("libsecret-1-dev")
         if self.options.webview:
             if self._gtk_version == "gtk2":
@@ -131,7 +134,7 @@ class wxWidgetsConan(ConanFile):
             if self.options.get_safe("opengl", default=False):
                 self.requires("opengl/system")
             self.requires("xkbcommon/1.6.0", options={"with_x11": True})
-            # TODO: Does not work right now
+            # FIXME: Conan Cairo result in linkage errors due mixed system deps from GTK
             # if self.options.get_safe("cairo"):
             #    self.requires("cairo/1.18.0")
             if self.options.mediactrl:
@@ -140,11 +143,11 @@ class wxWidgetsConan(ConanFile):
             self.requires("libcurl/[>=7.78.0 <9]")
 
         if self.options.jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.2")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         elif self.options.jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.5")
+            self.requires("mozjpeg/[>=4.1.5 <5]")
 
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/4.6.0")

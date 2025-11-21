@@ -1,9 +1,8 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
@@ -31,82 +30,45 @@ class RedisPlusPlusConan(ConanFile):
         "build_async": False,
     }
 
-    @property
-    def _min_cppstd(self):
-        return "11"
-
-    @property
-    def _compilers_minimum_version(self):
-        if Version(self.version) < "1.3.0":
-            return {}
-        return {
-            "Visual Studio": "16",
-            "msvc": "192",
-            "gcc": "8",
-            "clang": "7",
-            "apple-clang": "12",
-        }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-        if Version(self.version) < "1.3.0":
-            del self.options.build_async
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("hiredis/1.2.0", transitive_headers=True, transitive_libs=True)
-        if self.options.get_safe("build_async"):
-            self.requires("libuv/1.47.0")
+        if self.options.build_async:
+            self.requires("libuv/[>=1 <2]")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
-            )
+        check_min_cppstd(self, 11)
 
         if self.info.options.with_tls and not self.dependencies["hiredis"].options.with_ssl:
-            raise ConanInvalidConfiguration(f"{self.name}:with_tls=True requires hiredis:with_ssl=True")
+            raise ConanInvalidConfiguration(f"{self.name}/*:with_tls=True requires hiredis/*:with_ssl=True")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        cppstd = str(self.settings.get_safe("compiler.cppstd", 11)).replace("gnu", "")
+        cppstd = str(self.settings.compiler.cppstd).replace("gnu", "")
         tc.cache_variables["REDIS_PLUS_PLUS_CXX_STANDARD"] = cppstd
         tc.variables["REDIS_PLUS_PLUS_USE_TLS"] = self.options.with_tls
-        if self.options.get_safe("build_async"):
+        if self.options.build_async:
             tc.cache_variables["REDIS_PLUS_PLUS_BUILD_ASYNC"] = "libuv"
         tc.variables["REDIS_PLUS_PLUS_BUILD_TEST"] = False
         tc.variables["REDIS_PLUS_PLUS_BUILD_STATIC"] = not self.options.shared
         tc.variables["REDIS_PLUS_PLUS_BUILD_SHARED"] = self.options.shared
         tc.variables["REDIS_PLUS_PLUS_BUILD_STATIC_WITH_PIC"] = self.options.shared
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if Version(self.version) > "1.3.13": # pylint: disable=conan-unreachable-upper-version
-            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -129,7 +91,7 @@ class RedisPlusPlusConan(ConanFile):
         self.cpp_info.components["redis++lib"].requires = ["hiredis::hiredis"]
         if self.options.with_tls:
             self.cpp_info.components["redis++lib"].requires.append("hiredis::hiredis_ssl")
-        if self.options.get_safe("build_async"):
+        if self.options.build_async:
             self.cpp_info.components["redis++lib"].requires.append("libuv::libuv")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["redis++lib"].system_libs.append("pthread")

@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import collect_libs, copy, get, rmdir, replace_in_file
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class ArucoConan(ConanFile):
@@ -39,9 +39,9 @@ class ArucoConan(ConanFile):
     def requirements(self):
         # Header used in public markerdetector.h
         # cv::FileStorage::FileStorage used by aruco::CameraParameters::saveToFile
-        self.requires("opencv/4.9.0", transitive_headers=True, transitive_libs=True)
+        self.requires("opencv/[>=4.9.0 <5]", transitive_headers=True, transitive_libs=True)
         # Header used in levmarq.h
-        self.requires("eigen/3.4.0", transitive_headers=False)
+        self.requires("eigen/[>=3.4.0 <4]", transitive_headers=False)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

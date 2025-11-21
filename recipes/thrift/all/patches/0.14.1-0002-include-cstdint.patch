@@ -1,0 +1,14 @@
+Backport https://github.com/apache/thrift/pull/3078
+
+diff --git a/lib/cpp/src/thrift/concurrency/Mutex.h b/lib/cpp/src/thrift/concurrency/Mutex.h
+index 27e386ed4..fa4781ab4 100644
+--- a/lib/cpp/src/thrift/concurrency/Mutex.h
++++ b/lib/cpp/src/thrift/concurrency/Mutex.h
+@@ -20,6 +20,7 @@
+ #ifndef _THRIFT_CONCURRENCY_MUTEX_H_
+ #define _THRIFT_CONCURRENCY_MUTEX_H_ 1
+ 
++#include <cstdint>
+ #include <memory>
+ #include <boost/noncopyable.hpp>
+ 

@@ -117,6 +117,11 @@ class NngConan(ConanFile):
         if "with_ipv6" in self.options:
             tc.variables["NNG_ENABLE_IPV6"] = self.options.with_ipv6
         tc.variables["NNG_TLS_ENGINE"] = self.options.get_safe("tls_engine", "mbed")
+
+        # Prevent linking against unused found library
+        #https://github.com/nanomsg/nng/blob/8396f1df0420bb0156655532b5e6244dc1b3b646/src/platform/posix/CMakeLists.txt#L50C9-L50C22
+        tc.cache_variables["NNG_HAVE_LIBNSL"] = "0"
+
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -141,7 +146,7 @@ class NngConan(ConanFile):
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.system_libs.extend(["mswsock", "ws2_32"])
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread", "rt", "nsl"])
+            self.cpp_info.system_libs.extend(["pthread", "rt"])
 
         if self.options.shared:
             self.cpp_info.defines.append("NNG_SHARED_LIB")

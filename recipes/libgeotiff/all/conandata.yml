@@ -1,4 +1,7 @@
 sources:
+  "1.7.4":
+    url: "https://github.com/OSGeo/libgeotiff/releases/download/1.7.4/libgeotiff-1.7.4.tar.gz"
+    sha256: "c598d04fdf2ba25c4352844dafa81dde3f7fd968daa7ad131228cd91e9d3dc47"
   "1.7.1":
     url: "https://github.com/OSGeo/libgeotiff/releases/download/1.7.1/libgeotiff-1.7.1.tar.gz"
     sha256: "05ab1347aaa471fc97347d8d4269ff0c00f30fa666d956baba37948ec87e55d6"
@@ -12,6 +15,8 @@ sources:
     url: "https://github.com/OSGeo/libgeotiff/releases/download/1.5.1/libgeotiff-1.5.1.tar.gz"
     sha256: "f9e99733c170d11052f562bcd2c7cb4de53ed405f7acdde4f16195cd3ead612c"
 patches:
+  "1.7.4":
+    - patch_file: "patches/fix-cmake-1.7.4.patch"
   "1.7.1":
     - patch_file: "patches/fix-cmake-1.7.1.patch"
   "1.7.0":

@@ -190,6 +190,7 @@ class LibxsltConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "LibXslt")
+        self.cpp_info.set_property("cmake_additional_variables_prefixes", ["LIBXSLT"])
         self.cpp_info.set_property("pkg_config_name", "none") # see the two standalone ones instead
 
         prefix = "lib" if is_msvc(self) else ""
