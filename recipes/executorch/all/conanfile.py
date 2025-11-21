@@ -237,9 +237,9 @@ class ExecuTorchConan(ConanFile):
         # Some files extensions and folders are not allowed. Please, read the FAQs to get informed.
         # Consider disabling these at first to verify that the package_info() output matches the info exported by the project.
         # rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        # rmdir(self, os.path.join(self.package_folder, "share"))
-        # rm(self, "*.pdb", self.package_folder, recursive=True)
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
         # Match the installed config name: lib/cmake/ExecuTorch/executorch-config.cmake
@@ -252,12 +252,18 @@ class ExecuTorchConan(ConanFile):
         core = self.cpp_info.components["executorch_core"]
         core.libs = ["executorch_core"]
         core.set_property("cmake_target_name", "executorch_core")
-
+        core.includedirs =  [
+            # https://github.com/pytorch/executorch/blob/351815f4836c1752baabbe06de9a49ce103e67b5/CMakeLists.txt#L300
+            os.path.join("include", "executorch", "runtime","core", "portable_type","c10"),
+            # Trial and error
+            os.path.join("include", "executorch", "runtime","core", "portable_type","c10","torch"),
+        ]
+        core.defines = ["C10_USING_CUSTOM_GENERATED_MACROS"]
         main = self.cpp_info.components["executorch"]
         main.libs = ["executorch"]
         main.requires = ["executorch_core"]
-        main.set_property("cmake_target_name", "executorch::executorch")
-
+        main.set_property("cmake_target_name", "executorch")
+        main.defines = ["C10_USING_CUSTOM_GENERATED_MACROS"]
         #
         # --- Backend interface umbrella (always installed) ---
         #
@@ -305,6 +311,10 @@ class ExecuTorchConan(ConanFile):
             c = self.cpp_info.components["coremldelegate"]
             c.libs = ["coremldelegate"]
             backends.requires.append("coremldelegate")
+            # https://github.com/pytorch/executorch/blob/351815f4836c1752baabbe06de9a49ce103e67b5/backends/apple/coreml/CMakeLists.txt#L111
+            core.includedirs.append(os.path.join("include", "executorch", "backends","apple", "coreml","runtime","util"))
+            # https://github.com/pytorch/executorch/blob/351815f4836c1752baabbe06de9a49ce103e67b5/backends/apple/coreml/CMakeLists.txt#L146
+            core.includedirs.append(os.path.join("include", "executorch", "backends","apple", "coreml","runtime","inmemoryfs"))
 
         if self.options.mps:
             c = self.cpp_info.components["mpsdelegate"]
