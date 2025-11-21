@@ -13,6 +13,9 @@ patches:
     - patch_file: "patches/msvc-dll-export-0.6.3.patch"
       patch_description: "export ostream<< to dll"
       patch_type: "portability"
+    - patch_file: "patches/cmake-3.5.patch"
+      patch_description: "cmake version up due to incompatibility with cmake-v4"
+      patch_type: "portability"
   "0.6.2":
     - patch_file: "patches/include-stdexcept.patch"
       patch_description: "include stdexcept"
