@@ -80,9 +80,6 @@ class QtConan(ConanFile):
     options.update({module: [True, False] for module in _submodules})
     options.update({f"{status}_modules": [True, False] for status in _module_statuses})
 
-    # this significantly speeds up windows builds
-    no_copy_source = True
-
     default_options = {
         "shared": False,
         "opengl": "desktop",
@@ -263,6 +260,10 @@ class QtConan(ConanFile):
 
         for option in self.options.items():
             self.output.debug(f"qt6 option: {option}")
+
+        # no_copy_source slightly speeds up Linux builds.
+        # no_copy_source causes long relative paths, hitting Window's PATH limit when building Qt WebEngine.
+        self.no_copy_source = not (self.settings_build.os == "Windows" and self.options.get_safe("qtwebengine"))
 
     def validate_build(self):
         check_min_cppstd(self, 17)
@@ -479,8 +480,10 @@ class QtConan(ConanFile):
         if not cross_building(self):
             vre = VirtualRunEnv(self)
             vre.generate(scope="build")
-        # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
         env = Environment()
+        # Tell Python to assume UTF-8 encoding to work around character encoding issues while building Qt WebEngine on Polish locale on Windows.
+        env.define("PYTHONUTF8", "1")
+        # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
         env.unset("VCPKG_ROOT")
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         env.vars(self).save_script("conanbuildenv_pkg_config_path")
@@ -858,6 +861,8 @@ class QtConan(ConanFile):
                 continue
             if glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake")):
                 continue
+            if glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "Qt6QmlPublic*Helpers.cmake")):
+                continue
             if m.endswith("Tools"):
                 if os.path.isfile(os.path.join(self.package_folder, "lib", "cmake", m, f"{m[:-5]}Macros.cmake")):
                     continue
@@ -894,6 +899,9 @@ class QtConan(ConanFile):
         if self.options.qtdeclarative:
             targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
             targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview"])
+            if Version(self.version) >= "6.8.3":
+                targets.extend(["qmlaotstats"])
+
             # Note: consider "qmltestrunner", see https://github.com/conan-io/conan-center-index/issues/24276
         if self.options.get_safe("qtremoteobjects"):
             targets.append("repc")
@@ -958,6 +966,8 @@ class QtConan(ConanFile):
             _create_private_module("Qml", ["CorePrivate", "Qml"])
             save(self, os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_policies.cmake"), textwrap.dedent("""\
                     set(QT_KNOWN_POLICY_QTP0001 TRUE)
+                    set(QT_KNOWN_POLICY_QTP0004 TRUE)
+                    set(QT_KNOWN_POLICY_QTP0005 TRUE)
                     """))
             if self.options.gui and self.options.qtshadertools:
                 _create_private_module("Quick", ["CorePrivate", "GuiPrivate", "QmlPrivate", "Quick"])
@@ -1005,6 +1015,8 @@ class QtConan(ConanFile):
             save(self, os.path.join(self.package_folder, self._cmake_platform_target_setup_file), contents)
 
     def package_info(self):
+        disabled_features = str(self.options.disabled_features).split()
+
         self.cpp_info.set_property("cmake_file_name", "Qt6")
         self.cpp_info.set_property("pkg_config_name", "qt6")
 
@@ -1042,6 +1054,7 @@ class QtConan(ConanFile):
             componentname = f"qt{module}"
             assert componentname not in self.cpp_info.components, f"Module {module} already present in self.cpp_info.components"
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt6::{module}")
+            self.cpp_info.components[componentname].set_property("cmake_target_aliases", [f"Qt::{module}"])
             self.cpp_info.components[componentname].set_property("pkg_config_name", f"Qt6{module}")
             if module.endswith("Private"):
                 libname = module[:-7]
@@ -1059,6 +1072,7 @@ class QtConan(ConanFile):
             componentname = f"qt{pluginname}"
             assert componentname not in self.cpp_info.components, f"Plugin {pluginname} already present in self.cpp_info.components"
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt6::{pluginname}")
+            self.cpp_info.components[componentname].set_property("cmake_target_aliases", [f"Qt::{pluginname}"])
             if not self.options.shared:
                 self.cpp_info.components[componentname].libs = [libname + libsuffix]
             self.cpp_info.components[componentname].libdirs = [os.path.join("plugins", plugintype)]
@@ -1069,6 +1083,7 @@ class QtConan(ConanFile):
 
         # https://github.com/qt/qtbase/blob/v6.7.3/cmake/QtPlatformTargetHelpers.cmake
         self.cpp_info.components["qtPlatform"].set_property("cmake_target_name", "Qt6::Platform")
+        self.cpp_info.components["qtPlatform"].set_property("cmake_target_aliases", ["Qt::Platform"])
         self.cpp_info.components["qtPlatform"].includedirs = [os.path.join("mkspecs", self._xplatform())]
         if self.settings.os == "Android":
             self.cpp_info.components["qtPlatform"].system_libs.append("log")
@@ -1167,8 +1182,6 @@ class QtConan(ConanFile):
                 if Version(self.version) >= "6.7.0":
                     # https://github.com/qt/qtbase/blob/v6.7.0-beta1/src/gui/CMakeLists.txt#L430
                     self.cpp_info.components["qtGui"].system_libs.append("uxtheme")
-                if self.settings.compiler == "gcc":
-                    self.cpp_info.components["qtGui"].system_libs.append("uuid")
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/direct2d/CMakeLists.txt#L60-L82
                 self.cpp_info.components["qtGui"].system_libs += [
                     "advapi32", "d2d1", "d3d11", "dwmapi", "dwrite", "dxgi", "dxguid", "gdi32", "imm32", "ole32",
@@ -1186,6 +1199,9 @@ class QtConan(ConanFile):
                     "advapi32", "dwmapi", "gdi32", "imm32", "ole32", "oleaut32", "setupapi", "shell32", "shlwapi",
                     "user32", "winmm", "winspool", "wtsapi32", "shcore", "comdlg32", "d3d9", "runtimeobject"
                 ]
+                if Version(self.version) >= "6.8.0" and is_msvc(self):
+                    # https://github.com/qt/qtbase/blob/6.8.3/src/plugins/platforms/windows/CMakeLists.txt#L204
+                    self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs.append("uiautomationcore")
             elif self.settings.os == "Android":
                 _create_plugin("QAndroidIntegrationPlugin", "qtforandroid", "platforms", ["Core", "Gui"])
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/android/CMakeLists.txt#L68-L70
@@ -1193,9 +1209,11 @@ class QtConan(ConanFile):
             elif is_apple_os(self):
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/gui/CMakeLists.txt#L388-L394
                 self.cpp_info.components["qtGui"].frameworks = ["CoreFoundation", "CoreGraphics", "CoreText", "Foundation", "ImageIO"]
-                if self.options.get_safe("opengl", "no") != "no":
-                    # https://github.com/qt/qtbase/commit/2ed63e587eefb246dba9e69aa01fdb2abb2def13
-                    self.cpp_info.components["qtGui"].frameworks.append("AGL")
+                # https://github.com/qt/qtbase/blob/6.8.0/src/gui/configure.cmake#L834-L837
+                has_metal = "metal" not in disabled_features and self.settings.os in ["Macos", "iOS", "visionOS"]
+                if Version(self.version) >= "6.8.0" and has_metal:
+                    # https://github.com/qt/qtbase/blob/6.8.0/src/gui/CMakeLists.txt#L432-L437
+                    self.cpp_info.components["qtGui"].frameworks.append("QuartzCore")
                 if self.settings.os == "Macos":
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/gui/CMakeLists.txt#L362-L370
                     self.cpp_info.components["qtGui"].frameworks += ["AppKit", "Carbon"]
@@ -1284,6 +1302,7 @@ class QtConan(ConanFile):
             _add_build_module("qtQml", self._cmake_qt6_private_file("Qml"))
             _create_module("QmlModels", ["Qml"])
             self.cpp_info.components["qtQmlImportScanner"].set_property("cmake_target_name", "Qt6::QmlImportScanner")
+            self.cpp_info.components["qtQmlImportScanner"].set_property("cmake_target_aliases", ["Qt::QmlImportScanner"])
             self.cpp_info.components["qtQmlImportScanner"].requires = _get_corrected_reqs(["Qml"])
             if qt_quick_enabled:
                 _create_module("Quick", ["Gui", "Qml", "QmlModels"])
@@ -1296,6 +1315,7 @@ class QtConan(ConanFile):
 
         if self.options.qttools and self.options.gui and self.options.widgets:
             self.cpp_info.components["qtLinguistTools"].set_property("cmake_target_name", "Qt6::LinguistTools")
+            self.cpp_info.components["qtLinguistTools"].set_property("cmake_target_aliases", ["Qt::LinguistTools"])
             _create_module("UiPlugin", ["Gui", "Widgets"])
             self.cpp_info.components["qtUiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
             self.cpp_info.components["qtUiPlugin"].libdirs = []
@@ -1473,15 +1493,18 @@ class QtConan(ConanFile):
         if self.settings.os in ["Windows", "iOS"]:
             if self.settings.os == "Windows":
                 self.cpp_info.components["qtEntryPointImplementation"].set_property("cmake_target_name", "Qt6::EntryPointImplementation")
+                self.cpp_info.components["qtEntryPointImplementation"].set_property("cmake_target_aliases", ["Qt::EntryPointImplementation"])
                 self.cpp_info.components["qtEntryPointImplementation"].libs = [f"Qt6EntryPoint{libsuffix}"]
                 self.cpp_info.components["qtEntryPointImplementation"].system_libs = ["shell32"]
 
                 if self.settings.compiler == "gcc":
                     self.cpp_info.components["qtEntryPointMinGW32"].set_property("cmake_target_name", "Qt6::EntryPointMinGW32")
+                    self.cpp_info.components["qtEntryPointMinGW32"].set_property("cmake_target_aliases", ["Qt::EntryPointMinGW32"])
                     self.cpp_info.components["qtEntryPointMinGW32"].system_libs = ["mingw32"]
                     self.cpp_info.components["qtEntryPointMinGW32"].requires = ["qtEntryPointImplementation"]
 
             self.cpp_info.components["qtEntryPointPrivate"].set_property("cmake_target_name", "Qt6::EntryPointPrivate")
+            self.cpp_info.components["qtEntryPointPrivate"].set_property("cmake_target_aliases", ["Qt::EntryPointPrivate"])
             if self.settings.os == "Windows":
                 if self.settings.compiler == "gcc":
                     self.cpp_info.components["qtEntryPointPrivate"].defines.append("QT_NEEDS_QMAIN")
@@ -1588,6 +1611,8 @@ class QtConan(ConanFile):
                     _add_build_module(component_name, module)
 
                 for helper_modules in glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake")):
+                    _add_build_module(component_name, helper_modules)
+                for helper_modules in glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "Qt6QmlPublic*Helpers.cmake")):
                     _add_build_module(component_name, helper_modules)
                 self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
 

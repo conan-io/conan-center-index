@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
+from conan.tools.files import copy, export_conandata_patches, get, replace_in_file
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -68,12 +68,15 @@ class DoxygenConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
         #Do not build manpages
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         replace_in_file(self, cmakelists, "add_subdirectory(doc)", "")
         replace_in_file(self, cmakelists, "set(CMAKE_CXX_STANDARD", "##set(CMAKE_CXX_STANDARD")
+
+        if Version(self.version) == "1.15.0":
+            # https://github.com/doxygen/doxygen/issues/11833
+            replace_in_file(self, cmakelists, "MACOS_VERSION_MIN 10.14", "MACOS_VERSION_MIN 10.15")
 
     def generate(self):
         tc = CMakeToolchain(self)

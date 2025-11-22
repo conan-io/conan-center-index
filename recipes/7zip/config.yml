@@ -1,11 +1,3 @@
 versions:
-  "25.00":
-    folder: "all"
-  "24.09":
-    folder: "all"
-  "23.01":
-    folder: "all"
-  "22.01":
-    folder: "all"
-  "19.00":
+  "25.01":
     folder: "all"

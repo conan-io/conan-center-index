@@ -1,0 +1,4 @@
+sources:
+  "1.12.0":
+    url: "https://github.com/facebookresearch/faiss/archive/refs/tags/v1.12.0.tar.gz"
+    sha256: "561376d1a44771bf1230fabeef9c81643468009b45a585382cf38d3a7a94990a"

@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -52,6 +53,9 @@ class crc32cConan(ConanFile):
         tc = CMakeToolchain(self)
         if not valid_min_cppstd(self, self._min_cppstd):
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        # Newer versions will have CMake 4 support
+        if Version(self.version) <= "1.1.2":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.variables["CRC32C_BUILD_TESTS"] = False
         tc.variables["CRC32C_BUILD_BENCHMARKS"] = False
         tc.variables["CRC32C_INSTALL"] = True
