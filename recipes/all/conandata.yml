@@ -1,0 +1,5 @@
+sources:
+  cci.20250728:
+    url: "https://github.com/google/fuzztest/releases/download/2025-07-28/fuzztest-2025-07-28.tar.gz"
+    sha256: "f60af4b5d7f209ad049029e7ad7fe6a6cf74db20b375f033f97564bfb8b0d730"
+
