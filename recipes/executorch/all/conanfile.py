@@ -14,7 +14,7 @@ from conan.tools.files import (
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 from conan.tools.scm import Git
-
+from conan.tools.system import PipEnv
 
 required_conan_version = ">=2.0.9"
 
@@ -152,9 +152,7 @@ class ExecuTorchConan(ConanFile):
         git.checkout(f"v{self.version}")
         git.run("submodule update --init --recursive")
         # get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        subprocess.check_call(["./install_executorch.sh"], cwd=self.source_folder)
-        # subprocess.check_call(["git", "init"],cwd=self.source_folder)
-        # subprocess.check_call(["git", "submodule", "update", "--init" ,"--recursive"],cwd=self.source_folder)
+
         # Using patches is always the last resort to fix issues. If possible, try to fix the issue in the upstream project.
         apply_conandata_patches(self)
 
@@ -218,6 +216,8 @@ class ExecuTorchConan(ConanFile):
         # deps.set_property("fontconfig", "cmake_file_name", "Fontconfig")
         # deps.set_property("fontconfig", "cmake_target_name", "Fontconfig::Fontconfig")
         deps.generate()
+        PipEnv(self).generate()
+        self.run("./install_executorch.sh")
 
     def build(self):
         cmake = CMake(self)
