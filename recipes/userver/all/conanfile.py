@@ -9,7 +9,6 @@ from conan.tools.cmake import cmake_layout
 from conan.tools.cmake import CMakeDeps
 from conan.tools.cmake import CMakeToolchain
 from conan.tools.files import get, copy, export_conandata_patches
-from conan.tools.files import load
 from conan.tools.scm import Git
 from conan.tools.system import package_manager
 
@@ -46,10 +45,6 @@ class UserverConan(ConanFile):
         'with_s3api': [True, False],
         'with_grpc_reflection': [True, False],
         'with_grpc_protovalidate': [True, False],
-        'namespace': ['ANY'],
-        'namespace_begin': ['ANY'],
-        'namespace_end': ['ANY'],
-        'python_path': ['ANY'],
     }
 
     default_options = {
@@ -72,10 +67,6 @@ class UserverConan(ConanFile):
         'with_s3api': True,
         'with_grpc_reflection': True,
         'with_grpc_protovalidate': False,
-        'namespace': 'userver',
-        'namespace_begin': 'namespace userver {',
-        'namespace_end': '}',
-        'python_path': 'python3',
         'mongo-c-driver/*:with_sasl': 'cyrus',
         'grpc/*:php_plugin': False,
         'grpc/*:node_plugin': False,
@@ -96,28 +87,21 @@ class UserverConan(ConanFile):
         if known_version:
             get(self, **known_version, strip_root=True)
         else:
-            Git(self).clone('https://github.com/userver-framework/userver.git', target='.')
+            # Running from develop branch, do nothing
+            pass
 
     def export_sources(self):
         known_version = (self.conan_data or {}).get("sources", {}).get(self.version)
         if known_version:
             export_conandata_patches(self)
         else:
-            pass  # Running from develop branch, no patches
-
-    def set_version(self):
-        if self.version:
-            return
-
-        content = load(
-            self,
-            os.path.join(
-                os.path.dirname(os.path.realpath(__file__)),
-                'version.txt',
-            ),
-        )
-
-        self.version = content.strip()  # pylint: disable=attribute-defined-outside-init
+            # Running from develop branch, no patches
+            git = Git(self)
+            tracked_sources = git.included_files()
+            # To speed up copying, we take only the root folders
+            tracked_sources = {f.split('/')[0] for f in tracked_sources}
+            for i in tracked_sources:
+                copy(self, f'{i}*', self.recipe_folder, self.export_sources_folder)
 
     def layout(self):
         cmake_layout(self)
@@ -212,45 +196,41 @@ class UserverConan(ConanFile):
 
     def generate(self):
         tool_ch = CMakeToolchain(self)
-        tool_ch.variables['CMAKE_FIND_DEBUG_MODE'] = False
+        tool_ch.cache_variables['CMAKE_FIND_DEBUG_MODE'] = False
 
-        tool_ch.variables['USERVER_CONAN'] = True
-        tool_ch.variables['USERVER_INSTALL'] = True
-        tool_ch.variables['USERVER_DOWNLOAD_PACKAGES'] = True
-        tool_ch.variables['USERVER_FEATURE_DWCAS'] = True
-        tool_ch.variables['USERVER_NAMESPACE'] = self.options.namespace
-        tool_ch.variables['USERVER_NAMESPACE_BEGIN'] = self.options.namespace_begin
-        tool_ch.variables['USERVER_NAMESPACE_END'] = self.options.namespace_end
-        tool_ch.variables['USERVER_PYTHON_PATH'] = self.options.python_path
+        tool_ch.cache_variables['USERVER_CONAN'] = True
+        tool_ch.cache_variables['USERVER_INSTALL'] = True
+        tool_ch.cache_variables['USERVER_DOWNLOAD_PACKAGES'] = True
+        tool_ch.cache_variables['USERVER_FEATURE_DWCAS'] = True
 
-        tool_ch.variables['USERVER_LTO'] = self.options.lto
-        tool_ch.variables['USERVER_FEATURE_JEMALLOC'] = self.options.with_jemalloc
-        tool_ch.variables['USERVER_FEATURE_MONGODB'] = self.options.with_mongodb
-        tool_ch.variables['USERVER_FEATURE_POSTGRESQL'] = self.options.with_postgresql
-        tool_ch.variables['USERVER_FEATURE_PATCH_LIBPQ'] = self.options.with_postgresql_extra
-        tool_ch.variables['USERVER_FEATURE_REDIS'] = self.options.with_redis
-        tool_ch.variables['USERVER_FEATURE_REDIS_TLS'] = self.options.with_redis_tls
-        tool_ch.variables['USERVER_FEATURE_GRPC'] = self.options.with_grpc
-        tool_ch.variables['USERVER_FEATURE_CLICKHOUSE'] = self.options.with_clickhouse
-        tool_ch.variables['USERVER_FEATURE_RABBITMQ'] = self.options.with_rabbitmq
-        tool_ch.variables['USERVER_FEATURE_UTEST'] = self.options.with_utest
-        tool_ch.variables['USERVER_FEATURE_TESTSUITE'] = self.options.with_utest
-        tool_ch.variables['USERVER_FEATURE_KAFKA'] = self.options.with_kafka
-        tool_ch.variables['USERVER_FEATURE_OTLP'] = self.options.with_otlp
-        tool_ch.variables['USERVER_FEATURE_SQLITE'] = self.options.with_sqlite
-        tool_ch.variables['USERVER_FEATURE_EASY'] = self.options.with_easy
-        tool_ch.variables['USERVER_FEATURE_S3API'] = self.options.with_s3api
-        tool_ch.variables['USERVER_FEATURE_GRPC_REFLECTION'] = self.options.with_grpc_reflection
-        tool_ch.variables['USERVER_FEATURE_GRPC_PROTOVALIDATE'] = self.options.with_grpc_protovalidate
+        tool_ch.cache_variables['USERVER_LTO'] = self.options.lto
+        tool_ch.cache_variables['USERVER_FEATURE_JEMALLOC'] = self.options.with_jemalloc
+        tool_ch.cache_variables['USERVER_FEATURE_MONGODB'] = self.options.with_mongodb
+        tool_ch.cache_variables['USERVER_FEATURE_POSTGRESQL'] = self.options.with_postgresql
+        tool_ch.cache_variables['USERVER_FEATURE_PATCH_LIBPQ'] = self.options.with_postgresql_extra
+        tool_ch.cache_variables['USERVER_FEATURE_REDIS'] = self.options.with_redis
+        tool_ch.cache_variables['USERVER_FEATURE_REDIS_TLS'] = self.options.with_redis_tls
+        tool_ch.cache_variables['USERVER_FEATURE_GRPC'] = self.options.with_grpc
+        tool_ch.cache_variables['USERVER_FEATURE_CLICKHOUSE'] = self.options.with_clickhouse
+        tool_ch.cache_variables['USERVER_FEATURE_RABBITMQ'] = self.options.with_rabbitmq
+        tool_ch.cache_variables['USERVER_FEATURE_UTEST'] = self.options.with_utest
+        tool_ch.cache_variables['USERVER_FEATURE_TESTSUITE'] = self.options.with_utest
+        tool_ch.cache_variables['USERVER_FEATURE_KAFKA'] = self.options.with_kafka
+        tool_ch.cache_variables['USERVER_FEATURE_OTLP'] = self.options.with_otlp
+        tool_ch.cache_variables['USERVER_FEATURE_SQLITE'] = self.options.with_sqlite
+        tool_ch.cache_variables['USERVER_FEATURE_EASY'] = self.options.with_easy
+        tool_ch.cache_variables['USERVER_FEATURE_S3API'] = self.options.with_s3api
+        tool_ch.cache_variables['USERVER_FEATURE_GRPC_REFLECTION'] = self.options.with_grpc_reflection
+        tool_ch.cache_variables['USERVER_FEATURE_GRPC_PROTOVALIDATE'] = self.options.with_grpc_protovalidate
 
         if self.options.with_grpc:
-            tool_ch.variables['USERVER_GOOGLE_COMMON_PROTOS'] = (
+            tool_ch.cache_variables['USERVER_GOOGLE_COMMON_PROTOS'] = (
                 self.dependencies['googleapis'].cpp_info.components['google_rpc_status_proto'].resdirs[0]
             )
 
         if self.options.with_otlp:
-            tool_ch.variables['USERVER_OPENTELEMETRY_PROTO'] = self.dependencies['opentelemetry-proto'].conf_info.get(
-                'user.opentelemetry-proto:proto_root'
+            tool_ch.cache_variables['USERVER_OPENTELEMETRY_PROTO'] = self.dependencies['opentelemetry-proto'].conf_info.get(
+                'user.opentelemetry-proto:proto_root',
             )
 
         tool_ch.generate()
