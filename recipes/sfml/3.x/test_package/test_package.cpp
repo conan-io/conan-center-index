@@ -22,11 +22,16 @@ int main()
 
 #ifdef SFML_WITH_WINDOW
     sf::VideoMode videoMode{};
+    std::cout << "Can fullscreen: " << videoMode.isValid() << std::endl;
+    std::cout << "Vulkan supported: " << sf::Vulkan::isAvailable() << std::endl;
 #endif
 
 #ifdef SFML_WITH_GRAPHICS
     sf::RectangleShape shape;
     shape.setFillColor(sf::Color::Cyan);
+    std::cout << "Shape fill color - R: " << static_cast<int>(shape.getFillColor().r)
+              << ", G: " << static_cast<int>(shape.getFillColor().g)
+              << ", B: " << static_cast<int>(shape.getFillColor().b) << std::endl;
 #endif
 
 #ifdef SFML_WITH_NETWORK
@@ -37,9 +42,10 @@ int main()
 #ifdef SFML_WITH_AUDIO
     sf::SoundBuffer buffer;
     sf::Sound sound(buffer);
+    std::cout << "Sound status: " << static_cast<int>(sound.getStatus()) << std::endl;
 #endif
 
-std::cout << clock.getElapsedTime().asSeconds() << std::endl;
+std::cout << "Test elapsed time: " << clock.getElapsedTime().asSeconds() << std::endl;
 
     return 0;
 }
