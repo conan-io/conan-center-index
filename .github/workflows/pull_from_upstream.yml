@@ -22,9 +22,9 @@ jobs:
       - name: Add upstream remote and fetch
         run: |
           git remote add upstream https://github.com/conan-io/conan-center-index.git
-          git fetch upstream
+          git fetch upstream HEAD:upstream-head
 
-      - run: git merge --no-edit upstream/HEAD
+      - run: git merge --no-edit upstream-head
 
       - name: Push if merge was successful
         run: |
