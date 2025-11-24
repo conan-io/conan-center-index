@@ -6,6 +6,8 @@ from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.premake import Premake, PremakeDeps, PremakeToolchain
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.build import cross_building
 
 # @todo 2.23.0 is not yet released but we require the configuration setting for Premake
 # added in 86b5918763983683e4172fe21cb84d4fa98ec5fa
@@ -92,6 +94,10 @@ class WxPdfDocConan(ConanFile):
             if not version:
                 raise ConanInvalidConfiguration(f"Unimplemented compiler version: {self.settings.compiler.version}")
 
+        if cross_building(self) and is_apple_os(self):
+            # FIXME: WxWidgets wx-config can not find the correct paths/libs when cross-building for Apple platforms
+            raise ConanInvalidConfiguration("Cross-building wxpdfdoc for Apple platforms is not supported yet. Contributions are welcome!")
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -120,6 +126,7 @@ class WxPdfDocConan(ConanFile):
             wx_config = os.path.join(wxwidgets_root, "bin", "wx-config")
             tc = AutotoolsToolchain(self)
             tc.configure_args.append(f"--with-wx-config={wx_config}")
+            tc.configure_args.append(f"--with-wx-prefix={wxwidgets_root}")
             tc.generate()
             deps = AutotoolsDeps(self)
             deps.generate()
@@ -154,6 +161,7 @@ class WxPdfDocConan(ConanFile):
             autotools.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            fix_apple_shared_install_name(self)
 
         copy(self, "LICENCE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
