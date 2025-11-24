@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.android import android_abi
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy
 from conan.tools.microsoft import is_msvc_static_runtime
 import os
 
@@ -44,6 +44,9 @@ class SfmlConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def configure(self):
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
@@ -69,6 +72,7 @@ class SfmlConan(ConanFile):
 
             if self.settings.os not in ("iOS", "Android"):  # Handled as a framework
                 self.requires("opengl/system")
+            self.requires("vulkan-headers/[*]")
 
         if self.options.graphics:
             if self.settings.os == "Android" or self.settings.os == "iOS":
@@ -76,10 +80,13 @@ class SfmlConan(ConanFile):
             if self.settings.os == "iOS":
                 self.requires("bzip2/1.0.8")
             self.requires("freetype/2.13.2")
+            self.requires("stb/[*]")
 
         if self.options.audio:
             self.requires("vorbis/1.3.7")
             self.requires("flac/1.4.3")
+            self.requires("minimp3/cci.20211201")
+            self.requires("miniaudio/0.11.22", transitive_headers=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24]")
@@ -102,6 +109,7 @@ class SfmlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -125,6 +133,7 @@ class SfmlConan(ConanFile):
 
         tc.cache_variables["SFML_INSTALL_PKGCONFIG_FILES"] = False
         tc.cache_variables["SFML_WARNINGS_AS_ERRORS"] = False
+        tc.cache_variables["SFML_CONFIGURE_EXTRAS"] = False
 
         # Tip: You can use this locally to test the extras when adding a new version,
         # uncomment both to build examples, or run them manually
@@ -174,13 +183,6 @@ class SfmlConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "SFML")
         self.cpp_info.set_property("pkg_config_name", "sfml-all")
 
-        # if self.options.get_safe("opengl") == "desktop":
-        # -DSFML_OPENGL_ES
-        # -DGL_GLEXT_PROTOTYPES
-
-        # TODO: libatomic when gcc for graphics and audio, but only if not available?
-        # code says: (e.g. Raspberry Pi 3 armhf), GCC requires linking libatomic to use <atomic> features
-
         modules = ["system"]
         if self.settings.os in ["Windows", "iOS", "Android"]:
             modules.append("main")
@@ -199,7 +201,7 @@ class SfmlConan(ConanFile):
             self.cpp_info.components["system"].system_libs = ["log", "android"]
 
         if self.options.window:
-            self.cpp_info.components["window"].requires = ["system"]
+            self.cpp_info.components["window"].requires = ["system", "vulkan-headers::vulkan-headers"]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["window"].system_libs.append("dl")
                 self.cpp_info.components["window"].requires.extend(["xorg::x11", "xorg::xrandr", "xorg::xcursor", "xorg::xi"])
@@ -226,13 +228,12 @@ class SfmlConan(ConanFile):
                 self.cpp_info.components["window"].system_libs = ["android"]
 
         if self.options.graphics:
-            self.cpp_info.components["graphics"].requires = ["window"]
+            self.cpp_info.components["graphics"].requires = ["window", "stb::stb"]
             if self.settings.os == "Android" or self.settings.os == "iOS":
                 self.cpp_info.components["graphics"].requires.append("zlib::zlib")
             if self.settings.os == "iOS":
                 self.cpp_info.components["graphics"].requires.append("bzip2::bzip2")
             self.cpp_info.components["graphics"].requires.append("freetype::freetype")
-            # TODO: Atomic
 
         if self.options.network:
             self.cpp_info.components["network"].requires = ["system"]
@@ -241,7 +242,7 @@ class SfmlConan(ConanFile):
                 self.cpp_info.components["network"].system_libs = ["ws2_32"]
 
         if self.options.audio:
-            self.cpp_info.components["audio"].requires = ["vorbis::vorbis", "flac::flac", "system"]
+            self.cpp_info.components["audio"].requires = ["vorbis::vorbis", "flac::flac", "system", "minimp3::minimp3", "miniaudio::miniaudio"]
             if self.settings.os == "iOS":
                 self.cpp_info.components["audio"].frameworks = ["Foundation", "CoreFoundation", "CoreAudio", "AudioToolbox", "AVFoundation"]
             else:
