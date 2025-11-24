@@ -14,7 +14,7 @@ patches:
     - patch_file: "patches/3.12.x/2-allow-cycles-in-cmake-targets.patch"
   "3.10.3":
     - patch_file: "patches/3.10.3/0-replace-find-package.patch"
-    - patch_file: "patches/3.10.3/1-do-not-force-private-linking"
+    - patch_file: "patches/3.10.3/1-do-not-force-private-linking.patch"
     - patch_file: "patches/3.10.3/2-allow-cycles-in-cmake-targets.patch"
   "3.8.3":
     - patch_file: "patches/3.8.3/0-replace-find-package.patch"
