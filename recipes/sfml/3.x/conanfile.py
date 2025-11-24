@@ -44,13 +44,6 @@ class SfmlConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
@@ -109,11 +102,6 @@ class SfmlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
-        # Remove cocoa example - xcode needed
-        # TODO: Remove once we no longer build examples
-        replace_in_file(self, os.path.join(self.source_folder, "examples", "CMakeLists.txt"),
-                        "add_subdirectory(cocoa)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -128,8 +116,7 @@ class SfmlConan(ConanFile):
 
         tc.cache_variables["SFML_GENERATE_PDB"] = False  # PDBs not allowed in CCI
 
-        if self.settings.os == "Windows":
-            tc.cache_variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
+        tc.cache_variables["SFML_USE_STATIC_STD_LIBS"] = self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime") == "static"
 
         tc.cache_variables["SFML_USE_SYSTEM_DEPS"] = True
 
@@ -146,9 +133,12 @@ class SfmlConan(ConanFile):
 
         tc.generate()
         deps = CMakeDeps(self)
-        deps.set_property("flac", "cmake_file_name", "FLAC")
-        deps.set_property("freetype", "cmake_file_name", "Freetype")
-        deps.set_property("freetype", "cmake_target_name", "Freetype::Freetype")
+        if self.options.audio:
+            deps.set_property("flac", "cmake_file_name", "FLAC")
+
+        if self.options.graphics:
+            deps.set_property("freetype", "cmake_file_name", "Freetype")
+            deps.set_property("freetype", "cmake_target_name", "Freetype::Freetype")
         deps.generate()
 
     def build(self):
