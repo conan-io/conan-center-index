@@ -9,8 +9,6 @@ from conan.tools.premake import Premake, PremakeDeps, PremakeToolchain
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 
-# @todo 2.23.0 is not yet released but we require the configuration setting for Premake
-# added in 86b5918763983683e4172fe21cb84d4fa98ec5fa
 required_conan_version = ">=2.23.0"
 
 
