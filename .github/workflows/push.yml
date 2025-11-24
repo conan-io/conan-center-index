@@ -11,7 +11,7 @@ jobs:
     outputs:
       references: ${{ steps.find_modified_refs.outputs.result }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: '22.x'
