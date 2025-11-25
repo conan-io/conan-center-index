@@ -35,6 +35,7 @@ class PackageConan(ConanFile):
         self.requires("apr/[>=1.3]")
         self.requires("apr-util/[>=1.3]")
         self.requires("libuuid/[>=1.0.3]")
+        self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         check_min_cppstd(self, 11)
@@ -92,5 +93,5 @@ class PackageConan(ConanFile):
 
         self.cpp_info.set_property("pkg_config_name", "activemq-cpp")
 
-        if self.settings.os in ["Linux", "FreeBSD", "MacOS"]:
+        if self.settings.os in ["Linux", "FreeBSD", "Macos"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
