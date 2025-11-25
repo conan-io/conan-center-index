@@ -168,7 +168,7 @@ class SfmlConan(ConanFile):
 
         libname = f"sfml-{name}"
 
-        if not self.options.get_safe("shared") and name != "main":
+        if (self.package_type == "library" and not self.options.get_safe("shared")) and name != "main":
             libname += "-s"
             self.cpp_info.components[name].defines = ["SFML_STATIC"]
         if self.settings.build_type == "Debug":
