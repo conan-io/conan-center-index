@@ -121,7 +121,8 @@ class SfmlConan(ConanFile):
 
         tc.cache_variables["SFML_GENERATE_PDB"] = False  # PDBs not allowed in CCI
 
-        tc.cache_variables["SFML_USE_STATIC_STD_LIBS"] = self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime") == "static"
+        if self.settings.os == "Windows":
+            tc.cache_variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
 
         tc.cache_variables["SFML_USE_SYSTEM_DEPS"] = True
 
