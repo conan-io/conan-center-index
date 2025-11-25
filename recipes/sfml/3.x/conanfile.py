@@ -7,7 +7,7 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.microsoft import is_msvc_static_runtime
 import os
 
-required_conan_version = ">=2"
+required_conan_version = ">=2.1"
 
 
 class SfmlConan(ConanFile):
