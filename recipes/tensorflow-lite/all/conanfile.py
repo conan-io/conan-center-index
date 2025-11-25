@@ -135,7 +135,7 @@ class TensorflowLiteConan(ConanFile):
         if self.settings.arch == "armv8":
             # Not defined by Conan for Apple Silicon. See https://github.com/conan-io/conan/pull/8026
             tc.variables["CMAKE_SYSTEM_PROCESSOR"] = "arm64"
-        if is_msvc(self) and not self.options.shared:
+        if is_msvc(self) and self.options.shared:
             # INFO: Workaround for FlatBuffers GlobalLocale linkage error on Windows with MSVC shared
             # https://github.com/google/flatbuffers/issues/7587
             tc.preprocessor_definitions["FLATBUFFERS_LOCALE_INDEPENDENT"] = 0
