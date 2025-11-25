@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
+from conan.tools.build import check_min_cppstd
 import os
 
 required_conan_version = ">=1.53.0"
@@ -21,6 +22,7 @@ class SyscallsCppConan(ConanFile):
         self.info.clear()
 
     def validate(self):
+        check_min_cppstd(self, 20)
         if self.settings.os != "Windows" or self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration(f"{self.ref} is only supported on Windows x64")
 
