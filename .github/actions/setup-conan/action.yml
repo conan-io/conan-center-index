@@ -17,8 +17,30 @@ runs:
     - run: |
         DEFAULT_PROFILE="$(conan config home)/profiles/default"
         echo "include(autodetected)" > "$DEFAULT_PROFILE"
-        echo "[replace_requires]" >> "$DEFAULT_PROFILE"
+        # echo "[replace_requires]" >> "$DEFAULT_PROFILE"
         # echo "libiconv/1.17: libiconv/1.18" >> "$DEFAULT_PROFILE"
+
+        echo "[options]" >> "$DEFAULT_PROFILE"
+        echo "boost/*:pch=False" >> "$DEFAULT_PROFILE"
+        echo "boost/*:extra_b2_flags=-d2" >> "$DEFAULT_PROFILE"
+        if [[ "$RUNNER_OS" == "Windows" && "$RUNNER_ARCH" == "ARM64" ]]; then
+          echo "xnnpack/*:assembly=False" >> "$DEFAULT_PROFILE"
+        fi
+
+        echo "[settings]" >> "$DEFAULT_PROFILE"
+        if [[ "$RUNNER_OS" == "Windows" && "$RUNNER_ARCH" == "ARM64" ]]; then
+          echo "msys2/*:arch=x86_64" >> "$DEFAULT_PROFILE"
+          echo "strawberryperl/*:arch=x86_64" >> "$DEFAULT_PROFILE"
+        fi
+
+        echo "[conf]" >> "$DEFAULT_PROFILE"
+        if [[ "$RUNNER_OS" == "Linux" ]]; then
+          echo "tools.system.package_manager:mode=install" >> "$DEFAULT_PROFILE"
+          echo "tools.system.package_manager:sudo=True" >> "$DEFAULT_PROFILE"
+        elif [[ "$RUNNER_OS" == "Windows" ]]; then
+          echo "user.openssl:windows_use_jom=True" >> "$DEFAULT_PROFILE"
+        fi
+
       shell: bash
 
     - run: conan remote remove "*"

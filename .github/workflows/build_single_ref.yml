@@ -115,7 +115,7 @@ jobs:
       FOLDER: recipes/${{ inputs.package || 'zlib' }}/${{ needs.prepare-matrix.outputs.folder }}
       SHARED: ${{ matrix.shared }}
       BUILD_TYPE: ${{ matrix.build_type }}
-      CLI_ARGS: -sbuild_type=${{ matrix.build_type }} ${{ matrix.shared }} -c:a tools.system.package_manager:mode=install -c:a tools.system.package_manager:sudo=True -s:b msys2/*:arch=x86_64 -s:b strawberryperl/*:arch=x86_64 -c:a user.openssl:windows_use_jom=True -o:a boost/*:pch=False -o:a boost/*:extra_b2_flags=-d2
+      CLI_ARGS: -sbuild_type=${{ matrix.build_type }} ${{ matrix.shared }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -146,7 +146,8 @@ jobs:
             if [ "$cpp_std" = "None" ]; then
               ARG=""
             else
-              ARG="-s compiler.cppstd=$cpp_std"
+              ARG="-s compiler.cppstd=$c
+              pp_std"
             fi
             if ! conan profile show $ARG ${{ env.CLI_ARGS }}
             then
