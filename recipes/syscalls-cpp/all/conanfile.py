@@ -45,3 +45,5 @@ class SyscallsCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.set_property("cmake_target_name", "sapdragon::syscalls-cpp")
+        self.cpp_info.set_property("cmake_target_aliases", ["syscalls-cpp"])
