@@ -38,7 +38,7 @@ class SyscallsCppConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         
-        destination_include_folder = os.path.join(self.package_folder, "include", "syscalls-cpp")
+        destination_include_folder = os.path.join(self.package_folder, "include")
         source_include_folder = os.path.join(self.source_folder, "include")
         copy(self, "*.hpp", source_include_folder, destination_include_folder)
 
