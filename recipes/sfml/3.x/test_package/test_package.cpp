@@ -19,10 +19,9 @@ int main()
 {
     sf::Clock clock;
 
-
 #ifdef SFML_WITH_WINDOW
     sf::VideoMode videoMode{};
-    std::cout << "Can fullscreen: " << videoMode.isValid() << std::endl;
+    std::cout << "Video mode: " << &videoMode << std::endl;
     std::cout << "Vulkan supported: " << sf::Vulkan::isAvailable() << std::endl;
 #endif
 
@@ -45,7 +44,7 @@ int main()
     std::cout << "Sound status: " << static_cast<int>(sound.getStatus()) << std::endl;
 #endif
 
-std::cout << "Test elapsed time: " << clock.getElapsedTime().asSeconds() << std::endl;
+    std::cout << "Test elapsed time: " << clock.getElapsedTime().asSeconds() << std::endl;
 
     return 0;
 }
