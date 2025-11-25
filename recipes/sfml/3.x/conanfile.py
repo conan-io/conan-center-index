@@ -100,9 +100,6 @@ class SfmlConan(ConanFile):
         if self.options.get_safe("shared") and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared libraries with static runtime")
 
-        if self.settings.os not in ["Windows", "Linux", "FreeBSD", "Android", "Macos", "iOS"]:
-            raise ConanInvalidConfiguration(f"{self.ref} not supported on {self.settings.os}")
-
     def validate_build(self):
         if self.settings.os == "Macos" and self.settings.compiler != "apple-clang":
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os} with {self.settings.compiler}")
