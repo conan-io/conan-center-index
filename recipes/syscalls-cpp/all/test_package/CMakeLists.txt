@@ -5,4 +5,4 @@ find_package(syscalls-cpp REQUIRED CONFIG)
 
 add_executable(test_package src/main.cpp)
 
-target_link_libraries(test_package PRIVATE syscalls-cpp::syscalls-cpp)
+target_link_libraries(test_package PRIVATE sapdragon::syscalls-cpp)
