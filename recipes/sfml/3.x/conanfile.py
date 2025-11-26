@@ -4,7 +4,6 @@ from conan.tools.android import android_abi
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy
-from conan.tools.microsoft import is_msvc_static_runtime
 import os
 
 required_conan_version = ">=2.1"
@@ -122,7 +121,7 @@ class SfmlConan(ConanFile):
         tc.cache_variables["SFML_GENERATE_PDB"] = False  # PDBs not allowed in CCI
 
         if self.settings.os == "Windows":
-            tc.cache_variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
+            tc.cache_variables["SFML_USE_STATIC_STD_LIBS"] = self.settings.get_safe("compiler.runtime") == "static"
 
         tc.cache_variables["SFML_USE_SYSTEM_DEPS"] = True
 
