@@ -96,7 +96,7 @@ class SfmlConan(ConanFile):
         if self.options.graphics and not self.options.window:
             raise ConanInvalidConfiguration(f"-o={self.ref}:graphics=True requires -o={self.ref}:window=True")
 
-        if self.options.get_safe("shared") and is_msvc_static_runtime(self):
+        if self.options.get_safe("shared") and self.settings.get_safe("compiler.runtime") == "static":
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared libraries with static runtime")
 
     def validate_build(self):
