@@ -54,14 +54,10 @@ class InfluxdbCppRestConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 20)
-        minimum_compiler_versions = {"gcc": "13", "clang": "15", "apple-clang": "14", "msvc": "192"}
-        compiler = str(self.settings.compiler)
-        min_version = minimum_compiler_versions.get(compiler)
-        if min_version and Version(str(self.settings.compiler.version)) < Version(min_version):
-            raise ConanInvalidConfiguration(
-                f"influxdb-cpp-rest requires {compiler} >= {min_version} for std::format support. "
-                f"Current version: {self.settings.compiler.version}"
-            )
+        minimum_compiler_versions = {"gcc": 13, "clang": 15, "apple-clang": 14, "msvc": 192}
+        minimum_version = minimum_compiler_versions.get(str(self.settings.compiler))
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"Requires {self.settings.compiler} >= {minimum_version} for std::format support")
 
 
     def generate(self):
