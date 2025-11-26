@@ -15,12 +15,9 @@ from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 from conan.tools.scm import Git
 from conan.tools.system import PipEnv
+from conan.tools.env.environment import Environment
 
 required_conan_version = ">=2.0.9"
-
-#
-# INFO: Please, remove all comments before pushing your PR!
-#
 
 
 class ExecuTorchConan(ConanFile):
@@ -28,14 +25,13 @@ class ExecuTorchConan(ConanFile):
     description = (
         "ExecuTorch is PyTorch's unified solution for deploying AI models on-device"
     )
-    # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
-    # In case not listed there, use "DocumentRef-<license-file-name>:LicenseRef-<package-name>"
     license = "BSD"
     url = "https://github.com/pytorch/executorch"
     homepage = "https://docs.pytorch.org/executorch"
-    # no "conan" and project name in topics. Use topics from the upstream listed on GH
-    topics = ("topic1", "topic2", "topic3")
-    # package_type should usually be "library", "shared-library" or "static-library"
+
+    topics = ("machine-learning", "mobile", "embedded",
+              "deep-learning", "neural-network", "gpu", "tensor")
+
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -71,7 +67,7 @@ class ExecuTorchConan(ConanFile):
         "logging": [True, False],
         "log_level": ["debug", "info", "error", "fatal"],
 
-        "build_executor_runner" :[True,False]
+        "build_executor_runner": [True, False]
     }
     default_options = {
         "shared": False,
@@ -106,7 +102,7 @@ class ExecuTorchConan(ConanFile):
         "logging": False,
         "log_level": "debug",
 
-        "build_executor_runner" : False
+        "build_executor_runner": False
     }
     # In case having config_options() or configure() method, the logic should be moved to the specific methods.
     implements = ["auto_shared_fpic"]
@@ -116,13 +112,8 @@ class ExecuTorchConan(ConanFile):
         export_conandata_patches(self)
 
     def configure(self):
-        # Keep this logic only in case configure() is needed e.g pure-c project.
-        # Otherwise remove configure() and auto_shared_fpic will manage it.
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # for plain C projects only
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         # src_folder needs to be named "executorch" due to https://github.com/pytorch/executorch/issues/6475
@@ -133,10 +124,6 @@ class ExecuTorchConan(ConanFile):
             self.requires("vulkan-headers/1.4.313.0")
 
     def validate(self):
-        # validate the minimum cpp standard supported. For C++ projects only.
-        # check_min_cppstd(self, 17)
-        # in case it does not work in another configuration, it should be validated here. Always comment the reason including the upstream issue.
-        # INFO: Upstream does not support DLL: See <URL>
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(
                 f"{self.ref} can not be built as shared on Visual Studio and msvc."
@@ -151,10 +138,6 @@ class ExecuTorchConan(ConanFile):
         git.clone(url=self.url, target=".")
         git.checkout(f"v{self.version}")
         git.run("submodule update --init --recursive")
-        # get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-        # Using patches is always the last resort to fix issues. If possible, try to fix the issue in the upstream project.
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -210,16 +193,25 @@ class ExecuTorchConan(ConanFile):
             ] = not is_msvc_static_runtime(self)
         tc.generate()
 
-        # # In case there are dependencies listed under requirements, CMakeDeps should be used
         deps = CMakeDeps(self)
-        # # You can override the CMake package and target names if they don't match the names used in the project
-        # deps.set_property("fontconfig", "cmake_file_name", "Fontconfig")
-        # deps.set_property("fontconfig", "cmake_target_name", "Fontconfig::Fontconfig")
         deps.generate()
+
+        # setup an env to install uv into
+        pipenv = PipEnv(self,os.path.join(self.build_folder,".temp"))
+        pipenv.install(["uv"])
+        pipenv_executable = os.path.join(pipenv.bin_dir, "python.exe" if self.settings.os == "Windows" else "python")
+
+        # install required python version and create uv env
+        self.run(f"{pipenv_executable} -m uv python install 3.12.2")
+        self.run(f"{pipenv_executable} -m uv venv {pipenv.env_name} --seed --python 3.12.2",cwd=self.build_folder)
+
+        # generate script for uv env
         PipEnv(self).generate()
-        self.run("./install_executorch.sh")
+        
 
     def build(self):
+        
+        self.run("./install_executorch.sh",cwd=self.source_folder)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -234,29 +226,24 @@ class ExecuTorchConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        # Some files extensions and folders are not allowed. Please, read the FAQs to get informed.
-        # Consider disabling these at first to verify that the package_info() output matches the info exported by the project.
-        # rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        # Match the installed config name: lib/cmake/ExecuTorch/executorch-config.cmake
         self.cpp_info.set_property("cmake_file_name", "executorch")
-
-        #
-        # --- Core libraries (always installed) ---
-        #
 
         core = self.cpp_info.components["executorch_core"]
         core.libs = ["executorch_core"]
         core.set_property("cmake_target_name", "executorch_core")
-        core.includedirs =  [
+        core.includedirs = [
             # https://github.com/pytorch/executorch/blob/351815f4836c1752baabbe06de9a49ce103e67b5/CMakeLists.txt#L300
-            os.path.join("include", "executorch", "runtime","core", "portable_type","c10"),
+            os.path.join("include", "executorch", "runtime",
+                         "core", "portable_type", "c10"),
             # Trial and error
-            os.path.join("include", "executorch", "runtime","core", "portable_type","c10","torch"),
+            os.path.join("include", "executorch", "runtime",
+                         "core", "portable_type", "c10", "torch"),
         ]
         core.defines = ["C10_USING_CUSTOM_GENERATED_MACROS"]
         main = self.cpp_info.components["executorch"]
@@ -264,36 +251,18 @@ class ExecuTorchConan(ConanFile):
         main.requires = ["executorch_core"]
         main.set_property("cmake_target_name", "executorch")
         main.defines = ["C10_USING_CUSTOM_GENERATED_MACROS"]
-        #
-        # --- Backend interface umbrella (always installed) ---
-        #
 
         backends = self.cpp_info.components["executorch_backends"]
         backends.libs = []  # Interface target
         backends.set_property("cmake_target_name", "executorch::backends")
 
-        #
-        # --- Extensions interface umbrella (always installed) ---
-        #
-
         extensions = self.cpp_info.components["executorch_extensions"]
         extensions.libs = []  # Interface target
         extensions.set_property("cmake_target_name", "executorch::extensions")
 
-        #
-        # --- Kernels interface umbrella (always installed) ---
-        #
-
         kernels = self.cpp_info.components["executorch_kernels"]
         kernels.libs = []  # Interface target
         kernels.set_property("cmake_target_name", "executorch::kernels")
-
-
-        #
-        # ---------- OPTIONAL BACKEND TARGETS ----------
-        #
-        # These are installed only if the corresponding option is ON.
-        #
 
         if self.options.xnnpack:
             c = self.cpp_info.components["xnnpack_backend"]
@@ -312,9 +281,11 @@ class ExecuTorchConan(ConanFile):
             c.libs = ["coremldelegate"]
             backends.requires.append("coremldelegate")
             # https://github.com/pytorch/executorch/blob/351815f4836c1752baabbe06de9a49ce103e67b5/backends/apple/coreml/CMakeLists.txt#L111
-            core.includedirs.append(os.path.join("include", "executorch", "backends","apple", "coreml","runtime","util"))
+            core.includedirs.append(os.path.join(
+                "include", "executorch", "backends", "apple", "coreml", "runtime", "util"))
             # https://github.com/pytorch/executorch/blob/351815f4836c1752baabbe06de9a49ce103e67b5/backends/apple/coreml/CMakeLists.txt#L146
-            core.includedirs.append(os.path.join("include", "executorch", "backends","apple", "coreml","runtime","inmemoryfs"))
+            core.includedirs.append(os.path.join(
+                "include", "executorch", "backends", "apple", "coreml", "runtime", "inmemoryfs"))
 
         if self.options.mps:
             c = self.cpp_info.components["mpsdelegate"]
@@ -340,19 +311,6 @@ class ExecuTorchConan(ConanFile):
             c = self.cpp_info.components["vgf_backend"]
             c.libs = ["vgf_backend"]
             backends.requires.append("vgf_backend")
-
-        # if self.options.cadence:
-        #     # Cadence installs targets from its own subdir.
-        #     c = self.cpp_info.components["cadence_backend"]
-        #     # You'll need to confirm the exact lib name inside backends/cadence
-        #     c.libs = ["cadence_ops_lib"]
-        #     c.set_property("cmake_target_name", "cadence_ops_lib")
-        #     backends.requires.append("cadence_backend")
-
-
-        #
-        # ---------- OPTIONAL EXTENSION TARGETS ----------
-        #
 
         if self.options.extension_data_loader:
             c = self.cpp_info.components["extension_data_loader"]
@@ -399,16 +357,6 @@ class ExecuTorchConan(ConanFile):
             c.libs = ["extension_evalue_util"]
             # Not added to executorch_extensions by upstream
 
-        # # --- interface umbrella targets from upstream ---
-        # for name in ("backends", "extensions", "kernels"):
-        #     comp = self.cpp_info.components[name]
-        #     # expose exactly: executorch::backends, executorch::extensions, executorch::kernels
-        #     comp.set_property("cmake_target_name", f"executorch::{name}")
-        #     # When a consumer links an umbrella, make sure the main runtime is in the graph
-        #     comp.requires = ["executorch"]
-
-        
-         # Common Unix system libs
         if str(self.settings.os) in ["Linux", "FreeBSD"]:
             for name in self.cpp_info.components.keys():
                 comp = self.cpp_info.components[name]
