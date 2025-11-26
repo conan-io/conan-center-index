@@ -122,11 +122,9 @@ class SfmlConan(ConanFile):
 
         if self.settings.os == "Windows":
             tc.cache_variables["SFML_USE_STATIC_STD_LIBS"] = self.settings.get_safe("compiler.runtime") == "static"
+            tc.cache_variables["SFML_USE_MESA3D"] = False  # self.options.use_mesa3d
 
         tc.cache_variables["SFML_USE_SYSTEM_DEPS"] = True
-
-        if self.settings.os == "Windows":
-            tc.cache_variables["SFML_USE_MESA3D"] = False  # self.options.use_mesa3d
 
         tc.cache_variables["SFML_INSTALL_PKGCONFIG_FILES"] = False
         tc.cache_variables["SFML_WARNINGS_AS_ERRORS"] = False
