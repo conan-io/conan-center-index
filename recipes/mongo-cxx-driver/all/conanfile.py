@@ -48,7 +48,8 @@ class MongoCxxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("mongo-c-driver/1.29.0")
+        c_driver_version = "1.29.0" if Version(self.version) < "4.1" else "2.2.0"
+        self.requires(f"mongo-c-driver/{c_driver_version}")
         if self.options.polyfill == "boost":
             self.requires("boost/[>=1.86.0 <=1.90.0]", transitive_headers=True)
 
@@ -136,11 +137,17 @@ class MongoCxxConan(ConanFile):
 
         deps = CMakeDeps(self)
         deps.generate()
-        # FIXME: two CMake module/config files should be generated (mongoc-1.0-config.cmake and bson-1.0-config.cmake),
+        # FIXME: two CMake module/config files should be generated (mongoc[-1.0]-config.cmake and bson[-1.0]-config.cmake),
         # but it can't be modeled right now.
         # Fix should happen in mongo-c-driver recipe
-        mongoc_config_file = os.path.join(self.generators_folder, "mongoc-1.0-config.cmake")
-        bson_config_file = os.path.join(self.generators_folder, "bson-1.0-config.cmake")
+        def c_driver_config_file(component):
+            filename = f"{component}-1.0-config.cmake" \
+                       if Version(self.dependencies["mongo-c-driver"].ref.version).major == 1 else \
+                       f"{component}-config.cmake"
+            return os.path.join(self.generators_folder, filename)
+
+        mongoc_config_file = c_driver_config_file("mongoc")
+        bson_config_file = c_driver_config_file("bson")
         if not os.path.exists(bson_config_file):
             self.output.info("Copying mongoc config file to bson")
             shutil.copy(src=mongoc_config_file, dst=bson_config_file)
