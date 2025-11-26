@@ -60,8 +60,12 @@ class XZUtilsConan(ConanFile):
         return (is_msvc(self) or assume_clang_cl) and Version(self.version) < "5.8.1"
     
     @property
+    def _building_android_from_windows(self):
+        return self.settings.os == "Android" and self._settings_build.os == "Windows"
+
+    @property
     def _use_cmake(self):
-        return self.settings.os == "Windows" and Version(self.version) >= "5.8.1"
+        return (self.settings.os == "Windows" or self._building_android_from_windows) and Version(self.version) >= "5.8.1"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -80,7 +84,7 @@ class XZUtilsConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not self._use_msbuild and Version(self.version) < "5.8.1":
+        if self._settings_build.os == "Windows" and not self._use_msbuild and not self._use_cmake:
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
