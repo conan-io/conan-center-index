@@ -16,7 +16,7 @@ sources:
       - "https://mirror.bjtu.edu.cn/qt/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
       - "https://ftp.jaist.ac.jp/pub/qtproject/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
       - "https://mirror.aarnet.edu.au/pub/qtproject/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
-    sha256: "5c34b2e8054d23cbd6c98715af8766a61c7f346ac687aa2d80edd73f8073d2d2"
+    sha256: "cea1fbabf02455f3f0e8eaa839f5d6f45cdb56b62c8a83af5c1d00ac05f912ea"
 patches:
   "5.15.18":
     - "base_path": "qt5/qtbase"
