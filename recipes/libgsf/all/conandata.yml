@@ -1,0 +1,4 @@
+sources:
+  "1.14.52":
+    url: "https://download.gnome.org/sources/libgsf/1.14/libgsf-1.14.52.tar.xz"
+    sha256: "9181c914b9fac0e05d6bcaa34c7b552fe5fc0961d3c9f8c01ccc381fb084bcf0"
