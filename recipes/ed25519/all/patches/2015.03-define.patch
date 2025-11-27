@@ -1,0 +1,30 @@
+diff --git a/ed25519-donna-64bit-x86.h b/ed25519-donna-64bit-x86.h
+index 30bd472..bbf97e8 100644
+--- a/ed25519-donna-64bit-x86.h
++++ b/ed25519-donna-64bit-x86.h
+@@ -2,6 +2,13 @@
+ 
+ #define HAVE_GE25519_SCALARMULT_BASE_CHOOSE_NIELS
+ 
++#if defined(__clang__) || defined (__GNUC__)
++# define ATTRIBUTE_NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address))
++#else
++# define ATTRIBUTE_NO_SANITIZE_ADDRESS
++#endif
++
++ATTRIBUTE_NO_SANITIZE_ADDRESS
+ DONNA_NOINLINE static void
+ ge25519_scalarmult_base_choose_niels(ge25519_niels *t, const uint8_t table[256][96], uint32_t pos, signed char b) {
+ 	int64_t breg = (int64_t)b;
+diff --git a/ed25519-donna-portable.h b/ed25519-donna-portable.h
+index 0a0f7fc..d01160f 100644
+--- a/ed25519-donna-portable.h
++++ b/ed25519-donna-portable.h
+@@ -20,6 +20,7 @@
+ 	#include <sys/param.h>
+ 	#define DONNA_INLINE inline __attribute__((always_inline))
+ 	#define DONNA_NOINLINE __attribute__((noinline))
++	#undef ALIGN
+ 	#define ALIGN(x) __attribute__((aligned(x)))
+ 	#define ROTL32(a,b) (((a) << (b)) | ((a) >> (32 - b)))
+ 	#define ROTR32(a,b) (((a) >> (b)) | ((a) << (32 - b)))

@@ -1,0 +1,8 @@
+sources:
+  "2015.03":
+    url: https://github.com/floodyberry/ed25519-donna
+    commit: 8757bd4cd209cb032853ece0ce413f122eef212c
+patches:
+  "2015.03":
+    - patch_file: "patches/2015.03-define.patch"
+      patch_type: conan
