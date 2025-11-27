@@ -1,7 +1,6 @@
 sources:
   "5.15.18":
     url:
-      - "https://download.qt.io/official_releases/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
       - "https://download.qt.io/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
       - "https://qt-mirror.dannhauer.de/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
       - "https://ftp.fau.de/qtproject/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
