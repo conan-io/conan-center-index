@@ -61,13 +61,11 @@ class EdDonnaConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.verbose = True
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
         cmake = CMake(self)
-        cmake.verbose = True
         cmake.install()
 
     def package_info(self):

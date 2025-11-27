@@ -1,8 +1,9 @@
 from conan import ConanFile, tools
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get
 
 required_conan_version = ">=2.0.0"
+
 
 class WasmXrplfConan(ConanFile):
     name = "wasm-xrplf"
@@ -41,7 +42,7 @@ class WasmXrplfConan(ConanFile):
         tc.variables["WAMR_DISABLE_HW_BOUND_CHECK"] = 1
         tc.variables["WAMR_DISABLE_STACK_HW_BOUND_CHECK"] = 1
         tc.variables["WAMR_BH_LOG"] = "wamr_log_to_rippled"
-        
+
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -49,13 +50,11 @@ class WasmXrplfConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.verbose = True
         cmake.configure()
         cmake.build()
 
     def package(self):
         cmake = CMake(self)
-        cmake.verbose = True
         cmake.install()
 
     def package_info(self):

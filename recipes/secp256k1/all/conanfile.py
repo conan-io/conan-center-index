@@ -37,13 +37,11 @@ class SecpConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.verbose = True
         cmake.configure()
         cmake.build()
 
     def package(self):
         cmake = CMake(self)
-        cmake.verbose = True
         cmake.install()
 
     def package_info(self):
