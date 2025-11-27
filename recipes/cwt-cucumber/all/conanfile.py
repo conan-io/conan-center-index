@@ -57,6 +57,7 @@ class CwtCucumberRecipe(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CUCUMBER_BUILD_TESTS_AND_EXAMPLES"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
