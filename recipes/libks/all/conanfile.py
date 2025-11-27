@@ -82,11 +82,6 @@ class LibksConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines.append("KS_DECLARE_STATIC=1")
 
-        if sys.byteorder == "big":
-            self.cpp_info.defines.append("__BYTE_ORDER=__BIG_ENDIAN")
-        else:
-            self.cpp_info.defines.append("__BYTE_ORDER=__LITTLE_ENDIAN")
-
         # Upstream has public definitions for these, but propagating them is prone to cause issues
         # So unless reported as needed, let's skip them for now
         # 	-DSTDC_HEADERS=1
