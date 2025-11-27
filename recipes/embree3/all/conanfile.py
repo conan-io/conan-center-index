@@ -269,6 +269,9 @@ class EmbreeConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
 
+        if self.options.with_tbb:
+            self.cpp_info.requires = ["onetbb::libtbb"]
+
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "embree"
         self.cpp_info.names["cmake_find_package_multi"] = "embree"
