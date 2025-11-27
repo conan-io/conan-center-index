@@ -1,0 +1,4 @@
+sources:
+  "1.2.0":
+    url: "https://github.com/sapdragon/syscalls-cpp/archive/refs/tags/1.2.0.tar.gz"
+    sha256: "45cb5aa81576f3dfb47a8d1044b273334ba7bdb7ed9e731324c23c21b3a75f08"
