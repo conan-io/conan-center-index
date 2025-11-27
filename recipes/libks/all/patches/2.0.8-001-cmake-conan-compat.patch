@@ -1,0 +1,39 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f0facfe..9e0b5f8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -30,7 +30,7 @@ if(KS_PLAT_LIN)
+ 	set(CMAKE_C_STANDARD 99)
+ endif()
+ 
+-if (KS_PLAT_WIN OR WITH_KS_TEST)
++if (0)
+ 	# Setup hunter gate to auto grab our 3rd party dependencies
+ 	# (may be included by our super project so check HUNTER_WIKI)
+ 	if (NOT HUNTER_WIKI)
+@@ -416,7 +416,7 @@ if (KS_PLAT_WIN)
+ 	target_link_libraries(ks2 PUBLIC Rpcrt4.lib)
+ else()
+ 	# Locate libuuid on non-win platforms
+-	include(cmake/FindUUID.cmake)
++	find_package(libuuid CONFIG REQUIRED)
+ endif()
+ 
+ # Locate ssl
+@@ -432,7 +432,7 @@ if (NOT KS_PLAT_WIN AND WITH_JSON_VALIDATION)
+ 	find_package(nlohmann_json_schema_validator QUIET)
+ 	if(nlohmann_json_schema_validator_FOUND)
+ 		message(STATUS "Found nlohmann_json_schema_validator via CMake config")
+-		
++
+ 		# Set C++ standard (json-schema-validator requires C++11)
+ 		set(CMAKE_CXX_STANDARD 11)
+ 		set(CMAKE_CXX_STANDARD_REQUIRED ON)
+@@ -641,7 +641,6 @@ endif()
+ 
+ # Add tests
+ enable_testing()
+-add_subdirectory(tests)
+ 
+ if (WITH_KS_TEST)
+ 	enable_testing()

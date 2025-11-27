@@ -1,8 +1,9 @@
 import os
+import sys
+
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import replace_in_file, get, rmdir, copy
-from conan.tools.apple import is_apple_os
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, rmdir, copy
 from conan.errors import ConanInvalidConfiguration
 
 
@@ -26,13 +27,13 @@ class LibksConan(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+        apply_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -40,33 +41,24 @@ class LibksConan(ConanFile):
     def requirements(self):
         # libks2/libks/ks_ssl.h:25:10: fatal error: openssl/ssl.h: No such file or directory
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            # libks2/libks/ks_types.h:163:18: fatal error: uuid/uuid.h: No such file or directory
-            self.requires("util-linux-libuuid/2.39.2", transitive_headers=True)
+        # libks2/libks/ks_types.h:163:18: fatal error: uuid/uuid.h: No such file or directory
+        self.requires("util-linux-libuuid/2.39.2", transitive_headers=True)
 
     def validate(self):
-        if is_apple_os(self):
-            raise ConanInvalidConfiguration("This is not apple compatible, https://github.com/signalwire/libks/issues/204")
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Recipes does not yet support Windows - still needs addressing")
+            raise ConanInvalidConfiguration("Upstream does not install Windows files, cannot be used on Windows")
 
     def generate(self):
         deps = CMakeDeps(self)
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            deps.set_property("util-linux-libuuid", "cmake_target_name", "LIBUUID::LIBUUID")
+        deps.set_property("util-linux-libuuid", "cmake_target_name", "LIBUUID::LIBUUID")
         deps.generate()
 
         tc = CMakeToolchain(self)
+        tc.cache_variables["KS_STATIC"] = not self.options.shared
         tc.cache_variables["WITH_PACKAGING"] = False
         tc.generate()
 
     def build(self):
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        'include(cmake/FindUUID.cmake)',
-                        'find_package(libuuid CONFIG REQUIRED)') # Use conan to find uuid
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        'add_subdirectory(tests)',
-                        '') # Do not build tests
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -85,4 +77,25 @@ class LibksConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "ks2")
         self.cpp_info.includedirs = ["include/libks2"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread", "rt", "atomic"]
+
+        if not self.options.shared:
+            self.cpp_info.defines.append("KS_DECLARE_STATIC=1")
+
+        if sys.byteorder == "big":
+            self.cpp_info.defines.append("__BYTE_ORDER=__BIG_ENDIAN")
+        else:
+            self.cpp_info.defines.append("__BYTE_ORDER=__LITTLE_ENDIAN")
+
+        # Upstream has public definitions for these, but propagating them is prone to cause issues
+        # So unless reported as needed, let's skip them for now
+        # 	-DSTDC_HEADERS=1
+        # 	-DTIME_WITH_SYS_TIME=1
+        # 	-DRETSIGTYPE=void
+        # 	-DHAVE_LIBCRYPTO=1
+        # 	-DHAVE_LIBSSL=1
+        # 	-D_REENTRANT=1
+
+        # There are quite a few PUBLIC definitions being defined as part of dependency auto-detection,
+        # but none of them are actually used in public headers.
+        # So we skip them, but maybe newer versions might, so check!
