@@ -1,4 +1,7 @@
 sources:
+  "2.6.0":
+    url: "https://github.com/libigl/libigl/archive/refs/tags/v2.6.0.zip"
+    sha256: "b7679fc8eba847b64ffa33a112caad1a1cfacc2a0621014d3b6829c08acfe979"
   "2.5.0":
     url: "https://github.com/libigl/libigl/archive/refs/tags/v2.5.0.zip"
     sha256: "84af6a5f9266a4c1ce530f9ef8028c8a3569318563012d72a753622f61ea2f68"
