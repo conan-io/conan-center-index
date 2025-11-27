@@ -60,6 +60,10 @@ class GrpcConan(ConanFile):
     _target_info = None
 
     @property
+    def _is_clang_cl(self):
+        return self.settings.compiler == "clang" and self.settings.os == "Windows"
+
+    @property
     def _grpc_plugin_template(self):
         return "grpc_plugin_template.cmake.in"
 
@@ -213,6 +217,11 @@ class GrpcConan(ConanFile):
         if is_apple_os(self):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
             tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
+
+        if is_msvc(self) or self._is_clang_cl:
+            runtime = self.settings.get_safe("compiler.runtime")
+            if runtime:
+                tc.cache_variables["grpc_MSVC_STATIC_RUNTIME"] = runtime == "static"
 
         if self._supports_libsystemd:
             tc.cache_variables["gRPC_USE_SYSTEMD"] = self.options.with_libsystemd
