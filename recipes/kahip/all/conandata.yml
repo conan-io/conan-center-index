@@ -1,0 +1,4 @@
+sources:
+  "3.19":
+    url: "https://github.com/KaHIP/KaHIP/archive/v3.19.tar.gz"
+    sha256: "ab128104d198061b4dcad76f760aca240b96de781c1b586235ee4f12fd6829c6"
