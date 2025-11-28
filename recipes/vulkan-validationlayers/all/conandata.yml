@@ -1,4 +1,7 @@
 sources:
+  "1.4.328.1":
+    url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/refs/tags/vulkan-sdk-1.4.328.1.tar.gz"
+    sha256: "91D9BE1347A270288BCC50206BDA8CCF6AAD33BAB8318C0643DD36BEF97478F9"
   "1.3.243.0":
     url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/refs/tags/sdk-1.3.243.0.tar.gz"
     sha256: "fd9f6c24027de177b2fb0eb6385542d62f4c21665a8d4cc7e1c118688e0836de"
@@ -20,35 +23,3 @@ sources:
   "1.3.211.0":
     url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/refs/tags/sdk-1.3.211.0.tar.gz"
     sha256: "927c1cb98c81fe8a1a529cf2d977d701dcda49c495a19583dc00e178b6757203"
-patches:
-  "1.3.243.0":
-    - patch_file: "patches/1.3.243.0-0001-fix-cmake.patch"
-      patch_description: "CMake: Adapt to conan"
-      patch_type: "conan"
-  "1.3.239.0":
-    - patch_file: "patches/1.3.239.0-0001-fix-cmake.patch"
-      patch_description: "CMake: Adapt to conan"
-      patch_type: "conan"
-  "1.3.236.0":
-    - patch_file: "patches/1.3.236.0-0001-fix-cmake.patch"
-      patch_description: "CMake: Adapt to conan"
-      patch_type: "conan"
-  "1.3.231.1":
-    - patch_file: "patches/1.3.231.1-0001-fix-cmake.patch"
-      patch_description: "CMake: Adapt to conan"
-      patch_type: "conan"
-    - patch_file: "patches/1.3.231.1-0002-cmake-no-werror.patch"
-      patch_description: "Allow to disable Werror for old gcc/clang versions"
-      patch_type: "portability"
-  "1.3.224.1":
-    - patch_file: "patches/1.3.224.1-0001-fix-cmake.patch"
-      patch_description: "CMake: Adapt to conan"
-      patch_type: "conan"
-  "1.3.216.0":
-    - patch_file: "patches/1.3.204.1-0001-fix-cmake.patch"
-      patch_description: "CMake: Adapt to conan"
-      patch_type: "conan"
-  "1.3.211.0":
-    - patch_file: "patches/1.3.204.1-0001-fix-cmake.patch"
-      patch_description: "CMake: Adapt to conan"
-      patch_type: "conan"
