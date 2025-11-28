@@ -25,7 +25,7 @@
  include(CheckIncludeFiles)
  include(CheckFunctionExists)
  include(CheckSymbolExists)
-@@ -138,7 +129,7 @@ if(APPLE)
+@@ -147,7 +138,7 @@ if(APPLE)
    add_definitions(-DMACOS=1)
  endif()
  

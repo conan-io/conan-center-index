@@ -1,6 +1,6 @@
 --- a/source/CMakeLists.txt
 +++ b/source/CMakeLists.txt
-@@ -88,20 +88,10 @@ if(UNIX)
+@@ -97,20 +97,10 @@ if(UNIX)
      endif()
      option(ENABLE_LIBNUMA "Enable libnuma usage (Linux only)" ON)
      if(ENABLE_LIBNUMA)
