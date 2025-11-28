@@ -134,6 +134,7 @@ class QpidProtonConan(ConanFile):
             self.cpp_info.components["core"].requires = ["openssl::ssl"]
 
         self.cpp_info.components["proactor"].set_property("cmake_target_name", "Proton::proactor")
+        self.cpp_info.components["proactor"].set_property("pkg_config_name", "libqpid-proton-proactor")
         self.cpp_info.components["proactor"].libs = [f"qpid-proton-proactor{suffix}"]
         self.cpp_info.components["proactor"].requires = ["core"]
         if is_msvc(self):
