@@ -23,13 +23,13 @@ class MongoCxxConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "polyfill": ["std", "boost", "mnmlstc", "experimental"],
+        "polyfill": ["std", "boost", "mnmlstc", "experimental", "impls"],
         "with_ssl": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "polyfill": "boost",
+        # "polyfill" default set in config_options()
         "with_ssl": True,
     }
 
@@ -40,6 +40,13 @@ class MongoCxxConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        if valid_min_cppstd(self, 17):
+            self.options.polyfill = "std"
+        elif self._supports_impls_polyfill:
+            self.options.polyfill = "impls"
+        else:
+            self.options.polyfill = "boost"
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -48,9 +55,14 @@ class MongoCxxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("mongo-c-driver/1.29.0")
+        c_driver_version = "1.29.0" if Version(self.version) < "4.1" else "2.2.0"
+        self.requires(f"mongo-c-driver/{c_driver_version}")
         if self.options.polyfill == "boost":
             self.requires("boost/1.86.0", transitive_headers=True)
+
+    def build_requirements(self):
+        if Version(self.version) < "3.9":
+            self.tool_requires("cmake/[<4]")
 
     @property
     def _minimal_std_version(self):
@@ -58,7 +70,8 @@ class MongoCxxConan(ConanFile):
             "std": "17",
             "experimental": "14",
             "boost": "11",
-            "polyfill": "11"
+            "polyfill": "11",
+            "impls": "11",
         }[str(self.options.polyfill)]
 
     @property
@@ -79,7 +92,7 @@ class MongoCxxConan(ConanFile):
                 "clang": "3.5",
                 "apple-clang": "10"
             }
-        elif self.info.options.polyfill == "boost":
+        elif self.info.options.polyfill in ["boost", "impls"]:
             # C++11
             return {
                 "Visual Studio": "14",
@@ -92,9 +105,30 @@ class MongoCxxConan(ConanFile):
                 f"please, specify _compilers_minimum_version for {self.options.polyfill} polyfill"
             )
 
+    @property
+    def _supports_experimental_polyfill(self):
+        return Version(self.version) < "3.10"
+
+    @property
+    def _supports_impls_polyfill(self):
+        return Version(self.version) >= "3.10"
+
+    @property
+    def _supports_external_polyfill(self):
+        return Version(self.version) < 4
+
     def validate(self):
         if self.options.with_ssl and not bool(self.dependencies["mongo-c-driver"].options.with_ssl):
             raise ConanInvalidConfiguration("mongo-cxx-driver with_ssl=True requires mongo-c-driver with a ssl implementation")
+
+        if not self._supports_experimental_polyfill and self.options.polyfill == "experimental":
+            raise ConanInvalidConfiguration("experimental polyfill is no longer supported in mongo-cxx-driver versions 3.10+")
+
+        if not self._supports_impls_polyfill and self.options.polyfill == "impls":
+            raise ConanInvalidConfiguration("polyfill implementations are only supported in mongo-cxx-driver versions 3.10+")
+
+        if not self._supports_external_polyfill and self.options.polyfill in ["boost", "mnmlstc"]:
+            raise ConanInvalidConfiguration("external polyfill (boost or mnmlstc) is no longer supported in mongo-cxx-driver versions 4+")
 
         if self.options.polyfill == "mnmlstc":
             # TODO: add mnmlstc polyfill support
@@ -119,10 +153,19 @@ class MongoCxxConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BSONCXX_POLY_USE_MNMLSTC"] = self.options.polyfill == "mnmlstc"
+
+        if self._supports_experimental_polyfill:
+            tc.variables["BSONCXX_POLY_USE_STD_EXPERIMENTAL"] = self.options.polyfill == "experimental"
+
+        if self._supports_impls_polyfill:
+            tc.variables["BSONCXX_POLY_USE_IMPLS"] = self.options.polyfill == "impls"
+
+        if self._supports_external_polyfill:
+            tc.variables["BSONCXX_POLY_USE_MNMLSTC"] = self.options.polyfill == "mnmlstc"
+            tc.variables["BSONCXX_POLY_USE_BOOST"] = self.options.polyfill == "boost"
+
         tc.variables["BSONCXX_POLY_USE_STD"] = self.options.polyfill == "std"
-        tc.variables["BSONCXX_POLY_USE_STD_EXPERIMENTAL"] = self.options.polyfill == "experimental"
-        tc.variables["BSONCXX_POLY_USE_BOOST"] = self.options.polyfill == "boost"
+
         tc.cache_variables["BUILD_VERSION"] = self.version
         tc.cache_variables["BSONCXX_LINK_WITH_STATIC_MONGOC"] = "OFF" if self.dependencies["mongo-c-driver"].options.shared else "ON"
         tc.cache_variables["MONGOCXX_LINK_WITH_STATIC_MONGOC"] = "OFF" if self.dependencies["mongo-c-driver"].options.shared else "ON"
@@ -136,11 +179,17 @@ class MongoCxxConan(ConanFile):
 
         deps = CMakeDeps(self)
         deps.generate()
-        # FIXME: two CMake module/config files should be generated (mongoc-1.0-config.cmake and bson-1.0-config.cmake),
+        # FIXME: two CMake module/config files should be generated (mongoc[-1.0]-config.cmake and bson[-1.0]-config.cmake),
         # but it can't be modeled right now.
         # Fix should happen in mongo-c-driver recipe
-        mongoc_config_file = os.path.join(self.generators_folder, "mongoc-1.0-config.cmake")
-        bson_config_file = os.path.join(self.generators_folder, "bson-1.0-config.cmake")
+        def c_driver_config_file(component):
+            filename = f"{component}-1.0-config.cmake" \
+                       if Version(self.dependencies["mongo-c-driver"].ref.version).major == 1 else \
+                       f"{component}-config.cmake"
+            return os.path.join(self.generators_folder, filename)
+
+        mongoc_config_file = c_driver_config_file("mongoc")
+        bson_config_file = c_driver_config_file("bson")
         if not os.path.exists(bson_config_file):
             self.output.info("Copying mongoc config file to bson")
             shutil.copy(src=mongoc_config_file, dst=bson_config_file)
