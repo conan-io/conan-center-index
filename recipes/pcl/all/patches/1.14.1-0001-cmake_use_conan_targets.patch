@@ -9,7 +9,7 @@
  endif()
  if(OpenMP_FOUND)
    string(APPEND CMAKE_C_FLAGS " ${OpenMP_C_FLAGS}")
-@@ -319,11 +319,14 @@
+@@ -319,13 +319,16 @@
  find_package(Threads REQUIRED)
 
  # Eigen3 (required)
@@ -46,7 +46,7 @@
    if(NOT (${QHULL_LIBRARY_TYPE} MATCHES ${PCL_QHULL_REQUIRED_TYPE}) AND NOT (${PCL_QHULL_REQUIRED_TYPE} MATCHES "DONTCARE"))
      message(FATAL_ERROR "Qhull was selected with ${PCL_QHULL_REQUIRED_TYPE} but found as ${QHULL_LIBRARY_TYPE}")
    endif()
-@@ -409,7 +409,7 @@
+@@ -409,7 +412,7 @@
  #Find PCAP
  option(WITH_PCAP "pcap file capabilities in Velodyne HDL driver" TRUE)
  if(WITH_PCAP)
