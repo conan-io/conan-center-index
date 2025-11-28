@@ -240,9 +240,9 @@ class UserverConan(ConanFile):
     def build(self):
         # pg_config is required to build psycopg2 from source without system package.
         # However, this approach fails on later stage, when venv for tests is built.
-        # libpq = self.dependencies["libpq"]
-        # if libpq:
-        #     os.environ["PATH"] = os.environ["PATH"] + ":" + libpq.package_folder+ "/bin"
+        libpq = self.dependencies["libpq"]
+        if libpq:
+            os.environ["PATH"] = os.environ["PATH"] + ":" + libpq.package_folder+ "/bin"
 
         cmake = CMake(self)
         cmake.configure()
@@ -256,12 +256,3 @@ class UserverConan(ConanFile):
         # https://docs.conan.io/2/examples/tools/cmake/cmake_toolchain/use_package_config_cmake.html
         self.cpp_info.set_property('cmake_find_mode', 'none')
         self.cpp_info.builddirs.append(os.path.join('lib', 'cmake', 'userver'))
-
-    def system_requirements(self):
-        if self.options.with_postgresql:
-            # pg_config is required to build psycopg2 python module from source at
-            # testsuite venv creation during functional testing of user code.
-            package_manager.Apt(self).install(['libpq-dev'])
-            package_manager.Yum(self).install(['libpq-devel'])
-            package_manager.PacMan(self).install(['libpq-dev'])
-            package_manager.Zypper(self).install(['libpq-devel'])
