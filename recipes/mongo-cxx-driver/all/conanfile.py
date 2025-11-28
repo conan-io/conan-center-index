@@ -53,6 +53,10 @@ class MongoCxxConan(ConanFile):
         if self.options.polyfill == "boost":
             self.requires("boost/[>=1.86.0 <=1.90.0]", transitive_headers=True)
 
+    def build_requirements(self):
+        if Version(self.version) < "3.9":
+            self.tool_requires("cmake/[<4]")
+
     @property
     def _minimal_std_version(self):
         return {
