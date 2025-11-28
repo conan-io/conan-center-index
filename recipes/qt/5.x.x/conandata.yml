@@ -1,26 +1,23 @@
 sources:
-  "5.15.16":
+  "5.15.18":
     url:
-      - "https://download.qt.io/official_releases/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://download.qt.io/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://qt-mirror.dannhauer.de/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://mirror.netcologne.de/qtproject/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://ftp.fau.de/qtproject/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://ftp.nluug.nl/languages/qt/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://mirrors.dotsrc.org/qtproject/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://mirrors.20i.com/pub/qt.io/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://mirrors.ukfast.co.uk/sites/qt.io/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://ftp.acc.umu.se/mirror/qt.io/qtproject/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://www.nic.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://qt.mirror.constant.com/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://mirrors.cloud.tencent.com/qt/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://mirror.bjtu.edu.cn/qt/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://mirrors.ustc.edu.cn/qtproject/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://ftp.jaist.ac.jp/pub/qtproject/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-      - "https://mirror.aarnet.edu.au/pub/qtproject/archive/qt/5.15/5.15.16/single/qt-everywhere-opensource-src-5.15.16.tar.xz"
-    sha256: "efa99827027782974356aceff8a52bd3d2a8a93a54dd0db4cca41b5e35f1041c"
+      - "https://download.qt.io/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://qt-mirror.dannhauer.de/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://ftp.fau.de/qtproject/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://mirrors.dotsrc.org/qtproject/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://mirrors.20i.com/pub/qt.io/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://mirrors.ukfast.co.uk/sites/qt.io/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://mirror.accum.se/mirror/qt.io/qtproject/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://www.nic.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://qtproject.mirror.liquidtelecom.com/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://qt.mirror.constant.com/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://mirrors.sau.edu.cn/qt/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://mirror.bjtu.edu.cn/qt/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://ftp.jaist.ac.jp/pub/qtproject/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+      - "https://mirror.aarnet.edu.au/pub/qtproject/archive/qt/5.15/5.15.18/single/qt-everywhere-opensource-src-5.15.18.tar.xz"
+    sha256: "cea1fbabf02455f3f0e8eaa839f5d6f45cdb56b62c8a83af5c1d00ac05f912ea"
 patches:
-  "5.15.16":
+  "5.15.18":
     - "base_path": "qt5/qtbase"
       "patch_file": "patches/aa2a39dea5.diff"
     - "base_path": "qt5/qtwebengine"
