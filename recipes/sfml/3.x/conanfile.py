@@ -71,7 +71,7 @@ class SfmlConan(ConanFile):
 
             if self.settings.os not in ("iOS", "Android"):  # Handled as a framework
                 self.requires("opengl/system")
-            self.requires("vulkan-headers/[*]")
+            self.requires("vulkan-headers/[~1]")
 
         if self.options.graphics:
             if self.settings.os == "Android" or self.settings.os == "iOS":
@@ -79,7 +79,7 @@ class SfmlConan(ConanFile):
             if self.settings.os == "iOS":
                 self.requires("bzip2/1.0.8")
             self.requires("freetype/2.13.2")
-            self.requires("stb/[*]")
+            self.requires("stb/[>=cci.20240531]")
 
         if self.options.audio:
             self.requires("vorbis/1.3.7")
