@@ -49,12 +49,11 @@ class QpidProtonConan(ConanFile):
         if not is_msvc(self):
             self.requires("openssl/[>=1.1 <4]")
         if self.settings.os == "Macos":
-            self.requires("libuv/1.49.2")
-        self.requires("jsoncpp/1.9.6")
+            self.requires("libuv/[>=1 <2]")
+        self.requires("jsoncpp/[>=1.9.6 <2]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 14)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16]")
@@ -143,6 +142,7 @@ class QpidProtonConan(ConanFile):
             self.cpp_info.components["proactor"].requires = ["openssl::ssl"]
 
         self.cpp_info.components["cpp"].set_property("cmake_target_name", "Proton::cpp")
+        self.cpp_info.components["cpp"].set_property("pkg_config_name", "libqpid-proton-cpp")
         self.cpp_info.components["cpp"].libs = [f"qpid-proton-cpp{suffix}"]
         self.cpp_info.components["cpp"].requires = ["core", "proactor", "jsoncpp::jsoncpp"]
 
