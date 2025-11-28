@@ -63,6 +63,7 @@ class QpidProtonConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], filename=f"{self.version}.tar.gz", strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
