@@ -8,9 +8,10 @@ from conan.tools.cmake import CMake
 from conan.tools.cmake import cmake_layout
 from conan.tools.cmake import CMakeDeps
 from conan.tools.cmake import CMakeToolchain
-from conan.tools.files import get, copy, export_conandata_patches
+from conan.tools.files import copy
+from conan.tools.files import export_conandata_patches
+from conan.tools.files import get
 from conan.tools.scm import Git
-from conan.tools.system import package_manager
 
 required_conan_version = '>=2.8.0'  # pylint: disable=invalid-name
 
@@ -83,7 +84,7 @@ class UserverConan(ConanFile):
     }
 
     def source(self):
-        known_version = (self.conan_data or {}).get("sources", {}).get(self.version)
+        known_version = (self.conan_data or {}).get('sources', {}).get(self.version)
         if known_version:
             get(self, **known_version, strip_root=True)
         else:
@@ -91,7 +92,7 @@ class UserverConan(ConanFile):
             pass
 
     def export_sources(self):
-        known_version = (self.conan_data or {}).get("sources", {}).get(self.version)
+        known_version = (self.conan_data or {}).get('sources', {}).get(self.version)
         if known_version:
             export_conandata_patches(self)
         else:
@@ -150,7 +151,7 @@ class UserverConan(ConanFile):
             self.requires('cyrus-sasl/2.1.28')
         if self.options.with_mongodb:
             self.requires(
-                'mongo-c-driver/1.28.0',
+                'mongo-c-driver/1.30.3',
                 transitive_headers=True,
                 transitive_libs=True,
             )
@@ -229,7 +230,9 @@ class UserverConan(ConanFile):
             )
 
         if self.options.with_otlp:
-            tool_ch.cache_variables['USERVER_OPENTELEMETRY_PROTO'] = self.dependencies['opentelemetry-proto'].conf_info.get(
+            tool_ch.cache_variables['USERVER_OPENTELEMETRY_PROTO'] = self.dependencies[
+                'opentelemetry-proto'
+            ].conf_info.get(
                 'user.opentelemetry-proto:proto_root',
             )
 
@@ -240,9 +243,9 @@ class UserverConan(ConanFile):
     def build(self):
         # pg_config is required to build psycopg2 from source without system package.
         # However, this approach fails on later stage, when venv for tests is built.
-        libpq = self.dependencies["libpq"]
+        libpq = self.dependencies['libpq']
         if libpq:
-            os.environ["PATH"] = os.environ["PATH"] + ":" + libpq.package_folder+ "/bin"
+            os.environ['PATH'] = os.environ['PATH'] + ':' + libpq.package_folder + '/bin'
 
         cmake = CMake(self)
         cmake.configure()
