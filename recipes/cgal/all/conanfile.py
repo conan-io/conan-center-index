@@ -47,10 +47,10 @@ class CgalConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.83.0")
-        self.requires("eigen/3.4.0")
-        self.requires("mpfr/4.2.1")
-        self.requires("gmp/6.3.0")
+        self.requires("boost/[>=1.83.0 <=1.89.0]")
+        self.requires("eigen/[>=3.4.0 <4]")
+        self.requires("mpfr/[>=4.2.1 <5]")
+        self.requires("gmp/[>=6.3.0 <7]")
 
     def package_id(self):
         self.info.clear()
