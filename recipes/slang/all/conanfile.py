@@ -12,7 +12,7 @@ class PackageConan(ConanFile):
     name = "slang"
     description = "SystemVerilog compiler and language services"
     license = "MIT"
-    url = "https://github.com/MikePopoloski/slang"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sv-lang.com/"
     topics = ("parse", "compiler", "verilog", "language-service", "systemverilog")
     package_type = "library"
