@@ -131,6 +131,9 @@ class DrogonConan(ConanFile):
         if self.options.get_safe("with_mysql"):
             deps.set_property("mariadb-connector-c", "cmake_file_name", "MySQL")
             deps.set_property("mariadb-connector-c", "cmake_target_name", "MySQL_lib")
+        if self.options.get_safe("with_brotli"):
+            deps.set_property("brotli", "cmake_file_name", "Brotli")
+            deps.set_property("brotli", "cmake_target_name", "Brotli_lib")
         deps.generate()
 
     def build(self):
