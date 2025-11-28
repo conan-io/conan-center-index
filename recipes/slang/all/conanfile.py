@@ -69,7 +69,6 @@ class PackageConan(ConanFile):
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.libs = ["svlang"]
         self.cpp_info.set_property("pkg_config_name", "sv-lang")
         self.cpp_info.set_property("cmake_file_name", "slang")
 
@@ -79,6 +78,7 @@ class PackageConan(ConanFile):
 
         self.cpp_info.components["core"].set_property("cmake_target_name", "slang::slang")
         self.cpp_info.components["core"].requires = ["fmt::fmt", "mimalloc::mimalloc", "boost_unordered"]
+        self.cpp_info.components["core"].libs = ["svlang"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
