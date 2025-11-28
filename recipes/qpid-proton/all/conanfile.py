@@ -118,6 +118,7 @@ class QpidProtonConan(ConanFile):
         suffix = "-static" if is_msvc(self) and not self.options.shared else ""
 
         self.cpp_info.components["proton"].set_property("cmake_target_name", "Proton::proton")
+        self.cpp_info.components["proton"].set_property("pkg_config_name", "libqpid-proton")
         self.cpp_info.components["proton"].libs = [f"qpid-proton{suffix}"]
         if is_msvc(self):
             self.cpp_info.components["proton"].system_libs.extend(["secur32", "crypt32", "Ws2_32"])
