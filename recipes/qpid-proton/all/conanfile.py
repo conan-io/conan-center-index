@@ -111,10 +111,6 @@ class QpidProtonConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
-    @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ProtonCpp")
         self.cpp_info.set_property("pkg_config_name", "libqpid-proton-cpp")
