@@ -8,8 +8,8 @@ import os
 required_conan_version = ">=2.0.9"
 
 
-class PackageConan(ConanFile):
-    name = "slang"
+class VerilogSlangConan(ConanFile):
+    name = "verilog-slang"
     description = "SystemVerilog compiler and language services"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
