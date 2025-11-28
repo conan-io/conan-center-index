@@ -215,8 +215,8 @@ class LibcurlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        cert_url = self.conf.get("user.libcurl.cert:url", check_type=str) or "https://curl.se/ca/cacert-2025-07-15.pem"
-        cert_sha256 = self.conf.get("user.libcurl.cert:sha256", check_type=str) or "7430e90ee0cdca2d0f02b1ece46fbf255d5d0408111f009638e3b892d6ca089c"
+        cert_url = self.conf.get("user.libcurl.cert:url", check_type=str) or "https://curl.se/ca/cacert-2025-11-04.pem"
+        cert_sha256 = self.conf.get("user.libcurl.cert:sha256", check_type=str) or "8ac40bdd3d3e151a6b4078d2b2029796e8f843e3f86fbf2adbc4dd9f05e79def"
         download(self, cert_url, "cacert.pem", verify=True, sha256=cert_sha256)
 
     def generate(self):
