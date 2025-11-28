@@ -247,4 +247,4 @@ class SfmlConan(ConanFile):
                 self.cpp_info.components["audio"].system_libs = ["android", "OpenSLES"]
 
             if self.settings.os == "Linux":
-                self.cpp_info.components["audio"].system_libs = ["dl"]
+                self.cpp_info.components["audio"].system_libs = ["pthread", "dl"]
