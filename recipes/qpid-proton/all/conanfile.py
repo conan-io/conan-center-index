@@ -57,7 +57,7 @@ class QpidProtonConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16 <4]")
+        self.tool_requires("cmake/[>=3.16]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=1.7 <3]")
 
