@@ -69,6 +69,7 @@ class PackageConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["svlang"]
+        self.cpp_info.set_property("pkg_config_name", "sv-lang")
         self.cpp_info.set_property("cmake_file_name", "slang")
         self.cpp_info.set_property("cmake_target_name", "slang::slang")
 
