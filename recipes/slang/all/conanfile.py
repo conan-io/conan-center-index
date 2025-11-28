@@ -26,10 +26,6 @@ class PackageConan(ConanFile):
         "fPIC": True,
     }
     implements = ["auto_shared_fpic"]
-    requires = [
-        "fmt/12.1.0",
-        "mimalloc/2.2.4"
-    ]
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -39,6 +35,10 @@ class PackageConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
+
+    def requirements(self):
+        self.requires("fmt/12.1.0")
+        self.requires("mimalloc/2.2.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
