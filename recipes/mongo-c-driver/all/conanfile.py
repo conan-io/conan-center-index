@@ -213,12 +213,6 @@ class MongoCDriverConan(ConanFile):
 
         self.cpp_info.set_property("cmake_target_name", f"mongo::mongoc_{lib_type}")
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = cmake_name
-        self.cpp_info.filenames["cmake_find_package_multi"] = cmake_name
-        self.cpp_info.names["cmake_find_package"] = "mongo"
-        self.cpp_info.names["cmake_find_package_multi"] = "mongo"
-
         for component in ["mongoc", "bson"]:
             target = f"{component}_{lib_type}"
 
@@ -227,13 +221,9 @@ class MongoCDriverConan(ConanFile):
             self.cpp_info.components[component].set_property("cmake_target_name", f"mongo::{target}")
             self.cpp_info.components[component].set_property("cmake_target_aliases", [f"{component}::{lib_type}"])
 
-            # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-            self.cpp_info.components[component].names["cmake_find_package"] = target
-            self.cpp_info.components[component].names["cmake_find_package_multi"] = target
-
             lib_type_suffix = '' if self.options.shared else '-static'
 
-            pkg_config_name = f"lib{component}{lib_type_suffix}-1.0" if is_major_version_1 else f"lib{component}{version_major}{lib_type_suffix}"
+            pkg_config_name = f"lib{component}{lib_type_suffix}-1.0" if is_major_version_1 else f"{component}{version_major}{lib_type_suffix}"
             self.cpp_info.components[component].set_property("pkg_config_name", pkg_config_name)
 
             include_subdir = f"lib{component}-1.0" if is_major_version_1 else f"{component}-{self.version}"

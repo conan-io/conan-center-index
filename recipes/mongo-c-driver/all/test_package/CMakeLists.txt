@@ -1,13 +1,18 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES C)
 
-find_package(mongoc-1.0 CONFIG)
-
-if(NOT mongoc-1.0_FOUND)
-    find_package(mongoc REQUIRED CONFIG)
+if(MONGOC_VERSION_1)
+    message(STATUS "Using mongoc version 1.x")
+    set(MONGOC_CONFIG_NAME "mongoc-1.0")
+else()
+    message(STATUS "Using mongoc version 2.x or greater")
+    set(MONGOC_CONFIG_NAME "mongoc")
 endif()
 
+find_package(${MONGOC_CONFIG_NAME} REQUIRED CONFIG)
+
 add_executable(${PROJECT_NAME} test_package.c)
+
 if(TARGET mongo::mongoc_shared)
     if(NOT TARGET mongoc::shared)
         message(FATAL_ERROR "Target 'mongoc::shared' does not exist")
