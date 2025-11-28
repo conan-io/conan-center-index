@@ -5,10 +5,10 @@
 using namespace slang;
 
 int main(void) {
-    std::cout << VersionInfo::getMajor() << std::endl;
-    std::cout << VersionInfo::getMinor() << std::endl;
-    std::cout << VersionInfo::getPatch() << std::endl;
-    std::cout << VersionInfo::getHash() << std::endl;
+    std::cout << "Slang Verilog Version: " << VersionInfo::getMajor() << "."
+              << VersionInfo::getMinor() << "."
+              << VersionInfo::getPatch() << " ("
+              << VersionInfo::getHash() << ")" << std::endl;
 
     return EXIT_SUCCESS;
 }
