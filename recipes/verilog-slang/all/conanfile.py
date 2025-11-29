@@ -1,20 +1,18 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 import os
 
 
 required_conan_version = ">=2.0.9"
 
 
-class PackageConan(ConanFile):
-    name = "slang"
+class VerilogSlangConan(ConanFile):
+    name = "verilog-slang"
     description = "SystemVerilog compiler and language services"
     license = "MIT"
-    url = "https://github.com/MikePopoloski/slang"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sv-lang.com/"
     topics = ("parse", "compiler", "verilog", "language-service", "systemverilog")
     package_type = "library"
@@ -28,23 +26,23 @@ class PackageConan(ConanFile):
         "fPIC": True,
     }
     implements = ["auto_shared_fpic"]
-    requires = [
-        "fmt/12.1.0",
-        "mimalloc/2.2.4"
-    ]
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        check_min_cppstd(self, 17)
+        check_min_cppstd(self, 20)
+
+    def requirements(self):
+        self.requires("fmt/12.1.0")
+        self.requires("mimalloc/2.2.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
+        # INFO: Let Conan handle the C++ standard by settings.compiler.cppstd
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_CXX_STANDARD",
+                        "# set(CMAKE_CXX_STANDARD")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -61,6 +59,7 @@ class PackageConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*", os.path.join(self.source_folder, "LICENSES"), os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
@@ -70,9 +69,16 @@ class PackageConan(ConanFile):
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.libs = ["svlang"]
+        self.cpp_info.set_property("pkg_config_name", "sv-lang")
         self.cpp_info.set_property("cmake_file_name", "slang")
-        self.cpp_info.set_property("cmake_target_name", "slang::slang")
+
+        self.cpp_info.components["boost_unordered"].set_property("cmake_target_name", "slang::boost_unordered")
+        self.cpp_info.components["boost_unordered"].defines = ["SLANG_BOOST_SINGLE_HEADER"]
+        self.cpp_info.components["boost_unordered"].libdirs = []
+
+        self.cpp_info.components["core"].set_property("cmake_target_name", "slang::slang")
+        self.cpp_info.components["core"].requires = ["fmt::fmt", "mimalloc::mimalloc", "boost_unordered"]
+        self.cpp_info.components["core"].libs = ["svlang"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
