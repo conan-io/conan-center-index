@@ -1399,6 +1399,12 @@ class BoostConan(ConanFile):
             if os_subsystem == "catalyst":
                 cxx_flags.append("--target=arm64-apple-ios-macabi")
                 link_flags.append("--target=arm64-apple-ios-macabi")
+        
+        if self._toolset == "emscripten":
+            # boost uses -fwasm-exceptions by default
+            # https://github.com/boostorg/build/blob/4a52d8c06635435b64e31a56eaf7ca5dc912a71d/src/tools/emscripten.jam#L133C1-L134C115
+            if "-fexceptions" in self.conf.get("tools.build:cxxflags", default=[], check_type=list):
+                flags.extend(["exception-handling=on", "exception-handling-method=js"])
 
         if self.settings.os == "iOS":
             if self.options.multithreading:
