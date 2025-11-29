@@ -44,6 +44,7 @@ class WolfSSLConan(ConanFile):
         "with_experimental": [True, False],
         "with_rpk": [True, False],
         "keylog_export": [True, False],
+        "enable_asio": [True, False],
     }
     default_options = {
         "shared": False,
@@ -66,6 +67,7 @@ class WolfSSLConan(ConanFile):
         "with_experimental": False,
         "with_rpk": False,
         "keylog_export": False,
+        "enable_asio": False,
     }
 
     def config_options(self):
@@ -132,6 +134,8 @@ class WolfSSLConan(ConanFile):
             tc.configure_args.append("--enable-experimental")
         if self.options.get_safe("with_rpk"):
             tc.configure_args.append("--enable-rpk")
+        if self.options.get_safe("enable_asio"):
+            tc.configure_args.append("--enable-asio")
         if is_msvc(self):
             tc.extra_ldflags.append("-ladvapi32")
             if check_min_vs(self, "180", raise_invalid=False):
