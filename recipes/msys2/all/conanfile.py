@@ -38,16 +38,18 @@ class MSYS2Conan(ConanFile):
     description = "MSYS2 is a software distro and building platform for Windows"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.msys2.org"
-    license = "MSYS license"
+    license = "BSD-3-Clause"
     topics = ("msys", "unix", "subsystem")
 
     settings = "os", "arch"
+    package_type = "application"
+
     # "exclude_files" "packages" "additional_packages" values are a comma separated list
     options = {
         "exclude_files": ["ANY"],
         "packages": ["ANY"],
         "additional_packages": [None, "ANY"],
-        "no_kill": [True, False]
+        "no_kill": [True, False],
     }
     default_options = {
         "exclude_files": "*/link.exe",
