@@ -43,7 +43,7 @@ class WolfSSLConan(ConanFile):
         "with_quic": [True, False],
         "with_experimental": [True, False],
         "with_rpk": [True, False],
-        "with_asio": [True, False],
+        "enable_asio": [True, False],
     }
     default_options = {
         "shared": False,
@@ -64,7 +64,7 @@ class WolfSSLConan(ConanFile):
         "with_quic": False,
         "with_experimental": False,
         "with_rpk": False,
-        "with_asio": False,
+        "enable_asio": False,
     }
 
     @property
@@ -145,7 +145,7 @@ class WolfSSLConan(ConanFile):
             tc.configure_args.append("--enable-experimental")
         if self.options.get_safe("with_rpk"):
             tc.configure_args.append("--enable-rpk")
-        if self.options.get_safe("with_asio"):
+        if self.options.get_safe("enable_asio"):
             tc.configure_args.append("--enable-asio")
         if is_msvc(self):
             tc.extra_ldflags.append("-ladvapi32")
