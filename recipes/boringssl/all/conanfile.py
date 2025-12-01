@@ -104,8 +104,7 @@ class BoringSSLConan(ConanFile):
         if self.settings.os == "Windows":
             # Upstream adds ws2_32 on Windows
             crypto.system_libs.append("ws2_32")
-        elif str(self.settings.os) not in ("Android", "Generic"):
-            # Upstream links Threads::Threads on most non-Android/embedded platforms
+        elif self.settings.os in ["Linux", "FreeBSD"]:
             crypto.system_libs.append("pthread")
 
         # OpenSSL::SSL
