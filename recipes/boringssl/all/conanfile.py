@@ -37,7 +37,7 @@ class BoringSSLConan(ConanFile):
         "openssl_small": False,
     }
 
-    # Remove fPIC when shared=True
+    provides = "openssl"
     implements = ["auto_shared_fpic"]
 
     def export_sources(self):
