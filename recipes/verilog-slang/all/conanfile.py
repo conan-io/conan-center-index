@@ -85,7 +85,9 @@ class VerilogSlangConan(ConanFile):
         self.cpp_info.components["boost_unordered"].libdirs = []
 
         self.cpp_info.components["core"].set_property("cmake_target_name", "slang::slang")
-        self.cpp_info.components["core"].requires = ["fmt::fmt", "mimalloc::mimalloc", "boost_unordered"]
+        self.cpp_info.components["core"].requires = ["fmt::fmt", "boost_unordered"]
+        if not self.options.shared or not self.settings.os == "Windows":
+            self.cpp_info.components["core"].requires.append("mimalloc::mimalloc")
         self.cpp_info.components["core"].libs = ["svlang"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
