@@ -1,7 +1,9 @@
+import platform
+import shutil
 import subprocess
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import cmd_args_to_string
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import (
     apply_conandata_patches,
@@ -136,9 +138,31 @@ class ExecuTorchConan(ConanFile):
     def source(self):
         git = Git(self)
         git.clone(url=self.url, target=".")
-        git.checkout(f"v{self.version}")
+        if '.' in self.version:
+            git.checkout(f"v{self.version}")
+        else:
+            git.checkout(f"{self.version}")
         git.run("submodule update --init --recursive")
 
+    def get_system_python(self):
+        python = "python" if platform.system() == "Windows" else "python3"
+        default_python = shutil.which(python)
+        return os.path.realpath(default_python) if default_python else None
+    
+    def get_default_python(self):
+        return self.conf.get("tools.system.pipenv:python_interpreter") or self.get_system_python()
+    
+    def add_dir_to_path(self,bin_dir,env_name="conan_env"):
+        env = Environment()
+        env.prepend_path("PATH", bin_dir)
+        env.vars(self).save_script(env_name)
+
+    def get_env_bin_dir(self,env_dir):
+        return os.path.join(env_dir,"Scripts" if platform.system() == "Windows" else "bin")
+    
+    def get_env_python(self,env_dir):
+        return os.path.join(self.get_env_bin_dir(env_dir), "python.exe" if platform.system() == "Windows" else "python")
+    
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["EXECUTORCH_BUILD_CADENCE"] = self.options.cadence
@@ -197,21 +221,30 @@ class ExecuTorchConan(ConanFile):
         deps.generate()
 
         # setup an env to install uv into
-        pipenv = PipEnv(self,os.path.join(self.build_folder,".temp"))
-        pipenv.install(["uv"])
-        pipenv_executable = os.path.join(pipenv.bin_dir, "python.exe" if self.settings.os == "Windows" else "python")
+        python = self.get_default_python()
 
-        # install required python version and create uv env
-        self.run(f"{pipenv_executable} -m uv python install 3.12.2")
-        self.run(f"{pipenv_executable} -m uv venv {pipenv.env_name} --seed --python 3.12.2",cwd=self.build_folder)
+        uv_install_env_dir = os.path.join(self.build_folder,'.uv_install_env')
 
-        # generate script for uv env
-        PipEnv(self).generate()
+        # use default python to make an env
+        self.run(cmd_args_to_string([python, '-m', 'venv', uv_install_env_dir]))
+
+        # install uv in the env we just made
+        self.run(cmd_args_to_string([self.get_env_python(uv_install_env_dir),'-m','pip', 'install', 'uv']))
+
+        uv_env_name = 'uv_env'
+        uv_env_dir = os.path.join(self.build_folder,f'.{uv_env_name}')
+
+        # use the uv env we just made to create another env with the python version we need
+        self.run(cmd_args_to_string([self.get_env_python(uv_install_env_dir),'-m', 'uv', 'venv','--seed','--python','3.12.2',uv_env_dir]))
+
+        # use the env we just made to install the executorch requirements
+        self.run(cmd_args_to_string([self.get_env_python(uv_env_dir),os.path.join(self.source_folder,'install_requirements.py')]),cwd=self.source_folder)
+
+        # add the env with the required packages to path
+        self.add_dir_to_path(self.get_env_bin_dir(uv_env_dir))
         
 
     def build(self):
-        
-        self.run("./install_executorch.sh",cwd=self.source_folder)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
