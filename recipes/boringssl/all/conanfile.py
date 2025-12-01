@@ -7,6 +7,7 @@ from conan.tools.files import (
     rmdir,
     replace_in_file
 )
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=2.0.9"
@@ -57,6 +58,10 @@ class BoringSSLConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_TESTING"] = False
+        if is_msvc(self) and self.options.shared:
+            # INFO: Disable warning C4251 treated as error:
+            # pki\input.h(109) 'bssl::Span<const uint8_t,18446744073709551615>' needs to have dll-interface to ...
+            tc.extra_cxxflags.append("/wd4251")
         tc.generate()
 
         deps = CMakeDeps(self)
