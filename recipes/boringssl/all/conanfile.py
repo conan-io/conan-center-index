@@ -6,6 +6,7 @@ from conan.tools.files import (
     copy,
     export_conandata_patches,
     get,
+    rmdir,
 )
 import os
 
@@ -89,9 +90,7 @@ class BoringSSLConan(ConanFile):
 
         cmake = CMake(self)
         cmake.install()
-
-        # Intentionally DO NOT remove lib/cmake to preserve the upstream OpenSSL
-        # config package so consumers can use: find_package(OpenSSL CONFIG)
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         # So consumers can use: find_package(OpenSSL CONFIG)
