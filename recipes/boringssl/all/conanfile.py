@@ -5,6 +5,7 @@ from conan.tools.files import (
     copy,
     get,
     rmdir,
+    replace_in_file
 )
 import os
 
@@ -58,6 +59,10 @@ class BoringSSLConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)], strip_root=True)
+        # INFO: Let Conan manage the C++ standard from settings.compiler.cppstd
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_CXX_STANDARD",
+                        "# set(CMAKE_CXX_STANDARD")
 
     def generate(self):
         tc = CMakeToolchain(self)
