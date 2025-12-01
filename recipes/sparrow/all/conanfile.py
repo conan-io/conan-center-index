@@ -52,7 +52,7 @@ class SparrowRecipe(ConanFile):
         if self._uses_date_polyfill:
             self.requires("date/3.0.3", transitive_headers=True)
         if self.options.export_json_reader:
-            self.requires("nlohmann_json/3.12.0")
+            self.requires("nlohmann_json/3.12.0", transitive_headers=True)
 
     @property
     def _compilers_minimum_version(self):
