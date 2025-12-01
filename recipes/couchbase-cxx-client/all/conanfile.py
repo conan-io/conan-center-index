@@ -35,7 +35,12 @@ class CouchbaseCxxClientConan(ConanFile):
             del self.options.fPIC
     
     def configure(self):
-        if self.options.shared:
+        if self.settings.os == "Windows":
+            # Only static on Windows
+            del self.options.shared
+            self.package_type = "static-library"
+
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
     
     def requirements(self):
