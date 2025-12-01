@@ -25,15 +25,11 @@ class BoringSSLConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "openssl_no_asm": [True, False],
-        "openssl_small": [True, False],
     }
 
     default_options = {
         "shared": False,
         "fPIC": True,
-        "openssl_no_asm": False,
-        "openssl_small": False,
     }
 
     provides = "openssl"
@@ -66,8 +62,6 @@ class BoringSSLConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["OPENSSL_NO_ASM"] = self.options.openssl_no_asm
-        tc.cache_variables["OPENSSL_SMALL"] = self.options.openssl_small
         tc.cache_variables["BUILD_TESTING"] = False
         tc.generate()
 
