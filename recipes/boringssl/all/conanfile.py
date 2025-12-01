@@ -41,13 +41,7 @@ class BoringSSLConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.22 <4]")
 
-        # On Windows x86/x64, NASM is needed when assembly is enabled (default).
-        # Set -o boringssl:openssl_no_asm=True to avoid NASM.
-        if (
-            self.settings.os == "Windows"
-            and str(self.settings.arch) in ("x86", "x86_64")
-            and not self.options.openssl_no_asm
-        ):
+        if self.settings.os == "Windows" and str(self.settings.arch) in ("x86", "x86_64"):
             self.tool_requires("nasm/2.16.01")
 
     def validate(self):
