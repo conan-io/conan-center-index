@@ -66,8 +66,8 @@ class BoringSSLConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["OPENSSL_NO_ASM"] = bool(self.options.openssl_no_asm)
-        tc.cache_variables["OPENSSL_SMALL"] = bool(self.options.openssl_small)
+        tc.cache_variables["OPENSSL_NO_ASM"] = self.options.openssl_no_asm
+        tc.cache_variables["OPENSSL_SMALL"] = self.options.openssl_small
 
         tc.generate()
 
