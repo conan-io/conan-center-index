@@ -38,7 +38,8 @@ class VerilogSlangConan(ConanFile):
 
     def requirements(self):
         self.requires("fmt/12.1.0")
-        self.requires("mimalloc/2.2.4")
+        if not self.options.shared or not self.settings.os == "Windows":
+            self.requires("mimalloc/2.2.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
