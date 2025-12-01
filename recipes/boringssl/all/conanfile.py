@@ -36,7 +36,7 @@ class BoringSSLConan(ConanFile):
     implements = ["auto_shared_fpic"]
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.22 <4]")
