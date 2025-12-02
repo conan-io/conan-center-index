@@ -76,7 +76,7 @@ class LibuvConan(ConanFile):
     @property
     def _target_name(self):
         if Version(self.version) < "1.45.0":
-            return "uv" if self.options.shared else "uv_a"
+            return "libuv::uv" if self.options.shared else "libuv::uv_a"
         return "uv"
 
     @property
