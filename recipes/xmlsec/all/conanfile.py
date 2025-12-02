@@ -64,7 +64,7 @@ class XmlSecConan(ConanFile):
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
         if self.options.with_xslt:
-            self.requires("libxslt/1.1.42")
+            self.requires("libxslt/[^1.1]")
 
     def validate(self):
         if self.options.with_nss:

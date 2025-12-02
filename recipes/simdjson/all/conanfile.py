@@ -3,10 +3,9 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class SimdjsonConan(ConanFile):
@@ -30,41 +29,29 @@ class SimdjsonConan(ConanFile):
         "threads": True,
     }
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        if Version(self.version) < "3.12.0":
-            self.license = "Apache-2.0"
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def validate(self):
+    def validate_build(self):
         check_min_cppstd(self, 17)
+
+    def validate(self):
+        # https://github.com/simdjson/simdjson/blob/0c0ce1bd48baa0677dc7c0945ea7cd1e8b52b297/CMakeLists.txt#L103
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @property
-    def _cmake_cxx_standard(self):
-        compiler_cppstd = self.settings.get_safe("compiler.cppstd")
-        if compiler_cppstd is None:
-            return None
-        if compiler_cppstd.startswith("gnu"):
-            return compiler_cppstd[3:]
-        return compiler_cppstd
-
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["SIMDJSON_ENABLE_THREADS"] = self.options.threads
-        tc.variables["SIMDJSON_DEVELOPER_MODE"] = False
-        cppstd = self._cmake_cxx_standard
-        if cppstd:
-            tc.variables["SIMDJSON_CXX_STANDARD"] = cppstd
+        tc.cache_variables["SIMDJSON_ENABLE_THREADS"] = self.options.threads
+        tc.cache_variables["SIMDJSON_DEVELOPER_MODE"] = False
+
+        cppstd = str(self.settings.compiler.cppstd).replace("gnu", "")
+        tc.cache_variables["SIMDJSON_CXX_STANDARD"] = cppstd
+
         tc.generate()
 
     def build(self):

@@ -2,3 +2,11 @@ sources:
   "0.22.2":
     url: "https://github.com/paullouisageneau/libdatachannel/archive/refs/tags/v0.22.2.tar.gz"
     sha256: "8431ba62a3c83fbee05257226fb8bcb256b1a5ce48b449a718e3be5dbe9b2226"
+  "0.23.2":
+    url: "https://github.com/paullouisageneau/libdatachannel/archive/refs/tags/v0.23.2.tar.gz"
+    sha256: "b9606efc5b2b173f2d22d0be3f6ba4f12af78c00ca02cde5932f3ff902980eb9"
+patches:
+  "0.23.2":
+    - patch_file: "patches/0001-0.23.2-guard-pdb-install-cmake.patch"
+      patch_source: "https://github.com/paullouisageneau/libdatachannel/pull/1464"
+      patch_description: "Remove TARGET_PDB_FILE as it breaks static builds. This only affects windows."

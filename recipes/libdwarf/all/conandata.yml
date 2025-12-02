@@ -1,13 +1,10 @@
 sources:
+  "2.1.0":
+    url: "https://github.com/davea42/libdwarf-code/archive/refs/tags/v2.1.0.tar.gz"
+    sha256: "2c893fde2d96b4d465b3ab0cdee21639ae3bb064eb73e2a30af1cc8046dd5eef"
   "0.11.1":
     url: "https://github.com/davea42/libdwarf-code/archive/refs/tags/v0.11.1.tar.gz"
     sha256: "dfd24db87c354b3ba6fa72d29a481014f81768fea15ddcde96a8a938b1557c17"
-  "0.11.0":
-    url: "https://github.com/davea42/libdwarf-code/archive/refs/tags/v0.11.0.tar.gz"
-    sha256: "5135af38dc202206538a3dcdc90675aa8b320e132156849c6855dea5ea0c0729"
-  "0.10.1":
-    url: "https://github.com/davea42/libdwarf-code/archive/refs/tags/v0.10.1.tar.gz"
-    sha256: "4ab8ae7b4b7aa42453725054b348f4fdb2460d5ba644199a1305311c718ff416"
   "0.9.2":
     url: "https://github.com/davea42/libdwarf-code/archive/refs/tags/v0.9.2.tar.gz"
     sha256: "5371c68248c16a4a9cb071284c87c0cdb8f560d5277e0b86893fdc6576062f95"
@@ -18,15 +15,11 @@ sources:
     url: "https://github.com/davea42/libdwarf-code/archive/refs/tags/v0.8.0.tar.gz"
     sha256: "8ef0dbfb0816b02aac97b87426689ebaa4efb8ec2ca2c759ea34c5e4678dff3f"
 patches:
+  "2.1.0":
+    - patch_file: "patches/2.1.0-0001-fixes.patch"
+      patch_description: "fix off_t redefinition"
+      patch_type: "portability"
   "0.11.1":
-    - patch_file: "patches/0.9.2-0001-fixes.patch"
-      patch_description: "fix DW_API definition"
-      patch_type: "portability"
-  "0.11.0":
-    - patch_file: "patches/0.9.2-0001-fixes.patch"
-      patch_description: "fix DW_API definition"
-      patch_type: "portability"
-  "0.10.1":
     - patch_file: "patches/0.9.2-0001-fixes.patch"
       patch_description: "fix DW_API definition"
       patch_type: "portability"

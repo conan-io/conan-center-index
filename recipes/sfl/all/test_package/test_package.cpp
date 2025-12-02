@@ -5,10 +5,17 @@
 #include "sfl/small_flat_map.hpp"
 #include "sfl/small_flat_multiset.hpp"
 #include "sfl/small_flat_multimap.hpp"
+#if SFL_VERSION >= 2
+#include "sfl/small_unordered_linear_set.hpp"
+#include "sfl/small_unordered_linear_map.hpp"
+#include "sfl/small_unordered_linear_multiset.hpp"
+#include "sfl/small_unordered_linear_multimap.hpp"
+#else
 #include "sfl/small_unordered_flat_set.hpp"
 #include "sfl/small_unordered_flat_map.hpp"
 #include "sfl/small_unordered_flat_multiset.hpp"
 #include "sfl/small_unordered_flat_multimap.hpp"
+#endif
 #include "sfl/compact_vector.hpp"
 #include "sfl/segmented_vector.hpp"
 

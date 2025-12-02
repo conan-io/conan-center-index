@@ -49,7 +49,7 @@ class PixmanConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.4.0")
+        self.tool_requires("meson/[>=1.4.0 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

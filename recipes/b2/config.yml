@@ -21,3 +21,5 @@ versions:
     folder: portable
   "5.3.2":
     folder: portable
+  "5.3.3":
+    folder: portable

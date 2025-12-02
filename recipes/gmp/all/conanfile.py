@@ -1,15 +1,15 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, export_conandata_patches, get, patch, rm, rmdir
+from conan.tools.build import cross_building
+from conan.tools.files import copy, export_conandata_patches, get, patch, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 import os
 import stat
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2"
 
 
 class GmpConan(ConanFile):
@@ -41,10 +41,6 @@ class GmpConan(ConanFile):
         "run_checks": False,
         "enable_cxx": True,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -78,21 +74,19 @@ class GmpConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("m4/1.4.19")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         if is_msvc(self):
-            self.tool_requires("yasm/1.3.0")  # Needed for determining 32-bit word size
             self.tool_requires("automake/1.16.5")  # Needed for lib-wrapper
+            if self.settings.arch in ["x86", "x86_64"]:
+                self.tool_requires("yasm/1.3.0")  # Needed for determining 32-bit word size
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.extend([
@@ -118,11 +112,12 @@ class GmpConan(ConanFile):
             yasm_machine = {
                 "x86": "x86",
                 "x86_64": "amd64",
-            }[str(self.settings.arch)]
+            }.get(str(self.settings.arch), None)
             ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper"))
             dumpbin_nm = unix_path(self, os.path.join(self.source_folder, "dumpbin_nm.py"))
             env.define("CC", "cl -nologo")
-            env.define("CCAS", f"{yasm_wrapper} -a x86 -m {yasm_machine} -p gas -r raw -f win32 -g null -X gnu")
+            if yasm_machine:
+                env.define("CCAS", f"{yasm_wrapper} -a x86 -m {yasm_machine} -p gas -r raw -f win32 -g null -X gnu")
             env.define("CXX", "cl -nologo")
             env.define("LD", "link -nologo")
             env.define("AR", f'{ar_wrapper} "lib -nologo"')
@@ -150,6 +145,11 @@ class GmpConan(ConanFile):
         self._patch_sources()
         autotools = Autotools(self)
         autotools.configure()
+        if self.settings.os == "Macos" and cross_building(self):
+            # LD flags are not passed properly by the scripts - in particular '-arch x86_64' when crossbuilding
+            # and invoking libtool to generate one of the libraries. Being conservative here, but there's a chance
+            # this may need to be generalised
+            replace_in_file(self, os.path.join(self.build_folder, "libtool"), r'archive_cmds="\$CC ', r'archive_cmds="\$CC $LDFLAGS ')
         autotools.make()
         # INFO: According to the gmp readme file, make check should not be omitted, but it causes timeouts on the CI server.
         if self.options.run_checks:
@@ -177,12 +177,3 @@ class GmpConan(ConanFile):
             self.cpp_info.components["gmpxx"].requires = ["libgmp"]
             if self.settings.os != "Windows":
                 self.cpp_info.components["gmpxx"].system_libs = ["m"]
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        #       GMP doesn't have any official CMake Find nor config file, do not port these names to CMakeDeps
-        self.cpp_info.names["pkg_config"] = "gmp-all-do-not-use"
-        self.cpp_info.components["libgmp"].names["cmake_find_package"] = "GMP"
-        self.cpp_info.components["libgmp"].names["cmake_find_package_multi"] = "GMP"
-        if self.options.enable_cxx:
-            self.cpp_info.components["gmpxx"].names["cmake_find_package"] = "GMPXX"
-            self.cpp_info.components["gmpxx"].names["cmake_find_package_multi"] = "GMPXX"

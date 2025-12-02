@@ -1,0 +1,4 @@
+sources:
+  "3.2.2":
+    url: "https://github.com/libsdl-org/SDL_ttf/archive/refs/tags/release-3.2.2.tar.gz"
+    sha256: "ff6b81d3dc39d843cc3ead6dedd68043a79513d266792ea89445547ef4e9b073"

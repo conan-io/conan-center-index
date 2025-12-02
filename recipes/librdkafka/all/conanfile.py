@@ -3,11 +3,10 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=2.1"
 
 
 class LibrdkafkaConan(ConanFile):
@@ -70,7 +69,7 @@ class LibrdkafkaConan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[>=1.5.5 <1.6]")
         if self.options.ssl:
             self.requires("openssl/[>=1.1 <4]")
         if self._depends_on_cyrus_sasl:
@@ -79,8 +78,8 @@ class LibrdkafkaConan(ConanFile):
             self.requires("libcurl/[>=7.78.0 <9]")
 
     def build_requirements(self):
-        if self._depends_on_cyrus_sasl:
-            self.tool_requires("pkgconf/2.1.0")
+        if self._depends_on_cyrus_sasl and not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -165,7 +164,3 @@ class LibrdkafkaConan(ConanFile):
         self.cpp_info.components["rdkafka++"].set_property("pkg_config_name", "rdkafka++")
         self.cpp_info.components["rdkafka++"].libs = ["rdkafka++"]
         self.cpp_info.components["rdkafka++"].requires = ["rdkafka"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "RdKafka"
-        self.cpp_info.names["cmake_find_package_multi"] = "RdKafka"

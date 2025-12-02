@@ -6,7 +6,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 import os
 
-required_conan_version = ">=2.4"
+required_conan_version = ">=2.18" # ability to handle libplutosvg.a static library name on Windows
 
 class PlutoSVGConan(ConanFile):
     name = "plutosvg"

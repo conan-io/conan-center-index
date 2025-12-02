@@ -1,13 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.4"
 
 
 class BisonConan(ConanFile):
@@ -25,20 +24,11 @@ class BisonConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    implements = ["auto_shared_fpic"]
+    languages = "C"
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -54,7 +44,7 @@ class BisonConan(ConanFile):
             )
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -67,9 +57,6 @@ class BisonConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
             "--enable-relocatable",
@@ -160,9 +147,3 @@ class BisonConan(ConanFile):
         # yacc is a shell script, so requires a shell (such as bash)
         yacc = os.path.join(self.package_folder, "bin", "yacc").replace("\\", "/")
         self.conf_info.define("user.bison:yacc", yacc)
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.env_info.CONAN_BISON_ROOT = self.package_folder.replace("\\", "/")
-        self.env_info.BISON_PKGDATADIR = pkgdir
-        self.user_info.YACC = yacc

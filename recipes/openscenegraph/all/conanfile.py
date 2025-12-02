@@ -10,7 +10,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class OpenSceneGraphConanFile(ConanFile):
@@ -81,7 +81,6 @@ class OpenSceneGraphConanFile(ConanFile):
         "opengl_profile": "gl2",
         "with_avfoundation": True,
     }
-    short_paths = True
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
@@ -147,17 +146,17 @@ class OpenSceneGraphConanFile(ConanFile):
         if self.options.with_jasper:
             self.requires("jasper/4.2.0")
         if self.options.get_safe("with_jpeg") == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.2")
         elif self.options.get_safe("with_jpeg") == "mozjpeg":
-            self.requires("mozjpeg/4.1.5")
+            self.requires("mozjpeg/[>=4.1.5 <5]")
         if self.options.get_safe("with_openexr"):
-            self.requires("openexr/3.2.3")
+            self.requires("openexr/[>=3.2.3 <4]")
         if self.options.get_safe("with_png"):
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_tiff:
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.6.0 <5]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
 
@@ -175,6 +174,7 @@ class OpenSceneGraphConanFile(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -294,7 +294,6 @@ class OpenSceneGraphConanFile(ConanFile):
                         "CURL_FOUND", "CURL_FOUND AND OSG_WITH_CURL")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
@@ -348,14 +347,6 @@ class OpenSceneGraphConanFile(ConanFile):
             "osgAnimation",
             "osgVolume",
         ]
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "OpenSceneGraph"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenSceneGraph"
-        openscenegraph.names["cmake_find_package"] = "OpenSceneGraph"
-        openscenegraph.names["cmake_find_package_multi"] = "OpenSceneGraph"
-        self.cpp_info.build_modules["cmake_find_package"].append(cmake_vars_module)
-        self.cpp_info.build_modules["cmake_find_package_multi"].append(cmake_vars_module)
 
         if self.settings.build_type == "Debug":
             postfix = "d"

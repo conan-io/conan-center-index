@@ -1,0 +1,7 @@
+sources:
+  "17.5":
+    url: "https://ftp.postgresql.org/pub/source/v17.5/postgresql-17.5.tar.bz2"
+    sha256: "fcb7ab38e23b264d1902cb25e6adafb4525a6ebcbd015434aeef9eda80f528d8"
+patches:
+  "17.5":
+    - patch_file : "patches/17.5-pgflex-preserve-environment-variables.patch"

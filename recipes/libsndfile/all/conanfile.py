@@ -75,7 +75,7 @@ class LibsndfileConan(ConanFile):
             self.requires("ogg/1.3.5")
             self.requires("vorbis/1.3.7")
             self.requires("flac/1.4.2")
-            self.requires("opus/1.4")
+            self.requires("opus/[>=1.4 <2]")
         if self.options.get_safe("with_mpeg"):
             self.requires("mpg123/1.31.2")
             self.requires("libmp3lame/3.100")

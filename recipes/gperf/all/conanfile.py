@@ -1,12 +1,11 @@
 from conan import ConanFile
-from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, check_min_vs, unix_path
+from conan.tools.microsoft import is_msvc, unix_path
 import os
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2"
 
 
 class GperfConan(ConanFile):
@@ -16,12 +15,9 @@ class GperfConan(ConanFile):
     homepage = "https://www.gnu.org/software/gperf"
     description = "GNU gperf is a perfect hash function generator"
     topics = ("hash-generator", "hash")
+    package_type = "application"
 
     settings = "os", "arch", "compiler", "build_type"
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -34,31 +30,25 @@ class GperfConan(ConanFile):
         del self.info.settings.compiler
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
         # gperf makefile relies on GNU Make behaviour
-        if self._settings_build.os == "FreeBSD":
-            self.tool_requires("make/4.4.1")
+        if self.settings_build.os == "FreeBSD":
+            self.tool_requires("make/[*]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = AutotoolsToolchain(self)
-        if is_msvc(self) and check_min_vs(self, "180", raise_invalid=False):
-            tc.extra_cflags.append("-FS")
-            tc.extra_cxxflags.append("-FS")
-        tc.generate()
+        env = tc.environment()
 
         if is_msvc(self):
-            env = Environment()
             compile_wrapper = unix_path(self, os.path.join(self.source_folder, "build-aux", "compile"))
             ar_wrapper = unix_path(self, os.path.join(self.source_folder, "build-aux", "ar-lib"))
             env.define("CC", f"{compile_wrapper} cl -nologo")
@@ -70,14 +60,15 @@ class GperfConan(ConanFile):
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
-            
+
             #Prevent msys2 from performing erroneous path conversions for C++ files
             # when invoking cl.exe as this is already handled by the compile wrapper.
-            env.define("MSYS2_ARG_CONV_EXCL", "-Tp") 
+            env.define("MSYS2_ARG_CONV_EXCL", "-Tp")
             env.vars(self).save_script("conanbuild_gperf_msvc")
 
+        tc.generate(env)
+
     def build(self):
-        apply_conandata_patches(self)
         autotools = Autotools(self)
         with chdir(self, self.source_folder):
             autotools.configure()
@@ -87,13 +78,9 @@ class GperfConan(ConanFile):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         with chdir(self, self.source_folder):
-            # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-            autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+            autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
