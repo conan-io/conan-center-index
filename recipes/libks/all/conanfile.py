@@ -49,7 +49,7 @@ class LibksConan(ConanFile):
         if self.settings.os == "Macos":
             check_max_cppstd(self, "17")
         elif self.settings.os == "Linux":
-            raise ConanInvalidConfiguration("The recipe generate simbols that conflicts with the C++ standard library, contributions are welcome")
+            raise ConanInvalidConfiguration("On Linux the recipe generate simbols that conflicts with the C++ standard library, contributions are welcome")
         elif self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Upstream does not install Windows files, cannot be used on Windows")
 
