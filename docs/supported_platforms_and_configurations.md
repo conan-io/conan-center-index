@@ -17,7 +17,7 @@ builds the packages for the remaining profiles and promoted them to
 [JFrog ConanCenter](https://conan.io/center/) once the pull-request is merged.
 
 Currently, given the following supported platforms and configurations we
-are generating **30 different binary packages for a C++ library**.
+are generating **10 different binary packages for a C++ library**.
 
 
 ### Future Steps
@@ -38,15 +38,15 @@ a wider range of development environments. The following steps will be taken:
 
 ## Windows
 
-- Python: 3.7.9
+- Python: 3.13.4
 - CMake: 3.21.6
 - WinSDK: 10.0.20348
     > WinSDK version is rolled periodically as [discussed previously](https://github.com/conan-io/conan-center-index/issues/4450).
     > Please open an issue in case it needs to be updated.
 - Compilers: Visual Studio:
-  - 2019 (19.29.30148)
+  - 2022 (19.44.35213.0)
 
-- Architectures: x86_64
+- Architectures: x86_64, ARMv8
 - Build types: Release
 - Runtime: dynamic (MD)
 - Options:
@@ -55,7 +55,7 @@ a wider range of development environments. The following steps will be taken:
 
 ## Linux
 
-- Python: 3.7.17
+- Python: 3.12.7
 - CMake: 3.15.7, 3.18.6 (same version expected after all use [new docker images](https://github.com/conan-io/conan-docker-tools/tree/master/images))
 - Compilers:
   - GCC versions: 11
@@ -69,13 +69,13 @@ a wider range of development environments. The following steps will be taken:
 
 ## MacOS
 
-- Python: 3.7.12
+- Python: 3.9.6
 - CMake: 3.20.1
-- Compilers: Apple-clang versions 13.0.0
-- Macos SDK versions (for each apple-clang version respectively): 11.3
-- Macos deployment target (`minos`): 11.0
+- Compilers: Apple-clang versions 17.0.0
+- Macos SDK versions (for each apple-clang version respectively): 26.0
+- Macos deployment target (`minos`): 13.0
 - C++ Standard Library (`libcxx`): `libc++`
-- Architectures: armv8
+- Architectures: armv8, x86_64
 - Build types: Release
 - Options:
   - Shared, Static (option `"*/*:shared": [True, False]` in the recipe when available)
