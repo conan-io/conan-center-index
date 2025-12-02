@@ -63,15 +63,16 @@ class OnnxRuntimeConan(ConanFile):
         self.requires("nlohmann_json/[>=3.11.3 <3.12]")
         self.requires("eigen/[>=5.0.1 <6]")
         self.requires("ms-gsl/4.0.0")
-        self.requires("cpuinfo/cci.20250110")
         if self.settings.os != "Windows":
             self.requires("nsync/1.26.0")
         else:
             self.requires("wil/1.0.240803.1")
         if self.options.with_xnnpack:
-            self.requires("xnnpack/cci.20231026")
+            self.requires("xnnpack/cci.20240229")
+            self.requires("pthreadpool/cci.20231129")
         if self.options.with_cuda:
             self.requires("cutlass/3.5.0")
+        self.requires("cpuinfo/cci.20250110")
 
     def validate(self):
         check_min_cppstd(self, 17)
