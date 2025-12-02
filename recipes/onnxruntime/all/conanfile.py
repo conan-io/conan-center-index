@@ -83,7 +83,7 @@ class OnnxRuntimeConan(ConanFile):
         if onnx.options.get_safe("shared"):
             # Commented here: https://github.com/onnx/onnx/pull/7505#issuecomment-3601468150
             raise ConanInvalidConfiguration("There are link errors using 'onnx/*:shared=True',"
-                                            "'use onnx/*:shared=False' instead.")
+                                            "use 'onnx/*:shared=False' instead.")
 
     def validate_build(self):
         if self.settings.os == "Windows" and self.dependencies["abseil"].options.shared:
