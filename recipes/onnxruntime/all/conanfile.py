@@ -81,7 +81,7 @@ class OnnxRuntimeConan(ConanFile):
                 f"{self.ref} requires onnx compiled with `-o onnx:disable_static_registration=True`."
             )
         if onnx.options.get_safe("shared"):
-            # Related to this https://github.com/onnx/onnx/issues/7377
+            # Commented here: https://github.com/onnx/onnx/pull/7505#issuecomment-3601468150
             raise ConanInvalidConfiguration("There are link errors using 'onnx/*:shared=True',"
                                             "'use onnx/*:shared=False' instead.")
 
