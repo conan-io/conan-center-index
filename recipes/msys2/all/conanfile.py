@@ -206,8 +206,7 @@ class MSYS2Conan(ConanFile):
         if self.settings_target is not None and \
             self.settings_target.os == "Windows" and \
             self.settings_target.arch == "armv8" and \
-            self.settings_build.os == "Windows" and \
-            self.settings_build.arch == "x86_64":
+            self.settings_build.os == "Windows":
             # Expose /opt/bin to PATH, so that aarch64-w64-mingw32- prefixed tools can be found
             # Define autotools host/build triplet so that the right tools are used
             self.cpp_info.bindirs.insert(0, os.path.join(msys_root, "opt", "bin"))
