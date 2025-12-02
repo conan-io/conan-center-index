@@ -4,6 +4,7 @@ import sys
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, rmdir, copy
+from conan.tools.build import check_max_cppstd
 from conan.errors import ConanInvalidConfiguration
 
 
@@ -45,7 +46,11 @@ class LibksConan(ConanFile):
         self.requires("util-linux-libuuid/2.39.2", transitive_headers=True)
 
     def validate(self):
-        if self.settings.os == "Windows":
+        if self.settings.os == "Macos":
+            check_max_cppstd(self, "17")
+        elif self.settings.os == "Linux":
+            raise ConanInvalidConfiguration("The recipe generate simbols that conflicts with the C++ standard library, contributions are welcome")
+        elif self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Upstream does not install Windows files, cannot be used on Windows")
 
     def generate(self):
@@ -81,16 +86,26 @@ class LibksConan(ConanFile):
 
         if not self.options.shared:
             self.cpp_info.defines.append("KS_DECLARE_STATIC=1")
-
-        # Upstream has public definitions for these, but propagating them is prone to cause issues
-        # So unless reported as needed, let's skip them for now
-        # 	-DSTDC_HEADERS=1
-        # 	-DTIME_WITH_SYS_TIME=1
-        # 	-DRETSIGTYPE=void
-        # 	-DHAVE_LIBCRYPTO=1
-        # 	-DHAVE_LIBSSL=1
-        # 	-D_REENTRANT=1
-
-        # There are quite a few PUBLIC definitions being defined as part of dependency auto-detection,
-        # but none of them are actually used in public headers.
-        # So we skip them, but maybe newer versions might, so check!
+        self.cpp_info.defines.append("HAVE_MALLOC=1")
+        self.cpp_info.defines.append("HAVE_USLEEP=1")
+        self.cpp_info.defines.append("HAVE_PTHREAD_ATTR_SETSCHEDPARAM=1")
+        self.cpp_info.defines.append("HAVE_MEMMEM=1")
+        self.cpp_info.defines.append("HAVE_STDLIB_H=1")
+        self.cpp_info.defines.append("HAVE_SYS_TYPES_H=1")
+        self.cpp_info.defines.append("HAVE_SYS_STAT_H=1")
+        self.cpp_info.defines.append("HAVE_STRING_H=1")
+        self.cpp_info.defines.append("HAVE_UNISTD_H=1")
+        self.cpp_info.defines.append("HAVE_MEMORY_H=1")
+        self.cpp_info.defines.append("HAVE_STRINGS_H=1")
+        self.cpp_info.defines.append("HAVE_INTTYPES_H=1")
+        self.cpp_info.defines.append("HAVE_STDINT_H=1")
+        self.cpp_info.defines.append("HAVE_DLFCN_H=1")
+        self.cpp_info.defines.append("HAVE_SCHED_H=1")
+        self.cpp_info.defines.append("HAVE_DIRENT_H=1")
+        self.cpp_info.defines.append("STDC_HEADERS=1")
+        self.cpp_info.defines.append("TIME_WITH_SYS_TIME=1")
+        self.cpp_info.defines.append("RETSIGTYPE=void")
+        self.cpp_info.defines.append("HAVE_LIBCRYPTO=1")
+        self.cpp_info.defines.append("HAVE_LIBSSL=1")
+        self.cpp_info.defines.append("_REENTRANT=1")
+        self.cpp_info.defines.append("__BYTE_ORDER=__LITTLE_ENDIAN")
