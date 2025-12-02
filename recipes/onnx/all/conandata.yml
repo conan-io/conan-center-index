@@ -1,7 +1,7 @@
 sources:
   "1.20.0":
-    url: "https://github.com/onnx/onnx/archive/500b7bdefac1f1873a1d66be65e2daba609fa908.tar.gz"
-    sha256: "1acac9c2808c9c51657c49df60005000cb623c49a871820eec8446273d15d956"
+    url: "https://github.com/onnx/onnx/archive/refs/tags/v1.20.0.tar.gz"
+    sha256: "e9e9273cd39d460348aa3e2eb370a444b510e138c5f45dfa86ce50461901257b"
 patches:
   "1.20.0":
     - patch_file: "patches/cmake-absl-proto-targets.patch"
