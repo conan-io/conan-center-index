@@ -55,7 +55,7 @@ class OnnxRuntimeConan(ConanFile):
         self.requires(f"onnx/{required_onnx_version}")
         self.requires("abseil/[>=20240116.1 <=20250814.0]")
         self.requires("protobuf/[>=3.21.12 <7]")
-        self.requires("date/3.0.1")
+        self.requires("date/[>=3.0.1 <3.1]")
         self.requires("re2/[>=20231101]")
         self.requires("flatbuffers/23.5.26")
         self.requires("boost/1.83.0", headers=True, libs=False)  # for mp11, header only, no need for libraries
