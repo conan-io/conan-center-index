@@ -135,7 +135,12 @@ class NSSConan(ConanFile):
             _format_library_paths(self.dependencies["zlib"].cpp_info.aggregated_components().libdirs)))
         args.append("NSS_DISABLE_GTESTS=1")
         args.append("NSS_USE_SYSTEM_SQLITE=1")
-        args.append("SQLITE_INCLUDE_DIR=%s" % self.dependencies["sqlite3"].cpp_info.aggregated_components().includedirs[0])
+        # INFO: There was an issue for versions between 3.94 to 3.101 with finding a sqlite3 header file.
+        # This is how it can be build for these versions.
+        if "3.94" <= Version(self.version) <= "3.101":
+            args.append("SOFTOKEN_INCLUDE_DIR=%s" % self.dependencies["sqlite3"].cpp_info.aggregated_components().includedirs[0])
+        else:
+            args.append("SQLITE_INCLUDE_DIR=%s" % self.dependencies["sqlite3"].cpp_info.aggregated_components().includedirs[0])
         args.append("SQLITE_LIB_DIR=%s" % self.dependencies["sqlite3"].cpp_info.aggregated_components().libdirs[0])
         args.append("NSDISTMODE=copy")
         args.append("NSS_ENABLE_WERROR=0")
@@ -218,7 +223,7 @@ class NSSConan(ConanFile):
         self.cpp_info.components["softokn"].libs = [_library_name("softokn", 3)]
         self.cpp_info.components["softokn"].requires = ["sqlite3::sqlite3", "nssutil", "nspr::nspr"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["softokn"].system_libs = ["pthread"]
+            self.cpp_info.components["softokn"].system_libs = ["pthread", "m"]
 
         self.cpp_info.components["nssdbm"].libs = [_library_name("nssdbm", 3)]
         self.cpp_info.components["nssdbm"].requires = ["nspr::nspr", "nssutil"]
