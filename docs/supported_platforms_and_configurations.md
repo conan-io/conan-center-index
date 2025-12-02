@@ -47,6 +47,7 @@ a wider range of development environments. The following steps will be taken:
   - 2022 (19.44.35213.0)
 
 - Architectures: x86_64, ARMv8
+  > Note that for ARMv8, only a subset of packages are built in Conan Center (currently ~400)
 - Build types: Release
 - Runtime: dynamic (MD)
 - Options:
