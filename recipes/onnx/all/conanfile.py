@@ -81,7 +81,7 @@ class OnnxConan(ConanFile):
         tc.cache_variables["ONNX_VERIFY_PROTO3"] = False
         if is_msvc(self):
             tc.cache_variables["ONNX_USE_MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
-        tc.cache_variables["ONNX_DISABLE_STATIC_REGISTRATION"] = self.options.get_safe('disable_static_registration')
+        tc.cache_variables["ONNX_DISABLE_STATIC_REGISTRATION"] = self.options.disable_static_registration
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -137,15 +137,21 @@ class OnnxConan(ConanFile):
             "abseil::absl_utility",
             "abseil::absl_variant"
         ]
-        if "utf8_range" in self.dependencies.host["protobuf"].cpp_info.components:
+        host_protobuf = self.dependencies.host["protobuf"]
+        if "utf8_range" in host_protobuf.cpp_info.components:
             requires += ["protobuf::utf8_range", "protobuf::utf8_validity"]
+        defines = ["ONNX_NAMESPACE=onnx", "ONNX_ML=1"]
+        if self.options.disable_static_registration:
+            defines.append("__ONNX_DISABLE_STATIC_REGISTRATION")
+        if host_protobuf.options.lite:
+            defines.append("ONNX_USE_LITE_PROTO=1")
         # onnx
         self.cpp_info.components["libonnx"].set_property("cmake_target_name", "onnx")
         self.cpp_info.components["libonnx"].libs = ["onnx"]
-        self.cpp_info.components["libonnx"].defines = ["ONNX_NAMESPACE=onnx", "ONNX_ML=1"]
+        self.cpp_info.components["libonnx"].defines = defines
         self.cpp_info.components["libonnx"].requires = requires
         # onnx_proto
         self.cpp_info.components["onnx_proto"].set_property("cmake_target_name", "onnx_proto")
         self.cpp_info.components["onnx_proto"].libs = ["onnx_proto"]
-        self.cpp_info.components["onnx_proto"].defines = ["ONNX_NAMESPACE=onnx", "ONNX_ML=1"]
+        self.cpp_info.components["onnx_proto"].defines = defines
         self.cpp_info.components["onnx_proto"].requires = requires
