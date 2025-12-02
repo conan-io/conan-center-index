@@ -6,6 +6,7 @@ import fnmatch
 import os
 import shutil
 import subprocess
+import tempfile
 import errno
 import ctypes
 
@@ -199,6 +200,16 @@ class MSYS2Conan(ConanFile):
 
         self.buildenv_info.define_path("MSYS_ROOT", msys_root)
         self.buildenv_info.define_path("MSYS_BIN", msys_bin)
+
+        msys_tmp = tempfile.mkdtemp(prefix="msys_tmp_")
+        msys_home = tempfile.mkdtemp(prefix="msys_home_")
+        # Redirect HOME so MSYS2 does not pollute package folder
+        self.buildenv_info.define_path("HOME", msys_home)
+        self.buildenv_info.define_path("USERPROFILE", msys_home)
+        # Redirect /tmp so MSYS2 does not pollute the package folder
+        self.buildenv_info.define_path("MSYS2_TMPDIR", msys_tmp)
+        self.buildenv_info.define_path("TMP", msys_tmp)
+        self.buildenv_info.define_path("TEMP", msys_tmp)
 
         self.conf_info.define("tools.microsoft.bash:subsystem", "msys2")
         self.conf_info.define("tools.microsoft.bash:path", os.path.join(msys_bin, "bash.exe"))
