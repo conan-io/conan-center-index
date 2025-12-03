@@ -1,25 +1,26 @@
 from conan import ConanFile
-from conan.tools.files import get, copy
-from conan.tools.scm import Version
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 import os
 
 required_conan_version = ">=2.0"
 
 class DotenvConan(ConanFile):
     name = "dotenv"
-    version = "1.0.1"
     license = "MIT"
-    url = "https://github.com/Ayush272002/dotenv"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Ayush272002/dotenv"
     description = "A simple, header-only C++23 dotenv parser"
     topics = ("dotenv", "header-only", "environment", "configuration", "parser")
     package_type = "header-library"
-    
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     def layout(self):
-        self.folders.source = "."
-        self.folders.build = "build"
+        basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.clear()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -29,5 +30,5 @@ class DotenvConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
-        self.cpp_info.includedirs = ["include"]
+        self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
