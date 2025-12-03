@@ -7,7 +7,7 @@ required_conan_version = ">=2.0"
 
 class DotenvConan(ConanFile):
     name = "dotenv"
-    version = "1.0.0"
+    version = "1.0.1"
     license = "MIT"
     url = "https://github.com/Ayush272002/dotenv"
     homepage = "https://github.com/Ayush272002/dotenv"
