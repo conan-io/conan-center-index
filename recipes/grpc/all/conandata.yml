@@ -5,11 +5,3 @@ sources:
   "1.67.1":
     url: "https://github.com/grpc/grpc/archive/v1.67.1.tar.gz"
     sha256: "d74f8e99a433982a12d7899f6773e285c9824e1d9a173ea1d1fb26c9bd089299"
-  "1.54.3":
-    url: "https://github.com/grpc/grpc/archive/v1.54.3.tar.gz"
-    sha256: "17e4e1b100657b88027721220cbfb694d86c4b807e9257eaf2fb2d273b41b1b1"
-patches:
-  "1.54.3":
-    - patch_file: "patches/v1.50.x/002-CMake-Add-gRPC_USE_SYSTEMD-option-34384.patch"
-      patch_type: "backport"
-      patch_source: "https://github.com/grpc/grpc/commit/5c3400e8dc08d0810e3301d7e8cd8a718c82eeed"

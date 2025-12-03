@@ -102,22 +102,14 @@ class GrpcConan(ConanFile):
         # abseil requires:
         # transitive_headers=True because grpc headers include abseil headers
         # transitive_libs=True because generated code (grpc_cpp_plugin) require symbols from abseil
-        if Version(self.version) > "1.65.0":
-            self.requires("protobuf/5.27.0", transitive_headers=True)
-            self.requires("abseil/[>=20240116.1 <=20250814.0]", transitive_headers=True, transitive_libs=True)
-            self.requires("re2/20251105")
-        else:
-            self.requires("abseil/[>=20230125.3 <=20230802.1]", transitive_headers=True, transitive_libs=True)
-            self.requires("protobuf/3.21.12", transitive_headers=True)
-            self.requires("re2/20230301")  # no conflicts: re2/20230301 does not require abseil
+        self.requires("protobuf/5.27.0", transitive_headers=True)
+        self.requires("abseil/[>=20240116.1 <=20250814.0]", transitive_headers=True, transitive_libs=True)
+        self.requires("re2/20251105")
         self.requires("c-ares/[>=1.19.1 <2]")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_libsystemd"):
-            if Version(self.version) >= "1.67.0":
-                self.requires("libsystemd/255.10")
-            else:
-                self.requires("libsystemd/255")
+            self.requires("libsystemd/255.10")
         if self.options.get_safe("otel_plugin"):
             self.requires("opentelemetry-cpp/1.14.2")
 
@@ -215,8 +207,7 @@ class GrpcConan(ConanFile):
         if self._supports_libsystemd:
             tc.cache_variables["gRPC_USE_SYSTEMD"] = self.options.with_libsystemd
 
-        if Version(self.version) >= "1.62.0":
-            tc.cache_variables["gRPC_DOWNLOAD_ARCHIVES"] = False
+        tc.cache_variables["gRPC_DOWNLOAD_ARCHIVES"] = False
 
         tc.generate()
 
@@ -248,7 +239,7 @@ class GrpcConan(ConanFile):
                             "COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}",
                             f'COMMAND ${{CMAKE_COMMAND}} -E env --modify "{variable}=path_list_prepend:{repl}" ${{_gRPC_PROTOBUF_PROTOC_EXECUTABLE}}')
 
-        if self.settings.os == "Macos" and Version(self.version) >= "1.64":
+        if self.settings.os == "Macos":
             # See https://github.com/grpc/grpc/issues/36654#issuecomment-2228569158
             replace_in_file(self, cmakelists, f"target_compile_features(upb_textformat_lib PUBLIC cxx_std_{self._cxxstd_required})",
             f"""target_compile_features(upb_textformat_lib PUBLIC cxx_std_{self._cxxstd_required})
