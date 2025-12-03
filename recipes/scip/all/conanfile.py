@@ -25,7 +25,7 @@ class SCIPConan(ConanFile):
         "fPIC": [True, False],
         "with_gmp": [True, False],
         "with_tpi": [False, "omp", "tny"],
-        "with_sym": [False, "bliss", "snauty"],
+        "with_sym": [False, "bliss", "dejavu" ,"snauty"],
     }
     default_options = {
         "shared": False,
@@ -70,6 +70,8 @@ class SCIPConan(ConanFile):
         if Version(self.version) >= "9.0.1" and is_msvc(self) and self.settings.build_type == "Debug":
             # lpi_spx2.cpp : error C1128: number of sections exceeded object file format limit: compile with /bigobj
             raise ConanInvalidConfiguration(f"{self.ref} can not be build in Debug with MSVC.")
+        if Version(self.version) < "10.0.0" and self.options.with_sym == "dejavu":
+            raise ConanInvalidConfiguration(f"Value 'dejavu' for option 'with_sym' is supported only for version >= 10.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
