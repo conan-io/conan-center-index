@@ -1,7 +1,7 @@
 sources:
   "10.0.0":
-    url: "https://github.com/scipopt/scip/archive/refs/tags/v10.0.0.tar.gz"
-    sha256: "f750e1d94d4ee9382d3199430ea3c622d15b3e20032adafcfd89266b56d95c34"
+    url: "https://github.com/scipopt/scip/releases/download/v10.0.0/scip-10.0.0.tgz"
+    sha256: "b91d2ed32c422a13c502c37cf296eb9550e55d6bd311e61bfa6dfb9811b03d87"
   "9.2.4":
     url: "https://github.com/scipopt/scip/archive/refs/tags/v924.tar.gz"
     sha256: "780cc185e006ac09163d66d5fed2dbeabd1fdbe660232e7e46e9e51c77c3ab5d"
