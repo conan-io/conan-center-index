@@ -76,10 +76,10 @@ class ZlibNgConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         if Version(self.version) >= "2.3.1":
-            tc.variables["BUILD_TESTING"] = False
+            tc.cache_variables["BUILD_TESTING"] = False
         else:
-            tc.variables["ZLIB_ENABLE_TESTS"] = False
-            tc.variables["ZLIBNG_ENABLE_TESTS"] = False
+            tc.cache_variables["ZLIB_ENABLE_TESTS"] = False
+            tc.cache_variables["ZLIBNG_ENABLE_TESTS"] = False
 
         tc.variables["ZLIB_COMPAT"] = self.options.zlib_compat
         tc.variables["WITH_GZFILEOP"] = self.options.with_gzfileop
