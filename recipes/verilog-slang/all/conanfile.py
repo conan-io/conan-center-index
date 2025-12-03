@@ -34,7 +34,7 @@ class VerilogSlangConan(ConanFile):
         check_min_cppstd(self, 20)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.20 <5]")
+        self.tool_requires("cmake/[>=3.20]")
 
     def requirements(self):
         self.requires("fmt/12.1.0")
