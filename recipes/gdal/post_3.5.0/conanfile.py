@@ -180,7 +180,7 @@ class GdalConan(ConanFile):
     def requirements(self):
         self.requires("json-c/0.17")
         self.requires("libgeotiff/1.7.1")
-        self.requires("libtiff/4.6.0")
+        self.requires("libtiff/[>=4.6.0 <5]")
         self.requires("proj/9.3.1")
         # Used in a public header here:
         # https://github.com/OSGeo/gdal/blob/v3.7.1/port/cpl_minizip_ioapi.h#L26
@@ -335,6 +335,7 @@ class GdalConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -439,8 +440,13 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_ZLIB_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_ZSTD"] = self.options.with_zstd
 
-        tc.cache_variables["Parquet_FOUND"] = self.options.with_arrow and self.dependencies["arrow"].options.parquet
-        tc.cache_variables["ArrowDataset_FOUND"] = self.options.with_arrow and self.dependencies["arrow"].options.dataset_modules
+        if self.options.with_arrow:
+            # Let's avoid using a patch to set this variables
+            arrow_version = str(self.dependencies["arrow"].ref.version)
+            tc.cache_variables["Parquet_FOUND"] = self.dependencies["arrow"].options.parquet
+            tc.cache_variables["ArrowDataset_FOUND"] = self.dependencies["arrow"].options.dataset_modules
+            tc.cache_variables["Parquet_VERSION"] = arrow_version
+            tc.cache_variables["ArrowDataset_VERSION"] = arrow_version
 
         # General workaround for try_compile() tests in the project
         # https://github.com/conan-io/conan/issues/12180
@@ -641,7 +647,6 @@ class GdalConan(ConanFile):
                             "gdal_check_package(ArrowDataset", "# gdal_check_package(ArrowDataset")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
