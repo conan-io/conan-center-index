@@ -51,6 +51,7 @@ class VerilogSlangConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["SLANG_INCLUDE_TESTS"] = False
+        tc.cache_variables["SLANG_INCLUDE_TOOLS"] = False
         if self.settings.os == "Windows" and self.options.shared:
             # INFO: Make Error at external/CMakeLists.txt:74 (message):
             #  mimalloc cannot be used with Windows shared lib builds
