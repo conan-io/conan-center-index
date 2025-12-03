@@ -78,7 +78,7 @@ class DrogonConan(ConanFile):
         if Version(self.version) < "1.9.7":
             self.requires("trantor/1.5.19", transitive_headers=True, transitive_libs=True)
         else:
-            self.requires("trantor/1.5.21", transitive_headers=True, transitive_libs=True)
+            self.requires("trantor/[>=1.5.21 <2]", transitive_headers=True, transitive_libs=True)
         self.requires("jsoncpp/1.9.5", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/[>=1.2.11 <2]")
@@ -113,17 +113,16 @@ class DrogonConan(ConanFile):
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_ORM"] = self.options.with_orm
         tc.variables["COZ_PROFILING"] = self.options.with_profile
-        tc.variables["BUILD_DROGON_SHARED"] = self.options.shared
+        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_DOC"] = False
         tc.variables["BUILD_BROTLI"] = self.options.with_brotli
         tc.variables["BUILD_YAML_CONFIG"] = self.options.get_safe("with_yaml_cpp", False)
         tc.variables["BUILD_POSTGRESQL"] = self.options.get_safe("with_postgres", False)
-        tc.variables["BUILD_POSTGRESQL_BATCH"] = self.options.get_safe("with_postgres_batch", False)
+        tc.variables["LIBPQ_BATCH_MODE"] = self.options.get_safe("with_postgres_batch", False)
         tc.variables["BUILD_MYSQL"] = self.options.get_safe("with_mysql", False)
         tc.variables["BUILD_SQLITE"] = self.options.get_safe("with_sqlite", False)
         tc.variables["BUILD_REDIS"] = self.options.get_safe("with_redis", False)
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
-        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         if is_msvc(self):
             tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus /EHsc"
         tc.variables["USE_SUBMODULE"] = False
@@ -132,6 +131,9 @@ class DrogonConan(ConanFile):
         if self.options.get_safe("with_mysql"):
             deps.set_property("mariadb-connector-c", "cmake_file_name", "MySQL")
             deps.set_property("mariadb-connector-c", "cmake_target_name", "MySQL_lib")
+        if self.options.get_safe("with_brotli"):
+            deps.set_property("brotli", "cmake_file_name", "Brotli")
+            deps.set_property("brotli", "cmake_target_name", "Brotli_lib")
         deps.generate()
 
     def build(self):
