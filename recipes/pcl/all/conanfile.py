@@ -228,6 +228,7 @@ class PclConan(ConanFile):
             "metslib": [],
             "opencv": ["opencv::opencv"],
             "opengl": ["opengl::opengl", "freeglut::freeglut", "glew::glew", "glu::glu" if is_apple_os(self) or self.settings.os == "Windows" else "mesa-glu::mesa-glu"],
+            "openmp": [],
             "openni": [],
             "openni2": [],
             "pcap": ["libpcap::libpcap"],
