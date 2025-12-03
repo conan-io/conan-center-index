@@ -7,6 +7,7 @@ from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 import os
+required_conan_version = ">=2.1"
 
 class PackageConan(ConanFile):
     name = "activemq-cpp"
