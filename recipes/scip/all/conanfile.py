@@ -30,8 +30,7 @@ class SCIPConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_gmp": True,
-        "with_tpi": False
+        "with_gmp": True
     }
 
     @property
@@ -92,6 +91,8 @@ class SCIPConan(ConanFile):
             del self.options.fPIC
         if self.options.with_sym == None:
             self.options.with_sym = self.conan_data["version_mappings"][self.version]["default_sym"]
+        if self.options.with_tpi == None:
+            self.options.with_tpi = self.conan_data["version_mappings"][self.version]["default_tpi"]
 
     def configure(self):
         self.options["soplex"].with_gmp = self.options.with_gmp

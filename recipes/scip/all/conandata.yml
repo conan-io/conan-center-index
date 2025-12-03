@@ -32,24 +32,32 @@ version_mappings:
   "10.0.0":
     soplex: "8.0.0"
     default_sym: "snauty"
+    default_tpi: "tny"
   "9.2.4":
     soplex: "7.1.6"
     default_sym: "snauty"
+    default_tpi: False
   "9.2.3":
     soplex: "7.1.5"
     default_sym: "snauty"
+    default_tpi: False
   "9.2.0":
     soplex: "7.1.2"
     default_sym: "snauty"
+    default_tpi: False
   "9.0.1":
     soplex: "7.0.1"
     default_sym: "bliss"
+    default_tpi: False
   "8.1.0":
     soplex: "6.0.4"
     default_sym: "bliss"
+    default_tpi: False
   "8.0.4":
     soplex: "6.0.4"
     default_sym: "bliss"
+    default_tpi: False
   "8.0.3":
     soplex: "6.0.3"
     default_sym: "bliss"
+    default_tpi: False
