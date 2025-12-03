@@ -4,6 +4,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, load
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 import re
 
@@ -48,7 +49,7 @@ class ZlibNgConan(ConanFile):
 
     @property
     def _zlib_compat_version(self):
-         return {"2.2.5": "1.3.1"}.get(self.version)
+        return {"2.2.5": "1.3.1", "2.3.2": "1.3.1"}.get(self.version)
 
     def config_options(self):
         if self._is_windows:
@@ -74,8 +75,11 @@ class ZlibNgConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ZLIB_ENABLE_TESTS"] = False
-        tc.variables["ZLIBNG_ENABLE_TESTS"] = False
+        if Version(self.version) >= "2.3.1":
+            tc.cache_variables["BUILD_TESTING"] = False
+        else:
+            tc.cache_variables["ZLIB_ENABLE_TESTS"] = False
+            tc.cache_variables["ZLIBNG_ENABLE_TESTS"] = False
 
         tc.variables["ZLIB_COMPAT"] = self.options.zlib_compat
         tc.variables["WITH_GZFILEOP"] = self.options.with_gzfileop
