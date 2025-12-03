@@ -41,6 +41,7 @@ jobs:
           conan export secp256k1/all --version=0.7.0
           conan export snappy/all --version=1.1.10
           conan export soci/all --version=4.0.3
+          conan export wasmi/all --version=0.42.1
           conan export wasm-xrplf/all --version=2.4.1-xrplf
       - name: Add Conan remote
         run: |
