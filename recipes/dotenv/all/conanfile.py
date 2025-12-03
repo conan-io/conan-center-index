@@ -40,7 +40,7 @@ class DotenvConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
@@ -56,5 +56,8 @@ class DotenvConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "dotenv")
+        self.cpp_info.set_property("cmake_target_name", "dotenv::dotenv")
+        self.cpp_info.set_property("pkg_config_name", "dotenv")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
