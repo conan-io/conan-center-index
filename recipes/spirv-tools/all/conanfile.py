@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd, stdcpp_library
+from conan.tools.build import check_min_cppstd, stdcpp_library, check_max_cstd, check_max_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir, save, apply_conandata_patches, export_conandata_patches
@@ -56,6 +56,8 @@ class SpirvtoolsConan(ConanFile):
     def validate(self):
         # The interface requires C++11
         check_min_cppstd(self, 11)
+        if self.version >= Version("1.4.328.1"):
+            check_max_cppstd(self, 17)
 
     def build_requirements(self):
         if Version(self.version) >= "1.3.239":
