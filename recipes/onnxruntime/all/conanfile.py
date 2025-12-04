@@ -72,7 +72,7 @@ class OnnxRuntimeConan(ConanFile):
             self.requires("pthreadpool/cci.20231129")
         if self.options.with_cuda:
             self.requires("cutlass/3.5.0")
-        self.requires("cpuinfo/cci.20250110")
+        self.requires("cpuinfo/[>=cci.20250110]")
 
     def validate(self):
         check_min_cppstd(self, 17)
@@ -84,7 +84,7 @@ class OnnxRuntimeConan(ConanFile):
         if onnx.options.get_safe("shared"):
             # Commented here: https://github.com/onnx/onnx/pull/7505#issuecomment-3601468150
             raise ConanInvalidConfiguration("There are link errors using 'onnx/*:shared=True',"
-                                            "use 'onnx/*:shared=False' instead.")
+                                            " use '-o onnx/*:shared=False' instead.")
 
     def validate_build(self):
         if self.settings.os == "Windows" and self.dependencies["abseil"].options.shared:
