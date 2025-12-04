@@ -32,7 +32,7 @@ index 7dc21ab..3bf7f17 100644
 +# Conan: Unvendor 3rd party libraries
 +find_package(fmt REQUIRED CONFIG)
 +# Cant be unvendored because this project is using private headers not (yet) packaged by conan pdfium package
-+# find_package(pdfium REQUIRED CONFIG) 
++# find_package(pdfium REQUIRED CONFIG)
 +# find_package(numerics REQUIRED CONFIG) # This package does not exist in CCI
 +find_package(utf8cpp REQUIRED CONFIG)
 +find_package(FastFloat REQUIRED CONFIG)

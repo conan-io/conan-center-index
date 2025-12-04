@@ -22,7 +22,7 @@ index 45b63c5..3ef3fe1 100644
 +// Conan: use unvendored span
 +#include <tcb/span.hpp>
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index fdb6df8..1aef94b 100644
+index c678167..8203f1a 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -125,9 +125,6 @@ endif()

@@ -26,7 +26,6 @@ class PodofoConan(ConanFile):
         "with_tiff": [True, False],
         "with_png": [True, False],
         "with_unistring": [True, False],
-        "with_tools": [True, False],
     }
     default_options = {
         "shared": False,
@@ -36,7 +35,6 @@ class PodofoConan(ConanFile):
         "with_tiff": True,
         "with_png": True,
         "with_unistring": True,
-        "with_tools": False,
     }
 
     def export_sources(self):
@@ -96,7 +94,7 @@ class PodofoConan(ConanFile):
             self.requires("libunistring/0.9.10")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16 <5]")
+        self.tool_requires("cmake/[>=3.16]")
 
     def validate(self):
         check_min_cppstd(self, 17)
@@ -121,8 +119,6 @@ class PodofoConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["PODOFO_BUILD_TEST"] = False
         tc.cache_variables["PODOFO_BUILD_EXAMPLES"] = False
-        tools_option = "PODOFO_BUILD_UNSUPPORTED_TOOLS" if Version(self.version) >= "1.0.3" else "PODOFO_BUILD_TOOLS"
-        tc.cache_variables[tools_option] = self.options.with_tools
         tc.cache_variables["PODOFO_BUILD_STATIC"] = not self.options.shared
         tc.variables["PODOFO_HAVE_OPENSSL_NO_RC4"] = self.dependencies["openssl"].options.get_safe("no_rc4", False)
         tc.generate()
