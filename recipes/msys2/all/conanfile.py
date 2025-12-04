@@ -76,7 +76,7 @@ class MSYS2Conan(ConanFile):
             raise ConanInvalidConfiguration("Only Windows supported")
         if self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Only Windows x64 supported")
-        
+
     def compatibility(self):
         if self.settings.arch == "armv8":
             # Fallback on x86_64 package when natively on Windows arm64
@@ -203,7 +203,9 @@ class MSYS2Conan(ConanFile):
         self.conf_info.define("tools.microsoft.bash:subsystem", "msys2")
         self.conf_info.define("tools.microsoft.bash:path", os.path.join(msys_bin, "bash.exe"))
 
-        if self.settings_target is not None and self.settings_target.arch == "armv8":
+        if self.settings_target is not None and \
+            self.settings_target.os == "Windows" and \
+            self.settings_target.arch == "armv8":
             # Expose /opt/bin to PATH, so that aarch64-w64-mingw32- prefixed tools can be found
             # Define autotools host/build triplet so that the right tools are used
             self.cpp_info.bindirs.insert(0, os.path.join(msys_root, "opt", "bin"))
