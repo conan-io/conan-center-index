@@ -97,6 +97,8 @@ class BrotliConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if Version(self.version) >= "1.2.0":
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
 
