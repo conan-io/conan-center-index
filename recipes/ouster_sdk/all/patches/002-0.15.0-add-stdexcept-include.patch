@@ -1,0 +1,24 @@
+diff --git a/ouster_client/include/ouster/impl/open_source_impl.h b/ouster_client/include/ouster/impl/open_source_impl.h
+index 9daa0bb..5fd0e37 100644
+--- a/ouster_client/include/ouster/impl/open_source_impl.h
++++ b/ouster_client/include/ouster/impl/open_source_impl.h
+@@ -6,6 +6,7 @@
+ #pragma once
+ 
+ #include <vector>
++#include <stdexcept>
+ 
+ #include "nonstd/optional.hpp"
+ #include "ouster/io_type.h"
+diff --git a/ouster_client/src/io_type.cpp b/ouster_client/src/io_type.cpp
+index 340fbf1..1481448 100644
+--- a/ouster_client/src/io_type.cpp
++++ b/ouster_client/src/io_type.cpp
+@@ -8,6 +8,7 @@
+ 
+ #include <cstring>
+ #include <string>
++#include <stdexcept>
+ 
+ namespace ouster {
+ namespace core {

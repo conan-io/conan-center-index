@@ -97,6 +97,8 @@ patches:
       "patch_file": "patches/c72097e_6.8.3.diff"
       "patch_source": "https://codereview.qt-project.org/c/yocto/meta-qt5/+/192172"
       "patch_type": "bugfix"
+    - "base_path": "qtwebengine/src/3rdparty"
+      "patch_file": "patches/fix_webengine_on_VS2022_v17.14_6.8.x.diff"
   "6.7.3":
     - "patch_file": "patches/remove-linkage-to-agl-framework.patch"
       "base_path": "qtbase"

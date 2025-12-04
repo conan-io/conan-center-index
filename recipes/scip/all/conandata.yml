@@ -1,4 +1,7 @@
 sources:
+  "9.2.4":
+    url: "https://github.com/scipopt/scip/archive/refs/tags/v924.tar.gz"
+    sha256: "780cc185e006ac09163d66d5fed2dbeabd1fdbe660232e7e46e9e51c77c3ab5d"
   "9.2.3":
     url: "https://github.com/scipopt/scip/archive/refs/tags/v923.tar.gz"
     sha256: "876227c75475a295e586871996281582d10cfdebf5792c10183e1c336a197d11"
@@ -23,6 +26,9 @@ patches:
       patch_description: "Change hard-coded paths to conan includes"
       patch_type: "conan"
 version_mappings:
+  "9.2.4":
+    soplex: "7.1.6"
+    default_sym: "snauty"
   "9.2.3":
     soplex: "7.1.5"
     default_sym: "snauty"

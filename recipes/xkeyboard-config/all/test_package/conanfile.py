@@ -19,5 +19,5 @@ class TestPackageConan(ConanFile):
         pkg_config_deps.generate()
 
     def test(self):
-        pkg_config = self.conf_info.get("tools.gnu:pkg_config", default="pkg-config")
+        pkg_config = self.conf.get("tools.gnu:pkg_config", default="pkg-config")
         self.run(f"{pkg_config} --validate xkeyboard-config")
