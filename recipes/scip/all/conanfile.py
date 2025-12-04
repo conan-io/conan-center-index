@@ -25,13 +25,12 @@ class SCIPConan(ConanFile):
         "fPIC": [True, False],
         "with_gmp": [True, False],
         "with_tpi": [False, "omp", "tny"],
-        "with_sym": [False, "bliss", "snauty"],
+        "with_sym": [False, "bliss", "dejavu" ,"snauty"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_gmp": True,
-        "with_tpi": False
+        "with_gmp": True
     }
 
     @property
@@ -71,6 +70,8 @@ class SCIPConan(ConanFile):
         if Version(self.version) >= "9.0.1" and is_msvc(self) and self.settings.build_type == "Debug":
             # lpi_spx2.cpp : error C1128: number of sections exceeded object file format limit: compile with /bigobj
             raise ConanInvalidConfiguration(f"{self.ref} can not be build in Debug with MSVC.")
+        if Version(self.version) < "10.0.0" and self.options.with_sym == "dejavu":
+            raise ConanInvalidConfiguration(f"Value 'dejavu' for option 'with_sym' is supported only for version >= 10.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -92,6 +93,8 @@ class SCIPConan(ConanFile):
             del self.options.fPIC
         if self.options.with_sym == None:
             self.options.with_sym = self.conan_data["version_mappings"][self.version]["default_sym"]
+        if self.options.with_tpi == None:
+            self.options.with_tpi = self.conan_data["version_mappings"][self.version]["default_tpi"]
 
     def configure(self):
         self.options["soplex"].with_gmp = self.options.with_gmp
@@ -114,6 +117,9 @@ class SCIPConan(ConanFile):
         tc.variables["TPI"] = self.options.with_tpi or "none"
         tc.variables["LPS"] = "spx"
         tc.variables["SYM"] = self.options.with_sym or "none"
+        if Version(self.version) >= "10.0.0":
+            tc.variables["EXACTSOLVE"] = False
+            tc.variables["MPFR"] = False
         tc.variables["SOPLEX_INCLUDE_DIRS"] = self._to_cmake(self.dependencies["soplex"].cpp_info.includedirs)
         if self.options.shared:
             # CMakeLists accesses different variables for SoPlex depending on the SHARED option
