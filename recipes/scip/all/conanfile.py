@@ -117,6 +117,9 @@ class SCIPConan(ConanFile):
         tc.variables["TPI"] = self.options.with_tpi or "none"
         tc.variables["LPS"] = "spx"
         tc.variables["SYM"] = self.options.with_sym or "none"
+        if Version(self.version) >= "10.0.0":
+            tc.variables["EXACTSOLVE"] = False
+            tc.variables["MPFR"] = False
         tc.variables["SOPLEX_INCLUDE_DIRS"] = self._to_cmake(self.dependencies["soplex"].cpp_info.includedirs)
         if self.options.shared:
             # CMakeLists accesses different variables for SoPlex depending on the SHARED option
