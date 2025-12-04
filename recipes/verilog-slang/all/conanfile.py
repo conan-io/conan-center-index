@@ -90,8 +90,5 @@ class VerilogSlangConan(ConanFile):
         if not self.options.shared or not self.settings.os == "Windows":
             self.cpp_info.components["core"].requires.append("mimalloc::mimalloc")
         self.cpp_info.components["core"].libs = ["svlang"]
-
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("dl")
+            self.cpp_info.components["core"].system_libs = ["m", "pthread", "dl"]
