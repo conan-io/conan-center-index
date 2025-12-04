@@ -123,7 +123,7 @@ class LibiconvConan(ConanFile):
     def package(self):
         copy(self, "COPYING.LIB", self.source_folder, os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        autotools.install()
+        autotools.install(target="install")
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)
