@@ -19,6 +19,7 @@ runs:
         echo "include(autodetected)" > "$DEFAULT_PROFILE"
         echo "[replace_requires]" >> "$DEFAULT_PROFILE"
         echo "boost/1.83.0: boost/1.84.0" >> "$DEFAULT_PROFILE"
+        echo "geos/3.12.0: geos/3.13.0" >> "$DEFAULT_PROFILE"
 
         echo "[options]" >> "$DEFAULT_PROFILE"
         echo "boost/*:pch=False" >> "$DEFAULT_PROFILE"
