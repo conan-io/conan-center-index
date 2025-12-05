@@ -66,9 +66,6 @@ class OnnxConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # https://cmake.org/cmake/help/v3.28/module/FindPythonInterp.html
-        # https://github.com/onnx/onnx/blob/1014f41f17ecc778d63e760a994579d96ba471ff/CMakeLists.txt#L119C1-L119C50
-        tc.cache_variables["PYTHON_EXECUTABLE"] = sys.executable.replace("\\", "/")
         tc.cache_variables["ONNX_USE_PROTOBUF_SHARED_LIBS"] = self.dependencies.host["protobuf"].options.shared
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.get_safe("shared", False)
         tc.cache_variables["ONNX_BUILD_PYTHON"] = False
@@ -146,12 +143,14 @@ class OnnxConan(ConanFile):
         if host_protobuf.options.lite:
             defines.append("ONNX_USE_LITE_PROTO=1")
         # onnx
-        self.cpp_info.components["libonnx"].set_property("cmake_target_name", "onnx")
+        self.cpp_info.components["libonnx"].set_property("cmake_target_name", "ONNX::onnx")
+        self.cpp_info.components["libonnx"].set_property("cmake_target_aliases", ["onnx"])
         self.cpp_info.components["libonnx"].libs = ["onnx"]
         self.cpp_info.components["libonnx"].defines = defines
         self.cpp_info.components["libonnx"].requires = requires
         # onnx_proto
-        self.cpp_info.components["onnx_proto"].set_property("cmake_target_name", "onnx_proto")
+        self.cpp_info.components["onnx_proto"].set_property("cmake_target_name", "ONNX::onnx_proto")
+        self.cpp_info.components["libonnx"].set_property("cmake_target_aliases", ["onnx_proto"])
         self.cpp_info.components["onnx_proto"].libs = ["onnx_proto"]
         self.cpp_info.components["onnx_proto"].defines = defines
         self.cpp_info.components["onnx_proto"].requires = requires
