@@ -126,6 +126,9 @@ class OpenTelemetryCppConan(ConanFile):
         if self.options.with_otlp_grpc:
             self.tool_requires("grpc/<host_version>")
 
+        if Version(self.version) >= "1.24.0":
+            self.tool_requires("cmake/[>=3.16]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
