@@ -1,0 +1,63 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ba79322d93..ca0c87c5a4 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -247,6 +247,7 @@ add_custom_target(hugo
+     VERBATIM
+ )
+ 
++if(FALSE)
+ add_custom_target(hugo-deploy
+     DEPENDS hugo
+     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+@@ -304,6 +305,7 @@ add_custom_target(format-lint
+ add_custom_target(docs
+     DEPENDS hugo doxygen-current
+ )
++endif()
+ 
+ set(THIRD_PARTY_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/third_party)
+ set(DATA_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
+@@ -323,6 +325,7 @@ include(FetchMongoC)
+ 
+ add_subdirectory(src)
+ 
++if(FALSE)
+ add_subdirectory(examples EXCLUDE_FROM_ALL)
+ 
+ add_subdirectory(benchmark EXCLUDE_FROM_ALL)
+@@ -448,3 +451,4 @@ endif()
+ if(CMAKE_GENERATOR_TOOLSET)
+     message(STATUS "\tinstance: ${CMAKE_GENERATOR_TOOLSET}")
+ endif()
++endif()
+diff --git a/cmake/FetchMongoC.cmake b/cmake/FetchMongoC.cmake
+index b421213917..a4f9091305 100644
+--- a/cmake/FetchMongoC.cmake
++++ b/cmake/FetchMongoC.cmake
+@@ -52,7 +52,8 @@ set(NEED_DOWNLOAD_C_DRIVER false CACHE INTERNAL "")
+ # Only search for packages if targets are not already imported via add_subdirectory().
+ if(NOT ((TARGET bson_shared OR TARGET bson_static) AND (TARGET mongoc_shared OR TARGET mongoc_static)))
+     # Both libraries are required.
+-    find_package(bson ${BSON_REQUIRED_VERSION} QUIET)
++    find_package(bson REQUIRED)
++    set(bson_FOUND TRUE)
+     if(NOT bson_FOUND)
+         message(STATUS "find_package(bson ${BSON_REQUIRED_VERSION}) did not succeed")
+     endif()
+diff --git a/src/bsoncxx/CMakeLists.txt b/src/bsoncxx/CMakeLists.txt
+index 10e090c1d1..d2c2b1cc95 100644
+--- a/src/bsoncxx/CMakeLists.txt
++++ b/src/bsoncxx/CMakeLists.txt
+@@ -65,9 +65,9 @@ if(TARGET bson_shared OR TARGET bson_static)
+         set(bson_target bson::shared)
+     endif()
+ else()
+-    find_package(bson ${BSON_REQUIRED_VERSION} REQUIRED)
++    find_package(bson REQUIRED)
+ 
+-    message(STATUS "Found bson: ${bson_DIR} (found version \"${bson_VERSION}\")")
++    message(STATUS "Found bson: ${bson_DIR}")
+ 
+     if(BSONCXX_LINK_WITH_STATIC_MONGOC)
+         set(bson_target bson::static)
