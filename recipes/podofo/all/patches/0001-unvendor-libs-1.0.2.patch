@@ -1,0 +1,108 @@
+diff --git a/3rdparty/CMakeLists.txt b/3rdparty/CMakeLists.txt
+index 493a771..a739ce2 100644
+--- a/3rdparty/CMakeLists.txt
++++ b/3rdparty/CMakeLists.txt
+@@ -24,4 +24,4 @@ include_directories("afdko/include")
+ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+ 
+ add_library(podofo_3rdparty STATIC ${SOURCE_FILES})
+-target_link_libraries(podofo_3rdparty LibXml2::LibXml2)
++target_link_libraries(podofo_3rdparty LibXml2::LibXml2 tcb-span::tcb-span)
+diff --git a/3rdparty/span.hpp b/3rdparty/span.hpp
+index 45b63c5..3ef3fe1 100644
+--- a/3rdparty/span.hpp
++++ b/3rdparty/span.hpp
+@@ -1,5 +1,4 @@
+ #pragma once
+ 
+-// NOTE: This is just a shim that redirects to the
+-// actual "span.hpp", which is distributed with PoDoFo
+-#include "../src/podofo/3rdparty/span.hpp"
+\ No newline at end of file
++// Conan: use unvendored span
++#include <tcb/span.hpp>
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c678167..8203f1a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -125,9 +125,6 @@ endif()
+ # with compiler options as CMAKE_CXX_STANDARD (or any other
+ # CMake construct) won't really do it.
+ # See https://discourse.cmake.org/t/how-to-limit-maximum-cxx-standard-to-prevent-accidental-c-17-or-above-code/9862/2
+-set(CMAKE_CXX_STANDARD 17)
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-set(CMAKE_CXX_EXTENSIONS ON)
+ if (MSVC)
+     # Set the compiler less permissive and add some warnings
+     # /we4287: unsigned/negative constant mismatch
+@@ -255,6 +252,18 @@ list(APPEND PODOFO_LIB_DEPENDS ZLIB::ZLIB)
+ string(APPEND PODOFO_PKGCONFIG_REQUIRES_PRIVATE " zlib")
+ list(APPEND PODOFO_LIB_DEPENDS ${PLATFORM_SYSTEM_LIBRARIES})
+ 
++# Conan: Unvendor 3rd party libraries
++find_package(fmt REQUIRED CONFIG)
++# Cant be unvendored because this project is using private headers not (yet) packaged by conan pdfium package
++# find_package(pdfium REQUIRED CONFIG)
++# find_package(numerics REQUIRED CONFIG) # This package does not exist in CCI
++find_package(utf8cpp REQUIRED CONFIG)
++find_package(utf8proc REQUIRED CONFIG)
++find_package(FastFloat REQUIRED CONFIG)
++find_package(date REQUIRED CONFIG)
++find_package(tcb-span REQUIRED CONFIG)
++list(APPEND PODOFO_LIB_DEPENDS fmt::fmt utf8::cpp utf8proc::utf8proc FastFloat::fast_float date::date tcb-span::tcb-span)
++
+ if(LCMS2_FOUND)
+     # little-cms2 doesn't provide targets.
+     list(APPEND PODOFO_LIB_DEPENDS ${LCMS2_LIBRARIES})
+diff --git a/src/podofo/CMakeLists.txt b/src/podofo/CMakeLists.txt
+index de2e4ee..c3f6dd0 100644
+--- a/src/podofo/CMakeLists.txt
++++ b/src/podofo/CMakeLists.txt
+@@ -47,8 +47,6 @@ foreach(subdir main auxiliary optional staging)
+     list(APPEND PODOFO_HEADERS ${HEADER_FILES})
+ endforeach()
+ 
+-# Set to install further public 3rdparty headers
+-list(APPEND PODOFO_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/span.hpp")
+ 
+ if(NOT PODOFO_HAVE_FONTCONFIG)
+     # Remove FontConfig source if not needed
+diff --git a/src/podofo/auxiliary/span.h b/src/podofo/auxiliary/span.h
+index d484b77..3a30774 100644
+--- a/src/podofo/auxiliary/span.h
++++ b/src/podofo/auxiliary/span.h
+@@ -2,7 +2,7 @@
+ #define AUX_SPAN_H
+ #pragma once
+ 
+-#include <podofo/3rdparty/span.hpp>
++#include <tcb/span.hpp>
+ 
+ namespace PoDoFo
+ {
+diff --git a/src/podofo/private/SASLprep.cpp b/src/podofo/private/SASLprep.cpp
+index a9c8a67..6899b9f 100644
+--- a/src/podofo/private/SASLprep.cpp
++++ b/src/podofo/private/SASLprep.cpp
+@@ -8,7 +8,7 @@
+ #include <cassert>
+ #include <vector>
+ 
+-#include <utf8proc/utf8proc.h>
++#include <utf8proc.h>
+ #include <utf8cpp/utf8.h>
+ 
+ #include "SASLprepPrivate.h"
+diff --git a/src/podofo/private/charconv_compat.h b/src/podofo/private/charconv_compat.h
+index 8fd4a85..840eb2e 100644
+--- a/src/podofo/private/charconv_compat.h
++++ b/src/podofo/private/charconv_compat.h
+@@ -31,7 +31,7 @@
+ #endif
+ 
+ #if defined(WANT_CHARS_FORMAT) || defined(WANT_FROM_CHARS)
+-#include <fast_float.h>
++#include <fast_float/fast_float.h>
+ #endif
+ 
+ #ifdef WANT_TO_CHARS
