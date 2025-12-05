@@ -87,8 +87,14 @@ class VerilogSlangConan(ConanFile):
 
         self.cpp_info.components["core"].set_property("cmake_target_name", "slang::slang")
         self.cpp_info.components["core"].requires = ["fmt::fmt", "boost_unordered"]
+        self.cpp_info.components["core"].defines = ["SLANG_USE_THREADS"]
+        if self.settings.build_type == "Debug":
+            self.cpp_info.components["core"].defines.append("SLANG_DEBUG")
+        if not self.options.shared:
+            self.cpp_info.components["core"].defines.append("SLANG_STATIC_DEFINE")
         if not self.options.shared or not self.settings.os == "Windows":
             self.cpp_info.components["core"].requires.append("mimalloc::mimalloc")
+            self.cpp_info.components["core"].defines.append("SLANG_USE_MIMALLOC")
         self.cpp_info.components["core"].libs = ["svlang"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["core"].system_libs = ["m", "pthread", "dl"]
