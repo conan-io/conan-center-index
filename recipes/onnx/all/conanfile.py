@@ -150,7 +150,7 @@ class OnnxConan(ConanFile):
         self.cpp_info.components["libonnx"].requires = requires
         # onnx_proto
         self.cpp_info.components["onnx_proto"].set_property("cmake_target_name", "ONNX::onnx_proto")
-        self.cpp_info.components["libonnx"].set_property("cmake_target_aliases", ["onnx_proto"])
+        self.cpp_info.components["onnx_proto"].set_property("cmake_target_aliases", ["onnx_proto"])
         self.cpp_info.components["onnx_proto"].libs = ["onnx_proto"]
         self.cpp_info.components["onnx_proto"].defines = defines
         self.cpp_info.components["onnx_proto"].requires = requires
