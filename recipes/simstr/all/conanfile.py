@@ -2,12 +2,14 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches
+from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.1"
+
+
 class PackageConan(ConanFile):
     name = "simstr"
     description = "Yet another C++ strings library implementation"
@@ -25,46 +27,33 @@ class PackageConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    @property
-    def _min_cppstd(self):
-        return 20
+    implements = ["auto_shared_fpic"]
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "13",
-            "clang": "17",
-            "msvc": "193",
-            "Visual Studio": "17",
-        }
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-    
+
     def requirements(self):
-        self.requires("simdutf/7.5.0")
+        self.requires("simdutf/[>=7.5 <8]")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            ) 
+        check_min_cppstd(self, 20)
+        compiler = str(self.settings.compiler)
+        compiler_version = Version(self.settings.compiler.version)
+
+        if compiler == "gcc" and compiler_version < "13":
+            raise ConanInvalidConfiguration(f"{self.ref} requires at least GCC 13 for proper C++20 support")
+        elif compiler == "clang" and compiler_version < "17":
+            raise ConanInvalidConfiguration(f"{self.ref} requires at least Clang 17 for proper C++20 support")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.20 <4]")
+        self.tool_requires("cmake/[>=3.20]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -72,6 +61,8 @@ class PackageConan(ConanFile):
         tc.cache_variables["SIMSTR_BENCHMARKS"] = False
         tc.cache_variables["SIMSTR_LINK_NATVIS"] = False
         tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -84,9 +75,5 @@ class PackageConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        # library name to be packaged
         self.cpp_info.libs = ["simstr"]
-        # if package provides a CMake config file (package-config.cmake or packageConfig.cmake, with package::package target, usually installed in <prefix>/lib/cmake/<package>/)
-        self.cpp_info.set_property("cmake_file_name", "simstr")
-        self.cpp_info.set_property("cmake_target_name", "simstr::simstr")
-        self.cpp_info.set_property("pkg_config_name", "simstr")
+        self.cpp_info.includedirs = [os.path.join("include", f"simstr-{self.version}")]
