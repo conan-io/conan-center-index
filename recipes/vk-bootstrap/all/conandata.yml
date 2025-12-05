@@ -1,7 +1,13 @@
 sources:
+  "1.4.328":
+    url: "https://github.com/charles-lunarg/vk-bootstrap/archive/refs/tags/v1.4.328.tar.gz"
+    sha256: "3be0220de218dc3e692aeac552b2953860a0e0a48257f4a61c3f1c1472674744"
   "1.3.296":
     url: "https://github.com/charles-lunarg/vk-bootstrap/archive/refs/tags/v1.3.296.tar.gz"
     sha256: "fbff2746134459648a488588a71609d11e6e00f591ac4a3cc6683a131bf31a53"
   "0.7":
     url: "https://github.com/charles-lunarg/vk-bootstrap/archive/refs/tags/v0.7.tar.gz"
     sha256: "7b2c30a4c46514cc5b20d2bebab25c495df39574b9e117c760d1cfe19f71d9aa"
+last_digit_vulkan_headers:
+  "1.4.328": "1"
+  "1.3.296": "0"
