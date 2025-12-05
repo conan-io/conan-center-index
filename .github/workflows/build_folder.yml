@@ -60,6 +60,8 @@ jobs:
       - run: npm ci
       - uses: actions/github-script@v8
         id: find_versions
+        env:
+          INPUT_FOLDER: "${{ inputs.folder }}"
         with:
           script: |
             const fs = require('node:fs/promises');
