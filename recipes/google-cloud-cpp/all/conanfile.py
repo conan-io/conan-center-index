@@ -55,7 +55,7 @@ class GoogleCloudCppConan(ConanFile):
     def requirements(self):
         self.requires("abseil/[>=20230125.3 <=20230802.1]", transitive_headers=True)
         self.requires("crc32c/1.1.2")
-        self.requires("grpc/1.54.3")
+        self.requires("grpc/[>=1.54.3 <2]")
         self.requires("libcurl/[>=7.78.0 <9]")
         self.requires("nlohmann_json/3.11.3")
         self.requires("openssl/[>=1.1 <4]")
