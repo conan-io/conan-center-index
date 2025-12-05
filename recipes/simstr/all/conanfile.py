@@ -69,6 +69,8 @@ class PackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["SIMSTR_BUILD_TESTS"] = False
+        tc.cache_variables["SIMSTR_BENCHMARKS"] = False
+        tc.cache_variables["SIMSTR_LINK_NATVIS"] = False
         tc.generate()
 
     def build(self):
