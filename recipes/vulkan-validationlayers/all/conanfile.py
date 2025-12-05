@@ -112,6 +112,8 @@ class VulkanValidationLayersConan(ConanFile):
             self.requires("xorg/system")
         if self._needs_wayland_for_build:
             self.requires("wayland/1.22.0")
+        if Version(self.version) >= "1.4.328.1":
+            self.requires(self._require("vulkan-utility-libraries"))
 
     def _require(self, recipe_name):
         if recipe_name not in self._dependencies_versions:
@@ -191,7 +193,7 @@ class VulkanValidationLayersConan(ConanFile):
         # Vulkan-ValidationLayers relies on Vulkan-Headers version from CMake config file
         # to set api_version in its manifest file, but this value MUST have format x.y.z (no extra number).
         # FIXME: find a way to force correct version in CMakeDeps of vulkan-headers recipe?
-        # NOTE: At version 1.3.239, the JSON_API_VERSION was removed from the cmakelists file, 
+        # NOTE: At version 1.3.239, the JSON_API_VERSION was removed from the cmakelists file,
         if Version(self.version) >= "1.3.235" and Version(self.version) < "1.3.239":
             vk_version = Version(self.dependencies["vulkan-headers"].ref.version)
             sanitized_vk_version = f"{vk_version.major}.{vk_version.minor}.{vk_version.patch}"
@@ -216,7 +218,7 @@ class VulkanValidationLayersConan(ConanFile):
                 cmake_path = os.path.join(self.source_folder, "layers", "CMakeLists.txt")
                 # FIXME: Since 1.3.261.0 (https://github.com/KhronosGroup/Vulkan-ValidationLayers/pull/5913), we need to fix the line to be replaced
                 #        Check the patch for newer versions
-            replace_in_file(self, cmake_path, 
+            replace_in_file(self, cmake_path,
                         "VkLayer_utils PUBLIC Vulkan::Headers",
                         "VkLayer_utils PUBLIC Vulkan::Headers -landroid -llog")
 
@@ -253,25 +255,46 @@ class VulkanValidationLayersConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libs = ["VkLayer_utils"]
+        if Version(self.version) >= "1.4.328.1":
 
-        manifest_subfolder = "bin" if self.settings.os == "Windows" else os.path.join("res", "vulkan", "explicit_layer.d")
-        vk_layer_path = os.path.join(self.package_folder, manifest_subfolder)
-        self.runenv_info.prepend_path("VK_LAYER_PATH", vk_layer_path)
+            #self.cpp_info.libs = ["VkLayer_khronos_validation"]
+            self.cpp_info.includedirs = []
 
-        # Update runtime discovery paths to allow libVkLayer_khronos_validation.{so,dll,dylib} to be discovered
-        # and loaded by vulkan-loader when the consumer executes
-        # This is necessary because this package exports a static lib to link against and a dynamic lib to load at runtime
-        runtime_lib_discovery_path = "LD_LIBRARY_PATH"
-        if self.settings.os == "Windows":
-            runtime_lib_discovery_path = "PATH"
-        if self.settings.os == "Macos":
-            runtime_lib_discovery_path = "DYLD_LIBRARY_PATH"
-        for libdir in [os.path.join(self.package_folder, libdir) for libdir in self.cpp_info.libdirs]:
-            self.runenv_info.prepend_path(runtime_lib_discovery_path, libdir)
+            manifest_subfolder = "bin" if self.settings.os == "Windows" else os.path.join("res", "vulkan", "explicit_layer.d")
+            vk_layer_path = os.path.join(self.package_folder, manifest_subfolder)
+            self.runenv_info.prepend_path("VK_LAYER_PATH", vk_layer_path)
 
-        # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
-        self.env_info.VK_LAYER_PATH.append(vk_layer_path)
+            # Update runtime discovery paths to allow libVkLayer_khronos_validation.{so,dll,dylib} to be discovered
+            # and loaded by vulkan-loader when the consumer executes
+            # This is necessary because this package exports a static lib to link against and a dynamic lib to load at runtime
+            runtime_lib_discovery_path = "LD_LIBRARY_PATH"
+            if self.settings.os == "Windows":
+                runtime_lib_discovery_path = "PATH"
+            if self.settings.os == "Macos":
+                runtime_lib_discovery_path = "DYLD_LIBRARY_PATH"
+            for libdir in [os.path.join(self.package_folder, libdir) for libdir in self.cpp_info.libdirs]:
+                self.runenv_info.prepend_path(runtime_lib_discovery_path, libdir)
 
-        if self.settings.os == "Android":
-            self.cpp_info.system_libs.extend(["android", "log"])
+        else:
+            self.cpp_info.libs = ["VkLayer_utils"]
+
+            manifest_subfolder = "bin" if self.settings.os == "Windows" else os.path.join("res", "vulkan", "explicit_layer.d")
+            vk_layer_path = os.path.join(self.package_folder, manifest_subfolder)
+            self.runenv_info.prepend_path("VK_LAYER_PATH", vk_layer_path)
+
+            # Update runtime discovery paths to allow libVkLayer_khronos_validation.{so,dll,dylib} to be discovered
+            # and loaded by vulkan-loader when the consumer executes
+            # This is necessary because this package exports a static lib to link against and a dynamic lib to load at runtime
+            runtime_lib_discovery_path = "LD_LIBRARY_PATH"
+            if self.settings.os == "Windows":
+                runtime_lib_discovery_path = "PATH"
+            if self.settings.os == "Macos":
+                runtime_lib_discovery_path = "DYLD_LIBRARY_PATH"
+            for libdir in [os.path.join(self.package_folder, libdir) for libdir in self.cpp_info.libdirs]:
+                self.runenv_info.prepend_path(runtime_lib_discovery_path, libdir)
+
+            # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
+            self.env_info.VK_LAYER_PATH.append(vk_layer_path)
+
+            if self.settings.os == "Android":
+                self.cpp_info.system_libs.extend(["android", "log"])
