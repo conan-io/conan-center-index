@@ -1,0 +1,15 @@
+--- cpp/cmake_modules/ThirdpartyToolchain.cmake
++++ cpp/cmake_modules/ThirdpartyToolchain.cmake
+@@ -2550,12 +2550,9 @@
+ endmacro()
+ 
+ if(ARROW_WITH_RAPIDJSON)
+-  set(ARROW_RAPIDJSON_REQUIRED_VERSION "1.1.0")
+   resolve_dependency(RapidJSON
+                      HAVE_ALT
+                      TRUE
+-                     REQUIRED_VERSION
+-                     ${ARROW_RAPIDJSON_REQUIRED_VERSION}
+                      IS_RUNTIME_DEPENDENCY
+                      FALSE)
+ endif()
