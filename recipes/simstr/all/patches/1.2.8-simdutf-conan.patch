@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e06f8b4..dbc1a91 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -92,7 +92,7 @@ function(add_simdutf)
+     FetchContent_MakeAvailable(simdutf)
+ endfunction()
+ 
+-add_simdutf()
++find_package(simdutf REQUIRED)
+ 
+ target_link_libraries(simstr_simstr PUBLIC simdutf::simdutf)
+ 
