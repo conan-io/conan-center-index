@@ -27,6 +27,7 @@ class OpenTelemetryCppConan(ConanFile):
         "with_stl": [True, False],
         "with_gsl": [True, False],
         "with_otlp_grpc": [True, False],
+        "with_otlp_grpc_credentials": [True, False],
         "with_otlp_http": [True, False],
         "with_otlp_http_compression": [True, False],
         "with_otlp_file": [True, False],
@@ -48,6 +49,7 @@ class OpenTelemetryCppConan(ConanFile):
         "with_stl": False,
         "with_gsl": False,
         "with_otlp_grpc": False,
+        "with_otlp_grpc_credentials": False,
         # True because dependencies usually need this, and it would generate missing binaries for those
         "with_otlp_http": True,
         "with_otlp_http_compression": False,
@@ -145,6 +147,8 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["WITH_STL"] = self._stl_value
         tc.cache_variables["WITH_GSL"] = self.options.with_gsl
         tc.cache_variables["WITH_OTLP_GRPC"] = self.options.with_otlp_grpc
+        tc.cache_variables["WITH_OTLP_GRPC_CREDENTIAL_PREVIEW"] = self.options.with_otlp_grpc and self.options.get_safe("with_otlp_grpc_credentials")
+
         tc.cache_variables["WITH_OTLP_HTTP"] = self.options.with_otlp_http
         tc.cache_variables["WITH_OTLP_HTTP_COMPRESSION"] = self.options.with_otlp_http_compression
         if self.settings.os == "Linux":
