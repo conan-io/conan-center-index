@@ -1,4 +1,9 @@
 sources:
+  "3.01":
+    sha256: "b7324cbe86e767b65f26f467ed8b12ad80e124e3ccb89076855c98e43a9eddd4"
+    url:
+      - "https://www.nasm.us/pub/nasm/releasebuilds/3.01/nasm-3.01.tar.xz"
+      - "https://www.nasm.dev/pub/nasm/releasebuilds/3.01/nasm-3.01.tar.xz"
   "2.16.01":
     sha256: "c77745f4802375efeee2ec5c0ad6b7f037ea9c87c92b149a9637ff099f162558"
     url:
