@@ -37,7 +37,9 @@ class Re2Conan(ConanFile):
     def requirements(self):
         if self.options.get_safe("with_icu"):
             self.requires("icu/73.2")
-        if Version(self.version) >= "20230601":
+        if Version(self.version) >= "20251105":
+            self.requires("abseil/[>=20240116.1 <=20250814.0]", transitive_headers=True)
+        elif Version(self.version) >= "20230601":
             self.requires("abseil/20240116.1", transitive_headers=True)
 
     def validate(self):
