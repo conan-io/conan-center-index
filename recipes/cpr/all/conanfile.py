@@ -134,6 +134,15 @@ class CprConan(ConanFile):
         tc.variables["CMAKE_USE_OPENSSL"] = (self.options.with_ssl == "openssl")
         tc.variables["CPR_ENABLE_SSL"] = bool(self.options.with_ssl)
 
+        if Version(self.version) >= "1.13.0":
+            libcurl_dep = self.dependencies.get("libcurl")
+            use_libpsl = False
+            if libcurl_dep is not None:
+                # libcurl recipe defaults to with_libpsl=False, so this is off by default,
+                # and only enabled when the consumer explicitly turns it on for libcurl.
+                use_libpsl = bool(libcurl_dep.options.get_safe("with_libpsl", False))
+            tc.variables["CPR_CURL_USE_LIBPSL"] = use_libpsl
+
         if self.options.get_safe("verbose_logging", False):
             tc.variables["CURL_VERBOSE_LOGGING"] = True
         if cross_building(self, skip_x64_x86=True):
