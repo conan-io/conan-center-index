@@ -125,6 +125,12 @@ class TracyConan(ConanFile):
         # but upstream still generates info for including headers as #include <tracy/Tracy.hpp>
         self.cpp_info.components["tracyclient"].includedirs = ['include/tracy']
 
+        # Starting at 0.13.0, upstream introduced a subdirectory in the Runtime/Library/Archive path
+        # for all but release type.
+        if self.settings.build_type != "Release":
+            self.cpp_info.components["tracyclient"].bindirs = ['bin/' + str(self.settings.build_type)]
+            self.cpp_info.components["tracyclient"].libdirs = ['lib/' + str(self.settings.build_type)]
+
         # Tracy CMake adds options set to ON as public
         for opt in self._tracy_options.keys():
             switch = getattr(self.options, opt)
