@@ -46,6 +46,8 @@ class XlntConan(ConanFile):
         self.requires("libstudxml/1.1.0-b.10+1")
         self.requires("miniz/3.0.2")
         self.requires("utfcpp/3.2.3")
+        self.requires("fast_float/8.1.0")
+        self.requires("fmt/12.1.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -66,7 +68,7 @@ class XlntConan(ConanFile):
         tc.variables["BENCHMARKS"] = False
         tc.variables["PYTHON"] = False
         tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if Version(self.version) > "1.5.0": # pylint: disable=conan-unreachable-upper-version
+        if Version(self.version) > "1.6.1": # pylint: disable=conan-unreachable-upper-version
             raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
         deps = CMakeDeps(self)
