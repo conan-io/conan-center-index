@@ -2,3 +2,6 @@ sources:
   "1.0.0":
     url: "https://github.com/hent83722/xlog/archive/refs/tags/v1.0.0.tar.gz"
     sha256: "5fd0b24661093366a0064c27e866336670073fe462fbb6dc157d1213e0fdd3cb"
+"1.0.1":
+    url: "https://github.com/hent83722/xlog/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: "3f0f4608c20c6b5761cb7aaf0899381471d99a1fd8775279566f9de5f0d27302"
