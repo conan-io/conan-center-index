@@ -6,7 +6,7 @@ import os
 
 class XlogConan(ConanFile):
     name = "xlog"
-    version = "1.0.1"
+    version = "1.0.2"
     license = "MIT"
     author = "hent83722"
     url = "https://github.com/hent83722/xlog"
