@@ -357,6 +357,9 @@ class OpenTelemetryCppConan(ConanFile):
                 "opentelemetry_exporter_otlp_grpc_client",
             ])
 
+            if self.options.get_safe("with_otlp_grpc_credentials_preview"):
+                self.cpp_info.components["opentelemetry_common"].defines.append("ENABLE_OTLP_GRPC_CREDENTIAL_PREVIEW")
+
         if (self.options.with_otlp_http or
             self.options.with_zipkin or
             self.options.with_elasticsearch
