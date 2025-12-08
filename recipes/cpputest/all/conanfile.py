@@ -25,11 +25,15 @@ class CppUTestConan(ConanFile):
         "fPIC": [True, False],
         "with_extensions": [True, False],
         "with_leak_detection": [True, False],
+        "with_std_c": [True, False],
+        "with_std_cpp": [True, False]
     }
     default_options = {
         "fPIC": True,
         "with_extensions": True,
         "with_leak_detection": True,
+        "with_std_c": True,
+        "with_std_cpp": True,
     }
 
     def export_sources(self):
@@ -48,8 +52,8 @@ class CppUTestConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["STD_C"] = True
-        tc.variables["STD_CPP"] = True
+        tc.variables["STD_C"] = self.options.with_std_c
+        tc.variables["STD_CPP"] = self.options.with_std_cpp
         tc.variables["C++11"] = True
         tc.variables["MEMORY_LEAK_DETECTION"] = self.options.with_leak_detection
         tc.variables["EXTENSIONS"] = self.options.with_extensions
