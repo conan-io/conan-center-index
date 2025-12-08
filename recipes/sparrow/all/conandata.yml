@@ -1,4 +1,7 @@
 sources:
+  "1.4.0":
+    url: "https://github.com/man-group/sparrow/archive/refs/tags/1.4.0.tar.gz"
+    sha256: "6737746846510B1F1C0DF4CE8A3AC7BEF9E099299672115DE82A3A35EA595CA8"
   "1.3.0":
     url: "https://github.com/man-group/sparrow/archive/refs/tags/1.3.0.tar.gz"
     sha256: "2B880F63CDFF9DD43231F9D5935FE456F9588917FD5760BC33E849C784A1666C"
