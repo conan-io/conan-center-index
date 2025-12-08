@@ -58,7 +58,7 @@ class XZUtilsConan(ConanFile):
                            and self.settings.compiler == "clang"
                            and self.settings.get_safe("compiler.runtime") is not None)
         return (is_msvc(self) or assume_clang_cl) and Version(self.version) < "5.8.1"
-    
+
     @property
     def _use_cmake(self):
         return self.settings.os == "Windows" and Version(self.version) >= "5.8.1"
@@ -80,7 +80,7 @@ class XZUtilsConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not self._use_msbuild and Version(self.version) < "5.8.1":
+        if self._settings_build.os == "Windows" and not self._use_msbuild and (Version(self.version) < "5.8.1" or self.settings.os == "Android"):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
