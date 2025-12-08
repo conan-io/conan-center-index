@@ -48,3 +48,6 @@ class SecpConan(ConanFile):
         self.cpp_info.libs = ["secp256k1"]
         self.cpp_info.set_property("cmake_file_name", "secp256k1")
         self.cpp_info.set_property("cmake_target_name", "secp256k1::secp256k1")
+
+        if self.settings.os == "Windows" and not self.options.shared:
+            self.cpp_info.defines.append("SECP256K1_STATIC")
