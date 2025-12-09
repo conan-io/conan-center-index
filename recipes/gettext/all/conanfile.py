@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import AutotoolsToolchain, Autotools
@@ -88,6 +89,10 @@ class GetTextConan(ConanFile):
             # See https://github.com/conan-io/conan-center-index/issues/23698]
             if self.settings.build_type == "Debug":
                 tc.configure_args.extend(['gl_cv_func_printf_directive_n=no'])
+
+            if is_apple_os(self) and Version(self.version) >= "0.26":
+                # not guessed properly when cross-building
+                tc.configure_args.append("gl_cv_func_access_slash_works=yes")
 
             # The flag above `--with-libiconv-prefix` fails to correctly detect libiconv on windows+msvc
             # so it needs an extra nudge. We could use `AutotoolsDeps` but it's currently affected by the
