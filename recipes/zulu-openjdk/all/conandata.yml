@@ -1,5 +1,5 @@
 sources:
-  "21.0.8":
+  "21.0.9":
     "Windows":
       "x86_64":
         url: "https://cdn.azul.com/zulu/bin/zulu21.46.19-ca-jdk21.0.9-win_x64.zip"
