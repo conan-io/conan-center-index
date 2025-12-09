@@ -134,19 +134,22 @@ class XnnpackConan(ConanFile):
 
     def package_info(self):
         # TODO: XNN_LOG_LEVEL definition?
-        self.cpp_info.components["microkernels-prod"].libs = ["microkernels-prod"]
-        self.cpp_info.components["microkernels-prod"].requires = [
-            "fxdiv::fxdiv",
-        ]
-
         self.cpp_info.components["xnnpack"].libs = ["XNNPACK"]
         self.cpp_info.components["xnnpack"].requires = [
-            "microkernels-prod",
             "fxdiv::fxdiv",
             "fp16::fp16",
             "cpuinfo::cpuinfo",
             "pthreadpool::pthreadpool",
         ]
+
+        if Version(self.version) >= "cci.20241203":
+            self.cpp_info.components["microkernels-prod"].libs = ["microkernels-prod"]
+            self.cpp_info.components["microkernels-prod"].requires = [
+                "fxdiv::fxdiv",
+            ]
+            self.cpp_info.components["xnnpack"].requires.append("microkernels-prod")
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["microkernels-prod"].system_libs = ["m"]
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["xnnpack"].system_libs = ["m"]
-            self.cpp_info.components["microkernels-prod"].system_libs = ["m"]
