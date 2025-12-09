@@ -5,6 +5,7 @@ from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=2.0.9"
@@ -29,6 +30,11 @@ class PackageConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        self.options["libtiff"].jpeg = "libjpeg-turbo"
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -46,6 +52,8 @@ class PackageConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 23)
+        if self.dependencies["libtiff"].options.get_safe("jpeg") != "libjpeg-turbo":
+            raise ConanInvalidConfiguration("capypdf requires libtiff built with JPEG support")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
