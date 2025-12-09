@@ -56,7 +56,7 @@ class VkBootstrapConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) > Version("1.0"):
-            self.requires(f"vulkan-headers/{self.version}.{self.conan_data['last_digit_vulkan_headers'][self.version]}", transitive_headers=True)
+            self.requires(f"vulkan-headers/{self.conan_data['vulkan_headers_dependency'][self.version]}", transitive_headers=True)
         else:
             self.requires("vulkan-headers/1.3.239.0", transitive_headers=True)
 

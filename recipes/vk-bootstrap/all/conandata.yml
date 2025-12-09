@@ -8,6 +8,6 @@ sources:
   "0.7":
     url: "https://github.com/charles-lunarg/vk-bootstrap/archive/refs/tags/v0.7.tar.gz"
     sha256: "7b2c30a4c46514cc5b20d2bebab25c495df39574b9e117c760d1cfe19f71d9aa"
-last_digit_vulkan_headers:
-  "1.4.328": "1"
-  "1.3.296": "0"
+vulkan_headers_dependency:
+  "1.4.328": "1.4.328.1"
+  "1.3.296": "1.3.296.0"
