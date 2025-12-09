@@ -98,6 +98,11 @@ class GetTextConan(ConanFile):
             "--disable-threads" if self.options.threads == "disabled" else ("--enable-threads=" + str(self.options.threads)),
             f"--with-libiconv-prefix={unix_path(self, self.dependencies['libiconv'].package_folder)}",
         ]
+
+        if is_apple_os(self) and Version(self.version) >= "0.26":
+            # not guessed properly when cross-building
+            tc.configure_args.append("gl_cv_func_access_slash_works=yes")
+
         if is_msvc(self) or self._is_clang_cl:
             target = None
             if self.settings.arch == "x86_64":
@@ -123,10 +128,6 @@ class GetTextConan(ConanFile):
                     'gl_cv_func_swprintf_works=yes',
                     'gl_cv_func_swprintf_C_locale_sans_EILSEQ=yes',
                 ])
-
-            if is_apple_os(self) and Version(self.version) >= "0.26":
-                # not guessed properly when cross-building
-                tc.configure_args.append("gl_cv_func_access_slash_works=yes")
 
             if self.settings.build_type == "Debug":
                 # Skip checking for the 'n' printf format directly
