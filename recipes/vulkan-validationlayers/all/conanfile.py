@@ -191,7 +191,7 @@ class VulkanValidationLayersConan(ConanFile):
         # Vulkan-ValidationLayers relies on Vulkan-Headers version from CMake config file
         # to set api_version in its manifest file, but this value MUST have format x.y.z (no extra number).
         # FIXME: find a way to force correct version in CMakeDeps of vulkan-headers recipe?
-        # NOTE: At version 1.3.239, the JSON_API_VERSION was removed from the cmakelists file,
+        # NOTE: At version 1.3.239, the JSON_API_VERSION was removed from the cmakelists file, 
         if Version(self.version) >= "1.3.235" and Version(self.version) < "1.3.239":
             vk_version = Version(self.dependencies["vulkan-headers"].ref.version)
             sanitized_vk_version = f"{vk_version.major}.{vk_version.minor}.{vk_version.patch}"
@@ -216,7 +216,7 @@ class VulkanValidationLayersConan(ConanFile):
                 cmake_path = os.path.join(self.source_folder, "layers", "CMakeLists.txt")
                 # FIXME: Since 1.3.261.0 (https://github.com/KhronosGroup/Vulkan-ValidationLayers/pull/5913), we need to fix the line to be replaced
                 #        Check the patch for newer versions
-            replace_in_file(self, cmake_path,
+            replace_in_file(self, cmake_path, 
                         "VkLayer_utils PUBLIC Vulkan::Headers",
                         "VkLayer_utils PUBLIC Vulkan::Headers -landroid -llog")
 
