@@ -63,10 +63,10 @@ class VulkanUtilityLibrariesConan(ConanFile):
         self.cpp_info.components["UtilityHeaders"].set_property("cmake_target_name", "Vulkan::UtilityHeaders")
         self.cpp_info.components["UtilityHeaders"].requires = ["vulkan-headers::vulkan-headers"]
 
-        self.cpp_info.components["SafeStruct"].libs = ["vulkansafestruct"]
+        self.cpp_info.components["SafeStruct"].libs = ["VulkanSafeStruct"]
         self.cpp_info.components["SafeStruct"].set_property("cmake_target_name", "Vulkan::SafeStruct")
         self.cpp_info.components["SafeStruct"].requires = ["UtilityHeaders", "vulkan-headers::vulkan-headers"]
 
-        self.cpp_info.components["LayerSettings"].libs = ["vulkanlayersettings"]
+        self.cpp_info.components["LayerSettings"].libs = ["VulkanLayerSettings"]
         self.cpp_info.components["LayerSettings"].set_property("cmake_target_name", "Vulkan::LayerSettings")
         self.cpp_info.components["LayerSettings"].requires = ["UtilityHeaders", "vulkan-headers::vulkan-headers"]
