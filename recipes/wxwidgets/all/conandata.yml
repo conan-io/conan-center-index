@@ -1,4 +1,13 @@
 sources:
+  "3.3.1":
+    url: "https://github.com/wxWidgets/wxWidgets/releases/download/v3.3.1/wxWidgets-3.3.1.tar.bz2"
+    sha256: "f936c8d694f9c49a367a376f99c751467150a4ed7cbf8f4723ef19b2d2d9998d"
+  "3.3.0":
+    url: "https://github.com/wxWidgets/wxWidgets/releases/download/v3.3.0/wxWidgets-3.3.0.tar.bz2"
+    sha256: "492f5eb8a58715f2602f31025c3eaa20d71a3ec8e052c7a9d33153966b4badca"
+  "3.2.8.1":
+    url: "https://github.com/wxWidgets/wxWidgets/archive/v3.2.8.1.tar.gz"
+    sha256: "65654b00e8d6901f53cee31b0175720620a4153f32bd95980d03aa4424a26978"
   "3.2.8":
     url: "https://github.com/wxWidgets/wxWidgets/archive/v3.2.8.tar.gz"
     sha256: "bd9fc9886829994748705702591ffac96d20df9ee72af17af0af48590135fb85"

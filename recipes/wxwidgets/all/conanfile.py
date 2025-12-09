@@ -150,7 +150,8 @@ class wxWidgetsConan(ConanFile):
             self.requires("mozjpeg/[>=4.1.5 <5]")
 
         self.requires("libpng/[>=1.6 <2]")
-        self.requires("libtiff/4.6.0")
+        self.requires("libtiff/[>=4.6.0 <5]")
+        self.requires("libwebp/[>=1.6.0 <2]")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("expat/[>=2.6.2 <3]")
         self.requires("pcre2/10.42")
@@ -197,6 +198,7 @@ class wxWidgetsConan(ConanFile):
         tc.variables["wxUSE_LIBPNG"] = "sys"
         tc.variables["wxUSE_LIBJPEG"] = "sys"
         tc.variables["wxUSE_LIBTIFF"] = "sys"
+        tc.variables["wxUSE_LIBWEBP"] = "sys"
         tc.variables["wxUSE_ZLIB"] = "sys"
         tc.variables["wxUSE_EXPAT"] = "sys"
         tc.variables["wxUSE_REGEX"] = "sys"
@@ -257,9 +259,12 @@ class wxWidgetsConan(ConanFile):
 
         # Fix for strcpy_s on Apple platforms (fix upstream?)
         if is_apple_os(self):
-            cmake_version = "3.0"
-            if Version(self.version) >= "3.2.7":
+            if Version(self.version) < "3.2.7":
+                cmake_version = "3.0"
+            elif Version(self.version) < "3.3.0":
                 cmake_version = "3.0...3.31"
+            else:
+                cmake_version = "3.5...3.31"
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             f'cmake_minimum_required(VERSION {cmake_version})',
                             f'cmake_minimum_required(VERSION {cmake_version})\nadd_definitions(-D__STDC_WANT_LIB_EXT1__)')
@@ -372,6 +377,8 @@ class wxWidgetsConan(ConanFile):
         if self.options.stc:
             if not self.options.shared:
                 scintilla_suffix = "{debug}" if self.settings.os == "Windows" else "{suffix}"
+                if Version(self.version) >= "3.3.0":
+                    libs.append("wxlexilla" + scintilla_suffix)
                 libs.append("wxscintilla" + scintilla_suffix)
             libs.append(library_pattern("stc"))
         if self.options.webview:
@@ -439,6 +446,7 @@ class wxWidgetsConan(ConanFile):
                                           "wxNO_JPEG_LIB",
                                           "wxNO_PNG_LIB",
                                           "wxNO_TIFF_LIB",
+                                          "wxNO_WEBP_LIB",
                                           "wxNO_ADV_LIB",
                                           "wxNO_HTML_LIB",
                                           "wxNO_GL_LIB",
