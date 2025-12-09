@@ -4,7 +4,7 @@ sources:
     sha256: "91d9be1347a270288bcc50206bda8ccf6aad33bab8318c0643dd36bef97478f9"
 dependencies:
   "1.4.328.1":
-    - "vulkan-headers": "1.4.328.1"
-    - "vulkan-utility-libraries": "1.4.328.1"
-    - "spirv-tools": "1.4.328.1"
-    - "spirv-headers": "1.4.328.1"
+    "vulkan-headers": "1.4.328.1"
+    "vulkan-utility-libraries": "1.4.328.1"
+    "spirv-tools": "1.4.328.1"
+    "spirv-headers": "1.4.328.1"
