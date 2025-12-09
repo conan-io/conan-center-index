@@ -33,7 +33,7 @@ class PackageConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libjpeg/[>=9e]")
+        self.requires("libjpeg-turbo/[>=3.0.0 <4]")
         self.requires("libpng/[>=1.6 <2]")
         self.requires("lcms/2.17")
         self.requires("freetype/2.13.2")
