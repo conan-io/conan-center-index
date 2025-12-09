@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rename, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, get, rename, replace_in_file
 import glob
 import os
 
-required_conan_version = ">=2.4"
+required_conan_version = ">=1.46.0"
 
 
 class FoxiConan(ConanFile):
@@ -22,14 +22,24 @@ class FoxiConan(ConanFile):
     default_options = {
         "fPIC": True,
     }
-    languages = ["C"]
 
     def export_sources(self):
-        export_conandata_patches(self)
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def layout(self):
         cmake_layout(self, src_folder="src")
