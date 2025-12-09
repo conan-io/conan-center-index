@@ -32,7 +32,7 @@ class PackageConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         self.options["libtiff"].jpeg = "libjpeg-turbo"
 
     def layout(self):
