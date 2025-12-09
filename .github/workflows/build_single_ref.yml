@@ -146,8 +146,7 @@ jobs:
             if [ "$cpp_std" = "None" ]; then
               ARG=""
             else
-              ARG="-s compiler.cppstd=$c
-              pp_std"
+              ARG="-s compiler.cppstd=$cpp_std"
             fi
             if ! conan profile show $ARG ${{ env.CLI_ARGS }}
             then
