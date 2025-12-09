@@ -66,7 +66,7 @@ class VulkanValidationLayersConan(ConanFile):
     def _require(self, recipe_name):
         if recipe_name not in self.conan_data["dependencies"][self.version]:
             raise ConanException(f"{recipe_name} is missing in dependencies conandata.yml field")
-        return f"{recipe_name}/{self.conan_data["dependencies"][self.version][recipe_name]}"
+        return f"{recipe_name}/{self.conan_data['dependencies'][self.version][recipe_name]}"
 
     def validate(self):
         check_min_cppstd(self, 17)
