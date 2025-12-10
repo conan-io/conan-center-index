@@ -88,7 +88,8 @@ class OpenTelemetryCppConan(ConanFile):
             self.requires("ms-gsl/4.0.0")
 
         if self.options.with_otlp_grpc:
-            self.requires("grpc/1.67.1", transitive_headers=True, transitive_libs=True)
+            # Version range matches arrow, which uses this as a dependency
+            self.requires("grpc/[>=1.50.0 <2]", transitive_headers=True, transitive_libs=True)
 
         if self._needs_proto:
             # This will resolve to the pinned version coming from grpc
