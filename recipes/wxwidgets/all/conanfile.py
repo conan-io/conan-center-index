@@ -151,7 +151,8 @@ class wxWidgetsConan(ConanFile):
 
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/[>=4.6.0 <5]")
-        self.requires("libwebp/[>=1.6.0 <2]")
+        if Version(self.version) >= "3.3.0":
+            self.requires("libwebp/[>=1.6.0 <2]")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("expat/[>=2.6.2 <3]")
         self.requires("pcre2/10.42")
@@ -198,7 +199,8 @@ class wxWidgetsConan(ConanFile):
         tc.variables["wxUSE_LIBPNG"] = "sys"
         tc.variables["wxUSE_LIBJPEG"] = "sys"
         tc.variables["wxUSE_LIBTIFF"] = "sys"
-        tc.variables["wxUSE_LIBWEBP"] = "sys"
+        if Version(self.version) >= "3.3.0":
+            tc.variables["wxUSE_LIBWEBP"] = "sys"
         tc.variables["wxUSE_ZLIB"] = "sys"
         tc.variables["wxUSE_EXPAT"] = "sys"
         tc.variables["wxUSE_REGEX"] = "sys"
@@ -446,7 +448,7 @@ class wxWidgetsConan(ConanFile):
                                           "wxNO_JPEG_LIB",
                                           "wxNO_PNG_LIB",
                                           "wxNO_TIFF_LIB",
-                                          "wxNO_WEBP_LIB",
+                                          *(["wxNO_WEBP_LIB"] if Version(self.version) >= "3.3.0" else []),
                                           "wxNO_ADV_LIB",
                                           "wxNO_HTML_LIB",
                                           "wxNO_GL_LIB",
