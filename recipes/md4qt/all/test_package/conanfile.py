@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.scm import Version
 import os
 
 
@@ -14,6 +15,14 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        if Version(self.version) >= "5.0.0":
+            self.requires("qt/6.8.3", options={
+                "gui": False,
+                "widgets": False,
+                "with_pq": False,
+                "with_odbc": False,
+                "with_sqlite3": False
+            })
 
     def build(self):
         cmake = CMake(self)
