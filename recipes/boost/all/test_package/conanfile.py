@@ -32,6 +32,8 @@ class TestPackageConan(ConanFile):
             pyversion = self.dependencies["boost"].options.python_version
             tc.cache_variables["PYTHON_VERSION_TO_SEARCH"] = pyversion
             tc.cache_variables["Python_EXECUTABLE"] = self.dependencies["boost"].options.python_executable
+            if not self.dependencies["boost"].options.without_numpy:
+                tc.cache_variables["WITH_NUMPY"] = not self.dependencies["boost"].options.without_numpy
         tc.cache_variables["WITH_RANDOM"] = not self.dependencies["boost"].options.without_random
         tc.cache_variables["WITH_REGEX"] = not self.dependencies["boost"].options.without_regex
         tc.cache_variables["WITH_TEST"] = not self.dependencies["boost"].options.without_test
