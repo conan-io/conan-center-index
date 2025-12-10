@@ -46,6 +46,9 @@ class CpuinfoConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.18]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
