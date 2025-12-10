@@ -34,11 +34,11 @@ class NNPACKConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cpuinfo/[*]")
-        self.requires("pthreadpool/[*]", transitive_headers=True)
+        self.requires("cpuinfo/cci.20231129")
+        self.requires("pthreadpool/cci.20231129", transitive_headers=True)
         self.requires("psimd/cci.20200517")
         self.requires("fxdiv/cci.20200417")
-        self.requires("fp16/[*]")
+        self.requires("fp16/cci.20210320")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
