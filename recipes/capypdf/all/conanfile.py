@@ -79,6 +79,7 @@ class PackageConan(ConanFile):
         python_folder = [f for f in folders if f.startswith("python") and os.path.isdir(os.path.join(self.package_folder, "lib", f))]
         if python_folder:
             rmdir(self, os.path.join(self.package_folder, "lib", python_folder[0]))
+        rmdir(self, os.path.join(self.package_folder, "lib", "site-packages"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
         fix_apple_shared_install_name(self)
