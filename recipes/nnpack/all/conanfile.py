@@ -34,7 +34,6 @@ class NNPACKConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # Always prefer self.requirements() method instead of self.requires attribute.
         self.requires("cpuinfo/[*]")
         self.requires("pthreadpool/[*]", transitive_headers=True)
         self.requires("psimd/cci.20200517")
@@ -43,7 +42,6 @@ class NNPACKConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        # Using patches is always the last resort to fix issues. If possible, try to fix the issue in the upstream project.
         apply_conandata_patches(self)
 
     def generate(self):
