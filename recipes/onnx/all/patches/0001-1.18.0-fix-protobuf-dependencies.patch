@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8b5af30..83c8ac3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -198,7 +198,7 @@ else()
+       set(PROTOBUF_DIR "${_PROTOBUF_INSTALL_PREFIX}")
+       set(PROTOBUF_INCLUDE_DIR "${_PROTOBUF_INSTALL_PREFIX}/include")
+       set(Build_Protobuf OFF)
+-      if("${Protobuf_VERSION}" VERSION_GREATER_EQUAL "4.22.0")
++      if(0)
+         # There are extra dependencies for protobuf.
+         find_package(absl REQUIRED)
+         find_package(utf8_range REQUIRED)

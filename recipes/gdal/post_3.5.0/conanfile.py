@@ -180,7 +180,7 @@ class GdalConan(ConanFile):
     def requirements(self):
         self.requires("json-c/0.17")
         self.requires("libgeotiff/1.7.1")
-        self.requires("libtiff/4.6.0")
+        self.requires("libtiff/[>=4.6.0 <5]")
         self.requires("proj/9.3.1")
         # Used in a public header here:
         # https://github.com/OSGeo/gdal/blob/v3.7.1/port/cpl_minizip_ioapi.h#L26
@@ -188,7 +188,7 @@ class GdalConan(ConanFile):
         if self.options.with_armadillo:
             self.requires("armadillo/12.6.4")
         if self.options.with_arrow:
-            self.requires("arrow/14.0.2")
+            self.requires("arrow/[>=14.0.2 <20]")
         if self.options.with_basisu:
             self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
@@ -310,9 +310,6 @@ class GdalConan(ConanFile):
         else:
             check_min_cppstd(self, 11)
 
-        for option in ["crypto", "zlib", "proj", "libtiff"]:
-            if self.options.get_safe(f"with_{option}") != "deprecated":
-                self.output.warning(f"{self.ref}:with_{option} option is deprecated. The {option} dependecy is always enabled now.")
         if self.options.with_pcre and self.options.with_pcre2:
             raise ConanInvalidConfiguration("Enable either pcre or pcre2, not both")
 
@@ -338,6 +335,7 @@ class GdalConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -442,8 +440,13 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_ZLIB_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_ZSTD"] = self.options.with_zstd
 
-        tc.cache_variables["Parquet_FOUND"] = self.options.with_arrow and self.dependencies["arrow"].options.parquet
-        tc.cache_variables["ArrowDataset_FOUND"] = self.options.with_arrow and self.dependencies["arrow"].options.dataset_modules
+        if self.options.with_arrow:
+            # Let's avoid using a patch to set this variables
+            arrow_version = str(self.dependencies["arrow"].ref.version)
+            tc.cache_variables["Parquet_FOUND"] = self.dependencies["arrow"].options.parquet
+            tc.cache_variables["ArrowDataset_FOUND"] = self.dependencies["arrow"].options.dataset_modules
+            tc.cache_variables["Parquet_VERSION"] = arrow_version
+            tc.cache_variables["ArrowDataset_VERSION"] = arrow_version
 
         # General workaround for try_compile() tests in the project
         # https://github.com/conan-io/conan/issues/12180
@@ -644,7 +647,6 @@ class GdalConan(ConanFile):
                             "gdal_check_package(ArrowDataset", "# gdal_check_package(ArrowDataset")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()

@@ -691,6 +691,8 @@ class BoostConan(ConanFile):
             libraries.append("thread")
         if Version(self.version) >= "1.85.0":
             libraries.append("system")
+        if Version(self.version) >= "1.89.0":
+            libraries.append("atomic")
         libraries.sort()
         return list(filter(lambda library: f"without_{library}" in self.options, libraries))
 
@@ -838,6 +840,8 @@ class BoostConan(ConanFile):
             del self.info.options.python_executable  # PATH to the interpreter is not important, only version matters
             if self.info.options.without_python:
                 del self.info.options.python_version
+            if Version(self.version) >= "1.89.0":
+                del self.info.options.system_use_utf8
 
     def build_requirements(self):
         if not self.options.header_only:
@@ -1173,7 +1177,7 @@ class BoostConan(ConanFile):
 
     @property
     def _b2_address_model(self):
-        if self.settings.arch in ("x86_64", "ppc64", "ppc64le", "mips64", "armv8", "armv8.3", "sparcv9", "s390x", "riscv64"):
+        if self.settings.arch in ("x86_64", "ppc64", "ppc64le", "mips64", "armv8", "armv8.3", "sparcv9", "s390x", "riscv64", "wasm64"):
             return "64"
 
         return "32"
@@ -1628,7 +1632,7 @@ class BoostConan(ConanFile):
             return "clang-win" if self.settings.compiler.get_safe("toolset") == "ClangCL" else "msvc"
         if self.settings.os == "Windows" and self.settings.compiler == "clang":
             return "clang-win"
-        if self.settings.os == "Emscripten" and self.settings.compiler == "clang":
+        if self.settings.os == "Emscripten" and self.settings.compiler in ("clang", "emcc"):
             return "emscripten"
         if self.settings.compiler == "gcc" and is_apple_os(self):
             return "darwin"

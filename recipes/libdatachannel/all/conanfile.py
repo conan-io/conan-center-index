@@ -2,11 +2,12 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import copy, get, rm, rmdir, replace_in_file
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
 
@@ -36,6 +37,9 @@ class libdatachannelConan(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def requirements(self):
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
@@ -50,8 +54,10 @@ class libdatachannelConan(ConanFile):
         self.requires("libsrtp/2.6.0")
         if self.options.with_nice:
             self.requires("libnice/0.1.21")
-        else:
+        elif Version(self.version) < "0.23.0":
             self.requires("libjuice/1.5.7", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("libjuice/1.6.2", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         check_min_cppstd(self, 17)
@@ -64,6 +70,7 @@ class libdatachannelConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
         # Let Conan handle fpic
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
@@ -139,4 +146,3 @@ class libdatachannelConan(ConanFile):
         self.cpp_info.defines.append("RTC_ENABLE_WEBSOCKET=" + ("1" if self.options.with_websocket else "0"))
         # This is True by default, and the recipe currently does not model it
         self.cpp_info.defines.append("RTC_ENABLE_MEDIA=1")
-
