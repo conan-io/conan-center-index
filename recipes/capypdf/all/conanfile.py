@@ -41,9 +41,9 @@ class PackageConan(ConanFile):
     def requirements(self):
         self.requires("libjpeg-turbo/[>=3.0.0 <4]")
         self.requires("libpng/[>=1.6 <2]")
-        self.requires("lcms/2.17")
+        self.requires("lcms/[>=2.16 <3]")
         self.requires("freetype/2.13.2")
-        self.requires("libtiff/4.7.0")
+        self.requires("libtiff/[>=4.6.0 <5]")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
