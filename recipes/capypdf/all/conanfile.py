@@ -18,21 +18,10 @@ class PackageConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jpakkane/capypdf"
     topics = ("pdf", "rendering")
-    package_type = "library"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-    }
-    implements = ["auto_shared_fpic"]
 
     def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
         self.options["libtiff"].jpeg = "libjpeg-turbo"
 
     def layout(self):
