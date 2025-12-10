@@ -113,9 +113,6 @@ class OpenTelemetryCppConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 14)
 
-        if self.settings.os != "Linux" and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} supports building shared libraries only on Linux")
-
         if self.options.with_otlp_grpc:
             if not self.dependencies["grpc"].options.cpp_plugin:
                 raise ConanInvalidConfiguration(f"{self.ref} requires grpc with cpp_plugin=True")
@@ -146,6 +143,7 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["WITH_BENCHMARK"] = False
         tc.cache_variables["WITH_EXAMPLES"] = False
+        tc.cache_variables["WITH_FUNC_TESTS"] = False
         tc.cache_variables["WITH_NO_DEPRECATED_CODE"] = self.options.with_no_deprecated_code
         tc.cache_variables["WITH_STL"] = self._stl_value
         tc.cache_variables["WITH_GSL"] = self.options.with_gsl
@@ -199,8 +197,6 @@ class OpenTelemetryCppConan(ConanFile):
                 replace_in_file(self, protos_cmake_path,
                                 'SOURCE_DIR ${OPENTELEMETRY_PROTO_SUBMODULE}',
                                 f'SOURCE_DIR ${protos_path}')
-
-        rmdir(self, os.path.join(self.source_folder, "api", "include", "opentelemetry", "nostd", "absl"))
 
     def build(self):
         self._patch_sources()
