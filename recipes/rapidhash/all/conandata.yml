@@ -1,7 +1,10 @@
 sources:
+  "3.0.cci20251211":
+    url: "https://github.com/Nicoshev/rapidhash/archive/d60698faa10916879f85b2799bfdc6996b94c2b7.tar.gz"
+    sha256: "f403f34f892a78d58aef08bcb2a3ed1152a05ff07b70a698e02ba30865800b36"
   "3.0":
-    url: "https://github.com/Nicoshev/rapidhash/archive/refs/tags/rapidhash_v3.tar.gz"
-    sha256: "2e708bb2be76fd76f1e5d75bb3145d058e2dad0c5b0022646f84ec83aeff400d"
+    url: "https://github.com/Nicoshev/rapidhash/archive/bbaf1a70775b785f11dab29dc7d9bd717b4eb6a6.tar.gz"
+    sha256: "48c3cf8464deeeb1eb1023fd132c3e19d00c37d7931816fb1bd09eec8f4db00e"
   "1.0":
     url: "https://github.com/Nicoshev/rapidhash/archive/refs/tags/rapidhash_v1.0.tar.gz"
     sha256: "d295e66eec6745cc0e0c8c65fb8b5edf08ab3af83b0a503c54c6705144b53848"
