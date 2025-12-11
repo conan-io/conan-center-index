@@ -145,6 +145,8 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["WITH_BENCHMARK"] = False
         tc.cache_variables["WITH_EXAMPLES"] = False
         tc.cache_variables["WITH_FUNC_TESTS"] = False
+        if self.settings.os == "Windows":
+            tc.cache_variables["OPENTELEMETRY_BUILD_DLL"] = self.options.shared
         tc.cache_variables["WITH_NO_DEPRECATED_CODE"] = self.options.with_no_deprecated_code
         tc.cache_variables["WITH_STL"] = self._stl_value
         tc.cache_variables["WITH_GSL"] = self.options.with_gsl
