@@ -1,0 +1,59 @@
+diff --git a/Makefile b/Makefile
+index ef8ba8b..d47579b 100644
+--- a/Makefile
++++ b/Makefile
+@@ -7,7 +7,6 @@ include project/settings.mk
+ COMMON := $(COMMON)
+ LUAMOD := $(LUAMOD)
+ MODULES := COMMON
+-MODULES += LUAMOD
+ 
+ # Override optimizations via: make O=n
+ O = 3
+diff --git a/project/modules.mk b/project/modules.mk
+index 6bdf144..76b0d78 100644
+--- a/project/modules.mk
++++ b/project/modules.mk
+@@ -50,42 +50,3 @@ $(TARGET_INCL)/aerospike/%.h: $(COMMON)/$(TARGET_INCL)/aerospike/%.h
+ $(TARGET_INCL)/citrusleaf/%.h: $(COMMON)/$(TARGET_INCL)/citrusleaf/%.h
+ 	@mkdir -p $(@D)
+ 	cp -p $< $@
+-
+-###############################################################################
+-##  LUA MODULE                                                               ##
+-###############################################################################
+-
+-ifndef LUAMOD
+-  $(warning ***************************************************************)
+-  $(warning *)
+-  $(warning *  LUAMOD is not defined. )
+-  $(warning *  LUAMOD should be set to a valid path. )
+-  $(warning *)
+-  $(warning ***************************************************************)
+-  $(error )
+-endif
+-
+-ifeq ($(wildcard $(LUAMOD)/makefile),)
+-  $(warning ***************************************************************)
+-  $(warning *)
+-  $(warning *  LUAMOD is '$(LUAMOD)')
+-  $(warning *  LUAMOD doesn't contain 'makefile'. )
+-  $(warning *  LUAMOD should be set to a valid path. )
+-  $(warning *)
+-  $(warning ***************************************************************)
+-  $(error )
+-endif
+-
+-.PHONY: LUAMOD-build
+-LUAMOD-build: $(LUAMOD)/liblua.a
+-
+-$(LUAMOD)/liblua.a:
+-	$(MAKE) -C $(LUAMOD) CFLAGS="-Wall -O2 -std=c99 -D$(LUA_PLATFORM) -fPIC -fno-stack-protector -fno-common $(REAL_ARCH) -g" a
+-
+-.PHONY: LUAMOD-clean
+-LUAMOD-clean:
+-	$(MAKE) -e -C $(LUAMOD) clean
+-
+-.PHONY: LUAMOD-prepare
+-LUAMOD-prepare: ;
+-
