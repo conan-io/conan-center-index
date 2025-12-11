@@ -14,7 +14,7 @@ class NNPACKConan(ConanFile):
     license = " BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Maratyszcza/NNPACK"
-    topics = ("neural-networks", "deep-learning", "machine-learning", "ai")
+    topics = ("neural-networks", "deep-learning", "machine-learning", "ai", "simd", "fft")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
