@@ -51,14 +51,11 @@ class Md4QtConan(ConanFile):
             self.requires("icu/74.2")
             self.requires("uriparser/0.9.7")
         else:
-            self.requires("qt/6.8.3", options={
-                "gui": False,
-                "widgets": False,
-                "with_pq": False,
-                "with_odbc": False,
-                "with_sqlite3": False
-            })
+            self.requires("qt/6.8.3")
             self.requires("extra-cmake-modules/6.8.0")
+
+    def build_requirements(self):
+        self.tool_requires("qt/<host_version>")
 
     def generate(self):
         if Version(self.version) >= "5.0.0":
