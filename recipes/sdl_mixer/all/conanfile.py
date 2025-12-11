@@ -77,7 +77,7 @@ class SDLMixerConan(ConanFile):
         if self.options.flac:
             self.requires("flac/1.4.2")
         if self.options.mpg123:
-            self.requires("mpg123/1.31.2")
+            self.requires("mpg123/[>=1.31.2 <2]")
         if self.options.mad:
             self.requires("libmad/0.15.1b")
         if self.options.ogg:
@@ -85,7 +85,7 @@ class SDLMixerConan(ConanFile):
             self.requires("vorbis/1.3.7")
         if self.options.opus:
             self.requires("openssl/[>=1.1 <4]")
-            self.requires("opus/1.4")
+            self.requires("opus/[>=1.4 <2]")
             self.requires("opusfile/0.12")
         if self.options.mikmod:
             self.requires("libmikmod/3.3.11.1")

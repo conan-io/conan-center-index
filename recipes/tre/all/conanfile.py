@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
@@ -42,7 +42,7 @@ class TreConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os != "Windows":
-            self.tool_requires("gettext/0.21")
+            self.tool_requires("gettext/[>=0.21 <1]")
             self.tool_requires("libtool/2.4.7")
 
     def source(self):
@@ -59,6 +59,8 @@ class TreConan(ConanFile):
                 env = VirtualRunEnv(self)
                 env.generate(scope="build")
             tc = AutotoolsToolchain(self)
+            if is_apple_os(self):
+                tc.extra_ldflags.append("-headerpad_max_install_names")
             tc.generate()
 
     def build(self):
