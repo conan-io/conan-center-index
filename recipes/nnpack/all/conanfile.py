@@ -47,6 +47,7 @@ class NNPACKConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["NNPACK_BUILD_TESTS"] = False
+        tc.cache_variables["NNPACK_BACKEND"] = "psimd"
         tc.generate()
 
         deps = CMakeDeps(self)
