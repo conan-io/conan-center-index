@@ -50,7 +50,10 @@ class ProtobufCConan(ConanFile):
     def build_requirements(self):
         # Since the package using protobuf-c will also need to use protoc (part of protobuf),
         # we want to make sure the protobuf dep is visible
-        self.tool_requires("protobuf/<host_version>", visible=True)
+        if Version(self.version) >= "1.5.2":
+            self.requires("protobuf/[>=3.21.9 <=6.30.1]", visible=True)
+        else:
+            self.requires("protobuf/3.21.9", visible=True)
         if Version(self.version) >= "1.5.0":
             self.tool_requires("cmake/[>=3.19 <4]")
 
