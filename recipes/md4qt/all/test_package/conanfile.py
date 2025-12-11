@@ -16,19 +16,6 @@ class TestPackageConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
-    def build_requirements(self):
-        if Version(self.tested_reference_str.split("/")[1].split("#")[0]) >= "5.0.0":
-            self.requires("qt/6.8.3", options={
-                "gui": False,
-                "widgets": False,
-                "with_pq": False,
-                "with_odbc": False,
-                "with_sqlite3": False
-            })
-        else:
-            self.requires("icu/74.2")
-            self.requires("uriparser/0.9.7")
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
