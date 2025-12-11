@@ -48,6 +48,9 @@ class SysConfigOpenGLConan(ConanFile):
         pkg_util = package_manager.PkgUtil(self)
         pkg_util.install(["mesalibs"], update=True, check=True)
 
+        alpine = package_manager.Apk(self)
+        alpine.install(["mesa-dev"], update=True, check=True)
+
     def package_info(self):
         # TODO: Workaround for #2311 until a better solution can be found
         self.cpp_info.filenames["cmake_find_package"] = "opengl_system"
