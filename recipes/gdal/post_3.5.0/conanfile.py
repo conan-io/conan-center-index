@@ -278,7 +278,7 @@ class GdalConan(ConanFile):
         if self.options.with_poppler:
             self.requires("poppler/21.07.0")
         if self.options.with_qhull:
-            self.requires("qhull/8.0.1")
+            self.requires("qhull/8.0.2")
         if self.options.with_rasterlite2:
             self.requires("librasterlite2/1.1.0-beta1")
         if self.options.with_spatialite:

@@ -41,7 +41,7 @@ class OatppsqliteConan(ConanFile):
 
     def requirements(self):
         self.requires(f"oatpp/{self.version}", transitive_headers=True)
-        self.requires("sqlite3/3.45.0")
+        self.requires("sqlite3/[>=3.45.0 <4]")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
@@ -91,12 +91,5 @@ class OatppsqliteConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_oatpp-sqlite"].system_libs = ["pthread"]
 
-        # TODO: to remove in conan v2 once legacy generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "oatpp-sqlite"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "oatpp-sqlite"
-        self.cpp_info.names["cmake_find_package"] = "oatpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "oatpp"
-        self.cpp_info.components["_oatpp-sqlite"].names["cmake_find_package"] = "oatpp-sqlite"
-        self.cpp_info.components["_oatpp-sqlite"].names["cmake_find_package_multi"] = "oatpp-sqlite"
         self.cpp_info.components["_oatpp-sqlite"].set_property("cmake_target_name", "oatpp::oatpp-sqlite")
         self.cpp_info.components["_oatpp-sqlite"].requires = ["oatpp::oatpp", "sqlite3::sqlite3"]
