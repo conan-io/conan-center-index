@@ -45,10 +45,7 @@ class XnnpackConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.version in ["cci.20220801", "cci.20220621", "cci.20211210"]:
-            self.requires("cpuinfo/cci.20220618")
-        else:
-            self.requires("cpuinfo/[>=cci.20231129]")
+        self.requires("cpuinfo/[>=cci.20231129]")
         self.requires("fp16/cci.20210320")
         #  https://github.com/google/XNNPACK/blob/ed5f9c0562e016a08b274a4579de5ef500fec134/include/xnnpack.h#L15
         self.requires("pthreadpool/cci.20231129", transitive_headers=True)
@@ -58,15 +55,10 @@ class XnnpackConan(ConanFile):
         check_min_vs(self, 192)
         compiler = self.settings.compiler
         compiler_version = Version(compiler.version)
-        if Version(self.version) < "cci.20230715":
-            if (compiler == "gcc" and compiler_version < "6") or \
-                (compiler == "clang" and compiler_version < "5"):
-                raise ConanInvalidConfiguration(f"{self.ref} doesn't support {compiler} {compiler.version}")
-        else:
-            # since cci.20230715, xnnpack requires avx512 header file
-            if (compiler == "gcc" and compiler_version < "11") or \
-                (compiler == "clang" and compiler_version < "8"):
-                raise ConanInvalidConfiguration(f"{self.ref} doesn't support {compiler} {compiler.version}")
+        # xnnpack requires avx512 header file
+        if (compiler == "gcc" and compiler_version < "11") or \
+            (compiler == "clang" and compiler_version < "8"):
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support {compiler} {compiler.version}")
         if self.options.assembly and compiler == "clang" and self.settings.arch == "armv6":
             # clang assembly validator fails on XNNPACK's math.h for armv6:
             # https://github.com/google/XNNPACK/issues/4348#issuecomment-1445437613
@@ -94,7 +86,8 @@ class XnnpackConan(ConanFile):
         # To export symbols for shared msvc
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         # TODO Support?
-        tc.cache_variables["XNNPACK_ENABLE_KLEIDIAI"] = False
+        if Version(self.version) >= "cci.20241203":
+            tc.cache_variables["XNNPACK_ENABLE_KLEIDIAI"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
