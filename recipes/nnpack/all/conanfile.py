@@ -34,7 +34,7 @@ class NNPACKConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cpuinfo/cci.20231129")
+        self.requires("cpuinfo/[>=cci.20231129]")
         self.requires("pthreadpool/cci.20231129", transitive_headers=True)
         self.requires("psimd/cci.20200517")
         self.requires("fxdiv/cci.20200417")
