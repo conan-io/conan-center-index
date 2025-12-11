@@ -34,7 +34,7 @@ class PackageConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("apr/[>=1.3]")
+        self.requires("apr/[>=1.3]", transitive_headers=True)
         self.requires("apr-util/[>=1.3]")
         self.requires("libuuid/[>=1.0.3]")
         self.requires("openssl/[>=1.1 <4]")
