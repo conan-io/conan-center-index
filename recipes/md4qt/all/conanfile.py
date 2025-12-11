@@ -20,7 +20,7 @@ class Md4QtConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    def init(self):
+    def configure(self):
         if Version(self.version) < "5.0.0":
             self.package_type = "header-library"
         else:
