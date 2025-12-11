@@ -55,7 +55,8 @@ class Md4QtConan(ConanFile):
             self.requires("extra-cmake-modules/6.8.0")
 
     def build_requirements(self):
-        self.tool_requires("qt/<host_version>")
+        if Version(self.version) >= "5.0.0":
+            self.tool_requires("qt/<host_version>")
 
     def generate(self):
         if Version(self.version) >= "5.0.0":
