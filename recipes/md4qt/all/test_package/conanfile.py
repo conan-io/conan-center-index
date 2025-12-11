@@ -25,6 +25,9 @@ class TestPackageConan(ConanFile):
                 "with_odbc": False,
                 "with_sqlite3": False
             })
+        else:
+            self.requires("icu/74.2")
+            self.requires("uriparser/0.9.7")
 
     def build(self):
         cmake = CMake(self)
