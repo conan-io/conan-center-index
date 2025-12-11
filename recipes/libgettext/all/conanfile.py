@@ -98,6 +98,11 @@ class GetTextConan(ConanFile):
             "--disable-threads" if self.options.threads == "disabled" else ("--enable-threads=" + str(self.options.threads)),
             f"--with-libiconv-prefix={unix_path(self, self.dependencies['libiconv'].package_folder)}",
         ]
+
+        if is_apple_os(self) and Version(self.version) >= "0.26":
+            # not guessed properly when cross-building
+            tc.configure_args.append("gl_cv_func_access_slash_works=yes")
+
         if is_msvc(self) or self._is_clang_cl:
             target = None
             if self.settings.arch == "x86_64":
