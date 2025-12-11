@@ -1,5 +1,22 @@
 --- a/source/CMakeLists.txt
 +++ b/source/CMakeLists.txt
+@@ -1,11 +1,11 @@
+ cmake_minimum_required(VERSION 3.1...3.31)
+ project(xlnt VERSION 1.6.1)
+ 
+-set(CMAKE_CXX_STANDARD ${XLNT_CXX_LANG})
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-set(CMAKE_C_STANDARD ${XLNT_C_LANG})
+-set(CMAKE_C_STANDARD_REQUIRED ON)
+-set(CXX_EXTENSIONS OFF)
++#set(CMAKE_CXX_STANDARD ${XLNT_CXX_LANG})
++#set(CMAKE_CXX_STANDARD_REQUIRED ON)
++#set(CMAKE_C_STANDARD ${XLNT_C_LANG})
++#set(CMAKE_C_STANDARD_REQUIRED ON)
++#set(CXX_EXTENSIONS OFF)
+ 
+ # Project metadata
+ set(PROJECT_VENDOR "xlnt-community")
 @@ -20,8 +20,6 @@ set(XLNT_SOURCE_DIR ${XLNT_ROOT_DIR}/source)
  set(THIRD_PARTY_DIR ${XLNT_ROOT_DIR}/third-party)
  
