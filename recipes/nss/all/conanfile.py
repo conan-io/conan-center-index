@@ -135,7 +135,12 @@ class NSSConan(ConanFile):
             _format_library_paths(self.dependencies["zlib"].cpp_info.aggregated_components().libdirs)))
         args.append("NSS_DISABLE_GTESTS=1")
         args.append("NSS_USE_SYSTEM_SQLITE=1")
-        args.append("SQLITE_INCLUDE_DIR=%s" % self.dependencies["sqlite3"].cpp_info.aggregated_components().includedirs[0])
+        # INFO: There was an issue for versions between 3.94 to 3.101 with finding a sqlite3 header file.
+        # This is how it can be build for these versions.
+        if "3.94" <= Version(self.version) <= "3.101":
+            args.append("SOFTOKEN_INCLUDE_DIR=%s" % self.dependencies["sqlite3"].cpp_info.aggregated_components().includedirs[0])
+        else:
+            args.append("SQLITE_INCLUDE_DIR=%s" % self.dependencies["sqlite3"].cpp_info.aggregated_components().includedirs[0])
         args.append("SQLITE_LIB_DIR=%s" % self.dependencies["sqlite3"].cpp_info.aggregated_components().libdirs[0])
         args.append("NSDISTMODE=copy")
         args.append("NSS_ENABLE_WERROR=0")
@@ -168,10 +173,13 @@ class NSSConan(ConanFile):
         # INFO: The Darwin.mk has no configuration for ARM arch, and anything different from x86_64 or arm is considered as PowerPC
         # Using arm as CPU_ARCH will require ARM neon support, resulting in build errors due missing __ARM_FEATURE_CRYPTO feature support in Clang
         # See https://bugzilla.mozilla.org/show_bug.cgi?id=1952518
+        # 
         replace_in_file(self, os.path.join(self.source_folder, "nss", "coreconf", "Darwin.mk"), "ifeq (arm,$(CPU_ARCH))", "ifeq (aarch64, $(CPU_ARCH))")
 
     def build(self):
-        self._patch_sources()
+        # INFO: Patch is needed only for versions before 3.119
+        if (Version(self.version) < "3.119"):
+            self._patch_sources()
         with chdir(self, os.path.join(self.source_folder, "nss")):
             self.run(f"{self._make} {self._make_args}")
 
@@ -218,7 +226,7 @@ class NSSConan(ConanFile):
         self.cpp_info.components["softokn"].libs = [_library_name("softokn", 3)]
         self.cpp_info.components["softokn"].requires = ["sqlite3::sqlite3", "nssutil", "nspr::nspr"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["softokn"].system_libs = ["pthread"]
+            self.cpp_info.components["softokn"].system_libs = ["pthread", "m"]
 
         self.cpp_info.components["nssdbm"].libs = [_library_name("nssdbm", 3)]
         self.cpp_info.components["nssdbm"].requires = ["nspr::nspr", "nssutil"]
