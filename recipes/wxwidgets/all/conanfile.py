@@ -435,9 +435,9 @@ class wxWidgetsConan(ConanFile):
 
             arch_suffix = "_x64" if self.settings.arch == "x86_64" else ""
             lib_suffix = "_dll" if self.options.shared else "_lib"
-            libdir = f"{compiler_prefix}{arch_suffix}{lib_suffix}"
-            libdir = os.path.join("lib", libdir)
-            bindir = libdir if Version(self.version) < "3.3.0" else os.path.join("bin", libdir)
+            libtemplate = f"{compiler_prefix}{arch_suffix}{lib_suffix}"
+            libdir = os.path.join("lib", libtemplate)
+            bindir = libdir if Version(self.version) < "3.3.0" else os.path.join("bin", libtemplate)
             self.cpp_info.bindirs.append(bindir)
             self.cpp_info.libdirs.append(libdir)
             self.cpp_info.defines.append("__WXMSW__")
