@@ -15,6 +15,8 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+
+    def build_requirements(self):
         if Version(self.version) >= "5.0.0":
             self.requires("qt/6.8.3", options={
                 "gui": False,
