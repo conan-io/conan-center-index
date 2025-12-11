@@ -152,7 +152,7 @@ class Pagmo2Conan(ConanFile):
             self.cpp_info.components["_pagmo"].system_libs.append("pthread")
 
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["_pagmo"].requires = ["boost::boost", "onetbb::onetbb"]
+        self.cpp_info.components["_pagmo"].requires = ["boost::boost", "onetbb::libtbb"]
         if self.options.with_eigen:
             self.cpp_info.components["_pagmo"].requires.append("eigen::eigen")
         if self.options.with_nlopt:
