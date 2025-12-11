@@ -114,7 +114,7 @@ class CouchbaseCxxClientConan(ConanFile):
         tc.variables["COUCHBASE_CXX_CLIENT_INSTALL"] = "ON"
         tc.variables["COUCHBASE_CXX_CLIENT_CLANG_TIDY"] = False
 
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             tc.variables["COUCHBASE_CXX_CLIENT_BUILD_SHARED"] = "ON"
             tc.variables["COUCHBASE_CXX_CLIENT_BUILD_STATIC"] = "OFF"
         else:
@@ -149,7 +149,7 @@ class CouchbaseCxxClientConan(ConanFile):
 
     def package_info(self):
         # couchbase has different library names for shared vs static builds
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.cpp_info.libs = ["couchbase_cxx_client"]
         else:
             self.cpp_info.libs = ["couchbase_cxx_client_static"]
