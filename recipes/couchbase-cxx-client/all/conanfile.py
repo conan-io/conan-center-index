@@ -10,7 +10,7 @@ import re
 required_conan_version = ">=2.0.9"
 
 class CouchbaseCxxClientConan(ConanFile):
-    name = "couchbase_cxx_client"
+    name = "couchbase-cxx-client"
     description = "Couchbase C++ SDK"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
