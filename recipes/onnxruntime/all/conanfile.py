@@ -68,7 +68,7 @@ class OnnxRuntimeConan(ConanFile):
         else:
             self.requires("wil/1.0.240803.1")
         if self.options.with_xnnpack:
-            self.requires("xnnpack/cci.20240229")
+            self.requires("xnnpack/[>=cci.20241203]")
             self.requires("pthreadpool/cci.20231129")
         if self.options.with_cuda:
             self.requires("cutlass/3.5.0")
