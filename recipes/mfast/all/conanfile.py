@@ -6,7 +6,6 @@ from conan.tools.files import (
     apply_conandata_patches, copy, export_conandata_patches, get, load, mkdir,
     rename, rm, rmdir, save
 )
-from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -123,15 +122,8 @@ class mFASTConan(ConanFile):
         return os.path.join(self._new_mfast_config_dir, "FastTypeGenTarget.cmake")
 
     def _extract_fasttypegentarget_macro(self):
-        if Version(self.version) < "1.2.2":
-            config_file_content = load(self, os.path.join(self.package_folder, self._old_mfast_config_dir, "mFASTConfig.cmake"))
-            begin = config_file_content.find("macro(FASTTYPEGEN_TARGET Name)")
-            end = config_file_content.find("endmacro()", begin) + len("endmacro()")
-            macro_str = config_file_content[begin:end]
-            save(self, os.path.join(self.package_folder, self._fast_type_gen_target_file), macro_str)
-        else:
-            rename(self, os.path.join(self.package_folder, self._old_mfast_config_dir, "FastTypeGenTarget.cmake"),
-                         os.path.join(self.package_folder, self._fast_type_gen_target_file))
+        rename(self, os.path.join(self.package_folder, self._old_mfast_config_dir, "FastTypeGenTarget.cmake"),
+                    os.path.join(self.package_folder, self._fast_type_gen_target_file))
 
     def _prepend_exec_target_in_fasttypegentarget(self):
         extension = ".exe" if self.settings.os == "Windows" else ""
