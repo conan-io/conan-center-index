@@ -1,6 +1,6 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd, valid_min_cppstd
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import (
     apply_conandata_patches, copy, export_conandata_patches, get, load, mkdir,
@@ -67,10 +67,11 @@ class mFASTConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_TESTS"] = False
-        tc.variables["BUILD_EXAMPLES"] = False
-        tc.variables["BUILD_PACKAGES"] = False
-        tc.variables["BUILD_SQLITE3"] = self.options.with_sqlite3
+        tc.cache_variables["BUILD_TESTS"] = False
+        tc.cache_variables["BUILD_EXAMPLES"] = False
+        tc.cache_variables["BUILD_PACKAGES"] = False
+        tc.cache_variables["BUILD_SQLITE3"] = self.options.with_sqlite3
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -91,6 +92,8 @@ class mFASTConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         if self.options.shared:
             rm(self, "*_static*" if self.settings.os == "Windows" else "*.a", os.path.join(self.package_folder, "lib"))
+
+        fix_apple_shared_install_name(self)
 
         # TODO: several CMake variables should also be emulated (casing issues):
         #       [ ] MFAST_INCLUDE_DIR         - include directories for mFAST
