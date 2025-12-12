@@ -1,0 +1,12 @@
+sources:
+  "0.8.4.cci.20251212":
+    url: "https://github.com/IfcOpenShell/IfcOpenShell/archive/276c9c9833bb43957564fcd2fbbb7c54a3b42b2f.tar.gz"
+    sha256: "23a3dbbd8cd222eb40c8b5df787e843970200979cc80b0c052ce479f7d60732c"
+# patches:
+#   "0.8.4.cci.20251211":
+    # - patch_file: "patches/0001-Revert-cmake-Add-project-command-before-options-to-b.patch"
+    #   patch_type: "portability"
+    # - patch_file: "patches/0001-cmake-Remove-specific-FindPackage.patch"
+    #   patch_type: "build"
+    # - patch_file: "patches/0002.patch"
+    #   patch_type: "build"
