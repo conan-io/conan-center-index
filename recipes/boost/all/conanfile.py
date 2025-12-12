@@ -47,6 +47,7 @@ CONFIGURE_OPTIONS = (
     "math",
     "mpi",
     "nowide",
+    "numpy",
     "process",
     "program_options",
     "python",
@@ -2059,9 +2060,10 @@ class BoostConan(ConanFile):
                 if not self._shared:
                     self.cpp_info.components["python"].defines.append("BOOST_PYTHON_STATIC_LIB")
 
-                numpy_versioned_component_name = f"numpy{pyversion.major}{pyversion.minor}"
-                self.cpp_info.components[numpy_versioned_component_name].requires = ["numpy"]
-                self.cpp_info.components[numpy_versioned_component_name].set_property("cmake_target_name", "Boost::" + numpy_versioned_component_name)
+                if not self.options.without_numpy:
+                    numpy_versioned_component_name = f"numpy{pyversion.major}{pyversion.minor}"
+                    self.cpp_info.components[numpy_versioned_component_name].requires = ["numpy"]
+                    self.cpp_info.components[numpy_versioned_component_name].set_property("cmake_target_name", "Boost::" + numpy_versioned_component_name)
 
             if not self.options.get_safe("without_process"):
                 if self.settings.os == "Windows":
