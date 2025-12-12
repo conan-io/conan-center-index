@@ -48,7 +48,7 @@ class sqlpp11Conan(ConanFile):
             check_min_cppstd(self, 11)
 
     def requirements(self):
-        self.requires("sqlpp11/0.60", transitive_headers=True, transitive_libs=True)
+        self.requires("sqlpp11/[>=0.60 <1]", transitive_headers=True, transitive_libs=True)
         if self.options.with_sqlcipher:
             self.requires("sqlcipher/4.5.1", transitive_headers=True, transitive_libs=True)
         else:
