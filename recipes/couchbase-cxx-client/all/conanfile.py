@@ -132,9 +132,6 @@ class CouchbaseCxxClientConan(ConanFile):
 
         tc.generate()
 
-    def validate(self):
-        check_min_cppstd(self, 17)
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
