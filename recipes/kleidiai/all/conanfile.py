@@ -28,9 +28,17 @@ class KleidiaiConan(ConanFile):
         "fPIC": True,
     }
     implements = ["auto_shared_fpic"]
+    languages = ["C", "C++"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def config_options(self):
+        # Windows ARM does not support (yet) shared builds
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+            del self.options.shared
+            self.package_type = "static-library"
 
     def validate(self):
         check_min_cppstd(self, 17)
@@ -45,9 +53,7 @@ class KleidiaiConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         replace_in_file(self, "CMakeLists.txt", "set(CMAKE_CXX_STANDARD 17)", "")
-        replace_in_file(self, "CMakeLists.txt", "set(CMAKE_CXX_STANDARD_REQUIRED ON)", "")
         replace_in_file(self, "CMakeLists.txt", "set(CMAKE_C_STANDARD 99)", "")
-        replace_in_file(self, "CMakeLists.txt", "set(CMAKE_C_STANDARD_REQUIRED ON)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -69,3 +75,4 @@ class KleidiaiConan(ConanFile):
         self.cpp_info.libs = ["kleidiai"]
         self.cpp_info.set_property("cmake_file_name", "KleidiAI")
         self.cpp_info.set_property("cmake_target_name", "KleidiAI::kleidiai")
+        self.cpp_info.defines = ["KLEIDIAI_ERROR_TRAP=0"]
