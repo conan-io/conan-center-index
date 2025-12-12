@@ -1,0 +1,18 @@
+diff --git a/ConvertLib/ImageScaler.cpp b/ConvertLib/ImageScaler.cpp
+index 62f30fd..a1d9e71 100644
+--- a/ConvertLib/ImageScaler.cpp
++++ b/ConvertLib/ImageScaler.cpp
+@@ -85,13 +85,6 @@
+ 
+ #include "cpuid.h"
+ 
+-int GetProcessorCount()
+-{
+-	SYSTEM_INFO cSystem_info;
+-	GetSystemInfo(&cSystem_info);
+-	return cSystem_info.dwNumberOfProcessors;
+-}
+-
+ #elif __APPLE__
+ 
+ #include <sys/types.h>
