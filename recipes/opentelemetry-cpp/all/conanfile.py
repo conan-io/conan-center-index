@@ -67,9 +67,17 @@ class OpenTelemetryCppConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
             del self.options.with_etw
+            # Opentelemetry-cpp on Windows only supports static libraries,
+            # due to ppor support from upstream (and build failures)
+            # As Upstream does not expect shared builds to work properly on Windows,
+            # instead of validating shared out (which would remove shared builds from CCI of dependants),
+            # we just force static builds on Windows.
+            # See https://github.com/open-telemetry/opentelemetry-cpp/issues/2477
+            self.package_type = "static-library"
+            del self.options.shared
 
     def configure(self):
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def layout(self):
@@ -145,8 +153,6 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["WITH_BENCHMARK"] = False
         tc.cache_variables["WITH_EXAMPLES"] = False
         tc.cache_variables["WITH_FUNC_TESTS"] = False
-        if self.settings.os == "Windows":
-            tc.cache_variables["OPENTELEMETRY_BUILD_DLL"] = self.options.shared
         tc.cache_variables["WITH_NO_DEPRECATED_CODE"] = self.options.with_no_deprecated_code
         tc.cache_variables["WITH_STL"] = self._stl_value
         tc.cache_variables["WITH_GSL"] = self.options.with_gsl
