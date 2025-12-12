@@ -52,7 +52,6 @@ class Md4QtConan(ConanFile):
             self.requires("uriparser/0.9.7")
         else:
             self.requires("qt/6.8.3")
-            self.requires("extra-cmake-modules/6.8.0")
 
     def build_requirements(self):
         if Version(self.version) >= "5.0.0":
