@@ -10,6 +10,7 @@ required_conan_version = ">=1.53.0"
 
 class sqlpp11Conan(ConanFile):
     name = "sqlpp11-connector-sqlite3"
+    deprecated = "project no longer maintained by author"
     description = "A C++ wrapper for sqlite3 meant to be used in combination with sqlpp11."
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
@@ -48,7 +49,7 @@ class sqlpp11Conan(ConanFile):
             check_min_cppstd(self, 11)
 
     def requirements(self):
-        self.requires("sqlpp11/[>=0.60 <1]", transitive_headers=True, transitive_libs=True)
+        self.requires("sqlpp11/0.60", transitive_headers=True, transitive_libs=True)
         if self.options.with_sqlcipher:
             self.requires("sqlcipher/4.5.1", transitive_headers=True, transitive_libs=True)
         else:
