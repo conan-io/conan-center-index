@@ -13,7 +13,7 @@ class CouchbaseCxxClientConan(ConanFile):
     name = "couchbase_cxx_client"
     description = "Couchbase C++ SDK"
     license = "Apache-2.0"
-    url = "https://github.com/couchbase/couchbase-cxx-client"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/couchbase/couchbase-cxx-client"
     topics = ("couchbase", "database", "nosql", "sdk")
     package_type = "library"
