@@ -58,7 +58,7 @@ class OnnxRuntimeConan(ConanFile):
         self.requires("date/[>=3.0.1 <3.1]")
         self.requires("re2/[>=20231101]")
         self.requires("flatbuffers/23.5.26")
-        self.requires("boost/1.83.0", headers=True, libs=False)  # for mp11, header only, no need for libraries
+        self.requires("boost/[>=1.83.0 <1.90.0]", headers=True, libs=False)  # for mp11, header only, no need for libraries
         self.requires("safeint/3.0.28")
         self.requires("nlohmann_json/[>=3.11.3 <3.12]")
         self.requires("eigen/[>=5.0.1 <6]")
@@ -102,9 +102,6 @@ class OnnxRuntimeConan(ConanFile):
         tc = CMakeToolchain(self)
         # disable downloading dependencies to ensure conan ones are used
         tc.variables["FETCHCONTENT_FULLY_DISCONNECTED"] = True
-        if self.options.shared:
-            # Need to replace windows path separators with linux path separators to keep CMake from crashing
-            tc.variables["Python_EXECUTABLE"] = sys.executable.replace("\\", "/")
 
         tc.variables["onnxruntime_BUILD_SHARED_LIB"] = self.options.shared
         tc.variables["onnxruntime_USE_FULL_PROTOBUF"] = not self.dependencies["protobuf"].options.lite
