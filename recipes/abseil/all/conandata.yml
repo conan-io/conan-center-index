@@ -27,6 +27,11 @@ sources:
     url: "https://github.com/abseil/abseil-cpp/archive/20230125.3.tar.gz"
     sha256: "5366D7E7FA7BA0D915014D387B66D0D002C03236448E1BA9EF98122C13B35C36"
 patches:
+  "20250814.0":
+    - patch_file: "patches/0001-fix-absl-gcc-ubsan-constexpr-bug.patch"
+      patch_description: "Gcc ubsan constexpr compilation fix."
+      patch_type: "bugfix"
+      patch_source: "https://github.com/abseil/abseil-cpp/issues/1634"
   "20240722.1":
     - patch_file: "patches/0003-absl-string-libm-20240116.patch"
       patch_description: "link libm to absl string"
