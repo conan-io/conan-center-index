@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get, rmdir
 from conan.tools.layout import basic_layout
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 import os
 
@@ -62,6 +62,9 @@ class Md4QtConan(ConanFile):
             tc = CMakeToolchain(self)
             tc.cache_variables["BUILD_MD4QT_TESTS"] = False
             tc.generate()
+
+            cd = CMakeDeps(self)
+            cd.generate()
 
     def package_id(self):
         self.info.clear()
