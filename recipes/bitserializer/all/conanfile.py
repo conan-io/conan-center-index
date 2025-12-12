@@ -102,7 +102,7 @@ class BitserializerConan(ConanFile):
         compiler_name = str(self.settings.compiler)
         if compiler_name == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration(f'Using {self.ref} with GCC requires "compiler.libcxx=libstdc++11"')
-        elif compiler_name == "clang" and self.settings.compiler.libcxx not in ["libstdc++11", "libc++"]:
+        elif compiler_name == "clang" and self.settings.compiler.libcxx not in ["libstdc++11", "libc++", "c++_static"]:
             raise ConanInvalidConfiguration(f'Using {self.ref} with Clang requires either "compiler.libcxx=libstdc++11"'
                                             ' or "compiler.libcxx=libc++"')
 
