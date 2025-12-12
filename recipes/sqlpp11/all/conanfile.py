@@ -38,7 +38,7 @@ class Sqlpp11Conan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("date/3.0.1")
+        self.requires("date/[^3.0.1]")
 
     def package_id(self):
         self.info.clear()
