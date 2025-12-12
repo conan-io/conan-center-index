@@ -10,8 +10,9 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
+from conan.tools.system import PipEnv
 
-required_conan_version = ">=1.64.0"
+required_conan_version = ">=2.23"
 
 
 class LibsystemdConan(ConanFile):
@@ -68,9 +69,9 @@ class LibsystemdConan(ConanFile):
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_xz:
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[>=1.5.5 <2]")
 
     def validate(self):
         if self.settings.os != "Linux":
@@ -82,11 +83,11 @@ class LibsystemdConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.4.0")
+        self.tool_requires("meson/[>=1.4.0 <2]")
         self.tool_requires("m4/1.4.19")
         self.tool_requires("gperf/3.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.1.0 <3]")
 
     def source(self):
         # Extract using standard Python tools due to Conan's unzip() not handling backslashes in
@@ -109,6 +110,9 @@ class LibsystemdConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+
+        PipEnv(self).install(["Jinja2~=3.0"])
+        PipEnv(self).generate()
 
         tc = MesonToolchain(self)
         tc.project_options["selinux"] = ("true" if self.options.with_selinux
