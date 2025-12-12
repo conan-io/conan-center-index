@@ -1,16 +1,14 @@
-from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
-from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
-from conan.tools.env import VirtualBuildEnv
 import os
 import sys
 
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class OnnxRuntimeConan(ConanFile):
@@ -37,22 +35,6 @@ class OnnxRuntimeConan(ConanFile):
     }
     short_paths = True
 
-    @property
-    def _min_cppstd(self):
-        # macOS builds with C++17, and https://github.com/microsoft/onnxruntime/pull/16187 changes
-        # look like only affect onnxruntime/test module (not compiled)
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "17",
-            "msvc": "193",
-            "gcc": "9",
-            "clang": "5",
-            "apple-clang": "10",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, "cmake/*", src=self.recipe_folder, dst=self.export_sources_folder)
@@ -64,9 +46,6 @@ class OnnxRuntimeConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # onnxruntime forces this to be True
-        # https://github.com/microsoft/onnxruntime/blob/be76e1e1b8e2914e448d12a0cc683c00014c0490/cmake/external/onnxruntime_external_deps.cmake#L542
-        self.options["onnx"].disable_static_registration = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -74,39 +53,38 @@ class OnnxRuntimeConan(ConanFile):
     def requirements(self):
         required_onnx_version = self.conan_data["onnx_version_map"][self.version]
         self.requires(f"onnx/{required_onnx_version}")
-        self.requires("abseil/20240116.1")
-        self.requires("protobuf/3.21.12")
-        self.requires("date/3.0.1")
-        self.requires("re2/20231101")
+        self.requires("abseil/[>=20240116.1 <=20250814.0]")
+        self.requires("protobuf/[>=3.21.12 <7]")
+        self.requires("date/[>=3.0.1 <3.1]")
+        self.requires("re2/[>=20231101]")
         self.requires("flatbuffers/23.5.26")
-        # using 1.84.0+ fails on CCI as it prevents the cpp 17 version to be picked up when building with cpp 20
-        self.requires("boost/1.83.0", headers=True, libs=False)  # for mp11, header only, no need for libraries
+        self.requires("boost/[>=1.83.0 <1.90.0]", headers=True, libs=False)  # for mp11, header only, no need for libraries
         self.requires("safeint/3.0.28")
-        self.requires("nlohmann_json/3.11.3")
-        self.requires("eigen/3.4.0")
+        self.requires("nlohmann_json/[>=3.11.3 <3.12]")
+        self.requires("eigen/[>=5.0.1 <6]")
         self.requires("ms-gsl/4.0.0")
-        self.requires("cpuinfo/cci.20231129")
         if self.settings.os != "Windows":
             self.requires("nsync/1.26.0")
         else:
             self.requires("wil/1.0.240803.1")
         if self.options.with_xnnpack:
-            self.requires("xnnpack/cci.20231026")
+            self.requires("xnnpack/[>=cci.20241203]")
+            self.requires("pthreadpool/cci.20231129")
         if self.options.with_cuda:
             self.requires("cutlass/3.5.0")
+        self.requires("cpuinfo/[>=cci.20250110]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires minimum compiler version {minimum_version}."
-            )
-        if not self.dependencies["onnx"].options.disable_static_registration:
+        check_min_cppstd(self, 17)
+        onnx = self.dependencies["onnx"]
+        if not onnx.options.disable_static_registration:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires onnx compiled with `-o onnx:disable_static_registration=True`."
             )
+        if onnx.options.get_safe("shared"):
+            # Commented here: https://github.com/onnx/onnx/pull/7505#issuecomment-3601468150
+            raise ConanInvalidConfiguration("There are link errors using 'onnx/*:shared=True',"
+                                            " use '-o onnx/*:shared=False' instead.")
 
     def validate_build(self):
         if self.settings.os == "Windows" and self.dependencies["abseil"].options.shared:
@@ -114,7 +92,7 @@ class OnnxRuntimeConan(ConanFile):
 
     def build_requirements(self):
         # Required by upstream https://github.com/microsoft/onnxruntime/blob/v1.16.1/cmake/CMakeLists.txt#L5
-        self.tool_requires("cmake/[>=3.26 <4]")
+        self.tool_requires("cmake/[>=3.28]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -124,9 +102,6 @@ class OnnxRuntimeConan(ConanFile):
         tc = CMakeToolchain(self)
         # disable downloading dependencies to ensure conan ones are used
         tc.variables["FETCHCONTENT_FULLY_DISCONNECTED"] = True
-        if self.options.shared:
-            # Need to replace windows path separators with linux path separators to keep CMake from crashing
-            tc.variables["Python_EXECUTABLE"] = sys.executable.replace("\\", "/")
 
         tc.variables["onnxruntime_BUILD_SHARED_LIB"] = self.options.shared
         tc.variables["onnxruntime_USE_FULL_PROTOBUF"] = not self.dependencies["protobuf"].options.lite
@@ -158,9 +133,6 @@ class OnnxRuntimeConan(ConanFile):
         deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
         deps.generate()
 
-        vbe = VirtualBuildEnv(self)
-        vbe.generate(scope="build")
-
     def _patch_sources(self):
         apply_conandata_patches(self)
         copy(self, "onnxruntime_external_deps.cmake",
@@ -168,17 +140,9 @@ class OnnxRuntimeConan(ConanFile):
              dst=os.path.join(self.source_folder, "cmake", "external"))
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "CMakeLists.txt"),
                         "if (Git_FOUND)", "if (FALSE)")
-        # https://github.com/microsoft/onnxruntime/commit/5bfca1dc576720627f3af8f65e25af408271079b
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "onnxruntime_providers_cuda.cmake"),
-                        'option(onnxruntime_NVCC_THREADS "Number of threads that NVCC can use for compilation." 1)',
-                        'set(onnxruntime_NVCC_THREADS "1" CACHE STRING "Number of threads that NVCC can use for compilation.")')
 
     def build(self):
         cmake = CMake(self)
-        # https://github.com/microsoft/onnxruntime/blob/v1.14.1/cmake/CMakeLists.txt#L792
-        # onnxruntime is builds its targets with COMPILE_WARNING_AS_ERROR ON
-        # This will most likely lead to build errors on compilers not undergoing CI testing upstream
-        # so disable COMPILE_WARNING_AS_ERROR
         cmake.configure(build_script_folder="cmake", cli_args=["--compile-no-warning-as-error"])
         cmake.build()
 
@@ -194,26 +158,25 @@ class OnnxRuntimeConan(ConanFile):
             self.cpp_info.libs = ["onnxruntime"]
         else:
             # order is important
-            # https://github.com/microsoft/onnxruntime/blob/v1.18.1/cmake/onnxruntime.cmake#L178C1-L206C2
-            onnxruntime_libs = ["session"]
-            if self.options.with_xnnpack:
-                onnxruntime_libs.append("providers_xnnpack")
-            onnxruntime_libs.extend([
+            # https://github.com/microsoft/onnxruntime/blob/v1.23.2/cmake/onnxruntime.cmake#L240
+            onnxruntime_libs = [
+                "session",
+                *(["providers_xnnpack"] if self.options.with_xnnpack else []),
                 "optimizer",
                 "providers",
+                "lora",
                 "framework",
                 "graph",
                 "util",
                 "mlas",
                 "common",
                 "flatbuffers",
-            ])
+            ]
             self.cpp_info.libs = [f"onnxruntime_{lib}" for lib in onnxruntime_libs]
 
+        self.cpp_info.includedirs.append("include/onnxruntime")
         if not self.options.shared:
             self.cpp_info.includedirs.append("include/onnxruntime/core/session")
-        else:
-            self.cpp_info.includedirs.append("include/onnxruntime")
 
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
@@ -223,30 +186,6 @@ class OnnxRuntimeConan(ConanFile):
             self.cpp_info.frameworks.append("Foundation")
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("shlwapi")
-
-        # conanv1 doesn't support traits and we only need headers from boost
-        self.cpp_info.requires = [
-            "abseil::abseil",
-            "protobuf::protobuf",
-            "date::date",
-            "re2::re2",
-            "onnx::onnx",
-            "flatbuffers::flatbuffers",
-            "boost::headers",
-            "safeint::safeint",
-            "nlohmann_json::nlohmann_json",
-            "eigen::eigen",
-            "ms-gsl::ms-gsl",
-            "cpuinfo::cpuinfo"
-        ]
-        if self.settings.os != "Windows":
-            self.cpp_info.requires.append("nsync::nsync")
-        else:
-            self.cpp_info.requires.append("wil::wil")
-        if self.options.with_xnnpack:
-            self.cpp_info.requires.append("xnnpack::xnnpack")
-        if self.options.with_cuda:
-            self.cpp_info.requires.append("cutlass::cutlass")
 
         # https://github.com/microsoft/onnxruntime/blob/v1.16.0/cmake/CMakeLists.txt#L1759-L1763
         self.cpp_info.set_property("cmake_file_name", "onnxruntime")
