@@ -45,6 +45,7 @@ class TestPackageConan(ConanFile):
         tc.cache_variables["WITH_STACKTRACE"] = not self.dependencies["boost"].options.without_stacktrace
         tc.cache_variables["WITH_STACKTRACE_ADDR2LINE"] = self.dependencies["boost"].conf_info.get("user.boost:stacktrace_addr2line_available")
         tc.cache_variables["WITH_STACKTRACE_BACKTRACE"] = self._boost_option("with_stacktrace_backtrace", False)
+        tc.cache_variables["WITH_THREAD"] = not self._boost_option("without_thread", True)
         tc.cache_variables["WITH_URL"] = not self._boost_option("without_url", True)
         if self.dependencies["boost"].options.namespace != 'boost' and not self.dependencies["boost"].options.namespace_alias:
             tc.cache_variables['BOOST_NAMESPACE'] = self.dependencies["boost"].options.namespace
