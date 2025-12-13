@@ -2,12 +2,12 @@ import os
 
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import cmake_layout
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "VirtualBuildEnv"
+    generators = "CMakeDeps", "VirtualBuildEnv"
     test_type = "explicit"
 
     def build_requirements(self):
@@ -16,15 +16,23 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    @property
+    def _binary_name(self):
+        name = "test_package"
+        if self.settings.os == "Windows":
+            name = f"{name}.exe"
+        return name
+
     def test(self):
-        self.run("nasm --version")
-        asm_file = os.path.join(self.source_folder, "hello_linux.asm")
-        out_file = os.path.join(self.build_folder, "hello_linux.o")
-        self.run(f"nasm -felf64 {asm_file} -o {out_file}")
         if can_run(self):
-            if self.settings.os == "Linux" and self.settings.arch == "x86_64":
-                # TODO was tools.get_env, what should it be?
-                ld = os.getenv("LD", "ld")
-                bin_file = os.path.join(self.build_folder, "hello_linux")
-                self.run(f"{ld} hello_linux.o -o {bin_file}")
-                self.run(bin_file)
+            bin_path = os.path.join(self.cpp.build.bindirs[0], self._binary_name)
+            self.run(bin_path, env="conanrun")
