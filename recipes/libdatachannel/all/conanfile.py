@@ -5,11 +5,20 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import copy, get, rm, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import (
+    copy,
+    get,
+    rm,
+    rmdir,
+    replace_in_file,
+    export_conandata_patches,
+    apply_conandata_patches,
+)
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
+
 
 class libdatachannelConan(ConanFile):
     name = "libdatachannel"
@@ -25,14 +34,14 @@ class libdatachannelConan(ConanFile):
         "fPIC": [True, False],
         "with_websocket": [True, False],
         "with_nice": [True, False],
-        "with_ssl": ["openssl", "mbedtls", "gnutls"]
+        "with_ssl": ["openssl", "mbedtls", "gnutls"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_websocket": True,
         "with_nice": False,
-        "with_ssl": "openssl"
+        "with_ssl": "openssl",
     }
 
     implements = ["auto_shared_fpic"]
@@ -55,15 +64,25 @@ class libdatachannelConan(ConanFile):
         if self.options.with_nice:
             self.requires("libnice/0.1.21")
         elif Version(self.version) < "0.23.0":
-            self.requires("libjuice/1.5.7", transitive_headers=True, transitive_libs=True)
+            self.requires(
+                "libjuice/1.5.7", transitive_headers=True, transitive_libs=True
+            )
+        elif Version(self.version) < "0.24.0":
+            self.requires(
+                "libjuice/1.6.2", transitive_headers=True, transitive_libs=True
+            )
         else:
-            self.requires("libjuice/1.6.2", transitive_headers=True, transitive_libs=True)
+            self.requires(
+                "libjuice/1.7.0", transitive_headers=True, transitive_libs=True
+            )
 
     def validate(self):
         check_min_cppstd(self, 17)
         if self.options.with_ssl == "mbedtls":
             # dtlstransport.cpp:414:3: error: use of undeclared identifier 'mbedtls_ssl_conf_dtls_srtp_protection_profiles'
-            raise ConanInvalidConfiguration("Compilation error with mbedtls. Contributions are welcome.")
+            raise ConanInvalidConfiguration(
+                "Compilation error with mbedtls. Contributions are welcome."
+            )
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -72,8 +91,12 @@ class libdatachannelConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
         # Let Conan handle fpic
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "CMakeLists.txt"),
+            "set(CMAKE_POSITION_INDEPENDENT_CODE ON)",
+            "",
+        )
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -115,7 +138,12 @@ class libdatachannelConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(
+            self,
+            "LICENSE",
+            self.source_folder,
+            os.path.join(self.package_folder, "licenses"),
+        )
         cmake = CMake(self)
         cmake.install()
         fix_apple_shared_install_name(self)
@@ -133,7 +161,9 @@ class libdatachannelConan(ConanFile):
             suffix = "d"
         self.cpp_info.libs = ["datachannel" + suffix]
         self.cpp_info.set_property("cmake_file_name", "LibDataChannel")
-        self.cpp_info.set_property("cmake_target_name", "LibDataChannel::LibDataChannel")
+        self.cpp_info.set_property(
+            "cmake_target_name", "LibDataChannel::LibDataChannel"
+        )
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
@@ -143,6 +173,8 @@ class libdatachannelConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines.append("RTC_STATIC")
 
-        self.cpp_info.defines.append("RTC_ENABLE_WEBSOCKET=" + ("1" if self.options.with_websocket else "0"))
+        self.cpp_info.defines.append(
+            "RTC_ENABLE_WEBSOCKET=" + ("1" if self.options.with_websocket else "0")
+        )
         # This is True by default, and the recipe currently does not model it
         self.cpp_info.defines.append("RTC_ENABLE_MEDIA=1")
