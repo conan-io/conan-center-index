@@ -5,6 +5,7 @@
 #ifdef MD4QT_VERSION_GREATER_EQUAL_4
 #include <md4qt/parser.h>
 #else
+#include <utility>
 #include <md4qt/parser.hpp>
 #endif
 #endif
