@@ -102,16 +102,22 @@ class GrpcConan(ConanFile):
         # abseil requires:
         # transitive_headers=True because grpc headers include abseil headers
         # transitive_libs=True because generated code (grpc_cpp_plugin) require symbols from abseil
-        if Version(self.version) > "1.65.0":
+        if Version(self.version) >= "1.76.0":
+            self.requires("protobuf/[>=6.32.1 <7]", transitive_headers=True) # requires in theory 6.31.1, but this version does not exist as recipe
+            self.requires("abseil/[>=20250512.1 <=20250814.1]", transitive_headers=True, transitive_libs=True)
+            self.requires("c-ares/[>=1.34.1 <2]")
+        elif Version(self.version) > "1.65.0":
             self.requires("protobuf/5.27.0", transitive_headers=True)
             self.requires("abseil/[>=20240116.1 <=20250127.0]", transitive_headers=True, transitive_libs=True)
+            self.requires("c-ares/[>=1.19.1 <2]")
         elif Version(self.version) >= "1.62.0" and Version(self.version) <= "1.65.0":
             self.requires("protobuf/5.27.0", transitive_headers=True)
             self.requires("abseil/[>=20240116.1 <20240117.0]", transitive_headers=True, transitive_libs=True)
+            self.requires("c-ares/[>=1.19.1 <2]")
         else:
             self.requires("abseil/[>=20230125.3 <=20230802.1]", transitive_headers=True, transitive_libs=True)
             self.requires("protobuf/3.21.12", transitive_headers=True)
-        self.requires("c-ares/[>=1.19.1 <2]")
+            self.requires("c-ares/[>=1.19.1 <2]")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("re2/20230301")
         self.requires("zlib/[>=1.2.11 <2]")
@@ -160,7 +166,7 @@ class GrpcConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
-        
+
         # Let Conan define CMAKE_MSVC_RUNTIME_LIBRARY
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(cmake/msvc_static_runtime.cmake)", "")
 
