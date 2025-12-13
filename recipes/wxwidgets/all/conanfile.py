@@ -116,8 +116,8 @@ class wxWidgetsConan(ConanFile):
         if self.options.get_safe("secretstore"):
             packages.append("libsecret-devel")
         if self.options.webview:
-                packages.extend(["libsoup3-devel",
-                                 "webkit2gtk4.1-devel"])
+            packages.extend(["libsoup3-devel",
+                             "webkit2gtk4.1-devel"])
         if self.options.get_safe("cairo"):
             packages.append("cairo-devel")
         yum.install(packages)
@@ -207,7 +207,7 @@ class wxWidgetsConan(ConanFile):
         tc.variables["wxUSE_NANOSVG"] = "sys"
 
         # wxWidgets features
-        tc.variables["wxUSE_SECRETSTORE"] = self.options.get_safe("secretstore")
+        tc.variables["wxUSE_SECRETSTORE"] = "ON" if self.options.get_safe("secretstore") else "OFF"
 
         # wxWidgets libraries
         tc.variables["wxUSE_AUI"] = self.options.aui
