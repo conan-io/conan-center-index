@@ -56,8 +56,10 @@ class libdatachannelConan(ConanFile):
             self.requires("libnice/0.1.21")
         elif Version(self.version) < "0.23.0":
             self.requires("libjuice/1.5.7", transitive_headers=True, transitive_libs=True)
-        else:
+        elif Version(self.version) < "0.24.0":
             self.requires("libjuice/1.6.2", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("libjuice/1.7.0", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         check_min_cppstd(self, 17)
