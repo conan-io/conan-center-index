@@ -3,14 +3,14 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class D3D12MemoryAllocatorConan(ConanFile):
     name = "d3d12-memory-allocator"
     package_type = "library"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://gpuopen.com/d3d12-memory-allocator/"
+    homepage = "https://github.com/GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator"
     license = "MIT"
     description = "The open source memory allocation library for the D3D12 API"
     topics = ("allocator", "directx", "direct3d", "gpu", "graphics")
@@ -23,12 +23,19 @@ class D3D12MemoryAllocatorConan(ConanFile):
         "shared": False,
     }
 
+    def validate(self):
+        if self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("Only available in Windows")
+
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
+    
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.25]")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -47,7 +54,6 @@ class D3D12MemoryAllocatorConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "D3D12MemoryAllocator")
         self.cpp_info.set_property("cmake_target_name", "GPUOpen::D3D12MemoryAllocator")
         self.cpp_info.libs = ["D3D12MA"]
