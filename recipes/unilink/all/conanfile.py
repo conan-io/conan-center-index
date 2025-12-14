@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, collect_libs
 from conan.tools.scm import Version
 import os
 
@@ -40,15 +40,19 @@ class UnilinkConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        cmake_layout(self)
 
     def validate(self):
         check_min_cppstd(self, 17)
 
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
+        if self.settings.compiler == "gcc" and Version(
+            self.settings.compiler.version
+        ) < Version("7"):
             raise ConanInvalidConfiguration(f"{self.ref} requires at least GCC 7")
 
-        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "5":
+        if self.settings.compiler == "clang" and Version(
+            self.settings.compiler.version
+        ) < Version("5"):
             raise ConanInvalidConfiguration(f"{self.ref} requires at least Clang 5")
 
     def source(self):
@@ -60,14 +64,20 @@ class UnilinkConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["UNILINK_BUILD_SHARED"] = bool(self.options.shared)
-        tc.variables["UNILINK_BUILD_STATIC"] = not bool(self.options.shared)
-        tc.variables["UNILINK_ENABLE_INSTALL"] = True
+        tc.variables["UNILINK_ENABLE_INSTALL"] = (
+            True  # ensure unilinkConfig.cmake/targets are generated & installed
+        )
         tc.variables["UNILINK_BUILD_EXAMPLES"] = False
         tc.variables["UNILINK_BUILD_TESTS"] = False
         tc.variables["UNILINK_BUILD_DOCS"] = False
         tc.variables["UNILINK_ENABLE_PKGCONFIG"] = False
         tc.variables["UNILINK_ENABLE_CONFIG"] = bool(self.options.enable_config)
-        tc.variables["UNILINK_ENABLE_MEMORY_TRACKING"] = bool(self.options.enable_memory_tracking)
+        tc.variables["UNILINK_ENABLE_MEMORY_TRACKING"] = bool(
+            self.options.enable_memory_tracking
+        )
+        tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = bool(
+            self.options.get_safe("fPIC", True)
+        )
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -83,15 +93,26 @@ class UnilinkConan(ConanFile):
         cmake.install()
 
         # Copy license files
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "NOTICE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(
+            self,
+            "LICENSE*",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"),
+        )
+        if os.path.isfile(os.path.join(self.source_folder, "NOTICE")):
+            copy(
+                self,
+                "NOTICE",
+                src=self.source_folder,
+                dst=os.path.join(self.package_folder, "licenses"),
+            )
 
     def package_info(self):
         # Set target name
         self.cpp_info.set_property("cmake_target_name", "unilink::unilink")
         self.cpp_info.set_property("cmake_file_name", "unilink")
         self.cpp_info.set_property("pkg_config_name", "unilink")
-        self.cpp_info.libs = ["unilink"]
+        self.cpp_info.libs = collect_libs(self)
 
         # Set compile definitions
         if self.options.enable_config:
@@ -103,4 +124,4 @@ class UnilinkConan(ConanFile):
             self.cpp_info.system_libs.append("pthread")
 
         # Boost dependency
-        self.cpp_info.requires = ["boost::boost", "boost::system"]
+        self.cpp_info.requires = ["boost::headers", "boost::system"]

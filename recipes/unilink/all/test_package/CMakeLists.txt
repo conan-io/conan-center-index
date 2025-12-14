@@ -6,4 +6,4 @@ find_package(unilink REQUIRED)
 add_executable(test_package test_package.cpp)
 target_link_libraries(test_package unilink::unilink)
 
-set_property(TARGET test_package PROPERTY CXX_STANDARD 17)
+target_compile_features(test_package PRIVATE cxx_std_17)

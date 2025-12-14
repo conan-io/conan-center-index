@@ -23,5 +23,6 @@ class UnilinkTestConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            exe = "test_package.exe" if self.settings.os == "Windows" else "test_package"
+            bin_path = os.path.join(self.cpp.build.bindirs[0], exe)
             self.run(bin_path, env="conanrun")
