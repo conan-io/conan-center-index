@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rm, rmdir, save, rename, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rm, rmdir, save, rename, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path, check_min_vs
@@ -154,6 +154,12 @@ class DjVuLibreConan(ConanFile):
         autotools = Autotools(self)
         autotools.autoreconf()
         autotools.configure()
+        if (is_apple_os(self) and cross_building(self) and self.settings.arch in ("x86_64", "armv8") and
+            self.settings.compiler == "apple-clang"):
+            # when crossbuilding, the -arch flag is not correctly forwarded to the linker invocation
+            libtool_sh = os.path.join(self.build_folder, "libtool")
+            arch = "x86_64" if self.settings.arch == "x86_64" else "arm64"
+            replace_in_file(self, libtool_sh, r'archive_cmds="\$CC -r ', r'archive_cmds="\$CC -r -arch {} '.format(arch))
         autotools.make()
 
     def package(self):
