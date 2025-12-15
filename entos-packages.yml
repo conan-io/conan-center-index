@@ -283,3 +283,7 @@ zstd:
 zxing-cpp:
   versions:
     - '2.2.1'
+harfbuzz:
+  versions:
+    - '8.3.0'
+    - '11.4.1'
