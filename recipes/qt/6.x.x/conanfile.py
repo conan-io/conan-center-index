@@ -901,7 +901,9 @@ class QtConan(ConanFile):
         if self.options.qttools:
             if "qtattributionsscanner" not in disabled_features:
                 targets.extend(["qtattributionsscanner"])
-            if "assistant" not in disabled_features:
+            if (not any(item in disabled_features for item in ["assistant", "toolbutton", "pushbutton"])) and self.options.widgets and self.options.get_safe("with_libpng"):
+                # https://github.com/qt/qttools/blob/d5f3f624717092dde55a93e1212c5b7c63d360b8/configure.cmake#L102-L108
+                # and `qhelpgenerator` is a subdirectory of assistant in qttools
                 targets.extend(["qhelpgenerator"])
             if "linguist" not in disabled_features:
                 targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
