@@ -310,15 +310,9 @@ libmount:
 libselinux:
   versions:
     - '3.6'
-libsepol:
-  versions:
-    - '3.6'
 bzip2:
   versions:
     - '1.0.8'
 libxml2:
   versions:
     - '2.13.8'
-gmp:
-  versions:
-    - '6.3.0'
