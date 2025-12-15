@@ -212,6 +212,7 @@ pugixml:
 qt:
   versions:
     - '5.15.7'
+    - '6.5.3'
 re2:
   versions:
     - '20230301'
