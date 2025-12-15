@@ -53,8 +53,9 @@ class KleidiaiConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        replace_in_file(self, "CMakeLists.txt", "set(CMAKE_CXX_STANDARD 17)", "")
-        replace_in_file(self, "CMakeLists.txt", "set(CMAKE_C_STANDARD 99)", "")
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmakelists, "set(CMAKE_CXX_STANDARD 17)", "")
+        replace_in_file(self, cmakelists, "set(CMAKE_C_STANDARD 99)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
