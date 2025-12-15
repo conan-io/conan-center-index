@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, check_min_cstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.microsoft import is_msvc
 import os
 
 
@@ -75,4 +76,8 @@ class KleidiaiConan(ConanFile):
         self.cpp_info.libs = ["kleidiai"]
         self.cpp_info.set_property("cmake_file_name", "KleidiAI")
         self.cpp_info.set_property("cmake_target_name", "KleidiAI::kleidiai")
-        self.cpp_info.defines = ["KLEIDIAI_ERROR_TRAP=0"]
+        # Library public definitions
+        if is_msvc(self):
+           self.cpp_info.defines.append("KLEIDIAI_HAS_BUILTIN_ASSUME0")
+        elif self.settings.compiler in ("clang", "apple-clang", "gcc"):
+           self.cpp_info.defines.append("KLEIDIAI_HAS_BUILTIN_UNREACHABLE")
