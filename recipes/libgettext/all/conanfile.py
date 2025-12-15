@@ -2,7 +2,7 @@ import glob
 import os
 
 from conan import ConanFile
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
 from conan.tools.files import copy, get, rename
@@ -215,6 +215,7 @@ class GetTextConan(ConanFile):
         copy(self, "*libgnuintl.h", self.build_folder, dest_include_dir, keep_path=False)
         rename(self, os.path.join(dest_include_dir, "libgnuintl.h"), os.path.join(dest_include_dir, "libintl.h"))
         fix_msvc_libname(self)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
