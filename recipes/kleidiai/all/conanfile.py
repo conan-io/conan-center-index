@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc
 import os
 
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.4"
 
 
 class KleidiaiConan(ConanFile):
