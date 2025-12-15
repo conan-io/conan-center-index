@@ -1,30 +1,10 @@
 #include <D3D12MemAlloc.h>
 
 int main() {
-  // D3D12_RESOURCE_DESC resourceDesc = {};
-  // resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-  // resourceDesc.Alignment = 0;
-  // resourceDesc.Width = 1024;
-  // resourceDesc.Height = 1024;
-  // resourceDesc.DepthOrArraySize = 1;
-  // resourceDesc.MipLevels = 1;
-  // resourceDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-  // resourceDesc.SampleDesc.Count = 1;
-  // resourceDesc.SampleDesc.Quality = 0;
-  // resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-  // resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-  // D3D12MA::ALLOCATION_DESC allocDesc = {};
-  // allocDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
-
-  // D3D12Resource *resource;
-  // D3D12MA::Allocation *allocation;
-  // HRESULT hr = allocator->CreateResource(&allocDesc, &resourceDesc,
-  //                                        D3D12_RESOURCE_STATE_COPY_DEST, NULL,
-  //                                        &allocation, IID_PPV_ARGS(&resource));
-
-  // TODO: Think of simple test code to show that this is working, as creating allocators
-  // needs for directx to be used
-
+  // A simple test to check the ability to link with the library
+  D3D12MA::ALLOCATION_DESC allocDesc = {};
+  (void)allocDesc;
+  D3D12MA::Allocator *allocator = nullptr;
+  (void)allocator;
   return 0;
 }
