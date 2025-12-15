@@ -79,6 +79,6 @@ class KleidiaiConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "KleidiAI::kleidiai")
         # Library public definitions
         if is_msvc(self):
-           self.cpp_info.defines.append("KLEIDIAI_HAS_BUILTIN_ASSUME0")
+            self.cpp_info.defines.append("KLEIDIAI_HAS_BUILTIN_ASSUME0")
         elif self.settings.compiler in ("clang", "apple-clang", "gcc"):
-           self.cpp_info.defines.append("KLEIDIAI_HAS_BUILTIN_UNREACHABLE")
+            self.cpp_info.defines.append("KLEIDIAI_HAS_BUILTIN_UNREACHABLE")
