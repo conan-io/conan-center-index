@@ -287,3 +287,6 @@ harfbuzz:
   versions:
     - '8.3.0'
     - '11.4.1'
+glib:
+  versions:
+    - '2.78.3'
