@@ -307,9 +307,6 @@ libiconv:
 libmount:
   versions:
     - '2.39.2'
-libpcre:
-  versions:
-    - '8.45'
 libselinux:
   versions:
     - '3.6'
