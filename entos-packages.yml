@@ -293,3 +293,35 @@ harfbuzz:
 glib:
   versions:
     - '2.78.3'
+
+# Qt6 full-featured build dependencies (additions)
+gettext:
+  versions:
+    - '0.22.5'
+libffi:
+  versions:
+    - '3.4.4'
+libiconv:
+  versions:
+    - '1.18'
+libmount:
+  versions:
+    - '2.39.2'
+libpcre:
+  versions:
+    - '8.45'
+libselinux:
+  versions:
+    - '3.6'
+libsepol:
+  versions:
+    - '3.6'
+bzip2:
+  versions:
+    - '1.0.8'
+libxml2:
+  versions:
+    - '2.13.8'
+gmp:
+  versions:
+    - '6.3.0'
