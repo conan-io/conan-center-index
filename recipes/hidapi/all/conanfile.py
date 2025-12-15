@@ -5,17 +5,18 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.apple import is_apple_os
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class HidapiConan(ConanFile):
     name = "hidapi"
+    package_type = "library"
     description = "HIDAPI is a multi-platform library which allows an application to interface " \
                   "with USB and Bluetooth HID-Class devices on Windows, Linux, FreeBSD, and macOS."
     topics = ("libusb", "hid-class", "bluetooth")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libusb/hidapi"
-    license = "GPL-3-or-later", "BSD-3-Clause"
+    license = "GPL-3.0-or-later", "BSD-3-Clause"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -26,10 +27,6 @@ class HidapiConan(ConanFile):
         "fPIC": True,
         "shared": False,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     @property
     def _msbuild_configuration(self):
@@ -58,8 +55,8 @@ class HidapiConan(ConanFile):
         if self.settings.os != "Windows":
             self.tool_requires("libtool/2.4.7")
             if self.settings.os in ["Linux", "FreeBSD"] and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/1.9.3")
-            if self._settings_build.os == "Windows":
+                self.tool_requires("pkgconf/[>=1.9.3 <3]")
+            if self.settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                     self.tool_requires("msys2/cci.latest")
