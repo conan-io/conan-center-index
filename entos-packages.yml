@@ -48,6 +48,9 @@ dbus:
 double-conversion:
   versions:
     - '3.3.0'
+elfutils:
+  versions:
+    - '0.190'
 expat:
   versions:
     - '2.7.1'
