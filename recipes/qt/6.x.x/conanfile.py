@@ -892,7 +892,9 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             targets.extend(["windeployqt"])
         if self.options.qttools:
-            targets.extend(["qhelpgenerator", "qtattributionsscanner"])
+            if self.options.widgets:
+                targets.extend(["qhelpgenerator"])
+            targets.extend(["qtattributionsscanner"])
             targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
         if self.options.qtshadertools:
             targets.append("qsb")
