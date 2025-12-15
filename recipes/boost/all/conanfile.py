@@ -1808,7 +1808,24 @@ class BoostConan(ConanFile):
         if self.options.header_only:
             self.cpp_info.components["_boost_cmake"].libdirs = []
 
-        if not self.options.header_only:
+        # Boost's own CMake provides this target even for header-only builds, so some
+        # build systems may expect it to exist unconditionally (eg: Arrow).
+        self.cpp_info.components["disable_autolinking"].libs = []
+        self.cpp_info.components["disable_autolinking"].set_property("cmake_target_name", "Boost::disable_autolinking")
+        self.cpp_info.components["disable_autolinking"].names["cmake_find_package"] = "disable_autolinking"
+        self.cpp_info.components["disable_autolinking"].names["cmake_find_package_multi"] = "disable_autolinking"
+        self.cpp_info.components["disable_autolinking"].names["pkg_config"] = "boost_disable_autolinking"  # FIXME: disable on pkg_config
+
+        if self.options.header_only:
+            # Since the header-only build is platform-agnostic, disable_autolinking
+            # defines BOOST_ALL_NO_LIB regardless of platform. It simply won't have
+            # any effect on platforms without auto-linking.
+            self.cpp_info.components["disable_autolinking"].defines = ["BOOST_ALL_NO_LIB"]
+            # Auto-linking makes no sense for header-only builds, and some libraries
+            # can operate in header-only or compiled mode (eg: Boost.JSON), so pull in
+            # disable_autolinking unconditionally.
+            self.cpp_info.components["headers"].requires.append("disable_autolinking")
+        else:
             self.cpp_info.components["_libboost"].requires = ["headers"]
 
             self.cpp_info.components["diagnostic_definitions"].libs = []
@@ -1821,12 +1838,6 @@ class BoostConan(ConanFile):
             self.cpp_info.components["headers"].requires.append("diagnostic_definitions")
             if self.options.diagnostic_definitions:
                 self.cpp_info.components["diagnostic_definitions"].defines = ["BOOST_LIB_DIAGNOSTIC"]
-
-            self.cpp_info.components["disable_autolinking"].libs = []
-            self.cpp_info.components["disable_autolinking"].set_property("cmake_target_name", "Boost::disable_autolinking")
-            self.cpp_info.components["disable_autolinking"].names["cmake_find_package"] = "disable_autolinking"
-            self.cpp_info.components["disable_autolinking"].names["cmake_find_package_multi"] = "disable_autolinking"
-            self.cpp_info.components["disable_autolinking"].names["pkg_config"] = "boost_disable_autolinking"  # FIXME: disable on pkg_config
 
             # Even headers needs to know the flags for disabling autolinking ...
             # magic_autolink is an option in the recipe, so if a consumer wants this version of boost,
