@@ -1556,6 +1556,9 @@ class QtConan(ConanFile):
                 self.cpp_info.components["qtCore"].frameworks.append("IOKit")
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/network/CMakeLists.txt#L205-L214
                 self.cpp_info.components["qtNetwork"].frameworks.append("CFNetwork")
+                if Version(self.version) >= "6.10":
+                    # https://github.com/qt/qtbase/commit/1299aaa231b1ce989c8aedcfed372bde0e1e3a0e
+                    self.cpp_info.components["qtNetwork"].frameworks.append("Network")
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/network/CMakeLists.txt#L216-L221
                 # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Cocoa")
