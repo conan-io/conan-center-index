@@ -26,7 +26,7 @@ class QtConan(ConanFile):
                    "qtserialport", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview",
                    "qtremoteobjects", "qtpositioning", "qtlanguageserver",
                    "qtspeech", "qthttpserver", "qtquick3dphysics", "qtgrpc", "qtquickeffectmaker"]
-    _submodules += ["qtgraphs"] # new modules for qt 6.6.0 and later
+    _submodules += ["qtgraphs"] # new modules for qt 6.6.0 
 
     _module_statuses = ["essential", "addon", "deprecated", "preview"]
 
