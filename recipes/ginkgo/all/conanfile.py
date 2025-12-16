@@ -86,9 +86,9 @@ class GinkgoConan(ConanFile):
     def build_requirements(self):
         if Version(self.version) >= "1.7.0":
             if self.options.cuda:
-                self.tool_requires("cmake/[>=3.18 <4]")
+                self.tool_requires("cmake/[>=3.18]")
             else:
-                self.tool_requires("cmake/[>=3.16 <4]")
+                self.tool_requires("cmake/[>=3.16]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
