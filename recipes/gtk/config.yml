@@ -1,5 +1,5 @@
 versions:
+    "4.20.3":
+        folder: all
     "system":
         folder: "system"
-    "4.7.0":
-        folder: all
