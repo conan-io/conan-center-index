@@ -57,6 +57,7 @@ class PinocchioConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_PYTHON_INTERFACE"] = False
         tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_EXAMPLES"] = False
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
         tc.generate()
 
