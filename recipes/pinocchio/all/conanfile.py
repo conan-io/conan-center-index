@@ -42,7 +42,7 @@ class PinocchioConan(ConanFile):
     def requirements(self):
         self.requires("eigen/3.4.0", transitive_headers=True)
         self.requires("urdfdom_headers/1.1.1")
-        self.requires("urdfdom/4.0.0")
+        self.requires("urdfdom/4.0.0", transitive_headers=True)
         self.requires("boost/1.87.0", transitive_headers=True)
 
     def build_requirements(self):
