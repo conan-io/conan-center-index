@@ -48,6 +48,9 @@ dbus:
 double-conversion:
   versions:
     - '3.3.0'
+elfutils:
+  versions:
+    - '0.190'
 expat:
   versions:
     - '2.7.1'
@@ -67,12 +70,18 @@ freetype:
 frozen:
   versions:
     - '1.2.0'
+gettext:
+  versions:
+    - '0.22.5'
 glad:
   versions:
     - '2.0.8'
 glfw:
   versions:
     - '3.4'
+glib:
+  versions:
+    - '2.78.3'
 glslang:
   versions:
     - '1.3.268.0'
@@ -89,6 +98,10 @@ grpc:
 gtest:
   versions:
     - '1.17.0'
+harfbuzz:
+  versions:
+    - '8.3.0'
+    - '11.4.1'
 icu:
   versions:
     - '74.2'
@@ -212,6 +225,7 @@ pugixml:
 qt:
   versions:
     - '5.15.7'
+    - '6.5.3'
 re2:
   versions:
     - '20230301'
