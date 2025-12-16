@@ -8,7 +8,7 @@ required_conan_version = ">=2"
 
 class PinocchioConan(ConanFile):
     name = "pinocchio"
-    package_type = "library"
+    package_type = "shared-library"
     license = ("BSD-2-Clause")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://stack-of-tasks.github.io/pinocchio/"
@@ -24,16 +24,6 @@ class PinocchioConan(ConanFile):
         )
 
     settings = "os", "compiler", "build_type", "arch"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-        }
-    default_options = {
-        "shared": False,
-        "fPIC": True
-        }
-
-    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
