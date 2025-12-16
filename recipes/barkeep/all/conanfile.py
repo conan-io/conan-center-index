@@ -7,7 +7,7 @@ import os
 
 required_conan_version = ">=2"
 
-class GlazeConan(ConanFile):
+class BarkeepConan(ConanFile):
     name = "barkeep"
     description = "Small C++ header to display async animations, counters, progress bars, and status messages"
     license = "Apache-2.0"
@@ -25,7 +25,7 @@ class GlazeConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        check_min_cppstd(self, 20)
+        check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -42,3 +42,5 @@ class GlazeConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        if (is_msvc(self)):
+            self.cpp_info.cxxflags.append("/permissive-")
