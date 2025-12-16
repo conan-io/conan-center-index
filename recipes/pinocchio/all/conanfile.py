@@ -48,10 +48,6 @@ class PinocchioConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.22 <4]")
 
-    def validate(self):
-        if self.settings.compiler == "msvc":
-            raise ConanInvalidConfiguration("MSVC is not supported")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
