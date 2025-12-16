@@ -35,7 +35,7 @@ index c678167..8203f1a 100644
  if (MSVC)
      # Set the compiler less permissive and add some warnings
      # /we4287: unsigned/negative constant mismatch
-@@ -255,6 +252,18 @@ list(APPEND PODOFO_LIB_DEPENDS ZLIB::ZLIB)
+@@ -255,6 +252,23 @@ list(APPEND PODOFO_LIB_DEPENDS ZLIB::ZLIB)
  string(APPEND PODOFO_PKGCONFIG_REQUIRES_PRIVATE " zlib")
  list(APPEND PODOFO_LIB_DEPENDS ${PLATFORM_SYSTEM_LIBRARIES})
  
@@ -49,7 +49,12 @@ index c678167..8203f1a 100644
 +find_package(FastFloat REQUIRED CONFIG)
 +find_package(date REQUIRED CONFIG)
 +find_package(tcb-span REQUIRED CONFIG)
-+list(APPEND PODOFO_LIB_DEPENDS fmt::fmt utf8::cpp utf8proc::utf8proc FastFloat::fast_float date::date tcb-span::tcb-span)
++list(APPEND PODOFO_LIB_DEPENDS utf8::cpp utf8proc::utf8proc FastFloat::fast_float date::date tcb-span::tcb-span)
++if(TARGET fmt::fmt)
++    list(APPEND PODOFO_LIB_DEPENDS fmt::fmt)
++else()
++    list(APPEND PODOFO_LIB_DEPENDS fmt::fmt-header-only)
++endif()
 +
  if(LCMS2_FOUND)
      # little-cms2 doesn't provide targets.
@@ -106,3 +111,15 @@ index 8fd4a85..840eb2e 100644
  #endif
  
  #ifdef WANT_TO_CHARS
+diff --git a/src/podofo/private/format_compat.h b/src/podofo/private/format_compat.h
+index 49d89a2..5839e00 100644
+--- a/src/podofo/private/format_compat.h
++++ b/src/podofo/private/format_compat.h
+@@ -7,7 +7,6 @@
+
+ #else // __cplusplus < 202002L
+
+-#define FMT_HEADER_ONLY
+ #include <fmt/format.h>
+
+ namespace std
