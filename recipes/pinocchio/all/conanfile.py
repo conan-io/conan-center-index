@@ -12,12 +12,7 @@ class PinocchioConan(ConanFile):
     license = ("BSD-2-Clause")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://stack-of-tasks.github.io/pinocchio/"
-    description = (
-        "Pinocchio instantiates the state-of-the-art Rigid Body Algorithms for poly-articulated "
-        "systems based on revisited Roy Featherstone's algorithms. Besides, Pinocchio provides "
-        "the analytical derivatives of the main Rigid-Body Algorithms, such as the Recursive "
-        "Newton-Euler Algorithm or the Articulated-Body Algorithm."
-        )
+    description = "A fast and flexible implementation of Rigid Body Dynamics algorithms and their analytical derivatives"
     topics = (
         "robotics", "kinematics", "dynamics", "automatic-differentiation",
         "motion-planning", "ros", "rigid-body-dynamics", "analytical-derivatives",
