@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file
-from conan.tools.microsoft import check_min_vs
+from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 import os
 
@@ -44,12 +44,18 @@ class XnnpackConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    @property
+    def _with_kleidiai(self):
+        return Version(self.version) >= "cci.20241203" and "arm" in str(self.settings.arch) and not is_msvc(self)
+
     def requirements(self):
         self.requires("cpuinfo/[>=cci.20231129]")
         self.requires("fp16/cci.20210320")
         #  https://github.com/google/XNNPACK/blob/ed5f9c0562e016a08b274a4579de5ef500fec134/include/xnnpack.h#L15
         self.requires("pthreadpool/cci.20231129", transitive_headers=True)
         self.requires("fxdiv/cci.20200417")
+        if self._with_kleidiai:
+            self.requires("kleidiai/1.18.0")
 
     def validate(self):
         check_min_vs(self, 192)
@@ -85,9 +91,8 @@ class XnnpackConan(ConanFile):
         tc.variables["CMAKE_SKIP_INSTALL_ALL_DEPENDENCY"] = True
         # To export symbols for shared msvc
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        # TODO Support?
         if Version(self.version) >= "cci.20241203":
-            tc.cache_variables["XNNPACK_ENABLE_KLEIDIAI"] = False
+            tc.cache_variables["XNNPACK_ENABLE_KLEIDIAI"] = self._with_kleidiai
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -101,6 +106,7 @@ class XnnpackConan(ConanFile):
         deps.set_property("pthreadpool", "cmake_target_name", "pthreadpool")
         deps.set_property("fp16", "cmake_target_name", "fp16")
         deps.set_property("fxdiv", "cmake_target_name", "fxdiv")
+        deps.set_property("kleidiai", "cmake_target_name", "kleidiai")
         deps.generate()
 
     def _patch_sources(self):
@@ -126,7 +132,6 @@ class XnnpackConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        # TODO: XNN_LOG_LEVEL definition?
         self.cpp_info.components["xnnpack"].libs = ["XNNPACK"]
         self.cpp_info.components["xnnpack"].requires = [
             "fxdiv::fxdiv",
@@ -141,6 +146,10 @@ class XnnpackConan(ConanFile):
                 "fxdiv::fxdiv",
             ]
             self.cpp_info.components["xnnpack"].requires.append("microkernels-prod")
+            if self._with_kleidiai:
+                self.cpp_info.components["microkernels-prod"].requires.append("kleidiai::kleidiai")
+                self.cpp_info.components["xnnpack"].requires.append("kleidiai::kleidiai")
+
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["microkernels-prod"].system_libs = ["m"]
 
