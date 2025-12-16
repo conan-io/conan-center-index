@@ -12,6 +12,7 @@ class PinocchioConan(ConanFile):
     package_type = "library"
     license = ("BSD-2-Clause")
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://stack-of-tasks.github.io/pinocchio/"
     description = (
         "Pinocchio instantiates the state-of-the-art Rigid Body Algorithms for poly-articulated "
         "systems based on revisited Roy Featherstone's algorithms. Besides, Pinocchio provides "
