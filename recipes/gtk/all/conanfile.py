@@ -1,8 +1,12 @@
-from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.meson import Meson
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.microsoft import is_msvc
+from conan.tools.files import get, copy, rmdir, rm
+from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=2.4"
 
 
 class GtkConan(ConanFile):
@@ -12,9 +16,10 @@ class GtkConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gtk.org"
     license = "LGPL-2.1-or-later"
-    generators = "pkg_config"
-
+    package_type = "library"
+    languages = "C"
     settings = "os", "arch", "compiler", "build_type"
+    implements = ["auto_shared_fpic"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -38,16 +43,8 @@ class GtkConan(ConanFile):
         "with_cloudprint": False
     }
 
-    short_paths = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
+    
     @property
     def _gtk4(self):
         return tools.Version("4.0.0") <= tools.Version(self.version) < tools.Version("5.0.0")
@@ -67,7 +64,7 @@ class GtkConan(ConanFile):
             self.options["gdk-pixbuf"].shared = True
             # Fix segmentation fault
             self.options["cairo"].shared = True
-        if tools.Version(self.version) >= "4.1.0":
+            # TODO: Re-check if this is still needed for gtk4
             # The upstream meson file does not create a static library
             # See https://github.com/GNOME/gtk/commit/14f0a0addb9a195bad2f8651f93b95450b186bd6
             self.options.shared = True
@@ -76,36 +73,31 @@ class GtkConan(ConanFile):
             del self.options.with_x11
 
     def validate(self):
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
-            raise ConanInvalidConfiguration("this recipes does not support GCC before version 5. contributions are welcome")
-        if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
-            if tools.Version(self.version) < "4.2":
-                raise ConanInvalidConfiguration("MSVC support of this recipe requires at least gtk/4.2")
-            if not self.options["gdk-pixbuf"].shared:
+        # TODO: Re-validate these cases
+        if is_msvc(self) and not self.dependencies["gdk-pixbuf"].options.shared:
                 raise ConanInvalidConfiguration("MSVC build requires shared gdk-pixbuf")
-            if not self.options["cairo"].shared:
-                raise ConanInvalidConfiguration("MSVC build requires shared cairo")
-        if tools.Version(self.version) >= "4.1.0":
-            if not self.options.shared:
-                raise ConanInvalidConfiguration("gtk supports only shared since 4.1.0")
+        if is_msvc(self) and not self.dependencies["cairo"].options.shared:
+            raise ConanInvalidConfiguration("MSVC build requires shared cairo")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
         if self.settings.os == "Linux":
             if self.options.with_wayland or self.options.with_x11:
                 if not self.options.with_pango:
                     raise ConanInvalidConfiguration("with_pango option is mandatory when with_wayland or with_x11 is used")
 
     def build_requirements(self):
-        self.build_requires("meson/0.62.2")
-        if self._gtk4:
-            self.build_requires("libxml2/2.9.14") # for xmllint
-        self.build_requires("pkgconf/1.7.4")
-        if self._gtk4:
-            self.build_requires("sassc/3.6.2")
+        self.tool_requires("meson/[>=1.2.3 <2]")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
+
+        # TODO: Re-check if these are needed for gtk4
+        #if self._gtk4:
+        #    self.build_requires("libxml2/2.9.14") # for xmllint
+        #
+        #if self._gtk4:
+        #    self.build_requires("sassc/3.6.2")
 
     def requirements(self):
         self.requires("gdk-pixbuf/2.42.6")
@@ -140,7 +132,7 @@ class GtkConan(ConanFile):
             self.requires("gstreamer/1.19.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _configure_meson(self):
         meson = Meson(self)
@@ -188,17 +180,15 @@ class GtkConan(ConanFile):
             meson.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        meson = self._configure_meson()
-        with tools.environment_append({
-            "PKG_CONFIG_PATH": self.install_folder,
-            "PATH": [os.path.join(self.package_folder, "bin")]}):
-            meson.install()
-
-        self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        
+        meson = Meson(self)
+        meson.install()
+        
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         if self._gtk3:
