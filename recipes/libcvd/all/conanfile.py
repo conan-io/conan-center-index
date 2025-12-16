@@ -81,15 +81,15 @@ class LibCVDConan(ConanFile):
             # test_package fails with "undefined reference to `raw1394_new_handle'" etc
             self.requires("libdc1394/2.2.7")
         if self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.2")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         elif self.options.with_libjpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.with_libjpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.5")
+            self.requires("mozjpeg/[>=4.1.5 <5]")
         if self.options.with_libpng:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_libtiff:
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.6.0 <5]")
         if self.options.get_safe("with_opengl", True):
             # https://github.com/edrosten/libcvd/blob/RELEASE_2_5_0/cvd/videodisplay.h#L18-L20
             self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
