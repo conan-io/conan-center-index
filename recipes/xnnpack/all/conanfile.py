@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file
-from conan.tools.microsoft import check_min_vs
+from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 import os
 
@@ -43,10 +43,10 @@ class XnnpackConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-    
+
     @property
     def _with_kleidiai(self):
-        return Version(self.version) >= "cci.20241203" and "arm" in str(self.settings.arch) and self.settings.compiler != "msvc"
+        return Version(self.version) >= "cci.20241203" and "arm" in str(self.settings.arch) and not is_msvc(self)
 
     def requirements(self):
         self.requires("cpuinfo/[>=cci.20231129]")
