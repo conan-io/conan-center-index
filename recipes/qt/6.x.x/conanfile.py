@@ -907,7 +907,7 @@ class QtConan(ConanFile):
             targets.append("qsb")
         if self.options.qtdeclarative:
             targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
-            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview"])
+            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltc"])
             if Version(self.version) >= "6.8.3":
                 targets.extend(["qmlaotstats"])
 
