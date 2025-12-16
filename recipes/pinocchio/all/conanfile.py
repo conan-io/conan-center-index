@@ -10,7 +10,7 @@ required_conan_version = ">=2"
 class PinocchioConan(ConanFile):
     name = "pinocchio"
     package_type = "library"
-    license = ("BSD 2-Clause")
+    license = ("BSD-2-Clause")
     url = "https://github.com/conan-io/conan-center-index"
     description = (
         "Pinocchio instantiates the state-of-the-art Rigid Body Algorithms for poly-articulated "
