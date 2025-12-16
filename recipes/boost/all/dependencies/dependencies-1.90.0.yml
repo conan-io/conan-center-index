@@ -170,6 +170,7 @@ libs:
   - boost_cobalt
   cobalt_io:
   - boost_cobalt_io
+  cobalt_io_ssl: []
   container:
   - boost_container
   context:
