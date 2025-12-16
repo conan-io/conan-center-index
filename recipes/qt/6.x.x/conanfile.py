@@ -664,7 +664,7 @@ class QtConan(ConanFile):
         tc.cache_variables["QT_USE_VCPKG"] = False
 
         with_wayland = self.options.get_safe("qtwayland", False)
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Wayland"] = with_wayland
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Wayland"] = not with_wayland
         tc.variables["FEATURE_wayland"] = with_wayland
         
         tc.generate()
