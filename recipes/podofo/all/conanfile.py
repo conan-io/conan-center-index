@@ -124,6 +124,8 @@ class PodofoConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        if self.dependencies["fmt"].options.header_only:
+            deps.set_property("fmt", "cmake_target_aliases", ["fmt::fmt"])
         deps.generate()
 
     def build(self):

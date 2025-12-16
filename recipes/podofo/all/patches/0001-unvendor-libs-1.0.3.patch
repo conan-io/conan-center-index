@@ -35,7 +35,7 @@ index c678167..8203f1a 100644
  if (MSVC)
      # Set the compiler less permissive and add some warnings
      # /we4287: unsigned/negative constant mismatch
-@@ -255,6 +252,23 @@ list(APPEND PODOFO_LIB_DEPENDS ZLIB::ZLIB)
+@@ -255,6 +252,18 @@ list(APPEND PODOFO_LIB_DEPENDS ZLIB::ZLIB)
  string(APPEND PODOFO_PKGCONFIG_REQUIRES_PRIVATE " zlib")
  list(APPEND PODOFO_LIB_DEPENDS ${PLATFORM_SYSTEM_LIBRARIES})
  
@@ -49,12 +49,7 @@ index c678167..8203f1a 100644
 +find_package(FastFloat REQUIRED CONFIG)
 +find_package(date REQUIRED CONFIG)
 +find_package(tcb-span REQUIRED CONFIG)
-+list(APPEND PODOFO_LIB_DEPENDS utf8::cpp utf8proc::utf8proc FastFloat::fast_float date::date tcb-span::tcb-span)
-+if(TARGET fmt::fmt)
-+    list(APPEND PODOFO_LIB_DEPENDS fmt::fmt)
-+else()
-+    list(APPEND PODOFO_LIB_DEPENDS fmt::fmt-header-only)
-+endif()
++list(APPEND PODOFO_LIB_DEPENDS fmt::fmt utf8::cpp utf8proc::utf8proc FastFloat::fast_float date::date tcb-span::tcb-span)
 +
  if(LCMS2_FOUND)
      # little-cms2 doesn't provide targets.
