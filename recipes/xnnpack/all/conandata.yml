@@ -1,19 +1,7 @@
 sources:
-  "cci.20240229":
-    url: "https://github.com/google/XNNPACK/archive/fcbf55af6cf28a4627bcd1f703ab7ad843f0f3a2.tar.gz"
-    sha256: "96b2800652a605f0bd289faa09865792d139cadde89f681c79e1b2a08a7e0498"
+  "cci.20241203":
+    url: "https://github.com/google/XNNPACK/archive/51a0103656eff6fc9bfd39a4597923c4b542c883.tar.gz"
+    sha256: "3ff271a4f41e798616950b0c690d127afcc530a6180f78c78c4b2932920911aa"
   "cci.20231026":
     url: "https://github.com/google/XNNPACK/archive/ab16a544c1cbc5ee4ec105a2f35f8adca22e94c1.tar.gz"
     sha256: "11c7e0555d2c2c14d812b3fba2a277d59121cfb898dcc99de1c76477ff2055a0"
-  "cci.20230715":
-    url: "https://github.com/google/XNNPACK/archive/645035286fe31d47eeb07900450f4f6540b75c2c.tar.gz"
-    sha256: "4c91153dfe4648dc3b325db0b4d6719d6e16f7ce30940b4ceb65abd033e5245e"
-  "cci.20220801":
-    url: "https://github.com/google/XNNPACK/archive/8e3d3359f9bec608e09fac1f7054a2a14b1bd73c.tar.gz"
-    sha256: "c82327543249bd333034bbaa0300ed1fc9c7060fa73673a285042e3f042540e0"
-  "cci.20220621":
-    url: "https://github.com/google/XNNPACK/archive/b725ca1a40b53d8087d1be0c53cb49fa05e2f1bc.tar.gz"
-    sha256: "a745c629dea5fc76e5a545e412a408fde1a523b71027f07d1b0670ec9ae54819"
-  "cci.20211210":
-    url: "https://github.com/google/XNNPACK/archive/113092317754c7dea47bfb3cb49c4f59c3c1fa10.tar.gz"
-    sha256: "065bb9c85438c453f9300251f263118c4d123d79b21acf8f66582a3124d95fb2"
