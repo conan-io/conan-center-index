@@ -78,6 +78,7 @@ class PinocchioConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["pinocchio_headers"].includedirs = ["include"]
         self.cpp_info.components["pinocchio_headers"].requires = ["eigen::eigen", "boost::boost"]
+        self.cpp_info.components["pinocchio_headers"].libdirs = []
 
         self.cpp_info.components["pinocchio_default"].libs = ["pinocchio_default"]
         self.cpp_info.components["pinocchio_default"].requires = ["pinocchio_headers"]
@@ -87,12 +88,11 @@ class PinocchioConan(ConanFile):
         self.cpp_info.components["pinocchio_visualizers"].libs = ["pinocchio_visualizers"]
         self.cpp_info.components["pinocchio_visualizers"].requires = ["pinocchio_headers", "pinocchio_default"]
         self.cpp_info.components["pinocchio_visualizers"].set_property("cmake_target_name", "pinocchio::pinocchio_visualizers")
-        self.cpp_info.components["pinocchio_visualizers"].defines = ["PINOCCHIO_ENABLE_TEMPLATE_INSTANTIATION"]
 
         self.cpp_info.components["pinocchio_parsers"].libs = ["pinocchio_parsers"]
         self.cpp_info.components["pinocchio_parsers"].set_property("cmake_target_name", "pinocchio::pinocchio_parsers")
         self.cpp_info.components["pinocchio_parsers"].requires = ["pinocchio_headers", "pinocchio_default", "boost::headers", "urdfdom::urdfdom", "urdfdom_headers::urdfdom_headers"]
-        self.cpp_info.components["pinocchio_parsers"].defines = ["PINOCCHIO_WITH_URDFDOM", "PINOCCHIO_ENABLE_TEMPLATE_INSTANTIATION"]
+        self.cpp_info.components["pinocchio_parsers"].defines = ["PINOCCHIO_WITH_URDFDOM"]
 
         self.cpp_info.components["pinocchio"].requires = ["pinocchio_default", "pinocchio_parsers", "pinocchio_visualizers"]
         self.cpp_info.components["pinocchio"].set_property("cmake_target_name", "pinocchio::pinocchio")
