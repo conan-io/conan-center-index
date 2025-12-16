@@ -609,16 +609,6 @@ class QtConan(ConanFile):
         for feature in str(self.options.disabled_features).split():
             tc.variables[f"FEATURE_{feature}"] = "OFF"
 
-        # Qt 6.10.1+ Wayland platform plugin (part of qtbase) requires EGL when building shared libraries
-        # If EGL is disabled, disable the Wayland platform plugin to avoid build failures
-        if (Version(self.version) >= "6.10.1" and
-            self.options.shared and
-            self.options.gui and
-            not self.options.get_safe("with_egl", False)):
-            tc.variables["FEATURE_wayland_client"] = "OFF"
-            tc.variables["FEATURE_wayland_server"] = "OFF"
-            self.output.warning("Disabling Wayland platform plugin for Qt 6.10.1+ shared library build "
-                                "on Linux/FreeBSD (requires EGL which is disabled)")
 
         if self.settings.os == "Macos":
             tc.variables["FEATURE_framework"] = "OFF"
@@ -671,9 +661,12 @@ class QtConan(ConanFile):
         for std, feature in cpp_std_map.items():
             tc.variables[feature] = "ON" if int(current_cpp_std) >= std else "OFF"
 
-        tc.variables["QT_USE_VCPKG"] = False
         tc.cache_variables["QT_USE_VCPKG"] = False
 
+        with_wayland = self.options.get_safe("qtwayland", False)
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Wayland"] = with_wayland
+        tc.variables["FEATURE_wayland"] = with_wayland
+        
         tc.generate()
 
     def package_id(self):
