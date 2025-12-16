@@ -43,6 +43,10 @@ class XnnpackConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+    
+    @property
+    def _with_kleidiai(self):
+        return Version(self.version) >= "cci.20241203" and "arm" in str(self.settings.arch) and self.settings.compiler != "msvc"
 
     def requirements(self):
         self.requires("cpuinfo/[>=cci.20231129]")
@@ -50,7 +54,7 @@ class XnnpackConan(ConanFile):
         #  https://github.com/google/XNNPACK/blob/ed5f9c0562e016a08b274a4579de5ef500fec134/include/xnnpack.h#L15
         self.requires("pthreadpool/cci.20231129", transitive_headers=True)
         self.requires("fxdiv/cci.20200417")
-        if Version(self.version) >= "cci.20241203" and "arm" in str(self.settings.arch):
+        if self._with_kleidiai:
             self.requires("kleidiai/1.18.0")
 
     def validate(self):
@@ -88,7 +92,7 @@ class XnnpackConan(ConanFile):
         # To export symbols for shared msvc
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if Version(self.version) >= "cci.20241203":
-            tc.cache_variables["XNNPACK_ENABLE_KLEIDIAI"] = "arm" in str(self.settings.arch)
+            tc.cache_variables["XNNPACK_ENABLE_KLEIDIAI"] = self._with_kleidiai
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -142,7 +146,7 @@ class XnnpackConan(ConanFile):
                 "fxdiv::fxdiv",
             ]
             self.cpp_info.components["xnnpack"].requires.append("microkernels-prod")
-            if "arm" in str(self.settings.arch):
+            if self._with_kleidiai:
                 self.cpp_info.components["microkernels-prod"].requires.append("kleidiai::kleidiai")
                 self.cpp_info.components["xnnpack"].requires.append("kleidiai::kleidiai")
 
