@@ -42,7 +42,6 @@ dependencies:
   - context
   cobalt_io:
   - cobalt
-  cobalt_io_ssl: []
   container: []
   context: []
   contract:
