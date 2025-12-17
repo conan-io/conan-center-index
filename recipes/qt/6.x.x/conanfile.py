@@ -282,16 +282,15 @@ class QtConan(ConanFile):
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("apple-clang >= 12 required by qt >= 6.4.0")
 
-        if Version(self.version) >= "6.6.1" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "13":
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "13":
             # note: assuming that by now, any xcode 13 is updated to the latest 13.4.1
             raise ConanInvalidConfiguration("apple-clang >= 13.1 is required by qt >= 6.6.1 cf QTBUG-119490")
 
-        if Version(self.version) >= "6.8.3":
-            if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "193":
-                raise ConanInvalidConfiguration("Visual Studio 2022 (MSVC 1930 or newer) is required by qt >= 6.8.3")
+        if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "193":
+            raise ConanInvalidConfiguration("Visual Studio 2022 (MSVC 1930 or newer) is required by qt >= 6.8.3")
 
-            if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "15":
-                raise ConanInvalidConfiguration("apple-clang >= 14 is required by qt >= 6.8.3")
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "15":
+            raise ConanInvalidConfiguration("apple-clang >= 14 is required by qt >= 6.8.3")
 
         if self.options.get_safe("qtwebengine"):
             if not self.options.shared:
@@ -515,7 +514,7 @@ class QtConan(ConanFile):
 
         if self.options.multiconfiguration:
             tc.variables["CMAKE_CONFIGURATION_TYPES"] = "Release;Debug"
-        tc.variables["FEATURE_optimize_size"] = ("ON" if self.settings.build_type == "MinSizeRel" else "OFF")
+        tc.variables["FEATURE_optimize_size"] = ("ON" if self.settings.get_safe("build_type") == "MinSizeRel" else "OFF")
 
         for module in self._get_module_tree:
             tc.variables[f"BUILD_{module}"] = ("ON" if getattr(self.options, module) else "OFF")
@@ -644,7 +643,7 @@ class QtConan(ConanFile):
             tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = True
 
         tc.variables["FEATURE_pkg_config"] = "ON"
-        if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
+        if self.settings.compiler == "gcc" and self.settings.get_safe("build_type") == "Debug" and not self.options.shared:
             tc.variables["BUILD_WITH_PCH"] = "OFF"  # disabling PCH to save disk space
 
                                #"set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
@@ -715,7 +714,7 @@ class QtConan(ConanFile):
             "")
 
         replace_in_file(self,
-                        os.path.join(self.source_folder, "qtbase", "cmake", "QtAutoDetect.cmake" if Version(self.version) < "6.6.2" else "QtAutoDetectHelpers.cmake"),
+                        os.path.join(self.source_folder, "qtbase", "cmake", "QtAutoDetectHelpers.cmake"),
                         "qt_auto_detect_vcpkg()",
                         "# qt_auto_detect_vcpkg()")
 
@@ -1043,7 +1042,7 @@ class QtConan(ConanFile):
             build_modules[component].append(module)
 
         libsuffix = ""
-        if self.settings.build_type == "Debug":
+        if self.settings.get_safe("build_type") == "Debug":
             if is_msvc(self):
                 libsuffix = "d"
             if is_apple_os(self):
@@ -1186,12 +1185,11 @@ class QtConan(ConanFile):
                 if self.settings.compiler == "gcc":
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/gui/CMakeLists.txt#L746
                     self.cpp_info.components["qtGui"].system_libs.append("uuid")
-                if Version(self.version) >= "6.6.0":
-                    # https://github.com/qt/qtbase/blob/v6.6.0/src/gui/CMakeLists.txt#L428
-                    self.cpp_info.components["qtGui"].system_libs.append("d3d12")
-                if Version(self.version) >= "6.7.0":
-                    # https://github.com/qt/qtbase/blob/v6.7.0-beta1/src/gui/CMakeLists.txt#L430
-                    self.cpp_info.components["qtGui"].system_libs.append("uxtheme")
+
+                # https://github.com/qt/qtbase/blob/v6.6.0/src/gui/CMakeLists.txt#L428
+                self.cpp_info.components["qtGui"].system_libs.append("d3d12")
+                # https://github.com/qt/qtbase/blob/v6.7.0-beta1/src/gui/CMakeLists.txt#L430
+                self.cpp_info.components["qtGui"].system_libs.append("uxtheme")
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/direct2d/CMakeLists.txt#L60-L82
                 self.cpp_info.components["qtGui"].system_libs += [
                     "advapi32", "d2d1", "d3d11", "dwmapi", "dwrite", "dxgi", "dxguid", "gdi32", "imm32", "ole32",
@@ -1200,18 +1198,14 @@ class QtConan(ConanFile):
                 ]
                 _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
                 # https://github.com/qt/qtbase/commit/65d58e6c41e3c549c89ea4f05a8e467466e79ca3
-                if Version(self.version) >= "6.7.0":
-                    _create_plugin("QModernWindowsStylePlugin", "qmodernwindowsstyle", "styles", ["Core", "Gui"])
-                else:
-                    _create_plugin("QWindowsVistaStylePlugin", "qwindowsvistastyle", "styles", ["Core", "Gui"])
+                _create_plugin("QModernWindowsStylePlugin", "qmodernwindowsstyle", "styles", ["Core", "Gui"])
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/windows/CMakeLists.txt#L53-L69
                 self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs += [
                     "advapi32", "dwmapi", "gdi32", "imm32", "ole32", "oleaut32", "setupapi", "shell32", "shlwapi",
                     "user32", "winmm", "winspool", "wtsapi32", "shcore", "comdlg32", "d3d9", "runtimeobject"
                 ]
-                if Version(self.version) >= "6.8.0" and is_msvc(self):
-                    # https://github.com/qt/qtbase/blob/6.8.3/src/plugins/platforms/windows/CMakeLists.txt#L204
-                    self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs.append("uiautomationcore")
+                # https://github.com/qt/qtbase/blob/6.8.3/src/plugins/platforms/windows/CMakeLists.txt#L204
+                self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs.append("uiautomationcore")
             elif self.settings.os == "Android":
                 _create_plugin("QAndroidIntegrationPlugin", "qtforandroid", "platforms", ["Core", "Gui"])
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/android/CMakeLists.txt#L68-L70
@@ -1221,7 +1215,7 @@ class QtConan(ConanFile):
                 self.cpp_info.components["qtGui"].frameworks = ["CoreFoundation", "CoreGraphics", "CoreText", "Foundation", "ImageIO"]
                 # https://github.com/qt/qtbase/blob/6.8.0/src/gui/configure.cmake#L834-L837
                 has_metal = "metal" not in disabled_features and self.settings.os in ["Macos", "iOS", "visionOS"]
-                if Version(self.version) >= "6.8.0" and has_metal:
+                if has_metal:
                     # https://github.com/qt/qtbase/blob/6.8.0/src/gui/CMakeLists.txt#L432-L437
                     self.cpp_info.components["qtGui"].frameworks.append("QuartzCore")
                 if self.settings.os == "Macos":
@@ -1573,9 +1567,8 @@ class QtConan(ConanFile):
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/network/CMakeLists.txt#L216-L221
                 # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Cocoa")
-                if Version(self.version) >= "6.8.0":
-                    # https://github.com/qt/qtbase/blob/v6.8.3/src/corelib/CMakeLists.txt#L712-L717
-                    self.cpp_info.components["qtCore"].frameworks.append("UniformTypeIdentifiers")
+                # https://github.com/qt/qtbase/blob/v6.8.3/src/corelib/CMakeLists.txt#L712-L717
+                self.cpp_info.components["qtCore"].frameworks.append("UniformTypeIdentifiers")
                 self.cpp_info.components["qtNetwork"].system_libs.append("resolv")
                 if self.options.with_gssapi:
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/network/CMakeLists.txt#L250C56-L253
