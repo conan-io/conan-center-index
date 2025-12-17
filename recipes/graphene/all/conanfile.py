@@ -121,6 +121,11 @@ class GrapheneConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["graphene-1.0"].set_property("pkg_config_name", "graphene-1.0")
+        pkgconfig_vars = {"graphene_has_gcc": 1 if self.settings.compiler == "gcc" else 0,
+                          "graphene_has_sse2": 1 if str(self.settings.arch) in ["x86", "x86_64"] else 0,
+                          "graphene_has_neon": 1 if str(self.settings.arch).startswith("arm") else 0,
+                          "graphene_has_scalar": 1}
+        self.cpp_info.components["graphene-1.0"].set_property("pkg_config_custom_content", pkgconfig_vars)
         self.cpp_info.components["graphene-1.0"].libs = ["graphene-1.0"]
         self.cpp_info.components["graphene-1.0"].includedirs = [os.path.join("include", "graphene-1.0"), os.path.join("lib", "graphene-1.0", "include")]
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -130,6 +135,7 @@ class GrapheneConan(ConanFile):
 
         if self.options.with_glib:
             self.cpp_info.components["graphene-gobject-1.0"].set_property("pkg_config_name","graphene-gobject-1.0")
+            self.cpp_info.components["graphene-gobject-1.0"].set_property("pkg_config_custom_content", pkgconfig_vars)
             self.cpp_info.components["graphene-gobject-1.0"].includedirs = [os.path.join("include", "graphene-1.0")]
             self.cpp_info.components["graphene-gobject-1.0"].requires = ["graphene-1.0", "glib::gobject-2.0"]
 
