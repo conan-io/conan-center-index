@@ -7,7 +7,7 @@ sources:
     sha256: "49b159e88ba177ad2561b5cf6cbd68ecbe83272f5488bc527e44f97dbf695273"
 patches:
   "1.0.3":
-    - patch_file: "patches/0001-unvendor-libs-1.0.2.patch"
+    - patch_file: "patches/0001-unvendor-libs-1.0.3.patch"
       patch_description: "Unvendor date, fmt, utf8cpp, utf8proc, tcb-span and fast-float. Remove C++ hardcoded standard"
       patch_type: "conan"
   "0.10.5":
