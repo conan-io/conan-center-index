@@ -68,11 +68,7 @@ class OpenTelemetryCppConan(ConanFile):
             self.options.rm_safe("fPIC")
             del self.options.with_etw
             # Opentelemetry-cpp on Windows only supports static libraries,
-            # due to ppor support from upstream (and build failures)
-            # As Upstream does not expect shared builds to work properly on Windows,
-            # instead of validating shared out (which would remove shared builds from CCI of dependants),
-            # we just force static builds on Windows.
-            # See https://github.com/open-telemetry/opentelemetry-cpp/issues/2477
+            # upstream does not support shared builds on Windows
             self.package_type = "static-library"
             del self.options.shared
 
