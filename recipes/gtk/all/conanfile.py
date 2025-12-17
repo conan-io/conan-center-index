@@ -1,10 +1,12 @@
 from conan import ConanFile
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.cmake import CMakeDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.files import get, copy, rmdir, rm
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.4"
@@ -26,14 +28,12 @@ class GtkConan(ConanFile):
         "fPIC": [True, False],
         "with_wayland": [True, False],
         "with_x11": [True, False],
-        "with_gstreamer": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_wayland": False,
-        "with_x11": False,
-        "with_gstreamer": False,
+        "with_x11": True,
     }
 
     def config_options(self):
@@ -59,6 +59,7 @@ class GtkConan(ConanFile):
         self.tool_requires("cmake/[>=3.17]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
+        self.tool_requires("glib/<host_version>")
 
         # TODO: Re-check if these are needed for gtk4
         #if self._gtk4:
@@ -69,13 +70,13 @@ class GtkConan(ConanFile):
 
     def requirements(self):
         self.requires("gdk-pixbuf/[^2.42]")
-        self.requires("glib/[^2.82]", override=True) # gtk requires >=2.82
-        #if not is_msvc(self):
-        #    self.requires("cairo/[>=1.17.4 <2]")
+        self.requires("glib/[^2.82]", transitive_headers=True)
+        if not is_msvc(self):
+            self.requires("cairo/[^1.18]")
+            self.requires("graphene/1.10.8")
 
-            #self.requires("graphene/1.10.8")
             #self.requires("fribidi/1.0.12")
-            #self.requires("libpng/1.6.37")
+        self.requires("libpng/[>=1.6 <2]")
             #self.requires("libtiff/4.3.0")
             #self.requires("libjpeg/9d")
         if self.settings.os == "Linux":
@@ -86,34 +87,43 @@ class GtkConan(ConanFile):
                 self.requires("xorg/system")
         self.requires("libepoxy/1.5.10")
         self.requires("pango/[>1.50.7 <2]")
-        if self.options.with_gstreamer:
-            self.requires("gstreamer/[>=1.19.2 <2]")
+
+        self.requires("libdrm/[^2.4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = MesonToolchain(self)
+        # tc.project_options.pop("wrap_mode")
         if self.settings.os == "Linux":
             true_false = lambda opt : "true" if opt else "false" 
             tc.project_options["wayland-backend"] = true_false(self.options.with_wayland)
             tc.project_options["x11-backend"] = true_false(self.options.with_x11)
-        tc.project_options["introspection"] = "disabled"
+        tc.project_options["broadway-backend"] = "false"        
         tc.project_options["documentation"] = "false"
-        tc.project_options["man-pages"] = "false"
         tc.project_options["build-testsuite"] = "false"
         tc.project_options["build-tests"] = "false"
         tc.project_options["build-examples"] = "false"
         tc.project_options["build-demos"] = "false"
-        
-        enabled_disabled = lambda opt : "enabled" if opt else "disabled" 
-        tc.project_options["media-gstreamer"] = enabled_disabled(self.options.with_gstreamer)
-        tc.generate()
+        tc.project_options["sysprof"] = "disabled"
+        tc.project_options["introspection"] = "disabled"
+        tc.project_options["print-cups"] = "disabled"
+        tc.project_options["cloudproviders"] = "disabled"
+        tc.project_options["tracker"] = "disabled"
+        tc.project_options["f16c"] = "disabled"
+        tc.project_options["colord"] = "disabled"
+        tc.project_options["media-gstreamer"] = "disabled"
+        tc.project_options["vulkan"] = "disabled"
 
-        #args=[]
-        #args.append("--wrap-mode=nofallback")
+        if Version(self.version) < "4.10":
+            tc.project_options["gtk_doc"] = "false"
+            tc.project_options["demos"] = "false"
+            tc.project_options["man-pages"] = "false"
+
+        tc.generate()
     
-        deps = PkgConfigDeps(self)
+        deps = PkgConfigDeps(self)        
         deps.generate()
     
     def validate(self):
@@ -122,6 +132,8 @@ class GtkConan(ConanFile):
                 raise ConanInvalidConfiguration("MSVC build requires shared gdk-pixbuf")
         if is_msvc(self) and not self.dependencies["cairo"].options.shared:
             raise ConanInvalidConfiguration("MSVC build requires shared cairo")
+        if self.settings.os == "Linux" and not (self.options.with_wayland or self.options.with_x11):
+            raise ConanInvalidConfiguration("At least one of backends '-o &:with_wayland' or '-o &:with_x11' options must be True on Linux")
 
     def build(self):
         meson = Meson(self)
