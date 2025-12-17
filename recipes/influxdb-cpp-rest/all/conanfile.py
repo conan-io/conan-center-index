@@ -53,11 +53,27 @@ class InfluxdbCppRestConan(ConanFile):
                         "set(CMAKE_CXX_STANDARD", "#set(CMAKE_CXX_STANDARD")
 
     def validate(self):
+        # Require C++20 for std::format support
         check_min_cppstd(self, 20)
+
+        # Require compilers new enough for std::format / <format> (and friends) to work
         minimum_compiler_versions = {"gcc": 13, "clang": 15, "apple-clang": 14, "msvc": 192}
         minimum_version = minimum_compiler_versions.get(str(self.settings.compiler))
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"Requires {self.settings.compiler} >= {minimum_version} for std::format support")
+
+        # Apple libc++ only makes floating-point std::to_chars (used by std::format)
+        # available starting macOS 13.3. Building this library with an older
+        # deployment target fails in the standard headers, so declare that
+        # configuration as unsupported instead of failing during compilation.
+        if self.settings.os == "Macos":
+            deployment_target = os.environ.get("MACOSX_DEPLOYMENT_TARGET")
+            if deployment_target and Version(deployment_target) < "13.3":
+                raise ConanInvalidConfiguration(
+                    f"{self.name}/{self.version} requires MACOSX_DEPLOYMENT_TARGET >= 13.3 "
+                    "because std::format uses floating-point std::to_chars, which is "
+                    "unavailable on earlier macOS deployment targets."
+                )
 
 
     def generate(self):
