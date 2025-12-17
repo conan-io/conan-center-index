@@ -1,0 +1,13 @@
+diff --git a/main.mk b/main.mk
+index 1234567..abcdefg 100644
+--- a/main.mk
++++ b/main.mk
+@@ -1142,7 +1142,7 @@ libsqlite3.out.implib ?=
+ #
+ # libsqlite3.LIB => the static library
+ #
+-libsqlite3.LIB = libsqlite3$(T.lib)
++libsqlite3.LIB = libsqlcipher$(T.lib)
+ 
+ #
+ # libsqlite3.DLL.install-rules => the suffix of the symoblic name of

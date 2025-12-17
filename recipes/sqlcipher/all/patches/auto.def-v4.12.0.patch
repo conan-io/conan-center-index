@@ -1,0 +1,20 @@
+diff --git a/auto.def b/auto.def
+index 1234567..abcdefg 100644
+--- a/auto.def
++++ b/auto.def
+@@ -17,7 +17,15 @@
+ # starting with "proj-" are project-agnostic and found in
+ # autosetup/proj.tcl.
+ #
+ use sqlite-config
++
++# Add support for autoconf-style options for compatibility with Conan's AutotoolsToolchain
++# These options need to be defined early for command-line parsing
++options {
++  oldincludedir:DIR => "Ignored for compatibility with autoconf"
++  shared            => "Build shared library"
++  static            => "Build static library"
++}
+ sqlite-configure canonical {
+   proj-if-opt-truthy dev {
+     # --enable-dev needs to come early so that the downstream tests

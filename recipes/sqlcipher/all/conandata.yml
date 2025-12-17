@@ -1,4 +1,7 @@
 sources:
+  "4.12.0":
+    url: "https://github.com/sqlcipher/sqlcipher/archive/v4.12.0.zip"
+    sha256: "a4bbfd266245eb4695e88e2b5e7c2b68408633e16da67cafd96bde515df24641"
   "4.6.1":
     url: "https://github.com/sqlcipher/sqlcipher/archive/v4.6.1.zip"
     sha256: "93a7475183d47e2d33f85aefa7518e8730796f103612d36ae191ae56209104e0"
@@ -9,6 +12,8 @@ sources:
     url: "https://github.com/sqlcipher/sqlcipher/archive/v4.4.3.zip"
     sha256: "e52d0595dc1ed30eed68523fe286d38657bd905957447a3725706ff54e21edf8"
 patches:
+  "4.12.0":
+    - patch_file: patches/main.mk-v4.12.0.patch
   "4.6.1":
     - patch_file: patches/Makefile.in-v4.6.1.patch
     - patch_file: patches/Makefile.msc-v4.6.1.patch

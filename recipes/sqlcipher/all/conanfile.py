@@ -150,10 +150,32 @@ class SqlcipherConan(ConanFile):
             env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
-        tc.configure_args += [
-            f"--enable-tempstore={self._temp_store_autotools_value}",
-            "--disable-tcl",
-        ]
+        if Version(self.version) >= "4.12.0":
+            # SQLCipher 4.12.0+ uses autosetup instead of autoconf
+            # Remove autoconf-specific options that autosetup doesn't recognize
+            tc.update_configure_args({
+                "--enable-shared": None,
+                "--disable-shared": None,
+                "--enable-static": None,
+                "--disable-static": None,
+                "--oldincludedir": None,
+            })
+            # Autosetup uses --with-tempstore instead of --enable-tempstore
+            tc.configure_args.append(f"--with-tempstore={self._temp_store_autotools_value}")
+            if self.options.shared:
+                tc.configure_args.append("--disable-static")
+            else:
+                tc.configure_args.append("--disable-shared")
+            # For cross-compilation, autosetup looks for ${host}-cc which doesn't exist
+            # Remove --host and --build to let autosetup use CC from environment
+            if cross_building(self):
+                tc.update_configure_args({
+                    "--host": None,
+                    "--build": None,
+                })
+        else:
+            tc.configure_args.append(f"--enable-tempstore={self._temp_store_autotools_value}")
+        tc.configure_args.append("--disable-tcl")
         if self.settings.os == "Windows":
             tc.configure_args += [
                 "config_BUILD_EXEEXT='.exe'",
@@ -177,6 +199,13 @@ class SqlcipherConan(ConanFile):
 
         if self.options.enable_column_metadata:
             tc.extra_defines.append("SQLITE_ENABLE_COLUMN_METADATA=1")
+        if Version(self.version) >= "4.12.0":
+            tc.extra_defines.extend([
+                "SQLITE_EXTRA_INIT=sqlcipher_extra_init",
+                "SQLITE_EXTRA_SHUTDOWN=sqlcipher_extra_shutdown",
+            ])
+            if not self._use_commoncrypto:
+                tc.extra_ldflags.append("-lcrypto")
         tc.generate()
 
         deps = AutotoolsDeps(self)
@@ -194,6 +223,12 @@ class SqlcipherConan(ConanFile):
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def _patch_sources_unix(self):
+        autosetup_dir = os.path.join(self.source_folder, "autosetup")
+        if os.path.isdir(autosetup_dir):
+            for fname in os.listdir(autosetup_dir):
+                if fname.startswith("autosetup"):
+                    self._chmod_plus_x(os.path.join(autosetup_dir, fname))
+
         for gnu_config in [
             self.conf.get("user.gnu-config:config_guess", check_type=str),
             self.conf.get("user.gnu-config:config_sub", check_type=str),
@@ -203,14 +238,15 @@ class SqlcipherConan(ConanFile):
         configure = os.path.join(self.source_folder, "configure")
         self._chmod_plus_x(configure)
         # relocatable shared libs on macOS
-        replace_in_file(self, configure, "-install_name \\$rpath/", "-install_name @rpath/")
-        # avoid SIP issues on macOS when dependencies are shared
-        if is_apple_os(self):
-            libdirs = sum([dep.cpp_info.libdirs for dep in self.dependencies.values()], [])
-            libpaths = ":".join(libdirs)
-            replace_in_file(self, configure,
-                            "#! /bin/sh\n",
-                            f"#! /bin/sh\nexport DYLD_LIBRARY_PATH={libpaths}:$DYLD_LIBRARY_PATH\n")
+        if Version(self.version) < "4.12.0":
+            replace_in_file(self, configure, "-install_name \\$rpath/", "-install_name @rpath/")
+            # avoid SIP issues on macOS when dependencies are shared
+            if is_apple_os(self):
+                libdirs = sum([dep.cpp_info.libdirs for dep in self.dependencies.values()], [])
+                libpaths = ":".join(libdirs)
+                replace_in_file(self, configure,
+                                "#! /bin/sh\n",
+                                f"#! /bin/sh\nexport DYLD_LIBRARY_PATH={libpaths}:$DYLD_LIBRARY_PATH\n")
 
     def build(self):
         apply_conandata_patches(self)
@@ -226,20 +262,18 @@ class SqlcipherConan(ConanFile):
                 if self.settings.os == "Windows":
                     # sqlcipher will create .exe for the build machine, which we defined to Linux...
                     replace_in_file(self, "Makefile", "BEXE = .exe", "BEXE = ")
-                autotools.make()
+                # Do not build the executable
+                autotools.make(target="libsqlcipher.a")
 
     def package(self):
         copy(self, "LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "sqlite3.h", dst=os.path.join(self.package_folder, "include", "sqlcipher"), src=self.source_folder)
         if is_msvc(self):
             copy(self, "*.dll", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder, keep_path=False)
             copy(self, "*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
-            copy(self, "sqlite3.h", dst=os.path.join(self.package_folder, "include", "sqlcipher"), src=self.source_folder)
         else:
-            with chdir(self, self.source_folder):
-                autotools = Autotools(self)
-                autotools.install()
-            rm(self, "*.la", self.package_folder, recursive=True)
-            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            copy(self, "libsqlcipher.a", dst=os.path.join(self.package_folder, "lib"),
+                    src=self.source_folder, keep_path=False)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "sqlcipher")
