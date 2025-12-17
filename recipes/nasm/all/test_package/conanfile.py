@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.build import can_run
 
 
 class TestPackageConan(ConanFile):
@@ -8,4 +9,5 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def test(self):
-        self.run("nasm --version", env="conanrun")
+        if can_run(self):
+            self.run("nasm --version", env="conanrun")
