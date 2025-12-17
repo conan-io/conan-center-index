@@ -106,3 +106,21 @@ index 8fd4a85..840eb2e 100644
  #endif
  
  #ifdef WANT_TO_CHARS
+diff --git a/src/podofo/private/format_compat.h b/src/podofo/private/format_compat.h
+index 49d89a2..5839e00 100644
+--- a/src/podofo/private/format_compat.h
++++ b/src/podofo/private/format_compat.h
+@@ -7,7 +7,12 @@
+
+ #else // __cplusplus < 202002L
+
+-#define FMT_HEADER_ONLY
++// https://github.com/podofo/podofo/issues/299
++// Including the manually defined header-only version of fmt header
++// will force clients consuming PoDoFo to also exclusively use the
++// header-only version of fmt, hence this is handled in the package
++// recipe until PoDoFo unvendors fmt in a way that they prefer
++// #define FMT_HEADER_ONLY
+ #include <fmt/format.h>
+
+ namespace std
