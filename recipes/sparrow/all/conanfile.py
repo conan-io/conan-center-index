@@ -53,7 +53,7 @@ class SparrowRecipe(ConanFile):
         return self.options.get_safe("use_date_polyfill", False)
 
     def requirements(self):
-        if self._uses_date_polyfill:
+        if self._uses_date_polyfill or Version(self.version) < "2.0.0": # Because of a bug in the CMake files in <2.0.0, we have to get date unconditionally
             self.requires("date/[>=3.0.3 <4]", transitive_headers=True)
         if self.options.export_json_reader:
             self.requires("nlohmann_json/3.12.0", transitive_headers=True)
