@@ -51,7 +51,7 @@ class GrapheneConan(ConanFile):
 
     def requirements(self):
         if self.options.with_glib:
-            self.requires("glib/2.78.3")
+            self.requires("glib/[^2.78.3]")
 
     def validate(self):
         if self.settings.compiler == "gcc":
@@ -72,7 +72,7 @@ class GrapheneConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("meson/1.3.1")
         if not self.conf.get("tools.gnu:pkg_config", default=False):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
