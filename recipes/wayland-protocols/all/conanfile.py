@@ -23,10 +23,6 @@ class WaylandProtocolsConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
-    def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
-
     def build_requirements(self):
         self.tool_requires("meson/[>=1.3.1 <2]")
 
