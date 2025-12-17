@@ -58,8 +58,8 @@ class Gtk4Conan(ConanFile):
         self.requires("libtiff/[>=4.6.0 <5]")
         self.requires("libjpeg/[>=9e]")
         if self.settings.os == "Linux":
-            self.requires("xkbcommon/[>=1.5.0 <2]")
             if self.options.with_wayland:
+                self.requires("xkbcommon/[>=1.5.0 <2]")
                 self.requires("wayland/[^1.23]")
                 self.requires("wayland-protocols/[^1.33]")
             if self.options.with_x11:
