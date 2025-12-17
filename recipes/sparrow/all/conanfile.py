@@ -30,7 +30,7 @@ class SparrowRecipe(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "use_date_polyfill": True,
+        "use_date_polyfill": False,
         "export_json_reader": False,
     }
 
@@ -40,13 +40,17 @@ class SparrowRecipe(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        if self.settings.os == "Macos":
+        # On macOS or libc++, date polyfill is not needed
+        if self.settings.os == "Macos" or self.settings.get_safe("compiler.libcxx") != "libstdc++":
             del self.options.use_date_polyfill
 
     @property
     def _uses_date_polyfill(self):
-        # Not an option not to use it on Macos
-        return self.options.get_safe("use_date_polyfill", True)
+        # On macOS or libstdc++, date polyfill is required
+        if self.settings.os == "Macos" or self.settings.get_safe("compiler.libcxx") == "libstdc++":
+            return True
+        # Otherwise use the option value, defaulting to False if option was removed
+        return self.options.get_safe("use_date_polyfill", False)
 
     def requirements(self):
         if self._uses_date_polyfill:
