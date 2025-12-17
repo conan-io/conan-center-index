@@ -117,10 +117,10 @@ class Gtk4Conan(ConanFile):
         tc.project_options["build-tests"] = "false"
 
         tc.generate()
-    
-        deps = PkgConfigDeps(self)        
+
+        deps = PkgConfigDeps(self)
         deps.generate()
-    
+
     def validate(self):
         if self.settings.os == "Linux" and not (self.options.with_wayland or self.options.with_x11):
             raise ConanInvalidConfiguration("At least one of backends '-o &:with_wayland' or '-o &:with_x11' options must be True on Linux")
@@ -132,11 +132,11 @@ class Gtk4Conan(ConanFile):
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        
+
         meson = Meson(self)
         meson.install()
-        
-        # rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
@@ -160,7 +160,6 @@ class Gtk4Conan(ConanFile):
                                                       "fribidi::fribidi", "libepoxy::libepoxy", "libdrm::libdrm", "libtiff::libtiff",
                                                       "libjpeg::libjpeg", "libpng::libpng", "glib::glib"]
         if self.settings.os == "Linux":
-            self.cpp_info.components["gtk-4"].requires.append("xkbcommon::xkbcommon")
             self.cpp_info.components["gtk-4"].system_libs = ["m"]
 
             self.cpp_info.components["gtk-unix-print"].set_property("pkg_config_name", "gtk4-unix-print")
@@ -178,4 +177,5 @@ class Gtk4Conan(ConanFile):
         if self.options.get_safe("with_wayland", False):
             self.cpp_info.components["gtk-wayland"].set_property("pkg_config_name", "gtk4-wayland")
             self.cpp_info.components["gtk-wayland"].set_property("pkg_config_custom_content", pkgconfig_vars)
-            self.cpp_info.components["gtk-wayland"].requires = ["gtk-4", "wayland::wayland", "wayland-protocols::wayland-protocols"]
+            self.cpp_info.components["gtk-wayland"].requires = ["gtk-4", "wayland::wayland", "wayland-protocols::wayland-protocols",
+                                                                "xkbcommon::xkbcommon"]
