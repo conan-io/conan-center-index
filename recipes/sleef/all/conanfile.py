@@ -44,7 +44,6 @@ class SleefConan(ConanFile):
             )
         if cross_building(self):
             # Fails with "No rule to make target `/bin/mkrename'"
-            # https://github.com/shibatch/sleef/issues/308
             raise ConanInvalidConfiguration(f"{self.ref} does not support cross-building")
 
     def build_requirements(self):
