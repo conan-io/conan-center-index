@@ -1,7 +1,8 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
-from conan.tools.layout import basic_layout
+
 import os
 
 required_conan_version = ">=2.0.9"
@@ -18,12 +19,10 @@ class LiftHttpConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "PIE": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "PIE": False,
     }
 
     def export_sources(self):
@@ -37,15 +36,17 @@ class LiftHttpConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcurl/[>=7.88.1 <9]", transitive_headers=True)
-        self.requires("libuv/[>=1 <2]", transitive_headers=True)
+        self.requires("libcurl/[>=7.88.0 <9]", transitive_headers=True)
+        self.requires("libuv/[>=1.45.0 <2]", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def validate(self):
+        check_min_cppstd(self, 17)
 
     def generate(self):
         tc = CMakeToolchain(self)

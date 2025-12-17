@@ -12,10 +12,6 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
-    def configure(self):
-        if self.settings.os == "Windows":
-            self.options["libcurl/*"].with_ssl = "schannel"
-
     def requirements(self):
         self.requires(self.tested_reference_str)
 

@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
+cmake_minimum_required(VERSION 3.15)
+project(test_package CXX)
 
 find_package(lifthttp REQUIRED)
 
