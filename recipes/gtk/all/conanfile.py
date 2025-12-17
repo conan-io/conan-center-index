@@ -56,29 +56,21 @@ class GtkConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
-        self.tool_requires("cmake/[>=3.17]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         self.tool_requires("glib/<host_version>")
 
-        # TODO: Re-check if these are needed for gtk4
-        #if self._gtk4:
-        #    self.build_requires("libxml2/2.9.14") # for xmllint
-        #
-        #if self._gtk4:
-        #    self.build_requires("sassc/3.6.2")
-
     def requirements(self):
-        self.requires("gdk-pixbuf/[^2.42]")
+        self.requires("gdk-pixbuf/[^2.42]", transitive_headers=True)
         self.requires("glib/[^2.82]", transitive_headers=True)
         if not is_msvc(self):
-            self.requires("cairo/[^1.18]")
-            self.requires("graphene/1.10.8")
+            self.requires("cairo/[^1.18]", transitive_headers=True)
+            self.requires("graphene/1.10.8", transitive_headers=True)
 
-            #self.requires("fribidi/1.0.12")
+        self.requires("fribidi/1.0.13")
         self.requires("libpng/[>=1.6 <2]")
-            #self.requires("libtiff/4.3.0")
-            #self.requires("libjpeg/9d")
+        self.requires("libtiff/[>=4.6.0 <5]")
+        self.requires("libjpeg/[>=9e]")
         if self.settings.os == "Linux":
             self.requires("xkbcommon/[>=1.5.0 <2]")
             if self.options.with_wayland:
@@ -86,7 +78,7 @@ class GtkConan(ConanFile):
             if self.options.with_x11:
                 self.requires("xorg/system")
         self.requires("libepoxy/1.5.10")
-        self.requires("pango/[>1.50.7 <2]")
+        self.requires("pango/[>1.50.7 <2]", transitive_headers=True)
 
         self.requires("libdrm/[^2.4]")
 
@@ -95,7 +87,6 @@ class GtkConan(ConanFile):
 
     def generate(self):
         tc = MesonToolchain(self)
-        # tc.project_options.pop("wrap_mode")
         if self.settings.os == "Linux":
             true_false = lambda opt : "true" if opt else "false" 
             tc.project_options["wayland-backend"] = true_false(self.options.with_wayland)
@@ -115,12 +106,6 @@ class GtkConan(ConanFile):
         tc.project_options["colord"] = "disabled"
         tc.project_options["media-gstreamer"] = "disabled"
         tc.project_options["vulkan"] = "disabled"
-
-        if Version(self.version) < "4.10":
-            tc.project_options["gtk_doc"] = "false"
-            tc.project_options["demos"] = "false"
-            tc.project_options["man-pages"] = "false"
-
         tc.generate()
     
         deps = PkgConfigDeps(self)        
