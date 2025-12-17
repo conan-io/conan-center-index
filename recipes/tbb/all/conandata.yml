@@ -1,4 +1,7 @@
 sources:
+  "2022.3.0":
+    url: "https://github.com/uxlfoundation/oneTBB/archive/v2022.3.0.tar.gz"
+    sha256: "01598a46c1162c27253a0de0236f520fd8ee8166e9ebb84a4243574f88e6e50a"
   "2020.3":
     url: "https://github.com/oneapi-src/oneTBB/archive/v2020.3.tar.gz"
     sha256: "ebc4f6aa47972daed1f7bf71d100ae5bf6931c2e3144cf299c8cc7d041dca2f3"
