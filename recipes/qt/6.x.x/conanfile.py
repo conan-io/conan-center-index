@@ -339,6 +339,9 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtspeech") and not self.options.qtdeclarative:
             raise ConanInvalidConfiguration("qtspeech requires qtdeclarative, cf QTBUG-108381")
 
+        if self.options.get_safe("qtwayland") and not self.options.get_safe("with_egl"):
+            raise ConanInvalidConfiguration("qtwayland requires with_egl=True")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -666,7 +669,10 @@ class QtConan(ConanFile):
         with_wayland = self.options.get_safe("qtwayland", False)
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Wayland"] = not with_wayland
         tc.variables["FEATURE_wayland"] = with_wayland
-        
+
+        with_egl = self.options.get_safe("with_egl", False)
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_EGL"] = not with_egl
+
         tc.generate()
 
     def package_id(self):
