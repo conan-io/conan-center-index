@@ -1,14 +1,8 @@
 sources:
   "4.20.3":
-    # REQUIRES Dependency 'librsvg-2.0' is required but not found.
+    # REQUIRES >=4.19.2 Dependency 'librsvg-2.0' is required but not found.
     url: "https://download.gnome.org/sources/gtk/4.20/gtk-4.20.3.tar.xz"
     sha256: "2873f2903088a66c71173ea2ed85ffae266a66b972c3a4842bbb2f6f187ec153"
   "4.18.6":
     url: "https://download.gnome.org/sources/gtk/4.18/gtk-4.18.6.tar.xz"
     sha256: "e1817c650ddc3261f9a8345b3b22a26a5d80af154630dedc03cc7becefffd0fa"
-  "4.16.3":
-    url: "https://download.gnome.org/sources/gtk/4.16/gtk-4.16.3.tar.xz"
-    sha256: "2ec53e07d18c9f003b39e4a6a838054d9259e048b6c4c05d80c0d05aa721d944"
-  "4.7.0":
-    url: "https://download.gnome.org/sources/gtk/4.7/gtk-4.7.0.tar.xz"
-    sha256: "913fcd9d065efb348723e18c3b9113e23b92072e927ebd2f61d32745c8228b94"
