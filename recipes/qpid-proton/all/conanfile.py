@@ -63,28 +63,24 @@ class QpidProtonConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_TOOLS"] = False
+        tc.cache_variables["BUILD_EXAMPLES"] = False
+
+        tc.cache_variables["ENABLE_JSONCPP"] = True
+        tc.cache_variables["ENABLE_OPENTELEMETRYCPP"] = False
+        tc.cache_variables["ENABLE_WARNING_ERROR"] = False
+        tc.cache_variables["ENABLE_UNDEFINED_ERROR"] = False
+        tc.cache_variables["ENABLE_LINKTIME_OPTIMIZATION"] = False
+        tc.cache_variables["ENABLE_HIDE_UNEXPORTED_SYMBOLS"] = False
+        tc.cache_variables["ENABLE_FUZZ_TESTING"] = False
+        tc.cache_variables["ENABLE_BENCHMARKS"] = False
 
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_CyrusSASL"] = True
-
-        tc.variables["BUILD_PYTHON"] = False
-        tc.variables["BUILD_RUBY"] = False
-        tc.variables["BUILD_GO"] = False
-
-        tc.variables["ENABLE_WARNING_ERROR"] = False
-        tc.variables["ENABLE_UNDEFINED_ERROR"] = False
-        tc.variables["ENABLE_LINKTIME_OPTIMIZATION"] = False
-        tc.variables["ENABLE_HIDE_UNEXPORTED_SYMBOLS"] = False
-        tc.variables["ENABLE_FUZZ_TESTING"] = False
-        tc.variables["ENABLE_BENCHMARKS"] = False
-
-        tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
-
-        tc.variables["BUILD_TESTING"] = False
-        tc.cache_variables["BUILD_TOOLS"] = False
-        tc.variables["BUILD_EXAMPLES"] = False
-        tc.cache_variables["ENABLE_JSONCPP"] = True
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_SWIG"] = True
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_SWIG"] = True
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_opentelemetry-cpp"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
