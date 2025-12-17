@@ -339,6 +339,9 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtspeech") and not self.options.qtdeclarative:
             raise ConanInvalidConfiguration("qtspeech requires qtdeclarative, cf QTBUG-108381")
 
+        if self.options.get_safe("qtwayland") and not self.options.get_safe("with_egl"):
+            raise ConanInvalidConfiguration("qtwayland requires with_egl=True")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -609,6 +612,7 @@ class QtConan(ConanFile):
         for feature in str(self.options.disabled_features).split():
             tc.variables[f"FEATURE_{feature}"] = "OFF"
 
+
         if self.settings.os == "Macos":
             tc.variables["FEATURE_framework"] = "OFF"
         elif self.settings.os == "Android":
@@ -660,8 +664,14 @@ class QtConan(ConanFile):
         for std, feature in cpp_std_map.items():
             tc.variables[feature] = "ON" if int(current_cpp_std) >= std else "OFF"
 
-        tc.variables["QT_USE_VCPKG"] = False
         tc.cache_variables["QT_USE_VCPKG"] = False
+
+        with_wayland = self.options.get_safe("qtwayland", False)
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Wayland"] = not with_wayland
+        tc.variables["FEATURE_wayland"] = with_wayland
+
+        with_egl = self.options.get_safe("with_egl", False)
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_EGL"] = not with_egl
 
         tc.generate()
 
@@ -1533,6 +1543,11 @@ class QtConan(ConanFile):
                 self.cpp_info.components["qtCore"].system_libs.append("ws2_32")
                 self.cpp_info.components["qtCore"].system_libs.append("mpr")
                 self.cpp_info.components["qtCore"].system_libs.append("userenv")
+                if Version(self.version) >= "6.10":
+                    # https://github.com/qt/qtbase/blob/90b845d15ffb97693dba527385db83510ebd121a/src/corelib/CMakeLists.txt#L891-L895
+                    self.cpp_info.components["qtCore"].system_libs.extend(["icuuc", "icuin"])
+                    # https://github.com/qt/qtbase/commit/09991b51a48aab7a5f7c5cbf2577ba5450d4cbb4
+                    self.cpp_info.components["qtCore"].system_libs.append("ntdll")
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/network/CMakeLists.txt#L196-L200
                 self.cpp_info.components["qtNetwork"].system_libs.append("advapi32")
                 self.cpp_info.components["qtNetwork"].system_libs.append("dnsapi")
@@ -1552,6 +1567,9 @@ class QtConan(ConanFile):
                 self.cpp_info.components["qtCore"].frameworks.append("IOKit")
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/network/CMakeLists.txt#L205-L214
                 self.cpp_info.components["qtNetwork"].frameworks.append("CFNetwork")
+                if Version(self.version) >= "6.10":
+                    # https://github.com/qt/qtbase/commit/1299aaa231b1ce989c8aedcfed372bde0e1e3a0e
+                    self.cpp_info.components["qtNetwork"].frameworks.append("Network")
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/network/CMakeLists.txt#L216-L221
                 # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Cocoa")
