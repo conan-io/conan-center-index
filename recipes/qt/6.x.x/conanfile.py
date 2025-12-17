@@ -890,6 +890,7 @@ class QtConan(ConanFile):
         if self.settings.os == "Macos":
             filecontents += 'set(__qt_internal_cmake_apple_support_files_path "${CMAKE_CURRENT_LIST_DIR}/../../../lib/cmake/Qt6/macos")\n'
         targets = ["moc", "qlalr", "rcc", "tracegen", "cmake_automoc_parser", "qmake", "qtpaths", "syncqt", "tracepointgen"]
+        disabled_features = str(self.options.disabled_features).split()
         if self.options.with_dbus:
             targets.extend(["qdbuscpp2xml", "qdbusxml2cpp"])
         if self.options.gui:
@@ -901,10 +902,11 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             targets.extend(["windeployqt"])
         if self.options.qttools:
-            targets.extend(["qtattributionsscanner"])
-            if "assistant" not in str(self.options.disabled_features).split():
+            if "qtattributionsscanner" not in disabled_features:
+                targets.extend(["qtattributionsscanner"])
+            if "assistant" not in disabled_features:
                 targets.extend(["qhelpgenerator"])
-            if "linguist" not in str(self.options.disabled_features).split():
+            if "linguist" not in disabled_features:
                 targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
         if self.options.qtshadertools:
             targets.append("qsb")
@@ -1327,8 +1329,10 @@ class QtConan(ConanFile):
             self.cpp_info.components["qtUiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
             self.cpp_info.components["qtUiPlugin"].libdirs = []
             _create_module("UiTools", ["UiPlugin", "Gui", "Widgets"])
-            _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
-            _create_module("Help", ["Gui", "Sql", "Widgets"])
+            if "designer" not in disabled_features:
+                _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
+            if "assistant" not in disabled_features:
+                _create_module("Help", ["Gui", "Sql", "Widgets"])
 
         if self.options.qtshadertools and self.options.gui:
             _create_module("ShaderTools", ["Gui"])
