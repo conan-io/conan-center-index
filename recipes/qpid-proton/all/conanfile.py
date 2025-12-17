@@ -27,9 +27,6 @@ class QpidProtonConan(ConanFile):
         "fPIC": True
     }
 
-    @property
-    def _min_cppstd(self):
-        return "14"
 
     def export_sources(self):
         export_conandata_patches(self)
