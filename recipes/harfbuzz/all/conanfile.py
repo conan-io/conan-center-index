@@ -45,7 +45,7 @@ class HarfbuzzConan(ConanFile):
         "with_gdi": True,
         "with_uniscribe": True,
         "with_directwrite": False,
-        "with_subset": False,
+        "with_subset": True,
         "with_coretext": True,
     }
 
