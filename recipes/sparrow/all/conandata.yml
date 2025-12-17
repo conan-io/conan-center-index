@@ -1,7 +1,7 @@
 sources:
   "2.0.0":
     url: "https://github.com/man-group/sparrow/archive/refs/tags/2.0.0.tar.gz"
-    sha256: "E63806947384B518575F7116AFF0427C0084AEBBC0EDDE52CB47BEC5FBABDE9E"
+    sha256: "7A08C6C7D4C87BF9E5FD91ADCD41965AE0FA8F484CB975956BC917581EE78585"
   "1.4.0":
     url: "https://github.com/man-group/sparrow/archive/refs/tags/1.4.0.tar.gz"
     sha256: "6737746846510B1F1C0DF4CE8A3AC7BEF9E099299672115DE82A3A35EA595CA8"
