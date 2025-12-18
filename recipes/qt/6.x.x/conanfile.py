@@ -422,7 +422,7 @@ class QtConan(ConanFile):
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_md4c", False):
-            self.requires("md4c/0.4.8")
+            self.requires("md4c/[>=0.4.8 <1]") # stable API since 0.3x as per md4c wiki
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.21.1 <4]")
