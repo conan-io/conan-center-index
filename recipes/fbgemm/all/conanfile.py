@@ -38,14 +38,17 @@ class FbgemmConan(ConanFile):
 
     def requirements(self):
         self.requires("cpuinfo/[>=cci.20250321]", transitive_headers=True, transitive_libs=True)
-        self.requires("asmjit/cci.20240531", transitive_headers=True, transitive_libs=True)
+        self.requires("asmjit/cci.20250628", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         check_min_cppstd(self, 17)
         if self.settings.get_safe("compiler.cstd"):
             check_min_cstd(self, 99)
-        if "arm" in self.settings.arch or self.settings.arch == "x86":
-            raise ConanInvalidConfiguration("fbgemm is not supported on ARM or x86 architectures")
+        if self.settings.arch == "x86":
+            raise ConanInvalidConfiguration("fbgemm is not supported on x86 architectures")
+        # TODO verify if v1.4.2 can work in ARM
+        # if "arm" in self.settings.arch:
+        #     raise ConanInvalidConfiguration("fbgemm is not supported on ARM")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.21]")
@@ -58,7 +61,6 @@ class FbgemmConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["FBGEMM_BUILD_TESTS"] = False
         tc.cache_variables["FBGEMM_BUILD_BENCHMARKS"] = False
-        tc.cache_variables["FBGEMM_BUILD_FBGEMM_GPU"] = False  # Off by default, consider enabling in the future
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("cpuinfo", "cmake_target_name", "cpuinfo")

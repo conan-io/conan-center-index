@@ -1,9 +1,8 @@
 sources:
-  "1.3.0":
-    url: "https://github.com/pytorch/FBGEMM/archive/refs/tags/v1.3.0.tar.gz"
-    sha256: "ad3746f6d42ec159cbe6bf6e469cbdce01f5a19f538dc2f806a05e3ee05575d4"
+  "1.4.2":
+    url: "https://github.com/pytorch/FBGEMM/archive/refs/tags/v1.4.2.tar.gz"
+    sha256: "525abde5f161c1730952f175adfcbc77a4b7eeebd7b7a342170e9011734164cf"
 patches:
-  "1.3.0":
-    - patch_file: "patches/1.3.0-cmake-deps.patch"
-
+  "1.4.2":
+    - patch_file: "patches/1.4.2-cmake-deps.patch"
 
