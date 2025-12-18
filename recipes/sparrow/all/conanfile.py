@@ -47,7 +47,7 @@ class SparrowRecipe(ConanFile):
     @property
     def _uses_date_polyfill(self):
         # On macOS or libstdc++, date polyfill is required
-        if self.settings.os == "Macos" or self.settings.get_safe("compiler.libcxx") == "libstdc++":
+        if self.settings.os == "Macos" or self.settings.get_safe("compiler.libcxx") == "libstdc++" or self.settings.get_safe("compiler.libcxx") == "libstdc++11" :
             return True
         # Otherwise use the option value, defaulting to False if option was removed
         return self.options.get_safe("use_date_polyfill", False)
