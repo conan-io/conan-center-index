@@ -43,21 +43,34 @@ class B2Conan(ConanFile):
     def _b2_output_dir(self):
         return os.path.join(self.build_folder, "output")
 
-    def generate(self):
-        tc = AutotoolsToolchain(self)
-        if self.settings.os == "Linux" and "libstdc++" in self.settings.compiler.libcxx:
-            # Link C++ library statically on Linux so that it can run on systems
-            # with an older C++ runtime
-            tc.extra_cxxflags.append("-static-libstdc++ -static-libgcc")
-        tc.generate()
-
     def build(self):
         # The order of the with:with: below is important. The first one changes
         # the current dir. While the second does env changes that guarantees
         # that dir doesn't change if/when vsvars runs to set the msvc compile
         # env.
         self.output.info("Build engine...")
-        command =  "build.bat msvc" if is_msvc(self) else "./build.sh cxx"
+        if is_msvc(self):
+            command = "build.bat msvc"
+        else:
+            flags = []
+            if self.settings.os == "Linux":
+                flags.append("-lpthread")
+            if self.settings.compiler == "gcc":
+                flags.extend(["-static-libstdc++", "-static-libgcc"])
+
+            command = "./build.sh cxx"
+            if flags:
+                command += f" --cxxflags='{' '.join(flags)}'"
+
+        if self.conf.get("tools.build:compiler_executables"):
+            cxx_compiler = self.conf.get("tools.build:compiler_executables").get("cpp")
+        else:
+            cxx_compiler = None
+
+        if cxx_compiler:
+            self.output.info(f"Using C++ compiler: {cxx_compiler}")
+            command += f" --cxx={cxx_compiler}"
+
         with chdir(self, self._b2_engine_dir):
             self.run(command)
 
