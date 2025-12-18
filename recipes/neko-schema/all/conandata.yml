@@ -1,8 +1,4 @@
 ﻿sources:
-  "1.0.3":
-    url: "https://github.com/moehoshio/NekoSchema/archive/refs/tags/v1.0.3.tar.gz"
-    sha256: "69A347F219CF3D56C42ECDE1C26E663DF93446B6F1D7D6BD4E647C2830F36A6D"
-
-  "1.0.4":
-    url: "https://github.com/moehoshio/NekoSchema/archive/refs/tags/v1.0.4.tar.gz"
-    sha256: "2FC7B1F495CB6EC92697B589D062A2D30B5DBC78D1AF53696022835FE7092963"
+  "1.1.5":
+    url: "https://github.com/moehoshio/NekoSchema/archive/refs/tags/v1.1.5.tar.gz"
+    sha256: "d8705eee4bfe67a8557aa6209aa87594db0484de6bd20642b0f834935aa4ad48"
