@@ -31,10 +31,6 @@ class B2Conan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def build_requirements(self):
-        if cross_building(self):
-            self.tool_requires(f"b2/{self.version}")
-
     def generate(self):
         if is_msvc(self):
             ms = VCVars(self)
@@ -56,33 +52,32 @@ class B2Conan(ConanFile):
         # the current dir. While the second does env changes that guarantees
         # that dir doesn't change if/when vsvars runs to set the msvc compile
         # env.
+        if cross_building(self):
+            raise ConanException("Cross-building is not supported for b2.")
+
         self.output.info("Build engine...")
+
         if is_msvc(self):
             command = "build.bat msvc"
             with chdir(self, self._b2_engine_dir):
                 self.run(command)
         else:
-            flags = []
-            if self.settings.os == "Linux":
-                flags.append("-lpthread")
-
             command = "./build.sh cxx"
 
         with chdir(self, self._b2_engine_dir):
             self.run(command)
 
         self.output.info("Install...")
-        if cross_building(self):
-            # use the pre-built b2 from the tool_requires
-            b2_command = "b2"
-        else:
-            b2_command = os.path.join(self._b2_engine_dir, "b2.exe" if self.settings.os == "Windows" else "b2")
+
+        b2_command = os.path.join(self._b2_engine_dir, "b2.exe" if self.settings.os == "Windows" else "b2")
+
         install_command = \
             (f"{b2_command} --ignore-site-config " +
              f"--prefix={self._b2_output_dir} " +
              "--abbreviate-paths " +
              "install " +
              "b2-install-layout=portable")
+
         with chdir(self, self.source_folder):
             self.run(install_command)
 
