@@ -4,12 +4,12 @@ from conan.tools.files import chdir, copy, get
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import VCVars
+from conan.tools.env import Environment
 
 import os
 
-
 required_conan_version = ">=2.0"
-
 
 class B2Conan(ConanFile):
     name = "b2"
@@ -35,6 +35,11 @@ class B2Conan(ConanFile):
         if cross_building(self):
             self.tool_requires(f"b2/{self.version}")
 
+    def generate(self):
+        if is_msvc(self):
+            ms = VCVars(self)
+            ms.generate()
+
     @property
     def _b2_engine_dir(self):
         return os.path.join(self.source_folder, "src", "engine")
@@ -51,6 +56,8 @@ class B2Conan(ConanFile):
         self.output.info("Build engine...")
         if is_msvc(self):
             command = "build.bat msvc"
+            with chdir(self, self._b2_engine_dir):
+                self.run(command)
         else:
             flags = []
             if self.settings.os == "Linux":
