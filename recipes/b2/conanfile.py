@@ -59,8 +59,6 @@ class B2Conan(ConanFile):
 
         if is_msvc(self):
             command = "build.bat msvc"
-            with chdir(self, self._b2_engine_dir):
-                self.run(command)
         else:
             command = "./build.sh cxx"
 
