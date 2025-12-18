@@ -5,8 +5,3 @@ find_package(asmjit REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE asmjit::asmjit)
-if(asmjit_VERSION STRGREATER_EQUAL "cci.20250524")
-  target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
-else()
-  target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
-endif()
