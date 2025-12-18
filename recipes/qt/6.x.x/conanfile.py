@@ -324,9 +324,6 @@ class QtConan(ConanFile):
         if not self.options.with_pcre2:
             raise ConanInvalidConfiguration("pcre2 is actually required by qt (QTBUG-92454). please use option qt:with_pcre2=True")
 
-        if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
-            raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
-
         if self.options.get_safe("with_x11", False) and not self.dependencies.direct_host["xkbcommon"].options.with_x11:
             raise ConanInvalidConfiguration("The 'with_x11' option for the 'xkbcommon' package must be enabled when the 'with_x11' option is enabled")
         if self.options.get_safe("qtwayland", False) and not self.dependencies.direct_host["xkbcommon"].options.with_wayland:
@@ -420,9 +417,9 @@ class QtConan(ConanFile):
         if self.options.with_dbus:
             self.requires("dbus/1.15.8")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
-            self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
+            self.requires("krb5/1.21.2")
         if self.options.get_safe("with_md4c", False):
-            self.requires("md4c/0.4.8")
+            self.requires("md4c/[>=0.4.8 <1]") # stable API since 0.3x as per md4c wiki
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.21.1 <4]")
@@ -890,6 +887,7 @@ class QtConan(ConanFile):
         if self.settings.os == "Macos":
             filecontents += 'set(__qt_internal_cmake_apple_support_files_path "${CMAKE_CURRENT_LIST_DIR}/../../../lib/cmake/Qt6/macos")\n'
         targets = ["moc", "qlalr", "rcc", "tracegen", "cmake_automoc_parser", "qmake", "qtpaths", "syncqt", "tracepointgen"]
+        disabled_features = str(self.options.disabled_features).split()
         if self.options.with_dbus:
             targets.extend(["qdbuscpp2xml", "qdbusxml2cpp"])
         if self.options.gui:
@@ -901,13 +899,19 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             targets.extend(["windeployqt"])
         if self.options.qttools:
-            targets.extend(["qhelpgenerator", "qtattributionsscanner"])
-            targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
+            if "qtattributionsscanner" not in disabled_features:
+                targets.extend(["qtattributionsscanner"])
+            if (not any(item in disabled_features for item in ["assistant", "toolbutton", "pushbutton"])) and self.options.widgets and self.options.get_safe("with_libpng"):
+                # https://github.com/qt/qttools/blob/d5f3f624717092dde55a93e1212c5b7c63d360b8/configure.cmake#L102-L108
+                # and `qhelpgenerator` is a subdirectory of assistant in qttools
+                targets.extend(["qhelpgenerator"])
+            if "linguist" not in disabled_features:
+                targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
         if self.options.qtshadertools:
             targets.append("qsb")
         if self.options.qtdeclarative:
             targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
-            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview"])
+            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltc"])
             if Version(self.version) >= "6.8.3":
                 targets.extend(["qmlaotstats"])
 
@@ -1258,6 +1262,8 @@ class QtConan(ConanFile):
                     jpeg_reqs.append("libjpeg::libjpeg")
                 _create_plugin("QJpegPlugin", "qjpeg", "imageformats", jpeg_reqs)
 
+        if self.options.with_mysql:
+            _create_plugin("QMYSQLDriverPlugin", "qsqlmysql", "sqldrivers", ["libmysqlclient::libmysqlclient"])
         if self.options.with_sqlite3:
             _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"])
         if self.options.with_pq:
@@ -1265,9 +1271,9 @@ class QtConan(ConanFile):
         if self.options.with_odbc:
             _create_plugin("QODBCDriverPlugin", "qsqlodbc", "sqldrivers", [])
             if self.settings.os != "Windows":
-                self.cpp_info.components["QODBCDriverPlugin"].requires.append("odbc::odbc")
+                self.cpp_info.components["qtQODBCDriverPlugin"].requires.append("odbc::odbc")
             else:
-                self.cpp_info.components["QODBCDriverPlugin"].system_libs.append("odbc32")
+                self.cpp_info.components["qtQODBCDriverPlugin"].system_libs.append("odbc32")
         networkReqs = []
         if self.options.openssl:
             networkReqs.append("openssl::openssl")
@@ -1324,8 +1330,10 @@ class QtConan(ConanFile):
             self.cpp_info.components["qtUiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
             self.cpp_info.components["qtUiPlugin"].libdirs = []
             _create_module("UiTools", ["UiPlugin", "Gui", "Widgets"])
-            _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
-            _create_module("Help", ["Gui", "Sql", "Widgets"])
+            if "designer" not in disabled_features:
+                _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
+            if "assistant" not in disabled_features:
+                _create_module("Help", ["Gui", "Sql", "Widgets"])
 
         if self.options.qtshadertools and self.options.gui:
             _create_module("ShaderTools", ["Gui"])
