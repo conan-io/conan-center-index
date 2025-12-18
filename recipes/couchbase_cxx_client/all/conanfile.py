@@ -57,7 +57,7 @@ class CouchbaseCxxClientConan(ConanFile):
         self.tool_requires("cmake/[>=3.19.0 <4.0]")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         # couchbase-cxx-client requires C++17 or newer
@@ -72,7 +72,7 @@ class CouchbaseCxxClientConan(ConanFile):
     
     def export_sources(self):
         # provide our custom ThirdPartyDependencies.cmake into the cmake folder to use later in patching
-        copy(self, "ConanThirdPartyDependencies.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "cmake"))
+        copy(self, "ConanThirdPartyDependencies.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src", "cmake"))
 
     def _patch_sources(self):
         # couchbase uses spdlog's bundled fmt rather than having fmt as a separate dependency. 
