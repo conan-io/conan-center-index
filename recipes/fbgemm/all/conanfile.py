@@ -38,7 +38,7 @@ class FbgemmConan(ConanFile):
 
     def requirements(self):
         self.requires("cpuinfo/[>=cci.20250321]", transitive_headers=True, transitive_libs=True)
-        self.requires("asmjit/cci.20250628", transitive_headers=True, transitive_libs=True)
+        self.requires("asmjit/cci.20241216", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         check_min_cppstd(self, 17)
@@ -46,9 +46,8 @@ class FbgemmConan(ConanFile):
             check_min_cstd(self, 99)
         if self.settings.arch == "x86":
             raise ConanInvalidConfiguration("fbgemm is not supported on x86 architectures")
-        # TODO verify if v1.4.2 can work in ARM
-        # if "arm" in self.settings.arch:
-        #     raise ConanInvalidConfiguration("fbgemm is not supported on ARM")
+        if "arm" in self.settings.arch:
+            raise ConanInvalidConfiguration("fbgemm is not supported on ARM")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.21]")
