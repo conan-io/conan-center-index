@@ -6,7 +6,7 @@ from conan.tools.microsoft import is_msvc
 
 import os
 
-required_conan_version = ">=2.1.0"
+required_conan_version = ">=2.4.0"
 
 
 class QpidProtonConan(ConanFile):
@@ -16,28 +16,12 @@ class QpidProtonConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://qpid.apache.org/proton/"
     topics = ("conan", "qpid", "proton", "messaging", "message", "queue", "topic", "mq", "amqp")
-    package_type = "library"
+    package_type = "shared-library"
+    languages = ["C", "C++"]
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False]
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True
-    }
-
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -63,10 +47,10 @@ class QpidProtonConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["BUILD_TOOLS"] = False
         tc.cache_variables["BUILD_EXAMPLES"] = False
+        tc.cache_variables["BUILD_BINDINGS"] = "cpp"
         # Do not mess up the LIB_INSTALL_DIR
         tc.cache_variables["LIB_SUFFIX"] = ""
 
@@ -108,12 +92,10 @@ class QpidProtonConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ProtonCpp")
-
-        suffix = "-static" if is_msvc(self) and not self.options.shared else ""
-
+        # C core components
         self.cpp_info.components["proton"].set_property("cmake_target_name", "Proton::proton")
         self.cpp_info.components["proton"].set_property("pkg_config_name", "libqpid-proton")
-        self.cpp_info.components["proton"].libs = [f"qpid-proton{suffix}"]
+        self.cpp_info.components["proton"].libs = [f"qpid-proton"]
         if is_msvc(self):
             self.cpp_info.components["proton"].system_libs.extend(["secur32", "crypt32", "Ws2_32"])
         else:
@@ -121,7 +103,7 @@ class QpidProtonConan(ConanFile):
 
         self.cpp_info.components["core"].set_property("cmake_target_name", "Proton::core")
         self.cpp_info.components["core"].set_property("pkg_config_name", "libqpid-proton-core")
-        self.cpp_info.components["core"].libs = [f"qpid-proton-core{suffix}"]
+        self.cpp_info.components["core"].libs = [f"qpid-proton-core"]
         if is_msvc(self):
             self.cpp_info.components["core"].system_libs.extend(["secur32", "crypt32", "Ws2_32"])
         else:
@@ -131,16 +113,16 @@ class QpidProtonConan(ConanFile):
 
         self.cpp_info.components["proactor"].set_property("cmake_target_name", "Proton::proactor")
         self.cpp_info.components["proactor"].set_property("pkg_config_name", "libqpid-proton-proactor")
-        self.cpp_info.components["proactor"].libs = [f"qpid-proton-proactor{suffix}"]
+        self.cpp_info.components["proactor"].libs = [f"qpid-proton-proactor"]
         self.cpp_info.components["proactor"].requires = ["core"]
         if is_msvc(self):
             self.cpp_info.components["proactor"].system_libs.extend(["secur32", "crypt32", "Ws2_32"])
         else:
             self.cpp_info.components["proactor"].requires = ["openssl::ssl"]
-
+        # C++ binding
         self.cpp_info.components["cpp"].set_property("cmake_target_name", "Proton::cpp")
         self.cpp_info.components["cpp"].set_property("pkg_config_name", "libqpid-proton-cpp")
-        self.cpp_info.components["cpp"].libs = [f"qpid-proton-cpp{suffix}"]
+        self.cpp_info.components["cpp"].libs = [f"qpid-proton-cpp"]
         self.cpp_info.components["cpp"].requires = ["core", "proactor", "jsoncpp::jsoncpp"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["cpp"].system_libs.append("pthread")
