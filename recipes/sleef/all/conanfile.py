@@ -6,7 +6,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.build import cross_building
 
-required_conan_version = ">=2.4"
+required_conan_version = ">=2.18"
 
 
 class SleefConan(ConanFile):
@@ -84,14 +84,22 @@ class SleefConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_name", "sleef")
+        self.cpp_info.set_property("pkg_config_name", "none")
+        self.cpp_info.set_property("cmake_file_name", "sleef")
+
         self.cpp_info.components["sleef"].libs = ["sleef"]
+        self.cpp_info.components["sleef"].set_property("cmake_target_name", "sleef::sleef")
+        self.cpp_info.components["sleef"].set_property("pkg_config_name", "sleef")
+
         self.cpp_info.components["sleefquad"].libs = ["sleefquad"]
+        self.cpp_info.components["sleefquad"].set_property("cmake_target_name", "sleef::sleefquad")
+
         if self._support_gnulibs:
+            self.cpp_info.components["sleef"].system_libs = ["m"]
             self.cpp_info.components["sleefgnuabi"].libs = ["sleefgnuabi"]
+            self.cpp_info.components["sleefgnuabi"].set_property("cmake_target_name", "sleef::sleefgnuabi")
             self.cpp_info.components["sleefgnuabi"].system_libs = ["m"]
+
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.components["sleef"].defines = ["SLEEF_STATIC_LIBS"]
             self.cpp_info.components["sleefquad"].defines = ["SLEEF_STATIC_LIBS"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["sleef"].system_libs = ["m"]
