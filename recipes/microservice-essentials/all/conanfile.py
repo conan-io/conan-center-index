@@ -8,13 +8,13 @@ import os
 required_conan_version = ">=1.53.0"
 
 class MicroserviceEssentials(ConanFile):
-    name = "microservice-essentials"    
+    name = "microservice-essentials"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/seboste/microservice-essentials"
-    license = "MIT"    
+    license = "MIT"
     description = """microservice-essentials is a portable, independent C++ library that takes care of typical recurring concerns that occur in microservice development."""
     topics = ("microservices", "cloud-native", "request-handling")
-    settings = "os", "compiler", "arch", "build_type"    
+    settings = "os", "compiler", "arch", "build_type"
     package_type = "library"
     options = {
         "shared": [True, False],
@@ -47,7 +47,7 @@ class MicroserviceEssentials(ConanFile):
             self.requires("cpp-httplib/0.14.1")
             self.requires("nlohmann_json/3.11.2")
             self.requires("openssl/[>=3 <4]")
-            self.requires("grpc/1.54.3")
+            self.requires("grpc/[>=1.54.3 <2]")
         if self.options.with_tests:
             self.requires("catch2/3.4.0")
             self.requires("nlohmann_json/3.11.2")
@@ -84,7 +84,7 @@ class MicroserviceEssentials(ConanFile):
             raise ConanInvalidConfiguration(
                 "{} requires C++17, which your compiler does not support.".format(self.name)
             )
-    
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -97,7 +97,7 @@ class MicroserviceEssentials(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
- 
+
     def package_info(self):
         self.cpp_info.libs = ["microservice-essentials"]
         self.cpp_info.bindirs.extend(["lib"])

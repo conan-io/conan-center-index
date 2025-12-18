@@ -62,7 +62,7 @@ class SplunkOpentelemetryConan(ConanFile):
 
     def requirements(self):
         self.requires("opentelemetry-cpp/1.8.3", transitive_headers=True) # v1.12 is not compatible
-        self.requires("grpc/1.54.3")
+        self.requires("grpc/[>=1.54.3 <2]")
         self.requires("nlohmann_json/3.11.3")
         if self.options.build_jaeger_exporter:
             self.requires("thrift/0.17.0")
