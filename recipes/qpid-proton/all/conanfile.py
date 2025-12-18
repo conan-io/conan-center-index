@@ -67,6 +67,8 @@ class QpidProtonConan(ConanFile):
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["BUILD_TOOLS"] = False
         tc.cache_variables["BUILD_EXAMPLES"] = False
+        # Do not mess up the LIB_INSTALL_DIR
+        tc.cache_variables["LIB_SUFFIX"] = ""
 
         tc.cache_variables["ENABLE_JSONCPP"] = True
         tc.cache_variables["ENABLE_OPENTELEMETRYCPP"] = False
