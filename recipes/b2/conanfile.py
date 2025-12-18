@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
@@ -38,6 +39,9 @@ class B2Conan(ConanFile):
         if is_msvc(self):
             ms = VCVars(self)
             ms.generate()
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
 
     @property
     def _b2_engine_dir(self):
@@ -61,21 +65,8 @@ class B2Conan(ConanFile):
             flags = []
             if self.settings.os == "Linux":
                 flags.append("-lpthread")
-            if self.settings.compiler == "gcc":
-                flags.extend(["-static-libstdc++", "-static-libgcc"])
 
             command = "./build.sh cxx"
-            if flags:
-                command += f" --cxxflags='{' '.join(flags)}'"
-
-        if self.conf.get("tools.build:compiler_executables"):
-            cxx_compiler = self.conf.get("tools.build:compiler_executables").get("cpp")
-        else:
-            cxx_compiler = None
-
-        if cxx_compiler:
-            self.output.info(f"Using C++ compiler: {cxx_compiler}")
-            command += f" --cxx={cxx_compiler}"
 
         with chdir(self, self._b2_engine_dir):
             self.run(command)
