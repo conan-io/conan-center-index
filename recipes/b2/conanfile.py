@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.files import chdir, copy, get
-from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.microsoft import VCVars
