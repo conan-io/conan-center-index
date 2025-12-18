@@ -85,6 +85,9 @@ glfw:
 glib:
   versions:
     - '2.78.3'
+glm:
+  versions:
+    - '1.0.1'
 glslang:
   versions:
     - '1.3.268.0'
