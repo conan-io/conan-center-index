@@ -86,6 +86,7 @@ class QpidProtonConan(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("libuv", "cmake_file_name", "Libuv")
         deps.set_property("libuv", "cmake_target_name", "Libuv::Libuv")
+        deps.set_property("jsoncpp", "cmake_file_name", "JsonCpp")
         deps.generate()
 
     def build(self):
