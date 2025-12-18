@@ -126,6 +126,8 @@ class QpidProtonConan(ConanFile):
             self.cpp_info.components["core"].system_libs.extend(["secur32", "crypt32", "Ws2_32"])
         else:
             self.cpp_info.components["core"].requires = ["openssl::ssl"]
+        if self.settings.os == "Macos":
+            self.cpp_info.components["core"].requires.append("libuv::libuv")
 
         self.cpp_info.components["proactor"].set_property("cmake_target_name", "Proton::proactor")
         self.cpp_info.components["proactor"].set_property("pkg_config_name", "libqpid-proton-proactor")
@@ -140,9 +142,5 @@ class QpidProtonConan(ConanFile):
         self.cpp_info.components["cpp"].set_property("pkg_config_name", "libqpid-proton-cpp")
         self.cpp_info.components["cpp"].libs = [f"qpid-proton-cpp{suffix}"]
         self.cpp_info.components["cpp"].requires = ["core", "proactor", "jsoncpp::jsoncpp"]
-
-        if self.settings.os == "Macos":
-            self.cpp_info.components["core"].requires.append("libuv::libuv")
-
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.components["cpp"].system_libs.append("pthread")
