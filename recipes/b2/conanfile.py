@@ -35,7 +35,7 @@ class B2Conan(ConanFile):
             ms.generate()
         else:
             tc = AutotoolsToolchain(self)
-            if self.settings.os == "Linux":
+            if self.settings.os == "Linux" or self.settings.os == "AIX":
                 # systems with older glibc require pthread flag
                 tc.extra_cxxflags.append("-pthread")
             tc.generate()
