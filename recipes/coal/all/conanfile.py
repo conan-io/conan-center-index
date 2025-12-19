@@ -20,7 +20,7 @@ class CoalConan(ConanFile):
     languages = "C++"
     settings = "os", "arch", "compiler", "build_type"
     options = {"with_qhull": [True, False]}
-    default_options = {"with_qhull": False}
+    default_options = {"with_qhull": True}
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -31,7 +31,7 @@ class CoalConan(ConanFile):
         self.requires("assimp/5.4.3")
         self.requires("octomap/1.10.0", transitive_headers=True)
         if self.options.with_qhull:
-            self.requires("qhull/8.0.2")
+            self.requires("qhull/8.1-alpha6")
 
     def validate(self):
         check_min_cppstd(self, 14)
@@ -48,6 +48,7 @@ class CoalConan(ConanFile):
         tc.cache_variables["BUILD_PYTHON_INTERFACE"] = False
         tc.cache_variables["COAL_HAS_QHULL"] = self.options.with_qhull
         tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["COAL_BACKWARD_COMPATIBILITY_WITH_HPP_FCL"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
