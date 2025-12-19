@@ -6,6 +6,7 @@ from conan.tools.files import get, copy, rmdir, rm
 from conan.tools.layout import basic_layout
 from conan.tools.env import VirtualRunEnv
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 import os
 
 
@@ -135,6 +136,7 @@ class Gtk4Conan(ConanFile):
 
         meson = Meson(self)
         meson.install()
+        fix_apple_shared_install_name(self)
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
