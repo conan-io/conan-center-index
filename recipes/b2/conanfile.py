@@ -46,10 +46,6 @@ class B2Conan(ConanFile):
         return os.path.join(self.build_folder, "output")
 
     def build(self):
-        # The order of the with:with: below is important. The first one changes
-        # the current dir. While the second does env changes that guarantees
-        # that dir doesn't change if/when vsvars runs to set the msvc compile
-        # env.
         if cross_building(self):
             raise ConanException("Cross-building is not supported for b2.")
 
