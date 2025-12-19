@@ -1,11 +1,9 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
-from conan.tools.microsoft import VCVars
-from conan.tools.env import Environment
+from conan.tools.microsoft import VCVars, is_msvc
+from conan.tools.env import VirtualBuildEnv
 
 import os
 
@@ -91,3 +89,4 @@ class B2Conan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
+
