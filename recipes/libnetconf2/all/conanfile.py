@@ -20,7 +20,7 @@ class LibNetconf2Conan(ConanFile):
 
     def requirements(self):
         self.requires("libyang/2.1.148")
-        self.requires("openssl/1.1.1u")
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("libssh/0.10.6")
 
     def configure(self):
