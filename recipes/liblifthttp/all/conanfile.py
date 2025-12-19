@@ -53,12 +53,14 @@ class LiftHttpConan(ConanFile):
         tc.variables["CMAKE_PROJECT_lifthttp_INCLUDE"] = "conan_deps.cmake"
         tc.variables["LIFT_BUILD_EXAMPLES"] = False
         tc.variables["LIFT_BUILD_TESTS"] = False
-        tc.variables["LIFT_USER_LINK_LIBRARIES"] = "CURL::libcurl;uv"
+        tc.variables["LIFT_USER_LINK_LIBRARIES"] = "CURL::libcurl;libuv::uv"
         if self.settings.os in ["Linux", "FreeBSD"]:
             tc.variables["LIFT_USER_LINK_LIBRARIES"] += ";pthread;dl"
         tc.generate()
         
         deps = CMakeDeps(self)
+        # INFO: Avoid guessing libuv target name as it changes according version/configuration
+        deps.set_property("libuv", "cmake_target_name", "libuv::uv")
         deps.generate()
 
     def build(self):
