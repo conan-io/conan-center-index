@@ -48,10 +48,9 @@ class B2Conan(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
-        if self.settings.os == "Linux" and "libstdc++" in self.settings.compiler.libcxx:
-            # Link C++ library statically on Linux so that it can run on systems
-            # with an older C++ runtime
-            tc.extra_cxxflags.append("-static-libstdc++ -static-libgcc -pthread")
+        if self.settings.os == "Linux":
+            # systems with older glibc require pthread flag
+            tc.extra_cxxflags.append("-pthread")
         tc.generate()
 
     def build(self):
