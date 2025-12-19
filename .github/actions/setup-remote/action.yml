@@ -19,3 +19,8 @@ runs:
         CONAN_PASSWORD_COMMUNITY: ${{ inputs.artifactory-token }}
       shell: bash
       if: ${{ inputs.artifactory-user && inputs.artifactory-token }}
+
+    - run: |
+        GLOBAL_CONF="$(conan config home)/global.conf"
+        echo "core.graph:compatibility_mode=optimized" >> "$GLOBAL_CONF"
+      shell: bash
