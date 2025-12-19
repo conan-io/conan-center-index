@@ -162,7 +162,7 @@ class GdkPixbufConan(ConanFile):
             replace_in_file(self, meson_build,
                             "intl_dep = cc.find_library('intl', required: false)",
                             "intl_dep = dependency('libgettext', version: '>=0.21', required: false, method: 'pkg-config')")
-            replace_in_file(self, meson_build, "'-Werror=undef',", "")
+            replace_in_file(self, meson_build, "'-Werror=undef',", "", strict=False)
         if self.settings.os == "Macos" and self.options.shared:
             # Workaround to avoid generating gdk-pixbuf/loaders.cache fails
             # Error output:
