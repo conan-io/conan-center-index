@@ -213,7 +213,7 @@ class HarfbuzzConan(ConanFile):
             self.cpp_info.components["subset"].set_property("pkg_config_name", "harfbuzz-subset")
             self.cpp_info.components["subset"].requires = ["core"]
 
-        if self.options.with_glib:
+        if self.options.with_glib and can_run(self):
             self.cpp_info.components["gobject"].libs = ["harfbuzz-gobject"]
             self.cpp_info.components["gobject"].set_property("cmake_target_name", "harfbuzz::gobject")
             self.cpp_info.components["gobject"].set_property("pkg_config_name", "harfbuzz-gobject")
