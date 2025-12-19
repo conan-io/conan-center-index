@@ -45,6 +45,14 @@ class B2Conan(ConanFile):
     def _b2_output_dir(self):
         return os.path.join(self.build_folder, "output")
 
+    @property
+    def _exe_suffix(self):
+        return ".exe" if self.settings.os == "Windows" else ""
+
+    @property
+    def _b2_command(self):
+        return os.path.join(self._b2_engine_dir, f"b2{self._exe_suffix}")
+
     def build(self):
         if cross_building(self):
             raise ConanException("Cross-building is not supported for b2.")
@@ -61,14 +69,14 @@ class B2Conan(ConanFile):
 
         self.output.info("Install...")
 
-        b2_command = os.path.join(self._b2_engine_dir, "b2.exe" if self.settings.os == "Windows" else "b2")
-
-        install_command = \
-            (f"{b2_command} --ignore-site-config " +
-             f"--prefix={self._b2_output_dir} " +
-             "--abbreviate-paths " +
-             "install " +
-             "b2-install-layout=portable")
+        install_command = " ".join([
+            self._b2_command,
+            "--ignore-site-config",
+            f"--prefix={self._b2_output_dir}",
+            "--abbreviate-paths",
+            "install",
+            "b2-install-layout=portable"
+        ])
 
         with chdir(self, self.source_folder):
             self.run(install_command)
