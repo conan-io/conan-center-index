@@ -122,7 +122,7 @@ class GdkPixbufConan(ConanFile):
             "man": "false",
             "installed_tests": "false"
         })
-        if Version(self.version) < "2.44.4":
+        if Version(self.version) <= "2.43.2":
             tc.project_options["docs"] = "false"
 
         tc.project_options.update({
@@ -150,7 +150,7 @@ class GdkPixbufConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "build-aux", "post-install.py"),
                         "close_fds=True", "close_fds=(sys.platform != 'win32')")
         replace_in_file(self, meson_build, "is_msvc_like = ", "is_msvc_like = false #")
-        if Version(self.version) < "2.44.4":
+        if Version(self.version) <= "2.43.2":
             # Fix libtiff and libpng not being linked against when building statically
             # Reported upstream: https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/merge_requests/159
             replace_in_file(self, gdk_meson_build,
