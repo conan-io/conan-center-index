@@ -3,7 +3,7 @@ from conan.tools.build import cross_building
 from conan.tools.files import chdir, copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import VCVars, is_msvc
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.gnu import AutotoolsToolchain
 
 import os
 
@@ -34,8 +34,8 @@ class B2Conan(ConanFile):
             ms = VCVars(self)
             ms.generate()
         else:
-            env = VirtualBuildEnv(self)
-            env.generate()
+            tc = AutotoolsToolchain(self)
+            tc.generate()
 
     @property
     def _b2_engine_dir(self):
