@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
-from conan.tools.files import chdir, copy, get
+from conan.tools.files import chdir, copy, get, trim_conandata
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
@@ -8,7 +8,7 @@ from conan.tools.microsoft import is_msvc
 import os
 
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.2"
 
 
 class B2Conan(ConanFile):
@@ -21,6 +21,9 @@ class B2Conan(ConanFile):
 
     settings = "os", "arch", "compiler"
     package_type = "application"
+
+    def export(self):
+        trim_conandata(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
