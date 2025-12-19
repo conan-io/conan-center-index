@@ -157,9 +157,10 @@ class Gtk4Conan(ConanFile):
         self.cpp_info.components["gtk-4"].set_property("pkg_config_custom_content", pkgconfig_vars)
         self.cpp_info.components["gtk-4"].includedirs.append(os.path.join("include", "gtk-4.0"))
         self.cpp_info.components["gtk-4"].requires = ["pango::pango", "cairo::cairo", "gdk-pixbuf::gdk-pixbuf", "graphene::graphene",
-                                                      "fribidi::fribidi", "libepoxy::libepoxy", "libdrm::libdrm", "libtiff::libtiff",
+                                                      "fribidi::fribidi", "libepoxy::libepoxy", "libtiff::libtiff",
                                                       "libjpeg::libjpeg", "libpng::libpng", "glib::glib"]
         if self.settings.os == "Linux":
+            self.cpp_info.components["gtk-4"].requires.extend(["libdrm::libdrm"])
             self.cpp_info.components["gtk-4"].system_libs = ["m"]
 
             self.cpp_info.components["gtk-unix-print"].set_property("pkg_config_name", "gtk4-unix-print")
