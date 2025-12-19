@@ -48,7 +48,7 @@ class B2Conan(ConanFile):
         if self.settings.os == "Linux" and "libstdc++" in self.settings.compiler.libcxx:
             # Link C++ library statically on Linux so that it can run on systems
             # with an older C++ runtime
-            tc.extra_cxxflags.append("-static-libstdc++ -static-libgcc")
+            tc.extra_cxxflags.append("-static-libstdc++ -static-libgcc -pthread")
         tc.generate()
 
     def build(self):
