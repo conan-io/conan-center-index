@@ -2,7 +2,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy
+from conan.tools.files import get, rmdir, copy
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
 
 required_conan_version = ">=1.54.0"
@@ -34,9 +34,6 @@ class RotorConan(ConanFile):
         "enable_ev": False,
         "enable_fltk": False,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -79,7 +76,6 @@ class RotorConan(ConanFile):
         self.tool_requires("cmake/[>=3.29]")
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
