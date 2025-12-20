@@ -68,6 +68,7 @@ class BisonConan(ConanFile):
                 "gl_cv_func_printf_directive_n=no",
                 "gl_cv_func_snprintf_directive_n=no",
                 "gl_cv_func_snprintf_directive_n=no",
+                "gl_cv_func_free_preserve_errno=yes", 
             ])
             tc.extra_cflags.append("-FS")
             tc.extra_cflags.append("-utf-8")
