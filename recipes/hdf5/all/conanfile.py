@@ -216,7 +216,7 @@ class Hdf5Conan(ConanFile):
                             f"conan-official-{self.name}-variables.cmake")
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING" if Version(self.version) < "2.0.0" else "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
         cmake = CMake(self)
         cmake.install()
@@ -247,7 +247,7 @@ class Hdf5Conan(ConanFile):
             def _config_libname(lib):
                 if self.settings.os == "Windows" and self.settings.compiler != "gcc" and not self.options.shared:
                     lib = "lib" + lib
-                if self.settings.build_type == "Debug":
+                if self.settings.build_type == "Debug" and Version(self.version) < "2.0.0":
                     debug_postfix = "_D" if self.settings.os == "Windows" else "_debug"
                     return lib + debug_postfix
                 # See config/cmake_ext_mod/HDFMacros.cmake
