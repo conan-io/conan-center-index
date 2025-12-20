@@ -36,13 +36,6 @@ class BisonConan(ConanFile):
     def requirements(self):
         self.requires("m4/1.4.19")
 
-    def validate(self):
-        if is_msvc(self) and self.version == "3.8.2":
-            raise ConanInvalidConfiguration(
-                f"{self.ref} is not yet ready for Visual Studio, use previous version "
-                "or open a pull request on https://github.com/conan-io/conan-center-index/pulls"
-            )
-
     def build_requirements(self):
         if self.settings_build.os == "Windows":
             self.win_bash = True
@@ -77,6 +70,7 @@ class BisonConan(ConanFile):
                 "gl_cv_func_snprintf_directive_n=no",
             ])
             tc.extra_cflags.append("-FS")
+            tc.extra_cflags.append("-utf-8")
         env = tc.environment()
         if is_msvc(self):
             automake_conf = self.dependencies.build["automake"].conf_info
