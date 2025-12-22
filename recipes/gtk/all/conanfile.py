@@ -52,9 +52,8 @@ class Gtk4Conan(ConanFile):
     def requirements(self):
         self.requires("gdk-pixbuf/[^2.42]", transitive_headers=True)
         self.requires("glib/[^2.82]", transitive_headers=True)
-        if not is_msvc(self):
-            self.requires("cairo/[^1.18]", transitive_headers=True)
-            self.requires("graphene/1.10.8", transitive_headers=True)
+        self.requires("cairo/[^1.18]", transitive_headers=True)
+        self.requires("graphene/1.10.8", transitive_headers=True)
         self.requires("fribidi/1.0.13")
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/[>=4.6.0 <5]")
@@ -139,8 +138,8 @@ class Gtk4Conan(ConanFile):
         meson.install()
         fix_apple_shared_install_name(self)
 
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
+        #rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        #rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
@@ -160,11 +159,9 @@ class Gtk4Conan(ConanFile):
         self.cpp_info.components["gtk-4"].set_property("pkg_config_name", "gtk4")
         self.cpp_info.components["gtk-4"].set_property("pkg_config_custom_content", pkgconfig_vars)
         self.cpp_info.components["gtk-4"].includedirs.append(os.path.join("include", "gtk-4.0"))
-        self.cpp_info.components["gtk-4"].requires = ["pango::pango", "gdk-pixbuf::gdk-pixbuf",
+        self.cpp_info.components["gtk-4"].requires = ["pango::pango", "gdk-pixbuf::gdk-pixbuf", "cairo::cairo",
                                                       "fribidi::fribidi", "libepoxy::libepoxy", "libtiff::libtiff",
-                                                      "libjpeg::libjpeg", "libpng::libpng", "glib::glib"]
-        if not is_msvc(self):
-            self.cpp_info.components["gtk-4"].requires.extend(["cairo::cairo", "graphene::graphene"])
+                                                      "libjpeg::libjpeg", "libpng::libpng", "glib::glib", "graphene::graphene"]
         if self.settings.os == "Linux":
             self.cpp_info.components["gtk-4"].requires.extend(["libdrm::libdrm"])
             self.cpp_info.components["gtk-4"].system_libs = ["m"]
