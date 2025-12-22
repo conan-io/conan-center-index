@@ -2,6 +2,8 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
+from conan.tools.windows import is_msvc
+from conan.errors import ConanInvalidConfiguration
 
 import os
 
@@ -44,9 +46,11 @@ class LiftHttpConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
     def validate(self):
         check_min_cppstd(self, 17)
+        if is_msvc(self) and self.options.shared:
+            # INFO: It lacks of exposing symbols in a .lib
+            raise ConanInvalidConfiguration("The project does not support Windows shared build.")
 
     def generate(self):
         tc = CMakeToolchain(self)
