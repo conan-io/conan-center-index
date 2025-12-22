@@ -36,11 +36,11 @@ class FakeItConan(ConanFile):
         if self.options.integration == "boost":
             self.requires("boost/1.83.0")
         elif self.options.integration == "catch":
-            self.requires("catch2/3.5.2")
+            self.requires("catch2/[>=3.5.2 <4]")
         elif self.options.integration == "gtest":
-            self.requires("gtest/1.14.0")
+            self.requires("gtest/[>=1.14.0 <2]")
         elif self.options.integration == "qtest":
-            self.requires("qt/6.6.1")
+            self.requires("qt/[>=6.6.1 <7]")
         elif self.options.integration == "standalone":
             pass
         else:

@@ -1,11 +1,12 @@
 sources:
-  "2.5.18.0":
-    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.5.18.0.tar.gz"
-    sha256: "f57481435cec18633d3eba9b2e8c483fc1df6f0a01c5c9f98cbae6d1c52928e5"
+  "3.1.8.0":
+    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/releases/download/v3.1.8.0/OpenImageIO-3.1.8.0.tar.gz"
+    sha256: "2848d01d10d70461e5e63035950a4e14d3afdba116be5b71ef8eff5fd660488a"
+  "2.5.19.1":
+    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.5.19.1.tar.gz"
+    sha256: "adb73f270f2eaae81c3c7cde311239944ae9faf6d206552da4ee12d746628b26"
 patches:
-  "2.5.18.0":
-    - patch_file: "patches/2.5.18.0-cmake-targets.patch"
-      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
-      patch_type: "conan"
-    - patch_file: "patches/2.5.18.0-libheif-1.20-backport.patch"
-      patch_source: "https://github.com/AcademySoftwareFoundation/OpenImageIO/pull/4822/files"
+  "3.1.8.0":
+    - patch_file: "patches/3.1.8.0-conan-fixes.patch"
+  "2.5.19.1":
+    - patch_file: "patches/2.5.19.1-conan-fixes.patch"

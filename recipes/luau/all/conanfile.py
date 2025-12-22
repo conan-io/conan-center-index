@@ -2,12 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 class LuauConan(ConanFile):
     name = "luau"
@@ -29,20 +28,6 @@ class LuauConan(ConanFile):
         "native_code_gen": False,
     }
 
-    @property
-    def _minimum_cpp_standard(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "9",
-            "clang": "7",
-            "apple-clang": "12",
-            "Visual Studio": "15",
-            "msvc": "191",
-        }
-
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
@@ -50,13 +35,7 @@ class LuauConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -85,40 +64,42 @@ class LuauConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Luau")
         self.cpp_info.set_property("cmake_target_name", "Luau::Luau")
-
-        self.cpp_info.filenames["cmake_find_package"] = "Luau"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Luau"
-        self.cpp_info.names["cmake_find_package_multi"] = "Luau"
-        self.cpp_info.names["cmake_find_package"] = "Luau"
-
+        # Common
+        self.cpp_info.components["Common"].libs = ["Luau.Common"]
+        self.cpp_info.components["Common"].set_property("cmake_target_name", "Luau::Common")
+        # Ast
         self.cpp_info.components["Ast"].libs = ["Luau.Ast"]
         self.cpp_info.components["Ast"].set_property("cmake_target_name", "Luau::Ast")
-
+        self.cpp_info.components["Ast"].requires = ["Common"]
+        # VM
         self.cpp_info.components["VM"].libs = ["Luau.VM"]
         self.cpp_info.components["VM"].set_property("cmake_target_name", "Luau::VM")
-        self.cpp_info.components["VM"].requires = ["Ast"]
+        self.cpp_info.components["VM"].requires = ["Common"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["VM"].system_libs = ["m"]
-
+        # Analysis
         self.cpp_info.components["Analysis"].libs = ["Luau.Analysis"]
         self.cpp_info.components["Analysis"].set_property("cmake_target_name", "Luau::Analysis")
-        self.cpp_info.components["Analysis"].requires = ["Ast"]
-
+        self.cpp_info.components["Analysis"].requires = ["Ast", "Config", "Compiler", "VM"]
+        # Config
+        self.cpp_info.components["Config"].libs = ["Luau.Config"]
+        self.cpp_info.components["Config"].set_property("cmake_target_name", "Luau::Config")
+        self.cpp_info.components["Config"].requires = ["Ast", "Compiler", "VM"]
+        # Compiler
         self.cpp_info.components["Compiler"].libs = ["Luau.Compiler"]
         self.cpp_info.components["Compiler"].set_property("cmake_target_name", "Luau::Compiler")
         self.cpp_info.components["Compiler"].requires = ["Ast"]
-
+        # CodeGen
         self.cpp_info.components["CodeGen"].libs = ["Luau.CodeGen"]
         self.cpp_info.components["CodeGen"].set_property("cmake_target_name", "Luau::CodeGen")
-        self.cpp_info.components["CodeGen"].requires = ["Ast"]
-        self.cpp_info.components["CodeGen"].requires.append("VM")
-
-        if self.options.with_cli:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH environment variable: {bin_path}")
-            self.env_info.PATH.append(bin_path)
-
+        self.cpp_info.components["CodeGen"].requires = ["VM", "Common"]
+        # Require
+        self.cpp_info.components["Require"].libs = ["Luau.Require"]
+        self.cpp_info.components["Require"].set_property("cmake_target_name", "Luau::Require")
+        self.cpp_info.components["Require"].requires = ["Config", "VM"]
+        # Web
         if self.options.with_web:
             self.cpp_info.components["Web"].libs = ["Luau.Web"]
             self.cpp_info.components["Web"].set_property("cmake_target_name", "Luau::Web")
-            self.cpp_info.components["Web"].requires = ["Compiler", "VM"]
+            self.cpp_info.components["Web"].requires = ["Compiler", "VM", "Analysis"]
+

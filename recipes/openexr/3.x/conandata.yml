@@ -1,16 +1,16 @@
 sources:
-  "3.3.5":
-    url: "https://github.com/AcademySoftwareFoundation/openexr/releases/download/v3.3.5/openexr-3.3.5.tar.gz"
-    sha256: "8f9241f0e9d6b7aec7e9509cf2a9224416b9cd9d41740deab3827b1f2d01c662"
-  "3.3.2":
-    url: "https://github.com/AcademySoftwareFoundation/openexr/releases/download/v3.3.2/openexr-3.3.2.tar.gz"
-    sha256: "4fb4c643b39f04b67e8f4138e4d5a7804b62fdc15b8f6bcdd32ccc8ecd515683"
-  "3.2.4":
-    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.2.4.tar.gz"
-    sha256: "81e6518f2c4656fdeaf18a018f135e96a96e7f66dbe1c1f05860dd94772176cc"
+  "3.4.4":
+    url: "https://github.com/AcademySoftwareFoundation/openexr/releases/download/v3.4.4/openexr-3.4.4.tar.gz"
+    sha256: "91fc5670f13fe7d9d3b7ae0fe695e3cc813200839084eae6497459e7f650d876"
+  "3.3.6":
+    url: "https://github.com/AcademySoftwareFoundation/openexr/releases/download/v3.3.6/openexr-3.3.6.tar.gz"
+    sha256: "35d3d597ca2a9dcbf405874c774bd716cd729fb35ab27ccbd75a1355ee9d9c0f"
+  "3.2.5":
+    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.2.5.tar.gz"
+    sha256: "89374d93401dda1a49bf4acb930a906b9936f9526523d0f318dacb9fa8f025d7"
 patches:
-  "3.2.4":
-    - patch_file: "patches/3.2.1-gcc5-bug-workaround.patch"
+  "3.2.5":
+    - patch_file: "patches/3.2.5-gcc5-bug-workaround.patch"
       patch_description: "Workaround for GCC 5 bug"
       patch_type: "portability"
       patch_source: "https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82336"
