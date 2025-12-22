@@ -63,7 +63,7 @@ class GdkPixbufConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/[^2.78]", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/[>=2.78.3 <3]", transitive_headers=True, transitive_libs=True)
         if self.options.with_libpng:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_libtiff:
@@ -119,11 +119,10 @@ class GdkPixbufConan(ConanFile):
             "builtin_loaders": "all",
             "gio_sniffing": "false",
             "introspection": enabled_disabled(self.options.with_introspection),
+            "docs": "false",
             "man": "false",
             "installed_tests": "false"
         })
-        if Version(self.version) <= "2.43.2":
-            tc.project_options["docs"] = "false"
 
         tc.project_options.update({
             "png": enabled_disabled(self.options.with_libpng),
@@ -150,19 +149,17 @@ class GdkPixbufConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "build-aux", "post-install.py"),
                         "close_fds=True", "close_fds=(sys.platform != 'win32')")
         replace_in_file(self, meson_build, "is_msvc_like = ", "is_msvc_like = false #")
-        if Version(self.version) <= "2.43.2":
-            # Fix libtiff and libpng not being linked against when building statically
-            # Reported upstream: https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/merge_requests/159
-            replace_in_file(self, gdk_meson_build,
-                            "dependencies: gdk_pixbuf_deps + [ gdkpixbuf_dep ],",
-                            "dependencies: loaders_deps + gdk_pixbuf_deps + [ gdkpixbuf_dep ],")
+        # Fix libtiff and libpng not being linked against when building statically
+        # Reported upstream: https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/merge_requests/159
+        replace_in_file(self, gdk_meson_build,
+                        "dependencies: gdk_pixbuf_deps + [ gdkpixbuf_dep ],",
+                        "dependencies: loaders_deps + gdk_pixbuf_deps + [ gdkpixbuf_dep ],")
         # Forcing Conan libgettext instead of system one (if OS != Linux)
         if self.settings.os != "Linux":
             # FIXME: unify libgettext and gettext ??
             replace_in_file(self, meson_build,
                             "intl_dep = cc.find_library('intl', required: false)",
                             "intl_dep = dependency('libgettext', version: '>=0.21', required: false, method: 'pkg-config')")
-            replace_in_file(self, meson_build, "'-Werror=undef',", "", strict=False)
         if self.settings.os == "Macos" and self.options.shared:
             # Workaround to avoid generating gdk-pixbuf/loaders.cache fails
             # Error output:
