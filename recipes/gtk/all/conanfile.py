@@ -47,6 +47,7 @@ class Gtk4Conan(ConanFile):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         # INFO: GTK requires glib-compile-resources
         self.tool_requires("glib/<host_version>")
+        self.requires("wayland-protocols/[^1.42]")
 
     def requirements(self):
         # INFO: gdktexture.h:26 gdk-pixbuf.h/gdk-pixbuf.h
@@ -68,7 +69,6 @@ class Gtk4Conan(ConanFile):
             if self.options.with_wayland:
                 self.requires("xkbcommon/[>=1.5.0 <2]")
                 self.requires("wayland/[^1.23]")
-                self.requires("wayland-protocols/[^1.33]")
             if self.options.with_x11:
                 self.requires("xorg/system")
             self.requires("libdrm/[^2.4]")
@@ -137,8 +137,6 @@ class Gtk4Conan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         gtk_targets = []
