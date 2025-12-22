@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.microsoft import is_msvc
 from conan.tools.files import get, copy, rmdir, rm
 from conan.tools.layout import basic_layout
 from conan.tools.env import VirtualRunEnv
@@ -138,8 +137,8 @@ class Gtk4Conan(ConanFile):
         meson.install()
         fix_apple_shared_install_name(self)
 
-        #rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        #rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
@@ -149,6 +148,12 @@ class Gtk4Conan(ConanFile):
             gtk_targets.append("x11")
         if self.options.get_safe("with_wayland", False):
             gtk_targets.append("wayland")
+        if self.settings.os == "Windows":
+            gtk_targets.append("win32")
+        if self.settings.os == "Macos":
+            gtk_targets.append("macos")
+        if self.settings.os == "Android":
+            gtk_targets.append("android")
         pkgconfig_vars = {
             "targets": gtk_targets,
             "gtk_binary_version": f"{Version(self.version).major}.0.0",
@@ -171,6 +176,11 @@ class Gtk4Conan(ConanFile):
             self.cpp_info.components["gtk-unix-print"].libdirs = []
             self.cpp_info.components["gtk-unix-print"].includedirs.append(os.path.join("include", "gtk-4.0", "unix-print"))
             self.cpp_info.components["gtk-unix-print"].requires = ["gtk-4"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["gtk-win32"].set_property("pkg_config_name", "gtk4-win32")
+            self.cpp_info.components["gtk-win32"].set_property("pkg_config_custom_content", pkgconfig_vars)
+            self.cpp_info.components["gtk-win32"].libdirs = []
+            self.cpp_info.components["gtk-win32"].requires = ["gtk-4"]
 
         if self.options.get_safe("with_x11", False):
             self.cpp_info.components["gtk-x11"].set_property("pkg_config_name", "gtk4-x11")
