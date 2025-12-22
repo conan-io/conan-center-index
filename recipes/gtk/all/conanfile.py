@@ -181,6 +181,11 @@ class Gtk4Conan(ConanFile):
             self.cpp_info.components["gtk-win32"].set_property("pkg_config_custom_content", pkgconfig_vars)
             self.cpp_info.components["gtk-win32"].libdirs = []
             self.cpp_info.components["gtk-win32"].requires = ["gtk-4"]
+        elif self.settings.os == "Macos":
+            self.cpp_info.components["gtk-macos"].set_property("pkg_config_name", "gtk4-macos")
+            self.cpp_info.components["gtk-macos"].set_property("pkg_config_custom_content", pkgconfig_vars)
+            self.cpp_info.components["gtk-macos"].libdirs = []
+            self.cpp_info.components["gtk-macos"].requires = ["gtk-4"]
 
         if self.options.get_safe("with_x11", False):
             self.cpp_info.components["gtk-x11"].set_property("pkg_config_name", "gtk4-x11")
