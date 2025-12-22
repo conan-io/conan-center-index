@@ -19,8 +19,10 @@ class CoalConan(ConanFile):
     package_type = "shared-library"
     languages = "C++"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"with_qhull": [True, False]}
-    default_options = {"with_qhull": True}
+    options = {"with_qhull": [True, False],
+               "with_hpp_fcl_backward_compatibility": [True, False]}
+    default_options = {"with_qhull": True,
+                       "with_hpp_fcl_backward_compatibility": True}
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -48,7 +50,7 @@ class CoalConan(ConanFile):
         tc.cache_variables["BUILD_PYTHON_INTERFACE"] = False
         tc.cache_variables["COAL_HAS_QHULL"] = self.options.with_qhull
         tc.cache_variables["BUILD_TESTING"] = False
-        tc.cache_variables["COAL_BACKWARD_COMPATIBILITY_WITH_HPP_FCL"] = True
+        tc.cache_variables["COAL_BACKWARD_COMPATIBILITY_WITH_HPP_FCL"] = self.options.with_hpp_fcl_backward_compatibility
         tc.generate()
 
         deps = CMakeDeps(self)
