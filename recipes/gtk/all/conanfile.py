@@ -49,14 +49,21 @@ class Gtk4Conan(ConanFile):
         self.tool_requires("glib/<host_version>")
 
     def requirements(self):
+        # INFO: gdktexture.h:26 gdk-pixbuf.h/gdk-pixbuf.h
         self.requires("gdk-pixbuf/[^2.42]", transitive_headers=True)
+        # INFO: gtkconfig.h:8 glib.h
         self.requires("glib/[^2.82]", transitive_headers=True)
+        # INFO: gdktypes.h:36 cairo.h
         self.requires("cairo/[^1.18]", transitive_headers=True)
+        # INFO: gtkscrollinfo.h:29 graphene.h
         self.requires("graphene/1.10.8", transitive_headers=True)
+        # INFO: gdkcairo.h:26 pango/pangocairo.h
+        self.requires("pango/[>1.50.7 <2]", transitive_headers=True)
         self.requires("fribidi/1.0.13")
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/[>=4.6.0 <5]")
         self.requires("libjpeg/[>=9e]")
+        self.requires("libepoxy/1.5.10")
         if self.settings.os == "Linux":
             if self.options.with_wayland:
                 self.requires("xkbcommon/[>=1.5.0 <2]")
@@ -65,8 +72,6 @@ class Gtk4Conan(ConanFile):
             if self.options.with_x11:
                 self.requires("xorg/system")
             self.requires("libdrm/[^2.4]")
-        self.requires("libepoxy/1.5.10")
-        self.requires("pango/[>1.50.7 <2]", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -84,14 +89,11 @@ class Gtk4Conan(ConanFile):
         tc.project_options["macos-backend"] = self.settings.os == "Macos"
         tc.project_options["android-backend"] = self.settings.os == "Android"
         tc.project_options["broadway-backend"] = "false"
-
         # Media backends
         tc.project_options["media-gstreamer"] = "disabled"
-
         # Print backends
         tc.project_options["print-cups"] = "disabled"
         tc.project_options["print-cpdb"] = "disabled"
-
         # Optional features
         tc.project_options["vulkan"] = "disabled"
         tc.project_options["cloudproviders"] = "disabled"
@@ -100,22 +102,18 @@ class Gtk4Conan(ConanFile):
         tc.project_options["colord"] = "disabled"
         tc.project_options["f16c"] = "disabled"
         tc.project_options["accesskit"] = "disabled"
-
         # Introspection
         tc.project_options["introspection"] = "disabled"
-
         # Documentation
         tc.project_options["documentation"] = "false"
         tc.project_options["screenshots"] = "false"
         tc.project_options["man-pages"] = "false"
-
         # Demos, examples and tests
         tc.project_options["profile"] = "devel"
         tc.project_options["build-demos"] = "false"
         tc.project_options["build-testsuite"] = "false"
         tc.project_options["build-examples"] = "false"
         tc.project_options["build-tests"] = "false"
-
         tc.generate()
 
         deps = PkgConfigDeps(self)
@@ -152,8 +150,6 @@ class Gtk4Conan(ConanFile):
             gtk_targets.append("win32")
         if self.settings.os == "Macos":
             gtk_targets.append("macos")
-        if self.settings.os == "Android":
-            gtk_targets.append("android")
         pkgconfig_vars = {
             "targets": gtk_targets,
             "gtk_binary_version": f"{Version(self.version).major}.0.0",
