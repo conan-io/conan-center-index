@@ -34,8 +34,8 @@ index c981e30..6ae2d76 100644
          $<INSTALL_INTERFACE:include>
 -    LIBS c4core
 -    INCORPORATE c4core
-++    LIBS c4core::c4core
-++#    INCORPORATE c4core
++    LIBS c4core::c4core
++#    INCORPORATE c4core
      )
  
  if(RYML_WITH_TAB_TOKENS)
