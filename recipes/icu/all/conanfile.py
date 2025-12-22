@@ -227,7 +227,12 @@ class ICUConan(ConanFile):
     @property
     def _data_filename(self):
         vtag = Version(self.version).major
-        return f"icudt{vtag}l.dat"
+        arch = self.settings.get_safe("arch")
+        suffix = "b" if arch in {"ppc32", "ppc64",
+                                 "sparc", "sparcv9",
+                                 "s390", "s390x",
+                                 "mips", "mips64"} else "l"
+        return f"icudt{vtag}{suffix}.dat"
 
     @property
     def _data_path(self):
