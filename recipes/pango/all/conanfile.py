@@ -159,6 +159,9 @@ class PangoConan(ConanFile):
         replace_in_file(self, meson_build, "subdir('tools')", "")
         replace_in_file(self, meson_build, "subdir('utils')", "")
         replace_in_file(self, meson_build, "subdir('examples')", "")
+        if Version(self.version) < "1.54.0":
+            # GCC-13+ pango-language.c:518 error: array subscript 0 is outside array bounds
+            replace_in_file(self, meson_build, "'-Werror=array-bounds',", "")
 
     def build(self):
         self._patch_sources()
