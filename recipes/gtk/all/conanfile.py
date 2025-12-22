@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.files import get, copy, rmdir, rm
+from conan.tools.files import get, copy, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.env import VirtualRunEnv
 from conan.errors import ConanInvalidConfiguration
@@ -47,7 +47,8 @@ class Gtk4Conan(ConanFile):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         # INFO: GTK requires glib-compile-resources
         self.tool_requires("glib/<host_version>")
-        self.requires("wayland-protocols/[^1.42]")
+        if self.options.get_safe("with_wayland", False):
+            self.tool_requires("wayland-protocols/[^1.42]")
 
     def requirements(self):
         # INFO: gdktexture.h:26 gdk-pixbuf.h/gdk-pixbuf.h
