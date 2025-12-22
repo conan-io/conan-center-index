@@ -1,0 +1,4 @@
+sources:
+  "0.8.4.cci.20251221":
+    url: "https://github.com/IfcOpenShell/IfcOpenShell/archive/b0450597d00c27c5ca338310bfd703fa14b6f670.tar.gz"
+    sha256: "3353c6f92f731a1eb67ebee4223283aaec0e001d75d97bdfa4e973b6f1701415"
