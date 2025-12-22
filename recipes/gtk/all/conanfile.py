@@ -7,6 +7,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.env import VirtualRunEnv
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.scm import Version
 import os
 
 
@@ -144,8 +145,6 @@ class Gtk4Conan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.components["gtk-4"].libs = ["gtk-4"]
-        self.cpp_info.components["gtk-4"].set_property("pkg_config_name", "gtk4")
         gtk_targets = []
         if self.options.get_safe("with_x11", False):
             gtk_targets.append("x11")
@@ -153,14 +152,19 @@ class Gtk4Conan(ConanFile):
             gtk_targets.append("wayland")
         pkgconfig_vars = {
             "targets": gtk_targets,
-            "gtk_binary_version": "4.0.0",
+            "gtk_binary_version": f"{Version(self.version).major}.0.0",
             "gtk_host": f"{self.settings.arch}-" + str(self.settings.os).lower()
         }
+
+        self.cpp_info.components["gtk-4"].libs = ["gtk-4"]
+        self.cpp_info.components["gtk-4"].set_property("pkg_config_name", "gtk4")
         self.cpp_info.components["gtk-4"].set_property("pkg_config_custom_content", pkgconfig_vars)
         self.cpp_info.components["gtk-4"].includedirs.append(os.path.join("include", "gtk-4.0"))
-        self.cpp_info.components["gtk-4"].requires = ["pango::pango", "cairo::cairo", "gdk-pixbuf::gdk-pixbuf", "graphene::graphene",
+        self.cpp_info.components["gtk-4"].requires = ["pango::pango", "gdk-pixbuf::gdk-pixbuf",
                                                       "fribidi::fribidi", "libepoxy::libepoxy", "libtiff::libtiff",
                                                       "libjpeg::libjpeg", "libpng::libpng", "glib::glib"]
+        if not is_msvc(self):
+            self.cpp_info.components["gtk-4"].requires.extend(["cairo::cairo", "graphene::graphene"])
         if self.settings.os == "Linux":
             self.cpp_info.components["gtk-4"].requires.extend(["libdrm::libdrm"])
             self.cpp_info.components["gtk-4"].system_libs = ["m"]
@@ -180,5 +184,6 @@ class Gtk4Conan(ConanFile):
         if self.options.get_safe("with_wayland", False):
             self.cpp_info.components["gtk-wayland"].set_property("pkg_config_name", "gtk4-wayland")
             self.cpp_info.components["gtk-wayland"].set_property("pkg_config_custom_content", pkgconfig_vars)
+            self.cpp_info.components["gtk-wayland"].libdirs = []
             self.cpp_info.components["gtk-wayland"].requires = ["gtk-4", "wayland::wayland", "wayland-protocols::wayland-protocols",
                                                                 "xkbcommon::xkbcommon"]
