@@ -65,7 +65,7 @@ class SplunkOpentelemetryConan(ConanFile):
         self.requires("grpc/1.54.3")
         self.requires("nlohmann_json/3.11.3")
         if self.options.build_jaeger_exporter:
-            self.requires("thrift/0.17.0")
+            self.requires("thrift/[>=0.17.0 <=0.21.0]")
             self.requires("libcurl/[>=7.78.0 <9]")
 
     def validate(self):
