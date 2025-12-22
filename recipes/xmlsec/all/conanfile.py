@@ -174,10 +174,10 @@ class XmlSecConan(ConanFile):
 
             makefile_msvc = os.path.join(self.source_folder, "win32", "Makefile.msvc")
             replace_in_file(self, makefile_msvc, "libxml2.lib", format_libs("libxml2"))
-            replace_in_file(self, makefile_msvc, "libxml2_a.lib", format_libs("libxml2"))
+            replace_in_file(self, makefile_msvc, "libxml2s.lib", format_libs("libxml2"))
             if self.options.with_xslt:
                 replace_in_file(self, makefile_msvc, "libxslt.lib", format_libs("libxslt"))
-                replace_in_file(self, makefile_msvc, "libxslt_a.lib", format_libs("libxslt"))
+                replace_in_file(self, makefile_msvc, "libxslts.lib", format_libs("libxslt"))
             if self.options.with_openssl:
                 replace_in_file(self, makefile_msvc, "libcrypto.lib", format_libs("openssl"))
 
