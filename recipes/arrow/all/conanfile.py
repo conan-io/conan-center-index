@@ -158,7 +158,7 @@ class ArrowConan(ConanFile):
 
     def requirements(self):
         if self.options.with_thrift:
-            self.requires("thrift/0.20.0")
+            self.requires("thrift/[>=0.20.0 <=0.21.0]")
         if self.options.with_grpc:
             self.requires("grpc/[>=1.50.0 <2]")
         if self.options.with_protobuf:
@@ -168,7 +168,7 @@ class ArrowConan(ConanFile):
         if self.options.with_mimalloc:
             self.requires("mimalloc/[>=1.7.6 <3]")
         if self.options.with_boost:
-            self.requires("boost/[>=1.85.0 <=1.88.0]")
+            self.requires("boost/[>=1.85.0 <=1.90.0]")
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
         if self.options.with_glog:
