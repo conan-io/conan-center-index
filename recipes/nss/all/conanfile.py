@@ -176,9 +176,6 @@ class NSSConan(ConanFile):
         # 
         replace_in_file(self, os.path.join(self.source_folder, "nss", "coreconf", "Darwin.mk"), "ifeq (arm,$(CPU_ARCH))", "ifeq (aarch64, $(CPU_ARCH))")
 
-
-        replace_in_file(self, os.path.join(self.source_folder, "nss", "build.sh"), "gyp_params+=(-Duse_system_zlib=0", "###")
-
     def build(self):
         # INFO: Patch is needed only for versions before 3.119
         if (Version(self.version) < "3.119"):
