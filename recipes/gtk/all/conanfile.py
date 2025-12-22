@@ -191,5 +191,4 @@ class Gtk4Conan(ConanFile):
             self.cpp_info.components["gtk-wayland"].set_property("pkg_config_name", "gtk4-wayland")
             self.cpp_info.components["gtk-wayland"].set_property("pkg_config_custom_content", pkgconfig_vars)
             self.cpp_info.components["gtk-wayland"].libdirs = []
-            self.cpp_info.components["gtk-wayland"].requires = ["gtk-4", "wayland::wayland", "wayland-protocols::wayland-protocols",
-                                                                "xkbcommon::xkbcommon"]
+            self.cpp_info.components["gtk-wayland"].requires = ["gtk-4", "wayland::wayland", "xkbcommon::xkbcommon"]
