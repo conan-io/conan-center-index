@@ -67,7 +67,8 @@ class Md4QtConan(ConanFile):
             cd.generate()
 
     def package_id(self):
-        self.info.clear()
+        if Version(self.version) < "5.0.0":
+            self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
