@@ -13,7 +13,7 @@ import shutil
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class LibXMLPlusPlus(ConanFile):
@@ -70,7 +70,6 @@ class LibXMLPlusPlus(ConanFile):
 
     def requirements(self):
         self.requires("libxml2/[>=2.12.5 <3]")
-        self.requires("glibmm/2.75.0")
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self):
