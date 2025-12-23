@@ -136,6 +136,7 @@ class Hdf5Conan(ConanFile):
             tc.variables["HDF5_ENABLE_INSTRUMENT"] = False  # Option?
         tc.variables["HDF5_ENABLE_PARALLEL"] = self.options.parallel
         tc.variables["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
+        tc.cache_variables["ZLIB_PACKAGE_NAME"] = "ZLIB"
         libaec_package = "libaec" if self.options.szip_support == "with_libaec" else "szip"
         tc.cache_variables["LIBAEC_PACKAGE_NAME"] = libaec_package
         tc.cache_variables["HDF5_ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
