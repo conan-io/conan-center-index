@@ -5,7 +5,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
 
@@ -36,11 +35,7 @@ class Open62541ppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        version = Version(self.version)
-        if version <= "0.19":
-            self.requires("open62541/1.4.6", transitive_headers=True, transitive_libs=True)
-        elif version <= "0.20":
-            self.requires("open62541/1.4.14", transitive_headers=True, transitive_libs=True)
+        self.requires("open62541/[~1.4.14]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         check_min_cppstd(self, 17)
