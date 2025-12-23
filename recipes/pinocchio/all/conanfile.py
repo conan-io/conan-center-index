@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, rmdir, copy, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import get, rmdir, copy
 
 required_conan_version = ">=2"
 
@@ -19,9 +19,12 @@ class PinocchioConan(ConanFile):
         )
 
     settings = "os", "compiler", "build_type", "arch"
-    options = {"with_collision_support": [True, False]}
-    default_options = {"with_collision_support": True}
-    export_sources = "patches/*.patch"
+    options = {
+        "with_collision_support": [True, False]
+    }
+    default_options = {
+        "with_collision_support": False
+    }
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -32,21 +35,15 @@ class PinocchioConan(ConanFile):
         self.requires("urdfdom/4.0.0", transitive_headers=True)
         self.requires("boost/[>=1.84.0 <1.90.0]", transitive_headers=True)
         if self.options.with_collision_support:
-            self.requires("coal/3.0.2@mastermind/stable")
-            
-    def export_sources(self):
-        export_conandata_patches(self)
-        
+            self.requires("coal/[~3.0.1]")
+          
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.22 <4]")
+        self.tool_requires("cmake/[>=3.22]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
 
     def generate(self):
-        deps = CMakeDeps(self)
-        deps.generate()
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_PYTHON_INTERFACE"] = False
         tc.cache_variables["BUILD_TESTING"] = False
@@ -55,8 +52,12 @@ class PinocchioConan(ConanFile):
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
         tc.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
+        deps = CMakeDeps(self)
+        # coal is a fork/continuation of hpp-fcl, pinocchio still uses hpp-fcl names,
+        # but coal provides compatibility headers if the target links against the coal library
+        deps.set_property("coal", "cmake_file_name", "hpp-fcl")
+        deps.set_property("coal", "cmake_target_name", "hpp-fcl::hpp-fcl")
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
