@@ -10,7 +10,7 @@ import os
 required_conan_version = ">=2.0.9"
 
 class LiftHttpConan(ConanFile):
-    name = "lifthttp"
+    name = "liblifthttp"
     description = "Safe and easy to use C++17 HTTP client library."
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
