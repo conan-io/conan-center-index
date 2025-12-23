@@ -30,7 +30,12 @@ class EigenConan(ConanFile):
         export_conandata_patches(self)
 
     def configure(self):
-        self.license = "MPL-2.0" if self.options.MPL2_only else ("MPL-2.0", "LGPL-3.0-or-later")
+        self.license = "MPL-2.0"  # MPL-2 only
+        if Version(self.version) >= "5.0.0":
+            del self.options.MPL2_only
+        elif not self.options.MPL2_only:  # < 5.0.0
+            self.license = ("MPL-2.0", "LGPL-3.0-or-later")
+
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -50,7 +55,16 @@ class EigenConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_TESTING"] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
-        tc.cache_variables["EIGEN_TEST_NOQT"] = True
+        if Version(self.version) >= "5.0.0":
+            # TODO consider making EIGEN_BUILD_{BLAS,LAPACK} tunable
+            tc.cache_variables["EIGEN_BUILD_BLAS"] = False
+            tc.cache_variables["EIGEN_BUILD_LAPACK"] = False
+            tc.cache_variables["EIGEN_BUILD_DEMOS"] = False
+            tc.cache_variables["EIGEN_BUILD_DOC"] = False
+            tc.cache_variables["EIGEN_BUILD_PKGCONFIG"] = False
+            tc.cache_variables["EIGEN_BUILD_TESTING"] = tc.cache_variables["BUILD_TESTING"]
+        else:
+            tc.cache_variables["EIGEN_TEST_NOQT"] = True
         tc.generate()
 
     def build(self):
@@ -73,7 +87,7 @@ class EigenConan(ConanFile):
         self.cpp_info.components["eigen3"].libdirs = []
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["eigen3"].system_libs = ["m"]
-        if self.options.MPL2_only:
+        if self.options.get_safe("MPL2_only"):
             self.cpp_info.components["eigen3"].defines = ["EIGEN_MPL2_ONLY"]
 
         self.cpp_info.components["eigen3"].set_property("cmake_target_name", "Eigen3::Eigen")

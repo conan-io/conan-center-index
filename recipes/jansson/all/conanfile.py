@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -56,6 +57,8 @@ class JanssonConan(ConanFile):
         tc.variables["USE_WINDOWS_CRYPTOAPI"] = self.options.use_windows_cryptoapi
         if is_msvc(self):
             tc.variables["JANSSON_STATIC_CRT"] = is_msvc_static_runtime(self)
+        if Version(self.version) <= "2.14.1":  # pylint: disable=conan-condition-evals-to-constant
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):

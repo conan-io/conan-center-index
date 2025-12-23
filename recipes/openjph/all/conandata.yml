@@ -1,9 +1,9 @@
 sources:
-  "0.22.0":
-    url: "https://github.com/aous72/OpenJPH/archive/0.22.0.tar.gz"
-    sha256: "c9c6e9ec82ee8770ede41eeffe8acaab1814724c698b258c3de160dc09cb7d12"
+  "0.25.3":
+    url: "https://github.com/aous72/OpenJPH/archive/0.25.3.tar.gz"
+    sha256: "815b0d345daf3bbad72f3930d4f6c831643dcb2b734d8bb44d871d68db12f4d2"
 patches:
-  "0.22.0":
-    - patch_file: "patches/0.22.0-cmake-cxx-standard-fpic.patch"
-      patch_description: "Remove setting of CXX standard to a fixed value overriding the toolchain provided by Conan and fPIC hardcoded option"
+  "0.25.3":
+    - patch_file: "patches/0.25.3-cmake-cxx-standard-pic.patch"
+      patch_description: "Remove setting of CXX standard to a fixed value overriding the toolchain provided by Conan and PIC hardcoded option"
       patch_type: "conan"

@@ -26,12 +26,21 @@ sources:
   "5.6.2":
     sha256: 458f60df8e8f1f2fdad93c8f24e1aa8f4b095cc61a14fac81b90680d7306a42e
     url: https://github.com/CGAL/cgal/releases/download/v5.6.2/CGAL-5.6.2.tar.xz
+  "5.6.3":
+    sha256: 15c743cb395d1a0855b9062525f3ae0cd40486489acfe7ce1457c3710ab34111
+    url: https://github.com/CGAL/cgal/releases/download/v5.6.3/CGAL-5.6.3.tar.xz
   "6.0":
     sha256: ed53a1498569a22341b482e579c6a3caf9ecbfb6e013f5a90ce780138073b520
     url: https://github.com/CGAL/cgal/releases/download/v6.0/CGAL-6.0-library.tar.xz
   "6.0.1":
     sha256: c752737f91d1af71fa96038f0e37945ce82a5f1fffb6200172cfcdd77755a356
     url: https://github.com/CGAL/cgal/releases/download/v6.0.1/CGAL-6.0.1-library.tar.xz
+  "6.0.2":
+    sha256: 11eaf69d6d21083c6074c2187267cee28541fc462d6b7cbb3deb599007b64f3a
+    url: https://github.com/CGAL/cgal/releases/download/v6.0.2/CGAL-6.0.2-library.tar.xz
+  "6.1":
+    sha256: ef4861f1a55417d1e884306c9408ff64fdf39362a38443f17885c55f7f19278a
+    url: https://github.com/CGAL/cgal/releases/download/v6.1/CGAL-6.1-library.tar.xz
 patches:
   "5.3.2":
     - patch_file: "patches/0001-fix-for-conan.patch"

@@ -1,4 +1,7 @@
 sources:
+  "1.51.0":
+    url: "https://github.com/libuv/libuv/archive/v1.51.0.tar.gz"
+    sha256: "27e55cf7083913bfb6826ca78cde9de7647cded648d35f24163f2d31bb9f51cd"
   "1.49.2":
     url: "https://github.com/libuv/libuv/archive/v1.49.2.tar.gz"
     sha256: "388ffcf3370d4cf7c4b3a3205504eea06c4be5f9e80d2ab32d19f8235accc1cf"

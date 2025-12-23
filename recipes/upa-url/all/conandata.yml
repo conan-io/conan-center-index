@@ -1,4 +1,4 @@
 sources:
-  "2.2.0":
-    url: "https://github.com/upa-url/upa/archive/refs/tags/v2.2.0.tar.gz"
-    sha256: "7b6d5e5774d0264ef2be0782ec3548e191ef113b34983323791a914a00de0d3a"
+  "2.4.0":
+    url: "https://github.com/upa-url/upa/archive/refs/tags/v2.4.0.tar.gz"
+    sha256: "97a7ddf56c8b65e8b54027d01acfb4fe7b2f0f1f16ce5023d12ce5a5539718ff"
