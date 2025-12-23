@@ -74,7 +74,35 @@ class CoalConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["coal"]
+        core = self.cpp_info.components["core"]
+        core.set_property("cmake_target_name", "coal::coal")
+        core.set_property("cmake_target_aliases", ["hpp-fcl::hpp-fcl"])
+        core.set_property("pkg_config_name", "coal")
+        core.set_property("pkg_config_aliases", ["hpp-fcl"])
+        core.libs = ["coal"]
+        core.requires = [
+            "eigen::eigen",
+            "boost::chrono",
+            "boost::filesystem",
+            "boost::serialization",
+            "assimp::assimp",
+            "octomap::octomap",
+            "qhull::qhull"
+        ]
+        core.defines.append("COAL_BACKWARD_COMPATIBILITY_WITH_HPP_FCL")
+        core.defines.append("COAL_DISABLE_HPP_FCL_WARNINGS")
+        octomap_version = Version(self.version)
+        core.defines.extend([
+            "COAL_HAS_OCTOMAP",
+            "COAL_HAVE_OCTOMAP",
+            f"OCTOMAP_MAJOR_VERSION={octomap_version.major}",
+            f"OCTOMAP_MINOR_VERSION={octomap_version.minor}",
+            f"OCTOMAP_PATCH_VERSION={octomap_version.patch}",
+        ])
+        core.includedirs = ["include"]
+
         self.cpp_info.defines = ["COAL_HAS_OCTOMAP",
+                                 "COAL_DISABLE_HPP_FCL_WARNINGS",
                                  "COAL_HAVE_OCTOMAP",
                                 f"OCTOMAP_MAJOR_VERSION={Version(self.version).major}",
                                 f"OCTOMAP_MINOR_VERSION={Version(self.version).minor}",
