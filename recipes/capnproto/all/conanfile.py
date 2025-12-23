@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
@@ -38,28 +38,12 @@ class CapnprotoConan(ConanFile):
         "with_zlib": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return "14"
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "15",
-            "msvc": "191",
-            "gcc": "5" if Version(self.version) < "1.0.0" else "7",
-            "clang": "5",
-            "apple-clang": "5.1",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "0.8.0":
-            del self.options.with_zlib
 
     def configure(self):
         if self.options.shared:
@@ -78,21 +62,10 @@ class CapnprotoConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
-            )
+        check_min_cppstd(self, 14)
+
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared libraries for Visual Studio")
-        if self.settings.os == "Windows" and Version(self.version) < "0.8.0" and self.options.with_openssl:
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support OpenSSL on Windows pre 0.8.0")
-        # MSVC Release build is not supported in 1.0.0
-        # https://github.com/capnproto/capnproto/issues/1740
-        if Version(self.version) == "1.0.0" and is_msvc(self) and self.settings.build_type == "Release":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support MSVC Release build")
 
     def build_requirements(self):
         if self.settings.os != "Windows":
@@ -128,9 +101,8 @@ class CapnprotoConan(ConanFile):
             tc.configure_args.extend([
                 f"--with-openssl={yes_no(self.options.with_openssl)}",
                 "--enable-reflection",
+                f"--with-zlib={yes_no(self.options.with_zlib)}"
             ])
-            if Version(self.version) >= "0.8.0":
-                tc.configure_args.append(f"--with-zlib={yes_no(self.options.with_zlib)}")
             # Fix rpath on macOS
             if self.settings.os == "Macos":
                 tc.extra_ldflags.append("-Wl,-rpath,@loader_path/../lib")
@@ -150,6 +122,12 @@ class CapnprotoConan(ConanFile):
                 # TODO: replace by a call to autootols.autoreconf() in c++ folder once https://github.com/conan-io/conan/issues/12103 implemented
                 self.run("autoreconf --force --install")
                 autotools.configure(build_script_folder=os.path.join(self.source_folder, "c++"))
+                if (is_apple_os(self) and cross_building(self) and self.settings.arch in ("x86_64", "armv8") and
+                    self.settings.compiler == "apple-clang"):
+                    # when crossbuilding, the -arch flag is not correctly forwarded to the linker invocation
+                    libtool_sh = os.path.join(self.source_folder, "c++", "libtool")
+                    arch = "x86_64" if self.settings.arch == "x86_64" else "arm64"
+                    replace_in_file(self, libtool_sh, r'archive_cmds="\$CC -r ', r'archive_cmds="\$CC -r -arch {} '.format(arch))
                 autotools.make()
 
     @property
@@ -215,12 +193,11 @@ class CapnprotoConan(ConanFile):
 
         if self.options.get_safe("with_zlib"):
             components.update({"kj-gzip": {"requires": ["kj", "kj-async", "zlib::zlib"]}})
-            if Version(self.version) >= "1.0.0":
-                components["kj-http"].setdefault("requires", []).append("zlib::zlib")
+            components["kj-http"].setdefault("requires", []).append("zlib::zlib")
         if self.options.with_openssl:
             components.update({"kj-tls": {"requires": ["kj", "kj-async", "openssl::openssl"]}})
-        if Version(self.version) >= "0.9.0":
-            components.update({"capnp-websocket": {"requires": ["capnp", "capnp-rpc", "kj-http", "kj-async", "kj"]}})
+        
+        components.update({"capnp-websocket": {"requires": ["capnp", "capnp-rpc", "kj-http", "kj-async", "kj"]}})
 
         return components
 
