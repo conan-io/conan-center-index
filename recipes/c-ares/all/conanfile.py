@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get, rm, rmdir, apply_conandata_patches, export_conandata_patches
-from conan.tools.scm import Version
+from conan.tools.files import collect_libs, copy, get, rm, rmdir
 import os
 
 required_conan_version = ">=1.53.0"
@@ -29,9 +28,6 @@ class CAresConan(ConanFile):
         "tools": True,
         "multithreading": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -60,7 +56,6 @@ class CAresConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -85,8 +80,7 @@ class CAresConan(ConanFile):
             self.cpp_info.components["cares"].defines.append("CARES_STATICLIB")
         if self.settings.os == "Linux":
             self.cpp_info.components["cares"].system_libs.append("rt")
-            if Version(self.version) >= "1.23.0":
-                self.cpp_info.components["cares"].system_libs.append("pthread")
+            self.cpp_info.components["cares"].system_libs.append("pthread")
         elif self.settings.os == "Windows":
             self.cpp_info.components["cares"].system_libs.extend(["ws2_32", "advapi32"])
             self.cpp_info.components["cares"].system_libs.append("iphlpapi")
