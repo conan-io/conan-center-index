@@ -36,7 +36,7 @@ class SdlttfConan(ConanFile):
 
     def requirements(self):
         self.requires("freetype/2.13.2")
-        self.requires("sdl/[>=2.32 <3]", transitive_headers=True, transitive_libs=True)
+        self.requires("sdl/[^2.28]", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_harfbuzz"):
             self.requires("harfbuzz/[>=8.3.0]")
 

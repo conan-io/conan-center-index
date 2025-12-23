@@ -5,7 +5,7 @@ from conan.tools.files import copy, get
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=2.4"
+required_conan_version = ">=1.53.0"
 
 
 class SdlnetConan(ConanFile):
@@ -25,6 +25,7 @@ class SdlnetConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
     exports_sources = "CMakeLists.txt"
 
     def config_options(self):
@@ -64,7 +65,8 @@ class SdlnetConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        license_file = "COPYING.txt" if Version(self.version) < "2.2.0" else "LICENSE.txt"
+        copy(self, license_file, self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
@@ -78,3 +80,7 @@ class SdlnetConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi"])
 
+        # TODO: to remove in conan v2
+        self.cpp_info.names["cmake_find_package"] = "SDL2_net"
+        self.cpp_info.names["cmake_find_package_multi"] = "SDL2_net"
+        self.cpp_info.names["pkg_config"] = "SDL2_net"
