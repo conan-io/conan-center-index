@@ -43,8 +43,11 @@ class YojimboConan(ConanFile):
     def generate(self):
         deps = PremakeDeps(self)
         deps.generate()
-        toolchain = PremakeToolchain(self)
-        toolchain.generate()
+        tc = PremakeToolchain(self)
+        # Disable internal tests per project
+        tc.project("netcode").extra_defines = ["NETCODE_ENABLE_TESTS=False"]
+        tc.project("reliable").extra_defines = ["RELIABLE_ENABLE_TESTS=False"]
+        tc.generate()
 
     def build(self):
         premake = Premake(self)
