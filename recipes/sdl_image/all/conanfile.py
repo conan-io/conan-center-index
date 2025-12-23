@@ -6,7 +6,7 @@ from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=2.4"
+required_conan_version = ">=2"
 
 
 class SDLImageConan(ConanFile):
@@ -65,8 +65,6 @@ class SDLImageConan(ConanFile):
         "imageio": False,
         "wic": False,
     }
-    implements = ["auto_shared_fpic"]
-    languages = "C"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -75,6 +73,12 @@ class SDLImageConan(ConanFile):
             del self.options.imageio
         if self.settings.os != "Windows":
             del self.options.wic
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -91,12 +95,13 @@ class SDLImageConan(ConanFile):
             self.requires("libwebp/[>=1.3.2 <2]")
         if self.options.with_avif:
             self.requires("libavif/[>=1.0.1 <2]")
-        if self.options.with_jxl:
-            self.requires("libjxl/0.11.1")
 
     def validate(self):
         if self.options.shared and not self.dependencies["sdl"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} shared requires sdl shared")
+        # TODO: libjxl doesn't support conan v2(yet)
+        if self.options.get_safe("with_jxl"):
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support with_jxl (yet)")
         if Version(self.version).major != Version(self.dependencies["sdl"].ref.version).major:
             raise ConanInvalidConfiguration(f"{self.ref} and sdl must have the same major version")
 
@@ -185,8 +190,6 @@ class SDLImageConan(ConanFile):
             self.cpp_info.components["_sdl_image"].requires.append("libwebp::libwebp")
         if self.options.with_avif:
             self.cpp_info.components["_sdl_image"].requires.append("libavif::libavif")
-        if self.options.with_jxl:
-            self.cpp_info.components["_sdl_image"].requires.append("libjxl::libjxl")
         if self.options.get_safe("imageio") and not self.options.shared:
             self.cpp_info.components["_sdl_image"].frameworks = [
                 "CoreFoundation",

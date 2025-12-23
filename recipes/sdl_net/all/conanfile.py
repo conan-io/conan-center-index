@@ -26,8 +26,16 @@ class SdlnetConan(ConanFile):
         "fPIC": True,
     }
     exports_sources = "CMakeLists.txt"
-    implements = ["auto_shared_fpic"]
-    languages = "C"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
