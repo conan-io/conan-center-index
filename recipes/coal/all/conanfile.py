@@ -48,6 +48,7 @@ class CoalConan(ConanFile):
         tc.cache_variables["BUILD_PYTHON_INTERFACE"] = False
         tc.cache_variables["COAL_HAS_QHULL"] = self.options.with_qhull
         tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["COAL_BACKWARD_COMPATIBILITY_WITH_HPP_FCL"] = True # to ease transition from hpp-fcl to coal, just installs additional headers
         tc.generate()
 
         deps = CMakeDeps(self)
