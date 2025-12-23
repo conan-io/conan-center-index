@@ -27,6 +27,7 @@ class SdlttfConan(ConanFile):
         "fPIC": True,
         "with_harfbuzz": False,
     }
+
     languages = "C"
     implements = ["auto_shared_fpic"]
 
