@@ -1,25 +1,4 @@
 sources:
-  "0.36":
-    url: "https://github.com/basiliscos/cpp-rotor/archive/refs/tags/v0.36.tar.gz"
-    sha256: "9dce406c2a72baf804af5161f87fd5822433566de348cb7eb48789a4db4c05d1"
-  "0.35":
-    url: "https://github.com/basiliscos/cpp-rotor/archive/refs/tags/v0.35.tar.gz"
-    sha256: "245fdda4374ed7a0af18b682b1d861df87d05162daeca263776259a31d1dd4b9"
-  "0.34":
-    url: "https://github.com/basiliscos/cpp-rotor/archive/refs/tags/v0.34.tar.gz"
-    sha256: "8c59a36b3b2917c91650fb91e57f8e116e0dd7f88b70d95e2e92bde4f9395202"
-  "0.33":
-    url: "https://github.com/basiliscos/cpp-rotor/archive/refs/tags/v0.33.tar.gz"
-    sha256: "0a57af1018e2ca89c9cd95ae134c4b2af2c8e803c81ebee5433495776830eea6"
-  "0.32":
-    url: "https://github.com/basiliscos/cpp-rotor/archive/refs/tags/v0.32.tar.gz"
-    sha256: "b0b7a294704f1ab779b95ab433eb5f4a2859db3539108a0e08709fc97f6bccee"
-  "0.31":
-    url: "https://github.com/basiliscos/cpp-rotor/archive/refs/tags/v0.31.tar.gz"
-    sha256: "c8d9b28083c7a9c32af2cbff1d90fe1e62def989f0f89baba1244c44fb8ec9e4"
-  "0.30":
-    url: "https://github.com/basiliscos/cpp-rotor/archive/refs/tags/v0.30.tar.gz"
-    sha256: "d143bfce1d18d42ab0f072acfe239d1cc07a495411537579e02260673cbe8121"
-  "0.29":
-    url: "https://github.com/basiliscos/cpp-rotor/archive/refs/tags/v0.29.tar.gz"
-    sha256: "e17e25f2d6402389e8fde07a158ca952b815666f0a2b5e07748dfc062834c522"
+  "0.39":
+    url: "https://github.com/basiliscos/cpp-rotor/archive/refs/tags/v0.39.tar.gz"
+    sha256: "3a1338dda5d5d038ce29ccc1b7f754954e0fbe6ebddcc886fabf9e383d0c061f"
