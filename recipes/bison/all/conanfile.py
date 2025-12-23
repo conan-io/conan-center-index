@@ -70,7 +70,7 @@ class BisonConan(ConanFile):
                 "gl_cv_func_snprintf_directive_n=no",
             ])
             # fix MSVC error C2375: 'rpl_free': redefinition
-            tc.preprocessor_definitions["GNULIB_FREE_POSIX"] = "0"
+            tc.extra_cflags.append("-DGNULIB_FREE_POSIX=0")
             tc.extra_cflags.append("-FS")
             tc.extra_cflags.append("-utf-8")
         env = tc.environment()
