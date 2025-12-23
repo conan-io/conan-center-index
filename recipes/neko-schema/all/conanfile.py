@@ -16,7 +16,6 @@ class NekoSchemaConan(ConanFile):
     description = "A lightweight C++20 header-only library providing fundamental type definitions and utilities for the Neko ecosystem"
     topics = ("c++20", "header-only", "schema", "types", "auto-srcLoc", "utilities")
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = "CMakeLists.txt", "include/*", "cmake/*", "LICENSE", "README.md"
 
     package_type = "header-library"
 
@@ -24,14 +23,7 @@ class NekoSchemaConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        data = self.conan_data or {}
-        sources = data.get("sources", {})
-
-        # Use remote source when available; otherwise fall back to exported sources (local workflow)
-        if self.version in sources:
-            get(self, **sources[self.version], strip_root=True)
-        else:
-            copy(self, pattern="*", src=self.export_sources_folder, dst=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def validate(self):
         check_min_cppstd(self, 20)
