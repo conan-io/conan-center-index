@@ -56,8 +56,6 @@ class SpirvtoolsConan(ConanFile):
     def validate(self):
         # The interface requires C++11
         check_min_cppstd(self, 11)
-        if Version(self.version) >= "1.4.335.0":
-            check_max_cppstd(self, 17)
 
     def build_requirements(self):
         if Version(self.version) >= "1.3.239":
