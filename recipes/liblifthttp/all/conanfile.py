@@ -38,6 +38,7 @@ class LiftHttpConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
