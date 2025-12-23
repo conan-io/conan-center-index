@@ -104,4 +104,3 @@ class PinocchioConan(ConanFile):
             for comp_name in ["pinocchio_headers", "pinocchio_default", "pinocchio_visualizers", "pinocchio_parsers", "pinocchio"]:
                 self.cpp_info.components[comp_name].requires.append("coal::coal")
                 self.cpp_info.components[comp_name].defines.append("PINOCCHIO_WITH_HPP_FCL")
-                self.cpp_info.components[comp_name].defines.append("COAL_DISABLE_HPP_FCL_WARNINGS")
