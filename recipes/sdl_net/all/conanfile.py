@@ -5,7 +5,7 @@ from conan.tools.files import copy, get
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2.4"
 
 
 class SdlnetConan(ConanFile):
@@ -78,5 +78,3 @@ class SdlnetConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi"])
 
-        self.cpp_info.names["cmake_find_package"] = "SDL2_mixer"
-        self.cpp_info.names["cmake_find_package_multi"] = "SDL2_mixer"

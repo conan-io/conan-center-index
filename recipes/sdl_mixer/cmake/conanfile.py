@@ -7,7 +7,7 @@ from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=1.57.0"
 
 
 class SDLMixerConan(ConanFile):
@@ -264,3 +264,6 @@ class SDLMixerConan(ConanFile):
             self.cpp_info.frameworks.extend(["AudioToolbox", "CoreServices", "CoreGraphics", "CoreFoundation"])
             if self.settings.os == "Macos":
                 self.cpp_info.frameworks.extend(["AppKit", "AudioUnit"])
+
+        self.cpp_info.names["cmake_find_package"] = "SDL2_mixer"
+        self.cpp_info.names["cmake_find_package_multi"] = "SDL2_mixer"
