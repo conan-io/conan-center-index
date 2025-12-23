@@ -289,8 +289,8 @@ class QtConan(ConanFile):
         if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "193":
             raise ConanInvalidConfiguration("Visual Studio 2022 (MSVC 1930 or newer) is required by qt >= 6.8.3")
 
-        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "15":
-            raise ConanInvalidConfiguration("apple-clang >= 14 is required by qt >= 6.8.3")
+            if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "15":
+                raise ConanInvalidConfiguration("apple-clang >= 14 is required by qt >= 6.8.3")
 
         if self.options.get_safe("qtwebengine"):
             if not self.options.shared:
@@ -1365,8 +1365,12 @@ class QtConan(ConanFile):
             self.cpp_info.components["qtAxServer"].system_libs.append("shell32")
             self.cpp_info.components["qtAxServer"].defines.append("QAXSERVER")
             _create_module("AxContainer", ["AxBase"])
+        
         if self.options.get_safe("qtcharts"):
             _create_module("Charts", ["Gui", "Widgets"])
+        if self.options.get_safe("qtgraphs") and Version(self.version) >= "6.8.0":
+            _create_module("Graphs", ["Gui", "Widgets", "Quick", "Quick3D"])
+
         if self.options.get_safe("qtdatavis3d") and qt_quick_enabled:
             _create_module("DataVisualization", ["Gui", "OpenGL", "Qml", "Quick"])
         if self.options.get_safe("qtlottie"):
