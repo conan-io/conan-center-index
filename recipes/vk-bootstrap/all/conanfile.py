@@ -56,9 +56,9 @@ class VkBootstrapConan(ConanFile):
 
     def requirements(self):
         self.requires(f"vulkan-headers/{self.conan_data['vulkan_headers_dependency'][self.version]}", transitive_headers=True)
-    
+
     def build_requirements(self):
-        if Version(self.version) >= "1.4.328":
+        if Version(self.version) >= "1.4.335":
             self.tool_requires("cmake/[>=3.22]")
 
     def validate(self):

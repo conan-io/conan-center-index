@@ -1,10 +1,4 @@
 sources:
-  "1.4.328.1":
-    url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/refs/tags/vulkan-sdk-1.4.328.1.tar.gz"
-    sha256: "91d9be1347a270288bcc50206bda8ccf6aad33bab8318c0643dd36bef97478f9"
-dependencies:
-  "1.4.328.1":
-    "vulkan-headers": "1.4.328.1"
-    "vulkan-utility-libraries": "1.4.328.1"
-    "spirv-tools": "1.4.328.1"
-    "spirv-headers": "1.4.328.1"
+  "1.4.335.0":
+    url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/refs/tags/vulkan-sdk-1.4.335.0.tar.gz"
+    sha256: "464f754abdebef13c342e18861eab87be0ecc36cb1c257f6b2ddfa10afb8401a"

@@ -53,20 +53,15 @@ class VulkanValidationLayersConan(ConanFile):
 
     def requirements(self):
         self.requires("robin-hood-hashing/3.11.5")
-        self.requires(self._require("spirv-headers"))
-        self.requires(self._require("spirv-tools"))
-        self.requires(self._require("vulkan-headers"), transitive_headers=True)
-        self.requires(self._require("vulkan-utility-libraries"))
+        self.requires("spirv-headers/1.4.335.0")
+        self.requires("spirv-tools/1.4.335.0")
+        self.requires("vulkan-headers/1.4.335.0", transitive_headers=True)
+        self.requires("vulkan-utility-libraries/1.4.335.0")
 
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
         if self.options.get_safe("with_wsi_wayland"):
             self.requires("wayland/1.22.0")
-
-    def _require(self, recipe_name):
-        if recipe_name not in self.conan_data["dependencies"][self.version]:
-            raise ConanException(f"{recipe_name} is missing in dependencies conandata.yml field")
-        return f"{recipe_name}/{self.conan_data['dependencies'][self.version][recipe_name]}"
 
     def validate(self):
         check_min_cppstd(self, 17)
