@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, rmdir, copy
+from conan.tools.files import get, rmdir, copy, apply_conandata_patches, export_conandata_patches
 
 required_conan_version = ">=2"
 
@@ -19,6 +19,9 @@ class PinocchioConan(ConanFile):
         )
 
     settings = "os", "compiler", "build_type", "arch"
+    options = {"with_collision_support": [True, False]}
+    default_options = {"with_collision_support": True}
+    export_sources = "patches/*.patch"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -28,12 +31,18 @@ class PinocchioConan(ConanFile):
         self.requires("urdfdom_headers/1.1.1")
         self.requires("urdfdom/4.0.0", transitive_headers=True)
         self.requires("boost/[>=1.84.0 <1.90.0]", transitive_headers=True)
-
+        if self.options.with_collision_support:
+            self.requires("coal/3.0.2@mastermind/stable")
+            
+    def export_sources(self):
+        export_conandata_patches(self)
+        
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.22 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -42,8 +51,12 @@ class PinocchioConan(ConanFile):
         tc.cache_variables["BUILD_PYTHON_INTERFACE"] = False
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["BUILD_EXAMPLES"] = False
+        tc.cache_variables["BUILD_WITH_COLLISION_SUPPORT"] = self.options.with_collision_support
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
         tc.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
 
     def build(self):
         cmake = CMake(self)
@@ -80,3 +93,14 @@ class PinocchioConan(ConanFile):
 
         self.cpp_info.components["pinocchio"].requires = ["pinocchio_default", "pinocchio_parsers", "pinocchio_visualizers"]
         self.cpp_info.components["pinocchio"].set_property("cmake_target_name", "pinocchio::pinocchio")
+
+        if self.options.with_collision_support:
+            self.cpp_info.components["pinocchio_collision"].libs = ["pinocchio_collision"]
+            self.cpp_info.components["pinocchio_collision"].requires = ["pinocchio_headers", "pinocchio_default", "coal::coal"]
+            self.cpp_info.components["pinocchio_collision"].set_property("cmake_target_name", "pinocchio::pinocchio_collision")
+            self.cpp_info.components["pinocchio_parsers"].requires.append("pinocchio_collision")
+            self.cpp_info.components["pinocchio"].requires.append("pinocchio_collision")
+            for comp_name in ["pinocchio_headers", "pinocchio_default", "pinocchio_visualizers", "pinocchio_parsers", "pinocchio"]:
+                self.cpp_info.components[comp_name].requires.append("coal::coal")
+                self.cpp_info.components[comp_name].defines.append("PINOCCHIO_WITH_HPP_FCL")
+                self.cpp_info.components[comp_name].defines.append("COAL_DISABLE_HPP_FCL_WARNINGS")
