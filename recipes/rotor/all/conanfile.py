@@ -1,7 +1,6 @@
 import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.files import get, rmdir, copy
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
 
@@ -38,8 +37,6 @@ class RotorConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "0.30":
-            del self.options.enable_fltk
 
     def configure(self):
         if self.options.shared:
@@ -56,15 +53,13 @@ class RotorConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def generate(self):
-        v = Version(self.version)
         tc = CMakeToolchain(self)
-        tc.cache_variables["BUILD_BOOST_ASIO" if v < "0.34" else "ROTOR_BUILD_ASIO"] = self.options.enable_asio
-        tc.cache_variables["BUILD_THREAD" if v < "0.34" else "ROTOR_BUILD_THREAD"] = self.options.enable_thread
-        tc.cache_variables["BUILD_THREAD_UNSAFE" if v < "0.34" else "ROTOR_BUILD_THREAD_UNSAFE"] = not self.options.multithreading
-        tc.cache_variables["BUILD_TESTING" if v < "0.34" else "ROTOR_BUILD_TESTS"] = False
-        tc.cache_variables["BUILD_EV" if v < "0.34" else "ROTOR_BUILD_EV"] = self.options.enable_ev
-        if v >= "0.30":
-            tc.cache_variables["BUILD_FLTK" if v < "0.34" else "ROTOR_BUILD_FLTK"] = self.options.enable_fltk
+        tc.cache_variables["ROTOR_BUILD_ASIO"] = self.options.enable_asio
+        tc.cache_variables["ROTOR_BUILD_THREAD"] = self.options.enable_thread
+        tc.cache_variables["ROTOR_BUILD_THREAD_UNSAFE"] = not self.options.multithreading
+        tc.cache_variables["ROTOR_BUILD_TESTS"] = False
+        tc.cache_variables["ROTOR_BUILD_EV"] = self.options.enable_ev
+        tc.cache_variables["ROTOR_BUILD_FLTK"] = self.options.enable_fltk
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -95,8 +90,7 @@ class RotorConan(ConanFile):
         self.cpp_info.components["core"].requires = ["boost::date_time", "boost::system", "boost::regex"]
 
         if not self.options.multithreading:
-            v = Version(self.version)
-            self.cpp_info.components["core"].defines.append("BUILD_THREAD_UNSAFE" if v < "0.34" else "ROTOR_BUILD_THREAD_UNSAFE")
+            self.cpp_info.components["core"].defines.append("ROTOR_BUILD_THREAD_UNSAFE")
 
         if self.options.enable_asio:
             self.cpp_info.components["asio"].libs = ["rotor_asio"]
