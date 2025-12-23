@@ -35,22 +35,6 @@ class LibXMLPlusPlus(ConanFile):
     }
 
     @property
-    def _min_cppstd(self):
-        return "17" if Version(self.version) >= "5.4.0" else "11"
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "17": {
-                "gcc": "8",
-                "clang": "7",
-                "apple-clang": "12",
-                "Visual Studio": "16",
-                "msvc": "192",
-            },
-        }.get(self._min_cppstd, {})
-
-    @property
     def _lib_version(self):
         return "5.0"
 
@@ -72,15 +56,9 @@ class LibXMLPlusPlus(ConanFile):
         self.requires("libxml2/[>=2.12.5 <3]")
 
     def validate(self):
-        if hasattr(self, "settings_build") and cross_building(self):
+        if cross_building(self):
             raise ConanInvalidConfiguration("Cross-building not implemented")
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
