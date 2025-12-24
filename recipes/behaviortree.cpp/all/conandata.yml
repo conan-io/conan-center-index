@@ -1,9 +1,10 @@
 sources:
-  "4.8.0":
-    url: "https://github.com/BehaviorTree/BehaviorTree.CPP/archive/refs/tags/4.8.0.tar.gz"
-    sha256: "7464badd36d322b4eb459f32b2ae8ca05a3bb16dbd61ac03f1730cef6347f770"
+  "4.8.2":
+    url: "https://github.com/BehaviorTree/BehaviorTree.CPP/archive/refs/tags/4.8.2.tar.gz"
+    sha256: "fe682bc2a3430378611d5d520970333fcd57874eb726fce59b5b274b947b0ba7"
 patches:
   "4.8.0":
-    - patch_file: "patches/4.8.0-0001-fix-tools-linkage.patch"
-      patch_description: "Fix linking of tools"
-      patch_type: "build"
+    - patch_file: "patches/4.8.2-0001-fix-linking.patch"
+      patch_description: "Fix linking"
+      patch_type: "backport"
+      patch_source: "https://github.com/BehaviorTree/BehaviorTree.CPP/pull/1043"
