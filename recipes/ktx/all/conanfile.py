@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd, stdcpp_library
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd, stdcpp_library, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, save
 from conan.tools.scm import Version
@@ -82,6 +83,10 @@ class KtxConan(ConanFile):
         if self.options.tools:
             self.requires("fmt/10.2.1", transitive_libs=False)
 
+    def validate_build(self):
+        if Version(self.version) == "4.4.2" and cross_building(self) and is_apple_os(self):
+            raise ConanInvalidConfiguration("Cross-building KTX 4.4.2 for Apple OS is not supported in this version")
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
@@ -113,6 +118,8 @@ class KtxConan(ConanFile):
         tc.variables["KTX_FEATURE_STATIC_LIBRARY"] = not self.options.shared
         tc.variables["KTX_FEATURE_TESTS"] = False
         tc.variables["BASISU_SUPPORT_SSE"] = self.options.get_safe("sse", False)
+        if Version(self.version) == "4.0.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("zstd", "cmake_target_name", "zstd::libzstd")
