@@ -29,10 +29,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup conan and config
-        uses: entos-xe/conan-setup-action@main
+        uses: entos-xe/conan-setup-action@db0a63ab409d3f82ab69171e5cd03d8c1ec99397
         with:
           config: "https://${{ secrets.XE_ORG_TOKEN }}@github.com/entos-xe/conan-config.git"
           remotes: ${{ env.CONAN_REMOTE }}
+          version: latest
 
       - name: Export packages to the local cache
         run: python entos-packages.py --export
