@@ -1,0 +1,29 @@
+diff --git a/ouster_library/CMakeLists.txt b/ouster_library/CMakeLists.txt
+index 70afd9b..db5c802 100644
+--- a/ouster_library/CMakeLists.txt
++++ b/ouster_library/CMakeLists.txt
+@@ -45,6 +45,14 @@ function(ouster_library_common _TARGET)
+       $<BUILD_INTERFACE:${_INCLUDE_DIRS}>)
+     message("Building Library: ${_TARGET}: Adding ouster_viz")
+   endif()
++  if(BUILD_MAPPING)
++    target_link_libraries(${_TARGET} PRIVATE ouster_mapping)
++    get_target_property(_INCLUDE_DIRS ouster_mapping INTERFACE_INCLUDE_DIRECTORIES)
++    target_include_directories(${_TARGET}
++      PUBLIC
++      $<BUILD_INTERFACE:${_INCLUDE_DIRS}>)
++    message("Building Library: ${_TARGET}: Adding ouster_mapping")
++  endif()
+ 
+   add_library(OusterSDK::${_TARGET} ALIAS ${_TARGET})
+ endfunction()
+@@ -66,6 +74,9 @@ if(BUILD_SHARED_LIBRARY)
+   if(TARGET ouster_sensor)
+   target_sources(shared_library PRIVATE $<TARGET_OBJECTS:ouster_sensor>)
+   endif()
++  if(TARGET ouster_mapping)
++      target_sources(shared_library PRIVATE $<TARGET_OBJECTS:ouster_mapping>)
++  endif()
+   ouster_library_common(shared_library)
+   target_compile_definitions(shared_library PRIVATE BUILD_SHARED_LIBS_EXPORT)
+ endif()

@@ -1,4 +1,7 @@
 sources:
+  "6.1.9":
+    url: "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v6.1.9.tar.gz"
+    sha256: "45819c1e54914783d4a1ca5633885035d74146778a1f74e1213cdb7b76340e71"
   "6.0.2":
     url: "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v6.0.2.tar.gz"
     sha256: "ace3477a8dd7cdb911dbc75e7b43cdcc9cf1d4a3cc3fb41168ecc31c06626cb9"
@@ -21,6 +24,10 @@ sources:
     url: "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v2.0.0.tar.gz"
     sha256: "d891695ef22176f0c09f8261a37af9ad5b262dd670a81e6b83661a23abc2c54f"
 patches:
+  "6.1.9":
+    - patch_file: "patches/6.0.2-0001-disable-pic.patch"
+      patch_description: "add runtime destionation for windows shared build"
+      patch_type: "conan"
   "6.0.2":
     - patch_file: "patches/6.0.2-0001-disable-pic.patch"
       patch_description: "add runtime destionation for windows shared build"

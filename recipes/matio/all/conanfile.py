@@ -54,7 +54,7 @@ class MatioConan(ConanFile):
 
     def requirements(self):
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.3")
+            self.requires("hdf5/[>=1.14.3 <2]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
 
