@@ -4,6 +4,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.4"
@@ -77,6 +78,9 @@ class BisonConan(ConanFile):
                 "gl_cv_func_snprintf_directive_n=no",
             ])
             tc.extra_cflags.append("-FS")
+        elif self.settings.compiler == "apple-clang" and Version(self.version) < "3.7.6":
+            # INFO: lib/obstack.c:351:31: error: incompatible function pointer types initializing 'void (*)(void) __attribute__((noreturn))'
+            tc.extra_cflags.append("-Wno-error=incompatible-pointer-types")
         env = tc.environment()
         if is_msvc(self):
             automake_conf = self.dependencies.build["automake"].conf_info
