@@ -76,7 +76,7 @@ class PulseAudioConan(ConanFile):
                 )
 
     def build_requirements(self):
-        self.tool_requires("m4/1.4.19")
+        self.tool_requires("m4/[>=1.4 <2]")
         self.tool_requires("meson/1.3.2")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
