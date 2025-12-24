@@ -1,10 +1,12 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, load
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
+import re
 
 required_conan_version = ">=2"
 
@@ -45,6 +47,10 @@ class ZlibNgConan(ConanFile):
     def _is_windows(self):
         return self.settings.os in ["Windows", "WindowsStore"]
 
+    @property
+    def _zlib_compat_version(self):
+        return {"2.2.5": "1.3.1", "2.3.2": "1.3.1"}.get(self.version)
+
     def config_options(self):
         if self._is_windows:
             del self.options.fPIC
@@ -69,8 +75,11 @@ class ZlibNgConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ZLIB_ENABLE_TESTS"] = False
-        tc.variables["ZLIBNG_ENABLE_TESTS"] = False
+        if Version(self.version) >= "2.3.1":
+            tc.cache_variables["BUILD_TESTING"] = False
+        else:
+            tc.cache_variables["ZLIB_ENABLE_TESTS"] = False
+            tc.cache_variables["ZLIBNG_ENABLE_TESTS"] = False
 
         tc.variables["ZLIB_COMPAT"] = self.options.zlib_compat
         tc.variables["WITH_GZFILEOP"] = self.options.with_gzfileop
@@ -81,7 +90,16 @@ class ZlibNgConan(ConanFile):
         tc.variables["WITH_RUNTIME_CPU_DETECTION"] = self.options.with_runtime_cpu_detection
         tc.generate()
 
+    def _get_zlib_header_version(self):
+        zlib_h = load(self, os.path.join(self.source_folder, "zlib.h.in"))
+        match = re.search(r'#define\s+ZLIB_VERSION\s+"([0-9]+\.[0-9]+\.[0-9]+)\.zlib-ng"', zlib_h)
+        return match.group(1) if match and match.group(1) else None
+
     def build(self):
+        header_version = self._get_zlib_header_version()
+        if header_version and header_version != self._zlib_compat_version:
+            raise ConanException(f"the zlib compatibility version ({header_version}) is not correctly recorded in the recipe for this zlib-ng version ({self.version})")
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -116,6 +134,7 @@ class ZlibNgConan(ConanFile):
             self.cpp_info.set_property("cmake_find_mode", "both")
             self.cpp_info.set_property("cmake_file_name", "ZLIB")
             self.cpp_info.set_property("cmake_target_name", "ZLIB::ZLIB")
+            self.cpp_info.set_property("system_package_version", self._zlib_compat_version)
         if self.options.with_gzfileop:
             self.cpp_info.defines.append("WITH_GZFILEOP")
         if not self.options.with_new_strategies:

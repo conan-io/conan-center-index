@@ -43,7 +43,7 @@ class SdlnetConan(ConanFile):
 
     def requirements(self):
         # SDL_net.h includes SDL.h, SDL_endian.h and SDL_version.h
-        self.requires("sdl/2.28.5", transitive_headers=True)
+        self.requires("sdl/[^2.28]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if Version(self.version).major != Version(self.dependencies["sdl"].ref.version).major:

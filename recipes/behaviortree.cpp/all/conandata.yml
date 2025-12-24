@@ -1,4 +1,7 @@
 sources:
+  "4.7.2":
+    url: "https://github.com/BehaviorTree/BehaviorTree.CPP/archive/refs/tags/4.7.2.tar.gz"
+    sha256: "fa52bfd1f23a65ecf7da887b565213441a3628dab85179329d4731a6d273ebd5"
   "4.6.2":
     url: "https://github.com/BehaviorTree/BehaviorTree.CPP/archive/refs/tags/4.6.2.tar.gz"
     sha256: "b0e7e53b27feae894e2df3f3faadfdd49f2108ebccfb1bd7cc0d405ffc56cecd"
@@ -21,7 +24,11 @@ sources:
     url: "https://github.com/BehaviorTree/BehaviorTree.CPP/archive/refs/tags/3.7.0.tar.gz"
     sha256: "ab0d8ac1a0df4dd43cf45da8a784bab7fdedf711bd0e227f7ed071f79b0c7b5c"
 patches:
+  "4.7.2":
+    - patch_file: "patches/4.7.2-001-minitrace.patch"
+      patch_description: "Consume minitrace from Conan"
+      patch_type: "conan"
   "4.6.2":
-    - patch_file: "patches/001-minitrace.patch"
+    - patch_file: "patches/4.6.2-001-minitrace.patch"
       patch_description: "Consume minitrace from Conan"
       patch_type: "conan"

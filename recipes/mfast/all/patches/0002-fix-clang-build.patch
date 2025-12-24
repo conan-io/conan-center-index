@@ -1,0 +1,23 @@
+https://github.com/objectcomputing/mFAST/commit/b1e00ba911d666bb487aca2d3079ff3c52afbfde
+From b1e00ba911d666bb487aca2d3079ff3c52afbfde Mon Sep 17 00:00:00 2001
+From: Huang-Ming Huang
+Date: Tue, 25 Feb 2025 16:19:24 -0600
+Subject: [PATCH] clang-19 fix
+
+---
+ src/mfast/ext_ref.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/mfast/ext_ref.h b/src/mfast/ext_ref.h
+index c9a569fa..c7a41800 100644
+--- a/src/mfast/ext_ref.h
++++ b/src/mfast/ext_ref.h
+@@ -128,7 +128,7 @@ class ext_cref<decimal_cref, std::tuple<ExponentOp, MantissaOp>, Properties> {
+   exponent_type get_exponent() const {
+     return exponent_type(base_.get_exponent());
+   }
+-  bool present() const { return !this->optional() || base_.present(); }
++  bool present() const { return !base_.optional() || base_.present(); }
+ 
+ private:
+   decimal_cref base_;
