@@ -68,7 +68,7 @@ class BisonConan(ConanFile):
                 "gl_cv_func_printf_directive_n=no",
                 "gl_cv_func_snprintf_directive_n=no",
                 "gl_cv_func_snprintf_directive_n=no",
-                "gl_cv_func_free=yes",
+                "gl_cv_func_free=no",
             ])
             
             tc.extra_cflags.append("-FS")
