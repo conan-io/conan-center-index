@@ -11,7 +11,6 @@ sources:
 patches:
   "4.4.2":
     - patch_file: "patches/4.4.2/0004-unvendor-dependencies.patch"
-    - patch_file: "patches/4.4.2/0005-disable-Gz-for-win32debug.patch"
   "4.3.2":
     - patch_file: "patches/4.3.2/0001-objutil-cxx-std.patch"
     - patch_file: "patches/4.3.2/0004-unvendor-dependencies.patch"
