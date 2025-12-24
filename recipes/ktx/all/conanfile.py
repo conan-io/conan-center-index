@@ -95,7 +95,7 @@ class KtxConan(ConanFile):
             raise ConanInvalidConfiguration("GCC v6+ is required")
 
     def build_requirements(self):
-        if Version(self.version) >= "4.4.0":
+        if Version(self.version) >= "4.4.2":
             self.tool_requires("cmake/[>=3.22 <4]")
 
     def source(self):
