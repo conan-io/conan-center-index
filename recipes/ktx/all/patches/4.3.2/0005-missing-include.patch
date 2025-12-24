@@ -1,0 +1,18 @@
+https://github.com/KhronosGroup/KTX-Software/pull/936
+
+---
+ tools/imageio/imageio.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/tools/imageio/imageio.h b/tools/imageio/imageio.h
+index 02e6ab5e38..83c1331b32 100644
+--- a/tools/imageio/imageio.h
++++ b/tools/imageio/imageio.h
+@@ -37,6 +37,7 @@
+ #include <string>
+ #include <sstream>
+ #include <vector>
++#include <memory>
+ 
+ #include <fmt/format.h>
+ #include <math.h>
