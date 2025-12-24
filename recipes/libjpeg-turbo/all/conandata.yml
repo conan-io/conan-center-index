@@ -1,19 +1,7 @@
 sources:
-  "3.1.2":
-    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.2/libjpeg-turbo-3.1.2.tar.gz"
-    sha256: "8f0012234b464ce50890c490f18194f913a7b1f4e6a03d6644179fa0f867d0cf"
-  "3.1.1":
-    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.1/libjpeg-turbo-3.1.1.tar.gz"
-    sha256: "aadc97ea91f6ef078b0ae3a62bba69e008d9a7db19b34e4ac973b19b71b4217c"
-  "3.1.0":
-    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.0/libjpeg-turbo-3.1.0.tar.gz"
-    sha256: "9564c72b1dfd1d6fe6274c5f95a8d989b59854575d4bbee44ade7bc17aa9bc93"
-  "3.0.4":
-    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.0.4/libjpeg-turbo-3.0.4.tar.gz"
-    sha256: "99130559e7d62e8d695f2c0eaeef912c5828d5b84a0537dcb24c9678c9d5b76b"
-  "3.0.3":
-    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.0.3/libjpeg-turbo-3.0.3.tar.gz"
-    sha256: "343e789069fc7afbcdfe44dbba7dbbf45afa98a15150e079a38e60e44578865d"
+  "3.1.3":
+    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.3/libjpeg-turbo-3.1.3.tar.gz"
+    sha256: "075920b826834ac4ddf97661cc73491047855859affd671d52079c6867c1c6c0"
   "3.0.2":
     url: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.0.2/libjpeg-turbo-3.0.2.tar.gz"
     sha256: "c2ce515a78d91b09023773ef2770d6b0df77d674e144de80d63e0389b3a15ca6"
@@ -26,6 +14,3 @@ sources:
   "2.1.5":
     url: "https://sourceforge.net/projects/libjpeg-turbo/files/2.1.5/libjpeg-turbo-2.1.5.tar.gz"
     sha256: "bc12bc9dce55300c6bf4342bc233bcc26bd38bf289eedf147360d731c668ddaf"
-  "2.0.6":
-    url: "https://sourceforge.net/projects/libjpeg-turbo/files/2.0.6/libjpeg-turbo-2.0.6.tar.gz"
-    sha256: "d74b92ac33b0e3657123ddcf6728788c90dc84dcb6a52013d758af3c4af481bb"

@@ -1,16 +1,16 @@
 sources:
   "2.17.1":
-    url: "https://github.com/datastax/cpp-driver/archive/2.17.1.tar.gz"
-    sha256: "53b4123aad59b39f2da0eb0ce7fe0e92559f7bba0770b2e958254f17bffcd7cf"
+    url: "https://github.com/apache/cassandra-cpp-driver/archive/2.17.1.tar.gz"
+    sha256: "e6ab5f5c60a916dd6c0dd9a19a883a4a1ab3d6b4e95cab925a186fecff08344e"
   "2.17.0":
-    url: "https://github.com/datastax/cpp-driver/archive/2.17.0.tar.gz"
-    sha256: "075af6a6920b0a8b12e37b8e5aa335b0c7919334aa1b451642668e6e37c5372f"
+    url: "https://github.com/apache/cassandra-cpp-driver/archive/2.17.0.tar.gz"
+    sha256: "dacd6a19e7d287807cfff5e337ecb29c5e4222f7faf040aa337c33fe59742a30"
   "2.16.2":
-    url: "https://github.com/datastax/cpp-driver/archive/2.16.2.tar.gz"
-    sha256: "de60751bd575b5364c2c5a17a24a40f3058264ea2ee6fef19de126ae550febc9"
+    url: "https://github.com/apache/cassandra-cpp-driver/archive/2.16.2.tar.gz"
+    sha256: "38ee1678bbf05eb566be7e45bebd9aedcac98c8a1fccba31bf89057c9cd6c6e3"
   "2.15.3":
-    url: "https://github.com/datastax/cpp-driver/archive/2.15.3.tar.gz"
-    sha256: "eccb53c5151621c3b647fc83781a542cfb93e76687b4178ebce418fc4c817293"
+    url: "https://github.com/apache/cassandra-cpp-driver/archive/2.15.3.tar.gz"
+    sha256: "37aac1aef46833ae535a411782d3eeba4314c0e8d6eecc3b56aeb9179b8c0786"
 patches:
   "2.17.1":
     - patch_file: "patches/2.16.2/fix-cmake.patch"
@@ -22,7 +22,7 @@ patches:
     - patch_file: "patches/2.15.3/fix-atomic.patch"
       patch_description: "Adapt MemoryOrder definition for C++ 20"
       patch_type: "portability"
-      patch_source: "https://github.com/datastax/cpp-driver/pull/533"
+      patch_source: "https://github.com/apache/cassandra-cpp-driver/pull/533"
     - patch_file: "patches/2.15.3/remove-attribute-for-msvc.patch"
       patch_description: "remove attribute for msvc"
       patch_type: "portability"
@@ -36,7 +36,7 @@ patches:
     - patch_file: "patches/2.15.3/fix-atomic.patch"
       patch_description: "Adapt MemoryOrder definition for C++ 20"
       patch_type: "portability"
-      patch_source: "https://github.com/datastax/cpp-driver/pull/533"
+      patch_source: "https://github.com/apache/cassandra-cpp-driver/pull/533"
     - patch_file: "patches/2.15.3/remove-attribute-for-msvc.patch"
       patch_description: "remove attribute for msvc"
       patch_type: "portability"
@@ -50,7 +50,7 @@ patches:
     - patch_file: "patches/2.15.3/fix-atomic.patch"
       patch_description: "Adapt MemoryOrder definition for C++ 20"
       patch_type: "portability"
-      patch_source: "https://github.com/datastax/cpp-driver/pull/533"
+      patch_source: "https://github.com/apache/cassandra-cpp-driver/pull/533"
     - patch_file: "patches/2.15.3/remove-attribute-for-msvc.patch"
       patch_description: "remove attribute for msvc"
       patch_type: "portability"
@@ -64,7 +64,7 @@ patches:
     - patch_file: "patches/2.15.3/fix-atomic.patch"
       patch_description: "Adapt MemoryOrder definition for C++ 20"
       patch_type: "portability"
-      patch_source: "https://github.com/datastax/cpp-driver/pull/533"
+      patch_source: "https://github.com/apache/cassandra-cpp-driver/pull/533"
     - patch_file: "patches/2.15.3/remove-attribute-for-msvc.patch"
       patch_description: "remove attribute for msvc"
       patch_type: "portability"

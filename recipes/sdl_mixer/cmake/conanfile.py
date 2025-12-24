@@ -89,7 +89,7 @@ class SDLMixerConan(ConanFile):
             raise ConanInvalidConfiguration("wavpack is not yet available in CCI, contributions are welcome")
 
     def requirements(self):
-        self.requires("sdl/2.28.5", transitive_headers=True, transitive_libs=True)
+        self.requires("sdl/[^2.28]", transitive_headers=True, transitive_libs=True)
         if self.options.flac:
             self.requires("flac/1.4.2")
         elif self.options.gme:
@@ -97,7 +97,7 @@ class SDLMixerConan(ConanFile):
             # self.requires("gme/x.y.z")
             pass
         if self.options.mpg123:
-            self.requires("mpg123/1.31.2")
+            self.requires("mpg123/[>=1.31.2 <2]")
         if self.options.minimp3:
             self.requires("minimp3/cci.20211201")
         if self.options.vorbis == "stb":

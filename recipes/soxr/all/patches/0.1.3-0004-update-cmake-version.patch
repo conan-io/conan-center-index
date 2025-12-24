@@ -1,0 +1,127 @@
+From 5613ea379cb0fa0899bbdca46fa2509b5c082f81 Mon Sep 17 00:00:00 2001
+From: Andrew Turchyn <ultimate.question.of.life@gmail.com>
+Date: Tue, 15 Jul 2025 04:19:31 +0300
+Subject: [PATCH] Update CMake version Add file extensions
+
+---
+ CMakeLists.txt          |  2 +-
+ examples/CMakeLists.txt |  8 ++++----
+ src/CMakeLists.txt      | 28 ++++++++++++++--------------
+ 3 files changed, 19 insertions(+), 19 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1686374..85cd3e1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,7 +1,7 @@
+ # SoX Resampler Library       Copyright (c) 2007-18 robs@users.sourceforge.net
+ # Licence for this file: LGPL v2.1                  See LICENCE for details.
+ 
+-cmake_minimum_required (VERSION 3.1 FATAL_ERROR)
++cmake_minimum_required (VERSION 3.10)
+ 
+ project (soxr C)
+ set (DESCRIPTION_SUMMARY
+diff --git a/examples/CMakeLists.txt b/examples/CMakeLists.txt
+index c8c17c9..cb3adcd 100644
+--- a/examples/CMakeLists.txt
++++ b/examples/CMakeLists.txt
+@@ -6,16 +6,16 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROJECT_CXX_FLAGS}")
+ link_libraries (${PROJECT_NAME} ${LIBM_LIBRARIES})
+ 
+ if (${BUILD_EXAMPLES} OR ${BUILD_TESTS})
+-  set (SOURCES 3-options-input-fn)
++  set (SOURCES 3-options-input-fn.c)
+   if (${WITH_LSR_BINDINGS})
+-    set (LSR_SOURCES 1a-lsr)
++    set (LSR_SOURCES 1a-lsr.c)
+   endif ()
+ endif ()
+ 
+ if (${BUILD_EXAMPLES})
+-  list (APPEND SOURCES 1-single-block 2-stream 4-split-channels)
++  list (APPEND SOURCES 1-single-block.c 2-stream.c 4-split-channels.c)
+   if (${WITH_VR32})
+-    list (APPEND SOURCES 5-variable-rate)
++    list (APPEND SOURCES 5-variable-rate.c)
+   endif ()
+ endif ()
+ 
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index f6fcb39..2d09489 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -24,40 +24,40 @@ add_definitions (${PROJECT_C_FLAGS} -DSOXR_LIB)
+ 
+ # Libsoxr configuration:
+ 
+-set (RDFT32 fft4g32)
++set (RDFT32 fft4g32.c)
+ if (AVCODEC_FOUND)
+-  set (RDFT32 avfft32)
+-  set (RDFT32S avfft32s)
++  set (RDFT32 avfft32.c)
++  set (RDFT32S avfft32s.c)
+ elseif (WITH_PFFFT)
+   #set (RDFT32 pffft32)
+-  set (RDFT32S pffft32s)
++  set (RDFT32S pffft32s.c)
+ elseif (WITH_CR32S)
+-  set (RDFT32S fft4g32s)
++  set (RDFT32S fft4g32s.c)
+   if (NOT WITH_CR32)
+-    list (APPEND RDFT32S fft4g32)
++    list (APPEND RDFT32S fft4g32.c)
+   endif ()
+ endif ()
+ 
+-set (SOURCES ${PROJECT_NAME}.c data-io)
++set (SOURCES ${PROJECT_NAME}.c data-io.c)
+ 
+ if (WITH_CR32 OR WITH_CR32S OR WITH_CR64 OR WITH_CR64S)
+-  list (APPEND SOURCES dbesi0 filter fft4g64 cr)
++  list (APPEND SOURCES dbesi0.c filter.c fft4g64.c cr.c)
+ endif ()
+ 
+ if (WITH_CR32)
+-  list (APPEND SOURCES cr32 ${RDFT32})
++  list (APPEND SOURCES cr32.c ${RDFT32})
+ endif ()
+ 
+ if (WITH_CR64)
+-  list (APPEND SOURCES cr64)
++  list (APPEND SOURCES cr64.c)
+ endif ()
+ 
+ if (WITH_VR32)
+-  list (APPEND SOURCES vr32)
++  list (APPEND SOURCES vr32.c)
+ endif ()
+ 
+ if (WITH_CR32S)
+-  foreach (source cr32s ${RDFT32S} util32s)
++  foreach (source cr32s.c ${RDFT32S} util32s.c)
+     list (APPEND SOURCES ${source})
+     set_property (SOURCE ${source}
+         APPEND_STRING PROPERTY COMPILE_FLAGS ${SIMD32_C_FLAGS})
+@@ -65,7 +65,7 @@ if (WITH_CR32S)
+ endif ()
+ 
+ if (WITH_CR64S)
+-  foreach (source cr64s pffft64s util64s)
++  foreach (source cr64s.c pffft64s.c util64s.c)
+     list (APPEND SOURCES ${source})
+     set_property (SOURCE ${source}
+         APPEND_STRING PROPERTY COMPILE_FLAGS ${SIMD64_C_FLAGS})
+@@ -99,7 +99,7 @@ if (WITH_LSR_BINDINGS)
+   set (LSR ${PROJECT_NAME}-lsr)
+   set (LSR_SO_VERSION 0.1.9)
+   set (LSR_SO_VERSION_MAJOR 0)
+-  add_library (${LSR} ${LIB_TYPE} ${LSR})
++  add_library (${LSR} ${LIB_TYPE} ${LSR}.c)
+   target_link_libraries (${LSR} ${PROJECT_NAME})
+   set_target_properties (${LSR} PROPERTIES
+     VERSION "${LSR_SO_VERSION}"
+-- 
+2.50.1.windows.1
+
