@@ -1,0 +1,8 @@
+sources:
+  "0.8.4.cci.20251222":
+    url: "https://github.com/IfcOpenShell/IfcOpenShell/archive/cc559212a3831d7cb68dca67be0cabdfd743f585.tar.gz"
+    sha256: "f814697bc400efa096e5f77f0a0226f79a66e1e7465d30356704f98efe378913"
+patches:
+  "0.8.4.cci.20251222":
+    - patch_file: "patches/0001-Update-CMakeLists.txt.patch"
+      patch_type: "portability"
