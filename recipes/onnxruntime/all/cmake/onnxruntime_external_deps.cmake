@@ -98,7 +98,7 @@ endif()
 
 
 set(onnxruntime_EXTERNAL_LIBRARIES ${onnxruntime_EXTERNAL_LIBRARIES_XNNPACK} ${WIL_TARGET} nlohmann_json::nlohmann_json
-                                   onnx onnx_proto ${PROTOBUF_LIB} re2::re2 Boost::mp11 safeint_interface
+                                   onnx ${PROTOBUF_LIB} re2::re2 Boost::mp11 safeint_interface
                                    flatbuffers::flatbuffers ${GSL_TARGET} ${ABSEIL_LIBS} date::date
                                    ${ONNXRUNTIME_CPUINFO_TARGETS} Eigen3::Eigen)
 
