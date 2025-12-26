@@ -35,3 +35,6 @@ patches:
     - patch_file: "patches/4.4-fix-cmake-targets-and-config.patch"
       patch_description: "Make external libraries work when provided by conan and remove the generation of a config file"
       patch_type: "conan"
+    - patch_file: "patches/4.4-use-conan-lunasvg.patch"
+      patch_description: "Use Conan CMakeDeps lunasvg target"
+      patch_type: "conan"
