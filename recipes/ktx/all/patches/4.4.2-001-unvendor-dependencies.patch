@@ -19,8 +19,8 @@ index 5712cf8..6de509e 100644
 +   target_link_libraries(ktx PUBLIC zstd::libzstd_shared)
 +   target_link_libraries(ktx_read PUBLIC zstd::libzstd_shared)
 +else()
-+   target_link_libraries(ktx PUBLIC std::libzstd_static)
-+   target_link_libraries(ktx_read PUBLIC std::libzstd_static)
++   target_link_libraries(ktx PUBLIC zstd::libzstd_static)
++   target_link_libraries(ktx_read PUBLIC zstd::libzstd_static)
 +endif()
 +
  if(KTX_FEATURE_JNI)
