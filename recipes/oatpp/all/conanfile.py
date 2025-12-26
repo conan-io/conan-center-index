@@ -60,7 +60,7 @@ class OatppConan(ConanFile):
             raise ConanInvalidConfiguration("oatpp requires GCC >=5")
 
     def build_requirements(self):
-        if Version(self._version) >= "1.3.0":
+        if Version(self._version) >= "1.3.0.latest":
             self.tool_requires("cmake/[>=3.20]")
 
     def source(self):
@@ -73,7 +73,7 @@ class OatppConan(ConanFile):
         if is_msvc(self) and Version(self.version) >= "1.3.0":
             tc.variables["OATPP_MSVC_LINK_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.variables["OATPP_LINK_TEST_LIBRARY"] = self.options.with_test_library
-        if Version(self.version) <= "1.3.0.latest":
+        if Version(self.version) <= "1.3.1":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         venv = VirtualBuildEnv(self)
