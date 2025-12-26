@@ -1365,8 +1365,12 @@ class QtConan(ConanFile):
             self.cpp_info.components["qtAxServer"].system_libs.append("shell32")
             self.cpp_info.components["qtAxServer"].defines.append("QAXSERVER")
             _create_module("AxContainer", ["AxBase"])
+        
         if self.options.get_safe("qtcharts"):
             _create_module("Charts", ["Gui", "Widgets"])
+        if self.options.get_safe("qtgraphs") and Version(self.version) >= "6.8.0":
+            _create_module("Graphs", ["Gui", "Widgets", "Quick", "Quick3D"])
+
         if self.options.get_safe("qtdatavis3d") and qt_quick_enabled:
             _create_module("DataVisualization", ["Gui", "OpenGL", "Qml", "Quick"])
         if self.options.get_safe("qtlottie"):
