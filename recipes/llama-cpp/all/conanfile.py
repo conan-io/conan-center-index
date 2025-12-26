@@ -17,7 +17,7 @@ class LlamaCppConan(ConanFile):
     description = "Inference of LLaMA model in pure C/C++"
     topics = ("llama", "llm", "ai")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/ggerganov/llama.cpp"
+    homepage = "https://github.com/ggml-org/llama.cpp"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     package_type = "library"
@@ -26,14 +26,20 @@ class LlamaCppConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_examples": [True, False],
+        "with_tools": [True, False],
         "with_cuda": [True, False],
+        "with_vulkan": [True, False],
+        "with_cann": [True, False],
         "with_curl": [True, False],
     }
     default_options = {
-        "shared": False,
+        "shared": True,
         "fPIC": True,
         "with_examples": False,
+        "with_tools": False,
         "with_cuda": False,
+        "with_vulkan": False,
+        "with_cann": False,
         "with_curl": False,
     }
 
@@ -67,7 +73,8 @@ class LlamaCppConan(ConanFile):
 
     def validate_build(self):
         if self._is_new_llama and self.settings.compiler == "msvc" and "arm" in self.settings.arch:
-            raise ConanInvalidConfiguration("llama-cpp does not support ARM architecture on msvc, it recommends to use clang instead")
+            raise ConanInvalidConfiguration(
+                "llama-cpp does not support ARM architecture on msvc, it recommends to use clang instead")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -98,6 +105,8 @@ class LlamaCppConan(ConanFile):
         # right now it tries to add_subdirectory to a non-existent folder
         tc.variables["GGML_BUILD_EXAMPLES"] = False
         tc.variables["GGML_CUDA"] = self.options.get_safe("with_cuda")
+        tc.variables["GGML_VULKAN"] = self.options.get_safe("with_vulkan")
+        tc.variables["GGML_CANN"] = self.options.get_safe("with_cann")
         tc.generate()
 
     def build(self):
@@ -113,14 +122,17 @@ class LlamaCppConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         copy(self, "*", os.path.join(self.source_folder, "models"), os.path.join(self.package_folder, "res", "models"))
-        copy(self, "*.h*", os.path.join(self.source_folder, "common"), os.path.join(self.package_folder, "include", "common"))
+        copy(self, "*.h*", os.path.join(self.source_folder, "common"),
+             os.path.join(self.package_folder, "include", "common"))
         copy(self, "*common*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*common*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         copy(self, "*common*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*common*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*common*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"),
+             keep_path=False)
         copy(self, "*common*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         if self.options.with_cuda and not self.options.shared:
-            save(self, os.path.join(self.package_folder, "lib", "cmake", "llama-cpp-cuda-static.cmake"), self._cuda_build_module)
+            save(self, os.path.join(self.package_folder, "lib", "cmake", "llama-cpp-cuda-static.cmake"),
+                 self._cuda_build_module)
 
     def _get_backends(self):
         results = ["cpu"]
@@ -129,6 +141,10 @@ class LlamaCppConan(ConanFile):
             results.append("metal")
         if self.options.with_cuda:
             results.append("cuda")
+        if self.options.with_vulkan:
+            results.append("vulkan")
+        if self.options.with_cann:
+            results.append("cann")
         return results
 
     def package_info(self):
@@ -169,7 +185,6 @@ class LlamaCppConan(ConanFile):
             if self.settings.os in ("Linux", "FreeBSD"):
                 self.cpp_info.components["ggml-base"].system_libs.extend(["dl", "m", "pthread"])
 
-
             if self.options.shared:
                 self.cpp_info.components["llama"].defines.append("LLAMA_SHARED")
                 self.cpp_info.components["ggml-base"].defines.append("GGML_SHARED")
@@ -189,4 +204,5 @@ class LlamaCppConan(ConanFile):
                 if "blas" in backends:
                     self.cpp_info.components["ggml-blas"].frameworks.append("Accelerate")
                 if "metal" in backends:
-                    self.cpp_info.components["ggml-metal"].frameworks.extend(["Metal", "MetalKit", "Foundation", "CoreFoundation"])
+                    self.cpp_info.components["ggml-metal"].frameworks.extend(
+                        ["Metal", "MetalKit", "Foundation", "CoreFoundation"])
