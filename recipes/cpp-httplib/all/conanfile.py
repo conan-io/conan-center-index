@@ -37,16 +37,9 @@ class CpphttplibConan(ConanFile):
         if self.settings.os != "Macos":
             del self.options.use_macos_keychain_certs
 
-        if Version(self.version) < "0.20":
-            del self.options.with_zstd
-
     def requirements(self):
         if self.options.with_openssl:
-            if Version(self.version) < "0.15":
-                self.requires("openssl/[>=1.1 <4]")
-            else:
-                # New version of httplib.h requires OpenSSL 3
-                self.requires("openssl/[>=3 <4]")
+            self.requires("openssl/[>=3 <4]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_brotli:
