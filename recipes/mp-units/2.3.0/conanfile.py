@@ -192,9 +192,20 @@ class MPUnitsConan(ConanFile):
                 self.requires("fmt/11.0.1", transitive_headers=True)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.30 <4]")
+        self.tool_requires("cmake/[>=4.2.1 <5]")
 
     def validate(self):
+        compiler = self.settings.compiler
+        if compiler == "clang" and Version(compiler.version).major == 19:
+            raise ConanInvalidConfiguration(
+                "clang-19 does not build mp-units because of an unfixable bug in the compiler."
+            )
+        if compiler == "apple-clang" and Version(compiler.version).major == 17:
+            raise ConanInvalidConfiguration(
+                "apple-clang-17 (Xcode 16.3+) does not build mp-units "
+                + "because it has the same unfixable bug as clang-19."
+            )
+
         self._check_feature_supported("mp-units", "minimum_support")
         for key, value in self._option_feature_map.items():
             if self.options.get_safe(key) == True:
@@ -223,20 +234,25 @@ class MPUnitsConan(ConanFile):
     def generate(self):
         opt = self.options
         tc = CMakeToolchain(self)
+        tc.cache_variables["MP_UNITS_BUILD_CXX_MODULES"] = opt.cxx_modules
         if opt.cxx_modules:
             tc.cache_variables["CMAKE_CXX_SCAN_FOR_MODULES"] = True
         if opt.import_std:
             tc.cache_variables["CMAKE_CXX_MODULE_STD"] = True
-            # TODO current experimental support according to `Help/dev/experimental.rst`
+            # Current experimental support according to `Help/dev/experimental.rst`
             tc.cache_variables["CMAKE_EXPERIMENTAL_CXX_IMPORT_STD"] = (
-                "0e5b6991-d74f-4b3d-a41c-cf096e0b2508"
+                "d0edc3af-4c50-42ea-a356-e2862fe7a444"
             )
 
         # TODO remove the below when Conan will learn to handle C++ modules
         if opt.freestanding:
             tc.cache_variables["MP_UNITS_API_FREESTANDING"] = True
+            # Fix for freestanding builds: CMake compiler tests fail when linking with -ffreestanding
+            # Set CMAKE_TRY_COMPILE_TARGET_TYPE to STATIC_LIBRARY to avoid linking during compiler tests
+            tc.cache_variables["CMAKE_TRY_COMPILE_TARGET_TYPE"] = "STATIC_LIBRARY"
         else:
             tc.cache_variables["MP_UNITS_API_STD_FORMAT"] = opt.std_format
+        tc.cache_variables["MP_UNITS_API_NO_CRTP"] = opt.no_crtp
         tc.cache_variables["MP_UNITS_API_CONTRACTS"] = str(opt.contracts).upper()
 
         tc.generate()
@@ -301,15 +317,18 @@ class MPUnitsConan(ConanFile):
             self.cpp_info.components["core"].defines.append(
                 "MP_UNITS_API_NO_CRTP=" + str(int(self.options.no_crtp == True))
             )
-            self.cpp_info.components["core"].defines.append(
-                "MP_UNITS_API_STD_FORMAT=" + str(int(self.options.std_format == True))
-            )
-            if not self.options.std_format:
-                self.cpp_info.components["core"].requires.append("fmt::fmt")
 
             # handle hosted configuration
-            if not self.options.freestanding:
+            if self.options.freestanding:
+                self.cpp_info.components["core"].defines.append("MP_UNITS_HOSTED=0")
+            else:
                 self.cpp_info.components["core"].defines.append("MP_UNITS_HOSTED=1")
+                if not self.options.std_format:
+                    self.cpp_info.components["core"].requires.append("fmt::fmt")
+                self.cpp_info.components["core"].defines.append(
+                    "MP_UNITS_API_STD_FORMAT="
+                    + str(int(self.options.std_format == True))
+                )
 
             # handle import std
             if self.options.import_std:
@@ -323,3 +342,11 @@ class MPUnitsConan(ConanFile):
                 self.cpp_info.components["core"].cxxflags.append("/utf-8")
 
             self.cpp_info.components["systems"].requires = ["core"]
+
+            # https://github.com/llvm/llvm-project/issues/131410
+            if (
+                compiler == "clang"
+                and Version(compiler.version).major == 20
+                and Version(compiler.version).minor == 1
+            ):
+                self.cpp_info.components["core"].cxxflags.append("-Wno-unused-result")
