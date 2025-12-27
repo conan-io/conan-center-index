@@ -1,3 +1,7 @@
+#ifdef __APPLE__
+#define Darwin
+#endif
+
 #include <Aeron.h>
 
 #include <cstdlib>
