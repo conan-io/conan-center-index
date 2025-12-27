@@ -18,6 +18,7 @@ configure_options:
 - math
 - mpi
 - nowide
+- numpy
 - program_options
 - python
 - random
@@ -266,7 +267,6 @@ requirements:
   - zlib
   - zstd
   locale:
-  - iconv
   - icu
   python:
   - python

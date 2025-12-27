@@ -18,6 +18,7 @@ configure_options:
 - math
 - mpi
 - nowide
+- numpy
 - program_options
 - python
 - random
