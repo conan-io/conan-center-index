@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_max_cppstd, check_min_cppstd, cross_building
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 
@@ -34,10 +34,10 @@ class PackageConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("apr/[>=1.3]")
+        self.requires("apr/[>=1.3]", transitive_headers=True)
         self.requires("apr-util/[>=1.3]")
         self.requires("libuuid/[>=1.0.3]")
-        self.requires("openssl/[>=1.1 <4]")
+        self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
 
     def validate(self):
         check_min_cppstd(self, 11)
@@ -48,6 +48,9 @@ class PackageConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "activemq-cpp", "Makefile.am"),
+                        "SUBDIRS = src/main src/examples",
+                        "SUBDIRS = src/main")
 
     def generate(self):
         if not cross_building(self):
@@ -94,6 +97,7 @@ class PackageConan(ConanFile):
         self.cpp_info.libs = ["activemq-cpp"]
 
         self.cpp_info.set_property("pkg_config_name", "activemq-cpp")
+        self.cpp_info.defines = ["HAVE_OPENSSL"]
 
         if self.settings.os in ["Linux", "FreeBSD", "Macos"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
