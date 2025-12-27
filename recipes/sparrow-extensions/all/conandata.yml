@@ -1,0 +1,4 @@
+sources:
+  "0.2.0":
+    url: "https://github.com/QuantStack/sparrow-extensions/archive/refs/tags/0.2.0.tar.gz"
+    sha256: "ae61b0ca1f77016f7baf4c6c8d5f112a6936149c22d83ba973fbb6841d836e6c"
