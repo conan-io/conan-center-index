@@ -1,4 +1,7 @@
 sources:
+  "4.12.0":
+    url: "https://github.com/emweb/wt/archive/4.12.0.tar.gz"
+    sha256: "8a134eb532cfd2f6d956be271bc7403cad2def370cf52dd59b9e968f1bba9459"
   "4.11.2":
     url: "https://github.com/emweb/wt/archive/4.11.2.tar.gz"
     sha256: "d28ce0b18121a5ded5ad9737ee664cac17ff1e287d339cc422ecef57fa68c2b6"
@@ -24,6 +27,10 @@ sources:
     url: "https://github.com/emweb/wt/archive/4.6.0.tar.gz"
     sha256: "7f709e132d32c4925e6db0a590c7ccc5613344e8b9052676ef891a25ccb550e6"
 patches:
+  "4.12.0":
+    - patch_file: "patches/4.12.0-0001-use-cci-package.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
   "4.11.2":
     - patch_file: "patches/4.8.0-0001-use-cci-package.patch"
       patch_description: "use cci package"
