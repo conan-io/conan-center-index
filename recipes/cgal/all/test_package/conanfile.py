@@ -9,8 +9,8 @@ class TestPackageConan(ConanFile):
     generators = "CMakeDeps", "CMakeToolchain"
 
     def requirements(self):
-        self.requires("eigen/3.4.0")
         self.requires(self.tested_reference_str)
+        self.requires("eigen/[*]")
 
     def build(self):
         cmake = CMake(self)
