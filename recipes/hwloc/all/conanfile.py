@@ -1,9 +1,12 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -29,6 +32,11 @@ class HwlocConan(ConanFile):
     def configure(self):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+
+    def validate(self):
+        # cf https://github.com/open-mpi/hwloc/commit/441f8c71709ce56743cdf82d0294fd2760789e8f
+        if Version(self.version) < "2.13.0" and is_msvc(self) and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration(f"{self.ref} cannot be built on windows ARM")
 
     def requirements(self):
         if self.options.with_libxml2:
