@@ -84,7 +84,7 @@ class ElfutilsConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("gettext/0.22.5")
         self.tool_requires("automake/1.16.5")
-        self.build_requires("m4/1.4.19")
+        self.build_requires("m4/[>=1.4 <2]")
         self.build_requires("flex/2.6.4")
         self.tool_requires("bison/3.8.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
