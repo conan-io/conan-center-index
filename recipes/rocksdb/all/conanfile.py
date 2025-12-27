@@ -49,7 +49,7 @@ class RocksDBConan(ConanFile):
         "enable_sse": False,
         "use_rtti": False,
     }
-    
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -201,7 +201,7 @@ class RocksDBConan(ConanFile):
         if self.options.with_zstd:
             self.cpp_info.components["librocksdb"].requires.append("zstd::zstd")
         if self.options.get_safe("with_tbb"):
-            self.cpp_info.components["librocksdb"].requires.append("onetbb::onetbb")
+            self.cpp_info.components["librocksdb"].requires.append("onetbb::libtbb")
         if self.options.with_jemalloc:
             self.cpp_info.components["librocksdb"].requires.append("jemalloc::jemalloc")
         if self.options.with_folly:

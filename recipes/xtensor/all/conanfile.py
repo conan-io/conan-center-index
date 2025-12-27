@@ -98,3 +98,6 @@ class XtensorConan(ConanFile):
             self.cpp_info.defines.append("XTENSOR_USE_TBB")
         if self.options.openmp:
             self.cpp_info.defines.append("XTENSOR_USE_OPENMP")
+        self.cpp_info.requires = ["xtl::xtl", "nlohmann_json::nlohmann_json", "xsimd::xsimd"]
+        if self.options.tbb:
+            self.cpp_info.requires.append("onetbb::libtbb")
