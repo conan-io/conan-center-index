@@ -158,6 +158,8 @@ class FollyConan(ConanFile):
         if Version(self.version) > "2024.08.12.00": # pylint: disable=conan-unreachable-upper-version
             raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
 
+        # Enable int128 support
+        tc.cache_variables["FOLLY_HAVE_INT128_T"] = True
 
         # 2019.10.21.00 -> either MSVC_ flags or CXX_STD
         if is_msvc(self):
@@ -287,3 +289,5 @@ class FollyConan(ConanFile):
             self.cpp_info.components["folly_exception_counter"].set_property("pkg_config_name", "libfolly_exception_counter")
             self.cpp_info.components["folly_exception_counter"].libs = ["folly_exception_counter"]
             self.cpp_info.components["folly_exception_counter"].requires = ["folly_exception_tracer"]
+        # Public define for consumers
+        self.cpp_info.defines.append("FOLLY_HAVE_INT128_T")
