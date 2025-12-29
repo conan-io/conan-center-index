@@ -14,8 +14,10 @@ class AlpakaConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/alpaka-group/alpaka"
     topics = ("hpc", "cuda", "hip", "sycl", "gpu", "heterogeneous-computing")
+
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "CMakeToolchain"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -23,23 +25,17 @@ class AlpakaConan(ConanFile):
     def requirements(self):
         self.requires("boost/[>=1.74.0 <2]")
 
-    def package_id(self):
-        self.info.clear()
-
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.25]")
+
+    def package_id(self):
+        self.info.clear()
 
     def validate(self):
         check_min_cppstd(self, 20)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
 
     def build(self):
         cmake = CMake(self)

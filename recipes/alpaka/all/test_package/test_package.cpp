@@ -1,5 +1,3 @@
-/* Test package for alpaka Conan recipe */
-
 #include <alpaka/alpaka.hpp>
 
 #include <iostream>
