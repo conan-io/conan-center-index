@@ -67,7 +67,10 @@ class PackageConan(ConanFile):
             cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
+        if Version(self.version) < "2.3.0":
+            self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("fmt/11.1.3", transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
         if self.info.options.header_only:

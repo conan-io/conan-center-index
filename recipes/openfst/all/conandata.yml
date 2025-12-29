@@ -1,4 +1,7 @@
 sources:
+  "1.8.4":
+    url: "https://www.openfst.org/twiki/pub/FST/FstDownload/openfst-1.8.4.tar.gz"
+    sha256: "a8ebbb6f3d92d07e671500587472518cfc87cb79b9a654a5a8abb2d0eb298016"
   "1.8.2":
     url: "https://www.openfst.org/twiki/pub/FST/FstDownload/openfst-1.8.2.tar.gz"
     sha256: "de987bf3624721c5d5ba321af95751898e4f4bb41c8a36e2d64f0627656d8b42"
