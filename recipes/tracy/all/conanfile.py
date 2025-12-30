@@ -45,7 +45,6 @@ class TracyConan(ConanFile):
         "libunwind_backtrace": ([True, False], False),
         "symbol_offline_resolve": ([True, False], False),
         "libbacktrace_elf_dynload_support": ([True, False], False),
-        "debuginfod": ([True, False], False),
         "ignore_memory_faults": ([True, False], False),
         "verbose": ([True, False], False),
     }
