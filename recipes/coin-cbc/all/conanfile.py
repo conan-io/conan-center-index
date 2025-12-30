@@ -70,7 +70,7 @@ class CoinCbcConan(ConanFile):
             ])
 
         if is_msvc(self):
-            self.extra_cxxflags.append("-EHsc")
+            self.conf.append("tools.build:cxxflags", "-EHsc")
             tc.configure_args.append(f"--enable-msvc={msvc_runtime_flag(self)}")
             if self.options.parallel:
                 pthreads4w_info = self.dependencies["pthreads4w"].cpp_info
