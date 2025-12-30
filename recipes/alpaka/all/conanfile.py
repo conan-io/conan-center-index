@@ -52,9 +52,6 @@ class AlpakaConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
-        self.cpp_info.set_property("cmake_file_name", "alpaka")
-        self.cpp_info.set_property("cmake_target_name", "alpaka::alpaka")
-
         self.cpp_info.requires = ["boost::headers"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
