@@ -1,12 +1,10 @@
 import os
-import shutil
 
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
-from conan.tools.scm import Version
 
 required_conan_version = ">=2.1.0"
 
@@ -66,7 +64,6 @@ class CoinCbcConan(ConanFile):
         tc.generate()
 
         tc = AutotoolsToolchain(self)
-        yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.extend([
             "--without-blas",
             "--without-lapack",
