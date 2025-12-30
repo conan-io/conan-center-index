@@ -33,6 +33,10 @@ class CpphttplibConan(ConanFile):
     }
     no_copy_source = True
 
+    @property
+    def _support_non_blocking_getaddrinfo(self):
+        return Version(self.version) >= "0.23.0"
+
     def config_options(self):
         if self.settings.os != "Macos":
             del self.options.use_macos_keychain_certs
@@ -85,7 +89,9 @@ class CpphttplibConan(ConanFile):
             if self.options.with_openssl and self.options.get_safe("use_macos_keychain_certs"):
                 self.cpp_info.frameworks.extend(["CoreFoundation", "Security"])
                 self.cpp_info.defines.append("CPPHTTPLIB_USE_CERTS_FROM_MACOSX_KEYCHAIN")
-            if Version(self.version) >= "0.29.0":
-                self.cpp_info.frameworks.append("CFNetwork")
-        if Version(self.version) >= "0.23.0":
+            # Since HTTPLIB_USE_NON_BLOCKING_GETADDRINFO option was introduced, CoreFoundation is needed too
+            # even though upstream does not reflect that in their CMakeLists.txt
+            if self._support_non_blocking_getaddrinfo:
+                self.cpp_info.frameworks.extend(["CoreFoundation", "CFNetwork"])
+        if self._support_non_blocking_getaddrinfo:
             self.cpp_info.defines.append("CPPHTTPLIB_USE_NON_BLOCKING_GETADDRINFO")
