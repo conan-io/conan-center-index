@@ -1,0 +1,5 @@
+sources:
+  "2.1.1":
+    url: "https://github.com/alpaka-group/alpaka/archive/refs/tags/2.1.1.tar.gz"
+    sha256: "2d30a43594c55067297947b0ec83300e4f2899497464c5cc6f142c823f3ea1b2"
+
