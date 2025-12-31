@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, rmdir
+from conan.tools.files import copy, get, mkdir, rename, rmdir
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -30,9 +30,6 @@ class CoinCbcConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -58,7 +55,6 @@ class CoinCbcConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         env = VirtualBuildEnv(self)
