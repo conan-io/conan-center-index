@@ -38,7 +38,6 @@ class CoinCbcConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # Roll version as part of modernizing to avoid a graph conflict
         self.requires("coin-utils/2.11.9")
         self.requires("coin-osi/0.108.7")
         self.requires("coin-clp/1.17.7", transitive_headers=True, transitive_libs=True)
@@ -55,8 +54,8 @@ class CoinCbcConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-            if is_msvc(self):
-                self.tool_requires("automake/1.16.5")
+        if is_msvc(self):
+            self.tool_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
