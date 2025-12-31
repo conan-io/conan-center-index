@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rmdir
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
@@ -66,8 +67,8 @@ class CoinCbcConan(ConanFile):
                         "avr | avr32 ", "avr | avr32 | aarch64")
 
     def generate(self):
-        tc = PkgConfigDeps(self)
-        tc.generate()
+        env = VirtualBuildEnv(self)
+        env.generate()
 
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
@@ -99,6 +100,9 @@ class CoinCbcConan(ConanFile):
         if self.settings_build.os == "Windows":
             env.define("PKG_CONFIG_PATH", self.generators_folder)
         tc.generate(env)
+
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def build(self):
         for gnu_config in [
