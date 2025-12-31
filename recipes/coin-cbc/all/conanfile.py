@@ -3,6 +3,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1.0"
@@ -53,12 +54,16 @@ class CoinCbcConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-        if is_msvc(self):
-            self.tool_requires("automake/1.16.5")
+            if is_msvc(self):
+                self.tool_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
+        # Fix for: Invalid configuration `aarch64-apple-darwin': machine `aarch64-apple' not recognized
+        if Version(self) < "2.10.11":
+            replace_in_file(self, os.path.join(self.source_folder, "config.sub"),
+                        "avr | avr32 ", "avr | avr32 | aarch64")
 
     def generate(self):
         tc = PkgConfigDeps(self)
