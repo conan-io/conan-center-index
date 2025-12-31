@@ -1,9 +1,10 @@
-import os
 from conan import ConanFile
-from conan.tools.files import copy, get, mkdir, rename, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
+from conan.tools.scm import Version
+import os
 
 required_conan_version = ">=2.1.0"
 
@@ -29,6 +30,9 @@ class CoinCbcConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -49,15 +53,16 @@ class CoinCbcConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-        if is_msvc(self):
-            self.tool_requires("automake/1.16.5")
+            if is_msvc(self):
+                self.tool_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
-        deps = PkgConfigDeps(self)
-        deps.generate()
+        tc = PkgConfigDeps(self)
+        tc.generate()
 
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
@@ -89,7 +94,6 @@ class CoinCbcConan(ConanFile):
         if self.settings_build.os == "Windows":
             env.define("PKG_CONFIG_PATH", self.generators_folder)
         tc.generate(env)
-
 
     def build(self):
         for gnu_config in [
