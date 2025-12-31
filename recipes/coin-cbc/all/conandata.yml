@@ -1,7 +1,4 @@
 sources:
-  "2.10.5":
-    url: "https://github.com/coin-or/Cbc/archive/releases/2.10.5.tar.gz"
-    sha256: "cc44c1950ff4615e7791d7e03ea34318ca001d3cac6dc3f7f5ee392459ce6719"
-patches:
-  "2.10.5":
-    - patch_file: "patches/0002-pthreads4w.patch"
+  "2.10.12":
+    url: "https://github.com/coin-or/Cbc/archive/refs/tags/releases/2.10.12.tar.gz"
+    sha256: "9ed71e4b61668462fc3794c102e26b4bb01a047efbbbcbd69ae7bde1f04f46a8"
