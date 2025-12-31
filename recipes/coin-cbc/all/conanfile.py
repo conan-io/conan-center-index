@@ -57,8 +57,8 @@ class CoinCbcConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        #env = VirtualBuildEnv(self)
-        #env.generate()
+        env = VirtualBuildEnv(self)
+        env.generate()
 
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
