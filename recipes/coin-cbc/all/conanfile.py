@@ -92,7 +92,7 @@ class CoinCbcConan(ConanFile):
             env.define("NM", "dumpbin -symbols")
             env.vars(self).save_script("conanbuild_msvc")
         if self.settings_build.os == "Windows":
-            env.define("PKG_CONFIG_PATH", self.generators_folder)
+            env.define_path("PKG_CONFIG_PATH", self.generators_folder)
         tc.generate(env)
 
     def build(self):
