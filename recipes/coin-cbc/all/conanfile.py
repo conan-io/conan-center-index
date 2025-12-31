@@ -72,8 +72,8 @@ class CoinCbcConan(ConanFile):
             if self.options.parallel:
                 pthreads4w_info = self.dependencies["pthreads4w"].cpp_info
                 pthreads_path = os.path.join(pthreads4w_info.libdir, pthreads4w_info.libs[0] + ".lib")
-                tc.configure_args.append("--with-pthreadsw32-lib={}".format(unix_path(self,pthreads_path)))
-                tc.configure_args.append("--with-pthreadsw32-incdir={}".format(unix_path(self, pthreads4w_info.includedir)))
+                tc.configure_args.append(f"--with-pthreadsw32-lib={unix_path(self,pthreads_path)}")
+                tc.configure_args.append(f"--with-pthreadsw32-incdir={unix_path(self, pthreads4w_info.includedir)}")
         tc.generate()
 
         env = tc.environment()
@@ -129,7 +129,12 @@ class CoinCbcConan(ConanFile):
         self.cpp_info.components["libcbc"].set_property("pkg_config_name", "cbc")
         self.cpp_info.components["libcbc"].libs = ["CbcSolver", "Cbc"]
         self.cpp_info.components["libcbc"].includedirs.append(os.path.join("include", "coin"))
-        self.cpp_info.components["libcbc"].requires = ["coin-clp::osi-clp", "coin-utils::coin-utils", "coin-osi::coin-osi", "coin-cgl::coin-cgl"]
+        self.cpp_info.components["libcbc"].requires = [
+                "coin-clp::osi-clp",
+                "coin-utils::coin-utils",
+                "coin-osi::coin-osi",
+                "coin-cgl::coin-cgl"
+                ]
         if self.settings.os in ["Linux", "FreeBSD"] and self.options.parallel:
             self.cpp_info.components["libcbc"].system_libs.append("pthread")
         if self.settings.os in ["Windows"] and self.options.parallel:
