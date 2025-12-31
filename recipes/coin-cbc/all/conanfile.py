@@ -57,6 +57,9 @@ class CoinCbcConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        deps = PkgConfigDeps(self)
+        deps.generate()
+
         env = VirtualBuildEnv(self)
         env.generate()
 
@@ -91,8 +94,6 @@ class CoinCbcConan(ConanFile):
             env.define("PKG_CONFIG_PATH", self.generators_folder)
         tc.generate(env)
 
-        deps = PkgConfigDeps(self)
-        deps.generate()
 
     def build(self):
         for gnu_config in [
