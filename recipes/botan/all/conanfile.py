@@ -302,6 +302,7 @@ class BotanConan(ConanFile):
                 'Linux': 'linux',
                 'Macos': 'darwin',
                 'Android': 'android',
+                'Emscripten': 'emscripten',
                 'baremetal': 'none',
                 'iOS': 'ios'}.get(str(self.settings.os))
 
@@ -316,7 +317,11 @@ class BotanConan(ConanFile):
 
     @property
     def _configure_cmd(self):
-        if self.settings.compiler in ('clang', 'apple-clang'):
+        botan_compiler_bin = None
+        if self.settings.os == 'Emscripten':
+            botan_compiler = 'emcc'
+            botan_compiler_bin = self.conf.get('tools.build:compiler_executables')['cxx']
+        elif self.settings.compiler in ('clang', 'apple-clang'):
             botan_compiler = 'clang'
         elif self.settings.compiler == 'gcc':
             botan_compiler = 'gcc'
@@ -509,6 +514,9 @@ class BotanConan(ConanFile):
                              prefix=prefix,
                              os=self._botan_os,
                              build_flags=' '.join(build_flags))
+
+        if botan_compiler_bin:
+            configure_cmd += ' --cc-bin={compiler_bin}'.format(compiler_bin=botan_compiler_bin)
 
         return configure_cmd
 
