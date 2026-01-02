@@ -72,14 +72,14 @@ class PangoConan(ConanFile):
         if self.options.with_freetype:
             self.requires("freetype/2.13.2")
         if self.options.with_fontconfig:
-            self.requires("fontconfig/2.15.0")
+            self.requires("fontconfig/[^2.15]")
         if self.options.get_safe("with_xft"):
             self.requires("libxft/2.3.8")
             self.requires("xorg/system")  # for xorg::xrender
         if self.options.with_cairo:
             # "pango/pangocairo.h" includes "cairo.h"
-            self.requires("cairo/1.18.0", transitive_headers=True)
-        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
+            self.requires("cairo/[^1.18]", transitive_headers=True)
+        self.requires("glib/[^2.78]", transitive_headers=True, transitive_libs=True)
         self.requires("fribidi/1.0.13")
         # "pango/pango-coverage.h" includes "hb.h"
         self.requires("harfbuzz/[>=8.3.0]", transitive_headers=True)
@@ -159,6 +159,9 @@ class PangoConan(ConanFile):
         replace_in_file(self, meson_build, "subdir('tools')", "")
         replace_in_file(self, meson_build, "subdir('utils')", "")
         replace_in_file(self, meson_build, "subdir('examples')", "")
+        if Version(self.version) < "1.54.0":
+            # GCC-13+ pango-language.c:518 error: array subscript 0 is outside array bounds
+            replace_in_file(self, meson_build, "'-Werror=array-bounds',", "")
 
     def build(self):
         self._patch_sources()
