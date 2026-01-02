@@ -63,7 +63,7 @@ class LibVPXConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if str(self.settings.compiler) not in ["Visual Studio", "msvc", "gcc", "clang", "apple-clang"]:
+        if str(self.settings.compiler) not in ["Visual Studio", "msvc", "gcc", "clang", "apple-clang", "emcc"]:
             raise ConanInvalidConfiguration(f"Unsupported compiler {self.settings.compiler}")
         if self.settings.os == "iOS" and (self.settings.os.sdk != "iphonesimulator" and self.settings.arch in ["x86_64", "x86"]):
             raise ConanInvalidConfiguration("iOS platform with x86/x86_64 architectures only supports 'iphonesimulator' SDK option")
@@ -122,6 +122,8 @@ class LibVPXConan(ConanFile):
             os_name = 'solaris'
         elif host_os == 'Android':
             os_name = 'android'
+        if compiler == 'emcc':
+            return 'generic-gnu'
         return f"{arch}-{os_name}-{compiler}"
 
     def generate(self):
