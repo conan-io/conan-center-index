@@ -7,7 +7,7 @@ on:
     
 jobs:
   find_modified_refs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       references: ${{ steps.find_modified_refs.outputs.result }}
     steps:

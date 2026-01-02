@@ -48,7 +48,7 @@ env:
 jobs:
   find_versions:
     name: Find Version of ${{ inputs.package || 'zlib' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       references: ${{ steps.find_versions.outputs.result }}
     steps:
