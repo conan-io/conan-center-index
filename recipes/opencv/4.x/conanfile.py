@@ -1045,11 +1045,11 @@ class OpenCVConan(ConanFile):
         # dnn module dependencies
         if self.options.get_safe("with_protobuf"):
             # Symbols are exposed https://github.com/conan-io/conan-center-index/pull/16678#issuecomment-1507811867
-            self.requires("protobuf/3.21.12", transitive_libs=True)
+            self.requires("protobuf/[>=3.21.12 <7]", transitive_libs=True)
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-headers/1.3.268.0")
         if self.options.get_safe("with_openvino"):
-            self.requires("openvino/[>=2024.5.0 <=2025.0.0]")
+            self.requires("openvino/[>=2024.5.0 <=2025.4.0]")
         # gapi module dependencies
         if self.options.gapi:
             self.requires("ade/0.1.2d")
