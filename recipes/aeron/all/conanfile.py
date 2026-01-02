@@ -9,7 +9,7 @@ from conan.tools.scm import Version
 import glob
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class AeronConan(ConanFile):
@@ -68,11 +68,11 @@ class AeronConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("This platform (os=Macos arch=armv8) is not yet supported by this recipe")
-
     def build_requirements(self):
-        self.tool_requires("zulu-openjdk/11.0.19")
+        if Version(self.version) >= "1.48":
+            self.tool_requires("zulu-openjdk/17.0.9")
+        else:
+            self.tool_requires("zulu-openjdk/11.0.19")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -99,8 +99,9 @@ class AeronConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "/MTd", "")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "/MT", "")
+        if is_msvc(self):
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "/MTd", "")
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "/MT", "")
 
     def build(self):
         self._patch_sources()
