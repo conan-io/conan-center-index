@@ -33,10 +33,6 @@ class CpphttplibConan(ConanFile):
     }
     no_copy_source = True
 
-    @property
-    def _support_non_blocking_getaddrinfo(self):
-        return Version(self.version) >= "0.23.0"
-
     def config_options(self):
         if self.settings.os != "Macos":
             del self.options.use_macos_keychain_certs
@@ -73,6 +69,7 @@ class CpphttplibConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "httplib"))
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        support_non_blocking_getaddrinfo = Version(self.version) >= "0.23.0"
         if self.options.with_openssl:
             self.cpp_info.defines.append("CPPHTTPLIB_OPENSSL_SUPPORT")
         if self.options.with_zlib:
@@ -89,7 +86,7 @@ class CpphttplibConan(ConanFile):
             if self.options.with_openssl and self.options.get_safe("use_macos_keychain_certs"):
                 self.cpp_info.frameworks.extend(["CFNetwork", "CoreFoundation", "Security"])
                 self.cpp_info.defines.append("CPPHTTPLIB_USE_CERTS_FROM_MACOSX_KEYCHAIN")
-            if self._support_non_blocking_getaddrinfo:
+            if support_non_blocking_getaddrinfo:
                 self.cpp_info.frameworks.extend(["CFNetwork", "CoreFoundation"])
-        if self._support_non_blocking_getaddrinfo:
+        if support_non_blocking_getaddrinfo:
             self.cpp_info.defines.append("CPPHTTPLIB_USE_NON_BLOCKING_GETADDRINFO")
