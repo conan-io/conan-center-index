@@ -66,7 +66,7 @@ class FollyConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.85.0", transitive_headers=True, transitive_libs=True)
+        self.requires("boost/[>=1.85.0 <1.89.0]", transitive_headers=True, transitive_libs=True)
         self.requires("bzip2/1.0.8")
         self.requires("double-conversion/3.3.0", transitive_headers=True, transitive_libs=True)
         self.requires("gflags/2.2.2")
@@ -76,7 +76,7 @@ class FollyConan(ConanFile):
         self.requires("lz4/1.10.0", transitive_libs=True)
         self.requires("snappy/1.2.1")
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("zstd/1.5.5", transitive_libs=True)
+        self.requires("zstd/[>=1.5 <1.6]", transitive_libs=True)
         if not is_msvc(self):
             self.requires("libdwarf/0.9.1")
         self.requires("libsodium/1.0.20")
@@ -91,7 +91,7 @@ class FollyConan(ConanFile):
 
     def build_requirements(self):
         # INFO: Required due ZIP_LISTS CMake feature in conan_deps.cmake
-        self.tool_requires("cmake/[>=3.17 <4]")
+        self.tool_requires("cmake/[>=3.17]")
 
     @property
     def _required_boost_components(self):
@@ -158,7 +158,6 @@ class FollyConan(ConanFile):
         if Version(self.version) > "2024.08.12.00": # pylint: disable=conan-unreachable-upper-version
             raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
 
-
         # 2019.10.21.00 -> either MSVC_ flags or CXX_STD
         if is_msvc(self):
             cxx_std_value = "c++latest" if str(self.settings.compiler.cppstd) > "17" else f"c++{str(self.settings.compiler.cppstd)}"
@@ -166,6 +165,9 @@ class FollyConan(ConanFile):
             tc.cache_variables["MSVC_ENABLE_ALL_WARNINGS"] = False
             tc.cache_variables["MSVC_USE_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
             tc.preprocessor_definitions["NOMINMAX"] = ""
+        else:
+            # Enable __int128 support (not supported by msvc)
+            tc.cache_variables["FOLLY_HAVE_INT128_T"] = True
 
         if not self.dependencies["boost"].options.header_only:
             tc.cache_variables["BOOST_LINK_STATIC"] = not self.dependencies["boost"].options.shared
@@ -287,3 +289,6 @@ class FollyConan(ConanFile):
             self.cpp_info.components["folly_exception_counter"].set_property("pkg_config_name", "libfolly_exception_counter")
             self.cpp_info.components["folly_exception_counter"].libs = ["folly_exception_counter"]
             self.cpp_info.components["folly_exception_counter"].requires = ["folly_exception_tracer"]
+
+        if not is_msvc(self):
+            self.cpp_info.defines.append("FOLLY_HAVE_INT128_T")
