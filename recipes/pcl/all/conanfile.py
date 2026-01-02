@@ -68,6 +68,7 @@ class PclConan(ConanFile):
         "tools": [True, False],
         # Optional external dependencies.
         # Only used if the corresponding component is enabled.
+        "with_cjson": [True, False],
         "with_cuda": [True, False],
         "with_flann": [True, False],
         "with_libusb": [True, False],
@@ -110,7 +111,7 @@ class PclConan(ConanFile):
         "keypoints": True,
         "ml": True,
         "octree": True,
-        "outofcore": False,
+        "outofcore": True,
         "people": False,
         "recognition": True,
         "registration": True,
@@ -143,6 +144,7 @@ class PclConan(ConanFile):
         "tools": False,
         # Optional external dependencies
         "with_cuda": False,
+        "with_cjson": True,
         "with_flann": True,
         "with_libusb": True,
         "with_opencv": True,
@@ -184,6 +186,7 @@ class PclConan(ConanFile):
             "gpu_tracking": ["cuda"],
             "gpu_utils": ["cuda"],
             "io": ["zlib"],
+            "outofcore": ["cjson"] if Version(self.version) >= "1.15" else [],
             "people": ["vtk"],
             "surface": ["zlib"],
             "visualization": ["vtk"],
@@ -193,16 +196,29 @@ class PclConan(ConanFile):
     def _external_optional_deps(self):
         return {
             "2d": ["vtk"],
+            "common": ["openmp"],
             "io": ["davidsdk", "dssdk", "ensenso", "fzapi", "libusb", "openni", "openni2", "pcap", "png", "rssdk", "rssdk2", "vtk"],
+            "features": ["openmp"],
+            "filters": ["openmp"],
+            "gpu_kinfu": ["openmp"],
+            "gpu_kinfu_large_scale": ["openmp"],
+            "gpu_people": ["openmp"],
+            "io": ["openmp"],
             "kdtree": ["flann"],
+            "keypoints": ["openmp"],
             "people": ["openni"],
-            "recognition": ["metslib"],
+            "recognition": ["metslib", "openmp"],
+            "registration": ["openmp"],
+            "sample_consensus": ["openmp"],
+            "segmentation": ["openmp"],
+            "surface": ["openmp"],
             "search": ["flann"],
             "simulation": ["opengl"],
             "surface": ["qhull", "vtk"],
+            "tracking": ["openmp"],
             "visualization": ["davidsdk", "dssdk", "ensenso", "opengl", "openni", "openni2", "qvtk", "rssdk"],
-            "apps": ["cuda", "libusb", "opengl", "openni", "png", "qhull", "qt", "qvtk", "vtk"],
-            "tools": ["cuda", "davidsdk", "dssdk", "ensenso", "opencv", "opengl", "openni", "openni2", "qhull", "rssdk", "vtk"],
+            "apps": ["cuda", "libusb", "opengl", "openmp", "openni", "png", "qhull", "qt", "qvtk", "vtk"],
+            "tools": ["cuda", "davidsdk", "dssdk", "ensenso", "opencv", "opengl", "openmp", "openni", "openni2", "qhull", "rssdk", "vtk"],
         }
 
     def _ext_dep_to_conan_target(self, dep):
@@ -210,6 +226,7 @@ class PclConan(ConanFile):
             return []
         return {
             "boost": ["boost::boost"],
+            "cjson": ["cjson::cjson"] if Version(self.version) >= "1.15" else [],
             "cuda": [],
             "davidsdk": [],
             "dssdk": [],
@@ -221,6 +238,7 @@ class PclConan(ConanFile):
             "metslib": [],
             "opencv": ["opencv::opencv"],
             "opengl": ["opengl::opengl", "freeglut::freeglut", "glew::glew", "glu::glu" if is_apple_os(self) or self.settings.os == "Windows" else "mesa-glu::mesa-glu"],
+            "openmp": ["llvm-openmp::llvm-openmp"] if self.settings.compiler in ["clang", "apple-clang"] else [],
             "openni": [],
             "openni2": [],
             "pcap": ["libpcap::libpcap"],
@@ -266,7 +284,7 @@ class PclConan(ConanFile):
             "keypoints": ["common", "features", "filters", "kdtree", "octree", "search"],
             "ml": ["common"],
             "octree": ["common"],
-            "outofcore": ["common", "filters", "io", "octree", "visualization"],
+            "outofcore": ["common", "filters", "io", "octree"],
             "people": ["common", "filters", "geometry", "io", "kdtree", "octree",
                        "sample_consensus", "search", "segmentation", "visualization"],
             "recognition": ["common", "features", "filters", "io", "kdtree", "ml",
@@ -343,6 +361,9 @@ class PclConan(ConanFile):
         if self.settings.arch not in ["x86", "x86_64"]:
             del self.options.use_sse
             del self.options.use_avx
+        if Version(self.version) < "1.15":
+            del self.options.with_cjson
+            self.options.outofcore = False
 
     def configure(self):
         if self.options.shared:
@@ -399,6 +420,13 @@ class PclConan(ConanFile):
             self.requires("opencv/[>=4.8.1 <5]", transitive_headers=True)
         if self._is_enabled("zlib"):
             self.requires("zlib/[>=1.2.11 <2]")
+        if self._is_enabled("cjson"):
+            self.requires("cjson/[~1]", transitive_headers=True)
+
+        if self._is_enabled("openmp"):
+            if self.settings.compiler in ["clang", "apple-clang"]:
+                self.requires("llvm-openmp/[*]", transitive_headers=True)
+
         # TODO:
         # self.requires("vtk/9.x.x", transitive_headers=True)
         # self.requires("openni/x.x.x", transitive_headers=True)
@@ -501,7 +529,11 @@ class PclConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("eigen", "cmake_file_name", "EIGEN")
+        if Version(self.version) < "1.15":
+            deps.set_property("eigen", "cmake_file_name", "EIGEN")
+        else:
+            deps.set_property("eigen", "cmake_file_name", "Eigen3")
+            deps.set_property("cjson", "cmake_target_name", "cJSON::cJSON")
         deps.set_property("flann", "cmake_file_name", "FLANN")
         deps.set_property("flann", "cmake_target_name", "FLANN::FLANN")
         deps.set_property("libpcap", "cmake_file_name", "PCAP")
