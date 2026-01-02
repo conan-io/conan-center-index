@@ -11,6 +11,9 @@ sources:
 patches:
   "2.5.25":
     - patch_file: "patches/0001-2.5.25-mingw-support.patch"
+    - patch_file: "patches/0002-fix-clang-cl-compatibility.patch"
+      patch_description: "Fix clang-cl compatibility with __extension__ keyword"
+      patch_type: "portability"
   "2.5.24":
     - patch_file: "patches/0001-2.5.24-mingw-support.patch"
   "2.5.22":
