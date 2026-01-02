@@ -65,6 +65,8 @@ class MpirConan(ConanFile):
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building doesn't work (yet)")
+        if is_msvc(self) and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration(f"{self.ref} cannot be built on windows ARM")
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
