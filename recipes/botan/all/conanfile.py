@@ -302,6 +302,7 @@ class BotanConan(ConanFile):
                 'Linux': 'linux',
                 'Macos': 'darwin',
                 'Android': 'android',
+                'Emscripten': 'emscripten',
                 'baremetal': 'none',
                 'iOS': 'ios'}.get(str(self.settings.os))
 
@@ -320,6 +321,8 @@ class BotanConan(ConanFile):
             botan_compiler = 'clang'
         elif self.settings.compiler == 'gcc':
             botan_compiler = 'gcc'
+        elif self.settings.os == 'Emscripten':
+            botan_compiler = 'emcc'
         else:
             botan_compiler = 'msvc'
 
