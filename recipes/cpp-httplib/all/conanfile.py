@@ -69,6 +69,7 @@ class CpphttplibConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "httplib"))
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+
         if self.options.with_openssl:
             self.cpp_info.defines.append("CPPHTTPLIB_OPENSSL_SUPPORT")
         if self.options.with_zlib:
@@ -81,6 +82,10 @@ class CpphttplibConan(ConanFile):
             self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["crypt32", "cryptui", "ws2_32"]
-        elif self.settings.os == "Macos" and self.options.with_openssl and self.options.get_safe("use_macos_keychain_certs"):
-            self.cpp_info.frameworks = ["CoreFoundation", "Security"]
-            self.cpp_info.defines.append("CPPHTTPLIB_USE_CERTS_FROM_MACOSX_KEYCHAIN")
+        elif self.settings.os == "Macos":
+            if self.options.with_openssl and self.options.get_safe("use_macos_keychain_certs"):
+                self.cpp_info.frameworks.extend(["CFNetwork", "CoreFoundation", "Security"])
+                self.cpp_info.defines.append("CPPHTTPLIB_USE_CERTS_FROM_MACOSX_KEYCHAIN")
+                self.cpp_info.frameworks.extend(["CFNetwork", "CoreFoundation"])
+        
+        self.cpp_info.defines.append("CPPHTTPLIB_USE_NON_BLOCKING_GETADDRINFO")
