@@ -77,10 +77,18 @@ class ProtobufConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_zlib:
-            self.requires("zlib/[>=1.2.11 <2]")
+        # Dependencies based on the following source. Replace 'main' with your version.
+        # https://github.com/protocolbuffers/protobuf/blob/main/cmake/dependencies.cmake
 
-        if self._protobuf_release >= "30.1":
+        if self.options.with_zlib:
+            if self._protobuf_release >= "33.2":
+                self.requires("zlib/[>=1.3.1 <2]")
+            else:
+                self.requires("zlib/[>=1.2.11 <2]")
+
+        if self._protobuf_release >= "33.2":
+            self.requires("abseil/[>=20250512.1 <=20250814.1]", transitive_headers=True)
+        elif self._protobuf_release >= "30.1":
             self.requires("abseil/[>=20230802.1 <=20250814.0]", transitive_headers=True)
         elif self._protobuf_release >= "22.0":
             self.requires("abseil/[>=20230802.1 <=20250127.0]", transitive_headers=True)
