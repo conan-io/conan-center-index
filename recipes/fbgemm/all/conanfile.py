@@ -1,8 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd, check_min_cstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 import os
 
 required_conan_version = ">=2.4"
@@ -31,7 +31,7 @@ class FbgemmConan(ConanFile):
     languages = "C", "C++"
 
     def export_sources(self):
-        export_conandata_patches(self)
+        copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -42,22 +42,19 @@ class FbgemmConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
-        if self.settings.get_safe("compiler.cstd"):
-            check_min_cstd(self, 99)
-        if self.settings.arch == "x86":
-            raise ConanInvalidConfiguration("fbgemm is not supported on x86 architectures")
-        if "arm" in self.settings.arch:
-            raise ConanInvalidConfiguration("fbgemm is not supported on ARM")
+        if self.settings.arch != "x86_64":
+            raise ConanInvalidConfiguration("fbgemm is only supported on x86_64 architectures (yet)")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.21]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "modules", "CppLibrary.cmake"), "-Werror", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_PROJECT_fbgemm_INCLUDE"] = os.path.join(self.source_folder, "conan_cmake_project_include.cmake")
         tc.cache_variables["FBGEMM_BUILD_TESTS"] = False
         tc.cache_variables["FBGEMM_BUILD_BENCHMARKS"] = False
         tc.generate()
