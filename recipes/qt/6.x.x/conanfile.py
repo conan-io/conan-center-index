@@ -13,6 +13,7 @@ from conan.tools.files import copy, get, replace_in_file, apply_conandata_patche
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
+from conan.tools.system import PipEnv
 from conan.errors import ConanException, ConanInvalidConfiguration
 
 required_conan_version = ">=2.0"
@@ -445,6 +446,12 @@ class QtConan(ConanFile):
     def generate(self):
         ms = VirtualBuildEnv(self)
         ms.generate()
+
+        if self.options.qtwebengine:
+            # https://github.com/qt/qtwebengine/blob/1a75761f912328b7b3b7f0302cec62ae5c111d1a/configure.cmake#L361-L366
+            # QtWebEngine cannot build without html5lib visible to the python interpreter
+            PipEnv(self).install(["html5lib~=1.0"])
+            PipEnv(self).generate()
 
         tc = CMakeDeps(self)
         tc.set_property("libdrm", "cmake_file_name", "Libdrm")
