@@ -86,7 +86,7 @@ class CoinCbcConan(ConanFile):
             env.define("NM", "dumpbin -symbols")
             env.vars(self).save_script("conanbuild_msvc")
         if self.settings_build.os == "Windows":
-            env.define("PKG_CONFIG_PATH", self.generators_folder)
+            env.define("PKG_CONFIG_PATH", self.generators_folder + ":" + self.build_folder)
         tc.generate(env)
 
         deps = PkgConfigDeps(self)
