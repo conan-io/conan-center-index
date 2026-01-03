@@ -57,9 +57,6 @@ class CoinCbcConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = PkgConfigDeps(self)
-        tc.generate()
-
         env = VirtualBuildEnv(self)
         env.generate()
 
@@ -77,8 +74,6 @@ class CoinCbcConan(ConanFile):
                 pthreads_path = os.path.join(pthreads4w_info.libdir, pthreads4w_info.libs[0] + ".lib")
                 tc.configure_args.append(f"--with-pthreadsw32-lib={unix_path(self,pthreads_path)}")
                 tc.configure_args.append(f"--with-pthreadsw32-incdir={unix_path(self, pthreads4w_info.includedir)}")
-        tc.generate()
-
         env = tc.environment()
         if is_msvc(self):
             automake_conf = self.dependencies.build["automake"].conf_info
@@ -93,6 +88,9 @@ class CoinCbcConan(ConanFile):
         if self.settings_build.os == "Windows":
             env.define("PKG_CONFIG_PATH", self.generators_folder)
         tc.generate(env)
+
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def build(self):
         for gnu_config in [
