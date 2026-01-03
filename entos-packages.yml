@@ -15,7 +15,6 @@ bison:
     - '3.8.2'
 boost:
   versions:
-    - '1.84.0'
     - '1.88.0'
 brotli:
   versions:
@@ -37,8 +36,8 @@ cli11:
     - '2.4.2'
 cmake:
   versions:
-    - '4.1.2'
-    - '3.31.9'
+    - '3.31.10'
+    - '4.2.1'
 cpp-httplib:
   versions:
     - '0.15.3'
@@ -48,6 +47,9 @@ dbus:
 double-conversion:
   versions:
     - '3.3.0'
+editline:
+  versions:
+    - '3.1'
 elfutils:
   versions:
     - '0.190'
@@ -59,7 +61,6 @@ flex:
     - '2.6.4'
 fmt:
   versions:
-    - '11.2.0'
     - '12.0.0'
 fontconfig:
   versions:
@@ -90,7 +91,6 @@ glm:
     - '1.0.1'
 glslang:
   versions:
-    - '1.3.268.0'
     - '1.4.313.0'
 gnu-config:
   versions:
@@ -106,7 +106,6 @@ gtest:
     - '1.17.0'
 harfbuzz:
   versions:
-    - '8.3.0'
     - '11.4.1'
 icu:
   versions:
@@ -125,7 +124,6 @@ libcurl:
     - '8.16.0'
 libffi:
   versions:
-    - '3.4.4'
     - '3.4.8'
 libgpucounters:
   versions:
@@ -157,16 +155,12 @@ libxcrypt:
     - '4.4.36'
 libwebp:
   versions:
-    - '1.3.1'
-    - '1.4.0'
-    - '1.5.0'
     - '1.6.0'
 libxml2:
   versions:
-    - '2.13.8'
+    - '2.15.0'
 libzip:
   versions:
-    - '1.10.1'
     - '1.11.4'
 lz4:
   versions:
@@ -198,7 +192,6 @@ opengl:
 openssl:
   versions:
     - '3.2.2'
-    - '3.0.5'
 opentelemetry-cpp:
   versions:
     - '1.21.0'
@@ -213,7 +206,6 @@ paho-mqtt-c:
     - '1.3.13'
 paho-mqtt-cpp:
   versions:
-    - '1.4.1'
     - '1.5.3'
 parallel-hashmap:
   versions:
@@ -221,13 +213,11 @@ parallel-hashmap:
 pcre2:
   versions:
     - '10.44'
-    - '10.42'
 perfetto:
   versions:
     - '52.0'
 pkgconf:
   versions:
-    - '2.1.0'
     - '2.2.0'
 protobuf:
   versions:
@@ -244,7 +234,6 @@ re2:
     - '20230301'
 spdlog:
   versions:
-    - '1.15.3'
     - '1.16.0'
 spirv-headers:
   versions:
@@ -255,6 +244,9 @@ spirv-tools:
 sqlite3:
   versions:
     - '3.45.3'
+termcap:
+  versions:
+    - '1.3.1'
 tl-expected:
   versions:
     - '1.1.0'
@@ -275,7 +267,6 @@ vulkan-validationlayers:
     - '1.4.313.0'
 wayland:
   versions:
-    - '1.22.0'
     - '1.23.92'
 waylandpp:
   versions:
@@ -285,7 +276,6 @@ waylandpp-scanner:
     - '1.0.1.cci.20251006'
 wayland-protocols:
   versions:
-    - '1.33'
     - '1.45'
 xkbcommon:
   versions:
@@ -302,10 +292,12 @@ xorg:
 zlib:
   versions:
     - '1.3.1'
+z3:
+  versions:
+    - '4.14.1'
 zstd:
   versions:
     - '1.5.7'
-    - '1.5.5'
 zxing-cpp:
   versions:
     - '2.2.1'
