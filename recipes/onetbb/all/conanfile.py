@@ -146,6 +146,9 @@ class OneTBBConan(ConanFile):
                     os.path.join(hwloc_package_folder, "bin", "hwloc.dll").replace("\\", "/")
         if self.options.get_safe("build_apple_frameworks"):
             toolchain.variables["TBB_BUILD_APPLE_FRAMEWORKS"] = True
+        if self.settings.compiler == "clang":
+            # Avoid undefined version error on Clang 17+. See: https://github.com/uxlfoundation/oneTBB/issues/1274
+            toolchain.cache_variables["CMAKE_SHARED_LINKER_FLAGS"] = "-Wl,--undefined-version"
         if Version(self.version) <= "2021.10.0":
             toolchain.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
 
