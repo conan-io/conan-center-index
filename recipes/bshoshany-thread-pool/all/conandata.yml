@@ -1,4 +1,7 @@
 sources:
+  "5.1.0":
+    sha256: "54378fb9cbeaee72996d3f8761469c43bb7dd2d4b07faec6d29a68277bd91a51"
+    url: "https://github.com/bshoshany/thread-pool/archive/refs/tags/v5.1.0.tar.gz"
   "5.0.0":
     sha256: "617a8fbc2c360577f498998f336777c73d581810831d4ce9c920f11ec680b07b"
     url: "https://github.com/bshoshany/thread-pool/archive/refs/tags/v5.0.0.tar.gz"
