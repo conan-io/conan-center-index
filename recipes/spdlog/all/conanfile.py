@@ -120,7 +120,7 @@ class SpdlogConan(ConanFile):
             tc.variables["SPDLOG_WCHAR_SUPPORT"] = self.options.get_safe("wchar_support", False)
             tc.variables["SPDLOG_WCHAR_FILENAMES"] = self.options.get_safe("wchar_filenames", False)
             if Version(self.version) >= "1.15.0":
-                tc.variables["SDPLOG_WCHAR_CONSOLE"] = self.options.get_safe("wchar_console", False)
+                tc.variables["SPDLOG_WCHAR_CONSOLE"] = self.options.get_safe("wchar_console", False)
             tc.variables["SPDLOG_INSTALL"] = True
             tc.variables["SPDLOG_NO_EXCEPTIONS"] = self.options.no_exceptions
             tc.variables["SPDLOG_USE_STD_FORMAT"] = self.options.get_safe("use_std_fmt")
