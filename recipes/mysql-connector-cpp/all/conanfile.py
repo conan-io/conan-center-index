@@ -120,7 +120,8 @@ class MysqlConnectorCppConan(ConanFile):
         self.cpp_info.libs = [lib]
 
         if self.settings.os == "Windows":
-            self.cpp_info.libdirs = [os.path.join("lib", "vs14")]
+            libdirs = [os.path.join("lib", "vs14") if self.settings.build_type == "Release" else os.path.join("lib", "debug", "vs14")]
+            self.cpp_info.libdirs = libdirs
             self.cpp_info.bindirs = ["lib"]
             self.cpp_info.system_libs.extend(["dnsapi", "ws2_32"])
         if self.settings.os in ["Linux", "FreeBSD"]:
