@@ -81,7 +81,7 @@ class ProtobufConan(ConanFile):
         # https://github.com/protocolbuffers/protobuf/blob/main/cmake/dependencies.cmake
 
         if self.options.with_zlib:
-            if self._protobuf_release >= "33.2":
+            if self._protobuf_release >= "28.0":
                 self.requires("zlib/[>=1.3.1 <2]")
             else:
                 self.requires("zlib/[>=1.2.11 <2]")
