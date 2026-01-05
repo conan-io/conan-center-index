@@ -2,7 +2,3 @@ sources:
   "7.7.1":
     url: "https://github.com/simdutf/simdutf/archive/v7.7.1.tar.gz"
     sha256: "3b119d55c47196f6310f5b7b300563e6f2789b7de352536809438a3de1eb4432"
-  # 4.0.5 is required by scnlib
-  "4.0.5":
-    url: "https://github.com/simdutf/simdutf/archive/v4.0.5.tar.gz"
-    sha256: "040d80ff4321f89ea9739ccc7f468ece9c4bc2630f3d4762b6d829000d2ec625"
