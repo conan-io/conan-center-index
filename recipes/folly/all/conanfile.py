@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir, replace_in_file, save, rm
+from conan.tools.files import get, copy, rmdir, replace_in_file, save, rm, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -49,6 +49,7 @@ class FollyConan(ConanFile):
 
     def export_sources(self):
         copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -130,6 +131,7 @@ class FollyConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=False)
+        apply_conandata_patches(self)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -284,6 +286,3 @@ class FollyConan(ConanFile):
             self.cpp_info.components["folly_exception_counter"].set_property("pkg_config_name", "libfolly_exception_counter")
             self.cpp_info.components["folly_exception_counter"].libs = ["folly_exception_counter"]
             self.cpp_info.components["folly_exception_counter"].requires = ["folly_exception_tracer"]
-
-        if not is_msvc(self) and self.settings.arch in ("x86_64", "armv8"):
-            self.cpp_info.defines.append("FOLLY_HAVE_INT128_T")
