@@ -157,8 +157,3 @@ class DrogonConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "Drogon")
         self.cpp_info.set_property("cmake_target_name", "Drogon::Drogon")
-
-        # if self.options.with_ctl:
-        #     bin_path = os.path.join(self.package_folder, "bin")
-        #     self.runenv_info.prepend_path("PATH", bin_path)
-        #     self.buildenv_info.prepend_path("PATH", bin_path)
