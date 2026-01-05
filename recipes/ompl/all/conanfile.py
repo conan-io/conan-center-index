@@ -92,9 +92,17 @@ class OmplConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+
+        # Enforce CMake Policy CMP0077 to NEW.
+        # This prevents internal 'option()' command overwrite back to default."
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+
+        # Respect the shared option defined in this recipe.
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+
+        tc.cache_variables["OMPL_BUILD_PYBINDINGS"] = False
         tc.cache_variables["OMPL_BUILD_DEMOS"] = False
         tc.cache_variables["OMPL_BUILD_TESTS"] = False
-        tc.cache_variables["OMPL_BUILD_PYBINDINGS"] = False
         tc.cache_variables["OMPL_BUILD_PYTESTS"] = False
         tc.cache_variables["OMPL_REGISTRATION"] = False
         tc.cache_variables["OMPL_VERSIONED_INSTALL"] = False
