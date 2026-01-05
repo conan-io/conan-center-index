@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 import os
 
@@ -124,6 +124,18 @@ class OmplConan(ConanFile):
         cd.generate()
 
     def build(self):
+        # PATCH: The OMPL CMakeLists.txt hardcodes "SHARED" for non-MSVC builds
+        # Remove this keyword so CMake respects Conan's "shared=False" setting
+        ompl_cmake_path = os.path.join(
+            self.source_folder, "src", "ompl", "CMakeLists.txt"
+        )
+        replace_in_file(
+            self,
+            ompl_cmake_path,
+            "add_library(ompl SHARED ${OMPL_SOURCE_CODE})",
+            "add_library(ompl ${OMPL_SOURCE_CODE})",
+        )
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
