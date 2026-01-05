@@ -109,6 +109,8 @@ class GetTextConan(ConanFile):
                 target = "x86_64-w64-mingw32"
             elif self.settings.arch == "x86":
                 target = "i686-w64-mingw32"
+            elif self.settings.arch == "armv8":
+                target = "arm64-w64-mingw32"
 
             if target is not None:
                 tc.configure_args += [f"--host={target}", f"--build={target}"]

@@ -121,7 +121,10 @@ class GetTextConan(ConanFile):
             env.prepend("CPPFLAGS", f"-I{iconv_includedir}")
 
             if str(self.settings.arch) in ("x86", "x86_64"):
-                windres_arch = {"x86": "i686", "x86_64": "x86-64"}[str(self.settings.arch)]
+                windres_arch = {
+                    "x86": "i686",
+                    "x86_64": "x86-64",
+                    "armv8": "arm64"}[str(self.settings.arch)]
                 env.define("RC", f"windres --target=pe-{windres_arch}")
             env.vars(self).save_script("conanbuild_msvc")
 
