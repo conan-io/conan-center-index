@@ -44,20 +44,6 @@ class BehaviorTreeCPPConan(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
-    @property
-    def _minimum_cppstd_required(self):
-        return 17
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "gcc": "8",
-            "clang": "7",
-            "apple-clang": "12",
-            "msvc": "192",
-            "Visual Studio": "16",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -77,20 +63,12 @@ class BehaviorTreeCPPConan(ConanFile):
         if self.options.with_tools:
             self.requires("zeromq/4.3.5")
 
-
     def validate(self):
         if self.info.settings.os == "Windows" and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Windows.")
+
         if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cppstd_required)
-        minimum_version = self._minimum_compilers_version.get(str(self.info.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn(f"{self.ref} requires C++{self._minimum_cppstd_required}. "
-                             f"Your compiler is unknown. Assuming it supports C++{self._minimum_cppstd_required}.")
-        elif Version(self.info.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"BehaviorTree.CPP requires C++{self._minimum_cppstd_required}, which your compiler does not support."
-            )
+            check_min_cppstd(self, 17)
 
         if self.settings.compiler == "clang" and str(self.settings .compiler.libcxx) == "libstdc++":
             raise ConanInvalidConfiguration(f"{self.ref} needs recent libstdc++ with charconv. please switch to gcc, or to libc++")
