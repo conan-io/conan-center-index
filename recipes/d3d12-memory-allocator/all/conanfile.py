@@ -34,7 +34,7 @@ class D3D12MemoryAllocatorConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
-    
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.25]")
 
@@ -58,4 +58,5 @@ class D3D12MemoryAllocatorConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "D3D12MemoryAllocator")
         self.cpp_info.set_property("cmake_target_name", "GPUOpen::D3D12MemoryAllocator")
-        self.cpp_info.libs = ["D3D12MA"]
+        postfix = {"Release": "", "Debug": "d", "RelWithDebInfo": "rd", "MinSizeRel": "s"}[str(self.settings.build_type)]
+        self.cpp_info.libs = [f"D3D12MA{postfix}"]
