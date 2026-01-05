@@ -60,7 +60,7 @@ class OatppConan(ConanFile):
             raise ConanInvalidConfiguration("oatpp requires GCC >=5")
 
     def build_requirements(self):
-        if Version(self._version) >= "1.3.0.latest":
+        if Version(self.version) >= "1.3.0.latest":
             self.tool_requires("cmake/[>=3.20]")
 
     def source(self):
