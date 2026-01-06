@@ -27,4 +27,7 @@ int main() {
   // Launch the clustering
   // The results will be stored in the `clue::PointsHost` object
   algo.make_clusters(queue, h_points, d_points);
+
+  std::cout << "CLUEstering reconstructed " << h_points.n_clusters()
+            << " clusters from " << size << " points." << std::endl;
 }
