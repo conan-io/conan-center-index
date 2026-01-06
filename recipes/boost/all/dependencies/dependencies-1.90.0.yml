@@ -40,8 +40,6 @@ dependencies:
   cobalt:
   - container
   - context
-  cobalt_io:
-  - cobalt
   container: []
   context: []
   contract:
@@ -167,8 +165,8 @@ libs:
   - boost_chrono
   cobalt:
   - boost_cobalt
-  cobalt_io:
-  - boost_cobalt_io
+  - boost_cobalt_io_ssl
+  - boost_cobalt_io 
   container:
   - boost_container
   context:
