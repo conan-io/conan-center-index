@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.files import copy, rm, get, export_conandata_patches, apply_conandata_patches, rmdir, mkdir
 from conan.tools.gnu import AutotoolsToolchain, PkgConfigDeps, Autotools
 from conan.tools.build import cross_building
@@ -129,6 +130,8 @@ class CoinCbcConan(ConanFile):
         mkdir(self, os.path.join(self.package_folder, "include", "coin"))
         autotools = Autotools(self)
         autotools.install()
+
+        fix_apple_shared_install_name(self)
 
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
