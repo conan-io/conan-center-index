@@ -4,7 +4,7 @@ from conan.tools.files import copy, rm, get, export_conandata_patches, apply_con
 from conan.tools.gnu import AutotoolsToolchain, PkgConfigDeps, Autotools
 from conan.tools.build import cross_building
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
 
 import os
 
@@ -82,21 +82,35 @@ class CoinCbcConan(ConanFile):
             "--without-blas",
             "--without-lapack",
         ])
-
+        env = tc.environment()
         if is_msvc(self):
             tc.extra_cxxflags.append("-EHsc")
-            tc.configure_args.append(f"--enable-msvc={self.settings.compiler.runtime}")
+            tc.configure_args.append(f"--enable-msvc={msvc_runtime_flag(self)}")
+
+            compile_wrapper = unix_path(self, self.conf.get("user.automake:compile-wrapper", check_type=str))
+            ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper", check_type=str))
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("LD", f"{compile_wrapper} link -nologo")
+            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
 
             if self.options.parallel:
-                tc.configure_args.append("--with-pthreadsw32-lib={}".format(tools.unix_path(os.path.join(self.deps_cpp_info["pthreads4w"].lib_paths[0], self.deps_cpp_info["pthreads4w"].libs[0] + ".lib"))))
-                tc.configure_args.append("--with-pthreadsw32-incdir={}".format(tools.unix_path(self.deps_cpp_info["pthreads4w"].include_paths[0])))
-        tc.generate()
+                pthreads4w_libdir = self.dependencies["pthreads4w"].cpp_info.aggregated_components().libdirs[0]
+                pthreads4w_incdir = self.dependencies["pthreads4w"].cpp_info.aggregated_components().includedirs[0]
+                pthreads4w_lib = os.path.join(pthreads4w_libdir, self.dependencies["pthreads4w"].cpp_info.aggregated_components().libs[0]) + ".lib"
+                tc.configure_args.append(f"--with-pthreadsw32-lib={unix_path(self, pthreads4w_lib)}")
+                tc.configure_args.append(f"--with-pthreadsw32-incdir={unix_path(self, pthreads4w_incdir)}")
+        if self.settings_build.os == "Windows":
+            # the coin-cbc configure script adds values to PKG_CONFIG_PATH before invoking pkg-config,
+            # the paths with leading double slash // interfere with msys2 path conversions and prevent it from working
+            # as a workaround, add the path as regular windows PATH
+            env.define("PKG_CONFIG_PATH", self.generators_folder)
+        tc.generate(env)
 
         deps = PkgConfigDeps(self)
         deps.generate()
 
     def build(self):
-        
         for gnu_config in [
             self.conf.get("user.gnu-config:config_guess", check_type=str),
             self.conf.get("user.gnu-config:config_sub", check_type=str),
@@ -117,16 +131,13 @@ class CoinCbcConan(ConanFile):
         autotools.install()
 
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        #     if self.settings.compiler == "Visual Studio":
-        #         rename(self,
-        #                f"{self.package_folder}/lib/lib{l}.a",
-        #                f"{self.package_folder}/lib/{l}.lib")
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.components["libcbc"].libs = ["CbcSolver", "Cbc"]
+        self.cpp_info.components["libcbc"].set_property("pkg_config_name", "cbc")
         self.cpp_info.components["libcbc"].includedirs.append(os.path.join("include", "coin"))
         self.cpp_info.components["libcbc"].requires = ["coin-clp::osi-clp", "coin-utils::coin-utils", "coin-osi::coin-osi", "coin-cgl::coin-cgl"]
         if self.settings.os in ["Linux", "FreeBSD"] and self.options.parallel:
@@ -135,5 +146,6 @@ class CoinCbcConan(ConanFile):
             self.cpp_info.components["libcbc"].requires.append("pthreads4w::pthreads4w")
 
         self.cpp_info.components["osi-cbc"].libs = ["OsiCbc"]
+        self.cpp_info.components["osi-cbc"].set_property("pkg_config_name", "osi-cbc")
         self.cpp_info.components["osi-cbc"].requires = ["libcbc"]
 
