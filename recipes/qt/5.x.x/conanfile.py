@@ -422,7 +422,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_mysql", False) == "mariadb":
             self.requires("mariadb-connector-c/3.3.3")
         if self.options.with_pq:
-            self.requires("libpq/15.4")
+            self.requires("libpq/[>=15.4 <18]")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.11")

@@ -137,7 +137,7 @@ class PocoConan(ConanFile):
         if self.options.enable_data_odbc and self.settings.os != "Windows":
             self.requires("odbc/2.3.11")
         if self.options.get_safe("enable_data_postgresql"):
-            self.requires("libpq/15.4")
+            self.requires("libpq/[>=15.4 <18]")
         if self.options.get_safe("enable_data_mysql"):
             self.requires("libmysqlclient/8.1.0")
 
