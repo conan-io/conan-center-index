@@ -1,9 +1,10 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, apply_conandata_patches
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import get, copy, apply_conandata_patches, rmdir
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2.1"
 
 
 class CLUEsteringConan(ConanFile):
@@ -50,11 +51,15 @@ class CLUEsteringConan(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        copy(self, "LICENSE", dst=self.package_folder, src=self.source_folder)
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
         self.cpp_info.set_property("cmake_file_name", "cluestering")
         self.cpp_info.set_property("cmake_target_name", "CLUEstering::CLUEstering")
         self.cpp_info.includedirs = ["include"]
