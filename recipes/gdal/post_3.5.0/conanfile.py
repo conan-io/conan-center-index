@@ -159,11 +159,6 @@ class GdalConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "3.7":
-            # Latest versions of Arrow are no longer compatible with GDAL 3.5
-            self.options.with_arrow = False
-        if Version(self.version) < "3.8":
-            del self.options.with_libaec
 
     def configure(self):
         if self.options.shared:
@@ -249,7 +244,7 @@ class GdalConan(ConanFile):
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_mongocxx:
-            self.requires("mongo-cxx-driver/3.8.1")
+            self.requires("mongo-cxx-driver/[>=3.8.1 <4]")
         if self.options.with_mysql == "libmysqlclient":
             self.requires("libmysqlclient/8.1.0")
         elif self.options.with_mysql == "mariadb-connector-c":
@@ -278,7 +273,7 @@ class GdalConan(ConanFile):
         if self.options.with_poppler:
             self.requires("poppler/21.07.0")
         if self.options.with_qhull:
-            self.requires("qhull/8.0.1")
+            self.requires("qhull/8.0.2")
         if self.options.with_rasterlite2:
             self.requires("librasterlite2/1.1.0-beta1")
         if self.options.with_spatialite:
@@ -581,7 +576,7 @@ class GdalConan(ConanFile):
             deps.set_property(conan_name, "cmake_file_name", cmake_name)
 
         renamed_targets = {
-            "arrow::libarrow":            "Arrow::arrow_shared" if Version(self.version) >= "3.7" else "arrow_shared",
+            "arrow::libarrow":            "Arrow::arrow_shared",
             "arrow::dataset":             "ArrowDataset::arrow_dataset_shared",
             "arrow::libparquet":          "Parquet::parquet_shared",
             "brunsli::brunslidec-c":      "BRUNSLI::DECODE",
@@ -642,7 +637,6 @@ class GdalConan(ConanFile):
         if Version(self.version) < "3.10.0":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
                             "gdal_check_package(Parquet", "# gdal_check_package(Parquet")
-        if Version(self.version) >= "3.6.0" and Version(self.version) < "3.10.0":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
                             "gdal_check_package(ArrowDataset", "# gdal_check_package(ArrowDataset")
 

@@ -1,5 +1,7 @@
+From https://codereview.qt-project.org/c/yocto/meta-qt5/+/192172
+
 From c72097e8790553771daf3231124c3fbe1a438379 Mon Sep 17 00:00:00 2001
-From: Samuli Piippo <samuli.piippo@qt.io>
+From: Samuli Piippo
 Date: Thu, 30 Mar 2017 11:37:24 +0300
 Subject: [PATCH] chromium: workaround for too long .rps file name
 
