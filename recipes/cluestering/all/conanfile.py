@@ -11,25 +11,31 @@ class CLUEsteringConan(ConanFile):
     version = "2.9.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/cms-patatrack/CLUEstering"
-    description = "CLUEstering is a density-based weighted clustering library based on a highly parallel and scalable algorithm, CLUE, which was developed at CERN. The library is designed to be performance portable, supporting both CPU and GPU architectures, and is implemented in C++20 using the Alpaka framework for heterogeneous computing. CLUEstering is suitable for high-performance computing environments and can be used in various applications requiring efficient clustering of large datasets."
+    description = (
+        "CLUEstering is a density-based weighted clustering library "
+        "designed for high-performance computing applications."
+    )
     topics = ("clustering", "density-based/weighted", "gpu", "hpc", "performance-portability", "alpaka")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     license = "MPL-2.0"
 
-    @property
-    def _is_mingw(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+    def requirements(self):
+        self.requires("alpaka/2.1.1", transitive_headers=True)
+        self.requires("boost/[>=1.74.0 <2]", transitive_headers=True)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 20)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
