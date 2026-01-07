@@ -30,7 +30,9 @@ class XsimdConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 14 if self.options.xtl_complex else 11
+        if Version(self.version) >= "14.0.0" or self.options.xtl_complex:
+            return 14
+        return 11
 
     @property
     def _compilers_minimum_version(self):
