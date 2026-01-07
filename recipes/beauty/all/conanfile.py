@@ -2,8 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.microsoft import is_msvc
+from conan.tools.files import copy, get, rmdir
 import os
 
 required_conan_version = ">=2.1"
@@ -29,9 +28,6 @@ class BeautyConan(ConanFile):
         "with_openssl": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -55,9 +51,6 @@ class BeautyConan(ConanFile):
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libc++":
             raise ConanInvalidConfiguration(f"{self.ref} clang compiler requires -s compiler.libcxx=libc++")
 
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} shared=True is not supported with {self.settings.compiler}")
-
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.21]")
 
@@ -74,7 +67,6 @@ class BeautyConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build(target="beauty")
@@ -89,7 +81,7 @@ class BeautyConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "beauty")
         self.cpp_info.set_property("cmake_target_name", "beauty::beauty")
         self.cpp_info.libs = ["beauty"]
-        self.cpp_info.requires = ["boost::headers"]
+        self.cpp_info.requires = ["boost::json"]
         if self.options.with_openssl:
             self.cpp_info.requires.append("openssl::ssl")
             self.cpp_info.defines = ["BEAUTY_ENABLE_OPENSSL"]

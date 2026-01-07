@@ -1,8 +1,4 @@
 sources:
-  "1.0.7":
-    url: "https://github.com/dfleury2/beauty/archive/refs/tags/1.0.7.tar.gz"
-    sha256: "3a7aa647e10f328554e62d60cf01df4c0bac86dc543735f9ee74a0e0b6f07d2c"
-patches:
-  "1.0.7":
-    - patch_file: "patches/1.0.7-fix-apple-clang-shared.patch"
-      patch_source: "https://github.com/dfleury2/beauty/issues/62"
+  "1.0.8":
+    url: "https://github.com/dfleury2/beauty/archive/refs/tags/1.0.8.tar.gz"
+    sha256: "123bb34d535688fb27f2ab56c8266ae392f618f0159ab0d618c5eb5bcff0d164"
