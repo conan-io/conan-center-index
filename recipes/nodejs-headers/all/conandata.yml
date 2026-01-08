@@ -1,0 +1,39 @@
+sources:
+    "22.19.0":
+        Headers:
+            url: "https://nodejs.org/dist/v22.19.0/node-v22.19.0-headers.tar.xz"
+            sha256: "12a22367bd09674d04b95265f14295d737892bd682b99aad3122364d36e1ac8f"
+        Windows:
+            import_libs:
+                "x86_64":
+                    url: "https://nodejs.org/dist/v22.19.0/win-x64/node.lib"
+                    sha256: "4af0951712fb05a686a03e0592880e195ba53e5eb70e224d7ea7b8b76f2a3e86"
+                "armv8":
+                    url: "https://nodejs.org/dist/v22.19.0/win-arm64/node.lib"
+                    sha256: "c174ae3348a4a59c9d61629a7a73a38679fd27c55b2a7d85a2ea3e65de2beb13"
+            pdbs:
+                "x86_64":
+                    url: "https://nodejs.org/dist/v22.19.0/win-x64/node_pdb.zip"
+                    sha256: "0145b60fb83e2f0007d2a7cf98922530a66d906e6fcf73ab9ed061ac8a282cce"
+                "armv8":
+                    url: "https://nodejs.org/dist/v22.19.0/win-arm64/node_pdb.zip"
+                    sha256: "9bd3d552eb550cdab011b8090a1f6bfa95656ea59301d5e8b9f76114204f80a5"
+    "20.19.5":
+        Headers:
+            url: "https://nodejs.org/dist/v20.19.5/node-v20.19.5-headers.tar.xz"
+            sha256: "63ffe7c8e3cdce5c1a75d8ad8ed1d2dc3956343d012bec84e7c51a182ca8824f"
+        Windows:
+            import_libs:
+                "x86_64":
+                    url: "https://nodejs.org/dist/v20.19.5/win-x64/node.lib"
+                    sha256: "7d545cfcf38456553e83f419c72e91bf9bc80500bf8c0f3f838a7be020e88def"
+                "armv8":
+                    url: "https://nodejs.org/dist/v20.19.5/win-arm64/node.lib"
+                    sha256: "dd8b0acfe80fa4ac731561848405b173cdc16ade8347e0ebb59bdb7aee668ed1"
+            pdbs:
+                "x86_64":
+                    url: "https://nodejs.org/dist/v20.19.5/win-x64/node_pdb.zip"
+                    sha256: "a70c814f6ea5e8c06bf08f6644a883be9e8479362bce639ef8caf62fd2345cf4"
+                "armv8":
+                    url: "https://nodejs.org/dist/v20.19.5/win-arm64/node_pdb.zip"
+                    sha256: "6888ddb1259551a24b26b8ca1883a0a08126ca23d17cc6504c682aeaa1665310"
