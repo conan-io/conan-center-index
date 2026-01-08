@@ -29,8 +29,7 @@ class CLUEsteringConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 20)
+        check_min_cppstd(self, 20)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16]")
