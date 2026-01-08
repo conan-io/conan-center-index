@@ -4,7 +4,6 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from collections import namedtuple
 import os
 
