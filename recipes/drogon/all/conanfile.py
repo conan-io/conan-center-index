@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
 from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rmdir
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rmdir, collect_libs
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 
@@ -52,6 +53,7 @@ class DrogonConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        export_sources = "*.cmake"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -128,6 +130,11 @@ class DrogonConan(ConanFile):
         tc.variables["USE_SUBMODULE"] = False
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("jsoncpp", "cmake_file_name", "JsonCpp")
+        deps.set_property("jsoncpp", "cmake_target_name", "JsonCpp::JsonCpp")
+        if self.settings.os == "Linux":
+            deps.set_property("util-linux-libuuid", "cmake_file_name", "libuuid")
+            deps.set_property("util-linux-libuuid", "cmake_target_name", "libuuid::libuuid")
         if self.options.get_safe("with_mysql"):
             deps.set_property("mariadb-connector-c", "cmake_file_name", "MySQL")
             deps.set_property("mariadb-connector-c", "cmake_target_name", "MySQL_lib")
@@ -144,12 +151,17 @@ class DrogonConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "*cmake", src=self.source_folder, dst=self.package_folder)
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = ["drogon"]
+        self.cpp_info.builddirs = ["."]
+        if self.settings.os in ["Linux", "FreeBSD"]
+            self.cpp_info.system_libs = ["pthread", "dl", "uuid"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["rpcrt4", "ws2_32", "crypt32", "advapi32"])
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
@@ -157,7 +169,10 @@ class DrogonConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "Drogon")
         self.cpp_info.set_property("cmake_target_name", "Drogon::Drogon")
-        
+
+        drogon_utils = os.path.join("cmake", "DrogonUtilities.cmake")
+        drogon_test = os.path.join("cmake", "ParseAndAddDrogonTests.cmake")
+        self.cpp_info.set_property("cmake_build_modules", [drogon_utils, drogon_test])
         if self.options.with_ctl:
             bin_path = os.path.join(self.package_folder, "bin")
             self.runenv_info.prepend_path("PATH", bin_path)
