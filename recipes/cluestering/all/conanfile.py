@@ -59,6 +59,6 @@ class CLUEsteringConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
-        self.cpp_info.set_property("cmake_file_name", "cluestering")
+        self.cpp_info.set_property("cmake_file_name", "CLUEstering")
         self.cpp_info.set_property("cmake_target_name", "CLUEstering::CLUEstering")
         self.cpp_info.includedirs = ["include"]
