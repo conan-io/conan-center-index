@@ -1,11 +1,10 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc
 import os
-import sys
 import shutil
 
 required_conan_version = ">=1.54.0"
@@ -297,8 +296,7 @@ class WtConan(ConanFile):
             self.cpp_info.components["wtmain"].system_libs = ["m", "rt"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["wtmain"].system_libs = ["ws2_32", "mswsock", "winmm"]
-            if Version(self.version) >= "4.9.0":
-                self.cpp_info.components["wtmain"].system_libs.extend(["dwrite", "d2d1", "shlwapi"])
+            self.cpp_info.components["wtmain"].system_libs.extend(["dwrite", "d2d1", "shlwapi"])
         self.cpp_info.components["wtmain"].requires = ["boost::boost"]
         if self.options.with_ssl:
             self.cpp_info.components["wtmain"].requires.append("openssl::openssl")
