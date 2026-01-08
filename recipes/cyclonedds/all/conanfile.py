@@ -161,15 +161,13 @@ class CycloneDDSConan(ConanFile):
                 "iphlpapi"
             ]
 
-        build_modules = [
-            os.path.join("lib", "cmake", "CycloneDDS", "CycloneDDS_idlc.cmake"),
-            os.path.join("lib", "cmake", "CycloneDDS", "idlc", "Generate.cmake"),
-        ]
+        build_modules = [ os.path.join("lib", "cmake", "CycloneDDS", "CycloneDDS_idlc.cmake") ]
+        if self._has_idlc():
+            build_modules.append(os.path.join("lib", "cmake", "CycloneDDS", "idlc", "Generate.cmake"))
         self.cpp_info.set_property("cmake_build_modules", build_modules)
-        build_dirs = [
-            os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS"),
-            os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS", "idlc"),
-        ]
+        build_dirs = [ os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS") ]
+        if self._has_idlc():
+            build_dirs.append(os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS", "idlc"))
         self.cpp_info.builddirs = build_dirs
 
         # TODO: to remove in conan v2
