@@ -1,0 +1,27 @@
+From d43fca14d3dc69e3b6cf19dc359389786b6b15f6 Mon Sep 17 00:00:00 2001
+From: johan-bytecat <johan@bytecat.co.za>
+Date: Wed, 26 Nov 2025 10:05:04 +0200
+Subject: [PATCH] Fix clang-cl compatibility
+
+---
+ CMakeLists.txt | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cf657a6..1fca4da 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -37,7 +37,9 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+     #   applies to WIN32/MSVC.
+     #------------------------------------------------------------------------
+     if (MSVC)
+-        add_compile_definitions("__extension__")
++	if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
++        	add_compile_definitions("__extension__")
++	endif ()
+         add_compile_options("/source-charset:utf-8")
+         option( USE_STATIC_RUNTIME "Set ON to change /MD(DLL) to /MT(static)" OFF )
+         if (USE_STATIC_RUNTIME)
+-- 
+2.30.0.windows.1
+
