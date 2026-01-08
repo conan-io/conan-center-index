@@ -33,7 +33,7 @@ class LlamaCppConan(ConanFile):
         "with_curl": [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
         "with_examples": False,
         "with_tools": False,
@@ -49,6 +49,10 @@ class LlamaCppConan(ConanFile):
     def _is_new_llama(self):
         # Structure of llama.cpp libraries was changed after b4079
         return Version(self.version) >= "b4570"
+
+    @property
+    def _add_vendors(self):
+        return Version(self.version) >= "b7667"
 
     @property
     def _cuda_build_module(self):
@@ -95,6 +99,7 @@ class LlamaCppConan(ConanFile):
         tc.variables["LLAMA_STANDALONE"] = False
         tc.variables["LLAMA_BUILD_TESTS"] = False
         tc.variables["LLAMA_BUILD_EXAMPLES"] = self.options.get_safe("with_examples")
+        tc.variables["LLAMA_BUILD_TOOLS"] = self.options.get_safe("with_tools")
         tc.variables["LLAMA_CURL"] = self.options.get_safe("with_curl")
         if cross_building(self):
             tc.variables["LLAMA_NATIVE"] = False
@@ -130,6 +135,21 @@ class LlamaCppConan(ConanFile):
         copy(self, "*common*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"),
              keep_path=False)
         copy(self, "*common*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+
+        if self._add_vendors:
+            copy(self, "*.h*", src=os.path.join(self.source_folder, "vendor"),
+                 dst=os.path.join(self.package_folder, "include", "vendor"), keep_path=True)
+            copy(self, "*vendor*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"),
+                 keep_path=False)
+            copy(self, "*vendor*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"),
+                 keep_path=False)
+            copy(self, "*vendor*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"),
+                 keep_path=False)
+            copy(self, "*vendor*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"),
+                 keep_path=False)
+            copy(self, "*vendor*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"),
+                 keep_path=False)
+
         if self.options.with_cuda and not self.options.shared:
             save(self, os.path.join(self.package_folder, "lib", "cmake", "llama-cpp-cuda-static.cmake"),
                  self._cuda_build_module)
@@ -161,6 +181,8 @@ class LlamaCppConan(ConanFile):
         self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
         self.cpp_info.components["common"].libs = ["common"]
         self.cpp_info.components["common"].requires = ["llama"]
+
+        self.cpp_info.components["cpp-httplib"].libs = ["cpp-httplib"]
 
         if self.options.with_curl:
             self.cpp_info.components["common"].requires.append("libcurl::libcurl")
