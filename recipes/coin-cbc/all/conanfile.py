@@ -96,9 +96,10 @@ class CoinCbcConan(ConanFile):
             env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
 
             if self.options.parallel:
-                pthreads4w_libdir = self.dependencies["pthreads4w"].cpp_info.aggregated_components().libdirs[0]
-                pthreads4w_incdir = self.dependencies["pthreads4w"].cpp_info.aggregated_components().includedirs[0]
-                pthreads4w_lib = os.path.join(pthreads4w_libdir, self.dependencies["pthreads4w"].cpp_info.aggregated_components().libs[0]) + ".lib"
+                pthreads4w_info = self.dependencies["pthreads4w"].cpp_info.aggregated_components()
+                pthreads4w_libdir = pthreads4w_info.libdirs[0]
+                pthreads4w_incdir = pthreads4w_info.includedirs[0]
+                pthreads4w_lib = os.path.join(pthreads4w_libdir, pthreads4w_info.libs[0]) + ".lib"
                 tc.configure_args.append(f"--with-pthreadsw32-lib={unix_path(self, pthreads4w_lib)}")
                 tc.configure_args.append(f"--with-pthreadsw32-incdir={unix_path(self, pthreads4w_incdir)}")
         if self.settings_build.os == "Windows":
@@ -145,7 +146,7 @@ class CoinCbcConan(ConanFile):
         self.cpp_info.components["libcbc"].requires = ["coin-clp::osi-clp", "coin-utils::coin-utils", "coin-osi::coin-osi", "coin-cgl::coin-cgl"]
         if self.settings.os in ["Linux", "FreeBSD"] and self.options.parallel:
             self.cpp_info.components["libcbc"].system_libs.append("pthread")
-        if self.settings.os in ["Windows"] and self.options.parallel:
+        if is_msvc(self) and self.options.parallel:
             self.cpp_info.components["libcbc"].requires.append("pthreads4w::pthreads4w")
 
         self.cpp_info.components["osi-cbc"].libs = ["OsiCbc"]
