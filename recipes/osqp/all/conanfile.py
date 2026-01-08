@@ -18,10 +18,12 @@ class OsqpConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_ctrlc": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_ctrlc": True
     }
 
     def config_options(self):
@@ -46,7 +48,7 @@ class OsqpConan(ConanFile):
         tc.variables['UNITTESTS'] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
         tc.variables["PRINTING"] = True
         tc.variables["PROFILING"] = True
-        tc.variables["CTRLC"] = True
+        tc.variables["CTRLC"] = self.options.with_ctrlc
         tc.variables["DFLOAT"] = False
         tc.variables["DLONG"] = True
         tc.variables["COVERAGE"] = False
