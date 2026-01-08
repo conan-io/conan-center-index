@@ -69,6 +69,16 @@ class LlamaCppConan(ConanFile):
             endif()
         """)
 
+    @property
+    def _vulkan_build_module(self):
+        return textwrap.dedent("""\
+            include(CMakeFindDependencyMacro)
+            find_dependency(Vulkan REQUIRED)
+            if(TARGET ggml-vulkan)
+                target_link_libraries(ggml-vulkan INTERFACE Vulkan::Vulkan)
+            endif()
+        """)
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -154,6 +164,10 @@ class LlamaCppConan(ConanFile):
             save(self, os.path.join(self.package_folder, "lib", "cmake", "llama-cpp-cuda-static.cmake"),
                  self._cuda_build_module)
 
+        if self.options.with_vulkan:
+            save(self, os.path.join(self.package_folder, "lib", "cmake", "llama-cpp-vulkan.cmake"),
+                 self._vulkan_build_module)
+
     def _get_backends(self):
         results = ["cpu"]
         if is_apple_os(self):
@@ -196,6 +210,11 @@ class LlamaCppConan(ConanFile):
         if self.options.with_cuda and not self.options.shared:
             self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
             module_path = os.path.join("lib", "cmake", "llama-cpp-cuda-static.cmake")
+            self.cpp_info.set_property("cmake_build_modules", [module_path])
+
+        if self.options.with_vulkan:
+            self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
+            module_path = os.path.join("lib", "cmake", "llama-cpp-vulkan.cmake")
             self.cpp_info.set_property("cmake_build_modules", [module_path])
 
         if self._is_new_llama:
