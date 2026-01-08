@@ -1,0 +1,4 @@
+sources:
+  "2.3.2":
+    url: "https://github.com/apolukhin/pfr_non_boost/archive/refs/tags/2.3.2.tar.gz"
+    sha256: "b3661c6fd8b53889110e64a9563574123d2997ac70f13a0de73a0cef2e87f4c3"
