@@ -20,6 +20,7 @@ configure_options:
 - math
 - mpi
 - nowide
+- numpy
 - process
 - program_options
 - python
