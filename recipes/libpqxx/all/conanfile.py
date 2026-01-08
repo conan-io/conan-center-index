@@ -66,7 +66,7 @@ class LibpqxxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libpq/15.4")
+        self.requires("libpq/[>=15.4 <18]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -143,7 +143,6 @@ class LibpqxxConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["pqxx"].set_property("cmake_target_name", "libpqxx::pqxx")
         self.cpp_info.components["pqxx"].set_property("pkg_config_name", "libpqxx")
         self.cpp_info.components["pqxx"].requires = ["libpq::libpq"]

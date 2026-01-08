@@ -422,7 +422,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_mysql", False) == "mariadb":
             self.requires("mariadb-connector-c/3.3.3")
         if self.options.with_pq:
-            self.requires("libpq/15.4")
+            self.requires("libpq/[>=15.4 <18]")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.11")
@@ -1017,17 +1017,12 @@ Prefix = ..""")
         self.cpp_info.set_property("cmake_file_name", "Qt5")
         self.cpp_info.set_property("pkg_config_name", "qt5")
 
-        self.cpp_info.names["cmake_find_package"] = "Qt5"
-        self.cpp_info.names["cmake_find_package_multi"] = "Qt5"
-
         build_modules = {}
 
         def _add_build_module(component, module):
             if component not in build_modules:
                 build_modules[component] = []
             build_modules[component].append(module)
-            self.cpp_info.components[component].build_modules["cmake_find_package"].append(module)
-            self.cpp_info.components[component].build_modules["cmake_find_package_multi"].append(module)
 
         libsuffix = ""
         if self.settings.os == "Android":
@@ -1056,8 +1051,6 @@ Prefix = ..""")
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt5::{module}")
             self.cpp_info.components[componentname].set_property("cmake_target_aliases", [f"Qt::{module}"])
             self.cpp_info.components[componentname].set_property("pkg_config_name", f"Qt5{module}")
-            self.cpp_info.components[componentname].names["cmake_find_package"] = module
-            self.cpp_info.components[componentname].names["cmake_find_package_multi"] = module
             if module.endswith("Private"):
                 libname = module[:-7]
             else:
@@ -1082,8 +1075,6 @@ Prefix = ..""")
             assert componentname not in self.cpp_info.components, f"Plugin {pluginname} already present in self.cpp_info.components"
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt5::{pluginname}")
             self.cpp_info.components[componentname].set_property("cmake_target_aliases", [f"Qt::{pluginname}"])
-            self.cpp_info.components[componentname].names["cmake_find_package"] = pluginname
-            self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
             if not self.options.shared:
                 self.cpp_info.components[componentname].libs = [libname + libsuffix]
             self.cpp_info.components[componentname].libdirs = [os.path.join("plugins", plugintype)]
@@ -1119,8 +1110,6 @@ Prefix = ..""")
             componentname = f"qt{module}"
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt5::{module}")
             self.cpp_info.components[componentname].set_property("cmake_target_aliases", [f"Qt::{module}"])
-            self.cpp_info.components[componentname].names["cmake_find_package"] = module
-            self.cpp_info.components[componentname].names["cmake_find_package_multi"] = module
             self.cpp_info.components[componentname].libs = [f"qtmain{libsuffix}"]
             self.cpp_info.components[componentname].includedirs = []
             self.cpp_info.components[componentname].defines = []
@@ -1285,8 +1274,6 @@ Prefix = ..""")
             _create_module("QmlModels", ["Qml"])
             self.cpp_info.components["qtQmlImportScanner"].set_property("cmake_target_name", "Qt5::QmlImportScanner")
             self.cpp_info.components["qtQmlImportScanner"].set_property("cmake_target_aliases", ["Qt::QmlImportScanner"])
-            self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package"] = "QmlImportScanner" # this is an alias for Qml and there to integrate with existing consumers
-            self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package_multi"] = "QmlImportScanner"
             self.cpp_info.components["qtQmlImportScanner"].requires = _get_corrected_reqs(["Qml"])
             if self.options.gui:
                 _create_module("Quick", ["Gui", "Qml", "QmlModels"])
@@ -1300,8 +1287,6 @@ Prefix = ..""")
         if self.options.qttools and self.options.gui and self.options.widgets:
             self.cpp_info.components["qtLinguistTools"].set_property("cmake_target_name", "Qt5::LinguistTools")
             self.cpp_info.components["qtLinguistTools"].set_property("cmake_target_aliases", ["Qt::LinguistTools"])
-            self.cpp_info.components["qtLinguistTools"].names["cmake_find_package"] = "LinguistTools"
-            self.cpp_info.components["qtLinguistTools"].names["cmake_find_package_multi"] = "LinguistTools"
             _create_module("UiPlugin", ["Gui", "Widgets"])
             self.cpp_info.components["qtUiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
             self.cpp_info.components["qtUiPlugin"].libdirs = []

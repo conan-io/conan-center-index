@@ -264,8 +264,7 @@ class GdalConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.42")
         if self.options.with_pg:
-            # libpq 15+ is not supported
-            self.requires("libpq/14.9")
+            self.requires("libpq/[>=14.9 <18]")
         if self.options.with_png:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_podofo:
