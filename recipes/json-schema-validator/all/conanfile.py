@@ -66,6 +66,9 @@ class JsonSchemaValidatorConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+        self.cpp.source.includedirs = [ "src" ]
+        if Version(self.version) < "2.1.0":
+            self.cpp.build.includedirs = [ "include"]
 
     def requirements(self):
         # to support latest compilers, we have to downgrade nlohmann_json.
@@ -112,6 +115,10 @@ class JsonSchemaValidatorConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
+        if Version(self.version) < "2.1.0":
+            copy(self, "json-schema.hpp",
+                       dst=os.path.join(self.build_folder, "include", "nlohmann"),
+                       src=os.path.join(self.source_folder, "src"))
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
