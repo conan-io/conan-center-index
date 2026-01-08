@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, apply_conandata_patches, rmdir
+from conan.tools.files import get, copy, rmdir
 import os
 
 required_conan_version = ">=2.1"
@@ -9,7 +9,6 @@ required_conan_version = ">=2.1"
 
 class CLUEsteringConan(ConanFile):
     name = "cluestering"
-    version = "2.9.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/cms-patatrack/CLUEstering"
     description = (
