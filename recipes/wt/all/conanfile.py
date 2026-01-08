@@ -98,7 +98,7 @@ class WtConan(ConanFile):
         return ["program_options", "filesystem", "thread"]
 
     def requirements(self):
-        self.requires("boost/1.83.0", transitive_headers = True)
+        self.requires("boost/[>=1.83.0 <1.87.0]", transitive_headers = True)
         if self.options.connector_http:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_ssl:
