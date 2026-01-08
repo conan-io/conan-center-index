@@ -225,7 +225,7 @@ class CeressolverConan(ConanFile):
         if self.options.use_glog:
             self.cpp_info.components["ceres"].requires.append("glog::glog")
         if self.options.get_safe("use_TBB"):
-            self.cpp_info.components["ceres"].requires.append("onetbb::onetbb")
+            self.cpp_info.components["ceres"].requires.append("onetbb::libtbb")
         if not self.options.shared:
             libcxx = stdcpp_library(self)
             if libcxx:

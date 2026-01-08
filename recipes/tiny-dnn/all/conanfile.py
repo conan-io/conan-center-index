@@ -98,7 +98,7 @@ class TinyDnnConan(ConanFile):
             self.cpp_info.components["tinydnn"].system_libs = ["pthread"]
         if self.options.with_tbb:
             self.cpp_info.components["tinydnn"].defines = ["CNN_USE_TBB=1"]
-            self.cpp_info.components["tinydnn"].requires.append("onetbb::onetbb")
+            self.cpp_info.components["tinydnn"].requires.append("onetbb::libtbb")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "tinydnn"
