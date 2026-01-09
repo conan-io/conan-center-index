@@ -111,7 +111,7 @@ class XZUtilsConan(ConanFile):
             if self.settings.build_type == "Debug":
                 tc.configure_args.append("--enable-debug")
             if self.options.with_sandbox != 'auto':
-                tc.configure_args.append("--with-sandbox={}".format(self.options.with_sandbox or "no"))
+                tc.configure_args.append(f"--enable-sandbox={self.options.with_sandbox}")
             tc.generate()
 
     @property
