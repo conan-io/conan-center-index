@@ -45,7 +45,7 @@ class HarfbuzzConan(ConanFile):
         "with_gdi": True,
         "with_uniscribe": True,
         "with_directwrite": False,
-        "with_subset": False,
+        "with_subset": True,
         "with_coretext": True,
     }
 
@@ -77,7 +77,7 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_icu:
             self.requires("icu/74.1")
         if self.options.with_glib:
-            self.requires("glib/2.78.3")
+            self.requires("glib/[^2.78]")
 
     def validate(self):
         if self.options.shared and self.options.with_glib and not self.dependencies["glib"].options.shared:
@@ -170,35 +170,54 @@ class HarfbuzzConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "harfbuzz")
-        self.cpp_info.set_property("cmake_target_name", "harfbuzz::harfbuzz")
         self.cpp_info.set_property("pkg_config_name", "harfbuzz")
-        if self.options.with_icu:
-            self.cpp_info.libs.append("harfbuzz-icu")
-        if self.options.with_subset:
-            self.cpp_info.libs.append("harfbuzz-subset")
-        self.cpp_info.libs.append("harfbuzz")
-        self.cpp_info.includedirs.append(os.path.join("include", "harfbuzz"))
+
+        self.cpp_info.components["core"].set_property("cmake_target_name", "harfbuzz::harfbuzz")
+        self.cpp_info.components["core"].libs = ["harfbuzz"]
+        self.cpp_info.components["core"].includedirs.append(os.path.join("include", "harfbuzz"))
+        if self.options.with_freetype:
+            self.cpp_info.components["core"].requires.append("freetype::freetype")
+        if self.options.with_glib:
+            self.cpp_info.components["core"].requires.append("glib::glib")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["core"].system_libs.append("m")
         if self.settings.os == "Windows" and not self.options.shared:
-            self.cpp_info.system_libs.append("user32")
+            self.cpp_info.components["core"].system_libs.append("user32")
             if self.options.with_gdi or self.options.with_uniscribe:
-                self.cpp_info.system_libs.append("gdi32")
+                self.cpp_info.components["core"].system_libs.append("gdi32")
             if self.options.with_uniscribe or self.options.with_directwrite:
-                self.cpp_info.system_libs.append("rpcrt4")
+                self.cpp_info.components["core"].system_libs.append("rpcrt4")
             if self.options.with_uniscribe:
-                self.cpp_info.system_libs.append("usp10")
+                self.cpp_info.components["core"].system_libs.append("usp10")
             if self.options.with_directwrite:
-                self.cpp_info.system_libs.append("dwrite")
+                self.cpp_info.components["core"].system_libs.append("dwrite")
         if is_apple_os(self) and self.options.get_safe("with_coretext", False):
             if self.settings.os == "Macos":
-                self.cpp_info.frameworks.append("ApplicationServices")
+                self.cpp_info.components["core"].frameworks.append("ApplicationServices")
             else:
                 self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText"])
         if not self.options.shared:
             libcxx = stdcpp_library(self)
             if libcxx:
-                self.cpp_info.system_libs.append(libcxx)
+                self.cpp_info.components["core"].system_libs.append(libcxx)
+
+        if self.options.with_icu:
+            self.cpp_info.components["icu"].libs = ["harfbuzz-icu"]
+            self.cpp_info.components["icu"].set_property("cmake_target_name", "harfbuzz::icu")
+            self.cpp_info.components["icu"].set_property("pkg_config_name", "harfbuzz-icu")
+            self.cpp_info.components["icu"].requires = ["core", "icu::icu"]
+
+        if self.options.with_subset:
+            self.cpp_info.components["subset"].libs = ["harfbuzz-subset"]
+            self.cpp_info.components["subset"].set_property("cmake_target_name", "harfbuzz::subset")
+            self.cpp_info.components["subset"].set_property("pkg_config_name", "harfbuzz-subset")
+            self.cpp_info.components["subset"].requires = ["core"]
+
+        if self.options.with_glib and can_run(self):
+            self.cpp_info.components["gobject"].libs = ["harfbuzz-gobject"]
+            self.cpp_info.components["gobject"].set_property("cmake_target_name", "harfbuzz::gobject")
+            self.cpp_info.components["gobject"].set_property("pkg_config_name", "harfbuzz-gobject")
+            self.cpp_info.components["gobject"].requires = ["core", "glib::glib"]
 
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
