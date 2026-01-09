@@ -89,11 +89,6 @@ class BeautyConan(ConanFile):
             self.cpp_info.system_libs = ["m", "pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["crypt32"]
-            debug_level = "2" if self.settings.build_type == "Debug" else "0"
-            self.cpp_info.defines.extend([
-                "_WIN32_WINNT=0xA00",
-                "_CRT_SECURE_NO_WARNINGS",
-                f"_ITERATOR_DEBUG_LEVEL={debug_level}"
-            ])
+            self.cpp_info.defines.append("_WIN32_WINNT=0xA00")
         if not self.options.shared:
             self.cpp_info.defines.append("BEAUTY_STATIC_DEFINE")
