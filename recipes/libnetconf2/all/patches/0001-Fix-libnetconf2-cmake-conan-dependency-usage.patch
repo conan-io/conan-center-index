@@ -1,0 +1,55 @@
+From 67b577b0f3159f9e43e20d2ca7ed26f8d5de24ca Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Adem=20=C3=87ak=C4=B1r?= <adem.cakir@ulakhaberlesme.com.tr>
+Date: Thu, 4 Dec 2025 14:47:45 +0300
+Subject: [PATCH] Fix libnetconf2 cmake conan dependency usage
+
+---
+ CMakeLists.txt | 19 ++++++++-----------
+ 1 file changed, 8 insertions(+), 11 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f3ef24a..b8b9414 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -236,20 +236,18 @@ if(ENABLE_TLS OR ENABLE_DNSSEC OR ENABLE_SSH)
+         message(WARNING "OpenSSL version ${OPENSSL_VERSION} is no longer maintained, consider an update.")
+     endif()
+ 
+-    target_link_libraries(netconf2 ${OPENSSL_LIBRARIES})
+-    include_directories(${OPENSSL_INCLUDE_DIR})
++    target_link_libraries(netconf2 openssl::openssl)
+ endif()
+ 
+ # dependencies - libssh
+ if(ENABLE_SSH)
+-    find_package(LibSSH 0.7.1 REQUIRED)
+-    if(LIBSSH_VERSION VERSION_EQUAL 0.9.3 OR LIBSSH_VERSION VERSION_EQUAL 0.9.4)
+-        message(FATAL_ERROR "LibSSH ${LIBSSH_VERSION} includes regression bugs and libnetconf2 will NOT work properly, try to use another version")
++    find_package(libssh REQUIRED)
++    if(libssh_VERSION VERSION_EQUAL 0.9.3 OR libssh_VERSION VERSION_EQUAL 0.9.4)
++        message(FATAL_ERROR "libssh ${libssh_VERSION} includes regression bugs and libnetconf2 will NOT work properly, try to use another version")
+     endif()
+ 
+-    target_link_libraries(netconf2 ${LIBSSH_LIBRARIES})
+-    list(APPEND CMAKE_REQUIRED_LIBRARIES ${LIBSSH_LIBRARIES})
+-    include_directories(${LIBSSH_INCLUDE_DIRS})
++    target_link_libraries(netconf2 ssh::ssh)
++    list(APPEND CMAKE_REQUIRED_LIBRARIES ${libssh_LIBRARIES})
+     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNC_ENABLED_SSH")
+ 
+     # crypt
+@@ -290,9 +288,8 @@ if(ENABLE_DNSSEC)
+ endif()
+ 
+ # dependencies - libyang
+-find_package(LibYANG ${LIBYANG_DEP_SOVERSION} REQUIRED)
+-target_link_libraries(netconf2 ${LIBYANG_LIBRARIES})
+-include_directories(${LIBYANG_INCLUDE_DIRS})
++find_package(LibYANG REQUIRED)
++target_link_libraries(netconf2 libyang::libyang)
+ 
+ # header file compatibility - shadow.h and crypt.h
+ check_include_file("shadow.h" HAVE_SHADOW)
+-- 
+2.25.1
+
