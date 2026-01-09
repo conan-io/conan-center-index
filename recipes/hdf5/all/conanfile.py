@@ -163,6 +163,7 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
         tc.variables["HDF5_BUILD_JAVA"] = False
         tc.variables["ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
+        tc.cache_variables["HDF5_ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
         tc.generate()
 
     def build(self):
