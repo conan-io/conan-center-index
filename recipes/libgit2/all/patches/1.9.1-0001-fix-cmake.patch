@@ -60,15 +60,3 @@ index b0d747114..7e3ca6b9a 100644
  
  	if(NOT LIBSSH2_FOUND)
  		message(FATAL_ERROR "LIBSSH2 not found. Set CMAKE_PREFIX_PATH if it is installed outside of the default search path.")
-@@ -22,10 +18,7 @@ elseif(USE_SSH STREQUAL ON OR USE_SSH STREQUAL "libssh2")
- 	list(APPEND LIBGIT2_SYSTEM_LIBS ${LIBSSH2_LIBRARIES})
- 	list(APPEND LIBGIT2_PC_LIBS ${LIBSSH2_LDFLAGS})
- 
--	check_library_exists("${LIBSSH2_LIBRARIES}" libssh2_userauth_publickey_frommemory "${LIBSSH2_LIBRARY_DIRS}" HAVE_LIBSSH2_MEMORY_CREDENTIALS)
--	if(HAVE_LIBSSH2_MEMORY_CREDENTIALS)
--		set(GIT_SSH_LIBSSH2_MEMORY_CREDENTIALS 1)
--	endif()
-+	set(GIT_SSH_LIBSSH2_MEMORY_CREDENTIALS 1)
- 
- 	if(WIN32 AND EMBED_SSH_PATH)
- 		file(GLOB SSH_SRC "${EMBED_SSH_PATH}/src/*.c")
