@@ -25,9 +25,6 @@ class LibvplConan(ConanFile):
         "fPIC": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -55,10 +52,6 @@ class LibvplConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # Generate a relocatable shared lib on Macos
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        # Honor BUILD_SHARED_LIBS
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):
@@ -71,6 +64,7 @@ class LibvplConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "etc"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
@@ -78,13 +72,9 @@ class LibvplConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "vpl")
         self.cpp_info.set_property("cmake_target_name", "VPL::VPL")
-        self.cpp_info.set_property("pkg_config_name", "libvpl")
-
-        # Set the library names based on the build type and platform
-        if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.libs = ["vpl"]
-        else:
-            self.cpp_info.libs = ["vpl"]
+        self.cpp_info.set_property("cmake_target_aliases", ["VPL::dispatcher"])
+        self.cpp_info.set_property("pkg_config_name", "vpl")
+        self.cpp_info.libs = ["vpl"]
 
         # Add system libraries if needed
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -92,6 +82,3 @@ class LibvplConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["advapi32"]
 
-    def system_requirements(self):
-        # System requirements are now handled by Conan packages in the requirements method
-        pass
