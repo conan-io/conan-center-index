@@ -101,7 +101,7 @@ class XZUtilsConan(ConanFile):
             tc = CMakeToolchain(self)
             tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
             if self.options.with_sandbox != 'auto':
-                tc.cache_variables["XZ_SANDBOX"] = self.options.with_sandbox or "no"
+                tc.cache_variables["XZ_SANDBOX"] = self.options.with_sandbox
             tc.generate()
         else:
             env = VirtualBuildEnv(self)
