@@ -8,11 +8,7 @@ find_package(xsimd REQUIRED CONFIG)
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE xsimd)
 
-if (XSIMD_WITH_XTL)
-    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
-else()
-    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
-endif()
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   foreach(flag "/arch:AVX")
