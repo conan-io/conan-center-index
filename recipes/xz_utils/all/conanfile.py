@@ -29,7 +29,7 @@ class XZUtilsConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_sandbox": [False, "auto", "capsicum", "pledge", "landlock"],
+        "with_sandbox": ["auto", "no", "capsicum", "pledge", "landlock"],
     }
     default_options = {
         "shared": False,
