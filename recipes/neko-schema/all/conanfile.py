@@ -18,6 +18,7 @@ class NekoSchemaConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 
     package_type = "header-library"
+    implements = "auto_header_only"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -51,8 +52,4 @@ class NekoSchemaConan(ConanFile):
 
         # Set the CMake package file name to match the official CMake config
         self.cpp_info.set_property("cmake_file_name", "NekoSchema")
-        self.cpp_info.set_property("cmake_target_name", "NekoSchema")
-        self.cpp_info.set_property("cmake_target_aliases", ["Neko::Schema"])
-
-    def package_id(self):
-        self.info.clear()
+        self.cpp_info.set_property("cmake_target_name", "Neko::Schema")
