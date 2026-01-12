@@ -4,7 +4,6 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
 from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rmdir
-from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rmdir, collect_libs
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 
@@ -160,7 +159,7 @@ class DrogonConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["drogon"]
         self.cpp_info.builddirs = ["."]
-        if self.settings.os in ["Linux", "FreeBSD"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "dl", "uuid"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["rpcrt4", "ws2_32", "crypt32", "advapi32"])
