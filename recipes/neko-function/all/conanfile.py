@@ -95,7 +95,7 @@ class NekoFunctionConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "NekoFunction")
 
         # Main target
-        self.cpp_info.set_property("cmake_target_name", "NekoFunction")
+        self.cpp_info.set_property("cmake_target_name", "Neko::Function")
 
         # Configure based on package type
         if self.options.enable_hash or self.options.enable_archive:
