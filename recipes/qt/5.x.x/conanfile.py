@@ -407,7 +407,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_icu", False):
             self.requires("icu/74.2")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/8.3.0")
+            self.requires("harfbuzz/[>=8.3.0]")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/[>=3.0 <3.1]")
@@ -1581,6 +1581,11 @@ Prefix = ..""")
 
     def _gather_libs(self, p):
         libs = ["-l" + i for i in p.cpp_info.aggregated_components().libs + p.cpp_info.aggregated_components().system_libs]
+        if p.ref.name == "libpq" and self.settings.os == "Windows" and Version(p.ref.version) >= "17":
+            # libpq/17.x uses Meson filename conventions, pass full filenames instead of "-l" flags
+            ext = "lib" if p.options.shared else "a"
+            libs = [f"lib{lib}.{ext}" for lib in p.cpp_info.aggregated_components().libs]
+            libs.extend([f"{lib}.lib" for lib in p.cpp_info.aggregated_components().system_libs])
         if is_apple_os(self):
             libs += ["-framework " + i for i in p.cpp_info.aggregated_components().frameworks]
         libs += p.cpp_info.aggregated_components().sharedlinkflags
