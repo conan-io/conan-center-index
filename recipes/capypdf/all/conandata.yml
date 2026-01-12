@@ -1,4 +1,4 @@
 sources:
-  "0.18.0":
-    url: "https://github.com/jpakkane/capypdf/releases/download/0.18.0/capypdf-0.18.0.tar.xz"
-    sha256: "bda2c0cbbc60b461b1c5d64c50cdecfee6e90b3c9ee28d33212412771caaafd4"
+  "0.19.0":
+    url: "https://github.com/jpakkane/capypdf/releases/download/0.19.0/capypdf-0.19.0.tar.xz"
+    sha256: "620c8e0a44a97880ac49a89530435aac3839e82676e9c263866154449ee7c203"
