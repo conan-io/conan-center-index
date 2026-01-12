@@ -66,7 +66,6 @@ class NekoFunctionConan(ConanFile):
         tc.variables["NEKO_FUNCTION_ENABLE_MODULE"] = False
         tc.variables["NEKO_FUNCTION_ENABLE_HASH"] = self.options.enable_hash
         tc.variables["NEKO_FUNCTION_ENABLE_ARCHIVE"] = self.options.enable_archive
-        # Automatically fetch NekoSchema until it is available in Conan
         tc.variables["NEKO_FUNCTION_AUTO_FETCH_DEPS"] = False
         tc.variables["NEKO_SCHEMA_BUILD_TESTS"] = False
         tc.generate()
