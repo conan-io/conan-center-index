@@ -45,7 +45,7 @@ class NekoFunctionConan(ConanFile):
             self.options.rm_safe("shared")
 
     def requirements(self):
-        self.requires("neko-schema/1.0.4", transitive_headers=True)
+        self.requires("neko-schema/1.1.5", transitive_headers=True)
         if self.options.enable_hash:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.enable_archive:
