@@ -40,6 +40,9 @@ class CoalConan(ConanFile):
         if self.options.with_qhull and not self.dependencies["qhull"].options.reentrant:
             raise ConanInvalidConfiguration("coal:with_qhull=True requires qhull/*:reentrant=True due libqhull_r library")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.22]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
