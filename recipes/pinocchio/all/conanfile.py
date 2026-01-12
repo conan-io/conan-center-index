@@ -35,7 +35,7 @@ class PinocchioConan(ConanFile):
         self.requires("urdfdom/4.0.0", transitive_headers=True)
         self.requires("boost/[>=1.84.0 <1.90.0]", transitive_headers=True)
         if self.options.with_collision_support:
-            self.requires("coal/[~3.0.1]")
+            self.requires("coal/[>=3.0.2]")
           
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.22]")
