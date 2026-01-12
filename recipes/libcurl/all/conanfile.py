@@ -621,6 +621,11 @@ class LibcurlConan(ConanFile):
         if is_msvc(self):
             tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
 
+        if Version(self.version) >= "8.18.0":
+            if self.options.with_libssh2:
+                # Not generated automatically
+                tc.cache_variables["LIBSSH2_FOUND"] = True
+
         tc.generate()
 
         deps = CMakeDeps(self)
