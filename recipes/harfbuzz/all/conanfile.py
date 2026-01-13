@@ -49,8 +49,6 @@ class HarfbuzzConan(ConanFile):
         "with_coretext": True,
     }
 
-    short_paths = True
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
