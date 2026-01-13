@@ -137,16 +137,20 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_ENABLE_PARALLEL"] = self.options.parallel
         tc.variables["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
         tc.cache_variables["ZLIB_PACKAGE_NAME"] = "ZLIB"
+        if self.options.szip_support == "with_szip":
+            tc.cache_variables["SZIP_LIBRARIES"] = "szip-shared" if self.dependencies[libaec_package].options.shared else "szip-static"
         libaec_package = "libaec" if self.options.szip_support == "with_libaec" else "szip"
         tc.cache_variables["LIBAEC_PACKAGE_NAME"] = libaec_package
-        tc.cache_variables["HDF5_ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
         tc.cache_variables["HDF5_USE_ZLIB_STATIC"] = not self.dependencies["zlib"].options.shared if self.options.with_zlib else False
-        tc.cache_variables["HDF5_MODULE_MODE_ZLIB"] = False
         tc.cache_variables["HDF5_USE_LIBAEC_STATIC"] = not self.dependencies[libaec_package].options.shared if bool(self.options.szip_support) else False
-        tc.variables["HDF5_ENABLE_SZIP_SUPPORT"] = bool(self.options.szip_support)
-        tc.variables["HDF5_PROVIDES_SZIP_SUPPORT"] = bool(self.options.szip_support)
-        if self.options.szip_support == "with_szip":
-            tc.variables["SZIP_LIBRARIES"] = "szip-shared" if self.dependencies[libaec_package].options.shared else "szip-static"
+        if Version(self.version) >= "2":
+            tc.cache_variables["HDF5_ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
+            tc.cache_variables["HDF5_MODULE_MODE_ZLIB"] = False
+            tc.cache_variables["HDF5_PROVIDES_SZIP_SUPPORT"] = bool(self.options.szip_support)
+            tc.cache_variables["HDF5_ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
+        else:
+            tc.variables["HDF5_ENABLE_SZIP_SUPPORT"] = bool(self.options.szip_support)
+            tc.variables["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
         tc.variables["HDF5_ENABLE_SZIP_ENCODING"] = self.options.get_safe("szip_encoding", False)
         tc.variables["HDF5_USE_ZLIB_NG"] = self.options.get_safe("with_zlibng", False)
         tc.variables["HDF5_PACKAGE_EXTLIBS"] = False
@@ -163,10 +167,12 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
         tc.variables["HDF5_BUILD_JAVA"] = False
         tc.variables["ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
-        tc.cache_variables["HDF5_ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
         tc.generate()
 
     def build(self):
+        if Version(self.version) < "2":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "set (CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
