@@ -41,7 +41,7 @@ class PackageConan(ConanFile):
         #self.requires("coin-osi/[>=0.108.7]") # source is 0.108.11
         #self.requires("coin-utils/[>=2.11.09]") # source is 2.11.12
         self.requires("coin-cbc/[>=2.10.5]") # source is 2.10.12
-        #self.requires("eigen/[>=3.4.0]")
+        self.requires("eigen/[>=3.4.0]")
         self.requires("highs/[>=1.12.0]")
         self.requires("protobuf/6.32.1", transitive_headers=True, transitive_libs=True) # source is 33.1
         self.requires("re2/[>=20240702]")
