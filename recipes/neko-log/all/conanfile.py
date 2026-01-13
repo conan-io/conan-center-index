@@ -9,7 +9,6 @@ required_conan_version = ">=2.1"
 
 class NekoLogConan(ConanFile):
     name = "neko-log"
-    # version is managed by config.yml in ConanCenter
     license = "MIT OR Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/moehoshio/NekoLog"
