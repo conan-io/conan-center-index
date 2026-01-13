@@ -38,9 +38,7 @@ class NekoThreadPoolConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["NEKO_THREAD_POOL_BUILD_TESTS"] = False
         tc.variables["NEKO_THREAD_POOL_ENABLE_MODULE"] = False
-        # Automatically fetch NekoSchema until it is available in Conan
-        tc.variables["NEKO_THREAD_POOL_AUTO_FETCH_DEPS"] = True
-        tc.variables["NEKO_SCHEMA_BUILD_TESTS"] = False
+        tc.variables["NEKO_THREAD_POOL_AUTO_FETCH_DEPS"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
