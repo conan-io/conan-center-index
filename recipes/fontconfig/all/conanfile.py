@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches, copy, export_conandata_patches, get,
@@ -77,9 +77,10 @@ class FontconfigConan(ConanFile):
             "sysconfdir": os.path.join("res", "etc"),
             "datadir": os.path.join("res", "share"),
         })
-        # INFO: AppleClang 17: 2.13.93 fails fccfg.c:357:9: error: incompatible integer to pointer ... [-Wint-conversion]
-        tc.extra_cflags.append("-Wno-error=int-conversion")
-        tc.generate()
+        if is_apple_os(self):
+            # INFO: AppleClang 17: 2.13.93 fails fccfg.c:357:9: error: incompatible integer to pointer ... [-Wint-conversion]
+            tc.extra_cflags.append("-Wno-error=int-conversion")
+            tc.generate()
 
     def _patch_files(self):
         apply_conandata_patches(self)
