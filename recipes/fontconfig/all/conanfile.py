@@ -11,7 +11,7 @@ from conan.tools.meson import Meson, MesonToolchain
 
 import os
 
-required_conan_version = ">=1.64.0 <2 || >=2.2.0"
+required_conan_version = ">=2.1"
 
 
 class FontconfigConan(ConanFile):
@@ -30,6 +30,7 @@ class FontconfigConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    package_type = "library"
 
     def export_sources(self):
         export_conandata_patches(self)
