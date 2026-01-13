@@ -46,7 +46,7 @@ class PackageConan(ConanFile):
         self.requires("libtiff/[>=4.6.0 <5]")
 
     def build_requirements(self):
-        self.tool_requires("meson/[>=1.2.3 <2]")
+        self.tool_requires("meson/[>=1.10.0 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2.0 <3]")
 
@@ -88,5 +88,7 @@ class PackageConan(ConanFile):
         self.cpp_info.libs = ["capypdf"]
         self.cpp_info.includedirs = ['include', 'include/capypdf-0']
         self.cpp_info.set_property("pkg_config_name", "capypdf")
+        if not self.options.shared:
+            self.cpp_info.defines = ["CAPYPDF_STATIC"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m"])
