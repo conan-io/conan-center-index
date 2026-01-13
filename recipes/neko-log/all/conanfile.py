@@ -27,7 +27,6 @@ class NekoLogConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        # Download sources from GitHub using conandata.yml
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
