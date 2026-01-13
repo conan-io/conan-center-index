@@ -34,12 +34,9 @@ class NekoLogConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["NEKO_LOG_BUILD_TESTS"] = False  # Don't build tests in ConanCenter
+        tc.variables["NEKO_LOG_BUILD_TESTS"] = False
         tc.variables["NEKO_LOG_USE_MODULES"] = False  # Disable modules for compatibility
-        # Enable auto-fetch to get NekoSchema via FetchContent
         tc.variables["NEKO_LOG_AUTO_FETCH_DEPS"] = False
-        # Tell NekoSchema not to build tests (prevents GoogleTest installation)
-        tc.variables["NEKO_SCHEMA_BUILD_TESTS"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
