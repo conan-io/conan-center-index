@@ -29,8 +29,8 @@ class SentryNativeConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "backend": ["none", "inproc", "crashpad", "breakpad"],
-        "transport": ["none", "curl", "winhttp"],
+        "backend": ["auto", "none", "inproc", "crashpad", "breakpad"],
+        "transport": ["auto", "none", "curl", "winhttp"],
         "qt": [True, False],
         "with_crashpad": ["google", "sentry"],
         "crashpad_with_tls": ["openssl", False],
@@ -40,8 +40,8 @@ class SentryNativeConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "backend": "inproc",  # overwritten in config_options
-        "transport": "curl",  # overwritten in config_options
+        "backend": "auto",  # overwritten in configure
+        "transport": "auto",  # overwritten in configure
         "qt": False,
         "with_crashpad": "sentry",
         "crashpad_with_tls": "openssl",
@@ -51,11 +51,13 @@ class SentryNativeConan(ConanFile):
 
     @property
     def _min_cppstd(self):
+        if self.options.get_safe("backend") == "crashpad" and self.options.get_safe("with_crashpad") == "sentry":
+            return "20"
         return "17"
 
     @property
     def _minimum_compilers_version(self):
-        if self.options.get_safe("with_crashpad") == "sentry":
+        if self.options.get_safe("backend") == "crashpad" and self.options.get_safe("with_crashpad") == "sentry":
             # Sentry-native 0.7.8 requires C++20: Concepts and bit_cast
             # https://github.com/chromium/mini_chromium/blob/e49947ad445c4ed4bc1bb4ed60bbe0fe17efe6ec/base/numerics/byte_conversions.h#L88
             return {
@@ -83,29 +85,37 @@ class SentryNativeConan(ConanFile):
         if self.settings.os != "Windows":
             del self.options.wer
 
-        # Configure default transport
-        if self.settings.os == "Windows":
-            self.options.backend = "crashpad"
-            self.options.transport = "winhttp"
-        elif self.settings.os == "Android":
-            self.options.transport = "none"
-
-        # Configure default backend
-        # See https://github.com/getsentry/sentry-native/pull/927
-        if self.settings.os == "Macos":
-            self.options.backend = "crashpad"
-        if self.settings.os in ("FreeBSD", "Linux"):
-            self.options.backend = "crashpad"
-        if self.settings.os not in ("Linux", "Android") or self.options.backend != "crashpad" or self.options.with_crashpad != "sentry":
+        if self.settings.os not in ("Linux", "Android"):
             del self.options.crashpad_with_tls
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+        if self.options.transport == "auto":
+            if self.settings.os == "Windows":
+                self.options.transport = "winhttp"
+            elif self.settings.os == "Android":
+                self.options.transport = "none"
+            else:
+                self.options.transport = "curl"
+
+        # Configure default backend
+        # See https://github.com/getsentry/sentry-native/pull/927
+        if self.options.backend == "auto":
+            if self.settings.os in ("FreeBSD", "Linux", "Macos", "Windows"):
+                self.options.backend = "crashpad"
+            elif self.settings.os == "Android":
+                self.options.backend = "inproc"
+            else:
+                self.options.backend = "none"
+        
         if self.options.backend != "crashpad":
             self.options.rm_safe("with_crashpad")
         if self.options.backend != "breakpad":
             self.options.rm_safe("with_breakpad")
+        if self.options.backend != "crashpad" or self.options.get_safe("with_crashpad") != "sentry":
+            self.options.rm_safe("crashpad_with_tls")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -141,7 +151,7 @@ class SentryNativeConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os == "Windows":
-            self.tool_requires("cmake/[>=3.16.4 <4]")
+            self.tool_requires("cmake/[>=3.16.4 <5]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
