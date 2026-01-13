@@ -29,7 +29,6 @@ class BearConan(ConanFile):
         self.requires("protobuf/[*]")
         self.requires("spdlog/[>=1.11.0 <2]")
         self.requires("fmt/[*]")
-
         self.requires("nlohmann_json/[~3.11]")
 
     def build_requirements(self):
