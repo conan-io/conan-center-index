@@ -38,7 +38,6 @@ class NekoEventConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["NEKO_EVENT_BUILD_TESTS"] = False
         tc.variables["NEKO_EVENT_ENABLE_MODULE"] = False
-        # Automatically fetch NekoSchema until it is available in Conan
         tc.variables["NEKO_EVENT_AUTO_FETCH_DEPS"] = False
         tc.generate()
 
