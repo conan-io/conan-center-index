@@ -16,7 +16,6 @@ class NekoLogConan(ConanFile):
     description = "An easy-to-use, modern, lightweight, and efficient C++20 logging library"
     topics = ("logging", "cpp20", "header-only", "async")
 
-    # Header-only library
     package_type = "header-library"
     implements = "auto_header_only"
 
