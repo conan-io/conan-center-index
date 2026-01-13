@@ -3,6 +3,6 @@ project(test_package LANGUAGES CXX)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 
-find_package(BehaviorTree REQUIRED CONFIG)
+find_package(behaviortree_cpp REQUIRED CONFIG)
 target_link_libraries(${PROJECT_NAME} PRIVATE BT::behaviortree_cpp)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
