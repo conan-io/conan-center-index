@@ -34,7 +34,7 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("abseil/20250814.1", transitive_headers=True, transitive_libs=True, override=True)
+        self.requires("abseil/20250814.0", transitive_headers=True, transitive_libs=True) # source is 20250814.1 which conflicts with protobuf 32.1, and that needs an upgrade anyway
         #self.requires("boost/1.87.0", override=True) # build this because conan version lacks Boost::multiprecision or Boost::serialization
         self.requires("bzip2/1.0.8")
         #self.requires("coin-clp/[>=1.17.0]")
