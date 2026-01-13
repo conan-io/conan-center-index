@@ -111,11 +111,6 @@ class FontconfigConan(ConanFile):
         fontconfig_path = os.path.join(self.package_folder, "res", "etc", "fonts")
         self.runenv_info.append_path("FONTCONFIG_PATH", fontconfig_path)
 
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "Fontconfig"
-        self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"
-        self.env_info.FONTCONFIG_PATH = fontconfig_path
-
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
     if not conanfile.settings.get_safe("compiler.runtime"):
