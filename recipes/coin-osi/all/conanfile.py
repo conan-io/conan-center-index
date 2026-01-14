@@ -49,7 +49,7 @@ class CoinOsiConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("coin-utils/2.11.9")
+        self.requires("coin-utils/2.11.12")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
