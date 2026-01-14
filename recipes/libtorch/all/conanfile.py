@@ -74,7 +74,7 @@ class LibtorchRecipe(ConanFile):
 
     def requirements(self):
         self.requires("concurrentqueue/1.0.4", transitive_headers=True)
-        self.requires("cpp-httplib/0.27.0")
+        self.requires("cpp-httplib/[~0.30]")
         self.requires("cpuinfo/[>=cci.20250321]", transitive_headers=True)
         self.requires("eigen/[>=3 <4]")
         # mobile_bytecode_generated.h is fixed to 24.12.23. If we want to support other versions, we will need to regenerate the header
@@ -249,6 +249,7 @@ class LibtorchRecipe(ConanFile):
             return component
 
         self.cpp_info.set_property("cmake_file_name", "Torch")
+        self.cpp_info.set_property("cmake_additional_variables_prefixes", ["TORCH"])
 
         # C10 component
         c10 = _whole_archive(self.cpp_info.components["c10"], "c10")
