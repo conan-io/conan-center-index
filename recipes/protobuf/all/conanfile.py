@@ -85,11 +85,15 @@ class ProtobufConan(ConanFile):
         elif self._protobuf_release >= "22.0":
             self.requires("abseil/[>=20230802.1 <=20250127.0]", transitive_headers=True)
 
-    def validate_build(self):
-        if self._protobuf_release >= "30.1":
-            check_min_cppstd(self, 17)
-        elif self._protobuf_release >= "22.0":
-            check_min_cppstd(self, 14)    
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "6",
+            "clang": "5",
+            "apple-clang": "10",
+            "Visual Studio": "15",
+            "msvc": "191",
+        }
 
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):
@@ -99,10 +103,18 @@ class ProtobufConan(ConanFile):
             not self.dependencies["abseil"].options.shared:
             raise ConanInvalidConfiguration("When building protobuf as a shared library on Windows, "
                                             "abseil needs to be a shared library too")
-        if self._protobuf_release >= "30.1" and self.settings_target is None:
+        if self._protobuf_release >= "30.1":
             check_min_cppstd(self, 17)
-        elif self._protobuf_release >= "22.0" and self.settings_target is None:
-            check_min_cppstd(self, 14)
+        elif self._protobuf_release >= "22.0":
+            if self.settings.compiler.get_safe("cppstd"):
+                check_min_cppstd(self, 14)
+            else:
+                minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), None)
+                compiler_version = Version(self.settings.compiler.version)
+                if minimum_version and compiler_version < minimum_version:
+                    raise ConanInvalidConfiguration(
+                        f"{self.ref} requires C++14, which your compiler does not support.",
+                    )
 
         check_min_vs(self, "190")
 
@@ -110,7 +122,7 @@ class ProtobufConan(ConanFile):
             if Version(self.settings.compiler.version) < "4":
                 raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 4")
 
-        if "abseil" in self.dependencies.host and self.settings_target is not None:
+        if "abseil" in self.dependencies.host:
             abseil_cppstd = self.dependencies.host['abseil'].info.settings.compiler.cppstd
             if abseil_cppstd != self.settings.compiler.cppstd:
                 raise ConanInvalidConfiguration(f"Protobuf and abseil must be built with the same compiler.cppstd setting")
@@ -310,3 +322,14 @@ class ProtobufConan(ConanFile):
                 self.cpp_info.components["libprotobuf-lite"].requires.extend(absl_deps)
                 if not self.options.shared:
                     self.cpp_info.components["libprotobuf-lite"].requires.extend(["utf8_validity"])
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "Protobuf"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "protobuf"
+        self.cpp_info.names["pkg_config"] ="protobuf_full_package"
+        for generator in ["cmake_find_package", "cmake_find_package_multi"]:
+            self.cpp_info.components["libprotobuf"].build_modules[generator] = build_modules
+        if self.options.lite:
+            for generator in ["cmake_find_package", "cmake_find_package_multi"]:
+                self.cpp_info.components["libprotobuf-lite"].build_modules[generator] = build_modules
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
