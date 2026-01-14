@@ -10,7 +10,7 @@ from conan.tools.files import (
     rmdir, copy,
 )
 from conan.tools.apple import is_apple_os
-from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from pathlib import Path
 from conan.tools.system import PipEnv
 
@@ -47,6 +47,11 @@ class LibtorchRecipe(ConanFile):
     implements = ["auto_shared_fpic"]
 
     @property
+    def _is_clang_cl(self):
+        return self.settings.compiler == "clang" and self.settings.os == "Windows" and \
+               self.settings.compiler.get_safe("runtime")
+
+    @property
     def _has_backtrace(self):
         # Even though backtrace is Windows compatible, libtorch expects to find it only on Unix-like systems
         # Failing otherwise as it will include headers not present in windows
@@ -58,7 +63,7 @@ class LibtorchRecipe(ConanFile):
 
     @property
     def _has_qnnpack(self):
-        return self.settings.compiler != "msvc"
+        return not is_msvc(self) and not self._is_clang_cl
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -249,6 +254,7 @@ class LibtorchRecipe(ConanFile):
             return component
 
         self.cpp_info.set_property("cmake_file_name", "Torch")
+        # Make it compatible with upstream example usages
         self.cpp_info.set_property("cmake_additional_variables_prefixes", ["TORCH"])
 
         # C10 component
