@@ -1,0 +1,4 @@
+sources:
+  "1.4.2":
+    url: "https://github.com/pytorch/FBGEMM/archive/refs/tags/v1.4.2.tar.gz"
+    sha256: "525abde5f161c1730952f175adfcbc77a4b7eeebd7b7a342170e9011734164cf"

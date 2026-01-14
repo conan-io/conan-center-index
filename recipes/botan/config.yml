@@ -1,19 +1,7 @@
 versions:
   "3.10.0":
     folder: all
-  "3.9.0":
-    folder: all
-  "3.8.1":
-    folder: all
   "3.7.1+rscs1":
-    folder: all
-  "3.6.1":
-    folder: all
-  "3.5.0":
-    folder: all
-  "3.4.0":
-    folder: all
-  "3.3.0":
     folder: all
   "2.19.5":
     folder: all

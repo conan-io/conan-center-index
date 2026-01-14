@@ -2,57 +2,6 @@ sources:
   "4.11.2":
     url: "https://github.com/emweb/wt/archive/4.11.2.tar.gz"
     sha256: "d28ce0b18121a5ded5ad9737ee664cac17ff1e287d339cc422ecef57fa68c2b6"
-  "4.10.1":
-    url: "https://github.com/emweb/wt/archive/4.10.1.tar.gz"
-    sha256: "f6d6114416a628604793197cd077066a9d4d98799bbb288b97de42f66705bde5"
-  "4.10.0":
-    url: "https://github.com/emweb/wt/archive/4.10.0.tar.gz"
-    sha256: "7090023d4fc4b6594bf4cb11072d9d3d775269327aece9a8993c7bbe46decb9d"
-  "4.9.1":
-    url: "https://github.com/emweb/wt/archive/4.9.1.tar.gz"
-    sha256: "253c61779623ed125bdd604a7b7fe48e64bd991548d17180f040bfa88ccafd98"
-  "4.8.0":
-    url: "https://github.com/emweb/wt/archive/4.8.0.tar.gz"
-    sha256: "e4030d8f530ec7bdd6b341a2bf31a608fb9ebcedb905155f83ec7f300a7d420d"
-  "4.7.1":
-    url: "https://github.com/emweb/wt/archive/4.7.1.tar.gz"
-    sha256: "04548ff017b026f7c2e46fd2f12cc70fbeeadebaf473fb1d6eb472868d11dce1"
-  "4.6.2":
-    url: "https://github.com/emweb/wt/archive/refs/tags/4.6.2.tar.gz"
-    sha256: "a4e113874c107185a18b052f6d8fe57114d47b26410dee148ed22652eeff4d2f"
-  "4.6.0":
-    url: "https://github.com/emweb/wt/archive/4.6.0.tar.gz"
-    sha256: "7f709e132d32c4925e6db0a590c7ccc5613344e8b9052676ef891a25ccb550e6"
 patches:
   "4.11.2":
     - patch_file: "patches/4.8.0-0001-use-cci-package.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "4.10.1":
-    - patch_file: "patches/4.8.0-0001-use-cci-package.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "4.10.0":
-    - patch_file: "patches/4.8.0-0001-use-cci-package.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "4.9.1":
-    - patch_file: "patches/4.8.0-0001-use-cci-package.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "4.8.0":
-    - patch_file: "patches/4.8.0-0001-use-cci-package.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "4.7.1":
-    - patch_file: "patches/4.7.1-0001-use-cci-package.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "4.6.2":
-    - patch_file: "patches/4.6.2-0001-use-cci-package.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "4.6.0":
-    - patch_file: "patches/4.6.2-0001-use-cci-package.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
