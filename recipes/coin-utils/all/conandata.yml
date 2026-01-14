@@ -1,4 +1,7 @@
 sources:
+  "2.11.12":
+    url: "https://github.com/coin-or/CoinUtils/archive/releases/2.11.12.tar.gz"
+    sha256: "eef1785d78639b228ae2de26b334129fe6a7d399c4ac6f8fc5bb9054ba00de64"
   "2.11.10":
     url: "https://github.com/coin-or/CoinUtils/archive/releases/2.11.10.tar.gz"
     sha256: "80c7c215262df8d6bd2ba171617c5df844445871e9891ec6372df12ccbe5bcfd"
