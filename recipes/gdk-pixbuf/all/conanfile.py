@@ -56,8 +56,7 @@ class GdkPixbufConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
         if self.options.shared:
-            wildcard = "" if Version(conan_version) < "2.0.0" else "/*"
-            self.options[f"glib{wildcard}"].shared = True
+            self.options["glib/*"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
