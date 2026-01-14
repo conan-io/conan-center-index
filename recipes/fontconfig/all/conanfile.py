@@ -8,6 +8,7 @@ from conan.tools.files import (
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.scm import Version
 
 import os
 
@@ -77,7 +78,7 @@ class FontconfigConan(ConanFile):
             "sysconfdir": os.path.join("res", "etc"),
             "datadir": os.path.join("res", "share"),
         })
-        if Version(self.version) >= "2.17.0":
+        if Version(self.version) >= "2.16.0":
             tc.project_options.update({
                 "xml-backend": "expat",
             })
