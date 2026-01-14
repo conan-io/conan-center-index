@@ -3,6 +3,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
 
@@ -30,6 +31,10 @@ class EfswConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 11)
+
+    def build_requirements(self):
+        if Version(self.version) >= "1.5.1":
+            self.tool_requires("cmake/[>=3.27]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
