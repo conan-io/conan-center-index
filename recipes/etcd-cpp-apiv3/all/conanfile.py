@@ -47,7 +47,11 @@ class EtcdCppApiv3Conan(ConanFile):
         self.tool_requires("grpc/<host_version>")
     
     def validate(self):
-        check_min_cppstd(self, 14)
+        # etcd-cpp-apiv3 requires at least C++14, but if grpc is >=1.70.0, C++17 is required
+        min_cppstd = "17" if self.dependencies["grpc"].ref.version >= "1.70.0" else "14"
+        if min_cppstd == "17":
+            self.output.warning("etcd-cpp-apiv3 requires C++14, but grpc >=1.70.0 requires C++17. Enforcing C++17.")
+        check_min_cppstd(self, min_cppstd)
     
     def export_sources(self):
         export_conandata_patches(self)
