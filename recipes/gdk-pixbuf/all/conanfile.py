@@ -86,7 +86,7 @@ class GdkPixbufConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/[>=1.2.3 <2]")
+        self.tool_requires("meson/[>=1.5 <2]")
         # FIXME: unify libgettext and gettext??
         # INFO: gettext provides msgfmt, which is required to build the .mo files
         self.tool_requires("gettext/0.22.5")
@@ -115,14 +115,21 @@ class GdkPixbufConan(ConanFile):
         tc = MesonToolchain(self)
         enabled_disabled = lambda v: "enabled" if v else "disabled"
         true_false = lambda v: "true" if v else "false"
+        docs_name = "docs" if Version(self.version) < "2.44.0" else "documentation"
         tc.project_options.update({
             "builtin_loaders": "all",
             "gio_sniffing": "false",
             "introspection": enabled_disabled(self.options.with_introspection),
-            "docs": "false",
+            docs_name: "false",
+            "tests": "false",
             "man": "false",
             "installed_tests": "false"
         })
+        if Version(self.version) >= "2.44.0":
+            tc.project_options.update({
+                "thumbnailer": "disabled",
+                "glycin": "disabled",
+            })
 
         tc.project_options.update({
             "png": enabled_disabled(self.options.with_libpng),
@@ -142,18 +149,20 @@ class GdkPixbufConan(ConanFile):
         meson_build = os.path.join(self.source_folder, "meson.build")
         gdk_meson_build = os.path.join(self.source_folder, "gdk-pixbuf", "meson.build")
 
-        replace_in_file(self, meson_build, "subdir('tests')", "#subdir('tests')")
-        replace_in_file(self, meson_build, "subdir('thumbnailer')", "#subdir('thumbnailer')")
+        if Version(self.version) < "2.44.0":
+            replace_in_file(self, meson_build, "subdir('tests')", "#subdir('tests')")
+            replace_in_file(self, meson_build, "subdir('thumbnailer')", "#subdir('thumbnailer')")
         replace_in_file(self, meson_build, "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')", "'true'")
         # workaround https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/issues/203
         replace_in_file(self, os.path.join(self.source_folder, "build-aux", "post-install.py"),
                         "close_fds=True", "close_fds=(sys.platform != 'win32')")
         replace_in_file(self, meson_build, "is_msvc_like = ", "is_msvc_like = false #")
-        # Fix libtiff and libpng not being linked against when building statically
-        # Reported upstream: https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/merge_requests/159
-        replace_in_file(self, gdk_meson_build,
-                        "dependencies: gdk_pixbuf_deps + [ gdkpixbuf_dep ],",
-                        "dependencies: loaders_deps + gdk_pixbuf_deps + [ gdkpixbuf_dep ],")
+        if Version(self.version) < "2.44.0":
+            # Fix libtiff and libpng not being linked against when building statically
+            # Reported upstream: https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/merge_requests/159
+            replace_in_file(self, gdk_meson_build,
+                            "dependencies: gdk_pixbuf_deps + [ gdkpixbuf_dep ],",
+                            "dependencies: loaders_deps + gdk_pixbuf_deps + [ gdkpixbuf_dep ],")
         # Forcing Conan libgettext instead of system one (if OS != Linux)
         if self.settings.os != "Linux":
             # FIXME: unify libgettext and gettext ??
@@ -204,23 +213,17 @@ class GdkPixbufConan(ConanFile):
             self.cpp_info.exelinkflags = ldflags
             self.cpp_info.sharedlinkflags = ldflags
 
-        # Breaking change since Conan >= 2.0.8
-        # Related to https://github.com/conan-io/conan/pull/14233
-        libdir_variable = "libdir1" if Version(conan_version) < "2.0" else "libdir"
         pkgconfig_variables = {
             "bindir": "${prefix}/bin",
             "gdk_pixbuf_binary_version": "2.10.0",
-            "gdk_pixbuf_binarydir": "${%s}/gdk-pixbuf-2.0/2.10" % libdir_variable,
+            "gdk_pixbuf_binarydir": "${libdir}/gdk-pixbuf-2.0/2.10",
             "gdk_pixbuf_moduledir": "${gdk_pixbuf_binarydir}/loaders",
             "gdk_pixbuf_cache_file": "${gdk_pixbuf_binarydir}/loaders.cache",
             "gdk_pixbuf_csource": "${bindir}/gdk-pixbuf-csource",
             "gdk_pixbuf_pixdata": "${bindir}/gdk-pixbuf-pixdata",
             "gdk_pixbuf_query_loaders": "${bindir}/gdk-pixbuf-query-loaders"
         }
-        self.cpp_info.set_property(
-            "pkg_config_custom_content",
-            "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items()))
-
+        self.cpp_info.set_property("pkg_config_custom_content", pkgconfig_variables)
         gdk_pixbuf_pixdata = os.path.join(self.package_folder, "bin", "gdk-pixbuf-pixdata")
         self.runenv_info.define_path("GDK_PIXBUF_PIXDATA", gdk_pixbuf_pixdata)
 
