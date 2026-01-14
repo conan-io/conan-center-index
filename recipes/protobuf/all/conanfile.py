@@ -85,16 +85,6 @@ class ProtobufConan(ConanFile):
         elif self._protobuf_release >= "22.0":
             self.requires("abseil/[>=20230802.1 <=20250127.0]", transitive_headers=True)
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "6",
-            "clang": "5",
-            "apple-clang": "10",
-            "Visual Studio": "15",
-            "msvc": "191",
-        }
-
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
@@ -106,15 +96,7 @@ class ProtobufConan(ConanFile):
         if self._protobuf_release >= "30.1":
             check_min_cppstd(self, 17)
         elif self._protobuf_release >= "22.0":
-            if self.settings.compiler.get_safe("cppstd"):
-                check_min_cppstd(self, 14)
-            else:
-                minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), None)
-                compiler_version = Version(self.settings.compiler.version)
-                if minimum_version and compiler_version < minimum_version:
-                    raise ConanInvalidConfiguration(
-                        f"{self.ref} requires C++14, which your compiler does not support.",
-                    )
+            check_min_cppstd(self, 14)
 
         check_min_vs(self, "190")
 
