@@ -57,7 +57,7 @@ class IttApiConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         copy(self, "*.txt", src=os.path.join(self.source_folder, "LICENSES"), dst=os.path.join(self.package_folder, "licenses"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         # https://github.com/intel/ittapi/blob/03f7260c96d4b437d12dceee7955ebb1e30e85ad/CMakeLists.txt#L176
