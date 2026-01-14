@@ -2,36 +2,22 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
-from conan.tools.gnu import PkgConfigDeps
-from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class BearConan(ConanFile):
     name = "bear"
+    package_type = "application"
     description = "Bear is a tool that generates a compilation database for clang tooling"
     license = "GPL-3.0-only"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/rizsotto/Bear"
     topics = ("clang", "compilation", "database", "llvm")
     settings = "os", "arch", "compiler", "build_type"
-
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "9",
-            "clang": "12",
-            "apple-clang": "12",
-        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -40,51 +26,44 @@ class BearConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("grpc/1.50.1")
-        self.requires("fmt/9.1.0")
-        self.requires("spdlog/1.11.0")
-        self.requires("nlohmann_json/3.11.2")
+        self.requires("grpc/[>=1.50.1 <2]")
+        self.requires("protobuf/[*]")
+        self.requires("spdlog/[>=1.11.0 <2]")
+        self.requires("fmt/[*]")
+        self.requires("nlohmann_json/[~3.11]")
 
     def build_requirements(self):
-        self.tool_requires("grpc/1.50.1")
+        self.tool_requires("grpc/<host_version>")
+        self.tool_requires("protobuf/<host_version>")
 
     def package_id(self):
         del self.info.settings.compiler
         del self.info.settings.build_type
 
+    def validate_build(self):
+        check_min_cppstd(self, 17)
+
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built on windows.")
+            raise ConanInvalidConfiguration("Windows is not supported by bear")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ENABLE_UNIT_TESTS"] = False
-        tc.variables["ENABLE_FUNC_TESTS"] = False
+        tc.cache_variables["ENABLE_UNIT_TESTS"] = False
+        tc.cache_variables["ENABLE_FUNC_TESTS"] = False
+        tc.cache_variables["CMAKE_PROJECT_VERSION"] = self.version
         tc.generate()
-        # In case there are dependencies listed on requirements, CMakeDeps should be used
+
         tc = CMakeDeps(self)
         tc.generate()
-        
-        pc = PkgConfigDeps(self)
-        pc.generate()
-
-        tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, "source"))
         cmake.build()
 
     def package(self):
@@ -92,7 +71,6 @@ class BearConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
@@ -105,7 +83,3 @@ class BearConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        bin_folder = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bin_folder)
