@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, rename, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir, rm, save
-from conan.tools.microsoft import check_min_vs, msvc_runtime_flag, is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
 import os
@@ -322,14 +322,3 @@ class ProtobufConan(ConanFile):
                 self.cpp_info.components["libprotobuf-lite"].requires.extend(absl_deps)
                 if not self.options.shared:
                     self.cpp_info.components["libprotobuf-lite"].requires.extend(["utf8_validity"])
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "Protobuf"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "protobuf"
-        self.cpp_info.names["pkg_config"] ="protobuf_full_package"
-        for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-            self.cpp_info.components["libprotobuf"].build_modules[generator] = build_modules
-        if self.options.lite:
-            for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-                self.cpp_info.components["libprotobuf-lite"].build_modules[generator] = build_modules
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
