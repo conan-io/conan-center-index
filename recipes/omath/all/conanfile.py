@@ -91,12 +91,3 @@ class OmathConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=f"{self.package_folder}/licenses")
         cmake = CMake(self)
         cmake.install()
-
-    def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "omath")
-        self.cpp_info.set_property("cmake_target_name", "omath::omath")
-        
-        self.cpp_info.libs = ["omath"]
-        
-        if self.options.imgui:
-            self.cpp_info.requires = ["imgui::imgui"]
