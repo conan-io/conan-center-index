@@ -39,7 +39,7 @@ else()
 endif()
 
 function(IDLCXX_GENERATE)
-  set(one_value_keywords TARGET DEFAULT_EXTENSIBILITY BASE_DIR OUTPUT_DIR)
+  set(one_value_keywords TARGET DEFAULT_EXTENSIBILITY BASE_DIR)
   set(multi_value_keywords FILES FEATURES INCLUDES WARNINGS)
   cmake_parse_arguments(
     IDLCXX "" "${one_value_keywords}" "${multi_value_keywords}" "" ${ARGN})
@@ -53,7 +53,6 @@ function(IDLCXX_GENERATE)
     WARNINGS ${IDLCXX_WARNINGS}
     DEFAULT_EXTENSIBILITY ${IDLCXX_DEFAULT_EXTENSIBILITY}
     SUFFIXES .hpp .cpp
-    OUTPUT_DIR ${IDLCXX_OUTPUT_DIR}
     DEPENDS ${_idlcxx_depends}
   )
   if(CYCLONEDDS_CXX_ENABLE_LEGACY)
