@@ -5,4 +5,3 @@ sources:
 patches:
   "3.1.6":
     - patch_file: "patches/grpc-use-cmake-config.diff"
-    - patch_file: "patches/fix-msvc-compiler-flags.diff"

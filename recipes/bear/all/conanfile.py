@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
@@ -41,6 +42,10 @@ class BearConan(ConanFile):
 
     def validate_build(self):
         check_min_cppstd(self, 17)
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows is not supported by bear")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
