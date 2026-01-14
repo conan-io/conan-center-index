@@ -41,7 +41,6 @@ class GdkPixbufConan(ConanFile):
         "with_libjpeg": "libjpeg",
         "with_introspection": False,
     }
-    short_paths = True
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -113,24 +112,16 @@ class GdkPixbufConan(ConanFile):
         deps.generate()
         tc = MesonToolchain(self)
         enabled_disabled = lambda v: "enabled" if v else "disabled"
-        true_false = lambda v: "true" if v else "false"
-        docs_name = "docs" if Version(self.version) < "2.44.0" else "documentation"
         tc.project_options.update({
             "builtin_loaders": "all",
             "gio_sniffing": "false",
             "introspection": enabled_disabled(self.options.with_introspection),
-            docs_name: "false",
+            "documentation": "false",
             "tests": "false",
             "man": "false",
-            "installed_tests": "false"
-        })
-        if Version(self.version) >= "2.44.0":
-            tc.project_options.update({
-                "thumbnailer": "disabled",
-                "glycin": "disabled",
-            })
-
-        tc.project_options.update({
+            "installed_tests": "false",
+            "thumbnailer": "disabled",
+            "glycin": "disabled",
             "png": enabled_disabled(self.options.with_libpng),
             "tiff": enabled_disabled(self.options.with_libtiff),
             "jpeg": enabled_disabled(self.options.with_libjpeg)
@@ -148,20 +139,11 @@ class GdkPixbufConan(ConanFile):
         meson_build = os.path.join(self.source_folder, "meson.build")
         gdk_meson_build = os.path.join(self.source_folder, "gdk-pixbuf", "meson.build")
 
-        if Version(self.version) < "2.44.0":
-            replace_in_file(self, meson_build, "subdir('tests')", "#subdir('tests')")
-            replace_in_file(self, meson_build, "subdir('thumbnailer')", "#subdir('thumbnailer')")
         replace_in_file(self, meson_build, "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')", "'true'")
         # workaround https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/issues/203
         replace_in_file(self, os.path.join(self.source_folder, "build-aux", "post-install.py"),
                         "close_fds=True", "close_fds=(sys.platform != 'win32')")
         replace_in_file(self, meson_build, "is_msvc_like = ", "is_msvc_like = false #")
-        if Version(self.version) < "2.44.0":
-            # Fix libtiff and libpng not being linked against when building statically
-            # Reported upstream: https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/merge_requests/159
-            replace_in_file(self, gdk_meson_build,
-                            "dependencies: gdk_pixbuf_deps + [ gdkpixbuf_dep ],",
-                            "dependencies: loaders_deps + gdk_pixbuf_deps + [ gdkpixbuf_dep ],")
         # Forcing Conan libgettext instead of system one (if OS != Linux)
         if self.settings.os != "Linux":
             # FIXME: unify libgettext and gettext ??
