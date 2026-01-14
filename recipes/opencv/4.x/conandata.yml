@@ -34,3 +34,7 @@ patches:
       patch_description: "Fix Eigen legacy version variable uses"
       patch_type: "backport"
       patch_source: "https://github.com/opencv/opencv/pull/27536"
+    - patch_file: "patches/4.12.0-0003-fix-cuda-12-9.patch"
+      patch_description: "Fix compilation problems with MSVC+Cuda 12.9"
+      patch_type: "backport"
+      patch_source: "https://github.com/opencv/opencv/commit/e2d87defd10d415c29120c3b1c07ac7364ba12f2"

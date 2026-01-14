@@ -49,7 +49,7 @@ class Gammaconan(ConanFile):
 
     def requirements(self):
         if self.options.soundfile:
-            self.requires("libsndfile/1.2.0")
+            self.requires("libsndfile/1.2.2")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):

@@ -1,43 +1,8 @@
 sources:
-  "1.18.0":
-    url: "https://github.com/onnx/onnx/archive/v1.18.0.tar.gz"
-    sha256: "b466af96fd8d9f485d1bb14f9bbdd2dfb8421bc5544583f014088fb941a1d21e"
-  "1.17.0":
-    url: "https://github.com/onnx/onnx/archive/v1.17.0.tar.gz"
-    sha256: "8d5e983c36037003615e5a02d36b18fc286541bf52de1a78f6cf9f32005a820e"
-  "1.16.2":
-    url: "https://github.com/onnx/onnx/archive/v1.16.2.tar.gz"
-    sha256: "84fc1c3d6133417f8a13af6643ed50983c91dacde5ffba16cc8bb39b22c2acbb"
-  "1.16.1":
-    url: "https://github.com/onnx/onnx/archive/v1.16.1.tar.gz"
-    sha256: "0e6aa2c0a59bb2d90858ad0040ea1807117cc2f05b97702170f18e6cd6b66fb3"
-  "1.16.0":
-    url: "https://github.com/onnx/onnx/archive/v1.16.0.tar.gz"
-    sha256: "0ce153e26ce2c00afca01c331a447d86fbf21b166b640551fe04258b4acfc6a4"
-  "1.15.0":
-    url: "https://github.com/onnx/onnx/archive/v1.15.0.tar.gz"
-    sha256: "c757132e018dd0dd171499ef74fca88b74c5430a20781ec53da19eb7f937ef68"
-  "1.14.1":
-    url: "https://github.com/onnx/onnx/archive/v1.14.1.tar.gz"
-    sha256: "e296f8867951fa6e71417a18f2e550a730550f8829bd35e947b4df5e3e777aa1"
-  "1.14.0":
-    url: "https://github.com/onnx/onnx/archive/v1.14.0.tar.gz"
-    sha256: "1b02ad523f79d83f9678c749d5a3f63f0bcd0934550d5e0d7b895f9a29320003"
-  "1.13.1":
-    url: "https://github.com/onnx/onnx/archive/refs/tags/v1.13.1.tar.gz"
-    sha256: "090d3e10ec662a98a2a72f1bf053f793efc645824f0d4b779e0ce47468a0890e"
+  "1.20.0":
+    url: "https://github.com/onnx/onnx/archive/refs/tags/v1.20.0.tar.gz"
+    sha256: "e9e9273cd39d460348aa3e2eb370a444b510e138c5f45dfa86ce50461901257b"
 patches:
-  "1.18.0":
-    - patch_file: "patches/0001-1.18.0-fix-protobuf-dependencies.patch"
-  "1.17.0":
-    - patch_description: "Fix CMakelist.txt to allow protobuf to get its own dependencies"
-      patch_file: "patches/0001-1.17.0-fix-protobuf-dependencies.patch"
-  "1.16.2":
-    - patch_description: "Fix CMakelist.txt to allow protobuf to get its own dependencies"
-      patch_file: "patches/0001-1.16.2-fix-protobuf-dependencies.patch"
-  "1.16.1":
-    - patch_description: "Fix CMakelist.txt to allow protobuf to get its own dependencies"
-      patch_file: "patches/0001-1.16.2-fix-protobuf-dependencies.patch"
-  "1.15.0":
-    - patch_description: "Fix CMakelist.txt to allow protobuf to get its own dependencies"
-      patch_file: "patches/0001-1.15.0-fix-protobuf-dependencies.patch"
+  "1.20.0":
+    - patch_file: "patches/cmake-absl-proto-targets.patch"
+    - patch_file: "patches/export-visible-symbols.patch"

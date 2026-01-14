@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.scm import Version
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.microsoft import is_msvc
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, rmdir, rename, get, rm, replace_in_file
@@ -13,7 +12,7 @@ import shutil
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class LibXMLPlusPlus(ConanFile):
@@ -35,22 +34,6 @@ class LibXMLPlusPlus(ConanFile):
     }
 
     @property
-    def _min_cppstd(self):
-        return "17" if Version(self.version) >= "5.4.0" else "11"
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "17": {
-                "gcc": "8",
-                "clang": "7",
-                "apple-clang": "12",
-                "Visual Studio": "16",
-                "msvc": "192",
-            },
-        }.get(self._min_cppstd, {})
-
-    @property
     def _lib_version(self):
         return "5.0"
 
@@ -70,18 +53,11 @@ class LibXMLPlusPlus(ConanFile):
 
     def requirements(self):
         self.requires("libxml2/[>=2.12.5 <3]")
-        self.requires("glibmm/2.75.0")
 
     def validate(self):
-        if hasattr(self, "settings_build") and cross_building(self):
+        if cross_building(self):
             raise ConanInvalidConfiguration("Cross-building not implemented")
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")

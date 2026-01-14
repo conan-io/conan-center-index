@@ -1,40 +1,13 @@
 sources:
-  "1.18.1":
-    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.18.1.tar.gz"
-    sha256: "480ff5d2450ff18d02db48908c9c0c6a602993942cb47866b8effe32d0469a2c"
+  "1.23.2":
+    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.23.2.tar.gz"
+    sha256: "99bcf964ce4e869d823c99b2294562a9050cbfa8e76ec81c8683cb3c7e19c2b4"
 patches:
-  "1.18.1":
-    - patch_file: "patches/1.17.3-0002-missing-include.patch"
-      patch_description: "add missing '<optional>' include when abseil is built without c++17 support"
-      patch_type: "portability"
-    - patch_file: "patches/1.18.0-0004-abseil-no-string-view.patch"
-      patch_description: "allow to build with abseil built without c++17 support"
-      patch_type: "portability"
-    - patch_file: "patches/1.18.1-0005-fix-cutlass-cuda-provider.patch"
-      patch_description: "use cutlass from Conan"
-      patch_type: "portability"
-    - patch_file: "patches/1.15.1-0006-ort-mutex-include.patch"
-      patch_description: "Add missing chrono include to ort_mutex.h"
-      patch_type: "portability"
-    - patch_file: "patches/1.18.1-0007-xnnpack-proper-linkage.patch"
-      patch_description: "Fix target name for xnnpack"
-      patch_type: "conan"
-    - patch_file: "patches/1.18.1-0008-cmake-cxx-standard.patch"
-      patch_description: "Remove hardcoded CMAKE_CXX_STANDARD"
-      patch_type: "conan"
-    - patch_file: "patches/1.18.1-0009-protobuf.patch"
-      patch_description: "Be compatible with the latest protobuf"
-      patch_source: "https://github.com/microsoft/onnxruntime/pull/23260"
-      patch_type: "portability"
-    - patch_file: "patches/1.18.1-0010-tree-ensemble-aggregator.patch"
-      patch_description: "Fix C++20 compilation issues in TreeEnsembleAggregator"
-      patch_source: "https://github.com/microsoft/onnxruntime/pull/22062"
-      patch_type: "portability"
-    - patch_file: "patches/1.18.1-0011-cpuinfo.patch"
-      patch_description: "Fix target name for cpuinfo"
-      patch_type: "conan"
+  "1.23.2":
+    - patch_file: "patches/fix-cutlass-cuda-provider.patch"
+    - patch_file: "patches/cmake-cxx-standard.patch"
 
 # ONNX versions are based on the minor version used at
 # https://github.com/microsoft/onnxruntime/tree/main/cmake/external
 onnx_version_map:
-  "1.18.1": "1.16.2"
+  "1.23.2": "1.20.0"
