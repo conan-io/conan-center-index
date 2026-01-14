@@ -212,9 +212,7 @@ class WtConan(ConanFile):
             tc.variables["MYSQL_DEFINITIONS"] = ";".join(f"-D{d}" for d in libmysqlclient_cppinfo.defines)
             tc.variables["MYSQL_FOUND"] = True
         if self.options.get_safe("with_postgres"):
-            tc.variables["POSTGRES_PREFIX"] = self._cmakify_path_list([self.dependencies["libpq"].package_folder])
-            tc.variables["POSTGRES_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libpq"))
-            tc.variables["POSTGRES_INCLUDE"] = self._cmakify_path_list(self.dependencies["libpq"].cpp_info.aggregated_components().includedirs)
+            # There's alredy a patch to call find_package(PostgreSQL REQUIRED CONFIG)
             tc.variables["POSTGRES_FOUND"] = True
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
             tc.variables["ODBC_PREFIX"] = self._cmakify_path_list([self.dependencies["odbc"].package_folder])
@@ -234,6 +232,7 @@ class WtConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("libpq", "cmake_additional_variables_prefixes", ["POSTGRES"])
         deps.generate()
 
     def _patch_sources(self):
