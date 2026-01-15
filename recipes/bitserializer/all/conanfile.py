@@ -17,9 +17,10 @@ class BitserializerConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/PavelKisliak/BitSerializer"
     license = "MIT"
-    package_type = "header-library"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
         "with_cpprestsdk": [True, False],
         "with_rapidjson": [True, False],
@@ -29,6 +30,7 @@ class BitserializerConan(ConanFile):
         "with_msgpack": [True, False],
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
         "with_cpprestsdk": False,
         "with_rapidjson": False,
@@ -61,12 +63,15 @@ class BitserializerConan(ConanFile):
         # The component based on CppRestSdk has been removed since version 0.80
         if Version(self.version) >= "0.80":
             del self.options.with_cpprestsdk
+        # Shared library support was added in version 0.80
+        if Version(self.version) < "0.80":
+            del self.options.shared
 
     def configure(self):
         if self._is_header_only():
             self.options.rm_safe("fPIC")
-        else:
-            self.package_type = "static-library"
+            self.options.rm_safe("shared")
+            self.package_type = "header-library"
 
     def layout(self):
         if self._is_header_only():
@@ -189,12 +194,10 @@ class BitserializerConan(ConanFile):
         if self.options.get_safe("with_csv"):
             self.cpp_info.components["bitserializer-csv"].set_property("cmake_target_name", "BitSerializer::csv-archive")
             self.cpp_info.components["bitserializer-csv"].requires = ["bitserializer-core"]
-            self.cpp_info.components["bitserializer-csv"].bindirs = []
             self.cpp_info.components["bitserializer-csv"].libs = [f"csv-archive{lib_suffix}" if Version(self.version) < "0.80" else f"bitserializer-csv{lib_suffix}"]
 
         # msgpack-archive
         if self.options.get_safe("with_msgpack"):
             self.cpp_info.components["bitserializer-msgpack"].set_property("cmake_target_name", "BitSerializer::msgpack-archive")
             self.cpp_info.components["bitserializer-msgpack"].requires = ["bitserializer-core"]
-            self.cpp_info.components["bitserializer-msgpack"].bindirs = []
             self.cpp_info.components["bitserializer-msgpack"].libs = [f"msgpack-archive{lib_suffix}" if Version(self.version) < "0.80" else f"bitserializer-msgpack{lib_suffix}"]
