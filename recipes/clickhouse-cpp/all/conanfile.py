@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain,CMakeDeps, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
@@ -47,12 +47,17 @@ class ClickHouseCppConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
+        abseil_cppstd = self.dependencies.host['abseil'].info.settings.compiler.cppstd
+        if abseil_cppstd != self.settings.compiler.cppstd:
+            raise ConanInvalidConfiguration(f"abseil must be built with the same compiler.cppstd setting")
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared library on Windows.")
             # look at https://github.com/ClickHouse/clickhouse-cpp/pull/226
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Let's avoid upstream setting the CMAKE_CXX_STANDARD 17
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "USE_CXX17", "# USE_CXX17")
 
     def generate(self):
         tc = CMakeToolchain(self)
