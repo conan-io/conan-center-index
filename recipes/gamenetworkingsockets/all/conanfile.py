@@ -7,8 +7,9 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class GameNetworkingSocketsConan(ConanFile):
@@ -51,8 +52,17 @@ class GameNetworkingSocketsConan(ConanFile):
             self.requires("libsodium/1.0.20")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        # Determine minimum C++ standard based on Protobuf version
+        protobuf_version = Version(self.dependencies["protobuf"].ref.version)
+        protobuf_release = Version(f"{protobuf_version.minor}.{protobuf_version.patch}")
+        if protobuf_release >= Version("30.1"):
+            min_cpp_std = 17
+        elif protobuf_release >= Version("22.0"):
+            min_cpp_std = 14
+        else:
+            min_cpp_std = 11
+
+        check_min_cppstd(self, min_cpp_std)
 
         if self.options.encryption == "bcrypt" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("bcrypt is only valid on Windows")
