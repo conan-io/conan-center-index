@@ -56,7 +56,7 @@ class libxftConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def generate(self):        
+    def generate(self):
         tc = PkgConfigDeps(self)
         tc.generate()
         tc = MesonToolchain(self)
