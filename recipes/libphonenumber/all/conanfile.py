@@ -8,6 +8,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
+from conan.tools.apple import fix_apple_shared_install_name
 
 required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
@@ -156,6 +157,7 @@ class LibphonenumberConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         if self.options.shared:
