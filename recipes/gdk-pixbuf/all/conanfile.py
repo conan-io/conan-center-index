@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import can_run
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
@@ -132,6 +132,9 @@ class GdkPixbufConan(ConanFile):
         # workaround this by appropriately setting global linker flags in their profile
         if self._requires_compiler_rt:
             tc.c_link_args.append("-rtlib=compiler-rt")
+        if is_apple_os(self):
+            # INFO: gdk-pixbuf-private.h:32: error: 'BUILDING_LIBINTL' is not defined, evaluates to 0
+            tc.extra_cflags.extend(["-Wno-error=unset"])
         tc.generate()
 
     def _patch_sources(self):
