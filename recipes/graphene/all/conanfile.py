@@ -116,10 +116,22 @@ class GrapheneConan(ConanFile):
         fix_apple_shared_install_name(self)
         fix_msvc_libname(self)
 
+    def _package_info_components(self):
+        # INFO: these definitions are extracted from meson.build:
+        # https://github.com/ebassi/graphene/blob/1.10.8/meson.build?#L409
+        # https://github.com/ebassi/graphene/blob/1.10.8/meson.build?#L359
+        # https://github.com/ebassi/graphene/blob/1.10.8/meson.build?#L294
+        return {"graphene_has_gcc": 1 if self.settings.compiler == "gcc" else 0,
+                "graphene_has_sse2": 1 if str(self.settings.arch) in ["x86", "x86_64"] else 0,
+                "graphene_has_neon": 1 if str(self.settings.arch).startswith("arm") else 0,
+                "graphene_has_scalar": 1}
+
     def package_info(self):
         self.cpp_info.components["graphene-1.0"].set_property("pkg_config_name", "graphene-1.0")
         self.cpp_info.components["graphene-1.0"].libs = ["graphene-1.0"]
         self.cpp_info.components["graphene-1.0"].includedirs = [os.path.join("include", "graphene-1.0"), os.path.join("lib", "graphene-1.0", "include")]
+        self.cpp_info.components["graphene-1.0"].set_property("pkg_config_custom_content", self._package_info_components)
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["graphene-1.0"].system_libs = ["m", "pthread"]
         if self.options.with_glib:
@@ -129,12 +141,8 @@ class GrapheneConan(ConanFile):
             self.cpp_info.components["graphene-gobject-1.0"].set_property("pkg_config_name","graphene-gobject-1.0")
             self.cpp_info.components["graphene-gobject-1.0"].includedirs = [os.path.join("include", "graphene-1.0")]
             self.cpp_info.components["graphene-gobject-1.0"].requires = ["graphene-1.0", "glib::gobject-2.0"]
+            self.cpp_info.components["graphene-gobject-1.0"].set_property("pkg_config_custom_content", self._package_info_components)
 
-        pkgconfig_vars = {"graphene_has_gcc": 1 if self.settings.compiler == "gcc" else 0,
-                          "graphene_has_sse2": 1 if str(self.settings.arch) in ["x86", "x86_64"] else 0,
-                          "graphene_has_neon": 1 if str(self.settings.arch).startswith("arm") else 0,
-                          "graphene_has_scalar": 1}
-        self.cpp_info.components["graphene-1.0"].set_property("pkg_config_custom_content", pkgconfig_vars)
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
