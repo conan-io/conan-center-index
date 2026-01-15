@@ -130,6 +130,12 @@ class GrapheneConan(ConanFile):
             self.cpp_info.components["graphene-gobject-1.0"].includedirs = [os.path.join("include", "graphene-1.0")]
             self.cpp_info.components["graphene-gobject-1.0"].requires = ["graphene-1.0", "glib::gobject-2.0"]
 
+        pkgconfig_vars = {"graphene_has_gcc": 1 if self.settings.compiler == "gcc" else 0,
+                          "graphene_has_sse2": 1 if str(self.settings.arch) in ["x86", "x86_64"] else 0,
+                          "graphene_has_neon": 1 if str(self.settings.arch).startswith("arm") else 0,
+                          "graphene_has_scalar": 1}
+        self.cpp_info.components["graphene-1.0"].set_property("pkg_config_custom_content", pkgconfig_vars)
+
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
     from conan.tools.files import rename
