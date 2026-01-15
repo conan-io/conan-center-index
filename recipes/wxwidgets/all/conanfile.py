@@ -172,12 +172,6 @@ class wxWidgetsConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
-        # wxWidgets fails to compile with glib < 2.74 (e.g. Ubuntu 16)
-        # due to missing gio-unix include path. This works with configure
-        # but not cmake. Explicitly add this path until wxWidgets fixes this.
-        if self._gtk_version == "gtk2" and Version(self.version) >= "3.3.0" and os.path.exists("/usr/include/gio-unix-2.0"):
-            tc.extra_cxxflags = ["-I/usr/include/gio-unix-2.0"]
-
         # generic build options
         tc.variables["wxBUILD_SHARED"] = self.options.shared
         tc.variables["wxBUILD_SAMPLES"] = "OFF"
