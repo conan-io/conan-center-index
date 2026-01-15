@@ -71,6 +71,7 @@ class OatppWebSocketConan(ConanFile):
             tc.variables["OATPP_MSVC_LINK_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -89,7 +90,6 @@ class OatppWebSocketConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "oatpp-websocket")
         self.cpp_info.set_property("cmake_target_name", "oatpp::oatpp-websocket")
-        # TODO: back to global scope in conan v2 once legacy generators removed
         self.cpp_info.components["_oatpp-websocket"].includedirs = [
             os.path.join("include", f"oatpp-{self._version}", "oatpp-websocket")
         ]
@@ -102,12 +102,5 @@ class OatppWebSocketConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_oatpp-websocket"].system_libs = ["pthread"]
 
-        # TODO: to remove in conan v2 once legacy generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "oatpp-websocket"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "oatpp-websocket"
-        self.cpp_info.names["cmake_find_package"] = "oatpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "oatpp"
-        self.cpp_info.components["_oatpp-websocket"].names["cmake_find_package"] = "oatpp-websocket"
-        self.cpp_info.components["_oatpp-websocket"].names["cmake_find_package_multi"] = "oatpp-websocket"
         self.cpp_info.components["_oatpp-websocket"].set_property("cmake_target_name", "oatpp::oatpp-websocket")
         self.cpp_info.components["_oatpp-websocket"].requires = ["oatpp::oatpp"]
