@@ -48,6 +48,7 @@ class ArcusConan(ConanFile):
     def requirements(self):
         self.requires("protobuf/[>=4.25.0 <7]")
         self.requires("abseil/[*]")
+        self.tool_requires("cmake/[>=3.23]")
 
     def validate(self):
         # Newer versions of protobuf require higher versions of C++ than arcus itself
