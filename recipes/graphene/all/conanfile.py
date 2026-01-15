@@ -91,10 +91,7 @@ class GrapheneConan(ConanFile):
             "gtk_doc": "false",
         })
         meson.project_options["gobject_types"] = "true" if self.options.with_glib else "false"
-        if Version(self.version) < "1.10.4":
-            meson.project_options["introspection"] = "false"
-        else:
-            meson.project_options["introspection"] = "disabled"
+        meson.project_options["introspection"] = "disabled"
         meson.generate()
 
     def _patch_sources(self):
