@@ -13,6 +13,7 @@ required_conan_version = ">=1.53.0"
 
 class EnjinCppSdk(ConanFile):
     name = "enjincppsdk"
+    deprecated = "project no longer maintained or publicly available"
     description = "A C++ SDK for development on the Enjin blockchain platform."
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"

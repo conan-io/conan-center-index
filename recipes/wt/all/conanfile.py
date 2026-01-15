@@ -1,11 +1,9 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc
 import os
-import sys
 import shutil
 
 required_conan_version = ">=1.54.0"
@@ -98,10 +96,7 @@ class WtConan(ConanFile):
         return ["program_options", "filesystem", "thread"]
 
     def requirements(self):
-        if Version(self.version) < "4.9.0":
-            self.requires("boost/1.80.0", transitive_headers = True)
-        else:
-            self.requires("boost/1.83.0", transitive_headers = True)
+        self.requires("boost/[>=1.83.0 <1.87.0]", transitive_headers = True)
         if self.options.connector_http:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_ssl:
@@ -111,7 +106,7 @@ class WtConan(ConanFile):
         if self.options.get_safe("with_mysql"):
             self.requires("libmysqlclient/8.1.0", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_postgres"):
-            self.requires("libpq/15.4", transitive_headers=True, transitive_libs=True)
+            self.requires("libpq/[>=15.4 <18]", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
             self.requires("odbc/2.3.11")
         if self.options.get_safe("with_unwind"):
@@ -129,16 +124,6 @@ class WtConan(ConanFile):
             )
         if self.options.get_safe("raster_image", "none") == "Direct2D" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Direct2D is supported only on Windows.")
-
-        # FIXME: https://redmine.emweb.be/issues/12073w
-        if conan_version.major == 2 and Version(self.version) == "4.10.1" and is_msvc(self):
-
-            # FIXME: check_max_cppstd is only available for Conan 2.x. Remove it after dropping support for Conan 1.x
-            # FIXME: linter complains, but function is there
-            # https://docs.conan.io/2.0/reference/tools/build.html?highlight=check_min_cppstd#conan-tools-build-check-max-cppstd
-            check_max_cppstd = getattr(sys.modules['conan.tools.build'], 'check_max_cppstd')
-            # INFO: error C2661: 'std::to_chars': no overloaded function takes 2 arguments. Removed in C++17.
-            check_max_cppstd(self, 14)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -227,9 +212,7 @@ class WtConan(ConanFile):
             tc.variables["MYSQL_DEFINITIONS"] = ";".join(f"-D{d}" for d in libmysqlclient_cppinfo.defines)
             tc.variables["MYSQL_FOUND"] = True
         if self.options.get_safe("with_postgres"):
-            tc.variables["POSTGRES_PREFIX"] = self._cmakify_path_list([self.dependencies["libpq"].package_folder])
-            tc.variables["POSTGRES_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libpq"))
-            tc.variables["POSTGRES_INCLUDE"] = self._cmakify_path_list(self.dependencies["libpq"].cpp_info.aggregated_components().includedirs)
+            # There's alredy a patch to call find_package(PostgreSQL REQUIRED CONFIG)
             tc.variables["POSTGRES_FOUND"] = True
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
             tc.variables["ODBC_PREFIX"] = self._cmakify_path_list([self.dependencies["odbc"].package_folder])
@@ -249,6 +232,7 @@ class WtConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("libpq", "cmake_additional_variables_prefixes", ["POSTGRES"])
         deps.generate()
 
     def _patch_sources(self):
@@ -310,8 +294,7 @@ class WtConan(ConanFile):
             self.cpp_info.components["wtmain"].system_libs = ["m", "rt"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["wtmain"].system_libs = ["ws2_32", "mswsock", "winmm"]
-            if Version(self.version) >= "4.9.0":
-                self.cpp_info.components["wtmain"].system_libs.extend(["dwrite", "d2d1", "shlwapi"])
+            self.cpp_info.components["wtmain"].system_libs.extend(["dwrite", "d2d1", "shlwapi"])
         self.cpp_info.components["wtmain"].requires = ["boost::boost"]
         if self.options.with_ssl:
             self.cpp_info.components["wtmain"].requires.append("openssl::openssl")
@@ -384,38 +367,3 @@ class WtConan(ConanFile):
                 self.cpp_info.components["wtdbomssqlserver"].system_libs.append("odbc32")
             else:
                 self.cpp_info.components["wtdbomssqlserver"].requires.append("odbc::odbc")
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "wt"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "wt"
-        self.cpp_info.names["cmake_find_package"] = "Wt"
-        self.cpp_info.names["cmake_find_package_multi"] = "Wt"
-        self.cpp_info.components["wtmain"].names["cmake_find_package"] = "Wt"
-        self.cpp_info.components["wtmain"].names["cmake_find_package_multi"] = "Wt"
-        if self.options.with_test:
-            self.cpp_info.components["wttest"].names["cmake_find_package"] = "Test"
-            self.cpp_info.components["wttest"].names["cmake_find_package_multi"] = "Test"
-        if self.options.connector_http:
-            self.cpp_info.components["wthttp"].names["cmake_find_package"] = "HTTP"
-            self.cpp_info.components["wthttp"].names["cmake_find_package_multi"] = "HTTP"
-        if self.options.get_safe("connector_isapi"):
-            self.cpp_info.components["wtisapi"].names["cmake_find_package"] = "Isapi"
-            self.cpp_info.components["wtisapi"].names["cmake_find_package_multi"] = "Isapi"
-        if self.options.get_safe("connector_fcgi"):
-            self.cpp_info.components["wtfcgi"].names["cmake_find_package"] = "FCGI"
-            self.cpp_info.components["wtfcgi"].names["cmake_find_package_multi"] = "FCGI"
-        if self.options.with_dbo:
-            self.cpp_info.components["wtdbo"].names["cmake_find_package"] = "Dbo"
-            self.cpp_info.components["wtdbo"].names["cmake_find_package_multi"] = "Dbo"
-        if self.options.get_safe("with_sqlite"):
-            self.cpp_info.components["wtdbosqlite3"].names["cmake_find_package"] = "DboSqlite3"
-            self.cpp_info.components["wtdbosqlite3"].names["cmake_find_package_multi"] = "DboSqlite3"
-        if self.options.get_safe("with_postgres"):
-            self.cpp_info.components["wtdbopostgres"].names["cmake_find_package"] = "DboPostgres"
-            self.cpp_info.components["wtdbopostgres"].names["cmake_find_package_multi"] = "DboPostgres"
-        if self.options.get_safe("with_mysql"):
-            self.cpp_info.components["wtdbomysql"].names["cmake_find_package"] = "DboMySQL"
-            self.cpp_info.components["wtdbomysql"].names["cmake_find_package_multi"] = "DboMySQL"
-        if self.options.get_safe("with_mssql"):
-            self.cpp_info.components["wtdbomssqlserver"].names["cmake_find_package"] = "DboMSSQLServer"
-            self.cpp_info.components["wtdbomssqlserver"].names["cmake_find_package_multi"] = "DboMSSQLServer"

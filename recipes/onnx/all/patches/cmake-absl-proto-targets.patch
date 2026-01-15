@@ -1,0 +1,26 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -220,8 +220,8 @@ if(NOT ONNX_BUILD_CUSTOM_PROTOBUF)
+         set(Build_Protobuf OFF)
+         if("${Protobuf_VERSION}" VERSION_GREATER_EQUAL "4.22.0")
+           # There are extra dependencies for protobuf.
+-          find_package(absl REQUIRED)
+-          find_package(utf8_range)
++          find_package(absl REQUIRED CONFIG)
++          # find_package(utf8_range)
+           message(STATUS "absl_VERSION: ${absl_VERSION}")
+           set(protobuf_ABSL_USED_TARGETS
+             absl::absl_check
+@@ -258,9 +258,10 @@ if(NOT ONNX_BUILD_CUSTOM_PROTOBUF)
+             absl::type_traits
+             absl::utility
+             absl::variant
+-            utf8_range::utf8_range
+-            utf8_range::utf8_validity
+           )
++          if (TARGET utf8_range::utf8_range)
++            list(APPEND protobuf_ABSL_USED_TARGETS utf8_range::utf8_range utf8_range::utf8_validity)
++          endif()
+         endif()
+       endif()
+     endif()

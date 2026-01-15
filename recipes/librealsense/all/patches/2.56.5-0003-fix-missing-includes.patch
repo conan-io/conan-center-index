@@ -1,0 +1,102 @@
+--- a/src/core/matcher-factory.cpp
++++ b/src/core/matcher-factory.cpp
+@@ -7,6 +7,7 @@
+ 
+ #include <src/sync.h>
+ 
++#include <stdexcept>
+ 
+ namespace librealsense {
+ 
+--- a/src/core/options-registry.cpp
++++ b/src/core/options-registry.cpp
+@@ -7,6 +7,7 @@
+ #include <vector>
+ #include <mutex>
+ #include <map>
++#include <stdexcept>
+ 
+ 
+ namespace librealsense {
+--- a/src/librealsense-exception.h
++++ b/src/librealsense-exception.h
+@@ -10,6 +10,7 @@
+ #include <exception>
+ #include <string>
+ 
++#include <cstring>
+ 
+ namespace librealsense {
+ 
+--- a/src/linux/backend-hid.h
++++ b/src/linux/backend-hid.h
+@@ -7,6 +7,7 @@
+ 
+ #include <limits.h>
+ #include <list>
++#include <fstream>
+ 
+ namespace librealsense
+ {
+--- a/src/platform/platform-utils.cpp
++++ b/src/platform/platform-utils.cpp
+@@ -7,6 +7,7 @@
+ #include "hid-device-info.h"
+ #include <src/librealsense-exception.h>
+ 
++#include <algorithm>
+ 
+ namespace librealsense {
+ namespace platform {
+--- a/src/types.cpp
++++ b/src/types.cpp
+@@ -6,6 +6,7 @@
+ #include "librealsense-exception.h"
+ #include <librealsense2/hpp/rs_processing.hpp>
+ #include <ostream>
++#include <cmath>
+ 
+ 
+ std::ostream & operator<<( std::ostream & out, rs2_extrinsics const & e )
+--- a/third-party/rsutils/src/control-c-handler.cpp
++++ b/third-party/rsutils/src/control-c-handler.cpp
+@@ -6,6 +6,7 @@
+ 
+ #include <signal.h>
+ #include <atomic>
++#include <stdexcept>
+ 
+ 
+ namespace rsutils {
+--- a/third-party/rsutils/src/network-adapter-watcher.cpp
++++ b/third-party/rsutils/src/network-adapter-watcher.cpp
+@@ -26,6 +26,9 @@
+ #endif
+ #endif  // ! __APPLE__ && ! __ANDROID__
+ 
++#include <thread>
++#include <cstring>
++
+ 
+ namespace rsutils {
+ namespace os {
+--- a/third-party/rsutils/src/special-folder.cpp
++++ b/third-party/rsutils/src/special-folder.cpp
+@@ -19,6 +19,7 @@
+ 
+ #endif
+ 
++#include <stdexcept>
+ 
+ namespace rsutils {
+ namespace os {
+--- a/src/algo.cpp
++++ b/src/algo.cpp
+@@ -4,6 +4,7 @@
+ #include "algo.h"
+ #include "option.h"
+ #include "core/video-frame.h"
++#include <algorithm>
+ 
+ using namespace librealsense;
+ 

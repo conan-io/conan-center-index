@@ -379,7 +379,7 @@ class PclConan(ConanFile):
         if self._is_enabled("png"):
             self.requires("libpng/[>=1.6 <2]")
         if self._is_enabled("qhull"):
-            self.requires("qhull/8.0.1", transitive_headers=True)
+            self.requires("qhull/8.0.2", transitive_headers=True)
         if self._is_enabled("qt"):
             self.requires("qt/[>=6.6 <7]")
         if self._is_enabled("libusb"):
@@ -492,6 +492,7 @@ class PclConan(ConanFile):
             tc.cache_variables[f"BUILD_{comp}"] = False
 
         tc.cache_variables["PCL_ENABLE_SSE"] = self.options.get_safe("use_sse", False)
+        tc.cache_variables["PCL_ENABLE_MARCHNATIVE"] = False
         tc.cache_variables["PCL_ENABLE_AVX"] = self.options.get_safe("use_avx", False)
         # Let's skip the AVX2 check as it fails when cross-building from ARM to AMD
         # because of the -march=native flag, but -mavx2 actually works
@@ -514,7 +515,9 @@ class PclConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         for mod in ["Eigen", "FLANN", "GLEW", "Pcap", "Qhull", "libusb"]:
-            os.remove(os.path.join(self.source_folder, "cmake", "Modules", f"Find{mod}.cmake"))
+            find_module_path = os.path.join(self.source_folder, "cmake", "Modules", f"Find{mod}.cmake")
+            if os.path.exists(find_module_path):
+                os.remove(find_module_path)
         # Let users activate/deactivate the AVX/SSE optimizations without depending on extra flags
         # added by Conan or downstream
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
@@ -523,6 +526,14 @@ class PclConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         'if(PCL_ENABLE_SSE AND "${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")',
                         'if(PCL_ENABLE_SSE)')
+        # GCC case
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'if("${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")',
+                        'if(1)')
+        # Apple-clang case
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'if("${CMAKE_CXX_FLAGS}" STREQUAL "")',
+                        'if(1)')
 
     def build(self):
         cmake = CMake(self)
@@ -589,14 +600,6 @@ class PclConan(ConanFile):
             for dep in self._external_optional_deps["tools"]:
                 component.requires += self._ext_dep_to_conan_target(dep)
 
-        if self.options.get_safe("use_sse"):
-            # Assuming SSE4.2 extensions
-            if not is_msvc(self):
-                self.cpp_info.cxxflags.append("-msse4.2")
-        if self.options.get_safe("use_avx"):
-            # Assuming AVX2
-            self.cpp_info.cxxflags.append("/arch:AVX2" if is_msvc(self) else "-mavx2")
-
         common = self.cpp_info.components["common"]
         if not self.options.shared:
             if self.settings.os in ["Linux", "FreeBSD"]:
@@ -613,3 +616,15 @@ class PclConan(ConanFile):
                         common.system_libs.append("gomp")
         if self.settings.os == "Windows":
             common.system_libs.append("ws2_32")
+
+        if self.options.get_safe("use_sse"):
+            # Assuming SSE4.2 extensions
+            if not is_msvc(self):
+                common.cxxflags.extend(["-msse4.2", "-mfpmath=sse"])
+            else:
+                # MSVC: we do not need cxxflags, but SSE defines
+                common.defines.extend(["__SSE4_2__", "__SSE4_1__", "__SSSE3__",
+                                       "__SSE3__", "__SSE2__", "__SSE__"])
+        if self.options.get_safe("use_avx"):
+            # Assuming AVX2 and modern MSVC/GCC versions
+            common.cxxflags.append("/arch:AVX2" if is_msvc(self) else "-mavx2")
