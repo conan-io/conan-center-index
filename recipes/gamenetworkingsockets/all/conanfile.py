@@ -5,10 +5,11 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class GameNetworkingSocketsConan(ConanFile):
@@ -44,15 +45,24 @@ class GameNetworkingSocketsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("protobuf/3.21.12")
+        self.requires("protobuf/[>=3.21.12 <7]")
         if self.options.encryption == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         elif self.options.encryption == "libsodium":
             self.requires("libsodium/1.0.20")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        # Determine minimum C++ standard based on Protobuf version
+        protobuf_version = Version(self.dependencies["protobuf"].ref.version)
+        protobuf_release = Version(f"{protobuf_version.minor}.{protobuf_version.patch}")
+        if protobuf_release >= Version("30.1"):
+            min_cpp_std = 17
+        elif protobuf_release >= Version("22.0"):
+            min_cpp_std = 14
+        else:
+            min_cpp_std = 11
+
+        check_min_cppstd(self, min_cpp_std)
 
         if self.options.encryption == "bcrypt" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("bcrypt is only valid on Windows")
@@ -60,15 +70,14 @@ class GameNetworkingSocketsConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("protobuf/<host_version>")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
-        venv = VirtualBuildEnv(self)
-        venv.generate()
-        venv = VirtualRunEnv(self)
-        venv.generate(scope="build")
-
         tc = CMakeToolchain(self)
         tc.variables["GAMENETWORKINGSOCKETS_BUILD_EXAMPLES"] = False
         tc.variables["GAMENETWORKINGSOCKETS_BUILD_TESTS"] = False
@@ -138,7 +147,3 @@ class GameNetworkingSocketsConan(ConanFile):
             self.cpp_info.system_libs = ["ws2_32", "crypt32", "winmm", "iphlpapi"]
             if self.options.encryption == "bcrypt":
                 self.cpp_info.system_libs += ["bcrypt"]
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "GameNetworkingSockets"
-        self.cpp_info.names["cmake_find_package_multi"] = "GameNetworkingSockets"
