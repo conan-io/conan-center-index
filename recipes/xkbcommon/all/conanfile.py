@@ -61,10 +61,10 @@ class XkbcommonConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} is only compatible with Linux, FreeBSD and Android")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.2")
-        self.tool_requires("bison/3.8.2")
+        self.tool_requires("meson/[>=1.3.2 <2]")
+        self.tool_requires("bison/[>=3.8.2 <4]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.1 <3]")
         if self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/<host_version>")
             self.tool_requires("wayland-protocols/[^1.33]")
