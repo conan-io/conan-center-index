@@ -172,7 +172,8 @@ class HarfbuzzConan(ConanFile):
 
         # TODO in next Harfbuzz major version:
         # - rename "core" component to "harfbuzz"
-        # - check if https://github.com/conan-io/conan/issues/17815 is solved
+        # - add self.cpp_info.set_property("pkg_config_name", "none")
+        # - set "harfbuzz" as the pkg_config_name of the harfbuzz component
         self.cpp_info.components["core"].set_property("cmake_target_name", "harfbuzz::harfbuzz")
         self.cpp_info.components["core"].libs = ["harfbuzz"]
         self.cpp_info.components["core"].includedirs.append(os.path.join("include", "harfbuzz"))
