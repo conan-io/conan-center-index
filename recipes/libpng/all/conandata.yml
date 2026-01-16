@@ -1,4 +1,7 @@
 sources:
+  "1.6.54":
+    url: "https://download.sourceforge.net/libpng/libpng-1.6.54.tar.xz"
+    sha256: "01c9d8a303c941ec2c511c14312a3b1d36cedb41e2f5168ccdaa85d53b887805"
   "1.6.53":
     url: "https://download.sourceforge.net/libpng/libpng-1.6.53.tar.xz"
     sha256: "1d3fb8ccc2932d04aa3663e22ef5ef490244370f4e568d7850165068778d98d4"
