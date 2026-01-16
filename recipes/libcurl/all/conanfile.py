@@ -162,7 +162,7 @@ class LibcurlConan(ConanFile):
     def requirements(self):
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
-        if self.settings.os == "Windows" and self.options.with_ldap:
+        if self.settings.os != "Windows" and self.options.with_ldap:
             self.requires("openldap/[>=2]")
         elif self.options.with_ssl == "libressl":
             self.requires("libressl/[>=3.5 <4]")
@@ -708,7 +708,7 @@ class LibcurlConan(ConanFile):
 
         if self.options.with_ssl == "openssl":
             self.cpp_info.components["curl"].requires.append("openssl::openssl")
-        if self.settings.os == "Windows" and self.options.with_ldap:
+        if self.settings.os != "Windows" and self.options.with_ldap:
             self.cpp_info.components["curl"].requires.append("openldap::openldap")
         if self.options.with_ssl == "libressl":
             self.cpp_info.components["curl"].requires.append("libressl::libressl")
