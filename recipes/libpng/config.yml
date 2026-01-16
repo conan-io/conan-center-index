@@ -1,3 +1,4 @@
 versions:
+# Keep only the latest version, unless there's strong reasons to keep older ones
   "1.6.54":
     folder: all
