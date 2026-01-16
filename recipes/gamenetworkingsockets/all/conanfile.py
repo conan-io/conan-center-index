@@ -78,11 +78,6 @@ class GameNetworkingSocketsConan(ConanFile):
         apply_conandata_patches(self)
 
     def generate(self):
-        venv = VirtualBuildEnv(self)
-        venv.generate()
-        venv = VirtualRunEnv(self)
-        venv.generate(scope="build")
-
         tc = CMakeToolchain(self)
         tc.variables["GAMENETWORKINGSOCKETS_BUILD_EXAMPLES"] = False
         tc.variables["GAMENETWORKINGSOCKETS_BUILD_TESTS"] = False
