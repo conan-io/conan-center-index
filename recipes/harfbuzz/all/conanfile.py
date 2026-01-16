@@ -71,7 +71,7 @@ class HarfbuzzConan(ConanFile):
 
     def requirements(self):
         if self.options.with_freetype:
-            self.requires("freetype/2.13.2")
+            self.requires("freetype/[^2.13]")
         if self.options.with_icu:
             self.requires("icu/74.1")
         if self.options.with_glib:
