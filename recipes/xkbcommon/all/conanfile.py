@@ -9,7 +9,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=2.0.5"
+required_conan_version = ">=2.18"
 
 
 class XkbcommonConan(ConanFile):
@@ -66,6 +66,7 @@ class XkbcommonConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.1 <3]")
         if self.options.get_safe("with_wayland"):
+            # INFO: wayland is required due to wayland-scanner build tool
             self.tool_requires("wayland/<host_version>")
             self.tool_requires("wayland-protocols/[^1.33]")
 
@@ -77,10 +78,9 @@ class XkbcommonConan(ConanFile):
         if Version(self.version) >= "1.6":
             tc.project_options["enable-bash-completion"] = False
         tc.project_options["enable-docs"] = False
-        tc.project_options["enable-wayland"] = self.options.get_safe("with_wayland", False)
-        tc.project_options["enable-x11"] = self.options.get_safe("with_x11", False)
-        if self._has_xkbregistry_option:
-            tc.project_options["enable-xkbregistry"] = self.options.xkbregistry
+        tc.project_options["enable-wayland"] = bool(self.options.get_safe("with_wayland", False))
+        tc.project_options["enable-x11"] = bool(self.options.get_safe("with_x11", False))
+        tc.project_options["enable-xkbregistry"] = bool(self.options.xkbregistry)
         tc.project_options["build.pkg_config_path"] = self.generators_folder
         if self.settings.os == "Android":
             tc.project_options["enable-tools"] = False
@@ -89,19 +89,15 @@ class XkbcommonConan(ConanFile):
         pkg_config_deps = PkgConfigDeps(self)
         if self.options.get_safe("with_wayland"):
             pkg_config_deps.build_context_activated = ["wayland", "wayland-protocols"]
-            pkg_config_deps.build_context_suffix = {"wayland": "_BUILD"}
+            pkg_config_deps.build_context_folder = "_build"
         pkg_config_deps.generate()
 
     def _patch_sources(self):
         if self.options.get_safe("with_wayland"):
-            # Patch the build system to use the pkg-config files generated for the build context.
+            # INFO: Patch the build system to use the pkg-config files generated for the build context.
             meson_build_file = os.path.join(self.source_folder, "meson.build")
-            replace_in_file(
-                self,
-                meson_build_file,
-                "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
-                "wayland_scanner_dep = dependency('wayland-scanner_BUILD', required: false, native: true)",
-            )
+            for dep in ["wayland-scanner", "wayland-protocols"]:
+                replace_in_file(self, meson_build_file, f"dependency('{dep}',", f"dependency('_build/{dep}',")
 
     def build(self):
         self._patch_sources()
@@ -136,6 +132,4 @@ class XkbcommonConan(ConanFile):
             self.cpp_info.components["xkbcli-interactive-wayland"].includedirs = []
             self.cpp_info.components["xkbcli-interactive-wayland"].requires = ["wayland::wayland-client"]
 
-        # unofficial, but required to avoid side effects (libxkbcommon component
-        # "steals" the default global pkg_config name)
-        self.cpp_info.set_property("pkg_config_name", "xkbcommon_all_do_not_use")
+        self.cpp_info.set_property("pkg_config_name", "none")
