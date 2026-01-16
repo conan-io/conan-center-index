@@ -24,7 +24,7 @@ class LibavrocppConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_boost": True
+        "with_boost": False
     }
 
     def config_options(self):
