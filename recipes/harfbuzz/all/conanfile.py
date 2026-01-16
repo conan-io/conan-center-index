@@ -1,7 +1,7 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
-from conan.tools.build import can_run, stdcpp_library
+from conan.tools.build import stdcpp_library
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
@@ -140,7 +140,7 @@ class HarfbuzzConan(ConanFile):
             "gdi": is_enabled(self.options.get_safe("with_gdi")),
             "coretext": is_enabled(self.options.get_safe("with_coretext")),
             "directwrite": is_enabled(self.options.get_safe("with_directwrite")),
-            "gobject": is_enabled(can_run(self) and self.options.with_glib),
+            "gobject": is_enabled(self.options.with_glib),
             "introspection": is_enabled(False),
             "tests": "disabled",
             "docs": "disabled",
@@ -211,7 +211,7 @@ class HarfbuzzConan(ConanFile):
             self.cpp_info.components["subset"].set_property("pkg_config_name", "harfbuzz-subset")
             self.cpp_info.components["subset"].requires = ["core"]
 
-        if self.options.with_glib and can_run(self):
+        if self.options.with_glib:
             self.cpp_info.components["gobject"].libs = ["harfbuzz-gobject"]
             self.cpp_info.components["gobject"].set_property("cmake_target_name", "harfbuzz::gobject")
             self.cpp_info.components["gobject"].set_property("pkg_config_name", "harfbuzz-gobject")
