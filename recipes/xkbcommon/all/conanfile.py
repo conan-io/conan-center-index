@@ -54,7 +54,7 @@ class XkbcommonConan(ConanFile):
         if self.options.xkbregistry:
             self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.get_safe("with_wayland"):
-            self.requires("wayland/1.22.0")
+            self.requires("wayland/[^1.22]")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Android"]:
@@ -67,7 +67,7 @@ class XkbcommonConan(ConanFile):
             self.tool_requires("pkgconf/2.1.0")
         if self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/<host_version>")
-            self.tool_requires("wayland-protocols/1.33")
+            self.tool_requires("wayland-protocols/[^1.33]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
