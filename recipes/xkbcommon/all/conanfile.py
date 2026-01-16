@@ -38,13 +38,7 @@ class XkbcommonConan(ConanFile):
     implements = ["auto_shared_fpic"]
     languages = ["C"]
 
-    @property
-    def _has_xkbregistry_option(self):
-        return Version(self.version) >= "1.0.0"
-
     def config_options(self):
-        if not self._has_xkbregistry_option:
-            del self.options.xkbregistry
         if self.settings.os not in ("Linux", "Android"):
             del self.options.with_wayland
         if self.settings.os == "Android":
@@ -57,7 +51,7 @@ class XkbcommonConan(ConanFile):
         self.requires("xkeyboard-config/system")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
-        if self.options.get_safe("xkbregistry"):
+        if self.options.xkbregistry:
             self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.22.0")
@@ -133,7 +127,7 @@ class XkbcommonConan(ConanFile):
             self.cpp_info.components["libxkbcommon-x11"].set_property("pkg_config_name", "xkbcommon-x11")
             self.cpp_info.components["libxkbcommon-x11"].libs = ["xkbcommon-x11"]
             self.cpp_info.components["libxkbcommon-x11"].requires = ["libxkbcommon", "xorg::xcb", "xorg::xcb-xkb"]
-        if self.options.get_safe("xkbregistry"):
+        if self.options.xkbregistry:
             self.cpp_info.components["libxkbregistry"].set_property("pkg_config_name", "xkbregistry")
             self.cpp_info.components["libxkbregistry"].libs = ["xkbregistry"]
             self.cpp_info.components["libxkbregistry"].requires = ["libxml2::libxml2"]
