@@ -1,11 +1,12 @@
 import os
-import sys
 from pathlib import Path
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.system import PipEnv
+
 
 class GladConan(ConanFile):
     name = "glad"
@@ -88,14 +89,11 @@ class GladConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        PipEnv(self).install(["Jinja2>=2.7,<4.0"])
+        PipEnv(self).generate()
+
         tc = CMakeToolchain(self)
-        # We need the Jinja2 package for Glad's code generation.
-        # Use conan's Python installation by default as Jinja2 is
-        # a requirement,
-        # but give the user the ability to override this behaviour
-        python_exe = self.conf.get("user.glad:python_exe", sys.executable)
         tc.cache_variables.update({
-            "Python_EXECUTABLE": python_exe,
             "GLAD_SOURCES_DIR": self.source_folder,
             "GLAD_CONAN_LIB_TYPE": "SHARED" if self.options.shared else "STATIC",
             "GLAD_CONAN_API": self._get_api(),
