@@ -19,8 +19,10 @@ class CoalConan(ConanFile):
     package_type = "shared-library"
     languages = "C++"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"with_qhull": [True, False]}
-    default_options = {"with_qhull": False}
+    options = {"with_qhull": [True, False],
+               "with_octomap": [True, False]}
+    default_options = {"with_qhull": False,
+                       "with_octomap": True}
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -29,7 +31,8 @@ class CoalConan(ConanFile):
         self.requires("eigen/[>=3.4.0 <4]", transitive_headers=True)
         self.requires("boost/1.88.0", transitive_headers=True)
         self.requires("assimp/5.4.3")
-        self.requires("octomap/1.10.0", transitive_headers=True)
+        if self.options.with_octomap:
+            self.requires("octomap/1.10.0", transitive_headers=True)
         if self.options.with_qhull:
             self.requires("qhull/8.0.2")
 
@@ -39,6 +42,9 @@ class CoalConan(ConanFile):
             raise ConanInvalidConfiguration("coal:with_qhull=True requires qhull/*:shared=False due qhullcpp library")
         if self.options.with_qhull and not self.dependencies["qhull"].options.reentrant:
             raise ConanInvalidConfiguration("coal:with_qhull=True requires qhull/*:reentrant=True due libqhull_r library")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.22]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -52,7 +58,8 @@ class CoalConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("octomap", "cmake_target_name", "octomap")
+        if self.options.with_octomap:
+            deps.set_property("octomap", "cmake_target_name", "octomap")
         if self.options.with_qhull:
             deps.set_property("qhull", "cmake_target_name", "Qhull::qhull_r")
         deps.generate()
@@ -72,8 +79,9 @@ class CoalConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["coal"]
-        self.cpp_info.defines = ["COAL_HAS_OCTOMAP",
-                                 "COAL_HAVE_OCTOMAP",
-                                f"OCTOMAP_MAJOR_VERSION={Version(self.version).major}",
-                                f"OCTOMAP_MINOR_VERSION={Version(self.version).minor}",
-                                f"OCTOMAP_PATCH_VERSION={Version(self.version).patch}",]
+        if self.options.with_octomap:
+            self.cpp_info.defines = ["COAL_HAS_OCTOMAP",
+                                     "COAL_HAVE_OCTOMAP",
+                                     f"OCTOMAP_MAJOR_VERSION={Version(self.version).major}",
+                                     f"OCTOMAP_MINOR_VERSION={Version(self.version).minor}",
+                                     f"OCTOMAP_PATCH_VERSION={Version(self.version).patch}",]
