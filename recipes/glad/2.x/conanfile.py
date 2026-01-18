@@ -8,6 +8,9 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.system import PipEnv
 
 
+required_conan_version = ">=2.21.0"
+
+
 class GladConan(ConanFile):
     name = "glad"
     description = "Multi-Language GL/GLES/EGL/GLX/WGL Loader-Generator based on the official specs."
