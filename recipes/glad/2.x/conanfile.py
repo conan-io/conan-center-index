@@ -94,7 +94,7 @@ class GladConan(ConanFile):
 
         tc = CMakeToolchain(self)
         tc.cache_variables.update({
-            "Python_FIND_FRAMEWORK": "NEVER",
+            "Python_ROOT_DIR": (Path(self.build_folder) / "conan_pipenv").as_posix(),
             "GLAD_SOURCES_DIR": self.source_folder,
             "GLAD_CONAN_LIB_TYPE": "SHARED" if self.options.shared else "STATIC",
             "GLAD_CONAN_API": self._get_api(),
