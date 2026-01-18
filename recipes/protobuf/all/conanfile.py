@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, rename, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir, rm, save
-from conan.tools.microsoft import check_min_vs, msvc_runtime_flag, is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
 import os
@@ -85,12 +85,6 @@ class ProtobufConan(ConanFile):
         elif self._protobuf_release >= "22.0":
             self.requires("abseil/[>=20230802.1 <=20250127.0]", transitive_headers=True)
 
-    def validate_build(self):
-        if self._protobuf_release >= "30.1":
-            check_min_cppstd(self, 17)
-        elif self._protobuf_release >= "22.0":
-            check_min_cppstd(self, 14)    
-
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
@@ -99,9 +93,9 @@ class ProtobufConan(ConanFile):
             not self.dependencies["abseil"].options.shared:
             raise ConanInvalidConfiguration("When building protobuf as a shared library on Windows, "
                                             "abseil needs to be a shared library too")
-        if self._protobuf_release >= "30.1" and self.settings_target is None:
+        if self._protobuf_release >= "30.1":
             check_min_cppstd(self, 17)
-        elif self._protobuf_release >= "22.0" and self.settings_target is None:
+        elif self._protobuf_release >= "22.0":
             check_min_cppstd(self, 14)
 
         check_min_vs(self, "190")
@@ -110,7 +104,7 @@ class ProtobufConan(ConanFile):
             if Version(self.settings.compiler.version) < "4":
                 raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 4")
 
-        if "abseil" in self.dependencies.host and self.settings_target is not None:
+        if "abseil" in self.dependencies.host:
             abseil_cppstd = self.dependencies.host['abseil'].info.settings.compiler.cppstd
             if abseil_cppstd != self.settings.compiler.cppstd:
                 raise ConanInvalidConfiguration(f"Protobuf and abseil must be built with the same compiler.cppstd setting")

@@ -1,0 +1,37 @@
+* Remove reliance on external standardprojectsettings package
+* Make `cmake_minimum_required` the first command in CMakeLists.txt
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 32d537d..0a9ada7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,7 +1,6 @@
++cmake_minimum_required(VERSION 3.23)
+ cmake_policy(SET CMP0091 NEW)
+ project(libarcus)
+-cmake_minimum_required(VERSION 3.23)
+-find_package(standardprojectsettings REQUIRED)
+ find_package(protobuf REQUIRED)
+ 
+ set(arcus_SRCS
+@@ -18,9 +17,17 @@ else()
+     add_library(Arcus STATIC ${arcus_SRCS})
+ endif()
+ 
+-set_project_warnings(Arcus)
+-enable_sanitizers(Arcus)
+-use_threads(Arcus)
++# https://github.com/Ultimaker/conan-ultimaker-index/blob/3acad6b63350964d3e556c5313c113a9a4e1e086/recipes/standardprojectsettings/all/StandardProjectSettings.cmake#L4
++set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
++set(THREADS_PREFER_PTHREAD_FLAG TRUE)
++find_package(Threads)
++
++if(CMAKE_USE_PTHREADS_INIT AND UNIX AND NOT APPLE)
++    target_link_libraries(Threads::Threads INTERFACE -pthread)
++endif()
++
++target_link_libraries(Arcus PRIVATE Threads::Threads)
++
+ 
+ target_include_directories(Arcus
+         PUBLIC
