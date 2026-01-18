@@ -92,8 +92,11 @@ class GladConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        PipEnv(self).install(["Jinja2>=2.7,<4.0"])
-        PipEnv(self).generate()
+        pipenv = PipEnv(self)
+        # Should be pipenv.install(["Jinja2>=2.7,<4.0"])
+        # but version constraint omitted due to https://github.com/conan-io/conan/issues/19477
+        pipenv.install(["Jinja2"])
+        pipenv.generate()
 
         tc = CMakeToolchain(self)
         tc.cache_variables.update({
