@@ -15,6 +15,8 @@ sources:
     url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-19.0.1/apache-arrow-19.0.1.tar.gz?action=download"
     sha256: "acb76266e8b0c2fbb7eb15d542fbb462a73b3fd1e32b80fad6c2fafd95a51160"
 patches:
+  "23.0.0":
+    - patch_file: "patches/23.0.0-0001-fix-downloaded-mimalloc.patch"
   "22.0.0":
     - patch_file: "patches/22.0.0-0001-fix-downloaded-mimalloc.patch"
     - patch_file: "patches/22.0.0-0002-fix-msvc-arm64.patch"
