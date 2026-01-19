@@ -60,15 +60,12 @@ class BitserializerConan(ConanFile):
             cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.get_safe("with_cpprestsdk"):
-            self.requires("cpprestsdk/2.10.19", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_rapidjson"):
             self.requires("rapidjson/1.1.0", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_pugixml"):
             self.requires("pugixml/1.15", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_rapidyaml"):
-            required_rapidyaml = "rapidyaml/[>=0.8.0 <=0.10.0]" if Version(self.version) >= "0.80" else "rapidyaml/0.5.0"
-            self.requires(required_rapidyaml, transitive_headers=True, transitive_libs=True)
+            self.requires("rapidyaml/[>=0.8.0 <=0.10.0]", transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
         if self._is_header_only(info=True):
@@ -89,7 +86,6 @@ class BitserializerConan(ConanFile):
     def generate(self):
         if not self._is_header_only():
             tc = CMakeToolchain(self)
-            tc.cache_variables["BUILD_CPPRESTJSON_ARCHIVE"] = self.options.get_safe("with_cpprestsdk")
             tc.cache_variables["BUILD_RAPIDJSON_ARCHIVE"] = self.options.get_safe("with_rapidjson")
             tc.cache_variables["BUILD_PUGIXML_ARCHIVE"] = self.options.get_safe("with_pugixml")
             tc.cache_variables["BUILD_RAPIDYAML_ARCHIVE"] = self.options.get_safe("with_rapidyaml")
@@ -135,13 +131,6 @@ class BitserializerConan(ConanFile):
         if self.settings.compiler == "gcc" or (self.settings.os == "Linux" and self.settings.compiler == "clang"):
             if Version(self.settings.compiler.version) < 9:
                 self.cpp_info.components["bitserializer-core"].system_libs = ["stdc++fs"]
-
-        # cpprestjson-archive
-        if self.options.get_safe("with_cpprestsdk"):
-            self.cpp_info.components["bitserializer-cpprestjson"].set_property("cmake_target_name", "BitSerializer::cpprestjson-archive")
-            self.cpp_info.components["bitserializer-cpprestjson"].bindirs = []
-            self.cpp_info.components["bitserializer-cpprestjson"].libdirs = []
-            self.cpp_info.components["bitserializer-cpprestjson"].requires = ["bitserializer-core", "cpprestsdk::cpprestsdk"]
 
         # rapidjson-archive
         if self.options.get_safe("with_rapidjson"):
