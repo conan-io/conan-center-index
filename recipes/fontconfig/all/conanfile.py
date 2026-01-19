@@ -1,10 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import (
-    apply_conandata_patches, copy, export_conandata_patches, get,
-    rm, rmdir
-)
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -32,9 +29,6 @@ class FontconfigConan(ConanFile):
         "fPIC": True,
     }
     package_type = "library"
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -78,16 +72,9 @@ class FontconfigConan(ConanFile):
             "sysconfdir": os.path.join("res", "etc"),
             "datadir": os.path.join("res", "share"),
         })
-        if is_apple_os(self):
-            # INFO: AppleClang 17: 2.13.93 fails fccfg.c:357:9: error: incompatible integer to pointer ... [-Wint-conversion]
-            tc.extra_cflags.append("-Wno-error=int-conversion")
         tc.generate()
 
-    def _patch_files(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_files()
         meson = Meson(self)
         meson.configure()
         meson.build()
