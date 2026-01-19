@@ -10,4 +10,4 @@ patches:
 # ONNX versions are based on the minor version used at
 # https://github.com/microsoft/onnxruntime/tree/main/cmake/external
 onnx_version_map:
-  "1.23.2": "1.20.0"
+  "1.23.2": "1.20.1"
