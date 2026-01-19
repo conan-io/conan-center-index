@@ -82,7 +82,7 @@ class BitserializerConan(ConanFile):
         if self.options.get_safe("with_pugixml"):
             self.requires("pugixml/1.15", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_rapidyaml"):
-            required_rapidyaml = "rapidyaml/0.8.0" if Version(self.version) >= "0.80" else "rapidyaml/0.5.0"
+            required_rapidyaml = "rapidyaml/[>=0.8.0 <=0.10.0]" if Version(self.version) >= "0.80" else "rapidyaml/0.5.0"
             self.requires(required_rapidyaml, transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
@@ -102,9 +102,6 @@ class BitserializerConan(ConanFile):
         compiler_name = str(self.settings.compiler)
         if compiler_name == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration(f'Using {self.ref} with GCC requires "compiler.libcxx=libstdc++11"')
-        elif compiler_name == "clang" and self.settings.compiler.libcxx not in ["libstdc++11", "libc++"]:
-            raise ConanInvalidConfiguration(f'Using {self.ref} with Clang requires either "compiler.libcxx=libstdc++11"'
-                                            ' or "compiler.libcxx=libc++"')
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -152,7 +149,7 @@ class BitserializerConan(ConanFile):
         lib_suffix = "d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.set_property("cmake_file_name", "bitserializer")
 
-        # cpprestjson-core
+        # bitserializer-core
         self.cpp_info.components["bitserializer-core"].set_property("cmake_target_name", "BitSerializer::core")
         self.cpp_info.components["bitserializer-core"].bindirs = []
         self.cpp_info.components["bitserializer-core"].libdirs = []

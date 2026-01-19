@@ -64,7 +64,7 @@ class PodofoConan(ConanFile):
 
         # Unvendor 3rd party libraries
         self.requires("fmt/[>=11.0.2]")
-        self.requires("date/3.0.4")
+        self.requires("date/[^3.0.4]")
         self.requires("fast_float/6.1.0")
         self.requires("tcb-span/cci.20220616", transitive_headers=True)
         if Version(self.version) < "1.0.3":
@@ -124,6 +124,8 @@ class PodofoConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        if self.dependencies["fmt"].options.header_only:
+            deps.set_property("fmt", "cmake_target_aliases", ["fmt::fmt"])
         deps.generate()
 
     def build(self):
