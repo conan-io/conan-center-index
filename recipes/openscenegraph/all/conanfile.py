@@ -125,7 +125,7 @@ class OpenSceneGraphConanFile(ConanFile):
         self.requires("opengl/system")
 
         if self.options.use_fontconfig:
-            self.requires("fontconfig/2.14.2")
+            self.requires("fontconfig/[>=2.14.2 <3]")
 
         if self.options.get_safe("with_asio"):
             # Should these be private requires?
@@ -136,7 +136,7 @@ class OpenSceneGraphConanFile(ConanFile):
         if self.options.get_safe("with_dcmtk"):
             self.requires("dcmtk/3.6.7")
         if self.options.with_freetype:
-            self.requires("freetype/2.13.2")
+            self.requires("freetype/[>=2.13.2 <3]")
         if self.options.with_gdal:
             self.requires("gdal/3.8.3")
         if self.options.get_safe("with_gif"):
