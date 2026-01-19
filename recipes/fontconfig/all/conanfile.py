@@ -88,7 +88,9 @@ class FontconfigConan(ConanFile):
         rm(self, "*.def", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         fix_apple_shared_install_name(self)
-        fix_msvc_libname(self)
+        if Version(self.version) <= "2.15.0":
+            # TODO: Keep this for versions <= 2.15.0, remove in future versions
+            fix_msvc_libname(self)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
