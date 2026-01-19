@@ -78,10 +78,6 @@ class FontconfigConan(ConanFile):
             "sysconfdir": os.path.join("res", "etc"),
             "datadir": os.path.join("res", "share"),
         })
-        if Version(self.version) >= "2.16.0":
-            tc.project_options.update({
-                "xml-backend": "expat",
-            })
         if is_apple_os(self):
             # INFO: AppleClang 17: 2.13.93 fails fccfg.c:357:9: error: incompatible integer to pointer ... [-Wint-conversion]
             tc.extra_cflags.append("-Wno-error=int-conversion")
