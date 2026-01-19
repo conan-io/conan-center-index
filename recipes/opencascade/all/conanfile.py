@@ -455,7 +455,7 @@ class OpenCascadeConan(ConanFile):
             "CSF_OpenVR": {"externals": ["openvr::openvr"] if self.options.with_openvr else []},
             "CSF_RapidJSON": {"externals": ["rapidjson::rapidjson"] if self.options.with_rapidjson else []},
             "CSF_Draco": {"externals": ["draco::draco"] if self.options.get_safe("with_draco") else []},
-            "CSF_TBB": {"externals": ["onetbb::onetbb"] if self.options.with_tbb else []},
+            "CSF_TBB": {"externals": ["onetbb::libtbb"] if self.options.with_tbb else []},
             "CSF_VTK": {},
             # TODO: If requested, allow jemalloc/tbb instead of default native
             "CSF_MMGR": {},

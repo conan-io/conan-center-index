@@ -368,7 +368,8 @@ class GtsamConan(ConanFile):
         gtsam.requires = [f"boost::{component}" for component in self._required_boost_components]
         gtsam.requires.append("eigen::eigen")
         if self.options.with_TBB:
-            gtsam.requires.append("onetbb::onetbb")
+            gtsam.requires.append("onetbb::libtbb")
+            gtsam.requires.append("onetbb::tbbmalloc")
         if self.options.default_allocator == "tcmalloc":
             gtsam.requires.append("gperftools::gperftools")
         if self.settings.os == "Windows":

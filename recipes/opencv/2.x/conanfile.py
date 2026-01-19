@@ -126,7 +126,7 @@ class OpenCVConan(ConanFile):
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
 
         def tbb():
-            return ["onetbb::onetbb"] if self.options.with_tbb else []
+            return ["onetbb::libtbb"] if self.options.with_tbb else []
 
         def opencv_gpu():
             return ["opencv_gpu"] if self.options.get_safe("gpu") else []

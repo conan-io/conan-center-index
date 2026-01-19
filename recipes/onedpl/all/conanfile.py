@@ -101,4 +101,4 @@ class OneDplConan(ConanFile):
         self.cpp_info.components["_onedpl"].bindirs = []
         self.cpp_info.components["_onedpl"].libdirs = []
         if self.options.backend == "tbb":
-            self.cpp_info.components["_onedpl"].requires = ["onetbb::onetbb"]
+            self.cpp_info.components["_onedpl"].requires = ["onetbb::libtbb"]

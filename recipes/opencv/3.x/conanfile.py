@@ -329,7 +329,7 @@ class OpenCVConan(ConanFile):
 
         def parallel():
             if self.options.parallel:
-                return ["onetbb::onetbb"] if self.options.parallel == "tbb" else ["openmp"]
+                return ["onetbb::libtbb"] if self.options.parallel == "tbb" else ["openmp"]
             return []
 
         def xfeatures2d():

@@ -150,7 +150,7 @@ class CCTagConan(ConanFile):
             "boost::thread",
             "boost::timer",
             "eigen::eigen",
-            "onetbb::onetbb",
+            "onetbb::libtbb",
             "opencv::opencv_core",
             "opencv::opencv_imgcodecs",
             "opencv::opencv_imgproc",
