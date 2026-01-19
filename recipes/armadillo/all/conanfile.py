@@ -101,8 +101,11 @@ class ArmadilloConan(ConanFile):
         if self.settings.os == "Windows" or Version(self.version) >= "12.6.2":
             del self.options.use_extern_rng
 
+        if Version(self.version) < "15":
+            del self.options.header_only
+
     def configure(self):
-        if self.options.header_only:
+        if self.options.get_safe("header_only"):
             self.options.rm_safe("fPIC")
             self.options.rm_safe("shared")
             self.options.rm_safe("use_wrapper")
@@ -127,11 +130,6 @@ class ArmadilloConan(ConanFile):
         ):
             raise ConanInvalidConfiguration(
                 "framework_accelerate can only be used on Macos"
-            )
-
-        if Version(self.version) < "15" and self.options.header_only:
-            raise ConanInvalidConfiguration(
-                "header_only=True is only supported for armadillo versions >=15"
             )
 
         if self.options.use_hdf5 and Version(self.version) > "12" and cross_building(self):
@@ -179,7 +177,7 @@ class ArmadilloConan(ConanFile):
                 f"DEPRECATION NOTICE: Value {opt} uses armadillo's default dependency search and will be replaced when this package becomes available in ConanCenter"
             )
 
-        if not self.options.header_only:
+        if not self.options.get_safe("header_only"):
             # Ignore use_extern_rng when the option has been removed
             if self.options.use_wrapper and not self.options.get_safe("use_extern_rng", True):
                 raise ConanInvalidConfiguration(
@@ -228,7 +226,7 @@ class ArmadilloConan(ConanFile):
         if Version(self.version) >= "15":
             tc.variables["HEADER_ONLY"] = self.options.header_only
 
-        if not self.options.header_only:
+        if not self.options.get_safe("header_only"):
             tc.variables["ARMA_USE_LAPACK"] = self.options.use_lapack
             tc.variables["ARMA_USE_BLAS"] = self.options.use_blas
             tc.variables["ARMA_USE_ATLAS"] = self.options.use_lapack == "system_atlas"
@@ -268,7 +266,7 @@ class ArmadilloConan(ConanFile):
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support{
         tc.generate()
 
-        if not self.options.header_only:
+        if not self.options.get_safe("header_only"):
             deps = CMakeDeps(self)
             deps.generate()
 
@@ -277,7 +275,7 @@ class ArmadilloConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        if not self.options.header_only:
+        if not self.options.get_safe("header_only"):
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
@@ -317,14 +315,14 @@ class ArmadilloConan(ConanFile):
         save(self, module_file, content)
 
     def package_id(self):
-        if self.info.options.header_only:
+        if self.info.options.get_safe("header_only"):
             self.info.clear()
 
     def package(self):
         copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, "NOTICE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
-        if self.options.header_only:
+        if self.options.get_safe("header_only"):
             copy(self, pattern="**/*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
             copy(self, pattern="armadillo", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
         else:
@@ -343,7 +341,7 @@ class ArmadilloConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "Armadillo::Armadillo")
         self.cpp_info.set_property("cmake_target_aliases", ["armadillo", "armadillo::armadillo"])
         
-        if self.options.header_only:
+        if self.options.get_safe("header_only"):
             self.cpp_info.bindirs = []
             self.cpp_info.libdirs = []
             self.cpp_info.defines.append("ARMA_HEADER_ONLY")
