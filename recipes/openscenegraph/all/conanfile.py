@@ -241,6 +241,7 @@ class OpenSceneGraphConanFile(ConanFile):
         if is_apple_os(self):
             tc.preprocessor_definitions["GL_SILENCE_DEPRECATION"] = "1"
 
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"  # macOS: use @rpath for shared libs
         tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support 
         tc.generate()
 
