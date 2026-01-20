@@ -440,7 +440,11 @@ class QtConan(ConanFile):
         if self.options.qtwayland:
             self.tool_requires("wayland/1.22.0")
         if cross_building(self):
-            self.tool_requires(f"qt/{self.version}")
+            # Building qtshadertools for iOS requires the qsb tool available during build time.
+            # This commonly results in QT being built twice: Once for the build host to build qsb,
+            # and then again for the target host.
+            need_qsb = self.settings.os == "iOS" and self.options.qtshadertools
+            self.tool_requires(f"qt/{self.version}", options={"qtshadertools": need_qsb})
 
     def generate(self):
         ms = VirtualBuildEnv(self)
