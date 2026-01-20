@@ -226,59 +226,56 @@ class ArmadilloConan(ConanFile):
         if Version(self.version) >= "15":
             tc.cache_variables["HEADER_ONLY"] = self.options.header_only
 
-        if not self.options.get_safe("header_only"):
-            tc.cache_variables["ARMA_USE_LAPACK"] = self.options.use_lapack
-            tc.cache_variables["ARMA_USE_BLAS"] = self.options.use_blas
-            tc.cache_variables["ARMA_USE_ATLAS"] = self.options.use_lapack == "system_atlas"
-            tc.cache_variables["ARMA_USE_HDF5"] = self.options.use_hdf5
-            tc.cache_variables["ARMA_USE_HDF5_CMAKE"] = self.options.use_hdf5
-            tc.cache_variables["ARMA_USE_ARPACK"] = self.options.use_arpack
-            if Version(self.version) < "12.6.2":
-                tc.cache_variables["ARMA_USE_EXTERN_RNG"] = self.options.get_safe("use_extern_rng", default=False)
-            tc.cache_variables["ARMA_USE_SUPERLU"] = self.options.use_superlu
-            tc.cache_variables["ARMA_USE_WRAPPER"] = self.options.get_safe("use_wrapper")
-            tc.cache_variables["ARMA_USE_ACCELERATE"] = (
-                self.options.use_blas == "framework_accelerate"
-                or self.options.use_lapack == "framework_accelerate"
-            ) and self.settings.os == "Macos"
-            tc.cache_variables["DETECT_HDF5"] = self.options.use_hdf5
-            tc.cache_variables["USE_OPENBLAS"] = (self.options.use_blas == "openblas")
-            tc.cache_variables["USE_MKL"] = self.options.use_blas == "intel_mkl" and self.options.use_lapack == "intel_mkl"
-            tc.cache_variables["USE_SYSTEM_LAPACK"] = self.options.use_lapack == "system_lapack"
-            tc.cache_variables["USE_SYSTEM_BLAS"] = (self.options.use_blas == "system_blas")
-            tc.cache_variables["USE_SYSTEM_ATLAS"] = self.options.use_lapack == "system_atlas"
-            tc.cache_variables["USE_SYSTEM_HDF5"] = False
-            tc.cache_variables["USE_SYSTEM_ARPACK"] = self.options.use_arpack
-            tc.cache_variables["USE_SYSTEM_SUPERLU"] = self.options.use_superlu
-            tc.cache_variables["USE_SYSTEM_OPENBLAS"] = False
-            tc.cache_variables["USE_SYSTEM_FLEXIBLAS"] = self.options.use_blas == "system_flexiblas"
-            tc.cache_variables["ALLOW_FLEXIBLAS_LINUX"] = self.options.use_blas == "system_flexiblas" and self.settings.os == "Linux"
-            tc.cache_variables["ALLOW_OPENBLAS_MACOS"] = self.options.use_blas == "openblas" and self.settings.os == "Macos"
-            tc.cache_variables["OPENBLAS_PROVIDES_LAPACK"] = self.options.use_lapack == "openblas"
-            tc.cache_variables["ALLOW_BLAS_LAPACK_MACOS"] = self.options.use_blas != "framework_accelerate"
-            if Version(self.version) >= "15":
-                tc.cache_variables["STATIC_LIB"] = not self.options.get_safe("shared")
-            else:
-                tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["ARMA_USE_LAPACK"] = self.options.use_lapack
+        tc.cache_variables["ARMA_USE_BLAS"] = self.options.use_blas
+        tc.cache_variables["ARMA_USE_ATLAS"] = self.options.use_lapack == "system_atlas"
+        tc.cache_variables["ARMA_USE_HDF5"] = self.options.use_hdf5
+        tc.cache_variables["ARMA_USE_HDF5_CMAKE"] = self.options.use_hdf5
+        tc.cache_variables["ARMA_USE_ARPACK"] = self.options.use_arpack
+        if Version(self.version) < "12.6.2":
+            tc.cache_variables["ARMA_USE_EXTERN_RNG"] = self.options.get_safe("use_extern_rng", default=False)
+        tc.cache_variables["ARMA_USE_SUPERLU"] = self.options.use_superlu
+        tc.cache_variables["ARMA_USE_WRAPPER"] = self.options.get_safe("use_wrapper")
+        tc.cache_variables["ARMA_USE_ACCELERATE"] = (
+            self.options.use_blas == "framework_accelerate"
+            or self.options.use_lapack == "framework_accelerate"
+        ) and self.settings.os == "Macos"
+        tc.cache_variables["DETECT_HDF5"] = self.options.use_hdf5
+        tc.cache_variables["USE_OPENBLAS"] = (self.options.use_blas == "openblas")
+        tc.cache_variables["USE_MKL"] = self.options.use_blas == "intel_mkl" and self.options.use_lapack == "intel_mkl"
+        tc.cache_variables["USE_SYSTEM_LAPACK"] = self.options.use_lapack == "system_lapack"
+        tc.cache_variables["USE_SYSTEM_BLAS"] = (self.options.use_blas == "system_blas")
+        tc.cache_variables["USE_SYSTEM_ATLAS"] = self.options.use_lapack == "system_atlas"
+        tc.cache_variables["USE_SYSTEM_HDF5"] = False
+        tc.cache_variables["USE_SYSTEM_ARPACK"] = self.options.use_arpack
+        tc.cache_variables["USE_SYSTEM_SUPERLU"] = self.options.use_superlu
+        tc.cache_variables["USE_SYSTEM_OPENBLAS"] = False
+        tc.cache_variables["USE_SYSTEM_FLEXIBLAS"] = self.options.use_blas == "system_flexiblas"
+        tc.cache_variables["ALLOW_FLEXIBLAS_LINUX"] = self.options.use_blas == "system_flexiblas" and self.settings.os == "Linux"
+        tc.cache_variables["ALLOW_OPENBLAS_MACOS"] = self.options.use_blas == "openblas" and self.settings.os == "Macos"
+        tc.cache_variables["OPENBLAS_PROVIDES_LAPACK"] = self.options.use_lapack == "openblas"
+        tc.cache_variables["ALLOW_BLAS_LAPACK_MACOS"] = self.options.use_blas != "framework_accelerate"
+        if Version(self.version) >= "15":
+            tc.cache_variables["STATIC_LIB"] = not self.options.get_safe("shared")
+        else:
+            tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.cache_variables["BUILD_SMOKE_TEST"] = False
         tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if Version(self.version) < "14.0.0": # pylint: disable=conan-condition-evals-to-constant
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support{
         tc.generate()
 
-        if not self.options.get_safe("header_only"):
-            deps = CMakeDeps(self)
-            deps.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
-        if not self.options.get_safe("header_only"):
-            cmake = CMake(self)
-            cmake.configure()
-            cmake.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     @property
     def _get_arma_version_name(self):
@@ -322,14 +319,10 @@ class ArmadilloConan(ConanFile):
         copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, "NOTICE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
-        if self.options.get_safe("header_only"):
-            copy(self, pattern="**/*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
-            copy(self, pattern="armadillo", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
-        else:
-            cmake = CMake(self)
-            cmake.install()
-            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-            rmdir(self, os.path.join(self.package_folder, "share"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_vars_rel_path))
 
 
