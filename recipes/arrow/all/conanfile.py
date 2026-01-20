@@ -118,9 +118,14 @@ class ArrowConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        # arrow >= 10.0.0 requires C++17.
-        # https://github.com/apache/arrow/pull/13991
-        return "17"
+        if Version(self.version) >= "23.0.0":
+            # arrow >= 23.0.0 requires C++20.
+            # https://github.com/apache/arrow/issues/45885
+            return "20"
+        else:
+            # arrow >= 10.0.0 requires C++17.
+            # https://github.com/apache/arrow/pull/13991
+            return "17"
 
     def export_sources(self):
         export_conandata_patches(self)
