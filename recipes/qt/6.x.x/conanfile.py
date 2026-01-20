@@ -921,10 +921,14 @@ class QtConan(ConanFile):
         if self.options.qtdeclarative:
             targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
             targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltc", "qmldom"])
+            targets.extend(["qmljsrootgen"])
             if Version(self.version) >= "6.8.3":
                 targets.extend(["qmlaotstats"])
-
+            if self.options.qtsvg:
+                targets.extend(["svgtoqml"])
             # Note: consider "qmltestrunner", see https://github.com/conan-io/conan-center-index/issues/24276
+            # Also: qmleasing, qmlplugindump, qmlscene, qmltime
+
         if self.options.get_safe("qtremoteobjects"):
             targets.append("repc")
         if self.options.get_safe("qtscxml"):
