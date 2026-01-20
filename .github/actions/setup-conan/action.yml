@@ -39,6 +39,7 @@ runs:
         if [[ "$RUNNER_OS" == "Windows" && "$RUNNER_ARCH" == "ARM64" ]]; then
           echo "msys2/*:arch=x86_64" >> "$DEFAULT_PROFILE"
           echo "strawberryperl/*:arch=x86_64" >> "$DEFAULT_PROFILE"
+          echo "gettext/*:arch=x86_64" >> "$DEFAULT_PROFILE"
         fi
 
         echo "[conf]" >> "$DEFAULT_PROFILE"
