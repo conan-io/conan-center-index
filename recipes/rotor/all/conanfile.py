@@ -47,7 +47,7 @@ class RotorConan(ConanFile):
         if self.options.get_safe("enable_ev", False):
             self.requires("libev/4.33")
         if self.options.get_safe("enable_fltk", False):
-            self.requires("fltk/1.3.9")
+            self.requires("fltk/1.4.4")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
