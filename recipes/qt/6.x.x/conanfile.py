@@ -443,12 +443,13 @@ class QtConan(ConanFile):
         if cross_building(self):
             options = {}
             if self.settings.os == "iOS":
+                # Tools are required on build host
                 if self.options.get_safe("qtshadertools"):
-                    # qtshadertools requires qsb tool
                     options["qtshadertools"] = True
                 if self.options.get_safe("qtdeclarative"):
-                    # qtdeclarative requires qmlaotstats tool
                     options["qtdeclarative"] = True
+                if self.options.get_safe("qttools"):
+                    options["qttools"] = True
             self.tool_requires(f"qt/{self.version}", options=options)
 
     def generate(self):
