@@ -2,8 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.files import copy, get, rm, rmdir
-from conan.tools.gnu import PkgConfigDeps
-from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=2.1"
@@ -48,30 +47,32 @@ class libxftConan(ConanFile):
         self.requires("xorg-proto/2024.1", transitive_headers=True)
 
     def build_requirements(self):
-        self.tool_requires("meson/[>=1.3.1 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.1.0 <3]")
+        self.tool_requires("xorg-macros/1.20.0")
+        self.tool_requires("libtool/2.4.7")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = PkgConfigDeps(self)
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--disable-dependency-tracking")
         tc.generate()
-        tc = MesonToolchain(self)
+        tc = PkgConfigDeps(self)
         tc.generate()
 
     def build(self):
-        meson = Meson(self)
-        meson.configure()
-        meson.build()
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
-        meson = Meson(self)
-        meson.install()
+        autotools = Autotools(self)
+        autotools.install()
 
         rm(self, "*.la", f"{self.package_folder}/lib", recursive=True)
         rmdir(self, f"{self.package_folder}/lib/pkgconfig")
