@@ -55,10 +55,10 @@ class OpenSlideConan(ConanFile):
     def requirements(self):
         self.requires("cairo/1.18.4")
         self.requires("gdk-pixbuf/2.44.4")
-        self.requires("glib/2.78.3")
+        self.requires("glib/[^2.78.3]")
         self.requires("libdicom/1.0.5")
         self.requires("libpng/[>=1.6 <2]")
-        self.requires("libtiff/4.6.0")
+        self.requires("libtiff/[>=4.6.0 <5]")
         self.requires("libxml2/[>=2.12.5 <3]")
         self.requires("openjpeg/[>=2.5.2 <3]")
         self.requires("sqlite3/[>=3.45.3 <4]")
