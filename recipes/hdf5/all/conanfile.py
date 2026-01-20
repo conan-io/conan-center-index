@@ -80,7 +80,7 @@ class Hdf5Conan(ConanFile):
         elif self.options.szip_support == "with_szip":
             self.requires("szip/2.1.1")
         if self.options.parallel:
-            self.requires("openmpi/4.1.0")
+            self.requires("openmpi/4.1.6")
 
     def validate(self):
         if self.options.parallel and not self.options.enable_unsupported:
@@ -148,6 +148,8 @@ class Hdf5Conan(ConanFile):
             tc.cache_variables["HDF5_MODULE_MODE_ZLIB"] = False
             tc.cache_variables["HDF5_PROVIDES_SZIP_SUPPORT"] = bool(self.options.szip_support)
             tc.cache_variables["HDF5_ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
+            if self.options.parallel:
+                tc.cache_variables["MPI_C_FOUND"] = True
         else:
             tc.variables["HDF5_ENABLE_SZIP_SUPPORT"] = bool(self.options.szip_support)
             tc.variables["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
