@@ -43,10 +43,8 @@ class libxftConan(ConanFile):
 
     def requirements(self):
         self.requires("xorg/system") # Xorg is for libX11 and xrender
-        # TODO: Move to version ranges after merging #29340
-        self.requires("freetype/2.13.2", transitive_headers=True)
-        # TODO: Move to version ranges after merging #29340
-        self.requires("fontconfig/2.15.0", transitive_headers=True)
+        self.requires("freetype/[>=2.13.2 <3]", transitive_headers=True)
+        self.requires("fontconfig/[>=2.15.0 <3]", transitive_headers=True)
         self.requires("xorg-proto/2024.1", transitive_headers=True)
 
     def build_requirements(self):
