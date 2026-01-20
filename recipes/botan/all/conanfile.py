@@ -7,7 +7,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name, XCRun
 from conan.tools.build import build_jobs, check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import chdir, copy, get, rmdir
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, VCVars, check_min_vs
@@ -33,7 +33,6 @@ class BotanConan(ConanFile):
         "fPIC": [True, False],
         "amalgamation": [True, False],
         "with_bzip2": [True, False],
-        "with_openssl": [True, False],
         "with_sqlite3": [True, False],
         "with_zlib": [True, False],
         "with_boost": [True, False],
@@ -61,9 +60,8 @@ class BotanConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "amalgamation": True,
+        "amalgamation": False,
         "with_bzip2": False,
-        "with_openssl": False,
         "with_sqlite3": False,
         "with_zlib": False,
         "with_boost": False,
@@ -103,9 +101,6 @@ class BotanConan(ConanFile):
     def _is_arm(self):
         return 'arm' in str(self.settings.arch)
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -128,10 +123,6 @@ class BotanConan(ConanFile):
             del self.options.with_altivec
             del self.options.with_powercrypto
 
-        # Support for the OpenSSL provider was removed in 2.19.2
-        if Version(self.version) >= '2.19.2':
-            del self.options.with_openssl
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -139,8 +130,6 @@ class BotanConan(ConanFile):
     def requirements(self):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
-        if self.options.get_safe('with_openssl', False):
-            self.requires("openssl/[>=1.1 <3]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_sqlite3:
@@ -185,8 +174,7 @@ class BotanConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"{self.name} requires non-header-only static boost, "
                     f"without magic_autolink, and with these components: {', '.join(self._required_boost_components)}")
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
 
         compiler = self.settings.compiler
         compiler_name = str(compiler)
@@ -221,6 +209,21 @@ class BotanConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"botan amalgamation is not supported for {compiler}/{compiler_version}")
 
+        if Version(self.version) >= '3.9':
+            # Botan 3.9 removed support for disabling the usage of specific ISAs via configure.py switches.
+            # See: https://github.com/randombit/botan/pull/4927
+            #
+            # TODO: Eventually, we should remove these Conan options entirely (latest with Botan4).
+            isa_opts = ["with_sse2", "with_ssse3", "with_sse4_1", "with_sse4_2", "with_avx2", "with_bmi2",
+                        "with_rdrand", "with_rdseed", "with_aes_ni", "with_sha_ni", "with_altivec", "with_neon",
+                        "with_armv8crypto", "with_powercrypto"]
+            if any(not self.options.get_safe(opt, True) for opt in isa_opts):
+                raise ConanInvalidConfiguration(
+                    "Since Botan 3.9 users are expected to explicitly disable modules that use a certain ISA. "
+                    "See https://botan.randombit.net/doxygen/topics.html for a list of available modules.\nUse "
+                    "the Conan option disable_modules=... with a comma-separated list of module names instead of "
+                    f"disabling any of those now-deprecated Conan options: {', '.join(isa_opts)}")
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -248,7 +251,6 @@ class BotanConan(ConanFile):
         VirtualBuildEnv(self).generate()
 
     def build(self):
-        apply_conandata_patches(self)
         with chdir(self, self.source_folder):
             self.run(self._configure_cmd)
             self.run(self._make_cmd)
@@ -287,6 +289,7 @@ class BotanConan(ConanFile):
                 'Linux': 'linux',
                 'Macos': 'darwin',
                 'Android': 'android',
+                'Emscripten': 'emscripten',
                 'baremetal': 'none',
                 'iOS': 'ios'}.get(str(self.settings.os))
 
@@ -305,6 +308,8 @@ class BotanConan(ConanFile):
             botan_compiler = 'clang'
         elif self.settings.compiler == 'gcc':
             botan_compiler = 'gcc'
+        elif self.settings.os == 'Emscripten':
+            botan_compiler = 'emcc'
         else:
             botan_compiler = 'msvc'
 
@@ -364,6 +369,10 @@ class BotanConan(ConanFile):
         if self.options.disable_modules:
             build_flags.append('--disable-modules={}'.format(self.options.disable_modules))
 
+        cpp_compiler = self.conf.get("tools.build:compiler_executables", {}).get('cpp')
+        if cpp_compiler is not None:
+            build_flags.append("--cc-bin={}".format(cpp_compiler))
+
         if self.options.amalgamation:
             build_flags.append('--amalgamation')
 
@@ -376,10 +385,6 @@ class BotanConan(ConanFile):
         if self.options.with_bzip2:
             build_flags.append('--with-bzip2')
             build_flags.extend(self._dependency_build_flags('bzip2'))
-
-        if self.options.get_safe('with_openssl', False):
-            build_flags.append('--with-openssl')
-            build_flags.extend(self._dependency_build_flags('openssl'))
 
         if self.options.with_sqlite3:
             build_flags.append('--with-sqlite3')
@@ -399,7 +404,7 @@ class BotanConan(ConanFile):
         if self.settings.build_type == 'RelWithDebInfo':
             build_flags.append('--with-debug-info')
 
-        if self._is_x86:
+        if self._is_x86 and Version(self.version) < '3.9':
             if not self.options.with_sse2:
                 build_flags.append('--disable-sse2')
 
@@ -430,14 +435,14 @@ class BotanConan(ConanFile):
             if not self.options.with_sha_ni:
                 build_flags.append('--disable-sha-ni')
 
-        if self._is_ppc:
+        if self._is_ppc and Version(self.version) < '3.9':
             if not self.options.with_powercrypto:
                 build_flags.append('--disable-powercrypto')
 
             if not self.options.with_altivec:
                 build_flags.append('--disable-altivec')
 
-        if self._is_arm:
+        if self._is_arm and Version(self.version) < '3.9':
             if not self.options.with_neon:
                 build_flags.append('--disable-neon')
 

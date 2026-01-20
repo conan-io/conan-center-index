@@ -1,8 +1,4 @@
-#ifdef ASIO_GRPC_V2
 #include <agrpc/asio_grpc.hpp>
-#else
-#include <agrpc/asioGrpc.hpp>
-#endif
 #include <boost/asio/post.hpp>
 
 #ifndef CROSSCOMPILING

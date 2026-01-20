@@ -1,0 +1,22 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1075,7 +1075,8 @@ if(UA_ENABLE_NODESETLOADER)
+     list(APPEND lib_sources ${NODESETLOADER_SOURCES})
+     list(APPEND plugin_headers ${PROJECT_SOURCE_DIR}/plugins/include/open62541/plugin/nodesetloader.h)
+     list(APPEND plugin_sources ${PROJECT_SOURCE_DIR}/plugins/ua_nodesetloader.c)
+-    list(APPEND open62541_LIBRARIES ${NODESETLOADER_DEPS_LIBS})
++    find_package(libxml2 REQUIRED)
++    list(APPEND open62541_LIBRARIES LibXml2::LibXml2)
+ 
+     if(UA_ENABLE_AMALGAMATION)
+         list(APPEND exported_headers ${NODESETLOADER_PUBLIC_HEADERS})
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/deps/nodesetLoader/CMakeLists.txt
++++ b/deps/nodesetLoader/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.0)
++cmake_minimum_required(VERSION 3.0...3.13)
+ 
+ project(nodesetLoader)
+ 

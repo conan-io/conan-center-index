@@ -51,16 +51,22 @@ class LogrConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fmt/10.2.1")
+        if Version(self.version) >= "0.8.0":
+            self.requires( "fmt/11.2.0" )
 
-        if self.options.with_spdlog:
-            self.requires("spdlog/1.12.0")
+            if self.options.with_spdlog:
+                self.requires( "spdlog/1.15.3" )
+        else:
+            self.requires("fmt/10.2.1")
+
+            if self.options.with_spdlog:
+                self.requires("spdlog/1.12.0")
 
         if self.options.with_glog:
-            self.requires("glog/0.6.0")
+            self.requires( "glog/0.7.1" )
 
         if self.options.with_log4cplus:
-            self.requires("log4cplus/2.1.0")
+            self.requires( "log4cplus/2.1.2" )
 
         if self.options.with_boostlog:
             self.requires("boost/1.83.0")

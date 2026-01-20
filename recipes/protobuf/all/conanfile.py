@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, rename, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir, rm, save
-from conan.tools.microsoft import check_min_vs, msvc_runtime_flag, is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
 import os
@@ -63,6 +63,9 @@ class ProtobufConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        if Version(self.version) >= "6.32.1":
+            del self.options.upb
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -77,18 +80,10 @@ class ProtobufConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
 
-        if self._protobuf_release >= "22.0":
+        if self._protobuf_release >= "30.1":
+            self.requires("abseil/[>=20230802.1 <=20250814.0]", transitive_headers=True)
+        elif self._protobuf_release >= "22.0":
             self.requires("abseil/[>=20230802.1 <=20250127.0]", transitive_headers=True)
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "6",
-            "clang": "5",
-            "apple-clang": "10",
-            "Visual Studio": "15",
-            "msvc": "191",
-        }
 
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):
@@ -101,15 +96,7 @@ class ProtobufConan(ConanFile):
         if self._protobuf_release >= "30.1":
             check_min_cppstd(self, 17)
         elif self._protobuf_release >= "22.0":
-            if self.settings.compiler.get_safe("cppstd"):
-                check_min_cppstd(self, 14)
-            else:
-                minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), None)
-                compiler_version = Version(self.settings.compiler.version)
-                if minimum_version and compiler_version < minimum_version:
-                    raise ConanInvalidConfiguration(
-                        f"{self.ref} requires C++14, which your compiler does not support.",
-                    )
+            check_min_cppstd(self, 14)
 
         check_min_vs(self, "190")
 
@@ -317,14 +304,3 @@ class ProtobufConan(ConanFile):
                 self.cpp_info.components["libprotobuf-lite"].requires.extend(absl_deps)
                 if not self.options.shared:
                     self.cpp_info.components["libprotobuf-lite"].requires.extend(["utf8_validity"])
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "Protobuf"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "protobuf"
-        self.cpp_info.names["pkg_config"] ="protobuf_full_package"
-        for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-            self.cpp_info.components["libprotobuf"].build_modules[generator] = build_modules
-        if self.options.lite:
-            for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-                self.cpp_info.components["libprotobuf-lite"].build_modules[generator] = build_modules
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

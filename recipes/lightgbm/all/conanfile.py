@@ -1,12 +1,13 @@
 import os
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -34,7 +35,6 @@ class LightGBMConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_openmp": True,
     }
 
     def export_sources(self):
@@ -44,9 +44,10 @@ class LightGBMConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if conan_version.major == 1 and self.settings.compiler == "apple-clang":
-            # https://github.com/conan-io/conan-center-index/pull/18759#issuecomment-1817470331
-            del self.options.with_openmp
+
+        # apple-clang does not support OpenMP out of the box
+        # and externally provided headers and libraries are not guaranteed to work with future versions
+        self.options.with_openmp = self.settings.compiler != "apple-clang"
 
     def configure(self):
         if self.options.shared:
@@ -59,12 +60,14 @@ class LightGBMConan(ConanFile):
         self.requires("eigen/3.4.0")
         self.requires("fast_double_parser/0.7.0", transitive_headers=True, transitive_libs=True)
         self.requires("fmt/10.1.1", transitive_headers=True, transitive_libs=True)
-        if self.options.get_safe("with_openmp") and self.settings.compiler in ["clang", "apple-clang"]:
-            self.requires("llvm-openmp/17.0.4", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
+
+        if self.options.with_openmp and self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration("OpenMP support is required, which is not "
+                                            "available in Apple Clang")
 
     def build_requirements(self):
         if Version(self.version) >= "4.3.0":

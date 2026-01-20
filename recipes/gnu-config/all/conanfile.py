@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanException
-from conan.tools.files import copy, get, load, save, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import copy, load, save, apply_conandata_patches, export_conandata_patches
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Git
 import os
 
 required_conan_version = ">=1.52.0"
@@ -26,10 +27,12 @@ class GnuConfigConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        git = Git(self)
+        git.fetch_commit(**self.conan_data["sources"][self.version])
+        apply_conandata_patches(self)
 
     def build(self):
-        apply_conandata_patches(self)
+        pass
 
     def _extract_license(self):
         txt_lines = load(self, os.path.join(self.source_folder, "config.guess")).splitlines()
@@ -58,8 +61,3 @@ class GnuConfigConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.conf_info.define("user.gnu-config:config_guess", os.path.join(bin_path, "config.guess"))
         self.conf_info.define("user.gnu-config:config_sub", os.path.join(bin_path, "config.sub"))
-
-        # TODO: to remove in conan v2
-        self.user_info.CONFIG_GUESS = os.path.join(bin_path, "config.guess")
-        self.user_info.CONFIG_SUB = os.path.join(bin_path, "config.sub")
-        self.env_info.PATH.append(bin_path)

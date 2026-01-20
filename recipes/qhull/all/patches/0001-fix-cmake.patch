@@ -1,0 +1,63 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f50b187..82e4a3e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -66,9 +66,8 @@
+ #  
+ # $Id: //main/2019/qhull/CMakeLists.txt#21 $$Change: 3039 $
+ # $DateTime: 2020/09/03 21:26:22 $$Author: bbarber $
+-
++cmake_minimum_required(VERSION 3.5)
+ project(qhull)
+-cmake_minimum_required(VERSION 3.0)
+ 
+ # Define qhull_VERSION in README.txt, Announce.txt, qh-get.htm, CMakeLists.txt
+ #   qhull-zip.sh (twice), qhull-wiki.md, qhull-news.htm, File_id.diz, index.htm
+@@ -369,6 +368,7 @@ set_target_properties(${qhull_SHAREDR} PROPERTIES
+ 
+ if(UNIX)
+     target_link_libraries(${qhull_SHAREDR} m)
++    if(0)
+     if(APPLE)
+         set_target_properties(${qhull_SHAREDR} PROPERTIES 
+             INSTALL_NAME_DIR "${LIB_INSTALL_DIR}")
+@@ -378,6 +378,7 @@ if(UNIX)
+             INSTALL_RPATH_USE_LINK_PATH TRUE
+             BUILD_WITH_INSTALL_RPATH FALSE)
+     endif()
++    endif()
+ endif(UNIX)
+ 
+ # ---------------------------------------
+@@ -396,6 +397,7 @@ set_target_properties(${qhull_SHARED} PROPERTIES
+ 
+ if(UNIX)
+     target_link_libraries(${qhull_SHARED} m)
++    if(0)
+     if(APPLE)
+         set_target_properties(${qhull_SHARED} PROPERTIES 
+             INSTALL_NAME_DIR "${LIB_INSTALL_DIR}")
+@@ -405,6 +407,7 @@ if(UNIX)
+             INSTALL_RPATH_USE_LINK_PATH TRUE
+             BUILD_WITH_INSTALL_RPATH FALSE)
+     endif()
++    endif()
+ endif(UNIX)
+ 
+ # ---------------------------------------
+@@ -424,6 +427,7 @@ set_target_properties(${qhull_SHAREDP} PROPERTIES
+ 
+ if(UNIX)
+     target_link_libraries(${qhull_SHAREDP} m)
++    if(0)
+     if(APPLE)
+         set_target_properties(${qhull_SHAREDP} PROPERTIES 
+             INSTALL_NAME_DIR "${LIB_INSTALL_DIR}")
+@@ -433,6 +437,7 @@ if(UNIX)
+             INSTALL_RPATH_USE_LINK_PATH TRUE
+             BUILD_WITH_INSTALL_RPATH FALSE)
+     endif()
++    endif()
+ endif(UNIX)
+ 
+ # ---------------------------------------

@@ -1,14 +1,7 @@
 sources:
-  "6.4.0":
-    url: "https://github.com/gamecreature/QtAwesome/archive/font-awesome-6.4.0.tar.gz"
-    sha256: "4310aba189e0bba4090997ecfefe27c2c7595aa499b790389dabdce5b4e54f5a"
-patches:
-  "6.4.0":
-    - patch_file: "patches/0001-add-install.patch"
-      patch_description: "Add install target to CMakeLists.txt"
-      patch_type: "bugfix"
-      patch_source: "https://github.com/gamecreature/QtAwesome/pull/52"
-    - patch_file: "patches/0002-ce7784e-add-header.patch"
-      patch_description: "Add header to CMakeLists.txt"
-      patch_type: "bugfix"
-      patch_source: "https://github.com/gamecreature/QtAwesome/pull/50"
+  "7.0.0":
+    url: "https://github.com/gamecreature/QtAwesome/archive/refs/tags/font-awesome-7.0.0.tar.gz"
+    sha256: "151b2d218256fbcd6ce84bf25c78213a92e4836d1d43361458ee2b33c371fd23"
+  "6.7.2p1":
+    url: "https://github.com/gamecreature/QtAwesome/archive/refs/tags/font-awesome-6.7.2-p1.tar.gz"
+    sha256: "43148bb6c2d82ad988216d785516b65da1aa63cba14cb0735e01dedb42b73889"

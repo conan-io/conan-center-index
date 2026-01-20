@@ -1,0 +1,35 @@
+--- a/src/quickhull.cpp
++++ b/src/quickhull.cpp
+@@ -19,6 +19,8 @@
+ 
+ #include <algorithm>
+ #include <limits>
++#include <unordered_map>
++#include <cstddef>
+ 
+ #include "impl.h"
+ 
+--- a/src/smoothing.cpp
++++ b/src/smoothing.cpp
+@@ -14,6 +14,7 @@
+ 
+ #include "impl.h"
+ #include "parallel.h"
++#include <unordered_map>
+ 
+ namespace {
+ using namespace manifold;
+--- a/src/subdivision.cpp
++++ b/src/subdivision.cpp
+@@ -15,6 +15,8 @@
+ #include "impl.h"
+ #include "parallel.h"
+ 
++#include <unordered_map>
++
+ template <>
+ struct std::hash<manifold::ivec4> {
+   size_t operator()(const manifold::ivec4& p) const {
+-- 
+2.45.2
+

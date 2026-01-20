@@ -2,18 +2,16 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.files import copy, get, rmdir, replace_in_file
-from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import copy, get, rmdir
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class TracyConan(ConanFile):
     name = "tracy"
     description = "C++ frame profiler"
-    license = ["BSD-3-Clause"]
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/wolfpld/tracy"
     topics = ("profiler", "performance", "gamedev")
@@ -38,6 +36,7 @@ class TracyConan(ConanFile):
         "no_vsync_capture": ([True, False], False),
         "no_frame_image": ([True, False], False),
         "no_system_tracing": ([True, False], False),
+        "patchable_nopsleds": ([True, False], False),
         "delayed_init": ([True, False], False),
         "manual_lifetime": ([True, False], False),
         "fibers": ([True, False], False),
@@ -46,6 +45,7 @@ class TracyConan(ConanFile):
         "libunwind_backtrace": ([True, False], False),
         "symbol_offline_resolve": ([True, False], False),
         "libbacktrace_elf_dynload_support": ([True, False], False),
+        "ignore_memory_faults": ([True, False], False),
         "verbose": ([True, False], False),
     }
     options = {
@@ -58,53 +58,17 @@ class TracyConan(ConanFile):
         "fPIC": True,
         **{k: v[1] for k, v in _tracy_options.items()},
     }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-        if Version(self.version) < "0.9":
-            self.options.rm_safe("manual_lifetime")
-            self.options.rm_safe("fibers")
-            self.options.rm_safe("no_crash_handler")
-            self.options.rm_safe("timer_fallback")
-
-            del self._tracy_options["manual_lifetime"]
-            del self._tracy_options["fibers"]
-            del self._tracy_options["no_crash_handler"]
-            del self._tracy_options["timer_fallback"]
-
-        if Version(self.version) < "0.11.0":
-            self.options.rm_safe("libunwind_backtrace")
-            self.options.rm_safe("symbol_offline_resolve")
-            self.options.rm_safe("libbacktrace_elf_dynload_support")
-
-            del self._tracy_options["libunwind_backtrace"]
-            del self._tracy_options["symbol_offline_resolve"]
-            del self._tracy_options["libbacktrace_elf_dynload_support"]
-
-        if Version(self.version) < "0.11.1":
-            self.options.rm_safe("verbose")
-            del self._tracy_options["verbose"]
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.get_safe("libunwind_backtrace"):
+        if self.options.libunwind_backtrace:
             self.requires("libunwind/1.8.1", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
-
-        # libunwind_backtrace is not supported in 0.11.0. https://github.com/wolfpld/tracy/pull/841
-        if Version(self.version) == "0.11.0" and self.options.get_safe("libunwind_backtrace"):
-            raise ConanInvalidConfiguration(f"libunwind_backtrace is not supported in {self.ref}")
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -118,7 +82,7 @@ class TracyConan(ConanFile):
             opt = f"TRACY_{opt.upper()}"
             tc.variables[opt] = switch
         tc.generate()
-        if self.options.get_safe("libunwind_backtrace"):
+        if self.options.libunwind_backtrace:
             deps = PkgConfigDeps(self)
             deps.generate()
 
@@ -133,6 +97,7 @@ class TracyConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Tracy")
@@ -154,8 +119,19 @@ class TracyConan(ConanFile):
                 "dbghelp",
                 "ws2_32"
             ])
-        if self.options.get_safe("libunwind_backtrace"):
+        if self.options.libunwind_backtrace:
             self.cpp_info.components["tracyclient"].requires.append("libunwind::libunwind")
+
+        # Starting at 0.12.0, upstream has added an extra "tracy" directory for the include directory
+        # include/tracy/tracy/Tracy.hpp
+        # but upstream still generates info for including headers as #include <tracy/Tracy.hpp>
+        self.cpp_info.components["tracyclient"].includedirs = ['include/tracy']
+
+        # Starting at 0.13.0, upstream introduced a subdirectory in the Runtime/Library/Archive path
+        # for all but release type.
+        if self.settings.build_type != "Release":
+            self.cpp_info.components["tracyclient"].bindirs = ['bin/' + str(self.settings.build_type)]
+            self.cpp_info.components["tracyclient"].libdirs = ['lib/' + str(self.settings.build_type)]
 
         # Tracy CMake adds options set to ON as public
         for opt in self._tracy_options.keys():
@@ -164,10 +140,5 @@ class TracyConan(ConanFile):
             if switch:
                 self.cpp_info.components["tracyclient"].defines.append(opt)
 
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "Tracy"
-        self.cpp_info.names["cmake_find_package_multi"] = "Tracy"
-        self.cpp_info.components["tracyclient"].names["cmake_find_package"] = "TracyClient"
-        self.cpp_info.components["tracyclient"].names["cmake_find_package_multi"] = "TracyClient"
         self.cpp_info.components["tracyclient"].set_property(
             "cmake_target_name", "Tracy::TracyClient")
