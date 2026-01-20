@@ -439,13 +439,16 @@ class QtConan(ConanFile):
 
         if self.options.qtwayland:
             self.tool_requires("wayland/1.22.0")
+
         if cross_building(self):
-            # Building qtshadertools for iOS requires the qsb tool available during build time.
-            # This commonly results in QT being built twice: Once for the build host to build qsb,
-            # and then again for the target host.
-            options = None
-            if self.settings.os == "iOS" and self.options.qtshadertools:
-                options = {"qtshadertools": True}
+            options = {}
+            if self.settings.os == "iOS":
+                if self.options.get_safe("qtshadertools"):
+                    # qtshadertools requires qsb tool
+                    options["qtshadertools"] = True
+                if self.options.get_safe("qtdeclarative"):
+                    # qtdeclarative requires qmlaotstats tool
+                    options["qtdeclarative"] = True
             self.tool_requires(f"qt/{self.version}", options=options)
 
     def generate(self):
@@ -1371,7 +1374,7 @@ class QtConan(ConanFile):
             self.cpp_info.components["qtAxServer"].system_libs.append("shell32")
             self.cpp_info.components["qtAxServer"].defines.append("QAXSERVER")
             _create_module("AxContainer", ["AxBase"])
-        
+
         if self.options.get_safe("qtcharts"):
             _create_module("Charts", ["Gui", "Widgets"])
         if self.options.get_safe("qtgraphs") and Version(self.version) >= "6.8.0":
