@@ -101,11 +101,8 @@ class ArmadilloConan(ConanFile):
         if self.settings.os == "Windows" or Version(self.version) >= "12.6.2":
             del self.options.use_extern_rng
 
-        if Version(self.version) < "15":
-            del self.options.header_only
-
     def configure(self):
-        if self.options.get_safe("header_only"):
+        if self.options.header_only:
             self.options.rm_safe("fPIC")
             self.options.rm_safe("shared")
             self.options.rm_safe("use_wrapper")
@@ -123,6 +120,9 @@ class ArmadilloConan(ConanFile):
                 check_min_cppstd(self, 14)
             else:
                 check_min_cppstd(self, 11)
+
+        if Version(self.version) < "15" and self.options.header_only:
+            raise ConanInvalidConfiguration("The header_only option is only available for armadillo version 15 or higher.")
 
         if self.settings.os != "Macos" and (
             self.options.use_blas == "framework_accelerate"
@@ -177,7 +177,7 @@ class ArmadilloConan(ConanFile):
                 f"DEPRECATION NOTICE: Value {opt} uses armadillo's default dependency search and will be replaced when this package becomes available in ConanCenter"
             )
 
-        if not self.options.get_safe("header_only"):
+        if not self.options.header_only:
             # Ignore use_extern_rng when the option has been removed
             if self.options.use_wrapper and not self.options.get_safe("use_extern_rng", True):
                 raise ConanInvalidConfiguration(
@@ -312,7 +312,7 @@ class ArmadilloConan(ConanFile):
         save(self, module_file, content)
 
     def package_id(self):
-        if self.info.options.get_safe("header_only"):
+        if self.info.options.header_only:
             self.info.clear()
 
     def package(self):
@@ -334,7 +334,7 @@ class ArmadilloConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "Armadillo::Armadillo")
         self.cpp_info.set_property("cmake_target_aliases", ["armadillo", "armadillo::armadillo"])
         
-        if self.options.get_safe("header_only"):
+        if self.options.header_only:
             self.cpp_info.bindirs = []
             self.cpp_info.libdirs = []
             self.cpp_info.defines.append("ARMA_HEADER_ONLY")
