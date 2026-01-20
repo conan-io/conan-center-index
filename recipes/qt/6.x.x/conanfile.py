@@ -443,8 +443,10 @@ class QtConan(ConanFile):
             # Building qtshadertools for iOS requires the qsb tool available during build time.
             # This commonly results in QT being built twice: Once for the build host to build qsb,
             # and then again for the target host.
-            need_qsb = self.settings.os == "iOS" and self.options.qtshadertools
-            self.tool_requires(f"qt/{self.version}", options={"qtshadertools": need_qsb})
+            options = None
+            if self.settings.os == "iOS" and self.options.qtshadertools:
+                options = {"qtshadertools": True}
+            self.tool_requires(f"qt/{self.version}", options=options)
 
     def generate(self):
         ms = VirtualBuildEnv(self)
