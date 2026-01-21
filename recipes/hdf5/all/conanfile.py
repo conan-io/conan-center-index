@@ -135,6 +135,8 @@ class Hdf5Conan(ConanFile):
         if self.settings.build_type == "Debug":
             tc.variables["HDF5_ENABLE_INSTRUMENT"] = False  # Option?
         tc.variables["HDF5_ENABLE_PARALLEL"] = self.options.parallel
+        if self.options.parallel:
+            tc.cache_variables["MPI_C_FOUND"] = True
         tc.variables["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
         tc.cache_variables["ZLIB_PACKAGE_NAME"] = "ZLIB"
         libaec_package = "libaec" if self.options.szip_support == "with_libaec" else "szip"
@@ -148,8 +150,6 @@ class Hdf5Conan(ConanFile):
             tc.cache_variables["HDF5_MODULE_MODE_ZLIB"] = False
             tc.cache_variables["HDF5_PROVIDES_SZIP_SUPPORT"] = bool(self.options.szip_support)
             tc.cache_variables["HDF5_ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
-            if self.options.parallel:
-                tc.cache_variables["MPI_C_FOUND"] = True
         else:
             tc.variables["HDF5_ENABLE_SZIP_SUPPORT"] = bool(self.options.szip_support)
             tc.variables["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
