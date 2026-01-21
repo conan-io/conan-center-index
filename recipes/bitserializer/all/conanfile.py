@@ -17,11 +17,11 @@ class BitserializerConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/PavelKisliak/BitSerializer"
     license = "MIT"
-    package_type = "header-library"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
-        "with_cpprestsdk": [True, False],
         "with_rapidjson": [True, False],
         "with_pugixml": [True, False],
         "with_rapidyaml": [True, False],
@@ -29,24 +29,14 @@ class BitserializerConan(ConanFile):
         "with_msgpack": [True, False],
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
-        "with_cpprestsdk": False,
         "with_rapidjson": False,
         "with_pugixml": False,
         "with_rapidyaml": False,
         "with_csv": False,
         "with_msgpack": False,
     }
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "8",
-            "clang": "8",
-            "Visual Studio": "15",
-            "msvc": "191",
-            "apple-clang": "12",
-        }
 
     def _is_header_only(self, info=False):
         # All components of library are header-only except csv-archive and msgpack-archive
@@ -56,17 +46,12 @@ class BitserializerConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "0.70":
-            del self.options.with_msgpack
-        # The component based on CppRestSdk has been removed since version 0.80
-        if Version(self.version) >= "0.80":
-            del self.options.with_cpprestsdk
 
     def configure(self):
         if self._is_header_only():
             self.options.rm_safe("fPIC")
-        else:
-            self.package_type = "static-library"
+            self.options.rm_safe("shared")
+            self.package_type = "header-library"
 
     def layout(self):
         if self._is_header_only():
@@ -75,15 +60,12 @@ class BitserializerConan(ConanFile):
             cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.get_safe("with_cpprestsdk"):
-            self.requires("cpprestsdk/2.10.19", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_rapidjson"):
             self.requires("rapidjson/1.1.0", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_pugixml"):
             self.requires("pugixml/1.15", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_rapidyaml"):
-            required_rapidyaml = "rapidyaml/[>=0.8.0 <=0.10.0]" if Version(self.version) >= "0.80" else "rapidyaml/0.5.0"
-            self.requires(required_rapidyaml, transitive_headers=True, transitive_libs=True)
+            self.requires("rapidyaml/[>=0.8.0 <=0.10.0]", transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
         if self._is_header_only(info=True):
@@ -91,12 +73,6 @@ class BitserializerConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires at least {self.settings.compiler} {minimum_version}.",
-            )
 
         # Check stdlib ABI compatibility
         compiler_name = str(self.settings.compiler)
@@ -110,7 +86,6 @@ class BitserializerConan(ConanFile):
     def generate(self):
         if not self._is_header_only():
             tc = CMakeToolchain(self)
-            tc.cache_variables["BUILD_CPPRESTJSON_ARCHIVE"] = self.options.get_safe("with_cpprestsdk")
             tc.cache_variables["BUILD_RAPIDJSON_ARCHIVE"] = self.options.get_safe("with_rapidjson")
             tc.cache_variables["BUILD_PUGIXML_ARCHIVE"] = self.options.get_safe("with_pugixml")
             tc.cache_variables["BUILD_RAPIDYAML_ARCHIVE"] = self.options.get_safe("with_rapidyaml")
@@ -125,8 +100,8 @@ class BitserializerConan(ConanFile):
         replace_in_file(
             self,
             os.path.join(self.source_folder, "include", "bitserializer", "rapidyaml_archive.h"),
-            "#include <ryml/" if Version(self.version) < "0.80" else "#include \"ryml/",
-            "#include <" if Version(self.version) < "0.80" else "#include \"",
+            "#include \"ryml/",
+            "#include \"",
         )
 
     def build(self):
@@ -157,13 +132,6 @@ class BitserializerConan(ConanFile):
             if Version(self.settings.compiler.version) < 9:
                 self.cpp_info.components["bitserializer-core"].system_libs = ["stdc++fs"]
 
-        # cpprestjson-archive
-        if self.options.get_safe("with_cpprestsdk"):
-            self.cpp_info.components["bitserializer-cpprestjson"].set_property("cmake_target_name", "BitSerializer::cpprestjson-archive")
-            self.cpp_info.components["bitserializer-cpprestjson"].bindirs = []
-            self.cpp_info.components["bitserializer-cpprestjson"].libdirs = []
-            self.cpp_info.components["bitserializer-cpprestjson"].requires = ["bitserializer-core", "cpprestsdk::cpprestsdk"]
-
         # rapidjson-archive
         if self.options.get_safe("with_rapidjson"):
             self.cpp_info.components["bitserializer-rapidjson"].set_property("cmake_target_name", "BitSerializer::rapidjson-archive")
@@ -189,12 +157,10 @@ class BitserializerConan(ConanFile):
         if self.options.get_safe("with_csv"):
             self.cpp_info.components["bitserializer-csv"].set_property("cmake_target_name", "BitSerializer::csv-archive")
             self.cpp_info.components["bitserializer-csv"].requires = ["bitserializer-core"]
-            self.cpp_info.components["bitserializer-csv"].bindirs = []
-            self.cpp_info.components["bitserializer-csv"].libs = [f"csv-archive{lib_suffix}" if Version(self.version) < "0.80" else f"bitserializer-csv{lib_suffix}"]
+            self.cpp_info.components["bitserializer-csv"].libs = [f"bitserializer-csv{lib_suffix}"]
 
         # msgpack-archive
         if self.options.get_safe("with_msgpack"):
             self.cpp_info.components["bitserializer-msgpack"].set_property("cmake_target_name", "BitSerializer::msgpack-archive")
             self.cpp_info.components["bitserializer-msgpack"].requires = ["bitserializer-core"]
-            self.cpp_info.components["bitserializer-msgpack"].bindirs = []
-            self.cpp_info.components["bitserializer-msgpack"].libs = [f"msgpack-archive{lib_suffix}" if Version(self.version) < "0.80" else f"bitserializer-msgpack{lib_suffix}"]
+            self.cpp_info.components["bitserializer-msgpack"].libs = [f"bitserializer-msgpack{lib_suffix}"]
