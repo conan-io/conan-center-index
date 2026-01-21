@@ -66,6 +66,7 @@ class PixmanConan(ConanFile):
         # workaround https://gitlab.freedesktop.org/pixman/pixman/-/issues/129
         if is_msvc(self) and self.settings.arch == "armv8":
             tc.project_options["a64-neon"] = "disabled"
+            tc.project_options["mmx"] = "disabled"
 
         # Android armv7 build of Pixman makes use of cpu-features functionality, provided in the NDK
         if self.settings.os == "Android":
