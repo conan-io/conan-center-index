@@ -70,7 +70,7 @@ class CoinUtilsConan(ConanFile):
         if is_msvc(self):
             self.tool_requires("automake/1.16.5")
         else:
-            self.tool_requires("gnu-config/cci.20210814")
+            self.tool_requires("gnu-config/[*]")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -148,7 +148,8 @@ class CoinUtilsConan(ConanFile):
                 self.conf.get("user.gnu-config:config_sub", check_type=str),
             ]:
                 if gnu_config:
-                    copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
+                    copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=os.path.join(self.source_folder))
+                    copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=os.path.join(self.source_folder, "CoinUtils"))
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()

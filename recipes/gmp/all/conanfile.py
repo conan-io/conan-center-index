@@ -149,7 +149,7 @@ class GmpConan(ConanFile):
             # LD flags are not passed properly by the scripts - in particular '-arch x86_64' when crossbuilding
             # and invoking libtool to generate one of the libraries. Being conservative here, but there's a chance
             # this may need to be generalised
-            replace_in_file(self, os.path.join(self.build_folder, "libtool"), 'archive_cmds="\$CC ', 'archive_cmds="\$CC $LDFLAGS ')
+            replace_in_file(self, os.path.join(self.build_folder, "libtool"), r'archive_cmds="\$CC ', r'archive_cmds="\$CC $LDFLAGS ')
         autotools.make()
         # INFO: According to the gmp readme file, make check should not be omitted, but it causes timeouts on the CI server.
         if self.options.run_checks:

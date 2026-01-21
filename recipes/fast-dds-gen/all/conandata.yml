@@ -1,0 +1,14 @@
+sources:
+  "4.2.0":
+    - url: "https://github.com/eProsima/Fast-DDS-Gen/archive/refs/tags/v4.2.0.tar.gz"
+      sha256: "05d948107c2cff8212b015b221cfc286a2a9b9d113b1d562abec93b848dbc20b"
+    - url: "https://github.com/eProsima/IDL-Parser/archive/af0ef1fe06c3d9817593d1431f33183bccc6261c.tar.gz"
+      sha256: "03868d04961d9bfce492c88b5550c59a9ede7af341540d9f17525d30d0e41743"
+      destination: "thirdparty/idl-parser"
+patches:
+  "4.2.0":
+    - patch_file: "patches/4.2.0-0001-skip-git-submodule-update.patch"
+      patch_type: "conan"
+      patch_description: "Skip git submodule update as sources are fetched via conandata.yml"
+fastdds_versions:
+  "4.2.0": "3.4.0"

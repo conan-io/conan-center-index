@@ -118,9 +118,14 @@ class ArrowConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        # arrow >= 10.0.0 requires C++17.
-        # https://github.com/apache/arrow/pull/13991
-        return "17"
+        if Version(self.version) >= "23.0.0":
+            # arrow >= 23.0.0 requires C++20.
+            # https://github.com/apache/arrow/issues/45885
+            return "20"
+        else:
+            # arrow >= 10.0.0 requires C++17.
+            # https://github.com/apache/arrow/pull/13991
+            return "17"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -158,7 +163,7 @@ class ArrowConan(ConanFile):
 
     def requirements(self):
         if self.options.with_thrift:
-            self.requires("thrift/0.20.0")
+            self.requires("thrift/[>=0.20.0 <=0.21.0]")
         if self.options.with_grpc:
             self.requires("grpc/[>=1.50.0 <2]")
         if self.options.with_protobuf:
@@ -168,7 +173,7 @@ class ArrowConan(ConanFile):
         if self.options.with_mimalloc:
             self.requires("mimalloc/[>=1.7.6 <3]")
         if self.options.with_boost:
-            self.requires("boost/[>=1.85.0 <=1.88.0]")
+            self.requires("boost/[>=1.85.0 <=1.90.0]")
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
         if self.options.with_glog:
@@ -188,7 +193,7 @@ class ArrowConan(ConanFile):
         if self.options.get_safe("with_opentelemetry"):
             self.requires("opentelemetry-cpp/1.21.0")
         if self.options.with_s3:
-            self.requires("aws-sdk-cpp/1.9.234")
+            self.requires("aws-sdk-cpp/[~1.11]")
         if self.options.with_brotli:
             self.requires("brotli/1.1.0")
         if self.options.with_bz2:
@@ -265,6 +270,8 @@ class ArrowConan(ConanFile):
             raise ConanInvalidConfiguration("arrow:parquet requires arrow:with_thrift")
 
     def build_requirements(self):
+        if self.options.with_protobuf:
+            self.tool_requires("protobuf/<host_version>")
         if Version(self.version) >= "22.0.0":
             self.tool_requires("cmake/[>=3.26 <4]")
         elif Version(self.version) >= "20.0.0":
@@ -447,7 +454,10 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow_substrait"].set_property("pkg_config_name", "arrow_substrait")
             self.cpp_info.components["libarrow_substrait"].set_property("cmake_target_name", f"Arrow::arrow_substrait_{cmake_suffix}")
             self.cpp_info.components["libarrow_substrait"].libs = [f"arrow_substrait{suffix}"]
-            self.cpp_info.components["libarrow_substrait"].requires = ["libparquet", "dataset"]
+            self.cpp_info.components["libarrow_substrait"].requires = ["libparquet"]
+            if self.options.dataset_modules:
+                self.cpp_info.components["libarrow_substrait"].requires.append("dataset")
+
 
         # Plasma was deprecated in Arrow 12.0.0
         del self.options.plasma
