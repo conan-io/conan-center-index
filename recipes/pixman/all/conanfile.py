@@ -60,7 +60,10 @@ class PixmanConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options.update({
             "libpng": "disabled",
-            "gtk": "disabled"
+            "gtk": "disabled",
+            "demos": "disabled",
+            "openmp": "disabled",
+            "tests": "disabled"
         })
 
         # workaround https://gitlab.freedesktop.org/pixman/pixman/-/issues/129
