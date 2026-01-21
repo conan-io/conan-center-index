@@ -80,6 +80,7 @@ class NanoarrowConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         if self.options.shared:
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+            rm(self, "*_static.lib", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "nanoarrow")
