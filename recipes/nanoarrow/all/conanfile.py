@@ -92,7 +92,7 @@ class NanoarrowConan(ConanFile):
         self.cpp_info.components["nanoarrow_core"].set_property("cmake_target_name", "nanoarrow::nanoarrow")
         if self.options.shared:
             self.cpp_info.components["nanoarrow_core"].defines.append("NANOARROW_EXPORT_DLL")
-        if self.settings.debug:
+        if self.settings.build_type = "Debug":
             self.cpp_info.components["nanoarrow_core"].defines.append("NANOARROW_DEBUG")
         
         if self.options.with_ipc:
