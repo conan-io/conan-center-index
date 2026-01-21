@@ -94,7 +94,7 @@ class NanoarrowConan(ConanFile):
             self.cpp_info.components["nanoarrow_ipc"].requires = ["nanoarrow_core"]
             self.cpp_info.components["nanoarrow_ipc"].set_property("cmake_target_name", "nanoarrow::nanoarrow_ipc")
             if self.options.get_safe("with_zstd"):
-                 self.cpp_info.components["nanoarrow_ipc"].requires.append("zstd::zstd")
+                self.cpp_info.components["nanoarrow_ipc"].requires.append("zstd::zstd")
 
         if self.options.with_device:
             self.cpp_info.components["nanoarrow_device"].libs = [f"nanoarrow_device{suffix}"]
