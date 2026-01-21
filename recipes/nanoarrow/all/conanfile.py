@@ -60,6 +60,7 @@ class NanoarrowConan(ConanFile):
         tc.variables["NANOARROW_BUILD_APPS"] = False
         tc.variables["NANOARROW_BUNDLE"] = False
         tc.variables["NANOARROW_INSTALL_SHARED"] = self.options.shared 
+        tc.variables["NANOARROW_DEBUG_EXTRA_WARNINGS"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
