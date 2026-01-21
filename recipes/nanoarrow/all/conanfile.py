@@ -102,5 +102,3 @@ class NanoarrowConan(ConanFile):
             self.cpp_info.components["nanoarrow_device"].libs = [f"nanoarrow_device{suffix}"]
             self.cpp_info.components["nanoarrow_device"].requires = ["nanoarrow_core"]
             self.cpp_info.components["nanoarrow_device"].set_property("cmake_target_name", "nanoarrow::nanoarrow_device")
-
-        self.cpp_info.set_property("cmake_target_name", "nanoarrow::nanoarrow")
