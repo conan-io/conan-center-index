@@ -4,7 +4,6 @@ from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rename, rm, rmdir
-)
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
