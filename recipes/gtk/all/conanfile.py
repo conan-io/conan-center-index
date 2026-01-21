@@ -48,7 +48,7 @@ class Gtk4Conan(ConanFile):
         # INFO: GTK requires glib-compile-resources
         self.tool_requires("glib/<host_version>")
         if self.options.get_safe("with_wayland", False):
-            self.tool_requires("wayland-protocols/[^1.42]")
+            self.tool_requires("wayland-protocols/[>=1.42 <2]")
 
     def requirements(self):
         # INFO: gtkconfig.h:8 glib.h
@@ -119,6 +119,8 @@ class Gtk4Conan(ConanFile):
         tc.generate()
 
         deps = PkgConfigDeps(self)
+        if self.options.get_safe("with_wayland", False):
+            deps.build_context_activated = ["wayland-protocols"]
         deps.generate()
 
     def validate(self):
