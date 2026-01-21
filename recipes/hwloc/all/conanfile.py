@@ -78,6 +78,7 @@ class HwlocConan(ConanFile):
             else:
                  tc.configure_args.extend(["--disable-shared", "--enable-static"])
             tc.configure_args.extend(["--disable-io", "--disable-cairo"])
+            tc.configure_args.append("--disable-libudev")
             tc.generate()
 
     def build(self):
