@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rm, rmdir
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4.0"
 
 class NanoarrowConan(ConanFile):
     name = "nanoarrow"
@@ -29,13 +29,8 @@ class NanoarrowConan(ConanFile):
         "with_device": False,
         "with_zstd": False,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    implements = ["auto_shared_fpic"]
+    languages = "C"
 
     def configure(self):
         if self.options.shared:
@@ -54,7 +49,6 @@ class NanoarrowConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -66,7 +60,7 @@ class NanoarrowConan(ConanFile):
         tc.variables["NANOARROW_BUILD_TESTS"] = False
         tc.variables["NANOARROW_BUILD_APPS"] = False
         tc.variables["NANOARROW_BUNDLE"] = False
-        tc.variables["NANOARROW_INSTALL_SHARED"] = True 
+        tc.variables["NANOARROW_INSTALL_SHARED"] = self.options.shared 
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -85,6 +79,8 @@ class NanoarrowConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        if self.options.shared:
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "nanoarrow")
@@ -95,7 +91,7 @@ class NanoarrowConan(ConanFile):
         self.cpp_info.components["nanoarrow_core"].set_property("cmake_target_name", "nanoarrow::nanoarrow")
         
         if self.options.with_ipc:
-            self.cpp_info.components["nanoarrow_ipc"].libs = [f"nanoarrow_ipc{suffix}", "flatccrt"]
+            self.cpp_info.components["nanoarrow_ipc"].libs = [f"nanoarrow_ipc{suffix}"]
             self.cpp_info.components["nanoarrow_ipc"].requires = ["nanoarrow_core"]
             self.cpp_info.components["nanoarrow_ipc"].set_property("cmake_target_name", "nanoarrow::nanoarrow_ipc")
             if self.options.get_safe("with_zstd"):
