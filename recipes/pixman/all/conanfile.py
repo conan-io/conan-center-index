@@ -3,9 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import (
-    apply_conandata_patches, copy, export_conandata_patches, get,
-    rename, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, rename, rm, rmdir
 )
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -31,9 +29,6 @@ class PixmanConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -79,13 +74,7 @@ class PixmanConan(ConanFile):
 
         tc.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('test')", "")
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('demos')", "")
-
     def build(self):
-        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()
