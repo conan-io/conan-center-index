@@ -17,7 +17,6 @@ class HwlocConan(ConanFile):
     license = "BSD-3-Clause"
     homepage = "https://www.open-mpi.org/projects/hwloc/"
     url = "https://github.com/conan-io/conan-center-index"
-    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
