@@ -100,7 +100,7 @@ class OneTBBConan(ConanFile):
 
     def requirements(self):
         if self._tbbbind_build:
-            self.requires("hwloc/2.9.3")
+            self.requires("hwloc/2.12.2")
 
     def validate(self):
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "11.0":

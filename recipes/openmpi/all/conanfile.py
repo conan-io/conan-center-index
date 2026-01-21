@@ -60,7 +60,7 @@ class OpenMPIConan(ConanFile):
     def requirements(self):
         # OpenMPI public headers don't include anything besides stddef.h.
         # transitive_headers=True is not needed for any dependencies.
-        self.requires("hwloc/2.10.0")
+        self.requires("hwloc/2.12.2")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.settings.os == "Linux":
             self.requires("libnl/3.8.0")
