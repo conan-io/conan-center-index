@@ -63,6 +63,10 @@ class PixmanConan(ConanFile):
             "gtk": "disabled"
         })
 
+        # workaround https://gitlab.freedesktop.org/pixman/pixman/-/issues/129
+        if is_msvc(self) and self.settings.arch == "armv8":
+            tc.project_options["a64-neon"] = "disabled"
+
         # Android armv7 build of Pixman makes use of cpu-features functionality, provided in the NDK
         if self.settings.os == "Android":
             android_ndk_home = self.conf.get("tools.android:ndk_path").replace("\\", "/")
