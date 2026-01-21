@@ -8,7 +8,7 @@ import os
 
 required_conan_version = ">=1.53.0"
 
-# INFO: In order to prevent OneTBB missing package error, we build only shared library for hwloc.
+# WIP - CI test
 
 class HwlocConan(ConanFile):
     name = "hwloc"
