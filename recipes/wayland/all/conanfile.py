@@ -70,6 +70,8 @@ class WaylandConan(ConanFile):
                 "Macos build disabled on CCI as test package requires pkg-config")
 
     def validate(self):
+      if self.info.settings.os == "Windows":
+          raise ConanInvalidConfiguration(f"{self.ref} does not support Windows")
       if not (self.options.get_safe("enable_libraries") or self.options.get_safe("enable_scanner", True)):
           raise ConanInvalidConfiguration(f"Either libraries or scanner must be enabled")
 
