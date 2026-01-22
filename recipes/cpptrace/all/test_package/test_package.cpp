@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <limits.h>
+#include <cpptrace/cpptrace.hpp>
 #include <ctrace/ctrace.h>
 
 int main() {
