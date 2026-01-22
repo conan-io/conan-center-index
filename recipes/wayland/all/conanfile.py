@@ -63,6 +63,12 @@ class WaylandConan(ConanFile):
             if self.options.enable_dtd_validation:
                 self.requires("libxml2/[>=2.12.5 <3]")
 
+    def validate_build(self):
+        if os.getenv('CONAN_CENTER_BUILD_SERVICE') is not None and self.settings.os == "Macos":
+            # https://github.com/conan-io/conan/issues/19195
+            raise ConanInvalidConfiguration(
+                "Macos build disabled on CCI as test package requires pkg-config")
+
     def validate(self):
       if not (self.options.get_safe("enable_libraries") or self.options.get_safe("enable_scanner", True)):
           raise ConanInvalidConfiguration(f"Either libraries or scanner must be enabled")
