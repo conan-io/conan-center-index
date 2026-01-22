@@ -29,33 +29,43 @@ class WaylandConan(ConanFile):
         "fPIC": [True, False],
         "enable_libraries": [True, False],
         "enable_dtd_validation": [True, False],
+        "enable_scanner": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_libraries": True,
         "enable_dtd_validation": True,
+        "enable_scanner": True
     }
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if not self.options.get_safe("enable_scanner", True):
+            self.options.rm_safe("enable_dtd_validation")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+
+    def config_options(self):
+        if self.settings.os not in ("Linux", "Android"):
+            del self.options.enable_libraries
+            del self.options.enable_scanner
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.enable_libraries:
+        if self.options.get_safe("enable_libraries"):
             self.requires("libffi/[>=3.4.4 <4]")
-        if self.options.enable_dtd_validation:
-            self.requires("libxml2/[>=2.12.5 <3]")
-        self.requires("expat/[>=2.6.2 <3]")
+        if self.options.get_safe("enable_scanner", True):
+            self.requires("expat/[>=2.6.2 <3]")
+            if self.options.enable_dtd_validation:
+                self.requires("libxml2/[>=2.12.5 <3]")
 
     def validate(self):
-      if self.settings.os not in ("Linux", "Android"):
-            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux or Android")
+      if not (self.options.get_safe("enable_libraries") or self.options.get_safe("enable_scanner", True)):
+          raise ConanInvalidConfiguration(f"Either libraries or scanner must be enabled")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.4.0 <2]")
@@ -67,6 +77,13 @@ class WaylandConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def _is_build_require(self):
+        if self.options.get_safe("enable_scanner", True) and self.dependencies["expat"].is_build_context:
+            return True
+        if self.options.get_safe("enable_libraries") and self.dependencies["libffi"].is_build_context:
+            return True
+        return False
+
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -77,15 +94,16 @@ class WaylandConan(ConanFile):
         pkg_config_deps = PkgConfigDeps(self)
         if not can_run(self):
             pkg_config_deps.build_context_activated = ["wayland"]
-        elif self.dependencies["expat"].is_build_context:  # wayland is being built as build_require
+        elif self._is_build_require():
             # If wayland is the build_require, all its dependencies are treated as build_requires
             pkg_config_deps.build_context_activated = [dep.ref.name for _, dep in self.dependencies.host.items()]
         pkg_config_deps.generate()
         tc = MesonToolchain(self)
         tc.project_options["libdir"] = "lib"
         tc.project_options["datadir"] = "res"
-        tc.project_options["libraries"] = self.options.enable_libraries
-        tc.project_options["dtd_validation"] = self.options.enable_dtd_validation
+        tc.project_options["libraries"] = self.options.get_safe("enable_libraries", False)
+        tc.project_options["dtd_validation"] = self.options.get_safe("enable_dtd_validation", False)
+        tc.project_options["scanner"] = self.options.get_safe("enable_scanner", True)
         tc.project_options["documentation"] = False
         if not can_run(self):
             tc.project_options["build.pkg_config_path"] = self.generators_folder
@@ -110,25 +128,26 @@ class WaylandConan(ConanFile):
         rmdir(self, pkg_config_dir)
 
     def package_info(self):
-        self.cpp_info.components["wayland-scanner"].set_property("pkg_config_name", "wayland-scanner")
-        self.cpp_info.components["wayland-scanner"].resdirs = ["res"]
-        self.cpp_info.components["wayland-scanner"].includedirs = []
-        self.cpp_info.components["wayland-scanner"].libdirs = []
-        self.cpp_info.components["wayland-scanner"].set_property("component_version", self.version)
-        self.cpp_info.components["wayland-scanner"].requires = ["expat::expat"]
-        if self.options.enable_dtd_validation:
-            self.cpp_info.components["wayland-scanner"].requires.append("libxml2::libxml2")
-        pkgconfig_variables = {
-            'datarootdir': '${prefix}/res',
-            'pkgdatadir': '${datarootdir}/wayland',
-            'bindir': '${prefix}/bin',
-            'wayland_scanner': '${bindir}/wayland-scanner',
-        }
-        self.cpp_info.components["wayland-scanner"].set_property(
-            "pkg_config_custom_content",
-            "\n".join(f"{key}={value}" for key,value in pkgconfig_variables.items()))
+        if self.options.get_safe("enable_scanner", True):
+            self.cpp_info.components["wayland-scanner"].set_property("pkg_config_name", "wayland-scanner")
+            self.cpp_info.components["wayland-scanner"].resdirs = ["res"]
+            self.cpp_info.components["wayland-scanner"].includedirs = []
+            self.cpp_info.components["wayland-scanner"].libdirs = []
+            self.cpp_info.components["wayland-scanner"].set_property("component_version", self.version)
+            self.cpp_info.components["wayland-scanner"].requires = ["expat::expat"]
+            if self.options.enable_dtd_validation:
+                self.cpp_info.components["wayland-scanner"].requires.append("libxml2::libxml2")
+            pkgconfig_variables = {
+                'datarootdir': '${prefix}/res',
+                'pkgdatadir': '${datarootdir}/wayland',
+                'bindir': '${prefix}/bin',
+                'wayland_scanner': '${bindir}/wayland-scanner',
+            }
+            self.cpp_info.components["wayland-scanner"].set_property(
+                "pkg_config_custom_content",
+                "\n".join(f"{key}={value}" for key,value in pkgconfig_variables.items()))
 
-        if self.options.enable_libraries:
+        if self.options.get_safe("enable_libraries"):
             self.cpp_info.components["wayland-server"].libs = ["wayland-server"]
             self.cpp_info.components["wayland-server"].set_property("pkg_config_name", "wayland-server")
             self.cpp_info.components["wayland-server"].requires = ["libffi::libffi"]
