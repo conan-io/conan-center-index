@@ -89,7 +89,6 @@ class XZUtilsConan(ConanFile):
         elif self._use_cmake:
             tc = CMakeToolchain(self)
             tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
-            tc.cache_variables["XZ_DOC"] = False
             if not self.options.with_tools:
                 tc.cache_variables["XZ_TOOL_XZ"] = False
                 tc.cache_variables["XZ_TOOL_XZDEC"] = False
@@ -98,11 +97,11 @@ class XZUtilsConan(ConanFile):
                 tc.cache_variables["ENABLE_SCRIPTS"] = False
                 tc.cache_variables["XZ_TOOL_SYMLINKS"] = False
                 tc.cache_variables["XZ_TOOL_SYMLINKS_LZMA"] = False
+                tc.cache_variables["XZ_DOC"] = False
                 tc.cache_variables["XZ_SANDBOX"] = False
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
-            tc.configure_args.append("--disable-doc")
             if not self.options.with_tools:
                 tc.configure_args.extend([
                     "--disable-xz",
