@@ -1,8 +1,10 @@
-from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
-from conan.tools.microsoft import is_msvc
 import os
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir, replace_in_file
 
 required_conan_version = ">=2.1"
 
@@ -33,14 +35,12 @@ class LibvplConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
-    def requirements(self):
-        pass
-
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.13]")
+
+    def validate(self):
+        if is_apple_os(self):
+            raise ConanInvalidConfiguration(f"The library is not supported on Apple OS")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -58,7 +58,6 @@ class LibvplConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
