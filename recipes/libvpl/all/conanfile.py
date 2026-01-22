@@ -92,7 +92,7 @@ class LibvplConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             disp.system_libs = ["dl", "pthread"]
         elif self.settings.os == "Windows":
-            disp.system_libs = ["advapi32", "ole32"]
+            disp.system_libs = ["ole32", "gdi32", "uuid"]
 
         # ------------------------------------------------------------------
         # api component (headers for the C API)
