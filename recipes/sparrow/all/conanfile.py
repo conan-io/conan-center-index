@@ -30,7 +30,7 @@ class SparrowRecipe(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "use_date_polyfill": False,
+        "use_date_polyfill": False if Version(self.version) >= "2.0.0" else True,
         "export_json_reader": False,
     }
 
