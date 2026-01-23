@@ -127,6 +127,11 @@ class Gtk4Conan(ConanFile):
         if self.settings.os == "Linux" and not (self.options.with_wayland or self.options.with_x11):
             raise ConanInvalidConfiguration("At least one of backends '-o &:with_wayland' or '-o &:with_x11' options must be True on Linux")
 
+        # INFO: Avoid embedding static dependencies into shared library
+        for req, dep in self.dependencies.direct_host.items():
+            if dep.options.get_safe("shared", None) == False and dep.options.get_safe("header_only", False) == False:
+                raise ConanInvalidConfiguration(f"{req.ref} is static; {self.name} requires '-o \"*/*:shared=True\"' to be built as shared library")
+
     def build(self):
         meson = Meson(self)
         meson.configure()
