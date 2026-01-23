@@ -74,6 +74,8 @@ class RapidcheckConan(ConanFile):
             self.tool_requires("cmake/[>=3.16]")
         elif Version(self.version) >= "cci.20231215":
             self.tool_requires("cmake/[>=3.16 <4]")
+        else:
+            self.tool_requires("cmake/[>=3.0 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
