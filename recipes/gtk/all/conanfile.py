@@ -62,7 +62,7 @@ class Gtk4Conan(ConanFile):
         # INFO: gdkcairo.h:26 pango/pangocairo.h
         self.requires("pango/[>=1.50.7 <2]", transitive_headers=True)
         # TODO: Consider to depend on libjpeg-turbo
-        self.requires("libjpeg/[>=9e]")
+        self.requires("libjpeg/[>=9f]")
         self.requires("fribidi/1.0.13")
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/[>=4.6.0 <5]")
