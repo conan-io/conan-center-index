@@ -109,13 +109,12 @@ class WaylandConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options["libdir"] = "lib"
         tc.project_options["datadir"] = "res"
-        tc.project_options["libraries"] = self.options.get_safe("enable_libraries", False)
-        tc.project_options["dtd_validation"] = self.options.get_safe("enable_dtd_validation", False)
-        tc.project_options["scanner"] = self.options.get_safe("enable_scanner", True)
+        tc.project_options["libraries"] = bool(self.options.get_safe("enable_libraries", False))
+        tc.project_options["dtd_validation"] = bool(self.options.get_safe("enable_dtd_validation", False))
+        tc.project_options["scanner"] = bool(self.options.get_safe("enable_scanner", True))
         tc.project_options["documentation"] = False
         if not can_run(self):
             tc.project_options["build.pkg_config_path"] = self.generators_folder
-        tc.project_options["scanner"] = True
         tc.generate()
 
     def _patch_sources(self):
