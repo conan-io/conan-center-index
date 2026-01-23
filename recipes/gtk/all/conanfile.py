@@ -47,6 +47,7 @@ class Gtk4Conan(ConanFile):
         # INFO: GTK requires glib-compile-resources
         self.tool_requires("glib/<host_version>")
         if self.options.get_safe("with_wayland", False):
+            self.tool_requires("wayland/<host_version>")
             self.tool_requires("wayland-protocols/[>=1.42 <2]")
 
     def requirements(self):
@@ -125,6 +126,16 @@ class Gtk4Conan(ConanFile):
             glib_build_context_bindir = self.dependencies.build['glib'].cpp_info.bindirs[0]
             glib_gio_pkg_config_vars = glib_gio_pkg_config_vars.replace("${bindir}", glib_build_context_bindir)
             deps.set_property("glib::gio-2.0", "pkg_config_custom_content", glib_gio_pkg_config_vars)
+        deps.generate()
+
+        # INFO: wayland-scanner needs to load wayland shared library at runtime
+        # Meson wayland.wlmod.find_protocol uses pkg-config to find wayland-scanner.pc file
+        # Adjust pkg_config_custom_content to point to build context binary directory
+        wayland_scanner_config_vars = self.dependencies.host['wayland'].cpp_info.components['wayland-scanner'].get_property("pkg_config_custom_content", None)
+        if wayland_scanner_config_vars:
+            wayland_build_context_bindir = self.dependencies.build['wayland'].cpp_info.bindirs[0]
+            wayland_scanner_config_vars = wayland_scanner_config_vars.replace("${bindir}", wayland_build_context_bindir)
+            deps.set_property("wayland::wayland-scanner", "pkg_config_custom_content", wayland_scanner_config_vars)
         deps.generate()
 
     def validate(self):
