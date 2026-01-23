@@ -83,6 +83,7 @@ class Z3Conan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE.txt", os.path.join(self.source_folder), os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.txt", os.path.join(self.source_folder, "core"), os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
