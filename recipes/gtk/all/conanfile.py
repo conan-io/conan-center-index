@@ -52,7 +52,7 @@ class Gtk4Conan(ConanFile):
 
     def requirements(self):
         # INFO: gtkconfig.h:8 glib.h
-        self.requires("glib/[^2.82]", transitive_headers=True)
+        self.requires("glib/[>=2.82 <3]", transitive_headers=True)
         # INFO: gdktexture.h:26 gdk-pixbuf.h/gdk-pixbuf.h
         self.requires("gdk-pixbuf/[>=2.42 <3]", transitive_headers=True)
         # INFO: gdktypes.h:36 cairo.h
