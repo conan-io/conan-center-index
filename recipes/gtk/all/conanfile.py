@@ -3,7 +3,6 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.files import get, copy, rmdir
 from conan.tools.layout import basic_layout
-from conan.tools.env import VirtualRunEnv
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.scm import Version
@@ -79,10 +78,6 @@ class Gtk4Conan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        # INFO: glib-compile-resources needs to load libgio-2.0 shared library at runtime
-        env = VirtualRunEnv(self)
-        env.generate(scope="build")
-
         tc = MesonToolchain(self)
         # GDK backends
         tc.project_options["wayland-backend"] = "true" if self.options.get_safe("with_wayland", False) else "false"
@@ -121,6 +116,15 @@ class Gtk4Conan(ConanFile):
         deps = PkgConfigDeps(self)
         if self.options.get_safe("with_wayland", False):
             deps.build_context_activated = ["wayland-protocols"]
+
+        # INFO: glib-compile-resources needs to load libgio-2.0 shared library at runtime
+        # Meson gnome.compile_resources uses pkg-config to find gio-2.0.pc file
+        # Adjust pkg_config_custom_content to point to build context binary directory
+        glib_gio_pkg_config_vars = self.dependencies.host['glib'].cpp_info.components['gio-2.0'].get_property("pkg_config_custom_content", None)
+        if glib_gio_pkg_config_vars:
+            glib_build_context_bindir = self.dependencies.build['glib'].cpp_info.bindirs[0]
+            glib_gio_pkg_config_vars = glib_gio_pkg_config_vars.replace("${bindir}", glib_build_context_bindir)
+            deps.set_property("glib::gio-2.0", "pkg_config_custom_content", glib_gio_pkg_config_vars)
         deps.generate()
 
     def validate(self):
