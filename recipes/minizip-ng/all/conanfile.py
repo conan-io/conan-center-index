@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
@@ -21,6 +22,7 @@ class MinizipNgConan(ConanFile):
         "fPIC": [True, False],
         "mz_compatibility": [True, False],
         "with_zlib": [True, False],
+        "zlib_flavor": ["auto", "zlib-ng", "zlib"],
         "with_bzip2": [True, False],
         "with_lzma": [True, False],
         "with_zstd": [True, False],
@@ -30,7 +32,7 @@ class MinizipNgConan(ConanFile):
         "with_libcomp": [True, False],
         "with_pkcrypt": [True, False],
         "with_wzaes": [True, False],
-        "with_signing": [True, False],
+        "compress_only": [True, False],
         "decompress_only": [True, False],
     }
     default_options = {
@@ -38,6 +40,7 @@ class MinizipNgConan(ConanFile):
         "fPIC": True,
         "mz_compatibility": False,
         "with_zlib": True,
+        "zlib_flavor": "auto",
         "with_bzip2": True,
         "with_lzma": True,
         "with_zstd": True,
@@ -47,7 +50,7 @@ class MinizipNgConan(ConanFile):
         "with_libcomp": True,
         "with_pkcrypt": True,
         "with_wzaes": True,
-        "with_signing": True,
+        "compress_only": False,
         "decompress_only": False,
     }
 
@@ -70,6 +73,10 @@ class MinizipNgConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         if self.options.get_safe("with_libcomp"):
             del self.options.with_zlib
+
+    def validate(self):
+        if self.options.compress_only and self.options.decompress_only:
+            raise ConanInvalidConfiguration("compress_only and decompress_only cannot both be enabled")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -100,6 +107,7 @@ class MinizipNgConan(ConanFile):
         tc.cache_variables["MZ_FETCH_LIBS"] = False
         tc.cache_variables["MZ_COMPAT"] = self.options.mz_compatibility
         tc.cache_variables["MZ_ZLIB"] = self.options.get_safe("with_zlib", False)
+        tc.cache_variables["MZ_ZLIB_FLAVOR"] = str(self.options.zlib_flavor)
         tc.cache_variables["MZ_BZIP2"] = self.options.with_bzip2
         tc.cache_variables["MZ_LZMA"] = self.options.with_lzma
         tc.cache_variables["MZ_ZSTD"] = self.options.with_zstd
@@ -107,7 +115,7 @@ class MinizipNgConan(ConanFile):
         tc.cache_variables["MZ_LIBCOMP"] = self.options.get_safe("with_libcomp", False)
         tc.cache_variables["MZ_PKCRYPT"] = self.options.with_pkcrypt
         tc.cache_variables["MZ_WZAES"] = self.options.with_wzaes
-        tc.cache_variables["MZ_SIGNING"] = self.options.with_signing
+        tc.cache_variables["MZ_COMPRESS_ONLY"] = self.options.compress_only
         tc.cache_variables["MZ_DECOMPRESS_ONLY"] = self.options.decompress_only
         if self.settings.os != "Windows":
             tc.cache_variables["MZ_ICONV"] = self.options.with_iconv
