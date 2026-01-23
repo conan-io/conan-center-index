@@ -98,6 +98,8 @@ class XZUtilsConan(ConanFile):
                 tc.cache_variables["XZ_TOOL_SYMLINKS"] = False
                 tc.cache_variables["XZ_TOOL_SYMLINKS_LZMA"] = False
                 tc.cache_variables["XZ_DOC"] = False
+                # sandbox should only apply to the tools, so if the tools are enabled
+                # the sandboxing features will be enabled.
                 tc.cache_variables["XZ_SANDBOX"] = "no"
             tc.generate()
         else:
@@ -111,6 +113,8 @@ class XZUtilsConan(ConanFile):
                     "--disable-scripts",
                     "--disable-doc",
                     "--disable-lzma-links",
+                    # sandbox should only apply to the tools, so if the tools are enabled
+                    # the sandboxing features will be enabled.
                     "--disable-sandbox"
                     ])
             if self.settings.build_type == "Debug":
