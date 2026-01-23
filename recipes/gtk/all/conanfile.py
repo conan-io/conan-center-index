@@ -131,12 +131,13 @@ class Gtk4Conan(ConanFile):
         # INFO: wayland-scanner needs to load wayland shared library at runtime
         # Meson wayland.wlmod.find_protocol uses pkg-config to find wayland-scanner.pc file
         # Adjust pkg_config_custom_content to point to build context binary directory
-        wayland_scanner_config_vars = self.dependencies.host['wayland'].cpp_info.components['wayland-scanner'].get_property("pkg_config_custom_content", None)
-        if wayland_scanner_config_vars:
-            wayland_build_context_bindir = self.dependencies.build['wayland'].cpp_info.bindirs[0]
-            wayland_scanner_config_vars = wayland_scanner_config_vars.replace("${bindir}", wayland_build_context_bindir)
-            deps.set_property("wayland::wayland-scanner", "pkg_config_custom_content", wayland_scanner_config_vars)
-        deps.generate()
+        if self.options.get_safe("with_wayland", False):
+            wayland_scanner_config_vars = self.dependencies.host['wayland'].cpp_info.components['wayland-scanner'].get_property("pkg_config_custom_content", None)
+            if wayland_scanner_config_vars:
+                wayland_build_context_bindir = self.dependencies.build['wayland'].cpp_info.bindirs[0]
+                wayland_scanner_config_vars = wayland_scanner_config_vars.replace("${bindir}", wayland_build_context_bindir)
+                deps.set_property("wayland::wayland-scanner", "pkg_config_custom_content", wayland_scanner_config_vars)
+            deps.generate()
 
     def validate(self):
         if self.settings.os == "Linux" and not (self.options.with_wayland or self.options.with_x11):
