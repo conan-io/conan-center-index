@@ -122,13 +122,8 @@ class RapidcheckConan(ConanFile):
 
         self.cpp_info.components["rapidcheck_rapidcheck"].set_property("cmake_target_name", "rapidcheck")
         self.cpp_info.components["rapidcheck_rapidcheck"].libs = ["rapidcheck"]
-        version = str(self.version)[4:]
-        if Version(version) < "20201218":
-            if self.options.enable_rtti:
-                self.cpp_info.components["rapidcheck_rapidcheck"].defines.append("RC_USE_RTTI")
-        else:
-            if not self.options.enable_rtti:
-                self.cpp_info.components["rapidcheck_rapidcheck"].defines.append("RC_DONT_USE_RTTI")
+        if not self.options.enable_rtti:
+            self.cpp_info.components["rapidcheck_rapidcheck"].defines.append("RC_DONT_USE_RTTI")
 
         if self.options.enable_catch:
             self.cpp_info.components["rapidcheck_catch"].set_property("cmake_target_name", "rapidcheck_catch")
