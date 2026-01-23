@@ -98,7 +98,7 @@ class XZUtilsConan(ConanFile):
                 tc.cache_variables["XZ_TOOL_SYMLINKS"] = False
                 tc.cache_variables["XZ_TOOL_SYMLINKS_LZMA"] = False
                 tc.cache_variables["XZ_DOC"] = False
-                tc.cache_variables["XZ_SANDBOX"] = False
+                tc.cache_variables["XZ_SANDBOX"] = "no"
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
