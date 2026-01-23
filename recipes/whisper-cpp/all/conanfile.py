@@ -124,9 +124,9 @@ class WhisperCppConan(ConanFile):
     def requirements(self):
         if not is_apple_os(self):
             if self.options.get_safe("with_blas"):
-                self.requires("openblas/0.3.24")
+                self.requires("openblas/[^0.3.24]")
         if self.options.get_safe("with_openvino"):
-            self.requires("openvino/2023.2.0")
+            self.requires("openvino/[>=2023.2.0 <=2025.4.0]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
