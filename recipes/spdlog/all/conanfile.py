@@ -28,6 +28,7 @@ class SpdlogConan(ConanFile):
         "wchar_console": [True, False],
         "no_exceptions": [True, False],
         "use_std_fmt": [True, False],
+        "prevent_child_fd": [True, False],
     }
     default_options = {
         "shared": False,
@@ -38,6 +39,7 @@ class SpdlogConan(ConanFile):
         "wchar_console": False,
         "no_exceptions": False,
         "use_std_fmt": False,
+        "prevent_child_fd": False,
     }
 
     def export_sources(self):
@@ -124,6 +126,7 @@ class SpdlogConan(ConanFile):
             tc.cache_variables["SPDLOG_INSTALL"] = True
             tc.cache_variables["SPDLOG_NO_EXCEPTIONS"] = self.options.no_exceptions
             tc.cache_variables["SPDLOG_USE_STD_FORMAT"] = self.options.get_safe("use_std_fmt")
+            tc.cache_variables["SPDLOG_PREVENT_CHILD_FD"] = self.options.get_safe("prevent_child_fd")
             if self.settings.os in ("iOS", "tvOS", "watchOS"):
                 tc.cache_variables["SPDLOG_NO_TLS"] = True
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
@@ -190,6 +193,8 @@ class SpdlogConan(ConanFile):
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_UTF8_TO_WCHAR_CONSOLE")
         if self.options.no_exceptions:
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_NO_EXCEPTIONS")
+        if self.options.get_safe("prevent_child_fd"):
+            self.cpp_info.components["libspdlog"].defines.append("SPDLOG_PREVENT_CHILD_FD")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libspdlog"].system_libs = ["pthread"]
         if self.options.header_only and self.settings.os in ("iOS", "tvOS", "watchOS"):
