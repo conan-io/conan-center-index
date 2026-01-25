@@ -113,6 +113,10 @@ class HighwayConan(ConanFile):
             self.cpp_info.components["hwy_contrib"].set_property("pkg_config_name", "libhwy-contrib")
             self.cpp_info.components["hwy_contrib"].libs = ["hwy_contrib"]
             self.cpp_info.components["hwy_contrib"].requires = ["hwy"]
+            if Version(self.version) >= "1.3.0" and self.settings.os in ["Linux", "FreeBSD"]:
+                # From 1.3.0 Highway does a FindPackage(Threads) and if not found
+                # but not requested to build without contrib, it fails.
+                self.cpp_info.components["hwy_contrib"].system_libs.append("pthread")
         if "0.15.0" <= Version(self.version) < "1.0.6" or (Version(self.version) >= "1.0.6" and self.options.with_test):
             self.cpp_info.components["hwy_test"].set_property("pkg_config_name", "libhwy-test")
             self.cpp_info.components["hwy_test"].libs = ["hwy_test"]
