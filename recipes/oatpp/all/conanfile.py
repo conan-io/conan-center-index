@@ -61,7 +61,7 @@ class OatppConan(ConanFile):
 
     def build_requirements(self):
         if Version(self._version) >= "1.3.0":
-            self.tool_requires("cmake/[>=3.20 <4]")
+            self.tool_requires("cmake/[>=3.20]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -73,6 +73,8 @@ class OatppConan(ConanFile):
         if is_msvc(self) and Version(self.version) >= "1.3.0":
             tc.variables["OATPP_MSVC_LINK_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.variables["OATPP_LINK_TEST_LIBRARY"] = self.options.with_test_library
+        if Version(self.version) <= "1.3.1":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         venv = VirtualBuildEnv(self)
         venv.generate(scope="build")
