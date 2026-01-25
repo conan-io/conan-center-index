@@ -92,7 +92,7 @@ jobs:
 
             return {
               os: ['ubuntu-24.04', 'windows-2025', 'macos-14', 'ubuntu-24.04-arm', 'windows-11-arm'],
-              shared: ( "shared" in info.options_definitions ) ? ['-o*/*:shared=False', '-o*/*:shared=True'] : [''],
+              shared: ( "shared" in info.options_definitions ) ? ['-o*/*:shared=False', '-o*/*:shared=True'] : (info.package_type == 'shared-library') ? ['-o*/*:shared=True'] : [''],
               build_type: ["Release"]
             };
 
