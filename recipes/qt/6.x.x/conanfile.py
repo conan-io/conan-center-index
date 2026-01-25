@@ -618,8 +618,7 @@ class QtConan(ConanFile):
         for feature in str(self.options.disabled_features).split():
             tc.variables[f"FEATURE_{feature}"] = "OFF"
 
-
-        if self.settings.os == "Macos":
+        if self.settings.os in ["Macos", "iOS", "tvOS", "watchOS"]:
             tc.variables["FEATURE_framework"] = "OFF"
         elif self.settings.os == "Android":
             tc.variables["CMAKE_ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
@@ -647,7 +646,7 @@ class QtConan(ConanFile):
             # Stand-in for Qt6CoreTools - which is loaded for the executable targets
             tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = os.path.join(self.dependencies.direct_build["qt"].package_folder, self._cmake_executables_file)
             # Ensure tools for host are always built
-            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = True
+            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = False
 
         tc.variables["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.get_safe("build_type") == "Debug" and not self.options.shared:
