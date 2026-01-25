@@ -29,6 +29,7 @@ runs:
           echo "*/*:with_glib=False" >> "$DEFAULT_PROFILE"
           echo "cairo/*:with_glib=True" >> "$DEFAULT_PROFILE"
           echo "graphene/*:with_glib=True" >> "$DEFAULT_PROFILE"
+          echo "harfbuzz/*:with_glib=True" >> "$DEFAULT_PROFILE"
           if [[ "$RUNNER_ARCH" == "ARM64" ]]; then
             echo "xnnpack/*:assembly=False" >> "$DEFAULT_PROFILE"
             echo "*/*:enable_data_postgresql=False" >> "$DEFAULT_PROFILE"
