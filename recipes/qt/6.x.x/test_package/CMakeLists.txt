@@ -9,6 +9,7 @@ if (IOS)
     qt_import_plugins(${PROJECT_NAME} INCLUDE Qt6::QIOSIntegrationPlugin)
     set_target_properties(${PROJECT_NAME} PROPERTIES
         QT_IOS_LAUNCH_SCREEN "${CMAKE_CURRENT_SOURCE_DIR}/LaunchScreen.storyboard"
+        QT_IOS_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.app.in"
     )
 else()
     add_executable(${PROJECT_NAME} test_package.cpp greeter.h example.qrc)
