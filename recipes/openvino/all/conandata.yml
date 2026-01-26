@@ -53,8 +53,5 @@ sources:
 patches:
   "2025.4.0":
     - patch_file: "patches/2025.4.0-CPU-ARM-Define-HWCAP2_I8MM-constant-properly-33060.patch"
-      patch_description: "[CPU][ARM] Define HWCAP2_I8MM constant properly"
-      patch_type: "official"
-      patch_source: "https://github.com/openvinotoolkit/openvino/pull/33060"
   "2025.2.0":
     - patch_file: "patches/2025.2.0-dont-disable-macos-adhoc-codesign.patch"
