@@ -9,7 +9,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
+required_conan_version = ">=2.1"
 
 
 class LibsecretConan(ConanFile):
@@ -26,13 +26,11 @@ class LibsecretConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "crypto": [False, "libgcrypt", "gnutls"],
-        "with_libgcrypt": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "crypto": "libgcrypt",
-        "with_libgcrypt": "deprecated",
     }
 
     def config_options(self):
@@ -45,18 +43,16 @@ class LibsecretConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-        if self.options.with_libgcrypt != "deprecated":
-            self.output.warning(f"The '{self.ref}:with_libgcrypt' option is deprecated. Use '{self.ref}:crypto' instead.")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/[>=2.78.3 <3]", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("crypto") == "libgcrypt":
             self.requires("libgcrypt/1.10.3")
         elif self.options.get_safe("crypto") == "gnutls":
-            self.requires("gnutls/3.8.2")
+            self.requires("gnutls/3.8.7")
 
     def validate(self):
         if self.settings.os == "Windows":
@@ -64,13 +60,10 @@ class LibsecretConan(ConanFile):
         if self.options.crypto == "gnutls" and Version(self.version) < "0.21.2":
             raise ConanInvalidConfiguration(f"{self.ref} does not support GnuTLS before version 0.21.2. Use -o '&:crypto=libgcrypt' instead.")
 
-    def package_id(self):
-        del self.info.options.with_libgcrypt
-
     def build_requirements(self):
-        self.tool_requires("meson/1.4.1")
+        self.tool_requires("meson/[>=1.4.0 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.2.0")
+            self.tool_requires("pkgconf/[2.2 <3]")
         self.tool_requires("glib/<host_version>")
 
         if is_apple_os(self):
@@ -78,7 +71,7 @@ class LibsecretConan(ConanFile):
             # a different/incompatible libiconv than the one being exposed
             # in the runtime environment (DYLD_LIBRARY_PATH)
             # See https://github.com/conan-io/conan-center-index/pull/17502#issuecomment-1542492466
-            self.tool_requires("gettext/0.22.5")
+            self.tool_requires("gettext/[>=0.22 <1]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
