@@ -5,7 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2"
 
 
 class SeqanConan(ConanFile):
