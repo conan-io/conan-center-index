@@ -22,7 +22,7 @@ class SeqanConan(ConanFile):
     topics = ("algorithms", "data structures", "biological sequences", "header-only")
 
     package_type = "header-library"
-    settings = "compiler"
+    settings = "compiler", "os"
     no_copy_source = True
 
     def validate(self):
