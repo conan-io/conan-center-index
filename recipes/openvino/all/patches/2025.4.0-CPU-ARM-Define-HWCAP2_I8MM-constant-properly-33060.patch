@@ -1,6 +1,7 @@
 From b2af8551957abaa3b25c720fccef5fc77d14fd77 Mon Sep 17 00:00:00 2001
 Date: Mon, 1 Dec 2025 15:54:44 +0100
 Subject: [PATCH] [CPU][ARM] Define HWCAP2_I8MM constant properly (#33060)
+URL:. https://github.com/openvinotoolkit/openvino/pull/33060
 
 ### Details:
  - Conda build fails because of undefined constant
