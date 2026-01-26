@@ -679,10 +679,13 @@ class QtConan(ConanFile):
         tc.variables["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.get_safe("build_type") == "Debug" and not self.options.shared:
             tc.variables["BUILD_WITH_PCH"] = "OFF"  # disabling PCH to save disk space
+        # Disable PCH for iOS builds to avoid build order issues with precompiled headers
+        if self.settings.os == "iOS":
+            tc.variables["BUILD_WITH_PCH"] = "OFF"
 
-                               #"set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
-                               #"set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
-                               #"set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS})\n"
+        #"set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
+        #"set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
+        #"set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS})\n"
 
         current_cpp_std = self.settings.get_safe("compiler.cppstd", default_cppstd(self))
         current_cpp_std = str(current_cpp_std).replace("gnu", "")
