@@ -1323,16 +1323,16 @@ Prefix = ..""")
             _create_module("QuickControls2", ["Gui", "Quick"])
             _create_module("QuickTemplates2", ["Gui", "Quick"])
 
-        if self.options.qtsvg and self.options.gui:
+        if self.options.gui and self.options.get_safe("qtsvg"):
             _create_module("Svg", ["Gui"])
             _create_plugin("QSvgIconPlugin", "qsvgicon", "iconengines", [])
             _create_plugin("QSvgPlugin", "qsvg", "imageformats", [])
 
-        if self.options.with_libjpeg and self.options.gui:
+        if self.options.gui and self.options.get_safe("with_libjpeg"):
             jpeg_lib = str(self.options.with_libjpeg)
             _create_plugin("QJpegPlugin", "qjpeg", "imageformats", [f"{jpeg_lib}::{jpeg_lib}"])
 
-        if self.options.qtwayland and self.options.gui:
+        if self.options.gui and self.options.get_safe("qtwayland"):
             _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
             _create_module("WaylandCompositor", ["Gui", "wayland::wayland-server"])
             _create_plugin("QWaylandIntegrationPlugin","qwayland-generic", "platforms", ["Gui"])
