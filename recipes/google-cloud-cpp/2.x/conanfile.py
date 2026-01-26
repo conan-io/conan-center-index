@@ -22,6 +22,7 @@ from conan.errors import ConanInvalidConfiguration
 import components_2_15_1
 import components_2_19_0
 import components_2_28_0
+import components_2_45_0
 
 required_conan_version = ">=1.56.0"
 
@@ -48,6 +49,7 @@ class GoogleCloudCppConan(ConanFile):
     exports = ["components_2_15_1.py",
                "components_2_19_0.py",
                "components_2_28_0.py",
+               "components_2_45_0.py",
                ]
 
     short_paths = True
@@ -56,16 +58,19 @@ class GoogleCloudCppConan(ConanFile):
         '2.15.1': components_2_15_1.COMPONENTS,
         '2.19.0': components_2_19_0.COMPONENTS,
         '2.28.0': components_2_28_0.COMPONENTS,
+        '2.45.0': components_2_45_0.COMPONENTS,
     }
     _PROTO_COMPONENTS = {
         '2.15.1': components_2_15_1.PROTO_COMPONENTS,
         '2.19.0': components_2_19_0.PROTO_COMPONENTS,
         '2.28.0': components_2_28_0.PROTO_COMPONENTS,
+        '2.45.0': components_2_45_0.PROTO_COMPONENTS,
     }
     _PROTO_COMPONENT_DEPENDENCIES = {
         "2.15.1": components_2_15_1.DEPENDENCIES,
         "2.19.0": components_2_19_0.DEPENDENCIES,
         "2.28.0": components_2_28_0.DEPENDENCIES,
+        '2.45.0': components_2_45_0.DEPENDENCIES,
     }
     # Some components require custom dependency definitions.
     _REQUIRES_CUSTOM_DEPENDENCIES = {
