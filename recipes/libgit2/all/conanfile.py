@@ -157,6 +157,7 @@ class LibGit2Conan(ConanFile):
             tc.variables["STATIC_CRT"] = is_msvc_static_runtime(self)
         # REGEX_BACKEND is SET(), avoid options overriding it
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
         deps = CMakeDeps(self)
         if self.options.get_safe("with_http_parser") == "llhttp":

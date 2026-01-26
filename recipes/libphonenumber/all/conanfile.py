@@ -8,6 +8,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
+from conan.tools.apple import fix_apple_shared_install_name
 
 required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
@@ -76,8 +77,8 @@ class LibphonenumberConan(ConanFile):
 
     def requirements(self):
         # https://github.com/google/libphonenumber/blob/v8.13.35/cpp/src/phonenumbers/phonenumberutil.h#L33-L34
-        self.requires("abseil/20240116.2", transitive_headers=True)
-        self.requires("protobuf/5.27.0", transitive_headers=True, transitive_libs=True)
+        self.requires("protobuf/[>=5.27.0 <7]", transitive_headers=True, transitive_libs=True)
+        self.requires("abseil/[*]", transitive_headers=True)
         if self.options.use_boost:
             # https://github.com/google/libphonenumber/blob/v8.13.35/cpp/src/phonenumbers/base/synchronization/lock_boost.h
             self.requires("boost/1.85.0", transitive_headers=True, transitive_libs=True)
@@ -156,6 +157,7 @@ class LibphonenumberConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         if self.options.shared:

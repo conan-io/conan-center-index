@@ -1,4 +1,7 @@
 sources:
+  "0.22.0":
+    url: "https://github.com/LibRaw/LibRaw/archive/0.22.0.tar.gz"
+    sha256: "5a11327a9cef2496d6a4335e8da30a1604460b6c545a30fe7588cf4c00a0fcae"
   "0.21.5b":
     url: "https://github.com/LibRaw/LibRaw/archive/0.21.5b.tar.gz"
     sha256: "f60e8377dec42e50f59ed2860ba00bcb59773e04afbf7bd6bd9367ac3529e0e8"
