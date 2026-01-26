@@ -941,16 +941,15 @@ class QtConan(ConanFile):
                 if os.path.isfile(os.path.join(self.package_folder, path_)):
                     exe_path = path_
                     break
-            else:
-                assert False, f"Could not find executable {target}{extension} in {self.package_folder}"
             if not exe_path:
-                self.output.warning(f"Could not find path to {target}{extension}")
-            filecontents += textwrap.dedent(f"""\
-                if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{target})
-                    add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} IMPORTED)
-                    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../{exe_path})
-                endif()
-                """)
+                self.output.warning(f"Could not find executable {target}{extension} in {self.package_folder}")
+            else:
+                filecontents += textwrap.dedent(f"""\
+                    if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{target})
+                        add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} IMPORTED)
+                        set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../{exe_path})
+                    endif()
+                    """)
 
         filecontents += textwrap.dedent(f"""\
             if(NOT DEFINED QT_DEFAULT_MAJOR_VERSION)
