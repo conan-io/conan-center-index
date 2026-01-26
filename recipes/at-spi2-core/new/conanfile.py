@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -35,9 +35,6 @@ class AtSpi2CoreConan(ConanFile):
         "with_x11": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -69,6 +66,18 @@ class AtSpi2CoreConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
+
+    def _patch_sources(self):
+        replace_in_file(self, os.path.join(self.source_folder, "bus", "meson.build"),
+                                "if x11_dep.found()",
+                                "if get_option('x11').enabled()")
+        replace_in_file(self, os.path.join(self.source_folder, 'meson.build'),
+            "subdir('tests')",
+            "#subdir('tests')")
+        replace_in_file(self, os.path.join(self.source_folder, 'meson.build'),
+            "libxml_dep = dependency('libxml-2.0', version: libxml_req_version)",
+            "#libxml_dep = dependency('libxml-2.0', version: libxml_req_version)")
 
     def generate(self):
         virtual_build_env = VirtualBuildEnv(self)
@@ -85,16 +94,6 @@ class AtSpi2CoreConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "bus", "meson.build"),
-                                "if x11_dep.found()",
-                                "if get_option('x11').enabled()")
-        replace_in_file(self, os.path.join(self.source_folder, 'meson.build'),
-            "subdir('tests')",
-            "#subdir('tests')")
-        replace_in_file(self, os.path.join(self.source_folder, 'meson.build'),
-            "libxml_dep = dependency('libxml-2.0', version: libxml_req_version)",
-            "#libxml_dep = dependency('libxml-2.0', version: libxml_req_version)")
         meson = Meson(self)
         meson.configure()
         meson.build()
