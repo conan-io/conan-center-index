@@ -3,7 +3,6 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.files import get, copy, rmdir
 from conan.tools.layout import basic_layout
-from conan.tools.env import VirtualRunEnv
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.scm import Version
@@ -23,7 +22,7 @@ class Gtk4Conan(ConanFile):
     package_type = "library"
     languages = "C"
     settings = "os", "arch", "compiler", "build_type"
-    implements = ["auto_shared_fpic"]    
+    implements = ["auto_shared_fpic"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -68,7 +67,7 @@ class Gtk4Conan(ConanFile):
         # INFO: gtk/gtkwidget.h:36:#include <atk/atk.h>
         self.requires("at-spi2-core/[>=2.53.1 <3]", transitive_headers=True)
         self.requires("fribidi/1.0.13")
-        self.requires("libepoxy/1.5.10")        
+        self.requires("libepoxy/1.5.10")
         if self.settings.os == "Linux":
             if self.options.with_wayland:
                 self.requires("xkbcommon/[>=1.5.0 <2]")
@@ -124,7 +123,7 @@ class Gtk4Conan(ConanFile):
     def validate(self):
         if self.settings.os == "Linux" and not (self.options.with_wayland or self.options.with_x11):
             raise ConanInvalidConfiguration("At least one of backends '-o &:with_wayland' or '-o &:with_x11' options must be True on Linux")
-        
+
     def build(self):
         meson = Meson(self)
         meson.configure()
@@ -150,11 +149,13 @@ class Gtk4Conan(ConanFile):
         if self.settings.os == "Windows":
             gtk_targets.append("win32")
         if self.settings.os == "Macos":
-            gtk_targets.append("macos")
+            gtk_targets.append("quartz")
+        property_os = "darwin" if self.settings.os == "Macos" else str(self.settings.os).lower()
+        property_arch = "aarch64" if property_os == "darwin" and self.settings.arch == "armv8" else str(self.settings.arch)
         pkgconfig_vars = {
             "targets": gtk_targets,
             "gtk_binary_version": f"{Version(self.version).major}.0.0",
-            "gtk_host": f"{self.settings.arch}-" + str(self.settings.os).lower()
+            "gtk_host": f"{property_arch}-{property_os}"
         }
 
         self.cpp_info.components["gdk-3"].libs = ["gdk-3"]
@@ -162,7 +163,7 @@ class Gtk4Conan(ConanFile):
         self.cpp_info.components["gdk-3"].set_property("pkg_config_custom_content", pkgconfig_vars)
         self.cpp_info.components["gdk-3"].includedirs.append(os.path.join("include", "gtk-3.0"))
         self.cpp_info.components["gdk-3"].requires = ["pango::pango", "gdk-pixbuf::gdk-pixbuf", "cairo::cairo",
-                                                      "fribidi::fribidi", "libepoxy::libepoxy", "glib::glib"]        
+                                                      "fribidi::fribidi", "libepoxy::libepoxy", "glib::glib"]
 
         self.cpp_info.components["gtk-3"].libs = ["gtk-3"]
         self.cpp_info.components["gtk-3"].set_property("pkg_config_name", "gtk+-3.0")
@@ -200,14 +201,38 @@ class Gtk4Conan(ConanFile):
 
             self.cpp_info.components["gtk+-wayland-3.0"].set_property("pkg_config_name", "gtk+-wayland-3.0.pc")
             self.cpp_info.components["gtk+-wayland-3.0"].set_property("pkg_config_custom_content", pkgconfig_vars)
+            self.cpp_info.components["gtk+-wayland-3.0"].libs = ["gtk-3"]
             self.cpp_info.components["gtk+-wayland-3.0"].includedirs.append(os.path.join("include", "gtk-3.0"))
             self.cpp_info.components["gtk+-wayland-3.0"].requires = ["gdk-3", "pango::pango", "gdk-pixbuf::gdk-pixbuf", "cairo::cairo",
                                                                     "fribidi::fribidi", "libepoxy::libepoxy",
                                                                     "glib::glib", "at-spi2-core::at-spi2-core",
                                                                     "wayland::wayland", "xkbcommon::xkbcommon"]
+        if self.settings.os == "Macos":
+            self.cpp_info.components["gdk-3"].frameworks = ["Cocoa", "Carbon", "CoreGraphics", "CoreVideo", "IOSurface", "QuartzCore"]
+
+            self.cpp_info.components["gdk-quartz-3.0"].set_property("pkg_config_name", "gdk-quartz-3.0.pc")
+            self.cpp_info.components["gdk-quartz-3.0"].set_property("pkg_config_custom_content", pkgconfig_vars)
+            self.cpp_info.components["gdk-quartz-3.0"].libs = ["gdk-3"]
+            self.cpp_info.components["gdk-quartz-3.0"].includedirs.append(os.path.join("include", "gtk-3.0"))
+            self.cpp_info.components["gdk-quartz-3.0"].frameworks = ["Cocoa", "Carbon", "CoreGraphics", "CoreVideo",
+                                                                     "IOSurface", "QuartzCore"]
+            self.cpp_info.components["gdk-quartz-3.0"].requires = ["pango::pango", "gdk-pixbuf::gdk-pixbuf", "cairo::cairo",
+                                                                "fribidi::fribidi", "libepoxy::libepoxy", "glib::glib"]
+
+            self.cpp_info.components["gtk+-quartz-3.0"].set_property("pkg_config_name", "gtk+-quartz-3.0.pc")
+            self.cpp_info.components["gtk+-quartz-3.0"].set_property("pkg_config_custom_content", pkgconfig_vars)
+            self.cpp_info.components["gtk+-quartz-3.0"].libs = ["gtk-3"]
+            self.cpp_info.components["gtk+-quartz-3.0"].includedirs.append(os.path.join("include", "gtk-3.0"))
+            self.cpp_info.components["gtk+-quartz-3.0"].requires = ["gdk-3", "pango::pango", "gdk-pixbuf::gdk-pixbuf", "cairo::cairo",
+                                                                "fribidi::fribidi", "libepoxy::libepoxy", "glib::glib"]
 
         self.cpp_info.components["gail"].libs = ["gailutil-3"]
         self.cpp_info.components["gail"].set_property("pkg_config_name", "gail-3.0")
         self.cpp_info.components["gail"].includedirs.append(os.path.join("include", "gail-3.0"))
         self.cpp_info.components["gail"].requires = ["gtk-3", "at-spi2-core::at-spi2-core"]
-        
+
+        self.cpp_info.components["unix-print"].set_property("pkg_config_name", "gtk+-unix-print-3.0")
+        self.cpp_info.components["unix-print"].includedirs.append(os.path.join("include", "gtk-3.0", "unix-print"))
+        self.cpp_info.components["unit-print"].requires = ["gtk-3", "at-spi2-core::at-spi2-core", "cairo::cairo",
+                                                           "gdk-pixbuf::gdk-pixbuf", "glib::glib"]
+
