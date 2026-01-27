@@ -41,14 +41,6 @@ class OneTBBConan(ConanFile):
     }
 
     @property
-    def _has_tbbmalloc(self):
-        return self.options.get_safe("tbbmalloc")
-
-    @property
-    def _has_tbbproxy(self):
-        return self.options.get_safe("tbbproxy")
-
-    @property
     def _tbbbind_hwloc_version(self):
         # TBB expects different variables depending on the version
         return "2_5"
@@ -205,7 +197,7 @@ class OneTBBConan(ConanFile):
             tbb.system_libs = ["m", "dl", "rt", "pthread"]
 
         # tbbmalloc
-        if self._has_tbbmalloc:
+        if self.options.get_safe("tbbmalloc"):
             tbbmalloc = self.cpp_info.components["tbbmalloc"]
 
             tbbmalloc.set_property("cmake_target_name", "TBB::tbbmalloc")
@@ -220,7 +212,7 @@ class OneTBBConan(ConanFile):
                 tbbmalloc.system_libs = ["dl", "pthread"]
 
             # tbbmalloc_proxy
-            if self._has_tbbproxy:
+            if self.options.get_safe("tbbproxy"):
                 tbbproxy = self.cpp_info.components["tbbmalloc_proxy"]
 
                 tbbproxy.set_property("cmake_target_name", "TBB::tbbmalloc_proxy")
