@@ -5,7 +5,6 @@ from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
