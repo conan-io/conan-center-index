@@ -91,7 +91,6 @@ class Gtk4Conan(ConanFile):
         tc.project_options["win32_backend"] = self.settings.os == "Windows"
         tc.project_options["quartz_backend"] = self.settings.os == "Macos"
         # Print backends
-        tc.project_options["print_backends"] = "file"
         tc.project_options["colord"] = "no"
         # Optional features
         tc.project_options["xinerama"] = "no"
