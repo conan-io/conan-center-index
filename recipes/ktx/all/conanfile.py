@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd, stdcpp_library, cross_building
+from conan.tools.build import check_min_cppstd, stdcpp_library, cross_building, check_max_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save, replace_in_file
 from conan.tools.scm import Version
@@ -63,6 +63,9 @@ class KtxConan(ConanFile):
     def validate_build(self):
         if cross_building(self) and is_apple_os(self):
             raise ConanInvalidConfiguration("Cross-building KTX 4.4.2 for Apple OS is not supported in this version")
+        if self.options.tools:
+            # Does not compile with newer cppstd versions.
+            check_max_cppstd(self, 17)
 
     def validate(self):
         check_min_cppstd(self, 17)
