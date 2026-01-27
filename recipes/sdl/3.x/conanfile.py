@@ -228,8 +228,9 @@ class SDLConan(ConanFile):
         if self.options.get_safe("sndio"):
             self.requires("libsndio/1.9.0")
         if self.options.get_safe("wayland"):
-            self.requires("wayland/1.22.0")
             self.requires("xkbcommon/1.6.0")
+            # Version comes from xkbcommon
+            self.requires("wayland/[^1.22]")
             self.requires("egl/system")
         if self.options.get_safe("x11"):
             self.requires("xorg/system")
