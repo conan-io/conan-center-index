@@ -186,11 +186,11 @@ class Gtk4Conan(ConanFile):
             self.cpp_info.components["gdk-x11-3.0"].requires = ["gdk-3", "pango::pango", "gdk-pixbuf::gdk-pixbuf", "cairo::cairo",
                                                                 "fribidi::fribidi", "libepoxy::libepoxy", "glib::glib"]
 
-            self.cpp_info.components["gtk+-x11-3.0"].set_property("pkg_config_name", "gtk+-x11-3.0.pc")
-            self.cpp_info.components["gtk+-x11-3.0"].set_property("pkg_config_custom_content", pkgconfig_vars)
-            self.cpp_info.components["gtk+-x11-3.0"].requires = ["gdk-3"]
-            self.cpp_info.components["gtk+-x11-3.0"].includedirs.append(os.path.join("include", "gtk-3.0"))
-            self.cpp_info.components["gtk+-x11-3.0"].requires = ["gdk-3", "pango::pango", "gdk-pixbuf::gdk-pixbuf", "cairo::cairo",
+            self.cpp_info.components["gtk-x11-3.0"].set_property("pkg_config_name", "gtk+-x11-3.0.pc")
+            self.cpp_info.components["gtk-x11-3.0"].set_property("pkg_config_custom_content", pkgconfig_vars)
+            self.cpp_info.components["gtk-x11-3.0"].requires = ["gdk-3"]
+            self.cpp_info.components["gtk-x11-3.0"].includedirs.append(os.path.join("include", "gtk-3.0"))
+            self.cpp_info.components["gtk-x11-3.0"].requires = ["gdk-3", "pango::pango", "gdk-pixbuf::gdk-pixbuf", "cairo::cairo",
                                                                  "fribidi::fribidi", "libepoxy::libepoxy",
                                                                  "glib::glib", "at-spi2-core::at-spi2-core"]
 
@@ -203,11 +203,11 @@ class Gtk4Conan(ConanFile):
                                                                     "fribidi::fribidi", "libepoxy::libepoxy",
                                                                     "glib::glib", "wayland::wayland", "xkbcommon::xkbcommon"]
 
-            self.cpp_info.components["gtk+-wayland-3.0"].set_property("pkg_config_name", "gtk+-wayland-3.0.pc")
-            self.cpp_info.components["gtk+-wayland-3.0"].set_property("pkg_config_custom_content", pkgconfig_vars)
-            self.cpp_info.components["gtk+-wayland-3.0"].libs = ["gtk-3"]
-            self.cpp_info.components["gtk+-wayland-3.0"].includedirs.append(os.path.join("include", "gtk-3.0"))
-            self.cpp_info.components["gtk+-wayland-3.0"].requires = ["gdk-3", "pango::pango", "gdk-pixbuf::gdk-pixbuf", "cairo::cairo",
+            self.cpp_info.components["gtk-wayland-3.0"].set_property("pkg_config_name", "gtk+-wayland-3.0.pc")
+            self.cpp_info.components["gtk-wayland-3.0"].set_property("pkg_config_custom_content", pkgconfig_vars)
+            self.cpp_info.components["gtk-wayland-3.0"].libs = ["gtk-3"]
+            self.cpp_info.components["gtk-wayland-3.0"].includedirs.append(os.path.join("include", "gtk-3.0"))
+            self.cpp_info.components["gtk-wayland-3.0"].requires = ["gdk-3", "pango::pango", "gdk-pixbuf::gdk-pixbuf", "cairo::cairo",
                                                                     "fribidi::fribidi", "libepoxy::libepoxy",
                                                                     "glib::glib", "at-spi2-core::at-spi2-core",
                                                                     "wayland::wayland", "xkbcommon::xkbcommon"]
@@ -221,14 +221,33 @@ class Gtk4Conan(ConanFile):
             self.cpp_info.components["gdk-quartz-3.0"].frameworks = ["Cocoa", "Carbon", "CoreGraphics", "CoreVideo",
                                                                      "IOSurface", "QuartzCore"]
             self.cpp_info.components["gdk-quartz-3.0"].requires = ["pango::pango", "gdk-pixbuf::gdk-pixbuf", "cairo::cairo",
-                                                                "fribidi::fribidi", "libepoxy::libepoxy", "glib::glib"]
+                                                                   "fribidi::fribidi", "libepoxy::libepoxy", "glib::glib"]
 
-            self.cpp_info.components["gtk+-quartz-3.0"].set_property("pkg_config_name", "gtk+-quartz-3.0.pc")
-            self.cpp_info.components["gtk+-quartz-3.0"].set_property("pkg_config_custom_content", pkgconfig_vars)
-            self.cpp_info.components["gtk+-quartz-3.0"].libs = ["gtk-3"]
-            self.cpp_info.components["gtk+-quartz-3.0"].includedirs.append(os.path.join("include", "gtk-3.0"))
-            self.cpp_info.components["gtk+-quartz-3.0"].requires = ["gdk-3", "pango::pango", "gdk-pixbuf::gdk-pixbuf", "cairo::cairo",
-                                                                "fribidi::fribidi", "libepoxy::libepoxy", "glib::glib"]
+            self.cpp_info.components["gtk-quartz-3.0"].set_property("pkg_config_name", "gtk+-quartz-3.0.pc")
+            self.cpp_info.components["gtk-quartz-3.0"].set_property("pkg_config_custom_content", pkgconfig_vars)
+            self.cpp_info.components["gtk-quartz-3.0"].libs = ["gtk-3"]
+            self.cpp_info.components["gtk-quartz-3.0"].includedirs.append(os.path.join("include", "gtk-3.0"))
+            self.cpp_info.components["gtk-quartz-3.0"].requires = ["gdk-3", "pango::pango", "gdk-pixbuf::gdk-pixbuf", "cairo::cairo",
+                                                                    "fribidi::fribidi", "libepoxy::libepoxy", "glib::glib"]
+        elif self.settings.os == "Windows":
+            windows_system_libs = ["gdi32", "imm32", "shell32", "ole32", "winmm", "dwmapi", "setupapi", "cfgmgr32", "hid", "winspool", "comctl32", "comdlg32"]
+            self.cpp_info.components["gdk-3"].system_libs = windows_system_libs
+
+            self.cpp_info.components["gdk-win32-3.0"].set_property("pkg_config_name", "gdk-win32-3.0.pc")
+            self.cpp_info.components["gdk-win32-3.0"].set_property("pkg_config_custom_content", pkgconfig_vars)
+            self.cpp_info.components["gdk-win32-3.0"].libs = ["gdk-3"]
+            self.cpp_info.components["gdk-win32-3.0"].system_libs = windows_system_libs
+            self.cpp_info.components["gdk-win32-3.0"].includedirs.append(os.path.join("include", "gtk-3.0"))
+            self.cpp_info.components["gdk-win32-3.0"].requires = ["pango::pango", "gdk-pixbuf::gdk-pixbuf", "cairo::cairo",
+                                                                  "fribidi::fribidi", "libepoxy::libepoxy", "glib::glib"]
+
+            self.cpp_info.components["gtk-win32-3.0"].set_property("pkg_config_name", "gtk+-win32-3.0")
+            self.cpp_info.components["gtk-win32-3.0"].set_property("pkg_config_custom_content", pkgconfig_vars)
+            self.cpp_info.components["gtk-win32-3.0"].libs = ["gtk-3"]
+            self.cpp_info.components["gtk-win32-3.0"].system_libs = windows_system_libs
+            self.cpp_info.components["gtk-win32-3.0"].includedirs.append(os.path.join("include", "gtk-3.0"))
+            self.cpp_info.components["gtk-win32-3.0"].requires = ["gdk-3", "pango::pango", "gdk-pixbuf::gdk-pixbuf", "cairo::cairo",
+                                                                  "fribidi::fribidi", "libepoxy::libepoxy", "glib::glib"]
 
         self.cpp_info.components["gail"].libs = ["gailutil-3"]
         self.cpp_info.components["gail"].set_property("pkg_config_name", "gail-3.0")
