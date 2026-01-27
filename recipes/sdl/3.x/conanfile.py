@@ -21,6 +21,7 @@ _subsystems = [
     ("power", []),
     ("sensor", []),
     ("dialog", []),
+    ("tray", []),
 ]
 
 class SDLConan(ConanFile):
