@@ -19,13 +19,11 @@ class LibmngConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_lcms": [True, False],
-        "with_jpeg": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_lcms": True,
-        "with_jpeg": True,
     }
     package_type = "library"
 
@@ -34,8 +32,7 @@ class LibmngConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
-        if self.options.with_jpeg:
-            self.requires("libjpeg/9e", transitive_headers=True)
+        self.requires("libjpeg/9e", transitive_headers=True)
         if self.options.with_lcms:
             self.requires("lcms/2.14", transitive_headers=True)
 
@@ -59,7 +56,6 @@ class LibmngConan(ConanFile):
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["WITH_LCMS2"] = self.options.with_lcms
-        tc.variables["WITH_JPEG"] = self.options.with_jpeg
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -84,19 +80,12 @@ class LibmngConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "mng")
         self.cpp_info.set_property("cmake_target_name", "MNG::MNG")
 
-        # Define the component
-        comp = self.cpp_info.components["mng"]
-        comp.libs = ["mng"]
-        comp.requires = ["zlib::zlib"]
-        if self.options.with_jpeg:
-            comp.requires.append("libjpeg::libjpeg")
-        if self.options.with_lcms:
-            comp.requires.append("lcms::lcms")
+        lib_name = "libmng" if self.settings.compiler == "msvc" else "mng"
+        self.cpp_info.libs = [lib_name]
+        self.cpp_info.requires = ["zlib::zlib", "libjpeg::libjpeg"]
 
-        # Make sure the main target has the same properties as the component
-        self.cpp_info.libs = comp.libs
-        self.cpp_info.requires = comp.requires
+        if self.options.with_lcms:
+            self.cpp_info.requires.append("lcms::lcms")
 
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
-            comp.system_libs.append("m")
-            self.cpp_info.system_libs = comp.system_libs
+            self.cpp_info.system_libs.append("m")
