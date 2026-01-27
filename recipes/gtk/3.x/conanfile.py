@@ -1,10 +1,11 @@
 from conan import ConanFile
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
@@ -35,6 +36,9 @@ class Gtk4Conan(ConanFile):
         "with_wayland": False,
         "with_x11": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os != "Linux":
@@ -77,6 +81,7 @@ class Gtk4Conan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = MesonToolchain(self)
@@ -235,4 +240,3 @@ class Gtk4Conan(ConanFile):
         self.cpp_info.components["unix-print"].includedirs.append(os.path.join("include", "gtk-3.0", "unix-print"))
         self.cpp_info.components["unit-print"].requires = ["gtk-3", "at-spi2-core::at-spi2-core", "cairo::cairo",
                                                            "gdk-pixbuf::gdk-pixbuf", "glib::glib"]
-
