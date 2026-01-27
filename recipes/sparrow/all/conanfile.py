@@ -30,13 +30,15 @@ class SparrowRecipe(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "use_date_polyfill": False if Version(self.version) >= "2.0.0" else True,
+        "use_date_polyfill": None,
         "export_json_reader": False,
     }
 
     implements = ["auto_shared_fpic"]
 
     def config_options(self):
+        self.options.use_date_polyfill = Version(self.version) < "2.0.0"
+
         if self.settings.os == "Windows":
             del self.options.fPIC
 
@@ -114,11 +116,11 @@ class SparrowRecipe(ConanFile):
     def package_info(self):
         postfix = "d" if (self.settings.build_type == "Debug" and Version(self.version) >= "1.3.0") else ""
         self.cpp_info.set_property("cmake_file_name", "sparrow")
-        
+
         # Main sparrow component
         self.cpp_info.components["sparrow"].set_property("cmake_target_name", "sparrow::sparrow")
         self.cpp_info.components["sparrow"].libs = [f"sparrow{postfix}"]
-        
+
         if not self.options.shared:
             self.cpp_info.components["sparrow"].defines.append("SPARROW_STATIC_LIB")
         if self._uses_date_polyfill:
@@ -126,7 +128,7 @@ class SparrowRecipe(ConanFile):
             self.cpp_info.components["sparrow"].requires.append("date::date")
         if is_msvc(self):
             self.cpp_info.components["sparrow"].defines.append("SPARROW_USE_LARGE_INT_PLACEHOLDERS")
-    
+
         # Optional json_reader component
         if self.options.export_json_reader:
             self.cpp_info.components["json_reader"].set_property("cmake_target_name", "sparrow::json_reader")
