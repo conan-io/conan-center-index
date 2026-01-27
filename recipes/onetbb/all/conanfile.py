@@ -82,7 +82,7 @@ class OneTBBConan(ConanFile):
     def config_options(self):
         if Version(self.version) < "2021.5.0":
             del self.options.tbbmalloc
-        if Version(self.version) < "2021.6.0":
+        if Version(self.version) < "2021.6.0" or (self.settings.compiler == "msvc" and self.settings.arch == "armv8"):
             del self.options.tbbproxy
         if not self._tbbbind_supported:
             del self.options.tbbbind
@@ -130,7 +130,7 @@ class OneTBBConan(ConanFile):
         if self.options.get_safe("interprocedural_optimization") is not None:
             toolchain.variables["TBB_ENABLE_IPO"] = self.options.interprocedural_optimization
         if Version(self.version) >= "2021.6.0" and self.options.get_safe("tbbmalloc"):
-            toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.tbbproxy
+            toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.get_safe("tbbproxy")
         toolchain.variables["TBB_DISABLE_HWLOC_AUTOMATIC_SEARCH"] = not self._tbbbind_build
         if self._tbbbind_explicit_hwloc:
             hwloc_package_folder = self.dependencies["hwloc"].package_folder
