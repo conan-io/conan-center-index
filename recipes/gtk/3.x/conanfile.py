@@ -253,7 +253,8 @@ class Gtk4Conan(ConanFile):
         self.cpp_info.components["gail"].includedirs.append(os.path.join("include", "gail-3.0"))
         self.cpp_info.components["gail"].requires = ["gtk-3", "at-spi2-core::at-spi2-core"]
 
-        self.cpp_info.components["unix-print"].set_property("pkg_config_name", "gtk+-unix-print-3.0")
-        self.cpp_info.components["unix-print"].includedirs.append(os.path.join("include", "gtk-3.0", "unix-print"))
-        self.cpp_info.components["unit-print"].requires = ["gtk-3", "at-spi2-core::at-spi2-core", "cairo::cairo",
-                                                           "gdk-pixbuf::gdk-pixbuf", "glib::glib"]
+        if self.settings.os != "Windows":
+            self.cpp_info.components["unix-print"].set_property("pkg_config_name", "gtk+-unix-print-3.0")
+            self.cpp_info.components["unix-print"].includedirs.append(os.path.join("include", "gtk-3.0", "unix-print"))
+            self.cpp_info.components["unit-print"].requires = ["gtk-3", "at-spi2-core::at-spi2-core", "cairo::cairo",
+                                                               "gdk-pixbuf::gdk-pixbuf", "glib::glib"]
