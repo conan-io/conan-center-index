@@ -68,9 +68,16 @@ class M4Conan(ConanFile):
                 "-rtlib=compiler-rt",
                 "-Wno-unused-command-line-argument",
             ])
+        elif self.settings.compiler == "apple-clang" and Version(self.version) < "1.4.19":
+            # INFO: lib/obstack.c:351:31: error: incompatible function pointer types initializing 'void (*)(void) __attribute__((noreturn))'
+            tc.extra_cflags.append("-Wno-error=incompatible-function-pointer-types")
+        elif self.version == "1.4.19" and self.settings.compiler == "gcc" and Version(self.settings.compiler) >= "15":
+            # FIXME: https://savannah.gnu.org/support/?func=detailitem&item_id=111150
+            # WORKAROUND: https://lists.buildroot.org/pipermail/buildroot/2025-May/777741.html
+            tc.extra_cflags.append("-std=gnu17")
         if cross_building(self) and is_msvc(self):
             triplet_arch_windows = {"x86_64": "x86_64", "x86": "i686", "armv8": "aarch64"}
-            
+
             host_arch = triplet_arch_windows.get(str(self.settings.arch))
             build_arch = triplet_arch_windows.get(str(self._settings_build.arch))
 

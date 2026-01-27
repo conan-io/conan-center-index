@@ -35,7 +35,7 @@ class AutoconfConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("m4/1.4.19") # Needed at runtime by downstream clients as well
+        self.requires("m4/[>=1.4 <2]") # Needed at runtime by downstream clients as well
 
     def package_id(self):
         del self.info.settings.arch
@@ -44,7 +44,7 @@ class AutoconfConan(ConanFile):
         self.info.requires.clear()
 
     def build_requirements(self):
-        self.tool_requires("m4/1.4.19")
+        self.tool_requires("m4/<host_version>")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):

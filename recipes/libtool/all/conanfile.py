@@ -47,7 +47,7 @@ class LibtoolConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("automake/1.16.5")
-        self.tool_requires("m4/1.4.19")               # Needed by configure
+        self.tool_requires("m4/[>=1.4 <2]")               # Needed by configure
         self.tool_requires("gnu-config/cci.20210814")
         if self.settings_build.os == "Windows":
             self.win_bash = True
