@@ -96,6 +96,7 @@ class BoostConan(ConanFile):
         "bzip2": [True, False],
         "lzma": [True, False],
         "zstd": [True, False],
+        "ssl": [True, False],
         "segmented_stacks": [True, False],
         "debug_level": list(range(0, 14)),
         "pch": [True, False],
@@ -135,6 +136,7 @@ class BoostConan(ConanFile):
         "bzip2": True,
         "lzma": False,
         "zstd": False,
+        "ssl": False,
         "segmented_stacks": False,
         "debug_level": 0,
         "pch": True,
@@ -817,6 +819,12 @@ class BoostConan(ConanFile):
     def _with_stacktrace_backtrace(self):
         return not self.options.header_only and self.options.get_safe("with_stacktrace_backtrace", False)
 
+    @property
+    def _with_ssl(self):
+        # For now simplified to quickly test, needs proper integration in the dependency logic.
+        #return not self.options.header_only and self._with_dependency("ssl") and self.options.get_safe("ssl", False)
+        return not self.options.header_only and self.options.get_safe("ssl", False)
+
     def requirements(self):
         if self._with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
@@ -828,6 +836,8 @@ class BoostConan(ConanFile):
             self.requires("zstd/[>=1.5 <1.6]")
         if self._with_stacktrace_backtrace:
             self.requires("libbacktrace/cci.20210118", transitive_headers=True, transitive_libs=True)
+        if self._with_ssl:
+            self.requires("openssl/[>=1.1 <4]")
 
         if self._with_icu:
             self.requires("icu/74.2")
@@ -1553,6 +1563,13 @@ class BoostConan(ConanFile):
             contents += create_library_config("xz_utils", "lzma")
         if self._with_zstd:
             contents += create_library_config("zstd", "zstd")
+
+        if self._with_ssl:
+            contents += create_library_config("openssl", "openssl")
+        else:
+            # Unlike the other libraries, none of -sNO_SSL/-sNO_OPENSSL and other experiments didn't work.
+            # So by inducing an invalid path info, we prevent b2 to use a system installed openssl.
+            contents += "\nusing openssl : : <ssl-name>NOSUCHFILE ;"
 
         if not self.options.without_python:
             # https://www.boost.org/doc/libs/1_70_0/libs/python/doc/html/building/configuring_boost_build.html
