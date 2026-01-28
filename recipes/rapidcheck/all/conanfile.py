@@ -70,8 +70,7 @@ class RapidcheckConan(ConanFile):
             raise ConanInvalidConfiguration("The option `rapidcheck:enable_gmock` requires `gtest/*:build_gmock=True`")
 
     def build_requirements(self):
-        if Version(self.version) >= "cci.20231215":
-            self.tool_requires("cmake/[>=3.16 <4]")
+        self.tool_requires("cmake/[>=3.16]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -123,13 +122,8 @@ class RapidcheckConan(ConanFile):
 
         self.cpp_info.components["rapidcheck_rapidcheck"].set_property("cmake_target_name", "rapidcheck")
         self.cpp_info.components["rapidcheck_rapidcheck"].libs = ["rapidcheck"]
-        version = str(self.version)[4:]
-        if Version(version) < "20201218":
-            if self.options.enable_rtti:
-                self.cpp_info.components["rapidcheck_rapidcheck"].defines.append("RC_USE_RTTI")
-        else:
-            if not self.options.enable_rtti:
-                self.cpp_info.components["rapidcheck_rapidcheck"].defines.append("RC_DONT_USE_RTTI")
+        if not self.options.enable_rtti:
+            self.cpp_info.components["rapidcheck_rapidcheck"].defines.append("RC_DONT_USE_RTTI")
 
         if self.options.enable_catch:
             self.cpp_info.components["rapidcheck_catch"].set_property("cmake_target_name", "rapidcheck_catch")
