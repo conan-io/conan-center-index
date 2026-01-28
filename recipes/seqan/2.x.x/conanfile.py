@@ -44,7 +44,7 @@ class SeqanConan(ConanFile):
              keep_path=True)
         copy(self, "LICENSE",
              dst=os.path.join(self.package_folder, "licenses"),
-             src=os.path.join(self.source_folder, "share/doc/seqan/"))
+             src=os.path.join(self.source_folder, "share", "doc", "seqan"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
