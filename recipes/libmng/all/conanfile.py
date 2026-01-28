@@ -32,9 +32,9 @@ class LibmngConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
-        self.requires("libjpeg/9e", transitive_headers=True)
+        self.requires("libjpeg/9f", transitive_headers=True)
         if self.options.with_lcms:
-            self.requires("lcms/2.14", transitive_headers=True)
+            self.requires("lcms/[>=2.14 <3]", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -68,9 +68,9 @@ class LibmngConan(ConanFile):
 
     def build(self):
         cmake_lists = os.path.join(self.source_folder, "CMakeLists.txt")
-        replace_in_file(self, cmake_lists, "CMAKE_MINIMUM_REQUIRED(VERSION 2.6)", "CMAKE_MINIMUM_REQUIRED(VERSION 3.5)", strict=False)
-        replace_in_file(self, cmake_lists, "${JPEG_LIBRARY}", "${JPEG_LIBRARIES}", strict=False)
-        replace_in_file(self, cmake_lists, "${ZLIB_LIBRARY}", "${ZLIB_LIBRARIES}", strict=False)
+        replace_in_file(self, cmake_lists, "CMAKE_MINIMUM_REQUIRED(VERSION 2.6)", "CMAKE_MINIMUM_REQUIRED(VERSION 3.5)")
+        replace_in_file(self, cmake_lists, "${JPEG_LIBRARY}", "${JPEG_LIBRARIES}")
+        replace_in_file(self, cmake_lists, "${ZLIB_LIBRARY}", "${ZLIB_LIBRARIES}")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -85,22 +85,21 @@ class LibmngConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        # Set properties on the main cpp_info
         self.cpp_info.set_property("cmake_file_name", "mng")
         self.cpp_info.set_property("cmake_target_name", "MNG::MNG")
 
         if self.settings.os == "Windows" and self.options.shared:
             lib_name = "mng"
+            self.cpp_info.defines.append("MNG_USE_DLL")
+        elif self.settings.compiler == "msvc":
+            lib_name = "libmng"
         else:
-            lib_name = "libmng" if self.settings.compiler == "msvc" else "mng"
+            lib_name = "mng"
         self.cpp_info.libs = [lib_name]
         self.cpp_info.requires = ["zlib::zlib", "libjpeg::libjpeg"]
 
         if self.options.with_lcms:
             self.cpp_info.requires.append("lcms::lcms")
-
-        if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.defines.append("MNG_USE_DLL")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
