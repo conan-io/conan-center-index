@@ -40,7 +40,7 @@ class CasbinConan(ConanFile):
         tc.cache_variables["CASBIN_BUILD_TEST"] = False
         tc.cache_variables["CASBIN_BUILD_BENCHMARK"] = False
         tc.cache_variables["CASBIN_BUILD_PYTHON_BINDINGS"] = False
-        tc.cache_variables["CASBIN_INSTALL"] = False
+        tc.cache_variables["CASBIN_INSTALL"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -53,15 +53,12 @@ class CasbinConan(ConanFile):
         cmake.build()
 
     def package(self):
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        cmake = CMake(self)
+        cmake.install()
+
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
         # Upstream does not install these so we manually copy them
-        copy(self, "*.h", os.path.join(self.source_folder, "include"),
-             os.path.join(self.package_folder, "include"))
-        copy(self, "*.hpp", os.path.join(self.source_folder, "include"),
-             os.path.join(self.package_folder, "include"))
         lib_folder = os.path.join(self.package_folder, "lib")
         copy(self, "*.a", self.build_folder, lib_folder, keep_path=False)
         copy(self, "*.lib", self.build_folder, lib_folder, keep_path=False)
