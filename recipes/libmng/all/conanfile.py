@@ -84,12 +84,23 @@ class LibmngConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "mng")
         self.cpp_info.set_property("cmake_target_name", "MNG::MNG")
 
-        lib_name = "libmng" if self.settings.compiler == "msvc" else "mng"
+        if self.settings.os == "Windows" and self.options.shared:
+            lib_name = "mng"
+        else:
+            lib_name = "libmng" if self.settings.compiler == "msvc" else "mng"
         self.cpp_info.libs = [lib_name]
         self.cpp_info.requires = ["zlib::zlib", "libjpeg::libjpeg"]
 
         if self.options.with_lcms:
             self.cpp_info.requires.append("lcms::lcms")
+
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("MNG_USE_DLL")
+
+        if self.settings.os == "Linux":
+            lib64_dir = os.path.join(self.package_folder, "lib64")
+            if os.path.isdir(lib64_dir):
+                self.cpp_info.libdirs.append("lib64")
 
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
