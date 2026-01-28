@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import copy, get, rmdir, rm, replace_in_file
+from conan.tools.files import copy, get, rmdir, rm, replace_in_file, apply_conandata_patches, export_conandata_patches
 from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
@@ -40,6 +40,10 @@ class LibmngConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         # Remove the pre-existing config.h file to allow CMake to generate its own
         rm(self, "config.h", self.source_folder)
+        apply_conandata_patches(self)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -100,4 +104,3 @@ class LibmngConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
-
