@@ -56,6 +56,7 @@ class LibmngConan(ConanFile):
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["WITH_LCMS2"] = self.options.with_lcms
+        tc.variables["MNG_INSTALL_LIB_DIR"] = "lib"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -97,10 +98,6 @@ class LibmngConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("MNG_USE_DLL")
 
-        if self.settings.os == "Linux":
-            lib64_dir = os.path.join(self.package_folder, "lib64")
-            if os.path.isdir(lib64_dir):
-                self.cpp_info.libdirs.append("lib64")
-
-        if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+
