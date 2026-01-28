@@ -63,6 +63,7 @@ class LibmngConan(ConanFile):
 
     def build(self):
         cmake_lists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmake_lists, "CMAKE_MINIMUM_REQUIRED(VERSION 2.6)", "CMAKE_MINIMUM_REQUIRED(VERSION 3.5)", strict=False)
         replace_in_file(self, cmake_lists, "${JPEG_LIBRARY}", "${JPEG_LIBRARIES}", strict=False)
         replace_in_file(self, cmake_lists, "${ZLIB_LIBRARY}", "${ZLIB_LIBRARIES}", strict=False)
         cmake = CMake(self)
