@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, replace_in_file, rename
+from conan.tools.files import copy, get, rmdir, rename
 from conan.tools.scm import Version
 import os
 
@@ -44,18 +44,10 @@ class CasbinConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("nlohmann_json", "cmake_file_name", "json")
         deps.generate()
 
-    def _patch_sources(self):
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "cmake", "modules", "FindExtPackages.cmake"),
-            "find_package(json 3.10.1 REQUIRED)",
-            "find_package(nlohmann_json REQUIRED)"
-        )
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
