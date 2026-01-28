@@ -14,9 +14,9 @@ sources:
   3.4.4:
     url: "https://github.com/openssl/openssl/releases/download/openssl-3.4.4/openssl-3.4.4.tar.gz"
     sha256: 7bdf55ac20f2779e99e5eca306f824fad2b37dee5a06cc35ed5a8b85a6060010
-  3.3.5:
-    url: "https://github.com/openssl/openssl/releases/download/openssl-3.3.5/openssl-3.3.5.tar.gz"
-    sha256: 9d62c00a5a6903740c8703f0e006257f429d565d3b91ac1a9bd4a4c700002e01
+  3.3.6:
+    url: "https://github.com/openssl/openssl/releases/download/openssl-3.3.6/openssl-3.3.6.tar.gz"
+    sha256: 22db04f3c8f9a808c9795dcf7d2713ff40c12c410ea2d1f6435c6c9c8558958b
   3.2.6:
     url: "https://github.com/openssl/openssl/releases/download/openssl-3.2.6/openssl-3.2.6.tar.gz"
     sha256: 89681a9ddaa9ed7cf25ea8ef61338db805200bae47d00510490623547380c148
