@@ -65,15 +65,15 @@ class AtSpi2CoreConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
-
-    def _patch_sources(self):
+        # INFO: Use X11 only if explicitly enabled
         replace_in_file(self, os.path.join(self.source_folder, "bus", "meson.build"),
                                 "if x11_dep.found()",
                                 "if get_option('x11').enabled()")
+        # INFO: Disable building tests
         replace_in_file(self, os.path.join(self.source_folder, 'meson.build'),
             "subdir('tests')",
             "#subdir('tests')")
+        # INFO: Disable libxml2 dependency
         replace_in_file(self, os.path.join(self.source_folder, 'meson.build'),
             "libxml_dep = dependency('libxml-2.0', version: libxml_req_version)",
             "#libxml_dep = dependency('libxml-2.0', version: libxml_req_version)")
