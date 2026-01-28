@@ -3,11 +3,11 @@
 #include <libmng.h>
 
 // Callback functions required by libmng
-mng_ptr mng_malloc(mng_size_t size) {
-    return malloc(size);
+mng_ptr MNG_DECL mng_malloc(mng_size_t size) {
+    return calloc(1, size);
 }
 
-void mng_free(mng_ptr ptr, mng_size_t size) {
+void MNG_DECL mng_free(mng_ptr ptr, mng_size_t size) {
     free(ptr);
 }
 
