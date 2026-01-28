@@ -41,17 +41,9 @@ class OneTBBConan(ConanFile):
     }
 
     @property
-    def _has_tbbmalloc(self):
-        return Version(self.version) < "2021.5.0" or self.options.get_safe("tbbmalloc")
-
-    @property
-    def _has_tbbproxy(self):
-        return Version(self.version) < "2021.6.0" or self.options.get_safe("tbbproxy")
-
-    @property
     def _tbbbind_hwloc_version(self):
         # TBB expects different variables depending on the version
-        return "2_5" if Version(self.version) >= "2021.4.0" else "2_4"
+        return "2_5"
 
     @property
     def _tbbbind_supported(self):
@@ -80,19 +72,17 @@ class OneTBBConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if Version(self.version) < "2021.5.0":
-            del self.options.tbbmalloc
-        if Version(self.version) < "2021.6.0":
+        if self.settings.compiler == "msvc" and self.settings.arch == "armv8":
             del self.options.tbbproxy
         if not self._tbbbind_supported:
             del self.options.tbbbind
-        if Version(self.version) < "2021.6.0" or self.settings.os == "Android":
+        if self.settings.os == "Android":
             del self.options.interprocedural_optimization
         if not self._tbb_apple_frameworks_supported:
             del self.options.build_apple_frameworks
 
     def configure(self):
-        if Version(self.version) >= "2021.6.0" and not self.options.tbbmalloc:
+        if not self.options.tbbmalloc:
             self.options.rm_safe("tbbproxy")
 
     def layout(self):
@@ -125,12 +115,11 @@ class OneTBBConan(ConanFile):
         toolchain = CMakeToolchain(self)
         toolchain.variables["TBB_TEST"] = False
         toolchain.variables["TBB_STRICT"] = False
-        if Version(self.version) >= "2021.5.0":
-            toolchain.variables["TBBMALLOC_BUILD"] = self.options.tbbmalloc
+        toolchain.variables["TBBMALLOC_BUILD"] = self.options.tbbmalloc
         if self.options.get_safe("interprocedural_optimization") is not None:
             toolchain.variables["TBB_ENABLE_IPO"] = self.options.interprocedural_optimization
-        if Version(self.version) >= "2021.6.0" and self.options.get_safe("tbbmalloc"):
-            toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.tbbproxy
+        if self.options.get_safe("tbbmalloc"):
+            toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.get_safe("tbbproxy")
         toolchain.variables["TBB_DISABLE_HWLOC_AUTOMATIC_SEARCH"] = not self._tbbbind_build
         if self._tbbbind_explicit_hwloc:
             hwloc_package_folder = self.dependencies["hwloc"].package_folder
@@ -208,7 +197,7 @@ class OneTBBConan(ConanFile):
             tbb.system_libs = ["m", "dl", "rt", "pthread"]
 
         # tbbmalloc
-        if self._has_tbbmalloc:
+        if self.options.get_safe("tbbmalloc"):
             tbbmalloc = self.cpp_info.components["tbbmalloc"]
 
             tbbmalloc.set_property("cmake_target_name", "TBB::tbbmalloc")
@@ -223,7 +212,7 @@ class OneTBBConan(ConanFile):
                 tbbmalloc.system_libs = ["dl", "pthread"]
 
             # tbbmalloc_proxy
-            if self._has_tbbproxy:
+            if self.options.get_safe("tbbproxy"):
                 tbbproxy = self.cpp_info.components["tbbmalloc_proxy"]
 
                 tbbproxy.set_property("cmake_target_name", "TBB::tbbmalloc_proxy")
