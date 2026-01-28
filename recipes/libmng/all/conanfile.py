@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import copy, get, rmdir, rm
+from conan.tools.files import copy, get, rmdir, rm, replace_in_file
 from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
@@ -62,6 +62,9 @@ class LibmngConan(ConanFile):
         deps.generate()
 
     def build(self):
+        cmake_lists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmake_lists, "${JPEG_LIBRARY}", "${JPEG_LIBRARIES}", strict=False)
+        replace_in_file(self, cmake_lists, "${ZLIB_LIBRARY}", "${ZLIB_LIBRARIES}", strict=False)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
