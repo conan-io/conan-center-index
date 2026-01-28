@@ -6,6 +6,7 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 
 
@@ -91,6 +92,11 @@ class AtSpi2CoreConan(ConanFile):
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
+
+    def validate(self):
+        if self.options.shared and not self.dependencies["glib"].options.shared:
+            raise ConanInvalidConfiguration('Linking a shared library against static glib can cause unexpected behaviour.'
+                                            ' Use -o "*/*:shared=True" to build all shared libraries.')
 
     def build(self):
         meson = Meson(self)
