@@ -1,9 +1,7 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, rename
-from conan.tools.scm import Version
+from conan.tools.files import copy, get
 import os
 
 required_conan_version = ">=2.4.0"
@@ -17,7 +15,14 @@ class CasbinConan(ConanFile):
     topics = ("authorization", "access-control", "acl", "rbac", "abac", "permission")
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+      "fPIC": [True, False],
+    }
+    default_options = {
+      "fPIC": True
+    }
     languages = "C++"
+    implements = ["auto_shared_fpic"]
 
     @property
     def _min_cppstd(self):
@@ -63,14 +68,11 @@ class CasbinConan(ConanFile):
         copy(self, "*.a", self.build_folder, lib_folder, keep_path=False)
         copy(self, "*.lib", self.build_folder, lib_folder, keep_path=False)
 
-        # Prepend lib prefix
-        if self.settings.os != "Windows":
-            casbin_lib = os.path.join(lib_folder, "casbin.a")
-            if os.path.exists(casbin_lib):
-                rename(self, casbin_lib, os.path.join(lib_folder, "libcasbin.a"))
-
     def package_info(self):
-        self.cpp_info.libs = ["casbin"]
+        if self.settings.os == "Windows":
+            self.cpp_info.libs = ["casbin"]
+        else:
+            self.cpp_info.libs = ["casbin.a"]
         self.cpp_info.set_property("cmake_file_name", "casbin")
         self.cpp_info.set_property("cmake_target_name", "casbin::casbin")
         self.cpp_info.requires = ["nlohmann_json::nlohmann_json"]
