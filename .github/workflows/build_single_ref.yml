@@ -116,6 +116,7 @@ jobs:
       SHARED: ${{ matrix.shared }}
       BUILD_TYPE: ${{ matrix.build_type }}
       CLI_ARGS: -sbuild_type=${{ matrix.build_type }} ${{ matrix.shared }}
+      REQ: ${{ inputs.package == 'msys2' && '-s:b arch=x86_64 --tool-require' || '--require' }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -152,7 +153,7 @@ jobs:
             then
               continue
             fi
-            conan graph info $ARG --require=${{ env.REF }} --build=missing --build=${{ env.REF }} ${{ env.CLI_ARGS }} --format=json > graph.json
+            conan graph info $ARG ${{ env.REQ }}=${{ env.REF }} --build=missing --build=${{ env.REF }} ${{ env.CLI_ARGS }} --format=json > graph.json
             if jq -e 'any(.graph.nodes[]; .binary == "Invalid")' graph.json
             then
               continue
@@ -192,7 +193,7 @@ jobs:
           done
           wait
 
-      - run: conan install --require=${{ env.REF }} --build=missing --build=${{ env.REF }} ${{ env.CLI_ARGS }}
+      - run: conan install ${{ env.REQ }}=${{ env.REF }} --build=missing --build=${{ env.REF }} ${{ env.CLI_ARGS }}
         name: Conan Install
         if: ${{ steps.conan_install.outputs.CODE != 6 }}
 
