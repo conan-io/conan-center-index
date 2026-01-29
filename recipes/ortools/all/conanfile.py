@@ -39,7 +39,7 @@ class PackageConan(ConanFile):
         self.requires("bzip2/1.0.8")
         self.requires("coin-clp/[>=1.17.7 <=1.17.10]") # source is 1.17.10
         self.requires("coin-osi/[>=0.108.7 <=0.108.11]") # source is 0.108.11
-        self.requires("coin-utils/[>=2.11.09 <=2.11.12]") # source is 2.11.12
+        self.requires("coin-utils/[>=2.11.10 <=2.11.12]", override=True) # source is 2.11.12
         self.requires("coin-cbc/[>=2.10.5 <=2.10.12]") # source is 2.10.12
         self.requires("eigen/3.4.0")
         self.requires("highs/1.12.0")
@@ -59,6 +59,7 @@ class PackageConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
+        self.tool_requires("protobuf/6.32.1") # source is 33.1
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
