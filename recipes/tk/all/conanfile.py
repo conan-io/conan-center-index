@@ -58,7 +58,7 @@ class TkConan(ConanFile):
             f"tcl/{self.version}", transitive_headers=True, transitive_libs=True
         )
         if self.settings.os == "Linux":
-            self.requires("fontconfig/2.13.93")
+            self.requires("fontconfig/[>=2.13.93 <3]")
             self.requires("xorg/system")
 
     @property
@@ -293,11 +293,7 @@ class TkConan(ConanFile):
             "lib",
             f"{self.name}{tk_version.major}.{tk_version.minor}",
         ).replace("\\", "/")
-        self.output.info(f"Setting TK_LIBRARY environment variable: {tk_library}")
-        self.env_info.TK_LIBRARY = tk_library
         self.runenv_info.define("TK_LIBRARY", tk_library)
 
         tk_root = self.package_folder.replace("\\", "/")
-        self.output.info(f"Setting TK_ROOT environment variable: {tk_root}")
-        self.env_info.TK_ROOT = tk_root
         self.runenv_info.define("TK_ROOT", tk_root)

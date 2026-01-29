@@ -5,7 +5,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.1"
 
 
 class LibCheckConan(ConanFile):
@@ -47,17 +47,17 @@ class LibCheckConan(ConanFile):
 
     def requirements(self):
         if self.options.with_subunit:
-            self.requires("subunit/1.4.0", transitive_headers=True, transitive_libs=True)
+            self.requires("subunit/1.4.4", transitive_headers=True, transitive_libs=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CHECK_ENABLE_TESTS"] = False
-        tc.variables["ENABLE_MEMORY_LEAKING_TESTS"] = False
-        tc.variables["CHECK_ENABLE_TIMEOUT_TESTS"] = False
-        tc.variables["HAVE_SUBUNIT"] = self.options.with_subunit
+        tc.cache_variables["CHECK_ENABLE_TESTS"] = False
+        tc.cache_variables["ENABLE_MEMORY_LEAKING_TESTS"] = False
+        tc.cache_variables["CHECK_ENABLE_TIMEOUT_TESTS"] = False
+        tc.cache_variables["HAVE_SUBUNIT"] = self.options.with_subunit
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -91,7 +91,6 @@ class LibCheckConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", f"Check::{target}")
         self.cpp_info.set_property("pkg_config_name", "check")
 
-        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         libsuffix = "Dynamic" if is_msvc(self) and self.options.shared else ""
         self.cpp_info.components["liblibcheck"].libs = [f"check{libsuffix}"]
         if self.options.with_subunit:
@@ -100,15 +99,5 @@ class LibCheckConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["liblibcheck"].system_libs = ["m", "pthread", "rt"]
 
-        # TODO: to remove in conan v2
-        bin_path = os.path.join(self.package_folder, "bin")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "check"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "check"
-        self.cpp_info.names["cmake_find_package"] = "Check"
-        self.cpp_info.names["cmake_find_package_multi"] = "Check"
-        self.cpp_info.components["liblibcheck"].names["cmake_find_package"] = target
-        self.cpp_info.components["liblibcheck"].names["cmake_find_package_multi"] = target
         self.cpp_info.components["liblibcheck"].set_property("cmake_target_name", f"Check::{target}")
         self.cpp_info.components["liblibcheck"].set_property("pkg_config_name", "check")
