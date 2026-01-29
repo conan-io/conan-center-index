@@ -57,7 +57,7 @@ class CoinOsiConan(ConanFile):
         self.tool_requires("gnu-config/cci.20210814")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.0.3")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -83,7 +83,7 @@ class CoinOsiConan(ConanFile):
             env.define("CXX", "cl -nologo")
             env.define("LD", "link -nologo")
             env.define("AR", "lib -nologo")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             # TODO: Something to fix in conan client or pkgconf recipe?
             # This is a weird workaround when build machine is Windows. Here we have to inject regular
             # Windows path to pc files folder instead of unix path flavor injected by AutotoolsToolchain...
