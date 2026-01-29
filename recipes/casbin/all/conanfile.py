@@ -24,10 +24,6 @@ class CasbinConan(ConanFile):
     languages = "C++"
     implements = ["auto_shared_fpic"]
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
