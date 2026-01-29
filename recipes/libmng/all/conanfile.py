@@ -5,7 +5,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import copy, get, rmdir, rm, replace_in_file, apply_conandata_patches, export_conandata_patches
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.21"
 
 class LibmngConan(ConanFile):
     name = "libmng"
@@ -35,6 +35,9 @@ class LibmngConan(ConanFile):
         self.requires("libjpeg/9f", transitive_headers=True)
         if self.options.with_lcms:
             self.requires("lcms/[>=2.14 <3]", transitive_headers=True)
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.5]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
