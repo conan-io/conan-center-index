@@ -1,12 +1,12 @@
-From 5debae4165266c2efd7ddb40db9441051ce46cad Mon Sep 17 00:00:00 2001
+From fca74c5a20cc75092ec4d0add527180e7d27b83a Mon Sep 17 00:00:00 2001
 From: Gregor Jasny <gjasny@googlemail.com>
 Date: Fri, 23 Jan 2026 19:27:56 +0100
 Subject: [PATCH] add-missing-header-cci.20260120
 
 ---
  include/rapidcheck/Gen.hpp | 1 +
- include/rapidcheck/Maybe.h | 4 +++-
- 2 files changed, 4 insertions(+), 1 deletion(-)
+ include/rapidcheck/Maybe.h | 1 +
+ 2 files changed, 2 insertions(+)
 
 diff --git a/include/rapidcheck/Gen.hpp b/include/rapidcheck/Gen.hpp
 index 0c48004..e226545 100644
@@ -21,19 +21,15 @@ index 0c48004..e226545 100644
  #include "rapidcheck/detail/Any.h"
  #include "rapidcheck/detail/ImplicitParam.h"
 diff --git a/include/rapidcheck/Maybe.h b/include/rapidcheck/Maybe.h
-index 398ac54..6aab179 100644
+index 398ac54..0f06ca1 100644
 --- a/include/rapidcheck/Maybe.h
 +++ b/include/rapidcheck/Maybe.h
-@@ -1,7 +1,9 @@
+@@ -1,5 +1,6 @@
  #pragma once
  
--#include <type_traits>
 +#include <cstdint>
+ #include <type_traits>
  #include <iostream>
-+#include <type_traits>
-+#include <utility>
- 
- #include "rapidcheck/Nothing.h"
  
 -- 
 2.52.0
