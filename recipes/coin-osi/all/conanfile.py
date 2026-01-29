@@ -2,14 +2,13 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, msvc_runtime_flag
 import os
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2"
 
 
 class CoinOsiConan(ConanFile):
@@ -30,19 +29,15 @@ class CoinOsiConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def layout(self):
@@ -52,10 +47,10 @@ class CoinOsiConan(ConanFile):
         self.requires("coin-utils/2.11.12")
 
     def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
+        if self.settings.os == "Windows" and self.options.get_safe("shared"):
             raise ConanInvalidConfiguration("coin-osi does not support shared builds on Windows")
         # FIXME: This issue likely comes from very old autotools versions used to produce configure.
-        if hasattr(self, "settings_build") and cross_building(self) and self.options.shared:
+        if cross_building(self) and self.options.get_safe("shared"):
             raise ConanInvalidConfiguration("coin-osi shared not supported yet when cross-building")
 
     def build_requirements(self):
@@ -71,9 +66,6 @@ class CoinOsiConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
             "--without-blas",
