@@ -1,6 +1,13 @@
---- src/Wt/Dbo/backend/CMakeLists.txt	2025-07-23 14:46:08.000000000 +0200
-+++ src.new/Wt/Dbo/backend/CMakeLists.txt	2025-10-09 18:04:12.405062968 +0200
-@@ -132,7 +132,7 @@
+diff --git a/src/Wt/Dbo/backend/CMakeLists.txt b/src/Wt/Dbo/backend/CMakeLists.txt
+index 29a72c3..8efdd2b 100644
+--- a/src/Wt/Dbo/backend/CMakeLists.txt
++++ b/src/Wt/Dbo/backend/CMakeLists.txt
+@@ -128,11 +128,12 @@ IF(ENABLE_POSTGRES AND POSTGRES_FOUND)
+     SET_PROPERTY(TARGET wtdbopostgres PROPERTY VISIBILITY_INLINES_HIDDEN YES)
+   endif()
+ 
++  find_package(PostgreSQL REQUIRED CONFIG)
+   TARGET_LINK_LIBRARIES(wtdbopostgres
      PUBLIC
        wtdbo
      PRIVATE
@@ -9,7 +16,12 @@
    )
  
    IF(TARGET Boost::headers)
-@@ -312,7 +312,7 @@
+@@ -308,11 +309,12 @@ IF(ENABLE_MYSQL AND MYSQL_FOUND)
+     SET_PROPERTY(TARGET wtdbomysql PROPERTY VISIBILITY_INLINES_HIDDEN YES)
+   endif()
+ 
++  find_package(libmysqlclient CONFIG REQUIRED)
+   TARGET_LINK_LIBRARIES(wtdbomysql
      PUBLIC
        wtdbo
      PRIVATE
