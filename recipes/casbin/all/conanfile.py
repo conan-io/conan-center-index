@@ -73,7 +73,6 @@ class CasbinConan(ConanFile):
             self.cpp_info.libs = ["casbin.a"]
         self.cpp_info.set_property("cmake_file_name", "casbin")
         self.cpp_info.set_property("cmake_target_name", "casbin::casbin")
-        self.cpp_info.requires = ["nlohmann_json::nlohmann_json"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
