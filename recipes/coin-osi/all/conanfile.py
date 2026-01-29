@@ -35,7 +35,6 @@ class CoinOsiConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
-            self.options.rm_safe("shared")
             self.package_type = "static-library"
 
     def configure(self):
