@@ -35,6 +35,8 @@ class CoinOsiConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
+            self.options.rm_safe("shared")
+            self.package_type = "static-library"
 
     def configure(self):
         if self.options.get_safe("shared"):
@@ -47,8 +49,6 @@ class CoinOsiConan(ConanFile):
         self.requires("coin-utils/2.11.12")
 
     def validate(self):
-        if self.settings.os == "Windows" and self.options.get_safe("shared"):
-            raise ConanInvalidConfiguration("coin-osi does not support shared builds on Windows")
         # FIXME: This issue likely comes from very old autotools versions used to produce configure.
         if cross_building(self) and self.options.get_safe("shared"):
             raise ConanInvalidConfiguration("coin-osi shared not supported yet when cross-building")
