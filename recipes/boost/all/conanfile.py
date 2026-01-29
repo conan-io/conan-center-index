@@ -1010,8 +1010,8 @@ class BoostConan(ConanFile):
             libdir = os.path.join(os.path.dirname(libdest), "libs")
 
         candidates = [ldlibrary, library]
-        library_prefixes = [""] if is_msvc(self) else ["", "lib"]
-        library_suffixes = [".lib"] if is_msvc(self) else [".so", ".dll.a", ".a"]
+        library_prefixes = [""] if is_msvc(self) or self._is_clang_cl else ["", "lib"]
+        library_suffixes = [".lib"] if is_msvc(self) or self._is_clang_cl else [".so", ".dll.a", ".a"]
         if with_dyld:
             library_suffixes.insert(0, ".dylib")
 
