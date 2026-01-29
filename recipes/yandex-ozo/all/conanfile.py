@@ -41,7 +41,7 @@ class YandexOzoConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.79.0")
         self.requires("resource_pool/cci.20210322")
-        self.requires("libpq/15.4")
+        self.requires("libpq/[>=15.4 <18]")
 
     def package_id(self):
         self.info.clear()
@@ -91,10 +91,3 @@ class YandexOzoConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "ozo")
         self.cpp_info.set_property("cmake_target_name", "yandex::ozo")
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "ozo"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "ozo"
-        self.cpp_info.names["cmake_find_package"] = "yandex"
-        self.cpp_info.names["cmake_find_package_multi"] = "yandex"
-        main_comp.names["cmake_find_package"] = "ozo"
-        main_comp.names["cmake_find_package_multi"] = "ozo"

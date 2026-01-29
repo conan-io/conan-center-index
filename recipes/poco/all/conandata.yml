@@ -2,17 +2,7 @@ sources:
   "1.14.2":
     url: "https://github.com/pocoproject/poco/archive/poco-1.14.2-release.tar.gz"
     sha256: "47394ea7ddb7b0a40e1a5be896f8f5dc77cfdc4f561d2e7131ecf582df5a0c3a"
-  "1.13.3":
-    url: "https://github.com/pocoproject/poco/archive/poco-1.13.3-release.tar.gz"
-    sha256: "9f074d230daf30f550c5bde5528037bdab6aa83b2a06c81a25e89dd3bcb7e419"
 patches:
   "1.14.2":
     - patch_file: patches/1.14.0-0002-mysql-include.patch
     - patch_file: patches/1.14.2-0001-zlib-handling.patch
-  "1.13.3":
-    - patch_file: patches/1.13.0-0002-mysql-include.patch
-      patch_description: "include mysql.h instead of mysql/mysql.h"
-      patch_type: "portability"
-    - patch_file: patches/1.13.0-0003-pocomsg-resource.patch
-      patch_description: "include pocomsg.rc in dll"
-      patch_type: "portability"
