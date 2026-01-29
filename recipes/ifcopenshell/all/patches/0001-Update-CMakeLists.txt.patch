@@ -1,0 +1,122 @@
+--- a/cmake/CMakeLists.txt
++++ b/cmake/CMakeLists.txt
+@@ -54,9 +54,6 @@ if(NOT CMAKE_BUILD_TYPE)
+     set(CMAKE_BUILD_TYPE "Release")
+ endif()
+ 
+-# Include utility macros and functions
+-include(utilities.cmake)
+-
+ # use extra version to make pre-release using eg semver
+ if(NOT DEFINED EXTRA_VERSION)
+     set(EXTRA_VERSION "-alpha.3")
+@@ -198,22 +195,6 @@ if(BUILD_SHARED_LIBS)
+     endif()
+ endif()
+ 
+-UNIFY_ENVVARS_AND_CACHE(BOOST_ROOT)
+-
+-if(NOT MINIMAL_BUILD)
+-    UNIFY_ENVVARS_AND_CACHE(PYTHON_INCLUDE_DIR)
+-    UNIFY_ENVVARS_AND_CACHE(PYTHON_LIBRARY)
+-    UNIFY_ENVVARS_AND_CACHE(PYTHON_EXECUTABLE)
+-endif()
+-
+-# Get a list of all OPTION flags from the CMakeLists.txt
+-get_all_option_flags(option_flags)
+-
+-# Loop through the list of OPTION flags and convert the corresponding environment variables
+-foreach(option_flag IN LISTS option_flags)
+-    convert_env_var_to_bool("${option_flag}")
+-endforeach()
+-
+ if(BUILD_IFCGEOM AND WITH_OPENCASCADE)
+     find_package(OpenCASCADE REQUIRED)
+     add_definitions(-DIFOPSH_WITH_OPENCASCADE)
+@@ -335,7 +316,7 @@ endif()
+ # Otherwise it will find components needed for CGAL and we might some libraries.
+ if(WITH_CGAL)
+     find_package(CGAL REQUIRED)
+-    set(CGAL_LIBRARIES IFCOPENSHELL_CGAL)
++    set(CGAL_LIBRARIES CGAL::CGAL)
+     list(APPEND GEOMETRY_KERNELS cgal)
+ endif()
+ 
+@@ -681,18 +662,6 @@ if(BUILD_QTVIEWER)
+     add_subdirectory(../src/qtviewer qtviewer)
+ endif()
+ 
+-# Cmake uninstall target
+-if(NOT TARGET uninstall)
+-    configure_file(
+-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+-        "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+-        IMMEDIATE
+-        @ONLY
+-    )
+-
+-    add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+-endif()
+-
+ # Packaging
+ list(APPEND CPACK_SOURCE_IGNORE_FILES "/\\\\.git" "/build/" "/.pytest_cache/" "/__pycache__/")
+ set(CPACK_SOURCE_INSTALLED_DIRECTORIES "${CMAKE_SOURCE_DIR}/..;/")
+@@ -735,7 +704,3 @@ set(CPACK_DEBIAN_PACKAGE_VERSION
+ )
+ set(CPACK_DEBIAN_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}")
+ # set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_SOURCE_DIR}/cmake/debian/postinst")
+-
+-include(CPack)
+-
+-include(package_export.cmake)
+diff --git a/src/ifcconvert/CMakeLists.txt b/src/ifcconvert/CMakeLists.txt
+index a5e16180c..81667f7e2 100644
+--- a/src/ifcconvert/CMakeLists.txt
++++ b/src/ifcconvert/CMakeLists.txt
+@@ -15,7 +15,7 @@ target_link_libraries(
+         IfcGeom
+         IfcParse
+         Serializers
+-        ${OpenCASCADE_LIBRARIES}
++        ${kernel_libraries}
+         ${Boost_LIBRARIES}
+         ${HDF5_LIBRARIES}
+         ${USD_LIBRARIES}
+diff --git a/src/ifcgeom/kernels/CMakeLists.txt b/src/ifcgeom/kernels/CMakeLists.txt
+index fa9656b78..d40612dce 100644
+--- a/src/ifcgeom/kernels/CMakeLists.txt
++++ b/src/ifcgeom/kernels/CMakeLists.txt
+@@ -23,7 +23,7 @@ foreach(kernel ${GEOMETRY_KERNELS})
+ 
+     if(${kernel} STREQUAL "cgal")
+         find_package(CGAL REQUIRED)
+-        target_link_libraries(${KERNEL_TARGET} IFCOPENSHELL_CGAL)
++        target_link_libraries(${KERNEL_TARGET} CGAL::CGAL)
+         set_property(TARGET ${KERNEL_TARGET} APPEND_STRING PROPERTY COMPILE_FLAGS " -DCGAL_HAS_THREADS")
+ 
+         set(KERNEL_TARGET_SIMPLE "${KERNEL_TARGET}_simple")
+@@ -34,7 +34,7 @@ foreach(kernel ${GEOMETRY_KERNELS})
+         )
+         list(APPEND kernel_libraries ${KERNEL_TARGET_SIMPLE})
+         target_link_libraries(${KERNEL_TARGET_SIMPLE} ${${KERNEL_UPPER}_LIBRARIES} Eigen3::Eigen)
+-        target_link_libraries(${KERNEL_TARGET_SIMPLE} IFCOPENSHELL_CGAL)
++        target_link_libraries(${KERNEL_TARGET_SIMPLE} CGAL::CGAL)
+         install(TARGETS ${KERNEL_TARGET_SIMPLE} EXPORT ${IFCOPENSHELL_EXPORT_TARGETS})
+     elseif(${kernel} STREQUAL "opencascade")
+         target_link_libraries(${KERNEL_TARGET} ${OpenCASCADE_LIBRARIES})
+diff --git a/src/svgfill/CMakeLists.txt b/src/svgfill/CMakeLists.txt
+index f2f8c1a06..9f2111d2b 100644
+--- a/src/svgfill/CMakeLists.txt
++++ b/src/svgfill/CMakeLists.txt
+@@ -42,7 +42,7 @@ file(GLOB LIB_H_FILES src/*.h)
+ file(GLOB LIB_CPP_FILES src/svgfill.cpp src/arrange_polygons.cpp)
+ set(LIB_SRC_FILES ${LIB_H_FILES} ${LIB_CPP_FILES})
+ add_library(svgfill ${LIB_SRC_FILES})
+-target_link_libraries(svgfill ${Boost_LIBRARIES} ${BCRYPT_LIBRARIES} LibXml2::LibXml2 IFCOPENSHELL_CGAL)
++target_link_libraries(svgfill ${Boost_LIBRARIES} ${BCRYPT_LIBRARIES} LibXml2::LibXml2 CGAL::CGAL)
+ set_target_properties(svgfill PROPERTIES PUBLIC_HEADER "${LIB_H_FILES}")
+ 
+ add_executable(svgfill_exe src/main.cpp)
+-- 
+2.43.0
+
