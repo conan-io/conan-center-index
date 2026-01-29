@@ -1,10 +1,10 @@
 sources:
   "cci.20210814":
-    url: "http://git.savannah.gnu.org/cgit/config.git/snapshot/config-191bcb948f7191c36eefe634336f5fc5c0c4c2be.tar.gz"
-    sha256: "302e5e7f3c4996976c58efde8b2f28f71d51357e784330eeed738e129300dc33"
+    url: "https://https.git.savannah.gnu.org/git/config.git"
+    commit: "191bcb948f7191c36eefe634336f5fc5c0c4c2be"
   "cci.20201022":
-    url: "http://git.savannah.gnu.org/cgit/config.git/snapshot/config-1c4398015583eb77bc043234f5734be055e64bea.tar.gz"
-    sha256: "339eb64757bf5af9e23ca15daa136acdd9d778753377190ce17fba7e1b222aff"
+    url: "https://https.git.savannah.gnu.org/git/config.git"
+    commit: "1c4398015583eb77bc043234f5734be055e64bea"
 patches:
   "cci.20210814":
     - patch_file: "patches/cci.20210814-0001-tvos-support.patch"
