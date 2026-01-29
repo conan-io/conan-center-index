@@ -1,4 +1,4 @@
-version: 29.0
+version: 30.0
 #----------------------------------------------------------------------------
 components:
   - algo
@@ -73,12 +73,12 @@ libraries:
             ]
   dbapi:    ["sdbapi",
              "dbapi_util_blobstore",
-             "ncbi_xdbapi_ftds","ncbi_xdbapi_ftds14","ncbi_xdbapi_ftds100",
+             "ncbi_xdbapi_ftds","ncbi_xdbapi_ftds14",
              "ncbi_dbapi",
                 "dbapi",
              "ncbi_dbapi_driver",
                 "dbapi_driver",
-             "ct_ftds14", "tds_ftds14","ct_ftds100", "tds_ftds100"
+             "ct_ftds14", "tds_ftds14"
             ]
   eutils:   ["eutils_client",
              "ncbi_eutils",
@@ -193,17 +193,18 @@ requirements:
   blast_sra_input: ["VDB"]
   dbsnp_ptis:   ["GRPC"]
   grpc_integration: ["GRPC"]
-  psg_protobuf: ["GRPC"]
+  psg_cache:    ["LMDB"]
   psg_cassandra: ["CASSANDRA"]
+  psg_myncbi:   ["CURL"]
+  psg_protobuf: ["GRPC"]
   seqdb:        ["LMDB"]
   sqlitewrapp:  ["SQLITE3"]
   sraread:      ["VDB"]
-  tds_ftds100:  ["Iconv"]
   tds_ftds14:   ["Iconv"]
   vdb2blast:    ["VDB"]
   writedb:      ["LMDB"]
   xcompress:    ["Z", "BZ2", "LZO", "ZSTD"]
-  xregexp:      ["PCRE", "PCRE2"]
+  xregexp:      ["PCRE2"]
   ximage:       ["Z", "JPEG", "PNG", "GIF", "TIFF"]
   xmlwrapp:     ["XML", "XSLT"]
   xncbi:        ["BACKWARD", "UNWIND"]

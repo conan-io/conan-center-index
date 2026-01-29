@@ -1,4 +1,4 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
 from conan.tools.files import get, copy, replace_in_file, rmdir
@@ -29,14 +29,16 @@ class NcbiCxxToolkit(ConanFile):
         "fPIC":       [True, False],
         "with_targets":  ["ANY"],
         "with_components": ["ANY"],
-        "without_req": ["ANY"]
+        "without_req": ["ANY"],
+        "with_composite": [True, False]
     }
     default_options = {
         "shared":     False,
         "fPIC":       True,
         "with_targets":   "",
         "with_components": "",
-	"without_req": ""
+	"without_req": "",
+        "with_composite": False
     }
     short_paths = True
     _dependencies = None
@@ -47,15 +49,10 @@ class NcbiCxxToolkit(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "clang": "7",
-            "apple-clang": "10",
-        }
+        if self._version_less(29):
+            return 17
+        else:
+            return 20
 
     @property
     def _dependencies_folder(self):
@@ -63,11 +60,11 @@ class NcbiCxxToolkit(ConanFile):
 
     @property
     def _dependencies_filename(self):
-        return f"dependencies-{Version(self.version).major}.{Version(self.version).minor}.yml"
+        return f"dependencies-{Version(self.version).major}.0.yml"
 
     @property
     def _requirements_filename(self):
-        return f"requirements-{Version(self.version).major}.{Version(self.version).minor}.yml"
+        return f"requirements-{Version(self.version).major}.0.yml"
 
     @property
     def _tk_dependencies(self):
@@ -98,8 +95,6 @@ class NcbiCxxToolkit(ConanFile):
             key = "Boost"
         _disabled_req = self._parse_option(self.options.without_req)
         if key in _disabled_req:
-            return None
-        if key == "BerkeleyDB" and conan_version.major > "1":
             return None
         if key in self._tk_requirements["disabled"].keys():
             if self.settings.os in self._tk_requirements["disabled"][key]:
@@ -188,11 +183,15 @@ class NcbiCxxToolkit(ConanFile):
                 if lib in self._tk_dependencies["requirements"].keys():
                     requirements.update(self._tk_dependencies["requirements"][lib])
 
+        _reqs = set()
         for req in requirements:
             pkgs = self._translate_req(req)
             if pkgs != None:
                 for pkg in pkgs:
-                    self.requires(pkg)
+                    _reqs.add(pkg)
+
+        for pkg in _reqs:
+            self.requires(pkg, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -205,10 +204,6 @@ class NcbiCxxToolkit(ConanFile):
                 raise ConanInvalidConfiguration("This configuration is not supported")
             if self._version_less(29) and int(str(self.settings.compiler.version)) > 193:
                 raise ConanInvalidConfiguration("This configuration is not supported")
-        else:
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"This version of {self.settings.compiler} is not supported")
         if cross_building(self):
             raise ConanInvalidConfiguration("Cross compilation is not supported")
 
@@ -218,7 +213,7 @@ class NcbiCxxToolkit(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["NCBI_PTBCFG_PACKAGING"] = True
-        if self.options.shared:
+        if self.options.with_composite:
             tc.variables["NCBI_PTBCFG_ALLOW_COMPOSITE"] = True
         tc.variables["NCBI_PTBCFG_PROJECT_LIST"] = "-app/netcache"
         if len(self._targets) > 0:

@@ -166,7 +166,7 @@ libraries:
                 "id2_split","writedb","seqdb","seqmasks_io","seqsplit","snputil","uudutil",
                 "valerr","valid","variation_utils","xformat","xalnmgr","xcleanup", "xhugeasn",
                 "xobjedit","xobjreadex","xobjwrite","xobjread","xlogging","xobjimport",
-                "xobjmanip","xunittestutil","xobjutil","xobjmgr",
+                "xobjmanip","xunittestutil","xobjutil","xobjmgr"
             ]
   sqlitewrapp:  ["sqlitewrapp"]
   sraread:  ["sraread"]
