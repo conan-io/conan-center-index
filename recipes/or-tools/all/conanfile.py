@@ -55,7 +55,7 @@ class PackageConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
-        self.tool_requires("protobuf/6.32.1") # source is 33.1
+        self.tool_requires("protobuf/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
