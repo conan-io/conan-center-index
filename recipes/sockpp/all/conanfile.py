@@ -3,10 +3,8 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get, rmdir
-import os
 
 required_conan_version = ">=2.4"
-
 
 class SockppConan(ConanFile):
     name = "sockpp"
