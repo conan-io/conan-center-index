@@ -29,16 +29,6 @@ class SockppConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
-            self.options.rm_safe("with_can")
-            self.default_options["with_unix_sockets"] = False
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         cmake_layout(self)
 
