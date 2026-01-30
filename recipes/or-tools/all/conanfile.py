@@ -59,6 +59,9 @@ class PackageConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # INFO: Let Conan manage the C++ standard based on self.settings.compiler.cppstd
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD", "#set(CMAKE_CXX_STANDARD")
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "dependencies", "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD", "#set(CMAKE_CXX_STANDARD")
 
     def generate(self):
         tc = CMakeToolchain(self)
