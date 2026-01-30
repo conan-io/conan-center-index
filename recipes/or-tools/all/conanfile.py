@@ -48,8 +48,6 @@ class PackageConan(ConanFile):
         #self.requires("scip/10.0.0") # build this due to not having SCIP::libscip target
         #self.requires("soplex/[>=7.1.3]") # build this due to conflicts in lib name for targets
         self.requires("zlib/1.3.1")
-        if self.options.with_glpk:
-            self.requires("glpk/5.0")
 
     def validate(self):
         if is_msvc(self):
@@ -66,8 +64,6 @@ class PackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.options.with_glpk:
-            tc.cache_variables["USE_GLPK"] = True
         if is_msvc(self):
             tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.cache_variables["BUILD_Boost"] = True
