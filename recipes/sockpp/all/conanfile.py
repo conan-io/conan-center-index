@@ -54,6 +54,7 @@ class SockppConan(ConanFile):
 
 
     def package_info(self):
+        self.cpp_info.set_property(self, "cmake_target_name", "Sockpp::sockpp" if self.options.shared else "Sockpp::sockpp-static")
         if self.settings.os == "Windows":
             self.cpp_info.libs = ["sockpp" if self.options.shared else "sockpp-static"]
             self.cpp_info.system_libs = ["ws2_32"]
