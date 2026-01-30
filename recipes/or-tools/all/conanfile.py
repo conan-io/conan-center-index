@@ -19,12 +19,10 @@ class PackageConan(ConanFile):
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "with_glpk": [True, False],
         "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "with_glpk": False,
         "shared": True,
         "fPIC": True,
     }
