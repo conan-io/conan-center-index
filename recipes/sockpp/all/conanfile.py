@@ -52,6 +52,7 @@ class SockppConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
 
     def package_info(self):
