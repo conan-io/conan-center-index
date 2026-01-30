@@ -33,7 +33,6 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         self.requires("abseil/20250814.0", transitive_headers=True, transitive_libs=True) # source is 20250814.1 which conflicts with protobuf 32.1 at 20250814.0
-        #self.requires("boost/1.87.0") # build this because conan version lacks Boost::multiprecision or Boost::serialization
         self.requires("bzip2/1.0.8")
         self.requires("coin-clp/[>=1.17.7 <=1.17.10]") # source is 1.17.10
         self.requires("coin-osi/[>=0.108.7 <=0.108.11]") # source is 0.108.11
@@ -67,7 +66,7 @@ class PackageConan(ConanFile):
         tc = CMakeToolchain(self)
         if is_msvc(self):
             tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        tc.cache_variables["BUILD_Boost"] = True
+        tc.cache_variables["BUILD_Boost"] = False
         tc.cache_variables["BUILD_SCIP"] = True
         tc.cache_variables["BUILD_soplex"] = True
         tc.cache_variables["BUILD_TESTING"] = False
