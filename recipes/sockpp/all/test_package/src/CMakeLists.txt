@@ -4,4 +4,4 @@ project(test_package CXX)
 find_package(sockpp CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} sockpp::sockpp)
+target_link_libraries(${PROJECT_NAME} Sockpp::sockpp)
