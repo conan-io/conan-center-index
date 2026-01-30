@@ -107,12 +107,14 @@ class PackageConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["ortools"]
-        self.cpp_info.set_property("cmake_module_file_name", "ortools")
-        self.cpp_info.set_property("cmake_module_target_name", "ortools::ortools")
         self.cpp_info.set_property("cmake_file_name", "ortools")
-        self.cpp_info.set_property("cmake_target_name", "ortools::ortools")
+        self.cpp_info.components["ortools"].libs = ["ortools"]
+        self.cpp_info.components["ortools"].set_property("cmake_target_name", "ortools::ortools")
+        self.cpp_info.components["ortools"].defines = ["OR_PROTO_DLL=;USE_MATH_OPT;USE_BOP;USE_CBC;USE_GLOP;USE_HIGHS;USE_PDLP;USE_SCIP"]
+        self.cpp_info.components["ortools"].requires = [
+            "zlib::zlib",
+            "scip::scip"
+        ]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("dl")
+            self.cpp_info.components["ortools"].system_libs.extend(["m", "pthread", "dl"])
