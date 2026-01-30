@@ -5,7 +5,6 @@ from conan.tools.files import copy, get
 
 class SockppConan(ConanFile):
     name = "sockpp"
-    version = "1.0.0"
     package_type = "library"
 
     # Optional metadata
