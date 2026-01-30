@@ -4,7 +4,9 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get, rmdir
 import os
+
 required_conan_version = ">=2.4"
+
 class SockppConan(ConanFile):
     name = "sockpp"
     package_type = "library"
@@ -56,7 +58,7 @@ class SockppConan(ConanFile):
 
 
     def package_info(self):
-        self.cpp_info.set_property(self, "cmake_target_name", "Sockpp::sockpp" if self.options.shared else "Sockpp::sockpp-static")
+        self.cpp_info.set_property("cmake_target_name", "Sockpp::sockpp" if self.options.shared else "Sockpp::sockpp-static")
         if self.settings.os == "Windows":
             self.cpp_info.libs = ["sockpp" if self.options.shared else "sockpp-static"]
             self.cpp_info.system_libs = ["ws2_32"]
