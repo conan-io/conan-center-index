@@ -10,7 +10,7 @@ import os
 required_conan_version = ">=2.0.9"
 
 class PackageConan(ConanFile):
-    name = "ortools"
+    name = "or-tools"
     description = "Google OR Tools"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
