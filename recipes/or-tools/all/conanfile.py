@@ -42,8 +42,7 @@ class PackageConan(ConanFile):
         self.requires("highs/1.12.0")
         self.requires("protobuf/6.32.1", transitive_headers=True) # source is 33.1
         self.requires("re2/[>=20250812]") # source is 20250812, but only 20250722 or 20251105 are in conan center
-        #self.requires("scip/10.0.0") # build this due to not having SCIP::libscip target
-        #self.requires("soplex/[>=7.1.3]") # build this due to conflicts in lib name for targets
+        self.requires("scip/10.0.0")
         self.requires("zlib/1.3.1")
 
     def validate(self):
@@ -67,8 +66,8 @@ class PackageConan(ConanFile):
         if is_msvc(self):
             tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.cache_variables["BUILD_Boost"] = False
-        tc.cache_variables["BUILD_SCIP"] = True
-        tc.cache_variables["BUILD_soplex"] = True
+        tc.cache_variables["BUILD_SCIP"] = False
+        tc.cache_variables["BUILD_soplex"] = False
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["BUILD_SAMPLES"] = False
         tc.cache_variables["BUILD_CXX_EXAMPLES"] = False
