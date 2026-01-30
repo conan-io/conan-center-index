@@ -9,7 +9,8 @@ class SockppConan(ConanFile):
     package_type = "library"
 
     license = "BSD-3-Clause"
-    url = "https://github.com/fpagliughi/sockpp"
+    homepage = "https://github.com/fpagliughi/sockpp"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "Modern C++ socket library."
     topics = ("sockets", "networking", "cpp")
     settings = "os", "compiler", "build_type", "arch"
