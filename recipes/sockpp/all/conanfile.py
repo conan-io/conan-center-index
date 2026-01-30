@@ -33,14 +33,9 @@ class SockppConan(ConanFile):
         cmake_layout(self)
 
     def generate(self):
-        deps = CMakeDeps(self)
-        deps.generate()
         tc = CMakeToolchain(self)
         tc.variables["SOCKPP_BUILD_SHARED"] = self.options.shared
         tc.variables["SOCKPP_BUILD_STATIC"] = not self.options.shared
-        tc.variables["SOCKPP_WITH_UNIX_SOCKETS"] = self.options.with_unix_sockets
-        if self.settings.os == "Linux":
-            tc.variables["SOCKPP_WITH_CAN"] = self.options.with_can
         tc.generate()
 
     def build(self):
