@@ -113,6 +113,17 @@ class PackageConan(ConanFile):
         self.cpp_info.components["ortools"].defines = ["OR_PROTO_DLL=;USE_MATH_OPT;USE_BOP;USE_CBC;USE_GLOP;USE_HIGHS;USE_PDLP;USE_SCIP"]
         self.cpp_info.components["ortools"].requires = [
             "zlib::zlib",
+            "bzip2::bzip2",
+            "abseil::absl_base",
+            "protobuf::libprotobuf",
+            "re2::re2",
+            "coin-cbc::libcbc",
+            "coin-cbc::osi-cbc",
+            "coin-clp::clp",
+            "coin-clp::osi-clp",
+            "coin-osi::libosi",
+            "eigen::eigen3",
+            "highs::highs",
             "scip::scip"
         ]
 
