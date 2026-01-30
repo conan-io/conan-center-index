@@ -1,6 +1,7 @@
 import os
 from conan import ConanFile
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 
 class SockppConan(ConanFile):
