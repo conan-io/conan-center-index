@@ -74,6 +74,8 @@ class PackageConan(ConanFile):
         tc.cache_variables["BUILD_SCIP"] = True
         tc.cache_variables["BUILD_soplex"] = True
         tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_SAMPLES"] = False
+        tc.cache_variables["BUILD_CXX_EXAMPLES"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
