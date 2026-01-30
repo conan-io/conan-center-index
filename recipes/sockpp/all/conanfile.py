@@ -12,22 +12,18 @@ class SockppConan(ConanFile):
     url = "https://github.com/fpagliughi/sockpp"
     description = "Modern C++ socket library."
     topics = ("sockets", "networking", "cpp")
-
-    # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_unix_sockets": [True, False],
-        "with_can": [True, False],
     }
 
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_unix_sockets": True,
-        "with_can": False,
     }
+    implements = ["auto_shared_fpic"]
+    languages = "C++"
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
