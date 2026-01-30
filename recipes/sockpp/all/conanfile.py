@@ -7,6 +7,7 @@ import os
 
 required_conan_version = ">=2.4"
 
+
 class SockppConan(ConanFile):
     name = "sockpp"
     package_type = "library"
