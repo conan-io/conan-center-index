@@ -39,6 +39,9 @@ class SockppConan(ConanFile):
         tc.variables["SOCKPP_BUILD_STATIC"] = not self.options.shared
         tc.generate()
 
+    def validate(self):
+        check_min_cppstd(self, 14)
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
