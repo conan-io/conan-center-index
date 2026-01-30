@@ -1,0 +1,7 @@
+sources:
+  "0.7.0":
+    url:
+     - "https://www.apache.org/dyn/closer.lua/arrow/apache-arrow-nanoarrow-0.7.0/apache-arrow-nanoarrow-0.7.0.tar.gz?action=download"
+     - "https://github.com/apache/arrow-nanoarrow/releases/download/apache-arrow-nanoarrow-0.7.0/apache-arrow-nanoarrow-0.7.0.tar.gz"
+    sha256: "d60b49dfaa5a27614075c6c61ec2fdea3bc70f5e52aefce592f994d2ee6330ea"
+    filename: "apache-arrow-nanoarrow-0.7.0.tar.gz"
