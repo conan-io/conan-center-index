@@ -74,9 +74,20 @@ class PackageConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.generate()
-
-        deps = PkgConfigDeps(self)
+        deps.set_property("scip", "cmake_file_name", "SCIP")
+        deps.set_property("scip", "cmake_target_name", "SCIP::libscip")
+        deps.set_property("coin-utils", "cmake_file_name", "CoinUtils")
+        deps.set_property("coin-utils", "cmake_target_name", "Coin::CoinUtils")
+        deps.set_property("coin-cgl", "cmake_file_name", "Cgl")
+        deps.set_property("coin-cgl", "cmake_target_name", "Coin::Cgl")
+        deps.set_property("coin-cbc", "cmake_file_name", "Cbc")
+        deps.set_property("coin-cbc", "cmake_target_name", "Coin::Cbc")
+        deps.set_property("coin-cbc::libcbc", "cmake_target_name", "Coin::CbcSolver")
+        deps.set_property("coin-cbc::osi-cbc", "cmake_target_name", "Coin::OsiCbc")
+        deps.set_property("coin-clp", "cmake_file_name", "Clp")
+        deps.set_property("coin-clp", "cmake_target_name", "Coin::Clp")
+        deps.set_property("coin-clp::clp", "cmake_target_name", "Coin::ClpSolver")
+        deps.set_property("coin-clp::osi-clp", "cmake_target_name", "Coin::OsiClp")
         deps.generate()
 
     def build(self):
