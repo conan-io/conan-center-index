@@ -28,14 +28,6 @@ class SintraConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
-        allowed_architectures = {"x86", "x86_64", "armv7", "armv8"}
-        if str(self.settings.arch) not in allowed_architectures:
-            raise ConanInvalidConfiguration(
-                "sintra supports x86, x86_64, armv7, and armv8 architectures")
-        allowed_os = {"Windows", "Linux", "Macos", "FreeBSD"}
-        if str(self.settings.os) not in allowed_os:
-            raise ConanInvalidConfiguration(
-                "sintra supports Windows, Linux, macOS, and FreeBSD")
 
     def package_id(self):
         self.info.clear()
