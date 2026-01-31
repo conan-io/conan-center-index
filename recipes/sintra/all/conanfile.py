@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
@@ -24,7 +23,7 @@ class SintraConan(ConanFile):
         basic_layout(self)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16]"
+        self.tool_requires("cmake/[>=3.16]")
 
     def validate(self):
         check_min_cppstd(self, 17)
