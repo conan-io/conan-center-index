@@ -11,7 +11,6 @@ required_conan_version = ">=2.0"
 
 class SintraConan(ConanFile):
     name = "sintra"
-    version = "1.0.2"
     license = "BSD-2-Clause"
     homepage = "https://github.com/imakris/sintra"
     url = "https://github.com/conan-io/conan-center-index"
