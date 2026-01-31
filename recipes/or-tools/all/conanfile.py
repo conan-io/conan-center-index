@@ -109,6 +109,14 @@ class PackageConan(ConanFile):
         self.cpp_info.libs = ["ortools"]
         self.cpp_info.set_property("cmake_file_name", "ortools")
         self.cpp_info.components["ortools"].libs = ["ortools"]
+
+        # INFO: In order to use ortools::solve, it requires the experimental Conan generator CMakeConfigDeps
+        self.cpp_info.components["solve"].exe = ["solve"]
+        self.cpp_info.components["solve"].set_property("cmake_target_name", "ortools::solve")
+        # INFO: In order to use ortools::fzn, it requires the experimental Conan generator CMakeConfigDeps
+        self.cpp_info.components["fzn"].exe = ["fzn-cp-sat"]
+        self.cpp_info.components["fzn"].set_property("cmake_target_name", "ortools::fzn")
+
         self.cpp_info.components["ortools"].set_property("cmake_target_name", "ortools::ortools")
         self.cpp_info.components["ortools"].defines = ["OR_PROTO_DLL=;USE_MATH_OPT;USE_BOP;USE_CBC;USE_GLOP;USE_HIGHS;USE_PDLP;USE_SCIP"]
         self.cpp_info.components["ortools"].requires = [
@@ -161,3 +169,7 @@ class PackageConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["ortools"].system_libs.extend(["m", "pthread", "dl"])
+
+        self.cpp_info.components["flatzinc"].libs = ["ortools_flatzinc"]
+        self.cpp_info.components["flatzinc"].set_property("cmake_target_name", "ortools::flatzinc")
+        self.cpp_info.components["flatzinc"].requires = ["ortools"]
