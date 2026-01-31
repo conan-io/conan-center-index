@@ -32,11 +32,11 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("abseil/20250814.0", transitive_headers=True, transitive_libs=True) # source is 20250814.1 which conflicts with protobuf 32.1 at 20250814.0
+        self.requires("abseil/20250814.0", transitive_headers=True) # source is 20250814.1 which conflicts with protobuf 32.1 at 20250814.0
         self.requires("bzip2/1.0.8")
         self.requires("coin-clp/[>=1.17.7 <=1.17.10]") # source is 1.17.10
         self.requires("coin-osi/[>=0.108.7 <=0.108.11]") # source is 0.108.11
-        self.requires("coin-utils/2.11.12", override=True) # coin-clp 1.17.7 requires an older version for now
+        self.requires("coin-utils/[>=2.11.9 <3]") # coin-clp 1.17.7 requires an older version for now
         self.requires("coin-cbc/[>=2.10.5 <=2.10.12]") # source is 2.10.12
         self.requires("eigen/3.4.0")
         self.requires("highs/1.12.0")
@@ -115,6 +115,37 @@ class PackageConan(ConanFile):
             "zlib::zlib",
             "bzip2::bzip2",
             "abseil::absl_base",
+            "abseil::absl_core_headers",
+            "abseil::absl_absl_check",
+            "abseil::absl_absl_log",
+            "abseil::absl_check",
+            "abseil::absl_die_if_null",
+            "abseil::absl_flags",
+            "abseil::absl_flags_commandlineflag",
+            "abseil::absl_flags_marshalling",
+            "abseil::absl_flags_parse",
+            "abseil::absl_flags_reflection",
+            "abseil::absl_flags_usage",
+            "abseil::absl_log",
+            "abseil::absl_log_flags",
+            "abseil::absl_log_globals",
+            "abseil::absl_log_initialize",
+            "abseil::absl_log_internal_message",
+            "abseil::absl_cord",
+            "abseil::absl_random_random",
+            "abseil::absl_raw_hash_set",
+            "abseil::absl_hash",
+            "abseil::absl_leak_check",
+            "abseil::absl_memory",
+            "abseil::absl_meta",
+            "abseil::absl_stacktrace",
+            "abseil::absl_status",
+            "abseil::absl_statusor",
+            "abseil::absl_str_format",
+            "abseil::absl_strings",
+            "abseil::absl_synchronization",
+            "abseil::absl_time",
+            "abseil::absl_any",
             "protobuf::libprotobuf",
             "re2::re2",
             "coin-cbc::libcbc",
@@ -122,8 +153,9 @@ class PackageConan(ConanFile):
             "coin-clp::clp",
             "coin-clp::osi-clp",
             "coin-osi::libosi",
-            "eigen::eigen3",
+            "coin-utils::coin-utils",
             "highs::highs",
+            "eigen::eigen3",
             "scip::scip"
         ]
 
