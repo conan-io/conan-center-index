@@ -57,3 +57,7 @@ class SintraConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.set_property("cmake_file_name", "sintra")
         self.cpp_info.set_property("cmake_target_name", "sintra::sintra")
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["winmm"]
+        elif self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread"]
