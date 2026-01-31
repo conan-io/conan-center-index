@@ -1,9 +1,9 @@
 sources:
-  "5.1.0":
-    url: "https://github.com/rdbo/libmem/archive/refs/tags/5.1.0.tar.gz"
-    sha256: "9f61b53ce86fd59afb13bc4f48db40e8c8dc156f56879b9e9929014924f95495"
+  "5.1.5":
+    url: "https://github.com/rdbo/libmem/archive/refs/tags/5.1.5.tar.gz"
+    sha256: "58a1db4f4b01e452c91c307d4486d5e4e39887ee3b3b2ad930b6718d8daeb509"
 patches:
-  "5.1.0":
+  "5.1.5":
     - patch_file: "patches/5.1.0-001-fix-cmake.patch"
       patch_description: "Debundle dependencies"
       patch_type: "portability"
