@@ -23,6 +23,9 @@ class SintraConan(ConanFile):
     def layout(self):
         basic_layout(self)
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16]"
+
     def validate(self):
         check_min_cppstd(self, 17)
         allowed_architectures = {"x86", "x86_64", "armv7", "armv8"}
