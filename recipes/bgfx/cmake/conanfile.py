@@ -93,6 +93,14 @@ class bgfxConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "bgfx")
         bgfx_tools_utils = os.path.join(self.package_folder, "lib", "cmake", "bgfx", "bgfxToolUtils.cmake")
+        self.cpp_info.set_property(
+            "cmake_extra_variables",
+            {
+                "BGFX_SHADER_INCLUDE_PATH": os.path.join(
+                    self.package_folder, "include", "bgfx"
+                )
+            },
+        )
         self.cpp_info.set_property("cmake_build_modules", [bgfx_tools_utils])
 
         self.cpp_info.components["bx"].set_property("cmake_target_name", "bgfx::bx")
