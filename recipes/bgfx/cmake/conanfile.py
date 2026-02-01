@@ -141,5 +141,6 @@ class bgfxConan(ConanFile):
                 self.cpp_info.components[tool].set_property("cmake_target_name", f"bgfx::{tool}")
                 # INFO: .exe requires CMakeConfigDeps generator
                 self.cpp_info.components[tool].exe = os.path.join(self.package_folder, "bin", tool)
+                self.cpp_info.components[tool].location = os.path.join(self.package_folder, "bin", tool)
                 self.cpp_info.components[tool].libdirs = []
                 self.cpp_info.components[tool].includedirs = []
