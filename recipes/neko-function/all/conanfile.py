@@ -70,6 +70,7 @@ class NekoFunctionConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("neko-schema", "cmake_target_aliases", ["NekoSchema"])
         # Set the target name mapping for minizip-ng
         if self.options.enable_archive:
             deps.set_property("minizip-ng", "cmake_find_mode", "both")
@@ -103,12 +104,10 @@ class NekoFunctionConan(ConanFile):
 
             # Add dependencies
             if self.options.enable_hash:
-                self.cpp_info.requires.append("openssl::openssl")
                 self.cpp_info.defines.append("NEKO_FUNCTION_ENABLE_HASH")
                 self.cpp_info.defines.append("NEKO_IMPORT_OPENSSL")
 
             if self.options.enable_archive:
-                self.cpp_info.requires.append("minizip-ng::minizip-ng")
                 self.cpp_info.defines.append("NEKO_FUNCTION_ENABLE_ARCHIVE")
         else:
             # Header-only target - no libraries
