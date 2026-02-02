@@ -60,7 +60,6 @@ class QtConan(ConanFile):
         "with_brotli": [True, False],
         "with_dbus": [True, False],
         "with_libalsa": [True, False],
-        "with_openal": [True, False],
         "with_ffmpeg": [True, False],
         "with_gstreamer": [True, False],
         "with_pulseaudio": [True, False],
@@ -103,7 +102,6 @@ class QtConan(ConanFile):
         "with_brotli": True,
         "with_dbus": False,
         "with_libalsa": False,
-        "with_openal": True,
         "with_ffmpeg": True,
         "with_gstreamer": False,
         "with_pulseaudio": False,
@@ -245,7 +243,6 @@ class QtConan(ConanFile):
 
         if not self.options.get_safe("qtmultimedia"):
             self.options.rm_safe("with_libalsa")
-            del self.options.with_openal
             del self.options.with_gstreamer
             del self.options.with_pulseaudio
 
@@ -386,8 +383,6 @@ class QtConan(ConanFile):
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.11")
-        if self.options.get_safe("with_openal", False):
-            self.requires("openal-soft/1.22.2")
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_x11") or self.options.qtwayland:
@@ -1432,8 +1427,6 @@ class QtConan(ConanFile):
             multimedia_reqs = ["Network", "Gui"]
             if self.options.get_safe("with_libalsa", False):
                 multimedia_reqs.append("libalsa::libalsa")
-            if self.options.with_openal:
-                multimedia_reqs.append("openal-soft::openal-soft")
             if self.options.get_safe("with_pulseaudio", False):
                 multimedia_reqs.append("pulseaudio::pulse")
             if self.options.get_safe("with_ffmpeg", False):
