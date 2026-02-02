@@ -98,7 +98,7 @@ class bgfxConan(ConanFile):
             {
                 # This is used by bgfx shader compiler and tools to be able to, for example,
                 # find bgfx_shader.sh as part of bgfxToolUtils.cmake utils
-                "BGFX_SHADER_INCLUDE_PATH": os.path.join(self.package_folder, "include", "bgfx")
+                "BGFX_SHADER_INCLUDE_PATH": os.path.join(self.package_folder, "include", "bgfx").replace("\\", "/")
             },
         )
         self.cpp_info.set_property("cmake_build_modules", [bgfx_tools_utils])
