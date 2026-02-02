@@ -61,6 +61,7 @@ class QtConan(ConanFile):
         "with_dbus": [True, False],
         "with_libalsa": [True, False],
         "with_openal": [True, False],
+        "with_ffmpeg": [True, False],
         "with_gstreamer": [True, False],
         "with_pulseaudio": [True, False],
         "with_gssapi": [True, False],
@@ -103,6 +104,7 @@ class QtConan(ConanFile):
         "with_dbus": False,
         "with_libalsa": False,
         "with_openal": True,
+        "with_ffmpeg": True,
         "with_gstreamer": False,
         "with_pulseaudio": False,
         "with_gssapi": False,
@@ -409,6 +411,8 @@ class QtConan(ConanFile):
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.93")
             self.requires("libdrm/2.4.119")
+        if self.options.get_safe("with_ffmpeg", False):
+            self.requires("ffmpeg/[>=6.1 <8.1]")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gstreamer/1.19.2")
             self.requires("gst-plugins-base/1.19.2")
@@ -1432,6 +1436,8 @@ class QtConan(ConanFile):
                 multimedia_reqs.append("openal-soft::openal-soft")
             if self.options.get_safe("with_pulseaudio", False):
                 multimedia_reqs.append("pulseaudio::pulse")
+            if self.options.get_safe("with_ffmpeg", False):
+                multimedia_reqs.append("ffmpeg::ffmpeg")
             _create_module("Multimedia", multimedia_reqs)
             _create_module("MultimediaWidgets", ["Multimedia", "Widgets", "Gui"])
             if self.options.qtdeclarative and qt_quick_enabled:
