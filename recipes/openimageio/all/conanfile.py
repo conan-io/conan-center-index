@@ -268,6 +268,9 @@ class OpenImageIOConan(ConanFile):
             deps.set_property("libultrahdr", "cmake_target_name", "libuhdr::libuhdr")
             deps.set_property("libjxl", "cmake_file_name", "JXL")
             deps.set_property("openjph", "cmake_target_name", "openjph")
+        # Version 3.1.10.0 expects a differently named heif target imported.
+        if Version(self.version) >= "3.1.10.0":
+            deps.set_property("libheif", "cmake_target_name", "heif")
         deps.generate()
 
     def build(self):
