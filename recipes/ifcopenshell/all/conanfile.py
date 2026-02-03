@@ -86,7 +86,7 @@ class IfcopenshellConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        rm(self, "*.cmake", os.path.join(self.source_folder, "cmake"))
+        # rm(self, "*.cmake", os.path.join(self.source_folder, "cmake"))
         cmake = CMake(self)
         cmake.configure(build_script_folder="cmake")
         cmake.build()
@@ -137,28 +137,7 @@ class IfcopenshellConan(ConanFile):
         # For HDF5 support
         ifcgeom.requires.append("hdf5::hdf5_cpp")
 
-        geometry_kernel_opencascade = _add_component("geometry_kernel_opencascade", requires=[
-            "opencascade::occt_tkernel",
-            "opencascade::occt_tkmath",
-            "opencascade::occt_tkbrep",
-            "opencascade::occt_tkgeombase",
-            "opencascade::occt_tkgeomalgo",
-            "opencascade::occt_tkg3d",
-            "opencascade::occt_tkg2d",
-            "opencascade::occt_tkshhealing",
-            "opencascade::occt_tktopalgo",
-            "opencascade::occt_tkmesh",
-            "opencascade::occt_tkprim",
-            "opencascade::occt_tkbool",
-            "opencascade::occt_tkbo",
-            "opencascade::occt_tkfillet",
-            "opencascade::occt_tkxsbase",
-            "opencascade::occt_tkoffset",
-            "opencascade::occt_tkhlr",
-            "eigen::eigen",
-        ])
-        
-        geometry_kernel_opencascade = _add_component("geometry_kernel_opencascade", requires=[
+        _add_component("geometry_kernel_opencascade", requires=[
             "IfcGeom", 
             "opencascade::occt_tkernel",
             "opencascade::occt_tkmath",
@@ -180,7 +159,7 @@ class IfcopenshellConan(ConanFile):
             "eigen::eigen",
         ])
             
-        geometry_kernel_cgal = _add_component("geometry_kernel_cgal", requires=["IfcGeom", "cgal::cgal", "eigen::eigen"])
-        geometry_kernel_cgal_simple = _add_component("geometry_kernel_cgal_simple", requires=["IfcGeom", "cgal::cgal", "eigen::eigen"])
+        _add_component("geometry_kernel_cgal", requires=["IfcGeom", "cgal::cgal", "eigen::eigen"])
+        _add_component("geometry_kernel_cgal_simple", requires=["IfcGeom", "cgal::cgal", "eigen::eigen"])
         ifcgeom.defines.append("IFOPSH_WITH_CGAL")
         ifcgeom.requires += ["cgal::cgal", "eigen::eigen"]

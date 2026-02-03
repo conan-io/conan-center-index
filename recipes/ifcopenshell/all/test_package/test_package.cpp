@@ -9,19 +9,19 @@
 
 using namespace std::string_literals;
 
-// Some convenience typedefs and definitions. 
 typedef IfcParse::IfcGlobalId guid;
-typedef std::pair<double, double> XY;
 boost::none_t const null = boost::none;
 
-int main() {
+int main()
+{
 
 	IfcHierarchyHelper<IfcSchema> file;
 	file.header().file_name()->setname("gardenShed.ifc");
 
+	IfcSchema::IfcWallStandardCase *south_wall = new IfcSchema::IfcWallStandardCase(guid(), 0, "South wall"s, null, null, 0, 0, null, IfcSchema::IfcWallTypeEnum::IfcWallType_STANDARD);
 	file.addBuildingProduct(south_wall);
 
 	std::ofstream ofs("gardenShed.ifc");
-    ofs << file;
+	ofs << file;
 	return 0;
 }
