@@ -7,7 +7,7 @@ int main() {
   cache.put(1, "hello");
   auto val = cache.get(1);
   if (val && val->get() == "hello") {
-    sstd::cout << "test_package for loon: OK\n";
+    std::cout << "test_package for loon: OK\n";
   }
   return 0;
 }
