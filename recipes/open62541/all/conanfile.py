@@ -191,7 +191,7 @@ class Open62541Conan(ConanFile):
         if self.options.discovery == "With Multicast" or "multicast" in str(self.options.discovery):
             self.requires("pro-mdnsd/0.8.4")
         if self.options.get_safe("nodeset_loader"):
-            if Version(self.version) >= "1.5.0-rc1":
+            if Version(self.version) >= "1.5.0":
                 self.requires("libxml2/[>=2.12.5 <3]")
             else:
                 # version 1.4.11.1 with libxml2 2.14.x doesnt work because open62541 uses deprecated/remove APIs
@@ -234,7 +234,7 @@ class Open62541Conan(ConanFile):
             # NodesetLoader requires parsing to be enabled
             raise ConanInvalidConfiguration("When nodeset_loader is enabled, then parsing has to be enabled too.")
 
-        if self.options.get_safe("nodeset_loader") and Version(self.version) >= "1.4.13" and Version(self.version) < "1.5.0-rc1":
+        if self.options.get_safe("nodeset_loader") and Version(self.version) >= "1.4.13" and Version(self.version) < "1.5.0":
             raise ConanInvalidConfiguration("nodeset_loader option does not work properly with this version - fixed in 1.5.0")
 
     def source(self):

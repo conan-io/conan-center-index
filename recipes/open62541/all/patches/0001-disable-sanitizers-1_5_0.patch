@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 9823c8aa0..a1ff68db1 100644
+index 57970b101..9168c3d2d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -701,18 +701,18 @@ if((CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang") AND
+@@ -712,18 +712,18 @@ if((CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang") AND
      endif()
  
      # Debug
