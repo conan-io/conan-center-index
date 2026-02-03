@@ -53,8 +53,8 @@ class PackageConan(ConanFile):
     def validate(self):
         if is_apple_os(self):
             raise ConanInvalidConfiguration("Apple OS not supported")
-        if is_msvc(self) and self.info.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"Windows is not supported")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
