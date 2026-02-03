@@ -43,7 +43,7 @@ class LoonConan(ConanFile):
         cmake.install()
         # remove packaging cruft if present
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake")
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
