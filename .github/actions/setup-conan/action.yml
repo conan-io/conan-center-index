@@ -45,6 +45,10 @@ runs:
           echo "tools.system.package_manager:sudo=True" >> "$DEFAULT_PROFILE"
         elif [[ "$RUNNER_OS" == "Windows" ]]; then
           echo "user.openssl:windows_use_jom=True" >> "$DEFAULT_PROFILE"
+          if [[ "$RUNNER_ARCH" == "ARM64" ]]; then
+            echo "tools.gnu:build_triplet=aarch64-w64-mingw32" >> "$DEFAULT_PROFILE"
+            echo "tools.gnu:host_triplet=aarch64-w64-mingw32" >> "$DEFAULT_PROFILE"
+          fi
         fi
 
       shell: bash
