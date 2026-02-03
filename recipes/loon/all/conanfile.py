@@ -38,11 +38,12 @@ class LoonConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.build_folder)
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
         # remove packaging cruft if present
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake")
 
     def package_info(self):
         self.cpp_info.bindirs = []
