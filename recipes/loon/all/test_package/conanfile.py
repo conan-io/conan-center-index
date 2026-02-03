@@ -5,7 +5,7 @@ import os
 
 class LoonTestConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeToolchain", "CMakeDeps"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
@@ -20,6 +20,5 @@ class LoonTestConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            exe_name = "test_package.exe" if self.settings.os == "Windows" else "test_package"
-            exe = os.path.join(self.cpp.build.bindirs[0], exe_name)
-            self.run(exe, env="conanrun")
+            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
+            self.run(bin_path, env="conanrun")
