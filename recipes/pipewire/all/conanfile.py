@@ -25,13 +25,11 @@ class Pipewire(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
-        "feature": [True, False],
+        "fPIC": [True, False]
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
-        "feature": True,
+        "fPIC": True
     }
 
     implements = ["auto_shared_fpic"]
