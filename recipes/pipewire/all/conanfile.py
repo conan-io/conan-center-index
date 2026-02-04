@@ -10,11 +10,7 @@ from conan.tools.microsoft import is_msvc
 import os
 
 
-required_conan_version = ">=2.0"
-
-#
-# INFO: Please, remove all comments before pushing your PR!
-#
+required_conan_version = ">=2.1"
 
 
 class Pipewire(ConanFile):
