@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os, XCRun, fix_apple_shared_install_name
-from conan.tools.build import cross_building
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import Environment
 from conan.tools.files import copy, rename, get, rmdir, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
