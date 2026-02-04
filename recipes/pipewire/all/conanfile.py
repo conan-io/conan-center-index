@@ -17,7 +17,7 @@ required_conan_version = ">=2.0"
 #
 
 
-class PackageConan(ConanFile):
+class Pipewire(ConanFile):
     name = "pipewire"
     description = "PipeWire is a server and user space API to deal with multimedia pipelines."
     license = "MIT"
@@ -40,21 +40,15 @@ class PackageConan(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.85.3")
+        self.requires("glib/[>=2.82 <3]")
 
     def validate(self):
-        if is_apple_os(self):
-            raise ConanInvalidConfiguration("Apple OS not supported")
-        if is_msvc(self):
-            raise ConanInvalidConfiguration(f"Windows is not supported")
+        if self.settings.os not in ("Linux", "FreeBSD"):
+            raise ConanInvalidConfiguration("Not supported on this platform.")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
@@ -148,9 +142,13 @@ class PackageConan(ConanFile):
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.libs = ["pipewire"]
+        self.cpp_info.components["pipewire"].libs = ["pipewire-0.3"]
+        self.cpp_info.components["pipewire"].includedirs = [os.path.join("include", "pipewire-0.3")]
+        self.cpp_info.components["pipewire"].requires = ["glib::glib", "spa"]
 
-        self.cpp_info.set_property("pkg_config_name", "pipewire")
+        self.cpp_info.components["spa"].libs = ["spa"]
+        self.cpp_info.components["spa"].libdirs = [os.path.join("lib", "spa-0.2")]
+        self.cpp_info.components["spa"].includedirs = [os.path.join("include", "spa-0.2")]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
