@@ -214,4 +214,4 @@ class MSYS2Conan(ConanFile):
             # Expose /opt/bin to PATH, so that aarch64-w64-mingw32- prefixed tools can be found
             # Define autotools host/build triplet so that the right tools are used
             self.cpp_info.bindirs.insert(0, os.path.join(msys_root, "opt", "bin"))
-            self.conf_info.define("tools.gnu:build_triplet", "x86_64-w64-mingw32")
+            self.conf_info.define("tools.gnu:host_triplet", "aarch64-w64-mingw32")
