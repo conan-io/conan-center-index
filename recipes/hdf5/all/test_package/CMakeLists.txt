@@ -33,5 +33,5 @@ endif()
 
 if (TARGET hdf5::hdf5_fortran)
   add_executable(${PROJECT_NAME}_fortran test_package.f90)
-  target_link_libraries(${PROJECT_NAME}_fortran PRIVATE hdf5::hdf5_fortran hdf5::hdf5)
+  target_link_libraries(${PROJECT_NAME}_fortran PRIVATE hdf5::hdf5_fortran)
 endif()
