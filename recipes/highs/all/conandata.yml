@@ -1,4 +1,7 @@
 sources:
+  "1.13.0":
+    url: "https://github.com/ERGO-Code/HiGHS/releases/download/v1.13.0/source-archive.tar.gz"
+    sha256: "8429b0979f0879a6636292796ab4297bb0ee282d630710c9f7315541b9deab21"
   "1.12.0":
     url: "https://github.com/ERGO-Code/HiGHS/releases/download/v1.12.0/source-archive.tar.gz"
     sha256: "d41c4e72f5c7af25bdf16831b41425f9359a43df51acc456a227bf7bc39c691c"
