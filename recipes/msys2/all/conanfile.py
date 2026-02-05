@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
-from conan.tools.files import chdir, get, replace_in_file, copy
+from conan.tools.files import chdir, get, replace_in_file, copy, trim_conandata
 from conan.tools.layout import basic_layout
 import fnmatch
 import os
@@ -9,7 +9,7 @@ import subprocess
 import errno
 import ctypes
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=2.2"
 
 
 class lock:
@@ -60,6 +60,11 @@ class MSYS2Conan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
+
+    def export(self):
+        # this will ensure locally-exported recipes match the recipe revision from
+        # the Conan Center remote
+        trim_conandata(self)
 
     def package_id(self):
         del self.info.options.no_kill
@@ -209,5 +214,4 @@ class MSYS2Conan(ConanFile):
             # Expose /opt/bin to PATH, so that aarch64-w64-mingw32- prefixed tools can be found
             # Define autotools host/build triplet so that the right tools are used
             self.cpp_info.bindirs.insert(0, os.path.join(msys_root, "opt", "bin"))
-            self.conf_info.define("tools.gnu:build_triplet", "x86_64-w64-mingw32")
             self.conf_info.define("tools.gnu:host_triplet", "aarch64-w64-mingw32")

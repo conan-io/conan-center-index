@@ -93,6 +93,14 @@ class bgfxConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "bgfx")
         bgfx_tools_utils = os.path.join(self.package_folder, "lib", "cmake", "bgfx", "bgfxToolUtils.cmake")
+        self.cpp_info.set_property(
+            "cmake_extra_variables",
+            {
+                # This is used by bgfx shader compiler and tools to be able to, for example,
+                # find bgfx_shader.sh as part of bgfxToolUtils.cmake utils
+                "BGFX_SHADER_INCLUDE_PATH": os.path.join(self.package_folder, "include", "bgfx").replace("\\", "/")
+            },
+        )
         self.cpp_info.set_property("cmake_build_modules", [bgfx_tools_utils])
 
         self.cpp_info.components["bx"].set_property("cmake_target_name", "bgfx::bx")
@@ -140,6 +148,7 @@ class bgfxConan(ConanFile):
             for tool in ["bin2c", "texturec", "texturev", "geometryc", "geometryv", "shaderc"]:
                 self.cpp_info.components[tool].set_property("cmake_target_name", f"bgfx::{tool}")
                 # INFO: .exe requires CMakeConfigDeps generator
-                self.cpp_info.components[tool].exe = os.path.join(self.package_folder, "bin", tool)
+                self.cpp_info.components[tool].exe = tool
+                self.cpp_info.components[tool].location = os.path.join(self.package_folder, "bin", tool)
                 self.cpp_info.components[tool].libdirs = []
                 self.cpp_info.components[tool].includedirs = []

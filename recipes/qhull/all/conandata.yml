@@ -6,3 +6,4 @@ patches:
   "8.0.2":
     - patch_file: "patches/0001-fix-cmake.patch"
       patch_description: "Fix cmake_minimum_required() to provide CMake 4 support and avoid hardcoding rpath"
+    - patch_file: "patches/0002-cpp20-fixes.patch"

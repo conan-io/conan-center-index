@@ -1,0 +1,15 @@
+diff --git a/nss/cmd/selfserv/manifest.mn b/nss/cmd/selfserv/manifest.mn
+index a170169..c826fc5 100644
+--- a/nss/cmd/selfserv/manifest.mn
++++ b/nss/cmd/selfserv/manifest.mn
+@@ -10,6 +10,10 @@ DEFINES += -DNSPR20
+ # MODULE public and private header  directories are implicitly REQUIRED.
+ MODULE = nss
+ 
++ifdef ZLIB_INCLUDE_DIR
++INCLUDES += -I$(ZLIB_INCLUDE_DIR)
++endif
++
+ CSRCS = selfserv.c
+ 
+ # The MODULE is always implicitly required.

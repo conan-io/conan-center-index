@@ -118,9 +118,14 @@ class ArrowConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        # arrow >= 10.0.0 requires C++17.
-        # https://github.com/apache/arrow/pull/13991
-        return "17"
+        if Version(self.version) >= "23.0.0":
+            # arrow >= 23.0.0 requires C++20.
+            # https://github.com/apache/arrow/issues/45885
+            return "20"
+        else:
+            # arrow >= 10.0.0 requires C++17.
+            # https://github.com/apache/arrow/pull/13991
+            return "17"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -158,7 +163,7 @@ class ArrowConan(ConanFile):
 
     def requirements(self):
         if self.options.with_thrift:
-            self.requires("thrift/0.20.0")
+            self.requires("thrift/[>=0.20.0 <=0.21.0]")
         if self.options.with_grpc:
             self.requires("grpc/[>=1.50.0 <2]")
         if self.options.with_protobuf:
@@ -168,7 +173,7 @@ class ArrowConan(ConanFile):
         if self.options.with_mimalloc:
             self.requires("mimalloc/[>=1.7.6 <3]")
         if self.options.with_boost:
-            self.requires("boost/[>=1.85.0 <=1.88.0]")
+            self.requires("boost/[>=1.85.0 <=1.90.0]")
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
         if self.options.with_glog:
