@@ -1,0 +1,13 @@
+diff --git a/kaitai/kaitaistream.cpp b/kaitai/kaitaistream.cpp
+index 2ad14a4..2e75efc 100644
+--- a/kaitai/kaitaistream.cpp
++++ b/kaitai/kaitaistream.cpp
+@@ -981,7 +981,7 @@ std::string kaitai::kstream::bytes_to_str(const std::string src, const char *src
+     return dst;
+ }
+ #elif defined(KS_STR_ENCODING_NONE)
+-std::string kaitai::kstream::bytes_to_str(const std::string src, const char *src_enc) {
++std::string kaitai::kstream::bytes_to_str(const std::string src, const char* /*src_enc*/) {
+     return src;
+ }
+ #elif defined(KS_STR_ENCODING_WIN32API)

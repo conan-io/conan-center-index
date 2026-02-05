@@ -1,4 +1,7 @@
 sources:
+  "0.11":
+    url: "https://github.com/kaitai-io/kaitai_struct_cpp_stl_runtime/archive/refs/tags/0.11.tar.gz"
+    sha256: "55f62b0d97e9f8df6db4e4577c6343d6ad95705a4ce6437bf25bf184c06840d2"
   "0.10.1":
     url: "https://github.com/kaitai-io/kaitai_struct_cpp_stl_runtime/archive/refs/tags/0.10.1.tar.gz"
     sha256: "19a7fb2d386d1bb14c04ffa514d26673444c71fef73246984e2a587dc5ae1ab2"
@@ -9,6 +12,10 @@ sources:
     url: "https://github.com/kaitai-io/kaitai_struct_cpp_stl_runtime/archive/cb09b3a84c7e905c6a3fecfe9617cf864d9af781.zip"
     sha256: "058c01828692bf193cb862372651c572fcc43babbf2d664674409511b9f54e5b"
 patches:
+  "0.11":
+    - patch_file: "patches/0.11-0001-fix-unused-parameter-warning.patch"
+      patch_description: "fix unused parameter warning treated as error on MSVC"
+      patch_type: "portability"
   "0.10.1":
     - patch_file: "patches/0.10.1-0001-remove-template-id.patch"
       patch_description: "rempte template-id from constructor/destructor"
