@@ -58,7 +58,7 @@ main(int argc, char** argv)
   B.load("A.txt");
 
   // submatrices
-  cout << "B( span(0,2), span(3,4) ):" << endl << B( span(0,2), span(3,4) ) << endl;
+  cout << "B( span(0,2), span(3,4) ):" << endl << B( arma::span(0,2), arma::span(3,4) ) << endl;
 
   cout << "B( 0,3, size(3,2) ):" << endl << B( 0,3, size(3,2) ) << endl;
 
