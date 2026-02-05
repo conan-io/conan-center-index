@@ -31,17 +31,19 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("abseil/20250814.0", transitive_headers=True)
+        self.requires("abseil/20250814.0", transitive_headers=True, transitive_libs=True)
         self.requires("bzip2/1.0.8")
         self.requires("coin-cbc/[>=2.10.5 <=2.10.12]")
         self.requires("coin-clp/[>=1.17.7 <=1.17.10]")
+        self.requires("coin-cgl/[>=0.60.3 <1]")
         self.requires("coin-osi/[>=0.108.7 <=0.108.11]")
         self.requires("coin-utils/[>=2.11.9 <3]")
         self.requires("eigen/[=3.4.0 <4]")
         self.requires("highs/1.12.0")
-        self.requires("protobuf/[>=6.32.1 <7]", transitive_headers=True)
+        self.requires("protobuf/[>=6.32.1 <7]", transitive_headers=True, transitive_libs=True)
         self.requires("re2/[>=20250812]")
         self.requires("scip/10.0.0")
+        self.requires("soplex/8.0.0")
         self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
@@ -64,12 +66,10 @@ class PackageConan(ConanFile):
         tc = CMakeToolchain(self)
         if is_msvc(self):
             tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        tc.cache_variables["BUILD_Boost"] = False
-        tc.cache_variables["BUILD_SCIP"] = False
-        tc.cache_variables["BUILD_soplex"] = False
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["BUILD_SAMPLES"] = False
         tc.cache_variables["BUILD_CXX_EXAMPLES"] = False
+        tc.cache_variables["INSTALL_BUILD_DEPS"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -117,7 +117,7 @@ class PackageConan(ConanFile):
         self.cpp_info.components["fzn"].set_property("cmake_target_name", "ortools::fzn")
 
         self.cpp_info.components["ortools"].set_property("cmake_target_name", "ortools::ortools")
-        self.cpp_info.components["ortools"].defines = ["OR_PROTO_DLL=;USE_MATH_OPT;USE_BOP;USE_CBC;USE_GLOP;USE_HIGHS;USE_PDLP;USE_SCIP"]
+        self.cpp_info.components["ortools"].defines = ["OR_PROTO_DLL=;USE_MATH_OPT;USE_BOP;USE_CBC;USE_CLP;USE_GLOP;USE_HIGHS;USE_PDLP;USE_SCIP"]
         self.cpp_info.components["ortools"].requires = [
             "zlib::zlib",
             "bzip2::bzip2",
@@ -157,13 +157,15 @@ class PackageConan(ConanFile):
             "re2::re2",
             "coin-cbc::libcbc",
             "coin-cbc::osi-cbc",
+            "coin-cgl::coin-cgl",
             "coin-clp::clp",
             "coin-clp::osi-clp",
             "coin-osi::libosi",
             "coin-utils::coin-utils",
             "highs::highs",
             "eigen::eigen3",
-            "scip::scip"
+            "scip::scip",
+            "soplex::soplex"
         ]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
