@@ -1,0 +1,9 @@
+sources:
+  "2.0.3":
+    url: "https://downloads.sourceforge.net/project/libmng/libmng-devel/2.0.3/libmng-2.0.3.tar.gz"
+    sha256: "CF112A1FB02F5B1C0FCE5CAB11EA8243852C139E669C44014125874B14B7DFAA"
+patches:
+  "2.0.3":
+    - patch_file: "patches/0001-define-true-false-libmng-jpeg.patch"
+      patch_description: "Fixes linux build without lcms"
+      patch_type: "portability"
