@@ -220,8 +220,8 @@ class Open62541Conan(ConanFile):
             raise ConanInvalidConfiguration(
                 "PubSub over Ethernet is not supported for your OS!")
 
-        # Due to https://github.com/open62541/open62541/issues/4687 we cannot build with Windows + shared
-        if self.settings.os == "Windows" and self.options.shared:
+        # Due to https://github.com/open62541/open62541/issues/4687 we cannot build with Windows + shared for old versions
+        if Version(self.version) < "1.5.0" and self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration(
                 f"{self.ref} doesn't properly support shared lib on Windows")
 
