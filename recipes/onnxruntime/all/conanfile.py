@@ -50,7 +50,7 @@ class OnnxRuntimeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"onnx/1.20.1")
+        self.requires("onnx/1.20.1")
         self.requires("abseil/[>=20240116.1 <=20250814.0]")
         self.requires("protobuf/[>=3.21.12 <7]")
         self.requires("date/[>=3.0.1 <3.1]")
