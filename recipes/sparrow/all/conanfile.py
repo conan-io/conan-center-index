@@ -30,26 +30,32 @@ class SparrowRecipe(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "use_date_polyfill": True,
+        "use_date_polyfill": None,
         "export_json_reader": False,
     }
 
     implements = ["auto_shared_fpic"]
 
     def config_options(self):
+        self.options.use_date_polyfill = Version(self.version) < "2.0.0"
+
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        if self.settings.os == "Macos":
+        # On macOS or libc++, date polyfill is not needed
+        if self.settings.os == "Macos" or self.settings.get_safe("compiler.libcxx") != "libstdc++":
             del self.options.use_date_polyfill
 
     @property
     def _uses_date_polyfill(self):
-        # Not an option not to use it on Macos
-        return self.options.get_safe("use_date_polyfill", True)
+        # On macOS or libstdc++, date polyfill is required
+        if self.settings.os == "Macos" or self.settings.get_safe("compiler.libcxx") == "libstdc++" or self.settings.get_safe("compiler.libcxx") == "libstdc++11" :
+            return True
+        # Otherwise use the option value, defaulting to False if option was removed
+        return self.options.get_safe("use_date_polyfill", False)
 
     def requirements(self):
-        if self._uses_date_polyfill:
+        if self._uses_date_polyfill or Version(self.version) < "2.0.0": # Because of a bug in the CMake files in <2.0.0, we have to get date unconditionally
             self.requires("date/[>=3.0.3 <4]", transitive_headers=True)
         if self.options.export_json_reader:
             self.requires("nlohmann_json/3.12.0", transitive_headers=True)
@@ -75,7 +81,7 @@ class SparrowRecipe(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.28 <4]")
+        self.tool_requires("cmake/[>=3.28]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -110,11 +116,11 @@ class SparrowRecipe(ConanFile):
     def package_info(self):
         postfix = "d" if (self.settings.build_type == "Debug" and Version(self.version) >= "1.3.0") else ""
         self.cpp_info.set_property("cmake_file_name", "sparrow")
-        
+
         # Main sparrow component
         self.cpp_info.components["sparrow"].set_property("cmake_target_name", "sparrow::sparrow")
         self.cpp_info.components["sparrow"].libs = [f"sparrow{postfix}"]
-        
+
         if not self.options.shared:
             self.cpp_info.components["sparrow"].defines.append("SPARROW_STATIC_LIB")
         if self._uses_date_polyfill:
@@ -122,7 +128,7 @@ class SparrowRecipe(ConanFile):
             self.cpp_info.components["sparrow"].requires.append("date::date")
         if is_msvc(self):
             self.cpp_info.components["sparrow"].defines.append("SPARROW_USE_LARGE_INT_PLACEHOLDERS")
-    
+
         # Optional json_reader component
         if self.options.export_json_reader:
             self.cpp_info.components["json_reader"].set_property("cmake_target_name", "sparrow::json_reader")
