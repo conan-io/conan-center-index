@@ -1,0 +1,5 @@
+sources:
+  "1.1.6":
+    url:
+    - "https://github.com/LiamBindle/MQTT-C/archive/refs/tags/v1.1.6.zip"
+    sha256: "738df934bdff56ffe2a04364822b5136180b9f3cab43fb2e48b20e7355adc6fa"
