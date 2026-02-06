@@ -1,0 +1,4 @@
+sources:
+  "3.0.3":
+    url: "https://github.com/Daskie/qc-hash/archive/refs/tags/v3.0.3.tar.gz"
+    sha256: "402B33C06850C92ECEC7981CAC599993DFE5CEB02D8A1EB41C354AFF2D09FC6B"
