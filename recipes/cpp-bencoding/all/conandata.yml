@@ -1,0 +1,4 @@
+sources:
+  "0.1":
+    url: "https://github.com/leha-bot/cpp-bencoding/archive/refs/heads/master.zip"
+    sha256: "688019760a4e77756475dd7bcc5e398d52fa0186060bdf28c96281caf031f39e"
