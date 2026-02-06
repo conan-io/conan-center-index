@@ -68,7 +68,7 @@ class mdnsdConan(ConanFile):
         tc.variables["MDNSD_COMPILE_AS_CXX"] = self.options.compile_as_cpp
         tc.variables["MDNSD_LOGLEVEL"] = self._get_log_level()
         tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if Version(self.version) > "0.8.4": # pylint: disable=conan-unreachable-upper-version
+        if Version(self.version) > "0.8.4.1": # pylint: disable=conan-unreachable-upper-version
             raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
 
         tc.generate()
