@@ -106,23 +106,23 @@ class DrogonConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_CTL"] = self.options.with_ctl
-        tc.variables["BUILD_EXAMPLES"] = False
-        tc.variables["BUILD_ORM"] = self.options.with_orm
-        tc.variables["COZ_PROFILING"] = self.options.with_profile
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["BUILD_DOC"] = False
-        tc.variables["BUILD_BROTLI"] = self.options.with_brotli
-        tc.variables["BUILD_YAML_CONFIG"] = self.options.get_safe("with_yaml_cpp", False)
-        tc.variables["BUILD_POSTGRESQL"] = self.options.get_safe("with_postgres", False)
-        tc.variables["LIBPQ_BATCH_MODE"] = self.options.get_safe("with_postgres_batch", False)
-        tc.variables["BUILD_MYSQL"] = self.options.get_safe("with_mysql", False)
-        tc.variables["BUILD_SQLITE"] = self.options.get_safe("with_sqlite", False)
-        tc.variables["BUILD_REDIS"] = self.options.get_safe("with_redis", False)
+        tc.cache_variables["BUILD_CTL"] = self.options.with_ctl
+        tc.cache_variables["BUILD_EXAMPLES"] = False
+        tc.cache_variables["BUILD_ORM"] = self.options.with_orm
+        tc.cache_variables["COZ_PROFILING"] = self.options.with_profile
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["BUILD_DOC"] = False
+        tc.cache_variables["BUILD_BROTLI"] = self.options.with_brotli
+        tc.cache_variables["BUILD_YAML_CONFIG"] = self.options.get_safe("with_yaml_cpp", False)
+        tc.cache_variables["BUILD_POSTGRESQL"] = self.options.get_safe("with_postgres", False)
+        tc.cache_variables["LIBPQ_BATCH_MODE"] = self.options.get_safe("with_postgres_batch", False)
+        tc.cache_variables["BUILD_MYSQL"] = self.options.get_safe("with_mysql", False)
+        tc.cache_variables["BUILD_SQLITE"] = self.options.get_safe("with_sqlite", False)
+        tc.cache_variables["BUILD_REDIS"] = self.options.get_safe("with_redis", False)
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         if is_msvc(self):
-            tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus /EHsc"
-        tc.variables["USE_SUBMODULE"] = False
+            tc.cache_variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus /EHsc"
+        tc.cache_variables["USE_SUBMODULE"] = False
         tc.generate()
         deps = CMakeDeps(self)
         if self.options.get_safe("with_mysql"):
