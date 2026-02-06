@@ -1,0 +1,27 @@
+From 3263f496b68cbc2ec898fcc87ee4caaac10fdd18 Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Fri, 31 Oct 2025 12:22:57 +0100
+Subject: [PATCH 2/5] Simply use conan find package for minizip
+
+---
+ Config.cmake/fmizip.cmake | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/Config.cmake/fmizip.cmake b/Config.cmake/fmizip.cmake
+index aa8a450..5fb5b4d 100644
+--- a/Config.cmake/fmizip.cmake
++++ b/Config.cmake/fmizip.cmake
+@@ -20,10 +20,6 @@ include(jmutil)
+ 
+ if(FMILIB_SYSTEM_MINIZIP)
+     find_package(MiniZip REQUIRED)
+-    add_library(minizip UNKNOWN IMPORTED)
+-    target_link_libraries(minizip INTERFACE ${MINIZIP_LIBRARY})
+-    target_include_directories(minizip INTERFACE ${MINIZIP_INCLUDE_DIR})
+-    set_target_properties(minizip PROPERTIES IMPORTED_LOCATION ${MINIZIP_LIBRARY})
+ else()
+     set(FMILIB_MINIZIP_SOURCE_DIR  ${ZLIB_SOURCE_DIR}/contrib/minizip)
+     set(FMILIB_MINIZIP_INCLUDE_DIR ${ZLIB_SOURCE_DIR}/contrib/minizip)
+-- 
+2.39.5
+
