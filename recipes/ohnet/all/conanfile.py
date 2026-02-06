@@ -79,7 +79,7 @@ class OhNetConan(ConanFile):
             args = self._fill_openhome_architecture(args)
             args.append("rsync=no")
             if str(self.settings.compiler.libcxx) == "libc++":
-                args.extend(["CPPFLAGS=-stdlib=libc++", "LDFLAGS=-stdlib=libc++"])
+                args.extend(["CPPFLAGS=-stdlib=libc++", "LDFLAGS=-stdlib=libc++", "PYTHON=python3"])
         return args
 
     def build(self):
