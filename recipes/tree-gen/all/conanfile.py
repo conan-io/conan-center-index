@@ -46,7 +46,7 @@ class TreeGenConan(ConanFile):
     def build_requirements(self):
         if self._should_build_test:
             self.test_requires("gtest/1.15.0")
-        self.tool_requires("m4/1.4.19")
+        self.tool_requires("m4/[>=1.4 <2]")
         if self.settings.os == "Windows":
             self.tool_requires("winflexbison/2.5.24")
         else:
