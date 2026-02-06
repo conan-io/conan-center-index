@@ -57,6 +57,7 @@ class GlslangConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires(f"spirv-headers/{self.version}")
         if self.options.enable_optimizer:
             self.requires(f"spirv-tools/{self.version}")
 
@@ -76,6 +77,7 @@ class GlslangConan(ConanFile):
             )
 
     def build_requirements(self):
+        self.tool_requires("python/3.11.4")
         if Version(self.version) >= "1.3.261":
             self.tool_requires("cmake/[>=3.17.2 <4]")
 

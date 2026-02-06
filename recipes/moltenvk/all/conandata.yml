@@ -1,4 +1,7 @@
 sources:
+  "1.4.0":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.4.0.tar.gz"
+    sha256: "FC74AEF926EE3CD473FE260A93819C09FDC939BFF669271A587E9EBAA43D4306"
   "1.3.0":
     url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.3.0.tar.gz"
     sha256: "9476033d49ef02776ebab288fffae3e28fd627a3e29b7ae5975a1e1c785bf912"
