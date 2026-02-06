@@ -30,9 +30,6 @@ find_package(nlohmann_json REQUIRED CONFIG)
 
 find_package(cpuinfo REQUIRED CONFIG)
 list(APPEND ONNXRUNTIME_CPUINFO_TARGETS cpuinfo::cpuinfo)
-if (TARGET cpuinfo::clog)
-  list(APPEND ONNXRUNTIME_CPUINFO_TARGETS cpuinfo::clog)
-endif()
 set(CPUINFO_SUPPORTED ${cpuinfo_FOUND})
 if(CPUINFO_SUPPORTED)
   if (CMAKE_SYSTEM_NAME STREQUAL "iOS")
@@ -98,7 +95,7 @@ endif()
 
 
 set(onnxruntime_EXTERNAL_LIBRARIES ${onnxruntime_EXTERNAL_LIBRARIES_XNNPACK} ${WIL_TARGET} nlohmann_json::nlohmann_json
-                                   onnx onnx_proto ${PROTOBUF_LIB} re2::re2 Boost::mp11 safeint_interface
+                                   onnx ${PROTOBUF_LIB} re2::re2 Boost::mp11 safeint_interface
                                    flatbuffers::flatbuffers ${GSL_TARGET} ${ABSEIL_LIBS} date::date
                                    ${ONNXRUNTIME_CPUINFO_TARGETS} Eigen3::Eigen)
 

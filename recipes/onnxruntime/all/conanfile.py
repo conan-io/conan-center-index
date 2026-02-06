@@ -1,5 +1,4 @@
 import os
-import sys
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -51,8 +50,7 @@ class OnnxRuntimeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        required_onnx_version = self.conan_data["onnx_version_map"][self.version]
-        self.requires(f"onnx/{required_onnx_version}")
+        self.requires("onnx/1.20.1")
         self.requires("abseil/[>=20240116.1 <=20250814.0]")
         self.requires("protobuf/[>=3.21.12 <7]")
         self.requires("date/[>=3.0.1 <3.1]")
@@ -81,10 +79,6 @@ class OnnxRuntimeConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires onnx compiled with `-o onnx:disable_static_registration=True`."
             )
-        if onnx.options.get_safe("shared"):
-            # Commented here: https://github.com/onnx/onnx/pull/7505#issuecomment-3601468150
-            raise ConanInvalidConfiguration("There are link errors using 'onnx/*:shared=True',"
-                                            " use '-o onnx/*:shared=False' instead.")
 
     def validate_build(self):
         if self.settings.os == "Windows" and self.dependencies["abseil"].options.shared:
@@ -102,7 +96,6 @@ class OnnxRuntimeConan(ConanFile):
         tc = CMakeToolchain(self)
         # disable downloading dependencies to ensure conan ones are used
         tc.variables["FETCHCONTENT_FULLY_DISCONNECTED"] = True
-
         tc.variables["onnxruntime_BUILD_SHARED_LIB"] = self.options.shared
         tc.variables["onnxruntime_USE_FULL_PROTOBUF"] = not self.dependencies["protobuf"].options.lite
         tc.variables["onnxruntime_USE_XNNPACK"] = self.options.with_xnnpack
