@@ -1,0 +1,31 @@
+version: 29.0
+#----------------------------------------------------------------------------
+requirements:
+    BACKWARD:   ["backward-cpp/1.6"]
+    UNWIND:     ["libunwind/[>=1.6.2 <=1.8.1]"]
+    BerkeleyDB: ["libdb/5.3.28"]
+    BZ2:        ["bzip2/1.0.8"]
+    CASSANDRA:  ["cassandra-cpp-driver/[>=2.15.3 <=2.17.1]"]
+    GIF:        ["giflib/[>=5.2.1 <=5.2.2]"]
+    GRPC:       ["grpc/[>=1.50.1 <=1.67.1]", "protobuf/[>=3.21.12 <=5.27.0]"]
+    Iconv:      ["libiconv/[>=1.17]"]
+    JPEG:       ["libjpeg/[>=9e <=9f]"]
+    LMDB:       ["lmdb/[>=0.9.29 <=0.9.32]"]
+    LZO:        ["lzo/2.10"]
+    NGHTTP2:    ["libnghttp2/[>=1.51.0 <=1.61.0]"]
+    PCRE:       ["pcre/8.45"]
+    PCRE2:      ["pcre2/10.42"]
+    PNG:        ["libpng/[>=1.6.37 <=1.6.44]"]
+    SQLITE3:    ["sqlite3/[>=3.40.0 <=3.47.1]"]
+    TIFF:       ["libtiff/[>=4.3.0 <=4.6.0]"]
+    XML:        ["libxml2/[>=2.11.4 <3]"]
+    XSLT:       ["libxslt/[>1.1.34 <=1.1.42]"]
+    UV:         ["libuv/[>=1.45.0 <=1.46.0]"]
+    Z:          ["zlib/[>=1.2.11 <2]"]
+    ZSTD:       ["zstd/[>=1.5.2 <=1.5.5]"]
+
+disabled:
+    BACKWARD:   ["Windows", "Macos"]
+    UNWIND:     ["Windows", "Macos"]
+    BerkeleyDB: ["Windows", "Macos"]
+    CASSANDRA:  ["Windows", "Macos"]
