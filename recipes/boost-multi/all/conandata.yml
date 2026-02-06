@@ -1,0 +1,4 @@
+sources:
+  "0.86.0":
+    url: "https://gitlab.com/correaa/boost-multi/-/archive/v0.86.0/boost-multi-v0.86.0.tar.gz"
+    sha256: "acef5af28e34b1678a213754e0957971f4a56fb3524499da618d12175ec79ded"
