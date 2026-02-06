@@ -55,7 +55,8 @@ Prefix = {path}""")
                 self.run(bin_macos_path, env="conanrun")
 
         # Check that the directory exposed in the configuration exists and includes moc
-        qt_tools_dir = self.dependencies.host["qt"].conf_info.get("user.qt:tools_directory")
-        assert os.path.isdir(qt_tools_dir)
-        moc = os.path.join(qt_tools_dir, "moc.exe" if self.settings.os == "Windows" else "moc")
-        assert os.path.exists(moc)
+        if self.settings.os not in ["iOS", "tvOS", "watchOS"]:
+            qt_tools_dir = self.dependencies.host["qt"].conf_info.get("user.qt:tools_directory")
+            assert os.path.isdir(qt_tools_dir)
+            moc = os.path.join(qt_tools_dir, "moc.exe" if self.settings.os == "Windows" else "moc")
+            assert os.path.exists(moc)
