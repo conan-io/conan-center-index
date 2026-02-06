@@ -137,7 +137,7 @@ class DrogonConan(ConanFile):
         if self.options.get_safe("with_yaml_cpp"):
             deps.set_property("yaml-cpp", "cmake_additional_variables_prefixes", ["YAML_CPP"])
         deps.set_property("jsoncpp", "cmake_file_name", "JsonCpp")
-        deps.set_property("jsoncpp", "cmake_target_name", "JsonCpp_lib")
+        deps.set_property("jsoncpp", "cmake_target_name", "Jsoncpp_lib")
         deps.generate()
 
     def build(self):
