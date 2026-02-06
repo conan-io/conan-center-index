@@ -1,0 +1,4 @@
+sources:
+  "3.3.1":
+    url: "https://download.qt.io/official_releases/vsaddin/3.3.1/qt-vsaddin-msbuild-3.3.1.zip"
+    sha256: "fb3c9396dadba1bfcf69a5c0001935049c9a62f6a468e75e87844497bb358338"
