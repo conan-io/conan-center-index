@@ -11,7 +11,10 @@ sources:
 patches:
   "8.6.13":
     - patch_file: "patches/0001-8.6.11-no-read-only-data.patch"
+    - patch_file: "patches/0002-8.6.13-make-libs-owner-writable.patch"
   "8.6.11":
     - patch_file: "patches/0001-8.6.11-no-read-only-data.patch"
+    - patch_file: "patches/0002-8.6.11-make-libs-owner-writable.patch"
   "8.6.10":
     - patch_file: "patches/0001-8.6.10-no-read-only-data.patch"
+    - patch_file: "patches/0002-8.6.10-make-libs-owner-writable.patch"

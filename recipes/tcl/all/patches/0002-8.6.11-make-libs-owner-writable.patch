@@ -1,0 +1,11 @@
+--- unix/Makefile.in
++++ unix/Makefile.in
+@@ -891,7 +891,7 @@
+ 	    done;
+ 	@echo "Installing $(LIB_FILE) to $(DLL_INSTALL_DIR)/"
+ 	@@INSTALL_LIB@
+-	@chmod 555 "$(DLL_INSTALL_DIR)/$(LIB_FILE)"
++	@chmod 755 "$(DLL_INSTALL_DIR)/$(LIB_FILE)"
+ 	@echo "Installing ${TCL_EXE} as $(BIN_INSTALL_DIR)/tclsh$(VERSION)${EXE_SUFFIX}"
+ 	@$(INSTALL_PROGRAM) ${TCL_EXE} "$(BIN_INSTALL_DIR)/tclsh$(VERSION)${EXE_SUFFIX}"
+ 	@echo "Installing tclConfig.sh to $(CONFIG_INSTALL_DIR)/"
