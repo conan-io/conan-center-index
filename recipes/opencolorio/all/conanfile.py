@@ -22,12 +22,36 @@ class OpenColorIOConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "use_sse": [True, False],
+
+        # OCIO supports a number of optimized code paths using different SIMD instruction sets.
+        # By default it will determin the support of the current platform. A setting of none keeps
+        # those defaults, True or False will intentionally set the values.
+        # OCIO_USE_SSE was an option in older versions (< 2.3.2), newer versions support the following
+        # instruction sets OCIO_USE_SSE2 up to OCIO_USE_AVX512 (no pure SSE anymore).
+        "use_sse": [None, True, False],
+        "use_sse2": [None, True, False],
+        "use_sse3": [None, True, False],
+        "use_ssse3": [None, True, False],
+        "use_sse4": [None, True, False],
+        "use_sse42": [None, True, False],
+        "use_avx": [None, True, False],
+        "use_avx2": [None, True, False],
+        "use_avx512": [None, True, False],
+        "use_f16c": [None, True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "use_sse": True,
+        "use_sse": None,
+        "use_sse2": None,
+        "use_sse3": None,
+        "use_ssse3": None,
+        "use_sse4": None,
+        "use_sse42": None,
+        "use_avx": None,
+        "use_avx2": None,
+        "use_avx512": None,
+        "use_f16c": None,
     }
 
     def export_sources(self):
@@ -36,8 +60,9 @@ class OpenColorIOConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.arch not in ["x86", "x86_64"]:
-            del self.options.use_sse
+        # Reproduce the previous default which was injected instead of letting it be determined
+        if self.options.get_safe("use_sse", None) == None:
+            self.options.use_sse = self.settings.arch in ["x86", "x86_64"]
 
     def configure(self):
         if self.options.shared:
@@ -83,7 +108,37 @@ class OpenColorIOConan(ConanFile):
         tc.variables["CMAKE_VERBOSE_MAKEFILE"] = True
         tc.variables["OCIO_BUILD_PYTHON"] = False
 
-        tc.variables["OCIO_USE_SSE"] = self.options.get_safe("use_sse", False)
+        # Selection of SIMD Instruction sets
+        if not self.options.get_safe("use_sse", None) == None:
+            print('Set OCIO_USE_SSE to ', self.options.use_sse)
+            tc.variables["OCIO_USE_SSE"] = self.options.use_sse
+        if not self.options.get_safe("use_sse2", None) == None:
+            print('Set OCIO_USE_SSE2 to ', self.options.use_sse2)
+            tc.variables["OCIO_USE_SSE2"] = self.options.use_sse2
+        if not self.options.get_safe("use_sse3", None) == None:
+            print('Set OCIO_USE_SSE3 to ', self.options.use_sse3)
+            tc.variables["OCIO_USE_SSE3"] = self.options.use_sse3
+        if not self.options.get_safe("use_ssse3", None) == None:
+            print('Set OCIO_USE_SSSE3 to ', self.options.use_ssse3)
+            tc.variables["OCIO_USE_SSSE3"] = self.options.use_ssse3
+        if not self.options.get_safe("use_sse4", None) == None:
+            print('Set OCIO_USE_SSE4 to ', self.options.use_sse4)
+            tc.variables["OCIO_USE_SSE4"] = self.options.use_sse4
+        if not self.options.get_safe("use_sse42", None) == None:
+            print('Set OCIO_USE_SSE42 to ', self.options.use_sse42)
+            tc.variables["OCIO_USE_SSE42"] = self.options.use_sse42
+        if not self.options.get_safe("use_avx", None) == None:
+            print('Set OCIO_USE_AVX to ', self.options.use_avx)
+            tc.variables["OCIO_USE_AVX"] = self.options.use_avx
+        if not self.options.get_safe("use_avx2", None) == None:
+            print('Set OCIO_USE_AVX2 to ', self.options.use_avx2)
+            tc.variables["OCIO_USE_AVX2"] = self.options.use_avx2
+        if not self.options.get_safe("use_avx512", None) == None:
+            print('Set OCIO_USE_AVX512 to ', self.options.use_avx512)
+            tc.variables["OCIO_USE_AVX512"] = self.options.use_avx512
+        if not self.options.get_safe("use_f16c", None) == None:
+            print('Set OCIO_USE_F16C to ', self.options.use_f16c)
+            tc.variables["OCIO_USE_F16C"] = self.options.use_f16c
 
         # openexr 2.x provides Half library
         tc.variables["OCIO_USE_OPENEXR_HALF"] = True
