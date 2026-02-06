@@ -120,6 +120,7 @@ class DrogonConan(ConanFile):
         tc.cache_variables["BUILD_SQLITE"] = self.options.get_safe("with_sqlite", False)
         tc.cache_variables["BUILD_REDIS"] = self.options.get_safe("with_redis", False)
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
         if is_msvc(self):
             tc.cache_variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus /EHsc"
         tc.cache_variables["USE_SUBMODULE"] = False
