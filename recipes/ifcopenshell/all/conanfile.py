@@ -2,10 +2,9 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rm, rmdir
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rmdir
 
 required_conan_version = ">=2.1"
 
@@ -57,6 +56,8 @@ class IfcopenshellConan(ConanFile):
         self.requires("boost/1.83.0", transitive_headers=True, transitive_libs=True)
         # Used in public serializers/HdfSerializer.h, ifcgeom/kernels/opencascade/IfcGeomTree.h
         self.requires("hdf5/[^1.8]", transitive_headers=True, transitive_libs=True)
+        # TODO: Enable once fixed segfaults in the test package
+        self.requires("rocksdb/[^10.5.1]")
         self.requires("opencascade/[^7.8]", transitive_headers=True, transitive_libs=True)
         # ifcgeom/taxonomy.h
         self.requires("eigen/3.4.0", transitive_headers=True)
@@ -74,6 +75,7 @@ class IfcopenshellConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["SCHEMA_VERSIONS"] = ";".join(self._selected_ifc_schemas)
         tc.cache_variables["USE_MMAP"] = True
+        tc.cache_variables["USE_ROCKSDB"] = True
         tc.cache_variables["BUILD_CONVERT"] = False
         tc.cache_variables["BUILD_GEOMSERVER"] = False
         tc.cache_variables["COLLADA_SUPPORT"] = False
@@ -122,6 +124,9 @@ class IfcopenshellConan(ConanFile):
         # For IFCXML support
         ifcparse.requires.append("libxml2::libxml2")
         ifcparse.defines.append("WITH_IFCXML")
+        # TODO: Enable once fixed segfaults in the test package
+        # ifcparse.requires.append("rocksdb::rocksdb")
+        # ifcparse.defines.append("IFOPSH_WITH_ROCKSDB")
         ifcparse.defines.append(f"SCHEMA_SEQ=({')('.join(self._selected_ifc_schemas)})")
         for schema in self._selected_ifc_schemas:
             ifcparse.defines.append(f"HAS_SCHEMA_{schema}")
