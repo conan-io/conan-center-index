@@ -25,6 +25,7 @@ runs:
         echo "[options]" >> "$DEFAULT_PROFILE"
         echo "boost/*:pch=False" >> "$DEFAULT_PROFILE"
         echo "boost/*:extra_b2_flags=-d2" >> "$DEFAULT_PROFILE"
+        echo "*/*:without_cobalt=True" >> "$DEFAULT_PROFILE"
         if [[ "$RUNNER_OS" == "Windows" ]]; then
           if [[ "$RUNNER_ARCH" == "ARM64" ]]; then
             echo "xnnpack/*:assembly=False" >> "$DEFAULT_PROFILE"
