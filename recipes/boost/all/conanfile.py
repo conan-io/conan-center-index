@@ -1760,6 +1760,10 @@ class BoostConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Boost"
         self.cpp_info.names["cmake_find_package_multi"] = "Boost"
 
+        if self.options.header_only:
+            self.cpp_info.libdirs = []
+            self.cpp_info.bindirs = []
+
         # - Use 'headers' component for all includes + defines
         # - Use '_libboost' component to attach extra system_libs, ...
 
