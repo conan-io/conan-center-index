@@ -27,7 +27,7 @@ class ThorvgConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_engines": ['sw', 'gl_beta', 'wg_beta', "gl"],
+        "with_engines": ['sw', 'gl_beta', 'wg_beta', "gl", "wg", "all"],
         "with_loaders": [False, 'tvg', 'svg', 'png', 'jpg', 'lottie', 'ttf', 'webp', 'all'],
         "with_savers": [False, 'tvg', 'gif', 'all'],
         "with_bindings": [False, 'capi', 'wasm_beta'],
@@ -35,7 +35,9 @@ class ThorvgConan(ConanFile):
         "with_threads": [True, False],
         "with_simd": [True, False],
         "with_examples": [True, False],
-        "with_extra": [False, 'lottie_expressions'],
+        "with_lottie_exp": [False, True],
+        "with_openmp": [False, True],
+        "with_gl_variant": [False, True],
         "with_file": [True, False],
     }
     default_options = {
@@ -49,7 +51,9 @@ class ThorvgConan(ConanFile):
         "with_threads": True,
         "with_simd": False,
         "with_examples": False,
-        "with_extra": 'lottie_expressions',
+        "with_lottie_exp": True,
+        "with_openmp": False,
+        "with_gl_variant": False,
         "with_file": True,
     }
     # See more here: https://github.com/thorvg/thorvg/blob/main/meson_options.txt
@@ -62,7 +66,9 @@ class ThorvgConan(ConanFile):
         "with_bindings": "Enable API bindings",
         "with_tools": "Enable building thorvg tools",
         "with_examples": "Enable building examples",
-        "with_extra": "Enable support for exceptionally advanced features",
+        "with_lottie_exp": "Enable support for Lottie Expressions",
+        "with_openmp": "Enable support for OpenMP",
+        "with_gl_variant": "Enable support for OpenGL Variant",
     }
     short_paths = True
 
@@ -111,6 +117,24 @@ class ThorvgConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support with_engines=gl, use with_engines=gl_beta instead")
         if Version(self.version) >= "0.14.0" and self.options.with_engines in ["gl_beta"]:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support with_engines=gl_beta, use with_engines=gl instead")
+        if Version(self.version) < "1.0.0" and self.options.with_engines in ["wg"]:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support with_engines=wg, use with_engines=wg_beta instead")
+        if Version(self.version) >= "1.0.0" and self.options.with_engines in ["wg_beta"]:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support with_engines=wg_beta, use with_engines=wg instead")
+        if Version(self.version) < "1.0.0" and self.options.with_engines in ["all"]:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support with_engines=all")
+        if Version(self.version) >= "1.0.0" and self.options.with_loaders in ["tvg"]:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support with_loaders=tvg")
+        if Version(self.version) >= "1.0.0" and self.options.with_savers in ["tvg"]:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support with_savers=tvg")
+        if Version(self.version) >= "1.0.0" and self.options.with_bindings in ["wasm_beta"]:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support with_bindings=wasm_beta")
+        if Version(self.version) >= "1.0.0" and self.options.with_tools in ["svg2tvg"]:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support with_tools=svg2tvg")
+        if Version(self.version) < "1.0.0" and self.options.with_openmp is True:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support with_openmp=True")
+        if Version(self.version) < "1.0.0" and self.options.with_gl_variant is True:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support with_gl_variant=True")
 
     def requirements(self):
         loaders_opt = str(self.options.with_loaders)
@@ -142,7 +166,6 @@ class ThorvgConan(ConanFile):
             "bindings": str(self.options.with_bindings) if self.options.with_bindings else '',
             "tools": str(self.options.with_tools )if self.options.with_tools else '',
             "threads": bool(self.options.with_threads),
-            "examples": bool(self.options.with_examples),
             "tests": False,
             "log": is_debug,
         })
@@ -150,10 +173,22 @@ class ThorvgConan(ConanFile):
         if is_msvc(self) and is_debug:
             tc.project_options["optimization"] = "plain"
         tc.project_options["simd"] = bool(self.options.with_simd)
-        if self.options.with_extra:
-            tc.project_options["extra"] = str(self.options.with_extra)
+        extras = []
+        if self.options.with_lottie_exp:
+            if Version(self.version) < "1.0.0":
+                extras.append("lottie_expressions")
+            else:
+                extras.append("lottie_exp")
+        if self.options.with_openmp:
+            extras.append("openmp")
+        if self.options.with_gl_variant:
+            extras.append("gl_variant")
+        if extras:
+            tc.project_options["extra"] = ",".join(extras)
         if "with_file" in self.options:
             tc.project_options["file"] = self.options.with_file
+        if Version(self.version) < "1.0.0":
+            tc.project_options["examples"] = bool(self.options.with_examples)
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
@@ -165,8 +200,8 @@ class ThorvgConan(ConanFile):
         if is_msvc(self) and self.options.shared:
             replace_in_file(self, os.path.join(self.source_folder, "meson.build"), ", 'strip=true'", "")
 
-        # TODO: As OpenMP is tagged as "required: false", let's disable it for now to avoid extra flags and requirements injections.
-        if Version(self.version) >= "0.15.1" and self.options.with_threads:
+        if Version(self.version) >= "0.15.1" and Version(self.version) < "1.0.0" and self.options.with_threads:
+            # As OpenMP is tagged as "required: false", let's disable it for now to avoid extra flags and requirements injections.
             # Notice that the use of disabler() is not working here. If it's used, there is no targets to build.
             replace_in_file(self, os.path.join(self.source_folder, "src", "renderer", "sw_engine", "meson.build"),
                             "omp_dep = dependency('openmp', required: false)",
@@ -193,7 +228,10 @@ class ThorvgConan(ConanFile):
             rename(self, os.path.join(self.package_folder, "lib", "libthorvg.a"), os.path.join(self.package_folder, "lib", "thorvg.lib"))
 
     def package_info(self):
-        self.cpp_info.libs = ["thorvg"]
+        if Version(self.version) >= "1.0.0":
+            self.cpp_info.libs = ["thorvg-1"]
+        else:
+            self.cpp_info.libs = ["thorvg"]
 
         self.cpp_info.set_property("pkg_config_name", "libthorvg")
         if self.settings.os in ["Linux", "FreeBSD"]:
