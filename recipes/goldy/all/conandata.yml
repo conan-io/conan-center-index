@@ -1,0 +1,23 @@
+sources:
+  "0.1.0":
+    url: "https://github.com/koubaa/goldy/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "cd3cfd4cd313bd8f0cb48dd58da098fa572e861198fafac101e49096e5748da8"
+
+binaries:
+  "0.1.0":
+    "Windows":
+      "x86_64":
+        url: "https://github.com/koubaa/goldy/releases/download/v0.1.0/goldy_ffi-windows-x64.zip"
+        sha256: "7abd86b278756c8c73171ef2df4f248667e0fbcaab5f23dc2521ca569bead7a9"
+    "Linux":
+      "x86_64":
+        url: "https://github.com/koubaa/goldy/releases/download/v0.1.0/goldy_ffi-linux-x64.tar.gz"
+        sha256: "ccbc4152b4867c3bc5261ae56a046b087d76bf51063424799365711d52f49c01"
+    "Macos":
+      "x86_64":
+        url: "https://github.com/koubaa/goldy/releases/download/v0.1.0/goldy_ffi-macos-x64.tar.gz"
+        sha256: "632a12c2daf6cceb2cb4b5306e049abd613f6a309d62a329421acaa34070d7ce"
+      "armv8":
+        url: "https://github.com/koubaa/goldy/releases/download/v0.1.0/goldy_ffi-macos-arm64.tar.gz"
+        sha256: "53bdf0a288f39f6044d18851d9c41afdab35260929f64665cacac0630003aa34"
+
