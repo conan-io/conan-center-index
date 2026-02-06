@@ -58,6 +58,8 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
         else:
             tc.variables["STRING_ENCODING_TYPE"] = "NONE"
         tc.variables["BUILD_TESTS"] = False
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_ZLIB"] = not self.options.with_zlib
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Iconv"] = not self.options.with_iconv
         tc.generate()
 
         deps = CMakeDeps(self)
