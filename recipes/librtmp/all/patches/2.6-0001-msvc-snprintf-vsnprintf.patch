@@ -1,0 +1,17 @@
+--- a/librtmp/rtmp_sys.h
++++ b/librtmp/rtmp_sys.h
+@@ -28,11 +28,13 @@
+ #include <ws2tcpip.h>
+ 
+ #ifdef _MSC_VER	/* MSVC */
+-#define snprintf _snprintf
+ #define strcasecmp stricmp
+ #define strncasecmp strnicmp
++#if _MSC_VER < 1900
++#define snprintf _snprintf
+ #define vsnprintf _vsnprintf
+ #endif
++#endif
+ 
+ #define GetSockError()	WSAGetLastError()
+ #define SetSockError(e)	WSASetLastError(e)
