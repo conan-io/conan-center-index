@@ -113,7 +113,7 @@ class GrpcConan(ConanFile):
             self.requires("protobuf/3.21.12", transitive_headers=True)
         self.requires("c-ares/[>=1.19.1 <2]")
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("re2/20230301")
+        self.requires("re2/[>=20230301]")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_libsystemd"):
             if Version(self.version) >= "1.67.0":
