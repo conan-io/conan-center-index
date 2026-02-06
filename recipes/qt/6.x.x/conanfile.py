@@ -59,8 +59,7 @@ class QtConan(ConanFile):
         "with_zstd": [True, False],
         "with_brotli": [True, False],
         "with_dbus": [True, False],
-        "with_libalsa": [True, False],
-        "with_openal": [True, False],
+        "with_ffmpeg": [True, False],
         "with_gstreamer": [True, False],
         "with_pulseaudio": [True, False],
         "with_gssapi": [True, False],
@@ -101,8 +100,7 @@ class QtConan(ConanFile):
         "with_zstd": False,
         "with_brotli": True,
         "with_dbus": False,
-        "with_libalsa": False,
-        "with_openal": True,
+        "with_ffmpeg": True,
         "with_gstreamer": False,
         "with_pulseaudio": False,
         "with_gssapi": False,
@@ -166,7 +164,6 @@ class QtConan(ConanFile):
             del self.options.with_icu
             del self.options.with_fontconfig
             self.options.with_glib = False
-            del self.options.with_libalsa
             del self.options.with_x11
             del self.options.with_egl
 
@@ -242,8 +239,6 @@ class QtConan(ConanFile):
                 setattr(self.options, module, False)
 
         if not self.options.get_safe("qtmultimedia"):
-            self.options.rm_safe("with_libalsa")
-            del self.options.with_openal
             del self.options.with_gstreamer
             del self.options.with_pulseaudio
 
@@ -319,8 +314,6 @@ class QtConan(ConanFile):
         if "MT" in self.settings.get_safe("compiler.runtime", default="") and self.options.shared:
             raise ConanInvalidConfiguration("Qt cannot be built as shared library with static runtime")
 
-        if self.options.get_safe("with_pulseaudio", False) or self.options.get_safe("with_libalsa", False):
-            raise ConanInvalidConfiguration("alsa and pulseaudio are not supported (QTBUG-95116), please disable them.")
         if not self.options.with_pcre2:
             raise ConanInvalidConfiguration("pcre2 is actually required by qt (QTBUG-92454). please use option qt:with_pcre2=True")
 
@@ -384,10 +377,6 @@ class QtConan(ConanFile):
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.11")
-        if self.options.get_safe("with_openal", False):
-            self.requires("openal-soft/1.22.2")
-        if self.options.get_safe("with_libalsa", False):
-            self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_x11") or self.options.qtwayland:
             self.requires("xkbcommon/1.5.0")
         if self.options.get_safe("with_x11", False):
@@ -409,6 +398,8 @@ class QtConan(ConanFile):
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.93")
             self.requires("libdrm/2.4.119")
+        if self.options.get_safe("with_ffmpeg", False):
+            self.requires("ffmpeg/[>=6.1 <8.1]")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gstreamer/1.19.2")
             self.requires("gst-plugins-base/1.19.2")
@@ -1426,12 +1417,10 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("qtmultimedia"):
             multimedia_reqs = ["Network", "Gui"]
-            if self.options.get_safe("with_libalsa", False):
-                multimedia_reqs.append("libalsa::libalsa")
-            if self.options.with_openal:
-                multimedia_reqs.append("openal-soft::openal-soft")
             if self.options.get_safe("with_pulseaudio", False):
                 multimedia_reqs.append("pulseaudio::pulse")
+            if self.options.get_safe("with_ffmpeg", False):
+                multimedia_reqs.append("ffmpeg::ffmpeg")
             _create_module("Multimedia", multimedia_reqs)
             _create_module("MultimediaWidgets", ["Multimedia", "Widgets", "Gui"])
             if self.options.qtdeclarative and qt_quick_enabled:
