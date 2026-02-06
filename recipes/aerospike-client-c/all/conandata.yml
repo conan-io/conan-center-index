@@ -1,0 +1,24 @@
+sources:
+  "6.6.0":
+    url: "https://github.com/aerospike/aerospike-client-c/archive/refs/tags/6.6.0.tar.gz"
+    sha256: 9de182b55a1f0a6a10be66654b580de6b527c94144cd6688140b61181e0fc54d
+  "7.2.1":
+    url: "https://github.com/aerospike/aerospike-client-c/archive/refs/tags/7.2.1.tar.gz"
+    sha256: 2e9d0d1a53fd55cc5aed1b622c95c05b018fbfdd9faf77f15c61767d3022658c
+patches:
+  "6.6.0":
+    - patch_file: "patches/6.6.0-0001_remove_internal_lua.patch"
+      patch_description: "prevent build and linking with lua submodule for base project"
+      patch_type: conan
+    - patch_file: "patches/6.6.0-0002_remove_internal_lua_from_submodules.patch"
+      patch_description: "prevent build and linking with lua submodule for mod_lua submodule"
+      base_path: modules/mod-lua
+      patch_type: conan
+  "7.2.1":
+    - patch_file: "patches/7.2.1-0001_remove_internal_lua.patch"
+      patch_description: "prevent build and linking with lua submodule for base project"
+      patch_type: conan
+    - patch_file: "patches/7.2.1-0002_remove_internal_lua_from_submodules.patch"
+      patch_description: "prevent build and linking with lua submodule for mod_lua submodule"
+      base_path: modules/mod-lua
+      patch_type: conan
