@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
-from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rmdir
+from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 
@@ -49,9 +49,6 @@ class DrogonConan(ConanFile):
         "with_sqlite": False,
         "with_redis": False,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -134,10 +131,18 @@ class DrogonConan(ConanFile):
         if self.options.get_safe("with_brotli"):
             deps.set_property("brotli", "cmake_file_name", "Brotli")
             deps.set_property("brotli", "cmake_target_name", "Brotli_lib")
+        if self.options.get_safe("with_sqlite"):
+            deps.set_property("sqlite3", "cmake_target_name", "SQLite3_lib")
+        if self.options.get_safe("with_redis"):
+            deps.set_property("hiredis", "cmake_file_name", "Hiredis")
+            deps.set_property("hiredis", "cmake_target_name", "Hiredis_lib")
+        if self.options.get_safe("with_yaml_cpp"):
+            deps.set_property("yaml-cpp", "cmake_additional_variables_prefixes", ["YAML_CPP"])
+        deps.set_property("jsoncpp", "cmake_file_name", "JsonCpp")
+        deps.set_property("jsoncpp", "cmake_target_name", "JsonCpp_lib")
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
