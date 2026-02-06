@@ -1,0 +1,26 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index fa21f60..06eeedf 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -61,7 +61,7 @@ endif()
+ 
+ find_package(Threads REQUIRED)
+ 
+-include(cmake/ThirdPartyDependencies.cmake)
++include(cmake/ConanThirdPartyDependencies.cmake)
+ 
+ include(cmake/VersionInfo.cmake)
+ 
+diff --git a/cmake/ThirdPartyDependencies.cmake b/cmake/ThirdPartyDependencies.cmake
+index fbd2c25..025b513 100644
+--- a/cmake/ThirdPartyDependencies.cmake
++++ b/cmake/ThirdPartyDependencies.cmake
+@@ -122,7 +122,7 @@ if(NOT TARGET snappy)
+     "SNAPPY_BUILD_TESTS OFF"
+     "SNAPPY_BUILD_BENCHMARKS OFF")
+ endif()
+-if(NOT MSVC)
++if(snappy_ADDED AND NOT MSVC)
+   # https://github.com/google/snappy/pull/156
+   target_compile_options(snappy PRIVATE -Wno-sign-compare)
+ endif()
