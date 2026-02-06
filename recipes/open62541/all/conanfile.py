@@ -191,8 +191,11 @@ class Open62541Conan(ConanFile):
         if self.options.discovery == "With Multicast" or "multicast" in str(self.options.discovery):
             self.requires("pro-mdnsd/0.8.4")
         if self.options.get_safe("nodeset_loader"):
-            # version 1.4.11.1 with libxml2 2.14.x doesnt work because open62541 uses deprecated/remove APIs
-            self.requires("libxml2/[>=2.12.5 <=2.13.8]")
+            if Version(self.version) >= "1.5.0":
+                self.requires("libxml2/[>=2.12.5 <3]")
+            else:
+                # version 1.4.11.1 with libxml2 2.14.x doesnt work because open62541 uses deprecated/remove APIs
+                self.requires("libxml2/[>=2.12.5 <=2.13.8]")
 
     def validate(self):
         if not self.options.subscription:
@@ -217,8 +220,8 @@ class Open62541Conan(ConanFile):
             raise ConanInvalidConfiguration(
                 "PubSub over Ethernet is not supported for your OS!")
 
-        # Due to https://github.com/open62541/open62541/issues/4687 we cannot build with Windows + shared
-        if self.settings.os == "Windows" and self.options.shared:
+        # Due to https://github.com/open62541/open62541/issues/4687 we cannot build with Windows + shared for old versions
+        if Version(self.version) < "1.5.0" and self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration(
                 f"{self.ref} doesn't properly support shared lib on Windows")
 
@@ -231,8 +234,8 @@ class Open62541Conan(ConanFile):
             # NodesetLoader requires parsing to be enabled
             raise ConanInvalidConfiguration("When nodeset_loader is enabled, then parsing has to be enabled too.")
 
-        if self.options.get_safe("nodeset_loader") and Version(self.version) >= "1.4.13":
-            raise ConanInvalidConfiguration("nodeset_loader option does not work properly with this version - contributions welcome")
+        if self.options.get_safe("nodeset_loader") and Version(self.version) >= "1.4.13" and Version(self.version) < "1.5.0":
+            raise ConanInvalidConfiguration("nodeset_loader option does not work properly with this version - fixed in 1.5.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

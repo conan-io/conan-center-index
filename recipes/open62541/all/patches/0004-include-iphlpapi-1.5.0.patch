@@ -1,0 +1,15 @@
+diff --git a/src/util/ua_util.c b/src/util/ua_util.c
+index 5b31d8f29..7a5f697a2 100644
+--- a/src/util/ua_util.c
++++ b/src/util/ua_util.c
+@@ -11,6 +11,10 @@
+  * unit for the generated code from UA_INLINABLE definitions. */
+ #define UA_INLINABLE_IMPL 1
+ 
++#if defined(_WIN32)
++#  include <winsock2.h>
++#  include <iphlpapi.h>
++#endif
+ #include <open62541/types.h>
+ #include <open62541/server.h>
+ #include <open62541/util.h>
