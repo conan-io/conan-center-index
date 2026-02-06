@@ -52,6 +52,8 @@ class UsrsctpConan(ConanFile):
         tc.variables["sctp_build_shared_lib"] = self.options.shared
         tc.variables["sctp_build_programs"] = False
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
+        # Disable net/route.h for iOS (header not available in iOS SDK)
+        tc.variables["USE_NET_ROUTE_H"] = self.settings.os != "iOS"
         tc.generate()
 
     def _patch_sources(self):
@@ -59,7 +61,12 @@ class UsrsctpConan(ConanFile):
         # Fix "The CMake policy CMP0091 must be NEW, but is ''"
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "project(usrsctplib C)\ncmake_minimum_required(VERSION 3.0)",
-                        "cmake_minimum_required(VERSION 3.15)\nproject(usrsctplib C)")
+                        "cmake_minimum_required(VERSION 3.15)\nproject(usrsctplib C)",
+                        strict=False)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "project(usrsctplib C)\ncmake_minimum_required(VERSION 3.0...3.10)",
+                        "cmake_minimum_required(VERSION 3.15)\nproject(usrsctplib C)",
+                        strict=False)
 
     def build(self):
         self._patch_sources()

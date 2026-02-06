@@ -1,0 +1,16 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -110,7 +110,12 @@ if (have_netinet_ip_icmp_h)
+ 	add_definitions(-DHAVE_NETINET_IP_ICMP_H)
+ endif ()
+
+-check_include_files("sys/types.h;sys/socket.h;net/route.h" have_net_route_h)
++option(USE_NET_ROUTE_H "Use net/route.h header (disable for iOS)" ON)
++if(USE_NET_ROUTE_H)
++	check_include_files("sys/types.h;sys/socket.h;net/route.h" have_net_route_h)
++else()
++	set(have_net_route_h FALSE)
++endif()
+ if (have_net_route_h)
+ 	add_definitions(-DHAVE_NET_ROUTE_H)
+ endif ()
