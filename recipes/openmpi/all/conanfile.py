@@ -62,6 +62,7 @@ class OpenMPIConan(ConanFile):
         # transitive_headers=True is not needed for any dependencies.
         self.requires("hwloc/2.12.2")
         self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("libevent/2.1.12")
         if self.settings.os == "Linux":
             self.requires("libnl/3.8.0")
         if self.options.get_safe("with_verbs"):
@@ -92,6 +93,7 @@ class OpenMPIConan(ConanFile):
             f"--enable-mpi-cxx={yes_no(self.options.enable_cxx)}",
             f"--enable-cxx-exceptions={yes_no(self.options.get_safe('enable_cxx_exceptions'))}",
             f"--with-hwloc={root('hwloc')}",
+            f"--with-libevent={root('libevent')}",
             f"--with-libnl={root('libnl') if not is_apple_os(self) else 'no'}",
             f"--with-verbs={root('rdma-core') if self.options.get_safe('with_verbs') else 'no'}",
             f"--with-zlib={root('zlib')}",
@@ -181,6 +183,7 @@ class OpenMPIConan(ConanFile):
         requires = [
             "hwloc::hwloc",
             "zlib::zlib",
+            "libevent::libevent"
         ]
         if self.settings.os == "Linux":
             requires.append("libnl::libnl")
@@ -190,15 +193,22 @@ class OpenMPIConan(ConanFile):
         # The components are modelled based on OpenMPI's pkg-config files
 
         # Run-time environment library
+        self.cpp_info.components["opal"].set_property("pkg_config_name", "opal")
+        self.cpp_info.components["opal"].libs = ["open-pal"]
+        self.cpp_info.components["opal"].includedirs.append(os.path.join("include", "openmpi"))
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["opal"].system_libs = ["dl", "pthread", "rt", "util"]
+        self.cpp_info.components["opal"].requires = requires
+
         self.cpp_info.components["orte"].set_property("pkg_config_name", "orte")
-        self.cpp_info.components["orte"].libs = ["open-rte", "open-pal"]
+        self.cpp_info.components["orte"].libs = ["open-rte"]
         self.cpp_info.components["orte"].includedirs.append(os.path.join("include", "openmpi"))
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["orte"].system_libs = ["dl", "pthread", "rt", "util"]
         self.cpp_info.components["orte"].cflags = ["-pthread"]
         if self.options.get_safe("enable_cxx_exceptions"):
             self.cpp_info.components["orte"].cflags.append("-fexceptions")
-        self.cpp_info.components["orte"].requires = requires
+        self.cpp_info.components["orte"].requires = requires + ["opal"]
 
         self.cpp_info.components["ompi"].set_property("pkg_config_name", "ompi")
         self.cpp_info.components["ompi"].libs = ["mpi"]
