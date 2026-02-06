@@ -75,6 +75,7 @@ class LibcurlConan(ConanFile):
         "with_ca_fallback": [True, False],
         "with_form_api": [True, False],
         "with_websockets": [True, False],
+        "with_ssls_export": [True, False],
     }
     default_options = {
         "shared": False,
@@ -124,6 +125,7 @@ class LibcurlConan(ConanFile):
         "with_ca_fallback": False,
         "with_form_api": True,
         "with_websockets": True,
+        "with_ssls_export": False,
     }
 
     @property
@@ -482,6 +484,11 @@ class LibcurlConan(ConanFile):
                 tc.configure_args.append("--enable-websockets")
             else:
                 tc.configure_args.append("--disable-websockets")
+        if "with_ssls_export" in self.options:
+            if self.options.with_websockets:
+                tc.configure_args.append("--enable-ssls-export")
+            else:
+                tc.configure_args.append("--disable-ssls-export")
 
         if self.options.with_libidn:
             path = unix_path(self, self.dependencies["libidn2"].package_folder)
@@ -591,6 +598,8 @@ class LibcurlConan(ConanFile):
             tc.variables["CURL_DISABLE_FORM_API"] = not self.options.with_form_api
         if "with_websockets" in self.options:
             tc.variables["CURL_DISABLE_WEBSOCKETS"] = not self.options.with_websockets
+        if "with_ssls_export" in self.options:
+            tc.variables["USE_SSLS_EXPORT"] = self.options.with_ssls_export
 
         # Also disables NTLM_WB if set to false
         if not self.options.with_ntlm:
