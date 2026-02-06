@@ -1,4 +1,7 @@
 sources:
+  "0.12.6":
+    url: "https://github.com/getsentry/sentry-native/releases/download/0.12.6/sentry-native.zip"
+    sha256: "617a57ce6c32626828b79acce5271023637151b2b34a3a18732f3ba75099cd15"
   "0.12.3":
     url: "https://github.com/getsentry/sentry-native/releases/download/0.12.3/sentry-native.zip"
     sha256: "4952380acb71981528d586e59508496ccb902a51eb5597513bec43b7bc390c18"
