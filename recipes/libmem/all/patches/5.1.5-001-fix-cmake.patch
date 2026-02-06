@@ -1,0 +1,125 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0a6b77b..a749cb5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,6 +1,7 @@
+ cmake_minimum_required(VERSION 3.22.1)
+ 
+-include(ExternalProject)
++include(CMakePushCheckState)
++include(CheckSymbolExists)
+ 
+ project(libmem
+ 	LANGUAGES
+@@ -49,6 +50,7 @@ message(STATUS
+ message(STATUS "CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
+ message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+ 
++if(0)
+ # External dependencies
+ set(EXTERNAL_DEPENDENCIES_DIR "${PROJECT_SOURCE_DIR}/external")
+ set(CAPSTONE_DIR "${EXTERNAL_DEPENDENCIES_DIR}/capstone")
+@@ -66,6 +68,7 @@ set_target_properties(capstone PROPERTIES IMPORTED_LOCATION ${CAPSTONE_IMPORT_DI
+ add_library(keystone STATIC IMPORTED)
+ set_target_properties(keystone PROPERTIES IMPORTED_LOCATION ${KEYSTONE_IMPORT_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}keystone${CMAKE_STATIC_LIBRARY_SUFFIX})
+ # End of external dependencies
++endif()
+ 
+ set(LIBMEM_DIR "${PROJECT_SOURCE_DIR}")
+ set(LIBMEM_INC "${LIBMEM_DIR}/include")
+@@ -108,10 +111,14 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL FreeBSD)
+ 
+ 	file(GLOB LIBMEM_SRC ${LIBMEM_ARCH_SRC} "${LIBMEM_DIR}/src/freebsd/*.c" "${LIBMEM_DIR}/src/freebsd/ptrace/*.c" "${LIBMEM_DIR}/src/common/*.c" "${LIBMEM_DIR}/src/common/*.cpp" "${INTERNAL_DIR}/posixutils/*.c" "${INTERNAL_DIR}/elfutils/*.c" "${INTERNAL_DIR}/demangler/*.cpp")
+ endif()
++find_package(keystone CONFIG REQUIRED)
++find_package(capstone CONFIG REQUIRED)
++# Use bundled LLVMDemangler
++file(GLOB_RECURSE LLVM_DEM_SRC "${PROJECT_SOURCE_DIR}/external/llvm/lib/*.cpp")
++set(LIBMEM_SRC ${LIBMEM_SRC} ${LLVM_DEM_SRC})
+ set(LIBMEM_DEPS
+-	capstone
+-	keystone
+-	llvm
++	capstone::capstone
++	keystone::keystone
+ )
+ 
+ if (LIBMEM_BUILD_STATIC)
+@@ -130,9 +137,7 @@ endif()
+ 
+ include_directories(${PROJECT_SOURCE_DIR}
+ 	${LIBMEM_INC}
+-	${CAPSTONE_INC}
+-	${KEYSTONE_INC}
+-	${LLVM_INC}
++	"${PROJECT_SOURCE_DIR}/external/llvm/include"
+ )
+ 
+ if (LIBMEM_BUILD_TESTS)
+@@ -142,10 +147,14 @@ endif()
+ 
+ set_target_properties(libmem PROPERTIES POSITION_INDEPENDENT_CODE True INCLUDES ${LIBMEM_INC})
+ target_compile_definitions(libmem PUBLIC LM_EXPORT)
+-add_dependencies(libmem
+-	capstone-engine
+-	keystone-engine
+-)
++target_compile_definitions(libmem PRIVATE _GNU_SOURCE)
++cmake_push_check_state()
++set(CMAKE_REQUIRED_DEFINITIONS -D_GNU_SOURCE)
++check_symbol_exists(gettid "unistd.h" HAVE_GETTID)
++if(HAVE_GETTID)
++	target_compile_definitions(libmem PRIVATE HAVE_GETTID)
++endif()
++cmake_pop_check_state()
+ 
+ if(${CMAKE_SYSTEM_NAME} STREQUAL Windows OR ${CMAKE_SYSTEM_NAME} STREQUAL CYGWIN)
+ 	set(LIBMEM_DEPS
+@@ -157,7 +166,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL Windows OR ${CMAKE_SYSTEM_NAME} STREQUAL CYGWIN
+ 	)
+ 	target_compile_definitions(libmem PUBLIC alloca=_alloca)
+ elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux OR ${CMAKE_SYSTEM_NAME} STREQUAL Android)
+-	set(LIBMEM_DEPS 
++	set(LIBMEM_DEPS
+ 		${LIBMEM_DEPS}
+ 		dl
+ 		stdc++
+@@ -177,8 +186,8 @@ else()
+ 	message(FATAL_ERROR "[!] Unsupported platform")
+ endif()
+ 
+-target_link_libraries(libmem ${LIBMEM_DEPS})
+-if(LIBMEM_BUILD_STATIC)
++target_link_libraries(libmem PRIVATE ${LIBMEM_DEPS})
++if(0)
+ 	# Create a bundled static library containing all dependencies (to mimic the shared library behavior)
+ 	set_target_properties(libmem PROPERTIES OUTPUT_NAME "libmem_partial")
+ 	set(libmem_bundle_files "$<TARGET_FILE:libmem>")
+@@ -219,7 +228,7 @@ if(LIBMEM_BUILD_STATIC)
+ 	endif()
+ endif()
+ 
+-if(${CMAKE_SYSTEM_NAME} STREQUAL Windows OR ${CMAKE_SYSTEM_NAME} STREQUAL CYGWIN)
++if(0)
+ 	if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL CYGWIN)
+ 		cmake_path(SET CMAKE_INSTALL_PREFIX "$ENV{ProgramFiles}")
+ 	else()
+@@ -228,14 +237,13 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL Windows OR ${CMAKE_SYSTEM_NAME} STREQUAL CYGWIN
+ 	endif()
+ 	set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/libmem")
+ 	execute_process(COMMAND mkdir "${CMAKE_INSTALL_PREFIX}")
+-else()
+ 	set(CMAKE_INSTALL_PREFIX "/usr")
+ endif()
+ 
+ install(TARGETS libmem
+-	LIBRARY DESTINATION lib)
+-
+-install(TARGETS libmem
+-	RUNTIME DESTINATION lib)
++	LIBRARY DESTINATION lib
++	ARCHIVE DESTINATION lib
++	RUNTIME DESTINATION bin
++)
+ 
+ install(DIRECTORY ${LIBMEM_INC}/libmem DESTINATION include)
