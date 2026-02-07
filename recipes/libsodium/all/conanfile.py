@@ -61,7 +61,7 @@ class LibsodiumConan(ConanFile):
     def validate(self):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Cannot build shared libsodium libraries with static runtime")
-        if self.settings.arch == "armv8" and is_msvc(self) and self.version < Version("1.0.21"):
+        if self.settings.arch == "armv8" and is_msvc(self) and (self.version < Version("1.0.21") or self.version == "cci.20220430"):
             raise ConanInvalidConfiguration("Windows ARM64 builds are not supported by libsodium version less than 1.0.21")
 
     def build_requirements(self):
@@ -113,13 +113,14 @@ class LibsodiumConan(ConanFile):
             }
         }
         default_folder = "vs2019"
-        if self.version >= Version("1.0.19"):
-            sln_folders["msvc"]["193"] = "vs2022"
-            sln_folders["msvc"]["194"] = "vs2022"
-            default_folder = "vs2022"
-        if self.version >= Version("1.0.21"):
-            sln_folders["msvc"]["195"] = "vs2026"
-            default_folder = "vs2026"
+        if not self.version == "cci.20220430":
+            if self.version >= Version("1.0.19"):
+                sln_folders["msvc"]["193"] = "vs2022"
+                sln_folders["msvc"]["194"] = "vs2022"
+                default_folder = "vs2022"
+            if self.version >= Version("1.0.21"):
+                sln_folders["msvc"]["195"] = "vs2026"
+                default_folder = "vs2026"
 
 
         return sln_folders.get(str(self.settings.compiler), {}).get(str(self.settings.compiler.version), default_folder)
