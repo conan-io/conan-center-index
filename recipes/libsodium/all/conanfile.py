@@ -113,14 +113,13 @@ class LibsodiumConan(ConanFile):
             }
         }
         default_folder = "vs2019"
-        if not self.version == "cci.20220430":
-            if self.version >= Version("1.0.19"):
-                sln_folders["msvc"]["193"] = "vs2022"
-                sln_folders["msvc"]["194"] = "vs2022"
-                default_folder = "vs2022"
-            if self.version >= Version("1.0.21"):
-                sln_folders["msvc"]["195"] = "vs2026"
-                default_folder = "vs2026"
+        if self.version >= Version("1.0.19"):
+            sln_folders["msvc"]["193"] = "vs2022"
+            sln_folders["msvc"]["194"] = "vs2022"
+            default_folder = "vs2022"
+        if self.version >= Version("1.0.21") and not self.version == "cci.20220430":
+            sln_folders["msvc"]["195"] = "vs2026"
+            default_folder = "vs2026"
 
 
         return sln_folders.get(str(self.settings.compiler), {}).get(str(self.settings.compiler.version), default_folder)
