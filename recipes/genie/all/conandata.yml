@@ -1,4 +1,7 @@
 sources:
+  "1196":
+    url: "https://github.com/bkaradzic/GENie/archive/5ae13c9940b4d5a62b1ea086ffcdacc2ddc16b50.zip"
+    sha256: "922E4FA724E2A261F3FE45C917E0554F10A4A1FC9A3C8A667BB0D5B3C78AB0F8"
   "1190":
     url: "https://github.com/bkaradzic/GENie/archive/5f5363f79fd0934dfd775af5c097703f0791923f.zip"
     sha256: "EBC62188F3FB5530613EDA2E9886BB06AD8AF85028F892873C3DF7E65E56BF91"
