@@ -61,6 +61,8 @@ class LibsodiumConan(ConanFile):
     def validate(self):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Cannot build shared libsodium libraries with static runtime")
+        if self.settings.arch == "armv8" and is_msvc(self) and self.version < Version("1.0.21"):
+            raise ConanInvalidConfiguration("Windows ARM64 builds are not supported by libsodium version less than 1.0.21")
 
     def build_requirements(self):
         if not is_msvc(self):
