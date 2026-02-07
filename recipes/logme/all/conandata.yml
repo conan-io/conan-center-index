@@ -1,0 +1,4 @@
+sources:
+  "2.4.4":
+    url: "https://github.com/efmsoft/logme/archive/v2.4.4.tar.gz"
+    sha256: "80851783ec0ad838bb90d10c9db3c79cbf5b95f7b099b15fccf923188f4ff6b7"
