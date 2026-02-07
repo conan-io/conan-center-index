@@ -1,6 +1,9 @@
 # To update the version on CCI, add a new cci.date entry from the stable branch:
 # https://github.com/jedisct1/libsodium/commits/stable
 sources:
+  "1.0.21":
+    url: "https://github.com/jedisct1/libsodium/archive/1.0.21-RELEASE.tar.gz"
+    sha256: "42E0CA94FAAEC901F4FBEDA84B1B94B18F5309C360C66345CF52A7AB515B245B"
   "1.0.20":
     url: "https://github.com/jedisct1/libsodium/archive/1.0.20-RELEASE.tar.gz"
     sha256: "8e5aeca07a723a27bbecc3beef14b0068d37e7fc0e97f51b3f1c82d2a58005c1"

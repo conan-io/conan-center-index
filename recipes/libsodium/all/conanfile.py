@@ -6,9 +6,10 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, MSBuild, MSBuildToolchain
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 
 class LibsodiumConan(ConanFile):
@@ -101,27 +102,23 @@ class LibsodiumConan(ConanFile):
     @property
     def _msvc_sln_folder(self):
         sln_folders = {
-            "Visual Studio": {
-                "10": "vs2010",
-                "11": "vs2012",
-                "12": "vs2013",
-                "14": "vs2015",
-                "15": "vs2017",
-                "16": "vs2019",
-            },
             "msvc": {
                 "170": "vs2012",
                 "180": "vs2013",
                 "190": "vs2015",
                 "191": "vs2017",
                 "192": "vs2019",
-            },
+            }
         }
         default_folder = "vs2019"
-        if self.version != "1.0.18":
-            sln_folders["Visual Studio"]["17"] = "vs2022"
+        if self.version >= Version("1.0.19"):
             sln_folders["msvc"]["193"] = "vs2022"
+            sln_folders["msvc"]["194"] = "vs2022"
             default_folder = "vs2022"
+        if self.version >= Version("1.0.21"):
+            sln_folders["msvc"]["195"] = "vs2026"
+            default_folder = "vs2026"
+
 
         return sln_folders.get(str(self.settings.compiler), {}).get(str(self.settings.compiler.version), default_folder)
 
