@@ -15,15 +15,14 @@ class ccronexprConan(ConanFile):
     description = "Cron expression parsing in ANSI C"
     topics = ("lib-static", "C", "cron", "cronexpr")
     
+    package_type = "static-library"
     settings = "os", "compiler", "arch", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
         "use_local_time": [True, False],
         "disable_years": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
         "use_local_time": False,
         "disable_years": False,
@@ -54,9 +53,8 @@ class ccronexprConan(ConanFile):
     def package(self):
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "ccronexpr.h", self.source_folder, os.path.join(self.package_folder, "include"), keep_path=False)
-        for pattern in ["*.a", "*.so*", "*.dylib*", "*.lib"]:
+        for pattern in ["*.a", "*.lib"]:
             copy(self, pattern, dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
-        copy(self, "*.dll", dst=os.path.join(self.package_folder, "bin"), src=self.build_folder, keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["ccronexpr"]
