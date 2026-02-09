@@ -238,7 +238,7 @@ class SentryNativeConan(ConanFile):
             self.cpp_info.components["crashpad_util"].libs = [] if self.options.shared else ["crashpad_util"]
             self.cpp_info.components["crashpad_util"].requires = ["crashpad_compat", "crashpad_mini_chromium", "zlib::zlib"]
 
-            if self.version >= "0.12.4":
+            if Version(self.version) >= "0.12.4":
                 self.cpp_info.components["crashpad_mpack"].set_property("cmake_target_name", "crashpad::mpack")
                 self.cpp_info.components["crashpad_mpack"].libs = [] if self.options.shared else ["crashpad_mpack"]
                 self.cpp_info.components["crashpad_util"].requires.append ("crashpad_mpack")
