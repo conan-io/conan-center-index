@@ -78,5 +78,7 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["kaitai_struct_cpp_stl_runtime"]
+        if self.options.with_zlib:
+            self.cpp_info.defines.append("KS_ZLIB")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
