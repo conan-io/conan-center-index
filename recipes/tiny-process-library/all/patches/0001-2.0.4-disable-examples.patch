@@ -1,0 +1,30 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8662ba3..b5d0cc7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -35,7 +35,7 @@ target_include_directories(tiny-process-library PUBLIC $<BUILD_INTERFACE:${CMAKE
+                                                        $<INSTALL_INTERFACE:include>)
+ 
+ # if tiny-process-library is not a sub-project:
+-if(CMAKE_SOURCE_DIR STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
++if(0)
+   if(MSVC)
+     add_definitions(/D_CRT_SECURE_NO_WARNINGS)
+   else()
+@@ -44,7 +44,7 @@ if(CMAKE_SOURCE_DIR STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
+ 
+   add_executable(examples examples.cpp)
+   target_link_libraries(examples tiny-process-library)
+-  
++endif()
+   install(TARGETS tiny-process-library
+     EXPORT ${PROJECT_NAME}-config
+     ARCHIVE DESTINATION lib
+@@ -58,7 +58,6 @@ if(CMAKE_SOURCE_DIR STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
+   )
+ 
+   install(FILES process.hpp DESTINATION include)
+-endif()
+ 
+ if(BUILD_TESTING)
+   enable_testing()
