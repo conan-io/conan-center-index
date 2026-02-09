@@ -1,6 +1,6 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -177,6 +177,12 @@ if (enable_threads)
+@@ -183,6 +183,12 @@ if (enable_threads)
    message(STATUS "Thread library: ${CMAKE_THREAD_LIBS_INIT}")
    if (without_libatomic_ops OR BORLAND OR MSVC OR WATCOM)
      include_directories(libatomic_ops/src)
