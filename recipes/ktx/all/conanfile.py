@@ -61,9 +61,9 @@ class KtxConan(ConanFile):
             self.requires("fmt/[>=11 <12]")
 
     def validate_build(self):
-        if cross_building(self) and is_apple_os(self):
-            raise ConanInvalidConfiguration("Cross-building KTX 4.4.2 for Apple OS is not supported in this version")
         if self.options.tools:
+            if cross_building(self) and is_apple_os(self):
+                raise ConanInvalidConfiguration(f"Cross-building KTX tools {self.version} for Apple OS is not supported in this version")
             # Does not compile with newer cppstd versions.
             check_max_cppstd(self, 17)
 
