@@ -67,7 +67,14 @@ class LogmeConan(ConanFile):
         if self.settings.os != "Windows":
             tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = bool(self.options.get_safe("fPIC"))
 
+        tc.variables["LOGME_BUILD_STATIC"] = not self.options.shared
+        tc.variables["LOGME_BUILD_DYNAMIC"] = self.options.shared
+        tc.variables["USE_JSONCPP"] = True
+        tc.variables["LOGME_STD_FORMAT"] = False
         tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
