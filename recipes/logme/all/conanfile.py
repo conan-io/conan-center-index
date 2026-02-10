@@ -11,7 +11,7 @@ class LogmeConan(ConanFile):
     package_type = "library"
 
     license = "Apache-2.0"
-    url = "https://github.com/efmsoft/logme"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/efmsoft/logme"
     description = "Lightweight cross-platform C/C++ logging framework."
     topics = ("logging", "log", "logger", "console", "file")
