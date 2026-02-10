@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rm
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 
@@ -149,10 +149,13 @@ class DrogonConan(ConanFile):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rm(self, "*", os.path.join(self.package_folder, "lib", "cmake"), recursive=True,
+            excludes=["DrogonUtilities.cmake", "ParseAndAddDrogonTests.cmake"])
 
     def package_info(self):
         self.cpp_info.libs = ["drogon"]
+        self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "Drogon", "DrogonUtilities.cmake"),
+                                                           os.path.join("lib", "cmake", "Drogon", "ParseAndAddDrogonTests.cmake")])
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["rpcrt4", "ws2_32", "crypt32", "advapi32"])
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
