@@ -1,4 +1,4 @@
-#include <logme/logme.h>
+#include <Logme/Logme.h>
 
 int main()
 {
