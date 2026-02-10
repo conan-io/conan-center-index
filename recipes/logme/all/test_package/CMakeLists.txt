@@ -5,4 +5,3 @@ find_package(logme CONFIG REQUIRED)
 
 add_executable(test_package test_package.cpp)
 target_link_libraries(test_package PRIVATE logme::logme)
-target_compile_features(test_package PRIVATE cxx_std_20)
