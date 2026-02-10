@@ -1,5 +1,4 @@
 import os
-import sys
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
@@ -12,7 +11,7 @@ from conan.tools.files import (
 from conan.tools.apple import is_apple_os
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from pathlib import Path
-from conan.tools.system import PipEnv
+from conan.tools.system import PyEnv
 
 required_conan_version = ">=2.23"
 
@@ -212,14 +211,15 @@ class LibtorchRecipe(ConanFile):
 
         tc.cache_variables['Python_FIND_UNVERSIONED_NAMES'] = 'FIRST'
         tc.cache_variables['Python_FIND_STRATEGY'] = 'LOCATION'
-        tc.cache_variables["Python_ROOT_DIR"] = os.path.join(self.build_folder, "conan_pipenv").replace("\\", "/")
-        tc.cache_variables["Python_EXECUTABLE"] = os.path.join(self.build_folder, "conan_pipenv", "bin" if sys.platform != "win32" else "Scripts", "python" + (".exe" if sys.platform == "win32" else "")).replace("\\", "/")
+
+        pyenv = PyEnv(self)
+        tc.cache_variables["Python_ROOT_DIR"] = os.path.dirname(pyenv.bin_dir).replace("\\", "/")
+        tc.cache_variables["Python_EXECUTABLE"] = pyenv.python.replace("\\", "/")
 
         tc.generate()
 
-        pip = PipEnv(self)
-        pip.install(["pyyaml", "typing-extensions"])
-        pip.generate()
+        pyenv.install(["pyyaml", "typing-extensions"])
+        pyenv.generate()
 
     def build(self):
         cmake = CMake(self)
