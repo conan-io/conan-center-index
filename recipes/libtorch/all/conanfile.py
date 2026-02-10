@@ -1,4 +1,5 @@
 import os
+import sys
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
@@ -11,9 +12,9 @@ from conan.tools.files import (
 from conan.tools.apple import is_apple_os
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from pathlib import Path
-from conan.tools.system import PyEnv
+from conan.tools.system import PipEnv
 
-required_conan_version = ">=2.25"
+required_conan_version = ">=2.23"
 
 class LibtorchRecipe(ConanFile):
     name = "libtorch"
@@ -212,14 +213,15 @@ class LibtorchRecipe(ConanFile):
         tc.cache_variables['Python_FIND_UNVERSIONED_NAMES'] = 'FIRST'
         tc.cache_variables['Python_FIND_STRATEGY'] = 'LOCATION'
 
-        pyenv = PyEnv(self)
-        tc.cache_variables["Python_ROOT_DIR"] = os.path.dirname(pyenv.bin_dir).replace("\\", "/")
-        tc.cache_variables["Python_EXECUTABLE"] = pyenv.python.replace("\\", "/")
+        pipenv = PipEnv(self)
+        pyexe = "python.exe" if sys.platform == "win32" else "python"
+        tc.cache_variables["Python_ROOT_DIR"] = os.path.dirname(pipenv.bin_dir)
+        tc.cache_variables["Python_EXECUTABLE"] = os.path.join(pipenv.bin_dir, pyexe)
 
         tc.generate()
 
-        pyenv.install(["pyyaml", "typing-extensions"])
-        pyenv.generate()
+        pipenv.install(["pyyaml", "typing-extensions"])
+        pipenv.generate()
 
     def build(self):
         cmake = CMake(self)
