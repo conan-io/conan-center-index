@@ -82,13 +82,5 @@ class LogmeConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "logme")
-        self.cpp_info.set_property("cmake_target_name", "logme::logme")
-
-        if bool(self.options.shared):
-            self.cpp_info.libs = ["logmed"]
-        else:
-            self.cpp_info.libs = ["logme"]
-
-        if self.options.with_jsoncpp:
-            self.cpp_info.defines.append("USE_JSONCPP")
+        self.cpp_info.libs = ["logmed" if self.options.shared "logme"]
+        self.cpp_info.defines.append("USE_JSONCPP")
