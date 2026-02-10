@@ -81,8 +81,7 @@ class LogmeConan(ConanFile):
         cmake.install()
 
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        rmdir(self, os.path.join(self.package_folder, "share", "doc"))
-        rmdir(self, os.path.join(self.package_folder, "share", "man"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "logme")
