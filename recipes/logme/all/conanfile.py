@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy, rmdir
 import os
 
+required_conan_version = ">=2.1"
 
 class LogmeConan(ConanFile):
     name = "logme"
