@@ -1,25 +1,18 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, cmake_layout, CMakeDeps, CMakeToolchain
+from conan.tools.build import can_run
+from conan.tools.cmake import cmake_layout, CMake
 import os
 
 
-class LogmeTestPackage(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-
-    def requirements(self):
-        self.requires(self.tested_reference_str)
+    generators = "CMakeDeps", "CMakeToolchain"
 
     def layout(self):
         cmake_layout(self)
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["CMAKE_CXX_STANDARD"] = 20
-        tc.variables["CMAKE_CXX_EXTENSIONS"] = False
-        tc.generate()
-
-        deps = CMakeDeps(self)
-        deps.generate()
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def build(self):
         cmake = CMake(self)
@@ -27,8 +20,6 @@ class LogmeTestPackage(ConanFile):
         cmake.build()
 
     def test(self):
-        if not self.conf.get("tools.build:skip_test", default=False):
-            bin_path = "test_package"
-            if self.settings.os == "Windows":
-                bin_path += ".exe"
-            self.run(os.path.join(self.cpp.build.bindirs[0], bin_path), env="conanrun")
+        if can_run(self):
+            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
+            self.run(bin_path, env="conanrun")
