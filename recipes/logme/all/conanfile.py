@@ -39,8 +39,8 @@ class LogmeConan(ConanFile):
         check_min_cppstd(self, 20)
 
     def requirements(self):
-        if self.options.with_jsoncpp:
-            self.requires("jsoncpp/1.9.6")
+        # INFO: Transitive headers: Logme/Utils.h:#include <json/json.h>
+        self.requires("jsoncpp/[>=1.9.6 <2]", transitive_headers=True)
 
     def layout(self):
         cmake_layout(self)
