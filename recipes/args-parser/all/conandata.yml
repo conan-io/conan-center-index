@@ -1,4 +1,7 @@
 sources:
+  "6.3.5":
+    url: "https://github.com/igormironchik/args-parser/archive/refs/tags/6.3.5.tar.gz"
+    sha256: "e6eaebece03224e69c91ab540a3f0b349b1ccf5952db5a9a5760ff0bcf8567f6"
   "6.3.4":
     url: "https://github.com/igormironchik/args-parser/archive/refs/tags/6.3.4.tar.gz"
     sha256: "874be94baac622e16045b958539e91347f18fc0803356fb500757c0060222aa2"
