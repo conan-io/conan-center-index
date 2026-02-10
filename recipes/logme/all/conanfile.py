@@ -50,23 +50,10 @@ class LogmeConan(ConanFile):
         tc.variables["LOGME_BUILD_TOOLS"] = False
         tc.variables["LOGME_ENABLE_INSTALL"] = True
 
-        if bool(self.options.shared):
-            tc.variables["LOGME_BUILD_STATIC"] = False
-            tc.variables["LOGME_BUILD_DYNAMIC"] = True
-        else:
-            tc.variables["LOGME_BUILD_STATIC"] = True
-            tc.variables["LOGME_BUILD_DYNAMIC"] = False
-
-        tc.variables["USE_JSONCPP"] = bool(self.options.with_jsoncpp)
-        tc.variables["LOGME_STD_FORMAT"] = str(self.options.std_format)
-
-        if self.settings.os != "Windows":
-            tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = bool(self.options.get_safe("fPIC"))
-
         tc.variables["LOGME_BUILD_STATIC"] = not self.options.shared
         tc.variables["LOGME_BUILD_DYNAMIC"] = self.options.shared
         tc.variables["USE_JSONCPP"] = True
-        tc.variables["LOGME_STD_FORMAT"] = False
+
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -85,5 +72,5 @@ class LogmeConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["logmed" if self.options.shared "logme"]
+        self.cpp_info.libs = ["logmed" if self.options.shared else "logme"]
         self.cpp_info.defines.append("USE_JSONCPP")
