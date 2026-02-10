@@ -21,16 +21,13 @@ class LogmeConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_jsoncpp": [True, False],
-        "std_format": ["AUTO", "ON", "OFF"],
     }
 
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_jsoncpp": False,
-        "std_format": "AUTO",
     }
+    implements = ["auto_shared_fpic"]
 
     def config_options(self):
         if self.settings.os == "Windows":
