@@ -29,10 +29,6 @@ class LogmeConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def validate(self):
         check_min_cppstd(self, 20)
 
