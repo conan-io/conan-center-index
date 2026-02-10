@@ -74,3 +74,5 @@ class LogmeConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["logmed" if self.options.shared else "logme"]
         self.cpp_info.defines.append("USE_JSONCPP")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread"]
