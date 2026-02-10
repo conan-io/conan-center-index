@@ -13,7 +13,7 @@ from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from pathlib import Path
 from conan.tools.system import PyEnv
 
-required_conan_version = ">=2.23"
+required_conan_version = ">=2.25"
 
 class LibtorchRecipe(ConanFile):
     name = "libtorch"
