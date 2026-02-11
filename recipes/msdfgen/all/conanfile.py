@@ -47,9 +47,6 @@ class MsdfgenConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def build_requirements(self):
-        self.tool_requires(">=cmake/4.2.0")
-
     def requirements(self):
         self.requires("freetype/[>=2.13.2 <3]")
         if  Version(self.version) < "1.10":
