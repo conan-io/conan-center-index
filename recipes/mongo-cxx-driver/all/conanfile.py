@@ -62,7 +62,6 @@ class MongoCxxConan(ConanFile):
         return {
             "std": "17",
             "boost": "11",
-            "polyfill": "11",
             "impls": "11",
         }[str(self.options.polyfill)]
 
