@@ -45,14 +45,14 @@ class LogmeConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
-        tc.variables["LOGME_BUILD_EXAMPLES"] = False
-        tc.variables["LOGME_BUILD_TESTS"] = False
-        tc.variables["LOGME_BUILD_TOOLS"] = False
-        tc.variables["LOGME_ENABLE_INSTALL"] = True
+        tc.cache_variables["LOGME_BUILD_EXAMPLES"] = False
+        tc.cache_variables["LOGME_BUILD_TESTS"] = False
+        tc.cache_variables["LOGME_BUILD_TOOLS"] = False
+        tc.cache_variables["LOGME_ENABLE_INSTALL"] = True
 
-        tc.variables["LOGME_BUILD_STATIC"] = not self.options.shared
-        tc.variables["LOGME_BUILD_DYNAMIC"] = self.options.shared
-        tc.variables["USE_JSONCPP"] = True
+        tc.cache_variables["LOGME_BUILD_STATIC"] = not self.options.shared
+        tc.cache_variables["LOGME_BUILD_DYNAMIC"] = self.options.shared
+        tc.cache_variables["USE_JSONCPP"] = True
 
         tc.generate()
 
