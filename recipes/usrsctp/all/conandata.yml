@@ -7,9 +7,9 @@ sources:
     sha256: "066d7ac63f5593bfd9947004961c72e7f5f4112c1ed2df19a1469b5c2dfab44d"
 patches:
   "0.9.5.0":
-    - patch_file: "patches/0001-install.patch"
+    - patch_file: "patches/0001-fix-install-0.9.5.0.patch"
     - patch_file: "patches/0002-fix-cmake-minimum-required-0.9.5.0.patch"
   "0.9.5.0.cci.20251016":
-    - patch_file: "patches/0001-install-0.9.5.0.cci.20251016.patch"
+    - patch_file: "patches/0001-fix-install-0.9.5.0.cci.20251016.patch"
     - patch_file: "patches/0002-fix-cmake-minimum-required-0.9.5.0.cci.20251016.patch"
-    - patch_file: "patches/use_net_route_h_option.patch"
+    - patch_file: "patches/0003-use-net-route-h-option.patch"
