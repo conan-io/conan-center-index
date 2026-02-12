@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -32,9 +32,6 @@ class MsdfgenConan(ConanFile):
         "with_skia": False,
         "utility": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -88,25 +85,7 @@ class MsdfgenConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
-        if Version(self.version) < "1.10":
-            # remove bundled lodepng & tinyxml2
-            rmdir(self, os.path.join(self.source_folder, "lib"))
-            rmdir(self, os.path.join(self.source_folder, "include"))
-
-            # very weird but required for Visual Studio when libs are unvendored (at least for Ninja generator)
-            if is_msvc(self):
-                replace_in_file(
-                    self,
-                    os.path.join(self.source_folder, "CMakeLists.txt"),
-                    "set_target_properties(msdfgen-standalone PROPERTIES ARCHIVE_OUTPUT_DIRECTORY archive OUTPUT_NAME msdfgen)",
-                    "set_target_properties(msdfgen-standalone PROPERTIES OUTPUT_NAME msdfgen IMPORT_PREFIX foo)",
-                )
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
