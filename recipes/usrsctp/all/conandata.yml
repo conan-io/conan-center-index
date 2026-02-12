@@ -2,14 +2,14 @@ sources:
   "0.9.5.0":
     url: https://github.com/sctplab/usrsctp/archive/refs/tags/0.9.5.0.tar.gz
     sha256: 260107caf318650a57a8caa593550e39bca6943e93f970c80d6c17e59d62cd92
-  "0.9.5.0-2026-01-13":
-    # Specific sha from master branch as there has not been a new release since 2021-01-13.
-    # This release supports cross-compilation for iOS.
-    url: "https://github.com/sctplab/usrsctp/archive/refs/heads/master.tar.gz"
-    sha256: "90bb7b7538c060be6fce61723e2c4a4f4b33b294aaf5fe1456f4b5a4820c5438"
+  "0.9.5.0.cci.20251016":
+    url: "https://github.com/sctplab/usrsctp/archive/fd070e05a7474f38c7fecdf4d4b6005d2547ee00.tar.gz"
+    sha256: "066d7ac63f5593bfd9947004961c72e7f5f4112c1ed2df19a1469b5c2dfab44d"
 patches:
   "0.9.5.0":
     - patch_file: "patches/0001-install.patch"
-  "0.9.5.0-2026-01-13":
+    - patch_file: "patches/0002-fix-cmake-minimum-required-0.9.5.0.patch"
+  "0.9.5.0.cci.20251016":
+    - patch_file: "patches/0001-install-0.9.5.0.cci.20251016.patch"
+    - patch_file: "patches/0002-fix-cmake-minimum-required-0.9.5.0.cci.20251016.patch"
     - patch_file: "patches/use_net_route_h_option.patch"
-      base_path: "."

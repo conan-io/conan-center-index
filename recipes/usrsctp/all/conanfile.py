@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 
 required_conan_version = ">=1.53.0"
 
@@ -58,15 +58,6 @@ class UsrsctpConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # Fix "The CMake policy CMP0091 must be NEW, but is ''"
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "project(usrsctplib C)\ncmake_minimum_required(VERSION 3.0)",
-                        "cmake_minimum_required(VERSION 3.15)\nproject(usrsctplib C)",
-                        strict=False)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "project(usrsctplib C)\ncmake_minimum_required(VERSION 3.0...3.10)",
-                        "cmake_minimum_required(VERSION 3.15)\nproject(usrsctplib C)",
-                        strict=False)
 
     def build(self):
         self._patch_sources()

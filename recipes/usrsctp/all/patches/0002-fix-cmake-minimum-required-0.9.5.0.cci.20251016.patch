@@ -1,0 +1,12 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -30,7 +30,7 @@
+ #
+ 
+-project(usrsctplib C)
+-cmake_minimum_required(VERSION 3.0...3.10)
++cmake_minimum_required(VERSION 3.15)
++project(usrsctplib C)
+ 
+ # Debug build type as default
+ if (NOT CMAKE_BUILD_TYPE)
