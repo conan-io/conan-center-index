@@ -49,7 +49,7 @@ class ZlibNgConan(ConanFile):
 
     @property
     def _zlib_compat_version(self):
-        return {"2.2.5": "1.3.1", "2.3.2": "1.3.1"}.get(self.version)
+        return self.conan_data["zlib_compat"][self.version]
 
     def config_options(self):
         if self._is_windows:
