@@ -61,7 +61,7 @@ class MsdfgenConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["MSDFGEN_BUILD_MSDFGEN_STANDALONE"] = self.options.utility
+        tc.cache_variables["MSDFGEN_BUILD_STANDALONE"] = self.options.utility
         tc.cache_variables["MSDFGEN_USE_OPENMP"] = self.options.with_openmp
         tc.cache_variables["MSDFGEN_USE_CPP11"] = True
         tc.cache_variables["MSDFGEN_USE_SKIA"] = self.options.with_skia
@@ -92,17 +92,11 @@ class MsdfgenConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "msdfgen")
-        # Required to avoid some side effect in CMakeDeps generator of downstream recipes
-        self.cpp_info.set_property("cmake_target_name", "msdfgen::msdgen-all-unofficial")
-
-        self.cpp_info.names["cmake_find_package"] = "msdfgen"
-        self.cpp_info.names["cmake_find_package_multi"] = "msdfgen"
 
         includedir = os.path.join("include", "msdfgen")
 
-        self.cpp_info.components["_msdfgen"].set_property("cmake_target_name", "msdfgen::msdfgen")
-        self.cpp_info.components["_msdfgen"].names["cmake_find_package"] = "msdfgen"
-        self.cpp_info.components["_msdfgen"].names["cmake_find_package_multi"] = "msdfgen"
+        self.cpp_info.components["_msdfgen"].set_property("cmake_target_name", "msdfgen::msdfgen-core")
+        self.cpp_info.components["_msdfgen"].set_property("cmake_target_aliases", ["msdfgen::msdfgen"])
         self.cpp_info.components["_msdfgen"].includedirs.append(includedir)
         self.cpp_info.components["_msdfgen"].libs = ["msdfgen-core"]
         self.cpp_info.components["_msdfgen"].defines = ["MSDFGEN_USE_CPP11"]
@@ -112,15 +106,20 @@ class MsdfgenConan(ConanFile):
             self.cpp_info.components["_msdfgen"].defines.append("MSDFGEN_PUBLIC=")
 
         self.cpp_info.components["msdfgen-ext"].set_property("cmake_target_name", "msdfgen::msdfgen-ext")
-        self.cpp_info.components["msdfgen-ext"].names["cmake_find_package"] = "msdfgen-ext"
-        self.cpp_info.components["msdfgen-ext"].names["cmake_find_package_multi"] = "msdfgen-ext"
         self.cpp_info.components["msdfgen-ext"].includedirs.append(includedir)
         self.cpp_info.components["msdfgen-ext"].libs = ["msdfgen-ext"]
+        self.cpp_info.components["msdfgen-ext"].defines = ["MSDFGEN_USE_TINYXML2"]
         self.cpp_info.components["msdfgen-ext"].requires = [
-            "_msdfgen", "freetype::freetype",
+            "_msdfgen",
+            "freetype::freetype",
             "libpng::libpng",
             "tinyxml2::tinyxml2",
         ]
 
         if self.options.with_skia:
             self.cpp_info.components["msdfgen-ext"].defines.append("MSDFGEN_USE_SKIA")
+
+        if self.options.utility:
+            self.cpp_info.components["standalone"].set_property("cmake_target_name", "msdfgen-standalone::msdfgen")
+            self.cpp_info.components["standalone"].exe = "msdfgen"
+            self.cpp_info.components["standalone"].location = os.path.join("bin", "msdfgen")
