@@ -4,7 +4,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
@@ -67,12 +66,10 @@ class MsdfgenConan(ConanFile):
         tc.cache_variables["MSDFGEN_USE_CPP11"] = True
         tc.cache_variables["MSDFGEN_USE_SKIA"] = self.options.with_skia
         tc.cache_variables["MSDFGEN_INSTALL"] = True
-        if Version(self.version) >= "1.10":
-            tc.cache_variables["MSDFGEN_USE_VCPKG"] = False
-            # Because in upstream CMakeLists, project() is called after some logic based on BUILD_SHARED_LIBS
-            tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
-        if Version(self.version) >= "1.11":
-            tc.cache_variables["MSDFGEN_DYNAMIC_RUNTIME"] = not is_msvc_static_runtime(self)
+        tc.cache_variables["MSDFGEN_USE_VCPKG"] = False
+        # Because in upstream CMakeLists, project() is called after some logic based on BUILD_SHARED_LIBS
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["MSDFGEN_DYNAMIC_RUNTIME"] = not is_msvc_static_runtime(self)
         if self.settings.os == "Linux":
             # Workaround for https://github.com/conan-io/conan/issues/13560
             libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
@@ -107,13 +104,12 @@ class MsdfgenConan(ConanFile):
         self.cpp_info.components["_msdfgen"].names["cmake_find_package"] = "msdfgen"
         self.cpp_info.components["_msdfgen"].names["cmake_find_package_multi"] = "msdfgen"
         self.cpp_info.components["_msdfgen"].includedirs.append(includedir)
-        self.cpp_info.components["_msdfgen"].libs = ["msdfgen" if Version(self.version) < "1.10" else "msdfgen-core"]
+        self.cpp_info.components["_msdfgen"].libs = ["msdfgen-core"]
         self.cpp_info.components["_msdfgen"].defines = ["MSDFGEN_USE_CPP11"]
-        if Version(self.version) >= "1.10":
-            if self.options.shared and is_msvc(self):
-                self.cpp_info.components["_msdfgen"].defines.append("MSDFGEN_PUBLIC=__declspec(dllimport)")
-            else:
-                self.cpp_info.components["_msdfgen"].defines.append("MSDFGEN_PUBLIC=")
+        if self.options.shared and is_msvc(self):
+            self.cpp_info.components["_msdfgen"].defines.append("MSDFGEN_PUBLIC=__declspec(dllimport)")
+        else:
+            self.cpp_info.components["_msdfgen"].defines.append("MSDFGEN_PUBLIC=")
 
         self.cpp_info.components["msdfgen-ext"].set_property("cmake_target_name", "msdfgen::msdfgen-ext")
         self.cpp_info.components["msdfgen-ext"].names["cmake_find_package"] = "msdfgen-ext"
@@ -122,13 +118,9 @@ class MsdfgenConan(ConanFile):
         self.cpp_info.components["msdfgen-ext"].libs = ["msdfgen-ext"]
         self.cpp_info.components["msdfgen-ext"].requires = [
             "_msdfgen", "freetype::freetype",
-            "lodepng::lodepng" if Version(self.version) < "1.10" else "libpng::libpng",
+            "libpng::libpng",
             "tinyxml2::tinyxml2",
         ]
 
         if self.options.with_skia:
             self.cpp_info.components["msdfgen-ext"].defines.append("MSDFGEN_USE_SKIA")
-
-        # TODO: to remove once conan v1 support dropped
-        if self.options.utility:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
