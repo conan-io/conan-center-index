@@ -357,7 +357,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_sdl:
             self.requires("sdl/[^2.28]")
         if self.options.with_libx264:
-            self.requires("libx264/cci.20240224")
+            self.requires("libx264/[>=cci.20240224]")
         if self.options.with_libx265:
             self.requires("libx265/[>=3.4 <4]")
         if self.options.with_libvpx:
