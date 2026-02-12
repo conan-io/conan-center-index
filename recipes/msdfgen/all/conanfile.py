@@ -100,10 +100,7 @@ class MsdfgenConan(ConanFile):
         self.cpp_info.components["_msdfgen"].includedirs.append(includedir)
         self.cpp_info.components["_msdfgen"].libs = ["msdfgen-core"]
         self.cpp_info.components["_msdfgen"].defines = ["MSDFGEN_USE_CPP11"]
-        if self.options.shared and is_msvc(self):
-            self.cpp_info.components["_msdfgen"].defines.append("MSDFGEN_PUBLIC=__declspec(dllimport)")
-        else:
-            self.cpp_info.components["_msdfgen"].defines.append("MSDFGEN_PUBLIC=")
+        self.cpp_info.components["_msdfgen"].defines.append("MSDFGEN_PUBLIC=")
 
         self.cpp_info.components["msdfgen-ext"].set_property("cmake_target_name", "msdfgen::msdfgen-ext")
         self.cpp_info.components["msdfgen-ext"].includedirs.append(includedir)
