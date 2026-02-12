@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
@@ -92,11 +92,13 @@ class MsdfgenConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "msdfgen")
+        # Required to avoid some side effect in CMakeDeps generator of downstream recipes
+        self.cpp_info.set_property("cmake_target_name", "msdfgen::msdgen-all-unofficial")
 
         includedir = os.path.join("include", "msdfgen")
 
-        self.cpp_info.components["_msdfgen"].set_property("cmake_target_name", "msdfgen::msdfgen-core")
-        self.cpp_info.components["_msdfgen"].set_property("cmake_target_aliases", ["msdfgen::msdfgen"])
+        self.cpp_info.components["_msdfgen"].set_property("cmake_target_name", "msdfgen::msdfgen")
+        self.cpp_info.components["_msdfgen"].set_property("cmake_target_aliases", ["msdfgen::msdfgen-core"])
         self.cpp_info.components["_msdfgen"].includedirs.append(includedir)
         self.cpp_info.components["_msdfgen"].libs = ["msdfgen-core"]
         self.cpp_info.components["_msdfgen"].defines = ["MSDFGEN_USE_CPP11"]
