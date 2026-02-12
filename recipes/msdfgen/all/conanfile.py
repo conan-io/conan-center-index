@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 class MsdfgenConan(ConanFile):
     name = "msdfgen"
@@ -46,12 +46,8 @@ class MsdfgenConan(ConanFile):
 
     def requirements(self):
         self.requires("freetype/[>=2.13.2 <3]")
-        if  Version(self.version) < "1.10":
-            self.requires("lodepng/cci.20200615")
-        else:
-            self.requires("libpng/[>=1.6 <2]")
+        self.requires("libpng/[>=1.6 <2]")
         self.requires("tinyxml2/11.0.0")
-
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
