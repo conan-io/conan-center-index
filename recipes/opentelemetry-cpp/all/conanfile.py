@@ -116,7 +116,12 @@ class OpenTelemetryCppConan(ConanFile):
             self.requires("prometheus-cpp/1.1.0")
 
     def validate(self):
-        check_min_cppstd(self, 14)
+        protobuf_requires_cppstd17 = self._needs_proto and Version(self.dependencies["protobuf"].ref.version) >= "6.30"
+        grpc_requires_cppstd17 = self.options.with_otlp_grpc and Version(self.dependencies["grpc"].ref.version) >= "1.70.0"
+        require_cppstd_17 = protobuf_requires_cppstd17 or grpc_requires_cppstd17
+
+        # opentelemetry-cpp itself requires C++14, but newer protobuf/grpc require the consumer to build with C++17
+        check_min_cppstd(self, 17 if require_cppstd_17 else 14)
 
         if self.options.with_otlp_grpc:
             if not self.dependencies["grpc"].options.cpp_plugin:
@@ -155,11 +160,11 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["WITH_OTLP_GRPC"] = self.options.with_otlp_grpc
         tc.cache_variables["WITH_OTLP_HTTP"] = self.options.with_otlp_http
         tc.cache_variables["WITH_OTLP_HTTP_COMPRESSION"] = self.options.with_otlp_http_compression
-        if self.settings.os == "Linux":
-            # So that the linker can pick up the correct openssl transitive dependency from libcurl
-            # when building shared
-            libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
-            tc.cache_variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
+        # if self.settings.os == "Linux":
+        #     # So that the linker can pick up the correct openssl transitive dependency from libcurl
+        #     # when building shared
+        #     libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
+        #     tc.cache_variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
         if self.options.get_safe("with_otlp_file"):
             tc.cache_variables["WITH_OTLP_FILE"] = True
         if self._needs_proto:
