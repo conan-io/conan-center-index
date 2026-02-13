@@ -160,11 +160,11 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["WITH_OTLP_GRPC"] = self.options.with_otlp_grpc
         tc.cache_variables["WITH_OTLP_HTTP"] = self.options.with_otlp_http
         tc.cache_variables["WITH_OTLP_HTTP_COMPRESSION"] = self.options.with_otlp_http_compression
-        # if self.settings.os == "Linux":
-        #     # So that the linker can pick up the correct openssl transitive dependency from libcurl
-        #     # when building shared
-        #     libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
-        #     tc.cache_variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
+        if self.settings.os == "Linux":
+            # So that the linker can pick up the correct openssl transitive dependency from libcurl
+            # when building shared
+            libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
+            tc.cache_variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
         if self.options.get_safe("with_otlp_file"):
             tc.cache_variables["WITH_OTLP_FILE"] = True
         if self._needs_proto:
