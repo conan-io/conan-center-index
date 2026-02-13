@@ -444,8 +444,9 @@ class QtConan(ConanFile):
             self.tool_requires(f"qt/{self.version}")
 
     def generate(self):
-        ms = VirtualBuildEnv(self)
-        ms.generate()
+        # Explicitly .generate() the VirtualBuildEnv before PipEnv/PyEnv below
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
 
         if self.options.qtwebengine:
             # https://github.com/qt/qtwebengine/blob/1a75761f912328b7b3b7f0302cec62ae5c111d1a/configure.cmake#L361-L366
@@ -481,9 +482,8 @@ class QtConan(ConanFile):
         pc = PkgConfigDeps(self)
         pc.generate()
 
-        vbe = VirtualBuildEnv(self)
-        vbe.generate()
         if not cross_building(self):
+            # TODO: this should not be done, investigate why this was needed and implement an alternative solution
             vre = VirtualRunEnv(self)
             vre.generate(scope="build")
         env = Environment()
@@ -494,9 +494,10 @@ class QtConan(ConanFile):
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         env.vars(self).save_script("conanbuildenv_pkg_config_path")
         if self.settings_build.os == "Macos":
+            # TODO: this should not be needed - investigate and fix
             # On macOS, SIP resets DYLD_LIBRARY_PATH injected by VirtualBuildEnv & VirtualRunEnv
             dyld_library_path = "$DYLD_LIBRARY_PATH"
-            dyld_library_path_build = vbe.vars().get("DYLD_LIBRARY_PATH")
+            dyld_library_path_build = buildenv.vars().get("DYLD_LIBRARY_PATH")
             if dyld_library_path_build:
                 dyld_library_path = f"{dyld_library_path_build}:{dyld_library_path}"
             if not cross_building(self):
@@ -676,6 +677,12 @@ class QtConan(ConanFile):
         with_egl = self.options.get_safe("with_egl", False)
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_EGL"] = not with_egl
 
+        if self.options.qtwebengine:
+            # Get CMake to find PipEnv's Python first to ensure html5lib is found
+            tc.cache_variables['Python_FIND_UNVERSIONED_NAMES'] = 'FIRST'
+            tc.cache_variables['Python_FIND_STRATEGY'] = 'LOCATION'
+            tc.cache_variables['Python_FIND_VIRTUALENV'] = 'STANDARD'
+            tc.cache_variables['Python_FIND_REGISTRY'] = 'NEVER'
         tc.generate()
 
     def package_id(self):
