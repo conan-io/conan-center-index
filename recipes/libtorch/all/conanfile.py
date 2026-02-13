@@ -1,5 +1,4 @@
 import os
-import sys
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
@@ -12,6 +11,7 @@ from conan.tools.files import (
 from conan.tools.apple import is_apple_os
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from pathlib import Path
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.system import PipEnv
 
 required_conan_version = ">=2.23"
@@ -140,6 +140,10 @@ class LibtorchRecipe(ConanFile):
 
     def generate(self):
         # torchgen/gen.py includes pyyaml and typing_extensions modules
+        # VirtualBuildEnv first so PipEnv's PATH (generated last) takes
+        # precedence when CMake runs
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
 
         deps = CMakeDeps(self)
         deps.set_property("concurrentqueue", "cmake_target_name", "moodycamel")
@@ -210,16 +214,9 @@ class LibtorchRecipe(ConanFile):
         tc.cache_variables["USE_NNPACK"] = self.options.get_safe("with_nnpack")
         tc.cache_variables["USE_NUMA"] = self.options.get_safe("with_numa")
 
-        tc.cache_variables['Python_FIND_UNVERSIONED_NAMES'] = 'FIRST'
-        tc.cache_variables['Python_FIND_STRATEGY'] = 'LOCATION'
-
-        pipenv = PipEnv(self)
-        pyexe = "python.exe" if sys.platform == "win32" else "python"
-        tc.cache_variables["Python_ROOT_DIR"] = os.path.dirname(pipenv.bin_dir)
-        tc.cache_variables["Python_EXECUTABLE"] = os.path.join(pipenv.bin_dir, pyexe)
-
         tc.generate()
 
+        pipenv = PipEnv(self)
         pipenv.install(["pyyaml", "typing-extensions"])
         pipenv.generate()
 
