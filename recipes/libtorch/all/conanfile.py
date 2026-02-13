@@ -216,9 +216,9 @@ class LibtorchRecipe(ConanFile):
 
         tc.generate()
 
-        pipenv = PipEnv(self)
-        pipenv.install(["pyyaml", "typing-extensions"])
-        pipenv.generate()
+        pip = PipEnv(self)
+        pip.install(["pyyaml", "typing-extensions"])
+        pip.generate()
 
     def build(self):
         cmake = CMake(self)
