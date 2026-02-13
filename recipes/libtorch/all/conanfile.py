@@ -214,6 +214,9 @@ class LibtorchRecipe(ConanFile):
         tc.cache_variables["USE_NNPACK"] = self.options.get_safe("with_nnpack")
         tc.cache_variables["USE_NUMA"] = self.options.get_safe("with_numa")
 
+        tc.cache_variables['Python_FIND_UNVERSIONED_NAMES'] = 'FIRST'
+        tc.cache_variables['Python_FIND_STRATEGY'] = 'LOCATION'
+
         tc.generate()
 
         pip = PipEnv(self)
