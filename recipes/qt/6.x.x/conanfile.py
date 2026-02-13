@@ -451,8 +451,9 @@ class QtConan(ConanFile):
         if self.options.qtwebengine:
             # https://github.com/qt/qtwebengine/blob/1a75761f912328b7b3b7f0302cec62ae5c111d1a/configure.cmake#L361-L366
             # QtWebEngine cannot build without html5lib visible to the python interpreter
-            PipEnv(self).install(["html5lib~=1.0"])
-            PipEnv(self).generate()
+            pyenv = PipEnv(self)
+            pyenv.install(["html5lib~=1.0"])
+            pyenv.generate()
 
         tc = CMakeDeps(self)
         tc.set_property("libdrm", "cmake_file_name", "Libdrm")
