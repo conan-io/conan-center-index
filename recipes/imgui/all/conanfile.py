@@ -30,6 +30,10 @@ class IMGUIConan(ConanFile):
         "with_sdl3_bindings": False,
     }
 
+    def requirements(self):
+        if self.options.with_sdl3_bindings:
+            self.requires("sdl/3.4.0")
+
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
         export_conandata_patches(self)
