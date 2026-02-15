@@ -46,6 +46,7 @@ class UserverConan(ConanFile):
         'with_s3api': [True, False],
         'with_grpc_reflection': [True, False],
         'with_grpc_protovalidate': [True, False],
+        'with_phdr_cache': [True, False],
     }
 
     default_options = {
@@ -68,6 +69,7 @@ class UserverConan(ConanFile):
         'with_s3api': True,
         'with_grpc_reflection': True,
         'with_grpc_protovalidate': False,
+        'with_phdr_cache': True,
         'mongo-c-driver/*:with_sasl': 'cyrus',
         'grpc/*:php_plugin': False,
         'grpc/*:node_plugin': False,
@@ -108,10 +110,13 @@ class UserverConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires('boost/1.86.0', transitive_headers=True)
+        self.requires('boost/[>=1.83 <1.88]', transitive_headers=True)
         self.requires('c-ares/[^1.33]')
         self.requires('cctz/[^2.4]', transitive_headers=True)
+
+        # 1.0.4 does not work due to https://github.com/cameron314/concurrentqueue/issues/439
         self.requires('concurrentqueue/1.0.3', transitive_headers=True)
+
         self.requires('cryptopp/[^8.9]')
         self.requires('fmt/[>=8.1.1 <13]', transitive_headers=True)
         self.requires('libiconv/[^1.17]')
@@ -120,7 +125,7 @@ class UserverConan(ConanFile):
         self.requires('libev/[^4.33]')
         self.requires('openssl/[>=1.1 <4]')
         self.requires('rapidjson/[>=cci.20230929 <cci.20230930]', transitive_headers=True)
-        self.requires('yaml-cpp/[^0.8]')
+        self.requires('yaml-cpp/[^0.8.0]')
         self.requires('zlib/[^1.3]')
         self.requires('zstd/[^1.5]')
         self.requires('icu/[>=74.1 <77]', force=True)
@@ -223,6 +228,7 @@ class UserverConan(ConanFile):
         tool_ch.cache_variables['USERVER_FEATURE_S3API'] = self.options.with_s3api
         tool_ch.cache_variables['USERVER_FEATURE_GRPC_REFLECTION'] = self.options.with_grpc_reflection
         tool_ch.cache_variables['USERVER_FEATURE_GRPC_PROTOVALIDATE'] = self.options.with_grpc_protovalidate
+        tool_ch.cache_variables['USERVER_DISABLE_PHDR_CACHE'] = not self.options.with_phdr_cache
 
         if self.options.with_grpc:
             tool_ch.cache_variables['USERVER_GOOGLE_COMMON_PROTOS'] = (
@@ -243,8 +249,8 @@ class UserverConan(ConanFile):
     def build(self):
         # pg_config is required to build psycopg2 from source without system package.
         # However, this approach fails on later stage, when venv for tests is built.
-        if libpq := self.dependencies.get('libpq'):
-            os.environ['PATH'] = os.environ['PATH'] + ':' + libpq.package_folder + '/bin'
+        if self.options.with_postgresql:
+            os.environ['PATH'] = os.environ['PATH'] + ':' + self.dependencies['libpq'].package_folder + '/bin'
 
         cmake = CMake(self)
         cmake.configure()
