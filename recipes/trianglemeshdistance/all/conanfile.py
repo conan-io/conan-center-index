@@ -4,7 +4,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.build import check_min_cppstd
 import os
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.4"
 
 
 class TriangleMeshDistanceConan(ConanFile):
@@ -16,8 +16,8 @@ class TriangleMeshDistanceConan(ConanFile):
     topics = ("simulation", "geometry", "graphics", "distance", "triangle",  "collision-detection", "mesh", "sdf", "level-set", "signed-distance-fields")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {}
-    default_options = {}
+    implements = ["auto_header_only"]
+
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -25,12 +25,8 @@ class TriangleMeshDistanceConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def package_id(self):
-        self.info.clear()
-
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
