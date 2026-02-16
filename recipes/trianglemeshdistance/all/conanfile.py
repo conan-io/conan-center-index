@@ -1,7 +1,7 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches, rmdir
 from conan.tools.layout import basic_layout
-from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMakeToolchain, CMake
 import os
 
 required_conan_version = ">=2.4"
@@ -18,23 +18,29 @@ class TriangleMeshDistanceConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     implements = ["auto_header_only"]
 
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def export_sources(self):
         export_conandata_patches(self)
 
-    def validate(self):
-        check_min_cppstd(self, 11)
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
 
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "tmd/TriangleMeshDistance.h",  src=os.path.join(self.source_folder, "TriangleMeshDistance", "include"),  dst=os.path.join(self.package_folder, "include"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "TriangleMeshDistance")

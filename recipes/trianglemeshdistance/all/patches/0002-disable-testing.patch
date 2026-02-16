@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8c73297..f743749 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,8 +1,8 @@
+-cmake_minimum_required(VERSION 3.1)
++cmake_minimum_required(VERSION 3.15)
+ project(TriangleMeshDistance)
+ set(CMAKE_CXX_STANDARD 11)
+ 
+-add_subdirectory(tests)
++#add_subdirectory(tests)
+ 
+ if(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
+     SET(CMAKE_INSTALL_INCLUDEDIR include CACHE
