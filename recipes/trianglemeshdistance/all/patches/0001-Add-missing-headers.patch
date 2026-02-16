@@ -1,10 +1,6 @@
-From 9c00f34fe2cb8689ca2947463537d1e0835f0c41 Mon Sep 17 00:00:00 2001
-From: Naoto Kondo <cgigcp3yqt@gmail.com>
-Date: Sat, 14 Feb 2026 22:12:44 +0900
-Subject: [PATCH] Add missing headers
-
 Explicitly include <cstdint> and <limits> in TriangleMeshDistance.h.
 These are required for uint64_t and std::numeric_limits, fixing compilation errors on modern compilers like GCC 15.
+See: https://github.com/InteractiveComputerGraphics/TriangleMeshDistance/pull/7
 ---
  TriangleMeshDistance/include/tmd/TriangleMeshDistance.h | 2 ++
  1 file changed, 2 insertions(+)
