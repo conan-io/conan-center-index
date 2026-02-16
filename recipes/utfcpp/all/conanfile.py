@@ -57,10 +57,8 @@ class UtfCppConan(ConanFile):
             self.cpp_info.set_property("cmake_target_name", "utf8cpp")
             self.cpp_info.set_property("cmake_target_aliases", ["utf8::cpp"])
 
-        if Version(self.version) == "4.0.1":
+        if Version(self.version) != "4.0.1":
             # INFO: https://github.com/nemtrif/utfcpp/issues/112
-            self.cpp_info.includedirs.append(os.path.join("include", "utf8"))
-        else:
             self.cpp_info.includedirs.append(os.path.join("include", "utf8cpp"))
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
