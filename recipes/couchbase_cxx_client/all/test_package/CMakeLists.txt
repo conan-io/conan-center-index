@@ -1,8 +1,7 @@
-cmake_minimum_required(VERSION 3.19)
-set(CMAKE_CXX_STANDARD 20)
-project(PackageTest CXX)
+cmake_minimum_required(VERSION 3.15)
+project(test_package CXX)
 
 find_package(couchbase_cxx_client CONFIG REQUIRED)
 
-add_executable(example src/example.cpp)
-target_link_libraries(example couchbase_cxx_client::couchbase_cxx_client)
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} couchbase_cxx_client::couchbase_cxx_client)

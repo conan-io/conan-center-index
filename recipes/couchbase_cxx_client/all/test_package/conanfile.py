@@ -12,9 +12,6 @@ class couchbaseTestConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.19.0 <4.0]")
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
@@ -25,5 +22,5 @@ class couchbaseTestConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            cmd = os.path.join(self.cpp.build.bindir, "example")
+            cmd = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(cmd, env="conanrun")
