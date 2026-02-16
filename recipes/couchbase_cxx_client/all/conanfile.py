@@ -15,7 +15,6 @@ class CouchbaseCxxClientConan(ConanFile):
     homepage = "https://github.com/couchbase/couchbase-cxx-client"
     topics = ("couchbase", "database", "nosql", "sdk")
     package_type = "library"
-    exports_sources = "*.patch"
     settings = "os", "arch", "compiler", "build_type"
 
     options = {
@@ -37,7 +36,6 @@ class CouchbaseCxxClientConan(ConanFile):
             # Only static on Windows
             del self.options.shared
             self.package_type = "static-library"
-
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
@@ -101,8 +99,12 @@ class CouchbaseCxxClientConan(ConanFile):
         tc.cache_variables["COUCHBASE_CXX_CLIENT_INSTALL"] = "ON"
         tc.cache_variables["COUCHBASE_CXX_CLIENT_CLANG_TIDY"] = False
         tc.cache_variables["COUCHBASE_CXX_CLIENT_EMBED_MOZILLA_CA_BUNDLE"] = False
-        tc.cache_variables["COUCHBASE_CXX_CLIENT_BUILD_SHARED"] = self.options.get_safe("shared")
-        tc.cache_variables["COUCHBASE_CXX_CLIENT_BUILD_STATIC"] = not self.options.get_safe("shared")
+        if self.options.get_safe("shared"):
+            tc.cache_variables["COUCHBASE_CXX_CLIENT_BUILD_SHARED"] = "ON"
+            tc.cache_variables["COUCHBASE_CXX_CLIENT_BUILD_STATIC"] = "OFF"
+        else:
+            tc.cache_variables["COUCHBASE_CXX_CLIENT_BUILD_SHARED"] = "OFF"
+            tc.cache_variables["COUCHBASE_CXX_CLIENT_BUILD_STATIC"] = "ON"
         tc.cache_variables["COUCHBASE_CXX_CLIENT_STATIC_BORINGSSL"] = "OFF"
         tc.cache_variables["COUCHBASE_CXX_CLIENT_POST_LINKED_OPENSSL"] = "OFF"
         tc.cache_variables["OPENSSL_USABLE"] = True
