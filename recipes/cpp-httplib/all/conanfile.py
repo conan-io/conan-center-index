@@ -79,7 +79,7 @@ class CpphttplibConan(ConanFile):
         if self.options.get_safe("with_zstd"):
             self.cpp_info.defines.append("CPPHTTPLIB_ZSTD_SUPPORT")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread", "anl"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["crypt32", "cryptui", "ws2_32"]
         elif self.settings.os == "Macos":

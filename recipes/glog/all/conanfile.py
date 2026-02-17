@@ -3,10 +3,11 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class GlogConan(ConanFile):
@@ -71,26 +72,26 @@ class GlogConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = VirtualBuildEnv(self)
-        tc.generate()
-
         tc = CMakeToolchain(self)
-        tc.variables["WITH_GFLAGS"] = self.options.with_gflags
-        tc.variables["WITH_THREADS"] = self.options.with_threads
-        tc.variables["WITH_PKGCONFIG"] = True
+        tc.cache_variables["WITH_GFLAGS"] = self.options.with_gflags
+        tc.cache_variables["WITH_THREADS"] = self.options.with_threads
+        tc.cache_variables["WITH_PKGCONFIG"] = True
         if self.settings.os == "Emscripten":
-            tc.variables["WITH_SYMBOLIZE"] = False
-            tc.variables["HAVE_SYSCALL_H"] = False
-            tc.variables["HAVE_SYS_SYSCALL_H"] = False
+            tc.cache_variables["WITH_SYMBOLIZE"] = False
+            tc.cache_variables["HAVE_SYSCALL_H"] = False
+            tc.cache_variables["HAVE_SYS_SYSCALL_H"] = False
         else:
-            tc.variables["WITH_SYMBOLIZE"] = True
-        tc.variables["WITH_UNWIND"] = self.options.get_safe("with_unwind", default=False)
-        tc.variables["BUILD_TESTING"] = False
-        tc.variables["WITH_GTEST"] = False
+            tc.cache_variables["WITH_SYMBOLIZE"] = True
+        tc.cache_variables["WITH_UNWIND"] = self.options.get_safe("with_unwind", default=False)
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["WITH_GTEST"] = False
         # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
         # Needed for https://github.com/google/glog/blob/v0.7.1/CMakeLists.txt#L81
         # and https://github.com/google/glog/blob/v0.7.1/CMakeLists.txt#L90
-        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+
+        if is_msvc(self) and cross_building(self) and self.settings.arch == "armv8":
+            tc.cache_variables["HAVE_SYMBOLIZE_EXITCODE"] = "1"
         tc.generate()
 
         tc = CMakeDeps(self)
