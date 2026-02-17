@@ -48,7 +48,7 @@ class CouchbaseCxxClientConan(ConanFile):
         self.requires("asio/1.31.0")
         self.requires("hdrhistogram-c/0.11.8")
         self.requires("taocpp-json/1.0.0-beta.14")
-        self.requires("llhttp/9.3.0")
+        self.requires("llhttp/[>=9.1.3 <10]")
         self.requires("openssl/[>=1.1 <4]")
 
     def build_requirements(self):
@@ -83,11 +83,9 @@ class CouchbaseCxxClientConan(ConanFile):
 
     def generate(self):
         deps = CMakeDeps(self)
-        # Couchbase uses CPM.cmake to manage dependencies, which expects certain target names.
-        # Provide aliases expected by couchbase-cxx-client ThirdPartyDependencies.cmake
-        deps.set_property("hdrhistogram-c", "cmake_target_aliases", ["hdr_histogram_static", "hdr_histogram"])
-        deps.set_property("snappy", "cmake_target_aliases", ["snappy"])
-        deps.set_property("asio", "cmake_target_aliases", ["asio"])
+        deps.set_property("hdrhistogram-c", "cmake_target_name", "hdr_histogram_static")
+        deps.set_property("snappy", "cmake_target_name", "snappy")
+        deps.set_property("asio", "cmake_target_name", "asio")
         deps.generate()
 
         tc = CMakeToolchain(self)
