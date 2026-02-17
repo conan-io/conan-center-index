@@ -50,7 +50,7 @@ class OmathConan(ConanFile):
 
     def requirements(self):
         if self.options.imgui:
-            self.requires("imgui/1.91.8")
+            self.requires("imgui/1.92.5")
 
     def validate(self):
         check_min_cppstd(self, 23)
