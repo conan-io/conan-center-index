@@ -24,18 +24,12 @@ class OmathConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "avx2": False,
-        "imgui": False,
     }
     implements = ["auto_shared_fpic"]
-
-        }
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.arch not in ["x86", "x86_64"]:
-            del self.options.avx2
 
     def configure(self):
         if is_msvc(self):
@@ -47,10 +41,6 @@ class OmathConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def requirements(self):
-        if self.options.imgui:
-            self.requires("imgui/1.92.5")
-
     def validate(self):
         check_min_cppstd(self, 23)
 
@@ -59,9 +49,7 @@ class OmathConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["OMATH_USE_AVX2"] = self.options.get_safe("avx2", False)
-        tc.variables["OMATH_IMGUI_INTEGRATION"] = self.options.imgui
-        tc.variables["OMATH_USE_UNITY_BUILD"] = True
+        tc.variables["OMATH_USE_UNITY_BUILD"] = False
         tc.variables["OMATH_BUILD_TESTS"] = False
         tc.variables["OMATH_THREAT_WARNING_AS_ERROR"] = False
         tc.variables["OMATH_BUILD_BENCHMARK"] = False
