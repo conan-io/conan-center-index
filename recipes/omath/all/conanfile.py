@@ -1,8 +1,9 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
+import os
 
 required_conan_version = ">=2.1"
 
@@ -69,6 +70,8 @@ class OmathConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=f"{self.package_folder}/licenses")
         cmake = CMake(self)
         cmake.install()
+
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "omath")
