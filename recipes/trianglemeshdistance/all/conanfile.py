@@ -43,7 +43,7 @@ class TriangleMeshDistanceConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "TriangleMeshDistance")
+        self.cpp_info.set_property("cmake_file_name", "trianglemeshdistance")
         self.cpp_info.set_property("cmake_target_name", "trianglemeshdistance::trianglemeshdistance")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
