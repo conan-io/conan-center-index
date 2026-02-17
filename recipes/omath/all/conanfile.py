@@ -30,14 +30,6 @@ class OmathConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "13",
-            "clang": "16",
-            "apple-clang": "15",
-            "Visual Studio": "17",
-            "msvc": "193",
         }
 
     def config_options(self):
