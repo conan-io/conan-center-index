@@ -20,7 +20,6 @@ class OmathConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "imgui": [True, False],
     }
     default_options = {
         "shared": False,
