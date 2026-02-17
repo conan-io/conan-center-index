@@ -43,8 +43,9 @@ class CouchbaseCxxClientConan(ConanFile):
         # these should match https://github.com/couchbase/couchbase-cxx-client/blob/main/couchbase-sdk-cxx-black-duck-manifest.yaml
         # as best as possible
         self.requires("spdlog/[~1.15.0]")
+        self.requires("fmt/[*]")
         self.requires("ms-gsl/4.0.0")
-        self.requires("snappy/[~1.2.1]") # 1.2.2 not in conancenter yet
+        self.requires("snappy/[~1.2.1]")
         self.requires("asio/1.31.0")
         self.requires("hdrhistogram-c/0.11.8")
         self.requires("taocpp-json/1.0.0-beta.14")
@@ -72,6 +73,9 @@ class CouchbaseCxxClientConan(ConanFile):
                 replace_in_file(self, os.path.join(root, file),
                                 "#include <spdlog/fmt/bundled",
                                 "#include <fmt", strict=False)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "target_link_libraries(${TARGET} PUBLIC $<BUILD_INTERFACE:spdlog::spdlog>)",
+                        "target_link_libraries(${TARGET} PUBLIC $<BUILD_INTERFACE:spdlog::spdlog> fmt::fmt)")
         # Use only the ConanThirdPartyDependencies.cmake module
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "include(cmake/ThirdPartyDependencies.cmake)",
@@ -96,7 +100,6 @@ class CouchbaseCxxClientConan(ConanFile):
         tc.cache_variables["COUCHBASE_CXX_CLIENT_BUILD_DOCS"] = "OFF"
         tc.cache_variables["COUCHBASE_CXX_CLIENT_INSTALL"] = "ON"
         tc.cache_variables["COUCHBASE_CXX_CLIENT_CLANG_TIDY"] = False
-        tc.cache_variables["COUCHBASE_CXX_CLIENT_EMBED_MOZILLA_CA_BUNDLE"] = False
         if self.options.get_safe("shared"):
             tc.cache_variables["COUCHBASE_CXX_CLIENT_BUILD_SHARED"] = "ON"
             tc.cache_variables["COUCHBASE_CXX_CLIENT_BUILD_STATIC"] = "OFF"
@@ -105,6 +108,10 @@ class CouchbaseCxxClientConan(ConanFile):
             tc.cache_variables["COUCHBASE_CXX_CLIENT_BUILD_STATIC"] = "ON"
         tc.cache_variables["COUCHBASE_CXX_CLIENT_STATIC_BORINGSSL"] = "OFF"
         tc.cache_variables["COUCHBASE_CXX_CLIENT_POST_LINKED_OPENSSL"] = "OFF"
+        tc.cache_variables["COUCHBASE_CXX_CLIENT_USE_HOMEBREW_TO_DETECT_OPENSSL"] = False
+        tc.cache_variables["COUCHBASE_CXX_CLIENT_USE_SCOOP_TO_DETECT_OPENSSL"] = False
+        tc.cache_variables["COUCHBASE_CXX_CLIENT_EMBED_MOZILLA_CA_BUNDLE"] = False
+        tc.cache_variables["COUCHBASE_CXX_CLIENT_STATIC_OPENSSL"] = not bool(self.dependencies["openssl"].options.shared)
         tc.cache_variables["OPENSSL_USABLE"] = True
         # Force try_compile checks to use the current single-config build type to avoid looking for missing *_DEBUG imported targets
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
