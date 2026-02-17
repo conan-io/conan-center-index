@@ -77,11 +77,13 @@ class Z3Conan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        build_script_folder = os.path.join(self.source_folder, "core") if Version(self.version) >= "4.15.4" else self.source_folder
+        cmake.configure(build_script_folder=build_script_folder)
         cmake.build()
 
     def package(self):
         copy(self, "LICENSE.txt", os.path.join(self.source_folder), os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.txt", os.path.join(self.source_folder, "core"), os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

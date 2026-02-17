@@ -1,4 +1,7 @@
 sources:
+  "cci.20251216":
+    url: "https://github.com/ned14/quickcpplib/archive/40b0964df509e90a4b527243a8fd4dbf6b704ff2.tar.gz"
+    sha256: "4d81acd8f12d903bc5ae3a2d03e0ab49196c5d533a08cd66aa5e0480fe4a9138"
   "cci.20231208":
     url: "https://github.com/ned14/quickcpplib/archive/72277c70f925829935a2af846731ab36063ec16f.tar.gz"
     sha256: "bb9da86efa2f262e6a292453775fa9b999b422700eb1c1ac390b7cbe5f0ec92f"
