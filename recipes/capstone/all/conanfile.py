@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -75,6 +76,7 @@ class CapstoneConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["capstone"]
