@@ -3,6 +3,7 @@ from conan.tools.build import check_min_cstd
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=2.4"
@@ -41,6 +42,8 @@ class LibtirpcConan(ConanFile):
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cstd(self, 99)
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration(f"{self.ref} is only supported on Linux and FreeBSD")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -71,5 +74,4 @@ class LibtirpcConan(ConanFile):
         self.cpp_info.libs = ["tirpc"]
         self.cpp_info.includedirs.append(os.path.join("include", "tirpc"))
         self.cpp_info.set_property("pkg_config_name", "libtirpc")
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
+        self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
