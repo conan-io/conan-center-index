@@ -63,6 +63,7 @@ class CapstoneConan(ConanFile):
             tc.cache_variables[f"CAPSTONE_{a.upper()}_SUPPORT"] = self.options.get_safe(a)
 
         tc.cache_variables["CMAKE_MACOSX_RPATH"] = True
+        tc.cache_variables["CMAKE_INSTALL_NAME_DIR"] = "@rpath"
         tc.generate()
 
     def build(self):
