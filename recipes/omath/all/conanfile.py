@@ -76,4 +76,5 @@ class OmathConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "omath")
         self.cpp_info.set_property("cmake_target_name", "omath::omath")
+        self.cpp_info.defines.extend(["OMATH_SUPRESS_SAFETY_CHECKS", "OMATH_ENABLE_FORCE_INLINE", "OMATH_ENABLE_LEGACY"])
         self.cpp_info.libs = ["omath"]
