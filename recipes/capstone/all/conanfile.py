@@ -47,6 +47,13 @@ class CapstoneConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "src", "CMakeLists.txt"),
+            'SOVERSION ${SOVERSION}',
+            'SOVERSION ${SOVERSION} INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" INSTALL_NAME_DIR "@rpath"'
+        )
+
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -61,7 +68,6 @@ class CapstoneConan(ConanFile):
         for a in self._archs:
             tc.cache_variables[f"CAPSTONE_{a.upper()}_SUPPORT"] = self.options.get_safe(a)
 
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "cmake_policy(SET CMP0042 NEW)", "")
         tc.generate()
 
     def build(self):
