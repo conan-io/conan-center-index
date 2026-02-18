@@ -1,4 +1,6 @@
 versions:
+  "1.0.4":
+    folder: all
   "cci.20210411":
     folder: all
   "1.0.2":
