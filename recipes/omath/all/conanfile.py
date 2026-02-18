@@ -41,6 +41,9 @@ class OmathConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 23)
+        if is_msvc(self) and self.options.shared:
+            # https://github.com/orange-cpp/omath/pull/17
+            raise ConanInvalidConfiguration("Windows shared is not supported for now.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
