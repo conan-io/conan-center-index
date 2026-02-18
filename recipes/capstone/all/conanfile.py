@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -62,7 +61,8 @@ class CapstoneConan(ConanFile):
         tc.cache_variables["CAPSTONE_USE_DEFAULT_ALLOC"] = self.options.use_default_alloc
         for a in self._archs:
             tc.cache_variables[f"CAPSTONE_{a.upper()}_SUPPORT"] = self.options.get_safe(a)
-        
+
+        tc.cache_variables["CMAKE_MACOSX_RPATH"] = True
         tc.generate()
 
     def build(self):
@@ -76,7 +76,6 @@ class CapstoneConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["capstone"]
