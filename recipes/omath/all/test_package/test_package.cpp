@@ -3,7 +3,10 @@
 
 int main()
 {
-    omath::Vector2 w = omath::Vector2(20.0, 30.0);
-    std::cout << "Vector2: " << w.x << ", " << w.y << std::endl;
+    omath::pathfinding::NavigationMesh nav;
+    constexpr omath::Vector3<float> v{1.f, 1.f, 0.f};
+    nav.m_vertex_map[v] = {};
+    const auto path = omath::pathfinding::Astar::find_path(v, v, nav);
+    std::cout << "Omath Path size: " << path.size() << std::endl;
     return 0;
 }
