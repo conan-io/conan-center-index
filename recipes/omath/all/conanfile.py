@@ -11,7 +11,7 @@ required_conan_version = ">=2.1"
 class OmathConan(ConanFile):
     name = "omath"
     description = "Cross-platform modern general purpose math library written in C++23"
-    license = "LicenseRef-LICENSE"
+    license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/orange-cpp/omath"
     topics = ("math", "linear-algebra", "vector", "matrix")
