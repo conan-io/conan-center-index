@@ -8,7 +8,7 @@ required_conan_version = ">=2.0.9"
 
 
 class PackageConan(ConanFile):
-    name = "bigint23"
+    name = "rwindegger-bigint23"
     description = "A header-only C++ library provides a arbitrary-fixed-width integer type called `bigint`. It supports both signed and unsigned numbers with a customizable bit-width."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
@@ -24,7 +24,7 @@ class PackageConan(ConanFile):
         check_min_cppstd(self, 23)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.28 <4]")
+        self.tool_requires("cmake/[>=3.28]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -33,10 +33,8 @@ class PackageConan(ConanFile):
         self.info.clear()
 
     def generate(self):
-        deps = CMakeDeps(self)
-        deps.generate()
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_TESTING"] = False
         tc.generate()
 
     def build(self):
