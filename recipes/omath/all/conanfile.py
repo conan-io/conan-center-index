@@ -50,12 +50,12 @@ class OmathConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["OMATH_USE_UNITY_BUILD"] = False
-        tc.variables["OMATH_BUILD_TESTS"] = False
-        tc.variables["OMATH_THREAT_WARNING_AS_ERROR"] = False
-        tc.variables["OMATH_BUILD_BENCHMARK"] = False
-        tc.variables["OMATH_BUILD_EXAMPLES"] = False
-        tc.variables["OMATH_BUILD_AS_SHARED_LIBRARY"] = self.options.get_safe("shared")
+        tc.cache_variables["OMATH_USE_UNITY_BUILD"] = False
+        tc.cache_variables["OMATH_BUILD_TESTS"] = False
+        tc.cache_variables["OMATH_THREAT_WARNING_AS_ERROR"] = False
+        tc.cache_variables["OMATH_BUILD_BENCHMARK"] = False
+        tc.cache_variables["OMATH_BUILD_EXAMPLES"] = False
+        tc.cache_variables["OMATH_BUILD_AS_SHARED_LIBRARY"] = self.options.get_safe("shared")
         tc.generate()
         
         deps = CMakeDeps(self)
