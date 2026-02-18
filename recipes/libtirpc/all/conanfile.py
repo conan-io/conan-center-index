@@ -40,7 +40,7 @@ class LibtirpcConan(ConanFile):
         self.requires("krb5/1.21.2")
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
+        if self.settings.get_safe("compiler.cstd"):
             check_min_cstd(self, 99)
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration(f"{self.ref} is only supported on Linux and FreeBSD")
