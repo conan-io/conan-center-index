@@ -1,7 +1,6 @@
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime
 import os
 
@@ -48,13 +47,6 @@ class CapstoneConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            'SOVERSION ${PROJECT_VERSION_MAJOR}',
-            'SOVERSION ${PROJECT_VERSION_MAJOR} INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib" INSTALL_NAME_DIR "@rpath" MACOSX_RPATH ON'
-        )
-
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -82,7 +74,6 @@ class CapstoneConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["capstone"]
