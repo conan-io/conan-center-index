@@ -28,10 +28,6 @@ class OmathConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
         if is_msvc(self):
             self.options.rm_safe("shared")
