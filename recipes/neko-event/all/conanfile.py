@@ -15,10 +15,7 @@ class NekoEventConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "A modern easy to use type-safe and high-performance event handling system for C++"
     topics = ("c++20", "header-only", "event", "neko", "event-dispatcher", "event-bus", "event-system", "pub-sub", "observer-pattern")
-
     settings = "os", "compiler", "build_type", "arch"
-
-    # Header-only library
     package_type = "header-library"
     implements = "auto_header_only"
 
@@ -36,9 +33,9 @@ class NekoEventConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["NEKO_EVENT_BUILD_TESTS"] = False
-        tc.variables["NEKO_EVENT_ENABLE_MODULE"] = False
-        tc.variables["NEKO_EVENT_AUTO_FETCH_DEPS"] = False
+        tc.cache_variables["NEKO_EVENT_BUILD_TESTS"] = False
+        tc.cache_variables["NEKO_EVENT_ENABLE_MODULE"] = False
+        tc.cache_variables["NEKO_EVENT_AUTO_FETCH_DEPS"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -58,8 +55,5 @@ class NekoEventConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
-        # Set the CMake package file name to match the official CMake config
         self.cpp_info.set_property("cmake_file_name", "NekoEvent")
-
-        # Main header-only target
         self.cpp_info.set_property("cmake_target_name", "Neko::Event")

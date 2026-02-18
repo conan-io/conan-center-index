@@ -4,5 +4,4 @@ struct StartEvent {};
 
 int main() {
     neko::event::EventLoop loop;
-    loop.publish(StartEvent{});
 }
