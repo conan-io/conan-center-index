@@ -11,10 +11,6 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
-    def build_requirements(self):
-        # only if we have to call autoreconf
-        self.tool_requires("cmake/[>=3.15]")
-
     def requirements(self):
         self.requires(self.tested_reference_str)
 
