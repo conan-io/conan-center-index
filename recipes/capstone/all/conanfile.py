@@ -77,8 +77,6 @@ class CapstoneConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
-        fix_apple_shared_install_name(self)
-
     def package_info(self):
         self.cpp_info.libs = ["capstone"]
         if self.options.shared:
