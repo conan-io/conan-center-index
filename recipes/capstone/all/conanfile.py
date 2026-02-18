@@ -50,8 +50,8 @@ class CapstoneConan(ConanFile):
         replace_in_file(
             self,
             os.path.join(self.source_folder, "CMakeLists.txt"),
-            'SOVERSION ${SOVERSION}',
-            'SOVERSION ${SOVERSION} INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" INSTALL_NAME_DIR "@rpath"'
+            'SOVERSION ${PROJECT_VERSION_MAJOR}',
+            'SOVERSION ${PROJECT_VERSION_MAJOR} INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" INSTALL_NAME_DIR "@rpath"'
         )
 
 
