@@ -29,12 +29,6 @@ class OmathConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
-    def configure(self):
-        if is_msvc(self):
-            self.options.rm_safe("shared")
-            self.package_type = "static-library"
-        if self.options.get_safe("shared"):
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
