@@ -52,7 +52,7 @@ class OmathConan(ConanFile):
         tc.cache_variables["OMATH_THREAT_WARNING_AS_ERROR"] = False
         tc.cache_variables["OMATH_BUILD_BENCHMARK"] = False
         tc.cache_variables["OMATH_BUILD_EXAMPLES"] = False
-        tc.cache_variables["OMATH_BUILD_AS_SHARED_LIBRARY"] = self.options.get_safe("shared")
+        tc.cache_variables["OMATH_BUILD_AS_SHARED_LIBRARY"] = self.options.shared
         tc.cache_variables["OMATH_BUILD_VIA_VCPKG"] = False
         tc.generate()
         
