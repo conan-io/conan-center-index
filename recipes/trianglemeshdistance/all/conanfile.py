@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches, rmdir
+from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches, rmdir, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.cmake import CMakeToolchain, CMake
 import os
@@ -31,6 +31,8 @@ class TriangleMeshDistanceConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "add_subdirectory(tests)", "")
 
     def build(self):
         cmake = CMake(self)
