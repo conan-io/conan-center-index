@@ -1,9 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
-from conan.tools.apple import fix_apple_shared_install_name
 import os
 
 required_conan_version = ">=2.4"
@@ -63,8 +62,7 @@ class CapstoneConan(ConanFile):
         for a in self._archs:
             tc.cache_variables[f"CAPSTONE_{a.upper()}_SUPPORT"] = self.options.get_safe(a)
 
-        tc.cache_variables["CMAKE_MACOSX_RPATH"] = True
-        tc.cache_variables["CMAKE_INSTALL_NAME_DIR"] = "@rpath"
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "cmake_policy(SET CMP0042 NEW)", "")
         tc.generate()
 
     def build(self):
