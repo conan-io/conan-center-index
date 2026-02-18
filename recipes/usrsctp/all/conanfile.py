@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 
 required_conan_version = ">=2.4"
 
@@ -45,8 +46,8 @@ class UsrsctpConan(ConanFile):
         tc.variables["sctp_build_shared_lib"] = self.options.shared
         tc.variables["sctp_build_programs"] = False
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
-        # Disable net/route.h for iOS (header not available in iOS SDK)
-        tc.variables["USE_NET_ROUTE_H"] = self.settings.os != "iOS"
+        if Version(self.version) == "0.9.5.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
     def build(self):
