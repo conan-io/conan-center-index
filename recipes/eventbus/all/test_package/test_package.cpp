@@ -1,8 +1,6 @@
 
 #include <dexode/EventBus.hpp>
 
-#include <iostream>
-#include <cassert>
 
 using namespace dexode;
 
@@ -13,6 +11,7 @@ struct Value
 {
 	int value{-1};
 };
+
 }
 
 
@@ -27,7 +26,7 @@ int main(void) {
 	});
 
 	bus.postpone(event::Value{3});
-    bus.process() == 1;
+    bus.process();
 
     
     return 0;
