@@ -57,7 +57,11 @@ class GobjectIntrospectionConan(ConanFile):
 
     def requirements(self):
         # https://gitlab.gnome.org/GNOME/gobject-introspection/-/blob/1.76.1/meson.build?ref_type=tags#L127-131
-        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
+        if self.version < Version("1.82.0"):
+            self.requires("glib/[>=2.78.3 <3]", transitive_headers=True, transitive_libs=True)
+        else:
+            #https://gitlab.gnome.org/GNOME/gobject-introspection/-/commit/fc4b438253bf869f56153f80dc32f58bcf9e3b81
+            self.requires("glib/[>=2.82 <3]", transitive_headers=True, transitive_libs=True)
         # ffi.h is exposed by public header gobject-introspection-1.0/girffi.h
         self.requires("libffi/3.4.4", transitive_headers=True)
 
