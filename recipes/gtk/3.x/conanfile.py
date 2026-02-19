@@ -159,7 +159,7 @@ class Gtk4Conan(ConanFile):
                         if os.path.isabs(p):
                             try:
                                 # Calculate path relative to the build folder
-                                rel_p = os.path.relpath(p, build_folder).replace("\\", "/")
+                                rel_p = os.path.relpath(p, build_folder)
                                 short_parts.append(rel_p)
                             except ValueError:
                                 # If on a different drive (Windows), keep absolute
