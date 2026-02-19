@@ -5,6 +5,8 @@ from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
 from conan.tools.files import save, load
 from conan.tools.apple import is_apple_os
+from conan.tools.scm import Version
+from conan.tools.system import PyEnv
 
 
 class TestPackageConan(ConanFile):
@@ -26,6 +28,14 @@ class TestPackageConan(ConanFile):
         save(self, os.path.join(self.build_folder, "gobject_introspection_data"), str(introspection_data))
         save(self, os.path.join(self.build_folder, "gobject_introspection_bin"),
               self.dependencies["gobject-introspection"].cpp_info.bindirs[0])
+        
+        pyenv = PyEnv(self)
+        if(self.dependencies["gobject-introspection"].ref.version < Version("1.81.2")):
+            # https://gitlab.gnome.org/GNOME/gobject-introspection/-/commit/a2139dba59eac283a7f543ed737f038deebddc19
+            pyenv.install(["setuptools<74.0.0"])
+        else:
+            pyenv.install(["setuptools~=82.0.0"])
+        pyenv.generate()
 
     def build(self):
         cmake = CMake(self)
