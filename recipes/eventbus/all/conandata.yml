@@ -1,0 +1,4 @@
+sources:
+  "3.1.2":
+    url: "https://github.com/gelldur/EventBus/archive/refs/tags/v3.1.2.tar.gz"
+    sha256: "38e7fb003e875f5bddafd84c478f358007eff7224fafbf2143f9d27dad98e404"
