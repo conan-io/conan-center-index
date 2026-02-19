@@ -30,6 +30,9 @@ class M4Conan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
 
+    def requirements(self):
+        self.requires("libiconv/1.18")
+
     def build_requirements(self):
         if self.settings_build.os == "Windows":
             self.win_bash = True
@@ -44,6 +47,7 @@ class M4Conan(ConanFile):
         env.generate()
 
         tc = AutotoolsToolchain(self)
+        tc.configure_args.append(f"--with-libiconv-prefix={self.dependencies['libiconv'].package_folder}")
         if is_msvc(self):
             tc.extra_cflags.append("-FS")
             # Avoid a `Assertion Failed Dialog Box` during configure with build_type=Debug
