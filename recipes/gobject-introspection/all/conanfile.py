@@ -11,9 +11,10 @@ from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.env import Environment
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.scm import Version
+from conan.tools.system import PyEnv
 from conan import conan_version
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
+required_conan_version = ">=2.25"
 
 
 class GobjectIntrospectionConan(ConanFile):
@@ -111,6 +112,10 @@ class GobjectIntrospectionConan(ConanFile):
         env.define_path("PKG_CONFIG_PATH", self.generators_folder)
         envvars = env.vars(self)
         envvars.save_script("pkg_config_env")
+
+        pyenv = PyEnv(self)
+        pyenv.install(["setuptools~=82.0.0"])
+        pyenv.generate()
 
     def _patch_sources(self):
         # Disable tests
