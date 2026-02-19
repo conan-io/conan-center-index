@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
@@ -45,10 +45,7 @@ class Gtk4Conan(ConanFile):
             del self.options.with_x11
 
     def layout(self):
-        # XXX: Windows breaks with gtk/gtk-3-vs17.dll.rsp:
-        # fatal error LNK1170: line in command file contains 131071 or more characters
-        # We need to update the ninja build file to avoid passing too long command line to the linker
-        basic_layout(self, src_folder="s", build_folder="b")
+        basic_layout(self, src_folder="src")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
@@ -132,6 +129,13 @@ class Gtk4Conan(ConanFile):
 
     def build(self):
         meson = Meson(self)
+        # XXX: Windows breaks with gtk/gtk-3-vs17.dll.rsp:
+        # fatal error LNK1170: line in command file contains 131071 or more characters
+        # We need to update the ninja build file to avoid passing too long command line to the linker
+        if os.path.exists(os.path.join(self.build_folder, "build.ninja")):
+            ninja_build_path = os.path.join(self.build_folder, "build.ninja")
+            basebuildname = os.path.basename(self.build_folder)
+            replace_in_file(self, ninja_build_path, f"{self.build_folder}/", f"{basebuildname}/")
         meson.configure()
         meson.build()
 
