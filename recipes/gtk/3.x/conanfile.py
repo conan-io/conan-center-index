@@ -6,7 +6,6 @@ from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.scm import Version
-import shlex
 import os
 
 
@@ -128,58 +127,16 @@ class Gtk4Conan(ConanFile):
         if self.settings.os == "Linux" and not (self.options.with_wayland or self.options.with_x11):
             raise ConanInvalidConfiguration("At least one of backends '-o &:with_wayland' or '-o &:with_x11' options must be True on Linux")
 
-    def _shorten_rsp_files(self, build_folder):
-        """
-        XXX: Windows breaks with gtk/gtk-3-vs17.dll.rsp:
-        fatal error LNK1170: line in command file contains 131071 or more characters
-        We need to update the ninja build file to avoid passing too long command line to the linker
-        """
-        for root, _, files in os.walk(build_folder):
-            for file in files:
-                if file.endswith(".rsp"):
-                    rsp_path = os.path.join(root, file)
-
-                    with open(rsp_path, "r", encoding="utf-8") as f:
-                        content = f.read()
-
-                    # INFO: Parse the arguments (handling quotes and spaces)
-                    try:
-                        parts = shlex.split(content)
-                    except ValueError:
-                        # Fallback if shlex fails on complex Windows paths
-                        parts = content.split()
-
-                    # INFO: Deduplicate to save space
-                    unique_parts = list(dict.fromkeys(parts))
-
-                    # INFO: Convert absolute paths to relative paths
-                    short_parts = []
-                    for p in unique_parts:
-                        # Only convert if it's an absolute path that exists
-                        if os.path.isabs(p):
-                            try:
-                                # Calculate path relative to the build folder
-                                rel_p = os.path.relpath(p, build_folder)
-                                short_parts.append(rel_p)
-                            except ValueError:
-                                # If on a different drive (Windows), keep absolute
-                                short_parts.append(p)
-                        else:
-                            short_parts.append(p)
-
-                    # INFO: Write the shortened content back
-                    # Use double quotes for paths with spaces
-                    new_content = " ".join(f'"{p}"' if " " in p else p for p in short_parts)
-
-                    with open(rsp_path, "w", encoding="utf-8") as f:
-                        f.write(new_content)
-
-                    self.output.warning(f"Shortened: {rsp_path}")
-
     def build(self):
         meson = Meson(self)
+        # XXX: Windows breaks with gtk/gtk-3-vs17.dll.rsp:
+        # fatal error LNK1170: line in command file contains 131071 or more characters
+        # We need to update the ninja build file to avoid passing too long command line to the linker
+        if os.path.exists(os.path.join(self.build_folder, "build.ninja")):
+            ninja_build_path = os.path.join(self.build_folder, "build.ninja")
+            basebuildname = os.path.basename(self.build_folder)
+            replace_in_file(self, ninja_build_path, f"{self.build_folder}/", f"{basebuildname}/")
         meson.configure()
-        self._shorten_rsp_files(self.build_folder)
         meson.build()
 
     def package(self):
