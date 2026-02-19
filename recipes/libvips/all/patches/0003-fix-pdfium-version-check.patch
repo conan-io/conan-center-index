@@ -1,0 +1,21 @@
+diff --git a/meson.build b/meson.build
+--- a/meson.build
++++ b/meson.build
+@@ -514,9 +514,16 @@ pdf_loader = disabler()
+
+ # pick 4200 as the starting version number ... no reason, really, it'd
+ # probably work with much older versions
+-pdfium_dep = dependency('pdfium', version: '>=4200', required: get_option('pdfium'))
++pdfium_dep = dependency('pdfium', required: get_option('pdfium'))
+ if pdfium_dep.found()
++    # pdfium version may use Chromium scheme (95.0.4629) or flat API version (4629).
++    # The API version is always the last component.
++    _pdfium_parts = pdfium_dep.version().split('.')
++    _pdfium_api = _pdfium_parts[_pdfium_parts.length() - 1].to_int()
++    if _pdfium_api < 4200
++        error('pdfium API version must be >= 4200, got @0@'.format(pdfium_dep.version()))
++    endif
+     external_deps += pdfium_dep
+     cfg_var.set('HAVE_PDFIUM', '1')
+     pdf_loader = pdfium_dep
+ endif
