@@ -45,7 +45,10 @@ class Gtk4Conan(ConanFile):
             del self.options.with_x11
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        # XXX: Windows breaks with gtk/gtk-3-vs17.dll.rsp:
+        # fatal error LNK1170: line in command file contains 131071 or more characters
+        # We need to update the ninja build file to avoid passing too long command line to the linker
+        basic_layout(self, src_folder="s", build_folder="b")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
