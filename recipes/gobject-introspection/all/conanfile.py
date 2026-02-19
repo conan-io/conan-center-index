@@ -114,7 +114,11 @@ class GobjectIntrospectionConan(ConanFile):
         envvars.save_script("pkg_config_env")
 
         pyenv = PyEnv(self)
-        pyenv.install(["setuptools~=82.0.0"])
+        if(self.version < Version("1.81.2")):
+            # https://gitlab.gnome.org/GNOME/gobject-introspection/-/commit/a2139dba59eac283a7f543ed737f038deebddc19
+            pyenv.install(["setuptools<74.0.0"])
+        else:
+            pyenv.install(["setuptools~=82.0.0"])
         pyenv.generate()
 
     def _patch_sources(self):
