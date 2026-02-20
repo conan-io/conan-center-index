@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, load, replace_in_file, save
-from conan.tools.scm import Version
+from conan.tools.files import get, rmdir, copy, rm
 import os
 
 required_conan_version = ">=1.53.0"
@@ -27,9 +26,6 @@ class ZlibConan(ConanFile):
         "fPIC": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -49,58 +45,48 @@ class ZlibConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["SKIP_INSTALL_ALL"] = False
-        tc.variables["SKIP_INSTALL_LIBRARIES"] = False
-        tc.variables["SKIP_INSTALL_HEADERS"] = False
-        tc.variables["SKIP_INSTALL_FILES"] = True
-        # Correct for misuse of "${CMAKE_INSTALL_PREFIX}/" in CMakeLists.txt
-        tc.variables["INSTALL_LIB_DIR"] = "lib"
-        tc.variables["INSTALL_INC_DIR"] = "include"
-        tc.variables["ZLIB_BUILD_EXAMPLES"] = False
+        tc.cache_variables["ZLIB_BUILD_TESTING"] = False
+        tc.cache_variables["ZLIB_BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["ZLIB_BUILD_STATIC"] = not self.options.shared
         tc.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
-        is_apple_clang12 = self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "12.0"
-        if not is_apple_clang12:
-            for filename in ['zconf.h', 'zconf.h.cmakein', 'zconf.h.in']:
-                filepath = os.path.join(self.source_folder, filename)
-                replace_in_file(self, filepath,
-                                      '#ifdef HAVE_UNISTD_H    '
-                                      '/* may be set to #if 1 by ./configure */',
-                                      '#if defined(HAVE_UNISTD_H) && (1-HAVE_UNISTD_H-1 != 0)')
-                replace_in_file(self, filepath,
-                                      '#ifdef HAVE_STDARG_H    '
-                                      '/* may be set to #if 1 by ./configure */',
-                                      '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
-    def _extract_license(self):
-        tmp = load(self, os.path.join(self.source_folder, "zlib.h"))
-        license_contents = tmp[2:tmp.find("*/", 1)]
-        return license_contents
-
     def package(self):
-        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "ZLIB")
         self.cpp_info.set_property("cmake_target_name", "ZLIB::ZLIB")
+        if not self.options.shared:
+            # The official target name of the static library is ZLIB::ZLIBSTATIC
+            # We add it as only as alias to avoid breaking changes for ZLIB::ZLIB consumers,
+            # but it does not exist upstream in this case
+            self.cpp_info.set_property("cmake_target_aliases", ["ZLIB::ZLIBSTATIC"])
+        self.cpp_info.set_property("cmake_components", ["shared" if self.options.shared else "static"])
         self.cpp_info.set_property("pkg_config_name", "zlib")
+        self.cpp_info.languages = ["C"]
 
-        if self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime"):
-            # The recipe patches the CMakeLists.txt to generate different filenames when CMake
-            # detects MINGW (clang, gcc with compiler.runtime undefined and compiler.libcxx defined)
-            libname = "zdll" if self.options.shared else "zlib"
-        else:
-            libname = "z"
-        self.cpp_info.libs = [libname]
+        postfix = ""
+        suffix = ""
+        if self.settings.os == "Windows":
+            if self.settings.build_type == "Debug":
+                postfix = "d"
+            if not self.options.shared:
+                suffix = "s"
+        self.cpp_info.libs = [f"z{suffix}{postfix}"]
+        # TODO:
+        #  _LARGEFILE64_SOURCE definition, which is computed with:
+        #  set(CMAKE_REQUIRED_DEFINITIONS -D_LARGEFILE64_SOURCE=1)
+        #   check_type_size(off64_t OFF64_T)
+        #   unset(CMAKE_REQUIRED_DEFINITIONS) # clear variable
