@@ -22,10 +22,12 @@ class LibtirpcConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_gssapi": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_gssapi": True
     }
     implements = ["auto_shared_fpic"]
 
@@ -33,11 +35,13 @@ class LibtirpcConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        # INFO: krb5-config tool is required to obtain the correct CFLAGS and LDFLAGS for krb5 dependency
-        self.tool_requires("krb5/<host_version>")
+        if self.options.with_gssapi:
+            # INFO: krb5-config tool is required to obtain the correct CFLAGS and LDFLAGS for krb5 dependency
+            self.tool_requires("krb5/<host_version>")
 
     def requirements(self):
-        self.requires("krb5/1.21.2")
+        if self.options.with_gssapi:
+            self.requires("krb5/1.21.2")
 
     def validate(self):
         if self.settings.get_safe("compiler.cstd"):
@@ -50,6 +54,7 @@ class LibtirpcConan(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--enable-gssapi={}".format("yes" if self.options.with_gssapi else "no"))
         tc.generate()
         # INFO: In order to find AC_CHECK_HEADER(gssapi/gssapi.h) from krb5
         tc = AutotoolsDeps(self)
