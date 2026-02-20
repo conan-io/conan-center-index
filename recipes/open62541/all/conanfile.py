@@ -309,7 +309,9 @@ class Open62541Conan(ConanFile):
         tc.variables["UA_ENABLE_DISCOVERY"] = self.options.discovery != False
 
         if self.options.discovery != False:
-            tc.variables["UA_ENABLE_DISCOVERY_MULTICAST"] = \
+            mdnsd_variable = "UA_ENABLE_DISCOVERY_MULTICAST" if Version(self.version) < "1.5.0" \
+                else "UA_ENABLE_DISCOVERY_MULTICAST_MDNSD"
+            tc.variables[mdnsd_variable] = \
                 self.options.discovery == "With Multicast" or "multicast" in str(
                     self.options.discovery)
             tc.variables["UA_ENABLE_DISCOVERY_SEMAPHORE"] = \
