@@ -40,6 +40,8 @@ class Gtk4Conan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
         if self.settings.os != "Linux":
             del self.options.with_wayland
             del self.options.with_x11
