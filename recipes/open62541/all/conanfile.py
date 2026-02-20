@@ -234,7 +234,7 @@ class Open62541Conan(ConanFile):
             # NodesetLoader requires parsing to be enabled
             raise ConanInvalidConfiguration("When nodeset_loader is enabled, then parsing has to be enabled too.")
 
-        if self.options.get_safe("nodeset_loader") and Version(self.version) >= "1.4.13" and Version(self.version) < "1.5.0":
+        if self.options.get_safe("nodeset_loader") and Version(self.version) < "1.5.0":
             raise ConanInvalidConfiguration("nodeset_loader option does not work properly with this version - fixed in 1.5.0")
 
     def source(self):
