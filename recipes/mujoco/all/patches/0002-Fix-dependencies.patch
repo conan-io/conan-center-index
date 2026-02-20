@@ -1,0 +1,41 @@
+---
+ CMakeLists.txt | 16 +++++++++++-----
+ 1 file changed, 11 insertions(+), 5 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6c1747f3..356e52a3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -64,7 +64,12 @@ endif()
+ 
+ include(MujocoOptions)
+ include(MujocoMacOS)
+-include(MujocoDependencies)
++find_package(ccd REQUIRED CONFIG)
++find_package(lodepng REQUIRED CONFIG)
++find_package(Qhull REQUIRED CONFIG)
++find_package(tinyobjloader REQUIRED CONFIG)
++find_package(tinyxml2 REQUIRED CONFIG)
++find_package(MarchingCubeCpp REQUIRED CONFIG)
+ 
+ set(MUJOCO_HEADERS
+     include/mujoco/mjdata.h
+@@ -155,10 +160,11 @@ target_link_options(
+ target_link_libraries(
+   mujoco
+   PRIVATE ccd
+-          lodepng
+-          qhullstatic_r
+-          tinyobjloader
+-          tinyxml2
++          lodepng::lodepng
++          $<IF:$<TARGET_EXISTS:Qhull::qhull_r>,Qhull::qhull_r,Qhull::qhullstatic_r>
++          tinyobjloader::tinyobjloader
++          tinyxml2::tinyxml2
++          marchingcubecpp::marchingcubecpp
+ )
+ 
+ set_target_properties(
+-- 
+2.53.0
+

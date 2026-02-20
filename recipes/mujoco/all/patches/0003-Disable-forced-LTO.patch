@@ -1,0 +1,22 @@
+---
+ cmake/MujocoOptions.cmake | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/cmake/MujocoOptions.cmake b/cmake/MujocoOptions.cmake
+index a606220c..3c06a010 100644
+--- a/cmake/MujocoOptions.cmake
++++ b/cmake/MujocoOptions.cmake
+@@ -104,10 +104,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang
+   endif()
+ endif()
+ 
+-if(NOT CMAKE_INTERPROCEDURAL_OPTIMIZATION AND (CMAKE_BUILD_TYPE AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug"))
+-  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+-endif()
+-
+ include(MujocoHarden)
+ set(EXTRA_COMPILE_OPTIONS ${EXTRA_COMPILE_OPTIONS} ${MUJOCO_HARDEN_COMPILE_OPTIONS})
+ set(EXTRA_LINK_OPTIONS ${EXTRA_LINK_OPTIONS} ${MUJOCO_HARDEN_LINK_OPTIONS})
+-- 
+2.53.0
+

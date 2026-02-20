@@ -1,0 +1,34 @@
+---
+ src/user/user_mesh.cc    | 2 +-
+ src/user/user_objects.cc | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/user/user_mesh.cc b/src/user/user_mesh.cc
+index 20244116..b73ec1c8 100644
+--- a/src/user/user_mesh.cc
++++ b/src/user/user_mesh.cc
+@@ -68,7 +68,7 @@
+ #include "user/user_util.h"
+ 
+ extern "C" {
+-#include "qhull_ra.h"
++#include <libqhull_r/qhull_ra.h>
+ }
+ 
+ namespace {
+diff --git a/src/user/user_objects.cc b/src/user/user_objects.cc
+index 718c9f70..e2128bad 100644
+--- a/src/user/user_objects.cc
++++ b/src/user/user_objects.cc
+@@ -38,7 +38,7 @@
+ #include <utility>
+ #include <vector>
+ 
+-#include "lodepng.h"
++#include <lodepng.h>
+ #include "cc/array_safety.h"
+ #include "engine/engine_passive.h"
+ #include "engine/engine_support.h"
+-- 
+2.53.0
+
