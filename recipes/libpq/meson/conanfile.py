@@ -1,9 +1,11 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.microsoft import is_msvc
 
 import os
 
@@ -92,6 +94,10 @@ class LibpqConan(ConanFile):
         else:
             self.tool_requires("flex/2.6.4")
             self.tool_requires("bison/3.8.2")
+
+        if is_msvc(self) and cross_building(self):
+            # for zic executable
+            self.tool_requires(f"libpq/{self.version}")
 
     def export_sources(self):
         export_conandata_patches(self)
