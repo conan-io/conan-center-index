@@ -93,6 +93,8 @@ class KeystoneConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "keystone")
+        self.cpp_info.set_property("cmake_target_name", "keystone::keystone")
         self.cpp_info.libs = ["keystone"]
         if is_msvc(self) and self.options.shared:
             self.cpp_info.bindirs = ["lib"]
