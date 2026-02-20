@@ -158,7 +158,7 @@ class Open62541Conan(ConanFile):
         del self.options.embedded_profile
 
         # NodesetLoader has only rudimentary Windows support --> disabling for now. This might change in the future.
-        if Version(self.version) < "1.4.11.1" or self.settings.os != "Linux":
+        if self.settings.os != "Linux":
             del self.options.nodeset_loader
 
     def configure(self):
@@ -354,8 +354,7 @@ class Open62541Conan(ConanFile):
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
-        if version >= "1.4.11.1":
-            tc.cache_variables["UA_ENABLE_NODESETLOADER"] = self.options.nodeset_loader if self.settings.os == "Linux" else False
+        tc.cache_variables["UA_ENABLE_NODESETLOADER"] = self.options.nodeset_loader if self.settings.os == "Linux" else False
 
         tc.generate()
         tc = CMakeDeps(self)
@@ -365,9 +364,8 @@ class Open62541Conan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         rm(self, "FindPython3.cmake", os.path.join(self.source_folder, "tools", "cmake"))
-        if Version(self.version) >= "1.4.11.1":
-            replace_in_file(self, os.path.join(self.source_folder, "deps", "nodesetLoader", "CMakeLists.txt"),
-                        "find_package(LibXml2 REQUIRED QUIET)", "find_package(LibXml2 REQUIRED GLOBAL)")
+        replace_in_file(self, os.path.join(self.source_folder, "deps", "nodesetLoader", "CMakeLists.txt"),
+                    "find_package(LibXml2 REQUIRED QUIET)", "find_package(LibXml2 REQUIRED GLOBAL)")
 
     def build(self):
         cmake = CMake(self)
@@ -427,18 +425,16 @@ class Open62541Conan(ConanFile):
         else:
             self.cpp_info.includedirs.append(
                 os.path.join("include", "open62541", "plugin"))
-            if Version(self.version) < "1.4.0":
-                if self.settings.os == "Windows":
-                    self.cpp_info.includedirs.append(
-                        os.path.join("include", "open62541", "win32"))
-                else:
-                    self.cpp_info.includedirs.append(
-                        os.path.join("include", "open62541", "posix"))
+            if self.settings.os == "Windows":
+                self.cpp_info.includedirs.append(
+                    os.path.join("include", "open62541", "win32"))
+            else:
+                self.cpp_info.includedirs.append(
+                    os.path.join("include", "open62541", "posix"))
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
-            if Version(self.version) >= "1.4.6":
-                self.cpp_info.system_libs.append("iphlpapi")
+            self.cpp_info.system_libs.append("iphlpapi")
         elif self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["pthread", "m", "rt"])
         elif self.settings.os == "Neutrino":
