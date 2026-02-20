@@ -1,0 +1,43 @@
+---
+ src/user/user_mesh.cc    | 4 ++--
+ src/user/user_objects.cc | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/user/user_mesh.cc b/src/user/user_mesh.cc
+index 5d060117..c6965e4c 100644
+--- a/src/user/user_mesh.cc
++++ b/src/user/user_mesh.cc
+@@ -34,7 +34,7 @@
+ 
+ #include <mujoco/mjspec.h>
+ #include "user/user_api.h"
+-#include <TriangleMeshDistance/include/tmd/TriangleMeshDistance.h>
++#include <tmd/TriangleMeshDistance.h>
+ 
+ #ifdef MUJOCO_TINYOBJLOADER_IMPL
+ #define TINYOBJLOADER_IMPLEMENTATION
+@@ -69,7 +69,7 @@
+ #include "user/user_util.h"
+ 
+ extern "C" {
+-#include "qhull_ra.h"
++#include <libqhull_r/qhull_ra.h>
+ }
+ 
+ namespace {
+diff --git a/src/user/user_objects.cc b/src/user/user_objects.cc
+index 9dfa3346..214c7f1d 100644
+--- a/src/user/user_objects.cc
++++ b/src/user/user_objects.cc
+@@ -36,7 +36,7 @@
+ #include <utility>
+ #include <vector>
+ 
+-#include "lodepng.h"
++#include <lodepng.h>
+ #include "cc/array_safety.h"
+ #include "engine/engine_passive.h"
+ #include "engine/engine_support.h"
+-- 
+2.53.0
+
