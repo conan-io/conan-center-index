@@ -6,14 +6,7 @@ set(EXTRA_FONTS_DIR ${MISC_DIR}/fonts)
 set(IMGUI_EXPORT_HEADERS imgui_export_headers.h)
 
 file(GLOB SOURCE_FILES ${IMGUI_SRC_DIR}/*.cpp)
-if(IMGUI_WITH_SDL3_BINDINGS)
-    list(APPEND SOURCE_FILES ${IMGUI_SRC_DIR}/backends/imgui_impl_sdl3.cpp)
-endif()
-
 file(GLOB HEADER_FILES ${IMGUI_SRC_DIR}/*.h)
-if(IMGUI_WITH_SDL3_BINDINGS)
-    list(APPEND HEADER_FILES ${IMGUI_SRC_DIR}/backends/imgui_impl_sdl3.h)
-endif()
 
 if(IMGUI_ENABLE_TEST_ENGINE)
     message(STATUS "Building ImGui with test engine")
@@ -37,7 +30,9 @@ target_compile_features(${BINARY_TO_COMPRESSED_BIN} PRIVATE cxx_std_11)
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
-if(IMGUI_WITH_SDL3_BINDINGS)
+if(IMGUI_WITH_SDL3_BINDING)
+    target_sources(${PROJECT_NAME} PRIVATE ${IMGUI_SRC_DIR}/backends/imgui_impl_sdl3.cpp)
+    list(APPEND HEADER_FILES ${IMGUI_SRC_DIR}/backends/imgui_impl_sdl3.h)
     find_package(SDL3 REQUIRED)
     target_link_libraries(${PROJECT_NAME} sdl::sdl)
 endif()
