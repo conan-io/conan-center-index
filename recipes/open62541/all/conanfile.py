@@ -354,7 +354,7 @@ class Open62541Conan(ConanFile):
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
-        tc.cache_variables["UA_ENABLE_NODESETLOADER"] = self.options.nodeset_loader if self.settings.os == "Linux" else False
+        tc.cache_variables["UA_ENABLE_NODESETLOADER"] = self.options.get_safe("nodeset_loader", False)
 
         tc.generate()
         tc = CMakeDeps(self)
