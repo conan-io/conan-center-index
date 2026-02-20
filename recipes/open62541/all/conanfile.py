@@ -425,12 +425,6 @@ class Open62541Conan(ConanFile):
         else:
             self.cpp_info.includedirs.append(
                 os.path.join("include", "open62541", "plugin"))
-            if self.settings.os == "Windows":
-                self.cpp_info.includedirs.append(
-                    os.path.join("include", "open62541", "win32"))
-            else:
-                self.cpp_info.includedirs.append(
-                    os.path.join("include", "open62541", "posix"))
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
