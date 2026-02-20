@@ -8,5 +8,6 @@ sources:
 patches:
   "17.7":
     - patch_file: "patches/17.5-pgflex-preserve-environment-variables.patch"
+    - patch_file: "patches/17.7-backport-arm64-windows-support.patch"
   "17.5":
     - patch_file: "patches/17.5-pgflex-preserve-environment-variables.patch"
