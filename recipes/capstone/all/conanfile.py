@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc_static_runtime
 import os
 
 required_conan_version = ">=2.4"
@@ -57,11 +56,11 @@ class CapstoneConan(ConanFile):
 
         tc.cache_variables["CAPSTONE_BUILD_TESTS"] = False
         tc.cache_variables["CAPSTONE_BUILD_CSTOOL"] = False
-        tc.cache_variables["CAPSTONE_ARCHITECUTRE_DEFAULT"] = False
+        tc.cache_variables["CAPSTONE_ARCHITECTURE_DEFAULT"] = False
         tc.cache_variables["CAPSTONE_USE_DEFAULT_ALLOC"] = self.options.use_default_alloc
         for a in self._archs:
             tc.cache_variables[f"CAPSTONE_{a.upper()}_SUPPORT"] = self.options.get_safe(a)
-        
+
         tc.generate()
 
     def build(self):
