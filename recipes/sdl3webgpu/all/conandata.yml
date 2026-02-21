@@ -1,4 +1,4 @@
 sources:
   "1.0.0":
-    url: "https://github.com/benjiwolff/sdl3webgpu/archive/refs/tags/1.1.0-rc.3.tar.gz"
-    sha256: "8a43f686e1d65d2b894bdb4badc5f25b1d965cb82bdc440ab9945b674d4510b2"
+    url: "https://github.com/benjiwolff/sdl3webgpu/archive/refs/tags/1.1.0-rc.4.tar.gz"
+    sha256: "7ffd68c529084f59921451d5ef624243718de5062a34edd6494fabff633e56ff"
