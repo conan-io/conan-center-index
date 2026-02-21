@@ -15,7 +15,7 @@ class SDL3WebGPU(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/eliemichel/sdl3webgpu"
     topics = ("sdl3", "graphics", "wgsl", "emscripten")
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
