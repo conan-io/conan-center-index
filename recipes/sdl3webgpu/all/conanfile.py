@@ -17,6 +17,13 @@ class SDL3WebGPU(ConanFile):
     exports_sources = "CMakeLists.txt"
     generators = "CMakeToolchain", "CMakeConfigDeps"
 
+    options = {
+        "emdawnwebgpu": [True, False],
+    }
+    default_options = {
+        "emdawnwebgpu": False,
+    }
+
     def requirements(self):
         self.requires("sdl/[>3]")
 
@@ -51,3 +58,5 @@ class SDL3WebGPU(ConanFile):
         self.cpp_info.libs = ["sdl3webgpu"]
         self.cpp_info.set_property("cmake_file_name", "SDL3WebGPU")
         self.cpp_info.set_property("cmake_target_name", "SDL3WebGPU::SDL3WebGPU")
+        if self.options.emdawnwebgpu:
+            self.cpp_info.defines = ["WEBGPU_BACKEND_EMDAWNWEBGPU=1"]
