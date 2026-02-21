@@ -26,8 +26,11 @@ class SDL3WebGPU(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         cmakelists_path = os.path.join(self.source_folder, "CMakeLists.txt")
         cmakelists_content = load(self, cmakelists_path)
-        save(self, cmakelists_path, "cmake_minimum_required(VERSION 3.10)\n"+cmakelists_content)
-
+        save(
+            self,
+            cmakelists_path,
+            "cmake_minimum_required(VERSION 3.10)\n" + cmakelists_content,
+        )
 
     def build(self):
         cmake = CMake(self)
