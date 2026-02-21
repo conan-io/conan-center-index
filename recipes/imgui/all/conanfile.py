@@ -21,13 +21,13 @@ class IMGUIConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_test_engine": [True, False],
-        "with_binary_to_compressed": [True, False]
+        "with_binary_to_compressed": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_test_engine": False,
-        "with_binary_to_compressed": True
+        "with_binary_to_compressed": True,
     }
 
     def export_sources(self):
