@@ -20,9 +20,6 @@ class SDL3WebGPU(ConanFile):
     def requirements(self):
         self.requires("sdl/[>3]")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def source(self):
         get(
             self,
