@@ -59,6 +59,12 @@ class SDL3WebGPU(ConanFile):
             src=self.source_folder,
             dst=os.path.join(self.package_folder, "include"),
         )
+        copy(
+            self,
+            pattern="libsdl3webgpu.a",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "lib"),
+        )
 
     def package_info(self):
         self.cpp_info.libs = ["sdl3webgpu"]
