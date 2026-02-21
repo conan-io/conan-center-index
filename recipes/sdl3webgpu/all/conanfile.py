@@ -47,6 +47,6 @@ class SDL3WebGPU(ConanFile):
         )
 
     def package_info(self):
-        self.cpp_info.components["sdl3"].libs = "sdl3webgpu"
+        self.cpp_info.libs = ["sdl3webgpu"]
         self.cpp_info.set_property("cmake_file_name", "SDL3WebGPU")
         self.cpp_info.set_property("cmake_target_name", "SDL3WebGPU::SDL3WebGPU")
