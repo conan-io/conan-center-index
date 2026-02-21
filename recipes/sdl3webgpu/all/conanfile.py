@@ -47,22 +47,23 @@ class SDL3WebGPU(ConanFile):
         cmake.build()
 
     def package(self):
+        source_dir = os.path.join(self.source_folder, "subdir")
         copy(
             self,
             pattern="LICENSE.txt",
-            src=self.source_folder,
+            src=source_dir,
             dst=os.path.join(self.package_folder, "licenses"),
         )
         copy(
             self,
             pattern="sdl3webgpu.h",
-            src=self.source_folder,
+            src=source_dir,
             dst=os.path.join(self.package_folder, "include"),
         )
         copy(
             self,
             pattern="libsdl3webgpu.a",
-            src=self.source_folder,
+            src=source_dir,
             dst=os.path.join(self.package_folder, "lib"),
         )
 
