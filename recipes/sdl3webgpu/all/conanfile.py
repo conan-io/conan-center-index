@@ -14,6 +14,7 @@ class SDL3WebGPU(ConanFile):
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
 
+    exports_sources = "CMakeLists.txt"
     generators = "CMakeToolchain", "CMakeConfigDeps"
 
     def requirements(self):
