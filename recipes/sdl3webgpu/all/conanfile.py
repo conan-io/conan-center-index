@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, load, save
+from conan.tools.files import get, copy
 from conan.tools.cmake import CMake, cmake_layout
 import os
 
@@ -23,13 +23,11 @@ class SDL3WebGPU(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        cmakelists_path = os.path.join(self.source_folder, "CMakeLists.txt")
-        cmakelists_content = load(self, cmakelists_path)
-        save(
+        get(
             self,
-            cmakelists_path,
-            "cmake_minimum_required(VERSION 3.10)\n" + cmakelists_content,
+            **self.conan_data["sources"][self.version],
+            destination="./subdir",
+            strip_root=True
         )
 
     def build(self):
