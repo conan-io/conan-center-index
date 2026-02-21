@@ -38,7 +38,7 @@ class SDL3WebGPU(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         if self.options.emdawnwebgpu:
-            tc.preprocessor_definitions["WEBGPU_BACKEND_DAWN"] = "1"
+            tc.preprocessor_definitions["WEBGPU_BACKEND_EMDAWNWEBGPU"] = "1"
         tc.generate()
 
     def build(self):
