@@ -98,8 +98,8 @@ class bgfxConan(ConanFile):
 
     @property
     def _bx_version(self): #mapping of bgfx version to required/used bx version
-        return {"cci.20230216": "cci.20221116"}
     
+        return {"cci.20230216": "cci.20221116", "2026-02-22": "2026-02-01"}
     @property
     def _bimg_version(self): #mapping of bgfx version to required/used bimg version
         return {"cci.20230216": "cci.20230114"}
