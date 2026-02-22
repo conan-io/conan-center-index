@@ -1,4 +1,7 @@
 sources:
+  "2026-02-01":
+    url: "https://github.com/bkaradzic/bx/archive/36ad6131f4d292f62db64236d1d7f9f70eb26b13.tar.gz"
+    sha256: "3ced0bf0d4e4e212a3b43e56b4711e10a684c12b6f44f64b9ac24a956346515e"
   "cci.20221116":
     url: "https://github.com/bkaradzic/bx/archive/aed1086c48884b1b4f1c2f9af34c5198624263f6.tar.gz"
     sha256: "6867CF7ABD2BB53A1A92C7B70CBC7F424B97D3AE3A8183F284C6A6507EFE4517"
