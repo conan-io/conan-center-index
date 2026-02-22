@@ -77,7 +77,7 @@ class bimgConan(ConanFile):
 
     @property
     def _bx_version(self): #mapping of bimg version to required/used bx version
-        return {"cci.20230114": "cci.20221116"}
+        return {"cci.20230216": "cci.20221116", "2026-02-20": "2026-02-01"}
 
     @property
     def _settings_build(self):
