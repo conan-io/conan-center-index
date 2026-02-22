@@ -1,4 +1,6 @@
 versions:
+  "2026-02-22":
+    folder: all
   "1.129.8930-495":
     folder: cmake
   "cci.20230216":
