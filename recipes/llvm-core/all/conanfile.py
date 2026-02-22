@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeConfigDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import (
     apply_conandata_patches,
     collect_libs,
@@ -26,7 +26,7 @@ import re
 import textwrap
 
 
-required_conan_version = ">=1.62.0"
+required_conan_version = ">=2.25.0"
 
 # LLVM's default config is to enable all targets, but end users can significantly reduce
 # build times for the package by specifying only the targets they need as a
@@ -46,6 +46,7 @@ LLVM_TARGETS = {
     "PowerPC",
     "RISCV",
     "Sparc",
+    "SPIRV",
     "SystemZ",
     "VE",
     "WebAssembly",
@@ -61,12 +62,17 @@ def components_from_dotfile(dotfile):
 
     In future a [CPS](https://cps-org.github.io/cps/index.html) format could be used, or generated directly
     by the LLVM build system
+
+    CMake Graphviz output changed significantly in 3.17.0, prior to that version the dotfile cannot be relied upon
+    to correctly express inter-target dependencies
+    (See [Graphviz: Add tests, refactor and fix bug(s)](https://gitlab.kitware.com/cmake/cmake/-/merge_requests/3766))
     """
     def node_labels(dot):
         """
         match each node in the dotfile with a label property, and map the label to a conan component
         """
         label_replacements = {
+            "LibEdit::LibEdit": "editline::editline",
             "LibXml2::LibXml2": "libxml2::libxml2",
             "ZLIB::ZLIB": "zlib::zlib",
             "zstd::libzstd_static": "zstd::zstdlib",
@@ -146,6 +152,7 @@ class LLVMCoreConan(ConanFile):
         "fPIC": [True, False],
         "components": ["ANY"],
         "targets": ["ANY"],
+        "enable_lld": [True, False],
         "exceptions": [True, False],
         "rtti": [True, False],
         "threads": [True, False],
@@ -177,6 +184,7 @@ class LLVMCoreConan(ConanFile):
         "fPIC": True,
         "components": "all",
         "targets": "all",
+        "enable_lld": False,
         "exceptions": True,
         "rtti": True,
         "threads": True,
@@ -241,21 +249,26 @@ class LLVMCoreConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ffi:
-            self.requires("libffi/3.4.6")
+            self.requires("libffi/[>=3.4.6]")
         if self.options.get_safe("with_libedit"):
-            self.requires("editline/3.1")
+            self.requires("editline/[>=3.1]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_xml2:
             self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_z3:
-            self.requires("z3/4.13.0")
+            self.requires("z3/[>=4.14.1 <5]")
         if self.options.get_safe("with_zstd"):
-            self.requires("zstd/1.5.6")
+            self.requires("zstd/[>=1.5.6 <2]")
 
     def build_requirements(self):
         self.tool_requires("ninja/[>=1.10.2 <2]")
-        self.tool_requires("cmake/[>=3.20 <4]") # required by LLVM 19
+        if Version(self.version) >= 19:
+            self.tool_requires("cmake/[>=3.20 <5]")
+        else:
+            # we require at least 3.17 for correct graphviz output.
+            # Earlier LLVM versions will not build with CMake 4
+            self.tool_requires("cmake/[>=3.17 <4]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -295,12 +308,15 @@ class LLVMCoreConan(ConanFile):
 
     def source(self):
         sources = self.conan_data["sources"][self.version]
-        if Version(self.version) < 15:
+        version = Version(self.version)
+        if version < 15:
             get(self, **sources, strip_root=True)
         else:
             # LLVM >=15 split up several components in its release, including cmake
             get(self, **sources["llvm"], destination='llvm-main', strip_root=True)
             get(self, **sources["cmake"], destination='cmake', strip_root=True)
+        if version >= 21:
+            get(self, **sources["third-party"], destination='third-party', strip_root=True)
 
     def _apply_resource_limits(self, cmake_definitions):
         if os.getenv("CONAN_CENTER_BUILD_SERVICE"):
@@ -350,6 +366,7 @@ class LLVMCoreConan(ConanFile):
             "LLVM_INCLUDE_EXAMPLES": False,
             "LLVM_INCLUDE_TESTS": False,
             "LLVM_ENABLE_IDE": False,
+            "LLVM_ENABLE_LLD": bool(self.options.enable_lld),
             "LLVM_ENABLE_EH": self.options.exceptions,
             "LLVM_ENABLE_RTTI": self.options.rtti,
             "LLVM_ENABLE_THREADS": self.options.threads,
@@ -398,7 +415,10 @@ class LLVMCoreConan(ConanFile):
         tc.cache_variables.update(cmake_variables)
         tc.generate()
 
-        deps = CMakeDeps(self)
+        deps = CMakeConfigDeps(self)
+        deps.set_property("libxml2", "cmake_file_name", "LibXml2")
+        deps.set_property("editline", "cmake_file_name", "LibEdit")
+        deps.set_property("editline", "cmake_target_name", "LibEdit::LibEdit")
         deps.generate()
 
     @property
@@ -463,29 +483,36 @@ class LLVMCoreConan(ConanFile):
         return self._cmake_module_path / f"conan-official-{self.name}-variables.cmake"
 
     def _create_cmake_build_module(self, build_info, module_file):
-        targets_with_jit = ["X86", "PowerPC", "AArch64", "ARM", "Mips", "SystemZ"]
         content = textwrap.dedent(f"""\
-            set(LLVM_TOOLS_BINARY_DIR "${{CMAKE_CURRENT_LIST_DIR}}/../../../bin")
-            cmake_path(NORMAL_PATH LLVM_TOOLS_BINARY_DIR)
-            set(LLVM_PACKAGE_VERSION "{self.version}")
-            set(LLVM_AVAILABLE_LIBS "{';'.join(build_info['components'].keys())}")
-            set(LLVM_BUILD_TYPE "{self.settings.build_type}")
-            set(LLVM_CMAKE_DIR "${{CMAKE_CURRENT_LIST_DIR}}")
-            list(APPEND CMAKE_MODULE_DIR ${{CMAKE_CURRENT_LIST_DIR}})
-            set(LLVM_ALL_TARGETS "{self._all_targets}")
-            set(LLVM_TARGETS_TO_BUILD "{self._targets_to_build}")
-            set(LLVM_TARGETS_WITH_JIT "{';'.join(targets_with_jit)}")
-            set(LLVM_NATIVE_ARCH "{build_info['native_arch']}")
             set_property(GLOBAL PROPERTY LLVM_TARGETS_CONFIGURED On)
             set_property(GLOBAL PROPERTY LLVM_COMPONENT_LIBS ${{LLVM_AVAILABLE_LIBS}})
+            # following comment duplicated from LLVMConfig.cmake generated by LLVM's native build
+            # By creating the following targets here, subprojects that depend on
+            # LLVM's tablegen-generated headers can always depend on this target
+            # whether building in-tree with LLVM or not.
             if (NOT TARGET intrinsics_gen)
               add_custom_target(intrinsics_gen)
+            endif()
+            if (NOT TARGET vt_gen)
+              add_custom_target(vt_gen)
             endif()
             if (NOT TARGET omp_gen)
               add_custom_target(omp_gen)
             endif()
             if (NOT TARGET acc_gen)
               add_custom_target(acc_gen)
+            endif()
+            if (NOT TARGET target_parser_gen)
+              add_custom_target(target_parser_gen)
+            endif()
+            if(NOT TARGET ARMTargetParserTableGen)
+                add_custom_target(ARMTargetParserTableGen)
+            endif()
+            if(NOT TARGET AArch64TargetParserTableGen)
+                add_custom_target(AArch64TargetParserTableGen)
+            endif()
+            if(NOT TARGET RISCVTargetParserTableGen)
+                add_custom_target(RISCVTargetParserTableGen)
             endif()
            """)
         save(self, module_file, content)
@@ -533,12 +560,27 @@ class LLVMCoreConan(ConanFile):
                                    [self._build_module_file_rel_path,
                                     self._cmake_module_path / "LLVM-ConfigInternal.cmake"]
                                    )
+        build_info = self._read_build_info()
+        components = build_info["components"]
+        targets_with_jit = ["X86", "PowerPC", "AArch64", "ARM", "Mips", "SystemZ"]
+        self.cpp_info.set_property("cmake_extra_variables", {
+            "LLVM_TOOLS_BINARY_DIR": (Path(self.package_folder) / "bin").as_posix(),
+            "LLVM_PACKAGE_VERSION": self.version,
+            "LLVM_AVAILABLE_LIBS": ";".join(build_info['components'].keys()),
+            "LLVM_BUILD_TYPE": str(self.settings.build_type),
+            "LLVM_CMAKE_DIR": (Path(self.package_folder) / self._cmake_module_path).as_posix(),
+            "LLVM_ALL_TARGETS": self._all_targets,
+            "LLVM_TARGETS_TO_BUILD": str(self._targets_to_build),
+            "LLVM_TARGETS_WITH_JIT": ";".join(targets_with_jit),
+            "LLVM_NATIVE_ARCH": build_info['native_arch'],
+            "LLVM_ENABLE_RTTI": bool(self.options.rtti),
+            "LLVM_ENABLE_PIC": bool(self.options.get_safe("fPIC", default=True)),
+            "LLVM_LINK_LLVM_DYLIB": bool(self.options.shared),
+        })
+
         self.cpp_info.builddirs.append(self._cmake_module_path)
 
         if not self.options.shared:
-            build_info = self._read_build_info()
-            components = build_info["components"]
-
             for component_name, data in components.items():
                 self.cpp_info.components[component_name].set_property("cmake_target_name", component_name)
                 self.cpp_info.components[component_name].libs = [component_name]

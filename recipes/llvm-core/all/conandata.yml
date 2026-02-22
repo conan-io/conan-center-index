@@ -1,4 +1,14 @@
 sources:
+  "21.1.8":
+    "llvm":
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/llvm-21.1.8.src.tar.xz
+      sha256: d9022ddadb40a15015f6b27e6549a7144704ded8828ba036ffe4b8165707de21
+    "cmake":
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/cmake-21.1.8.src.tar.xz
+      sha256: 85735f20fd8c81ecb0a09abb0c267018475420e93b65050cc5b7634eab744de9
+    "third-party":
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/third-party-21.1.8.src.tar.xz
+      sha256: 7fe99424384aea529ffaeec9cc9dfb8b451fd1852c03fc109e426fe208a1f1a7
   "19.1.7":
     "llvm":
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/llvm-19.1.7.src.tar.xz
@@ -17,6 +27,11 @@ sources:
     sha256: ce8508e318a01a63d4e8b3090ab2ded3c598a50258cc49e2625b9120d4c03ea5
 
 patches:
+  "21.1.8":
+    - patch_file: patches/21x/0000-zlib-conan.patch
+      patch_description: fix references to third party libs to match conan variables and targets
+      patch_type: conan
+      base_path: llvm-main
   "19.1.7":
     - patch_file: patches/19x/0000-cmake-dependencies.patch
       patch_description: fix references to third party libs to match conan variables and targets
