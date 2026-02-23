@@ -6,6 +6,7 @@ patches:
   "1.24.2":
     - patch_file: "patches/fix-cutlass-cuda-provider.patch"
     - patch_file: "patches/cmake-cxx-standard.patch"
+    - patch_file: "patches/fix-logging-ortchar.patch"
 
 # ONNX versions are based on the minor version used at
 # https://github.com/microsoft/onnxruntime/tree/main/cmake/external
