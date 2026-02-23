@@ -28,7 +28,7 @@ class ZxcConan(ConanFile):
     languages = "C"
 
     def requirements(self):
-        self.requires("rapidhash/[>=1.0]")
+        self.requires("rapidhash/[>=3.0 <4]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
