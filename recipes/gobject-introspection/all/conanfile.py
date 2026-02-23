@@ -14,7 +14,7 @@ from conan.tools.scm import Version
 from conan.tools.system import PyEnv
 from conan import conan_version
 
-required_conan_version = ">=2.25"
+required_conan_version = ">=2.26"
 
 
 class GobjectIntrospectionConan(ConanFile):
@@ -100,12 +100,6 @@ class GobjectIntrospectionConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        tc = MesonToolchain(self)
-        if cross_building(self):
-            tc.project_options["gi_cross_use_prebuilt_gi"] = "false"
-        tc.project_options["build_introspection_data"] = self.options.build_introspection_data
-        tc.project_options["datadir"] = "res"
-        tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
         # INFO: g-ir-scanner uses PKG_CONFIG_PATH directly instead of pkg-config Meson module
@@ -121,6 +115,13 @@ class GobjectIntrospectionConan(ConanFile):
         else:
             pyenv.install(["setuptools~=82.0.0"])
         pyenv.generate()
+        tc = MesonToolchain(self)
+        if cross_building(self):
+            tc.project_options["gi_cross_use_prebuilt_gi"] = "false"
+        tc.project_options["build_introspection_data"] = self.options.build_introspection_data
+        tc.project_options["datadir"] = "res"
+        tc.project_options["python"] = pyenv.env_exe
+        tc.generate()
 
     def _patch_sources(self):
         # Disable tests
