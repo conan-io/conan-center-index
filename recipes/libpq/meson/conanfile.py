@@ -95,7 +95,7 @@ class LibpqConan(ConanFile):
             self.tool_requires("flex/2.6.4")
             self.tool_requires("bison/3.8.2")
 
-        if is_msvc(self) and cross_building(self):
+        if cross_building(self):
             # for zic executable
             self.tool_requires(f"libpq/{self.version}")
 
@@ -125,6 +125,12 @@ class LibpqConan(ConanFile):
         tc.project_options["tap_tests"] = "disabled"
         tc.project_options["plpython"] = "disabled"
         tc.project_options["docs"] = "disabled"
+
+        if cross_building(self):
+            libpq_bin_dir = os.path.join(self.dependencies.build['libpq'].package_folder, "bin")
+            zic_program = "zic.exe" if self.settings_build.os == "Windows" else "zic"
+            tc.project_options["ZIC"] = os.path.join(libpq_bin_dir, zic_program.replace("\\", "/"))
+
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
