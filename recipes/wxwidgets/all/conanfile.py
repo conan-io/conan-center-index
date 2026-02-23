@@ -90,15 +90,13 @@ class wxWidgetsConan(ConanFile):
         apt = package_manager.Apt(self)
         packages = []
         if self.options.webview:
-                packages.extend(["libsoup3.0-dev",
-                                 "libwebkit2gtk-4.0-dev"])
+            packages.extend(["libsoup3.0-dev", "libwebkit2gtk-4.0-dev"])
         apt.install(packages)
 
         yum = package_manager.Yum(self)
         packages = []
         if self.options.webview:
-                packages.extend(["libsoup3-devel",
-                                 "webkit2gtk4.1-devel"])
+            packages.extend(["libsoup3-devel", "webkit2gtk4.1-devel"])
         yum.install(packages)
 
     def build_requirements(self):
