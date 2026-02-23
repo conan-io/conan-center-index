@@ -32,7 +32,7 @@ class IMGUIConan(ConanFile):
 
     def requirements(self):
         if self.options.with_sdl3_binding:
-            self.requires("sdl/[>3]")
+            self.requires("sdl/[>3]", transitive_headers=True)
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
