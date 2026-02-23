@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, rmdir, copy, rm
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, rmdir, copy, rm
 import os
 
 required_conan_version = ">=1.53.0"
@@ -26,6 +26,9 @@ class ZlibConan(ConanFile):
         "fPIC": True,
     }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -42,6 +45,7 @@ class ZlibConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -77,14 +81,14 @@ class ZlibConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "zlib")
         self.cpp_info.languages = ["C"]
 
-        postfix = ""
-        suffix = ""
-        if self.settings.os == "Windows":
-            if self.settings.build_type == "Debug":
-                postfix = "d"
-            if not self.options.shared:
-                suffix = "s"
-        self.cpp_info.libs = [f"z{suffix}{postfix}"]
+        libname = "z"
+
+        if self.settings.compiler == "msvc":
+            libname = "zdll" if self.options.shared else "zlib"
+        elif False:
+            libname = ""
+
+        self.cpp_info.libs = [libname]
         # TODO:
         #  _LARGEFILE64_SOURCE definition, which is computed with:
         #  set(CMAKE_REQUIRED_DEFINITIONS -D_LARGEFILE64_SOURCE=1)

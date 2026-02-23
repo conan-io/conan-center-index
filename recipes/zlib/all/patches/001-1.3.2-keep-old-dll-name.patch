@@ -1,0 +1,34 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e103c40..16dda09 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -182,8 +182,27 @@ if(ZLIB_BUILD_SHARED)
+     set_target_properties(
+         zlib
+         PROPERTIES DEFINE_SYMBOL ZLIB_DLL
+-                   EXPORT_NAME ZLIB
+-                   OUTPUT_NAME z)
++                   EXPORT_NAME ZLIB)
++
++    # Keep old dll names from previous 1.3 versions to keep backwards compatibility
++    # Otherwise, use the now-default z name
++    if(MSVC)
++        set_target_properties(
++            zlib
++            PROPERTIES RUNTIME_OUTPUT_NAME zlib1
++                       ARCHIVE_OUTPUT_NAME zdll)
++    elseif(MINGW)
++        set_target_properties(
++            zlib
++            PROPERTIES PREFIX ""
++                       RUNTIME_OUTPUT_NAME zlib1
++                       ARCHIVE_OUTPUT_NAME z)
++    else(MINGW)
++        set_target_properties(
++            zlib
++            PROPERTIES OUTPUT_NAME z)
++    endif(MSVC)
++
+     if(UNIX
+         AND NOT APPLE
+         AND NOT (CMAKE_SYSTEM_NAME STREQUAL AIX)
