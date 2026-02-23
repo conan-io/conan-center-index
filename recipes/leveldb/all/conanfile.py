@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeConfigDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
@@ -75,7 +75,13 @@ class LevelDBCppConan(ConanFile):
         tc.variables["HAVE_CRC32C"] = self.options.with_crc32c
         tc.variables["HAVE_ZSTD"] = self.options.with_zstd
         tc.generate()
-        deps = CMakeDeps(self)
+        deps = CMakeConfigDeps(self)
+        if self.options.with_snappy:
+            deps.set_property("snappy", "cmake_target_name", "snappy")
+        if self.options.with_crc32c:
+            deps.set_property("crc32c", "cmake_target_name", "crc32c")
+        if self.options.with_zstd:
+            deps.set_property("zstd", "cmake_target_name", "zstd")
         deps.generate()
 
     def build(self):

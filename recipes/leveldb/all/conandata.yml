@@ -1,7 +1,7 @@
 sources:
-  "1.23.cci.20260209":
-    sha256: 9e1ddc58a61ee2dc83398d684dc4512a97809e740d8b08d6ab6e3ce6ecd5a079
-    url: https://github.com/google/leveldb/archive/4ee78d7ea98330f7d7599c42576ca99e3c6ff9c5.tar.gz
+  "1.23.cci.20260223":
+    sha256: 31bf05fb9ad6dd33a857690c8e630c271ba890d42b154d765f57e7c368ac9bd1
+    url: https://github.com/google/leveldb/archive/ac691084fdc5546421a55b25e7653d450e5a25fb.tar.gz
   "1.23":
     sha256: 9a37f8a6174f09bd622bc723b55881dc541cd50747cbd08831c2a82d620f6d76
     url: https://github.com/google/leveldb/archive/1.23.tar.gz
@@ -9,8 +9,8 @@ sources:
     sha256: 55423cac9e3306f4a9502c738a001e4a339d1a38ffbee7572d4a07d5d63949b2
     url: https://github.com/google/leveldb/archive/1.22.tar.gz
 patches:
-  "1.23.cci.20260209":
-    - patch_file: "patches/check_library_exists.1.23.cci.20260209.patch"
+  "1.23.cci.20260223":
+    - patch_file: "patches/check_library_exists.1.23.cci.20260223.patch"
   "1.23":
     - patch_file: "patches/check_library_exists.1.23.patch"
   "1.22":
