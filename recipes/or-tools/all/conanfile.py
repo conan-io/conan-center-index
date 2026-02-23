@@ -30,6 +30,10 @@ class PackageConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def config_options(self):
+        if self.settings.os == "MacOS":
+            self.package_type = "shared-library"
+
     def requirements(self):
         self.requires("abseil/20250814.0", transitive_headers=True, transitive_libs=True)
         self.requires("bzip2/1.0.8")
