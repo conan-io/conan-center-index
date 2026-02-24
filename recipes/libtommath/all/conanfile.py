@@ -32,9 +32,10 @@ class LibTomMathConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self.settings.os == "Windows" and not is_msvc(self):
-            self.tool_requires("make/[>=4.3.0 <5]")
-        self.tool_requires("libtool/2.4.7")
+        if self.settings.os == "Windows":
+            self.tool_requires("libtool/2.4.7")
+            if not is_msvc(self):
+                self.tool_requires("make/[>=4.3.0 <5]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
