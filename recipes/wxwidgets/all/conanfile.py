@@ -132,6 +132,8 @@ class wxWidgetsConan(ConanFile):
         self.requires("expat/[>=2.6.2 <3]")
         self.requires("pcre2/10.42")
         self.requires("nanosvg/cci.20231025")
+        if Version(self.version) >= "3.3.0":
+            self.requires("libwebp/[>=1.6.0 <2]")
 
     def validate(self):
         if self.settings.os == "Linux":
@@ -178,6 +180,8 @@ class wxWidgetsConan(ConanFile):
         tc.variables["wxUSE_EXPAT"] = "sys"
         tc.variables["wxUSE_REGEX"] = "sys"
         tc.variables["wxUSE_NANOSVG"] = "sys"
+        if Version(self.version) >= "3.3.0":
+            tc.variables["wxUSE_LIBWEBP"] = "sys"
 
         # wxWidgets features
         tc.variables["wxUSE_SECRETSTORE"] = self.options.get_safe("secretstore", False)
@@ -241,9 +245,9 @@ class wxWidgetsConan(ConanFile):
 
         # Fix for strcpy_s on Apple platforms (fix upstream?)
         if is_apple_os(self):
-            cmake_version = "3.0"
-            if Version(self.version) >= "3.2.7":
-                cmake_version = "3.0...3.31"
+            cmake_version = "3.0...3.31"
+            if Version(self.version) <= "3.3.1":
+                cmake_version = "3.5...3.31"
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             f'cmake_minimum_required(VERSION {cmake_version})',
                             f'cmake_minimum_required(VERSION {cmake_version})\nadd_definitions(-D__STDC_WANT_LIB_EXT1__)')
@@ -357,6 +361,8 @@ class wxWidgetsConan(ConanFile):
             if not self.options.shared:
                 scintilla_suffix = "{debug}" if self.settings.os == "Windows" else "{suffix}"
                 libs.append("wxscintilla" + scintilla_suffix)
+                if Version(self.version) >= "3.3.0":
+                    libs.append("wxlexilla" + scintilla_suffix)
             libs.append(library_pattern("stc"))
         if self.options.webview:
             libs.append(library_pattern("webview"))
@@ -410,9 +416,9 @@ class wxWidgetsConan(ConanFile):
 
             arch_suffix = "_x64" if self.settings.arch == "x86_64" else ""
             lib_suffix = "_dll" if self.options.shared else "_lib"
-            libdir = f"{compiler_prefix}{arch_suffix}{lib_suffix}"
-            libdir = os.path.join("lib", libdir)
-            self.cpp_info.bindirs.append(libdir)
+            basedir = f"{compiler_prefix}{arch_suffix}{lib_suffix}"
+            libdir = os.path.join("lib", basedir)
+            self.cpp_info.bindirs.append(libdir if Version(self.version) < "3.3.0" else os.path.join("bin", basedir))
             self.cpp_info.libdirs.append(libdir)
             self.cpp_info.defines.append("__WXMSW__")
             # disable annoying auto-linking
@@ -435,6 +441,8 @@ class wxWidgetsConan(ConanFile):
                                           "wxNO_MEDIA_LIB",
                                           "wxNO_STC_LIB",
                                           "wxNO_WEBVIEW_LIB"])
+            if Version(self.version) >= "3.3.0":
+                self.cpp_info.defines.append("wxNO_WEBP_LIB")
             self.cpp_info.system_libs.extend(["kernel32",
                                               "user32",
                                               "gdi32",
