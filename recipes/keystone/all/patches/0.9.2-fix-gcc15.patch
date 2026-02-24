@@ -1,0 +1,10 @@
+--- a/llvm/include/llvm/ADT/STLExtras.h
++++ b/llvm/include/llvm/ADT/STLExtras.h
+@@ -26,6 +26,7 @@
+ #include <iterator>
+ #include <memory>
+ #include <utility> // for std::pair
++#include <cstdint>
+ 
+ namespace llvm_ks {
+ 

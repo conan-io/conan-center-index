@@ -1,4 +1,4 @@
 sources:
-  "1.5.0":
-    url: "https://archive.apache.org/dist/logging/log4cxx/1.5.0/apache-log4cxx-1.5.0.tar.gz"
-    sha256: "aa23f47c3164aa2cf848c2258b4b4bc372e7964d4a3ed47c2b4a4a915c5dfa37"
+  "1.6.1":
+    url: "https://archive.apache.org/dist/logging/log4cxx/1.6.1/apache-log4cxx-1.6.1.tar.gz"
+    sha256: "187c85836f5b2f27fb1e8d77c7f1f2939725f1f6498b742b0dd569ba30965fd2"

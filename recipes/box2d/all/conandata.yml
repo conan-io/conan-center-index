@@ -1,35 +1,7 @@
 sources:
-  "3.1.0":
-    url: "https://github.com/erincatto/box2d/archive/refs/tags/v3.1.0.tar.gz"
-    sha256: "7fac19801485efb31ee3745b2284d9d4601f9e8138a3383a7b0df6d788ea5785"
-  "3.0.0":
-    url: "https://github.com/erincatto/box2d/archive/refs/tags/v3.0.0.tar.gz"
-    sha256: "64ad759006cd2377c99367f51fb36942b57f0e9ad690ed41548dd620e6f6c8b1"
+  "3.1.1":
+    url: "https://github.com/erincatto/box2d/archive/refs/tags/v3.1.1.tar.gz"
+    sha256: "fb6ef914b50f4312d7d921a600eabc12318bb3c55a0b8c0b90608fa4488ef2e4"
   "2.4.2":
     url: "https://github.com/erincatto/box2d/archive/refs/tags/v2.4.2.tar.gz"
     sha256: "85b9b104d256c985e6e244b4227d447897fac429071cc114e5cc819dae848852"
-  "2.4.1":
-    url: "https://github.com/erincatto/box2d/archive/refs/tags/v2.4.1.tar.gz"
-    sha256: "d6b4650ff897ee1ead27cf77a5933ea197cbeef6705638dd181adc2e816b23c2"
-  "2.4.0":
-    url: "https://github.com/erincatto/Box2D/archive/v2.4.0.zip"
-    sha256: "6aebbc54c93e367c97e382a57ba12546731dcde51526964c2ab97dec2050f8b9"
-patches:
-  "3.1.0":
-    - patch_file: "patches/3.1.0-0003-remove-compile-warnings-as-error.patch"
-      patch_description: "remove warnings as errors"
-      patch_type: "conan"
-  "3.0.0":
-    - patch_file: "patches/3.0.0-0001-fix-cmake.patch"
-      patch_description: "fix installer"
-      patch_type: "conan"
-    - patch_file: "patches/3.0.0-0002-use-cci.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-    - patch_file: "patches/3.0.0-0003-remove-compile-warnings-as-error.patch"
-      patch_description: "remove warnings as errors"
-      patch_type: "conan"
-  "2.4.0":
-    - patch_file: "patches/0001-install-and-allow-shared.patch"
-      patch_description: "add install, allow shared build"
-      patch_type: "conan"

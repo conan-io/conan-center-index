@@ -1,0 +1,52 @@
+1. comment out `src/testtex` in `CMakeLists.txt` since it's only used for testing
+2. disable `-DOPENEXR_DLL` definition since it causes issues when linking against static OpenEXR
+3. link against `fmt::fmt` instead of `fmt::fmt-header-only` (that's the default for the dependency)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2b1fd7893..7da7c256d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -235,7 +235,7 @@ if (OIIO_BUILD_TOOLS AND NOT BUILD_OIIOUTIL_ONLY)
+     add_subdirectory (src/iinfo)
+     add_subdirectory (src/maketx)
+     add_subdirectory (src/oiiotool)
+-    add_subdirectory (src/testtex)
++    # add_subdirectory (src/testtex) # only used for testing, no need to build it
+     add_subdirectory (src/iv)
+ endif ()
+ 
+diff --git a/src/cmake/externalpackages.cmake b/src/cmake/externalpackages.cmake
+index 6556cd2eb..ea5c93363 100644
+--- a/src/cmake/externalpackages.cmake
++++ b/src/cmake/externalpackages.cmake
+@@ -111,7 +111,7 @@ checked_find_package (OpenEXR REQUIRED
+ # building against Imath/OpenEXR 3.x when there is still a system-level
+ # install version of 2.x.
+ include_directories(BEFORE ${IMATH_INCLUDES} ${OPENEXR_INCLUDES})
+-if (MSVC AND NOT LINKSTATIC)
++if (FALSE)
+     add_definitions (-DOPENEXR_DLL) # Is this needed for new versions?
+ endif ()
+ if (OpenEXR_VERSION VERSION_GREATER_EQUAL 3.0)
+@@ -378,7 +378,7 @@ macro (find_or_download_fmt)
+         set (fmt_VERSION "${FMT_VERSION_MAJOR}.${FMT_VERSION_MINOR}.${FMT_VERSION_PATCH}")
+         list (APPEND CFP_ALL_BUILD_DEPS_FOUND "${pkgname} ${${pkgname}_VERSION}")
+     else ()
+-        get_target_property(FMT_INCLUDE_DIR fmt::fmt-header-only INTERFACE_INCLUDE_DIRECTORIES)
++        #get_target_property(FMT_INCLUDE_DIR fmt::fmt-header-only INTERFACE_INCLUDE_DIRECTORIES)
+         set (OIIO_USING_FMT_LOCAL FALSE)
+         checked_find_package (fmt REQUIRED
+                               VERSION_MIN 7.0)
+diff --git a/src/libutil/CMakeLists.txt b/src/libutil/CMakeLists.txt
+index f873b3eed..8ad8bc4c3 100644
+--- a/src/libutil/CMakeLists.txt
++++ b/src/libutil/CMakeLists.txt
+@@ -31,7 +31,7 @@ if (INTERNALIZE_FMT OR OIIO_USING_FMT_LOCAL)
+     add_dependencies(OpenImageIO_Util fmt_internal_target)
+ else ()
+     target_link_libraries (OpenImageIO_Util
+-                           PUBLIC fmt::fmt-header-only)
++                           PUBLIC fmt::fmt)
+ endif ()
+ 
+ if (WIN32)

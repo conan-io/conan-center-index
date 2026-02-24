@@ -4,12 +4,12 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import copy, get, rm, rmdir, save, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rm, rmdir, save, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class OpenMPIConan(ConanFile):
@@ -60,7 +60,7 @@ class OpenMPIConan(ConanFile):
     def requirements(self):
         # OpenMPI public headers don't include anything besides stddef.h.
         # transitive_headers=True is not needed for any dependencies.
-        self.requires("hwloc/2.10.0")
+        self.requires("hwloc/2.12.2")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.settings.os == "Linux":
             self.requires("libnl/3.8.0")
@@ -72,12 +72,12 @@ class OpenMPIConan(ConanFile):
             # Requires Cygwin or WSL
             raise ConanInvalidConfiguration("OpenMPI doesn't support Windows")
 
-        if self.version == "4.1.0" and is_apple_os(self) and self.settings.arch == "armv8":
-            # INFO: https://github.com/open-mpi/ompi/issues/8410
-            raise ConanInvalidConfiguration(f"{self.ref} is not supported in Mac M1. Use a newer version.")
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         def root(pkg):
@@ -239,21 +239,3 @@ class OpenMPIConan(ConanFile):
         self.runenv_info.define_path("OPAL_LIBDIR", os.path.join(self.package_folder, "lib"))
         self.runenv_info.define_path("OPAL_DATADIR", os.path.join(self.package_folder, "res"))
         self.runenv_info.define_path("OPAL_DATAROOTDIR", os.path.join(self.package_folder, "res"))
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        self.env_info.PATH.append(bin_folder)
-        self.env_info.MPI_BIN = bin_folder
-        self.env_info.MPI_HOME = self.package_folder
-        self.env_info.OPAL_PREFIX = self.package_folder
-        self.env_info.OPAL_EXEC_PREFIX = self.package_folder
-        self.env_info.OPAL_LIBDIR = os.path.join(self.package_folder, "lib")
-        self.env_info.OPAL_DATADIR = os.path.join(self.package_folder, "res")
-        self.env_info.OPAL_DATAROOTDIR = os.path.join(self.package_folder, "res")
-
-        self.cpp_info.names["cmake_find_package"] = "MPI"
-        self.cpp_info.names["cmake_find_package_multi"] = "MPI"
-        self.cpp_info.components["ompi-c"].names["cmake_find_package"] = "MPI_C"
-        if self.options.enable_cxx:
-            self.cpp_info.components["ompi-cxx"].names["cmake_find_package"] = "MPI_CXX"
-        if self.options.fortran != "no":
-            self.cpp_info.components["ompi-fort"].names["cmake_find_package"] = "MPI_Fortran"

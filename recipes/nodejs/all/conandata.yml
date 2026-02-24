@@ -1,4 +1,29 @@
 sources:
+    "22.20.0":
+        Linux:
+            "x86_64":
+                url: "https://nodejs.org/dist/v22.20.0/node-v22.20.0-linux-x64.tar.xz"
+                sha256: "00bbd05e306ea68b6e13e17360d0e2f680b493ef95f2fea1c4296ff7437530bc"
+            "armv7":
+                url: "https://nodejs.org/dist/v22.20.0/node-v22.20.0-linux-armv7l.tar.xz"
+                sha256: "c599a33d91c9a39b7de3319929948f91f6ac42afaa1417f4340a5cc1b2efceda"
+            "armv8":
+                url: "https://nodejs.org/dist/v22.20.0/node-v22.20.0-linux-arm64.tar.xz"
+                sha256: "06907b9c088ce62305bc1530e5c1ae1510245114645768f7750c349c5b6fe667"
+        Macos:
+            "x86_64":
+                url: "https://nodejs.org/dist/v22.20.0/node-v22.20.0-darwin-x64.tar.gz"
+                sha256: "00df9c5df3e4ec6848c26b70fb47bf96492f342f4bed6b17f12d99b3a45eeecc"
+            "armv8":
+                url: "https://nodejs.org/dist/v22.20.0/node-v22.20.0-darwin-arm64.tar.gz"
+                sha256: "cc04a76a09f79290194c0646f48fec40354d88969bec467789a5d55dd097f949"
+        Windows:
+            "x86_64":
+                url: "https://nodejs.org/dist/v22.20.0/node-v22.20.0-win-x64.zip"
+                sha256: "bb819d6eb8f5bfda294bbc83a7e4ec6539da67c4233d54b0d655b9248b15e29d"
+            "armv8":
+                url: "https://nodejs.org/dist/v22.20.0/node-v22.20.0-win-arm64.zip"
+                sha256: "b12919e609b4fa1176ba8a155b49f761419a0c7cc97b42e6be09874a3f760ab6"
     "20.16.0":
         Windows:
             "x86_64":

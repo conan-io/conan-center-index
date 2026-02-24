@@ -1,4 +1,7 @@
 sources:
+  "4.6.3":
+    url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.6.3.tar.gz"
+    sha256: "fad44fff274fdda5ffcc0c0fff3bc3c596362722b9292fc8944db91187813600"
   "4.4.0":
     url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.4.0.tar.gz"
     sha256: "95900cf95ae760839e7cb9678a7b2fad0858d6ac12234f934bd1cb6bfc246ba9"
@@ -21,6 +24,9 @@ sources:
     url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-3.49.tar.gz"
     sha256: "5b65a20d5c53494ec8f638267fca4a629836b7ac8dd0ef0266834eab270ed4b3"
 patches:
+  "4.6.3":
+    - patch_file: "patches/windows-use-strtok_s.patch"
+    - patch_file: "patches/fix-cmake-4.6.3.patch"
   "4.4.0":
     - patch_file: "patches/windows-use-strtok_s.patch"
     - patch_file: "patches/fix-cmake-4.2.0.patch"

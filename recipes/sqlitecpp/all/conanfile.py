@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.tools.files import copy, get, rmdir
-from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.errors import ConanInvalidConfiguration
@@ -36,8 +35,6 @@ class SQLiteCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "3.3.1":
-            del self.options.with_sqlcipher
 
     def configure(self):
         if self.options.shared:
@@ -56,8 +53,6 @@ class SQLiteCppConan(ConanFile):
         
         if self.info.settings.os == "Windows" and self.info.options.shared:
             raise ConanInvalidConfiguration("SQLiteCpp can not be built as shared lib on Windows")
-        if self.options.get_safe("with_sqlcipher")and Version(self.version) < "3.3.1":
-            raise ConanInvalidConfiguration("Using SQLCipher with this recipe is only available from version 3.3.1")
         if self.options.get_safe("with_sqlcipher") and not self.dependencies["sqlcipher"].options.enable_column_metadata:
             raise ConanInvalidConfiguration(f"{self.ref} option with_sqlcipher=True requires 'sqlcipher/*:enable_column_metadata=True'")
     

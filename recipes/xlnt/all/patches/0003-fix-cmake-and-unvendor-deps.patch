@@ -1,0 +1,124 @@
+--- a/source/CMakeLists.txt
++++ b/source/CMakeLists.txt
+@@ -1,11 +1,11 @@
+ cmake_minimum_required(VERSION 3.1...3.31)
+ project(xlnt VERSION 1.6.1)
+ 
+-set(CMAKE_CXX_STANDARD ${XLNT_CXX_LANG})
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-set(CMAKE_C_STANDARD ${XLNT_C_LANG})
+-set(CMAKE_C_STANDARD_REQUIRED ON)
+-set(CXX_EXTENSIONS OFF)
++#set(CMAKE_CXX_STANDARD ${XLNT_CXX_LANG})
++#set(CMAKE_CXX_STANDARD_REQUIRED ON)
++#set(CMAKE_C_STANDARD ${XLNT_C_LANG})
++#set(CMAKE_C_STANDARD_REQUIRED ON)
++#set(CXX_EXTENSIONS OFF)
+ 
+ # Project metadata
+ set(PROJECT_VENDOR "xlnt-community")
+@@ -20,8 +20,6 @@ set(XLNT_SOURCE_DIR ${XLNT_ROOT_DIR}/source)
+ set(THIRD_PARTY_DIR ${XLNT_ROOT_DIR}/third-party)
+ 
+ # Include libstudxml library
+-add_subdirectory(${THIRD_PARTY_DIR}/libstudxml.build
+-  ${CMAKE_CURRENT_BINARY_DIR}/third-party/libstudxml)
+ 
+ if(COVERAGE)
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+@@ -32,15 +30,12 @@ if(MSVC)
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4") # level 4 warnings
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") # multi-processor compilation
+ elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall") # all warnings
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra") # extra warnings
+   if (XLNT_ALL_WARNINGS_AS_ERRORS)
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror") # avoid code being pushed with warnings
+   endif()
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas") # ignore MSVC and Clang pragmas
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-maybe-uninitialized") # GCC diagnostic with lots of false positives
+ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Weverything") # all warnings
+   # blacklist warnings that are not relevant
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++98-compat") # ignore warnings about C++98 compatibility
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++98-compat-pedantic") # ignore pedantic warnings about C++98 compatibility
+@@ -59,7 +54,7 @@ if(STATIC_CRT)
+   ucm_set_runtime(STATIC)
+ endif()
+ 
+-if(APPLE)
++if(0)
+   # Prevent a warning about deployment target not being set by setting it to current OSX version
+   execute_process(COMMAND "sw_vers -productVersion | awk -F'.' '{print $1\".\"$2}'"
+     OUTPUT_VARIABLE OSX_VERSION)
+@@ -89,8 +84,6 @@ file(GLOB WORKBOOK_HEADERS ${XLNT_INCLUDE_DIR}/xlnt/workbook/*.hpp)
+ file(GLOB WORKBOOK_SOURCES ${XLNT_SOURCE_DIR}/workbook/*.cpp)
+ file(GLOB WORKSHEET_HEADERS ${XLNT_INCLUDE_DIR}/xlnt/worksheet/*.hpp)
+ file(GLOB WORKSHEET_SOURCES ${XLNT_SOURCE_DIR}/worksheet/*.cpp)
+-file(GLOB MINIZ_HEADERS ${THIRD_PARTY_DIR}/miniz/*.h)
+-file(GLOB MINIZ_SOURCES ${THIRD_PARTY_DIR}/miniz/*.c)
+ 
+ file(GLOB DETAIL_ROOT_HEADERS ${XLNT_SOURCE_DIR}/detail/*.hpp)
+ file(GLOB DETAIL_ROOT_SOURCES ${XLNT_SOURCE_DIR}/detail/*.cpp)
+@@ -122,12 +115,12 @@ set(XLNT_HEADERS ${ROOT_HEADERS} ${CELL_HEADERS} ${CHARTS_HEADERS}
+   ${CHARTSHEET_HEADERS} ${DRAWING_HEADERS} ${FORMULA_HEADERS}
+   ${PACKAGING_HEADERS} ${STYLES_HEADERS} ${UTILS_HEADERS}
+   ${WORKBOOK_HEADERS} ${WORKSHEET_HEADERS} ${DETAIL_HEADERS} ${DETAIL_CRYPTO_HEADERS}
+-  ${DRAWING_HEADERS} ${MINIZ_HEADERS})
++  ${DRAWING_HEADERS})
+ set(XLNT_SOURCES ${CELL_SOURCES} ${CHARTS_SOURCES} ${CHARTSHEET_SOURCES}
+   ${DRAWING_SOURCES} ${FORMULA_SOURCES} ${PACKAGING_SOURCES}
+   ${STYLES_SOURCES} ${UTILS_SOURCES} ${WORKBOOK_SOURCES}
+   ${WORKSHEET_SOURCES} ${DETAIL_SOURCES} ${DETAIL_CRYPTO_SOURCES}
+-  ${DRAWING_SOURCES} ${MINIZ_SOURCES})
++  ${DRAWING_SOURCES})
+ 
+ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+   # Set a default CMAKE_INSTALL_PREFIX if one wasn't specified
+@@ -166,7 +159,7 @@ if(NOT STATIC)
+   add_library(xlnt SHARED
+     ${XLNT_HEADERS}
+     ${XLNT_SOURCES}
+-    $<TARGET_OBJECTS:libstudxml>)
++    )
+ 
+   target_compile_definitions(xlnt PRIVATE XLNT_SHARED=1)
+ 
+@@ -178,7 +171,7 @@ if(NOT STATIC)
+     INSTALL_NAME_DIR "${XLNT_LIB_DEST_DIR}")
+ else()
+   # Compile static library
+-  add_library(xlnt STATIC ${XLNT_HEADERS} ${XLNT_SOURCES} $<TARGET_OBJECTS:libstudxml>)
++  add_library(xlnt STATIC ${XLNT_HEADERS} ${XLNT_SOURCES})
+   target_compile_definitions(xlnt PUBLIC XLNT_STATIC=1)
+ endif()
+ 
+@@ -208,11 +201,15 @@ target_include_directories(xlnt
+ 	$<INSTALL_INTERFACE:${XLNT_INC_DEST_DIR}>
+ 	PRIVATE
+ 	${XLNT_SOURCE_DIR}
+-	${XLNT_SOURCE_DIR}/../third-party/libstudxml
+-    ${XLNT_SOURCE_DIR}/../third-party/miniz
+-    ${XLNT_SOURCE_DIR}/../third-party/utfcpp/source
+-    ${XLNT_SOURCE_DIR}/../third-party/fmt/include
+-    ${XLNT_SOURCE_DIR}/../third-party/fast_float/include)
++	)
++
++find_package(libstudxml REQUIRED CONFIG)
++find_package(miniz REQUIRED CONFIG)
++find_package(utf8cpp REQUIRED CONFIG)
++find_package(FastFloat REQUIRED CONFIG)
++find_package(fmt REQUIRED CONFIG)
++target_link_libraries(xlnt PRIVATE miniz::miniz utf8cpp libstudxml::libstudxml FastFloat::fast_float fmt::fmt)
++target_compile_features(xlnt PUBLIC cxx_std_11)
+ 
+ # Platform- and file-specific settings, MSVC
+ if(MSVC)
+@@ -266,7 +263,6 @@ source_group(styles FILES ${STYLES_HEADERS} ${STYLES_SOURCES})
+ source_group(utils FILES ${UTILS_HEADERS} ${UTILS_SOURCES})
+ source_group(workbook FILES ${WORKBOOK_HEADERS} ${WORKBOOK_SOURCES})
+ source_group(worksheet FILES ${WORKSHEET_HEADERS} ${WORKSHEET_SOURCES})
+-source_group(third-party\\miniz FILES ${MINIZ_HEADERS} ${MINIZ_SOURCES})
+ 
+ # Install library
+ install(TARGETS xlnt EXPORT XlntTargets

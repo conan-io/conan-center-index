@@ -60,7 +60,7 @@ class LibjxlConan(ConanFile):
     def requirements(self):
         self.requires("brotli/1.1.0")
         self.requires("highway/1.1.0")
-        self.requires("lcms/2.16")
+        self.requires("lcms/[>=2.16 <3]")
         if self.options.with_tcmalloc:
             self.requires("gperftools/2.15")
 

@@ -60,8 +60,7 @@ class Catch2Conan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if Version(self.version) >= "3.8.0":
-            self.tool_requires("cmake/[>=3.16 <4]")
+        self.tool_requires("cmake/[>=3.16]")
 
     def validate(self):
         check_min_cppstd(self, 14)

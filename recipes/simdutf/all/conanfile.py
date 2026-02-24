@@ -7,15 +7,15 @@ from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 class SimdutfConan(ConanFile):
     name = "simdutf"
-    description = "Unicode routines (UTF8, UTF16): billions of characters per second."
+    description = "Unicode routines (UTF8, UTF16, UTF32) and base64 at billions of characters per second."
     license = ("Apache-2.0", "MIT")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/simdutf/simdutf"
-    topics = ("unicode", "transcoding", "neon", "simd", "avx2", "sse2", "utf8", "utf16", )
+    topics = ("unicode", "transcoding", "neon", "simd", "avx2", "sse2", "utf8", "utf16", "utf32", "base64", )
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -26,10 +26,6 @@ class SimdutfConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 11
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,8 +39,7 @@ class SimdutfConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 11)
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.0":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 9.")
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and \

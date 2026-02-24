@@ -21,10 +21,12 @@ class FlacConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_cxxlibs": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_cxxlibs": True,
     }
 
     def export_sources(self):
@@ -58,6 +60,7 @@ class FlacConan(ConanFile):
         tc.variables["BUILD_DOCS"] = False
         tc.variables["BUILD_PROGRAMS"] = not is_apple_os(self) or self.settings.os == "Macos"
         tc.variables["BUILD_TESTING"] = False
+        tc.variables["BUILD_CXXLIBS"] = self.options.with_cxxlibs
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         if Version(self.version) < "1.3.4":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
@@ -100,10 +103,11 @@ class FlacConan(ConanFile):
         self.cpp_info.components["libflac"].libs = ["FLAC"]
         self.cpp_info.components["libflac"].requires = ["ogg::ogg"]
 
-        self.cpp_info.components["libflac++"].set_property("cmake_target_name", "FLAC::FLAC++")
-        self.cpp_info.components["libflac++"].set_property("pkg_config_name", "flac++")
-        self.cpp_info.components["libflac++"].libs = ["FLAC++"]
-        self.cpp_info.components["libflac++"].requires = ["libflac"]
+        if self.options.with_cxxlibs:
+            self.cpp_info.components["libflac++"].set_property("cmake_target_name", "FLAC::FLAC++")
+            self.cpp_info.components["libflac++"].set_property("pkg_config_name", "flac++")
+            self.cpp_info.components["libflac++"].libs = ["FLAC++"]
+            self.cpp_info.components["libflac++"].requires = ["libflac"]
         if not self.options.shared:
             self.cpp_info.components["libflac"].defines = ["FLAC__NO_DLL"]
             if self.settings.os in ["Linux", "FreeBSD"]:
