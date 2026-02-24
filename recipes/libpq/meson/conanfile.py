@@ -135,7 +135,7 @@ class LibpqConan(ConanFile):
         deps.generate()
 
     def build(self):
-        if self.settings_build.os == "Windows":
+        if self.settings.os == "Windows":
             # package zic.exe so that we can crossbuild
             replace_in_file(self, os.path.join(self.source_folder, "src", "timezone", "meson.build"),
                     "'install': false", "'install': true")
