@@ -18,7 +18,7 @@ class wxWidgetsConan(ConanFile):
     topics = ("wxwidgets", "gui", "ui")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.wxwidgets.org"
-    license = "wxWidgets"
+    license = "WxWindows-exception-3.1"
     settings = "os", "arch", "compiler", "build_type"
 
     package_type = "library"
@@ -184,7 +184,7 @@ class wxWidgetsConan(ConanFile):
             tc.variables["wxUSE_LIBWEBP"] = "sys"
 
         # wxWidgets features
-        tc.variables["wxUSE_SECRETSTORE"] = self.options.get_safe("secretstore", False)
+        tc.variables["wxUSE_SECRETSTORE"] = "ON" if self.options.get_safe("secretstore") else "OFF"
 
         # wxWidgets libraries
         tc.variables["wxUSE_AUI"] = self.options.aui
