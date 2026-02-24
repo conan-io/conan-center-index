@@ -246,7 +246,7 @@ class wxWidgetsConan(ConanFile):
         # Fix for strcpy_s on Apple platforms (fix upstream?)
         if is_apple_os(self):
             cmake_version = "3.0...3.31"
-            if Version(self.version) <= "3.3.1":
+            if Version(self.version) >= "3.3.1":
                 cmake_version = "3.5...3.31"
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             f'cmake_minimum_required(VERSION {cmake_version})',
