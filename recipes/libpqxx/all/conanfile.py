@@ -145,4 +145,4 @@ class LibpqxxConan(ConanFile):
 
         self.cpp_info.components["pqxx"].set_property("cmake_target_name", "libpqxx::pqxx")
         self.cpp_info.components["pqxx"].set_property("pkg_config_name", "libpqxx")
-        self.cpp_info.components["pqxx"].requires = ["libpq::libpq"]
+        self.cpp_info.components["pqxx"].requires = ["libpq::pq"]

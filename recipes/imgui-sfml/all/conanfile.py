@@ -1,7 +1,9 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir, apply_conandata_patches, export_conandata_patches
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.0.9"
@@ -33,12 +35,19 @@ class ImGuiSFMLConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("sfml/2.6.2", transitive_headers=True)
+        sfml_version = "3.0.2" if Version(self.version) >= "3.0" else "2.6.2"
+        self.requires(f"sfml/{sfml_version}", transitive_headers=True)
         self.requires("imgui/1.91.8", transitive_headers=True, transitive_libs=True)
         self.requires("opengl/system")
 
+    def build_requirements(self):
+        if Version(self.version) >= "3.0":
+            self.tool_requires("cmake/[>=3.22]")
+
     def validate(self):
-        check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11 if Version(self.version) < "3.0" else 17)
+        if not self.dependencies["sfml"].options.graphics:
+            raise ConanInvalidConfiguration('imgui-sfml requires -o="sfml/*:graphics=True"')
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -81,6 +90,9 @@ class ImGuiSFMLConan(ConanFile):
         if self.options.shared and self.settings.build_type == "Debug":
             postfix = "_d"
         self.cpp_info.libs = ["ImGui-SFML" + postfix]
+        # 3.0 only requires the graphics component
+        sfml_requires = "sfml::graphics" if Version(self.version) >= "3.0" else "sfml::sfml"
+        self.cpp_info.requires = [sfml_requires, "imgui::imgui", "opengl::opengl"]
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["imm32"]
