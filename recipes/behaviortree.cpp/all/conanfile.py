@@ -49,7 +49,6 @@ class BehaviorTreeCPPConan(ConanFile):
 
     def requirements(self):
         self.requires("flatbuffers/24.12.23")
-        self.requires("foonathan-lexy/2025.05.0")
         self.requires("minicoro/0.1.3")
         self.requires("minitrace/cci.20230905")
         self.requires("tinyxml2/11.0.0")
@@ -82,7 +81,6 @@ class BehaviorTreeCPPConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["USE_VENDORED_CPPZMQ"] = False
         tc.cache_variables["USE_VENDORED_FLATBUFFERS"] = False
-        tc.cache_variables["USE_VENDORED_LEXY"] = False
         tc.cache_variables["USE_VENDORED_MINICORO"] = False
         tc.cache_variables["USE_VENDORED_MINITRACE"] = False
         tc.cache_variables["USE_VENDORED_TINYXML2"] = False
