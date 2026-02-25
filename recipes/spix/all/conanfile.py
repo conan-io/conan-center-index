@@ -63,7 +63,7 @@ class SpixConan(ConanFile):
 
     def requirements(self):
         self.requires("anyrpc/1.0.2")
-        self.requires("qt/6.6.1")
+        self.requires("qt/[>=6.6.1 <7]", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -119,10 +119,24 @@ class SpixConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.libs = ["Spix"]
         self.cpp_info.set_property("cmake_file_name", "Spix")
-        self.cpp_info.set_property("cmake_target_name", "Spix::Spix")
 
-        # TODO remove once conan v2 removed cmake_find_package_*
-        self.cpp_info.names["cmake_find_package"] = "Spix"
-        self.cpp_info.names["cmake_find_package_multi"] = "Spix"
+        if Version(self.version) >= "0.14":
+            self.cpp_info.components["core"].libs = ["SpixCore"]
+            self.cpp_info.components["core"].set_property("cmake_target_name", "Spix::Core")
+            self.cpp_info.components["core"].requires = [
+                "qt::qtCore",
+                "anyrpc::anyrpc",
+            ]
+
+            self.cpp_info.components["qtquick"].libs = ["SpixQtQuick"]
+            self.cpp_info.components["qtquick"].set_property("cmake_target_name", "Spix::QtQuick")
+            self.cpp_info.components["qtquick"].requires = [
+                "qt::qtQuick",
+                "qt::qtGui",
+            ]
+            if self.settings.os == "Macos":
+                self.cpp_info.components["qtquick"].requires.append("qt::QCocoaIntegrationPlugin")
+        else:
+            self.cpp_info.libs = ["Spix"]
+        self.cpp_info.set_property("cmake_target_name", "Spix::Spix")
