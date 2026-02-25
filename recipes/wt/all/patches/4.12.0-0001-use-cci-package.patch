@@ -1,8 +1,8 @@
 diff --git a/src/Wt/Dbo/backend/CMakeLists.txt b/src/Wt/Dbo/backend/CMakeLists.txt
-index 4121f68..457e95e 100644
+index 29a72c3..8efdd2b 100644
 --- a/src/Wt/Dbo/backend/CMakeLists.txt
 +++ b/src/Wt/Dbo/backend/CMakeLists.txt
-@@ -122,11 +122,12 @@ IF(ENABLE_POSTGRES AND POSTGRES_FOUND)
+@@ -128,11 +128,12 @@ IF(ENABLE_POSTGRES AND POSTGRES_FOUND)
      SET_PROPERTY(TARGET wtdbopostgres PROPERTY VISIBILITY_INLINES_HIDDEN YES)
    endif()
  
@@ -16,11 +16,11 @@ index 4121f68..457e95e 100644
    )
  
    IF(TARGET Boost::headers)
-@@ -290,11 +291,12 @@ IF(ENABLE_MYSQL AND MYSQL_FOUND)
+@@ -308,11 +309,12 @@ IF(ENABLE_MYSQL AND MYSQL_FOUND)
      SET_PROPERTY(TARGET wtdbomysql PROPERTY VISIBILITY_INLINES_HIDDEN YES)
    endif()
  
-+  find_package(libmysqlclient REQUIRED CONFIG)
++  find_package(libmysqlclient CONFIG REQUIRED)
    TARGET_LINK_LIBRARIES(wtdbomysql
      PUBLIC
        wtdbo
