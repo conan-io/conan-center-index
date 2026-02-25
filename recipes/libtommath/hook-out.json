@@ -1,9 +1,0 @@
-[
-    {
-        "identifier": "hook_recipe_metadata.py",
-        "details": "Attribute 'package_type' is mandatory in the recipe",
-        "hook_method": "pre_export",
-        "context": "libtommath/1.3.0",
-        "level": "warning"
-    }
-]
