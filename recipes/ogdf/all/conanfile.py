@@ -37,7 +37,8 @@ class OGDFConan(ConanFile):
 
     def requirements(self):
         self.requires("coin-clp/1.17.7")
-        self.requires("pugixml/1.14")
+        self.requires("pugixml/1.15")
+        self.requires("earcut/2.2.4")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -57,17 +58,26 @@ class OGDFConan(ConanFile):
         rmdir(self, join(self.source_folder, "include", "ogdf", "lib", "backward"))
         rmdir(self, join(self.source_folder, "src", "ogdf", "lib", "pugixml"))
         rmdir(self, join(self.source_folder, "include", "ogdf", "lib", "pugixml"))
+        rmdir(self, join(self.source_folder, "include", "ogdf", "lib", "mapbox"))
+        # do not set C++ standard
+        replace_in_file(self, join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD ", "## set(CMAKE_CXX_STANDARD ")
         # use cci packages where available
-        replace_in_file(self, join(self.source_folder, "CMakeLists.txt"), "include(coin)", "find_package(coin-clp REQUIRED CONFIG)\nfind_package(pugixml REQUIRED CONFIG)")
-        replace_in_file(self, join(self.source_folder, "cmake", "ogdf.cmake"), "target_link_libraries(OGDF PUBLIC COIN)", "target_link_libraries(OGDF PUBLIC coin-clp::coin-clp pugixml::pugixml)")
+        replace_in_file(self, join(self.source_folder, "CMakeLists.txt"), "include(coin)", "find_package(coin-clp REQUIRED CONFIG)\nfind_package(pugixml REQUIRED CONFIG)\nfind_package(earcut_hpp REQUIRED CONFIG)")
+        replace_in_file(self, join(self.source_folder, "cmake", "ogdf.cmake"), "target_link_libraries(OGDF PUBLIC COIN)", "target_link_libraries(OGDF PUBLIC coin-clp::coin-clp pugixml::pugixml earcut_hpp::earcut_hpp)")
         # replace pugixml copy in repo by conan dependency
         for dir_name, file_name in [("include", "GexfParser.h"),
                                     ("include", "GraphMLParser.h"),
                                     ("include", "SvgPrinter.h"),
                                     ("include", "TsplibXmlParser.h"),
                                     ("src", "GraphIO_graphml.cpp"),
-                                    ("src", "GraphIO_gexf.cpp")]:
+                                    ("src", "GraphIO_gexf.cpp"),
+                                    ("src", "GexfParser.cpp"),
+                                    ("src", "SvgPrinter.cpp"),
+                                    ("src", "GraphMLParser.cpp"),
+                                    ("src", "TsplibXmlParser.cpp")]:
             replace_in_file(self, join(self.source_folder, dir_name, "ogdf", "fileformats", file_name), "ogdf/lib/pugixml/pugixml.h", "pugixml.hpp")
+        # replace earcut
+        replace_in_file(self, join(self.source_folder, "include", "ogdf", "geometric", "cr_min", "geometry", "algorithm", "MapBoxTriangulation.h"), "ogdf/lib/mapbox/mapbox_earcut.h", "mapbox/mapbox_earcut.h")
 
     def build(self):
         self._patch_sources()
@@ -76,17 +86,12 @@ class OGDFConan(ConanFile):
         cmake.build(target="OGDF")
 
     def package(self):
-        copy(self, pattern="LICENSE*.txt", src=self.source_folder, dst=join(self.package_folder, "licenses"))
-        copy(self, pattern="*.h", src=join(self.source_folder, "include"), dst=join(self.package_folder, "include"))
-        copy(self, pattern="*.h", src=join(self.build_folder, "include"), dst=join(self.package_folder, "include"))
-        copy(self, pattern="*.lib", src=self.build_folder, dst=join(self.package_folder, "lib"), keep_path=False)
-        if self.options.shared:
-            copy(self, pattern="*.so*", src=self.build_folder, dst=join(self.package_folder, "lib"))
-            copy(self, pattern="*.dylib*", src=self.build_folder, dst=join(self.package_folder, "lib"))
-            copy(self, pattern="*.dll", src=self.build_folder, dst=join(self.package_folder, "bin"), keep_path=False)
-        else:
-            copy(self, pattern="*.a", src=self.build_folder, dst=join(self.package_folder, "lib"))
-        fix_apple_shared_install_name(self)
+        cmake = CMake(self)
+        cmake.install()
+        copy(self, pattern="*.h", src=join(self.package_folder, "include", "ogdf-release", "ogdf"), dst=join(self.package_folder, "include", "ogdf"))
+        rmdir(self, join(self.package_folder, "include", "ogdf-release"))
+        copy(self, pattern="*.h", src=join(self.package_folder, "include", "ogdf-debug", "ogdf"), dst=join(self.package_folder, "include", "ogdf"))
+        rmdir(self, join(self.package_folder, "include", "ogdf-debug"))
 
     def package_info(self):
         self.cpp_info.libs = ["OGDF"]
