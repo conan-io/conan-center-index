@@ -31,7 +31,7 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def config_options(self):
-        if self.settings.os == "MacOS":
+        if self.settings.os == "Macos":
             self.package_type = "shared-library"
 
     def requirements(self):
