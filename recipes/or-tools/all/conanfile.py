@@ -32,7 +32,7 @@ class PackageConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Macos":
-            self.package_type = "shared-library"
+            self.options.shared = True
 
     def requirements(self):
         self.requires("abseil/20250814.0", transitive_headers=True, transitive_libs=True)
