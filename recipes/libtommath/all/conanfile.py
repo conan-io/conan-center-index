@@ -2,7 +2,8 @@ from conan import ConanFile
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
-from conan.tools.files import get, copy, rmdir, chdir
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import get, copy, rmdir, chdir, rm
 import os
 
 required_conan_version = ">=2.4"
@@ -42,9 +43,7 @@ class LibTomMathConan(ConanFile):
         
     def generate(self):
         tc = AutotoolsToolchain(self)
-        env = tc.environment()
-        env.define("PREFIX", self.package_folder)
-        tc.generate(env)
+        tc.generate()
 
     def _run_makefile(self, target=None):
         target = target or ""
@@ -102,21 +101,63 @@ class LibTomMathConan(ConanFile):
                         tools.cpu_count(),
                     ), run_environment=True)
 
-    def build(self):        
+    @property
+    def _makefile(self):
+        """
+        Helper method to determine the appropriate makefile based on the build options and settings.
+        """
         makefile = "makefile.shared" if self.options.shared else "makefile.unix"
         if is_msvc(self):
             makefile = "makefile.msvc"
         elif self.settings.os == "Windows":
             makefile = "makefile.mingw"
+        return makefile
+        
+    @property
+    def _make_args(self):
+        """ Helper method to construct the arguments for the make command based on the build options and settings.
+            Environment variables have no effect because those variables are listed in the makefiles as arguments, so we need to pass them explicitly.
+        """
+        args = ["DESTDIR=", f"PREFIX={self.package_folder}"]
+        if self.settings.os == "Windows" and not is_msvc(self):
+            args.append("LDFLAGS=-lcrypt32")
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            args.append("LDFLAGS='-arch arm64'")
+        compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
+        buildenv_vars = VirtualBuildEnv(self).vars()
+        cc = compilers_from_conf.get("c", buildenv_vars.get("CC", "cc"))
+        if cc:
+            args.append(f"CC={cc}")
+        # INFO: Conan AutotoolsToolchain exports CXXFLAGS by default
+        cflags = self.conf.get("tools.build:cflags", default=[], check_type=list) or buildenv_vars.get("CFLAGS") \
+            or self.conf.get("tools.build:cxxflags", default=[], check_type=list) or buildenv_vars.get("CXXFLAGS")
+        if cflags:
+            args.append(f"CFLAGS={cflags}")
+        ldflags = self.conf.get("tools.build:sharedlinkflags", default=[], check_type=list) or buildenv_vars.get("LDFLAGS")
+        if ldflags:
+            args.append(f"LDFLAGS={ldflags}")
+        ar = buildenv_vars.get("AR")
+        if ar:
+            args.append(f"AR={ar}")
+        ld = buildenv_vars.get("LD")
+        if ld:
+            args.append(f"LD={ld}")
+        return args
+    
+    def build(self):
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
-            autotools.make(makefile=makefile)
+            autotools.make(args=self._make_args, makefile=self._makefile)
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
-            autotools.install(args=["DESTDIR="])
+            autotools.install(args=self._make_args, makefile=self._makefile)
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        if self.options.shared:
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["tommath"]
