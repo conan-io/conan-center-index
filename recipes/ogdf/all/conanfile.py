@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
 from os.path import join
@@ -23,6 +23,14 @@ class OGDFConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    @property
+    def _min_cppstd(self):
+        return 17
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
