@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
 from os.path import join
@@ -31,6 +31,12 @@ class OGDFConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
+        if cross_building(self):
+            raise ConanInvalidConfiguration(
+                f"Cross-building is not supported: "
+                f"build={self.settings_build.os}/{self.settings_build.arch}, "
+                f"host={self.settings.os}/{self.settings.arch}"
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
