@@ -24,18 +24,29 @@ class LibTomMathConan(ConanFile):
         "fPIC": True,
     }
     languages = "C"
-    implements = ["auto_shared_fpic"]
-    
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+            del self.options.shared
+
+    def configure(self):
+        if self.options.get_safe("shared"):
+            del self.options.fPIC
+        if self.settings.os == "Windows":
+            # INFO: Libtommath does not export a static library when built as shared on Windows
+            self.package_type = "static-library"
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.generate()
-    
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
