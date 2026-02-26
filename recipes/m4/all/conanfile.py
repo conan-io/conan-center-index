@@ -31,7 +31,7 @@ class M4Conan(ConanFile):
         del self.info.settings.compiler
 
     def requirements(self):
-        self.requires("libiconv/1.18")
+        self.requires("libiconv/1.17")
 
     def build_requirements(self):
         if self.settings_build.os == "Windows":
