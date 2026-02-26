@@ -8,7 +8,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
+from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.files import copy, get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
@@ -653,6 +653,15 @@ class QtConan(ConanFile):
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_EGL"] = not with_egl
 
         tc.generate()
+
+        if self.settings_build.os == "Windows" and not cross_building(self):
+            # moc.exe, uic.exe, etc are built first and used subsequently during the build
+            # and have DLL dependencies through QtCore library - copy the DLLs so that they
+            # are found at runtime to avoid exposing the "host" runenv to the build environment
+            dest_folder = os.path.join(self.build_folder, "qtbase", "bin") 
+            for dep in self.dependencies.host.values():
+                for bindir in dep.cpp_info.bindirs:
+                    copy(self, pattern="*.dll", src=bindir, dst=dest_folder, keep_path=False)
 
     def package_id(self):
         del self.info.options.cross_compile
