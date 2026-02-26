@@ -8,7 +8,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
+from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.files import copy, get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
@@ -362,7 +362,7 @@ class QtConan(ConanFile):
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.3.0")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
-            self.requires("freetype/2.13.2")
+            self.requires("freetype/[>=2.13 <3]")
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.15.0")
         if self.options.get_safe("with_icu", False):
@@ -390,7 +390,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_x11") or self.options.qtwayland:
-            self.requires("xkbcommon/1.5.0")
+            self.requires("xkbcommon/1.6.0")
         if self.options.get_safe("with_x11", False):
             self.requires("xorg/system")
         if self.options.get_safe("with_egl"):
@@ -483,30 +483,11 @@ class QtConan(ConanFile):
         pc = PkgConfigDeps(self)
         pc.generate()
 
-        if not cross_building(self):
-            # TODO: this should not be done, investigate why this was needed and implement an alternative solution
-            vre = VirtualRunEnv(self)
-            vre.generate(scope="build")
         env = Environment()
         # Tell Python to assume UTF-8 encoding to work around character encoding issues while building Qt WebEngine on Polish locale on Windows.
         env.define("PYTHONUTF8", "1")
-        # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
         env.unset("VCPKG_ROOT")
-        env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
-        env.vars(self).save_script("conanbuildenv_pkg_config_path")
-        if self.settings_build.os == "Macos":
-            # TODO: this should not be needed - investigate and fix
-            # On macOS, SIP resets DYLD_LIBRARY_PATH injected by VirtualBuildEnv & VirtualRunEnv
-            dyld_library_path = "$DYLD_LIBRARY_PATH"
-            dyld_library_path_build = buildenv.vars().get("DYLD_LIBRARY_PATH")
-            if dyld_library_path_build:
-                dyld_library_path = f"{dyld_library_path_build}:{dyld_library_path}"
-            if not cross_building(self):
-                dyld_library_path_host = vre.vars().get("DYLD_LIBRARY_PATH")
-                if dyld_library_path_host:
-                    dyld_library_path = f"{dyld_library_path_host}:{dyld_library_path}"
-            save(self, "bash_env", f'export DYLD_LIBRARY_PATH="{dyld_library_path}"')
-            env.define_path("BASH_ENV", os.path.abspath("bash_env"))
+        env.vars(self).save_script("conanbuildenv_extra_vars")
 
         tc = CMakeToolchain(self, generator="Ninja")
 
@@ -685,6 +666,15 @@ class QtConan(ConanFile):
             tc.cache_variables['Python_FIND_VIRTUALENV'] = 'STANDARD'
             tc.cache_variables['Python_FIND_REGISTRY'] = 'NEVER'
         tc.generate()
+
+        if self.settings_build.os == "Windows" and not cross_building(self):
+            # moc.exe, uic.exe, etc are built first and used subsequently during the build
+            # and have DLL dependencies through QtCore library - copy the DLLs so that they
+            # are found at runtime to avoid exposing the "host" runenv to the build environment
+            dest_folder = os.path.join(self.build_folder, "qtbase", "bin") 
+            for dep in self.dependencies.host.values():
+                for bindir in dep.cpp_info.bindirs:
+                    copy(self, pattern="*.dll", src=bindir, dst=dest_folder, keep_path=False)
 
     def package_id(self):
         del self.info.options.cross_compile
