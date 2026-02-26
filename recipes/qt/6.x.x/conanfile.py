@@ -13,10 +13,10 @@ from conan.tools.files import copy, get, replace_in_file, apply_conandata_patche
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
-from conan.tools.system import PipEnv
+from conan.tools.system import PyEnv
 from conan.errors import ConanException, ConanInvalidConfiguration
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.26"
 
 class QtConan(ConanFile):
     _submodules = ["qtsvg", "qtdeclarative", "qttools", "qttranslations", "qtdoc",
@@ -451,7 +451,7 @@ class QtConan(ConanFile):
         if self.options.qtwebengine:
             # https://github.com/qt/qtwebengine/blob/1a75761f912328b7b3b7f0302cec62ae5c111d1a/configure.cmake#L361-L366
             # QtWebEngine cannot build without html5lib visible to the python interpreter
-            pyenv = PipEnv(self)
+            pyenv = PyEnv(self)
             pyenv.install(["html5lib~=1.0"])
             pyenv.generate()
 
@@ -487,6 +487,8 @@ class QtConan(ConanFile):
         # Tell Python to assume UTF-8 encoding to work around character encoding issues while building Qt WebEngine on Polish locale on Windows.
         env.define("PYTHONUTF8", "1")
         env.unset("VCPKG_ROOT")
+        # PKG_CONFIG_PATH is exposed in CMakeToolchain, but the env var is needed when building QtWebEngine
+        env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         env.vars(self).save_script("conanbuildenv_extra_vars")
 
         tc = CMakeToolchain(self, generator="Ninja")
@@ -661,10 +663,8 @@ class QtConan(ConanFile):
 
         if self.options.qtwebengine:
             # Get CMake to find PipEnv's Python first to ensure html5lib is found
-            tc.cache_variables['Python_FIND_UNVERSIONED_NAMES'] = 'FIRST'
-            tc.cache_variables['Python_FIND_STRATEGY'] = 'LOCATION'
-            tc.cache_variables['Python_FIND_VIRTUALENV'] = 'STANDARD'
-            tc.cache_variables['Python_FIND_REGISTRY'] = 'NEVER'
+            tc.cache_variables['Python3_ROOT_DIR'] = pyenv.env_dir
+            tc.cache_variables['Python3_EXECUTABLE'] = pyenv.env_exe
         tc.generate()
 
         if self.settings_build.os == "Windows" and not cross_building(self):
