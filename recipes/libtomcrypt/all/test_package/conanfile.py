@@ -1,24 +1,18 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import can_run
+from conan.tools.cmake import cmake_layout, CMake
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    test_type = "explicit"
-
-    def requirements(self):
-        self.requires(self.tested_reference_str)
+    generators = "CMakeDeps", "CMakeToolchain"
 
     def layout(self):
         cmake_layout(self)
 
-    def generate(self):
-        deps = CMakeDeps(self)
-        deps.generate()
-        tc = CMakeToolchain(self)
-        tc.generate()
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def build(self):
         cmake = CMake(self)
@@ -27,6 +21,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            exe = "example" if self.settings.os != "Windows" else "example.exe"
-            exe_path = os.path.join(self.cpp.build.bindirs[0], exe)
-            self.run(exe_path, env="conanrun")
+            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
+            self.run(bin_path, env="conanrun")
