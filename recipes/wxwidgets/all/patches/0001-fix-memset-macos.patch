@@ -1,0 +1,48 @@
+https://github.com/wxWidgets/wxWidgets/issues/24687
+https://github.com/wxWidgets/wxWidgets/pull/25936
+
+From e913e9eba4815d5b2fe8148ed9b8b61e0441160f Mon Sep 17 00:00:00 2001
+From: Vadim Zeitlin <vadim@wxwidgets.org>
+Date: Thu, 30 Oct 2025 20:36:03 +0100
+Subject: [PATCH] Fix compilation problem due to memset_s() when using PCH
+
+Define __STDC_WANT_LIB_EXT1__ in wx/platform.h, which is included before
+the standard headers even when using PCH, to make sure memset_s()
+declaration is available in this case too.
+---
+ include/wx/platform.h | 6 ++++++
+ src/unix/utilsunx.cpp | 4 ----
+ 2 files changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/include/wx/platform.h b/include/wx/platform.h
+index 03f9d0b9e2e9..ea46f78be9cb 100644
+--- a/include/wx/platform.h
++++ b/include/wx/platform.h
+@@ -269,6 +269,12 @@
+ #        if !defined(wxSIZE_T_IS_UINT) && !defined(wxSIZE_T_IS_ULONG)
+ #            define wxSIZE_T_IS_ULONG
+ #        endif
++
++        /* Define this as soon as possible and before string.h is included to
++           get memset_s() declaration from it if available. */
++#       ifndef __STDC_WANT_LIB_EXT1__
++#           define __STDC_WANT_LIB_EXT1__ 1
++#       endif
+ #    endif
+
+ /*
+diff --git a/src/unix/utilsunx.cpp b/src/unix/utilsunx.cpp
+index 79996ef504c1..57088a259e5a 100644
+--- a/src/unix/utilsunx.cpp
++++ b/src/unix/utilsunx.cpp
+@@ -18,10 +18,6 @@
+ // for compilers that support precompilation, includes "wx.h".
+ #include "wx/wxprec.h"
+
+-// Define this as soon as possible and before string.h is included to get
+-// memset_s() declaration from it if available.
+-#define __STDC_WANT_LIB_EXT1__ 1
+-
+ #include "wx/utils.h"
+
+ #if !defined(HAVE_SETENV) && defined(HAVE_PUTENV)
