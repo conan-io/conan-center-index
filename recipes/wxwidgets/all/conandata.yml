@@ -1,4 +1,10 @@
 sources:
-  "3.2.8":
-    url: "https://github.com/wxWidgets/wxWidgets/archive/v3.2.8.tar.gz"
-    sha256: "bd9fc9886829994748705702591ffac96d20df9ee72af17af0af48590135fb85"
+  "3.3.1":
+    url: "https://github.com/wxWidgets/wxWidgets/releases/download/v3.3.1/wxWidgets-3.3.1.tar.bz2"
+    sha256: "f936c8d694f9c49a367a376f99c751467150a4ed7cbf8f4723ef19b2d2d9998d"
+  "3.2.9":
+    url: "https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.9/wxWidgets-3.2.9.tar.bz2"
+    sha256: "fb90f9538bffd6a02edbf80037a0c14c2baf9f509feac8f76ab2a5e4321f112b"
+patches:
+  "3.3.1":
+    - patch_file: "patches/0001-fix-memset-macos.patch"
