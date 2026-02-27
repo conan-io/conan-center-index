@@ -332,9 +332,6 @@ class QtConan(ConanFile):
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
 
-        if self.options.get_safe("qtspeech") and not self.options.qtdeclarative:
-            raise ConanInvalidConfiguration("qtspeech requires qtdeclarative, cf QTBUG-108381")
-
         if self.options.get_safe("qtwayland") and not self.options.get_safe("with_egl"):
             raise ConanInvalidConfiguration("qtwayland requires with_egl=True")
 
