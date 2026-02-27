@@ -1,4 +1,7 @@
 sources:
+  "1.1.0":
+    url: "https://github.com/marton78/pffft/archive/refs/tags/v1.1.0.tar.gz"
+    sha256: "ea0701a6bc256405b03975908a6a92d0ffecdd18579e8484b8d789c8bd561787"
   "1.0.0":
     url: "https://github.com/marton78/pffft/archive/refs/tags/v1.0.0.tar.gz"
     sha256: "6ea0465d215044d3b7c44a374f48f70c88965e75e97c0826157ac57e3cdc24ba"
