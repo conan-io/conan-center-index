@@ -27,7 +27,6 @@ class PffftConan(ConanFile):
         "with_double": [True, False],
         "with_pffastconv": [True, False],
         "with_pfdsp": [True, False],
-        "with_simd": [True, False],
     }
     default_options = {
         "shared": False,
@@ -38,7 +37,6 @@ class PffftConan(ConanFile):
         "with_double": True,
         "with_pffastconv": False,
         "with_pfdsp": False,
-        "with_simd": True,
     }
 
     exports_sources = "CMakeLists.txt"
@@ -55,9 +53,6 @@ class PffftConan(ConanFile):
             del self.options.with_double
             del self.options.with_pffastconv
             del self.options.with_pfdsp
-            del self.options.with_simd
-        else:
-            del self.options.disable_simd
 
     def configure(self):
         if self.options.shared:
@@ -99,7 +94,7 @@ class PffftConan(ConanFile):
         else:
             tc.variables["PFFFT_USE_TYPE_FLOAT"] = self.options.with_float
             tc.variables["PFFFT_USE_TYPE_DOUBLE"] = self.options.with_double
-            tc.variables["PFFFT_USE_SIMD"] = self.options.with_simd
+            tc.variables["PFFFT_USE_SIMD"] = not self.options.disable_simd
             tc.variables["INSTALL_PFFFT"] = True
             tc.variables["INSTALL_PFFASTCONV"] = self.options.with_pffastconv
             tc.variables["INSTALL_PFDSP"] = self.options.with_pfdsp
