@@ -3,6 +3,9 @@ from conan.tools.files import copy, chdir, get, rmdir, rm
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, NMakeToolchain, NMakeDeps, msvc_runtime_flag
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
+from conan.errors import ConanInvalidConfiguration
 import os
 
 conan_minimum_required = ">=2.4.0"
@@ -56,6 +59,11 @@ class LibtomcryptConan(ConanFile):
             tc = AutotoolsToolchain(self)
             tc.make_args = self._make_args()
             tc.generate()
+
+    def validate(self):
+        if cross_building(self):
+            # FIXME: On Mac it produces native libraries only, and fails when linking the test package.
+            raise ConanInvalidConfiguration("Cross-building is not supported. Contributions are welcome.")
 
     @property
     def _makefile(self):
@@ -179,6 +187,7 @@ class LibtomcryptConan(ConanFile):
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         if self.options.get_safe("shared"):
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["tomcrypt"]
