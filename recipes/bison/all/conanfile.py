@@ -35,7 +35,7 @@ class BisonConan(ConanFile):
 
     def requirements(self):
         self.requires("m4/1.4.19")
-        self.requires("libiconv/1.18")
+        self.requires("libiconv/1.17")
 
     def validate(self):
         if is_msvc(self) and self.version == "3.8.2":
