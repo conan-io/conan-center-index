@@ -1,4 +1,7 @@
 sources:
+  "1.0.0":
+    url: "https://github.com/marton78/pffft/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "6ea0465d215044d3b7c44a374f48f70c88965e75e97c0826157ac57e3cdc24ba"
   "cci.20210511":
     url: "https://bitbucket.org/jpommier/pffft/get/ed78751d751e.zip"
     sha256: "af4ac1f9e148348b492686491f2235b5b4dd210148fac29ceca6fb629e563b53"
