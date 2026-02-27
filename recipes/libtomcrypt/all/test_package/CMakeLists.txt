@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
-project(test_package C)
+project(test_package LANGUAGES C)
 
 find_package(libtomcrypt CONFIG REQUIRED)
 
-add_executable(example src/example.c)
-target_link_libraries(example PRIVATE libtomcrypt::libtomcrypt)
+add_executable(${CMAKE_PROJECT_NAME} test_package.c)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE libtomcrypt::libtomcrypt)
