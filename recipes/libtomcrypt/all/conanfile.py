@@ -38,9 +38,8 @@ class LibtomcryptConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build_requirements(self):
-        if self.settings_build.os == "Windows":
-            if not self.conf_info.get("tools.gnu:make_program", check_type=str):
-                self.tool_requires("make/4.4.1")
+        if not is_msvc(self) and self.options.shared:
+            self.tool_requires("libtool/2.4.7")
 
     def requirements(self):
         self.requires("libtommath/1.3.0")
@@ -75,6 +74,9 @@ class LibtomcryptConan(ConanFile):
             Environment variables have no effect because those variables are listed in the makefiles as arguments, so we need to pass them explicitly.
         """
         args = ["PREFIX=", f"DESTDIR={self.package_folder}"]
+        if not is_msvc(self) and self.options.shared:
+            libtoolpath = self.dependencies.build["libtool"].cpp_info.bindirs[0]
+            args.append(f"LIBTOOL={os.path.join(libtoolpath, 'libtool')}")
 
         compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
         autotools_vars = AutotoolsToolchain(self).vars()
