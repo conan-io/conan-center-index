@@ -134,6 +134,7 @@ class SpixConan(ConanFile):
             self.cpp_info.components["qtquick"].requires = [
                 "qt::qtQuick",
                 "qt::qtGui",
+                "qt::qtOpenGL"
             ]
             if self.settings.os == "Macos":
                 self.cpp_info.components["qtquick"].requires.append("qt::QCocoaIntegrationPlugin")
