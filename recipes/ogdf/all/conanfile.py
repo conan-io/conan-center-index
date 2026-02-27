@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
@@ -31,12 +32,10 @@ class OGDFConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
-        if cross_building(self):
-            raise ConanInvalidConfiguration(
-                f"Cross-building is not supported: "
-                f"build={self.settings_build.os}/{self.settings_build.arch}, "
-                f"host={self.settings.os}/{self.settings.arch}"
-            )
+        if cross_building(self) and is_apple_os(self):
+            # FIXME: https://github.com/ogdf/ogdf/issues/214
+            # error: unknown target CPU 'apple-m2'
+            raise ConanInvalidConfiguration("Cross-building is not support on Mac yet. See https://github.com/ogdf/ogdf/issues/214.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -51,8 +50,6 @@ class OGDFConan(ConanFile):
 
     def requirements(self):
         self.requires("coin-clp/1.17.7")
-        self.requires("pugixml/1.15")
-        self.requires("earcut/2.2.4")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -70,28 +67,11 @@ class OGDFConan(ConanFile):
         rmdir(self, join(self.source_folder, "src", "coin"))
         rmdir(self, join(self.source_folder, "include", "coin"))
         rmdir(self, join(self.source_folder, "include", "ogdf", "lib", "backward"))
-        rmdir(self, join(self.source_folder, "src", "ogdf", "lib", "pugixml"))
-        rmdir(self, join(self.source_folder, "include", "ogdf", "lib", "pugixml"))
-        rmdir(self, join(self.source_folder, "include", "ogdf", "lib", "mapbox"))
         # do not set C++ standard
         replace_in_file(self, join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD ", "## set(CMAKE_CXX_STANDARD ")
         # use cci packages where available
-        replace_in_file(self, join(self.source_folder, "CMakeLists.txt"), "include(coin)", "find_package(coin-clp REQUIRED CONFIG)\nfind_package(pugixml REQUIRED CONFIG)\nfind_package(earcut_hpp REQUIRED CONFIG)")
-        replace_in_file(self, join(self.source_folder, "cmake", "ogdf.cmake"), "target_link_libraries(OGDF PUBLIC COIN)", "target_link_libraries(OGDF PUBLIC coin-clp::coin-clp pugixml::pugixml earcut_hpp::earcut_hpp)")
-        # replace pugixml copy in repo by conan dependency
-        for dir_name, file_name in [("include", "GexfParser.h"),
-                                    ("include", "GraphMLParser.h"),
-                                    ("include", "SvgPrinter.h"),
-                                    ("include", "TsplibXmlParser.h"),
-                                    ("src", "GraphIO_graphml.cpp"),
-                                    ("src", "GraphIO_gexf.cpp"),
-                                    ("src", "GexfParser.cpp"),
-                                    ("src", "SvgPrinter.cpp"),
-                                    ("src", "GraphMLParser.cpp"),
-                                    ("src", "TsplibXmlParser.cpp")]:
-            replace_in_file(self, join(self.source_folder, dir_name, "ogdf", "fileformats", file_name), "ogdf/lib/pugixml/pugixml.h", "pugixml.hpp")
-        # replace earcut
-        replace_in_file(self, join(self.source_folder, "include", "ogdf", "geometric", "cr_min", "geometry", "algorithm", "MapBoxTriangulation.h"), "ogdf/lib/mapbox/mapbox_earcut.h", "mapbox/mapbox_earcut.h")
+        replace_in_file(self, join(self.source_folder, "CMakeLists.txt"), "include(coin)", "find_package(coin-clp REQUIRED CONFIG)")
+        replace_in_file(self, join(self.source_folder, "cmake", "ogdf.cmake"), "target_link_libraries(OGDF PUBLIC COIN)", "target_link_libraries(OGDF PUBLIC coin-clp::coin-clp)")
 
     def build(self):
         self._patch_sources()
