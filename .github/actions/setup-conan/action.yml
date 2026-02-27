@@ -29,9 +29,6 @@ runs:
         if [[ "$RUNNER_OS" == "Windows" ]]; then
           if [[ "$RUNNER_ARCH" == "ARM64" ]]; then
             echo "xnnpack/*:assembly=False" >> "$DEFAULT_PROFILE"
-            echo "*/*:enable_data_postgresql=False" >> "$DEFAULT_PROFILE"
-            echo "*/*:with_postgres=False" >> "$DEFAULT_PROFILE"
-            echo "*/*:with_pq=False" >> "$DEFAULT_PROFILE"
           fi
         fi
 
