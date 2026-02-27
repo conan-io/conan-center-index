@@ -67,6 +67,7 @@ class QtConan(ConanFile):
         "with_x11": [True, False],
         "with_egl": [True, False],
 
+        "quick": [True, False],
         "gui": [True, False],
         "widgets": [True, False],
 
@@ -110,6 +111,7 @@ class QtConan(ConanFile):
 
         "gui": True,
         "widgets": True,
+        "quick": False,
 
         "device": None,
         "cross_compile": None,
@@ -327,6 +329,12 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("qtwayland") and not self.options.get_safe("with_egl"):
             raise ConanInvalidConfiguration("qtwayland requires with_egl=True")
+
+        if self.options.get_safe("quick"):
+            if not self.options.qtdeclarative:
+                raise ConanInvalidConfiguration(f"option qt:quick requires also qt:qtdeclarative")
+            if not self.options.qtshadertools:
+                raise ConanInvalidConfiguration(f"option qt:quick requires also qt:qtshadertools")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
