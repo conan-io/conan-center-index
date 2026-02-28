@@ -1,4 +1,23 @@
 sources:
+  "2026.0.0":
+    "openvino":
+      url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2026.0.0.tar.gz"
+      sha256: "529ce766bcca30991c21d0e065886e175b5210d81d6f6b3d7cdaaa89fe22ea8a"
+    "arm_compute":
+      url: "https://github.com/ARM-software/ComputeLibrary/archive/refs/tags/v52.6.0.tar.gz"
+      sha256: "fa2aee62b237283c9a9dff5dc4c5052bb34313d09b510fb97dd63baf6964cb8e"
+    "arm_kleidiai":
+      url: "https://github.com/ARM-software/kleidiai/archive/refs/tags/v1.19.0.tar.gz"
+      sha256: "73170b676a9f4d67d2f3b76795804d7dbaca09f105bb08b0a4ae76a2db086156"
+    "onednn_cpu":
+      url: "https://github.com/openvinotoolkit/oneDNN/archive/c6b79c1207bd5f20b9395536dab1d71a47cfcb1d.tar.gz"
+      sha256: "c6825a7aad5bc83686da759aeb89cf979bd820ba4795b55241fde0d6b093f4d6"
+    "mlas":
+      url: "https://github.com/openvinotoolkit/mlas/archive/d1bc25ec4660cddd87804fcf03b2411b5dfb2e94.tar.gz"
+      sha256: "0a44fbfd4b13e8609d66ddac4b11a27c90c1074cde5244c91ad197901666004c"
+    "onednn_gpu":
+      url: "https://github.com/oneapi-src/oneDNN/archive/refs/tags/v3.11.tar.gz"
+      sha256: "04df98b18300daf6c3aa7cc2d5e7ce8a8f430fed1787151daed0254d8dd4e64e"
   "2025.4.0":
     "openvino":
       url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2025.4.0.tar.gz"
@@ -34,23 +53,9 @@ sources:
     "onednn_gpu":
       url: "https://github.com/oneapi-src/oneDNN/archive/0f269193c7466313888d3338209d0d06a22cc6fa.tar.gz"
       sha256: "abad1ff4ac138c593b7a927ef2099b01447af1f7364848392a950ba17b32bcd8"
-  "2023.3.0":
-    "openvino":
-      url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2023.3.0.tar.gz"
-      sha256: "27cff20ac0662f5495d2c2eec47cbe5469ab2f225aa091d223f8bfc9d32f4fc3"
-    "arm_compute":
-      url: "https://github.com/ARM-software/ComputeLibrary/archive/refs/tags/v23.08.tar.gz"
-      sha256: "62f514a555409d4401e5250b290cdf8cf1676e4eb775e5bd61ea6a740a8ce24f"
-    "onednn_cpu":
-      url: "https://github.com/openvinotoolkit/oneDNN/archive/cb3060bbf4694e46a1359a3d4dfe70500818f72d.tar.gz"
-      sha256: "9dea3da8dab8511677db3db68ff4d9cdbfd31d8614bf04fd79a7610892bb991c"
-    "mlas":
-      url: "https://github.com/openvinotoolkit/mlas/archive/7a35e48a723944972088627be1a8b60841e8f6a5.tar.gz"
-      sha256: "b7fdd19523a88373d19fd8d5380f64c2834040fa50a6f0774acf08f3fa858daa"
-    "onednn_gpu":
-      url: "https://github.com/oneapi-src/oneDNN/archive/cb77937ffcf5e83b5d1cf2940c94e8b508d8f7b4.tar.gz"
-      sha256: "2ca304c033786aa5c3ec1ec6f8fc3936ae5c6874d5964b586311da11bec2ec4a"
 patches:
+  "2026.0.0":
+    - patch_file: "patches/2026.0.0-gpu-wnoerror-for-debug-build.patch"
   "2025.4.0":
     - patch_file: "patches/2025.4.0-CPU-ARM-Define-HWCAP2_I8MM-constant-properly-33060.patch"
   "2025.2.0":
