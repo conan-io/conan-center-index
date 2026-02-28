@@ -1,4 +1,7 @@
 sources:
+  "8.0.0":
+    url: "https://github.com/jtv/libpqxx/archive/refs/tags/8.0.0.tar.gz"
+    sha256: "f467c8133b31941324e40eb21f05db0b52e0fcfa070fd1a08490967c1f129977"
   "7.10.5":
     url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.10.5.tar.gz"
     sha256: "aa214df8b98672a43a39b68a37da87af1415a44965f6e484f85ca0eb4f151367"
