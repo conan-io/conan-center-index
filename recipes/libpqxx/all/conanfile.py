@@ -30,21 +30,39 @@ class LibpqxxConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 14 if Version(self.version) < "7.0" else "17"
+        version = Version(self.version)
+        if version >= "8.0":
+            return 20
+        elif version >= "7.0":
+            return 17
+        else:
+            return 14
 
     @property
     def _compilers_minimum_version(self):
-        if Version(self.version) < "7.0":
+        version = Version(self.version)
+        if version >= "8.0":
             return {
-                "gcc": "7",
+                "gcc": "10",
+                "clang": "11",
+                # Apple Clang 15 supports C++20, but it has several bugs.
+                # One such bug causes `std::source_location` to return incorrect
+                # line numbers when used as a default argument.
+                # Since libpqxx 8 uses `std::source_location`, builds may
+                # succeed, but it will not be working correctly.
+                "apple-clang": "16",
+            }
+        elif version >= "7.0":
+            return {
+                "gcc": "7" if version < "7.5.0" else "8",
                 "clang": "6",
-                "apple-clang": "10"
+                "apple-clang": "10",
             }
         else:
             return {
-                "gcc": "7" if Version(self.version) < "7.5.0" else "8",
+                "gcc": "7",
                 "clang": "6",
-                "apple-clang": "10"
+                "apple-clang": "10",
             }
 
     @property
@@ -72,9 +90,10 @@ class LibpqxxConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
-        if Version(self.version) < "7.0":
+        version = Version(self.version)
+        if version < "7.0":
             check_min_vs(self, 190)
-        elif Version(self.version) < "7.6":
+        elif version < "7.6":
             check_min_vs(self, 191)
         else:
             check_min_vs(self, 192)
