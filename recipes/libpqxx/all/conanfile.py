@@ -67,7 +67,9 @@ class LibpqxxConan(ConanFile):
 
     @property
     def _mac_os_minimum_required_version(self):
-        return "10.15"
+        # libpqxx 8 requires C++20, and Apple Clang using C++20 requires Macos
+        # 13.3 or later.
+        return "13.3" if Version(self.version) > "8.0" else "10.15"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -112,7 +114,8 @@ class LibpqxxConan(ConanFile):
             os_version = self.settings.get_safe("os.version")
             if os_version and Version(os_version) < self._mac_os_minimum_required_version:
                 raise ConanInvalidConfiguration(
-                    "Macos Mojave (10.14) and earlier cannot to be built because C++ standard library too old.")
+                    f"Macos {self._mac_os_minimum_required_version} and earlier cannot be built."
+                )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
