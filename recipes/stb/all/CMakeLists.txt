@@ -1,9 +1,13 @@
 cmake_minimum_required(VERSION 3.18)
 project(stb LANGUAGES CXX)
 
-add_library(${PROJECT_NAME})
-target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
-
+set(STB_SOURCES "")
 if(STB_IMAGE)
-    target_sources(${PROJECT_NAME} PRIVATE "stb_image.cpp")
+    list(APPEND STB_SOURCES "stb_image.cpp")
 endif()
+
+if(STB_SOURCES)
+    add_library(${PROJECT_NAME} ${STB_SOURCES})
+    target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
+endif()
+

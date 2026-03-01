@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
@@ -33,6 +33,10 @@ class StbConan(ConanFile):
         # HACK: Used to circumvent the incompatibility
         #       of the format cci.YYYYMMDD in tools.Version
         return str(self.version)[4:]
+
+    @property
+    def _build_library(self):
+        return self.options.image
 
     def config_options(self):
         if Version(self._version) < "20210713":
@@ -82,11 +86,13 @@ class StbConan(ConanFile):
         if self.options.get_safe("with_deprecated"):
             copy(self, "*.h", src=os.path.join(self.source_folder, "deprecated"), dst=os.path.join(self.package_folder, "include"))
             copy(self, "stb_image.c", src=os.path.join(self.source_folder, "deprecated"), dst=os.path.join(self.package_folder, "include"))
-        copy(self, "libstb.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
+        copy(self, "lib*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
+        if not self.options.image:
+            rm(self, pattern="stb_image.h", folder=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.libs = ["stb"]
+        self.cpp_info.libs = ["stb"] if self._build_library else []
         self.cpp_info.defines.append("STB_TEXTEDIT_KEYTYPE=unsigned")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
