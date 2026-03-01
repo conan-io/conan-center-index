@@ -69,7 +69,7 @@ class LibpqxxConan(ConanFile):
     def _mac_os_minimum_required_version(self):
         # libpqxx 8 requires C++20, and Apple Clang using C++20 requires Macos
         # 13.3 or later.
-        return "13.3" if Version(self.version) > "8.0" else "10.15"
+        return "13.3" if Version(self.version) >= "8.0" else "10.15"
 
     def export_sources(self):
         export_conandata_patches(self)
