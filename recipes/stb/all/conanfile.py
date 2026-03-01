@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
@@ -19,10 +20,12 @@ class StbConan(ConanFile):
     no_copy_source = True
     options = {
         "with_deprecated": [True, False],
+        "image": [True, False],
     }
 
     default_options = {
         "with_deprecated": True,
+        "image": False,
     }
 
     @property
@@ -34,6 +37,10 @@ class StbConan(ConanFile):
     def config_options(self):
         if Version(self._version) < "20210713":
             del self.options.with_deprecated
+
+    def export_sources(self):
+        copy(self, pattern="CMakeLists.txt", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"))
+        copy(self, pattern="stb_image.cpp", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"))
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -51,6 +58,20 @@ class StbConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if self.options.image:
+            tc.variables["STB_IMAGE"] = "ON"
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
@@ -61,10 +82,11 @@ class StbConan(ConanFile):
         if self.options.get_safe("with_deprecated"):
             copy(self, "*.h", src=os.path.join(self.source_folder, "deprecated"), dst=os.path.join(self.package_folder, "include"))
             copy(self, "stb_image.c", src=os.path.join(self.source_folder, "deprecated"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, "libstb.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.libdirs = []
+        self.cpp_info.libs = ["stb"]
         self.cpp_info.defines.append("STB_TEXTEDIT_KEYTYPE=unsigned")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
