@@ -102,9 +102,10 @@ class OGDFConan(ConanFile):
             rm(self, dll_pattern_to_remove, join(self.package_folder, "bin"))
 
     def package_info(self):
-        suffix = "-debug" if self.settings.build_type == "Debug" else ""
-        self.cpp_info.libs = ["OGDF" + suffix]
+        libsuffix = "-debug" if self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = ["OGDF" + libsuffix]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
-        self.cpp_info.includedirs.append(join("include", "ogdf" + suffix))
+        includesuffix = "-debug" if self.settings.build_type == "Debug" else "-release"
+        self.cpp_info.includedirs.append(join("include", "ogdf" + includesuffix))
