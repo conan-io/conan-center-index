@@ -104,6 +104,7 @@ class OGDFConan(ConanFile):
     def package_info(self):
         libsuffix = "-debug" if self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = ["OGDF" + libsuffix]
+        self.cpp_info.set_property("cmake_target_name", "OGDF")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
