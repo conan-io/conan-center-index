@@ -100,6 +100,8 @@ class OGDFConan(ConanFile):
         rmdir(self, join(self.package_folder, "include", "ogdf-release"))
         copy(self, pattern="*.h", src=join(self.package_folder, "include", "ogdf-debug", "ogdf"), dst=join(self.package_folder, "include", "ogdf"))
         rmdir(self, join(self.package_folder, "include", "ogdf-debug"))
+        rmdir(self, join(self.package_folder, "lib", "cmake"))
+        rmdir(self, join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["OGDF"]
