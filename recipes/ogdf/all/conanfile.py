@@ -54,8 +54,8 @@ class OGDFConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["COIN_SOLVER"] = "CLP"
-        tc.variables["COIN_SOLVER_IS_EXTERNAL"] = 0
+        tc.cache_variables["COIN_SOLVER"] = "CLP"
+        tc.cache_variables["COIN_SOLVER_IS_EXTERNAL"] = 0
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
