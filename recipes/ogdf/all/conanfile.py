@@ -5,7 +5,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
 from os.path import join
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class OGDFConan(ConanFile):
@@ -16,6 +16,7 @@ class OGDFConan(ConanFile):
     homepage = "https://ogdf.net"
     topics = ("graph", "algorithm", "data-structures")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -25,13 +26,8 @@ class OGDFConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 17)
         if cross_building(self) and is_apple_os(self):
             # FIXME: https://github.com/ogdf/ogdf/issues/214
             # error: unknown target CPU 'apple-m2'
@@ -80,6 +76,8 @@ class OGDFConan(ConanFile):
         cmake.build(target="OGDF")
 
     def package(self):
+        copy(self, pattern="LICENSE*", src=self.source_folder, dst=join(self.package_folder, "licenses"))
+        copy(self, pattern="LICENSE*", src=join(self.source_folder, "include", "ogdf", "lib", "minisat"), dst=join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         copy(self, pattern="*.h", src=join(self.package_folder, "include", "ogdf-release", "ogdf"), dst=join(self.package_folder, "include", "ogdf"))
