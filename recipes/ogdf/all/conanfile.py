@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.files import copy, get, replace_in_file, rmdir, rm
 from conan.errors import ConanInvalidConfiguration
 from os.path import join
 
@@ -102,6 +102,8 @@ class OGDFConan(ConanFile):
         rmdir(self, join(self.package_folder, "include", "ogdf-debug"))
         rmdir(self, join(self.package_folder, "lib", "cmake"))
         rmdir(self, join(self.package_folder, "share"))
+        for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
+            rm(self, dll_pattern_to_remove, join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = ["OGDF"]
