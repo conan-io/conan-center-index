@@ -47,6 +47,7 @@ class OGDFConan(ConanFile):
 
     def requirements(self):
         self.requires("coin-clp/1.17.7")
+        self.requires("pugixml/[>=1.14 <2]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -67,8 +68,22 @@ class OGDFConan(ConanFile):
         # do not set C++ standard
         replace_in_file(self, join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD ", "## set(CMAKE_CXX_STANDARD ")
         # use cci packages where available
-        replace_in_file(self, join(self.source_folder, "CMakeLists.txt"), "include(coin)", "find_package(coin-clp REQUIRED CONFIG)")
-        replace_in_file(self, join(self.source_folder, "cmake", "ogdf.cmake"), "target_link_libraries(OGDF PUBLIC COIN)", "target_link_libraries(OGDF PUBLIC coin-clp::coin-clp)")
+        replace_in_file(self, join(self.source_folder, "CMakeLists.txt"), "include(coin)", "find_package(coin-clp REQUIRED CONFIG)\nfind_package(pugixml REQUIRED CONFIG)")
+        replace_in_file(self, join(self.source_folder, "cmake", "ogdf.cmake"), "target_link_libraries(OGDF PUBLIC COIN)", "target_link_libraries(OGDF PUBLIC coin-clp::coin-clp pugixml::pugixml)")
+        # replace pugixml copy in repo by conan dependency
+        rmdir(self, join(self.source_folder, "src", "ogdf", "lib", "pugixml"))
+        rmdir(self, join(self.source_folder, "include", "ogdf", "lib", "pugixml"))
+        for dir_name, file_name in [("include", "GexfParser.h"),
+                                    ("include", "GraphMLParser.h"),
+                                    ("include", "SvgPrinter.h"),
+                                    ("include", "TsplibXmlParser.h"),
+                                    ("src", "GexfParser.cpp"),
+                                    ("src", "GraphMLParser.cpp"),
+                                    ("src", "SvgPrinter.cpp"),
+                                    ("src", "TsplibXmlParser.cpp"),
+                                    ("src", "GraphIO_graphml.cpp"),
+                                    ("src", "GraphIO_gexf.cpp")]:
+            replace_in_file(self, join(self.source_folder, dir_name, "ogdf", "fileformats", file_name), "ogdf/lib/pugixml/pugixml.h", "pugixml.hpp")
 
     def build(self):
         self._patch_sources()
