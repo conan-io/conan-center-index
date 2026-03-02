@@ -96,17 +96,15 @@ class OGDFConan(ConanFile):
         copy(self, pattern="LICENSE*", src=join(self.source_folder, "include", "ogdf", "lib", "minisat"), dst=join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        copy(self, pattern="*.h", src=join(self.package_folder, "include", "ogdf-release", "ogdf"), dst=join(self.package_folder, "include", "ogdf"))
-        rmdir(self, join(self.package_folder, "include", "ogdf-release"))
-        copy(self, pattern="*.h", src=join(self.package_folder, "include", "ogdf-debug", "ogdf"), dst=join(self.package_folder, "include", "ogdf"))
-        rmdir(self, join(self.package_folder, "include", "ogdf-debug"))
         rmdir(self, join(self.package_folder, "lib", "cmake"))
         rmdir(self, join(self.package_folder, "share"))
         for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
             rm(self, dll_pattern_to_remove, join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.libs = ["OGDF"]
+        suffix = "-debug" if self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = ["OGDF" + suffix]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
+        self.cpp_info.includedirs.append(join("include", "ogdf" + suffix))
