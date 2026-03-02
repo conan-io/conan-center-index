@@ -3,6 +3,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.errors import ConanInvalidConfiguration
 from os.path import join
 
 required_conan_version = ">=2.1"
