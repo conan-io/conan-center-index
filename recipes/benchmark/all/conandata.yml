@@ -2,16 +2,10 @@ sources:
   "1.9.4":
     url: "https://github.com/google/benchmark/archive/v1.9.4.tar.gz"
     sha256: "b334658edd35efcf06a99d9be21e4e93e092bd5f95074c1673d5c8705d95c104"
-  "1.9.1":
-    url: "https://github.com/google/benchmark/archive/refs/tags/v1.9.1.tar.gz"
-    sha256: "32131c08ee31eeff2c8968d7e874f3cb648034377dfc32a4c377fa8796d84981"
   # keep 1.9.0, the last release for c++14
   "1.9.0":
     url: "https://github.com/google/benchmark/archive/refs/tags/v1.9.0.tar.gz"
     sha256: "35a77f46cc782b16fac8d3b107fbfbb37dcd645f7c28eee19f3b8e0758b48994"
-  "1.8.5":
-    url: "https://github.com/google/benchmark/archive/refs/tags/v1.8.5.tar.gz"
-    sha256: "d26789a2b46d8808a48a4556ee58ccc7c497fcd4c0af9b90197674a81e04798a"
   # keep 1.8.4, the last release for c++11
   "1.8.4":
     url: "https://github.com/google/benchmark/archive/refs/tags/v1.8.4.tar.gz"
