@@ -107,7 +107,9 @@ class OnnxRuntimeConan(ConanFile):
         tc.variables["onnxruntime_USE_FULL_PROTOBUF"] = not self.dependencies["protobuf"].options.lite
         tc.variables["onnxruntime_USE_XNNPACK"] = self.options.with_xnnpack
 
+        # use onnxruntime_CUDA_MINIMAL, as cudnn requires unpackaged https://github.com/NVIDIA/cudnn-frontend
         tc.variables["onnxruntime_USE_CUDA"] = self.options.with_cuda
+        tc.variables["onnxruntime_CUDA_MINIMAL"] = True
         tc.variables["onnxruntime_BUILD_UNIT_TESTS"] = False
         tc.variables["onnxruntime_DISABLE_CONTRIB_OPS"] = False
         tc.variables["onnxruntime_USE_FLASH_ATTENTION"] = False

@@ -1,5 +1,7 @@
 # Replacement for https://github.com/microsoft/onnxruntime/blob/v1.23.2/cmake/external/onnxruntime_external_deps.cmake
 
+# include(external/helper_functions.cmake)
+
 if(NOT onnxruntime_DISABLE_ABSEIL)
   find_package(absl REQUIRED CONFIG)
   include_directories(${absl_INCLUDE_DIRS})
@@ -88,6 +90,21 @@ if (onnxruntime_USE_XNNPACK)
   if(NOT TARGET XNNPACK)
     message(STATUS "Aliasing xnnpack::xnnpack to XNNPACK")
     add_library(XNNPACK ALIAS xnnpack::xnnpack)
+  endif()
+endif()
+
+
+if (onnxruntime_USE_CUDA)
+  find_package(CUDAToolkit REQUIRED)
+
+  # cuDNN is not needed for minimal CUDA builds (e.g., TensorRT-only builds)
+  if(NOT onnxruntime_CUDA_MINIMAL)
+    if(onnxruntime_CUDNN_HOME)
+      file(TO_CMAKE_PATH ${onnxruntime_CUDNN_HOME} onnxruntime_CUDNN_HOME)
+      set(CUDNN_PATH ${onnxruntime_CUDNN_HOME})
+    endif()
+
+    include(cuDNN)
   endif()
 endif()
 
