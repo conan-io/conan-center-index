@@ -1,0 +1,27 @@
+--- a/cmake/onnxruntime_providers_cuda.cmake
++++ b/cmake/onnxruntime_providers_cuda.cmake
+@@ -241,7 +241,7 @@
+       target_compile_definitions(${target} PRIVATE USE_CUDA_MINIMAL)
+       target_link_libraries(${target} PRIVATE ${ABSEIL_LIBS} ${ONNXRUNTIME_PROVIDERS_SHARED} Boost::mp11 safeint_interface CUDA::cudart)
+     else()
+-      include(cudnn_frontend) # also defines CUDNN::*
++      find_package(NvidiaCuDNNFrontend)
+       if (onnxruntime_USE_CUDA_NHWC_OPS)
+         if(CUDNN_MAJOR_VERSION GREATER 8)
+           add_compile_definitions(ENABLE_CUDA_NHWC_OPS)
+@@ -249,12 +249,12 @@
+           message( WARNING "To compile with NHWC ops enabled please compile against cuDNN 9 or newer." )
+         endif()
+       endif()
+-      target_link_libraries(${target} PRIVATE CUDA::cublasLt CUDA::cublas CUDNN::cudnn_all cudnn_frontend CUDA::curand CUDA::cufft CUDA::cudart
++      target_link_libraries(${target} PRIVATE CUDA::cublasLt CUDA::cublas CUDNN::cudnn_all nvidia::cudnn-frontend::cudnn-frontend CUDA::curand CUDA::cufft CUDA::cudart
+               ${ABSEIL_LIBS} ${ONNXRUNTIME_PROVIDERS_SHARED} Boost::mp11 safeint_interface)
+     endif()
+
+-    include(cutlass)
+-    target_include_directories(${target} PRIVATE ${cutlass_SOURCE_DIR}/include ${cutlass_SOURCE_DIR}/examples ${cutlass_SOURCE_DIR}/tools/util/include)
++    find_package(NvidiaCutlass)
++    target_link_libraries(${target} PRIVATE nvidia::cutlass::cutlass)
+     target_link_libraries(${target} PRIVATE Eigen3::Eigen)
+     target_include_directories(${target} PRIVATE ${ONNXRUNTIME_ROOT} ${CMAKE_CURRENT_BINARY_DIR} PUBLIC ${CUDAToolkit_INCLUDE_DIRS})
+

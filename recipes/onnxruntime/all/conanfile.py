@@ -26,12 +26,14 @@ class OnnxRuntimeConan(ConanFile):
         "fPIC": [True, False],
         "with_xnnpack": [True, False],
         "with_cuda": [True, False],
+        "with_cudnn": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_xnnpack": False,
         "with_cuda": False,
+        "with_cudnn": False,
     }
     short_paths = True
 
@@ -46,6 +48,8 @@ class OnnxRuntimeConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if self.options.with_cudnn:
+            self.options.with_cuda = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -72,6 +76,8 @@ class OnnxRuntimeConan(ConanFile):
             self.requires("pthreadpool/cci.20231129")
         if self.options.with_cuda:
             self.requires("cutlass/3.5.0")
+        if self.options.with_cudnn:
+            self.requires("cudnn-frontend/1.18.0")
         self.requires("cpuinfo/[>=cci.20250110]")
 
     def validate(self):
