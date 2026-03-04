@@ -77,7 +77,7 @@ class LibphonenumberConan(ConanFile):
 
     def requirements(self):
         # https://github.com/google/libphonenumber/blob/v8.13.35/cpp/src/phonenumbers/phonenumberutil.h#L33-L34
-        self.requires("protobuf/[>=5.27.0 <7]", transitive_headers=True, transitive_libs=True)
+        self.requires("protobuf/[>=5.27.0 <8]", transitive_headers=True, transitive_libs=True)
         self.requires("abseil/[*]", transitive_headers=True)
         if self.options.use_boost:
             # https://github.com/google/libphonenumber/blob/v8.13.35/cpp/src/phonenumbers/base/synchronization/lock_boost.h
