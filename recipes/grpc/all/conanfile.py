@@ -109,7 +109,6 @@ class GrpcConan(ConanFile):
             self.requires("re2/[>=20251105]")
         elif grpc_version >= "1.65.0":
             self.requires("protobuf/[>=5.27.0 <6]", transitive_headers=True)
-            # note: the most recent protobuf in the range is 6.33.5 and supports abseil up to <=20250814.0
             self.requires("abseil/[>=20240116.1 <=20250127.0]", transitive_headers=True, transitive_libs=True)
             self.requires("re2/20250722")
         else:
