@@ -40,7 +40,8 @@ class Re2Conan(ConanFile):
         if Version(self.version) >= "20251105":
             self.requires("abseil/[>=20240116.1 <=20260107.1]", transitive_headers=True)
         elif Version(self.version) >= "20230601":
-            self.requires("abseil/20240116.1", transitive_headers=True)
+            # 20250127.0 is the most recent abseil version that supports C++14
+            self.requires("abseil/[>=20240116.1 <=20250127.0]", transitive_headers=True)
 
     def validate(self):
         if Version(self.version) >= "20250805":
