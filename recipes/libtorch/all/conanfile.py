@@ -219,12 +219,8 @@ class LibtorchRecipe(ConanFile):
         pyenv.generate()
         # PyEnv is set up to put the virtual env first in PATH
         # but CMake's default behaviour may prioritise other locations
-        # we need: "use the first python3 you find in PATH"
+        tc.cache_variables['Python_ROOT_DIR'] = pyenv.env_dir
         tc.cache_variables['Python_EXECUTABLE'] = pyenv.env_exe
-        tc.cache_variables['Python_FIND_UNVERSIONED_NAMES'] = 'FIRST'
-        tc.cache_variables['Python_FIND_STRATEGY'] = 'LOCATION'
-        tc.cache_variables['Python_FIND_VIRTUALENV'] = 'STANDARD'
-        tc.cache_variables['Python_FIND_REGISTRY'] = 'NEVER'
 
         tc.generate()
 
