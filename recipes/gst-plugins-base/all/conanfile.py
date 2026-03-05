@@ -5,7 +5,7 @@ import shutil
 from conan import ConanFile, tools
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import Environment
-from conan.tools.files import copy, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.microsoft import VCVars
 from conan.tools.meson import Meson
 
@@ -57,7 +57,6 @@ class GStPluginsBaseConan(ConanFile):
         }
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
-    exports_sources = ["patches/*.patch"]
 
     generators = "PkgConfigDeps"
 
@@ -68,6 +67,9 @@ class GStPluginsBaseConan(ConanFile):
     @property
     def _is_msvc(self):
         return self.settings.compiler == "msvc"
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def validate(self):
         if not self.dependencies["glib"].options.shared and self.options.shared:
@@ -154,8 +156,9 @@ class GStPluginsBaseConan(ConanFile):
             self.build_requires("gobject-introspection/1.70.0")
 
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+        apply_conandata_patches(self)
 
     def _gl_config(self):
         if not self._gl_api or not self._gl_platform or not self._gl_winsys:
