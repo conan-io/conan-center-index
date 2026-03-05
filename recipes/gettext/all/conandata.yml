@@ -1,4 +1,10 @@
 sources:
+  "1.0":
+    url:
+    - "https://ftpmirror.gnu.org/gnu/gettext/gettext-1.0.tar.gz"
+    - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gettext/gettext-1.0.tar.gz"
+    - "https://ftp.gnu.org/pub/gnu/gettext/gettext-1.0.tar.gz"
+    sha256: "85d99b79c981a404874c02e0342176cf75c7698e2b51fe41031cf6526d974f1a"
   "0.26":
     url:
     - "https://ftpmirror.gnu.org/gnu/gettext/gettext-0.26.tar.gz"
