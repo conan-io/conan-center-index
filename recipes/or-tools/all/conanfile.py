@@ -30,7 +30,7 @@ class PackageConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def configure(self):
+    def config_options(self):
         if self.settings.os == "Macos":
             self.options.shared = True
 
