@@ -45,6 +45,11 @@ class IMGUIConan(ConanFile):
             self.output.warning("No test engine found for this version, removing test engine option")
             del self.options.enable_test_engine
 
+        # sdl3 bindings were introduced with 1.89.3
+        # 1.91.8 is the oldest version that supports the latest sdl headers
+        if self.version < "1.91.8":
+            del self.options.with_sdl3_binding
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
