@@ -1,3 +1,11 @@
+Backport
+https://github.com/lexxmark/winflexbison/pull/91
+to fix issue where multiple parallel instances can use the same temporary file
+
+From 2bfaf44a53b7282615cd611378f0b4e936c819b1 Mon Sep 17 00:00:00 2001
+From: jonnysoe
+Date: Mon, 6 Mar 2023 02:31:34 +0800
+Subject: [PATCH] Fix runtime error upon multiple flex processes
 diff --git a/bison/src/output.c b/bison/src/output.c
 index e2b2ac7..b5038ed 100644
 --- a/bison/src/output.c
