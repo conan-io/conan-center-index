@@ -259,10 +259,8 @@ class SDLConan(ConanFile):
         for subsystem in _subsystems:
             tc.cache_variables[f"SDL_{subsystem[0].upper()}"] = self.options.get_safe(subsystem[0])
 
-        if self._supports_opengl:
-            tc.cache_variables["SDL_OPENGL"] = True
-        if self._supports_opengles:
-            tc.cache_variables["SDL_OPENGLES"] = True
+        tc.cache_variables["SDL_OPENGL"] = bool(self._supports_opengl)
+        tc.cache_variables["SDL_OPENGLES"] = bool(self._supports_opengles)
 
         if self.options.hidapi:
             tc.cache_variables["SDL_HIDAPI_LIBUSB"] = self.options.get_safe("libusb")
