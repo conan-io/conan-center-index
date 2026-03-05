@@ -1,6 +1,8 @@
 sources:
   "2.3.0":
-    url: "https://archive.apache.org/dist/orc/orc-2.3.0/orc-2.3.0.tar.gz"
+    url:
+    - "https://dlcdn.apache.org/orc/orc-2.3.0/orc-2.3.0.tar.gz"
+    - "https://archive.apache.org/dist/orc/orc-2.3.0/orc-2.3.0.tar.gz"
     sha256: "d009dbb98652472f8c0b51471bff02509f2c94f56eb58ce19351295f4ad7d85a"
   "2.2.1":
     url: "https://archive.apache.org/dist/orc/orc-2.2.1/orc-2.2.1.tar.gz"
