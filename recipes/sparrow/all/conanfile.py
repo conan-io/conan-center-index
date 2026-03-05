@@ -37,8 +37,6 @@ class SparrowRecipe(ConanFile):
     implements = ["auto_shared_fpic"]
 
     def config_options(self):
-        self.options.use_date_polyfill = Version(self.version) < "2.0.0"
-
         if self.settings.os == "Windows":
             del self.options.fPIC
 
