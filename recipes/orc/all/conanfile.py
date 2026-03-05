@@ -61,6 +61,7 @@ class OrcRecipe(ConanFile):
         self.requires("snappy/1.1.9")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("zstd/[~1.5]")
+        self.tool_requires("cmake/[>=3.25]")
 
     def validate(self):
         check_min_cppstd(self, 17)
