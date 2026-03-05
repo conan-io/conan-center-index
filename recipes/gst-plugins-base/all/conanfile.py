@@ -125,7 +125,7 @@ class GStPluginsBaseConan(ConanFile):
             if self.options.with_graphene:
                 self.requires("graphene/1.10.8")
             if self.options.with_libpng:
-                self.requires("libpng/1.6.37")
+                self.requires("libpng/1.6.55")
             if self.options.with_libjpeg == "libjpeg":
                 self.requires("libjpeg/9d")
             elif self.options.with_libjpeg == "libjpeg-turbo":
