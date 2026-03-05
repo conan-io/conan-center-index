@@ -60,10 +60,14 @@ class LibpqxxConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "libpqxx")
         self.cpp_info.set_property("cmake_target_name", "libpqxx::pqxx")
         self.cpp_info.set_property("pkg_config_name", "libpqxx")
-        self.cpp_info.libs = ["pqxx"]
-        if self.options.shared:
-            self.cpp_info.defines = ["PQXX_SHARED"]
+        self.cpp_info.components["pqxx"].libs = ["pqxx"]
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["wsock32", "ws2_32"]
-        elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["pqxx"].system_libs = ["wsock32", "ws2_32"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["pqxx"].system_libs.append("m")
+
+        self.cpp_info.components["pqxx"].set_property("cmake_target_name", "libpqxx::pqxx")
+        self.cpp_info.components["pqxx"].set_property("pkg_config_name", "libpqxx")
+        self.cpp_info.components["pqxx"].requires = ["libpq::pq"]
+        if self.options.shared:
+            self.cpp_info.components["pqxx"].defines = ["PQXX_SHARED"]
