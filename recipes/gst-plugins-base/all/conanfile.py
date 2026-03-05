@@ -6,6 +6,7 @@ from conan import ConanFile, tools
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import Environment
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.layout import basic_layout
 from conan.tools.microsoft import VCVars
 from conan.tools.meson import Meson
 
@@ -95,6 +96,9 @@ class GStPluginsBaseConan(ConanFile):
         del self.settings.compiler.cppstd
         self.options['gstreamer'].shared = self.options.shared
         self.options['glib'].shared = self.options.shared
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -247,10 +251,9 @@ class GStPluginsBaseConan(ConanFile):
         defs["x11"] = "enabled" if self.options.get_safe("with_xorg") else "disabled"
         defs["xshm"] = "enabled" if self.options.get_safe("with_xorg") else "disabled"
         defs["xvideo"] = "enabled" if self.options.get_safe("with_xorg") else "disabled"
-        meson.configure(build_folder=self._build_subfolder,
-                        source_folder=self._source_subfolder,
-                        defs=defs)
+        meson.configure(defs=defs)
         return meson
+
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -259,7 +262,7 @@ class GStPluginsBaseConan(ConanFile):
 
         if self._is_msvc:
             env = Environment()
-            env.append(VCVars(self).vars)
+            # env.append(VCVars(self).vars)
             envvars = env.vars(self, scope="build")
             envvars.save_script("configure_meson_in_msvc")
             meson = self._configure_meson()
@@ -278,7 +281,7 @@ class GStPluginsBaseConan(ConanFile):
         copy(self, pattern="COPYING", dst="licenses", src=self._source_subfolder)
         if self._is_msvc:
             env = Environment()
-            env.append(VCVars(self).vars)
+            # env.append(VCVars(self).vars)
             envvars = env.vars(self, scope="build")
             envvars.save_script("install_meson_in_msvc")
             meson = self._configure_meson()
