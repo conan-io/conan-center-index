@@ -1,11 +1,13 @@
-from conan import ConanFile, tools
-from conan.tools.files import copy, rm, rmdir
-from conan.tools.microsoft import VCVars
-from conan.tools.meson import Meson
-from conan.errors import ConanInvalidConfiguration
 import glob
 import os
 import shutil
+
+from conan import ConanFile, tools
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import Environment
+from conan.tools.files import copy, rm, rmdir
+from conan.tools.microsoft import VCVars
+from conan.tools.meson import Meson
 
 
 class GStPluginsBaseConan(ConanFile):
@@ -86,7 +88,8 @@ class GStPluginsBaseConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
+        if not self._is_msvc:
+            del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         self.options['gstreamer'].shared = self.options.shared
         self.options['glib'].shared = self.options.shared
