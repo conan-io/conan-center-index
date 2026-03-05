@@ -33,7 +33,7 @@ add_library(${PROJECT_NAME} ${SOURCE_FILES})
 if(IMGUI_WITH_SDL3_BINDING)
     target_sources(${PROJECT_NAME} PRIVATE ${IMGUI_SRC_DIR}/backends/imgui_impl_sdl3.cpp)
     list(APPEND HEADER_FILES ${IMGUI_SRC_DIR}/backends/imgui_impl_sdl3.h)
-    find_package(SDL3 REQUIRED)
+    find_package(SDL3 REQUIRED CONFIG)
     target_link_libraries(${PROJECT_NAME} sdl::sdl)
 endif()
 
