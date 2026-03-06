@@ -20,12 +20,14 @@ class IMGUIConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "enable_test_engine": [True, False]
+        "enable_test_engine": [True, False],
+        "with_binary_to_compressed": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "enable_test_engine": False
+        "enable_test_engine": False,
+        "with_binary_to_compressed": True,
     }
 
     def export_sources(self):
@@ -61,6 +63,8 @@ class IMGUIConan(ConanFile):
             tc.preprocessor_definitions["IMGUI_TEST_ENGINE_ENABLE_COROUTINE_STDTHREAD_IMPL"] = "1"
             tc.variables["IMGUI_ENABLE_TEST_ENGINE"] = "ON"
             tc.variables["IMGUI_TEST_ENGINE_DIR"] = os.path.join(self.source_folder, "test_engine").replace("\\", "/")
+        if self.options.with_binary_to_compressed:
+            tc.variables["IMGUI_WITH_BINARY_TO_COMPRESSED"] = "ON"
         tc.generate()
 
     def _patch_sources(self):
