@@ -49,7 +49,7 @@ class GameNetworkingSocketsConan(ConanFile):
         if self.options.encryption == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         elif self.options.encryption == "libsodium":
-            self.requires("libsodium/1.0.20")
+            self.requires("libsodium/[~1.0.20]")
 
     def validate(self):
         # Determine minimum C++ standard based on Protobuf version
