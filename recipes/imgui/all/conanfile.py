@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeConfigDeps
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
 
 required_conan_version = ">=1.53.0"
@@ -76,7 +76,7 @@ class IMGUIConan(ConanFile):
             tc.variables["IMGUI_TEST_ENGINE_DIR"] = os.path.join(self.source_folder, "test_engine").replace("\\", "/")
         tc.generate()
 
-        deps = CMakeConfigDeps(self)
+        deps = CMakeDeps(self)
         deps.generate()
 
     def _patch_sources(self):
