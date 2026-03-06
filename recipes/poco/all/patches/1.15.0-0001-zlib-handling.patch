@@ -1,0 +1,24 @@
+Fix ZLIB::ZLIB handling when Poco is built with unbundled dependencies.
+This is needed to avoid the following error:
+
+CMake Error at dependencies/zlib/CMakeLists.txt:5 (set_target_properties):
+Attempt to promote imported target "ZLIB::ZLIB" to global scope (by setting
+IMPORTED_GLOBAL) which is not built in this directory.
+
+diff --git a/dependencies/zlib/CMakeLists.txt b/dependencies/zlib/CMakeLists.txt
+index 37f1430..f42c5b2 100644
+--- a/dependencies/zlib/CMakeLists.txt
++++ b/dependencies/zlib/CMakeLists.txt
+@@ -2,7 +2,6 @@
+
+ if(POCO_UNBUNDLED)
+ 	find_package(ZLIB REQUIRED)
+-	set_target_properties(ZLIB::ZLIB PROPERTIES IMPORTED_GLOBAL TRUE)
+ else()
+
+ 	# Sources
+@@ -25,4 +24,3 @@ else()
+
+ 	add_library(ZLIB::ZLIB ALIAS _BUNDLED_ZLIB)
+ endif()
+-
