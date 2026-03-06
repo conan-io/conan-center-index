@@ -6,7 +6,6 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, MSBuild, MSBuildToolchain
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.0"
@@ -61,8 +60,6 @@ class LibsodiumConan(ConanFile):
     def validate(self):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Cannot build shared libsodium libraries with static runtime")
-        if self.settings.arch == "armv8" and is_msvc(self) and (self.version < Version("1.0.21") or self.version == "cci.20220430"):
-            raise ConanInvalidConfiguration("Windows ARM64 builds are not supported by libsodium version less than 1.0.21")
 
     def build_requirements(self):
         if not is_msvc(self):
@@ -110,39 +107,23 @@ class LibsodiumConan(ConanFile):
                 "190": "vs2015",
                 "191": "vs2017",
                 "192": "vs2019",
+                "193": "vs2022",
+                "194": "vs2022",
+                "195": "vs2026",
             }
         }
-        default_folder = "vs2019"
-        if self.version >= Version("1.0.19"):
-            sln_folders["msvc"]["193"] = "vs2022"
-            sln_folders["msvc"]["194"] = "vs2022"
-            default_folder = "vs2022"
-        if self.version >= Version("1.0.21") and not self.version == "cci.20220430":
-            sln_folders["msvc"]["195"] = "vs2026"
-            default_folder = "vs2026"
-
-
-        return sln_folders.get(str(self.settings.compiler), {}).get(str(self.settings.compiler.version), default_folder)
+        fallback = "vs2026" # in case of yet-to-be-released Visual Studio version, try the latest available solution
+        return sln_folders.get(str(self.settings.compiler), {}).get(str(self.settings.compiler.version), fallback)
 
     def _build_msvc(self):
         msvc_sln_folder = os.path.join(self.source_folder, "builds", "msvc", self._msvc_sln_folder)
 
-        #==============================
-        # TODO: to remove once https://github.com/conan-io/conan/pull/12817 available in conan client
-        if self.version == "1.0.18" and self._msvc_sln_folder == "vs2019":
-            toolset = MSBuildToolchain(self).toolset
-            replace_in_file(
-                self, os.path.join(msvc_sln_folder, "libsodium", "libsodium.vcxproj"),
-                "<PlatformToolset>v142</PlatformToolset>",
-                f"<PlatformToolset>{toolset}</PlatformToolset>",
-            )
         conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
         replace_in_file(
             self, os.path.join(msvc_sln_folder, "libsodium", "libsodium.vcxproj"),
             "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
             f"<Import Project=\"{conantoolchain_props}\" /><Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
         )
-        #==============================
 
         msbuild = MSBuild(self)
         msbuild.build_type = "{}{}".format(
