@@ -31,7 +31,7 @@ class IMGUIConan(ConanFile):
     }
 
     def requirements(self):
-        if self.options.with_sdl3_binding:
+        if self.options.get_safe("with_sdl3_binding"):
             self.requires("sdl/[>3 <4]", transitive_headers=True)
 
     def export_sources(self):
