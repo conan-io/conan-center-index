@@ -34,7 +34,7 @@ if(IMGUI_WITH_SDL3_BINDING)
     target_sources(${PROJECT_NAME} PRIVATE ${IMGUI_SRC_DIR}/backends/imgui_impl_sdl3.cpp)
     list(APPEND HEADER_FILES ${IMGUI_SRC_DIR}/backends/imgui_impl_sdl3.h)
     find_package(SDL3 REQUIRED CONFIG)
-    target_link_libraries(${PROJECT_NAME} sdl::sdl)
+    target_link_libraries(${PROJECT_NAME} PUBLIC SDL3::SDL3)
 endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
