@@ -182,7 +182,7 @@ class PocoConan(ConanFile):
         for comp in self._poco_component_tree.values():
             if comp.option:
                 tc.variables[comp.option.upper()] = self.options.get_safe(comp.option, False)
-        tc.variables["POCO_UNBUNDLED"] = True
+        tc.cache_variables["POCO_UNBUNDLED"] = True
         tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
         if is_msvc(self):
             tc.variables["POCO_MT"] = is_msvc_static_runtime(self)

@@ -6,3 +6,4 @@ patches:
   "1.15.0":
     - patch_file: patches/1.15.0-0001-zlib-handling.patch
     - patch_file: patches/1.15.0-0002-mysql-include.patch
+    - patch_file: patches/1.15.0-0003-fix-cmake-unbudled.patch
