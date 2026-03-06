@@ -56,4 +56,5 @@ class GappConan(ConanFile):
     def package_info(self):
         self.cpp_info.libdirs = [os.path.join("lib", str(self.settings.build_type))]
         self.cpp_info.bindirs = [os.path.join("lib", str(self.settings.build_type))]
-        self.cpp_info.libs = ["gapp"]
+        prefix = "lib" if self.settings.os == "Windows" and not self.options.shared else ""
+        self.cpp_info.libs = [f"{prefix}gapp"]
