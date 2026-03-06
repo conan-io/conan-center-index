@@ -66,8 +66,7 @@ class IMGUIConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["IMGUI_SRC_DIR"] = self.source_folder.replace("\\", "/")
-        if self.options.with_sdl3_binding:
-            tc.variables["IMGUI_WITH_SDL3_BINDING"] = "ON"
+        tc.variables["IMGUI_WITH_SDL3_BINDING"] = self.options.get_safe("with_sdl3_binding", False)
         # test engine is not available for all versions
         if self.options.get_safe("enable_test_engine"):
             tc.preprocessor_definitions["IMGUI_ENABLE_TEST_ENGINE"] = "1"
