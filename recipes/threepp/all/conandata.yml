@@ -1,0 +1,4 @@
+sources:
+    "129.1.0":
+        url: "https://github.com/markaren/threepp.git"
+        commit: "b146c357742308422f38403fbf1b5fca901632b6"
