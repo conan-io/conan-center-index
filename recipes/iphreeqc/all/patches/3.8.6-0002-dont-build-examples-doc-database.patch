@@ -1,9 +1,9 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -405,10 +405,6 @@ include (CTest)
- 
+@@ -402,10 +402,6 @@ include (CTest)
+
  if (STANDALONE_BUILD)
- 
+
 -  add_subdirectory(database)
 -  add_subdirectory(doc)
 -  add_subdirectory(examples)
