@@ -1,8 +1,15 @@
 sources:
+  "3.8.6":
+    url: "https://github.com/usgs-coupled/iphreeqc/releases/download/v3.8.6/iphreeqc-3.8.6-17100.tar.gz",
+    sha256: "f5babcc9fb0c252e0c432786bbe9c265f02ca32791b096106f360cf1df1d9d94"
   "3.8.1":
     url: "https://github.com/usgs-coupled/iphreeqc/releases/download/v3.8.1/iphreeqc-3.8.1-16963.tar.gz"
     sha256: "15c47959a25e6c8b5d0c47214ea0c3f3626257dacc24a89d0f9c9635186c375c"
 patches:
+  "3.8.6":
+    - patch_file: "patches/3.8.6-0002-dont-build-examples-doc-database.patch"
+      patch_description: "Don't build examples, doc and database"
+      patch_type: "conan"
   "3.8.1":
     - patch_file: "patches/3.8.1-0001-dont-build-examples-doc-database.patch"
       patch_description: "Don't build examples, doc and database"
