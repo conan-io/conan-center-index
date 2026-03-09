@@ -1,3 +1,5 @@
+import os
+
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, replace_in_file
@@ -43,7 +45,7 @@ class ThreeppRecipe(ConanFile):
         tc.generate()
 
     def requirements(self):
-        if self.settings.os != "Emscripten"
+        if self.settings.os != "Emscripten":
             self.requires("glfw/3.4")
 
     def validate(self):
