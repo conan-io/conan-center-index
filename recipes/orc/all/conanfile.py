@@ -74,7 +74,7 @@ class OrcRecipe(ConanFile):
         self._patch_sources()
 
     def generate(self):
-        tc = CMakeToolchain(self)
+        tc = CMakeToolchain(self, generator="Ninja")
         tc.cache_variables["ORC_PACKAGE_KIND"] = "conan"
         tc.cache_variables["BUILD_JAVA"] = False
         tc.cache_variables["BUILD_CPP_TESTS"] = False
