@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -47,7 +48,7 @@ class IMGUIConan(ConanFile):
 
         # sdl3 bindings were introduced with 1.89.3
         # 1.91.8 is the oldest version that supports the latest sdl headers
-        if self.version < "1.91.8":
+        if Version(self.version) < "1.91.8":
             del self.options.with_sdl3_binding
 
     def configure(self):
