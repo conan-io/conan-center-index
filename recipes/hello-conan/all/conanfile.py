@@ -3,7 +3,7 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import save
 
 from pathlib import Path
-#testing infra - do not merge
+#testing infra - do not merge - #2
 required_conan_version = ">=2.12"
 
 class hello_conanRecipe(ConanFile):
