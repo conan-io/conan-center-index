@@ -1,4 +1,4 @@
 sources:
-    "129.1.0":
-        url: "https://github.com/markaren/threepp.git"
-        commit: "b146c357742308422f38403fbf1b5fca901632b6"
+    "0.0.0.cci.20260226":
+        url: "https://github.com/markaren/threepp/archive/b146c357742308422f38403fbf1b5fca901632b6.tar.gz"
+        sha256: "5c9d3f38540f3d5b5265c2bf040d1bd9f4675d3933da5ba0dd6f8118943eea88"
