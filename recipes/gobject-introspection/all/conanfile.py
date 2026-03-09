@@ -100,13 +100,6 @@ class GobjectIntrospectionConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        deps = PkgConfigDeps(self)
-        deps.generate()
-        # INFO: g-ir-scanner uses PKG_CONFIG_PATH directly instead of pkg-config Meson module
-        env = Environment()
-        env.define_path("PKG_CONFIG_PATH", self.generators_folder)
-        envvars = env.vars(self)
-        envvars.save_script("pkg_config_env")
 
         pyenv = PyEnv(self)
         if(self.version < Version("1.81.2")):
@@ -115,6 +108,7 @@ class GobjectIntrospectionConan(ConanFile):
         else:
             pyenv.install(["setuptools~=82.0.0"])
         pyenv.generate()
+
         tc = MesonToolchain(self)
         if cross_building(self):
             tc.project_options["gi_cross_use_prebuilt_gi"] = "false"
@@ -122,6 +116,14 @@ class GobjectIntrospectionConan(ConanFile):
         tc.project_options["datadir"] = "res"
         tc.project_options["python"] = pyenv.env_exe
         tc.generate()
+
+        deps = PkgConfigDeps(self)
+        deps.generate()
+        # INFO: g-ir-scanner uses PKG_CONFIG_PATH directly instead of pkg-config Meson module
+        env = Environment()
+        env.define_path("PKG_CONFIG_PATH", self.generators_folder)
+        envvars = env.vars(self)
+        envvars.save_script("pkg_config_env")
 
     def _patch_sources(self):
         # Disable tests
