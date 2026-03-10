@@ -38,7 +38,6 @@ class OsgearthConan(ConanFile):
         self.requires("openscenegraph/3.6.5")
         self.requires("libcurl/[>=7.78.0 <9]")
         self.requires("lerc/[>=4.0.1 <5]")
-        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("protobuf/[>=5.27.0 <7]")
         self.requires("geos/[>=3.12.0 <4]")
         self.requires("sqlite3/[>=3.42 <4]")
@@ -70,6 +69,7 @@ class OsgearthConan(ConanFile):
         tc.cache_variables["OSGEARTH_BUILD_TRITON_NODEKIT"] = False
         tc.cache_variables["OSGEARTH_BUILD_SILVERLINING_NODEKIT"] = False
         tc.cache_variables["OSGEARTH_BUILD_ZIP_PLUGIN"] = False
+        tc.cache_variables["OSGEARTH_INSTALL_SHADERS"] = False
         tc.generate()
         
         deps = CMakeDeps(self)
@@ -86,77 +86,22 @@ class OsgearthConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        if self.settings.build_type == "Debug":
-            postfix = "d"
-        elif self.settings.build_type == "RelWithDebInfo":
-            postfix = "rd"
-        elif self.settings.build_type == "MinSizeRel":
-            postfix = "s"
-        else:
-            postfix = ""
-
-        def setup_lib(library, required_components):
-            lib = self.cpp_info.components[library]
-            lib.libs = [library + postfix]
-
-            for source_lib, components in required_components.items():
-                lib.requires += [source_lib + "::" + comp for comp in components]
-
-            return lib
-
-        # osgEarth the main lib
-        required_libs = {"openscenegraph": ["osg", "osgUtil", "osgSim", "osgViewer", "osgText", "osgGA", "osgShadow",
-                                            "OpenThreads", "osgManipulator"],
-                         "libcurl": ["libcurl"],
-                         "gdal": ["gdal"],
-                         "opengl": ["opengl"],
-                         }
-
-        osgearth = setup_lib("osgEarth", required_libs)
-
+        libsuffix = {"Debug": "d", "RelWithDebInfo": "rd", "MinSizeRel": "s"}.get(str(self.settings.build_type), "")
+        self.cpp_info.components["osgEarth"].libs = ["osgEarth" + libsuffix]
+        self.cpp_info.components["osgEarth"].set_property("cmake_target_name", "osgEarth::osgEarth")
+        self.cpp_info.components["osgEarth"].requires = ["openscenegraph::osg", "openscenegraph::osgUtil", "openscenegraph::osgSim",
+                                                         "openscenegraph::osgViewer", "openscenegraph::osgText", "openscenegraph::osgGA",
+                                                         "openscenegraph::osgShadow", "openscenegraph::OpenThreads", "openscenegraph::osgManipulator",
+                                                         "libcurl::libcurl", "gdal::gdal", "opengl::opengl", "geos::geos", "sqlite3::sqlite3",
+                                                         "protobuf::protobuf", "libwebp::libwebp", "spdlog::spdlog"]
         if not self.options.shared and is_msvc(self):
-            osgearth.defines += ["OSGEARTH_LIBRARY_STATIC"]
-            osgearth.requires += ["geos::geos", "sqlite3::sqlite3", "protobuf::protobuf", "libwebp::libwebp"]
+            self.cpp_info.components["osgEarth"].defines.append("OSGEARTH_LIBRARY_STATIC")
 
-        # plugins
-        def setup_plugin(plugin):
-            libname = "osgdb_" + plugin
-            plugin_library = self.cpp_info.components[libname]
-            plugin_library.libs = [] if self.options.shared else [libname + postfix]
-            plugin_library.requires = ["osgEarth"]
-            if not self.options.shared:
-                plugin_library.libdirs = [os.path.join("lib", "osgPlugins-{}"
-                                                       .format(self.dependencies["openscenegraph"].ref.version))]
-            return plugin_library
+        # Enabled by default via CMake OSGEARTH_BUILD_IMGUI_NODEKIT
+        self.cpp_info.components["osgEarthImGui"].libs = ["osgdb_osgEarthImGui" + libsuffix]
+        self.cpp_info.components["osgEarthImGui"].set_property("cmake_target_name", "osgEarth::osgEarthImGui")
+        self.cpp_info.components["osgEarthImGui"].requires = ["osgEarth", "opengl::opengl"]
 
-        setup_plugin("osgearth_bumpmap")
-        setup_plugin("osgearth_cache_filesystem")
-        setup_plugin("osgearth_bumpmap")
-        setup_plugin("osgearth_cache_filesystem")
-        setup_plugin("osgearth_colorramp")
-        setup_plugin("osgearth_detail")
-        setup_plugin("earth")
-        setup_plugin("osgearth_engine_rex")
-        setup_plugin("osgearth_featurefilter_intersect")
-        setup_plugin("osgearth_featurefilter_join")
-        setup_plugin("kml")
-        setup_plugin("osgearth_mapinspector")
-        setup_plugin("osgearth_monitor")
-        setup_plugin("osgearth_scriptengine_javascript")
-        setup_plugin("osgearth_sky_gl")
-        setup_plugin("osgearth_sky_simple")
-        setup_plugin("template")
-        setup_plugin("osgearth_terrainshader")
-        setup_plugin("webp").requires.append("libwebp::libwebp")
-        setup_plugin("lerc").requires.append("lerc::lerc")
-        setup_plugin("osgearth_vdatum_egm2008")
-        setup_plugin("osgearth_vdatum_egm84")
-        setup_plugin("osgearth_vdatum_egm96")
-        setup_plugin("osgearth_viewpoints")
-        setup_plugin("fastdxt")
-
-        if self.settings.os == "Windows":
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin/osgPlugins-{}"
-                                                   .format(self.dependencies["openscenegraph"].ref.version)))
-        elif self.settings.os == "Linux":
-            self.env_info.LD_LIBRARY_PATH.append(os.path.join(self.package_folder, "lib"))
+        # Plugins
+        self.cpp_info.components["osgdb_lerc"].libs = ["osgdb_lerc" + libsuffix]
+        self.cpp_info.components["osgdb_lerc"].requires = ["osgEarth", "lerc::lerc"]
