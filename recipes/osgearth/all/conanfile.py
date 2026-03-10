@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.build import check_min_cppstd
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=2.1"
@@ -37,10 +38,7 @@ class OsgearthConan(ConanFile):
         self.requires("openscenegraph/3.6.5")
         self.requires("libcurl/[>=7.78.0 <9]")
         self.requires("lerc/[>=4.0.1 <5]")
-        # self.requires("rapidjson/cci.20250205")
         self.requires("zlib/[>=1.2.11 <2]")
-        # self.requires("libtiff/[>=4.6.0 <5]")
-        # self.requires("libpng/[>=1.6 <2]")
         self.requires("protobuf/[>=5.27.0 <7]")
         self.requires("geos/[>=3.12.0 <4]")
         self.requires("sqlite3/[>=3.42 <4]")
@@ -57,12 +55,9 @@ class OsgearthConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
         # INFO: Let Conan manage C++ standard
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 17)", "")
-        # INFO: Manage lerc dependency
-        #lerc_cmake = os.path.join(self.source_folder, "src", "osgEarthDrivers", "lerc", "CMakeLists.txt")
-        #replace_in_file(self, lerc_cmake, "include_directories", "find_package(lerc REQUIRED)\nadd_osgearth_plugin(TARGET osgdb_lerc SOURCES ReaderWriterLERC.cpp LIBRARIES PRIVATE lerc::lerc)\nreturn()\ninclude_directories")
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -71,7 +66,6 @@ class OsgearthConan(ConanFile):
         tc.cache_variables["OSGEARTH_BUILD_EXAMPLES"] = False
         tc.cache_variables["OSGEARTH_BUILD_TESTS"] = False
         tc.cache_variables["OSGEARTH_BUILD_DOCS"] = False
-
         tc.cache_variables["OSGEARTH_BUILD_PROCEDURAL_NODEKIT"] = False
         tc.cache_variables["OSGEARTH_BUILD_TRITON_NODEKIT"] = False
         tc.cache_variables["OSGEARTH_BUILD_SILVERLINING_NODEKIT"] = False
@@ -80,7 +74,6 @@ class OsgearthConan(ConanFile):
         
         deps = CMakeDeps(self)
         deps.generate()
-
 
     def build(self):
         cmake = CMake(self)
@@ -121,22 +114,9 @@ class OsgearthConan(ConanFile):
 
         osgearth = setup_lib("osgEarth", required_libs)
 
-        if not self.options.shared and self.settings.compiler == "Visual Studio":
+        if not self.options.shared and is_msvc(self):
             osgearth.defines += ["OSGEARTH_LIBRARY_STATIC"]
-        if self.options.build_zip_plugin:
-            osgearth.requires += ["zstd::zstd"]
-        if self.options.with_geos:
-            osgearth.requires += ["geos::geos"]
-        if self.options.with_sqlite3:
-            osgearth.requires += ["sqlite3::sqlite3"]
-        if self.options.with_protobuf:
-            osgearth.requires += ["protobuf::protobuf"]
-        if self.options.with_webp:
-            osgearth.requires += ["libwebp::libwebp"]
-
-        # osgEarthProcedural
-        if self.options.build_procedural_nodekit:
-            setup_lib("osgEarthProcedural", {}).requires.append("osgEarth")
+            osgearth.requires += ["geos::geos", "sqlite3::sqlite3", "protobuf::protobuf", "libwebp::libwebp"]
 
         # plugins
         def setup_plugin(plugin):
@@ -146,18 +126,11 @@ class OsgearthConan(ConanFile):
             plugin_library.requires = ["osgEarth"]
             if not self.options.shared:
                 plugin_library.libdirs = [os.path.join("lib", "osgPlugins-{}"
-                                                       .format(self.deps_cpp_info["openscenegraph"].version))]
+                                                       .format(self.dependencies["openscenegraph"].ref.version))]
             return plugin_library
 
         setup_plugin("osgearth_bumpmap")
         setup_plugin("osgearth_cache_filesystem")
-
-        if self.options.build_leveldb_cache:
-            setup_plugin("osgearth_cache_leveldb").requires.append("leveldb::leveldb")
-
-        if self.options.build_rocksdb_cache:
-            setup_plugin("osgearth_cache_rocksdb").requires.append("rocksdb::rocksdb")
-
         setup_plugin("osgearth_bumpmap")
         setup_plugin("osgearth_cache_filesystem")
         setup_plugin("osgearth_colorramp")
@@ -166,7 +139,6 @@ class OsgearthConan(ConanFile):
         setup_plugin("osgearth_engine_rex")
         setup_plugin("osgearth_featurefilter_intersect")
         setup_plugin("osgearth_featurefilter_join")
-        setup_plugin("gltf").requires.append("rapidjson::rapidjson")
         setup_plugin("kml")
         setup_plugin("osgearth_mapinspector")
         setup_plugin("osgearth_monitor")
@@ -175,10 +147,7 @@ class OsgearthConan(ConanFile):
         setup_plugin("osgearth_sky_simple")
         setup_plugin("template")
         setup_plugin("osgearth_terrainshader")
-
-        if self.options.with_webp:
-            setup_plugin("webp").requires.append("libwebp::libwebp")
-
+        setup_plugin("webp").requires.append("libwebp::libwebp")
         setup_plugin("lerc").requires.append("lerc::lerc")
         setup_plugin("osgearth_vdatum_egm2008")
         setup_plugin("osgearth_vdatum_egm84")
@@ -187,8 +156,7 @@ class OsgearthConan(ConanFile):
         setup_plugin("fastdxt")
 
         if self.settings.os == "Windows":
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin/osgPlugins-{}"
-                                                   .format(self.deps_cpp_info["openscenegraph"].version)))
+                                                   .format(self.dependencies["openscenegraph"].ref.version)))
         elif self.settings.os == "Linux":
             self.env_info.LD_LIBRARY_PATH.append(os.path.join(self.package_folder, "lib"))

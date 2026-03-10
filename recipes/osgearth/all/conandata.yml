@@ -5,3 +5,4 @@ sources:
 patches:
   "3.8":
     - patch_file: "patches/0001-unbundle-lerc.patch"
+    - patch_file: "patches/0002-linux-static.patch"
