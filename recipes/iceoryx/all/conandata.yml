@@ -1,4 +1,7 @@
 sources:
+  "2.95.8":
+    url: "https://github.com/eclipse-iceoryx/iceoryx.git"
+    commit: "ffd361023196d1422f1ff96723d1c83d9d4838ae"
   "2.0.6":
     url: "https://github.com/eclipse-iceoryx/iceoryx/archive/v2.0.6.tar.gz"
     sha256: "a2add8ffee0c3357ef985cc46c7de79ccb754ea2bed02c61f2ff805ab2c869f1"

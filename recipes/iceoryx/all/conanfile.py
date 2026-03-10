@@ -7,7 +7,7 @@ from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rmdir, save, rm
 from conan.tools.microsoft import is_msvc, check_min_vs
-from conan.tools.scm import Version
+from conan.tools.scm import Version, Git
 
 required_conan_version = ">=1.52.0"
 
@@ -93,7 +93,14 @@ class IceoryxConan(ConanFile):
             self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        if (self.version >= "2.95.0"):
+            git = Git(self, ".")
+            # git.fetch_commit(**self.conan_data["sources"][self.version])
+            # Cloning in current dir, not a children folder
+            git.clone(url=self.conan_data["sources"][self.version]["url"], target=".")
+            # git.checkout(commit=self.conan_data["sources"][self.version]["commit"], target=".")
+        else:
+            get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -113,12 +120,13 @@ class IceoryxConan(ConanFile):
             hoofs_dir = os.path.join(self.source_folder, "iceoryx_utils")
 
         # Use acl::acl target, since plain acl fails to link
-        replace_in_file(self, os.path.join(hoofs_dir, "CMakeLists.txt"), " acl", " acl::acl")
+        replace_in_file(self, os.path.join(hoofs_dir, "CMakeLists.txt"), " acl", " acl::acl", strict=False)
 
         # Honor fPIC option
         if Version(self.version) >= "2.90":
-            replace_in_file(self, os.path.join(self.source_folder, "iceoryx_hoofs", "cmake", "IceoryxPackageHelper.cmake"),
-                            "set_target_properties( ${IOX_TARGET} PROPERTIES POSITION_INDEPENDENT_CODE ON )", "")
+            if (os.path.exists(os.path.join(self.source_folder, "iceoryx_hoofs", "cmake", "IceoryxPackageHelper.cmake"))):
+                replace_in_file(self, os.path.join(self.source_folder, "iceoryx_hoofs", "cmake", "IceoryxPackageHelper.cmake"),
+                            "set_target_properties( ${IOX_TARGET} PROPERTIES POSITION_INDEPENDENT_CODE ON )", "", strict=False)
         else:
             cmakelists_list = [
                 os.path.join(self.source_folder, "iceoryx_dds", "CMakeLists.txt"),
@@ -132,7 +140,7 @@ class IceoryxConan(ConanFile):
                     os.path.join(hoofs_dir, "platform", "CMakeLists.txt"),
                 ]
             for cmakelists in cmakelists_list:
-                replace_in_file(self, cmakelists, "POSITION_INDEPENDENT_CODE ON", "")
+                replace_in_file(self, cmakelists, "POSITION_INDEPENDENT_CODE ON", "", strict=False)
 
     def build(self):
         self._patch_sources()
