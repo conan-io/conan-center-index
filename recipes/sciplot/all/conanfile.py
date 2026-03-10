@@ -10,7 +10,7 @@ required_conan_version = ">=2.0.9"
 class SciplotConan(ConanFile):
     name = "sciplot"
     description = "A modern C++ scientific plotting library powered by gnuplot."
-    version = "v0.3.1"
+    version = "0.3.1"
     license = "MIT"
     url = "https://github.com/sciplot/sciplot"
     homepage = "https://sciplot.github.io/"
@@ -28,16 +28,16 @@ class SciplotConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
-       
+
     def source(self):
-        get(self, url=f"https://github.com/sciplot/sciplot/archive/refs/tags/{self.version}.tar.gz", strip_root=True)
+        get(self, url=f"https://github.com/sciplot/sciplot/archive/refs/tags/v{self.version}.tar.gz", strip_root=True)
         # get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
         # apply_conandata_patches(self)
 
     def package(self):
         copy(self, "*.hpp", src=os.path.join(self.source_folder, "sciplot"), dst=os.path.join(self.package_folder, "include", "sciplot"))
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-      
+
 
     def package_info(self):
         self.cpp_info.bindirs = []
