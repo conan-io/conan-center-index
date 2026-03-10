@@ -2,3 +2,6 @@ sources:
   "3.8":
     url: "https://github.com/pelicanmapping/osgearth/archive/refs/tags/osgearth-3.8.tar.gz"
     sha256: "206c3a64dc6a907679e6f250262ff3403478c9f0f9db2896dc2d33219c0458ca"
+patches:
+  "3.8":
+    - patch_file: "patches/0001-unbundle-lerc.patch"

@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import get, copy, rmdir, replace_in_file
+from conan.tools.files import get, copy, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.build import check_min_cppstd
 import os
 
@@ -24,6 +24,9 @@ class OsgearthConan(ConanFile):
         "fPIC": True,
     }
     implements = ["auto_shared_fpic"]
+    
+    def export_sources(self):
+        export_conandata_patches(self)
     
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -57,8 +60,9 @@ class OsgearthConan(ConanFile):
         # INFO: Let Conan manage C++ standard
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 17)", "")
         # INFO: Manage lerc dependency
-        lerc_cmake = os.path.join(self.source_folder, "src", "osgEarthDrivers", "lerc", "CMakeLists.txt")
-        replace_in_file(self, lerc_cmake, "include_directories", "find_package(lerc REQUIRED)\nadd_osgearth_plugin(TARGET osgdb_lerc SOURCES ReaderWriterLERC.cpp LIBRARIES PRIVATE lerc::lerc)\nreturn()\ninclude_directories")
+        #lerc_cmake = os.path.join(self.source_folder, "src", "osgEarthDrivers", "lerc", "CMakeLists.txt")
+        #replace_in_file(self, lerc_cmake, "include_directories", "find_package(lerc REQUIRED)\nadd_osgearth_plugin(TARGET osgdb_lerc SOURCES ReaderWriterLERC.cpp LIBRARIES PRIVATE lerc::lerc)\nreturn()\ninclude_directories")
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -71,21 +75,7 @@ class OsgearthConan(ConanFile):
         tc.cache_variables["OSGEARTH_BUILD_PROCEDURAL_NODEKIT"] = False
         tc.cache_variables["OSGEARTH_BUILD_TRITON_NODEKIT"] = False
         tc.cache_variables["OSGEARTH_BUILD_SILVERLINING_NODEKIT"] = False
-        # tc.cache_variables["OSGEARTH_BUILD_LEVELDB_CACHE"] = self.options.build_leveldb_cache
-        # tc.cache_variables["OSGEARTH_BUILD_ROCKSDB_CACHE"] = self.options.build_rocksdb_cache
         tc.cache_variables["OSGEARTH_BUILD_ZIP_PLUGIN"] = False
-        # tc.cache_variables["OSGEARTH_ENABLE_GEOCODER"] = self.options.enable_geocoder
-
-        # tc.cache_variables["CURL_IS_STATIC"] = not self.dependencies["libcurl"].options.shared
-        # tc.cache_variables["CURL_INCLUDE_DIR"] = self.dependencies["libcurl"].cpp_info.includedirs[0]
-        # tc.cache_variables["OSGEARTH_INSTALL_SHADERS"] = self.options.install_shaders
-        # tc.cache_variables["OSGEARTH_ENABLE_NVTT_CPU_MIPMAPS"] = self.options.enable_nvtt_cpu_mipmaps
-        # tc.cache_variables["OSGEARTH_ENABLE_WININET_FOR_HTTP"] = self.options.enable_wininet_for_http
-
-        # our own defines for using in our top-level CMakeLists.txt
-        # tc.cache_variables["OSGEARTH_WITH_GEOS"] = self.options.with_geos
-        # tc.cache_variables["OSGEARTH_WITH_SQLITE3"] = self.options.with_sqlite3
-        # tc.cache_variables["OSGEARTH_WITH_WEBP"] = self.options.with_webp
         tc.generate()
         
         deps = CMakeDeps(self)
