@@ -26,10 +26,18 @@ class TaskflowConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17"
+        return "20" if Version(self.version) >= "4.0.0" else "17"
 
     @property
     def _compilers_minimum_version(self):
+        if Version(self.version) >= "4.0.0":
+            return {
+                "Visual Studio": "16",
+                "msvc": "192",
+                "gcc": "11",
+                "clang": "12",
+                "apple-clang": "13",
+            }
         return {
             "Visual Studio": "16",
             "msvc": "192",
