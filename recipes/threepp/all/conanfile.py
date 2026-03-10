@@ -44,6 +44,9 @@ class ThreeppRecipe(ConanFile):
         deps.generate()
         tc.generate()
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.19]")
+
     def requirements(self):
         self.requires("glfw/3.4")
 
