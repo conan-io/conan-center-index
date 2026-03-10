@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.env import Environment
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
@@ -157,7 +158,7 @@ class LibfabricConan(ConanFile):
         tc.configure_args.append("--with-synapseai=no")
         tc.configure_args.append("--with-uring=no")  # TODO
         tc.configure_args.append("--with-ze=no")
-        tc.configure_args.append("-enable-psm=no")
+        tc.configure_args.append("--enable-psm=no")
         tc.configure_args.append("--enable-psm2=no")
         tc.configure_args.append("--enable-psm3=no")
         tc.configure_args.append("--enable-xpmem=no")
@@ -173,9 +174,12 @@ class LibfabricConan(ConanFile):
         VirtualRunEnv(self).generate(scope="build")
 
     def build(self):
+        env = Environment()
+        env.define("lt_cv_deplibs_check_method", "pass_all")
         autotools = Autotools(self)
-        autotools.configure()
-        autotools.make()
+        with env.vars(self).apply():
+            autotools.configure()
+            autotools.make()
 
     def package(self):
         copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
