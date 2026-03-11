@@ -81,11 +81,11 @@ class ProtobufConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
 
         if self._protobuf_release >= "30.1":
-            self.requires("abseil/[>=20230802.1 <=20260107.1]", transitive_headers=True)
+            self.requires("abseil/[>=20230802.1 <=20260107.1]", transitive_headers=True, transitive_libs=True)
         else:
             # 5.29.x cannot use newer abseil than this, because newer abseil requires c++17 as minmum
             # and it no longer has the `absl::if_constexpr` CMake target
-            self.requires("abseil/[>=20230802.1 <=20250127.0]", transitive_headers=True)
+            self.requires("abseil/[>=20230802.1 <=20250127.0]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):
