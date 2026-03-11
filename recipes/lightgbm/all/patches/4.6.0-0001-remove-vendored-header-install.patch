@@ -1,7 +1,8 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 168026f..3cf44d4 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -791,12 +791,6 @@ if(INSTALL_HEADERS)
-     install(
+@@ -793,13 +793,4 @@ if(INSTALL_HEADERS)
        DIRECTORY ${LightGBM_HEADER_DIR}/LightGBM
        DESTINATION ${CMAKE_INSTALL_PREFIX}/include
      )
