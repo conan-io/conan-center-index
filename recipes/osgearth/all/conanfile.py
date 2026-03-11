@@ -30,7 +30,6 @@ class OsgearthConan(ConanFile):
     
     def export_sources(self):
         export_conandata_patches(self)
-        copy(self, "conan_project_include.cmake", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"))
     
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -44,7 +43,6 @@ class OsgearthConan(ConanFile):
         self.requires("protobuf/[>=5.27.0 <7]")
         self.requires("geos/[>=3.12.0 <4]")
         self.requires("sqlite3/[>=3.42 <4]")
-        self.requires("draco/1.5.7")
         self.requires("libwebp/[>=1.4.0 <2]")
         self.requires("spdlog/[>=1.11 <2]")
         
@@ -64,7 +62,6 @@ class OsgearthConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["CMAKE_PROJECT_OSGEARTH_INCLUDE"] = os.path.join(self.source_folder, "conan_project_include.cmake")
         tc.cache_variables["OSGEARTH_BUILD_SHARED_LIBS"] = self.options.shared
         tc.cache_variables["OSGEARTH_BUILD_TOOLS"] = False
         tc.cache_variables["OSGEARTH_BUILD_EXAMPLES"] = False
@@ -195,7 +192,7 @@ class OsgearthConan(ConanFile):
 
         self.cpp_info.components["osgdb_gltf"].libs = ["osgdb_gltf" + libsuffix]
         self.cpp_info.components["osgdb_gltf"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_gltf"].requires = ["osgEarth", "draco::draco"]
+        self.cpp_info.components["osgdb_gltf"].requires = ["osgEarth"]
 
         self.cpp_info.components["osgdb_fastdxt"].libs = ["osgdb_fastdxt" + libsuffix]
         self.cpp_info.components["osgdb_fastdxt"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
