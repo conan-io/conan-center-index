@@ -1,11 +1,11 @@
 from conan import ConanFile
-from conan.tools.build import valid_min_cppstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, get, export_conandata_patches, load, rmdir, save
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class AngelScriptConan(ConanFile):
@@ -45,26 +45,19 @@ class AngelScriptConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def validate(self):
+        check_min_cppstd(self, 11)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        # Website blocks default user agent string.
-        get(
-            self,
-            **self.conan_data["sources"][self.version],
-            destination=self.source_folder,
-            headers={"User-Agent": "ConanCenter"},
-            strip_root=True,
-        )
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["AS_NO_EXCEPTIONS"] = self.options.no_exceptions
-        if not valid_min_cppstd(self, 11):
-            tc.variables["CMAKE_CXX_STANDARD"] = 11
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.cache_variables["AS_NO_EXCEPTIONS"] = self.options.no_exceptions
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.generate()
 
     def build(self):
@@ -87,14 +80,9 @@ class AngelScriptConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Angelscript")
         self.cpp_info.set_property("cmake_target_name", "Angelscript::angelscript")
         postfix = "d" if is_msvc(self) and self.settings.build_type == "Debug" else ""
-        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
+
+        # todo: revisit need for the component
         self.cpp_info.components["_angelscript"].libs = [f"angelscript{postfix}"]
         if self.settings.os in ("Linux", "FreeBSD", "SunOS"):
             self.cpp_info.components["_angelscript"].system_libs.extend(["m", "pthread"])
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Angelscript"
-        self.cpp_info.names["cmake_find_package_multi"] = "Angelscript"
-        self.cpp_info.components["_angelscript"].names["cmake_find_package"] = "angelscript"
-        self.cpp_info.components["_angelscript"].names["cmake_find_package_multi"] = "angelscript"
         self.cpp_info.components["_angelscript"].set_property("cmake_target_name", "Angelscript::angelscript")

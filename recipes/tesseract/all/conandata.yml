@@ -1,4 +1,7 @@
 sources:
+  "5.5.1":
+    url: "https://github.com/tesseract-ocr/tesseract/archive/5.5.1.tar.gz"
+    sha256: "a7a3f2a7420cb6a6a94d80c24163e183cf1d2f1bed2df3bbc397c81808a57237"
   "5.5.0":
     url: "https://github.com/tesseract-ocr/tesseract/archive/5.5.0.tar.gz"
     sha256: "f2fb34ca035b6d087a42875a35a7a5c4155fa9979c6132365b1e5a28ebc3fc11"
@@ -18,6 +21,13 @@ sources:
     url: "https://github.com/tesseract-ocr/tesseract/archive/5.0.0.tar.gz"
     sha256: "72467b7876dc0c39ef7fbcb0f793f73aee1c78d9fabab3ab19cbac1eb42e9fed"
 patches:
+  "5.5.1":
+    - patch_file: "patches/0004-control-optimizations-5.4.0.patch"
+      patch_description: "fix condition for cpu optimizations"
+      patch_type: "portability"
+    - patch_file: "patches/0005-disable-install-pdb-5.5.1.patch"
+      patch_description: "disable installing PDB files"
+      patch_type: "portability"
   "5.5.0":
     - patch_file: "patches/0004-control-optimizations-5.4.0.patch"
       patch_description: "fix condition for cpu optimizations"

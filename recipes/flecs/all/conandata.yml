@@ -1,4 +1,7 @@
 sources:
+  "4.1.1":
+    url: "https://github.com/SanderMertens/flecs/archive/refs/tags/v4.1.1.tar.gz"
+    sha256: "4b3f2c073dcdbd2a62ce3e9fc5409504ab65acedacd9e3e650fd9a64ceac5881"
   "4.0.4":
     url: "https://github.com/SanderMertens/flecs/archive/refs/tags/v4.0.4.tar.gz"
     sha256: "a3b6238a913f65d90db18759ab5442393901da914e4a9bfe30aa8823687dce86"

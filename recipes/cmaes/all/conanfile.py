@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.files import (
     export_conandata_patches,
@@ -9,7 +8,6 @@ from conan.tools.files import (
     apply_conandata_patches,
 )
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.0"
@@ -38,10 +36,6 @@ class CmaesConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def validate_build(self):
-        if self.settings.compiler == "msvc":
-            raise ConanInvalidConfiguration("cmaes does not support MSVC")
-
     def validate(self):
         check_min_cppstd(self, 11)
 
@@ -63,9 +57,7 @@ class CmaesConan(ConanFile):
         tc.cache_variables["LIBCMAES_USE_OPENMP"] = False
         tc.cache_variables["LIBCMAES_BUILD_PYTHON"] = False
         tc.cache_variables["LIBCMAES_BUILD_TESTS"] = False
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
-        if Version(self.version) > "0.10.0":  # pylint: disable=conan-unreachable-upper-version
-            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
+
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

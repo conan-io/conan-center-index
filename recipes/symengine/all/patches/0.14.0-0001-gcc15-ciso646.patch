@@ -1,0 +1,31 @@
+Backported from https://github.com/symengine/symengine/pull/2102
+diff --git a/symengine/prime_sieve.cpp b/symengine/prime_sieve.cpp
+index 22058a25d..c5f564f64 100644
+--- a/symengine/prime_sieve.cpp
++++ b/symengine/prime_sieve.cpp
+@@ -1,5 +1,9 @@
+ #include <symengine/prime_sieve.h>
++#if __cplusplus <= 201703L
+ #include <ciso646>
++#else
++#include <version>
++#endif
+ #include <cmath>
+ #include <valarray>
+ #include <algorithm>
+diff --git a/symengine/symengine_rcp.h b/symengine/symengine_rcp.h
+index c49720ab2..0b1c2dbac 100644
+--- a/symengine/symengine_rcp.h
++++ b/symengine/symengine_rcp.h
+@@ -5,7 +5,11 @@
+ #include <cstddef>
+ #include <stdexcept>
+ #include <string>
++#if __cplusplus <= 201703L
+ #include <ciso646>
++#else
++#include <version>
++#endif
+ 
+ #include <symengine/symengine_config.h>
+ #include <symengine/symengine_assert.h>

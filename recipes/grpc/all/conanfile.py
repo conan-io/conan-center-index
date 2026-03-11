@@ -54,7 +54,7 @@ class GrpcConan(ConanFile):
         "ruby_plugin": True,
         "otel_plugin": False,
         "secure": False,
-        "with_libsystemd": True
+        "with_libsystemd": False
     }
 
     _target_info = None
@@ -69,7 +69,7 @@ class GrpcConan(ConanFile):
 
     @property
     def _supports_libsystemd(self):
-        return self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52"
+        return self.settings.os in ["Linux", "FreeBSD"]
 
     def export(self):
         copy(self, f"target_info/grpc_{self.version}.yml", src=self.recipe_folder, dst=self.export_folder)
@@ -102,18 +102,21 @@ class GrpcConan(ConanFile):
         # abseil requires:
         # transitive_headers=True because grpc headers include abseil headers
         # transitive_libs=True because generated code (grpc_cpp_plugin) require symbols from abseil
-        if Version(self.version) > "1.65.0":
-            self.requires("protobuf/5.27.0", transitive_headers=True)
+        grpc_version = Version(self.version)
+        if grpc_version > "1.69.0":
+            self.requires("protobuf/[>=5.27.0 <7]", transitive_headers=True)
+            self.requires("abseil/[*]", transitive_headers=True, transitive_libs=True)
+            self.requires("re2/[>=20251105]")
+        elif grpc_version >= "1.65.0":
+            self.requires("protobuf/[>=5.27.0 <6]", transitive_headers=True)
             self.requires("abseil/[>=20240116.1 <=20250127.0]", transitive_headers=True, transitive_libs=True)
-        elif Version(self.version) >= "1.62.0" and Version(self.version) <= "1.65.0":
-            self.requires("protobuf/5.27.0", transitive_headers=True)
-            self.requires("abseil/[>=20240116.1 <20240117.0]", transitive_headers=True, transitive_libs=True)
+            self.requires("re2/20250722")
         else:
             self.requires("abseil/[>=20230125.3 <=20230802.1]", transitive_headers=True, transitive_libs=True)
             self.requires("protobuf/3.21.12", transitive_headers=True)
+            self.requires("re2/20230301")
         self.requires("c-ares/[>=1.19.1 <2]")
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("re2/20230301")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_libsystemd"):
             if Version(self.version) >= "1.67.0":
@@ -132,11 +135,7 @@ class GrpcConan(ConanFile):
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} shared not supported by Visual Studio")
 
-        if Version(self.version) >= "1.47" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
-            raise ConanInvalidConfiguration("GCC older than 6 is not supported")
-
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._cxxstd_required)
+        check_min_cppstd(self, self._cxxstd_required)
 
         if self.options.shared and not self.dependencies.host["protobuf"].options.shared:
             raise ConanInvalidConfiguration(
@@ -151,7 +150,7 @@ class GrpcConan(ConanFile):
     def build_requirements(self):
         # cmake >=3.25 required to use `cmake -E env --modify` below
         # note: grpc 1.69.0 requires cmake >=3.16
-        self.tool_requires("cmake/[>=3.25 <4]")
+        self.tool_requires("cmake/[>=3.25]")
         self.tool_requires("protobuf/<host_version>")
         if cross_building(self):
             # when cross compiling we need pre compiled grpc plugins for protoc
@@ -159,6 +158,10 @@ class GrpcConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        
+        # Let Conan define CMAKE_MSVC_RUNTIME_LIBRARY
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(cmake/msvc_static_runtime.cmake)", "")
 
     def generate(self):
         # This doesn't work yet as one would expect, because the install target builds everything
@@ -201,7 +204,6 @@ class GrpcConan(ConanFile):
         # (supported in gRPC >= 1.62.0)
         tc.cache_variables["gRPC_DOWNLOAD_ARCHIVES"] = False
 
-
         # Consumed targets (abseil) via interface target_compiler_feature can propagate newer standards
         if not valid_min_cppstd(self, self._cxxstd_required):
             tc.cache_variables["CMAKE_CXX_STANDARD"] = self._cxxstd_required
@@ -213,17 +215,12 @@ class GrpcConan(ConanFile):
         if self._supports_libsystemd:
             tc.cache_variables["gRPC_USE_SYSTEMD"] = self.options.with_libsystemd
 
-        if Version(self.version) >= "1.62.0":
-            tc.cache_variables["gRPC_DOWNLOAD_ARCHIVES"] = False
-
         tc.generate()
 
         cmake_deps = CMakeDeps(self)
         cmake_deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
-
         # Management of shared libs when grpc has shared dependencies (like protobuf)
         # As the grpc_cpp_plugin that executes during the build will need those packages shared libs
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")

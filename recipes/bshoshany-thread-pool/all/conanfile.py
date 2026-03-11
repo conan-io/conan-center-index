@@ -56,9 +56,7 @@ class BShoshanyThreadPoolConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        if Version(self.version) < "3.5.0":
-            copy(self, "*.hpp", self.source_folder, os.path.join(self.package_folder, "include"))
-        elif Version(self.version) < "5.0.0":
+        if Version(self.version) < "5.0.0":
             copy(self, "*.hpp", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
         else:
             copy(self, "BS_thread_pool.hpp", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))

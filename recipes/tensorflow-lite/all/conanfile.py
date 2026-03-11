@@ -3,8 +3,9 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 from os.path import join
 import textwrap
 
@@ -77,7 +78,7 @@ class TensorflowLiteConan(ConanFile):
         return Version(self.version) >= "2.12.0"
 
     def requirements(self):
-        self.requires("abseil/20230125.3")
+        self.requires("abseil/[>=20230125.3 <=20250127.0]")
         self.requires("eigen/3.4.0")
         self.requires("farmhash/cci.20190513")
         self.requires("fft/cci.20061228")
@@ -87,6 +88,7 @@ class TensorflowLiteConan(ConanFile):
             self.requires("flatbuffers/23.5.26", transitive_headers=True)
         self.requires("gemmlowp/cci.20210928")
         self.requires("ruy/cci.20231129")
+        self.requires("cpuinfo/cci.20231129")
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
         if self.options.with_xnnpack:
@@ -113,6 +115,7 @@ class TensorflowLiteConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -132,12 +135,23 @@ class TensorflowLiteConan(ConanFile):
         if self.settings.arch == "armv8":
             # Not defined by Conan for Apple Silicon. See https://github.com/conan-io/conan/pull/8026
             tc.variables["CMAKE_SYSTEM_PROCESSOR"] = "arm64"
+        if is_msvc(self) and self.options.shared:
+            # INFO: Workaround for FlatBuffers GlobalLocale linkage error on Windows with MSVC shared
+            # https://github.com/google/flatbuffers/issues/7587
+            tc.preprocessor_definitions["FLATBUFFERS_LOCALE_INDEPENDENT"] = 0
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        lite_cmake = join(self.source_folder, "tensorflow", "lite", "CMakeLists.txt")
+        # INFO: Let Conan handle the C++ standard
+        replace_in_file(self, lite_cmake, "set(CMAKE_CXX_STANDARD 17)", "")
+        # INFO: Remove position independent code setting to let Conan handle it
+        replace_in_file(self, lite_cmake, "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+
+    def build(self):
         cmake = CMake(self)
         cmake.configure(build_script_folder=join("tensorflow", "lite"))
         cmake.build()

@@ -23,7 +23,7 @@ class CppSortConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 14
+        return 17 if Version(self.version) >= "2.0.0" else 14
 
     @property
     def _compilers_minimum_version(self):

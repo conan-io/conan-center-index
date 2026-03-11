@@ -73,9 +73,9 @@ class FreetypeConan(ConanFile):
             self.requires("brotli/1.1.0")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.2")
+        self.tool_requires("meson/[>=1.3.2 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.1.0 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -158,8 +158,9 @@ class FreetypeConan(ConanFile):
             # Duplicate DLL name for backwards compatibility with earlier recipe revisions
             # See https://github.com/conan-io/conan-center-index/issues/23768
             suffix = "d" if self.settings.build_type == "Debug" else ""
-            src = os.path.join(self.package_folder, "bin", "freetype-6.dll")
-            dst = os.path.join(self.package_folder, "bin", f"freetype{suffix}.dll")
+            prefix = "lib" if self.settings.compiler == "gcc" else ""  # For MinGW
+            src = os.path.join(self.package_folder, "bin", f"{prefix}freetype-6.dll")
+            dst = os.path.join(self.package_folder, "bin", f"{prefix}freetype{suffix}.dll")
             shutil.copyfile(src, dst)
 
         libtool_version = self._extract_libtool_version()
@@ -181,44 +182,15 @@ class FreetypeConan(ConanFile):
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_vars_rel_path)
         )
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_target_rel_path),
-            {"freetype": "Freetype::Freetype"}
-        )
 
         fix_apple_shared_install_name(self)
 
     def _create_cmake_module_variables(self, module_file):
-        content = textwrap.dedent(f"""\
-            set(FREETYPE_FOUND TRUE)
-            if(DEFINED Freetype_INCLUDE_DIRS)
-                set(FREETYPE_INCLUDE_DIRS ${{Freetype_INCLUDE_DIRS}})
-            endif()
-            if(DEFINED Freetype_LIBRARIES)
-                set(FREETYPE_LIBRARIES ${{Freetype_LIBRARIES}})
-            endif()
-            set(FREETYPE_VERSION_STRING "{self.version}")
-        """)
-        save(self, module_file, content)
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """.format(alias=alias, aliased=aliased))
-        save(self, module_file, content)
+        save(self, module_file, "set(FREETYPE_FOUND TRUE)\n")
 
     @property
     def _module_vars_rel_path(self):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
-
-    @property
-    def _module_target_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     @staticmethod
     def _chmod_plus_x(filename):
@@ -230,6 +202,7 @@ class FreetypeConan(ConanFile):
         self.cpp_info.set_property("cmake_module_file_name", "Freetype")
         self.cpp_info.set_property("cmake_file_name", "freetype")
         self.cpp_info.set_property("cmake_target_name", "Freetype::Freetype")
+        self.cpp_info.set_property("cmake_additional_variables_prefixes", ["FREETYPE"])
         self.cpp_info.set_property("cmake_target_aliases", ["freetype"]) # other possible target name in upstream config file
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
         self.cpp_info.set_property("pkg_config_name", "freetype2")
@@ -239,20 +212,7 @@ class FreetypeConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "freetype2"))
 
         libtool_version = load(self, self._libtool_version_txt).strip()
-        self.conf_info.define("user.freetype:libtool_version", libtool_version)
         self.cpp_info.set_property("system_package_version", libtool_version)
 
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.set_property("component_version", libtool_version)
-        self.cpp_info.filenames["cmake_find_package"] = "Freetype"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "freetype"
-        self.cpp_info.names["cmake_find_package"] = "Freetype"
-        self.cpp_info.names["cmake_find_package_multi"] = "Freetype"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_vars_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_target_rel_path]
-        self.cpp_info.names["pkg_config"] = "freetype2"
         freetype_config = os.path.join(self.package_folder, "bin", "freetype-config")
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.env_info.FT2_CONFIG = freetype_config
         self._chmod_plus_x(freetype_config)
-        self.user_info.LIBTOOL_VERSION = libtool_version

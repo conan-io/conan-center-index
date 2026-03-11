@@ -1,0 +1,20 @@
+--- a/include/concurrencpp/results/impl/shared_result_state.h
++++ b/include/concurrencpp/results/impl/shared_result_state.h
+@@ -5,6 +5,7 @@
+ #include "concurrencpp/results/impl/result_state.h"
+ 
+ #include <atomic>
++#include <chrono>
+ #include <semaphore>
+ 
+ #include <cassert>
+--- a/include/concurrencpp/threads/thread.h
++++ b/include/concurrencpp/threads/thread.h
+@@ -4,6 +4,7 @@
+ #include "concurrencpp/platform_defs.h"
+ 
+ #include <functional>
++#include <string>
+ #include <string_view>
+ #include <thread>
+ 

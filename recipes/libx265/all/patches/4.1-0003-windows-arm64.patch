@@ -1,0 +1,13 @@
+diff --git source/CMakeLists.txt source/CMakeLists.txt
+index c53d28861..5182dfd42 100755
+--- source/CMakeLists.txt
++++ source/CMakeLists.txt
+@@ -38,7 +38,7 @@ else()
+ endif()
+ set(X86_ALIASES x86 i386 i686 x86_64 amd64)
+ set(ARM_ALIASES armv6l armv7l)
+-set(ARM64_ALIASES arm64 arm64e aarch64)
++set(ARM64_ALIASES arm64 ARM64 arm64e aarch64)
+ list(FIND X86_ALIASES "${SYSPROC}" X86MATCH)
+ list(FIND ARM_ALIASES "${SYSPROC}" ARMMATCH)
+ list(FIND ARM64_ALIASES "${SYSPROC}" ARM64MATCH)

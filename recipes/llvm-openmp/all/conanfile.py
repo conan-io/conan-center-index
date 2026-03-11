@@ -16,6 +16,7 @@ required_conan_version = ">=1.53.0"
 
 class LLVMOpenMpConan(ConanFile):
     name = "llvm-openmp"
+    deprecated = "Please use OpenMP as provided by your compiler distribution"
     description = ("The OpenMP (Open Multi-Processing) specification is a standard for a set of compiler directives, "
                    "library routines, and environment variables that can be used to specify shared memory parallelism "
                    "in Fortran and C/C++ programs. This is the LLVM implementation.")

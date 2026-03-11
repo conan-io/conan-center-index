@@ -1,7 +1,0 @@
-OFX_1.0 {
-         global:
-		OfxGetNumberOfPlugins;
-		OfxGetPlugin;
-         local:
-                *;
-};

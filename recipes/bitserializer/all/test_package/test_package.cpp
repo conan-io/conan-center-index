@@ -3,9 +3,6 @@
 #define _SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
 
 #include <bitserializer/bit_serializer.h>
-#ifdef WITH_CPPRESTSDK
-#include <bitserializer/cpprestjson_archive.h>
-#endif
 #ifdef WITH_RAPIDJSON
 #include <bitserializer/rapidjson_archive.h>
 #endif
@@ -36,11 +33,7 @@ public:
 	template <class TArchive>
 	void Serialize(TArchive& archive)
 	{
-#if BITSERIALIZER_VERSION >= 7000
 		archive << BitSerializer::KeyValue("Message", mMessage);
-#else
-		archive << BitSerializer::MakeAutoKeyValue("Message", mMessage);
-#endif
 	}
 
 	std::string mMessage;
@@ -69,11 +62,7 @@ void TestArchive(const std::string& message)
 	CTest testObj[1] = { message };
 	std::stringstream outputStream;
 	BitSerializer::SaveObject<TArchive>(testObj, outputStream, serializationOptions);
-#if BITSERIALIZER_VERSION >= 7000
 	const std::string result = TArchive::is_binary ? PrintAsHexString(outputStream.str()) : outputStream.str();
-#else
-	const std::string result = outputStream.str();
-#endif
 	std::cout << result<< std::endl;
 }
 
@@ -95,9 +84,6 @@ int main() {
 	std::cout << "Testing the link of C++17 filesystem: " << std::filesystem::temp_directory_path() << std::endl;
 #endif
 
-#ifdef WITH_CPPRESTSDK
-	TestArchive<BitSerializer::Json::CppRest::JsonArchive>("Implementation based on cpprestsdk");
-#endif
 #ifdef WITH_RAPIDJSON
 	TestArchive<BitSerializer::Json::RapidJson::JsonArchive>("Implementation based on RapidJson");
 #endif

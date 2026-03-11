@@ -1,12 +1,11 @@
 import glob
 import os
-import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -25,13 +24,13 @@ class RocksDBConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "lite": [True, False],
         "with_gflags": [True, False],
         "with_snappy": [True, False],
         "with_lz4": [True, False],
         "with_zlib": [True, False],
         "with_zstd": [True, False],
         "with_tbb": [True, False],
+        "with_folly": [True, False],
         "with_jemalloc": [True, False],
         "enable_sse": [False, "sse42", "avx2"],
         "use_rtti": [True, False],
@@ -39,7 +38,6 @@ class RocksDBConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "lite": False,
         "with_snappy": False,
         "with_lz4": False,
         "with_zlib": False,
@@ -47,14 +45,11 @@ class RocksDBConan(ConanFile):
         "with_gflags": False,
         "with_tbb": False,
         "with_jemalloc": False,
+        "with_folly": False,
         "enable_sse": False,
         "use_rtti": False,
     }
-
-    @property
-    def _min_cppstd(self):
-        return "11" if Version(self.version) < "8.8.1" else "17"
-
+    
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -77,29 +72,43 @@ class RocksDBConan(ConanFile):
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
         if self.options.with_snappy:
-            self.requires("snappy/1.1.10")
+            self.requires("snappy/[>=1.1.10 <2]")
         if self.options.with_lz4:
-            self.requires("lz4/1.9.4")
+            self.requires("lz4/[>=1.9.4 <2]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[~1.5]")
         if self.options.get_safe("with_tbb"):
             self.requires("onetbb/2021.10.0")
         if self.options.with_jemalloc:
             self.requires("jemalloc/5.3.0")
+        if self.options.with_folly:
+            self.requires("folly/2024.08.12.00")
 
     def validate(self):
-        check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 17)
 
-        if self.settings.arch not in ["x86_64", "ppc64le", "ppc64", "mips64", "armv8"]:
+        if self.settings.arch not in ["x86_64", "ppc64le", "ppc64", "mips64", "armv8", "riscv64"]:
             raise ConanInvalidConfiguration("Rocksdb requires 64 bits")
 
         if is_msvc(self) and Version(self.settings.compiler.version) < "191":
             raise ConanInvalidConfiguration("Rocksdb requires MSVC version >= 191")
 
+        if self.options.shared and self.options.with_folly:
+            # https://github.com/facebook/rocksdb/blob/v10.5.1/CMakeLists.txt#L603
+            raise ConanInvalidConfiguration(f"{self.ref} does not support a shared build with folly")
+
+    def _patch_sources(self):
+        # INFO: Avoid enforcing all linkers to use copy-dt-needed-entries
+        # https://github.com/facebook/rocksdb/issues/13895
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                         'set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--copy-dt-needed-entries")', "")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -108,11 +117,10 @@ class RocksDBConan(ConanFile):
         tc.variables["WITH_TOOLS"] = False
         tc.variables["WITH_CORE_TOOLS"] = False
         tc.variables["WITH_BENCHMARK_TOOLS"] = False
-        tc.variables["WITH_FOLLY_DISTRIBUTED_MUTEX"] = False
+        tc.variables["USE_FOLLY"] = self.options.with_folly
         if is_msvc(self):
             tc.variables["WITH_MD_LIBRARY"] = not is_msvc_static_runtime(self)
         tc.variables["ROCKSDB_INSTALL_ON_WINDOWS"] = self.settings.os == "Windows"
-        tc.variables["ROCKSDB_LITE"] = self.options.lite
         tc.variables["WITH_GFLAGS"] = self.options.with_gflags
         tc.variables["WITH_SNAPPY"] = self.options.with_snappy
         tc.variables["WITH_LZ4"] = self.options.with_lz4
@@ -120,6 +128,7 @@ class RocksDBConan(ConanFile):
         tc.variables["WITH_ZSTD"] = self.options.with_zstd
         tc.variables["WITH_TBB"] = self.options.get_safe("with_tbb", False)
         tc.variables["WITH_JEMALLOC"] = self.options.with_jemalloc
+
         tc.variables["ROCKSDB_BUILD_SHARED"] = self.options.shared
         tc.variables["ROCKSDB_LIBRARY_EXPORTS"] = self.settings.os == "Windows" and self.options.shared
         tc.variables["ROCKSDB_DLL" ] = self.settings.os == "Windows" and self.options.shared
@@ -143,10 +152,11 @@ class RocksDBConan(ConanFile):
             deps.set_property("jemalloc", "cmake_target_name", "JeMalloc::JeMalloc")
         if self.options.with_zstd:
             deps.set_property("zstd", "cmake_target_name", "zstd::zstd")
+        if self.options.with_folly:
+            deps.set_property("folly", "cmake_additional_variables_prefixes", ["FOLLY",])
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -157,14 +167,6 @@ class RocksDBConan(ConanFile):
             if not lib.endswith(".dll.a"):
                 os.remove(lib)
 
-    def _remove_cpp_headers(self):
-        for path in glob.glob(os.path.join(self.package_folder, "include", "rocksdb", "*")):
-            if path != os.path.join(self.package_folder, "include", "rocksdb", "c.h"):
-                if os.path.isfile(path):
-                    os.remove(path)
-                else:
-                    shutil.rmtree(path)
-
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -172,7 +174,6 @@ class RocksDBConan(ConanFile):
         cmake.install()
         if self.options.shared:
             self._remove_static_libraries()
-            self._remove_cpp_headers() # Force stable ABI for shared libraries
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
@@ -180,18 +181,15 @@ class RocksDBConan(ConanFile):
         cmake_target = "rocksdb-shared" if self.options.shared else "rocksdb"
         self.cpp_info.set_property("cmake_file_name", "RocksDB")
         self.cpp_info.set_property("cmake_target_name", f"RocksDB::{cmake_target}")
-        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["librocksdb"].libs = collect_libs(self)
+        # INFO: Component librocksdb is legacy due cmake_find_package but may break a few users in case removed
+        lib_suffix = "-shared" if is_msvc(self) and self.options.shared else ""
+        self.cpp_info.components["librocksdb"].libs = [f"rocksdb{lib_suffix}"]
         if self.settings.os == "Windows":
             self.cpp_info.components["librocksdb"].system_libs = ["shlwapi", "rpcrt4"]
             if self.options.shared:
                 self.cpp_info.components["librocksdb"].defines = ["ROCKSDB_DLL"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["librocksdb"].system_libs = ["pthread", "m"]
-        if self.options.lite:
-            self.cpp_info.components["librocksdb"].defines.append("ROCKSDB_LITE")
-
-        self.cpp_info.components["librocksdb"].set_property("cmake_target_name", f"RocksDB::{cmake_target}")
         if self.options.with_gflags:
             self.cpp_info.components["librocksdb"].requires.append("gflags::gflags")
         if self.options.with_snappy:
@@ -206,3 +204,5 @@ class RocksDBConan(ConanFile):
             self.cpp_info.components["librocksdb"].requires.append("onetbb::onetbb")
         if self.options.with_jemalloc:
             self.cpp_info.components["librocksdb"].requires.append("jemalloc::jemalloc")
+        if self.options.with_folly:
+            self.cpp_info.components["librocksdb"].requires.append("folly::folly")

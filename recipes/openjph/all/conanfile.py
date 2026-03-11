@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.1"
 
 class OpenJPH(ConanFile):
     name = "openjph"
@@ -34,17 +34,10 @@ class OpenJPH(ConanFile):
         "with_stream_expand_tool": False,
         "disable_simd": False,
     }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -89,8 +82,10 @@ class OpenJPH(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "openjph::openjph")
         self.cpp_info.set_property("pkg_config_name", "openjph")
 
-        version_suffix = ""
+        version_suffix = "_d" if self.settings.build_type == "Debug" else ""
         if is_msvc(self):
             v = Version(self.version)
             version_suffix = f".{v.major}.{v.minor}"
+            if self.settings.build_type == "Debug":
+                version_suffix += "d"
         self.cpp_info.libs = ["openjph" + version_suffix]

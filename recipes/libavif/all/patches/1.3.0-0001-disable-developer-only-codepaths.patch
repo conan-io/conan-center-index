@@ -1,0 +1,43 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 991743c..c70d6cf 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -134,11 +134,13 @@ set_local_or_system_option(
+ # Whether the libavif library uses c++ indirectly (e.g. through linking to libyuv).
+ set(AVIF_LIB_USE_CXX OFF)
+ 
++if(0)
+ if(APPLE)
+     set(XCRUN xcrun)
+ else()
+     set(XCRUN)
+ endif()
++endif()
+ 
+ # This is also needed to get shared libraries (e.g. pixbufloader-avif) to compile against a static libavif.
+ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+@@ -260,6 +262,8 @@ check_avif_option(AVIF_LIBXML2 TARGET LibXml2::LibXml2 PKG_NAME LibXml2)
+ 
+ # ---------------------------------------------------------------------------------------
+ 
++add_library(avif_enable_warnings INTERFACE)
++if(0)
+ # Enable all warnings
+ include(CheckCCompilerFlag)
+ # avif_enable_warnings is a CMake interface library. It has no source files.
+@@ -268,7 +272,6 @@ include(CheckCCompilerFlag)
+ # target_compile_definitions() on avif_enable_warnings. We enable compiler
+ # warnings in a target by linking the target with avif_enable_warnings using
+ # target_link_libraries().
+-add_library(avif_enable_warnings INTERFACE)
+ if(MSVC)
+     message(STATUS "libavif: Enabling warnings for MSVC")
+     target_compile_options(
+@@ -315,6 +318,7 @@ elseif(CMAKE_C_COMPILER_ID MATCHES "GNU")
+ else()
+     message(FATAL_ERROR "libavif: Unknown compiler, bailing out")
+ endif()
++endif()
+ 
+ if(AVIF_ENABLE_WERROR)
+     # Warnings as errors

@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file
-from conan.tools.scm import Version
+from conan.tools.files import copy, get, rmdir
 import os
 
 required_conan_version = ">=2.0"
@@ -18,7 +17,7 @@ class IttApiConan(ConanFile):
         " across different Intel tools."
     )
     topics = ("itt", "ittapi", "vtune", "profiler", "profiling")
-
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -34,15 +33,8 @@ class IttApiConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        # We have no C++ files, so we delete unused options.
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+        self.settings.compiler.rm_safe("libcxx")
+        self.settings.compiler.rm_safe("cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -51,18 +43,9 @@ class IttApiConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
-    def _patch_sources(self):
-        # Don't force PIC
-        if Version(self.version) < "3.24.1":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            'set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")', "")
-
     def generate(self):
-        self._patch_sources()
         toolchain = CMakeToolchain(self)
         toolchain.variables["ITT_API_IPT_SUPPORT"] = self.options.ptmark
-        if Version(self.version) < "3.25.1":
-            toolchain.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         toolchain.generate()
 
     def build(self):
@@ -71,13 +54,10 @@ class IttApiConan(ConanFile):
         cmake.build()
 
     def package(self):
-        if self.settings.os == "Windows":
-            copy(self, "libittnotify.lib", src=f"bin/{self.settings.build_type}", dst=os.path.join(self.package_folder, "lib"))
-        else:
-            copy(self, "libittnotify.a", src="bin", dst=os.path.join(self.package_folder, "lib"))
-        copy(self, "*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
-        copy(self, "BSD-3-Clause.txt", src=os.path.join(self.source_folder, "LICENSES"), dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "GPL-2.0-only.txt", src=os.path.join(self.source_folder, "LICENSES"), dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+        copy(self, "*.txt", src=os.path.join(self.source_folder, "LICENSES"), dst=os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         # https://github.com/intel/ittapi/blob/03f7260c96d4b437d12dceee7955ebb1e30e85ad/CMakeLists.txt#L176

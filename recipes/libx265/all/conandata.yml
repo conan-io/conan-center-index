@@ -1,10 +1,18 @@
 sources:
-  "3.4":
-    url: "https://github.com/videolan/x265/archive/refs/tags/3.4.tar.gz"
-    sha256: "544d147bf146f8994a7bf8521ed878c93067ea1c7c6e93ab602389be3117eaaf"
+  "4.1":
+    url: "https://downloads.videolan.org/videolan/x265/x265_4.1.tar.gz"
+    sha256: "a31699c6a89806b74b0151e5e6a7df65de4b49050482fe5ebf8a4379d7af8f29"
+  "3.6":
+    url: "https://downloads.videolan.org/videolan/x265/x265_3.6.tar.gz"
+    sha256: "663531f341c5389f460d730e62e10a4fcca3428ca2ca109693867bc5fe2e2807"
 patches:
-  "3.4":
+  "4.1":
     - patch_file: "patches/3.2.1-0001-remove_register_classifier.patch"
-    - patch_file: "patches/3.4-0002-cmake-min-required.patch"
-    - patch_file: "patches/3.4-0001-numa.patch"
-    - patch_file: "patches/3.4-0003-windows-arm64.patch"
+    - patch_file: "patches/4.1-0001-cmake-min-required.patch"
+    - patch_file: "patches/4.1-0002-numa.patch"
+    - patch_file: "patches/4.1-0003-windows-arm64.patch"
+  "3.6":
+    - patch_file: "patches/3.2.1-0001-remove_register_classifier.patch"
+    - patch_file: "patches/3.6-0001-cmake-min-required.patch"
+    - patch_file: "patches/3.6-0002-numa.patch"
+    - patch_file: "patches/3.6-0003-windows-arm64.patch"

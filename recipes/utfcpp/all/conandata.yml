@@ -1,4 +1,7 @@
 sources:
+  "4.0.8":
+    url: "https://github.com/nemtrif/utfcpp/archive/v4.0.8.tar.gz"
+    sha256: "f808b26d8c3a59def27fea207182ece77a8930bd121a69f80d328ecf3cfef925"
   "4.0.5":
     url: "https://github.com/nemtrif/utfcpp/archive/v4.0.5.tar.gz"
     sha256: "ffc668a310e77607d393f3c18b32715f223da1eac4c4d6e0579a11df8e6b59cf"

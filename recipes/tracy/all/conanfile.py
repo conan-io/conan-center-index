@@ -3,8 +3,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.files import copy, get, rmdir
-from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=2.1"
@@ -38,6 +36,7 @@ class TracyConan(ConanFile):
         "no_vsync_capture": ([True, False], False),
         "no_frame_image": ([True, False], False),
         "no_system_tracing": ([True, False], False),
+        "patchable_nopsleds": ([True, False], False),
         "delayed_init": ([True, False], False),
         "manual_lifetime": ([True, False], False),
         "fibers": ([True, False], False),
@@ -46,6 +45,7 @@ class TracyConan(ConanFile):
         "libunwind_backtrace": ([True, False], False),
         "symbol_offline_resolve": ([True, False], False),
         "libbacktrace_elf_dynload_support": ([True, False], False),
+        "ignore_memory_faults": ([True, False], False),
         "verbose": ([True, False], False),
     }
     options = {
@@ -69,10 +69,6 @@ class TracyConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 11)
-
-        # libunwind_backtrace is not supported in 0.11.0. https://github.com/wolfpld/tracy/pull/841
-        if Version(self.version) == "0.11.0" and self.options.libunwind_backtrace:
-            raise ConanInvalidConfiguration(f"libunwind_backtrace is not supported in {self.ref}")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -129,8 +125,13 @@ class TracyConan(ConanFile):
         # Starting at 0.12.0, upstream has added an extra "tracy" directory for the include directory
         # include/tracy/tracy/Tracy.hpp
         # but upstream still generates info for including headers as #include <tracy/Tracy.hpp>
-        if Version(self.version) >= "0.12.0":
-            self.cpp_info.components["tracyclient"].includedirs = ['include/tracy']
+        self.cpp_info.components["tracyclient"].includedirs = ['include/tracy']
+
+        # Starting at 0.13.0, upstream introduced a subdirectory in the Runtime/Library/Archive path
+        # for all but release type.
+        if self.settings.build_type != "Release":
+            self.cpp_info.components["tracyclient"].bindirs = ['bin/' + str(self.settings.build_type)]
+            self.cpp_info.components["tracyclient"].libdirs = ['lib/' + str(self.settings.build_type)]
 
         # Tracy CMake adds options set to ON as public
         for opt in self._tracy_options.keys():
