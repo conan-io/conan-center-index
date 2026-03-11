@@ -4,9 +4,11 @@
 #if !defined(CONANTEST_PROTOBUF_LITE)
 #include <google/protobuf/timestamp.pb.h>
 #include <google/protobuf/util/time_util.h>
-#else 
+#else
 #include <google/protobuf/message_lite.h>
 #endif
+
+#include "addressbook.pb.h"
 
 int main()
 {
