@@ -5,8 +5,9 @@ project(test_package LANGUAGES CXX)
 find_package(protobuf CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR})
-target_sources(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/addressbook.pb.cc)
+if (EXISTS "${CMAKE_BINARY_DIR}/addressbook.pb.cc")
+    target_sources(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/addressbook.pb.cc)
+endif()
 
 if (protobuf_LITE)
     target_link_libraries(${PROJECT_NAME} PRIVATE protobuf::libprotobuf-lite)

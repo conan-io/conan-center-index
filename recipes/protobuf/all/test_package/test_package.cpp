@@ -8,8 +8,6 @@
 #include <google/protobuf/message_lite.h>
 #endif
 
-#include "addressbook.pb.h"
-
 int main()
 {
 

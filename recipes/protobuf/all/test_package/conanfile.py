@@ -23,10 +23,11 @@ class TestPackageConan(ConanFile):
         tc.generate()
 
     def build(self):
-        # Invoke protoc in the same way CMake would
-        self.run(f"protoc --proto_path={self.source_folder} --cpp_out={self.build_folder} {self.source_folder}/addressbook.proto", env="conanrun")
-        assert os.path.exists(os.path.join(self.build_folder, "addressbook.pb.cc"))
-        assert os.path.exists(os.path.join(self.build_folder, "addressbook.pb.h"))
+        if can_run(self):
+            # Invoke protoc in the same way CMake would
+            self.run(f"protoc --proto_path={self.source_folder} --cpp_out={self.build_folder} {self.source_folder}/addressbook.proto", env="conanrun")
+            assert os.path.exists(os.path.join(self.build_folder, "addressbook.pb.cc"))
+            assert os.path.exists(os.path.join(self.build_folder, "addressbook.pb.h"))
 
         cmake = CMake(self)
         cmake.configure()
