@@ -95,8 +95,9 @@ class LightGBMConan(ConanFile):
         apply_conandata_patches(self)
         # Fix vendored dependency includes
         common_h = os.path.join(self.source_folder, "include", "LightGBM", "utils", "common.h")
-        for lib in ["fmt", "fast_double_parser"]:
-            replace_in_file(self, common_h, f"../../../external_libs/{lib}/include/", "")
+        if Version(self.version) <= "4.3.0":
+            for lib in ["fmt", "fast_double_parser"]:
+                replace_in_file(self, common_h, f"../../../external_libs/{lib}/include/", "")
         # Unvendor Eigen3
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "include_directories(${EIGEN_DIR})", "")

@@ -18,6 +18,10 @@ sources:
     url: "https://github.com/microsoft/LightGBM/archive/refs/tags/v3.3.2.tar.gz"
     sha256: "d7c0f842e94165578d5a0c046ca942838d1574149f98c84400ce511239d17b9f"
 patches:
+  "4.6.0":
+    - patch_file: "patches/4.6.0-0001-remove-vendored-header-install.patch"
+      patch_type: "fix"
+      patch_description: "Remove install of vendored fast_double_parser and fmt headers (using Conan dependencies)"
   "4.1.0":
     - patch_file: "patches/4.1.0-0001-fix-openmp-clang.patch"
       patch_type: "portability"

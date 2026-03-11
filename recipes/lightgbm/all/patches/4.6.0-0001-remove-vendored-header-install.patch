@@ -1,0 +1,17 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -791,12 +791,6 @@ if(INSTALL_HEADERS)
+     install(
+       DIRECTORY ${LightGBM_HEADER_DIR}/LightGBM
+       DESTINATION ${CMAKE_INSTALL_PREFIX}/include
+     )
+-    install(
+-      FILES ${FAST_DOUBLE_PARSER_INCLUDE_DIR}/fast_double_parser.h
+-      DESTINATION ${CMAKE_INSTALL_PREFIX}/include/LightGBM/utils
+-    )
+-    install(
+-      DIRECTORY ${FMT_INCLUDE_DIR}/
+-      DESTINATION ${CMAKE_INSTALL_PREFIX}/include/LightGBM/utils
+-      FILES_MATCHING PATTERN "*.h"
+-    )
+ endif()
