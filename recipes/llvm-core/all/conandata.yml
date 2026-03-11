@@ -20,16 +20,17 @@ sources:
 patches:
   "21.1.8":
     - patch_file: patches/21x/0000-zlib-conan.patch
-      patch_description: fix references to third party libs to match conan variables and targets
+      patch_description: fix reference to Zlib variable name to match conan
       patch_type: conan
       base_path: llvm-main
     - patch_file: patches/21x/0001-trycompile-targets.patch
-      patch_description: use target names instead of legacy variables in trycompile
+      patch_description: use target names instead of legacy variables in try compile
       patch_type: portability
       patch_source: https://github.com/llvm/llvm-project/pull/185463
       base_path: llvm-main
   "19.1.7":
-    - patch_file: patches/19x/0000-cmake-dependencies.patch
-      patch_description: fix references to third party libs to match conan variables and targets
-      patch_type: conan
+    - patch_file: patches/19x/0000-trycompile-targets.patch
+      patch_description: use target names instead of legacy variables in try compile
+      patch_type: portability
+      patch_source: https://github.com/llvm/llvm-project/pull/185463
       base_path: llvm-main
