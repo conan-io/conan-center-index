@@ -86,7 +86,7 @@ class OsgearthConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        libsuffix = {"Debug": "d", "RelWithDebInfo": "rd", "MinSizeRel": "s"}.get(str(self.settings.build_type), "")
+        libsuffix = {"Debug": "d", "MinSizeRel": "s"}.get(str(self.settings.build_type), "") if self.settings.os == "Windows" else ""
         openscenegraph_version = self.dependencies["openscenegraph"].ref.version
         self.cpp_info.components["osgEarth"].libs = ["osgEarth" + libsuffix]
         self.cpp_info.components["osgEarth"].set_property("cmake_target_name", "osgEarth::osgEarth")
