@@ -43,7 +43,6 @@ class OsgearthConan(ConanFile):
         self.requires("protobuf/[>=5.27.0 <7]")
         self.requires("geos/[>=3.12.0 <4]")
         self.requires("sqlite3/[>=3.42 <4]")
-        self.requires("libwebp/[>=1.4.0 <2]")
         self.requires("spdlog/[>=1.11 <2]")
         
     def validate(self):
@@ -58,7 +57,6 @@ class OsgearthConan(ConanFile):
         apply_conandata_patches(self)
         # INFO: Let Conan manage C++ standard
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 17)", "")
-        # /tmp/tmp.9gUjnpfsNQ/osgearth-osgearth-3.8/src/osgEarthDrivers/gltf/CMakeLists.txt
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -177,10 +175,6 @@ class OsgearthConan(ConanFile):
         self.cpp_info.components["osgdb_osgearth_viewpoints"].libs = ["osgdb_osgearth_viewpoints" + libsuffix]
         self.cpp_info.components["osgdb_osgearth_viewpoints"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
         self.cpp_info.components["osgdb_osgearth_viewpoints"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_webp"].libs = ["osgdb_webp" + libsuffix]
-        self.cpp_info.components["osgdb_webp"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_webp"].requires = ["osgEarth"]
 
         self.cpp_info.components["osgdb_osgearth_scriptengine_javascript_qjs"].libs = ["osgdb_osgearth_scriptengine_javascript_qjs" + libsuffix]
         self.cpp_info.components["osgdb_osgearth_scriptengine_javascript_qjs"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
