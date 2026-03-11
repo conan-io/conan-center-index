@@ -1,5 +1,3 @@
-from collections.abc import Set
-
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
@@ -37,7 +35,8 @@ class OsgearthConan(ConanFile):
     def requirements(self):
         self.requires("opengl/system")
         self.requires("gdal/[>=3.4 <4]")
-        self.requires("openscenegraph/3.6.5")
+        # INFO: Transitive headers osgEarth/Notify:8 #include <osg/Notify>
+        self.requires("openscenegraph/3.6.5", transitive_headers=True)
         self.requires("libcurl/[>=7.78.0 <9]")
         self.requires("lerc/[>=4.0.1 <5]")
         self.requires("protobuf/[>=5.27.0 <7]")
@@ -84,6 +83,7 @@ class OsgearthConan(ConanFile):
         copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         libsuffix = {"Debug": "d", "RelWithDebInfo": "rd", "MinSizeRel": "s"}.get(str(self.settings.build_type), "")
@@ -99,113 +99,10 @@ class OsgearthConan(ConanFile):
             self.cpp_info.components["osgEarth"].defines.append("OSGEARTH_LIBRARY_STATIC")
 
         # Enabled by default via CMake OSGEARTH_BUILD_IMGUI_NODEKIT
-        self.cpp_info.components["osgEarthImGui"].libs = ["osgdb_osgEarthImGui" + libsuffix]
+        self.cpp_info.components["osgEarthImGui"].libs = ["osgEarthImGui" + libsuffix]
         self.cpp_info.components["osgEarthImGui"].set_property("cmake_target_name", "osgEarth::osgEarthImGui")
         self.cpp_info.components["osgEarthImGui"].requires = ["osgEarth", "opengl::opengl"]
 
-        # osgEarth Plugins
-        self.cpp_info.components["osgdb_osgearth_bumpmap"].libs = ["osgdb_bumpmap" + libsuffix]
-        self.cpp_info.components["osgdb_osgearth_bumpmap"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_osgearth_bumpmap"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_osgearth_cache_filesystem"].libs = ["osgdb_osgearth_cache_filesystem" + libsuffix]
-        self.cpp_info.components["osgdb_osgearth_cache_filesystem"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_osgearth_cache_filesystem"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_osgearth_colorramp"].libs = ["osgdb_osgearth_colorramp" + libsuffix]
-        self.cpp_info.components["osgdb_osgearth_colorramp"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_osgearth_colorramp"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_osgearth_detail"].libs = ["osgdb_osgearth_detail" + libsuffix]
-        self.cpp_info.components["osgdb_osgearth_detail"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_osgearth_detail"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_osgearth_detail"].libs = ["osgdb_osgearth_detail" + libsuffix]
-        self.cpp_info.components["osgdb_osgearth_detail"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_osgearth_detail"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_earth"].libs = ["osgdb_earth" + libsuffix]
-        self.cpp_info.components["osgdb_earth"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_earth"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_osgearth_engine_rex"].libs = ["osgdb_osgearth_engine_rex" + libsuffix]
-        self.cpp_info.components["osgdb_osgearth_engine_rex"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_osgearth_engine_rex"].requires = ["osgEarth", "opengl::opengl"]
-
-        self.cpp_info.components["osgdb_osgearth_featurefilter_intersect"].libs = ["osgdb_osgearth_featurefilter_intersect" + libsuffix]
-        self.cpp_info.components["osgdb_osgearth_featurefilter_intersect"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_osgearth_featurefilter_intersect"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_osgearth_featurefilter_join"].libs = ["osgdb_osgearth_featurefilter_join" + libsuffix]
-        self.cpp_info.components["osgdb_osgearth_featurefilter_join"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_osgearth_featurefilter_join"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_kml"].libs = ["osgdb_kml" + libsuffix]
-        self.cpp_info.components["osgdb_kml"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_kml"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_osgearth_sky_gl"].libs = ["osgdb_osgearth_sky_gl" + libsuffix]
-        self.cpp_info.components["osgdb_osgearth_sky_gl"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_osgearth_sky_gl"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_osgearth_sky_simple"].libs = ["osgdb_osgearth_sky_simple" + libsuffix]
-        self.cpp_info.components["osgdb_osgearth_sky_simple"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_osgearth_sky_simple"].requires = ["osgEarth", "opengl::opengl"]
-
-        self.cpp_info.components["osgdb_template"].libs = ["osgdb_template" + libsuffix]
-        self.cpp_info.components["osgdb_template"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_template"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_osgearth_terrainshader"].libs = ["osgdb_osgearth_terrainshader" + libsuffix]
-        self.cpp_info.components["osgdb_osgearth_terrainshader"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_osgearth_terrainshader"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_osgearth_vdatum_egm2008"].libs = ["osgdb_osgearth_vdatum_egm2008" + libsuffix]
-        self.cpp_info.components["osgdb_osgearth_vdatum_egm2008"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_osgearth_vdatum_egm2008"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_osgearth_vdatum_egm84"].libs = ["osgdb_osgearth_vdatum_egm84" + libsuffix]
-        self.cpp_info.components["osgdb_osgearth_vdatum_egm84"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_osgearth_vdatum_egm84"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_osgearth_vdatum_egm96"].libs = ["osgdb_osgearth_vdatum_egm96" + libsuffix]
-        self.cpp_info.components["osgdb_osgearth_vdatum_egm96"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_osgearth_vdatum_egm96"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_osgearth_viewpoints"].libs = ["osgdb_osgearth_viewpoints" + libsuffix]
-        self.cpp_info.components["osgdb_osgearth_viewpoints"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_osgearth_viewpoints"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_osgearth_scriptengine_javascript_qjs"].libs = ["osgdb_osgearth_scriptengine_javascript_qjs" + libsuffix]
-        self.cpp_info.components["osgdb_osgearth_scriptengine_javascript_qjs"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_osgearth_scriptengine_javascript_qjs"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_osgearth_scriptengine_javascript_duktape"].libs = ["osgdb_osgearth_scriptengine_javascript_duktape" + libsuffix]
-        self.cpp_info.components["osgdb_osgearth_scriptengine_javascript_duktape"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_osgearth_scriptengine_javascript_duktape"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_gltf"].libs = ["osgdb_gltf" + libsuffix]
-        self.cpp_info.components["osgdb_gltf"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_gltf"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_fastdxt"].libs = ["osgdb_fastdxt" + libsuffix]
-        self.cpp_info.components["osgdb_fastdxt"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_fastdxt"].requires = ["osgEarth"]
-
-        self.cpp_info.components["osgdb_lerc"].libs = ["osgdb_lerc" + libsuffix]
-        self.cpp_info.components["osgdb_lerc"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
-        self.cpp_info.components["osgdb_lerc"].requires = ["osgEarth", "lerc::lerc"]
-
-
-        # -- Set non-toolchain portion of runtime path of "/home/conan/.conan2/p/b/osgeae1dc417d448ff/p/lib/osgPlugins-3.6.5/osgdb_osgearth_vdatum_egm2008.so" to ""
-        # -- Set non-toolchain portion of runtime path of "/home/conan/.conan2/p/b/osgeae1dc417d448ff/p/lib/osgPlugins-3.6.5/osgdb_osgearth_vdatum_egm84.so" to ""
-        # -- Set non-toolchain portion of runtime path of "/home/conan/.conan2/p/b/osgeae1dc417d448ff/p/lib/osgPlugins-3.6.5/osgdb_osgearth_vdatum_egm96.so" to ""
-        # -- Set non-toolchain portion of runtime path of "/home/conan/.conan2/p/b/osgeae1dc417d448ff/p/lib/osgPlugins-3.6.5/osgdb_osgearth_viewpoints.so" to ""
-        # -- Set non-toolchain portion of runtime path of "/home/conan/.conan2/p/b/osgeae1dc417d448ff/p/lib/osgPlugins-3.6.5/osgdb_webp.so" to ""
-        # -- Set non-toolchain portion of runtime path of "/home/conan/.conan2/p/b/osgeae1dc417d448ff/p/lib/osgPlugins-3.6.5/osgdb_osgearth_scriptengine_javascript_qjs.so" to ""
-        # -- Set non-toolchain portion of runtime path of "/home/conan/.conan2/p/b/osgeae1dc417d448ff/p/lib/osgPlugins-3.6.5/osgdb_osgearth_scriptengine_javascript_duktape.so" to ""
-        # -- Set non-toolchain portion of runtime path of "/home/conan/.conan2/p/b/osgeae1dc417d448ff/p/lib/osgPlugins-3.6.5/osgdb_gltf.so" to ""
-        # -- Set non-toolchain portion of runtime path of "/home/conan/.conan2/p/b/osgeae1dc417d448ff/p/lib/osgPlugins-3.6.5/osgdb_fastdxt.so" to ""
-        # -- Set non-toolchain portion of runtime path of "/home/conan/.conan2/p/b/osgeae1dc417d448ff/p/lib/osgPlugins-3.6.5/osgdb_lerc.so" to ""
-        # -- Installing: /home/conan/.conan2/p/b/osgeae1dc417d448ff/p/lib/libosgEarth.so.3.8.0
-        #-- Installing: /home/conan/.conan2/p/b/osgeae1dc417d448ff/p/lib/libosgEarth.so.185
+        self.cpp_info.components["plugins"].libdirs = [os.path.join("lib", f"osgPlugins-{openscenegraph_version}")]
+        self.cpp_info.components["plugins"].set_property("cmake_target_name", "osgEarth::plugins")
+        self.cpp_info.components["plugins"].requires = ["osgEarth", "opengl::opengl", "lerc::lerc"]

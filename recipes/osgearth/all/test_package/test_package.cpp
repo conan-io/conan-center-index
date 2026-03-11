@@ -1,9 +1,11 @@
 #include <cstdlib>
 #include <iostream>
-#include <osgEarth/Map>
+#include <osgEarth/Version>
+#include <osgEarth/Capabilities>
 
 int main() {
-    osgEarth::initialize();
-    std::cout << "osgEarth version: " << osgEarth::getVersion() << std::endl;
+    std::cout << "osgEarth version: " << osgEarthGetVersion() << std::endl;
+    std::cout << "osgEarth SO version: " << osgEarthGetSOVersion() << std::endl;
+    std::cout << "osgEarth library name: " << osgEarthGetLibraryName() << std::endl;
     return EXIT_SUCCESS;
 }
