@@ -4,6 +4,4 @@ sources:
     sha256: "71d2c25855f10e82da8cb8b0c42bdf0da56e5556ff50a93b31c0592b8932eda3"
 patches:
   "4.6.0":
-    - patch_file: "patches/4.6.0-0001-remove-vendored-header-install.patch"
-      patch_type: "conan"
-      patch_description: "Remove install of vendored fast_double_parser and fmt headers (using Conan dependencies)"
+    - patch_file: "patches/4.6.0-0001-remove-vendored-headers.patch"

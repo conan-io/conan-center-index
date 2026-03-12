@@ -2,15 +2,13 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, replace_in_file, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class LightGBMConan(ConanFile):
@@ -38,7 +36,7 @@ class LightGBMConan(ConanFile):
     }
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        #copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
         export_conandata_patches(self)
 
     def config_options(self):
@@ -62,8 +60,8 @@ class LightGBMConan(ConanFile):
         self.requires("fmt/[>=10.1.1]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        # Note: Next release looks like the min cppstd will be 17
+        check_min_cppstd(self, 11)
 
         if self.options.with_openmp and self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration("OpenMP support is required, which is not "
@@ -74,6 +72,7 @@ class LightGBMConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -81,35 +80,18 @@ class LightGBMConan(ConanFile):
         tc.cache_variables["USE_DEBUG"] = self.settings.build_type in ["Debug", "RelWithDebInfo"]
         tc.cache_variables["USE_OPENMP"] = self.options.get_safe("with_openmp", False)
         tc.cache_variables["BUILD_CLI"] = False
-        if is_apple_os(self):
-            tc.cache_variables["APPLE_OUTPUT_DYLIB"] = True
         tc.variables["_MAJOR_VERSION"] = Version(self.version).major
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
-        venv = VirtualBuildEnv(self)
-        venv.generate(scope="build")
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # Unvendor Eigen3, FastDoubleParser and FMT
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "include_directories(${EIGEN_DIR})", "")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "include_directories(${FAST_DOUBLE_PARSER_INCLUDE_DIR})", "")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "include_directories(${FMT_INCLUDE_DIR})", "")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE",
-             dst=os.path.join(self.package_folder, "licenses"),
-             src=self.source_folder)
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
 
