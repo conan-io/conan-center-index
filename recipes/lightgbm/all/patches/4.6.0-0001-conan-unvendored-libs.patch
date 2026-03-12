@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 168026f..c5a81a7 100644
+index 168026f..3d0b7e4 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -35,12 +35,6 @@ endif()
+@@ -35,12 +35,9 @@ endif()
  
  project(lightgbm LANGUAGES C CXX)
  
@@ -12,10 +12,13 @@ index 168026f..c5a81a7 100644
 -  set(CMAKE_CXX_STANDARD 11)
 -endif()
 -set(CMAKE_CXX_STANDARD_REQUIRED ON)
++find_package(Eigen3 REQUIRED CONFIG)
++find_package(fast_double_parser REQUIRED CONFIG)
++find_package(fmt REQUIRED CONFIG)
  
  list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
  
-@@ -116,18 +110,11 @@ if(USE_SWIG)
+@@ -116,18 +113,11 @@ if(USE_SWIG)
    file(MAKE_DIRECTORY "${LGBM_SWIG_DESTINATION_DIR}")
  endif()
  
@@ -34,7 +37,17 @@ index 168026f..c5a81a7 100644
  
  if(__BUILD_FOR_R)
      find_package(LibR REQUIRED)
-@@ -793,13 +780,4 @@ if(INSTALL_HEADERS)
+@@ -470,6 +460,9 @@ else()
+   add_library(_lightgbm SHARED)
+ endif()
+ 
++target_link_libraries(lightgbm_objs PRIVATE Eigen3::Eigen fast_double_parser::fast_double_parser fmt::fmt)
++target_link_libraries(lightgbm_capi_objs PRIVATE Eigen3::Eigen fast_double_parser::fast_double_parser fmt::fmt)
++
+ # R expects libraries of the form <project>.{dll,dylib,so}, not lib_<project>.{dll,dylib,so}
+ if(__BUILD_FOR_R)
+   set_target_properties(
+@@ -793,13 +786,4 @@ if(INSTALL_HEADERS)
        DIRECTORY ${LightGBM_HEADER_DIR}/LightGBM
        DESTINATION ${CMAKE_INSTALL_PREFIX}/include
      )

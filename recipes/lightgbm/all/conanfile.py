@@ -36,7 +36,6 @@ class LightGBMConan(ConanFile):
     }
 
     def export_sources(self):
-        #copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
         export_conandata_patches(self)
 
     def config_options(self):
@@ -87,7 +86,7 @@ class LightGBMConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self.source_path.parent)
+        cmake.configure()
         cmake.build()
 
     def package(self):

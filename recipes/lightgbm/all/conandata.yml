@@ -4,4 +4,4 @@ sources:
     sha256: "71d2c25855f10e82da8cb8b0c42bdf0da56e5556ff50a93b31c0592b8932eda3"
 patches:
   "4.6.0":
-    - patch_file: "patches/4.6.0-0001-remove-vendored-headers.patch"
+    - patch_file: "patches/4.6.0-0001-conan-unvendored-libs.patch"
