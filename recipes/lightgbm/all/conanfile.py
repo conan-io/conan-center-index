@@ -92,9 +92,13 @@ class LightGBMConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # Unvendor Eigen3
+        # Unvendor Eigen3, FastDoubleParser and FMT
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "include_directories(${EIGEN_DIR})", "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "include_directories(${FAST_DOUBLE_PARSER_INCLUDE_DIR})", "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "include_directories(${FMT_INCLUDE_DIR})", "")
 
     def build(self):
         self._patch_sources()
