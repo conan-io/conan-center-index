@@ -92,8 +92,6 @@ class LightGBMConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # Fix vendored dependency includes
-        common_h = os.path.join(self.source_folder, "include", "LightGBM", "utils", "common.h")
         # Unvendor Eigen3
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "include_directories(${EIGEN_DIR})", "")
@@ -114,10 +112,6 @@ class LightGBMConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "LightGBM")
         self.cpp_info.set_property("cmake_target_name", "LightGBM::LightGBM")
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "LightGBM"
-        self.cpp_info.names["cmake_find_package_multi"] = "LightGBM"
 
         self.cpp_info.libs = ["lib_lightgbm"] if is_msvc(self) else ["_lightgbm"]
         if self.settings.os == "Windows":
