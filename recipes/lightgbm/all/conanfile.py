@@ -70,7 +70,7 @@ class LightGBMConan(ConanFile):
                                             "available in Apple Clang")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.18 <4]")
+        self.tool_requires("cmake/[>=3.18]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
