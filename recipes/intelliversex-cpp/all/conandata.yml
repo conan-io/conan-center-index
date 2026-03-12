@@ -1,0 +1,4 @@
+sources:
+  "5.1.0":
+    url: "https://github.com/intelli-verse-x/Intelli-verse-X-Unity-SDK/archive/refs/tags/v5.1.0.tar.gz"
+    sha256: "806e969c85d5fe716b9651ddac0a74d4368b267d971ce53652cfcd0114f51ee8"
