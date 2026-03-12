@@ -45,6 +45,7 @@ class ZxcConan(ConanFile):
         tc.cache_variables["ZXC_BUILD_CLI"] = False
         tc.cache_variables["ZXC_BUILD_TESTS"] = False
         tc.cache_variables["ZXC_ENABLE_LTO"] = False
+        tc.cache_variables["FIND_PACKAGE_DISABLE_Doxygen"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
