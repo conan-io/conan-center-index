@@ -162,7 +162,7 @@ class IceoryxConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "etc"))
         # bring to default package structure
         if Version(self.version) >= "2.0.0":
-            include_paths = ["iceoryx_binding_c", "iceoryx_hoofs", "iceoryx_posh", "iceoryx_versions.hpp"]
+            include_paths = ["iceoryx_binding_c", "iceoryx_hoofs", "iceoryx_posh", "iceoryx_versions.hpp", "iceoryx_platform", "iox", "iceoryx_versions.h"]
             for include_path in include_paths:
                 rename(self, os.path.join(self.package_folder, "include", "iceoryx", f"v{self.version}", include_path),
                              os.path.join(self.package_folder, "include", include_path))
