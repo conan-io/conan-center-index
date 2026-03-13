@@ -48,6 +48,8 @@ class GlslangConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) >= "1.4.328.1":
+            del self.options.spv_remapper
 
     def configure(self):
         if self.options.shared:
@@ -90,7 +92,7 @@ class GlslangConan(ConanFile):
         tc.variables["BUILD_EXTERNAL"] = False
         tc.variables["SKIP_GLSLANG_INSTALL"] = False
         tc.cache_variables["GLSLANG_ENABLE_INSTALL"] = True
-        tc.variables["ENABLE_SPVREMAPPER"] = self.options.spv_remapper
+        tc.variables["ENABLE_SPVREMAPPER"] = self.options.get_safe("spv_remapper")
         tc.variables["ENABLE_GLSLANG_BINARIES"] = self.options.build_executables
         tc.variables["ENABLE_GLSLANG_JS"] = False
         tc.variables["ENABLE_GLSLANG_WEBMIN"] = False
@@ -217,7 +219,7 @@ class GlslangConan(ConanFile):
             self.cpp_info.components["glslang-core"].requires.append("hlsl")
 
         # SPVRemapper
-        if self.options.spv_remapper:
+        if self.options.get_safe("spv_remapper"):
             self.cpp_info.components["spvremapper"].set_property("cmake_target_name", "glslang::SPVRemapper")
             self.cpp_info.components["spvremapper"].libs = [f"SPVRemapper{lib_suffix}"]
 
