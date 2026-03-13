@@ -1,4 +1,7 @@
 sources:
+  "2.15.2":
+    url: "https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.2.tar.xz"
+    sha256: "c8b9bc81f8b590c33af8cc6c336dbff2f53409973588a351c95f1c621b13d09d"
   "2.15.1":
     url: "https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.1.tar.xz"
     sha256: "c008bac08fd5c7b4a87f7b8a71f283fa581d80d80ff8d2efd3b26224c39bc54c"
