@@ -23,7 +23,7 @@ class LibZipConan(ConanFile):
         "with_bzip2": [True, False],
         "with_lzma": [True, False],
         "with_zstd": [True, False],
-        "crypto": [False, "win32", "openssl", "mbedtls", "gnutls"],
+        "crypto": [False, "win32", "openssl", "mbedtls", "gnutls", "CommonCrypto"],
         "tools": [True, False],
     }
     default_options = {
@@ -40,6 +40,10 @@ class LibZipConan(ConanFile):
     def _has_zstd_support(self):
         return Version(self.version) >= "1.8.0"
 
+    @property
+    def _is_apple_os(self):
+        return self.settings.os in ["Macos", "iOS", "tvOS", "watchOS", "visionOS"]
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -51,6 +55,10 @@ class LibZipConan(ConanFile):
         # Default crypto backend on windows
         if self.settings.os == "Windows":
             self.options.crypto = "win32"
+
+        # Default crypto backend on apple platforms
+        if self._is_apple_os:
+            self.options.crypto = "CommonCrypto"
 
     def configure(self):
         if self.options.shared:
@@ -84,6 +92,9 @@ class LibZipConan(ConanFile):
         if self.options.crypto == "win32" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Windows is required to use win32 crypto libraries")
 
+        if self.options.crypto == "CommonCrypto" and not self._is_apple_os:
+            raise ConanInvalidConfiguration("CommonCrypto is only available on Apple platforms")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
@@ -105,7 +116,7 @@ class LibZipConan(ConanFile):
             tc.extra_cflags.append("-Wno-incompatible-pointer-types")
         if self._has_zstd_support:
             tc.variables["ENABLE_ZSTD"] = self.options.with_zstd
-        tc.variables["ENABLE_COMMONCRYPTO"] = False  # TODO: We need CommonCrypto package
+        tc.variables["ENABLE_COMMONCRYPTO"] = self.options.crypto == "CommonCrypto"
         tc.variables["ENABLE_GNUTLS"] = self.options.crypto == "gnutls"
         tc.variables["ENABLE_MBEDTLS"] = self.options.crypto == "mbedtls"
         tc.variables["ENABLE_OPENSSL"] = self.options.crypto == "openssl"
