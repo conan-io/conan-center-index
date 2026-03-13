@@ -1,7 +1,7 @@
 sources:
-  "16.8":
-    url: "https://ftp.postgresql.org/pub/source/v16.8/postgresql-16.8.tar.bz2"
-    sha256: "9468083a56ce0ee7d294601b74dad3dd9fc69d87aff61f0a9fb63c813ff7efd8"
+  "16.13":
+    url: "https://ftp.postgresql.org/pub/source/v16.13/postgresql-16.13.tar.bz2"
+    sha256: "dc2ddbbd245c0265a689408e3d2f2f3f9ba2da96bd19318214b313cdd9797287"
   "15.17":
     url: "https://ftp.postgresql.org/pub/source/v15.17/postgresql-15.17.tar.bz2"
     sha256: "ae14f24c14727e0b2ded1c5553031666099bd1054db3ef44bfa6e2bd6d554a56"
