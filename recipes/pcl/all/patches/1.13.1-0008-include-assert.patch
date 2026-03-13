@@ -1,0 +1,73 @@
+diff --git a/common/include/pcl/common/gaussian.h b/common/include/pcl/common/gaussian.h
+index 8742ed32b..28c623af4 100644
+--- a/common/include/pcl/common/gaussian.h
++++ b/common/include/pcl/common/gaussian.h
+@@ -45,6 +45,8 @@
+ 
+ #include <functional>
+ 
++#include <cassert>
++
+ namespace pcl
+ {
+   /** Class GaussianKernel assembles all the method for computing, 
+diff --git a/common/include/pcl/common/impl/gaussian.hpp b/common/include/pcl/common/impl/gaussian.hpp
+index 3b9c20b22..f8ecab25c 100644
+--- a/common/include/pcl/common/impl/gaussian.hpp
++++ b/common/include/pcl/common/impl/gaussian.hpp
+@@ -40,6 +40,7 @@
+ #pragma once
+ 
+ #include <pcl/common/gaussian.h>
++#include <cassert>
+ 
+ namespace pcl
+ {
+diff --git a/common/src/colors.cpp b/common/src/colors.cpp
+index 4d53ab130..ba0c1144f 100644
+--- a/common/src/colors.cpp
++++ b/common/src/colors.cpp
+@@ -39,6 +39,7 @@
+ #include <pcl/common/colors.h>
+ 
+ #include <array>
++#include <cassert>
+ 
+ /// Glasbey lookup table
+ static constexpr std::array<unsigned char, 256 * 3> GLASBEY_LUT =
+diff --git a/common/src/gaussian.cpp b/common/src/gaussian.cpp
+index 69bbd1253..2b6a66716 100644
+--- a/common/src/gaussian.cpp
++++ b/common/src/gaussian.cpp
+@@ -36,6 +36,7 @@
+  */
+ 
+ #include <pcl/common/gaussian.h>
++#include <cassert>
+ 
+ void 
+ pcl::GaussianKernel::compute (float sigma, 
+diff --git a/common/src/range_image_planar.cpp b/common/src/range_image_planar.cpp
+index 97b249bc7..80f4ce1d1 100644
+--- a/common/src/range_image_planar.cpp
++++ b/common/src/range_image_planar.cpp
+@@ -34,6 +34,7 @@
+ 
+ /** \author Bastian Steder */
+ 
++#include <cassert>
+ #include <iostream>
+ using std::cout;
+ using std::cerr;
+diff --git a/kdtree/include/pcl/kdtree/kdtree.h b/kdtree/include/pcl/kdtree/kdtree.h
+index 3a72725ee..a141d55b8 100644
+--- a/kdtree/include/pcl/kdtree/kdtree.h
++++ b/kdtree/include/pcl/kdtree/kdtree.h
+@@ -43,6 +43,7 @@
+ #include <pcl/point_cloud.h>
+ #include <pcl/point_representation.h>
+ #include <pcl/common/copy_point.h>
++#include <cassert>
+ 
+ namespace pcl
+ {
