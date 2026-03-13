@@ -1,0 +1,4 @@
+sources:
+  "1.18.0":
+    url: "https://github.com/NVIDIA/cudnn-frontend/archive/refs/tags/v1.18.0.tar.gz"
+    sha256: "122dde9e9ee37cc05d626097b3c85d507be0db3f73ee196baa5a034069460517"

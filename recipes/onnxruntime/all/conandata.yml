@@ -1,13 +1,14 @@
 sources:
-  "1.23.2":
-    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.23.2.tar.gz"
-    sha256: "99bcf964ce4e869d823c99b2294562a9050cbfa8e76ec81c8683cb3c7e19c2b4"
+  "1.24.2":
+    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.24.2.tar.gz"
+    sha256: "e4f44579f0bdd06d1cc7abdb2a6740dc06ac10699d502c0f8d9576203550bd4d"
 patches:
-  "1.23.2":
+  "1.24.2":
     - patch_file: "patches/fix-cutlass-cuda-provider.patch"
     - patch_file: "patches/cmake-cxx-standard.patch"
+    - patch_file: "patches/fix-logging-ortchar.patch"
 
 # ONNX versions are based on the minor version used at
 # https://github.com/microsoft/onnxruntime/tree/main/cmake/external
 onnx_version_map:
-  "1.23.2": "1.20.0"
+  "1.24.2": "1.20.0"
