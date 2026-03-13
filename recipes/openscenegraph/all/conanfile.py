@@ -204,17 +204,25 @@ class OpenSceneGraphConanFile(ConanFile):
 
         # Disable option dependencies unless we have a package for them
         tc.cache_variables["OSG_WITH_FREETYPE"] = self.options.with_freetype
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Freetype"] = not self.options.with_freetype        
         tc.cache_variables["OSG_WITH_OPENEXR"] = self.options.get_safe("with_openexr", False)
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_OpenEXR"] = not self.options.get_safe("with_openexr", False)
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Inventor"] = True
         tc.cache_variables["OSG_WITH_JASPER"] = self.options.with_jasper
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Jasper"] = not self.options.with_jasper
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_OpenCascade"] = True
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_FBX"] = True
-        tc.cache_variables["OSG_WITH_ZLIB"] = self.options.with_zlib # okay OSG_WITH_ZLIB
+        tc.cache_variables["OSG_WITH_ZLIB"] = self.options.with_zlib
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_ZLIB"] = not self.options.with_zlib
         tc.cache_variables["OSG_WITH_GDAL"] = self.options.with_gdal
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_GDAL"] = not self.options.with_gdal
         tc.cache_variables["OSG_WITH_GTA"] = self.options.with_gta
-        tc.cache_variables["OSG_WITH_CURL"] = self.options.with_curl # Okay OSG_WITH_CURL
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_GTA"] = not self.options.with_gta
+        tc.cache_variables["OSG_WITH_CURL"] = self.options.with_curl
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = not self.options.with_curl
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_LibVNCServer"] = True
-        tc.cache_variables["OSG_WITH_DCMTK"] = self.options.get_safe("with_dcmtk", False) # okay OSG_WITH_DCMTK
+        tc.cache_variables["OSG_WITH_DCMTK"] = self.options.get_safe("with_dcmtk", False)
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_DCMTK"] = not self.options.get_safe("with_dcmtk", False)
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_FFmpeg"] = True
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_DirectShow"] = True
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_SDL2"] = True
@@ -224,15 +232,17 @@ class OpenSceneGraphConanFile(ConanFile):
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Asio"] = not self.options.get_safe("with_asio", False)
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_ZeroConf"] = True
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_LIBLAS"] = True
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_GtkGl"] = True
         tc.cache_variables["OSG_WITH_GIFLIB"] = self.options.get_safe("with_gif", False)
-        tc.cache_variables["OSG_WITH_JPEG"] = self.options.get_safe("with_jpeg", False)
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_GIFLIB"] = not self.options.get_safe("with_gif", False)
+        tc.cache_variables["OSG_WITH_JPEG"] = self.options.get_safe("with_jpeg", False)        
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_JPEG"] = not self.options.get_safe("with_jpeg", False)
         tc.cache_variables["OSG_WITH_PNG"] = self.options.get_safe("with_png", False)
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_PNG"] = not self.options.get_safe("with_png", False)
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_TIFF"] = not self.options.with_tiff
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_GLIB"] = True
-
-        if (self.options.get_safe("with_avfoundation")):
-            tc.cache_variables["OSG_WITH_AV_FOUNDATION"] = True
-
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_AVFoundation"] = not self.options.get_safe("with_avfoundation", False)
+    
         if self.settings.os == "Windows":
             # osg has optional quicktime support on Windows
             tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_QuickTime"] = True
