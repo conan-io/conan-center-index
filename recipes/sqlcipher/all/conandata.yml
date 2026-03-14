@@ -14,6 +14,7 @@ sources:
 patches:
   "4.13.0":
     - patch_file: patches/autoconf-Makefile.in-v4.13.0.patch
+    - patch_file: patches/cc.tcl-cross-compile-fallback-v4.13.0.patch
     - patch_file: patches/main.mk-v4.13.0.patch
     - patch_file: patches/Makefile.msc-v4.13.0.patch
     - patch_file: patches/sqlite-config.tcl-v4.13.0.patch
