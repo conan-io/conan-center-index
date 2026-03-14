@@ -1,4 +1,10 @@
 sources:
+  "1.0":
+    url:
+    - "https://ftpmirror.gnu.org/gnu/gettext/gettext-1.0.tar.gz"
+    - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gettext/gettext-1.0.tar.gz"
+    - "https://ftp.gnu.org/pub/gnu/gettext/gettext-1.0.tar.gz"
+    sha256: "85d99b79c981a404874c02e0342176cf75c7698e2b51fe41031cf6526d974f1a"
   "0.26":
     url:
     - "https://ftpmirror.gnu.org/gnu/gettext/gettext-0.26.tar.gz"
@@ -18,6 +24,13 @@ sources:
     - "https://ftp.gnu.org/gnu/gettext/gettext-0.21.tar.gz"
     sha256: "c77d0da3102aec9c07f43671e60611ebff89a996ef159497ce8e59d075786b12"
 patches:
+  "1.0":
+    - patch_file: "patches/1.0-gnulib-relocatable-prog-wrapper.patch"
+      patch_description: "https://github.com/coreutils/gnulib/commit/5b8f646ff514891678cd3d5b9c38b10dc7519c35"
+      base_path: gettext-runtime
+    - patch_file: "patches/1.0-gnulib-relocatable-prog-wrapper.patch"
+      patch_description: "https://github.com/coreutils/gnulib/commit/5b8f646ff514891678cd3d5b9c38b10dc7519c35"
+      base_path: gettext-tools
   "0.22.5":
     - patch_file: "patches/0004-autopoint-relocatable.patch"
       patch_description: "relocatable autopoint with resources relative to script"
