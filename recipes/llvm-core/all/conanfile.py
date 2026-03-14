@@ -5,7 +5,6 @@ from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeConfigDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import (
     apply_conandata_patches,
-    collect_libs,
     get,
     rmdir,
     load,
@@ -89,17 +88,18 @@ def components_from_dotfile(dotfile):
         """
         Using the nodes with labels, extract the component dependencies of each node
         """
-        ignore_deps = [
-            "diaguids.lib" # https://github.com/llvm/llvm-project/issues/86250
-        ]
+        def include_dependency(dep):
+            ignore_deps = [ "diaguids.lib" ] # https://github.com/llvm/llvm-project/issues/86250
+            return PurePosixPath(dep).parts[-1] not in ignore_deps and not dep.startswith("-")
+
         labels = {k: v for k, v in node_labels(dot)}
         for row in dot:
             match_dep = re.match(r'''^\s*"(node[0-9]+)"\s*->\s*"(node[0-9]+)".*''', row)
             if match_dep:
                 node_label = labels[match_dep.group(1)]
                 dependency = labels[match_dep.group(2)]
-                if node_label.startswith("LLVM") and PurePosixPath(dependency).parts[-1] not in ignore_deps:
-                    yield node_label, labels[match_dep.group(2)]
+                if node_label.startswith("LLVM") and include_dependency(dependency):
+                    yield node_label, dependency
         # some components don't have dependencies
         for label in labels.values():
             if label.startswith("LLVM"):
@@ -176,6 +176,7 @@ class LLVMCoreConan(ConanFile):
         "with_xml2": [True, False],
         "with_z3": [True, False],
         "with_zstd": [True, False],
+        "with_tools": [True, False]
     }
     default_options = {
         "shared": False,
@@ -197,6 +198,7 @@ class LLVMCoreConan(ConanFile):
         "with_z3": True,
         "with_zlib": True,
         "with_zstd": True,
+        "with_tools": True
     }
 
     @property
@@ -318,9 +320,8 @@ class LLVMCoreConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self, generator="Ninja")
-        # https://releases.llvm.org/12.0.0/docs/CMake.html
-        # https://releases.llvm.org/13.0.0/docs/CMake.html
         # https://releases.llvm.org/19.1.0/docs/CMake.html
+        # https://releases.llvm.org/21.1.0/docs/CMake.html
         cmake_variables = {
             # Enables LLVM to find conan libraries during try_compile
             "CMAKE_TRY_COMPILE_CONFIGURATION": str(self.settings.build_type),
@@ -334,7 +335,7 @@ class LLVMCoreConan(ConanFile):
             "LLVM_DYLIB_COMPONENTS": self.options.components,
             "LLVM_ABI_BREAKING_CHECKS": "WITH_ASSERTS",
             "LLVM_INCLUDE_BENCHMARKS": False,
-            "LLVM_INCLUDE_TOOLS": True,
+            "LLVM_BUILD_TOOLS": self.options.with_tools,
             "LLVM_INCLUDE_EXAMPLES": False,
             "LLVM_INCLUDE_TESTS": False,
             "LLVM_ENABLE_IDE": False,
@@ -409,6 +410,8 @@ class LLVMCoreConan(ConanFile):
             set(GRAPHVIZ_EXECUTABLES OFF)
             set(GRAPHVIZ_MODULE_LIBS OFF)
             set(GRAPHVIZ_OBJECT_LIBS OFF)
+            set(GRAPHVIZ_GENERATE_PER_TARGET OFF)
+            set(GRAPHVIZ_GENERATE_DEPENDERS OFF)
             set(GRAPHVIZ_IGNORE_TARGETS "{';'.join(exclude_patterns)}")
         """)
         save(self, PurePosixPath(self.build_folder) / "CMakeGraphVizOptions.cmake", graphviz_options)
@@ -490,6 +493,14 @@ class LLVMCoreConan(ConanFile):
         with open(self._build_info_file, encoding="utf-8") as fp:
             return json.load(fp)
 
+    @property
+    def _required_libs_in_shared_build(self):
+        # some static libraries are required to build downstream packages
+        # like clang even on a shared build
+        # See https://discourse.llvm.org/t/rfc-llvm-link-llvm-dylib-should-default-to-on-on-posix-platforms/85908
+        # for some background on this
+        return ["LLVMSupport", "LLVMTableGen", "LLVMDemangle", "LLVM", "LTO", "Remarks"]
+
     def package(self):
         copy(self, "LICENSE.TXT", self._llvm_source_folder_path, self._package_folder_path / "licenses")
         cmake = CMake(self)
@@ -508,8 +519,12 @@ class LLVMCoreConan(ConanFile):
         rename(self, cmake_folder / "LLVM-Config.cmake", cmake_folder / "LLVM-ConfigInternal.cmake")
         replace_in_file(self, cmake_folder / "AddLLVM.cmake", "LLVM-Config", "LLVM-ConfigInternal")
         rmdir(self, self._package_folder_path / "share")
+
+
         if self.options.shared:
-            rm(self, "*.a", self._package_folder_path / "lib")
+            for lib in build_info["components"].keys():
+                if lib not in self._required_libs_in_shared_build:
+                    rm(self, f"*{lib}*.a", self._package_folder_path / "lib")
 
         self._create_cmake_build_module(
             build_info,
@@ -517,37 +532,54 @@ class LLVMCoreConan(ConanFile):
         )
 
     def package_info(self):
+        def requirements_of_shared_lib():
+            for component_name, data in build_info["components"].items():
+                for requirement in data["requires"]:
+                    if not requirement.startswith("LLVM"):
+                        yield requirement
+
+        def components():
+            for component_name, data in build_info["components"].items():
+                if self.options.shared:
+                    components_for_shared_build = self._required_libs_in_shared_build
+                    if component_name in components_for_shared_build:
+                        yield component_name, data
+                else:
+                    yield component_name, data
+
         self.cpp_info.set_property("cmake_file_name", "LLVM")
         self.cpp_info.set_property("cmake_build_modules",
                                    [self._build_module_file_rel_path,
                                     self._cmake_module_path / "LLVM-ConfigInternal.cmake"]
                                    )
         build_info = self._read_build_info()
-        components = build_info["components"]
         targets_with_jit = ["X86", "PowerPC", "AArch64", "ARM", "Mips", "SystemZ"]
+        def to_cmake_bool(value):
+            return "ON" if value else "OFF"
+
         self.cpp_info.set_property("cmake_extra_variables", {
             "LLVM_TOOLS_BINARY_DIR": (Path(self.package_folder) / "bin").as_posix(),
             "LLVM_PACKAGE_VERSION": self.version,
             "LLVM_AVAILABLE_LIBS": ";".join(build_info['components'].keys()),
             "LLVM_BUILD_TYPE": str(self.settings.build_type),
             "LLVM_CMAKE_DIR": (Path(self.package_folder) / self._cmake_module_path).as_posix(),
+            "LLVM_DYLIB_COMPONENTS": str(self.options.components),
             "LLVM_ALL_TARGETS": self._all_targets,
             "LLVM_TARGETS_TO_BUILD": str(self._targets_to_build),
             "LLVM_TARGETS_WITH_JIT": ";".join(targets_with_jit),
             "LLVM_NATIVE_ARCH": build_info['native_arch'],
-            "LLVM_ENABLE_RTTI": bool(self.options.rtti),
-            "LLVM_ENABLE_PIC": bool(self.options.get_safe("fPIC", default=True)),
-            "LLVM_LINK_LLVM_DYLIB": bool(self.options.shared),
+            "LLVM_ENABLE_RTTI": to_cmake_bool(bool(self.options.rtti)),
+            "LLVM_ENABLE_PIC": to_cmake_bool(bool(self.options.get_safe("fPIC", default=True))),
+            "LLVM_LINK_LLVM_DYLIB": to_cmake_bool(bool(self.options.shared)),
         })
 
         self.cpp_info.builddirs.append(self._cmake_module_path)
 
-        if not self.options.shared:
-            for component_name, data in components.items():
-                self.cpp_info.components[component_name].set_property("cmake_target_name", component_name)
-                self.cpp_info.components[component_name].libs = [component_name]
+        for component_name, data in components():
+            self.cpp_info.components[component_name].set_property("cmake_target_name", component_name)
+            self.cpp_info.components[component_name].libs = [component_name]
+            if self.options.shared and component_name == "LLVM":
+                self.cpp_info.components[component_name].requires = list(set(requirements_of_shared_lib()))
+            else:
                 self.cpp_info.components[component_name].requires = data["requires"]
-                self.cpp_info.components[component_name].system_libs = data["system_libs"]
-        else:
-            self.cpp_info.set_property("cmake_target_name", "LLVM")
-            self.cpp_info.libs = collect_libs(self)
+            self.cpp_info.components[component_name].system_libs = data["system_libs"]
