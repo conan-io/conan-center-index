@@ -1,0 +1,21 @@
+Upstream PR: https://github.com/google-deepmind/mujoco/pull/3102
+---
+ src/engine/engine_print.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/engine/engine_print.c b/src/engine/engine_print.c
+index b2143c9c..b7d2b573 100644
+--- a/src/engine/engine_print.c
++++ b/src/engine/engine_print.c
+@@ -479,7 +479,7 @@ static bool validateFloatFormat(const char* float_format) {
+   // flag characters. allow at most one of each flag
+   const char flag_characters[] = "-+ #0";
+   int flag_character_counts[sizeof(flag_characters)] = { 0 };
+-  char* c;
++  const char* c;
+   while (c = strchr(flag_characters, float_format[cur_idx]), c != NULL) {
+     int flag_idx = (c - flag_characters)/sizeof(char);
+     flag_character_counts[flag_idx]++;
+-- 
+2.53.0
+

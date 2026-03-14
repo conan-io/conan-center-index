@@ -1,0 +1,21 @@
+Upstream PR: https://github.com/google-deepmind/mujoco/pull/3069
+---
+ src/user/user_init.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/user/user_init.c b/src/user/user_init.c
+index 82db341b..3b3c1b1e 100644
+--- a/src/user/user_init.c
++++ b/src/user/user_init.c
+@@ -268,7 +268,7 @@ void mjs_defaultTexture(mjsTexture* texture) {
+   texture->gridsize[0] = texture->gridsize[1] = 1;
+   texture->nchannel = 3;
+   char defaultlayout[sizeof(texture->gridlayout)] = "............";
+-  strncpy(texture->gridlayout, defaultlayout, sizeof(texture->gridlayout));
++  memcpy(texture->gridlayout, defaultlayout, sizeof(texture->gridlayout));
+ }
+ 
+ 
+-- 
+2.53.0
+

@@ -1,0 +1,11 @@
+sources:
+  "3.5.0":
+    url: "https://github.com/google-deepmind/mujoco/archive/refs/tags/3.5.0.tar.gz"
+    sha256: "ce6208a7889049161516c20afea5f587ed17ecad3f32e68f6647c08094f99577"
+patches:
+  "3.5.0":
+    - patch_file: "patches/0001-Fix-const-qualifier-error.patch"
+    - patch_file: "patches/0002-Fix-strncpy-truncation-warning.patch"
+    - patch_file: "patches/0003-Fix-include-headers.patch"
+    - patch_file: "patches/0004-Fix-dependencies.patch"
+    - patch_file: "patches/0005-Disable-forced-LTO.patch"
