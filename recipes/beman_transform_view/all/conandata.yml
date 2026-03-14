@@ -1,0 +1,5 @@
+sources:
+  "0.1.0":
+    url:
+      - "https://github.com/elvisdukaj/transform_view/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "8aec88c7685b314f9c46fbbeee3cbcb6ea6989681cd1bb4ed50f8f500d35a4f1"
