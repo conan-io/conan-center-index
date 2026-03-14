@@ -5,8 +5,3 @@ sources:
   "0.5.9.20250824.cci.20251209":
     url: "https://github.com/pistacheio/pistache/archive/8a1ac9059617d2e3c782f4b0afcdf9f55bb91a0a.tar.gz"
     sha256: "4343d082ab0a4c64c92d0930dbf8c36b591228864be50d2f85c2d6fddc421d81"
-patches:
-  "0.5.9.20250824.cci.20251209":
-    - patch_file: "patches/0001-fix-libevent-extern-c-linkage.patch"
-      patch_description: "Added extern C forward declaration for eventCallbackFn to fix linkage issues with libevent"
-      patch_type: "conan"
