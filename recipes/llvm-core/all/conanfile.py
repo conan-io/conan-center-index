@@ -75,6 +75,7 @@ def components_from_dotfile(dotfile):
             "LibXml2::LibXml2": "libxml2::libxml2",
             "ZLIB::ZLIB": "zlib::zlib",
             "zstd::libzstd_static": "zstd::zstdlib",
+            "zstd::libzstd_shared": "zstd::zstdlib",
             "-lpthread": "pthread"
         }
         for row in dot:
