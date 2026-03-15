@@ -1,10 +1,11 @@
 from conan import ConanFile
-from conan.tools.files import copy, get, save
-from conan.tools.layout import basic_layout
+from conan.tools.files import copy, get, rmdir
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.scm import Version
 import os
-import textwrap
 
-required_conan_version = ">=1.50.0"
+
+required_conan_version = ">=2.1"
 
 
 class UtfCppConan(ConanFile):
@@ -19,7 +20,7 @@ class UtfCppConan(ConanFile):
     no_copy_source = True
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -27,42 +28,37 @@ class UtfCppConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if Version(self.version) < "4.0":
+            tc.cache_variables["UTF8_TESTS"] = False
+            tc.cache_variables["UTF8_SAMPLES"] = False
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "*.h", src=os.path.join(self.source_folder, "source"),
-                          dst=os.path.join(self.package_folder, "include", "utf8cpp"))
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {"utf8cpp":   "utf8cpp::utf8cpp",
-             "utf8::cpp": "utf8cpp::utf8cpp"},
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "utf8cpp")
-        self.cpp_info.set_property("cmake_target_name", "utf8cpp")
-        self.cpp_info.set_property("cmake_target_aliases", ["utf8::cpp"])
-        self.cpp_info.includedirs.append(os.path.join("include", "utf8cpp"))
+        if Version(self.version) >= "4.0":
+            self.cpp_info.set_property("cmake_target_name", "utf8cpp::utf8cpp")
+            # FIXME: Keep CMake target utf8cpp for backward compatibility as more projects are using it in CCI.
+            self.cpp_info.set_property("cmake_target_aliases", ["utf8::cpp", "utf8cpp"])
+        else:
+            self.cpp_info.set_property("cmake_target_name", "utf8cpp")
+            self.cpp_info.set_property("cmake_target_aliases", ["utf8::cpp"])
+
+        if Version(self.version) != "4.0.1":
+            # INFO: https://github.com/nemtrif/utfcpp/issues/112
+            self.cpp_info.includedirs.append(os.path.join("include", "utf8cpp"))
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-            self.cpp_info.names[generator] = "utf8cpp"
-            self.cpp_info.build_modules[generator] = [self._module_file_rel_path]
