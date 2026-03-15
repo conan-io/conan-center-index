@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeConfigDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
@@ -25,12 +25,14 @@ class LevelDBCppConan(ConanFile):
         "fPIC": [True, False],
         "with_snappy": [True, False],
         "with_crc32c": [True, False],
+        "with_zstd": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_snappy": True,
         "with_crc32c": True,
+        "with_zstd": True,
     }
 
     def export_sources(self):
@@ -55,6 +57,8 @@ class LevelDBCppConan(ConanFile):
             self.requires("snappy/1.1.10")
         if self.options.with_crc32c:
             self.requires("crc32c/1.1.2")
+        if self.options.with_zstd:
+            self.requires("zstd/1.5.7")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -69,8 +73,15 @@ class LevelDBCppConan(ConanFile):
         tc.variables["LEVELDB_BUILD_BENCHMARKS"] = False
         tc.variables["HAVE_SNAPPY"] = self.options.with_snappy
         tc.variables["HAVE_CRC32C"] = self.options.with_crc32c
+        tc.variables["HAVE_ZSTD"] = self.options.with_zstd
         tc.generate()
-        deps = CMakeDeps(self)
+        deps = CMakeConfigDeps(self)
+        if self.options.with_snappy:
+            deps.set_property("snappy", "cmake_target_name", "snappy")
+        if self.options.with_crc32c:
+            deps.set_property("crc32c", "cmake_target_name", "crc32c")
+        if self.options.with_zstd:
+            deps.set_property("zstd", "cmake_target_name", "zstd")
         deps.generate()
 
     def build(self):
