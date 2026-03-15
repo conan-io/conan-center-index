@@ -27,6 +27,10 @@ class ZxcConan(ConanFile):
     implements = ["auto_shared_fpic"]
     languages = "C"
 
+    def configure(self):
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
     def requirements(self):
         self.requires("rapidhash/[>=3.0 <4]")
 
