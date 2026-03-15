@@ -2,9 +2,10 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class UsrsctpConan(ConanFile):
@@ -44,6 +45,7 @@ class UsrsctpConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -52,17 +54,11 @@ class UsrsctpConan(ConanFile):
         tc.variables["sctp_build_shared_lib"] = self.options.shared
         tc.variables["sctp_build_programs"] = False
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
+        if Version(self.version) == "0.9.5.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # Fix "The CMake policy CMP0091 must be NEW, but is ''"
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "project(usrsctplib C)\ncmake_minimum_required(VERSION 3.0)",
-                        "cmake_minimum_required(VERSION 3.15)\nproject(usrsctplib C)")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
