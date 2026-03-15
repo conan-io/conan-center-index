@@ -1,0 +1,243 @@
+version: 29.0
+#----------------------------------------------------------------------------
+components:
+  - algo
+  - algo-ms
+  - algo-structure
+  - align-format
+  - bamread
+  - blast
+  - core
+  - dbapi
+  - eutils
+  - grpc
+  - image
+  - loader-asncache
+  - loader-bam
+  - loader-blastdb
+  - loader-cdd
+  - loader-genbank
+  - loader-lds2
+  - loader-snp
+  - loader-sra
+  - loader-wgs
+  - loaders
+  - objects
+  - psg-client
+  - psg-server
+  - seqext
+  - sqlitewrapp
+  - sraread
+  - xmlwrapp
+  - web
+#----------------------------------------------------------------------------
+libraries:
+  algo:     ["ncbi_algo",
+                  "prosplign","xalgoalignsplign",
+                  "cobalt","proteinkmer","xalgocontig_assembly","xalgoalignutil","xblastformat",
+                  "phytree_format","xblast","xalgoseqqa",
+                  "xprimer","xalgognomon","xalgowinmask",
+                  "xalgoblastdbindex","xalgophytree","xalgoseq",
+                  "xalgoalignnw","xalgodustmask","xalgosegmask","xid_mapper",
+                  "xalgotext","composition_adjustment","fastme",
+             "utrtprof"
+            ]
+  algo-ms:  ["ncbi_algo_ms",
+                "xomssa","omssa","pepXML"
+            ]
+  algo-structure:
+            ["ncbi_algo_structure",
+                "xcd_utils","xstruct_util","xstruct_thread","xstruct_dp"
+            ]
+  align-format:
+            ["xalntool",
+             "ncbi_align_format",
+                "align_format"
+            ]
+  bamread:  ["bamread"]
+  blast:    ["xngalign","vdb2blast",
+             "igblast",
+             "ncbi_blastinput",
+                "blastinput",
+             "blast_sra_input",
+             "xmergetree",
+             "xalgoblastdbindex_search",
+             "gumbelparams"
+            ]
+  core:     ["xconnext","xxconnect2","xalgovmerge", "ncbi_xcache_netcache",
+             "ncbi_core",
+                "xconnserv","xcompress","xthrserv","xregexp","xser",
+                "sequtil","xconnect","xdiff","xqueryparse","xutil",
+                "tables","xncbi",
+             "zcf"
+            ]
+  dbapi:    ["sdbapi",
+             "dbapi_util_blobstore",
+             "ncbi_xdbapi_ftds","ncbi_xdbapi_ftds14","ncbi_xdbapi_ftds100",
+             "ncbi_dbapi",
+                "dbapi",
+             "ncbi_dbapi_driver",
+                "dbapi_driver",
+             "ct_ftds14", "tds_ftds14","ct_ftds100", "tds_ftds100"
+            ]
+  eutils:   ["eutils_client",
+             "ncbi_eutils",
+                "eutils", "egquery", "ehistory", "einfo", "elink",
+                "epost", "esearch", "espell", "esummary", 
+                "linkout", "uilist"
+            ]
+  grpc:     ["grpc_integration"]
+  image:    ["ncbi_image",
+                "ximage"
+            ]
+  loader-asncache:
+            [
+             "ncbi_xloader_asn_cache",
+             "asn_cache",
+             "ncbi_xcache_bdb",
+             "ncbi_bdb",
+                "bdb"
+            ]
+  loader-bam: ["ncbi_xloader_bam"]
+  loader-blastdb:
+            ["ncbi_xloader_blastdb_rmt",
+             "ncbi_xloader_blastdb"
+            ]
+  loader-cdd:
+            ["ncbi_xloader_cdd",
+             "cdd_access"
+            ]
+  loader-genbank:
+            [
+             "ncbi_xobjsimple",
+                "xobjsimple",
+             "ncbi_xloader_genbank",
+             "ncbi_xreader_cache",
+             "ncbi_xreader_gicache",
+             "ncbi_xreader_id1",
+             "ncbi_xreader_id2",
+             "ncbi_xreader_pubseqos",
+             "ncbi_xreader_pubseqos2",
+             "ncbi_xreader",
+             "eMyNCBI_result"
+            ]
+  loader-lds2:
+            ["ncbi_xloader_lds2",
+             "ncbi_lds2",
+                "lds2"
+            ]
+  loader-snp: ["ncbi_xloader_snp", "dbsnp_ptis"]
+  loader-sra: ["ncbi_xloader_sra", "ncbi_xloader_csra"]
+  loader-wgs: ["ncbi_xloader_vdbgraph", "ncbi_xloader_wgs"]
+  loaders:  ["xflatfile",
+             "data_loaders_util",
+             "ncbi_xloader_patcher"
+            ]
+  objects:  ["searchbyrsid",
+             "ncbi_trackmgr",
+                "gbproj","trackmgrcli","trackmgr",
+             "ncbi_mmdb",
+                "ncbimime","cdd","cn3d","mmdb",
+             "pcassay2",
+             "ncbi_misc",
+                "proj","remapcli","remap","pcassay","entrezgene",
+                "pcsubstance","entrez2cli","biotree",
+                "access","docsum","entrez2","featdef","gbseq",
+                "genesbyloc","insdseq","mim","objcoords","objprt",
+                "tinyseq",
+             "gencoll_client",
+             "local_taxon",
+             "macro",
+             "homologene",
+             "ncbi_seq",
+                "blastdb","xnetblastcli","xnetblast",
+                "scoremat","seqedit","submit",
+                "genome_collection","seqtest","taxon1","taxon3","variation","seqset",
+                "seq","blastxml","blastxml2","seqcode",
+             "efetch",
+             "ncbi_pub",
+                "pub","pubmed","medlars","medline","biblio",
+             "ncbi_general",
+                "generalasn"
+            ]
+  psg-client:   ["psg_client"
+                ]
+  psg-server:   ["psg_cache", "psg_ipg", "psg_myncbi", "psg_cassandra", "psg_protobuf"
+                ]
+  seqext:   ["ncbi_validator",
+                "xvalidate",
+             "ncbi_xdiscrepancy",
+                "xdiscrepancy",
+             "ncbi_seqext",
+                "xobjwrite","xformat",
+                "blastdb_format","writedb","seqmasks_io","xcleanup",
+                "blast_services","seqdb","variation_utils","xalnmgr","xobjedit",
+                "xobjreadex","xobjimport","xunittestutil",
+                "id2cli","id2_split","snputil","uudutil","xhugeasn","xobjutil",
+                "xobjread","id2","id1cli","xobjmgr","id1","seqsplit","valerr",
+                "xobjmanip","valid","xlogging"
+            ]
+  sqlitewrapp:  ["sqlitewrapp"]
+  sraread:  ["srareadx", "sraread"]
+  xmlwrapp: ["xmlreaders",
+             "xmlwrapp"
+            ]
+  web:      ["xsoap_server", "xsoap",
+             "ncbi_web",
+                "xcgi_redirect","xcgi","xhtml"
+            ]
+#----------------------------------------------------------------------------
+requirements:
+  bamread:      ["VDB"]
+  bdb:          ["BerkeleyDB"]
+  blast_sra_input: ["VDB"]
+  dbsnp_ptis:   ["GRPC"]
+  grpc_integration: ["GRPC"]
+  psg_protobuf: ["GRPC"]
+  psg_cassandra: ["CASSANDRA"]
+  seqdb:        ["LMDB"]
+  sqlitewrapp:  ["SQLITE3"]
+  sraread:      ["VDB"]
+  tds_ftds100:  ["Iconv"]
+  tds_ftds14:   ["Iconv"]
+  vdb2blast:    ["VDB"]
+  writedb:      ["LMDB"]
+  xcompress:    ["Z", "BZ2", "LZO", "ZSTD"]
+  xregexp:      ["PCRE", "PCRE2"]
+  ximage:       ["Z", "JPEG", "PNG", "GIF", "TIFF"]
+  xmlwrapp:     ["XML", "XSLT"]
+  xncbi:        ["BACKWARD", "UNWIND"]
+  xconnext:     ["NCBICRYPT"]
+  xxconnect2:   ["UV", "NGHTTP2"]
+  xfcgi:        ["FASTCGI"]
+#----------------------------------------------------------------------------
+dependencies:
+  algo:         ["align-format","sqlitewrapp"]
+  algo-ms:      ["algo"]
+  algo-structure: ["algo","objects"]
+  align-format: ["loader-genbank", "web"]
+  bamread:      ["objects"]
+  blast:        ["loader-blastdb", "algo", "sraread"]
+  core:         []
+  dbapi:        ["core"]
+  eutils:       ["objects","xmlwrapp"]
+  grpc:         ["core"]
+  image:        ["core"]
+  loader-asncache:  ["seqext"]
+  loader-bam:       ["bamread", "seqext"]
+  loader-blastdb:   ["seqext"]
+  loader-cdd:       ["seqext"]
+  loader-genbank:   ["psg-client", "dbapi"]
+  loader-lds2:      ["seqext", "sqlitewrapp"]
+  loader-snp:       ["sraread", "grpc"]
+  loader-sra:       ["sraread"]
+  loader-wgs:       ["sraread"]
+  loaders:      ["loader-asncache", "loader-blastdb", "loader-genbank", "loader-lds2"]
+  objects:      ["sqlitewrapp","core"]
+  psg-client:   ["seqext"]
+  psg-server:   ["objects","xmlwrapp"]
+  seqext:       ["eutils", "objects"]
+  sqlitewrapp:  ["core"]
+  sraread:      ["seqext"]
+  xmlwrapp:     ["core"]
+  web:          ["core"]
