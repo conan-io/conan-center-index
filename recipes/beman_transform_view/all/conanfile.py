@@ -5,6 +5,8 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy
 import os
 
+from conan.tools.layout import basic_layout
+
 required_conan_version = ">=2"
 
 
@@ -21,22 +23,34 @@ class BemanTransformViewConan(ConanFile):
     options = {
         "header_only": [True, False],
         "shared": [True, False],
+        "fPIC": [True, False],
     }
     default_options = {
         "header_only": True,
         "shared": False,
+        "fPIC": False,
     }
 
     def validate(self):
-        if self.options.get_sage("shared"):
+        if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, "23")
 
     def layout(self):
-        cmake_layout(self)
+        if self.options.header_only:
+            basic_layout(self)
+        else:
+            cmake_layout(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.options.header_only:
+            self.options.rm_safe("fPIC")
             self.options.rm_safe("shared")
+        if self.options.get_safe("shared"):
+            self.options.rm_safe("fPIC")
 
     def package_id(self):
         if self.info.options.header_only:
