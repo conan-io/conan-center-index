@@ -104,7 +104,7 @@ class GrpcConan(ConanFile):
         # transitive_libs=True because generated code (grpc_cpp_plugin) require symbols from abseil
         grpc_version = Version(self.version)
         if grpc_version > "1.69.0":
-            self.requires("protobuf/[>=5.27.0 <7]", transitive_headers=True)
+            self.requires("protobuf/[>=5.27.0 <8]", transitive_headers=True)
             self.requires("abseil/[*]", transitive_headers=True, transitive_libs=True)
             self.requires("re2/[>=20251105]")
         elif grpc_version >= "1.65.0":
