@@ -87,13 +87,20 @@ class RocksDBConan(ConanFile):
             self.requires("folly/2024.08.12.00")
 
     def validate(self):
-        check_min_cppstd(self, 17)
+        if self.version >= Version("10.7.0"):
+            check_min_cppstd(self, 20)
+        else:
+            check_min_cppstd(self, 17)
 
         if self.settings.arch not in ["x86_64", "ppc64le", "ppc64", "mips64", "armv8", "riscv64"]:
             raise ConanInvalidConfiguration("Rocksdb requires 64 bits")
 
-        if is_msvc(self) and Version(self.settings.compiler.version) < "191":
-            raise ConanInvalidConfiguration("Rocksdb requires MSVC version >= 191")
+        if is_msvc(self):
+            if self.version >= Version("10.7.0"):
+                if Version(self.settings.compiler.version) < "192":
+                    raise ConanInvalidConfiguration("Rocksdb requires MSVC version >= 192")
+            elif Version(self.settings.compiler.version) < "191":
+                raise ConanInvalidConfiguration("Rocksdb requires MSVC version >= 191")
 
         if self.options.shared and self.options.with_folly:
             # https://github.com/facebook/rocksdb/blob/v10.5.1/CMakeLists.txt#L603
@@ -130,18 +137,11 @@ class RocksDBConan(ConanFile):
         tc.variables["WITH_JEMALLOC"] = self.options.with_jemalloc
 
         tc.variables["ROCKSDB_BUILD_SHARED"] = self.options.shared
-        tc.variables["ROCKSDB_LIBRARY_EXPORTS"] = self.settings.os == "Windows" and self.options.shared
-        tc.variables["ROCKSDB_DLL" ] = self.settings.os == "Windows" and self.options.shared
         tc.variables["USE_RTTI"] = self.options.use_rtti
-        if not bool(self.options.enable_sse):
+        if not bool(self.options.enable_sse) or self.options.enable_sse == "sse42":
             tc.variables["PORTABLE"] = True
-            tc.variables["FORCE_SSE42"] = False
-        elif self.options.enable_sse == "sse42":
-            tc.variables["PORTABLE"] = True
-            tc.variables["FORCE_SSE42"] = True
         elif self.options.enable_sse == "avx2":
             tc.variables["PORTABLE"] = False
-            tc.variables["FORCE_SSE42"] = False
         # not available yet in CCI
         tc.variables["WITH_NUMA"] = False
         tc.generate()
