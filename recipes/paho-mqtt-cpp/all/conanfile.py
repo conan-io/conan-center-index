@@ -51,7 +51,10 @@ class PahoMqttCppConan(ConanFile):
     def requirements(self):
         # Headers are exposed https://github.com/conan-io/conan-center-index/pull/16760#issuecomment-1502420549
         # Symbols are exposed   "_MQTTProperties_free", referenced from: mqtt::connect_options::~connect_options() in test_package.cpp.o
-        self.requires("paho-mqtt-c/1.3.13", transitive_headers=True, transitive_libs=True)
+        if Version(self.version) >= "1.6.0":
+            self.requires("paho-mqtt-c/[>=1.3.14 <=1.3.16]", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("paho-mqtt-c/1.3.13", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):

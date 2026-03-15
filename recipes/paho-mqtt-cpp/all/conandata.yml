@@ -1,4 +1,7 @@
 sources:
+  "1.6.0":
+    url: "https://github.com/eclipse/paho.mqtt.cpp/archive/v1.6.0.tar.gz"
+    sha256: "73bdb408ae98812c5c2b7f00b2ae7c4fdb9798424abe5a7f7afb13c8fd462156"
   "1.5.3":
     url: "https://github.com/eclipse/paho.mqtt.cpp/archive/v1.5.3.tar.gz"
     sha256: "8aab7761bcb43e2d65dbf266c8623d345f7612411363a97aa66370fb9822d0b9"
