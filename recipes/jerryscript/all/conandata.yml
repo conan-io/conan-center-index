@@ -8,6 +8,9 @@ sources:
   "2.4.0":
     sha256: 08c950b8689f1229e9796a7beb2e6c5c911f49666db7712ddf006d76a0766b79
     url: https://github.com/jerryscript-project/jerryscript/archive/v2.4.0.zip
+  "3.0.0":
+    sha256: 97bb81a91aa1e277f5045c7cb3902075489f6229c729ddbcd478618bd6561a0f
+    url: https://github.com/jerryscript-project/jerryscript/archive/v3.0.0.zip
 patches:
   "2.2.0":
     - patch_file: "patches/0001-2.3.0-remove-werror.patch"
