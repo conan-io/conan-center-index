@@ -28,7 +28,8 @@ class BemanTransformViewConan(ConanFile):
     }
 
     def validate(self):
-        check_min_cppstd(self, "23")
+        if self.options.get_sage("shared"):
+            check_min_cppstd(self, "23")
 
     def layout(self):
         cmake_layout(self)
