@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.errors import ConanInvalidConfiguration
 import os
 
 
@@ -11,6 +12,10 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+    
+    def validate(self):
+        if self.settings.os not in ("Windows", "Linux"):
+            raise ConanInvalidConfiguration(f"{self.settings.os} is not supported")
 
     def layout(self):
         cmake_layout(self)

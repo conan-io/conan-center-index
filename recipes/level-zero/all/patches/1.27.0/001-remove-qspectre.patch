@@ -1,0 +1,17 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index dd511c3..6d1c2fc 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -93,12 +93,10 @@ if(MSVC)
+     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${CMAKE_CXX_LINKER_WRAPPER_FLAG}/LTCG /INCREMENTAL:NO")
+     # enable flags, that are not supported or unused by clang-cl
+     if((NOT CMAKE_CXX_COMPILER_ID STREQUAL Clang) AND (NOT CMAKE_CXX_COMPILER_ID STREQUAL IntelLLVM))
+-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Qspectre")
+         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /guard:cf")
+         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GL")
+     endif()
+     if((NOT CMAKE_C_COMPILER_ID STREQUAL Clang) AND NOT (CMAKE_C_COMPILER_ID STREQUAL IntelLLVM))
+-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Qspectre")
+         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /guard:cf")
+         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /GL")
+     endif()
