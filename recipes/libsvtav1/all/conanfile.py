@@ -81,7 +81,7 @@ class SVTAV1Conan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "1.3.0":
-            self.tool_requires("cmake/[>=3.16 <4]")
+            self.tool_requires("cmake/[>=3.16]")
         if self.settings.arch in ("x86", "x86_64"):
             self.tool_requires("nasm/2.16.01")
 
