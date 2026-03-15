@@ -10,26 +10,24 @@ required_conan_version = ">=2"
 
 class BemanTransformViewConan(ConanFile):
     name = "beman-transform_view"
-    package_type = "header-library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/elvisdukaj/transform_view"
     license = "Apache-2.0"
+    package_type = "library"
     description = "A conditionally borrowed std::ranges::transform_view"
     topics = ("algorithm", "ranges")
     settings = "os", "arch", "compiler", "build_type"
 
     options = {
         "header_only": [True, False],
+        "shared": [True, False],
     }
     default_options = {
         "header_only": True,
+        "shared": False,
     }
 
     def validate(self):
-        if not self.options.header_only and not self.settings.compiler.get_safe("cppstd"):
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++23. Please set compiler.cppstd=23 in your profile."
-            )
         check_min_cppstd(self, "23")
 
     def layout(self):
@@ -37,9 +35,7 @@ class BemanTransformViewConan(ConanFile):
 
     def configure(self):
         if self.options.header_only:
-            self.package_type = "header-library"
-        else:
-            self.package_type = "static-library"
+            self.options.rm_safe("shared")
 
     def package_id(self):
         if self.info.options.header_only:
