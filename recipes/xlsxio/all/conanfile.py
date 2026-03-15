@@ -56,16 +56,17 @@ class XlsxioConan(ConanFile):
     def requirements(self):
         if self.options.with_libzip:
             self.requires("libzip/1.10.1")
-        elif Version(self.version) >= "0.2.34" and self.options.with_minizip_ng :
-            self.requires("minizip-ng/[>=4.0.1 <5]")
+        elif self.options.with_minizip_ng :
+            # INFO: minizip-ng 4.0.8 replaced mz_compat.h with other headers
+            # https://github.com/zlib-ng/minizip-ng/commit/7df56f7cc8438b1b67c881cad049b29bf075bccd
+            self.requires("minizip-ng/[>=4.0.1 <4.0.8]")
         else:
             self.requires("minizip/1.2.13")
         self.requires("expat/[>=2.6.2 <3]")
 
     def validate(self):
-        if Version(self.version) >= "0.2.34":
-            if self.options.with_libzip and self.options.with_minizip_ng:
-                raise ConanInvalidConfiguration("with_libzip and with_minizip_ng are mutually exclusive")
+        if self.options.with_libzip and self.options.with_minizip_ng:
+            raise ConanInvalidConfiguration("with_libzip and with_minizip_ng are mutually exclusive")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
