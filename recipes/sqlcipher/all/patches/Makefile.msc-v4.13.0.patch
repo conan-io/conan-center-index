@@ -1,0 +1,79 @@
+--- a/Makefile.msc	2026-03-10 19:14:56.542776707 +0100
++++ b/Makefile.msc	2026-03-10 19:15:44.248765020 +0100
+@@ -322,18 +322,18 @@
+ #
+ !IFNDEF SQLITE3DLL
+ !IF $(FOR_WIN10)!=0
+-SQLITE3DLL = winsqlite3.dll
++SQLITE3DLL = sqlcipher.dll
+ !ELSE
+-SQLITE3DLL = sqlite3.dll
++SQLITE3DLL = sqlcipher.dll
+ !ENDIF
+ !ENDIF
+ 
+ # This is the name to use for the SQLite import library (LIB).
+ #
+ !IFNDEF SQLITE3LIB
+ !IF $(FOR_WIN10)!=0
+-SQLITE3LIB = winsqlite3.lib
++SQLITE3LIB = sqlcipher.lib
+ !ELSE
+-SQLITE3LIB = sqlite3.lib
++SQLITE3LIB = sqlcipher.lib
+ !ENDIF
+ !ENDIF
+@@ -734,7 +734,7 @@
+ SHELL_CORE_DEP = $(SQLITE3DLL)
+ # <<mark>>
+ !ELSEIF $(USE_AMALGAMATION)==0
+-SHELL_CORE_DEP = libsqlite3.lib
++SHELL_CORE_DEP = sqlcipher.lib
+ # <</mark>>
+ !ELSE
+ SHELL_CORE_DEP =
+@@ -757,7 +757,7 @@
+ SHELL_CORE_LIB = $(SQLITE3LIB)
+ # <<mark>>
+ !ELSEIF $(USE_AMALGAMATION)==0
+-SHELL_CORE_LIB = libsqlite3.lib
++SHELL_CORE_LIB = sqlcipher.lib
+ # <</mark>>
+ !ELSE
+ SHELL_CORE_LIB =
+@@ -1858,7 +1858,7 @@
+ # This is the default Makefile target.  The objects listed here
+ # are what get build when you type just "make" with no arguments.
+ #
+-core:	dll libsqlite3.lib shell
++core:	dll sqlcipher.lib shell
+ 
+ # Targets that require the Tcl library.
+ #
+@@ -1882,11 +1882,11 @@
+ 	cl -DHAVE__FULLPATH=1 $(TOP)\autosetup\jimsh0.c
+ 
+ # <<mark>>
+-libsqlite3.lib:	$(LIBOBJ)
++sqlcipher.lib:	$(LIBOBJ)
+ 	$(LTLIB) $(LTLIBOPTS) /OUT:$@ $(LIBOBJ) $(TLIBS)
+ 
+-libtclsqlite3.lib:	tclsqlite.lo libsqlite3.lib
+-	$(LTLIB) $(LTLIBOPTS) $(TCLLIBPATHS) $(LTLIBPATHS) /OUT:$@ tclsqlite.lo libsqlite3.lib $(LIBTCLSTUB) $(TLIBS)
++libtclsqlite3.lib:	tclsqlite.lo sqlcipher.lib
++	$(LTLIB) $(LTLIBOPTS) $(TCLLIBPATHS) $(LTLIBPATHS) /OUT:$@ tclsqlite.lo sqlcipher.lib $(LIBTCLSTUB) $(TLIBS)
+ 
+ tclsqlite3.def:	tclsqlite.lo
+ 	echo EXPORTS > tclsqlite3.def
+@@ -1924,9 +1924,9 @@
+ 	$(LD) $(LDFLAGS) $(LTLINKOPTS) $(LTLIBPATHS) /DLL $(CORE_LINK_OPTS) /OUT:$@ $(LIBOBJ) $(LIBRESOBJS) $(LTLIBS) $(TLIBS)
+ 
+ # <<block2>>
+-sqlite3.def:	libsqlite3.lib $(JIM_TCLSH)
++sqlite3.def:	sqlcipher.lib $(JIM_TCLSH)
+ 	echo EXPORTS > sqlite3.def
+-	dumpbin /all libsqlite3.lib \
++	dumpbin /all sqlcipher.lib \
+ 		| $(JIM_TCLSH) $(TOP)\tool\replace.tcl include "^\s+1 _?(sqlite3(?:session|changeset|changegroup|rebaser|rbu)?_[^@]*)(?:@\d+)?$$" \1 \
+ 		| sort >> sqlite3.def
+ # <</block2>>

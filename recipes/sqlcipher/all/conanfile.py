@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, chmod, mkdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import VCVars, is_msvc, is_msvc_static_runtime, NMakeToolchain, NMakeDeps
@@ -30,6 +30,7 @@ class SqlcipherConan(ConanFile):
         "crypto_library": ["openssl", "libressl", "commoncrypto"],
         "with_largefile": [True, False],
         "temporary_store": ["always_file", "default_file", "default_memory", "always_memory"],
+        "thread_safe": [True, False],
         "enable_column_metadata": [True, False],
     }
     default_options = {
@@ -38,6 +39,7 @@ class SqlcipherConan(ConanFile):
         "crypto_library": "openssl",
         "with_largefile": True,
         "temporary_store": "default_memory",
+        "thread_safe": True,
         "enable_column_metadata": False,
     }
 
@@ -65,7 +67,10 @@ class SqlcipherConan(ConanFile):
 
     def requirements(self):
         if self.options.crypto_library == "openssl":
-            self.requires("openssl/[>=1.1 <4]")
+            if Version(self.version) > "4.6.1":
+                self.requires("openssl/[>=3 <4]")
+            else:
+                self.requires("openssl/[>=1.1 <4]")
         elif self.options.crypto_library == "libressl":
             self.requires("libressl/3.5.3")
 
@@ -85,6 +90,9 @@ class SqlcipherConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+        if Version(self.version) > "4.6.1":
+            chmod(self, "autosetup/autosetup", execute=True)
+            chmod(self, "autosetup/autosetup-find-tclsh", execute=True)
 
     @property
     def _temp_store_nmake_value(self):
@@ -104,6 +112,10 @@ class SqlcipherConan(ConanFile):
             "always_memory": "always",
         }.get(str(self.options.temporary_store))
 
+    @property
+    def _thread_safe_value(self):
+        return "1" if self.options.thread_safe else "2"
+
     def _generate_msvc(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -117,10 +129,18 @@ class SqlcipherConan(ConanFile):
         env.define("NO_TCL", "1")
         env.define("USE_AMALGAMATION", "1")
         opt_feature_flags = "-DSQLCIPHER_CRYPTO_OPENSSL"
+        tc.extra_ldflags += [" -lcrypto"]
         if self.options.enable_column_metadata:
             opt_feature_flags += " -DSQLITE_ENABLE_COLUMN_METADATA"
+        if Version(self.version) > "4.6.1":
+            opt_feature_flags += " -DHAVE_STDINT_H"  #
+            opt_feature_flags += f" -DSQLTHREAD_SAFE={self._thread_safe_value}"
+            opt_feature_flags += " -DSQLITE_EXTRA_INIT=sqlcipher_extra_init" # This is required from version 4.7.0
+            opt_feature_flags += " -DSQLITE_EXTRA_SHUTDOWN=sqlcipher_extra_shutdown" # This is required from version 4.7.0
+            opt_feature_flags += f" -DSQLITE_TEMP_STORE={self._temp_store_nmake_value}"
+        else:
+            env.define("SQLITE_TEMP_STORE", self._temp_store_nmake_value)
         env.define("OPT_FEATURE_FLAGS", opt_feature_flags)
-        env.define("SQLITE_TEMP_STORE", self._temp_store_nmake_value)
         env.define("TCLSH_CMD", self.dependencies.build['tcl'].runenv_info.vars(self)['TCLSH'])
 
         if not is_msvc_static_runtime(self):
@@ -141,6 +161,16 @@ class SqlcipherConan(ConanFile):
     def _use_commoncrypto(self):
         return self.options.crypto_library == "commoncrypto" and is_apple_os(self)
 
+    def _configure_tempstore(self, tc):
+        if Version(self.version) > "4.6.1":
+            tc.configure_args += [
+                f"--with-tempstore={self._temp_store_autotools_value}"
+            ]
+        else:
+            tc.configure_args += [
+                f"--enable-tempstore={self._temp_store_autotools_value}"
+            ]
+
     def _generate_unix(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -150,10 +180,15 @@ class SqlcipherConan(ConanFile):
             env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
+        tc.update_configure_args({
+            "--oldincludedir": None,  # remove this arg (SQLCipher/SQLite configure doesn't support it)
+        })
         tc.configure_args += [
-            f"--enable-tempstore={self._temp_store_autotools_value}",
             "--disable-tcl",
         ]
+        tc.extra_ldflags += ["-lm"]
+
+        self._configure_tempstore(tc)
         if self.settings.os == "Windows":
             tc.configure_args += [
                 "config_BUILD_EXEEXT='.exe'",
@@ -165,14 +200,22 @@ class SqlcipherConan(ConanFile):
             if not self.options.with_largefile:
                 tc.extra_defines.append("SQLITE_DISABLE_LFS=1")
         tc.extra_defines.append("SQLITE_HAS_CODEC")
+        if Version(self.version) > "4.6.1":
+            tc.extra_defines.append("SQLITE_EXTRA_INIT=sqlcipher_extra_init") # This is required from version 4.7.0
+            tc.extra_defines.append("SQLITE_EXTRA_SHUTDOWN=sqlcipher_extra_shutdown") # This is required from version 4.7.0
+            tc.extra_defines.append(f"SQLTHREAD_SAFE={self._thread_safe_value}")
 
         if self._use_commoncrypto:
             tc.extra_ldflags += [
                 "-framework", "Security",
                 "-framework", "CoreFoundation",
             ]
-            tc.configure_args.append("--with-crypto-lib=commoncrypto")
+            if Version(self.version) > "4.6.1":
+                tc.extra_defines.append("SQLCIPHER_CRYPTO_COMMONCRYPTO")
+            else:
+                tc.configure_args.append("--with-crypto-lib=commoncrypto")
         else:
+            tc.extra_ldflags += ["-lcrypto"]
             tc.extra_defines.append("SQLCIPHER_CRYPTO_OPENSSL")
 
         if self.options.enable_column_metadata:
@@ -203,9 +246,9 @@ class SqlcipherConan(ConanFile):
         configure = os.path.join(self.source_folder, "configure")
         self._chmod_plus_x(configure)
         # relocatable shared libs on macOS
-        replace_in_file(self, configure, "-install_name \\$rpath/", "-install_name @rpath/")
+        # replace_in_file(self, configure, "-install_name \\$rpath/", "-install_name @rpath/")
         # avoid SIP issues on macOS when dependencies are shared
-        if is_apple_os(self):
+        if is_apple_os(self) and Version(self.version) <= "4.6.1":
             libdirs = sum([dep.cpp_info.libdirs for dep in self.dependencies.values()], [])
             libpaths = ":".join(libdirs)
             replace_in_file(self, configure,
@@ -241,9 +284,17 @@ class SqlcipherConan(ConanFile):
             rm(self, "*.la", self.package_folder, recursive=True)
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+            if Version(self.version) > "4.6.1":
+                include_dir = os.path.join(self.package_folder, "include")
+                mkdir(self, os.path.join(include_dir, "sqlcipher"))
+                copy(self, "*.h", os.path.join(include_dir), os.path.join(include_dir, "sqlcipher"))
+                rm(self, "*.h", include_dir)
+
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "sqlcipher")
+
         self.cpp_info.libs = ["sqlcipher"]
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread", "dl"])
             if Version(self.version) >= "4.5.0":
@@ -256,5 +307,6 @@ class SqlcipherConan(ConanFile):
             self.cpp_info.frameworks = ["Security", "CoreFoundation"]
         else:
             self.cpp_info.defines.append("SQLCIPHER_CRYPTO_OPENSSL")
+            self.cpp_info.requires = ["openssl::openssl"]
         # Allow using #include <sqlite3.h> even with sqlcipher (for libs like sqlpp11-connector-sqlite3)
         self.cpp_info.includedirs.append(os.path.join("include", "sqlcipher"))
