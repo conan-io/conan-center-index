@@ -117,6 +117,9 @@ class PocoConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.26]")
+
     def requirements(self):
         self.requires("pcre2/[>=10.42 <11]")
         self.requires("utf8proc/[>=2.8.0 <3]")
@@ -143,12 +146,11 @@ class PocoConan(ConanFile):
         del self.info.options.log_debug
 
     def validate_build(self):
-        check_min_cppstd(self, 17)
+        check_min_cppstd(self, 20)
 
     def validate(self):
-        #  1.13.3: https://github.com/pocoproject/poco/blob/d6bd48a94c5f03e3c69cac1b024fdad5120e3a7b/Foundation/CMakeLists.txt#L125-L128
-        #  1.14.2: https://github.com/pocoproject/poco/blob/96d182a99303fb068575294b36f0cc20da2e7b25/Foundation/CMakeLists.txt#L130
-        check_min_cppstd(self, 14)
+        #  1.15.0: https://github.com/pocoproject/poco/blob/poco-1.15.0-release/Foundation/CMakeLists.txt#L120
+        check_min_cppstd(self, 17)
 
         if self.options.enable_apacheconnector:
             # FIXME: missing apache2 recipe + few issues
@@ -180,7 +182,7 @@ class PocoConan(ConanFile):
         for comp in self._poco_component_tree.values():
             if comp.option:
                 tc.variables[comp.option.upper()] = self.options.get_safe(comp.option, False)
-        tc.variables["POCO_UNBUNDLED"] = True
+        tc.cache_variables["POCO_UNBUNDLED"] = True
         tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
         if is_msvc(self):
             tc.variables["POCO_MT"] = is_msvc_static_runtime(self)
