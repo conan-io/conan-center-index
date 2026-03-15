@@ -5,9 +5,13 @@
 #include <QFile>
 
 #include <QNetworkAccessManager>
+#ifdef HAVE_QT_SQL
 #include <QSqlDatabase>
+#endif
 #include <qtconcurrentfilter.h>
+#ifdef HAVE_QT_XML
 #include <QDomText>
+#endif
 
 #include "greeter.h"
 
@@ -33,7 +37,9 @@ int main(int argc, char *argv[]){
 
     QNetworkAccessManager networkTester;
 
+#ifdef HAVE_QT_SQL
     QSqlDatabase sqlTester;
+#endif
 
     QVector<int> v;
     v << 1 << 2 << 3 << 4;
@@ -42,7 +48,9 @@ int main(int argc, char *argv[]){
         return i % 2;
     });
 
+#ifdef HAVE_QT_XML
     QDomText xmlTester;
+#endif
 
     return app.exec();
 }
