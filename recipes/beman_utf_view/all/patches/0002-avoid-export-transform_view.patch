@@ -1,0 +1,25 @@
+From e1a0b71a8e6625c1f9be1c70305ced2e036bb0a4 Mon Sep 17 00:00:00 2001
+From: Elvis Dukaj <elvis.dukaj@gmail.com>
+Date: Mon, 16 Mar 2026 10:45:06 +0100
+Subject: [PATCH] avoid export transform_view
+
+---
+ src/beman/utf_view/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/beman/utf_view/CMakeLists.txt b/src/beman/utf_view/CMakeLists.txt
+index 87e493d..5381e68 100644
+--- a/src/beman/utf_view/CMakeLists.txt
++++ b/src/beman/utf_view/CMakeLists.txt
+@@ -39,7 +39,7 @@ set_target_properties(
+ target_link_libraries(beman.utf_view PUBLIC beman::transform_view)
+ 
+ install(
+-    TARGETS beman.utf_view beman.transform_view
++    TARGETS beman.utf_view
+     COMPONENT beman.utf_view
+     EXPORT beman.utf_view
+     DESTINATION ${CMAKE_INSTALL_LIBDIR}$<$<CONFIG:Debug>:/debug>
+-- 
+2.53.0
+

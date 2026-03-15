@@ -1,0 +1,9 @@
+sources:
+  "0.0.1":
+    url:
+      - "https://github.com/elvisdukaj/utf_view/archive/refs/tags/v0.1.0.zip"
+    sha256: "428e0277e04cc4ee937bb0261e22d4345ae8266abbc78f8c490d61913e3dd983"
+patches:
+  "0.0.1":
+    - patch_file: "patches/0001-find_package-shouldn-t-include-semicolons-in-the-pac.patch"
+    - patch_file: "patches/0002-avoid-export-transform_view.patch"

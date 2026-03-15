@@ -1,0 +1,25 @@
+From b6f279ca1e4c3b1df8a2620bd63c91706b9f03bc Mon Sep 17 00:00:00 2001
+From: Elvis Dukaj <elvis.dukaj@gmail.com>
+Date: Mon, 16 Mar 2026 08:30:16 +0100
+Subject: [PATCH] find_package shouldn't include semicolons in the package name
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ebf83a0..e2dc216 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -39,7 +39,7 @@ option(
+     ${PROJECT_IS_TOP_LEVEL}
+ )
+ 
+-find_package(beman::transform_view REQUIRED)
++find_package(beman.transform_view REQUIRED)
+ 
+ add_subdirectory(src/beman/utf_view)
+ 
+-- 
+2.53.0
+
