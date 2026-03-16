@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
@@ -117,6 +117,8 @@ class LibpqConan(ConanFile):
             tc.make_args.append(f"DESTDIR={unix_path(self, self.package_folder)}")
             if self.settings.os == "Windows":
                 tc.make_args.append("MAKE_DLL={}".format(str(self.options.shared).lower()))
+            if is_apple_os(self):
+                tc.extra_ldflags.append("-headerpad_max_install_names")
             tc.generate()
             AutotoolsDeps(self).generate()
             PkgConfigDeps(self).generate()
