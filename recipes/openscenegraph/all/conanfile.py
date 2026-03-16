@@ -204,7 +204,7 @@ class OpenSceneGraphConanFile(ConanFile):
 
         # Disable option dependencies unless we have a package for them
         tc.cache_variables["OSG_WITH_FREETYPE"] = self.options.with_freetype
-        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Freetype"] = not self.options.with_freetype        
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Freetype"] = not self.options.with_freetype
         tc.cache_variables["OSG_WITH_OPENEXR"] = self.options.get_safe("with_openexr", False)
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_OpenEXR"] = not self.options.get_safe("with_openexr", False)
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Inventor"] = True
@@ -235,14 +235,13 @@ class OpenSceneGraphConanFile(ConanFile):
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_GtkGl"] = True
         tc.cache_variables["OSG_WITH_GIFLIB"] = self.options.get_safe("with_gif", False)
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_GIFLIB"] = not self.options.get_safe("with_gif", False)
-        tc.cache_variables["OSG_WITH_JPEG"] = self.options.get_safe("with_jpeg", False)        
+        tc.cache_variables["OSG_WITH_JPEG"] = self.options.get_safe("with_jpeg", False)
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_JPEG"] = not self.options.get_safe("with_jpeg", False)
         tc.cache_variables["OSG_WITH_PNG"] = self.options.get_safe("with_png", False)
-        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_PNG"] = not self.options.get_safe("with_png", False)
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_TIFF"] = not self.options.with_tiff
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_GLIB"] = True
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_AVFoundation"] = not self.options.get_safe("with_avfoundation", False)
-    
+
         if self.settings.os == "Windows":
             # osg has optional quicktime support on Windows
             tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_QuickTime"] = True
@@ -253,7 +252,7 @@ class OpenSceneGraphConanFile(ConanFile):
             tc.preprocessor_definitions["GL_SILENCE_DEPRECATION"] = "1"
 
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"  # macOS: use @rpath for shared libs
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support 
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -500,7 +499,7 @@ class OpenSceneGraphConanFile(ConanFile):
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
             setup_plugin("jpeg").requires.append("libjpeg-turbo::jpeg")
         elif self.options.get_safe("with_jpeg") == "mozjpeg":
-            setup_plugin("jpeg").requires.append("mozjpeg::libjpeg")       
+            setup_plugin("jpeg").requires.append("mozjpeg::libjpeg")
 
         if self.options.with_jasper:
             setup_plugin("jp2").requires.append("jasper::jasper")
