@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -19,7 +20,7 @@ class ValijsonConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return 17 if Version(self.version) >= "1.1.0" else 11
 
     def layout(self):
         basic_layout(self, src_folder="src")

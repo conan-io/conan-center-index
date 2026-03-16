@@ -22,8 +22,6 @@ using valijson::adapters::RapidJsonAdapter;
 #include <valijson/adapters/picojson_adapter.hpp>
 #include <valijson/utils/picojson_utils.hpp>
 
-#include <valijson/internal/optional.hpp>
-
 void check_document(const Schema& mySchema, const char* filename, bool is_valid_expectation) {
     rapidjson::Document myTargetDoc;
     if (!valijson::utils::loadDocument(filename, myTargetDoc)) {
