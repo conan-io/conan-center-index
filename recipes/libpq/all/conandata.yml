@@ -9,7 +9,7 @@ sources:
     url: "https://ftp.postgresql.org/pub/source/v14.22/postgresql-14.22.tar.bz2"
     sha256: "f57938ad30067077720277f6d7db05aafc07d1545efd2ed82f199ba828a7ad34"
 patches:
-  "16.8":
+  "16.13":
     - patch_file: "patches/16/001-mingw-build-static-libraries.patch"
   "15.17":
     - patch_file: "patches/15/001-mingw-build-static-libraries.patch"
