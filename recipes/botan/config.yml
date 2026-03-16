@@ -1,5 +1,5 @@
 versions:
-  "3.10.0":
+  "3.11.0":
     folder: all
   "3.7.1+rscs1":
     folder: all
