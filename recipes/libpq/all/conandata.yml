@@ -5,14 +5,14 @@ sources:
   "15.17":
     url: "https://ftp.postgresql.org/pub/source/v15.17/postgresql-15.17.tar.bz2"
     sha256: "ae14f24c14727e0b2ded1c5553031666099bd1054db3ef44bfa6e2bd6d554a56"
-  "14.9":
-    url: "https://ftp.postgresql.org/pub/source/v14.9/postgresql-14.9.tar.bz2"
-    sha256: "b1fe3ba9b1a7f3a9637dd1656dfdad2889016073fd4d35f13b50143cbbb6a8ef"
+  "14.22":
+    url: "https://ftp.postgresql.org/pub/source/v14.22/postgresql-14.22.tar.bz2"
+    sha256: "f57938ad30067077720277f6d7db05aafc07d1545efd2ed82f199ba828a7ad34"
 patches:
   "16.8":
     - patch_file: "patches/16/001-mingw-build-static-libraries.patch"
   "15.17":
     - patch_file: "patches/15/001-mingw-build-static-libraries.patch"
-  "14.9":
+  "14.22":
     - patch_file: "patches/14/002-mingw-build-static-libraries.patch"
 
