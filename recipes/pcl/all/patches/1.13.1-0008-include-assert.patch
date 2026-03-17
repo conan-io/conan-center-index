@@ -1,3 +1,8 @@
+From 03b00cc8f02aee8f1f0d0283f1f3c9328af19a0d Mon Sep 17 00:00:00 2001
+Date: Sun, 6 Aug 2023 17:44:12 -0700
+Subject: [PATCH 1/3] fix build with GNU13 and Eigen3.4
+
+
 diff --git a/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/command.h b/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/command.h
 index e7dbdedd3..ca4ef7fb1 100644
 --- a/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/command.h
