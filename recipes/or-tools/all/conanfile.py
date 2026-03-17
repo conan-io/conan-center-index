@@ -47,7 +47,7 @@ class PackageConan(ConanFile):
         self.requires("highs/1.12.0")
         self.requires("protobuf/[>=6.32.1 <7]", transitive_headers=True, transitive_libs=True)
         self.requires("re2/[>=20250812]")
-        self.requires("scip/10.0.0")
+        self.requires("scip/[>=10.0.0 <10.1.0]")
         self.requires("soplex/[>=8.0.0 <8.1.0]")
         self.requires("zlib/[>=1.2.11 <2]")
 
