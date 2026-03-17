@@ -51,3 +51,14 @@ sources:
     testengine:
       url: "https://github.com/ocornut/imgui_test_engine/archive/v1.90.5.tar.gz"
       sha256: "79339246d8c919c5926df0a7bee99be585ebaf67cdaba89a0ac314b1f7846f92"
+patches:
+  "1.92.4":
+    - patch_file: "patches/1.92.4-0001-static-linking-bugfix-backport.patch"
+      patch_description: "Add missing export for a function needed by the backends"
+      patch_source: "https://github.com/ocornut/imgui/pull/9016"
+      patch_type: "backport"
+  "1.92.4-docking":
+    - patch_file: "patches/1.92.4-docking-0001-static-linking-bugfix-backport.patch"
+      patch_description: "Add missing export for a function needed by the backends"
+      patch_source: "https://github.com/ocornut/imgui/pull/9016"
+      patch_type: "backport"
