@@ -18,11 +18,13 @@ class LibavrocppConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
+        "with_boost": [True, False]
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
+        "with_boost": False
     }
 
     def config_options(self):
@@ -35,9 +37,10 @@ class LibavrocppConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-        
+
     def requirements(self):
-        self.requires("boost/[>=1.81.0 <=1.89.0]", transitive_headers=True)
+        if self.options.with_boost:
+            self.requires("boost/[>=1.81.0 <=1.89.0]", transitive_headers=True)
         self.requires("snappy/[>=1.1.9 <2]")
         self.requires("fmt/[>=12 <13]", transitive_headers=True)
         self.requires("zlib/[>=1.3.1 <2]")
@@ -55,6 +58,7 @@ class LibavrocppConan(ConanFile):
         tc.cache_variables["AVRO_BUILD_STATIC"] = not self.options.shared
         tc.cache_variables["AVRO_BUILD_SHARED"] = self.options.shared
         tc.cache_variables["AVRO_BUILD_TESTS"] = False
+        tc.cache_variables["AVRO_USE_BOOST"] = self.options.with_boost
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_zstd"] = True # please open an issue if this is needed
         tc.generate()
 
@@ -90,6 +94,8 @@ class LibavrocppConan(ConanFile):
         self.cpp_info.requires = [
             "zlib::zlib",
             "snappy::snappy",
-            "boost::headers",
             "fmt::fmt",
         ]
+
+        if self.options.with_boost:
+            self.cpp_info.requires.append("boost::headers")

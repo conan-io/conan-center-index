@@ -1,27 +1,19 @@
 sources:
+  "1.5.0":
+    url: "https://github.com/open62541/open62541/archive/v1.5.0.tar.gz"
+    sha256: "b7d92fe4b767aac2935ffb7bff9c88d528ce8a05a3767d093748f14388622636"
   "1.4.14":
     url: "https://github.com/open62541/open62541/archive/v1.4.14.tar.gz"
     sha256: "0a0a8830e4e5f720e901579f826c788fdbc3d49f44a9515ab15a06e877b59416"
-  "1.4.13":
-    url: "https://github.com/open62541/open62541/archive/v1.4.13.tar.gz"
-    sha256: "491F8C526ECD6F2240F29CF3A00B0498587474B8F0CED1B074589F54533542AA"
-  "1.4.11.1":
-    url: "https://github.com/open62541/open62541/archive/v1.4.11.1.tar.gz"
-    sha256: "2979c0f09b766fd6470bdf06c8500c90ed51327aae1c22af132641a44178b722"
-  "1.4.6":
-    url: "https://github.com/open62541/open62541/archive/v1.4.6.tar.gz"
-    sha256: "bc4ad185fec5c257e15fcb813b7fef9607b7aaa5d355de7b665e1f210556d38e"
-  "1.3.9":
-    url: "https://github.com/open62541/open62541/archive/v1.3.9.tar.gz"
-    sha256: "71764d4a060cfa07eae7aaabd176da38b155ef01c63103513339699fd8026e2f"
-  "1.3.8":
-    url: "https://github.com/open62541/open62541/archive/v1.3.8.tar.gz"
-    sha256: "b6943b564787c4953b77ca8d7f987c4b896b3f3e91f45d9f13e9056b6148bc1d"
 patches:
-  "1.4.14":
-    - patch_file: "patches/0001-disable-sanitizers-1_4_14.patch"
-      patch_description: "Disable static code analysis"
+  "1.5.0":
+    - patch_file: "patches/0004-include-iphlpapi-1.5.0.patch"
+      patch_description: "Include iphlpapi.h for SecureZeroMemory"
       patch_type: "conan"
+    - patch_file: "patches/1.5.0-0001-use-external-mdnsd.patch"
+      patch_description: "Consume mdnsd as external dependency provided by Conan"
+      patch_type: "conan"
+  "1.4.14":
     - patch_file: "patches/0004-include-iphlpapi.patch"
       patch_description: "Include iphlpapi.h for SecureZeroMemory"
       patch_type: "conan"
@@ -30,57 +22,4 @@ patches:
       patch_type: "portability"
     - patch_file: "patches/1.4.14-0001-use-external-mdnsd.patch"
       patch_description: "Consume mdnsd as external dependency provided by Conan"
-      patch_type: "conan"
-  "1.4.13":
-    - patch_file: "patches/0001-disable-sanitizers-1_4_13.patch"
-      patch_description: "Disable static code analysis"
-      patch_type: "conan"
-    - patch_file: "patches/0004-include-iphlpapi.patch"
-      patch_description: "Include iphlpapi.h for SecureZeroMemory"
-      patch_type: "conan"
-    - patch_file: "patches/0008-fix-posix-qnx.patch"
-      patch_description: "Ensure posix is default architecture"
-      patch_type: "portability"
-    - patch_file: "patches/1.4.13-0001-use-external-mdnsd.patch"
-      patch_description: "Consume mdnsd as external dependency provided by Conan"
-      patch_type: "conan"
-  "1.4.11.1":
-    - patch_file: "patches/0004-include-iphlpapi.patch"
-      patch_description: "Include iphlpapi.h for SecureZeroMemory"
-      patch_type: "conan"
-    - patch_file: "patches/0005-fix-config-in-qnx.patch"
-      patch_description: "Add proper qnx flags"
-      patch_type: "portability"
-    - patch_file: "patches/0006-fix-eventloop-header-qnx.patch"
-      patch_description: "Do not include open62541_queue.h on qnx"
-      patch_type: "portability"
-    - patch_file: "patches/1.4.11.1-0007-fix-eventloop-udp-qnx.patch"
-      patch_description: "Check for proper network support"
-      patch_type: "portability"
-    - patch_file: "patches/0008-fix-posix-qnx.patch"
-      patch_description: "Ensure posix is default architecture"
-      patch_type: "portability"
-    - patch_file: "patches/1.4.11.1-0001-use-external-mdnsd.patch"
-      patch_description: "Consume mdnsd as external dependency provided by Conan"
-      patch_type: "conan"
-    - patch_file: "patches/0009-use-external-libxml2.patch"
-      patch_description: "Consume libxml2 as external dependency provided by Conan"
-      patch_type: "conan"
-  "1.4.6":
-    - patch_file: "patches/0001-disable-sanitizers-1_4_x.patch"
-      patch_description: "Disable static code analysis"
-      patch_type: "conan"
-    - patch_file: "patches/1.4.6-0001-use-external-mdnsd.patch"
-      patch_description: "Consume mdnsd as external dependency provided by Conan"
-      patch_type: "conan"
-    - patch_file: "patches/0004-include-iphlpapi.patch"
-      patch_description: "Include iphlpapi.h for SecureZeroMemory"
-      patch_type: "conan"
-  "1.3.9":
-    - patch_file: "patches/0001-disable-sanitizers-1_3_x.patch"
-      patch_description: "Disable static code analysis"
-      patch_type: "conan"
-  "1.3.8":
-    - patch_file: "patches/0001-disable-sanitizers-1_3_x.patch"
-      patch_description: "Disable static code analysis"
       patch_type: "conan"

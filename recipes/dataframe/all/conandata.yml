@@ -1,4 +1,7 @@
 sources:
+  "4.0.0":
+    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/4.0.0.tar.gz"
+    sha256: "093a3a0c7bdc475e8d7221e98bf00aac37c96e6311e870fd8b7f2ded4e0ec8ff"
   "3.7.0":
     url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/3.7.0.tar.gz"
     sha256: "bd3bb9f45bb0ac092e4ff9052d565d8d6eed8f8029a1a7de7424b4190b797345"

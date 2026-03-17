@@ -69,7 +69,8 @@ class LibVPXConan(ConanFile):
             raise ConanInvalidConfiguration("iOS platform with x86/x86_64 architectures only supports 'iphonesimulator' SDK option")
 
     def build_requirements(self):
-        self.tool_requires("yasm/1.3.0")
+        if self.settings.arch in ["x86", "x86_64"]:
+            self.tool_requires("yasm/1.3.0")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -92,6 +93,11 @@ class LibVPXConan(ConanFile):
                 'mips': 'mips32',
                 'mips64': 'mips64',
                 'sparc': 'sparc'}.get(str(self.settings.arch))
+        if arch is None:
+            # Fallback for unknown architectures. This is supported by upstream to be used
+            # when no specific target set is provided by the configure script.
+            return 'generic-gnu'
+
         compiler = str(self.settings.compiler)
         os_name = str(self.settings.os)
         if str(self.settings.compiler) == "Visual Studio":
