@@ -121,15 +121,15 @@ class UserverConan(ConanFile):
         self.requires('zlib/[^1.3]')
         self.requires('zstd/[^1.5]')
         self.requires('icu/[>=74.1 <77]', force=True)
-        self.requires('re2/20230301')
+        self.requires('re2/[>=20230301]')
 
         if self.options.with_jemalloc:
             self.requires('jemalloc/[^5.3]')
         if self.options.with_grpc or self.options.with_clickhouse:
-            self.requires('abseil/20240116.2', force=True)
+            self.requires('abseil/20240722.1', force=True)
         if self.options.with_grpc:
             self.requires(
-                'grpc/[^1.65.0]',
+                'grpc/[^1.69.0]',
                 transitive_headers=True,
                 transitive_libs=True,
             )
@@ -143,7 +143,9 @@ class UserverConan(ConanFile):
         if self.options.with_postgresql:
             # `run=True` required to find `pg_config` binary during `psycopg2` python module build
             # without system package. We use system package.
-            self.requires('libpq/[>=14.9 <20]')
+            #
+            # `<16` is due to link errors `undefined reference to `gss_release_buffer'`
+            self.requires('libpq/[>=14.9 <16]')
         if self.options.with_mongodb or self.options.with_kafka:
             self.requires('cyrus-sasl/[^2.1]')
         if self.options.with_mongodb:
@@ -179,7 +181,7 @@ class UserverConan(ConanFile):
             self.requires('opentelemetry-proto/[^1.3]')
 
     def build_requirements(self):
-        self.tool_requires('protobuf/[^5.27]')
+        self.tool_requires('protobuf/<host_version>')
 
     def validate(self):
         if self.settings.os == 'Windows':
