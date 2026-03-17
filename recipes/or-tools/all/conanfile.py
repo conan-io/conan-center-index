@@ -8,7 +8,7 @@ import os
 
 required_conan_version = ">=2.0.9"
 
-class PackageConan(ConanFile):
+class OrToolsConan(ConanFile):
     name = "or-tools"
     description = "Google OR Tools"
     license = "Apache-2.0"
