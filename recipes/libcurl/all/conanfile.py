@@ -713,14 +713,14 @@ class LibcurlConan(ConanFile):
 
         if self.options.with_ssl == "openssl":
             self.cpp_info.components["curl"].requires.append("openssl::openssl")
-        if self.settings.os == "Linux" and self.options.with_ldap:
-            self.cpp_info.components["curl"].requires.append("openldap::openldap")
         if self.options.with_ssl == "libressl":
             self.cpp_info.components["curl"].requires.append("libressl::libressl")
         if self.options.with_ssl == "wolfssl":
             self.cpp_info.components["curl"].requires.append("wolfssl::wolfssl")
         if self.options.with_ssl == "mbedtls":
             self.cpp_info.components["curl"].requires.append("mbedtls::mbedtls")
+        if self.settings.os == "Linux" and self.options.with_ldap:
+            self.cpp_info.components["curl"].requires.append("openldap::openldap")
         if self.options.with_nghttp2:
             self.cpp_info.components["curl"].requires.append("libnghttp2::libnghttp2")
         if self.options.with_libssh2:
