@@ -1,10 +1,4 @@
 sources:
-  "2.1.28":
-    url: "https://github.com/CESNET/libnetconf2/archive/refs/tags/v2.1.28.tar.gz"
-    sha256: "72e9a6461fadbd22f0cf0d23ba68d62b297c8f564f7f2bee069748fb67fc3a24"
-
-patches:
-  "2.1.28":
-    - patch_file: "patches/0001-Fix-libnetconf2-cmake-conan-dependency-usage.patch"
-      patch_description: "Fix libnetconf2 cmake conan dependency usage"
-      patch_type: "conan"
+  "4.1.2":
+    url: "https://github.com/CESNET/libnetconf2/archive/refs/tags/v4.1.2.tar.gz"
+    sha256: "c202c5e39e38caf4b29f0f90f496ba9917836f0e2ece56dc7dc0bf2c9910fad0"
