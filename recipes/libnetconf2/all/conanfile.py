@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import get
-from conan.tools.files import apply_conandata_patches, export_conandata_patches
 
 
 required_conan_version = ">=2.1"
@@ -35,11 +34,12 @@ class LibNetconf2Conan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ENABLE_EXAMPLES"] = False        
+        tc.cache_variables["ENABLE_EXAMPLES"] = False
+        tc.cache_variables["ENABLE_TESTS"] = False
+        tc.cache_variables["ENABLE_VALGRIND_TESTS"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
