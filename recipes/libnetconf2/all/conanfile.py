@@ -16,6 +16,8 @@ class LibNetconf2Conan(ConanFile):
     topics = ("yang", "netconf")
     settings = "os", "compiler", "build_type", "arch"
     package_type = "library"
+    languages = "C"
+    implements = ["auto_shared_fpic"]
     options = {"shared": [True, False],
                "fPIC": [True, False]}
     default_options = {
@@ -27,15 +29,6 @@ class LibNetconf2Conan(ConanFile):
         self.requires("libyang/4.2.2")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("libssh/[>=0.10.6 <0.12]")
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
