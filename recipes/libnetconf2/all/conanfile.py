@@ -28,6 +28,7 @@ class LibNetconf2Conan(ConanFile):
         self.requires("libyang/4.2.2")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("libssh/[>=0.10.6 <0.12]")
+        self.requires("libcurl/[>=7.78 <9]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -40,6 +41,7 @@ class LibNetconf2Conan(ConanFile):
         tc.cache_variables["ENABLE_EXAMPLES"] = False
         tc.cache_variables["ENABLE_TESTS"] = False
         tc.cache_variables["ENABLE_VALGRIND_TESTS"] = False
+        tc.cache_variables["ENABLE_PAM"] = False
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
         tc.generate()
         deps = CMakeDeps(self)
