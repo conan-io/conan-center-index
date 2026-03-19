@@ -57,3 +57,5 @@ class LibNetconf2Conan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["netconf2"]
         self.cpp_info.set_property("cmake_file_name", "LibNETCONF2")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
