@@ -2,12 +2,6 @@ sources:
   "0.10.0-alpha":
     url: "https://github.com/Auburn/FastNoise2/archive/v0.10.0-alpha.tar.gz"
     sha256: "8e1331425d6372e65e73775e13fedd367ae5999ec5616036b99df33434e3b527"
-  "1.0.1":
-    url: "https://github.com/Auburn/FastNoise2/archive/refs/tags/v1.0.1.tar.gz"
-    sha256: "f213a432abab6530c653da442796993433d2e16122d6b0b178497c25d2079da5"
-  "1.1.0":
-    url: "https://github.com/Auburn/FastNoise2/archive/refs/tags/v1.1.0.tar.gz"
-    sha256: "0c056f9180a3cce140f0b9e82ac1115811f64d55311bb472876408a807a0a565"
   "1.1.1":
     url: "https://github.com/Auburn/FastNoise2/archive/refs/tags/v1.1.1.tar.gz"
     sha256: "e460592c32e9b1a2cf6e6f6aea5e16c9fe23c68bd185adb315202a5a993656b9"
