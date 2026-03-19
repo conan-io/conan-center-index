@@ -11,6 +11,7 @@ class LibNetconf2Conan(ConanFile):
     homepage = "https://github.com/CESNET/libnetconf2"
     topics = ("yang", "netconf")
     settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
     options = {"shared": [True, False],
                "fPIC": [True, False]}
     default_options = {
