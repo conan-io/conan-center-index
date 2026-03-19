@@ -54,6 +54,8 @@ class LibYangConan(ConanFile):
         tc.cache_variables["ENABLE_TESTS"] = False
         tc.cache_variables["ENABLE_VALGRIND_TESTS"] = False
         tc.cache_variables["ENABLE_COMMON_TARGETS"] = False
+        tc.cache_variables["ENABLE_YANGLINT_INTERACTIVE"] = False
+        tc.cache_variables["ENABLE_TOOLS"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         tc = CMakeDeps(self)
