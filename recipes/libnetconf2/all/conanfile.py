@@ -3,6 +3,10 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import get
 from conan.tools.files import apply_conandata_patches, export_conandata_patches
 
+
+required_conan_version = ">=2.1"
+
+
 class LibNetconf2Conan(ConanFile):
     name = "libnetconf2"
     license = "BSD-3-Clause"
