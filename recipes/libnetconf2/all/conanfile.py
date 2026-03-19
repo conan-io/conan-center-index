@@ -43,6 +43,7 @@ class LibNetconf2Conan(ConanFile):
         tc.cache_variables["ENABLE_VALGRIND_TESTS"] = False
         tc.cache_variables["ENABLE_PAM"] = False
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_MbedTLS"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
