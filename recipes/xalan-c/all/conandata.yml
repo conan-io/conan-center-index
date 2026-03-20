@@ -1,0 +1,15 @@
+sources:
+  "1.12.0":
+    url: "https://github.com/apache/xalan-c/archive/refs/tags/Xalan-C_1_12_0.tar.gz"
+    sha256: "f3d4f23af7f7914259f2f5dbd9cc1450d3ebe0b8c8163fd50fcac4a39c63fccd"
+patches:
+  "1.12.0":
+    - patch_file: "patches/0001-fix-static-build-on-windows.patch"
+      patch_description: "Fix static build on Windows"
+      patch_type: "portability"
+    - patch_file: "patches/0002-do-not-build-tests-and-samples.patch"
+      patch_description: "Do not build tests and samples"
+      patch_type: "conan"
+    - patch_file: "patches/0003-use-lowercase-name-for-xalan-exe.patch"
+      patch_description: "Use lowercase name for XalanExe"
+      patch_type: "portability"
