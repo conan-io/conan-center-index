@@ -46,7 +46,9 @@ class LibiconvConan(ConanFile):
 
     @property
     def _msvc_tools(self):
-        return ("clang-cl", "llvm-lib", "lld-link") if self._is_clang_cl else ("cl", "lib", "link")
+        compilers = self.conf.get("tools.build:compiler_executables", default={})
+        compiler = compilers.get("c") or compilers.get("cpp")
+        return (compiler or "clang-cl", "llvm-lib", "lld-link") if self._is_clang_cl else ("cl", "lib", "link")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -94,11 +96,13 @@ class LibiconvConan(ConanFile):
         env = tc.environment()
         if is_msvc(self) or self._is_clang_cl:
             cc, lib, link = self._msvc_tools
+            if cc.endswith("clang-cl"):
+                cc = f"{cc} -nologo"
             build_aux_path = os.path.join(self.source_folder, "build-aux")
             lt_compile = unix_path(self, os.path.join(build_aux_path, "compile"))
             lt_ar = unix_path(self, os.path.join(build_aux_path, "ar-lib"))
-            env.define("CC", f"{lt_compile} {cc} -nologo")
-            env.define("CXX", f"{lt_compile} {cc} -nologo")
+            env.define("CC", f"{lt_compile} {cc}")
+            env.define("CXX", f"{lt_compile} {cc}")
             env.define("LD", link)
             env.define("STRIP", ":")
             env.define("AR", f"{lt_ar} {lib}")
