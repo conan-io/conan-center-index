@@ -1,4 +1,9 @@
 sources:
+  "2.14.2":
+    url:
+      - "https://download.savannah.gnu.org/releases/freetype/freetype-2.14.2.tar.xz"
+      - "https://sourceforge.net/projects/freetype/files/freetype2/2.14.2/freetype-2.14.2.tar.xz"
+    sha256: "4b62dcab4c920a1a860369933221814362e699e26f55792516d671e6ff55b5e1"
   "2.14.1":
     url:
       - "https://download.savannah.gnu.org/releases/freetype/freetype-2.14.1.tar.xz"
