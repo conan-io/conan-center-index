@@ -31,7 +31,7 @@ class OrToolsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("abseil/20250814.0", transitive_headers=True, transitive_libs=True)
+        self.requires("abseil/[>=20250814.0 <=20260107.1]", transitive_headers=True, transitive_libs=True)
         self.requires("bzip2/1.0.8")
         self.requires("coin-cbc/[>=2.10.5 <=2.10.12]")
         self.requires("coin-clp/[>=1.17.7 <=1.17.10]")
