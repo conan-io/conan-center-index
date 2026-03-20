@@ -61,6 +61,9 @@ class OrToolsConan(ConanFile):
         # INFO: Let Conan manage the C++ standard based on self.settings.compiler.cppstd
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD", "#set(CMAKE_CXX_STANDARD")
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "dependencies", "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD", "#set(CMAKE_CXX_STANDARD")
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "cpp.cmake"), "set_target_properties(${PROTO_NAME}_proto PROPERTIES CXX_STANDARD", "#set_target_properties(${PROTO_NAME}_proto PROPERTIES CXX_STANDARD")
+        replace_in_file(self, os.path.join(self.source_folder, "ortools", "third_party_solvers", "CMakeLists.txt"), "CXX_STANDARD ", "# CXX_STANDARD ")
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "flatzinc.cmake"), "CXX_STANDARD ", "# CXX_STANDARD ")
 
     def generate(self):
         tc = CMakeToolchain(self)
