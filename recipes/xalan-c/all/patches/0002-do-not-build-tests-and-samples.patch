@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 456e86c38..abb8f05e5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -95,10 +95,6 @@ add_subdirectory(src/xalanc/Utils/MsgCreator)
+ add_subdirectory(src/xalanc/Utils)
+ add_subdirectory(src/xalanc/Utils/XalanMsgLib)
+ add_subdirectory(src/xalanc)
+-add_subdirectory(src/xalanc/TestXSLT)
+-add_subdirectory(src/xalanc/TestXPath)
+-add_subdirectory(samples)
+-add_subdirectory(Tests)
+ add_subdirectory(docs/doxygen)
+ 
+ # Display configuration summary

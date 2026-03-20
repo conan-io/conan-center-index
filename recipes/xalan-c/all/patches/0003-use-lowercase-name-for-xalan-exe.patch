@@ -1,0 +1,19 @@
+diff --git a/src/xalanc/CMakeLists.txt b/src/xalanc/CMakeLists.txt
+index eee478e03..542286bf7 100644
+--- a/src/xalanc/CMakeLists.txt
++++ b/src/xalanc/CMakeLists.txt
+@@ -1100,10 +1100,10 @@ endif()
+ unset(group_dir)
+ unset(group_files)
+ 
+-add_executable(Xalan XalanExe/XalanExe.cpp)
+-target_link_libraries(Xalan XalanC::XalanC)
+-set_target_properties(Xalan PROPERTIES FOLDER "Programs")
++add_executable(xalan XalanExe/XalanExe.cpp)
++target_link_libraries(xalan XalanC::XalanC)
++set_target_properties(xalan PROPERTIES FOLDER "Programs")
+ 
+-install(TARGETS Xalan
++install(TARGETS xalan
+   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+   COMPONENT "runtime")
