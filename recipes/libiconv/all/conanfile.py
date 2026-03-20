@@ -96,7 +96,7 @@ class LibiconvConan(ConanFile):
         env = tc.environment()
         if is_msvc(self) or self._is_clang_cl:
             cc, lib, link = self._msvc_tools
-            if cc.endswith("clang-cl"):
+            if cc.endswith("cl"):
                 cc = f"{cc} -nologo"
             build_aux_path = os.path.join(self.source_folder, "build-aux")
             lt_compile = unix_path(self, os.path.join(build_aux_path, "compile"))
