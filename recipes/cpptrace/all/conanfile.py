@@ -42,6 +42,16 @@ class CpptraceConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    @property
+    def _fallback_to_ninja(self):
+        return self.conf.get("tools.cmake.cmaketoolchain:generator") is None
+
+    def build_requirements(self):
+        # required for c++ modules
+        self.tool_requires("cmake/[>=3.28]")
+        if self._fallback_to_ninja:
+            self.tool_requires("ninja/[>=0]")
+
     def requirements(self):
         self.requires("libdwarf/[>=0.11.0 <3]")
         if self.options.unwind == "libunwind":
@@ -62,6 +72,8 @@ class CpptraceConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if self._fallback_to_ninja:
+            tc.generator = "Ninja"
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.variables["CPPTRACE_USE_EXTERNAL_LIBDWARF"] = True
