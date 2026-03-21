@@ -1,0 +1,23 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index fda9e01..ba7f48a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -38,9 +38,15 @@ include(CheckIncludeFile)
+ check_include_file("unistd.h" HAVE_UNISTD_H)
+ 
+ include(CheckLibraryExists)
+-check_library_exists(crc32c crc32c_value "" HAVE_CRC32C)
+-check_library_exists(snappy snappy_compress "" HAVE_SNAPPY)
+-check_library_exists(zstd zstd_compress "" HAVE_ZSTD)
++if(HAVE_CRC32C)
++  find_package(Crc32c REQUIRED CONFIG)
++endif()
++if(HAVE_SNAPPY)
++  find_package(Snappy REQUIRED CONFIG)
++endif()
++if(HAVE_ZSTD)
++  find_package(zstd REQUIRED CONFIG)
++endif()
+ check_library_exists(tcmalloc malloc "" HAVE_TCMALLOC)
+ 
+ include(CheckCXXSymbolExists)
