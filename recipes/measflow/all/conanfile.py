@@ -56,6 +56,8 @@ class MeasFlowConan(ConanFile):
         tc.variables["MEAS_BUILD_TESTS"] = False
         tc.variables["MEAS_BUILD_BENCHMARKS"] = False
         tc.variables["MEAS_BUILD_QUICKSTART"] = False
+        tc.variables["MEAS_WITH_LZ4"] = bool(self.options.with_lz4)
+        tc.variables["MEAS_WITH_ZSTD"] = bool(self.options.with_zstd)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -80,7 +82,9 @@ class MeasFlowConan(ConanFile):
         self.cpp_info.libs = ["measflow"]
         if self.options.with_lz4:
             self.cpp_info.defines.append("MEAS_HAVE_LZ4")
+            self.cpp_info.requires.append("lz4::lz4")
         if self.options.with_zstd:
             self.cpp_info.defines.append("MEAS_HAVE_ZSTD")
+            self.cpp_info.requires.append("zstd::zstd")
         if self.options.shared and self.settings.os == "Windows":
             self.cpp_info.defines.append("MEASFLOW_SHARED")
