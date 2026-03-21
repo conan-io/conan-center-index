@@ -3,6 +3,7 @@ from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
 from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
@@ -43,12 +44,17 @@ class CpptraceConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     @property
+    def _uses_cpp_modules(self):
+        return self.version >= Version("1")
+
+    @property
     def _fallback_to_ninja(self):
-        return self.conf.get("tools.cmake.cmaketoolchain:generator") is None
+        return self._uses_cpp_modules and self.conf.get("tools.cmake.cmaketoolchain:generator") is None
+
 
     def build_requirements(self):
-        # required for c++ modules
-        self.tool_requires("cmake/[>=3.28]")
+        if self._uses_cpp_modules:
+            self.tool_requires("cmake/[>=3.28]")
         if self._fallback_to_ninja:
             self.tool_requires("ninja/[>=0]")
 
