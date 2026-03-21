@@ -9,7 +9,7 @@ import os
 required_conan_version = ">=2"
 
 class Dawn(ConanFile):
-    name = "Dawn"
+    name = "dawn"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Native WebGPU implementation"
     license = "BSD-3-Clause"
