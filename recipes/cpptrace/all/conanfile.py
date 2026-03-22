@@ -37,7 +37,15 @@ class CpptraceConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.version < Version("1"):
+
+        if self.version < Version("1") or not (
+            self.settings.compiler == "msvc"
+            and self.settings.compiler.version >= Version("194")
+            or self.settings.compiler == "clang"
+            and self.settings.compiler.version >= Version("16")
+            or self.settings.compiler == "gcc"
+            and self.settings.compiler.version >= Version("15")
+        ):
             del self.options.cpp20modules
 
     def configure(self):
