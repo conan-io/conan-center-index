@@ -47,9 +47,14 @@ class Dawn(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["DAWN_ENABLE_INSTALL"] = "ON"
         tc.generate()
 
     def build(self):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
+
+    def package(self):
+        cmake = CMake(self)
+        cmake.install()
