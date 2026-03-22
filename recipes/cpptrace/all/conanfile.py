@@ -81,11 +81,13 @@ class CpptraceConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+
         if self._fallback_to_ninja:
             tc.generator = "Ninja"
+        tc.variables["CPPTRACE_DISABLE_CXX_20_MODULES"] = not self._uses_cpp_modules
+
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        tc.cache_variables["HAS_CXX20_MODULES"] = self._uses_cpp_modules
         tc.variables["CPPTRACE_USE_EXTERNAL_LIBDWARF"] = True
         tc.variables["CPPTRACE_CONAN"] = True
         if self.options.unwind == "libunwind":
