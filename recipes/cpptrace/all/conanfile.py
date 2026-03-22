@@ -21,11 +21,13 @@ class CpptraceConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "unwind": ["default", "libunwind"],
+        "cpp20modules": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "unwind": "default",
+        "cpp20modules": False,
     }
 
     @property
@@ -35,6 +37,8 @@ class CpptraceConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.version < Version("1"):
+            del self.options.cpp20modules
 
     def configure(self):
         if self.options.shared:
@@ -45,7 +49,7 @@ class CpptraceConan(ConanFile):
 
     @property
     def _uses_cpp_modules(self):
-        return self.version >= Version("1")
+        return self.options.get_safe("cpp20modules", False)
 
     @property
     def _fallback_to_ninja(self):
@@ -81,6 +85,7 @@ class CpptraceConan(ConanFile):
             tc.generator = "Ninja"
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+        tc.cache_variables["HAS_CXX20_MODULES"] = self._uses_cpp_modules
         tc.variables["CPPTRACE_USE_EXTERNAL_LIBDWARF"] = True
         tc.variables["CPPTRACE_CONAN"] = True
         if self.options.unwind == "libunwind":
