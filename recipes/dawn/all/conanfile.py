@@ -8,6 +8,7 @@ import os
 
 required_conan_version = ">=2"
 
+
 class Dawn(ConanFile):
     name = "dawn"
     url = "https://github.com/conan-io/conan-center-index"
@@ -17,18 +18,31 @@ class Dawn(ConanFile):
     topics = ("rendering", "graphics", "wgsl")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+    }
+    default_options = {
+        "shared": False,
+    }
 
     def validate(self):
+        if self.options.shared:
+            raise ConanInvalidConfiguration(
+                "Building as a shared library is not implemented yet"
+            )
+
         if self.settings.os == "Emscripten":
-            raise ConanInvalidConfiguration("For the emscripten port of dawn, use https://github.com/conan-io/conan-toolchains/blob/main/recipes/emsdk/config.yml")
+            raise ConanInvalidConfiguration(
+                "For the emscripten port of dawn, use https://github.com/conan-io/conan-toolchains/blob/main/recipes/emsdk/config.yml"
+            )
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16]")
 
     def source(self):
         git = Git(self)
-        git.clone(url=self.homepage)
-        git.checkout(**self.conan_data.sources[self.version])
+        git.clone(url=self.homepage, target=".")
+        git.checkout(**self.conan_data["sources"][self.version])
         self.run("python tools/fetch_dawn_dependencies.py")
 
     def generate(self):
