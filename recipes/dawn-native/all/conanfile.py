@@ -61,3 +61,5 @@ class DawnNative(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["webgpu_dawn"]
+        if self.settings.os == "Macos":
+            self.cpp_info.frameworks = ["Foundation", "IOSurface"]
