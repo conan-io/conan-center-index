@@ -1,9 +1,8 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.env import VirtualBuildEnv
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.layout import basic_layout
-from conan.tools.meson import Meson, MesonToolchain
 import os
 
 
@@ -20,19 +19,19 @@ class TestPackageConan(ConanFile):
         self.requires("wayland/[>=1.22.0]")
 
     def build_requirements(self):
-        self.tool_requires("meson/[>=1.3.0]")
+        self.tool_requires("cmake/[>=3.25 <4]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.1.0]")
         self.tool_requires("wayland/<host_version>")
 
     def layout(self):
-        basic_layout(self)
+        cmake_layout(self)
 
     def generate(self):
-        tc = MesonToolchain(self)
-        tc.project_options["build.pkg_config_path"] = self.generators_folder
-        tc.project_options["has_build_profile"] = self._has_build_profile
+        tc = CMakeToolchain(self)
         tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
         pkg_config_deps = PkgConfigDeps(self)
         if self._has_build_profile:
             pkg_config_deps.build_context_activated = ["wayland"]
@@ -40,9 +39,9 @@ class TestPackageConan(ConanFile):
         pkg_config_deps.generate()
 
     def build(self):
-        meson = Meson(self)
-        meson.configure()
-        meson.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def test(self):
         if can_run(self):
