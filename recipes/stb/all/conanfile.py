@@ -49,20 +49,6 @@ class StbConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def package_id(self):
-        # this option adds a precompiled static library
-        if self.options.image:
-            return
-
-        # Can't call self.info.clear() because options contribute to package id
-        self.info.settings.clear()
-        self.info.requires.clear()
-        try:
-            # conan v2 specific
-            self.info.conf.clear()
-        except AttributeError:
-            pass
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
