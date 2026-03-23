@@ -17,6 +17,9 @@ sources:
   "15.2.3":
     url: "https://sourceforge.net/projects/arma/files/armadillo-15.2.3.tar.xz"
     sha256: "0182d67d6949e4347a0bc62fc8c2793be7eb203c71f19edff93f8c45fd4a8190"
+  "15.2.4":
+    url: "https://sourceforge.net/projects/arma/files/armadillo-15.2.4.tar.xz"
+    sha256: "bb03a16da6b2cca43962b65a2890faf4e6b16607220cf60270436a11e09e6f46"
 
 patches:
   "10.7.0":
@@ -40,6 +43,10 @@ patches:
       patch_description: "Add find_package statements to inject conan dependencies"
       patch_type: "conan"
   "15.2.3":
+    - patch_file: "patches/0005-Guard-dependency-discovery-15.2.x.patch"
+      patch_description: "Add find_package statements to inject conan dependencies"
+      patch_type: "conan"
+  "15.2.4":
     - patch_file: "patches/0005-Guard-dependency-discovery-15.2.x.patch"
       patch_description: "Add find_package statements to inject conan dependencies"
       patch_type: "conan"
