@@ -19,7 +19,6 @@ class TestPackageConan(ConanFile):
         self.requires("wayland/[>=1.22.0]")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.25 <4]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.1.0]")
         self.tool_requires("wayland/<host_version>")
@@ -32,11 +31,6 @@ class TestPackageConan(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
-        pkg_config_deps = PkgConfigDeps(self)
-        if self._has_build_profile:
-            pkg_config_deps.build_context_activated = ["wayland"]
-            pkg_config_deps.build_context_suffix = {"wayland": "_BUILD"}
-        pkg_config_deps.generate()
 
     def build(self):
         cmake = CMake(self)
