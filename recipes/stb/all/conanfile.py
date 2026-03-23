@@ -15,7 +15,7 @@ class StbConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nothings/stb"
     topics = ("stb", "single-file", "header-only")
-    package_type = "header-library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
     options = {
@@ -50,6 +50,10 @@ class StbConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
+        # this option adds a precompiled static library
+        if self.options.image:
+            return
+
         # Can't call self.info.clear() because options contribute to package id
         self.info.settings.clear()
         self.info.requires.clear()
