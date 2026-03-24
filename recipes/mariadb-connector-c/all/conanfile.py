@@ -62,9 +62,7 @@ class MariadbConnectorcConan(ConanFile):
             self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
-        if Version(self.version) >= "3.3":
-            # INFO: https://mariadb.com/kb/en/mariadb-connector-c-330-release-notes
-            self.requires("zstd/1.5.5")
+        self.requires("zstd/[>=1.5.5 <2]")
 
     def validate(self):
         if self.settings.os != "Windows" and self.options.with_ssl == "schannel":
@@ -99,8 +97,7 @@ class MariadbConnectorcConan(ConanFile):
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
-        if Version(self.version) >= "3.3":
-            deps.set_property("zstd", "cmake_file_name", "ZSTD")
+        deps.set_property("zstd", "cmake_file_name", "ZSTD")
         deps.generate()
 
     def _patch_sources(self):
@@ -117,12 +114,11 @@ class MariadbConnectorcConan(ConanFile):
         replace_in_file(self, plugins_io_cmake, "${CURL_LIBRARIES}", "CURL::libcurl")
         if Version(self.version) >= "3.3.6":
             replace_in_file(self, root_cmake, "${WARNING_AS_ERROR}", "")
-        elif Version(self.version) >= "3.1.18":
+        else:
             replace_in_file(self, root_cmake, " -WX", "")
-        if Version(self.version) >= "3.3":
-            replace_in_file(self, root_cmake,
-                            "INCLUDE(${CC_SOURCE_DIR}/cmake/FindZStd.cmake)",
-                            "find_package(ZSTD REQUIRED CONFIG)")
+        replace_in_file(self, root_cmake,
+                        "INCLUDE(${CC_SOURCE_DIR}/cmake/FindZStd.cmake)",
+                        "find_package(ZSTD REQUIRED CONFIG)")
 
     def build(self):
         self._patch_sources()
