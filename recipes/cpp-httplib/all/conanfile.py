@@ -48,7 +48,7 @@ class CpphttplibConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_brotli:
             self.requires("brotli/1.1.0")
-        if self.options.get_safe("with_zstd"):
+        if self.options.with_zstd:
             self.requires("zstd/[>=1.5 <1.6]")
         if self.options.with_wolfssl:
             self.requires("wolfssl/[>=5 <6]", options={ "opensslall": True, "opensslextra": True})
@@ -88,7 +88,7 @@ class CpphttplibConan(ConanFile):
             self.cpp_info.defines.append("CPPHTTPLIB_MBEDTLS_SUPPORT")
         if self.options.with_wolfssl:
             self.cpp_info.defines.append("CPPHTTPLIB_WOLFSSL_SUPPORT")
-        if self.options.get_safe("with_zstd"):
+        if self.options.with_zstd:
             self.cpp_info.defines.append("CPPHTTPLIB_ZSTD_SUPPORT")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "anl"]
