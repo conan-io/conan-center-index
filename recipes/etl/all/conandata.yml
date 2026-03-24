@@ -2,21 +2,3 @@ sources:
   "20.46.2":
     url: "https://github.com/ETLCPP/etl/archive/refs/tags/20.46.2.tar.gz"
     sha256: "9175d07898a4a6f605aea050fdcf95a10d57e6eb25b293c3b03f551debe49930"
-  "20.45.0":
-    url: "https://github.com/ETLCPP/etl/archive/refs/tags/20.45.0.tar.gz"
-    sha256: "97d639b012653af69e2e69b24a816622b7de616fbc9daf3caa12c5cddb5172ba"
-  "20.44.0":
-    url: "https://github.com/ETLCPP/etl/archive/refs/tags/20.44.0.tar.gz"
-    sha256: "212d4fc24660ddd22ebba46d36a1f5fcf2438472d64d8417f8713c1c9c3d0a3a"
-  "20.43.0":
-    url: "https://github.com/ETLCPP/etl/archive/refs/tags/20.43.0.tar.gz"
-    sha256: "98106a7bc3a858035251868fa8ed036b1a9e3095714bf0b4cbf8c8e51c4d4234"
-  "20.40.0":
-    url: "https://github.com/ETLCPP/etl/archive/refs/tags/20.40.0.tar.gz"
-    sha256: "b47ca70e7394f50dd2d65dddfd088757525488ac2fd934f435705fbf3ffe6d3d"
-  "20.39.4":
-    url: "https://github.com/ETLCPP/etl/archive/20.39.4.tar.gz"
-    sha256: "ce1222ed12fb39ae7a6160f8c33da61534d6b4c4d0d36be622910bbd545f5ee7"
-  "20.38.17":
-    url: "https://github.com/ETLCPP/etl/archive/20.38.17.tar.gz"
-    sha256: "5b490aca3faad3796a48bf0980e74f2a67953967fad3c051a6d4981051cb0b9a"
