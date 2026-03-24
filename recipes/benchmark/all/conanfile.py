@@ -66,7 +66,7 @@ class BenchmarkConan(ConanFile):
             self.requires("libpfm4/4.13.0")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16.3 <4]")
+        self.tool_requires("cmake/[>=3.16.3]")
 
     def _patch_sources(self):
         replace_in_file(self,
