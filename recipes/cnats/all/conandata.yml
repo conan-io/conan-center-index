@@ -2,6 +2,3 @@ sources:
   "3.12.0":
     url: "https://github.com/nats-io/nats.c/archive/refs/tags/v3.12.0.tar.gz"
     sha256: "06b64d7045fd618c98e5608001b384bdbfa6a17718dba64e732ba72a6f00649b"
-  "3.11.0":
-    url: "https://github.com/nats-io/nats.c/archive/refs/tags/v3.11.0.tar.gz"
-    sha256: "9ee45cd502a49dbd29bed491286a4926e5e53f14a8aacad413c0cf4a057abee0"
