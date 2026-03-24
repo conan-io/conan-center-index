@@ -82,7 +82,7 @@ class FlecsConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["_flecs"].system_libs.append("pthread")
             elif self.settings.os == "Windows":
-                self.cpp_info.components["_flecs"].system_libs.extend(["wsock32", "ws2_32"])
+                self.cpp_info.components["_flecs"].system_libs.extend(["wsock32", "ws2_32", "dbghelp"])
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "flecs"
