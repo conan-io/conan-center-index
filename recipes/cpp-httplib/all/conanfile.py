@@ -38,19 +38,23 @@ class CpphttplibConan(ConanFile):
     }
     no_copy_source = True
 
+    @property
     def _tls_enabled(self):
-        return self.options.with_openssl or self.options.with_mbedtls or self.options.with_wolfssl
+        return self.options.with_openssl or self.options.get_safe("with_mbedtls") or self.options.get_safe("with_wolfssl")
 
     def config_options(self):
         if self.settings.os != "Macos":
             del self.options.use_macos_keychain_certs
+        if Version(self.version) < "0.36":
+            del self.options.with_mbedtls
+            del self.options.with_wolfssl
 
     def requirements(self):
         if self.options.with_openssl:
             self.requires("openssl/[>=3 <4]")
-        if self.options.with_mbedtls:
-            self.requires("mbedtls/3.6.5")
-        if self.options.with_wolfssl:
+        if self.options.get_safe("with_mbedtls"):
+            self.requires("mbedtls/[>=3.6 <3.7]")
+        if self.options.get_safe("with_wolfssl"):
             self.requires("wolfssl/5.7.2")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
@@ -65,12 +69,7 @@ class CpphttplibConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 11)
 
-        if self.options.with_mbedtls and Version(self.version) < "0.36.0":
-            raise ConanInvalidConfiguration("with_mbedtls option not available, please use version 0.36.0 or newer")
-
-        if self.options.with_wolfssl:
-            if Version(self.version) < "0.36.0":
-                raise ConanInvalidConfiguration("with_wolfssl option not available, please use version 0.36.0 or newer")
+        if self.options.get_safe("with_wolfssl"):
             if not self.dependencies["wolfssl"].options.opensslall:
                 raise ConanInvalidConfiguration(f"{self.ref} requires wolfssl/*:opensslall=True.")
 
@@ -93,9 +92,9 @@ class CpphttplibConan(ConanFile):
 
         if self.options.with_openssl:
             self.cpp_info.defines.append("CPPHTTPLIB_OPENSSL_SUPPORT")
-        if self.options.with_mbedtls:
+        if self.options.get_safe("with_mbedtls"):
             self.cpp_info.defines.append("CPPHTTPLIB_MBEDTLS_SUPPORT")
-        if self.options.with_wolfssl:
+        if self.options.get_safe("with_wolfssl"):
             self.cpp_info.defines.append("CPPHTTPLIB_WOLFSSL_SUPPORT")
         if self.options.with_zlib:
             self.cpp_info.defines.append("CPPHTTPLIB_ZLIB_SUPPORT")
@@ -108,7 +107,7 @@ class CpphttplibConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["crypt32", "cryptui", "ws2_32"]
         elif self.settings.os == "Macos":
-            if self._tls_enabled() and self.options.get_safe("use_macos_keychain_certs"):
+            if self._tls_enabled and self.options.get_safe("use_macos_keychain_certs"):
                 self.cpp_info.frameworks.extend(["CFNetwork", "CoreFoundation", "Security"])
                 if Version(self.version) < "0.36.0":
                     self.cpp_info.defines.append("CPPHTTPLIB_USE_CERTS_FROM_MACOSX_KEYCHAIN")
