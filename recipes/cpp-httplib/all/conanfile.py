@@ -21,6 +21,8 @@ class CpphttplibConan(ConanFile):
         "with_openssl": [True, False],
         "with_zlib": [True, False],
         "with_brotli": [True, False],
+        "with_mbedtls": [True, False],
+        "with_wolfssl": [True, False],
         "use_macos_keychain_certs": [True, False],
         "with_zstd": [True, False],
     }
@@ -28,6 +30,8 @@ class CpphttplibConan(ConanFile):
         "with_openssl": False,
         "with_zlib": False,
         "with_brotli": False,
+        "with_mbedtls": False,
+        "with_wolfssl": False,
         "use_macos_keychain_certs": True,
         "with_zstd": False,
     }
@@ -46,6 +50,10 @@ class CpphttplibConan(ConanFile):
             self.requires("brotli/1.1.0")
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/[>=1.5 <1.6]")
+        if self.options.with_wolfssl:
+            self.requires("wolfssl/[>=5 <6]", options={ "opensslall": True, "opensslextra": True})
+        if self.options.with_mbedtls:
+            self.requires("mbedtls/[>=2 <4]")
 
     def package_id(self):
         self.info.clear()
@@ -76,6 +84,10 @@ class CpphttplibConan(ConanFile):
             self.cpp_info.defines.append("CPPHTTPLIB_ZLIB_SUPPORT")
         if self.options.with_brotli:
             self.cpp_info.defines.append("CPPHTTPLIB_BROTLI_SUPPORT")
+        if self.options.with_mbedtls:
+            self.cpp_info.defines.append("CPPHTTPLIB_MBEDTLS_SUPPORT")
+        if self.options.with_wolfssl:
+            self.cpp_info.defines.append("CPPHTTPLIB_WOLFSSL_SUPPORT")
         if self.options.get_safe("with_zstd"):
             self.cpp_info.defines.append("CPPHTTPLIB_ZSTD_SUPPORT")
         if self.settings.os in ["Linux", "FreeBSD"]:
