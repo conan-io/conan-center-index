@@ -74,6 +74,7 @@ class LibSoup(ConanFile):
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
