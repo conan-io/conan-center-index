@@ -3,6 +3,7 @@ from conan.tools.files import copy, get, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.apple import fix_apple_shared_install_name
 import os
 
 
@@ -37,6 +38,8 @@ class LibSoup(ConanFile):
         self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
+        # INFO: Requires glib-mkenums to build soup-enum-types.h from soup-enum-types.h.template
+        self.tool_requires("glib/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -71,6 +74,7 @@ class LibSoup(ConanFile):
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["soup-3.0"]
