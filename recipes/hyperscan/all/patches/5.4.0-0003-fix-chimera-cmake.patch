@@ -11,14 +11,14 @@ index ebb3b49..e946996 100644
  # only set these after all tests are done
  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_C_FLAGS}")
 diff --git a/cmake/pcre.cmake b/cmake/pcre.cmake
-index c3cbbc7..3d849e8 100644
+index c3cbbc7..2e0fa3d 100644
 --- a/cmake/pcre.cmake
 +++ b/cmake/pcre.cmake
-@@ -53,6 +53,7 @@ if (PCRE_BUILD_SOURCE)
- else ()
+@@ -54,6 +54,7 @@ else ()
      # conan should save us
      find_package(pcre)
-+    add_library(pcre ALIAS pcre::pcre)
      if(pcre_FOUND AND (pcre_VERSION VERSION_GREATER_EQUAL PCRE_REQUIRED_VERSION))
++        add_library(pcre ALIAS pcre::pcre)
          set(CORRECT_PCRE_VERSION TRUE)
          set(PCRE_LDFLAGS "pcre::pcre")
+     endif()
