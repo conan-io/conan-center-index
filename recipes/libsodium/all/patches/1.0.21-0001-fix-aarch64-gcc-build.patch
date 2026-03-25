@@ -1,7 +1,6 @@
 See https://github.com/jedisct1/libsodium/commit/6702f69bef6044163acc7715e6ac7e430890ce78
 
 From 6702f69bef6044163acc7715e6ac7e430890ce78 Mon Sep 17 00:00:00 2001
-From: Frank Denis <github@pureftpd.org>
 Date: Wed, 7 Jan 2026 12:00:49 +0100
 Subject: [PATCH] Fix compilation with GCC on aarch64
 
