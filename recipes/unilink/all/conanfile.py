@@ -40,26 +40,16 @@ class UnilinkConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         check_min_cppstd(self, 17)
-
-        if self.settings.compiler == "gcc" and Version(
-            self.settings.compiler.version
-        ) < Version("7"):
-            raise ConanInvalidConfiguration(f"{self.ref} requires at least GCC 7")
-
-        if self.settings.compiler == "clang" and Version(
-            self.settings.compiler.version
-        ) < Version("5"):
-            raise ConanInvalidConfiguration(f"{self.ref} requires at least Clang 5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def requirements(self):
-        self.requires("boost/[>=1.83.0 <2]")
+        self.requires("boost/[>=1.83.0 <2]", transitive_headers=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -74,9 +64,6 @@ class UnilinkConan(ConanFile):
         tc.variables["UNILINK_ENABLE_CONFIG"] = bool(self.options.enable_config)
         tc.variables["UNILINK_ENABLE_MEMORY_TRACKING"] = bool(
             self.options.enable_memory_tracking
-        )
-        tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = bool(
-            self.options.get_safe("fPIC", True)
         )
         tc.generate()
 
@@ -112,7 +99,7 @@ class UnilinkConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "unilink::unilink")
         self.cpp_info.set_property("cmake_file_name", "unilink")
         self.cpp_info.set_property("pkg_config_name", "unilink")
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["unilink"]
 
         # Set compile definitions
         if self.options.enable_config:
