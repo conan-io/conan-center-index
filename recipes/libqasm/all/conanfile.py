@@ -34,8 +34,8 @@ class LibqasmConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        
         self.requires("tree-gen/1.0.9", transitive_headers=True, transitive_libs=True)
+        self.requires("fmt/[>=11.0.2 <13]", transitive_headers=True)
         self.requires("range-v3/0.12.0", transitive_headers=True)
         self.requires("antlr4-cppruntime/4.13.2", transitive_headers=True)
 
