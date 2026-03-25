@@ -3,7 +3,6 @@ from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
 from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
@@ -21,13 +20,11 @@ class CpptraceConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "unwind": ["default", "libunwind"],
-        "cpp20modules": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "unwind": "default",
-        "cpp20modules": False,
     }
 
     @property
@@ -37,8 +34,6 @@ class CpptraceConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.version < Version("1"):
-            del self.options.cpp20modules
 
     def configure(self):
         if self.options.shared:
@@ -46,20 +41,6 @@ class CpptraceConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-
-    @property
-    def _uses_cpp_modules(self):
-        return self.options.get_safe("cpp20modules", False)
-
-    @property
-    def _fallback_to_ninja(self):
-        return self._uses_cpp_modules and self.conf.get("tools.cmake.cmaketoolchain:generator") is None
-
-    def build_requirements(self):
-        if self._uses_cpp_modules:
-            self.tool_requires("cmake/[>=3.28]")
-        if self._fallback_to_ninja:
-            self.tool_requires("ninja/[>=0]")
 
     def requirements(self):
         self.requires("libdwarf/[>=0.11.0 <3]")
@@ -81,11 +62,8 @@ class CpptraceConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-
-        if self._fallback_to_ninja:
-            tc.generator = "Ninja"
-        tc.variables["CPPTRACE_DISABLE_CXX_20_MODULES"] = not self._uses_cpp_modules
-
+        if "CPPTRACE_DISABLE_CXX_20_MODULES" not in self.conf.get("tools.cmake.cmaketoolchain:extra_variables", default={}):
+            tc.variables["CPPTRACE_DISABLE_CXX_20_MODULES"] = True
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.variables["CPPTRACE_USE_EXTERNAL_LIBDWARF"] = True
