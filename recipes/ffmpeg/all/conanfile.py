@@ -474,7 +474,12 @@ class FFMpegConan(ConanFile):
                                   "#define X264_API_IMPORTS 1", "")
         if self.options.with_ssl == "openssl":
                 # https://trac.ffmpeg.org/ticket/5675
-            if Version(self.version) >= "8.0":
+            if Version(self.version) >= "8.1":
+                openssl_libs = load(self, os.path.join(self.build_folder, "openssl_libs.list"))
+                replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                                    "check_lib openssl openssl/ssl.h DTLS_get_data_mtu -lssl -lcrypto -lws2_32 -lgdi32 ||",
+                                    f"check_lib openssl openssl/ssl.h DTLS_get_data_mtu {openssl_libs} || ")
+            elif Version(self.version) >= "8.0":
                 openssl_libs = load(self, os.path.join(self.build_folder, "openssl_libs.list"))
                 replace_in_file(self, os.path.join(self.source_folder, "configure"),
                                     "check_lib openssl openssl/ssl.h OPENSSL_init_ssl -lssl -lcrypto -lws2_32 -lgdi32 ||",
