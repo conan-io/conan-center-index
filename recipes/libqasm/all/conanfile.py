@@ -59,10 +59,10 @@ class LibqasmConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "/WX", "")
-        replace_in_file(self, os.path.join(self.source_folder, "test", "CMakeLists.txt"), "/WX", "")
-        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "-Werror", "")
-        replace_in_file(self, os.path.join(self.source_folder, "test", "CMakeLists.txt"), "-Werror", "")
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "/WX", "", strict=False)
+        replace_in_file(self, os.path.join(self.source_folder, "test", "CMakeLists.txt"), "/WX", "", strict=False)
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "-Werror", "", strict=False)
+        replace_in_file(self, os.path.join(self.source_folder, "test", "CMakeLists.txt"), "-Werror", "", strict=False)
 
     def build(self):
         cmake = CMake(self)
