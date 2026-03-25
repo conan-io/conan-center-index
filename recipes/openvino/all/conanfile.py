@@ -1,9 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import functools
 import os
@@ -113,9 +111,8 @@ class OpenvinoConan(ConanFile):
             destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/ComputeLibrary")
         get(self, **self.conan_data["sources"][self.version]["onednn_gpu"], strip_root=True,
             destination=f"{self.source_folder}/src/plugins/intel_gpu/thirdparty/onednn_gpu")
-        if Version(self.version) >= "2025.1.0":
-            get(self, **self.conan_data["sources"][self.version]["arm_kleidiai"], strip_root=True,
-                destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/kleidiai")
+        get(self, **self.conan_data["sources"][self.version]["arm_kleidiai"], strip_root=True,
+            destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/kleidiai")
         rmdir(self, f"{self.source_folder}/src/plugins/intel_gpu/thirdparty/rapidjson")
         apply_conandata_patches(self)
 
@@ -145,13 +142,12 @@ class OpenvinoConan(ConanFile):
             self.tool_requires("protobuf/<host_version>")
         if self.options.enable_tf_lite_frontend:
             self.tool_requires("flatbuffers/<host_version>")
-        self.tool_requires("cmake/[>=3.18 <4]")
+        self.tool_requires("cmake/[>=3.18]")
 
     def requirements(self):
         self.requires("onetbb/2021.10.0")
         self.requires("pugixml/1.14")
-        if Version(self.version) >= "2025.1.0":
-                self.requires("nlohmann_json/3.11.3")
+        self.requires("nlohmann_json/3.11.3")
         if self._target_x86_64:
             self.requires("xbyak/6.73")
         if self.options.get_safe("enable_gpu"):
@@ -220,13 +216,12 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_NCC_STYLE"] = False
         toolchain.cache_variables["ENABLE_SAMPLES"] = False
         toolchain.cache_variables["ENABLE_TEMPLATE"] = False
-        if self.settings.os == "Macos" and Version(self.version) >= "2025.3.0":
+        if self.settings.os == "Macos":
             toolchain.cache_variables["OV_FORCE_ADHOC_SIGN"] = True
         toolchain.generate()
 
     def validate_build(self):
-        min_cppstd = "17" if Version(self.version) >= "2025.0.0" else "11"
-        check_min_cppstd(self, min_cppstd)
+        check_min_cppstd(self, 17)
 
         # OpenVINO has unresolved symbols, when clang is used with libc++
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
@@ -237,10 +232,6 @@ class OpenvinoConan(ConanFile):
 
         if self.settings.os == "Emscripten":
             raise ConanInvalidConfiguration(f"{self.ref} does not support Emscripten")
-
-        # Failing on Conan Center CI due to memory usage
-        if os.getenv("CONAN_CENTER_BUILD_SERVICE") and self.settings.build_type == "Debug":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support Debug build type on Conan Center CI")
 
     def build(self):
         cmake = CMake(self)
@@ -269,9 +260,7 @@ class OpenvinoConan(ConanFile):
 
         openvino_runtime = self.cpp_info.components["Runtime"]
         openvino_runtime.set_property("cmake_target_name", "openvino::runtime")
-        openvino_runtime.requires = ["onetbb::libtbb", "pugixml::pugixml"]
-        if Version(self.version) >= "2025.1.0":
-            openvino_runtime.requires.append("nlohmann_json::nlohmann_json")
+        openvino_runtime.requires = ["onetbb::libtbb", "pugixml::pugixml", "nlohmann_json::nlohmann_json"]
         openvino_runtime.libs = [libname("openvino")]
         if self._preprocessing_available:
             openvino_runtime.requires.append("ade::ade")
@@ -294,12 +283,11 @@ class OpenvinoConan(ConanFile):
                     libname("openvino_snippets"),
                     libname("mlas")
                 ])
-                if Version(self.version) >= "2025.4.0":
-                    openvino_runtime.libs.append(libname("openvino_xml_util"))
+                openvino_runtime.libs.append(libname("openvino_xml_util"))
                 if self._target_arm:
                     openvino_runtime.libs.append("arm_compute-static")
-                    if Version(self.version) >= "2025.1.0":
-                        openvino_runtime.libs.append(libname("kleidiai"))
+                    # TODO: Use cci version
+                    openvino_runtime.libs.append(libname("kleidiai"))
             if self.options.get_safe("enable_gpu"):
                 openvino_runtime.libs.extend([
                     libname("openvino_intel_gpu_plugin"),
@@ -345,8 +333,7 @@ class OpenvinoConan(ConanFile):
                 # utils goes last since all others depend on it
                 libname("openvino_util")
             ])
-            if Version(self.version) >= "2025.1.0":
-                openvino_runtime.libs.append(libname("openvino_common_translators"))
+            openvino_runtime.libs.append(libname("openvino_common_translators"))
             # set 'openvino' once again for transformations objects files (cyclic dependency)
             # openvino_runtime.libs.append("openvino")
             full_openvino_lib_path = os.path.join(self.package_folder, "lib", f"openvino{lib_suffix}.lib").replace("\\", "/") if self.settings.os == "Windows" else \
