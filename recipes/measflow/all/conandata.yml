@@ -1,4 +1,4 @@
 sources:
-  "0.4.1":
-    url: "https://github.com/vreitenbach/MeasFlow/archive/refs/tags/v0.4.1.tar.gz"
-    sha256: "0d0a6afc0b2145d01e903519f026648bb685cb4f498771fe8cf7fd6aa7fd96ae"
+  "0.4.2":
+    url: "https://github.com/vreitenbach/MeasFlow/archive/refs/tags/v0.4.2.tar.gz"
+    sha256: "e7b6ccfb8056c56d86c0ff38b7a889dc79d8d74b60d18f67692ce55f60fc311c"
