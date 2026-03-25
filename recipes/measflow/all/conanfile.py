@@ -11,7 +11,7 @@ class MeasFlowConan(ConanFile):
     description = "Open, high-performance binary measurement data format"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/vreitenbach/MeasFlow"
+    homepage = "https://vreitenbach.github.io/MeasFlow/"
     topics = ("measurement", "binary-format", "streaming", "automotive", "data-acquisition")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
