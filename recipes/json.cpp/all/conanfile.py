@@ -5,7 +5,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 import os
 
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.1"
 
 
 class JsonCPPConan(ConanFile):
