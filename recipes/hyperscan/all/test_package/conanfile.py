@@ -15,7 +15,7 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires(self.tested_reference_str)
+        self.requires(self.tested_reference_str, options={"build_chimera": True})
 
     def generate(self):
         tc = CMakeToolchain(self)

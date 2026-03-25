@@ -1,0 +1,24 @@
+diff --git a/chimera/CMakeLists.txt b/chimera/CMakeLists.txt
+index ebb3b49..e946996 100644
+--- a/chimera/CMakeLists.txt
++++ b/chimera/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ # Chimera lib
+ 
+-include_directories(${PCRE_INCLUDE_DIRS})
++include_directories(${pcre_INCLUDE_DIRS})
+ 
+ # only set these after all tests are done
+ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_C_FLAGS}")
+diff --git a/cmake/pcre.cmake b/cmake/pcre.cmake
+index c3cbbc7..3d849e8 100644
+--- a/cmake/pcre.cmake
++++ b/cmake/pcre.cmake
+@@ -53,6 +53,7 @@ if (PCRE_BUILD_SOURCE)
+ else ()
+     # conan should save us
+     find_package(pcre)
++    add_library(pcre ALIAS pcre::pcre)
+     if(pcre_FOUND AND (pcre_VERSION VERSION_GREATER_EQUAL PCRE_REQUIRED_VERSION))
+         set(CORRECT_PCRE_VERSION TRUE)
+         set(PCRE_LDFLAGS "pcre::pcre")
