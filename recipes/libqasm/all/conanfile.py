@@ -5,12 +5,11 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.60.0 <2 || >=2.0.6"
+required_conan_version = ">=2.0.6"
 
 
 class LibqasmConan(ConanFile):
@@ -75,8 +74,7 @@ class LibqasmConan(ConanFile):
             self.tool_requires("cpython/3.12.2")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd},"
@@ -106,8 +104,6 @@ class LibqasmConan(ConanFile):
         tc.variables["LIBQASM_BUILD_PYTHON"] = self.options.build_python
         tc.variables["LIBQASM_BUILD_TESTS"] = self._should_build_test
         tc.generate()
-        env = VirtualBuildEnv(self)
-        env.generate()
 
     def _patch_sources(self):
         werror = "/WX" if is_msvc(self) else "-Werror"
