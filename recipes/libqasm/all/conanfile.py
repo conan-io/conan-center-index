@@ -34,7 +34,7 @@ class LibqasmConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fmt/[>=11.0.2]", transitive_headers=True)
+        self.requires("fmt/[>=11.0.2 <12]", transitive_headers=True)
         self.requires("tree-gen/1.0.9", transitive_headers=True, transitive_libs=True)
         self.requires("range-v3/0.12.0", transitive_headers=True)
         self.requires("antlr4-cppruntime/4.13.2", transitive_headers=True)
@@ -50,6 +50,7 @@ class LibqasmConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -58,12 +59,12 @@ class LibqasmConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        werror = "/WX" if is_msvc(self) else "-Werror"
-        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), werror, "")
-        replace_in_file(self, os.path.join(self.source_folder, "test", "CMakeLists.txt"), werror, "")
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "/WX", "")
+        replace_in_file(self, os.path.join(self.source_folder, "test", "CMakeLists.txt"), "/WX", "")
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "-Werror", "")
+        replace_in_file(self, os.path.join(self.source_folder, "test", "CMakeLists.txt"), "-Werror", "")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
