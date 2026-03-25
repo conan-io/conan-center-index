@@ -32,6 +32,10 @@ class CppcheckConan(ConanFile):
     def requirements(self):
         if self.options.get_safe("have_rules"):
             self.requires("pcre/8.45")
+    
+    def build_requirements(self):
+        if Version(self.version) >= "2.20":
+            self.tool_requires("cmake/[>=3.22]")
 
     def package_id(self):
         del self.info.settings.compiler
@@ -39,6 +43,7 @@ class CppcheckConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -56,7 +61,6 @@ class CppcheckConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
