@@ -205,7 +205,7 @@ class wxWidgetsConan(ConanFile):
         tc.cache_variables["wxUSE_XRC"] = self.options.xrc
         tc.cache_variables["wxUSE_HELP"] = self.options.help
         tc.cache_variables["wxUSE_WXHTML_HELP"] = self.options.html_help
-        tc.cache_variables["wxUSE_URL"] = self.options.protocol
+        tc.cache_variables["wxUSE_URL"] = self.options.url
         tc.cache_variables["wxUSE_PROTOCOL"] = self.options.protocol
         tc.cache_variables["wxUSE_FS_INET"] = self.options.fs_inet
         tc.cache_variables["CMAKE_CONFIGURATION_TYPES"] = "Debug;Release;RelWithDebInfo;MinSizeRel"
@@ -218,9 +218,6 @@ class wxWidgetsConan(ConanFile):
         for item in str(self.options.custom_disables).split(","):
             if len(item) > 0:
                 tc.cache_variables[item] = False
-
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
-
         tc.generate()
 
         deps = CMakeDeps(self)
