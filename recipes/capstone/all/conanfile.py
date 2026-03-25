@@ -42,6 +42,12 @@ class CapstoneConan(ConanFile):
     options.update({a: [True, False] for a in _archs})
     default_options.update({a: True for a in _archs})
 
+    def config_options(self):
+        if str(self.version).startswith("5."):
+            del self.options.aarch64
+        else:
+            del self.options.arm64
+        
     def layout(self):
         cmake_layout(self, src_folder="src")
 
