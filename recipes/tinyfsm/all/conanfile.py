@@ -31,9 +31,6 @@ class TinyfsmConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 11)
 
-    def build(self):
-        pass
-
     def package(self):
         copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(
