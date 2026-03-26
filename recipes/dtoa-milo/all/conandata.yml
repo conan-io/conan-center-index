@@ -1,0 +1,10 @@
+sources:
+  "1.0":
+    url: "https://github.com/miloyip/dtoa-benchmark/archive/bf1fb58ade01658c908a498679e47f0b4e89aff7.tar.gz"
+    sha256: "77d6089b96f1704af487c629bc4b3eea1a532de16fbc27a090a18d41c1ed8305"
+patches:
+  "1.0":
+    - patch_file: "patches/001-msvc-compat.patch"
+      base_path: "src/milo"
+      patch_description: "Fix MSVC compatibility: use standard <stdint.h>, add missing <string.h> for memmove, guard gcc __int128 extension"
+      patch_type: "portability"
