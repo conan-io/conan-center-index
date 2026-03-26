@@ -1,6 +1,8 @@
---- a/Makefile.msc	2026-03-10 19:14:56.542776707 +0100
-+++ b/Makefile.msc	2026-03-10 19:15:44.248765020 +0100
-@@ -322,18 +322,18 @@
+diff --git a/Makefile.msc b/Makefile.msc
+index 3ef50a3..18868a1 100644
+--- a/Makefile.msc
++++ b/Makefile.msc
+@@ -322,9 +322,9 @@ SQLITE3H = sqlite3.h
  #
  !IFNDEF SQLITE3DLL
  !IF $(FOR_WIN10)!=0
@@ -8,22 +10,11 @@
 +SQLITE3DLL = sqlcipher.dll
  !ELSE
 -SQLITE3DLL = sqlite3.dll
-+SQLITE3DLL = sqlcipher.dll
++SQLITE3DLL = sqlcipher.lib
  !ENDIF
  !ENDIF
  
- # This is the name to use for the SQLite import library (LIB).
- #
- !IFNDEF SQLITE3LIB
- !IF $(FOR_WIN10)!=0
--SQLITE3LIB = winsqlite3.lib
-+SQLITE3LIB = sqlcipher.lib
- !ELSE
--SQLITE3LIB = sqlite3.lib
-+SQLITE3LIB = sqlcipher.lib
- !ENDIF
- !ENDIF
-@@ -734,7 +734,7 @@
+@@ -734,7 +734,7 @@ SHELL_CORE_SRC = $(SQLITE3C)
  SHELL_CORE_DEP = $(SQLITE3DLL)
  # <<mark>>
  !ELSEIF $(USE_AMALGAMATION)==0
@@ -32,7 +23,7 @@
  # <</mark>>
  !ELSE
  SHELL_CORE_DEP =
-@@ -757,7 +757,7 @@
+@@ -757,7 +757,7 @@ TESTFIXTURE_DEP = zlib $(TESTFIXTURE_DEP)
  SHELL_CORE_LIB = $(SQLITE3LIB)
  # <<mark>>
  !ELSEIF $(USE_AMALGAMATION)==0
@@ -41,7 +32,16 @@
  # <</mark>>
  !ELSE
  SHELL_CORE_LIB =
-@@ -1858,7 +1858,7 @@
+@@ -1681,7 +1681,7 @@ TESTEXT = \
+   $(TOP)\ext\recover\test_recover.c \
+   $(TOP)\ext\intck\test_intck.c  \
+   $(TOP)\ext\intck\sqlite3intck.c \
+-  $(TOP)\ext\recover\dbdata.c 
++  $(TOP)\ext\recover\dbdata.c
+ 
+ # If use of zlib is enabled, add the "zipfile.c" source file.
+ #
+@@ -1859,7 +1859,7 @@ ALL_TCL_TARGETS =
  # This is the default Makefile target.  The objects listed here
  # are what get build when you type just "make" with no arguments.
  #
@@ -50,7 +50,7 @@
  
  # Targets that require the Tcl library.
  #
-@@ -1882,11 +1882,11 @@
+@@ -1883,11 +1883,11 @@ jimsh0.exe:	$(TOP)\autosetup\jimsh0.c
  	cl -DHAVE__FULLPATH=1 $(TOP)\autosetup\jimsh0.c
  
  # <<mark>>
@@ -65,7 +65,7 @@
  
  tclsqlite3.def:	tclsqlite.lo
  	echo EXPORTS > tclsqlite3.def
-@@ -1924,9 +1924,9 @@
+@@ -1925,9 +1925,9 @@ $(SQLITE3DLL):	$(LIBOBJ) $(LIBRESOBJS) $(CORE_LINK_DEP)
  	$(LD) $(LDFLAGS) $(LTLINKOPTS) $(LTLIBPATHS) /DLL $(CORE_LINK_OPTS) /OUT:$@ $(LIBOBJ) $(LIBRESOBJS) $(LTLIBS) $(TLIBS)
  
  # <<block2>>
@@ -77,3 +77,21 @@
  		| $(JIM_TCLSH) $(TOP)\tool\replace.tcl include "^\s+1 _?(sqlite3(?:session|changeset|changegroup|rebaser|rbu)?_[^@]*)(?:@\d+)?$$" \1 \
  		| sort >> sqlite3.def
  # <</block2>>
+@@ -2650,7 +2650,7 @@ testrunner:	testfixture.exe
+ 	.\testfixture.exe $(TOP)\test\testrunner.tcl
+ 
+ # This is the testing target preferred by the core SQLite developers.
+-# It runs tests under a standard configuration.  The devs run 
++# It runs tests under a standard configuration.  The devs run
+ # "nmake /f Makefile.msc devtest" prior to each check-in, at a minimum.
+ # Probably other tests too, but at least this one.
+ #
+@@ -2675,7 +2675,7 @@ releasetest: verify-source
+ # dependency on verify-source so that xdevtest can be run from
+ # a modified source tree.
+ #
+-xdevtest:	
++xdevtest:
+ 	$(TCLSH_CMD) $(TOP)\test\testrunner.tcl release
+ 
+ 

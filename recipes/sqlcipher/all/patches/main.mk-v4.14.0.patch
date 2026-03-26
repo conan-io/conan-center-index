@@ -1,6 +1,17 @@
---- a/main.mk	2026-03-10 19:14:56.532776851 +0100
-+++ b/main.mk	2026-03-10 19:15:13.405868591 +0100
-@@ -1126,7 +1126,7 @@
+diff --git a/main.mk b/main.mk
+index 2f02f87..078e8d6 100644
+--- a/main.mk
++++ b/main.mk
+@@ -582,7 +582,7 @@ LIBOBJS0 = alter.o analyze.o attach.o auth.o \
+          vdbe.o vdbeapi.o vdbeaux.o vdbeblob.o vdbemem.o vdbesort.o \
+          vdbetrace.o vdbevtab.o vtab.o \
+          wal.o walker.o where.o wherecode.o whereexpr.o \
+-         window.o $(SQLCIPHER_OBJ) 
++         window.o $(SQLCIPHER_OBJ)
+ LIBOBJS = $(LIBOBJS0)
+ 
+ #
+@@ -1130,7 +1130,7 @@ T.link.tcl = $(T.tcl.env.source); $(T.link)
  # of the static library ($(libsqlite3.LIB)) is constant on all tested
  # platforms.
  #
@@ -9,7 +20,7 @@
  #
  # libsqlite3.DLL => the DLL library
  #
-@@ -1142,7 +1142,7 @@
+@@ -1146,7 +1146,7 @@ libsqlite3.out.implib ?=
  #
  # libsqlite3.LIB => the static library
  #
@@ -18,7 +29,7 @@
  
  #
  # libsqlite3.DLL.install-rules => the suffix of the symoblic name of
-@@ -1626,12 +1626,12 @@
+@@ -1630,12 +1630,12 @@ install-dll-darwin: $(install-dir.lib) $(libsqlite3.DLL)
  	$(INSTALL) $(libsqlite3.DLL) "$(install-dir.lib)"
  	@echo "Setting up $(libsqlite3.DLL) version symlinks..."; \
  	cd "$(install-dir.lib)" || exit $$?; \
@@ -35,7 +46,7 @@
  
  install-dll-1: install-dll-$(libsqlite3.DLL.install-rules)
  install-dll-0 install-dll-:
-@@ -2514,7 +2514,7 @@
+@@ -2518,7 +2518,7 @@ tidy:
  	rm -f lemon$(B.exe) sqlite*.tar.gz
  	rm -f mkkeywordhash$(B.exe) mksourceid$(B.exe)
  	rm -f parse.* fts5parse.*
