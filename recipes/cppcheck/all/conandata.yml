@@ -2,27 +2,6 @@ sources:
   "2.20.0":
     url: "https://github.com/danmar/cppcheck/archive/2.20.0.tar.gz"
     sha256: "7be7992439339017edb551d8e7d2315f9bb57c402da50c2cee9cd0e2724600a1"
-  "2.19.1":
-    url: "https://github.com/danmar/cppcheck/archive/2.19.1.tar.gz"
-    sha256: "49bdf1d7826d60053575b78d3192d81d54970dbfb356590f7476de250b1a4234"
-  "2.18.3":
-    url: "https://github.com/danmar/cppcheck/archive/2.18.3.tar.gz"
-    sha256: "e37c94e190cdddc65682649b02b72939761585bddd8ada595f922e190a26a2be"
-  "2.17.1":
-    url: "https://github.com/danmar/cppcheck/archive/2.17.1.tar.gz"
-    sha256: "bfd681868248ec03855ca7c2aea7bcb1f39b8b18860d76aec805a92a967b966c"
-  "2.11.1":
-    url: "https://github.com/danmar/cppcheck/archive/2.11.1.tar.gz"
-    sha256: "fef6ef868d562d49136f158e1d0f7a38237e7e1c0a91d9189bdd465f1fe54316"
-  "2.10.3":
-    url: "https://github.com/danmar/cppcheck/archive/2.10.3.tar.gz"
-    sha256: "8aae5e116daeaaf5d19f3efa61b91c06f161cb97412a1d1af6e1e20686e48967"
-  "2.9.3":
-    url: "https://github.com/danmar/cppcheck/archive/2.9.3.tar.gz"
-    sha256: "46319ca73e33e4b2bd91981a76a0d4f184cd3f86b62dc18e8938eabacd3ad2e3"
-  "2.8.2":
-    url: "https://github.com/danmar/cppcheck/archive/2.8.2.tar.gz"
-    sha256: "30ba99ab54089c44b83f02e2453da046a7edff5237950d4A0eb1eba4afcb4f45"
 patches:
   "2.11.1":
     - patch_file: "patches/0003-pcre-debuglib-name.patch"
