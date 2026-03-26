@@ -5,12 +5,6 @@ sources:
   "4.6.1":
     url: "https://github.com/sqlcipher/sqlcipher/archive/v4.6.1.zip"
     sha256: "93a7475183d47e2d33f85aefa7518e8730796f103612d36ae191ae56209104e0"
-  "4.5.7":
-    url: "https://github.com/sqlcipher/sqlcipher/archive/v4.5.7.zip"
-    sha256: "4f7e00e4b485d162d638094daba354d04aabb0ca68b72cc1826f082b40c9fd7d"
-  "4.4.3":
-    url: "https://github.com/sqlcipher/sqlcipher/archive/v4.4.3.zip"
-    sha256: "e52d0595dc1ed30eed68523fe286d38657bd905957447a3725706ff54e21edf8"
 patches:
   "4.14.0":
     - patch_file: patches/autoconf-Makefile.in-v4.14.0.patch
@@ -22,11 +16,3 @@ patches:
     - patch_file: patches/Makefile.in-v4.6.1.patch
     - patch_file: patches/Makefile.msc-v4.6.1.patch
     - patch_file: patches/fix_configure-v4.5.7.patch
-  "4.5.7":
-    - patch_file: patches/Makefile.in-v4.5.7.patch
-    - patch_file: patches/Makefile.msc-v4.5.7.patch
-    - patch_file: patches/fix_configure-v4.5.7.patch
-  "4.4.3":
-    - patch_file: patches/Makefile.in-v4.4.3.patch
-    - patch_file: patches/Makefile.msc-v4.4.3.patch
-    - patch_file: patches/fix_configure-v4.4.3.patch
