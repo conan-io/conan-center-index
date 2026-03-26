@@ -11,7 +11,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import VCVars, is_msvc, is_msvc_static_runtime, NMakeToolchain, NMakeDeps
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.58.0"
+required_conan_version = ">=2.1"
 
 
 class SqlcipherConan(ConanFile):
@@ -30,7 +30,6 @@ class SqlcipherConan(ConanFile):
         "crypto_library": ["openssl", "libressl", "commoncrypto"],
         "with_largefile": [True, False],
         "temporary_store": ["always_file", "default_file", "default_memory", "always_memory"],
-        "thread_safe": [True, False],
         "enable_column_metadata": [True, False],
     }
     default_options = {
@@ -39,7 +38,6 @@ class SqlcipherConan(ConanFile):
         "crypto_library": "openssl",
         "with_largefile": True,
         "temporary_store": "default_memory",
-        "thread_safe": True,
         "enable_column_metadata": False,
     }
 
@@ -112,10 +110,6 @@ class SqlcipherConan(ConanFile):
             "always_memory": "always",
         }.get(str(self.options.temporary_store))
 
-    @property
-    def _thread_safe_value(self):
-        return "1" if self.options.thread_safe else "2"
-
     def _generate_msvc(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -134,7 +128,6 @@ class SqlcipherConan(ConanFile):
             opt_feature_flags += " -DSQLITE_ENABLE_COLUMN_METADATA"
         if Version(self.version) > "4.6.1":
             opt_feature_flags += " -DHAVE_STDINT_H"  #
-            opt_feature_flags += f" -DSQLTHREAD_SAFE={self._thread_safe_value}"
             opt_feature_flags += " -DSQLITE_EXTRA_INIT=sqlcipher_extra_init" # This is required from version 4.7.0
             opt_feature_flags += " -DSQLITE_EXTRA_SHUTDOWN=sqlcipher_extra_shutdown" # This is required from version 4.7.0
             opt_feature_flags += f" -DSQLITE_TEMP_STORE={self._temp_store_nmake_value}"
@@ -203,7 +196,6 @@ class SqlcipherConan(ConanFile):
         if Version(self.version) > "4.6.1":
             tc.extra_defines.append("SQLITE_EXTRA_INIT=sqlcipher_extra_init") # This is required from version 4.7.0
             tc.extra_defines.append("SQLITE_EXTRA_SHUTDOWN=sqlcipher_extra_shutdown") # This is required from version 4.7.0
-            tc.extra_defines.append(f"SQLTHREAD_SAFE={self._thread_safe_value}")
 
         if self._use_commoncrypto:
             tc.extra_ldflags += [
@@ -296,9 +288,7 @@ class SqlcipherConan(ConanFile):
         self.cpp_info.libs = ["sqlcipher"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread", "dl"])
-            if Version(self.version) >= "4.5.0":
-                self.cpp_info.system_libs.append("m")
+            self.cpp_info.system_libs.extend(["pthread", "dl", "m"])
         self.cpp_info.defines = [
             "SQLITE_HAS_CODEC",
             f"SQLITE_TEMP_STORE={self._temp_store_nmake_value}"
