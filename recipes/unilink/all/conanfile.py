@@ -47,7 +47,7 @@ class UnilinkConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def requirements(self):
-        self.requires("boost/[>=1.90.0 <2]", transitive_headers=True)
+        self.requires("boost/1.88.0", transitive_headers=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
