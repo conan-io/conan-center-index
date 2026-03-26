@@ -409,7 +409,7 @@ class wxWidgetsConan(ConanFile):
             lib_suffix = "_dll" if self.options.shared else "_lib"
             basedir = f"{compiler_prefix}{arch_suffix}{lib_suffix}"
             libdir = os.path.join("lib", basedir)
-            self.cpp_info.bindirs.append(libdir if Version(self.version) < "3.3.0" else os.path.join("bin", basedir))
+            self.cpp_info.bindirs.append(libdir)
             self.cpp_info.libdirs.append(libdir)
             self.cpp_info.defines.append("__WXMSW__")
             # disable annoying auto-linking
