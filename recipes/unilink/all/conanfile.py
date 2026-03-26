@@ -1,9 +1,7 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, collect_libs
-from conan.tools.scm import Version
+from conan.tools.files import copy, get
 import os
 
 required_conan_version = ">=2.0"
@@ -49,7 +47,7 @@ class UnilinkConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def requirements(self):
-        self.requires("boost/[>=1.83.0 <2]", transitive_headers=True)
+        self.requires("boost/[>=1.90.0 <2]", transitive_headers=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -111,4 +109,4 @@ class UnilinkConan(ConanFile):
             self.cpp_info.system_libs.append("pthread")
 
         # Boost dependency
-        self.cpp_info.requires = ["boost::headers", "boost::system"]
+        self.cpp_info.requires = ["boost::headers"]
