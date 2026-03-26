@@ -53,9 +53,9 @@ class CpphttplibConan(ConanFile):
         if self.options.with_openssl:
             self.requires("openssl/[>=3 <4]")
         if self.options.get_safe("with_mbedtls"):
-            self.requires("mbedtls/[>=3.6 <3.7]")
+            self.requires("mbedtls/[>=2 <4]")
         if self.options.get_safe("with_wolfssl"):
-            self.requires("wolfssl/5.7.2")
+            self.requires("wolfssl/[>=5 <6]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_brotli:
