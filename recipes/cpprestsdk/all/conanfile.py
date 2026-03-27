@@ -59,7 +59,7 @@ class CppRestSDKConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.83.0", transitive_headers=True)
-        self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
+        self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
         if self.options.with_compression:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_websockets:
