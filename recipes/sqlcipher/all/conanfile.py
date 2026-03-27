@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, chmod, mkdir
@@ -21,7 +21,8 @@ class SqlcipherConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.zetetic.net/sqlcipher/"
     topics = ("database", "encryption", "sqlite")
-
+    languages = "C"
+    implements = ["auto_shared_fpic"]
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -41,10 +42,6 @@ class SqlcipherConan(ConanFile):
         "enable_column_metadata": False,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -53,12 +50,6 @@ class SqlcipherConan(ConanFile):
             del self.options.fPIC
         if self.settings.os not in ["Linux", "FreeBSD"]:
             self.options.rm_safe("with_largefile")
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -80,7 +71,7 @@ class SqlcipherConan(ConanFile):
         self.tool_requires("tcl/8.6.13")
         if not is_msvc(self):
             self.tool_requires("gnu-config/cci.20210814")
-            if self._settings_build.os == "Windows":
+            if self.settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                     self.tool_requires("msys2/cci.latest")
@@ -171,8 +162,6 @@ class SqlcipherConan(ConanFile):
         tc.configure_args += [
             "--disable-tcl",
         ]
-        tc.extra_ldflags.append("-lm")
-
         prefix_tempstore = "with" if Version(self.version) > "4.6.1" else "enable"
         tc.configure_args.append(f"--{prefix_tempstore}-tempstore={self._temp_store_autotools_value}")
         if self.settings.os == "Windows":
@@ -225,8 +214,6 @@ class SqlcipherConan(ConanFile):
             if gnu_config:
                 copy(self, os.path.basename(gnu_config), os.path.dirname(gnu_config), os.path.join(self.source_folder, "build-aux"))
         configure = os.path.join(self.source_folder, "configure")
-        # relocatable shared libs on macOS
-        # replace_in_file(self, configure, "-install_name \\$rpath/", "-install_name @rpath/")
         # avoid SIP issues on macOS when dependencies are shared
         if is_apple_os(self) and Version(self.version) <= "4.6.1":
             libdirs = sum([dep.cpp_info.libdirs for dep in self.dependencies.values()], [])
@@ -262,20 +249,20 @@ class SqlcipherConan(ConanFile):
                 autotools.install()
             rm(self, "*.la", self.package_folder, recursive=True)
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            fix_apple_shared_install_name(self)
 
             if Version(self.version) > "4.6.1":
+                # INFO: Relocate sqlite3 headers to sqlcipher to prevent file collisions
                 include_dir = os.path.join(self.package_folder, "include")
                 mkdir(self, os.path.join(include_dir, "sqlcipher"))
                 copy(self, "*.h", os.path.join(include_dir), os.path.join(include_dir, "sqlcipher"))
                 rm(self, "*.h", include_dir)
 
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_name", "sqlcipher")
-
         self.cpp_info.libs = ["sqlcipher"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread", "dl", "m"])
+            self.cpp_info.system_libs = ["pthread", "dl", "m"]
         self.cpp_info.defines = [
             "SQLITE_HAS_CODEC",
             f"SQLITE_TEMP_STORE={self._temp_store_nmake_value}"
