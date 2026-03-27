@@ -195,6 +195,9 @@ class SqlcipherConan(ConanFile):
 
         if self.options.enable_column_metadata:
             tc.extra_defines.append("SQLITE_ENABLE_COLUMN_METADATA=1")
+        if self.options.shared and is_apple_os(self):
+            # INFO: changing install names or rpaths can't be redone for bin/sqlite3 because larger updated load commands do not fit
+            tc.extra_ldflags.append("-headerpad_max_install_names")
         tc.generate()
 
         deps = AutotoolsDeps(self)
