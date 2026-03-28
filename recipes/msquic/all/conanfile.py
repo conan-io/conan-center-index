@@ -1,8 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import copy, rmdir
-from conan.tools.scm import Git
+from conan.tools.files import copy, get, rmdir
 import os
+import yaml
 
 
 class MsQuicConan(ConanFile):
@@ -21,23 +21,32 @@ class MsQuicConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": True, "fPIC": True}
     implements = ["auto_shared_fpic"]
+    exports = "submoduledata.yml"
 
     def source(self):
-        git = Git(self)
-        git.clone(url="https://github.com/microsoft/msquic.git", target=".")
-        git.checkout(commit=f"v{self.version}")
-        git.run("submodule update --init --recursive")
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+        submodule_filename = os.path.join(self.recipe_folder, "submoduledata.yml")
+        with open(submodule_filename, "r") as submodule_stream:
+            submodules_data = yaml.safe_load(submodule_stream)
+            for path, submodule in submodules_data["submodules"][self.version].items():
+                archive_name = os.path.splitext(
+                    os.path.basename(submodule["url"]))[0]
+                get(self, url=submodule["url"],
+                    sha256=submodule["sha256"],
+                    destination=path,
+                    filename=archive_name,
+                    strip_root=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["QUIC_BUILD_TOOLS"] = False
-        tc.variables["QUIC_BUILD_TEST"] = False
-        tc.variables["QUIC_BUILD_PERF"] = False
-        if self.options.shared:
-            tc.variables["BUILD_SHARED_LIBS"] = True
+        tc.cache_variables["QUIC_BUILD_TOOLS"] = False
+        tc.cache_variables["QUIC_BUILD_TEST"] = False
+        tc.cache_variables["QUIC_BUILD_PERF"] = False
+        tc.cache_variables["QUIC_BUILD_SHARED"] = bool(self.options.shared)
         tc.generate()
 
     def build(self):

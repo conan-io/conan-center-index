@@ -1,0 +1,4 @@
+sources:
+  "2.5.6":
+    url: "https://github.com/microsoft/msquic/archive/refs/tags/v2.5.6.tar.gz"
+    sha256: "a010a5f8daa3a73623493e99ac09e7e5bbc783ad809904b5a23bfc41a4051550"
