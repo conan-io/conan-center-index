@@ -76,3 +76,5 @@ class LielabConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Lielab")
         self.cpp_info.set_property("cmake_target_name", "Lielab::Lielab")
         self.cpp_info.libs = ["Lielab"]
+        if self.options.with_assertions:
+            self.cpp_info.defines.append("LIELAB_INCLUDE_ASSERTS")
