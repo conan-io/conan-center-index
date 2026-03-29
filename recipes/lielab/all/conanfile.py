@@ -50,8 +50,7 @@ class LielabConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if "with_assertions" in self.options:
-            tc.variables["LIELAB_WITH_ASSERTIONS"] = self.options.with_assertions
+        tc.variables["LIELAB_WITH_ASSERTIONS"] = self.options.with_assertions
         tc.variables["LIELAB_INSTALL_LIBRARY"] = True
         tc.variables["LIELAB_BUILD_TESTS"] = False
         tc.variables["LIELAB_BUILD_PYTHON"] = False
