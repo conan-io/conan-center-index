@@ -2,7 +2,9 @@
 // OTL requires a database-type macro (OTL_ODBC, OTL_ORA8, etc.) to enable
 // actual database classes. For this test we just verify the header is
 // includable and the version macro is defined.
-#define OTL_ODBC  // enable ODBC variant (no actual ODBC driver needed at compile time)
+#if defined(_WIN32)
+#  define OTL_ODBC  // ODBC headers available natively on Windows
+#endif
 #include <otl/otlv4.h>
 #include <cstdio>
 
