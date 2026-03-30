@@ -39,6 +39,7 @@ class CPythonConan(ConanFile):
         "with_tkinter": [True, False],
         "with_curses": [True, False],
         "with_lzma": [True, False],
+        "free_threaded": [True, False],
 
         # options that don't change package id
         "env_vars": [True, False],  # set environment variables
@@ -57,6 +58,7 @@ class CPythonConan(ConanFile):
         "with_tkinter": True,
         "with_curses": True,
         "with_lzma": True,
+        "free_threaded": False,
 
         # options that don't change package id
         "env_vars": True,
@@ -86,6 +88,8 @@ class CPythonConan(ConanFile):
             del self.options.with_curses
             del self.options.with_gdbm
             del self.options.with_nis
+        if Version(self.version) < "3.13":
+            del self.options.free_threaded
         if Version(self.version) >= "3.13" and not is_msvc(self):
             del self.options.with_nis
 
@@ -215,6 +219,8 @@ class CPythonConan(ConanFile):
             tc.configure_args.append("--with-system-ffi")
         if Version(self.version) >= "3.10":
             tc.configure_args.append("--disable-test-modules")
+        if self.options.get_safe("free_threaded"):
+            tc.configure_args.append("--disable-gil")
         if self.options.get_safe("with_sqlite3"):
             tc.configure_args.append("--enable-loadable-sqlite-extensions={}".format(
                 yes_no(not self.dependencies["sqlite3"].options.omit_load_extension)
@@ -540,7 +546,10 @@ class CPythonConan(ConanFile):
         sln = os.path.join(self.source_folder, "PCbuild", "pcbuild.sln")
         # FIXME: Solution files do not pick up the toolset automatically.
         cmd = msbuild.command(sln, targets=projects)
-        self.run(f"{cmd} /p:PlatformToolset={msvs_toolset(self)}")
+        extra_props = f"/p:PlatformToolset={msvs_toolset(self)}"
+        if self.options.get_safe("free_threaded"):
+            extra_props += " /p:DisableGil=true"
+        self.run(f"{cmd} {extra_props}")
 
     def build(self):
         self._patch_sources()
@@ -585,7 +594,10 @@ class CPythonConan(ConanFile):
         build_path = self._msvc_artifacts_path
         infix = "_d" if self.settings.build_type == "Debug" else ""
         # FIXME: if cross building, use a build python executable here
-        python_built = os.path.join(build_path, f"python{infix}.exe")
+        if self.options.get_safe("free_threaded"):
+            python_built = os.path.join(build_path, f"python{self._version_suffix}{self._ft_suffix}{infix}.exe")
+        else:
+            python_built = os.path.join(build_path, f"python{infix}.exe")
         layout_args = [
             os.path.join(self.source_folder, "PC", "layout", "main.py"),
             "-v",
@@ -623,7 +635,7 @@ class CPythonConan(ConanFile):
         copy(self, "*.pyd",
              src=build_path,
              dst=os.path.join(self.package_folder, self._msvc_install_subprefix, "DLLs"))
-        copy(self, f"python{self._version_suffix}{infix}.lib",
+        copy(self, f"python{self._version_suffix}{self._ft_suffix}{infix}.lib",
              src=build_path,
              dst=os.path.join(self.package_folder, self._msvc_install_subprefix, "libs"))
         copy(self, "*",
@@ -760,13 +772,13 @@ class CPythonConan(ConanFile):
                         while [ -L "$__file__" ]; do
                             __file__="$(dirname "$__file__")/$(readlink "$__file__")"
                         done
-                        exec "$(dirname "$__file__")/python{self._version_suffix}" "$0" "$@"
+                        exec "$(dirname "$__file__")/python{self._version_suffix}{self._abi_suffix}" "$0" "$@"
                         '''
                         """).encode())
                     fn.write(text)
 
             if not os.path.exists(self._cpython_symlink):
-                os.symlink(f"python{self._version_suffix}", self._cpython_symlink)
+                os.symlink(f"python{self._version_suffix}{self._ft_suffix}", self._cpython_symlink)
         fix_apple_shared_install_name(self)
 
         self._write_cmake_findpython_wrapper_file()
@@ -782,10 +794,14 @@ class CPythonConan(ConanFile):
     def _cpython_interpreter_name(self):
         python = "python"
         if is_msvc(self):
+            if self.options.get_safe("free_threaded"):
+                python += self._version_suffix + "t"
             if self.settings.build_type == "Debug":
                 python += "_d"
         else:
             python += self._version_suffix
+            if self.options.get_safe("free_threaded"):
+                python += "t"
         if self.settings.os == "Windows":
             python += ".exe"
         return python
@@ -797,9 +813,15 @@ class CPythonConan(ConanFile):
     @property
     def _abi_suffix(self):
         res = ""
+        if self.options.get_safe("free_threaded"):
+            res += "t"
         if self.settings.build_type == "Debug":
             res += "d"
         return res
+
+    @property
+    def _ft_suffix(self):
+        return "t" if self.options.get_safe("free_threaded") else ""
 
     @property
     def _lib_name(self):
@@ -808,9 +830,9 @@ class CPythonConan(ConanFile):
                 lib_ext = "_d"
             else:
                 lib_ext = ""
+            return f"python{self._version_suffix}{self._ft_suffix}{lib_ext}"
         else:
-            lib_ext = self._abi_suffix
-        return f"python{self._version_suffix}{lib_ext}"
+            return f"python{self._version_suffix}{self._abi_suffix}"
 
     def package_info(self):
         py_version = Version(self.version)
@@ -833,11 +855,13 @@ class CPythonConan(ConanFile):
                 self.cpp_info.components["python"].system_libs.extend(
                     ["pathcch", "shlwapi", "version", "ws2_32"]
                 )
+        if self.options.get_safe("free_threaded"):
+            self.cpp_info.components["python"].defines.append("Py_GIL_DISABLED")
         self.cpp_info.components["python"].requires = ["zlib::zlib"]
         if self.settings.os != "Windows" and Version(self.version) < "3.13":
             self.cpp_info.components["python"].requires.append("libxcrypt::libxcrypt")
         self.cpp_info.components["python"].set_property(
-            "pkg_config_name", f"python-{py_version.major}.{py_version.minor}"
+            "pkg_config_name", f"python-{py_version.major}.{py_version.minor}{self._ft_suffix}"
         )
         self.cpp_info.components["python"].set_property(
             "pkg_config_aliases", [f"python{py_version.major}"]
@@ -849,7 +873,7 @@ class CPythonConan(ConanFile):
         self.cpp_info.components["embed"].libdirs = [libdir]
         self.cpp_info.components["embed"].includedirs = []
         self.cpp_info.components["embed"].set_property(
-            "pkg_config_name", f"python-{py_version.major}.{py_version.minor}-embed"
+            "pkg_config_name", f"python-{py_version.major}.{py_version.minor}{self._ft_suffix}-embed"
         )
         self.cpp_info.components["embed"].set_property(
             "pkg_config_aliases", [f"python{py_version.major}-embed"]
