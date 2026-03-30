@@ -26,7 +26,10 @@ class AkashaConan(ConanFile):
     
     def layout(self):
         cmake_layout(self)
-    
+
+    def validate(self):
+        check_min_cppstd(self, 23)
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
