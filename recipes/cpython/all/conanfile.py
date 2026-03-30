@@ -40,6 +40,7 @@ class CPythonConan(ConanFile):
         "with_curses": [True, False],
         "with_lzma": [True, False],
         "free_threaded": [True, False],
+        "with_jit": [True, False],
 
         # options that don't change package id
         "env_vars": [True, False],  # set environment variables
@@ -59,6 +60,7 @@ class CPythonConan(ConanFile):
         "with_curses": True,
         "with_lzma": True,
         "free_threaded": False,
+        "with_jit": False,
 
         # options that don't change package id
         "env_vars": True,
@@ -90,6 +92,7 @@ class CPythonConan(ConanFile):
             del self.options.with_nis
         if Version(self.version) < "3.13":
             del self.options.free_threaded
+            del self.options.with_jit
         if Version(self.version) >= "3.13" and not is_msvc(self):
             del self.options.with_nis
 
@@ -111,6 +114,8 @@ class CPythonConan(ConanFile):
     def build_requirements(self):
         if Version(self.version) >= "3.11" and not is_msvc(self) and not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
+        if self.options.get_safe("with_jit", False):
+            self.tool_requires("llvm-core/19.1.7")
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
@@ -197,6 +202,10 @@ class CPythonConan(ConanFile):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == 9 and Version(self.version) >= "3.12":
             raise ConanInvalidConfiguration("FIXME: GCC 9 produces an internal compiler error locally, and a link error in CCI")
 
+        if self.options.get_safe("with_jit"):
+            if str(self.settings.arch) not in ("x86_64", "armv8"):
+                raise ConanInvalidConfiguration("JIT compilation is only supported on x86_64 and armv8 architectures")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -221,6 +230,8 @@ class CPythonConan(ConanFile):
             tc.configure_args.append("--disable-test-modules")
         if self.options.get_safe("free_threaded"):
             tc.configure_args.append("--disable-gil")
+        if self.options.get_safe("with_jit"):
+            tc.configure_args.append("--enable-experimental-jit")
         if self.options.get_safe("with_sqlite3"):
             tc.configure_args.append("--enable-loadable-sqlite-extensions={}".format(
                 yes_no(not self.dependencies["sqlite3"].options.omit_load_extension)
@@ -549,6 +560,8 @@ class CPythonConan(ConanFile):
         extra_props = f"/p:PlatformToolset={msvs_toolset(self)}"
         if self.options.get_safe("free_threaded"):
             extra_props += " /p:DisableGil=true"
+        if self.options.get_safe("with_jit"):
+            extra_props += " /p:EnableJIT=true"
         self.run(f"{cmd} {extra_props}")
 
     def build(self):
