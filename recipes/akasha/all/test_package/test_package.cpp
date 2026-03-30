@@ -5,7 +5,6 @@
 #include <cstdio>
 
 int main() {
-    akasha::Store store;
     std::cout << "Akasha version: " << akasha::version() << std::endl;
 
     // Functional test: create Store, save and read a value
@@ -31,7 +30,8 @@ int main() {
     std::cout << "Read value: " << read.value() << std::endl;
 
     // Clean up temporary file
-    store.unload(dataset);
+    auto unload_status = store.unload(dataset);
+    assert(unload_status == akasha::Status::ok);
     std::remove(file.c_str());
 
     std::cout << "Akasha functional test OK" << std::endl;
