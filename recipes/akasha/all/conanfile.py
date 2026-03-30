@@ -21,13 +21,13 @@ class AkashaConan(ConanFile):
     options = {"fPIC": [True, False]}
     default_options = {"fPIC": True}
     generators = "CMakeDeps", "CMakeToolchain"
-    
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-    
+
     def requirements(self):
         self.requires("boost/1.90.0")
-    
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -38,7 +38,7 @@ class AkashaConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-    
+
     def package(self):
         cmake = CMake(self)
         cmake.install()
