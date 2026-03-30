@@ -345,14 +345,22 @@ class CPythonConan(ConanFile):
         replace_in_file(self, self._msvc_project_path("_hashlib"), '<Import Project="openssl.props" />', "")
         replace_in_file(self, self._msvc_project_path("_ssl"), '<Import Project="openssl.props" />', "")
 
-        # For mpdecimal, we need to remove all headers and all c files *except* the main module file, _decimal.c
-        self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\.*\.h.*', "")
-        self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\libmpdec\\.*\.c.*', "")
-        # There is also an assembly file with a complicated build step as part of the mpdecimal build
-        replace_in_file(self, self._msvc_project_path("_decimal"), "<CustomBuild", "<!--<CustomBuild")
-        replace_in_file(self, self._msvc_project_path("_decimal"), "</CustomBuild>", "</CustomBuild>-->")
-        # Remove extra include directory
-        replace_in_file(self, self._msvc_project_path("_decimal"), r"..\Modules\_decimal\libmpdec;", "")
+        if Version(self.version) >= "3.13":
+            # 3.13+ uses $(mpdecimalDir) for mpdecimal paths
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\$\(mpdecimalDir\)\\.*\.h.*', "")
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\$\(mpdecimalDir\)\\.*\.c.*', "")
+            replace_in_file(self, self._msvc_project_path("_decimal"), "<CustomBuild", "<!--<CustomBuild")
+            replace_in_file(self, self._msvc_project_path("_decimal"), "</CustomBuild>", "</CustomBuild>-->")
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'\$\(mpdecimalDir\)[^;]*;', "")
+        else:
+            # For mpdecimal, we need to remove all headers and all c files *except* the main module file, _decimal.c
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\.*\.h.*', "")
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\libmpdec\\.*\.c.*', "")
+            # There is also an assembly file with a complicated build step as part of the mpdecimal build
+            replace_in_file(self, self._msvc_project_path("_decimal"), "<CustomBuild", "<!--<CustomBuild")
+            replace_in_file(self, self._msvc_project_path("_decimal"), "</CustomBuild>", "</CustomBuild>-->")
+            # Remove extra include directory
+            replace_in_file(self, self._msvc_project_path("_decimal"), r"..\Modules\_decimal\libmpdec;", "")
 
         # Don't include vendored sqlite3
         replace_in_file(self, self._msvc_project_path("_sqlite3"),
