@@ -41,6 +41,7 @@ class CPythonConan(ConanFile):
         "with_lzma": [True, False],
         "free_threaded": [True, False],
         "with_jit": [True, False],
+        "with_zstd": [True, False],
 
         # options that don't change package id
         "env_vars": [True, False],  # set environment variables
@@ -61,6 +62,7 @@ class CPythonConan(ConanFile):
         "with_lzma": True,
         "free_threaded": False,
         "with_jit": False,
+        "with_zstd": True,
 
         # options that don't change package id
         "env_vars": True,
@@ -93,6 +95,8 @@ class CPythonConan(ConanFile):
         if Version(self.version) < "3.13":
             del self.options.free_threaded
             del self.options.with_jit
+        if Version(self.version) < "3.14":
+            del self.options.with_zstd
         if Version(self.version) >= "3.13" and not is_msvc(self):
             del self.options.with_nis
 
@@ -107,6 +111,7 @@ class CPythonConan(ConanFile):
             self.options.rm_safe("with_sqlite3")
             self.options.rm_safe("with_tkinter")
             self.options.rm_safe("with_lzma")
+            self.options.rm_safe("with_zstd")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -159,6 +164,8 @@ class CPythonConan(ConanFile):
             self.requires("ncurses/6.4", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_lzma", False):
             self.requires("xz_utils/5.4.5")
+        if self.options.get_safe("with_zstd", False):
+            self.requires("zstd/1.5.7")
 
     def package_id(self):
         del self.info.options.env_vars
@@ -426,6 +433,8 @@ class CPythonConan(ConanFile):
         self._inject_conan_props_file("_lzma", "xz_utils", self.options.get_safe("with_lzma"))
         if Version(self.version) < "3.12":
             self._inject_conan_props_file("_bsddb", "libdb", self.options.get_safe("with_bsddb"))
+        if self.options.get_safe("with_zstd"):
+            self._inject_conan_props_file("_zstd", "zstd")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -534,6 +543,8 @@ class CPythonConan(ConanFile):
             discarded.add("_tkinter")
         if not self.options.with_lzma:
             discarded.add("_lzma")
+        if not self.options.get_safe("with_zstd", True):
+            discarded.add("_zstd")
         return discarded
 
     @property
@@ -926,6 +937,8 @@ class CPythonConan(ConanFile):
                 self.cpp_info.components["_hidden"].requires.append("xz_utils::xz_utils")
             if self.options.get_safe("with_tkinter"):
                 self.cpp_info.components["_hidden"].requires.append("tk::tk")
+            if self.options.get_safe("with_zstd", False):
+                self.cpp_info.components["_hidden"].requires.append("zstd::zstd")
             self.cpp_info.components["_hidden"].includedirs = []
             self.cpp_info.components["_hidden"].libdirs = []
             if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) < "3.13":
