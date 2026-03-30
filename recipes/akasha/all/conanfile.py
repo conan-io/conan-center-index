@@ -15,7 +15,6 @@ class AkashaConan(ConanFile):
     package_type = "static-library"
     options = {"fPIC": [True, False]}
     default_options = {"fPIC": True}
-    
     generators = "CMakeDeps", "CMakeToolchain"
     
     def source(self):
