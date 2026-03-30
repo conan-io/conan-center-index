@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
-project(TestPackageAkasha CXX)
+project(test_package LANGUAGES CXX)
 
-find_package(akasha REQUIRED)
+find_package(akasha REQUIRED CONFIG)
 
-add_executable(test_akasha test.cpp)
-target_link_libraries(test_akasha PRIVATE akasha::akasha)
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE akasha::akasha)
