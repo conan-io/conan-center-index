@@ -86,6 +86,8 @@ class CPythonConan(ConanFile):
             del self.options.with_curses
             del self.options.with_gdbm
             del self.options.with_nis
+        if Version(self.version) >= "3.13" and not is_msvc(self):
+            del self.options.with_nis
 
         self.settings.compiler.rm_safe("libcxx")
         self.settings.compiler.rm_safe("cppstd")
@@ -120,12 +122,14 @@ class CPythonConan(ConanFile):
         if self.settings.os != "Windows":
             if not is_apple_os(self):
                 self.requires("util-linux-libuuid/2.39.2")
-            # In <3.9 and lower patch versions of 3.9/10/11, crypt.h was exposed in Python.h
-            # This was removed in 3.11 and backported: https://github.com/python/cpython/issues/88914
-            # For the sake of this recipe, we only have later patch versions, so this version check
-            # may be slightly inaccurate if a lower patch version is desired.
-            transitive_crypt = Version(self.version) < "3.9"
-            self.requires("libxcrypt/4.4.36", transitive_headers=transitive_crypt, transitive_libs=transitive_crypt)
+            if Version(self.version) < "3.13":
+                # In <3.9 and lower patch versions of 3.9/10/11, crypt.h was exposed in Python.h
+                # This was removed in 3.11 and backported: https://github.com/python/cpython/issues/88914
+                # For the sake of this recipe, we only have later patch versions, so this version check
+                # may be slightly inaccurate if a lower patch version is desired.
+                # The crypt module was removed entirely in 3.13 (PEP 594).
+                transitive_crypt = Version(self.version) < "3.9"
+                self.requires("libxcrypt/4.4.36", transitive_headers=transitive_crypt, transitive_libs=transitive_crypt)
         if self.options.get_safe("with_bz2"):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_gdbm", False):
@@ -134,7 +138,10 @@ class CPythonConan(ConanFile):
             # TODO: Add nis when available.
             raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.45.2")
+            if Version(self.version) >= "3.13":
+                self.requires("sqlite3/[>=3.45.2 <4]")
+            else:
+                self.requires("sqlite3/3.45.2")
         if self.options.get_safe("with_tkinter"):
             self.requires("tk/8.6.10")
         if self.options.get_safe("with_curses", False):
@@ -400,7 +407,8 @@ class CPythonConan(ConanFile):
         self._inject_conan_props_file("_ctypes", "libffi", self._supports_modules)
         self._inject_conan_props_file("_decimal", "mpdecimal", self._supports_modules)
         self._inject_conan_props_file("_lzma", "xz_utils", self.options.get_safe("with_lzma"))
-        self._inject_conan_props_file("_bsddb", "libdb", self.options.get_safe("with_bsddb"))
+        if Version(self.version) < "3.12":
+            self._inject_conan_props_file("_bsddb", "libdb", self.options.get_safe("with_bsddb"))
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -826,7 +834,7 @@ class CPythonConan(ConanFile):
                     ["pathcch", "shlwapi", "version", "ws2_32"]
                 )
         self.cpp_info.components["python"].requires = ["zlib::zlib"]
-        if self.settings.os != "Windows":
+        if self.settings.os != "Windows" and Version(self.version) < "3.13":
             self.cpp_info.components["python"].requires.append("libxcrypt::libxcrypt")
         self.cpp_info.components["python"].set_property(
             "pkg_config_name", f"python-{py_version.major}.{py_version.minor}"
@@ -867,7 +875,8 @@ class CPythonConan(ConanFile):
             if self.settings.os != "Windows":
                 if not is_apple_os(self):
                     self.cpp_info.components["_hidden"].requires.append("util-linux-libuuid::util-linux-libuuid")
-                self.cpp_info.components["_hidden"].requires.append("libxcrypt::libxcrypt")
+                if Version(self.version) < "3.13":
+                    self.cpp_info.components["_hidden"].requires.append("libxcrypt::libxcrypt")
             if self.options.with_bz2:
                 self.cpp_info.components["_hidden"].requires.append("bzip2::bzip2")
             if self.options.get_safe("with_gdbm", False):
@@ -882,7 +891,7 @@ class CPythonConan(ConanFile):
                 self.cpp_info.components["_hidden"].requires.append("tk::tk")
             self.cpp_info.components["_hidden"].includedirs = []
             self.cpp_info.components["_hidden"].libdirs = []
-            if self.settings.os in ["Linux", "FreeBSD"]:
+            if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) < "3.13":
                 self.cpp_info.components["_hidden"].system_libs.append("nsl")
 
         if self.options.env_vars:
