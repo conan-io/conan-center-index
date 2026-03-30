@@ -1,4 +1,10 @@
 sources:
+  "3.14.3":
+    url: "https://www.python.org/ftp/python/3.14.3/Python-3.14.3.tgz"
+    sha256: "d7fe130d0501ae047ca318fa92aa642603ab6f217901015a1df6ce650d5470cd"
+  "3.13.12":
+    url: "https://www.python.org/ftp/python/3.13.12/Python-3.13.12.tgz"
+    sha256: "12e7cb170ad2d1a69aee96a1cc7fc8de5b1e97a2bdac51683a3db016ec9a2996"
   "3.12.7":
     url: "https://www.python.org/ftp/python/3.12.7/Python-3.12.7.tgz"
     sha256: "73ac8fe780227bf371add8373c3079f42a0dc62deff8d612cd15a618082ab623"
