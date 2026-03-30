@@ -11,14 +11,9 @@ class AkashaConan(ConanFile):
     topics = ("libraries", "cpp", "data-store", "memory-mapped")
     
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "build_examples": [True, False],
-        "build_single_archive": [True, False],
-    }
-    default_options = {
-        "build_examples": False,
-        "build_single_archive": False,
-    }
+    package_type = "static-library"
+    options = {"fPIC": [True, False]}
+    default_options = {"fPIC": True}
     
     generators = "CMakeDeps", "CMakeToolchain"
     
