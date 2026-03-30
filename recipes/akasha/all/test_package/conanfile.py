@@ -20,6 +20,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if can_run(self):
-            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
-            self.run(bin_path, env="conanrun")
+        if not self.can_run():
+            return
+        self.run(f"{self.cpp.build.bindir}/test_akasha", env="conanrun")
