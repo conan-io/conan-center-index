@@ -6,7 +6,8 @@ import os
 class AkashaConan(ConanFile):
     name = "akasha"
     description = "High-performance hierarchical data store with memory-mapped file persistence"
-    url = "https://github.com/yawin123/Akasha"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/yawin123/Akasha"
     license = "MIT"
     topics = ("libraries", "cpp", "data-store", "memory-mapped")
     
