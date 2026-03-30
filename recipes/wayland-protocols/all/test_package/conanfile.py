@@ -1,8 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.gnu import PkgConfigDeps
 import os
 
 
@@ -19,8 +17,6 @@ class TestPackageConan(ConanFile):
         self.requires("wayland/[>=1.22.0]")
 
     def build_requirements(self):
-        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/[>=2.1.0]")
         self.tool_requires("wayland/<host_version>")
 
     def layout(self):
