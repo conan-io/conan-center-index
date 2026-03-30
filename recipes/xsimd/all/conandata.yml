@@ -8,6 +8,3 @@ sources:
   "13.0.0":
     url: "https://github.com/xtensor-stack/xsimd/archive/13.0.0.tar.gz"
     sha256: "8bdbbad0c3e7afa38d88d0d484d70a1671a1d8aefff03f4223ab2eb6a41110a3"
-  "11.1.0":
-    url: "https://github.com/xtensor-stack/xsimd/archive/11.1.0.tar.gz"
-    sha256: "aa54dba8daade472656eba0d27154f072fec06ee3831aefcac69a5f6c7dbbae7"
