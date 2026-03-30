@@ -1,5 +1,6 @@
 from conan import ConanFile
-from conan.tools.files import get, copy
+from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.files import get, copy, rmdir
 from conan.tools.layout import basic_layout
 import os
 
@@ -18,6 +19,12 @@ class LunarLogConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["LUNARLOG_BUILD_EXAMPLES"] = False
+        tc.cache_variables["LUNARLOG_BUILD_TESTS"] = False
+        tc.generate()
+
     def package_id(self):
         self.info.clear()
 
@@ -26,9 +33,10 @@ class LunarLogConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        copy(self, "*.hpp",
-             os.path.join(self.source_folder, "include"),
-             os.path.join(self.package_folder, "include"))
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
