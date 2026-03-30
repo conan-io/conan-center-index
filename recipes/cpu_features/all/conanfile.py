@@ -4,7 +4,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class CpuFeaturesConan(ConanFile):
@@ -76,7 +76,3 @@ class CpuFeaturesConan(ConanFile):
             self.cpp_info.components["ndk_compat"].libs = ["ndk_compat"]
             self.cpp_info.components["ndk_compat"].set_property("cmake_file_name", "CpuFeaturesNdkCompat")
             self.cpp_info.components["ndk_compat"].set_property("cmake_target_name", "CpuFeatures::ndk_compat")
-
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
