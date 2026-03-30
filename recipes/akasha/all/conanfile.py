@@ -37,6 +37,7 @@ class AkashaConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-    
+    rmdir(self, os.path.join(self.package_folder, "lib", "cmake") 
+    copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
     def package_info(self):
         self.cpp_info.libs = ["akasha"]
