@@ -1,0 +1,21 @@
+--- a/OpenLQM/include/openlqm/openlqm.hpp.in
++++ b/OpenLQM/include/openlqm/openlqm.hpp.in
+@@ -25,6 +25,10 @@
+ #include <cstdint>
+ 
+ #if defined(_WIN32) || defined(__MINGW32__) || defined(__CYGWIN__)
++	#if defined(OPENLQM_STATIC)
++		#define OPENLQM_API
++		#define OPENLQM_API_IMPL
++	#else
+ 	// Windows
+ 	#ifdef OPENLQM_EXPORTS
+ 		#define OPENLQM_API __declspec(dllexport)
+@@ -37,6 +41,7 @@
+ 	#else
+ 		#define OPENLQM_API_IMPL
+ 	#endif
++	#endif
+ #else
+ 	// Linux/Mac
+ 	#if __GNUC__ >= 4

@@ -1,0 +1,9 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/usnistgov/openlqm/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "78beebbeb77da64cc122c1b52298ccc590c7de12aa31e4e7f6ee94acf071fb69"
+
+patches:
+  "1.0.0":
+    - patch_file: "patches/1.0.0-0001-build-shared-libs.patch"
+    - patch_file: "patches/1.0.0-0002-windows-static-exports.patch"
