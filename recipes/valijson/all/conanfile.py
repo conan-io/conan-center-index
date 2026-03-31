@@ -6,6 +6,7 @@ import os
 
 required_conan_version = ">=2.1"
 
+
 class ValijsonConan(ConanFile):
     name = "valijson"
     description = "Valijson is a header-only JSON Schema Validation library for C++11."
@@ -48,3 +49,6 @@ class ValijsonConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "ValiJSON::valijson")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.components["libvalijson"].set_property("cmake_target_name", "ValiJSON::valijson")
+        self.cpp_info.components["libvalijson"].bindirs = []
+        self.cpp_info.components["libvalijson"].libdirs = []
