@@ -1,4 +1,7 @@
 sources:
+  "cci.20260327":
+    url: "https://github.com/ktprime/emhash/archive/d0628ffcdb37f6e43511a355515469d81916367c.tar.gz"
+    sha256: "b8523071d65eadec19ab1ac167c6778d8d868f52f5f045c80ddd40fc504fcd5c"
   "cci.20240601":
     url: "https://github.com/ktprime/emhash/archive/3efa77ef32786a033b379071fe8af3dc705736ca.tar.gz"
     sha256: "db6c524f3acb487f88221aff75a9198700478ece4ea2a9a25b013ef7375bc819"
