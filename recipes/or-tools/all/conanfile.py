@@ -77,6 +77,7 @@ class OrToolsConan(ConanFile):
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["BUILD_SAMPLES"] = False
         tc.cache_variables["BUILD_CXX_EXAMPLES"] = False
+        tc.cache_variables["BUILD_DEPS"] = False
         tc.cache_variables["INSTALL_BUILD_DEPS"] = False
         tc.generate()
 
