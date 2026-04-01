@@ -123,6 +123,7 @@ class LibjpegTurboConan(ConanFile):
             tc.variables["CMAKE_MACOSX_BUNDLE"] = False # avoid configuration error if building for iOS/tvOS/watchOS
         if Version(self.version) < "3.0.2":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        tc.cache_variables["CMAKE_INSTALL_JAVADIR"] = os.path.join(self.package_folder, "lib", "java")
         tc.generate()
 
     def _patch_sources(self):
@@ -130,6 +131,12 @@ class LibjpegTurboConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                               "include(cmakescripts/GNUInstallDirs.cmake)",
                               "include(GNUInstallDirs)")
+        replace_in_file(self, os.path.join(self.source_folder, "java", "CMakeLists.txt"),
+                              "GNUInstallDirs_set_install_dir",
+                              "# GNUInstallDirs_set_install_dir")
+        replace_in_file(self, os.path.join(self.source_folder, "java", "CMakeLists.txt"),
+                              '  "The directory',
+                              '#  "The directory')
         # do not override /MT by /MD if shared
         replace_in_file(self, os.path.join(self.source_folder, "sharedlib", "CMakeLists.txt"),
                               """string(REGEX REPLACE "/MT" "/MD" ${var} "${${var}}")""",
