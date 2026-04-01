@@ -80,8 +80,8 @@ class LibjpegTurboConan(ConanFile):
         if self.options.get_safe("java"):
             if not self.options.shared:
                 raise ConanInvalidConfiguration("java wrapper requires shared libjpeg-turbo")
-            if self.options.get_safe("turbojpeg") and Version(self.version) >= "3.1.4.1":
-                raise ConanInvalidConfiguration("java wrapper needs to be built without turbojpeg API")
+            if not self.options.get_safe("turbojpeg") and Version(self.version) >= "3.1.4.1":
+                raise ConanInvalidConfiguration("java wrapper needs to be built with turbojpeg API")
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(f"{self.ref} shared can't be built with static vc runtime")
 
