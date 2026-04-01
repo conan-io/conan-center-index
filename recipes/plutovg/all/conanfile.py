@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, rename
+from conan.tools.files import copy, get, rm, rmdir, rename
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -30,9 +30,6 @@ class PlutoVGConan(ConanFile):
     implements = ["auto_shared_fpic"]
     languages = "C"
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -43,7 +40,6 @@ class PlutoVGConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = MesonToolchain(self)
