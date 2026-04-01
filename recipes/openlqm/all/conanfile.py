@@ -44,6 +44,12 @@ class OpenLqmConan(ConanFile):
     def requirements(self):
         self.requires("opencv/[>=4.11.0 <5]", transitive_libs=True)
         self.requires("freeimage/3.18.0", transitive_libs=True)
+        # freeimage/3.18.0 pins libjpeg/9e, openjpeg/2.5.2, libtiff/4.6.0, libwebp/1.3.2; opencv uses
+        # wider ranges that resolve to newer minors on CCI — force a single version in the graph.
+        self.requires("libjpeg/9e", override=True)
+        self.requires("openjpeg/2.5.2", override=True)
+        self.requires("libtiff/4.6.0", override=True)
+        self.requires("libwebp/1.3.2", override=True)
 
     def validate(self):
         check_min_cppstd(self, 17)
