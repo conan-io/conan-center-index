@@ -12,8 +12,8 @@ required_conan_version = ">=2.4"
 class PlutoVGConan(ConanFile):
     name = "plutovg"
     description = "Tiny 2D vector graphics library in C"
-    license = "MIT",
-    topics = ("vector", "graphics", )
+    license = "MIT"
+    topics = ("vector", "graphics")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/sammycage/plutovg"
     package_type = "library"
