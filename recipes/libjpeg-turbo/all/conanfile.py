@@ -77,8 +77,11 @@ class LibjpegTurboConan(ConanFile):
     def validate(self):
         if self.options.get_safe("enable12bit") and (self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility):
             raise ConanInvalidConfiguration("12-bit samples is not allowed with libjpeg v7/v8 API/ABI")
-        if self.options.get_safe("java") and not self.options.shared:
-            raise ConanInvalidConfiguration("java wrapper requires shared libjpeg-turbo")
+        if self.options.get_safe("java"):
+            if not self.options.shared:
+                raise ConanInvalidConfiguration("java wrapper requires shared libjpeg-turbo")
+            if self.options.get_safe("turbojpeg") and Version(self.version) >= "3.1.4.1":
+                raise ConanInvalidConfiguration("java wrapper needs to be built without turbojpeg API")
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(f"{self.ref} shared can't be built with static vc runtime")
 
