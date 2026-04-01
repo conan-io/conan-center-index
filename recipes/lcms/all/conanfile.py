@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rename, rm, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 
@@ -62,6 +62,15 @@ class LcmsConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         fix_apple_shared_install_name(self)
+
+        # Meson uses 'libfoo.a' naming on Windows even with MSVC+ninja, by design
+        # (mesonbuild/meson#7378). Rename to 'lcms2.lib' so consumers can find it.
+        if self.settings.os == "Windows" and not self.options.shared:
+            lib_dir = os.path.join(self.package_folder, "lib")
+            wrong = os.path.join(lib_dir, "liblcms2.a")
+            correct = os.path.join(lib_dir, "lcms2.lib")
+            if os.path.exists(wrong) and not os.path.exists(correct):
+                rename(self, wrong, correct)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "lcms2")
