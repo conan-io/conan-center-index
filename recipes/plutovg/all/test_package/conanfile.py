@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.layout import basic_layout
-from conan.tools.cmake import CMake
+from conan.tools.cmake import cmake_layout, CMake
 import os
 
 class TestPackageConan(ConanFile):
@@ -9,7 +8,7 @@ class TestPackageConan(ConanFile):
     generators = "CMakeDeps", "CMakeToolchain"
 
     def layout(self):
-        basic_layout(self)
+        cmake_layout(self)
 
     def requirements(self):
         self.requires(self.tested_reference_str)
