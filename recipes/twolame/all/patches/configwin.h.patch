@@ -1,0 +1,13 @@
+diff --git a/win32/configwin.h b/win32/configwin.h
+index dd3669ee4..2970b5efe 100644
+--- a/win32/configwin.h
++++ b/win32/configwin.h
+@@ -63,7 +63,7 @@
+ 
+ /* Version information for package */
+ #define PACKAGE_BUGREPORT "support"
+-#define PACKAGE_VERSION "unknown"
++#define PACKAGE_VERSION "0.4.0"
+ 
+ /* Define to 1 if your processor stores words with the most significant byte
+    first (like Motorola and SPARC, unlike Intel and VAX). */

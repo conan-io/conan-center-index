@@ -1,0 +1,42 @@
+diff --git a/win32/twolame_static.sln b/win32/twolame_static.sln
+index e69de29bb..2f79b3681 100644
+--- /dev/null
++++ b/win32/twolame_static.sln
+@@ -0,0 +1,37 @@
++﻿
++Microsoft Visual Studio Solution File, Format Version 12.00
++# Visual Studio Version 17
++VisualStudioVersion = 17.14.36616.10 d17.14
++MinimumVisualStudioVersion = 10.0.40219.1
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "twolame_static", "twolame_static.vcxproj", "{8C69F7B6-684F-48D9-9057-8912CA3DAA8B}"
++EndProject
++Global
++	GlobalSection(SolutionConfigurationPlatforms) = preSolution
++		Debug|Win32 = Debug|Win32
++		Debug|x64 = Debug|x64
++		Release|Win32 = Release|Win32
++		Release|x64 = Release|x64
++		RelWithDebInfo|Win32 = RelWithDebInfo|Win32
++		RelWithDebInfo|x64 = RelWithDebInfo|x64
++	EndGlobalSection
++	GlobalSection(ProjectConfigurationPlatforms) = postSolution
++		{8C69F7B6-684F-48D9-9057-8912CA3DAA8B}.Debug|Win32.ActiveCfg = Debug|Win32
++		{8C69F7B6-684F-48D9-9057-8912CA3DAA8B}.Debug|Win32.Build.0 = Debug|Win32
++		{8C69F7B6-684F-48D9-9057-8912CA3DAA8B}.Debug|x64.ActiveCfg = Debug|x64
++		{8C69F7B6-684F-48D9-9057-8912CA3DAA8B}.Debug|x64.Build.0 = Debug|x64
++		{8C69F7B6-684F-48D9-9057-8912CA3DAA8B}.Release|Win32.ActiveCfg = Release|Win32
++		{8C69F7B6-684F-48D9-9057-8912CA3DAA8B}.Release|Win32.Build.0 = Release|Win32
++		{8C69F7B6-684F-48D9-9057-8912CA3DAA8B}.Release|x64.ActiveCfg = Release|x64
++		{8C69F7B6-684F-48D9-9057-8912CA3DAA8B}.Release|x64.Build.0 = Release|x64
++		{8C69F7B6-684F-48D9-9057-8912CA3DAA8B}.RelWithDebInfo|Win32.ActiveCfg = RelWithDebInfo|Win32
++		{8C69F7B6-684F-48D9-9057-8912CA3DAA8B}.RelWithDebInfo|Win32.Build.0 = RelWithDebInfo|Win32
++		{8C69F7B6-684F-48D9-9057-8912CA3DAA8B}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
++		{8C69F7B6-684F-48D9-9057-8912CA3DAA8B}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
++	EndGlobalSection
++	GlobalSection(SolutionProperties) = preSolution
++		HideSolutionNode = FALSE
++	EndGlobalSection
++	GlobalSection(ExtensibilityGlobals) = postSolution
++		SolutionGuid = {A631968E-7FCA-4D7E-A83C-8C60A28CB64A}
++	EndGlobalSection
++EndGlobal
