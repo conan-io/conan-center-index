@@ -16,7 +16,7 @@ import glob
 import shutil
 import re
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2"
 
 
 class FFMpegConan(ConanFile):
@@ -479,11 +479,6 @@ class FFMpegConan(ConanFile):
                 replace_in_file(self, os.path.join(self.source_folder, "configure"),
                                     "check_lib openssl openssl/ssl.h DTLS_get_data_mtu -lssl -lcrypto -lws2_32 -lgdi32 ||",
                                     f"check_lib openssl openssl/ssl.h DTLS_get_data_mtu {openssl_libs} || ")
-            elif Version(self.version) >= "8.0":
-                openssl_libs = load(self, os.path.join(self.build_folder, "openssl_libs.list"))
-                replace_in_file(self, os.path.join(self.source_folder, "configure"),
-                                    "check_lib openssl openssl/ssl.h OPENSSL_init_ssl -lssl -lcrypto -lws2_32 -lgdi32 ||",
-                                    f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libs} || ")
             else:
                 openssl_libs = load(self, os.path.join(self.build_folder, "openssl_libs.list"))
                 replace_in_file(self, os.path.join(self.source_folder, "configure"),
