@@ -3,6 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 import os
 
+required_conan_version = ">=2.1"
 
 class ConsteigConan(ConanFile):
     name = "consteig"
@@ -18,12 +19,16 @@ class ConsteigConan(ConanFile):
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+    implements = ["auto_header_only"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def validate(self):
+        check_min_cppstd(self, 17)
 
     def generate(self):
         tc = CMakeToolchain(self)
