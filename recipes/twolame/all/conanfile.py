@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import get, copy, rmdir, rm, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import get, copy, rmdir, rm, replace_in_file, apply_conandata_patches, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 
 required_conan_version = ">=2.0"
@@ -25,7 +25,7 @@ class TwoLAMEConan(ConanFile):
         "with_cli": [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
         "with_cli": False,
     }
@@ -67,6 +67,10 @@ class TwoLAMEConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Fix PACKAGE_VERSION in win32/configwin.h (upstream hardcodes "unknown")
+        replace_in_file(self, os.path.join(self.source_folder, "win32", "configwin.h"),
+                        '#define PACKAGE_VERSION "unknown"',
+                        f'#define PACKAGE_VERSION "{self.version}"')
 
     def generate(self):
         if self.settings.os == "Windows":
