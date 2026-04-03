@@ -93,7 +93,7 @@ class SwigConan(ConanFile):
         ]
         tc.extra_cflags.append("-DHAVE_PCRE=1")
         if self._use_pcre2:
-            env.define("PCRE2_LIBS", " ".join("-l" + lib for lib in self.dependencies["pcre2"].cpp_info.libs))
+            env.define("PCRE2_LIBS", " ".join("-l" + lib for lib in self.dependencies["pcre2"].cpp_info.components["pcre2-8"].libs))
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             tc.configure_args.append("LIBS=-ldl")
@@ -149,7 +149,8 @@ class SwigConan(ConanFile):
         # https://github.com/swig/swig/blob/v4.1.1/configure.ac#L70-L92
         # https://github.com/swig/swig/blob/v4.0.2/configure.ac#L65-L86
         replace_in_file(self, os.path.join(self.source_folder, "configure.ac"),
-                        'AS_IF([test "x$with_pcre" != xno],', 'AS_IF([false],')
+                        'AS_IF([test "x$with_pcre" != xno],',
+                        'AC_DEFINE([HAVE_PCRE], [1], [Define if you have PCRE2 library])\nLIBS="$LIBS $PCRE2_LIBS"\nAS_IF([false],')
 
     def build(self):
         self._patch_sources()
