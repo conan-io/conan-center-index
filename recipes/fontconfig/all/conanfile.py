@@ -101,8 +101,9 @@ class FontconfigConan(ConanFile):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["m", "pthread"])
 
-        fontconfig_path = os.path.join(self.package_folder, "res", "etc", "fonts")
-        self.runenv_info.append_path("FONTCONFIG_PATH", fontconfig_path)
+        # TODO: remove before PullRequest !
+        # fontconfig_path = os.path.join(self.package_folder, "res", "etc", "fonts")
+        # self.runenv_info.append_path("FONTCONFIG_PATH", fontconfig_path)
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
