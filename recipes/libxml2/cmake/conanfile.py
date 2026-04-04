@@ -38,6 +38,10 @@ class Libxml2Conan(ConanFile):
     languages = "C"
     implements = ["auto_shared_fpic"]
 
+    @property
+    def _is_msvc_like(self):
+        return is_msvc(self) or (self.settings.os == "Windows" and self.settings.compiler == "clang")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -125,7 +129,7 @@ class Libxml2Conan(ConanFile):
     def package_info(self):
         postfix = ""
         prefix = "lib" if self.settings.os == "Windows" else ""
-        if is_msvc(self):
+        if self._is_msvc_like:
             static_postfix = "s" if not self.options.shared else ""
             debug_postfix = "d" if self.settings.build_type == "Debug" else ""
             postfix = f"{static_postfix}{debug_postfix}"
