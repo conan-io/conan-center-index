@@ -58,6 +58,14 @@ class OpenH264Conan(ConanFile):
         env.generate()
         tc = MesonToolchain(self)
         tc.project_options["tests"] = "disabled"
+        # clang-cl + Meson: MesonToolchain maps cppstd=23 to 'c++23', but Meson
+        # validates it via get_supported_arguments() using -std=c++23 (GCC-style)
+        # instead of /std:c++23 (MSVC-style). The test fails → Meson rejects the
+        # value. Using 'c++latest' works because Meson translates it to /std:c++latest
+        # which clang-cl accepts. This is a Meson bug, not a clang-cl limitation —
+        # the workaround is safe even if a future clang-cl adds /std:c++23 support.
+        if self._is_clang_cl and tc.cpp_std and "23" in tc.cpp_std:
+            tc.cpp_std = "c++latest"
         tc.generate()
 
     def build(self):
