@@ -1,8 +1,15 @@
 sources:
+  "1.2.4":
+    url: "https://github.com/JSBSim-Team/jsbsim/archive/refs/tags/v1.2.4.tar.gz"
+    sha256: "73642c2ee698dad426899ef1752300b59ff5b3a3c48efb5aa01d71188970b1e9"
   "1.1.13":
     url: "https://github.com/JSBSim-Team/jsbsim/archive/refs/tags/v1.1.13.tar.gz"
     sha256: "e6cc167d4e7bb9d36e8cbb75bfaac270b15926e87367eebe9559e69ca32ad7e6"
 patches:
+  "1.2.4":
+    - patch_file: "patches/1.2.4-0001-expat-link.patch"
+      patch_description: "Use EXPAT::EXPAT imported target instead of raw variables and add missing expat link to Xml target"
+      patch_type: "conan"
   "1.1.13":
     - patch_file: "patches/1.1.13-0001-expat-link.patch"
       patch_description: "CMake: fix link to expat"
