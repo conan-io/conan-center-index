@@ -36,6 +36,15 @@ class LibtoolConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
+               self.settings.compiler.get_safe("runtime")
+
+    @property
+    def _is_msvc_like(self):
+        return is_msvc(self) or self._is_clang_cl
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -73,17 +82,31 @@ class LibtoolConan(ConanFile):
             env.vars(self, scope="build").save_script("conanbuild_vcvars_options.bat")
 
         tc = AutotoolsToolchain(self)
+        # clang-cl: libtool can't create shared DLLs (LNK1561: entry point must be defined).
+        # Disable shared when building static-only to avoid the failing DLL link step.
+        enable_shared = "--enable-shared" if not self._is_clang_cl or self.options.shared else "--disable-shared"
         tc.configure_args.extend([
             "--datarootdir=${prefix}/res",
-            "--enable-shared",
+            enable_shared,
             "--enable-static",
             "--enable-ltdl-install",
         ])
 
+        # ltdl.c calls access() without including <io.h>.
+        # Clang C99+ treats implicit function declarations as errors.
+        # Downgrade to warning — access() links fine via MSVC CRT (_access).
+        # Must be set BEFORE tc.environment() — generate(env) uses env's snapshot.
+        if self._is_clang_cl:
+            tc.extra_cflags += ["-Wno-implicit-function-declaration"]
+
         env = tc.environment()
-        if is_msvc(self):
-            env.define("CC", "cl -nologo")
-            env.define("CXX", "cl -nologo")
+        if self._is_msvc_like:
+            if self._is_clang_cl:
+                env.define("CC", os.environ.get("CC", "clang-cl"))
+                env.define("CXX", os.environ.get("CXX", "clang-cl"))
+            else:
+                env.define("CC", "cl -nologo")
+                env.define("CXX", "cl -nologo")
 
             # Disable Fortran detection to handle issue with VS 2022
             # See: https://savannah.gnu.org/patch/?9313#comment1
@@ -117,7 +140,7 @@ class LibtoolConan(ConanFile):
 
     @property
     def _static_ext(self):
-        if is_msvc(self):
+        if self._is_msvc_like:
             return "lib"
         else:
             return "a"
@@ -177,7 +200,7 @@ class LibtoolConan(ConanFile):
             rename(self, os.path.join(binpath, "libtool"),
                          os.path.join(binpath, "libtool.exe"))
 
-        if is_msvc(self) and self.options.shared:
+        if self._is_msvc_like and self.options.shared:
             rename(self, os.path.join(self.package_folder, "lib", "ltdl.dll.lib"),
                          os.path.join(self.package_folder, "lib", "ltdl.lib"))
 
