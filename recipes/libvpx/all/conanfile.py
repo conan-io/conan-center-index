@@ -128,7 +128,7 @@ class LibVPXConan(ConanFile):
         elif self._is_clang_cl:
             # clang-cl uses MSVC ABI — build with VS target; derive VS version from runtime_version
             rv = str(self.settings.compiler.runtime_version)
-            vc_version = {"v144": "18", "v143": "17", "v142": "16", "v141": "15"}.get(rv)
+            vc_version = {"v145": "18", "v144": "17", "v143": "17", "v142": "16", "v141": "15"}.get(rv)
             if not vc_version:
                 raise ConanInvalidConfiguration(
                     f"Unknown runtime_version '{rv}' for clang-cl — update the libvpx recipe"
