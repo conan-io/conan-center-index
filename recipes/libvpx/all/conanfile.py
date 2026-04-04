@@ -83,6 +83,17 @@ class LibVPXConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
+    def _is_clang_cl(self):
+        """True when building with clang-cl (clang targeting MSVC ABI on Windows)."""
+        return (str(self.settings.compiler) == "clang"
+                and str(self.settings.os) == "Windows")
+
+    @property
+    def _is_msvc_like(self):
+        """True for MSVC and clang-cl — both use VS project/toolchain."""
+        return is_msvc(self) or self._is_clang_cl
+
+    @property
     def _install_tmp_folder(self):
         return "tmp_install"
 
@@ -108,7 +119,20 @@ class LibVPXConan(ConanFile):
             compiler = f"vs{vc_version}"
         elif is_msvc(self):
             vc_version = str(self.settings.compiler.version)
-            vc_version = {"170": "11", "180": "12", "190": "14", "191": "15", "192": "16", "193": "17", "194": "17", "195": "18"}[vc_version]
+            vc_version = {"170": "11", "180": "12", "190": "14", "191": "15", "192": "16", "193": "17", "194": "17", "195": "18"}.get(vc_version)
+            if not vc_version:
+                raise ConanInvalidConfiguration(
+                    f"Unknown MSVC version '{self.settings.compiler.version}' — update the libvpx recipe"
+                )
+            compiler = f"vs{vc_version}"
+        elif self._is_clang_cl:
+            # clang-cl uses MSVC ABI — build with VS target; derive VS version from runtime_version
+            rv = str(self.settings.compiler.runtime_version)
+            vc_version = {"v144": "18", "v143": "17", "v142": "16", "v141": "15"}.get(rv)
+            if not vc_version:
+                raise ConanInvalidConfiguration(
+                    f"Unknown runtime_version '{rv}' for clang-cl — update the libvpx recipe"
+                )
             compiler = f"vs{vc_version}"
         elif self.settings.compiler in ["gcc", "clang", "apple-clang"]:
             compiler = 'gcc'
@@ -158,8 +182,10 @@ class LibVPXConan(ConanFile):
             tc.configure_args.extend([
                 "--enable-debug"
             ])
-        if is_msvc(self) and is_msvc_static_runtime(self):
-            tc.configure_args.append("--enable-static-msvcrt")
+        if self._is_msvc_like:
+            static_rt = is_msvc_static_runtime(self) if is_msvc(self) else (str(self.settings.compiler.runtime) == "static")
+            if static_rt:
+                tc.configure_args.append("--enable-static-msvcrt")
         if str(self.settings.arch) in ["x86", "x86_64"]:
             for name in self._arch_options:
                 if not self.options.get_safe(name):
@@ -182,7 +208,7 @@ class LibVPXConan(ConanFile):
             "--datarootdir": None,
         })
 
-        if is_msvc(self):
+        if self._is_msvc_like:
             # gen_msvs_vcxproj.sh doesn't like custom flags
             env = Environment()
             env.define("CC", "")
@@ -193,8 +219,8 @@ class LibVPXConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-        # Disable LTO for Visual Studio when CFLAGS doesn't contain -GL
-        if is_msvc(self):
+        # Disable LTO for MSVC-like compilers when CFLAGS doesn't contain -GL
+        if self._is_msvc_like:
             cflags = " ".join(self.conf.get("tools.build:cflags", default=[], check_type=list))
             lto = any(re.finditer("(^| )[/-]GL($| )", cflags))
             if not lto:
@@ -223,15 +249,41 @@ class LibVPXConan(ConanFile):
 """
             )
 
+    def _fix_msvc_build_root(self):
+        """Fix MSYS2 cygpath issue where 'cygpath -m .' returns '.' instead of
+        resolving to an absolute path. The generated Makefile uses BUILD_ROOT=.
+        which gen_msvs_vcxproj.sh passes through cygpath, resulting in garbled
+        include paths in the vcxproj when MSBuild runs yasm/cl.
+        Replace with absolute MSYS2-style path so cygpath -m resolves correctly.
+        """
+        build_path = self.build_folder.replace("\\", "/")
+        if len(build_path) >= 2 and build_path[1] == ':':
+            build_path = f"/{build_path[0].lower()}/{build_path[3:]}"
+        replace_in_file(self,
+            os.path.join(self.build_folder, "Makefile"),
+            "BUILD_ROOT?=.",
+            f"BUILD_ROOT={build_path}",
+        )
+
     def build(self):
         self._patch_sources()
         autotools = Autotools(self)
         autotools.configure()
+        if self._is_msvc_like:
+            self._fix_msvc_build_root()
         autotools.make()
 
     @property
     def _lib_name(self):
-        suffix = msvc_runtime_flag(self).lower() if is_msvc(self) else ""
+        if is_msvc(self):
+            suffix = msvc_runtime_flag(self).lower()
+        elif self._is_clang_cl:
+            # clang-cl: derive suffix from runtime + runtime_type (msvc_runtime_flag doesn't handle clang)
+            rt = str(self.settings.compiler.runtime)
+            rt_type = str(self.settings.compiler.runtime_type)
+            suffix = ("mtd" if rt_type == "Debug" else "mt") if rt == "static" else ("mdd" if rt_type == "Debug" else "md")
+        else:
+            suffix = ""
         return f"vpx{suffix}"
 
     def package(self):
@@ -245,7 +297,7 @@ class LibVPXConan(ConanFile):
                 os.path.join(self.package_folder, "include")
                 )
 
-        if is_msvc(self):
+        if self._is_msvc_like:
             # Libs are still in the build folder, get from there directly.
             # The makefile cannot correctly install the debug libs (see note about --enable-debug_libs)
             system = {"x86": "Win32", "armv8": "ARM64", "arm64ec": "ARM64EC"}
@@ -254,8 +306,6 @@ class LibVPXConan(ConanFile):
                     system.get(str(self.settings.arch), "x64"),
                     "Debug" if self.settings.build_type == "Debug" else "Release"
                     )
-            # Copy for msvc, as it will generate a release and debug library, so take what we want
-            # Note that libvpx's configure/make doesn't support shared lib builds on windows yet.
             copy(self, f"{self._lib_name}.lib", libs_from, os.path.join(self.package_folder, "lib"))
         else:
             # if not msvc, then libs were installed into package (in the wrong place), move them
