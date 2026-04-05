@@ -53,4 +53,7 @@ patches:
       "base_path": "qtwebengine"
     - "patch_file": "patches/fix_webengine_on_VS2022_v17.14_6.8.x.diff"
       "base_path": "qtwebengine/src/3rdparty"
+  "6.10.1":
+    - "patch_file": "patches/qtbase-725069.diff"
+      "base_path": "qtbase" 
       
