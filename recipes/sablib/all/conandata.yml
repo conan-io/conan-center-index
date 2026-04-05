@@ -1,0 +1,6 @@
+version: "0.3.2"
+
+sources:
+  "0.3.2":
+    url: "https://github.com/Izadori/sablib/archive/refs/tags/v0.3.2.tar.gz"
+    sha256: "1681dcdd2ab4cafe42d0460298566614f96bdc852d1abac25262b2f4f8441234"
