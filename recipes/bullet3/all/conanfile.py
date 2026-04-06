@@ -180,8 +180,6 @@ class Bullet3Conan(ConanFile):
 
         self.cpp_info.libs = libs
         self.cpp_info.includedirs = ["include", os.path.join("include", "bullet")]
-        if self.options.extras:
-            self.cpp_info.includedirs.append(os.path.join("include", "bullet_robotics"))
         self.cpp_info.defines = self._bullet_definitions
         if self.options.bt2_thread_locks and self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
