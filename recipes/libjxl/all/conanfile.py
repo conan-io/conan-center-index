@@ -116,10 +116,9 @@ class LibjxlConan(ConanFile):
             # TODO: add support for the jpegli JPEG encoder library
             tc.variables["JPEGXL_ENABLE_JPEGLI"] = False
             tc.variables["JPEGXL_ENABLE_JPEGLI_LIBJPEG"] = False
-        # Workaround for libjxl#3159: DebugString() in dec_modular.cc uses unqualified
-        # scoped enum values (GlobalData instead of Kind::GlobalData) which MSVC rejects
-        # in C++23 mode (-std:c++latest). Setting JXL_DEBUG_V_LEVEL=0 disables the debug
-        # logging code path entirely, avoiding the compile error.
+        # Workaround for libjxl#3159: DebugString() in dec_modular.cc uses unqualified scoped enum values
+        # (GlobalData instead of Kind::GlobalData) which MSVC rejects in C++23 mode (-std:c++latest).
+        # Setting JXL_DEBUG_V_LEVEL=0 disables the debug logging code path entirely, avoiding the compile error.
         # https://github.com/libjxl/libjxl/issues/3159
         if Version(self.version) >= "0.9" and self.settings.build_type == "Debug" and is_msvc(self):
             tc.preprocessor_definitions["JXL_DEBUG_V_LEVEL"] = 0
