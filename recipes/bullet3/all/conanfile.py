@@ -78,9 +78,6 @@ class Bullet3Conan(ConanFile):
         tc.variables["BUILD_UNIT_TESTS"] = False
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        if Version(self.version) < "3.21":
-            # silence warning
-            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0115"] = "OLD"
         if Version(self.version) <= "3.25":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
