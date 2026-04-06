@@ -55,7 +55,7 @@ class BehaviorTreeCPPConan(ConanFile):
         if self.options.enable_groot_interface:
             self.requires("cppzmq/4.11.0")
         if self.options.enable_sqlite_logging:
-            self.requires("sqlite3/3.50.4")
+            self.requires("sqlite3/[>=3.50.4 <4]")
         if self.options.with_tools:
             self.requires("zeromq/4.3.5")
 
