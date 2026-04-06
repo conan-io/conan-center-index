@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches, replace_in_file
+from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -21,20 +21,13 @@ class MujocoConan(ConanFile):
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
     }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def validate(self):
         check_min_cppstd(self, "20")
@@ -44,7 +37,7 @@ class MujocoConan(ConanFile):
         # https://github.com/google-deepmind/mujoco/pull/2693
         if self.settings.os != "Emscripten" and not self.options.shared:
             raise ConanInvalidConfiguration(
-                f"{self.ref} only supports shared libraries on non-Emscripten platforms."
+                f"{self.ref} only supports shared libraries on non-Emscripten platforms. Build it with -o {self.ref}:shared=True"
             )
 
         # MuJoCo's mjtNum is double; libccd must match to avoid precision mismatch.
@@ -63,9 +56,8 @@ class MujocoConan(ConanFile):
         self.requires("marchingcubecpp/0.0.0.cci.20260224")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)        
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "MujocoOptions.cmake"), "-Werror", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -76,6 +68,7 @@ class MujocoConan(ConanFile):
         tc.cache_variables["MUJOCO_TEST_PYTHON_UTIL"] = False
         tc.cache_variables["MUJOCO_WITH_USD"] = False
         tc.cache_variables["MUJOCO_USE_FILAMENT"] = False
+        tc.cache_variables["MUJOCO_BUILD_EXAMPLES"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -94,8 +87,6 @@ class MujocoConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "mujoco")
-        self.cpp_info.set_property("cmake_target_name", "mujoco::mujoco")
         self.cpp_info.libs = ["mujoco"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])

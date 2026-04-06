@@ -1,13 +1,17 @@
----
- CMakeLists.txt | 16 +++++++++++-----
- 1 file changed, 11 insertions(+), 5 deletions(-)
+Allow using Conan dependencies instead of running CMake fetchcontent to download and build them.
+
+A few dependencies listed in MujocoDependencies.cmake are not needed for the library:
+- Abseil: only used for tests and Python bindings
+- Google Benchmark: only used for tests
+- Google Test: only used for tests
+- Eigen: only used for Python bindings
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 6c1747f3..356e52a3 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -64,7 +64,12 @@ endif()
- 
+
  include(MujocoOptions)
  include(MujocoMacOS)
 -include(MujocoDependencies)
@@ -17,7 +21,7 @@ index 6c1747f3..356e52a3 100644
 +find_package(tinyobjloader REQUIRED CONFIG)
 +find_package(tinyxml2 REQUIRED CONFIG)
 +find_package(MarchingCubeCpp REQUIRED CONFIG)
- 
+
  set(MUJOCO_HEADERS
      include/mujoco/mjdata.h
 @@ -155,10 +160,11 @@ target_link_options(
@@ -34,8 +38,7 @@ index 6c1747f3..356e52a3 100644
 +          tinyxml2::tinyxml2
 +          marchingcubecpp::marchingcubecpp
  )
- 
- set_target_properties(
--- 
-2.53.0
 
+ set_target_properties(
+--
+2.53.0
