@@ -6,6 +6,7 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 import os
 import re
@@ -210,9 +211,15 @@ class LibtoolConan(ConanFile):
         replace_in_file(self, libtool_m4,
                               "lt_cv_deplibs_check_method='file_magic ^x86 archive import|^x86 DLL'",
                               method_pass_all)
-        replace_in_file(self, libtool_m4,
-                              "lt_cv_deplibs_check_method='file_magic file format (pei*-i386(.*architecture: i386)?|pe-arm-wince|pe-x86-64)'",
-                              method_pass_all)
+        # 2.5.4 added |pe-aarch64 to the file format pattern
+        if Version(self.version) >= "2.5":
+            replace_in_file(self, libtool_m4,
+                                  "lt_cv_deplibs_check_method='file_magic file format (pei*-i386(.*architecture: i386)?|pe-arm-wince|pe-x86-64|pe-aarch64)'",
+                                  method_pass_all)
+        else:
+            replace_in_file(self, libtool_m4,
+                                  "lt_cv_deplibs_check_method='file_magic file format (pei*-i386(.*architecture: i386)?|pe-arm-wince|pe-x86-64)'",
+                                  method_pass_all)
 
     def package_info(self):
         self.cpp_info.libs = ["ltdl"]

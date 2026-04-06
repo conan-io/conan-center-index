@@ -18,6 +18,15 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
     short_paths = True
 
+    @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
+               self.settings.compiler.get_safe("runtime")
+
+    @property
+    def _is_msvc_like(self):
+        return is_msvc(self) or self._is_clang_cl
+
     def layout(self):
         basic_layout(self)
 
@@ -54,18 +63,29 @@ class TestPackageConan(ConanFile):
         # Use two instances of AutotoolsToolchain with namespaceas,
         # as we have two different projects with different settings.
         ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper", check_type=str))
-        msvc_vars = {
-            "CC": "cl -nologo", 
-            "CXX": "cl -nologo", 
-            "AR": f"{ar_wrapper} lib",
-            "LD": "link"
-        }
+        if self._is_clang_cl:
+            msvc_vars = {
+                "CC": "clang-cl",
+                "CXX": "clang-cl",
+                "AR": f"{ar_wrapper} lib",
+                "LD": "link"
+            }
+        else:
+            msvc_vars = {
+                "CC": "cl -nologo", 
+                "CXX": "cl -nologo", 
+                "AR": f"{ar_wrapper} lib",
+                "LD": "link"
+            }
 
         # "Autotools" subfolder: project to test integration of Autotools with libtool 
         # at build time
         tc = AutotoolsToolchain(self, namespace="autotools")
+        # clang-cl: libtool can't create shared DLLs (LNK1561), disable shared in test too
+        if self._is_clang_cl:
+            tc.configure_args.append("--disable-shared")
         env = tc.environment()
-        if is_msvc(self):
+        if self._is_msvc_like:
             for key, value in msvc_vars.items():
                 env.define(key, value)
         tc.generate(env)
@@ -77,7 +97,7 @@ class TestPackageConan(ConanFile):
         lib_folder = unix_path(self, os.path.join(self.sis_package_folder, "lib"))
         tc.extra_ldflags.append(f"-L{lib_folder}")
         env = tc.environment()
-        if is_msvc(self):
+        if self._is_msvc_like:
             for key, value in msvc_vars.items():
                 env.define(key, value)
         tc.generate(env)
@@ -103,8 +123,15 @@ class TestPackageConan(ConanFile):
             env.append_path(var, os.path.join(self.autotools_package_folder, "lib"))
         env.vars(self, scope="run").save_script("conanrun_libtool_testpackage")
 
+        # Force autoreconf to use the package's own libtoolize instead of the
+        # system one (MSYS2 may ship a different version whose m4 macros conflict).
+        # LIBTOOLIZE tells autoreconf which libtoolize to invoke.
+        # ACLOCAL_PATH ensures aclocal picks up the package's m4 macros first.
+        libtool_pkg = self.dependencies["libtool"].package_folder
         env = Environment()
-        env.prepend_path("PATH", os.path.join(self.dependencies["libtool"].package_folder, "bin"))
+        env.prepend_path("PATH", os.path.join(libtool_pkg, "bin"))
+        env.define("LIBTOOLIZE", unix_path(self, os.path.join(libtool_pkg, "bin", "libtoolize")))
+        env.prepend_path("ACLOCAL_PATH", os.path.join(libtool_pkg, "res", "aclocal"))
         env.vars(self, scope="build").save_script("conanbuild_libtoolize")
 
         runenv = VirtualRunEnv(self)
@@ -186,10 +213,13 @@ class TestPackageConan(ConanFile):
         self._build_ltdl()
         if not cross_building(self):
             self._build_autotools()
-            self._build_static_lib_in_shared()
+            # clang-cl: libtool can't create shared DLLs (LNK1561), skip shared-from-static test
+            if not self._is_clang_cl:
+                self._build_static_lib_in_shared()
 
     def test(self):
         if can_run(self):
             self._test_ltdl()
             self._test_autotools()
-            self._test_static_lib_in_shared()
+            if not self._is_clang_cl:
+                self._test_static_lib_in_shared()
