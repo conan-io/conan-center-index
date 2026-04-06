@@ -1,4 +1,4 @@
 sources:
-  "1.15.0":
-    url: "https://github.com/doxygen/doxygen/releases/download/Release_1_15_0/doxygen-1.15.0.src.tar.gz"
-    sha256: "a8cafe605867ad475aaf288a3852783076e1df83aabf16488bbfa958062e7440"
+  "1.16.1":
+    url: "https://github.com/doxygen/doxygen/releases/download/Release_1_16_1/doxygen-1.16.1.src.tar.gz"
+    sha256: "201ce33b514ea87cc1697c0dcf829692c2695c1812683a9cc622194b05e263a8"

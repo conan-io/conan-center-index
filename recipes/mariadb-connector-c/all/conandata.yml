@@ -1,23 +1,33 @@
 sources:
+  "3.4.8":
+    url: "https://dlm.mariadb.com/Connectors/c/connector-c-3.4.8/mariadb-connector-c-3.4.8-src.tar.gz"
+    sha256: "156aed3b49f857d0ac74fb76f1982968bcbfd8382da3f5b6ae71f616729920d7"
   "3.4.3":
-    url: "https://downloads.mariadb.com/Connectors/c/connector-c-3.4.3/mariadb-connector-c-3.4.3-src.tar.gz"
+    url: "https://dlm.mariadb.com/Connectors/c/connector-c-3.4.3/mariadb-connector-c-3.4.3-src.tar.gz"
     sha256: "a9033833a88ca74789bd6db565965382c982d06aae1c086097fa9c3e7c7d1eaf"
   "3.3.8":
-    url: "https://downloads.mariadb.com/Connectors/c/connector-c-3.3.8/mariadb-connector-c-3.3.8-src.tar.gz"
+    url: "https://dlm.mariadb.com/Connectors/c/connector-c-3.3.8/mariadb-connector-c-3.3.8-src.tar.gz"
     sha256: "f9f076b4aa9fb22cc94b24f82c80f9ef063805ecd6533a2eb5d5060cf93833e8"
   "3.3.3":
-    url: "https://downloads.mariadb.com/Connectors/c/connector-c-3.3.3/mariadb-connector-c-3.3.3-src.tar.gz"
+    url: "https://dlm.mariadb.com/Connectors/c/connector-c-3.3.3/mariadb-connector-c-3.3.3-src.tar.gz"
     sha256: "d77630e2376fe08185b5354621c877b0a203a6b186a0694574d37b764aeb2874"
   "3.1.19":
-    url: "https://downloads.mariadb.com/Connectors/c/connector-c-3.1.19/mariadb-connector-c-3.1.19-src.tar.gz"
+    url: "https://dlm.mariadb.com/Connectors/c/connector-c-3.1.19/mariadb-connector-c-3.1.19-src.tar.gz"
     sha256: "3cafe6e197a0610e9a77aea4f0733a52e0697e8557998de4c4156c242e1ff405"
   "3.1.12":
-    url: "https://downloads.mariadb.com/Connectors/c/connector-c-3.1.12/mariadb-connector-c-3.1.12-src.tar.gz"
+    url: "https://dlm.mariadb.com/Connectors/c/connector-c-3.1.12/mariadb-connector-c-3.1.12-src.tar.gz"
     sha256: "2f5ae14708b4813e4ff6857d152c22e6fc0e551c9fa743c1ef81a68e3254fe63"
   "3.1.11":
-    url: "https://downloads.mariadb.com/Connectors/c/connector-c-3.1.11/mariadb-connector-c-3.1.11-src.tar.gz"
+    url: "https://dlm.mariadb.com/Connectors/c/connector-c-3.1.11/mariadb-connector-c-3.1.11-src.tar.gz"
     sha256: "3e6f6c399493fe90efdc21a3fe70c30434b7480e8195642a959f1dd7a0fa5b0f"
 patches:
+  "3.4.8":
+    - patch_file: "patches/3.4.8-0001-fix-install-and-static-or-shared.patch"
+      patch_description: "fix install path, separate static/shared build"
+      patch_type: "conan"
+    - patch_file: "patches/3.4.8-0004-include-mysqld_error-header.patch"
+      patch_description: "always include mysqld_error.h"
+      patch_type: "portability"
   "3.4.3":
     - patch_file: "patches/3.4.3-0001-fix-install-and-static-or-shared.patch"
       patch_description: "fix install path, separate static/shared build"

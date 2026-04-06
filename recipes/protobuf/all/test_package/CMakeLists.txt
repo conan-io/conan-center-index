@@ -5,11 +5,8 @@ project(test_package LANGUAGES CXX)
 find_package(protobuf CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-
-if(CONAN_TEST_USE_CXXSTD_14)
-    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
-else()
-    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+if (EXISTS "${CMAKE_BINARY_DIR}/addressbook.pb.cc")
+    target_sources(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/addressbook.pb.cc)
 endif()
 
 if (protobuf_LITE)

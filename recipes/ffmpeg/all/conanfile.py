@@ -16,7 +16,7 @@ import glob
 import shutil
 import re
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2"
 
 
 class FFMpegConan(ConanFile):
@@ -357,7 +357,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_sdl:
             self.requires("sdl/[^2.28]")
         if self.options.with_libx264:
-            self.requires("libx264/cci.20240224")
+            self.requires("libx264/[>=cci.20240224]")
         if self.options.with_libx265:
             self.requires("libx265/[>=3.4 <4]")
         if self.options.with_libvpx:
@@ -474,11 +474,11 @@ class FFMpegConan(ConanFile):
                                   "#define X264_API_IMPORTS 1", "")
         if self.options.with_ssl == "openssl":
                 # https://trac.ffmpeg.org/ticket/5675
-            if Version(self.version) >= "8.0":
+            if Version(self.version) >= "8.1":
                 openssl_libs = load(self, os.path.join(self.build_folder, "openssl_libs.list"))
                 replace_in_file(self, os.path.join(self.source_folder, "configure"),
-                                    "check_lib openssl openssl/ssl.h OPENSSL_init_ssl -lssl -lcrypto -lws2_32 -lgdi32 ||",
-                                    f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libs} || ")
+                                    "check_lib openssl openssl/ssl.h DTLS_get_data_mtu -lssl -lcrypto -lws2_32 -lgdi32 ||",
+                                    f"check_lib openssl openssl/ssl.h DTLS_get_data_mtu {openssl_libs} || ")
             else:
                 openssl_libs = load(self, os.path.join(self.build_folder, "openssl_libs.list"))
                 replace_in_file(self, os.path.join(self.source_folder, "configure"),

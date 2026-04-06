@@ -3,5 +3,3 @@ versions:
     folder: cmake
   "1.13.1":
     folder: cmake
-  "1.12.0":
-    folder: all

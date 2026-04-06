@@ -12,7 +12,7 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def requirements(self):
-        fastdds_version = self.conf.get("user.fast-dds-gen:fastdds_version", default="3.2.1")
+        fastdds_version = self.conf.get("user.fast-dds-gen:fastdds_version", default="3.4.0")
         self.requires(f"fast-dds/{fastdds_version}")
 
     def layout(self):
