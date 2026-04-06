@@ -755,6 +755,14 @@ class FFMpegConan(ConanFile):
             args.append("--extra-cflags={}".format(" ".join(tc.cflags)))
         if tc.ldflags:
             args.append("--extra-ldflags={}".format(" ".join(tc.ldflags)))
+
+        # On Linux, libsoxr statically links libm functions (ceil, log, sin…).
+        # ffmpeg's configure uses `require libsoxr soxr.h soxr_create -lsoxr`
+        # (not pkg-config), so -lm must be injected via --extra-libs for the
+        # link test to succeed. macOS/Windows don't need this (libm is implicit).
+        if self.options.get_safe("with_soxr") and self.settings.os in ("Linux", "FreeBSD"):
+            args.append("--extra-libs=-lm")
+
         tc.configure_args.extend(args)
         tc.generate()
 
