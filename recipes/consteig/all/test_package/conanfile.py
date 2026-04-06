@@ -20,5 +20,6 @@ class TestPackage(ConanFile):
         cmake.build()
 
     def test(self):
-        cmd = os.path.join(self.cpp.build.bindirs[0], "test_package")
-        self.run(cmd, env="conanrun")
+        if can_run(self):
+            cmd = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run(cmd, env="conanrun")
