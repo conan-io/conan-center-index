@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, rmdir
+from conan.tools.build import check_min_cppstd
 import os
 
 required_conan_version = ">=2.1"
@@ -38,12 +39,16 @@ class ConsteigConan(ConanFile):
         tc.variables["CONSTEIG_BUILD_PROFILING"] = False
         tc.generate()
 
-    def package(self):
-        copy(self, "LICENSE", src=self.source_folder,
-             dst=os.path.join(self.package_folder, "licenses"))
+    def build(self):
         cmake = CMake(self)
         cmake.configure()
+        cmake.build()
+
+    def package(self):
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
