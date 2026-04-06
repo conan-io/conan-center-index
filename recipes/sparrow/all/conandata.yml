@@ -2,6 +2,3 @@ sources:
   "2.4.0":
     url: "https://github.com/man-group/sparrow/archive/refs/tags/2.4.0.tar.gz"
     sha256: "474c25d8f3fbae210efd3cd88d83c5b5ab7dde84f3f9d95ff21b5f4b90f69874"
-  "2.3.1":
-    url: "https://github.com/man-group/sparrow/archive/refs/tags/2.3.1.tar.gz"
-    sha256: "5034343af53c61c6cc238d8a06321070caf84c4ff2c12fbb44e3bbb0893e16e5"
