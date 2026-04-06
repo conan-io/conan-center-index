@@ -571,6 +571,8 @@ class LibcurlConan(ConanFile):
             tc.variables["CURL_DISABLE_FORM_API"] = not self.options.with_form_api
         if "with_websockets" in self.options:
             tc.variables["CURL_DISABLE_WEBSOCKETS"] = not self.options.with_websockets
+        if self.options.with_nghttp2 and is_msvc(self) and not self.dependencies["libnghttp2"].options.shared:
+            tc.preprocessor_definitions["NGHTTP2_STATICLIB"] = "1"
 
         # Also disables NTLM_WB if set to false
         if not self.options.with_ntlm:
