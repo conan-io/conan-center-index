@@ -464,6 +464,18 @@ class FFMpegConan(ConanFile):
             "SunOS": "sunos",
         }.get(str(self.settings.os), "none")
 
+    @property
+    def _is_msvc_like(self):
+        """True for both MSVC and clang-cl on Windows.
+
+        clang-cl accepts cl.exe flags and needs --toolchain=msvc,
+        -LIBPATH: (not -L), and cl-style output paths.
+        """
+        return is_msvc(self) or (
+            self.settings.os == "Windows"
+            and str(self.settings.compiler) == "clang"
+        )
+
     def _patch_sources(self):
         apply_conandata_patches(self)
         if Version(self.version) < "5.1":
@@ -491,10 +503,10 @@ class FFMpegConan(ConanFile):
     def _default_compilers(self):
         if self.settings.compiler == "gcc":
             return {"cc": "gcc", "cxx": "g++"}
+        elif self._is_msvc_like:
+            return {"cc": "cl.exe", "cxx": "cl.exe"}
         elif self.settings.compiler in ["clang", "apple-clang"]:
             return {"cc": "clang", "cxx": "clang++"}
-        elif is_msvc(self):
-            return {"cc": "cl.exe", "cxx": "cl.exe"}
         return {}
 
     def _create_toolchain(self):
@@ -685,7 +697,11 @@ class FFMpegConan(ConanFile):
         if self.settings.build_type == "Debug":
             args.extend([
                 "--disable-optimizations",
-                "--disable-mmx",
+                # --disable-mmx removed: it cascades to disable all x86 SIMD (SSE/AVX/etc.)
+                # and empties X86ASMFLAGS. Combined with --disable-optimizations (-Od on MSVC),
+                # which prevents dead-code elimination of EXTERNAL_*() guards, this causes
+                # unresolved NASM symbols at link time. Runtime dispatch (av_get_cpu_flags)
+                # is safe regardless.
                 "--disable-stripping",
                 "--enable-debug",
             ])
@@ -725,7 +741,7 @@ class FFMpegConan(ConanFile):
             # unlike other tools that use the PKG_CONFIG environment variable
             # if we are aware the user has requested a specific pkg-config, we pass it to the configure script
             args.append(f"--pkg-config={unix_path(self, pkg_config)}")
-        if is_msvc(self):
+        if self._is_msvc_like:
             args.append("--toolchain=msvc")
             if not check_min_vs(self, "190", raise_invalid=False):
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
@@ -742,8 +758,8 @@ class FFMpegConan(ConanFile):
         tc.configure_args.extend(args)
         tc.generate()
 
-        if is_msvc(self):
-            # Custom AutotoolsDeps for cl like compilers
+        if self._is_msvc_like:
+            # Custom AutotoolsDeps for cl-like compilers (MSVC + clang-cl)
             # workaround for https://github.com/conan-io/conan/issues/12784
             includedirs = []
             defines = []
@@ -810,7 +826,7 @@ class FFMpegConan(ConanFile):
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        if is_msvc(self):
+        if self._is_msvc_like:
             if self.options.shared:
                 # ffmpeg created `.lib` files in the `/bin` folder
                 for fn in os.listdir(os.path.join(self.package_folder, "bin")):
