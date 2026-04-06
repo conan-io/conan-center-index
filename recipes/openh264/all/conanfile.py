@@ -58,14 +58,19 @@ class OpenH264Conan(ConanFile):
         env.generate()
         tc = MesonToolchain(self)
         tc.project_options["tests"] = "disabled"
-        # clang-cl + Meson: MesonToolchain maps cppstd=23 to 'c++23', but Meson
-        # validates it via get_supported_arguments() using -std=c++23 (GCC-style)
-        # instead of /std:c++23 (MSVC-style). The test fails → Meson rejects the
-        # value. Using 'c++latest' works because Meson translates it to /std:c++latest
-        # which clang-cl accepts. This is a Meson bug, not a clang-cl limitation —
-        # the workaround is safe even if a future clang-cl adds /std:c++23 support.
+        # clang-cl + Meson: MesonToolchain maps cppstd=23 to 'c++23', but Meson validates it via get_supported_arguments()
+        # using -std=c++23 (GCC-style) instead of /std:c++23 (MSVC-style).
+        # The test fails -> Meson rejects the value.
+        # Using 'c++latest' works because Meson translates it to /std:c++latest which clang-cl accepts.
+        # This is a Meson bug, not a clang-cl limitation - the workaround is safe even if a future clang-cl adds /std:c++23 support.
         if self._is_clang_cl and tc.cpp_std and "23" in tc.cpp_std:
             tc.cpp_std = "c++latest"
+        # Clang 21+ warns on memcpy with non-trivially-copyable types (-Wnontrivial-memcall).
+        # openh264 2.5.0 upstream uses memcpy on SWelsSvcCodingParam (with "confirmed_safe_unsafe_usage" comments),
+        # and compiles with -Werror -> build fails.
+        # Fixed in 2.6.0.
+        if Version(self.version) < "2.6.0" and self.settings.compiler in ("clang", "apple-clang"):
+            tc.extra_cxxflags.append("-Wno-nontrivial-memcall")
         tc.generate()
 
     def build(self):
