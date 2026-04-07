@@ -4,7 +4,4 @@ project(test_package LANGUAGES CXX)
 find_package(utf8cpp REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE utf8cpp)
-#check alias
-target_link_libraries(${PROJECT_NAME} PRIVATE utf8::cpp)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+target_link_libraries(${PROJECT_NAME} PRIVATE utf8cpp::utf8cpp)

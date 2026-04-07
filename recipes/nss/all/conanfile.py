@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import msvc_runtime_flag, VCVars, is_msvc
 from conan.tools.scm import Version
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import get, chdir, rename, rm, copy, replace_in_file
+from conan.tools.files import get, chdir, rename, rm, copy, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.build import cross_building
 from conan.tools.layout import basic_layout
 from conan.tools.apple import fix_apple_shared_install_name
@@ -56,13 +56,13 @@ class NSSConan(ConanFile):
 
         if msvc_runtime_flag(self) == "MTd":
             raise ConanInvalidConfiguration("NSS recipes does not support MTd runtime. Contributions are welcome.")
-
-        if Version(self.version) < "3.74":
-            if self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= 13:
-                raise ConanInvalidConfiguration("nss < 3.74 requires clang < 13 .")
+    
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     @property
     def _make_args(self):
@@ -168,10 +168,13 @@ class NSSConan(ConanFile):
         # INFO: The Darwin.mk has no configuration for ARM arch, and anything different from x86_64 or arm is considered as PowerPC
         # Using arm as CPU_ARCH will require ARM neon support, resulting in build errors due missing __ARM_FEATURE_CRYPTO feature support in Clang
         # See https://bugzilla.mozilla.org/show_bug.cgi?id=1952518
+        # 
         replace_in_file(self, os.path.join(self.source_folder, "nss", "coreconf", "Darwin.mk"), "ifeq (arm,$(CPU_ARCH))", "ifeq (aarch64, $(CPU_ARCH))")
 
     def build(self):
-        self._patch_sources()
+        # INFO: Patch is needed only for versions before 3.119
+        if (Version(self.version) < "3.119"):
+            self._patch_sources()
         with chdir(self, os.path.join(self.source_folder, "nss")):
             self.run(f"{self._make} {self._make_args}")
 
@@ -218,7 +221,7 @@ class NSSConan(ConanFile):
         self.cpp_info.components["softokn"].libs = [_library_name("softokn", 3)]
         self.cpp_info.components["softokn"].requires = ["sqlite3::sqlite3", "nssutil", "nspr::nspr"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["softokn"].system_libs = ["pthread"]
+            self.cpp_info.components["softokn"].system_libs = ["pthread", "m"]
 
         self.cpp_info.components["nssdbm"].libs = [_library_name("nssdbm", 3)]
         self.cpp_info.components["nssdbm"].requires = ["nspr::nspr", "nssutil"]

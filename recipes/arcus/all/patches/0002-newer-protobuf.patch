@@ -1,0 +1,29 @@
+Compatibility with newer protobuf versions
+* Adapt AddError to RecordError with absl::string_view as per https://protobuf.dev/support/migration/ (ErrorCollector Migration)
+* Use absl::string_view in hash function
+
+diff --git a/src/MessageTypeStore.cpp b/src/MessageTypeStore.cpp
+index 44c94ec..c80d416 100644
+--- a/src/MessageTypeStore.cpp
++++ b/src/MessageTypeStore.cpp
+@@ -19,9 +19,9 @@ using namespace Arcus;
+  * of std::hash differs between compilers, we need to make sure we use the same
+  * implementation everywhere.
+  */
+-uint32_t hash(const std::string& input)
++uint32_t hash(absl::string_view input)
+ {
+-    const char* data = input.c_str();
++    const char* data = input.data();
+     uint32_t length = input.size();
+     uint32_t result = static_cast<uint32_t>(2166136261UL);
+     for (; length; --length)
+@@ -39,7 +39,7 @@ public:
+     {
+     }
+ 
+-    void AddError(const std::string& filename, int line, int column, const std::string& message) override
++    void RecordError(absl::string_view filename, int line, int column, absl::string_view message) override
+     {
+         _stream << "[" << filename << " (" << line << "," << column << ")] " << message << std::endl;
+         _error_count++;

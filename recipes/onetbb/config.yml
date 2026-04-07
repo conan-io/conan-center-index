@@ -1,11 +1,7 @@
 versions:
   "2022.3.0":
     folder: all
-  "2022.2.0":
-    folder: all
   "2022.0.0":
-    folder: all
-  "2021.13.0":
     folder: all
   "2021.12.0":
     folder: all
@@ -13,13 +9,7 @@ versions:
     folder: all
   "2021.9.0":
     folder: all
-  "2021.8.0":
-    folder: all
   "2021.7.0":
-    folder: all
-  "2021.6.0":
-    folder: all
-  "2021.3.0":
     folder: all
   "2020.3.3":
     folder: "2020.x"

@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.apple import is_apple_os
 import os
@@ -64,10 +63,6 @@ class LibGit2Conan(ConanFile):
         if self.settings.os == "Macos":
             self.options.with_regex = "regcomp_l"
 
-        # < 1.8.1 requries http_parser only.
-        if Version(self.version) < "1.8.1":
-            del self.options.with_http_parser
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -79,7 +74,7 @@ class LibGit2Conan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
-        if Version(self.version) < "1.8.1" or self.options.get_safe("with_http_parser") == "http-parser":
+        if self.options.get_safe("with_http_parser") == "http-parser":
             self.requires("http_parser/2.9.4")
         else:
             self.requires("llhttp/9.1.3")
@@ -148,27 +143,21 @@ class LibGit2Conan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["THREADSAFE"] = self.options.threadsafe
-        if Version(self.version) < "1.8.1":
-            tc.variables["USE_SSH"] = self.options.with_libssh2
-        else:
-            tc.variables["USE_SSH"] = "libssh2" if self.options.with_libssh2 else False
+        tc.variables["USE_SSH"] = "libssh2" if self.options.with_libssh2 else False
         tc.variables["USE_ICONV"] = self.options.get_safe("with_iconv", False)
         tc.variables["USE_HTTPS"] = self._cmake_https[str(self.options.with_https)]
         tc.variables["USE_SHA1"] = self._cmake_sha1[str(self.options.with_sha1)]
-        if Version(self.version) >= "1.4.0":
-            tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_TESTS"] = False
         tc.variables["BUILD_CLAR"] = False
         tc.variables["BUILD_CLI"] = False
         tc.variables["BUILD_EXAMPLES"] = False
-        if Version(self.version) < "1.8.1":
-            tc.variables["USE_HTTP_PARSER"] = "system"
-        else:
-            tc.variables["USE_HTTP_PARSER"] = self.options.get_safe("with_http_parser")
+        tc.variables["USE_HTTP_PARSER"] = self.options.get_safe("with_http_parser")
         tc.variables["REGEX_BACKEND"] = self.options.with_regex
         if is_msvc(self):
             tc.variables["STATIC_CRT"] = is_msvc_static_runtime(self)
         # REGEX_BACKEND is SET(), avoid options overriding it
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
         deps = CMakeDeps(self)
         if self.options.get_safe("with_http_parser") == "llhttp":
@@ -186,13 +175,12 @@ class LibGit2Conan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libgit2")
         self.cpp_info.libs = ["git2"]
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(["winhttp", "rpcrt4", "crypt32"])
-            if Version(self.version) >= "1.7.0":
-                self.cpp_info.system_libs.append("secur32")
+            self.cpp_info.system_libs.extend(["winhttp", "rpcrt4", "crypt32", "secur32"])
         if self.settings.os in ["Linux", "FreeBSD"] and self.options.threadsafe:
             self.cpp_info.system_libs.append("pthread")

@@ -1,9 +1,9 @@
 sources:
-  "2.12.1":
-    url: "https://github.com/edenhill/librdkafka/archive/v2.12.1.tar.gz"
-    sha256: "ec103fa05cb0f251e375f6ea0b6112cfc9d0acd977dc5b69fdc54242ba38a16f"
+  "2.13.0":
+    url: "https://github.com/edenhill/librdkafka/archive/v2.13.0.tar.gz"
+    sha256: "3bd351601d8ebcbc99b9a1316cae1b83b00edbcf9411c34287edf1791c507600"
 patches:
-  "2.12.1":
+  "2.13.0":
     - patch_file: patches/0001-Change-library-names-1-9-1.patch
     - patch_file: patches/0002-Change-library-targets-and-result-variables-2-5-0.patch
     - patch_file: patches/0004-Fix_compilation_with_CMake_and_without_CURL.patch

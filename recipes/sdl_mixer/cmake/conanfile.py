@@ -97,7 +97,7 @@ class SDLMixerConan(ConanFile):
             # self.requires("gme/x.y.z")
             pass
         if self.options.mpg123:
-            self.requires("mpg123/1.31.2")
+            self.requires("mpg123/[>=1.31.2 <2]")
         if self.options.minimp3:
             self.requires("minimp3/cci.20211201")
         if self.options.vorbis == "stb":

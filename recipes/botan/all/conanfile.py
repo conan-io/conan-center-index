@@ -7,7 +7,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name, XCRun
 from conan.tools.build import build_jobs, check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import chdir, copy, get, rmdir
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, VCVars, check_min_vs
@@ -33,7 +33,6 @@ class BotanConan(ConanFile):
         "fPIC": [True, False],
         "amalgamation": [True, False],
         "with_bzip2": [True, False],
-        "with_openssl": [True, False],
         "with_sqlite3": [True, False],
         "with_zlib": [True, False],
         "with_boost": [True, False],
@@ -63,7 +62,6 @@ class BotanConan(ConanFile):
         "fPIC": True,
         "amalgamation": False,
         "with_bzip2": False,
-        "with_openssl": False,
         "with_sqlite3": False,
         "with_zlib": False,
         "with_boost": False,
@@ -103,9 +101,6 @@ class BotanConan(ConanFile):
     def _is_arm(self):
         return 'arm' in str(self.settings.arch)
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -128,10 +123,6 @@ class BotanConan(ConanFile):
             del self.options.with_altivec
             del self.options.with_powercrypto
 
-        # Support for the OpenSSL provider was removed in 2.19.2
-        if Version(self.version) >= '2.19.2':
-            del self.options.with_openssl
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -139,8 +130,6 @@ class BotanConan(ConanFile):
     def requirements(self):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
-        if self.options.get_safe('with_openssl', False):
-            self.requires("openssl/[>=1.1 <3]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_sqlite3:
@@ -185,8 +174,7 @@ class BotanConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"{self.name} requires non-header-only static boost, "
                     f"without magic_autolink, and with these components: {', '.join(self._required_boost_components)}")
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
 
         compiler = self.settings.compiler
         compiler_name = str(compiler)
@@ -263,7 +251,6 @@ class BotanConan(ConanFile):
         VirtualBuildEnv(self).generate()
 
     def build(self):
-        apply_conandata_patches(self)
         with chdir(self, self.source_folder):
             self.run(self._configure_cmd)
             self.run(self._make_cmd)
@@ -302,6 +289,7 @@ class BotanConan(ConanFile):
                 'Linux': 'linux',
                 'Macos': 'darwin',
                 'Android': 'android',
+                'Emscripten': 'emscripten',
                 'baremetal': 'none',
                 'iOS': 'ios'}.get(str(self.settings.os))
 
@@ -320,6 +308,8 @@ class BotanConan(ConanFile):
             botan_compiler = 'clang'
         elif self.settings.compiler == 'gcc':
             botan_compiler = 'gcc'
+        elif self.settings.os == 'Emscripten':
+            botan_compiler = 'emcc'
         else:
             botan_compiler = 'msvc'
 
@@ -395,10 +385,6 @@ class BotanConan(ConanFile):
         if self.options.with_bzip2:
             build_flags.append('--with-bzip2')
             build_flags.extend(self._dependency_build_flags('bzip2'))
-
-        if self.options.get_safe('with_openssl', False):
-            build_flags.append('--with-openssl')
-            build_flags.extend(self._dependency_build_flags('openssl'))
 
         if self.options.with_sqlite3:
             build_flags.append('--with-sqlite3')

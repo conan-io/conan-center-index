@@ -4,7 +4,7 @@ index 0000000..c7e4c0e
 --- /dev/null
 +++ b/CMakeLists.txt
 @@ -0,0 +1,114 @@
-+cmake_minimum_required(VERSION 3.1)
++cmake_minimum_required(VERSION 3.5)
 +project(marisa CXX)
 +
 +include(GNUInstallDirs)
