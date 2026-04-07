@@ -3,12 +3,18 @@
 #include <stdlib.h>
 #include <assert.h>
 
+void print_config_file(FcChar8 *file) {
+  assert(file != NULL);
+
+  printf("Config file: %s\n", file);
+}
+
 void print_config_files(FcStrList *files) {
   assert(files != NULL);
 
   FcChar8 *file;
   while ((file = FcStrListNext(files)) != NULL) {
-    printf("Config file: %s\n", file);
+    print_config_file(file);
   }
 }
 
@@ -28,13 +34,14 @@ int main() {
   }
 
   FcStrList *files = FcConfigGetConfigFiles(config);
-  FcChar8 *file = FcStrListNext(files);
-  if (!file) {
+  FcChar8 *firstFile = FcStrListNext(files);
+  if (!firstFile) {
     printf("No config file loaded\n");
     FcStrListDone(files);
     FcFini();
     return EXIT_FAILURE;
   }
+  print_config_file(firstFile);
   print_config_files(files);
   FcStrListDone(files);
 
