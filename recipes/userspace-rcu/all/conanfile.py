@@ -13,7 +13,7 @@ required_conan_version = ">=1.53.0"
 class UserspaceRCUConan(ConanFile):
     name = "userspace-rcu"
     description = "Userspace RCU (read-copy-update) library"
-    license = "LGPL-2.1"
+    license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://liburcu.org/"
     topics = "urcu"
