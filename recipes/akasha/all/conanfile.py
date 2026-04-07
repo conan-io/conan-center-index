@@ -26,7 +26,7 @@ class AkashaConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def requirements(self):
-        self.requires("boost/1.84.0")
+        self.requires("boost/1.90.0")
     
     def layout(self):
         cmake_layout(self, src_folder="src")
