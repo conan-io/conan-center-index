@@ -78,7 +78,8 @@ class UserspaceRCUConan(ConanFile):
         for lib_type in ["", "-bp", "-cds", "-mb", "-memb", "-qsbr", "-signal"]:
             component_name = f"urcu{lib_type}"
             self.cpp_info.components[component_name].libs = ["urcu-common", component_name]
-            self.cpp_info.components[component_name].set_property("pkg_config_name", component_name)
+            self.cpp_info.components[component_name].set_property("pkg_config_name", f"lib{component_name}")
+            self.cpp_info.components[component_name].set_property("pkg_config_aliases", [component_name])
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components[component_name].system_libs = ["pthread"]
 
