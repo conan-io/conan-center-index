@@ -37,9 +37,7 @@ class SparrowExtensionsRecipe(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        # Note: sparrow-extensions 0.2.0 was developed against sparrow 2.0.0,
-        # but we use 1.4.0 as it's the latest available in conan-center-index
-        self.requires("sparrow/[>=1.4.0 <2]", transitive_headers=True, transitive_libs=True)
+        self.requires("sparrow/[>=2]", transitive_headers=True, transitive_libs=True)
 
     @property
     def _compilers_minimum_version(self):
