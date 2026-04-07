@@ -1,0 +1,13 @@
+diff --git a/Source/FreeImage/PluginRAW.cpp b/Source/FreeImage/PluginRAW.cpp
+index 4f1bbe8..6f2b5f3 100644
+--- a/Source/FreeImage/PluginRAW.cpp
++++ b/Source/FreeImage/PluginRAW.cpp
+@@ -701,7 +701,7 @@ Load(FreeImageIO *io, fi_handle handle, int page, int flags, void *data) {
+ 		// --------------------------------------------
+ 
+ 		// (-s [0..N-1]) Select one raw image from input file
+-		RawProcessor->imgdata.params.shot_select = 0;
++		RawProcessor->imgdata.rawparams.shot_select = 0;
+ 		// (-w) Use camera white balance, if possible (otherwise, fallback to auto_wb)
+ 		RawProcessor->imgdata.params.use_camera_wb = 1;
+ 		// (-M) Use any color matrix from the camera metadata. This option only affects Olympus, Leaf, and Phase One cameras.

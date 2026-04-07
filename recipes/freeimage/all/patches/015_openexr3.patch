@@ -1,0 +1,85 @@
+diff -rupN --no-dereference FreeImage/PluginEXR.cpp Source/FreeImage/PluginEXR.cpp
+--- FreeImage/PluginEXR.cpp	2023-09-28 19:34:47.283014139 +0200
++++ Source/FreeImage/PluginEXR.cpp	2023-09-28 19:34:47.399012983 +0200
+@@ -37,8 +37,22 @@
+ #include <OpenEXR/ImfRgba.h>
+ #include <OpenEXR/ImfArray.h>
+ #include <OpenEXR/ImfPreviewImage.h>
+-#include <OpenEXR/half.h>
+-
++// The version can reliably be found in this header file from OpenEXR,
++// for both 2.x and 3.x:
++#include <OpenEXR/OpenEXRConfig.h>
++#define COMBINED_OPENEXR_VERSION ((10000*OPENEXR_VERSION_MAJOR) + \
++                                  (100*OPENEXR_VERSION_MINOR) + \
++                                  OPENEXR_VERSION_PATCH)
++
++// There's just no easy way to have an `#include` that works in both
++// cases, so we use the version to switch which set of include files we
++// use.
++#if COMBINED_OPENEXR_VERSION >= 20599 /* 2.5.99: pre-3.0 */
++#   include <Imath/half.h>
++#else
++    // OpenEXR 2.x, use the old locations
++#   include <OpenEXR/half.h>
++#endif
+
+ // ==========================================================
+ // Plugin Interface
+@@ -66,11 +80,11 @@ public:
+ 		return ((unsigned)n != _io->read_proc(c, 1, n, _handle));
+ 	}
+
+-	virtual Imath::Int64 tellg() {
++	virtual uint64_t tellg() {
+ 		return _io->tell_proc(_handle);
+ 	}
+
+-	virtual void seekg(Imath::Int64 pos) {
++	virtual void seekg(uint64_t pos) {
+ 		_io->seek_proc(_handle, (unsigned)pos, SEEK_SET);
+ 	}
+
+@@ -100,11 +114,11 @@ public:
+ 		}
+ 	}
+
+-	virtual Imath::Int64 tellp() {
++	virtual uint64_t tellp() {
+ 		return _io->tell_proc(_handle);
+ 	}
+
+-	virtual void seekp(Imath::Int64 pos) {
++	virtual void seekp(uint64_t pos) {
+ 		_io->seek_proc(_handle, (unsigned)pos, SEEK_SET);
+ 	}
+ };
+diff -rupN --no-dereference FreeImage/PluginTIFF.cpp Source/FreeImage/PluginTIFF.cpp
+--- FreeImage/PluginTIFF.cpp	2023-09-28 19:34:47.286014110 +0200
++++ Source/FreeImage/PluginTIFF.cpp	2023-09-28 19:34:47.400012973 +0200
+@@ -39,7 +39,24 @@
+ #include "Utilities.h"
+ #include <tiffio.h>
+ #include "../Metadata/FreeImageTag.h"
+-#include <OpenEXR/half.h>
++// The version can reliably be found in this header file from OpenEXR,
++// for both 2.x and 3.x:
++#include <OpenEXR/OpenEXRConfig.h>
++#define COMBINED_OPENEXR_VERSION ((10000*OPENEXR_VERSION_MAJOR) + \
++                                  (100*OPENEXR_VERSION_MINOR) + \
++                                  OPENEXR_VERSION_PATCH)
++
++// There's just no easy way to have an `#include` that works in both
++// cases, so we use the version to switch which set of include files we
++// use.
++#if COMBINED_OPENEXR_VERSION >= 20599 /* 2.5.99: pre-3.0 */
++#   include <Imath/ImathVec.h>
++#   include <Imath/half.h>
++#else
++    // OpenEXR 2.x, use the old locations
++#   include <OpenEXR/ImathVec.h>
++#   include <OpenEXR/half.h>
++#endif
+
+ #include "FreeImageIO.h"
+ #include "PSDParser.h"

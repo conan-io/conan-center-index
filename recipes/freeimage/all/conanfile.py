@@ -69,27 +69,26 @@ class FreeImageConan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.2")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         elif self.options.with_jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.1")
+            self.requires("mozjpeg/[>=4.1.1 <5]")
         if self.options.with_jpeg2000:
-            self.requires("openjpeg/2.5.2")
+            self.requires("openjpeg/[>=2.5.2 <3]")
         if self.options.with_png:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_webp:
-            self.requires("libwebp/1.3.2")
+            self.requires("libwebp/[>=1.3.2 <2]")
         if self.options.with_tiff or self.options.with_openexr:
-            # can't upgrade to openexr/3.x.x because plugin tiff requires openexr/2.x.x header files
-            self.requires("openexr/2.5.7")
+            self.requires("openexr/[>=2.5.7 <4]")
+            self.requires("imath/[>=3.2.1 <4]")
         if self.options.with_raw:
-            # can't upgrade to libraw >= 0.21 (error: no member named 'shot_select' in 'libraw_output_params_t')
-            self.requires("libraw/0.20.2")
+            self.requires("libraw/[>=0.21.2 <0.23.0]")
         if self.options.with_jxr:
             self.requires("jxrlib/cci.20170615")
         if self.options.with_tiff:
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.6.0 <5]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -100,15 +99,15 @@ class FreeImageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["FREEIMAGE_FOLDER"] = self.source_folder.replace("\\", "/")
-        tc.variables["FREEIMAGE_WITH_JPEG"] = bool(self.options.with_jpeg)
-        tc.variables["FREEIMAGE_WITH_OPENJPEG"] = self.options.with_jpeg2000
-        tc.variables["FREEIMAGE_WITH_PNG"] = self.options.with_png
-        tc.variables["FREEIMAGE_WITH_WEBP"] = self.options.with_webp
-        tc.variables["FREEIMAGE_WITH_OPENEXR"] = self.options.with_openexr
-        tc.variables["FREEIMAGE_WITH_RAW"] = self.options.with_raw
-        tc.variables["FREEIMAGE_WITH_JXR"] = self.options.with_jxr
-        tc.variables["FREEIMAGE_WITH_TIFF"] = self.options.with_tiff
+        tc.cache_variables["FREEIMAGE_FOLDER"] = self.source_folder.replace("\\", "/")
+        tc.cache_variables["FREEIMAGE_WITH_JPEG"] = bool(self.options.with_jpeg)
+        tc.cache_variables["FREEIMAGE_WITH_OPENJPEG"] = self.options.with_jpeg2000
+        tc.cache_variables["FREEIMAGE_WITH_PNG"] = self.options.with_png
+        tc.cache_variables["FREEIMAGE_WITH_WEBP"] = self.options.with_webp
+        tc.cache_variables["FREEIMAGE_WITH_OPENEXR"] = self.options.with_openexr
+        tc.cache_variables["FREEIMAGE_WITH_RAW"] = self.options.with_raw
+        tc.cache_variables["FREEIMAGE_WITH_JXR"] = self.options.with_jxr
+        tc.cache_variables["FREEIMAGE_WITH_TIFF"] = self.options.with_tiff
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
@@ -152,7 +151,7 @@ class FreeImageConan(ConanFile):
             if self.options.with_webp:
                 components.append("libwebp::libwebp")
             if self.options.with_openexr or self.options.with_tiff:
-                components.append("openexr::openexr")
+                components.extend(["openexr::openexr", "imath::imath"])
             if self.options.with_raw:
                 components.append("libraw::libraw")
             if self.options.with_jxr:
