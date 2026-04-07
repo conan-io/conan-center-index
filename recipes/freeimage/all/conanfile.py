@@ -129,8 +129,8 @@ class FreeImageConan(ConanFile):
         cmake.build()
 
     def package(self):
-        for license in ["license-fi.txt", "license-gplv3.txt", "license-fi.txt"]:
-            copy(self, license, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        for _license in ["license-fi.txt", "license-gplv3.txt", "license-fi.txt"]:
+            copy(self, _license, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
