@@ -108,6 +108,12 @@ class FreeImageConan(ConanFile):
         tc.cache_variables["FREEIMAGE_WITH_RAW"] = self.options.with_raw
         tc.cache_variables["FREEIMAGE_WITH_JXR"] = self.options.with_jxr
         tc.cache_variables["FREEIMAGE_WITH_TIFF"] = self.options.with_tiff
+        if self.options.with_openexr:
+            # INFO: Keep backward compatibility with OpenEXR 2.x and 3.x
+            # Need fit with zero-padded version numbers in preprocessor definitions
+            tc.preprocessor_definitions["OPENEXR_VERSION_MAJOR"] = self.dependencies["openexr"].ref.version.major
+            tc.preprocessor_definitions["OPENEXR_VERSION_MINOR"] = "{:02d}".format(self.dependencies["openexr"].ref.version.minor.value)
+            tc.preprocessor_definitions["OPENEXR_VERSION_PATCH"] = "{:02d}".format(self.dependencies["openexr"].ref.version.patch.value)
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
