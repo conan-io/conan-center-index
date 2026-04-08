@@ -30,9 +30,6 @@ class PackageConan(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -44,16 +41,13 @@ class PackageConan(ConanFile):
         check_min_cppstd(self, 14)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16 <4]")
+        self.tool_requires("cmake/[>=3.16]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if is_msvc(self):
-            tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -75,11 +69,6 @@ class PackageConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["video-viewer"]
-        self.cpp_info.set_property("cmake_module_file_name", "videoviewer")
-        self.cpp_info.set_property("cmake_module_target_name", "videoviewer::videoviewer")
-        self.cpp_info.set_property("cmake_file_name", "videoviewer")
-        self.cpp_info.set_property("cmake_target_name", "videoviewer::videoviewer")
-        self.cpp_info.set_property("pkg_config_name", "videoviewer")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
