@@ -162,14 +162,14 @@ class LibcurlConan(ConanFile):
     def requirements(self):
         if self.options.with_ssl == "openssl":
             self.requires(f"openssl/[>=3 <4]")
-        if self.settings.os == "Linux" and self.options.with_ldap:
-            self.requires("openldap/[>=2.6 <3]")
         elif self.options.with_ssl == "libressl":
             self.requires("libressl/[>=3.5 <4]")
         elif self.options.with_ssl == "wolfssl":
             self.requires("wolfssl/5.6.6")
         elif self.options.with_ssl == "mbedtls":
             self.requires("mbedtls/3.5.0")
+        if self.settings.os == "Linux" and self.options.with_ldap:
+            self.requires("openldap/[>=2.6 <3]")
         if self.options.with_nghttp2:
             self.requires("libnghttp2/[>=1.59.0 <2]")
         if self.options.with_libssh2:
@@ -713,14 +713,14 @@ class LibcurlConan(ConanFile):
 
         if self.options.with_ssl == "openssl":
             self.cpp_info.components["curl"].requires.append("openssl::openssl")
-        if self.settings.os == "Linux" and self.options.with_ldap:
-            self.cpp_info.components["curl"].requires.append("openldap::openldap")
         if self.options.with_ssl == "libressl":
             self.cpp_info.components["curl"].requires.append("libressl::libressl")
         if self.options.with_ssl == "wolfssl":
             self.cpp_info.components["curl"].requires.append("wolfssl::wolfssl")
         if self.options.with_ssl == "mbedtls":
             self.cpp_info.components["curl"].requires.append("mbedtls::mbedtls")
+        if self.settings.os == "Linux" and self.options.with_ldap:
+            self.cpp_info.components["curl"].requires.append("openldap::openldap")
         if self.options.with_nghttp2:
             self.cpp_info.components["curl"].requires.append("libnghttp2::libnghttp2")
         if self.options.with_libssh2:
