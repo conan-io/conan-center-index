@@ -93,14 +93,7 @@ class IceoryxConan(ConanFile):
             self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
-        if (self.version >= "2.95.0"):
-            git = Git(self, ".")
-            # git.fetch_commit(**self.conan_data["sources"][self.version])
-            # Cloning in current dir, not a children folder
-            git.clone(url=self.conan_data["sources"][self.version]["url"], target=".")
-            # git.checkout(commit=self.conan_data["sources"][self.version]["commit"], target=".")
-        else:
-            get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -126,7 +119,7 @@ class IceoryxConan(ConanFile):
         if Version(self.version) >= "2.90":
             if (os.path.exists(os.path.join(self.source_folder, "iceoryx_hoofs", "cmake", "IceoryxPackageHelper.cmake"))):
                 replace_in_file(self, os.path.join(self.source_folder, "iceoryx_hoofs", "cmake", "IceoryxPackageHelper.cmake"),
-                            "set_target_properties( ${IOX_TARGET} PROPERTIES POSITION_INDEPENDENT_CODE ON )", "", strict=False)
+                        "set_target_properties( ${IOX_TARGET} PROPERTIES POSITION_INDEPENDENT_CODE ON )", "")
         else:
             cmakelists_list = [
                 os.path.join(self.source_folder, "iceoryx_dds", "CMakeLists.txt"),
