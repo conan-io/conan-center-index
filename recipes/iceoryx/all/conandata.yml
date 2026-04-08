@@ -1,7 +1,7 @@
 sources:
   "2.95.8":
-    url: "https://github.com/eclipse-iceoryx/iceoryx.git"
-    commit: "ffd361023196d1422f1ff96723d1c83d9d4838ae"
+    url: "https://github.com/eclipse-iceoryx/iceoryx/archive/refs/tags/v2.95.8.tar.gz"
+    sha256: "00b1bf874e17b3e986f11cd134e2be339f3d12643b58b4544692cc4e820439ff"
   "2.0.6":
     url: "https://github.com/eclipse-iceoryx/iceoryx/archive/v2.0.6.tar.gz"
     sha256: "a2add8ffee0c3357ef985cc46c7de79ccb754ea2bed02c61f2ff805ab2c869f1"
@@ -15,7 +15,6 @@ sources:
     url: "https://github.com/eclipse-iceoryx/iceoryx/archive/v1.0.3.tar.gz"
     sha256: "566b7766fb1fabb48d1ca979f7a31082422d6aa5af014a56c1a6b605c60e33f0"
 patches:
-  "2.95.8":
   "1.0.3":
     - patch_file: "patches/1.0.0-0001-fix-find-toml.patch"
     - patch_file: "patches/1.0.0-0002-fix-install-bundle.patch"
