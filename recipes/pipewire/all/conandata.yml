@@ -1,0 +1,4 @@
+sources:
+  "1.5.85":
+    url: "https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/1.5.85/pipewire-1.5.85.tar.gz"
+    sha256: "8ca7613a29730ce49367baf29057ccad0fadc45f0ba657c91b7621078644667f"
