@@ -573,6 +573,8 @@ class LibcurlConan(ConanFile):
             tc.variables["CURL_DISABLE_WEBSOCKETS"] = not self.options.with_websockets
         if self.options.with_nghttp2:
             tc.variables["NGHTTP2_USE_STATIC_LIBS"] = not self.dependencies["libnghttp2"].options.shared
+        if self.options.with_zstd:
+            tc.variables["ZSTD_USE_STATIC_LIBS"] = not self.dependencies["zstd"].options.shared
 
         # Also disables NTLM_WB if set to false
         if not self.options.with_ntlm:
