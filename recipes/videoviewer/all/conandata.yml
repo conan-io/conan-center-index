@@ -1,4 +1,4 @@
 sources:
-  "1.5.0":
-    url: "https://github.com/deltacasttv/video-viewer/archive/refs/tags/1.5.0.tar.gz"
-    sha256: "de9b20d57f84f749d9739019be3a40aa59ebc71bc77cf0ff7ace27a63842db65"
+  "2.0.0":
+    url: "https://github.com/deltacasttv/video-viewer/archive/refs/tags/2.0.0.tar.gz"
+    sha256: "36f4095a8dc030dace9a9edc82d7068eff5b90396634937d0098fa00d3956859"

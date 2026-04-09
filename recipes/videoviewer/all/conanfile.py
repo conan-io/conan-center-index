@@ -34,8 +34,9 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glfw/[>=3.4 <4]")
-        self.requires("glm/cci.20230113")
+        self.requires("glfw/[>=3 <4]")
+        self.requires("glm/[>=1 <2]")
+        self.requires("glad/[>=2 <3]")
 
     def validate(self):
         check_min_cppstd(self, 14)
@@ -48,6 +49,8 @@ class PackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_EXAMPLES"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
