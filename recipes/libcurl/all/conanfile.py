@@ -220,6 +220,13 @@ class LibcurlConan(ConanFile):
         cert_url = self.conf.get("user.libcurl.cert:url", check_type=str) or "https://curl.se/ca/cacert-2025-11-04.pem"
         cert_sha256 = self.conf.get("user.libcurl.cert:sha256", check_type=str) or "8ac40bdd3d3e151a6b4078d2b2029796e8f843e3f86fbf2adbc4dd9f05e79def"
         download(self, cert_url, "cacert.pem", verify=True, sha256=cert_sha256)
+        replace_in_file(self, "CMakeLists.txt", "find_package(NGHTTP2 MODULE)", "find_package(NGHTTP2 CONFIG REQUIRED)")
+        replace_in_file(self, "CMakeLists.txt", "find_package(Cares MODULE REQUIRED)", "find_package(Cares CONFIG REQUIRED)")
+        replace_in_file(self, os.path.join("CMake", "Macros.cmake"), "find_package(${_find_name})", "find_package(${_find_name} CONFIG REQUIRED)")
+        replace_in_file(self, os.path.join("CMake", "Macros.cmake"), "find_package(${_find_name} MODULE)", "find_package(${_find_name} CONFIG REQUIRED)")
+        replace_in_file(self, os.path.join("CMake", "Macros.cmake"), "find_package(${_find_name} REQUIRED)", "find_package(${_find_name} CONFIG REQUIRED)")
+        replace_in_file(self, os.path.join("CMake", "Macros.cmake"), "find_package(${_find_name} MODULE REQUIRED)", "find_package(${_find_name} CONFIG REQUIRED)")
+
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -571,10 +578,6 @@ class LibcurlConan(ConanFile):
             tc.variables["CURL_DISABLE_FORM_API"] = not self.options.with_form_api
         if "with_websockets" in self.options:
             tc.variables["CURL_DISABLE_WEBSOCKETS"] = not self.options.with_websockets
-        if self.options.with_nghttp2:
-            tc.variables["NGHTTP2_USE_STATIC_LIBS"] = not self.dependencies["libnghttp2"].options.shared
-        if self.options.with_zstd:
-            tc.variables["ZSTD_USE_STATIC_LIBS"] = not self.dependencies["zstd"].options.shared
 
         # Also disables NTLM_WB if set to false
         if not self.options.with_ntlm:
