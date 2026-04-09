@@ -8,18 +8,3 @@ sources:
       - "https://tukaani.org/xz/xz-5.4.5.tar.xz"
       - "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/da9dec6c12cf2ecf269c31ab65b5de18e8e52b96f35d5bcd08c12b43e6878803"
     sha256: "da9dec6c12cf2ecf269c31ab65b5de18e8e52b96f35d5bcd08c12b43e6878803"
-  "5.2.10":
-    url:
-      - "https://tukaani.org/xz/xz-5.2.10.tar.gz"
-      - "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/eb7a3b2623c9d0135da70ca12808a214be9c019132baaa61c9e1d198d1d9ded3"
-    sha256: "eb7a3b2623c9d0135da70ca12808a214be9c019132baaa61c9e1d198d1d9ded3"
-  "5.2.4":
-    url:
-      - "https://tukaani.org/xz/xz-5.2.4.tar.gz"
-      - "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/b512f3b726d3b37b6dc4c8570e137b9311e7552e8ccbab4d39d47ce5f4177145"
-    sha256: "b512f3b726d3b37b6dc4c8570e137b9311e7552e8ccbab4d39d47ce5f4177145"
-patches:
-  "5.2.4":
-    - patch_file: "patches/0001-relax_windows-sdk-restriction.patch"
-      patch_description: "Relax Windows SDK restriction"
-      patch_type: "conan"
