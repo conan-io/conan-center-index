@@ -84,7 +84,7 @@ class FreeImageConan(ConanFile):
             self.requires("openexr/[>=2.5.7 <4]")
             self.requires("imath/[>=3.2.1 <4]")
         if self.options.with_raw:
-            self.requires("libraw/0.21.2 <0.23.0]")
+            self.requires("libraw/[>=0.21.2 <0.23.0]")
         if self.options.with_jxr:
             self.requires("jxrlib/cci.20170615")
         if self.options.with_tiff:
@@ -123,7 +123,7 @@ class FreeImageConan(ConanFile):
         rmdir(self, os.path.join(self.source_folder, "Source", "LibRawLite"))
         rmdir(self, os.path.join(self.source_folder, "Source", "OpenEXR"))
 
-    def build(self):        
+    def build(self):
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
