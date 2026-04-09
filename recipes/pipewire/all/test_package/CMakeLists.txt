@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-find_package(emhash REQUIRED CONFIG)
+find_package(pipewire REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE emhash::emhash)
+target_link_libraries(${PROJECT_NAME} PRIVATE pipewire::pipewire)
