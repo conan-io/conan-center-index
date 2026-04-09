@@ -1,0 +1,17 @@
+Mujoco expects being using CCD as a static library always,
+and by defining CCD_STATIC_DEFINE,
+it disables the use of __declspec(dllimport) in the headers of libccd
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 356e52a..e90d739 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -138,7 +138,7 @@ if(EMSCRIPTEN)
+ endif()
+
+
+-target_compile_definitions(mujoco PRIVATE _GNU_SOURCE CCD_STATIC_DEFINE MUJOCO_DLL_EXPORTS -DMC_IMPLEM_ENABLE)
++target_compile_definitions(mujoco PRIVATE _GNU_SOURCE MUJOCO_DLL_EXPORTS -DMC_IMPLEM_ENABLE)
+ if(MUJOCO_ENABLE_AVX_INTRINSICS)
+   target_compile_definitions(mujoco PUBLIC mjUSEPLATFORMSIMD)
+ endif()
