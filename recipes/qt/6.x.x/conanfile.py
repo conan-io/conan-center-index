@@ -61,6 +61,7 @@ class QtConan(ConanFile):
         "with_dbus": [True, False],
         "with_ffmpeg": [True, False],
         "with_gstreamer": [True, False],
+        "with_pipewire": [True, False],
         "with_pulseaudio": [True, False],
         "with_gssapi": [True, False],
         "with_md4c": [True, False],
@@ -103,6 +104,7 @@ class QtConan(ConanFile):
         "with_dbus": False,
         "with_ffmpeg": True,
         "with_gstreamer": False,
+        "with_pipewire": True,
         "with_pulseaudio": False,
         "with_gssapi": False,
         "with_md4c": True,
@@ -243,6 +245,9 @@ class QtConan(ConanFile):
         if not self.options.get_safe("qtmultimedia"):
             del self.options.with_gstreamer
             del self.options.with_pulseaudio
+            del self.options.with_pipewire
+        elif self.settings.os != "Linux" or Version(self.version) < Version("6.10.0"):
+            del self.options.with_pipewire
 
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.get_safe("qtwebengine"):
@@ -410,6 +415,8 @@ class QtConan(ConanFile):
             self.requires("gst-plugins-base/1.19.2")
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
+        if self.options.get_safe("with_pipewire", False)
+            self.requires("pipewire/1.2.7")
         if self.options.with_dbus:
             self.requires("dbus/1.15.8")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
@@ -1424,6 +1431,8 @@ class QtConan(ConanFile):
             multimedia_reqs = ["Network", "Gui"]
             if self.options.get_safe("with_pulseaudio", False):
                 multimedia_reqs.append("pulseaudio::pulse")
+            if self.options.get_safe("with_pipewire", False):
+                multimedia_reqs.append("pipewire::pipewire")
             if self.options.get_safe("with_ffmpeg", False):
                 multimedia_reqs.append("ffmpeg::ffmpeg")
             _create_module("Multimedia", multimedia_reqs)
