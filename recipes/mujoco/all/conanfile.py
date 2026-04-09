@@ -5,7 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.1"
 
 class MujocoConan(ConanFile):
     name = "mujoco"
@@ -30,7 +30,7 @@ class MujocoConan(ConanFile):
         export_conandata_patches(self)
 
     def validate(self):
-        check_min_cppstd(self, "20")
+        check_min_cppstd(self, 20)
 
         # Only shared libraries are supported on non-Emscripten platforms
         # Note: Static build support is being developed upstream:
@@ -52,11 +52,11 @@ class MujocoConan(ConanFile):
         self.requires("qhull/8.0.2")
         self.requires("tinyxml2/11.0.0")
         self.requires("tinyobjloader/2.0.0-rc10")
-        self.requires("libccd/2.1")
+        self.requires("libccd/2.1", options={"enable_double_precision": True})
         self.requires("marchingcubecpp/0.0.0.cci.20260224")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)        
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
 
     def generate(self):
