@@ -89,17 +89,14 @@ class wxWidgetsConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def system_requirements(self):
-        apt = package_manager.Apt(self)
-        packages = []
         if self.options.webview:
-            packages.extend(["libsoup3.0-dev", "libwebkit2gtk-4.0-dev"])
-        apt.install(packages)
+            # https://packages.debian.org/sid/libwebkit2gtk-4.1-dev
+            apt = package_manager.Apt(self)
+            apt.install(["libwebkit2gtk-4.1-dev",])
 
-        yum = package_manager.Yum(self)
-        packages = []
-        if self.options.webview:
-            packages.extend(["libsoup3-devel", "webkit2gtk4.1-devel"])
-        yum.install(packages)
+            # https://packages.fedoraproject.org/pkgs/webkitgtk/
+            yum = package_manager.Yum(self)
+            yum.install(["libwebkit2gtk-4.1-devel",])
 
     def build_requirements(self):
         self.tool_requires("ninja/[>=1.10.2 <2]")
@@ -136,6 +133,8 @@ class wxWidgetsConan(ConanFile):
         self.requires("nanosvg/cci.20231025")
         if Version(self.version) >= "3.3.0":
             self.requires("libwebp/[>=1.6.0 <2]")
+        if self.options.webview:
+            self.requires("libsoup/3.6.6")
 
     def validate(self):
         if self.settings.os == "Linux":
@@ -231,6 +230,8 @@ class wxWidgetsConan(ConanFile):
             deps.set_property("xkbcommon", "cmake_additional_variables_prefixes", ["XKBCOMMON",])
         if self.options.get_safe("secretstore"):
             deps.set_property("libsecret", "cmake_file_name", "LIBSECRET")
+        if self.options.webview:
+            deps.set_property("libsoup", "cmake_file_name", "LIBSOUP")
         deps.generate()
 
     def _patch_sources(self):
