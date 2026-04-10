@@ -1,21 +1,21 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration, ConanException
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import get, copy, replace_in_file, rmdir
-from conan.tools.build import check_min_cppstd, cross_building, can_run
-from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.files import get, copy, rmdir, save, load, apply_conandata_patches, export_conandata_patches
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
-from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 import os
 import yaml
-import re
 
-required_conan_version = ">=1.53.0"
+# cci-internal-mirror
+
+required_conan_version = ">=2.1.0"
 
 
 class NcbiCxxToolkit(ConanFile):
     name = "ncbi-cxx-toolkit-public"
-    description = "NCBI C++ Toolkit -- a cross-platform application framework and a collection of libraries for working with biological data."
+    description = ("NCBI C++ Toolkit -- a cross-platform application framework and "
+                   "a collection of libraries for working with biological data.")
     license = "CC0-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://ncbi.github.io/cxx-toolkit"
@@ -25,106 +25,47 @@ class NcbiCxxToolkit(ConanFile):
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared":     [True, False],
-        "fPIC":       [True, False],
-        "with_targets":  ["ANY"],
-        "with_components": ["ANY"],
-        "without_req": ["ANY"],
-        "with_composite": [True, False]
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_grpc": [True, False],
+        "with_xml": [True, False],
+        "with_image": [True, False],
+        "with_berkeleydb": [True, False],
+        "with_cassandra": [True, False],
+        "with_curl": [True, False],
     }
     default_options = {
-        "shared":     False,
-        "fPIC":       True,
-        "with_targets":   "",
-        "with_components": "",
-	"without_req": "",
-        "with_composite": False
+        "shared": False,
+        "fPIC": True,
+        "with_grpc": False,
+        "with_xml": False,
+        "with_image": False,
+        "with_berkeleydb": False,
+        "with_cassandra": False,
+        "with_curl": False,
     }
-    short_paths = True
-    _dependencies = None
-    _requirements = None
-    _targets = set()
-    _components = set()
-    _componenttargets = set()
+    _components_data = None
 
     @property
-    def _min_cppstd(self):
-        if self._version_less(29):
-            return 17
-        else:
-            return 20
-
-    @property
-    def _dependencies_folder(self):
-        return "dependencies"
-
-    @property
-    def _dependencies_filename(self):
-        return f"dependencies-{Version(self.version).major}.0.yml"
-
-    @property
-    def _requirements_filename(self):
-        return f"requirements-{Version(self.version).major}.0.yml"
-
-    @property
-    def _tk_dependencies(self):
-        if self._dependencies is None:
-            dependencies_filepath = os.path.join(self.recipe_folder, self._dependencies_folder, self._dependencies_filename)
-            if not os.path.isfile(dependencies_filepath):
-                raise ConanException(f"Cannot find {dependencies_filepath}")
-            with open(dependencies_filepath, "r", encoding="utf-8") as f:
-                self._dependencies = yaml.safe_load(f)
-        return self._dependencies
-
-    @property
-    def _tk_requirements(self):
-        if self._requirements is None:
-            requirements_filepath = os.path.join(self.recipe_folder, self._dependencies_folder, self._requirements_filename)
-            if not os.path.isfile(requirements_filepath):
-                raise ConanException(f"Cannot find {requirements_filepath}")
-            with open(requirements_filepath, "r", encoding="utf-8") as f:
-                self._requirements = yaml.safe_load(f)
-        return self._requirements
-
-    def _version_less(self, major):
-        ver = Version(self.version).major
-        return ver < major and ver > 1
-
-    def _translate_req(self, key):
-        if "Boost" in key:
-            key = "Boost"
-        _disabled_req = self._parse_option(self.options.without_req)
-        if key in _disabled_req:
-            return None
-        if key in self._tk_requirements["disabled"].keys():
-            if self.settings.os in self._tk_requirements["disabled"][key]:
-                return None
-        if key in self._tk_requirements["requirements"].keys():
-            return self._tk_requirements["requirements"][key]
-        return None
-
-    def _parse_option(self, data):
-        _res = set()
-        if data != "":
-            _data = str(data)
-            _data = _data.replace(",", ";")
-            _data = _data.replace(" ", ";")
-            _res.update(_data.split(";"))
-            if "" in _res:
-                _res.remove("")
-        return _res
+    def _tk_components(self):
+        if self._components_data is None:
+            filepath = os.path.join(self.recipe_folder, "components.yml")
+            self._components_data = yaml.safe_load(load(self, filepath))["components"]
+        return self._components_data
 
     def export(self):
-        copy(self, self._dependencies_filename,
-            os.path.join(self.recipe_folder, self._dependencies_folder),
-            os.path.join(self.export_folder, self._dependencies_folder))
-        copy(self, self._requirements_filename,
-            os.path.join(self.recipe_folder, self._dependencies_folder),
-            os.path.join(self.export_folder, self._dependencies_folder))
+        copy(self, "components.yml",
+             src=self.recipe_folder, dst=self.export_folder)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            self.options.rm_safe("with_berkeleydb")
+        if self.settings.os in ["Windows", "Macos"]:
+            self.options.rm_safe("with_cassandra")
 
     def configure(self):
         if self.options.shared:
@@ -133,77 +74,49 @@ class NcbiCxxToolkit(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def _collect_dependencies(self, components):
-        if len(components) > 0:
-            _todo = components.copy()
-            components.clear()
-            _next = set()
-            while len(_todo) > 0:
-                for _component in _todo:
-                    if not _component in components:
-                        components.add(_component)
-                        if _component in self._tk_dependencies["dependencies"].keys():
-                            for _n in self._tk_dependencies["dependencies"][_component]:
-                                if not _n in components:
-                                    _next.add(_n)
-                _todo = _next.copy()
-                _next.clear()
-
     def requirements(self):
-        self._targets = self._parse_option(self.options.with_targets)
-        self._components = set()
-        for _t in self._targets:
-            _re = re.compile(_t)
-            for _component in self._tk_dependencies["components"]:
-                _libraries = self._tk_dependencies["libraries"][_component]
-                for _lib in _libraries:
-                    if _re.match(_lib) != None:
-                        self._components.add(_component)
-                        break
+        self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("bzip2/1.0.8")
+        self.requires("lzo/2.10")
+        self.requires("zstd/[>=1.5.2 <=1.5.5]")
+        self.requires("pcre2/10.42")
+        self.requires("libuv/[>=1.45.0 <=1.46.0]")
+        self.requires("libnghttp2/[>=1.51.0 <=1.66.0]")
+        self.requires("libiconv/1.17")
+        self.requires("lmdb/[>=0.9.29 <=0.9.32]")
+        self.requires("sqlite3/[>=3.40.0 <=3.50.4]")
+        if self.settings.os == "Linux":
+            self.requires("backward-cpp/1.6")
+            self.requires("libunwind/[>=1.6.2 <=1.8.1]")
+        if self.options.with_grpc:
+            self.requires("grpc/[>=1.50.1 <=1.72.0]")
+            self.requires("protobuf/[>=3.21.12 <=5.27.0]")
+        if self.options.with_xml:
+            self.requires("libxml2/[>=2.11.4 <3]")
+            self.requires("libxslt/[>1.1.34 <=1.1.43]")
+        if self.options.with_image:
+            self.requires("libjpeg/[>=9e <=9f]")
+            self.requires("libpng/[>=1.6.37 <=1.6.50]")
+            self.requires("giflib/[>=5.2.1 <=5.2.2]")
+            self.requires("libtiff/[>=4.3.0 <=4.7.1]")
+        if self.options.get_safe("with_berkeleydb"):
+            self.requires("libdb/5.3.28")
+        if self.options.get_safe("with_cassandra"):
+            self.requires("cassandra-cpp-driver/[>=2.15.3 <=2.17.1]")
+        if self.options.with_curl:
+            self.requires("libcurl/[>=8.8.0 <=9]")
 
-        _requested_components = self._parse_option(self.options.with_components)
-        self._collect_dependencies(_requested_components)
-
-        if len(self._components) == 0 and len(_requested_components) == 0:
-            _requested_components.update( self._tk_dependencies["components"])
-
-        if len(_requested_components) > 0:
-            for component in _requested_components:
-                self._componenttargets.update(self._tk_dependencies["libraries"][component])
-            if len(self._targets) > 0:
-                self._componenttargets.update(self._targets)
-                self._targets.clear()
-            self._components.update(_requested_components)
-
-        self._collect_dependencies(self._components)
-        requirements = set()
-        for component in self._components:
-            libraries = self._tk_dependencies["libraries"][component]
-            for lib in libraries:
-                if lib in self._tk_dependencies["requirements"].keys():
-                    requirements.update(self._tk_dependencies["requirements"][lib])
-
-        _reqs = set()
-        for req in requirements:
-            pkgs = self._translate_req(req)
-            if pkgs != None:
-                for pkg in pkgs:
-                    _reqs.add(pkg)
-
-        for pkg in _reqs:
-            self.requires(pkg, transitive_libs=True)
+    def build_requirements(self):
+        if self.options.with_grpc:
+            self.tool_requires("protobuf/<host_version>")
+            self.tool_requires("grpc/<host_version>")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 20)
         if self.settings.os not in ["Linux", "Macos", "Windows"]:
             raise ConanInvalidConfiguration("This operating system is not supported")
         if is_msvc(self):
             check_min_vs(self, 192)
-            if self._version_less(28) and self.options.shared and is_msvc_static_runtime(self):
-                raise ConanInvalidConfiguration("This configuration is not supported")
-            if self._version_less(29) and int(str(self.settings.compiler.version)) > 193:
-                raise ConanInvalidConfiguration("This configuration is not supported")
         if cross_building(self):
             raise ConanInvalidConfiguration("Cross compilation is not supported")
 
@@ -213,89 +126,87 @@ class NcbiCxxToolkit(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["NCBI_PTBCFG_PACKAGING"] = True
-        if self.options.with_composite:
-            tc.variables["NCBI_PTBCFG_ALLOW_COMPOSITE"] = True
         tc.variables["NCBI_PTBCFG_PROJECT_LIST"] = "-app/netcache"
-        if len(self._targets) > 0:
-            tc.variables["NCBI_PTBCFG_PROJECT_TARGETS"] = ";".join(self._targets)
-        else:
-            tc.variables["NCBI_PTBCFG_PROJECT_COMPONENTTARGETS"] = ";".join(self._componenttargets)
         if is_msvc(self):
             tc.variables["NCBI_PTBCFG_CONFIGURATION_TYPES"] = self.settings.build_type
         tc.variables["NCBI_PTBCFG_PROJECT_TAGS"] = "-demo;-sample"
-        _disabled_req = self._parse_option(self.options.without_req)
-        if len(_disabled_req) > 0:
-            tc.variables["NCBI_PTBCFG_PROJECT_COMPONENTS"] = "-" + ";-".join(_disabled_req)
+        disabled_cmake = []
+        if not self.options.with_grpc:
+            disabled_cmake.append("GRPC")
+        if not self.options.with_xml:
+            disabled_cmake.extend(["XML", "XSLT"])
+        if not self.options.with_image:
+            disabled_cmake.extend(["JPEG", "PNG", "GIF", "TIFF"])
+        if not self.options.get_safe("with_berkeleydb"):
+            disabled_cmake.append("BerkeleyDB")
+        if not self.options.get_safe("with_cassandra"):
+            disabled_cmake.append("CASSANDRA")
+        if not self.options.with_curl:
+            disabled_cmake.append("CURL")
+        if disabled_cmake:
+            tc.variables["NCBI_PTBCFG_PROJECT_COMPONENTS"] = "-" + ";-".join(disabled_cmake)
         tc.generate()
         CMakeDeps(self).generate()
-        VirtualBuildEnv(self).generate()
-        if can_run(self):
-            VirtualRunEnv(self).generate(scope = "build" if self._version_less(29) else "run")
 
     def _patch_sources(self):
-        rmdir(self, os.path.join(self.source_folder, "src", "build-system", "cmake", "unused"))
+        apply_conandata_patches(self)
         rmdir(self, os.path.join(self.source_folder, "src", "build-system", "cmake", "modules"))
-        if self._version_less(29):
-            grpc = os.path.join(self.source_folder, "src", "build-system", "cmake", "CMake.NCBIptb.grpc.cmake")
-            if self.settings.os == "Macos":
-                replace_in_file(self, grpc,
-                    "COMMAND ${_cmd}",
-                    "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}\" ${_cmd}", strict=False)
-                pkg = os.path.join(self.source_folder, "src", "build-system", "cmake", "CMake.NCBIComponentsPackage.cmake")
-                replace_in_file(self, pkg,"NCBI_util_disable_find_use_path()","#NCBI_util_disable_find_use_path()", strict=False)
-                replace_in_file(self, pkg,"NCBI_util_enable_find_use_path()","#NCBI_util_enable_find_use_path()", strict=False)
-            elif self.settings.os == "Linux":
-                replace_in_file(self, grpc,
-                    "COMMAND ${_cmd}",
-                    "COMMAND ${CMAKE_COMMAND} -E env \"LD_LIBRARY_PATH=$<JOIN:${CMAKE_LIBRARY_PATH},:>:$ENV{LD_LIBRARY_PATH}\" ${_cmd}")
-        root = os.path.join(self.source_folder, "CMakeLists.txt")
-        with open(root, "w", encoding="utf-8") as f:
-            f.write("cmake_minimum_required(VERSION 3.15)\n")
-            f.write("project(ncbi-cpp)\n")
-            f.write("include(src/build-system/cmake/CMake.NCBItoolkit.cmake)\n")
-            f.write("add_subdirectory(src)\n")
+        save(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+             "cmake_minimum_required(VERSION 3.15)\n"
+             "project(ncbi_cpp)\n"
+             "include(src/build-system/cmake/CMake.NCBItoolkit.cmake)\n"
+             "add_subdirectory(src)\n")
 
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
-# Visual Studio sometimes runs "out of heap space"
-#        if is_msvc(self):
-#            cmake.parallel = False
         cmake.build()
 
     def package(self):
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("res", "build-system", "cmake", "CMake.NCBIpkg.conan.cmake")
+    def _available_targets(self):
+        targets = {"zlib::zlib", "bzip2::bzip2", "lzo::lzo", "zstd::zstd",
+                   "pcre2::pcre2", "libuv::libuv", "libnghttp2::libnghttp2",
+                   "libiconv::libiconv", "lmdb::lmdb", "sqlite3::sqlite3"}
+        if self.settings.os == "Linux":
+            targets.update(["backward-cpp::backward-cpp", "libunwind::libunwind"])
+        if self.options.with_grpc:
+            targets.update(["grpc::grpc", "protobuf::protobuf"])
+        if self.options.with_xml:
+            targets.update(["libxml2::libxml2", "libxslt::libxslt"])
+        if self.options.with_image:
+            targets.update(["libjpeg::libjpeg", "libpng::libpng",
+                            "giflib::giflib", "libtiff::libtiff"])
+        if self.options.get_safe("with_berkeleydb"):
+            targets.add("libdb::libdb")
+        if self.options.get_safe("with_cassandra"):
+            targets.add("cassandra-cpp-driver::cassandra-cpp-driver")
+        if self.options.with_curl:
+            targets.add("libcurl::libcurl")
+        return targets
 
     def package_info(self):
         impfile = os.path.join(self.package_folder, "res", "ncbi-cpp-toolkit.imports")
-        with open(impfile, "r", encoding="utf-8") as f:
-            allexports = set(f.read().split())
-        for component in self._components:
-            c_libs = []
-            c_reqs = []
-            n_reqs = set()
-            libraries = self._tk_dependencies["libraries"][component]
-            for lib in libraries:
-                if lib in allexports:
-                    c_libs.append(lib)
-                if lib in self._tk_dependencies["requirements"].keys():
-                    n_reqs.update(self._tk_dependencies["requirements"][lib])
-            c_reqs.extend(self._tk_dependencies["dependencies"][component])
-            for req in n_reqs:
-                pkgs = self._translate_req(req)
-                if pkgs != None:
-                    for pkg in pkgs:
-                        pkg = pkg[:pkg.find("/")]
-                        ref = pkg + "::" + pkg
-                        c_reqs.append(ref)
-            self.cpp_info.components[component].libs = c_libs
-            self.cpp_info.components[component].requires = c_reqs
+        allexports = set(load(self, impfile).split())
+
+        available = self._available_targets()
+        active = {}
+        for comp_name, comp_data in self._tk_components.items():
+            c_libs = [lib for lib in comp_data["libraries"] if lib in allexports]
+            if c_libs or comp_name == "core":
+                active[comp_name] = (c_libs, comp_data)
+
+        for comp_name, (c_libs, comp_data) in active.items():
+            c_reqs = [d for d in comp_data["dependencies"] if d in active]
+            for ext_req in comp_data.get("requires", []):
+                if ext_req in available:
+                    c_reqs.append(ext_req)
+            self.cpp_info.components[comp_name].libs = c_libs
+            self.cpp_info.components[comp_name].requires = c_reqs
 
         if self.settings.os == "Windows":
             self.cpp_info.components["core"].defines.append("_UNICODE")
@@ -318,9 +229,7 @@ class NcbiCxxToolkit(ConanFile):
         elif self.settings.os == "Macos":
             self.cpp_info.components["core"].system_libs = ["dl", "c", "m", "pthread", "resolv"]
             self.cpp_info.components["core"].frameworks = ["ApplicationServices"]
+
         self.cpp_info.components["core"].builddirs.append("res")
-        build_modules = [self._module_file_rel_path]
-        self.cpp_info.components["core"].build_modules["cmake"] = build_modules
-        self.cpp_info.components["core"].build_modules["cmake_find_package"] = build_modules
-        self.cpp_info.components["core"].build_modules["cmake_find_package_multi"] = build_modules
-        self.cpp_info.set_property("cmake_build_modules", build_modules)
+        module_path = os.path.join("res", "build-system", "cmake", "CMake.NCBIpkg.conan.cmake")
+        self.cpp_info.components["core"].set_property("cmake_build_modules", [module_path])
