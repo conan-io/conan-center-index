@@ -1,8 +1,8 @@
 sources:
-  "5.8.2":
+  "5.8.3":
     url:
-      - "https://tukaani.org/xz/xz-5.8.2.tar.xz"
-    sha256: "890966ec3f5d5cc151077879e157c0593500a522f413ac50ba26d22a9a145214"
+      - "https://tukaani.org/xz/xz-5.8.3.tar.xz"
+    sha256: "fff1ffcf2b0da84d308a14de513a1aa23d4e9aa3464d17e64b9714bfdd0bbfb6"
   "5.4.5":
     url:
       - "https://tukaani.org/xz/xz-5.4.5.tar.xz"
