@@ -42,7 +42,7 @@ class CouchbaseCxxClientConan(ConanFile):
     def requirements(self):
         # these should match https://github.com/couchbase/couchbase-cxx-client/blob/main/couchbase-sdk-cxx-black-duck-manifest.yaml
         # as best as possible
-        self.requires("spdlog/[~1.15.0]")
+        self.requires("spdlog/[>=1.15 <2]")
         self.requires("fmt/[*]")
         self.requires("ms-gsl/4.0.0")
         self.requires("snappy/[~1.2.1]")
