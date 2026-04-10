@@ -55,8 +55,7 @@ class LibfabricConan(ConanFile):
         tc.configure_args.append("--with-libnl=no")
         tc.configure_args.append("--enable-lpp=no")
         if is_apple_os(self):
-            # After install, Conan runs install_name_tool to fix paths on the dylib and utilities
-            # (e.g. fi_info). The linker must reserve extra Mach-O header space or that step fails.
+            # INFO: The linker must reserve extra Mach-O header space or that step fails.
             tc.extra_ldflags.append("-headerpad_max_install_names")
         tc.generate()
 
