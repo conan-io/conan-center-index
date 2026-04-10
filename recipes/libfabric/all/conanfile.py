@@ -8,7 +8,7 @@ from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 
 class LibfabricConan(ConanFile):
@@ -21,7 +21,9 @@ class LibfabricConan(ConanFile):
     topics = ("fabric", "communication", "framework", "service")
 
     package_type = "library"
+    languages = "C"
     settings = "os", "arch", "compiler", "build_type"
+    implements = ["auto_shared_fpic"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -31,11 +33,6 @@ class LibfabricConan(ConanFile):
         "fPIC": True,
     }
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         basic_layout(self, src_folder="src")
