@@ -9,7 +9,7 @@ required_conan_version = ">=2.0.9"
 
 
 class PackageConan(ConanFile):
-    name = "videoviewer"
+    name = "video-viewer"
     description = "Video viewer that creates an OpenGL (Core Profile 4.1) window to display incoming video data."
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"

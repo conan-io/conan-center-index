@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-find_package(videoviewer REQUIRED CONFIG)
+find_package(video-viewer REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE videoviewer::videoviewer)
+target_link_libraries(${PROJECT_NAME} PRIVATE video-viewer::video-viewer)
