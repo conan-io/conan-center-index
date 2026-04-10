@@ -3,9 +3,8 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=2.4"
@@ -56,11 +55,10 @@ class LibfabricConan(ConanFile):
         tc.configure_args.append("--with-libnl=no")
         tc.configure_args.append("--enable-lpp=no")
         if is_apple_os(self):
+            # After install, Conan runs install_name_tool to fix paths on the dylib and utilities
+            # (e.g. fi_info). The linker must reserve extra Mach-O header space or that step fails.
             tc.extra_ldflags.append("-headerpad_max_install_names")
         tc.generate()
-
-        deps = AutotoolsDeps(self)
-        deps.generate()
 
     def build(self):
         autotools = Autotools(self)
