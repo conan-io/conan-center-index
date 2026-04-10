@@ -7,8 +7,6 @@ from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
 import os
 import yaml
 
-# cci-internal-mirror
-
 required_conan_version = ">=2.1.0"
 
 
