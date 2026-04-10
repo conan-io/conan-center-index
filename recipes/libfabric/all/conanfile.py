@@ -62,9 +62,6 @@ class LibfabricConan(ConanFile):
         deps = AutotoolsDeps(self)
         deps.generate()
 
-        VirtualBuildEnv(self).generate()
-        VirtualRunEnv(self).generate(scope="build")
-
     def build(self):
         autotools = Autotools(self)
         autotools.configure()
@@ -80,9 +77,6 @@ class LibfabricConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_name", "libfabric")
         self.cpp_info.libs = ["fabric"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "m", "rt", "dl"]
-        if self.settings.compiler in ["gcc", "clang"]:
-            self.cpp_info.system_libs.append("atomic")
