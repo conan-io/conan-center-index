@@ -8,6 +8,7 @@ int main(void) {
 
     std::cout << "VideoViewer object created successfully!" << std::endl;
 
+    viewer.window_request_close();
 
     return EXIT_SUCCESS;
 }
