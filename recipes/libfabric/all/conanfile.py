@@ -37,10 +37,6 @@ class LibfabricConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
-    def requirements(self):
-        if self.settings.os == "Linux":
-            self.requires("rdma-core/52.0")
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
