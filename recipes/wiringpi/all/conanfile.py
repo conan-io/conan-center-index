@@ -2,7 +2,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -31,6 +31,7 @@ class WiringpiConan(ConanFile):
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def configure(self):
         if self.options.shared:
@@ -52,11 +53,6 @@ class WiringpiConan(ConanFile):
             if self.settings.compiler == "gcc" and \
                 Version(self.settings.compiler.version) < 8:
                 raise ConanInvalidConfiguration(f"{self.ref} requires gcc >= 8")
-            # wiringPi.c:1755:9: error: case label does not reduce to an integer constant
-            if self.settings.compiler == "gcc" and \
-                Version(self.settings.compiler.version).major == 11 and \
-                self.settings.build_type == "Debug":
-                raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc 11 in Debug build")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -71,6 +67,7 @@ class WiringpiConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()

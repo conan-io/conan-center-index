@@ -23,3 +23,9 @@ sources:
   "2.50":
     url: "https://github.com/WiringPi/WiringPi/archive/final_official_2.50.tar.gz"
     sha256: "f1ddf17e876f88e074d4597767e365a1b5ef20414a38754884935b38d8c8e932"
+patches:
+  "3.10":
+    - patch_file: "patches/3.10-0001-fix-const-switch-case.patch"
+      patch_description: "Replace switch with if-else to fix 'case label does not reduce to an integer constant' error in Debug builds"
+      patch_type: "backport"
+      patch_source: "https://github.com/WiringPi/WiringPi/pull/387"
