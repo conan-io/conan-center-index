@@ -36,20 +36,17 @@ class FontconfigConan(ConanFile):
     package_type = "library"
 
 
-    # TODO: check if localstatedir must be defined, or simply let it default, as before ?
     class _DirsHelper:
         def __init__(self, conanfile):
             self.conanfile = conanfile
             self.datadir = None
             self.sysconfdir = None
-            self.localstatedir = None
             self.use_package_dirs = True
             self._set_standard_dirs()
 
         def _set_package_standard_dirs(self):
             self.datadir = os.path.join("res", "share")
             self.sysconfdir = os.path.join("res", "etc")
-            self.localstatedir = os.path.join("res", "var")
             self.use_package_dirs = True
 
         def _set_standard_dirs(self):
@@ -60,7 +57,6 @@ class FontconfigConan(ConanFile):
             if self.conanfile.settings.os == "Linux":
                 self.datadir = "usr/share"
                 self.sysconfdir = "etc"
-                self.localstatedir = "var"
             else:
                 # TODO: make message better
                 self.conanfile.output.warning(f"it was requested to use system dirs, but it is not supported for {self.conanfile.settings.os}."
@@ -110,7 +106,6 @@ class FontconfigConan(ConanFile):
             "tools": "disabled",
             "sysconfdir": dirs_helper.sysconfdir,
             "datadir": dirs_helper.datadir,
-            "localstatedir": dirs_helper.localstatedir,
         })
         tc.generate()
 
