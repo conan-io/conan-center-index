@@ -57,6 +57,9 @@ class FontconfigConan(ConanFile):
             if self.conanfile.settings.os == "Linux":
                 self.datadir = "usr/share"
                 self.sysconfdir = "etc"
+            elif self.conanfile.settings.os == "FreeBSD":
+                self.datadir = "usr/local/share"
+                self.sysconfdir = "usr/local/etc"
             else:
                 # TODO: make message better
                 self.conanfile.output.warning(f"it was requested to use system dirs, but it is not supported for {self.conanfile.settings.os}."
