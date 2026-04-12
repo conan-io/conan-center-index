@@ -68,7 +68,6 @@ class MujocoConan(ConanFile):
         tc.cache_variables["MUJOCO_TEST_PYTHON_UTIL"] = False
         tc.cache_variables["MUJOCO_WITH_USD"] = False
         tc.cache_variables["MUJOCO_USE_FILAMENT"] = False
-        tc.cache_variables["MUJOCO_BUILD_EXAMPLES"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
