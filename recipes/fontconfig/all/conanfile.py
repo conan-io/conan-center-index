@@ -6,6 +6,7 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 
 import os
 
@@ -24,14 +25,21 @@ class FontconfigConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "use_system_dirs_if_supported": [True, False],
+        "datadir": ["package", "system-if-known", "ANY"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "use_system_dirs_if_supported": False,
+        "datadir": "package"
     }
     options_description = {
         "use_system_dirs_if_supported": "Use Fontconfig system directories if supported",
+        "datadir": "directory name, or relative path, for the GNU DATADIR. "
+                   "Note that the prefix will be / . Special values: "
+                   "package: use package DATADIR, require to set the FONTCONFIG_PATH env var at runtime. "
+                   "system-if-known: will set DATADIR to system dir, like usr/share on Linux, "
+                   "fallbacks to package if the platform is not known.",
     }
     package_type = "library"
 
@@ -43,6 +51,12 @@ class FontconfigConan(ConanFile):
             self.sysconfdir = None
             self.use_package_dirs = True
             self._set_standard_dirs()
+
+        def use_package_datadir(self):
+            return self.datadir == "package"
+
+        def use_package_sysconfdir(self):
+            return self.sysconfdir == "package"
 
         def _set_package_standard_dirs(self):
             self.datadir = os.path.join("res", "share")
@@ -67,6 +81,12 @@ class FontconfigConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    # TODO: not reliable + should we do that ?
+    def validate(self):
+        datadir = str(self.options.datadir)
+        if os.path.isabs(datadir):
+            raise ConanInvalidConfiguration(f"datadir option must not be an absolute path (given: {datadir})")
 
     def configure(self):
         if self.options.shared:
