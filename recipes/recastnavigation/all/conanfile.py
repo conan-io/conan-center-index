@@ -26,6 +26,9 @@ class RecastNavigationConan(ConanFile):
 
     short_paths = True
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[<=3.31.11]")
+
     def export_sources(self):
         export_conandata_patches(self)
 
