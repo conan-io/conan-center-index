@@ -16,7 +16,6 @@ class NxppConan(ConanFile):
     topics = ("graph", "boost", "bgl", "header-only", "cxx20")
 
     settings = "os", "arch", "compiler", "build_type"
-    default_options = {"boost/*:header_only": True}
     no_copy_source = True
 
     def layout(self):
