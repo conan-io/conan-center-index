@@ -99,9 +99,6 @@ class PackageConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
-            print("sssss")
-            print(self.build_folder)
-            print(os.path.join(self.source_folder, "include"))
             copy(self,pattern="*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
             copy(self, pattern="*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
             copy(self, pattern="*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
