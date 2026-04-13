@@ -5,30 +5,9 @@ sources:
   "2.2.4":
     url: "https://github.com/microsoft/mimalloc/archive/v2.2.4.tar.gz"
     sha256: "754a98de5e2912fddbeaf24830f982b4540992f1bab4a0a8796ee118e0752bda"
-  "2.1.9":
-    url: "https://github.com/microsoft/mimalloc/archive/v2.1.9.tar.gz"
-    sha256: "dd8ff701691f19bf4e225d42ef0d3d5e6ca0e03498ee4f044a0402e4697e4a20"
-  "2.1.7":
-    url: "https://github.com/microsoft/mimalloc/archive/v2.1.7.tar.gz"
-    sha256: "0eed39319f139afde8515010ff59baf24de9e47ea316a315398e8027d198202d"
   "2.1.2":
     url: "https://github.com/microsoft/mimalloc/archive/v2.1.2.tar.gz"
     sha256: "2b1bff6f717f9725c70bf8d79e4786da13de8a270059e4ba0bdd262ae7be46eb"
-  "2.0.9":
-    url: "https://github.com/microsoft/mimalloc/archive/v2.0.9.tar.gz"
-    sha256: "4a29edae32a914a706715e2ac8e7e4109e25353212edeed0888f4e3e15db5850"
-  "1.8.7":
-    url: "https://github.com/microsoft/mimalloc/archive/v1.8.7.tar.gz"
-    sha256: "347793a2c614e525edc4e286ab5cbc4c7a5efc12503e2dafca276d78394c4f07"
-  "1.8.2":
-    url: "https://github.com/microsoft/mimalloc/archive/v1.8.2.tar.gz"
-    sha256: "4058d53d6ceb75862f32c30a6ee686c3cbb5e965b2c324b828ca454f7fe064f9"
-  "1.7.9":
-    url: "https://github.com/microsoft/mimalloc/archive/v1.7.9.tar.gz"
-    sha256: "45e05be518363d32b2cdcce1a1fac3580895ea2e4524e1a3c7e71145cb58659f"
-  "1.7.6":
-    url: "https://github.com/microsoft/mimalloc/archive/v1.7.6.tar.gz"
-    sha256: "d74f86ada2329016068bc5a243268f1f555edd620b6a7d6ce89295e7d6cf18da"
 patches:
   "2.2.4":
     - patch_file: "patches/2.2.4-0002-support-older-compiler.patch"
