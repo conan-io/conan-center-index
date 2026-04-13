@@ -112,6 +112,16 @@ class NcbiCxxToolkit(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        rmdir(self, os.path.join(self.source_folder, "src", "build-system", "cmake", "modules"))
+        save(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+             "cmake_minimum_required(VERSION 3.15)\n"
+             "project(ncbi_cpp)\n"
+             "include(src/build-system/cmake/CMake.NCBItoolkit.cmake)\n"
+             "add_subdirectory(src)\n")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -138,17 +148,7 @@ class NcbiCxxToolkit(ConanFile):
         tc.generate()
         CMakeDeps(self).generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        rmdir(self, os.path.join(self.source_folder, "src", "build-system", "cmake", "modules"))
-        save(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-             "cmake_minimum_required(VERSION 3.15)\n"
-             "project(ncbi_cpp)\n"
-             "include(src/build-system/cmake/CMake.NCBItoolkit.cmake)\n"
-             "add_subdirectory(src)\n")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -204,7 +204,7 @@ class NcbiCxxToolkit(ConanFile):
             self.cpp_info.components[comp_name].requires = c_reqs
 
         if self.settings.os == "Windows":
-            self.cpp_info.components["core"].defines.append("_UNICODE")
+            self.cpp_info.components["core"].defines.extend(["_UNICODE", "UNICODE"])
             self.cpp_info.components["core"].system_libs = ["ws2_32", "dbghelp"]
         elif self.settings.os == "Linux":
             self.cpp_info.components["core"].defines.extend(["_MT", "_FILE_OFFSET_BITS=64"])
@@ -215,5 +215,3 @@ class NcbiCxxToolkit(ConanFile):
             self.cpp_info.components["core"].frameworks = ["ApplicationServices"]
         if self.options.shared:
             self.cpp_info.components["core"].defines.append("NCBI_DLL_BUILD")
-
-        self.buildenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
