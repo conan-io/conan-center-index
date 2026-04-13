@@ -38,7 +38,7 @@ class NxppConan(ConanFile):
         self.info.clear()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=self.package_folder)
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(
             self,
             "*.hpp",
