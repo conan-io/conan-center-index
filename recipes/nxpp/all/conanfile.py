@@ -10,7 +10,6 @@ class NxppConan(ConanFile):
     package_type = "header-library"
 
     license = "MIT"
-    author = "Mik1810"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Mik1810/nxpp"
     description = "Header-only C++20 graph library on top of Boost Graph Library"
