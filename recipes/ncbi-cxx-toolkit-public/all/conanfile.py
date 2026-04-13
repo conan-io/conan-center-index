@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.files import get, copy, rmdir, save, load, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import get, copy, rm, rmdir, save, load, apply_conandata_patches, export_conandata_patches
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
 import os
@@ -157,6 +157,10 @@ class NcbiCxxToolkit(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "res", "build-system"))
+        rmdir(self, os.path.join(self.package_folder, "res", "specs"))
+        rm(self, "*.cmake", os.path.join(self.package_folder, "res"))
+        rm(self, "buildinfo", os.path.join(self.package_folder, "res"))
 
     def _available_targets(self):
         targets = {"zlib::zlib", "bzip2::bzip2", "lzo::lzo", "zstd::zstd",
@@ -212,4 +216,4 @@ class NcbiCxxToolkit(ConanFile):
         if self.options.shared:
             self.cpp_info.components["core"].defines.append("NCBI_DLL_BUILD")
 
-        self.cpp_info.components["core"].builddirs.append("res")
+        self.buildenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
