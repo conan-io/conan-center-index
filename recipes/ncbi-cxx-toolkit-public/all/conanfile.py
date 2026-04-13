@@ -203,10 +203,10 @@ class NcbiCxxToolkit(ConanFile):
             self.cpp_info.components["core"].defines.append("_UNICODE")
             self.cpp_info.components["core"].system_libs = ["ws2_32", "dbghelp"]
         elif self.settings.os == "Linux":
-            self.cpp_info.components["core"].defines.extend(["_MT", "_REENTRANT", "_THREAD_SAFE", "_FILE_OFFSET_BITS=64"])
+            self.cpp_info.components["core"].defines.extend(["_MT", "_FILE_OFFSET_BITS=64"])
             self.cpp_info.components["core"].system_libs = ["dl", "rt", "m", "pthread", "resolv"]
         elif self.settings.os == "Macos":
-            self.cpp_info.components["core"].defines.extend(["_MT", "_REENTRANT", "_THREAD_SAFE", "_FILE_OFFSET_BITS=64"])
+            self.cpp_info.components["core"].defines.extend(["_MT", "_FILE_OFFSET_BITS=64"])
             self.cpp_info.components["core"].system_libs = ["dl", "c", "m", "pthread", "resolv"]
             self.cpp_info.components["core"].frameworks = ["ApplicationServices"]
         if self.options.shared:
