@@ -1,7 +1,5 @@
 versions:
-  "2.15.1":
-    folder: cmake
-  "2.15.0":
+  "2.15.2":
     folder: cmake
   "2.14.5":
     folder: cmake
