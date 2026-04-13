@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.files import get, copy, rm, rmdir, save, load, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import get, copy, rmdir, save, load, apply_conandata_patches, export_conandata_patches
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
 import os
@@ -157,10 +157,10 @@ class NcbiCxxToolkit(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "res", "build-system"))
-        rmdir(self, os.path.join(self.package_folder, "res", "specs"))
-        rm(self, "*.cmake", os.path.join(self.package_folder, "res"))
-        rm(self, "buildinfo", os.path.join(self.package_folder, "res"))
+        copy(self, "ncbi-cpp-toolkit.imports",
+             src=os.path.join(self.package_folder, "res"),
+             dst=os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "res"))
 
     def _available_targets(self):
         targets = {"zlib::zlib", "bzip2::bzip2", "lzo::lzo", "zstd::zstd",
@@ -184,7 +184,7 @@ class NcbiCxxToolkit(ConanFile):
         return targets
 
     def package_info(self):
-        impfile = os.path.join(self.package_folder, "res", "ncbi-cpp-toolkit.imports")
+        impfile = os.path.join(self.package_folder, "lib", "ncbi-cpp-toolkit.imports")
         allexports = set(load(self, impfile).split())
         components = yaml.safe_load(load(self, os.path.join(self.recipe_folder, "components.yml")))["components"]
 
