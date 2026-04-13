@@ -1,4 +1,4 @@
 sources:
-  "1.0.2":
-    url: "https://github.com/adobe/jsrl/archive/refs/tags/1.0.2.tar.gz"
-    sha256: "478d28df3322acad7389410b953077e69e1179efcd388294729d338213a2f1d4"
+  "1.0.3":
+    url: "https://github.com/adobe/jsrl/archive/refs/tags/1.0.3.tar.gz"
+    sha256: "b0a2a799b208d3c46c15a026afc24ec6c116365ed379ac0434a7789469439cd6"

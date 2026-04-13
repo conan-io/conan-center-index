@@ -57,6 +57,8 @@ class JsrlConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["jsrl"]
+        if not self.options.shared:
+            self.cpp_info.defines = ["JSRL_STATIC_DEFINE"]
         self.cpp_info.set_property("cmake_file_name", "jsrl")
         self.cpp_info.set_property("cmake_target_name", "jsrl::jsrl")
         self.cpp_info.set_property("pkg_config_name", "jsrl")
