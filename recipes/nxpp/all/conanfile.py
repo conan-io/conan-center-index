@@ -23,8 +23,7 @@ class NxppConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "20")
+        check_min_cppstd(self, "20")
 
     def requirements(self):
         self.requires("boost/1.86.0", transitive_headers=True)
