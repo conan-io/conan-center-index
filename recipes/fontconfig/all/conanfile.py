@@ -61,7 +61,6 @@ class FontconfigConan(ConanFile):
                 self.datadir = "usr/local/share"
                 self.sysconfdir = "usr/local/etc"
             else:
-                # TODO: make message better
                 self.conanfile.output.warning(f"it was requested to use system dirs, but it is not supported for {self.conanfile.settings.os}."
                                               " Fallback to using package dirs. Set the FONTCONFIG_PATH environment variable at runtime")
                 self._set_package_standard_dirs()
