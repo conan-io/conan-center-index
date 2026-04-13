@@ -1,0 +1,7 @@
+sources:
+  "0.40.0":
+    url: "https://www.apache.org/dyn/closer.lua?filename=qpid/proton/0.40.0/qpid-proton-0.40.0.tar.gz&action=download"
+    sha256: "0acb39e92d947e30175de0969a5b2e479e2983bc3e3d69c835ee5174610e9636"
+patches:
+    "0.40.0":
+        - patch_file: "patches/0001-adjust-proton-cpp-dependencies.patch"

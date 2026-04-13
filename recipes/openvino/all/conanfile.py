@@ -314,6 +314,8 @@ class OpenvinoConan(ConanFile):
             if self.options.enable_cpu:
                 openvino_runtime.libs.append(f"openvino_arm_cpu_plugin{lib_suffix}" if self._target_arm else f"openvino_intel_cpu_plugin{lib_suffix}")
                 openvino_runtime.libs.extend([f"openvino_onednn_cpu{lib_suffix}", f"openvino_snippets{lib_suffix}", f"mlas{lib_suffix}"])
+                if Version(self.version) >= "2025.4.0":
+                    openvino_runtime.libs.append(f"openvino_xml_util{lib_suffix}")
                 if self._target_arm:
                     openvino_runtime.libs.append("arm_compute-static")
                     if Version(self.version) >= "2025.1.0":

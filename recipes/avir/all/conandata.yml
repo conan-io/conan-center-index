@@ -1,4 +1,7 @@
 sources:
+  "3.1":
+    url: "https://github.com/avaneev/avir/archive/refs/tags/3.1.tar.gz"
+    sha256: "8235740e578f86d08d03d3f7ae2a6893554c1ae17a061117475219fe3538a7d2"
   "3.0":
     url: "https://github.com/avaneev/avir/archive/refs/tags/3.0.tar.gz"
     sha256: "011909d31cf782152a69f570563eb70700504f168174a6049b6acbb9b9f511ea"

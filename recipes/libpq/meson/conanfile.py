@@ -40,11 +40,11 @@ class LibpqConan(ConanFile):
         # but this is True by default in upstream
         "with_icu": False,
         "with_zlib": True,
-        "with_zstd": True,
-        "with_libxml2": True,
+        "with_zstd": False,
+        "with_libxml2": False,
         "with_lz4": True,
-        "with_xslt": True,
-        "with_readline": True,
+        "with_xslt": False,
+        "with_readline": False,
         "disable_rpath": False,
     }
 

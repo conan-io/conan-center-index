@@ -1,17 +1,16 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class LibpngConan(ConanFile):
     name = "libpng"
+    package_type = "library"
     description = "libpng is the official PNG file format reference library."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.libpng.org"
@@ -66,10 +65,6 @@ class LibpngConan(ConanFile):
             "check": "check",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-        copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -94,10 +89,6 @@ class LibpngConan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
 
-    def validate(self):
-        if Version(self.version) < "1.6" and self.settings.arch == "armv8" and is_apple_os(self):
-            raise ConanInvalidConfiguration(f"{self.ref} currently does not building for {self.settings.os} {self.settings.arch}. Contributions are welcomed")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -108,32 +99,23 @@ class LibpngConan(ConanFile):
         tc.cache_variables["PNG_STATIC"] = not self.options.shared
         tc.cache_variables["PNG_DEBUG"] = self.settings.build_type == "Debug"
         tc.cache_variables["PNG_PREFIX"] = self.options.api_prefix
-        if Version(self.version) < "1.6.38":
-            tc.cache_variables["CMAKE_PROJECT_libpng_INCLUDE"] = os.path.join(self.source_folder, "conan_cmake_project_include.cmake")
-        if self._has_neon_support:
-            tc.variables["PNG_ARM_NEON"] = self._neon_msa_sse_vsx_mapping[str(self.options.neon)]
-        if self._has_msa_support:
-            tc.variables["PNG_MIPS_MSA"] = self._neon_msa_sse_vsx_mapping[str(self.options.msa)]
-        if self._has_sse_support:
-            tc.variables["PNG_INTEL_SSE"] = self._neon_msa_sse_vsx_mapping[str(self.options.sse)]
-        if self._has_vsx_support:
-            tc.variables["PNG_POWERPC_VSX"] = self._neon_msa_sse_vsx_mapping[str(self.options.vsx)]
-        if Version(self.version) >= "1.6.41":
-            tc.variables["PNG_FRAMEWORK"] = False  # changed from False to True by default in PNG 1.6.41
-            tc.variables["PNG_TOOLS"] = False
-        elif Version(self.version) >= "1.6.38":
-            tc.variables["PNG_EXECUTABLES"] = False
-
+        tc.cache_variables["PNG_FRAMEWORK"] = False  # changed from False to True by default in PNG 1.6.41
+        tc.cache_variables["PNG_TOOLS"] = False
         tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
+        if self._has_neon_support:
+            tc.cache_variables["PNG_ARM_NEON"] = self._neon_msa_sse_vsx_mapping[str(self.options.neon)]
+        if self._has_msa_support:
+            tc.cache_variables["PNG_MIPS_MSA"] = self._neon_msa_sse_vsx_mapping[str(self.options.msa)]
+        if self._has_sse_support:
+            tc.cache_variables["PNG_INTEL_SSE"] = self._neon_msa_sse_vsx_mapping[str(self.options.sse)]
+        if self._has_vsx_support:
+            tc.cache_variables["PNG_POWERPC_VSX"] = self._neon_msa_sse_vsx_mapping[str(self.options.vsx)]
+        
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -168,7 +150,3 @@ class LibpngConan(ConanFile):
         self.cpp_info.libs = [f"{prefix}png{suffix}"]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
-
-        # TODO: Remove after Conan 2.0
-        self.cpp_info.names["cmake_find_package"] = "PNG"
-        self.cpp_info.names["cmake_find_package_multi"] = "PNG"

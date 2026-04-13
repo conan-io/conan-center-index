@@ -2,9 +2,10 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.files import get, rmdir, copy, rm, export_conandata_patches, apply_conandata_patches
+from conan.tools.layout import basic_layout
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 
 required_conan_version = ">=1.53.0"
@@ -33,6 +34,9 @@ class FlexConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         # Flex requires M4 to be compiled. If consumer does not have M4
@@ -69,7 +73,8 @@ class FlexConan(ConanFile):
             # https://github.com/easybuilders/easybuild-easyconfigs/pull/5792
             "ac_cv_func_reallocarray=no",
         ])
-        at.extra_ldflags.append("-headerpad_max_install_names")
+        if is_apple_os(self):
+            at.extra_ldflags.append("-headerpad_max_install_names")
         at.generate()
 
     def _patch_sources_autotools(self):
@@ -80,7 +85,7 @@ class FlexConan(ConanFile):
             if gnu_config:
                 copy(self, os.path.basename(gnu_config),
                      src=os.path.dirname(gnu_config),
-                     dst=os.path.join(self.source_folder, "config"))
+                     dst=os.path.join(self.source_folder, "build-aux"))
 
     def build(self):
         apply_conandata_patches(self)

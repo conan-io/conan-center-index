@@ -1,28 +1,4 @@
 sources:
-  "1.2.1":
-    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v1.2.1.2.tar.gz"
-    sha256: "dc008515f64c9054250909a16bf0d9173af845d2c6d4e49ed6d3f0f32dfdc747"
-  "1.2.0":
-    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v1.2.0.tar.gz"
-    sha256: "c80d0b23c6a20f8aa6fe776669dc8a9fb984046891d2f70bfc0539d16998164b"
-  "1.1.0":
-    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v1.1.0.tar.gz"
-    sha256: "f4281c3f25769dbc82437dd4199a8ba07b2a6e8a2f42e36a6fd805c493aae5ca"
-  "1.0+5":
-    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v1.0+5.tar.gz"
-    sha256: "4eb1b80b97dda4a3c4f613c581c734e0221911c88ff859ed679bda3dd5d7b319"
-  "1.0+3":
-    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v1.0+3.tar.gz"
-    sha256: "509248e7bd30dad725cfb66c383405a8bdc59d1fe7f8f2b464d459444047855e"
-  "1.0+1":
-    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v1.0+1.tar.gz"
-    sha256: "0763342f1d6bfc8a58c99647bd2a5ac9fcb278523a662a20b560e42e5c6c8474"
-  "0.3+4":
-    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v0.3+4.tar.gz"
-    sha256: "539622451c1c9be4329d1c260d4014db14ef399b6bc170c7dd0d72b33cba88b0"
-  "0.3+3":
-    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v0.3+3.tar.gz"
-    sha256: "d6d8019ec647dc199e026e847f6cdf714afea29d1c202e3b2a9cde929bfd54b2"
-  "0.3+2":
-    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v0.3+2.tar.gz"
-    sha256: "982fe978c113506aefe77c413befb3ab21fffb09d9bdf287ec8e8ba59bd786e7"
+  "1.3.1":
+    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v1.3.1.tar.gz"
+    sha256: "1aa4d487d7a1dd092d997f612608750aa5f5c5b618b4fe561dd8d249696fba79"
