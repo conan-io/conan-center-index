@@ -42,14 +42,6 @@ class NcbiCxxToolkit(ConanFile):
         "with_cassandra": False,
         "with_curl": False,
     }
-    _components_data = None
-
-    @property
-    def _tk_components(self):
-        if self._components_data is None:
-            filepath = os.path.join(self.recipe_folder, "components.yml")
-            self._components_data = yaml.safe_load(load(self, filepath))["components"]
-        return self._components_data
 
     def export(self):
         copy(self, "components.yml",
@@ -76,33 +68,33 @@ class NcbiCxxToolkit(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("bzip2/1.0.8")
         self.requires("lzo/2.10")
-        self.requires("zstd/[>=1.5.2 <=1.5.5]")
-        self.requires("pcre2/10.42")
-        self.requires("libuv/[>=1.45.0 <=1.46.0]")
-        self.requires("libnghttp2/[>=1.51.0 <=1.66.0]")
-        self.requires("libiconv/1.17")
-        self.requires("lmdb/[>=0.9.29 <=0.9.32]")
-        self.requires("sqlite3/[>=3.40.0 <=3.50.4]")
+        self.requires("zstd/[>=1.5.2 <1.6]")
+        self.requires("pcre2/[>=10.42 <11]")
+        self.requires("libuv/[>=1.45.0 <2]")
+        self.requires("libnghttp2/[>=1.66.0 <2]")
+        self.requires("libiconv/[>=1.17 <2]")
+        self.requires("lmdb/[>=0.9.29 <1]")
+        self.requires("sqlite3/[>=3.44.2 <4]")
         if self.settings.os == "Linux":
-            self.requires("backward-cpp/1.6")
-            self.requires("libunwind/[>=1.6.2 <=1.8.1]")
+            self.requires("backward-cpp/[>=1.6 <2]")
+            self.requires("libunwind/[>=1.6.2 <2]")
         if self.options.with_grpc:
-            self.requires("grpc/[>=1.50.1 <=1.72.0]")
-            self.requires("protobuf/[>=3.21.12 <=5.27.0]")
+            self.requires("grpc/[>=1.54.3 <2]")
+            self.requires("protobuf/[>=3.21.12 <7]")
         if self.options.with_xml:
-            self.requires("libxml2/[>=2.11.4 <3]")
-            self.requires("libxslt/[>1.1.34 <=1.1.43]")
+            self.requires("libxml2/[>=2.12.5 <3]")
+            self.requires("libxslt/[>=1.1.43 <2]")
         if self.options.with_image:
-            self.requires("libjpeg/[>=9e <=9f]")
-            self.requires("libpng/[>=1.6.37 <=1.6.50]")
-            self.requires("giflib/[>=5.2.1 <=5.2.2]")
-            self.requires("libtiff/[>=4.3.0 <=4.7.1]")
+            self.requires("libjpeg/[>=9e]")
+            self.requires("libpng/[>=1.6 <2]")
+            self.requires("giflib/[>=5.2.1 <6]")
+            self.requires("libtiff/[>=4.6.0 <5]")
         if self.options.get_safe("with_berkeleydb"):
             self.requires("libdb/5.3.28")
         if self.options.get_safe("with_cassandra"):
             self.requires("cassandra-cpp-driver/[>=2.15.3 <=2.17.1]")
         if self.options.with_curl:
-            self.requires("libcurl/[>=8.8.0 <=9]")
+            self.requires("libcurl/[>=8.8.0 <9]")
 
     def build_requirements(self):
         if self.options.with_grpc:
@@ -190,10 +182,11 @@ class NcbiCxxToolkit(ConanFile):
     def package_info(self):
         impfile = os.path.join(self.package_folder, "res", "ncbi-cpp-toolkit.imports")
         allexports = set(load(self, impfile).split())
+        components = yaml.safe_load(load(self, os.path.join(self.recipe_folder, "components.yml")))["components"]
 
         available = self._available_targets()
         active = {}
-        for comp_name, comp_data in self._tk_components.items():
+        for comp_name, comp_data in components.items():
             c_libs = [lib for lib in comp_data["libraries"] if lib in allexports]
             if c_libs or comp_name == "core":
                 active[comp_name] = (c_libs, comp_data)
@@ -208,26 +201,15 @@ class NcbiCxxToolkit(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.components["core"].defines.append("_UNICODE")
-            self.cpp_info.components["core"].defines.append("_CRT_SECURE_NO_WARNINGS=1")
-        else:
-            self.cpp_info.components["core"].defines.append("_MT")
-            self.cpp_info.components["core"].defines.append("_REENTRANT")
-            self.cpp_info.components["core"].defines.append("_THREAD_SAFE")
-            self.cpp_info.components["core"].defines.append("_FILE_OFFSET_BITS=64")
-        if self.options.shared:
-            self.cpp_info.components["core"].defines.append("NCBI_DLL_BUILD")
-        if self.settings.build_type == "Debug":
-            self.cpp_info.components["core"].defines.append("_DEBUG")
-        else:
-            self.cpp_info.components["core"].defines.append("NDEBUG")
-        if self.settings.os == "Windows":
             self.cpp_info.components["core"].system_libs = ["ws2_32", "dbghelp"]
         elif self.settings.os == "Linux":
+            self.cpp_info.components["core"].defines.extend(["_MT", "_REENTRANT", "_THREAD_SAFE", "_FILE_OFFSET_BITS=64"])
             self.cpp_info.components["core"].system_libs = ["dl", "rt", "m", "pthread", "resolv"]
         elif self.settings.os == "Macos":
+            self.cpp_info.components["core"].defines.extend(["_MT", "_REENTRANT", "_THREAD_SAFE", "_FILE_OFFSET_BITS=64"])
             self.cpp_info.components["core"].system_libs = ["dl", "c", "m", "pthread", "resolv"]
             self.cpp_info.components["core"].frameworks = ["ApplicationServices"]
+        if self.options.shared:
+            self.cpp_info.components["core"].defines.append("NCBI_DLL_BUILD")
 
         self.cpp_info.components["core"].builddirs.append("res")
-        module_path = os.path.join("res", "build-system", "cmake", "CMake.NCBIpkg.conan.cmake")
-        self.cpp_info.components["core"].set_property("cmake_build_modules", [module_path])

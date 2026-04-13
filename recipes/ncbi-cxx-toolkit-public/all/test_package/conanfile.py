@@ -5,7 +5,7 @@ import os
 
 class NcbiCxxToolkitTest(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    generators = "CMakeDeps", "CMakeToolchain"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
