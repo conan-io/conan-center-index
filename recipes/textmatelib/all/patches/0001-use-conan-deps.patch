@@ -1,6 +1,7 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -3,12 +3,6 @@ project(tml VERSION 0.1.0 LANGUAGES CXX)
+@@ -3,11 +3,6 @@
+
  include(GenerateExportHeader)
 
 -# Allow callers (e.g. Conan) to override the thirdparty directory.
@@ -8,11 +9,10 @@
 -if(NOT DEFINED THIRDPARTY_DIR)
 -    set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty")
 -endif()
--
+
  # Set C++17 standard for modern features
  set(CMAKE_CXX_STANDARD 17)
- set(CMAKE_CXX_STANDARD_REQUIRED ON)
-@@ -94,10 +88,13 @@ if(NOT USE_WASM_BUILD)
+@@ -94,10 +89,12 @@
      endif()
  endif()
 
@@ -26,7 +26,8 @@
  )
 
  # Source files
-@@ -156,92 +153,24 @@ set(TEXTMATE_HEADERS
+@@ -156,79 +153,13 @@
+     src/wasm/bigint_bindings.h
  )
 
 -include(ExternalProject)
@@ -107,20 +108,7 @@
      ExternalProject_Add(
          oniguruma_wasm
          SOURCE_DIR ${THIRDPARTY_DIR}/oniguruma
-         BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/oniguruma/build_wasm
-         CMAKE_ARGS
-             -DCMAKE_BUILD_TYPE=Release
-             -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-             -DCMAKE_INSTALL_PREFIX=${ONIG_INSTALL_DIR}
-             # Note: CMAKE_CROSSCOMPILING_EMULATOR intentionally omitted - not needed for
-             # static library builds and causes issues when it contains node arguments
-         INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install
-     )
-
-     set(ONIGURUMA_LIB ${ONIG_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}onig${CMAKE_STATIC_LIBRARY_SUFFIX})
-     set(ONIGURUMA_INCLUDE_DIR ${ONIG_INSTALL_DIR}/include)
- endif()
-@@ -369,15 +298,8 @@ if(USE_WASM_BUILD)
+@@ -369,15 +300,8 @@
      target_include_directories(tml PUBLIC "${ONIGURUMA_INCLUDE_DIR}")
      target_include_directories(tml-browser PUBLIC "${ONIGURUMA_INCLUDE_DIR}")
  else()
