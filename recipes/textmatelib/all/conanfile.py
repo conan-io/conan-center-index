@@ -60,13 +60,14 @@ class TextmatelibConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=os.path.join("packages", "tml-cpp"))
         cmake.build()
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        copy(self, "tml_export.h", self.build_folder, os.path.join(self.package_folder, "include", "tml"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))

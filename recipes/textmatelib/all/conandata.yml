@@ -5,5 +5,5 @@ sources:
 patches:
   "0.1.0":
     - patch_file: "patches/0001-use-conan-deps.patch"
-      patch_description: "Replace ExternalProject_Add(oniguruma) and bundled rapidjson with find_package"
+      patch_description: "Replace bundled dependencies with find_package and remove test targets"
       patch_type: "conan"

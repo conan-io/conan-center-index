@@ -1,18 +1,6 @@
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -3,11 +3,6 @@
-
- include(GenerateExportHeader)
-
--# Allow callers (e.g. Conan) to override the thirdparty directory.
--# Defaults to the monorepo layout where thirdparty/ sits two levels above this file.
--if(NOT DEFINED THIRDPARTY_DIR)
--    set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty")
--endif()
-
- # Set C++17 standard for modern features
- set(CMAKE_CXX_STANDARD 17)
-@@ -94,10 +89,12 @@
+--- a/packages/tml-cpp/CMakeLists.txt
++++ b/packages/tml-cpp/CMakeLists.txt
+@@ -88,10 +88,12 @@
      endif()
  endif()
 
@@ -22,11 +10,11 @@
  # Include directories
  include_directories(
      ${CMAKE_CURRENT_SOURCE_DIR}/src
--    ${THIRDPARTY_DIR}/rapidjson/include
+-    ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/rapidjson/include
  )
 
  # Source files
-@@ -156,79 +153,13 @@
+@@ -150,79 +152,13 @@
      src/wasm/bigint_bindings.h
  )
 
@@ -88,7 +76,7 @@
 -
 -    ExternalProject_Add(
 -        oniguruma
--        SOURCE_DIR ${THIRDPARTY_DIR}/oniguruma
+-        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/oniguruma
 -        BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/oniguruma/build
 -        CMAKE_ARGS ${ONIG_CMAKE_ARGS}
 -        BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE}
@@ -107,8 +95,8 @@
 +    include(ExternalProject)
      ExternalProject_Add(
          oniguruma_wasm
-         SOURCE_DIR ${THIRDPARTY_DIR}/oniguruma
-@@ -369,15 +300,8 @@
+         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/oniguruma
+@@ -363,15 +299,8 @@
      target_include_directories(tml PUBLIC "${ONIGURUMA_INCLUDE_DIR}")
      target_include_directories(tml-browser PUBLIC "${ONIGURUMA_INCLUDE_DIR}")
  else()
@@ -121,8 +109,26 @@
 -
 -    # Include oniguruma headers
 -    target_include_directories(tml PUBLIC "${ONIGURUMA_INCLUDE_DIR}")
-+    target_link_libraries(tml PUBLIC oniguruma::oniguruma)
-+    target_include_directories(tml PRIVATE "${RAPIDJSON_INCLUDE_DIRS}")
++    target_link_libraries(tml PUBLIC oniguruma::onig)
++    target_link_libraries(tml PRIVATE rapidjson)
  endif()
 
  # Install targets
+@@ -385,17 +314,6 @@
+     DESTINATION include/tml
+ )
+
+-# Enable testing (skip for WASM builds and shared library builds)
+-# Tests should only use the static library version for proper linking
+-if(NOT USE_WASM_BUILD AND NOT BUILD_SHARED_LIBS)
+-    enable_testing()
+-
+-    # Add test subdirectory if it exists
+-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+-        add_subdirectory(tests)
+-    endif()
+-endif()
+-
+ # Print configuration
+ message(STATUS "tml configuration:")
+ message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")
