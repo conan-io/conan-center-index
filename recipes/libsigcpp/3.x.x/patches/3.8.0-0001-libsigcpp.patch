@@ -1,29 +1,16 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 360becc..a29425b 100644
+index 360becc..b64faf5 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -32,7 +32,7 @@ set( CMAKE_CXX_STANDARD 17 )
+@@ -28,7 +28,6 @@ option (SIGCXX_DISABLE_DEPRECATED "Disable deprecated" OFF)
+ 
+ project (sigc++)
+ 
+-set( CMAKE_CXX_STANDARD 17 )
  
  # Turn on warnings for MSVC. Remove the CMake default of /W3 because when you
  # add /W4, MSVC will complain about two warning level flags. This default
--# changed at CMake 3.15 (see 
-+# changed at CMake 3.15 (see
- # https://cmake.org/cmake/help/v3.15/policy/CMP0092.html#policy:CMP0092 for
- # more details)
-  if (MSVC AND CMAKE_VERSION VERSION_LESS "13.15")
-@@ -80,9 +80,9 @@ install (FILES
- 		DESTINATION
- 			"${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}-${SIGCXX_API_VERSION}/include")
- 
--install (FILES 
-+install (FILES
- 			"${CMAKE_CURRENT_BINARY_DIR}/sigc++-${SIGCXX_API_VERSION}.pc"
--		DESTINATION 
-+		DESTINATION
- 			"${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
- 
- enable_testing()
-@@ -90,8 +90,6 @@ enable_testing()
+@@ -90,8 +89,6 @@ enable_testing()
  
  
  add_subdirectory (sigc++)
