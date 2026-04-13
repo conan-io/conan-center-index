@@ -1,0 +1,140 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -3,12 +3,6 @@ project(tml VERSION 0.1.0 LANGUAGES CXX)
+ include(GenerateExportHeader)
+
+-# Allow callers (e.g. Conan) to override the thirdparty directory.
+-# Defaults to the monorepo layout where thirdparty/ sits two levels above this file.
+-if(NOT DEFINED THIRDPARTY_DIR)
+-    set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty")
+-endif()
+-
+ # Set C++17 standard for modern features
+ set(CMAKE_CXX_STANDARD 17)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+@@ -94,10 +88,13 @@ if(NOT USE_WASM_BUILD)
+     endif()
+ endif()
+
++find_package(oniguruma REQUIRED CONFIG)
++find_package(RapidJSON REQUIRED CONFIG)
++
+ # Include directories
+ include_directories(
+     ${CMAKE_CURRENT_SOURCE_DIR}/src
+-    ${THIRDPARTY_DIR}/rapidjson/include
+ )
+
+ # Source files
+@@ -156,92 +153,24 @@ set(TEXTMATE_HEADERS
+ )
+
+-include(ExternalProject)
+-
+-# Find Oniguruma library (skip for WASM builds, will build for WASM)
+-if(NOT USE_WASM_BUILD)
+-    message(STATUS "Building native oniguruma from source")
+-
+-    # Build oniguruma
+-    set(ONIG_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/oniguruma)
+-
+-    # Build configuration for oniguruma - ensure static library, not shared
+-    set(ONIG_CMAKE_ARGS
+-        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+-        -DBUILD_SHARED_LIBS=OFF
+-        -DENABLE_POSIX_API=OFF
+-        -DENABLE_BINARY_COMPATIBLE_POSIX_API=OFF
+-        -DENABLE_STATISTICS=OFF
+-        -DINSTALL_DOCUMENTATION=OFF
+-        -DINSTALL_EXAMPLES=OFF
+-        -DBUILD_TEST=OFF
+-        -DCMAKE_INSTALL_PREFIX=${ONIG_INSTALL_DIR}
+-        -DCMAKE_C_FLAGS=-DONIG_STATIC
+-        -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+-    )
+-
+-    # On Windows/MSVC, ensure matching runtime library
+-    if(MSVC)
+-        list(APPEND ONIG_CMAKE_ARGS -DMSVC_STATIC_RUNTIME=ON)
+-    endif()
+-
+-    # On Apple platforms, propagate architecture and SDK settings
+-    if(CMAKE_OSX_ARCHITECTURES)
+-        # Join the list with semicolons and quote it properly for ExternalProject
+-        string(REPLACE ";" "$<SEMICOLON>" ONIG_OSX_ARCHITECTURES "${CMAKE_OSX_ARCHITECTURES}")
+-        list(APPEND ONIG_CMAKE_ARGS "-DCMAKE_OSX_ARCHITECTURES=${ONIG_OSX_ARCHITECTURES}")
+-    endif()
+-    if(CMAKE_OSX_DEPLOYMENT_TARGET)
+-        list(APPEND ONIG_CMAKE_ARGS -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET})
+-    endif()
+-    if(CMAKE_OSX_SYSROOT)
+-        list(APPEND ONIG_CMAKE_ARGS -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT})
+-    endif()
+-    if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+-        list(APPEND ONIG_CMAKE_ARGS -DCMAKE_SYSTEM_NAME=iOS)
+-    endif()
+-
+-    # For Android cross-compilation, propagate toolchain and ABI settings
+-    if(CMAKE_TOOLCHAIN_FILE)
+-        list(APPEND ONIG_CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE})
+-    endif()
+-    if(ANDROID_ABI)
+-        list(APPEND ONIG_CMAKE_ARGS -DANDROID_ABI=${ANDROID_ABI})
+-    endif()
+-    if(ANDROID_PLATFORM)
+-        list(APPEND ONIG_CMAKE_ARGS -DANDROID_PLATFORM=${ANDROID_PLATFORM})
+-    endif()
+-
+-    ExternalProject_Add(
+-        oniguruma
+-        SOURCE_DIR ${THIRDPARTY_DIR}/oniguruma
+-        BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/oniguruma/build
+-        CMAKE_ARGS ${ONIG_CMAKE_ARGS}
+-        BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE}
+-        INSTALL_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE} --target install
+-    )
+-    set(ONIGURUMA_LIB ${ONIG_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}onig${CMAKE_STATIC_LIBRARY_SUFFIX})
+-    set(ONIGURUMA_INCLUDE_DIR ${ONIG_INSTALL_DIR}/include)
+-
+-else()
++if(USE_WASM_BUILD)
+     message(STATUS "Building for WASM - oniguruma will be built from source")
+
+     # Build oniguruma for WASM
+     set(ONIG_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/oniguruma-wasm)
+
++    include(ExternalProject)
+     ExternalProject_Add(
+         oniguruma_wasm
+         SOURCE_DIR ${THIRDPARTY_DIR}/oniguruma
+         BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/oniguruma/build_wasm
+         CMAKE_ARGS
+             -DCMAKE_BUILD_TYPE=Release
+             -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+             -DCMAKE_INSTALL_PREFIX=${ONIG_INSTALL_DIR}
+             # Note: CMAKE_CROSSCOMPILING_EMULATOR intentionally omitted - not needed for
+             # static library builds and causes issues when it contains node arguments
+         INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install
+     )
+
+     set(ONIGURUMA_LIB ${ONIG_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}onig${CMAKE_STATIC_LIBRARY_SUFFIX})
+     set(ONIGURUMA_INCLUDE_DIR ${ONIG_INSTALL_DIR}/include)
+ endif()
+@@ -369,15 +298,8 @@ if(USE_WASM_BUILD)
+     target_include_directories(tml PUBLIC "${ONIGURUMA_INCLUDE_DIR}")
+     target_include_directories(tml-browser PUBLIC "${ONIGURUMA_INCLUDE_DIR}")
+ else()
+-    # Add dependency on oniguruma build
+-    add_dependencies(tml oniguruma)
+-
+-    # Link against oniguruma static library
+-    # Use target_link_libraries with the absolute path and PUBLIC to propagate to consumers
+-    target_link_libraries(tml PUBLIC "${ONIGURUMA_LIB}")
+-
+-    # Include oniguruma headers
+-    target_include_directories(tml PUBLIC "${ONIGURUMA_INCLUDE_DIR}")
++    target_link_libraries(tml PUBLIC oniguruma::oniguruma)
++    target_include_directories(tml PRIVATE "${RAPIDJSON_INCLUDE_DIRS}")
+ endif()
+
+ # Install targets
