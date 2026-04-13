@@ -29,6 +29,9 @@ class NxppConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.86.0", transitive_headers=True)
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
