@@ -68,6 +68,7 @@ class ZydisConan(ConanFile):
         self.cpp_info.libs = ["Zydis"]
         self.cpp_info.set_property("cmake_file_name", "Zydis")
         self.cpp_info.set_property("cmake_target_name", "Zydis::Zydis")
+        self.cpp_info.set_property("cmake_target_aliases", ["Zydis"])
 
         if not self.options.shared:
             self.cpp_info.defines = ["ZYDIS_STATIC_BUILD"]

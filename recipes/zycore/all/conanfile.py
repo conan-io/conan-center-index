@@ -55,5 +55,8 @@ class ZycoreConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Zycore")
         self.cpp_info.set_property("cmake_target_name", "Zycore::Zycore")
         self.cpp_info.set_property("cmake_target_aliases", ["Zycore"])
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
+        if not self.options.shared:
+            self.cpp_info.defines = ["ZYCORE_STATIC_BUILD"]
