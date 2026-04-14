@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import copy, get, rmdir
 import os
 
 
@@ -27,18 +27,14 @@ class ZydisConan(ConanFile):
     implements = ["auto_shared_fpic"]
     languages = "C"
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def requirements(self):
-        self.requires("zycore/1.5.2", transitive_headers=True)
+        self.requires("zycore/[>=1.5 <2]", transitive_headers=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -66,7 +62,6 @@ class ZydisConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["Zydis"]
-        self.cpp_info.set_property("cmake_file_name", "Zydis")
         self.cpp_info.set_property("cmake_target_name", "Zydis::Zydis")
         self.cpp_info.set_property("cmake_target_aliases", ["Zydis"])
 

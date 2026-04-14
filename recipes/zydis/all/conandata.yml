@@ -2,8 +2,3 @@ sources:
   "4.1.1":
     url: "https://github.com/zyantific/zydis/archive/refs/tags/v4.1.1.tar.gz"
     sha256: "45c6d4d499a1cc80780f7834747c637509777c01dca1e98c5e7c0bfaccdb1514"
-patches:
-  "4.1.1":
-    - patch_file: "patches/find-zycore-and-disable-macros.patch"
-      patch_description: "Correctly find Zycore package and disable unnecessary Zycore macros which just enables compilation flags"
-      patch_type: "conan"
