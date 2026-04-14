@@ -1,0 +1,30 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b84bc70..8546597 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -106,7 +106,7 @@ function (locate_zycore)
+         message(FATAL_ERROR "No CMake project found at explicitly set ZYAN_ZYCORE_PATH")
+     endif ()
+ 
+-    find_package(Zycore QUIET)
++    find_package(Zycore CONFIG REQUIRED)
+     if (Zycore_FOUND)
+         message(VERBOSE "Using system Zycore")
+         return ()
+@@ -163,8 +163,6 @@ set_target_properties("Zydis" PROPERTIES
+     VERSION "${Zydis_VERSION}"
+     SOVERSION "${Zydis_VERSION_MAJOR}.${Zydis_VERSION_MINOR}"
+     DEFINE_SYMBOL "ZYDIS_SHOULD_EXPORT")
+-zyan_set_common_flags("Zydis")
+-zyan_maybe_enable_wpo("Zydis")
+ 
+ if (ZYDIS_FEATURE_FORMATTER AND NOT ZYDIS_FEATURE_DECODER)
+     message(
+@@ -273,7 +271,6 @@ if (ZYDIS_BUILD_SHARED_LIB AND WIN32)
+     target_sources("Zydis" PRIVATE "resources/VersionInfo.rc")
+ endif ()
+ 
+-zyan_set_source_group("Zydis")
+ 
+ configure_package_config_file(cmake/zydis-config.cmake.in
+     "${CMAKE_CURRENT_BINARY_DIR}/zydis-config.cmake"
