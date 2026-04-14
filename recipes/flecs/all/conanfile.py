@@ -47,14 +47,9 @@ class FlecsConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) < "3.0.1":
-            tc.variables["FLECS_STATIC_LIBS"] = not self.options.shared
-            tc.variables["FLECS_SHARED_LIBS"] = self.options.shared
-            tc.variables["FLECS_DEVELOPER_WARNINGS"] = False
-        else:
-            tc.variables["FLECS_STATIC"] = not self.options.shared
-            tc.variables["FLECS_SHARED"] = self.options.shared
-            tc.variables["FLECS_TESTS"] = False
+        tc.variables["FLECS_STATIC"] = not self.options.shared
+        tc.variables["FLECS_SHARED"] = self.options.shared
+        tc.variables["FLECS_TESTS"] = False
         tc.variables["FLECS_PIC"] = self.options.get_safe("fPIC", True)
         tc.generate()
 
@@ -74,7 +69,6 @@ class FlecsConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "flecs")
         self.cpp_info.set_property("cmake_target_name", f"flecs::flecs{suffix}")
 
-        # TODO: back to global scope once cmake_find_package* generators removed
         self.cpp_info.components["_flecs"].libs = [f"flecs{suffix}"]
         if not self.options.shared:
             self.cpp_info.components["_flecs"].defines.append("flecs_STATIC")
@@ -84,9 +78,4 @@ class FlecsConan(ConanFile):
             elif self.settings.os == "Windows":
                 self.cpp_info.components["_flecs"].system_libs.extend(["wsock32", "ws2_32", "dbghelp"])
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "flecs"
-        self.cpp_info.names["cmake_find_package_multi"] = "flecs"
-        self.cpp_info.components["_flecs"].names["cmake_find_package"] = f"flecs{suffix}"
-        self.cpp_info.components["_flecs"].names["cmake_find_package_multi"] = f"flecs{suffix}"
         self.cpp_info.components["_flecs"].set_property("cmake_target_name", f"flecs::flecs{suffix}")
