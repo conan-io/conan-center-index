@@ -5,3 +5,4 @@ find_package(Zycore REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE Zycore::Zycore)
+zyan_maybe_enable_wpo(${PROJECT_NAME})
