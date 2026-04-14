@@ -1,4 +1,4 @@
 sources:
-  "2.2.0":
-    url: "https://github.com/ofiwg/libfabric/releases/download/v2.2.0/libfabric-2.2.0.tar.bz2"
-    sha256: "ff6d05240b4a9753bb3d1eaf962f5a06205038df5142374a6ef40f931bb55ecc"
+  "2.5.0":
+    url: "https://github.com/ofiwg/libfabric/releases/download/v2.5.0/libfabric-2.5.0.tar.bz2"
+    sha256: "276019edca708dc0569cf3064a412e395ba7b1883299781caed120594f850995"
