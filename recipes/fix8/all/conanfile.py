@@ -27,11 +27,13 @@ class PackageConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_TBB": [True, False],
         "with_tcmalloc": [True, False],
     }
     default_options = {
         "shared": True,
         "fPIC": True,
+        "with_TBB": True,
         "with_tcmalloc": False,
     }
     implements = ["auto_shared_fpic"]
@@ -42,14 +44,19 @@ class PackageConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if self.options.with_TBB:
+            self.options["hwloc"].shared = True
+            self.options["onetbb"].tbbmalloc = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
         self.folders.build = self.folders.source
 
     def requirements(self):
-        self.requires("poco/1.14.2")
+        self.requires("poco/1.14.2", transitive_headers=True, transitive_libs=True)
         self.requires("zlib/[>=1.2.11 <2]")
+        if self.options.with_TBB:
+            self.requires("onetbb/2022.3.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_tcmalloc:
             self.requires("gperftools/2.15")
 
@@ -99,7 +106,7 @@ class PackageConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
-            copy(self,pattern="*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+            copy(self, pattern="*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
             copy(self, pattern="*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
             copy(self, pattern="*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
             copy(self, pattern="*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
