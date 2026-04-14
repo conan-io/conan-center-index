@@ -1,0 +1,7 @@
+sources:
+  "1.0.2903.40":
+    url: "https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/1.0.2903.40"
+    sha256: "ef128016dd1e51c59178c827ed5b8aa3322c57afa8675d930f8109505542ad74"
+  "1.0.3912.50":
+    url: "https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/1.0.3912.50"
+    sha256: "8dd696301d8e5ad8389f26b636329bbf35754b793974e82168b1f6dda234eb07"
