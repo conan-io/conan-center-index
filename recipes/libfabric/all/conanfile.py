@@ -37,7 +37,7 @@ class LibfabricConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os == "Windows" and self.settings.arch == "armv8":
+        if self.settings.os == "Windows":
             # FIXME: libfabric provides msbuild project files.
             raise ConanInvalidConfiguration(f"{self.ref} Conan recipes is not supported on Windows armv. Contributions are welcome.")
 
