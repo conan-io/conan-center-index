@@ -1,4 +1,4 @@
 sources:
-  "2.4.0":
-    url: "https://github.com/nilstate/icey/archive/refs/tags/2.4.0.tar.gz"
-    sha256: "0c402b56093f392613b61320087bb888d291e80cdcb038dbb360555b6e1b6cc3"
+  "2.4.5":
+    url: "https://github.com/nilstate/icey/archive/refs/tags/2.4.5.tar.gz"
+    sha256: "b8574956fcdd497b79cbb267935972348385b6c679d0239e0debc79afbedfbcf"
