@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -180,6 +181,7 @@ class JemallocConan(ConanFile):
                 rmdir(self, os.path.join(self.package_folder, "lib"))
                 copy(self, "*.lib", os.path.join(self.build_folder, "lib"), os.path.join(self.package_folder, "lib"))
                 copy(self, "*.dll", os.path.join(self.build_folder, "lib"), os.path.join(self.package_folder, "bin"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "jemalloc")

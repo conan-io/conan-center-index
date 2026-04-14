@@ -24,7 +24,7 @@ patches:
       patch_type: "backport"
       patch_source: "https://github.com/jemalloc/jemalloc/issues/2283"
   "5.3.1":
-    - patch_file: "patches/0003-add-missing-cpp-flags-for-windows.patch"
+    - patch_file: "patches/0004-5.3.1-add-missing-cpp-flags-for-windows.patch"
       patch_description: "Add the missing compiler flags for MSVC on Windows."
       patch_type: "backport"
       patch_source: "https://github.com/jemalloc/jemalloc/issues/2283"
