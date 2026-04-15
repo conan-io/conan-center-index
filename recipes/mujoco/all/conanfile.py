@@ -68,10 +68,7 @@ class MujocoConan(ConanFile):
         tc.cache_variables["MUJOCO_TEST_PYTHON_UTIL"] = False
         tc.cache_variables["MUJOCO_WITH_USD"] = False
         tc.cache_variables["MUJOCO_USE_FILAMENT"] = False
-        if self.settings.compiler == "gcc":
-            # INFO: GCC-15 user_init.c:284:3: error: ‘__builtin_strncpy’
-            # https://github.com/google-deepmind/mujoco/pull/3069
-            tc.extra_cflags.append("-Wno-error=stringop-truncation")
+        tc.cache_variables["CMAKE_INTERPROCEDURAL_OPTIMIZATION"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
