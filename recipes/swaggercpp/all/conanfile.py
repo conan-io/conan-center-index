@@ -1,8 +1,11 @@
 import os
 
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, rmdir
+
+required_conan_version = ">=2.0.9"
 
 
 class SwaggerCppRecipe(ConanFile):
@@ -21,13 +24,20 @@ class SwaggerCppRecipe(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cpp-httplib/[>=0.18 <1]")
-        self.requires("nlohmann_json/[>=3.12 <4]")
-        self.requires("yaml-cpp/[>=0.8 <1]")
+        self.requires("cpp-httplib/0.39.0")
+        self.requires("nlohmann_json/3.12.0")
+        self.requires("yaml-cpp/0.9.0")
+
+    def validate(self):
+        check_min_cppstd(self, 23)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -52,10 +62,11 @@ class SwaggerCppRecipe(ConanFile):
              dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["swaggercpp"]
-        self.cpp_info.set_property("cmake_find_mode", "none")
         self.cpp_info.set_property("cmake_file_name", "swaggercpp")
         self.cpp_info.set_property("cmake_target_name", "swaggercpp::swaggercpp")
-        self.cpp_info.includedirs = ["include"]
