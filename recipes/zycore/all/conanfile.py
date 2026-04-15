@@ -6,7 +6,7 @@ import os
 
 required_conan_version = ">=2.4"
 
-# mirror
+
 class ZycoreConan(ConanFile):
     name = "zycore"
     description = "Platform independent types, macros and a fallback for environments without LibC"

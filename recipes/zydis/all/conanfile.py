@@ -6,7 +6,7 @@ import os
 
 required_conan_version = ">=2.4"
 
-# mirror
+
 class ZydisConan(ConanFile):
     name = "zydis"
     description = "Fast and lightweight x86/x86-64 disassembler and code generation library"
