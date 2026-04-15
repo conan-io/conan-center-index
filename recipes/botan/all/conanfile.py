@@ -260,8 +260,6 @@ class BotanConan(ConanFile):
         with chdir(self, self.source_folder):
             # Note: this will fail to properly consider the package_folder if a "conan build" followed by a "conan export-pkg" is executed
             self.run(self._make_install_cmd)
-        if Version(self.version) >= "3.3.0":
-            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
@@ -466,7 +464,10 @@ class BotanConan(ConanFile):
             self.output.warning("Disabling usage of getentropy(), getrandom(), and explicit_bzero() due to old glibc version")
             build_flags.append('--without-os-features=getentropy,getrandom,explicit_bzero')
 
-        build_flags.append('--without-pkg-config')
+        if Version(self.version) >= "3.3.0":
+            # Botan 3.3+ started shipping CMake config files, but we don't need
+            # them for Conan. Disable the installation of those files at build.
+            build_flags.append('--without-cmake-config')
 
         call_python = 'python' if self.settings.os == 'Windows' else ''
 
@@ -479,6 +480,7 @@ class BotanConan(ConanFile):
                          ' --build-targets={targets}'
                          ' --distribution-info="Conan"'
                          ' --without-documentation'
+                         ' --without-pkg-config'
                          ' --cc-abi-flags="{abi}"'
                          ' --extra-cxxflags="{cxxflags}"'
                          ' --cc={compiler}'
