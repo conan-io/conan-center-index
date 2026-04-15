@@ -1,7 +1,7 @@
 sources:
-  "0.5.2":
-    url: "https://github.com/dloebl/cgif/archive/refs/tags/v0.5.2.tar.gz"
-    sha256: "d5e603309176334406d7e4f0063ed96924fe9b0368e8037df2614c0df67bb41b"
+  "0.5.3":
+    url: "https://github.com/dloebl/cgif/archive/refs/tags/v0.5.3.tar.gz"
+    sha256: "dcc7731e974ee77db75df26c99aca4d95f11ca2d267d870d42bce1e0d1e1e75f"
   "0.3.2":
     url: "https://github.com/dloebl/cgif/archive/V0.3.2.tar.gz"
     sha256: "0abf83b7617f4793d9ab3a4d581f4e8d7548b56a29e3f95b0505f842cbfd7f95"
