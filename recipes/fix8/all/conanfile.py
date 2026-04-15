@@ -1,13 +1,13 @@
 from conan import ConanFile, tools
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.env import Environment, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, download
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path, MSBuild
 import os
+import shutil
 
 required_conan_version = ">=2.0.9"
 
@@ -37,6 +37,16 @@ class PackageConan(ConanFile):
         "with_tcmalloc": False,
     }
     implements = ["auto_shared_fpic"]
+
+    def _get_nuget(self):
+        nuget = shutil.which("nuget.exe")
+        if not nuget:
+            dest_path = os.path.join(self.build_folder, "nuget")
+            if not os.path.exists(dest_path):
+                os.makedirs(dest_path)
+            nuget = os.path.join(dest_path, "nuget.exe")
+            download(self, "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe", filename=nuget)
+        return nuget
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -95,7 +105,8 @@ class PackageConan(ConanFile):
         if is_msvc(self):
             os.chdir("msvc")
             msbuild = MSBuild(self)
-            self.run('nuget restore')
+            nuget = self._get_nuget()
+            self.run(f'{nuget} restore')
             msbuild.build("fix8-vc142.sln")
         else:
             autotools = Autotools(self)
