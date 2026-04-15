@@ -305,7 +305,10 @@ class BotanConan(ConanFile):
     @property
     def _configure_cmd(self):
         if self.settings.compiler in ('clang', 'apple-clang'):
-            botan_compiler = 'clang'
+            if Version(self.version) >= "3.5.0" and self.settings.compiler == 'apple-clang':
+                botan_compiler = 'xcode'
+            else:
+                botan_compiler = 'clang'
         elif self.settings.compiler == 'gcc':
             botan_compiler = 'gcc'
         elif self.settings.os == 'Emscripten':
