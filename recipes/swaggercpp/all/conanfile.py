@@ -14,7 +14,7 @@ class SwaggerCppRecipe(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/stescobedo92/swagger-cpp"
-    topics = ("swagger", "openapi", "openapi3", "cpp23", "api")
+    topics = ("swagger", "openapi", "openapi3", "rest", "json", "yaml")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -32,9 +32,9 @@ class SwaggerCppRecipe(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cpp-httplib/0.39.0")
-        self.requires("nlohmann_json/3.12.0")
-        self.requires("yaml-cpp/0.9.0")
+        self.requires("cpp-httplib/0.39.0", visible=False)
+        self.requires("nlohmann_json/3.12.0", transitive_headers=True)
+        self.requires("yaml-cpp/0.9.0", transitive_headers=True)
 
     def validate(self):
         check_min_cppstd(self, 23)
@@ -70,3 +70,4 @@ class SwaggerCppRecipe(ConanFile):
         self.cpp_info.libs = ["swaggercpp"]
         self.cpp_info.set_property("cmake_file_name", "swaggercpp")
         self.cpp_info.set_property("cmake_target_name", "swaggercpp::swaggercpp")
+        self.cpp_info.set_property("pkg_config_name", "swaggercpp")

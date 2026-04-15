@@ -18,6 +18,7 @@ int main() {
     })");
 
     if (!document) {
+        std::cerr << "Failed to parse swagger document\n";
         return 1;
     }
 
