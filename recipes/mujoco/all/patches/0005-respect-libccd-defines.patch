@@ -1,12 +1,12 @@
 Mujoco expects being using CCD as a static library always,
 and by defining CCD_STATIC_DEFINE,
-it disables the use of __declspec(dllimport) in the headers of libccd
+it disables the use of __declspec(dllimport) in the headers of libccd.
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 356e52a..e90d739 100644
+index a3f7d01..2b51d26 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -138,7 +138,7 @@ if(EMSCRIPTEN)
+@@ -139,7 +139,7 @@ if(EMSCRIPTEN)
  endif()
 
 
