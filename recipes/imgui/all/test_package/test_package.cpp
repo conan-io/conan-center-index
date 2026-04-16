@@ -16,6 +16,13 @@ int main(int, char**)
     printf("  with docking\n");
 #endif
 
+#ifdef USE_WCHAR32
+    printf("  with wchar32\n");
+    static_assert(sizeof(ImWchar) == 4, "ImWchar should be 32-bit when IMGUI_USE_WCHAR32 is defined");
+#else
+    static_assert(sizeof(ImWchar) == 2, "ImWchar should be 16-bit by default");
+#endif
+
 #ifdef ENABLE_TEST_ENGINE
     printf("  with test engine\n");
     ImGuiTestEngine *engine = ImGuiTestEngine_CreateContext();
