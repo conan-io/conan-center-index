@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMakeDeps, CMakeToolchain
 import os
 
 
@@ -20,7 +21,6 @@ class AkashaConan(ConanFile):
     package_type = "static-library"
     options = {"fPIC": [True, False]}
     default_options = {"fPIC": True}
-    generators = "CMakeDeps", "CMakeToolchain"
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -30,6 +30,12 @@ class AkashaConan(ConanFile):
     
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def validate(self):
         check_min_cppstd(self, 23)
