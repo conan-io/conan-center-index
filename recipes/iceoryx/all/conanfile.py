@@ -97,6 +97,7 @@ class IceoryxConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["INTROSPECTION"] = "ON"
         tc.cache_variables["TOML_CONFIG"] = self.options.toml_config
         if Version(self.version) >= "2.0.0":
             tc.cache_variables["DOWNLOAD_TOML_LIB"] = False
