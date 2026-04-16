@@ -70,6 +70,9 @@ class OrToolsConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "ortools", "third_party_solvers", "CMakeLists.txt"), "CXX_STANDARD ", "# CXX_STANDARD ")
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "flatzinc.cmake"), "CXX_STANDARD ", "# CXX_STANDARD ")
 
+        # INFO: Skip host.cmake that builds protoc since conan manages that dependency
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(host)", "set(PROTOC_PRG protobuf::protoc)")
+
     def generate(self):
         tc = CMakeToolchain(self)
         if is_msvc(self):
