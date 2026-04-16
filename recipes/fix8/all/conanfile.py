@@ -1,11 +1,11 @@
 from conan import ConanFile, tools
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.env import Environment, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, download
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path, MSBuild
+from conan.tools.microsoft import is_msvc, MSBuild
 import os
 import shutil
 
@@ -97,6 +97,10 @@ class PackageConan(ConanFile):
                 tc.configure_args.extend(["--enable-shared", "--disable-static"])
             else:
                 tc.configure_args.extend(["--disable-shared", "--enable-static"])
+            if is_apple_os(self):
+                for dep in self.dependencies.values():
+                    for libdir in dep.cpp_info.libdirs:
+                        tc.extra_ldflags.append(f"-Wl,-rpath,{libdir}")
             tc.generate()
             tc = PkgConfigDeps(self)
             tc.generate()
@@ -109,10 +113,16 @@ class PackageConan(ConanFile):
             self.run(f'{nuget} restore')
             msbuild.build("fix8-vc142.sln")
         else:
-            autotools = Autotools(self)
-            autotools.autoreconf()
-            autotools.configure()
-            autotools.make()
+            env = Environment()
+            if is_apple_os(self):
+                env.prepend("CXXFLAGS", "-DFIX8_MPMC_SYSTEM=FIX8_MPMC_TBB")
+                env.prepend("CXXFLAGS", "-DFIX8_MALLOC_SYSTEM=FIX8_MALLOC_TBB")
+
+            with env.vars(self).apply():
+                autotools = Autotools(self)
+                autotools.autoreconf()
+                autotools.configure()
+                autotools.make()
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
@@ -136,6 +146,8 @@ class PackageConan(ConanFile):
 
         self.cpp_info.set_property("cmake_target_name", "FIX8::fix8")
         self.cpp_info.set_property("pkg_config_name", "fix8")
+        if is_apple_os(self):
+            self.cpp_info.defines = ["FIX8_MPMC_SYSTEM=FIX8_MPMC_TBB", "FIX8_MALLOC_SYSTEM=FIX8_MALLOC_TBB"]
 
         self.output.info(f"Conan package_info for {self.name}/{self.version}:")
         self.output.info(f"  libs: {self.cpp_info.libs}")
