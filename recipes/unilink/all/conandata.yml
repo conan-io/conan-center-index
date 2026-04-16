@@ -1,4 +1,4 @@
 sources:
-  "0.4.3":
-    url: "https://github.com/jwsung91/unilink/archive/refs/tags/v0.4.3.tar.gz"
-    sha256: "d05375462080f75318c8012a2840ebbb1cbdeb9f96349d4e0f36136598629894"
+  "0.5.0":
+    url: "https://github.com/jwsung91/unilink/archive/refs/tags/v0.5.0.tar.gz"
+    sha256: "803f291b11755e8d0780d7081100eaaf4f88589f7a75be9db71270cf814f6324"
