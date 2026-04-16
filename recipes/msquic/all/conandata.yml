@@ -1,4 +1,15 @@
 sources:
-  "2.5.6":
-    url: "https://github.com/microsoft/msquic/archive/refs/tags/v2.5.6.tar.gz"
-    sha256: "a010a5f8daa3a73623493e99ac09e7e5bbc783ad809904b5a23bfc41a4051550"
+  "2.5.7":
+    url: "https://github.com/microsoft/msquic/archive/refs/tags/v2.5.7.tar.gz"
+    sha256: "ef447e3fb2e3d7e2dd2edfe23576e0e5fb7225073d8e83b30ca4e2a63a99b9e5"
+submodules:
+  "2.5.7":
+    quictls:
+      url: "https://github.com/quictls/openssl/archive/refs/tags/openssl-3.3.0-quic1.tar.gz"
+      sha256: "78d675d94c0ac3a8b44073f0c2b373d948c5afd12b25c9e245262f563307a566"
+    clog:
+      url: "https://github.com/microsoft/CLOG/archive/6a08c15cccbd9129d64732cd017828c5715825f7.tar.gz"
+      sha256: "7312eb1d518278f8ff4d63f6149d2e6d6dc719c33967f9acd42cdf7f0ce311a8"
+    xdp-for-windows:
+      url: "https://github.com/microsoft/xdp-for-windows/archive/refs/tags/v1.3.0.tar.gz"
+      sha256: "40be6eb3ed7f94c6fa2786207fce03ba9a3a901c7b1c137e70885f71a3847d1d"

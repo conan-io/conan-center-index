@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
-project(PackageTest C)
+project(test_package LANGUAGES C)
 
 find_package(msquic CONFIG REQUIRED)
 
-add_executable(example src/example.c)
-target_link_libraries(example msquic::msquic)
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE msquic::msquic)
