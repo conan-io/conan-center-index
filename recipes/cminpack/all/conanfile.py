@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.apple import is_apple_os
 import os
 
 required_conan_version = ">=1.54.0"
@@ -93,8 +94,9 @@ class CMinpackConan(ConanFile):
             self.cpp_info.components['cminpack-single'].system_libs.append("m")
 
         # required apple frameworks
-        self.cpp_info.components['cminpack-double'].frameworks.append("Accelerate")
-        self.cpp_info.components['cminpack-single'].frameworks.append("Accelerate")
+        if is_apple_os(self):
+            self.cpp_info.components['cminpack-double'].frameworks.append("Accelerate")
+            self.cpp_info.components['cminpack-single'].frameworks.append("Accelerate")
 
         if not self.options.shared and self.settings.os == "Windows":
             self.cpp_info.components['cminpack-double'].defines.append("CMINPACK_NO_DLL")
