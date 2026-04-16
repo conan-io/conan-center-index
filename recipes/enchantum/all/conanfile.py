@@ -17,7 +17,6 @@ class EnchantumConan(ConanFile):
     topics = ("enum", "metaprogramming", "reflection", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
