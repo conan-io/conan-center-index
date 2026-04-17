@@ -1,0 +1,24 @@
+diff --git a/OpenXLSX/headers/XLCellReference.hpp b/OpenXLSX/headers/XLCellReference.hpp
+index a7478101..a1cc7663 100644
+--- a/OpenXLSX/headers/XLCellReference.hpp
++++ b/OpenXLSX/headers/XLCellReference.hpp
+@@ -53,6 +53,7 @@ YM      M9  MM    MM MM       MM    MM   d'  `MM.    MM            MM   d'  `MM.
+ // ===== External Includes ===== //
+ #include <string>
+ #include <utility>
++#include <cstdint>
+ 
+ // ===== OpenXLSX Includes ===== //
+ #include "OpenXLSX-Exports.hpp"
+diff --git a/OpenXLSX/headers/XLColor.hpp b/OpenXLSX/headers/XLColor.hpp
+index c08f25e0..55e3e936 100644
+--- a/OpenXLSX/headers/XLColor.hpp
++++ b/OpenXLSX/headers/XLColor.hpp
+@@ -52,6 +52,7 @@ YM      M9  MM    MM MM       MM    MM   d'  `MM.    MM            MM   d'  `MM.
+ 
+ // ===== External Includes ===== //
+ #include <string>
++#include <cstdint>
+ 
+ // ===== OpenXLSX Includes ===== //
+ #include "OpenXLSX-Exports.hpp"

@@ -1,53 +1,18 @@
 sources:
-  "16.8":
-    url: "https://ftp.postgresql.org/pub/source/v16.8/postgresql-16.8.tar.bz2"
-    sha256: "9468083a56ce0ee7d294601b74dad3dd9fc69d87aff61f0a9fb63c813ff7efd8"
-  "15.12":
-    url: "https://ftp.postgresql.org/pub/source/v15.12/postgresql-15.12.tar.bz2"
-    sha256: "3bc8462a38ca0857270cc88b949a3f6659f0d5c44c029c482355835b61a0f6f7"
-  "15.5":
-    url: "https://ftp.postgresql.org/pub/source/v15.5/postgresql-15.5.tar.bz2"
-    sha256: "8f53aa95d78eb8e82536ea46b68187793b42bba3b4f65aa342f540b23c9b10a6"
-  "15.4":
-    url: "https://ftp.postgresql.org/pub/source/v15.4/postgresql-15.4.tar.bz2"
-    sha256: "baec5a4bdc4437336653b6cb5d9ed89be5bd5c0c58b94e0becee0a999e63c8f9"
-  "15.3":
-    url: "https://ftp.postgresql.org/pub/source/v15.3/postgresql-15.3.tar.bz2"
-    sha256: "ffc7d4891f00ffbf5c3f4eab7fbbced8460b8c0ee63c5a5167133b9e6599d932"
-  "14.9":
-    url: "https://ftp.postgresql.org/pub/source/v14.9/postgresql-14.9.tar.bz2"
-    sha256: "b1fe3ba9b1a7f3a9637dd1656dfdad2889016073fd4d35f13b50143cbbb6a8ef"
+  "16.13":
+    url: "https://ftp.postgresql.org/pub/source/v16.13/postgresql-16.13.tar.bz2"
+    sha256: "dc2ddbbd245c0265a689408e3d2f2f3f9ba2da96bd19318214b313cdd9797287"
+  "15.17":
+    url: "https://ftp.postgresql.org/pub/source/v15.17/postgresql-15.17.tar.bz2"
+    sha256: "ae14f24c14727e0b2ded1c5553031666099bd1054db3ef44bfa6e2bd6d554a56"
+  "14.22":
+    url: "https://ftp.postgresql.org/pub/source/v14.22/postgresql-14.22.tar.bz2"
+    sha256: "f57938ad30067077720277f6d7db05aafc07d1545efd2ed82f199ba828a7ad34"
 patches:
-  "16.8":
+  "16.13":
     - patch_file: "patches/16/001-mingw-build-static-libraries.patch"
-      patch_description: "port MinGW: Enable building static libraries in MinGW."
-      patch_type: "portability"
-  "15.12":
+  "15.17":
     - patch_file: "patches/15/001-mingw-build-static-libraries.patch"
-      patch_description: "port MinGW: Enable building static libraries in MinGW."
-      patch_type: "portability"
-  "15.5":
-    - patch_file: "patches/15/001-mingw-build-static-libraries.patch"
-      patch_description: "port MinGW: Enable building static libraries in MinGW."
-      patch_type: "portability"
-    - patch_file: "patches/15.5/0001-Use-BIO_-get-set-_app_data-instead-of-BIO_-get-se.patch"
-      patch_description: "Fix libpq w/ openssl >=3.2.x"
-      patch_type: "backport"
-  "15.4":
-    - patch_file: "patches/15/001-mingw-build-static-libraries.patch"
-      patch_description: "port MinGW: Enable building static libraries in MinGW."
-      patch_type: "portability"
-    - patch_file: "patches/15/0001-Use-BIO_-get-set-_app_data-instead-of-BIO_-get-se.patch"
-      patch_description: "Fix libpq w/ openssl >=3.2.x"
-      patch_type: "backport"
-  "15.3":
-    - patch_file: "patches/15/001-mingw-build-static-libraries.patch"
-      patch_description: "port MinGW: Enable building static libraries in MinGW."
-      patch_type: "portability"
-    - patch_file: "patches/15/0001-Use-BIO_-get-set-_app_data-instead-of-BIO_-get-se.patch"
-      patch_description: "Fix libpq w/ openssl >=3.2.x"
-      patch_type: "backport"
-  "14.9":
+  "14.22":
     - patch_file: "patches/14/002-mingw-build-static-libraries.patch"
-      patch_description: "port MinGW: Enable building static libraries in MinGW."
-      patch_type: "portability"
+

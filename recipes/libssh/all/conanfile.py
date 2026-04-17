@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 import os
 
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.21"
 
 
 class LibSSHRecipe(ConanFile):
@@ -33,9 +33,6 @@ class LibSSHRecipe(ConanFile):
         "with_symbol_versioning": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -56,7 +53,7 @@ class LibSSHRecipe(ConanFile):
         if self.options.crypto_backend =="openssl":
             self.requires("openssl/[>=1.1 <4]")
         elif self.options.crypto_backend == "gcrypt":
-            self.requires("libgcrypt/1.8.4")
+            self.requires("libgcrypt/[>=1.8.4 <2]")
         elif self.options.crypto_backend == "mbedtls":
             self.requires("mbedtls/3.6.0")
 
@@ -69,28 +66,30 @@ class LibSSHRecipe(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CLIENT_TESTING"] = False
-        tc.variables["SERVER_TESTING"] = False
-        tc.variables["WITH_EXAMPLES"] = False
-        tc.variables["WITH_GCRYPT"] = self.options.crypto_backend == "gcrypt"
-        tc.variables["WITH_GSSAPI"] = False
-        tc.variables["WITH_MBEDTLS"] = self.options.crypto_backend == "mbedtls"
-        tc.variables["WITH_NACL"] = False
-        tc.variables["WITH_SYMBOL_VERSIONING"] = self.options.get_safe("with_symbol_versioning", True)
+        tc.cache_variables["CLIENT_TESTING"] = False
+        tc.cache_variables["SERVER_TESTING"] = False
+        tc.cache_variables["WITH_EXAMPLES"] = False
+        tc.cache_variables["WITH_GCRYPT"] = self.options.crypto_backend == "gcrypt"
+        tc.cache_variables["WITH_GSSAPI"] = False
+        tc.cache_variables["WITH_MBEDTLS"] = self.options.crypto_backend == "mbedtls"
+        tc.cache_variables["WITH_NACL"] = False
+        tc.cache_variables["WITH_SYMBOL_VERSIONING"] = self.options.get_safe("with_symbol_versioning", True)
         tc.variables["WITH_ZLIB"] = self.options.with_zlib
         if is_msvc(self):
-            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+            tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
+
         deps = CMakeDeps(self)
+        deps.set_property("libgcrypt", "cmake_file_name", "GCrypt")
+        deps.set_property("libgcrypt", "cmake_additional_variables_prefixes", ["GCRYPT"])
+        deps.set_property("libgcrypt", "cmake_extra_variables", {"GCRYPT_FOUND": "TRUE"})
+        deps.set_property("mbedtls", "cmake_additional_variables_prefixes", ["MBEDTLS"])
+        deps.set_property("mbedtls", "cmake_extra_variables", {"MBEDTLS_FOUND": "TRUE"})
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

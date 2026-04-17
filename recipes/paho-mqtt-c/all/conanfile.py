@@ -80,9 +80,14 @@ class PahoMqttcConan(ConanFile):
 
     def _patch_source(self):
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "SET(CMAKE_MODULE_PATH \"${CMAKE_SOURCE_DIR}/cmake/modules\")",
-                        "LIST(APPEND CMAKE_MODULE_PATH \"${CMAKE_SOURCE_DIR}/cmake/modules\")")
+        if Version(self.version) < "1.3.14": # pylint: disable=conan-condition-evals-to-constant
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "SET(CMAKE_MODULE_PATH \"${CMAKE_SOURCE_DIR}/cmake/modules\")",
+                            "LIST(APPEND CMAKE_MODULE_PATH \"${CMAKE_SOURCE_DIR}/cmake/modules\")")
+        elif Version(self.version) < "1.3.17": # pylint: disable=conan-condition-evals-to-constant
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "set(CMAKE_MODULE_PATH \"${PROJECT_SOURCE_DIR}/cmake/modules\")",
+                            "list(APPEND CMAKE_MODULE_PATH \"${PROJECT_SOURCE_DIR}/cmake/modules\")")
         if not self.options.get_safe("fPIC", True):
             replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "POSITION_INDEPENDENT_CODE ON", "")
 

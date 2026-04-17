@@ -5,7 +5,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import get, rmdir, copy
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class LibYangConan(ConanFile):
@@ -16,6 +16,7 @@ class LibYangConan(ConanFile):
     homepage = "https://github.com/CESNET/libyang"
     topics = ("yang", "bsd", "netconf", "restconf", "yin")
     settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
     options = {"shared": [True, False],
                "fPIC": [True, False]}
     default_options = {
@@ -50,9 +51,11 @@ class LibYangConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ENABLE_TESTS"] = False
-        tc.variables["ENABLE_VALGRIND_TESTS"] = False
-        tc.variables["ENABLE_STATIC"] = not self.options.shared
+        tc.cache_variables["ENABLE_TESTS"] = False
+        tc.cache_variables["ENABLE_VALGRIND_TESTS"] = False
+        tc.cache_variables["ENABLE_COMMON_TARGETS"] = False
+        tc.cache_variables["ENABLE_YANGLINT_INTERACTIVE"] = False
+        tc.cache_variables["ENABLE_TOOLS"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         tc = CMakeDeps(self)

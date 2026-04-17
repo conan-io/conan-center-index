@@ -57,7 +57,7 @@ class OpusFileConan(ConanFile):
 
     def requirements(self):
         self.requires("ogg/1.3.5", transitive_headers=True)
-        self.requires("opus/1.4", transitive_headers=True)
+        self.requires("opus/[>=1.4 <2]", transitive_headers=True)
         if self.options.http:
             self.requires("openssl/[>=1.1 <4]")
 

@@ -39,6 +39,7 @@ class CMakeConan(ConanFile):
     def requirements(self):
         if self.options.get_safe("with_openssl", default=False):
             self.requires("openssl/[>=1.1 <4]")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def validate_build(self):
         if self.settings.os == "Windows" and self.options.bootstrap:
@@ -121,6 +122,7 @@ class CMakeConan(ConanFile):
             # the windows SDK available in the system
             if is_msvc(self) and not self.conf.get("tools.cmake.cmaketoolchain:system_version"):
                 tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0"
+            tc.cache_variables["CMAKE_USE_SYSTEM_ZLIB"] = True
             tc.generate()
             tc = CMakeDeps(self)
             # CMake try_compile failure: https://github.com/conan-io/conan-center-index/pull/16073#discussion_r1110037534
