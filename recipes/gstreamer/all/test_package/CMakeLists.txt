@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES C)
 
-find_package(gstreamer REQUIRED CONFIG)
+find_package(GStreamer REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_link_libraries(${PROJECT_NAME} PRIVATE
-        gstreamer::gstreamer-1.0 gstreamer::gstreamer-base-1.0 gstreamer::gstreamer-controller-1.0
-        gstreamer::gstreamer-net-1.0 gstreamer::gstreamer-check-1.0)
-    if (TARGET gstreamer::gstcoreelements)
-        target_link_libraries(${PROJECT_NAME} PRIVATE gstreamer::gstcoreelements)
+        GStreamer::gstreamer-1.0 GStreamer::gstreamer-base-1.0 GStreamer::gstreamer-controller-1.0
+        GStreamer::gstreamer-net-1.0 GStreamer::gstreamer-check-1.0)
+    if (TARGET GStreamer::gstcoreelements)
+        target_link_libraries(${PROJECT_NAME} PRIVATE GStreamer::gstcoreelements)
     endif ()
 else()
     find_package(PkgConfig REQUIRED)

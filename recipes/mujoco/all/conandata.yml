@@ -1,0 +1,8 @@
+sources:
+  "3.7.0":
+    url: "https://github.com/google-deepmind/mujoco/archive/refs/tags/3.7.0.tar.gz"
+    sha256: "16d6fce6858c02ebeb1d876a89ca288cb03321639a0ecccb19634a52f35a131f"
+patches:
+  "3.7.0":
+    - patch_file: "patches/0001-external-dependencies.patch"
+    - patch_file: "patches/0002-build-options.patch"

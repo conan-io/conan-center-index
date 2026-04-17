@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.15)
 project(wiringPi LANGUAGES C)
 
 file(GLOB SRC_FILES ${WIRINGPI_SRC_DIR}/wiringPi/*.c)
