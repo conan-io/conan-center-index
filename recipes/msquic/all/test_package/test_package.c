@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "msquic.h"
+#include "quic_platform.h"
 
 int main(void) {
     const QUIC_API_TABLE *MsQuic = NULL;
@@ -11,6 +12,6 @@ int main(void) {
     } else {
         printf("MsQuic load failed: 0x%x\n", Status);
     }
-
+    CxPlatSystemLoad();
     return 0;
 }

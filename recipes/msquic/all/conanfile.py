@@ -9,15 +9,15 @@ required_conan_version = ">=2.4.0"
 
 class MsQuicConan(ConanFile):
     name = "msquic"
-    package_type = "library"
+    package_type = "static-library"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Cross-platform, C implementation of the IETF QUIC protocol"
     homepage = "https://github.com/microsoft/msquic"
     topics = ("quic", "networking", "protocol", "microsoft", "ietf")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": True, "fPIC": True}
+    options = {"fPIC": [True, False]}
+    default_options = {"fPIC": True}
     implements = ["auto_shared_fpic"]
     languages = "C"
 
@@ -37,7 +37,7 @@ class MsQuicConan(ConanFile):
         tc.cache_variables["QUIC_BUILD_TOOLS"] = False
         tc.cache_variables["QUIC_BUILD_TEST"] = False
         tc.cache_variables["QUIC_BUILD_PERF"] = False
-        tc.cache_variables["QUIC_BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["QUIC_BUILD_SHARED"] = False
         tc.generate()
 
     def build(self):
@@ -57,7 +57,9 @@ class MsQuicConan(ConanFile):
         self.cpp_info.libs = ["msquic"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "dl", "m"]
+            self.cpp_info.defines = ["CX_PLATFORM_LINUX"]
         elif self.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreFoundation", "Security"]
+            self.cpp_info.defines = ["CX_PLATFORM_DARWIN"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32", "schannel", "ntdll", "bcrypt", "ncrypt", "crypt32", "iphlpapi", "advapi32", "secur32"]
