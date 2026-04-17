@@ -25,7 +25,7 @@ class NxppConan(ConanFile):
         check_min_cppstd(self, "20")
 
     def requirements(self):
-        self.requires("boost/[>=1.74.0 <2]", transitive_headers=True)
+        self.requires("boost/[>=1.86.0 <2]", transitive_headers=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16]")
