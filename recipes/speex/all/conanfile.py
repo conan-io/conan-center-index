@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import Environment, VirtualRunEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -60,7 +60,6 @@ class SpeexConan(ConanFile):
     def generate(self):
         if not cross_building(self):
             VirtualRunEnv(self).generate(scope="build")
-        VirtualBuildEnv(self).generate()
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--disable-binaries")
         if is_msvc(self) and check_min_vs(self, "180", raise_invalid=False):
