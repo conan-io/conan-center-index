@@ -118,7 +118,7 @@ class PocoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.26]")
+        self.tool_requires("cmake/4.2.3")
 
     def requirements(self):
         self.requires("pcre2/[>=10.42 <11]")
@@ -173,8 +173,7 @@ class PocoConan(ConanFile):
             raise ConanInvalidConfiguration("Conflicting enable_netssl[_win] settings")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)        
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -184,6 +183,7 @@ class PocoConan(ConanFile):
                 tc.variables[comp.option.upper()] = self.options.get_safe(comp.option, False)
         tc.cache_variables["POCO_UNBUNDLED"] = True
         tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
+        tc.cache_variables["POCO_MINIMAL_BUILD"] = True
         if is_msvc(self):
             tc.variables["POCO_MT"] = is_msvc_static_runtime(self)
         if not self.options.enable_apacheconnector:
@@ -212,11 +212,11 @@ class PocoConan(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("expat", "cmake_file_name", "EXPAT")
         deps.set_property("expat", "cmake_target_name", "EXPAT::EXPAT")
-        deps.set_property("expat", "cmake_find_mode", "config")
+        # deps.set_property("expat", "cmake_find_mode", "config")
         deps.set_property("libmysqlclient", "cmake_file_name", "mysql")
         deps.set_property("libmysqlclient", "cmake_target_name", "MySQL::client")
         deps.set_property("libmysqlclient", "cmake_additional_variables_prefixes", ["MYSQL"])
-        deps.set_property("libmysqlclient", "cmake_find_mode", "config")
+        # deps.set_property("libmysqlclient", "cmake_find_mode", "config")
         deps.set_property("libpq", "cmake_target_name", "PostgreSQL::PostgreSQL")
         deps.set_property("libpq", "cmake_target_aliases", ["PostgreSQL::client"])
         deps.set_property("libpq", "cmake_file_name", "PostgreSQL")
@@ -225,6 +225,7 @@ class PocoConan(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

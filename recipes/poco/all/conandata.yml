@@ -1,10 +1,7 @@
 sources:
-  "1.15.0":
-    url: "https://github.com/pocoproject/poco/archive/poco-1.15.0-release.tar.gz"
-    sha256: "5042931e043c127ee7eb7f5274c1aef9af77cb1f38247f6c8acdb6498104d0e3"
-patches:
-  "1.15.0":
-    - patch_file: patches/1.15.0-0001-zlib-handling.patch
-    - patch_file: patches/1.15.0-0002-mysql-include.patch
-    - patch_file: patches/1.15.0-0003-fix-cmake-unbudled.patch
-    - patch_file: patches/1.15.0-0004-fix-pcre-unbundled.patch
+  "1.15.2":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.15.2-release.tar.gz"
+    sha256: "aed7f94b3ea6a0d22f3bebaa368c76def029a5a45c9b3ea105e19e84e3530b3f"
+#patches:
+#  "1.15.2":
+#    - patch_file: "patches/1.15.2-0001-fix-cmake4-imported-global.patch"

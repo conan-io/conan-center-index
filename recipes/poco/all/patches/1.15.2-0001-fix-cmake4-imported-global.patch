@@ -1,0 +1,14 @@
+diff --git a/dependencies/zlib/CMakeLists.txt b/dependencies/zlib/CMakeLists.txt
+index 0c47c68..e65ec1d 100644
+--- a/dependencies/zlib/CMakeLists.txt
++++ b/dependencies/zlib/CMakeLists.txt
+@@ -8,8 +8,7 @@
+ # Poco only uses the low-level streaming API.
+ 
+ if(POCO_UNBUNDLED)
+-	find_package(ZLIB REQUIRED)
+-	set_target_properties(ZLIB::ZLIB PROPERTIES IMPORTED_GLOBAL TRUE)
++	find_package(ZLIB REQUIRED GLOBAL)
+ else()
+ 
+ 	# Sources
