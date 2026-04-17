@@ -185,5 +185,5 @@ class OrToolsConan(ConanFile):
         self.cpp_info.components["flatzinc"].libs = ["ortools_flatzinc"]
         self.cpp_info.components["flatzinc"].set_property("cmake_target_name", "ortools::flatzinc")
         self.cpp_info.components["flatzinc"].requires = ["ortools"]
-        self.cpp_info.components["flatzinc"].location = os.join.path(self.package_folder, "bin")
+        self.cpp_info.components["flatzinc"].location = os.path.join(self.package_folder, "bin")
         self.cpp_info.components["flatzinc"].exe = "fzn-cp-sat"
