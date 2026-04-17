@@ -1,4 +1,7 @@
 sources:
+  "1.10":
+    url: "https://github.com/reo7sp/tgbot-cpp/archive/refs/tags/v1.10.tar.gz"
+    sha256: "e81b1fd79e550a759ec2abf651373bd5f452fb898a4c12dd91a223adc9c71b50"
   "1.9.1":
     url: "https://github.com/reo7sp/tgbot-cpp/archive/v1.9.1.tar.gz"
     sha256: "632aa24722e0744280f6c20ebe458a5fd47cba5d8221f4530f395639937c108c"
