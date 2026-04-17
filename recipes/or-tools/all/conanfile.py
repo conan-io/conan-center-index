@@ -117,7 +117,6 @@ class OrToolsConan(ConanFile):
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.libs = ["ortools"]
         self.cpp_info.set_property("cmake_file_name", "ortools")
         self.cpp_info.components["ortools"].libs = ["ortools"]
 
