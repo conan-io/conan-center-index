@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake
+from conan.tools.microsoft import is_msvc
 import os
 
 
@@ -10,6 +11,8 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        if is_msvc(self):
+            self.tool_requires("cmake/[>=3.22 <4]")
 
     def layout(self):
         cmake_layout(self)
