@@ -42,6 +42,8 @@ class ClickHouseCppConan(ConanFile):
         self.requires("lz4/1.9.4")
         self.requires("abseil/[>=20230125.3 <=20250127.0]", transitive_headers=True)
         self.requires("cityhash/1.0.1")
+        if Version(self.version) >= "2.6.0":
+            self.requires("zstd/[~1.5]")
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
 
@@ -66,6 +68,8 @@ class ClickHouseCppConan(ConanFile):
         tc.cache_variables["WITH_SYSTEM_ABSEIL"] = True
         tc.cache_variables["WITH_SYSTEM_LZ4"] = True
         tc.cache_variables["WITH_SYSTEM_CITYHASH"] = True
+        if Version(self.version) >= "2.6.0":
+            tc.cache_variables["WITH_SYSTEM_ZSTD"] = True
         tc.cache_variables["DEBUG_DEPENDENCIES"] = False
         if Version(self.version) <= "2.5.1":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
