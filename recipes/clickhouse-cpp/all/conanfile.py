@@ -39,11 +39,14 @@ class ClickHouseCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("lz4/1.9.4")
-        self.requires("abseil/[>=20230125.3 <=20250127.0]", transitive_headers=True)
-        self.requires("cityhash/1.0.1")
         if Version(self.version) >= "2.6.0":
+            self.requires("lz4/[>=1.9.4 <2]")
+            self.requires("abseil/[>=20230125.3 <=20260107.1]", transitive_headers=True)
             self.requires("zstd/[~1.5]")
+        else:
+            self.requires("lz4/1.9.4")
+            self.requires("abseil/[>=20230125.3 <=20250127.0]", transitive_headers=True)
+        self.requires("cityhash/1.0.1")
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
 
@@ -60,6 +63,15 @@ class ClickHouseCppConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         # Let's avoid upstream setting the CMAKE_CXX_STANDARD 17
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "USE_CXX17", "# USE_CXX17")
+        if Version(self.version) >= "2.6.0":
+            # Conan's zstd recipe exports `zstd::libzstd` (alias) rather than the
+            # `zstd::zstd` target upstream's Findzstd.cmake creates.
+            replace_in_file(self, os.path.join(self.source_folder, "clickhouse", "CMakeLists.txt"),
+                            "zstd::zstd", "zstd::libzstd")
+            # Drop upstream's -Werror so consumers building with a newer C++ standard
+            # (e.g. C++20's -Wdeprecated-enum-enum-conversion) aren't blocked by warnings.
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "-Wall -Wextra -Werror", "-Wall -Wextra")
 
     def generate(self):
         tc = CMakeToolchain(self)
