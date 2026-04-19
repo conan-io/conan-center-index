@@ -5,7 +5,7 @@ from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, rm, rmdir, get
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.microsoft import is_msvc
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 
