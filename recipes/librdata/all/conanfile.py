@@ -94,6 +94,10 @@ class Librdata(ConanFile):
             fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libs = ["rdata"]
+        if is_msvc(self):
+            self.cpp_info.libs = ["librdata"]
+        else:
+            self.cpp_info.libs = ["rdata"]
+            
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs.append("m")
