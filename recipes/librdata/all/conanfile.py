@@ -53,9 +53,6 @@ class Librdata(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def _patch_sources(self):
         apply_conandata_patches(self)
 
@@ -97,7 +94,6 @@ class Librdata(ConanFile):
             fix_apple_shared_install_name(self)
 
     def package_info(self):
-        suffix = "_i" if is_msvc(self) and self.options.shared else ""
-        self.cpp_info.libs = [f"rdata{suffix}"]
+        self.cpp_info.libs = ["rdata"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs.append("m")
