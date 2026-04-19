@@ -1,0 +1,14 @@
+--- a/LAPACKE/CMakeLists.txt
++++ b/LAPACKE/CMakeLists.txt
+@@ -102,7 +102,10 @@
+   $<INSTALL_INTERFACE:include>
+ )
+ if(WIN32 AND NOT UNIX)
+-  target_compile_definitions(${LAPACKELIB} PUBLIC HAVE_LAPACK_CONFIG_H LAPACK_COMPLEX_STRUCTURE)
++  target_compile_definitions(${LAPACKELIB}_obj PRIVATE HAVE_LAPACK_CONFIG_H LAPACK_COMPLEX_STRUCTURE)
++  if(BUILD_INDEX64_EXT_API)
++    target_compile_definitions(${LAPACKELIB}_64_obj PRIVATE HAVE_LAPACK_CONFIG_H LAPACK_COMPLEX_STRUCTURE)
++  endif()
+   message(STATUS "Windows BUILD")
+ endif()
+

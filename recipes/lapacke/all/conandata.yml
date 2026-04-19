@@ -2,3 +2,11 @@ sources:
   "3.12.1":
     url: "https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v3.12.1.tar.gz"
     sha256: "2ca6407a001a474d4d4d35f3a61550156050c48016d949f0da0529c0aa052422"
+patches:
+  "3.12.1":
+    - patch_file: "patches/3.12.1/0001-skip-fortran-checks.patch"
+      patch_description: "Skip Fortran compiler checks for BLAS/LAPACK when using pre-built OpenBLAS"
+      patch_type: "conan"
+    - patch_file: "patches/3.12.1/0002-fix-windows-compile-definitions.patch"
+      patch_description: "Use PRIVATE scope and _obj target for Windows compile definitions"
+      patch_type: "bugfix"

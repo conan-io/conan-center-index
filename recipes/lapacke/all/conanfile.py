@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import glob
 import os
@@ -26,6 +26,9 @@ class LapackeConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def requirements(self):
         self.requires("openblas/0.3.30")
@@ -64,32 +67,16 @@ class LapackeConan(ConanFile):
             if os.path.isfile(path) and not path.lower().endswith((".dll", ".so", ".dylib"))
         ), None)
         if openblas_lib:
-            tc.variables["LAPACK_LIBRARIES"] = openblas_lib.replace("\\", "/")
+            openblas_lib = openblas_lib.replace("\\", "/")
+            tc.variables["BLAS_LIBRARIES"] = openblas_lib
+            tc.variables["LAPACK_LIBRARIES"] = openblas_lib
 
         if Version(self.version) < "3.13":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
-    def _patch_sources(self):
-        if self.settings.os == "Windows":
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "LAPACKE", "CMakeLists.txt"),
-                """if(WIN32 AND NOT UNIX)
-  target_compile_definitions(${LAPACKELIB} PUBLIC HAVE_LAPACK_CONFIG_H LAPACK_COMPLEX_STRUCTURE)
-  message(STATUS \"Windows BUILD\")
-endif()""",
-                """if(WIN32 AND NOT UNIX)
-  target_compile_definitions(${LAPACKELIB}_obj PRIVATE HAVE_LAPACK_CONFIG_H LAPACK_COMPLEX_STRUCTURE)
-  if(BUILD_INDEX64_EXT_API)
-    target_compile_definitions(${LAPACKELIB}_64_obj PRIVATE HAVE_LAPACK_CONFIG_H LAPACK_COMPLEX_STRUCTURE)
-  endif()
-  message(STATUS \"Windows BUILD\")
-endif()""",
-            )
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build(target="lapacke")

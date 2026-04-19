@@ -1,0 +1,55 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -225,19 +225,8 @@
+
+ # Check the usage of the user provided BLAS libraries
+ if(BLAS_LIBRARIES)
+-  enable_language(Fortran)
+-  include(CheckFortranFunctionExists)
+-  set(CMAKE_REQUIRED_LIBRARIES ${BLAS_LIBRARIES})
+-  CHECK_FORTRAN_FUNCTION_EXISTS("dgemm" BLAS_FOUND)
+-  unset(CMAKE_REQUIRED_LIBRARIES)
+-  if(BLAS_FOUND)
+-    message(STATUS "--> BLAS supplied by user is WORKING, will use ${BLAS_LIBRARIES}.")
+-  else()
+-    message(ERROR "--> BLAS supplied by user is not WORKING, CANNOT USE ${BLAS_LIBRARIES}.")
+-    message(ERROR "-->     Will use REFERENCE BLAS (by default)")
+-    message(ERROR "-->     Or Correct your BLAS_LIBRARIES entry ")
+-    message(ERROR "-->     Or Consider checking USE_OPTIMIZED_BLAS")
+-  endif()
++  set(BLAS_FOUND TRUE)
++  message(STATUS "--> BLAS supplied by user is assumed working, will use ${BLAS_LIBRARIES}.")
+
+ # User did not provide a BLAS Library but specified to search for one
+ elseif(USE_OPTIMIZED_BLAS)
+@@ -281,28 +270,8 @@
+
+ # Check the usage of the user provided or automatically found LAPACK libraries
+ if(LAPACK_LIBRARIES)
+-  include(CheckLanguage)
+-  check_language(Fortran)
+-  if(CMAKE_Fortran_COMPILER)
+-    enable_language(Fortran)
+-    include(CheckFortranFunctionExists)
+-    set(CMAKE_REQUIRED_LIBRARIES ${LAPACK_LIBRARIES})
+-    # Check if new routine of 3.4.0 is in LAPACK_LIBRARIES
+-    CHECK_FORTRAN_FUNCTION_EXISTS("dgeqrt" LATESTLAPACK_FOUND)
+-    unset(CMAKE_REQUIRED_LIBRARIES)
+-    if(LATESTLAPACK_FOUND)
+-      message(STATUS "--> LAPACK supplied by user is WORKING, will use ${LAPACK_LIBRARIES}.")
+-    else()
+-      message(ERROR "--> LAPACK supplied by user is not WORKING or is older than LAPACK 3.4.0, CANNOT USE ${LAPACK_LIBRARIES}.")
+-      message(ERROR "-->     Will use REFERENCE LAPACK (by default)")
+-      message(ERROR "-->     Or Correct your LAPACK_LIBRARIES entry ")
+-      message(ERROR "-->     Or Consider checking USE_OPTIMIZED_LAPACK")
+-    endif()
+-  else()
+-    message(STATUS "--> LAPACK supplied by user is ${LAPACK_LIBRARIES}.")
+-    message(STATUS "--> CMake couldn't find a Fortran compiler, so it cannot check if the provided LAPACK library works.")
+-    set(LATESTLAPACK_FOUND TRUE)
+-  endif()
++  set(LATESTLAPACK_FOUND TRUE)
++  message(STATUS "--> LAPACK supplied by user is assumed working, will use ${LAPACK_LIBRARIES}.")
+ endif()
+
+ # Neither user specified or optimized LAPACK libraries can be used
