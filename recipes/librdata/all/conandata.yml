@@ -7,4 +7,4 @@ patches:
     - patch_file: "patches/0001-build-on-windows.patch"
       patch_description: "Enable to build on Windows"
       patch_type: "portability"
-      patch_source: "https://github.com/WizardMac/librdata/pull/52/commits/a8182c1e8eb796f856b35d4087cf9413a5211c50"
+      patch_source: "https://github.com/WizardMac/librdata/pull/52/commits/af71477b28d0e6ac6a7ffb3f1db35a648e314b45"

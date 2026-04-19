@@ -1,9 +1,9 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 0000000..8281d84
+index 0000000..99ba64d
 --- /dev/null
 +++ b/CMakeLists.txt
-@@ -0,0 +1,88 @@
+@@ -0,0 +1,90 @@
 +cmake_minimum_required(VERSION 3.15)
 +project(librdata LANGUAGES C)
 +
@@ -12,6 +12,8 @@ index 0000000..8281d84
 +option(WITH_ZLIB "Enable zlib compression support" ON)
 +option(WITH_BZIP2 "Enable bzip2 compression support" ON)
 +option(WITH_LZMA "Enable lzma/xz compression support" ON)
++
++set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 +
 +file(GLOB RDATA_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h")
 +file(GLOB RDATA_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
