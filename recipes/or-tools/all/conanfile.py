@@ -54,6 +54,8 @@ class OrToolsConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
+        # INFO: or-tools requires C++17 with C++20 extensions on Unix and C++20 on MSVC
+        # See: github.com/google/or-tools/discussions/4719
         if is_msvc(self):
             check_min_cppstd(self, 20)
         else:
@@ -73,6 +75,8 @@ class OrToolsConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "flatzinc.cmake"), "CXX_STANDARD ", "# CXX_STANDARD ")
         # INFO: Skip host.cmake that builds protoc since Conan manages that dependency
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(host)", "set(PROTOC_PRG protobuf::protoc)")
+        # INFO: Let Conan manage the CMAKE_OSX_DEPLOYMENT_TARGET variable
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_OSX_DEPLOYMENT_TARGET", "#set(CMAKE_OSX_DEPLOYMENT_TARGET")
 
     def generate(self):
         tc = CMakeToolchain(self)
