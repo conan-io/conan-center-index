@@ -38,20 +38,26 @@ class OrToolsConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("protobuf/[>=6.32.1 <7]", transitive_headers=True, transitive_libs=True)
+        # ortools/util/proto_tools.h:#include "google/protobuf/message.h"
+        self.requires("protobuf/[>=6.32.1 <7]", transitive_headers=True)
         self.requires("re2/[>=20250812]")
         self.requires("coin-cbc/[>=2.10.5 <=2.10.12]")
-        self.requires("eigen/[=3.4.0 <4]")
+        # ortools/pdlp/trust_region.h:#include "Eigen/Core"
+        self.requires("eigen/[=3.4.0 <4]", transitive_headers=True)
+        # ortools/math_opt/solvers/highs_solver.h:#include "Highs.h"
         self.requires("highs/1.12.0")
-        self.requires("scip/[>=10.0.0 <10.1.0]")
+        # include/ortools/math_opt/solvers/gscip/gscip_ext.h:#include "scip/scip.h"
+        self.requires("scip/[>=10.0.0 <10.1.0]", transitive_headers=True)
         self.requires("soplex/[>=8.0.0 <8.1.0]")
         self.requires("coin-cgl/[>=0.60.3 <1]")
-        self.requires("abseil/[>=20250814.0 <=20260107.1]", transitive_headers=True, transitive_libs=True)
+        # ortools/set_cover/views.h:#include <absl/types/span.h>
+        self.requires("abseil/[>=20250814.0 <=20260107.1]", transitive_headers=True)
         self.requires("coin-clp/[>=1.17.7 <=1.17.10]")
         self.requires("coin-osi/[>=0.108.7 <=0.108.11]")
         self.requires("coin-utils/[>=2.11.9 <3]")
         self.requires("bzip2/1.0.8")
-        self.requires("zlib/[>=1.2.11 <2]")
+        # ortools/base/gzipstring.h:#include <zlib.h>
+        self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
 
     def validate(self):
         # INFO: or-tools requires C++17 with C++20 extensions on Unix and C++20 on MSVC
