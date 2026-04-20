@@ -148,6 +148,8 @@ class LibcurlConan(ConanFile):
             del self.options.fPIC
         if self._is_using_cmake_build:
             del self.options.with_libgsasl
+        if not is_apple_os(self):
+            del self.options.with_apple_sectrust
 
     def configure(self):
         if self.options.shared:
@@ -195,8 +197,6 @@ class LibcurlConan(ConanFile):
             raise ConanInvalidConfiguration("schannel only suppported on Windows.")
         if self.options.with_ssl == "darwinssl":
             raise ConanInvalidConfiguration("darwinssl (Secure Transport) is no longer supported as of libcurl 8.15.0 - please choose a different SSL backend.")
-        if self.options.with_apple_sectrust and not is_apple_os(self):
-            raise ConanInvalidConfiguration("with_apple_sectrust is only supported on Apple operating systems.")
         if self.options.with_ssl == "openssl":
             openssl = self.dependencies["openssl"]
             if self.options.with_ntlm and openssl.options.no_des:
