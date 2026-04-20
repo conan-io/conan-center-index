@@ -35,7 +35,7 @@ class OrToolsConan(ConanFile):
             del self.options.shared
             self.package_type = "shared-library"
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         # ortools/util/proto_tools.h:#include "google/protobuf/message.h"
