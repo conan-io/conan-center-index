@@ -38,23 +38,25 @@ class OrToolsConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        # ortools/util/proto_tools.h:#include "google/protobuf/message.h"
-        self.requires("protobuf/[>=6.32.1 <7]", transitive_headers=True)
+        # transitive headers: ortools/util/proto_tools.h:#include "google/protobuf/message.h"
+        # transitive libs: ortools/util/proto_tools.h  Proto::default_instance().GetDescriptor()
+        self.requires("protobuf/[>=6.32.1 <7]", transitive_headers=True, transitive_libs=True)
         self.requires("re2/[>=20250812]")
-        self.requires("coin-cbc/[>=2.10.5 <=2.10.12]")
+        self.requires("coin-cbc/2.10.5")
         # ortools/pdlp/trust_region.h:#include "Eigen/Core"
         self.requires("eigen/[=3.4.0 <4]", transitive_headers=True)
         # ortools/math_opt/solvers/highs_solver.h:#include "Highs.h"
         self.requires("highs/1.12.0")
         # include/ortools/math_opt/solvers/gscip/gscip_ext.h:#include "scip/scip.h"
-        self.requires("scip/[>=10.0.0 <10.1.0]", transitive_headers=True)
-        self.requires("soplex/[>=8.0.0 <8.1.0]")
-        self.requires("coin-cgl/[>=0.60.3 <1]")
-        # ortools/set_cover/views.h:#include <absl/types/span.h>
-        self.requires("abseil/[>=20250814.0 <=20260107.1]", transitive_headers=True)
-        self.requires("coin-clp/[>=1.17.7 <=1.17.10]")
-        self.requires("coin-osi/[>=0.108.7 <=0.108.11]")
-        self.requires("coin-utils/[>=2.11.9 <3]")
+        self.requires("scip/10.0.2", transitive_headers=True)
+        self.requires("soplex/8.0.2")
+        self.requires("coin-cgl/0.60.3")
+        # transitive headers: ortools/set_cover/views.h:#include <absl/types/span.h>
+        # transitive libs: ortools/base/init_google.h absl::ParseCommandLine()
+        self.requires("abseil/[>=20250814.0 <=20260107.1]", transitive_headers=True, transitive_libs=True)
+        self.requires("coin-clp/1.17.7")
+        self.requires("coin-osi/0.108.7")
+        self.requires("coin-utils/2.11.9")
         self.requires("bzip2/1.0.8")
         # ortools/base/gzipstring.h:#include <zlib.h>
         self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
