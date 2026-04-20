@@ -34,21 +34,23 @@ class OrToolsConan(ConanFile):
         if self.settings.os == "Macos" or self.settings.os == "Linux":
             del self.options.shared
             self.package_type = "shared-library"
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def requirements(self):
-        self.requires("abseil/[>=20250814.0 <=20260107.1]", transitive_headers=True, transitive_libs=True)
-        self.requires("bzip2/1.0.8")
-        self.requires("coin-cbc/[>=2.10.5 <=2.10.12]")
-        self.requires("coin-clp/[>=1.17.7 <=1.17.10]")
-        self.requires("coin-cgl/[>=0.60.3 <1]")
-        self.requires("coin-osi/[>=0.108.7 <=0.108.11]")
-        self.requires("coin-utils/[>=2.11.9 <3]")
-        self.requires("eigen/[=3.4.0 <4]")
-        self.requires("highs/1.12.0")
         self.requires("protobuf/[>=6.32.1 <7]", transitive_headers=True, transitive_libs=True)
         self.requires("re2/[>=20250812]")
+        self.requires("coin-cbc/[>=2.10.5 <=2.10.12]")
+        self.requires("eigen/[=3.4.0 <4]")
+        self.requires("highs/1.12.0")
         self.requires("scip/[>=10.0.0 <10.1.0]")
         self.requires("soplex/[>=8.0.0 <8.1.0]")
+        self.requires("coin-cgl/[>=0.60.3 <1]")
+        self.requires("abseil/[>=20250814.0 <=20260107.1]", transitive_headers=True, transitive_libs=True)
+        self.requires("coin-clp/[>=1.17.7 <=1.17.10]")
+        self.requires("coin-osi/[>=0.108.7 <=0.108.11]")
+        self.requires("coin-utils/[>=2.11.9 <3]")
+        self.requires("bzip2/1.0.8")
         self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
@@ -69,8 +71,7 @@ class OrToolsConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "cpp.cmake"), "set_target_properties(${PROTO_NAME}_proto PROPERTIES CXX_STANDARD", "#set_target_properties(${PROTO_NAME}_proto PROPERTIES CXX_STANDARD")
         replace_in_file(self, os.path.join(self.source_folder, "ortools", "third_party_solvers", "CMakeLists.txt"), "CXX_STANDARD ", "# CXX_STANDARD ")
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "flatzinc.cmake"), "CXX_STANDARD ", "# CXX_STANDARD ")
-
-        # INFO: Skip host.cmake that builds protoc since conan manages that dependency
+        # INFO: Skip host.cmake that builds protoc since Conan manages that dependency
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(host)", "set(PROTOC_PRG protobuf::protoc)")
 
     def generate(self):
@@ -122,6 +123,7 @@ class OrToolsConan(ConanFile):
 
         # INFO: In order to use ortools::solve, it requires the experimental Conan generator CMakeConfigDeps
         self.cpp_info.components["solve"].exe = ["solve"]
+        self.cpp_info.components["solve"].location = os.path.join(self.package_folder, "bin")
         self.cpp_info.components["solve"].set_property("cmake_target_name", "ortools::solve")
         # INFO: In order to use ortools::fzn, it requires the experimental Conan generator CMakeConfigDeps
         self.cpp_info.components["fzn"].exe = ["fzn-cp-sat"]
