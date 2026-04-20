@@ -71,8 +71,8 @@ class LibAVIFConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["AVIF_ENABLE_WERROR"] = False
-        tc.cache_variables["AVIF_CODEC_AOM"] = True
-        tc.cache_variables["AVIF_CODEC_DAV1D"] = self.options.with_decoder == "dav1d"
+        tc.cache_variables["AVIF_CODEC_AOM"] = "SYSTEM"
+        tc.cache_variables["AVIF_CODEC_DAV1D"] = "SYSTEM" if self.options.with_decoder == "dav1d" else "OFF"
         tc.cache_variables["AVIF_CODEC_AOM_DECODE"] = self.options.with_decoder == "aom"
         tc.cache_variables["LIBYUV_VERSION"] = str(self.dependencies["libyuv"].ref.version)
         if "with_ycgco_r" in self.options:
