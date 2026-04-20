@@ -131,6 +131,7 @@ class OrToolsConan(ConanFile):
         self.cpp_info.components["solve"].set_property("cmake_target_name", "ortools::solve")
         # INFO: In order to use ortools::fzn, it requires the experimental Conan generator CMakeConfigDeps
         self.cpp_info.components["fzn"].exe = ["fzn-cp-sat"]
+        self.cpp_info.components["fzn"].location = os.path.join(self.package_folder, "bin")
         self.cpp_info.components["fzn"].set_property("cmake_target_name", "ortools::fzn")
 
         self.cpp_info.components["ortools"].set_property("cmake_target_name", "ortools::ortools")
@@ -191,5 +192,3 @@ class OrToolsConan(ConanFile):
         self.cpp_info.components["flatzinc"].libs = ["ortools_flatzinc"]
         self.cpp_info.components["flatzinc"].set_property("cmake_target_name", "ortools::flatzinc")
         self.cpp_info.components["flatzinc"].requires = ["ortools"]
-        self.cpp_info.components["flatzinc"].location = os.path.join(self.package_folder, "bin")
-        self.cpp_info.components["flatzinc"].exe = "fzn-cp-sat"
