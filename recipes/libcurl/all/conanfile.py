@@ -473,7 +473,7 @@ class LibcurlConan(ConanFile):
         else:
             tc.configure_args.append("--without-libidn2")
 
-        if self.options.with_apple_sectrust:
+        if self.options.get_safe("with_apple_sectrust"):
             tc.configure_args.append("--with-apple-sectrust")
 
         # Cross building flags
@@ -706,7 +706,7 @@ class LibcurlConan(ConanFile):
             self.cpp_info.components["curl"].frameworks.append("CoreFoundation")
             self.cpp_info.components["curl"].frameworks.append("CoreServices")
             self.cpp_info.components["curl"].frameworks.append("SystemConfiguration")
-            if self.options.with_apple_sectrust:
+            if self.options.get_safe("with_apple_sectrust"):
                 self.cpp_info.components["curl"].frameworks.append("Security")
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("ldap")
