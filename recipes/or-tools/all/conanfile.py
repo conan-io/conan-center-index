@@ -125,9 +125,6 @@ class OrToolsConan(ConanFile):
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "ortools")
-        self.cpp_info.components["ortools"].libs = ["ortools"]
-
         # INFO: In order to use ortools::solve, it requires the experimental Conan generator CMakeConfigDeps
         self.cpp_info.components["solve"].exe = ["solve"]
         self.cpp_info.components["solve"].location = os.path.join(self.package_folder, "bin")
@@ -137,6 +134,7 @@ class OrToolsConan(ConanFile):
         self.cpp_info.components["fzn"].location = os.path.join(self.package_folder, "bin")
         self.cpp_info.components["fzn"].set_property("cmake_target_name", "ortools::fzn")
 
+        self.cpp_info.components["ortools"].libs = ["ortools"]
         self.cpp_info.components["ortools"].set_property("cmake_target_name", "ortools::ortools")
         self.cpp_info.components["ortools"].defines = ["OR_PROTO_DLL=;USE_MATH_OPT;USE_BOP;USE_CBC;USE_CLP;USE_GLOP;USE_HIGHS;USE_PDLP;USE_SCIP"]
         self.cpp_info.components["ortools"].requires = [
