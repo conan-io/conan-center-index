@@ -507,8 +507,9 @@ class ImageMagickConan(ConanFile):
         autotools = Autotools(self)
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "etc"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
+        # Keep etc/ImageMagick-7/ (runtime config XMLs: colors.xml, policy.xml, coder.xml, ...)
+        # and share/ImageMagick-7/ (locale XMLs: english.xml, francais.xml, locale.xml).
+        # IM needs these at runtime unless built with zero-configuration (built-in XML blobs).
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
@@ -553,3 +554,9 @@ class ImageMagickConan(ConanFile):
             self.cpp_info.system_libs.extend([
                 "gdi32", "user32", "advapi32", "ole32", "oleaut32",
             ])
+
+        # Expose the config XML directory so consumers can find it at runtime.
+        # IM searches MAGICK_CONFIGURE_PATH first, then beside the exe, then hardcoded paths.
+        etc_path = os.path.join(self.package_folder, "etc", f"ImageMagick-{self._major_version}")
+        if os.path.isdir(etc_path):
+            self.runenv_info.define("MAGICK_CONFIGURE_PATH", etc_path)
