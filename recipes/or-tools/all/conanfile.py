@@ -6,7 +6,7 @@ from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.4"
 
 class OrToolsConan(ConanFile):
     name = "or-tools"
@@ -22,20 +22,14 @@ class OrToolsConan(ConanFile):
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
     }
     implements = ["auto_shared_fpic"]
+    languages = "C++"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-
-    def config_options(self):
-        if self.settings.os == "Macos" or self.settings.os == "Linux":
-            del self.options.shared
-            self.package_type = "shared-library"
-        if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
 
     def requirements(self):
         # transitive headers: ortools/util/proto_tools.h:#include "google/protobuf/message.h"
@@ -92,6 +86,7 @@ class OrToolsConan(ConanFile):
             tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["BUILD_SAMPLES"] = False
+        tc.cache_variables["BUILD_EXAMPLES"] = False
         tc.cache_variables["BUILD_CXX_EXAMPLES"] = False
         tc.cache_variables["BUILD_DEPS"] = False
         tc.cache_variables["INSTALL_BUILD_DEPS"] = False
