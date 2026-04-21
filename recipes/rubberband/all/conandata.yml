@@ -1,0 +1,4 @@
+sources:
+  "4.0.0":
+    url: "https://github.com/breakfastquay/rubberband/archive/refs/tags/v4.0.0.tar.gz"
+    sha256: "24300f48a8014b7c863b573a9647e61b1b19b37875e2cdd92005e64c6424d266"
