@@ -62,7 +62,7 @@ class LibAVIFConan(ConanFile):
             self.requires("dav1d/[>=1.4 <2]")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.19]")
+        self.tool_requires("cmake/[>=3.22]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
