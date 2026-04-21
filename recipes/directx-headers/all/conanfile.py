@@ -14,7 +14,6 @@ required_conan_version = ">=1.52.0"
 
 class DirectXHeadersConan(ConanFile):
     name = "directx-headers"
-    version = "1.619.1"
     description = "Headers for using D3D12"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
@@ -52,7 +51,7 @@ class DirectXHeadersConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/[>=1.2.2]")
+        self.tool_requires("meson/[>=1.2.2 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
