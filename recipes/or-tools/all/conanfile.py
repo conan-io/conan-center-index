@@ -125,6 +125,7 @@ class OrToolsConan(ConanFile):
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "ortools")
         # INFO: In order to use ortools::solve, it requires the experimental Conan generator CMakeConfigDeps
         self.cpp_info.components["solve"].exe = ["solve"]
         self.cpp_info.components["solve"].location = os.path.join(self.package_folder, "bin")
