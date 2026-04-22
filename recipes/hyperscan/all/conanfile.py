@@ -58,15 +58,18 @@ class HyperscanConan(ConanFile):
         if self.options.build_chimera:
             self.requires("pcre/8.45")
 
+    def validate_build(self):
+        if self.settings_build.arch not in ["x86", "x86_64"]:
+            raise ConanInvalidConfiguration(f"Hyperscan only builds on x86 architectures")
+
     def validate(self):
         check_min_cppstd(self, 11)
 
         if self.options.shared and self.options.build_chimera:
-            raise ConanInvalidConfiguration("Chimera build requires static building")
+            raise ConanInvalidConfiguration("Chimera builds requires static building")
 
-        if self.settings.arch not in ["x86", "x86_64"] or self.settings_build.arch not in ["x86", "x86_64"]:
-            raise ConanInvalidConfiguration(f"Hyperscan only supports x86 architecture for host and build profiles "
-                                            f"(host: {self.settings.arch}, build: {self.settings_build.arch})")
+        if self.settings.arch not in ["x86", "x86_64"]:
+            raise ConanInvalidConfiguration(f"Hyperscan only supports x86 architectures")
 
     def build_requirements(self):
         self.tool_requires("ragel/6.10")
