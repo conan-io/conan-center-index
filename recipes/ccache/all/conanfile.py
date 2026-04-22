@@ -32,13 +32,13 @@ class CcacheConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17"
+        return "20"
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "8",
-            "clang": "9",
+            "gcc": "10",
+            "clang": "12",
             "apple-clang": "11",
         }
 
@@ -47,15 +47,14 @@ class CcacheConan(ConanFile):
 
     def requirements(self):
         self.requires("zstd/[>=1.5 <1.6]")
+        self.requires("fmt/[>=10.2.1 <=11.1.1]") # Explicitly tested with all versions in this range
+        self.requires("xxhash/[~0.8]")
         if self.options.redis_storage_backend:
             if Version(self.version) >= "4.12":
                 self.requires("hiredis/1.3.0")
             else:
                 self.requires("hiredis/1.2.0")
 
-        if Version(self.version) >= "4.10":
-            self.requires("fmt/[>=10.2.1 <=11.1.1]") # Explicitly tested with all versions in this range
-            self.requires("xxhash/[~0.8]")
 
 
     def validate(self):
@@ -92,19 +91,15 @@ class CcacheConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        if Version(self.version) >= "4.10":
-            deps.set_property("fmt", "cmake_file_name", "Fmt")
-            deps.set_property("fmt", "cmake_find_mode", "module")
-            deps.set_property("fmt", "cmake_target_name", "dep_fmt")
-            deps.set_property("zstd", "cmake_file_name", "Zstd")
-            deps.set_property("zstd", "cmake_target_name", "dep_zstd")
-            deps.set_property("hiredis", "cmake_file_name", "Hiredis")
-            deps.set_property("hiredis", "cmake_target_name", "dep_hiredis")
-        else:
-            deps.set_property("hiredis", "cmake_target_name", "HIREDIS::HIREDIS")
-            deps.set_property("zstd", "cmake_target_name", "ZSTD::ZSTD")
-        deps.set_property("zstd", "cmake_find_mode", "module")
+        deps.set_property("fmt", "cmake_file_name", "Fmt")
+        deps.set_property("fmt", "cmake_find_mode", "module")
+        deps.set_property("fmt", "cmake_target_name", "dep_fmt")
+        deps.set_property("hiredis", "cmake_file_name", "Hiredis")
+        deps.set_property("hiredis", "cmake_target_name", "dep_hiredis")
         deps.set_property("hiredis", "cmake_find_mode", "module")
+        deps.set_property("zstd", "cmake_file_name", "Zstd")
+        deps.set_property("zstd", "cmake_target_name", "dep_zstd")
+        deps.set_property("zstd", "cmake_find_mode", "module")
         deps.generate()
 
     def build(self):
