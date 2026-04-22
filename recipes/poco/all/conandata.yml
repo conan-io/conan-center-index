@@ -6,3 +6,4 @@ patches:
   "1.15.2":
     - patch_file: "patches/0001-fix-cmake-imported-global.patch"
     - patch_file: "patches/0002-adjust-mysql-headers.patch"
+    - patch_file: "patches/0003-fix-pcre2-interface-library-type.patch"

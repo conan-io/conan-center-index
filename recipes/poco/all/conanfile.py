@@ -211,6 +211,8 @@ class PocoConan(ConanFile):
             tc.cache_variables["MYSQL_FOUND"] = True
         if self.options.get_safe("enable_data_postgresql"):
             tc.cache_variables["POSTGRESQL_FOUND"] = True
+        # TODO: pcre2 library type marker, not needed after moving to CMakeConfigDeps
+        tc.cache_variables["PCRE2_SHARED"] = self.dependencies["pcre2"].options.shared
         tc.generate()
 
         deps = CMakeDeps(self)

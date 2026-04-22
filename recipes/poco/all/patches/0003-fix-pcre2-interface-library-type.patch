@@ -1,0 +1,31 @@
+Behavior changed in Poco 1.15.0.
+See https://github.com/pocoproject/poco/commit/337f13414df298f7ece0ee123c622b1b20a7b004
+
+CMakeDeps always generates INTERFACE IMPORTED targets, so get_target_property()
+never returns SHARED_LIBRARY or STATIC_LIBRARY. Fixed by CMakeConfigDeps: the library type is shared/static/interface.
+
+The EMBEDDED_PCRE2_SOURCES are private source from pcre2, which should be compiled when linking against the shared library.
+The static library is expected to be linked against the system pcre2 library, so the embedded sources should not be compiled in that case.
+
+diff --git a/Foundation/CMakeLists.txt b/Foundation/CMakeLists.txt
+index bf141ba..d5b80df 100644
+--- a/Foundation/CMakeLists.txt
++++ b/Foundation/CMakeLists.txt
+@@ -42,8 +42,15 @@ if(POCO_UNBUNDLED)
+ 		POCO_SOURCES(SRCS RegExp ${EMBEDDED_PCRE2_SOURCES} )
+ 	elseif ("${_PCRE2TYPE}" STREQUAL "STATIC_LIBRARY")
+ 		message(STATUS "PCRE2: linking static library.")
+-	else()
+-		message(WARNING "PCRE2: unknown library type: ${_PCRE2TYPE}")
++	elseif("${_PCRE2TYPE}" STREQUAL "INTERFACE_LIBRARY")
++		if(PCRE2_SHARED)
++			# FIXME: CMakeDeps generates INTERFACE targets for both shared and static libraries.
++			# This is a workaround to ensure that the embedded sources are only compiled when linking against a shared library.
++			# Fixed by CMakeConfigDeps usage
++			POCO_SOURCES(SRCS RegExp ${EMBEDDED_PCRE2_SOURCES} )
++		else()
++			message(STATUS "PCRE2: linking static library via interface target.")
++		endif()
+ 	endif()
+
+ 	unset(_PCRE2TYPE)
