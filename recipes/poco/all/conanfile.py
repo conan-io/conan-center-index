@@ -123,23 +123,27 @@ class PocoConan(ConanFile):
     def requirements(self):
         self.requires("pcre2/[>=10.42 <11]")
         self.requires("utf8proc/[>=2.8.0 <3]")
-        self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.enable_xml:
-            self.requires("expat/[>=2.6.2 <3]", transitive_headers=True)
+            self.requires("expat/[>=2.6.2 <3]")
         if self.options.enable_data_sqlite:
-            self.requires("sqlite3/[>=3.45.0 <4]")
+            # transitive header: Poco/Data/SQLite/Extractor.h:36:#include <sqlite3.h>
+            self.requires("sqlite3/[>=3.45.0 <4]", transitive_headers=True)
         if self.options.enable_apacheconnector:
             self.requires("apr/1.7.4")
             self.requires("apr-util/1.6.1")
         if self.options.enable_netssl or self.options.enable_crypto or \
            self.options.get_safe("enable_jwt"):
+            # transitive header: Poco/Crypto/Crypto.h:26:#include <openssl/err.h>
             self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
         if self.options.enable_data_odbc and self.settings.os != "Windows":
             self.requires("odbc/2.3.11")
         if self.options.get_safe("enable_data_postgresql"):
-            self.requires("libpq/[>=15.4 <18]")
+            # transitive header: Poco/Data/PostgreSQL/SessionHandle.h:26:#include <libpq-fe.h>
+            self.requires("libpq/[>=15.4 <18]", transitive_headers=True)
         if self.options.get_safe("enable_data_mysql"):
-            self.requires("libmysqlclient/8.1.0")
+            # transitive header: Poco/Data/MySQL/SessionHandle.h:22:#include <mysql.h>
+            self.requires("libmysqlclient/8.1.0", transitive_headers=True)
 
     def package_id(self):
         del self.info.options.enable_active_record
