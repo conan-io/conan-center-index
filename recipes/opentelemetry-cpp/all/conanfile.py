@@ -31,7 +31,6 @@ class OpenTelemetryCppConan(ConanFile):
         "with_otlp_http": [True, False],
         "with_otlp_http_compression": [True, False],
         "with_otlp_file": [True, False],
-        "with_zipkin": [True, False],
         "with_prometheus": [True, False],
         "with_elasticsearch": [True, False],
         "with_no_getenv": [True, False],
@@ -53,7 +52,6 @@ class OpenTelemetryCppConan(ConanFile):
         "with_otlp_http": True,
         "with_otlp_http_compression": False,
         "with_otlp_file": False,
-        "with_zipkin": True,
         "with_prometheus": False,
         "with_elasticsearch": False,
         "with_no_getenv": False,
@@ -85,7 +83,7 @@ class OpenTelemetryCppConan(ConanFile):
 
     @property
     def _with_http_client_curl(self):
-        return self.options.with_otlp_http or self.options.with_zipkin or self.options.with_elasticsearch
+        return self.options.with_otlp_http or self.options.with_elasticsearch
 
     def requirements(self):
         if self.options.with_gsl:
@@ -99,8 +97,7 @@ class OpenTelemetryCppConan(ConanFile):
             # This will resolve to the pinned version coming from grpc
             self.requires("protobuf/[>=4.25.3 <7]", transitive_headers=True, transitive_libs=True)
 
-        if (self.options.with_zipkin or
-           self.options.with_elasticsearch or
+        if (self.options.with_elasticsearch or
            self.options.with_otlp_http or
            self.options.get_safe("with_etw") or
            self.options.get_safe("with_otlp_file")
@@ -169,7 +166,6 @@ class OpenTelemetryCppConan(ConanFile):
             tc.cache_variables["WITH_OTLP_FILE"] = True
         if self._needs_proto:
             tc.cache_variables["OTELCPP_PROTO_PATH"] = self.dependencies.build["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root").replace("\\", "/")
-        tc.cache_variables["WITH_ZIPKIN"] = self.options.with_zipkin
         tc.cache_variables["WITH_PROMETHEUS"] = self.options.with_prometheus
         tc.cache_variables["WITH_ELASTICSEARCH"] = self.options.with_elasticsearch
         tc.cache_variables["WITH_NO_GETENV"] = self.options.with_no_getenv
@@ -264,8 +260,6 @@ class OpenTelemetryCppConan(ConanFile):
             libraries.append("opentelemetry_exporter_prometheus")
         if self.options.with_elasticsearch:
             libraries.append("opentelemetry_exporter_elasticsearch_logs")
-        if self.options.with_zipkin:
-            libraries.append("opentelemetry_exporter_zipkin_trace")
         libraries.append("opentelemetry_metrics")
         libraries.append("opentelemetry_exporter_ostream_metrics")
         libraries.extend([
@@ -411,13 +405,6 @@ class OpenTelemetryCppConan(ConanFile):
             self.cpp_info.components["opentelemetry_exporter_otlp_file_metric"].requires.extend([
                 "opentelemetry_otlp_recordable",
                 "opentelemetry_exporter_otlp_file_client",
-            ])
-
-        if self.options.with_zipkin:
-            self.cpp_info.components["opentelemetry_exporter_zipkin_trace"].requires.extend([
-                self._http_client_name,
-                "nlohmann_json::nlohmann_json",
-                "opentelemetry_trace",
             ])
 
         if self.options.with_prometheus:
