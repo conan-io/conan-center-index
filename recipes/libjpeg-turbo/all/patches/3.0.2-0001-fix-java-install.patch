@@ -1,0 +1,18 @@
+Fix installation when using java support
+
+https://github.com/conan-io/conan-center-index/issues/27762
+https://github.com/conan-io/conan-center-index/pull/29891
+
+diff --git a/java/CMakeLists.txt b/java/CMakeLists.txt
+index 3d863bd..e3dcac4 100644
+--- a/java/CMakeLists.txt
++++ b/java/CMakeLists.txt
+@@ -77,8 +77,6 @@ endif()
+ if(NOT DEFINED CMAKE_INSTALL_DEFAULT_JAVADIR)
+   set(CMAKE_INSTALL_DEFAULT_JAVADIR "<CMAKE_INSTALL_DATAROOTDIR>/java")
+ endif()
+-GNUInstallDirs_set_install_dir(JAVADIR
+-  "The directory into which Java classes should be installed")
+ GNUInstallDirs_get_absolute_install_dir(CMAKE_INSTALL_FULL_JAVADIR
+   CMAKE_INSTALL_JAVADIR)
+ set(CMAKE_INSTALL_JAVADIR ${CMAKE_INSTALL_JAVADIR} PARENT_SCOPE)
