@@ -137,7 +137,8 @@ class PocoConan(ConanFile):
             # transitive header: Poco/Crypto/Crypto.h:26:#include <openssl/err.h>
             self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
         if self.options.enable_data_odbc and self.settings.os != "Windows":
-            self.requires("odbc/2.3.11")
+            # transitive header: Poco/Data/ODBC/Unicode.h:31:#include <sqlucode.h>
+            self.requires("odbc/2.3.11", transitive_headers=True)
         if self.options.get_safe("enable_data_postgresql"):
             # transitive header: Poco/Data/PostgreSQL/SessionHandle.h:26:#include <libpq-fe.h>
             self.requires("libpq/[>=15.4 <18]", transitive_headers=True)
@@ -177,7 +178,8 @@ class PocoConan(ConanFile):
             raise ConanInvalidConfiguration("Conflicting enable_netssl[_win] settings")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)        
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -214,11 +216,9 @@ class PocoConan(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("expat", "cmake_file_name", "EXPAT")
         deps.set_property("expat", "cmake_target_name", "EXPAT::EXPAT")
-        # deps.set_property("expat", "cmake_find_mode", "config")
         deps.set_property("libmysqlclient", "cmake_file_name", "mysql")
         deps.set_property("libmysqlclient", "cmake_target_name", "MySQL::client")
         deps.set_property("libmysqlclient", "cmake_additional_variables_prefixes", ["MYSQL"])
-        # deps.set_property("libmysqlclient", "cmake_find_mode", "config")
         deps.set_property("libpq", "cmake_target_name", "PostgreSQL::PostgreSQL")
         deps.set_property("libpq", "cmake_target_aliases", ["PostgreSQL::client"])
         deps.set_property("libpq", "cmake_file_name", "PostgreSQL")
@@ -226,8 +226,7 @@ class PocoConan(ConanFile):
         deps.set_property("utf8proc", "cmake_target_name", "Utf8Proc::Utf8Proc")
         deps.generate()
 
-    def build(self):
-        apply_conandata_patches(self)
+    def build(self):        
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
