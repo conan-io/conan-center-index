@@ -27,6 +27,7 @@ class QtConan(ConanFile):
                    "qtremoteobjects", "qtpositioning", "qtlanguageserver",
                    "qtspeech", "qthttpserver", "qtquick3dphysics", "qtgrpc", "qtquickeffectmaker"]
     _submodules += ["qtgraphs"] # new modules for qt 6.6.0
+    _submodules += ["qttasktree", "qtopenapi", "qtcanvaspainter"] # new modules for qt 6.11.0
 
     _module_statuses = ["essential", "addon", "deprecated", "preview"]
 
