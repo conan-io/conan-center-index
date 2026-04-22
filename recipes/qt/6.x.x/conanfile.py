@@ -358,13 +358,13 @@ class QtConan(ConanFile):
             if is_apple_os(self):
                 self.requires("moltenvk/1.2.2")
         if self.options.with_glib:
-            self.requires("glib/2.78.3")
+            self.requires("glib/[>=2.78 <3")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.3.0")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
-            self.requires("freetype/2.13.2")
+            self.requires("freetype/[>=2.13.2 <3]")
         if self.options.get_safe("with_fontconfig", False):
-            self.requires("fontconfig/2.15.0")
+            self.requires("fontconfig/[>=2.15.0 <3]")
         if self.options.get_safe("with_icu", False):
             self.requires("icu/74.2")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
