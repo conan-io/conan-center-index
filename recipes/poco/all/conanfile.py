@@ -118,7 +118,7 @@ class PocoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires("cmake/4.2.3")
+        self.tool_requires("cmake/[>=3.26]")
 
     def requirements(self):
         self.requires("pcre2/[>=10.42 <11]")
@@ -177,13 +177,11 @@ class PocoConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CMAKE_BUILD_TYPE"] = self.settings.build_type
         for comp in self._poco_component_tree.values():
             if comp.option:
                 tc.variables[comp.option.upper()] = self.options.get_safe(comp.option, False)
         tc.cache_variables["POCO_UNBUNDLED"] = True
         tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
-        tc.cache_variables["POCO_MINIMAL_BUILD"] = True
         if is_msvc(self):
             tc.variables["POCO_MT"] = is_msvc_static_runtime(self)
         if not self.options.enable_apacheconnector:
