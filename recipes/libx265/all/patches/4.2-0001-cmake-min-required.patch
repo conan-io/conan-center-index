@@ -1,0 +1,28 @@
+diff --git source/CMakeLists.txt source/CMakeLists.txt
+index 2e3beaaf3..b941766c0 100755
+--- source/CMakeLists.txt
++++ source/CMakeLists.txt
+@@ -1,4 +1,5 @@
+ # vim: syntax=cmake
++cmake_minimum_required (VERSION 3.5) # OBJECT libraries require 2.8.8
+ if(NOT CMAKE_BUILD_TYPE)
+     # default to Release build for GCC builds
+     set(CMAKE_BUILD_TYPE Release CACHE STRING
+@@ -7,17 +8,10 @@ if(NOT CMAKE_BUILD_TYPE)
+ endif()
+ message(STATUS "cmake version ${CMAKE_VERSION}")
+ 
+-if(POLICY CMP0042)
+-    cmake_policy(SET CMP0042 NEW) # MACOSX_RPATH
+-endif()
+-
+-cmake_minimum_required (VERSION 2.8.8...3.10) # OBJECT libraries require 2.8.8
+-
+ if (POLICY CMP0075)
+     cmake_policy(SET CMP0075 NEW) # CMAKE_REQUIRED_LIBRARIES warning
+ endif()
+ 
+-
+ project (x265)
+ include(CheckIncludeFiles)
+ include(CheckFunctionExists)
