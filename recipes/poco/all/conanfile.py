@@ -226,7 +226,7 @@ class PocoConan(ConanFile):
         deps.set_property("utf8proc", "cmake_target_name", "Utf8Proc::Utf8Proc")
         deps.generate()
 
-    def build(self):        
+    def build(self):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
