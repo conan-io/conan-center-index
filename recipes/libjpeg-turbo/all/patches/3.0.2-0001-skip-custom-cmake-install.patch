@@ -1,3 +1,9 @@
+Use GNUInstallDirs from CMake instead of custom one
+Also fix installation when using java support
+
+https://github.com/conan-io/conan-center-index/issues/27762
+https://github.com/conan-io/conan-center-index/pull/29891
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index adb0ca4..3660bd4 100644
 --- a/CMakeLists.txt
@@ -5,10 +11,10 @@ index adb0ca4..3660bd4 100644
 @@ -186,7 +186,7 @@ if(CMAKE_INSTALL_PREFIX STREQUAL "${CMAKE_INSTALL_DEFAULT_PREFIX}")
    endif()
  endif()
- 
+
 -include(cmakescripts/GNUInstallDirs.cmake)
 +include(GNUInstallDirs)
- 
+
  macro(report_directory var)
    if(CMAKE_INSTALL_${var} STREQUAL CMAKE_INSTALL_FULL_${var})
 diff --git a/java/CMakeLists.txt b/java/CMakeLists.txt
