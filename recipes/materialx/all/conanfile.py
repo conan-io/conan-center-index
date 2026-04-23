@@ -85,7 +85,7 @@ class MaterialXConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.26 <5]")
+        self.tool_requires("cmake/[>=3.26]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
