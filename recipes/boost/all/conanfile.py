@@ -23,6 +23,14 @@ import yaml
 
 required_conan_version = ">=1.53.0"
 
+
+def _to_posix_path(path):
+    # Convert backslashes in windows paths to forward slashes to avoid
+    # issues with b2's lexing which otherwise treats e.g. `\t` in a path
+    # as an escape sequence.
+    return path.replace("\\", "/")
+
+
 # When adding (or removing) an option, also add this option to the list in
 # `rebuild-dependencies.yml` and re-run that script.
 CONFIGURE_OPTIONS = (
@@ -387,7 +395,7 @@ class BoostConan(ConanFile):
         :return: path to the python interpreter executable, either set by option, or system default
         """
         exe = self.options.python_executable if self.options.python_executable else sys.executable
-        return str(exe).replace("\\", "/")
+        return _to_posix_path(str(exe))
 
     @property
     def _is_windows_platform(self):
@@ -984,7 +992,7 @@ class BoostConan(ConanFile):
                 self.output.info(f"checking {python_h}")
                 if os.path.isfile(python_h):
                     self.output.info(f"found Python.h: {python_h}")
-                    return candidate.replace("\\", "/")
+                    return _to_posix_path(candidate)
         raise Exception("couldn't locate Python.h - make sure you have installed python development files")
 
     @property
@@ -1031,7 +1039,7 @@ class BoostConan(ConanFile):
                 self.output.info(f"checking {python_lib}")
                 if os.path.isfile(python_lib):
                     self.output.info(f"found python library: {python_lib}")
-                    return libdir.replace("\\", "/")
+                    return _to_posix_path(libdir)
         raise ConanInvalidConfiguration("couldn't locate python libraries - make sure you have installed python development files")
 
     def _clean(self):
@@ -1532,9 +1540,9 @@ class BoostConan(ConanFile):
             if len(aggregated_cpp_info.libs) == 0:
                 return ""
 
-            includedir = aggregated_cpp_info.includedirs[0].replace("\\", "/")
+            includedir = _to_posix_path(aggregated_cpp_info.includedirs[0])
             includedir = f"\"{includedir}\""
-            libdir = aggregated_cpp_info.libdirs[0].replace("\\", "/")
+            libdir = _to_posix_path(aggregated_cpp_info.libdirs[0])
             libdir = f"\"{libdir}\""
             lib = aggregated_cpp_info.libs[0]
             version = self.dependencies[deps_name].ref.version
@@ -1565,7 +1573,7 @@ class BoostConan(ConanFile):
         # Specify here the toolset with the binary if present if don't empty parameter :
         contents += f'\nusing "{self._toolset}" : {self._toolset_version} : '
 
-        cxx_fwd_slahes = self._cxx.replace("\\", "/")
+        cxx_fwd_slahes = _to_posix_path(self._cxx)
         if cxx_fwd_slahes:
             contents += f" \"{cxx_fwd_slahes}\""
 
@@ -1577,10 +1585,10 @@ class BoostConan(ConanFile):
 
         contents += " : \n"
         if self._ar:
-            ar_path = self._ar.replace("\\", "/")
+            ar_path = _to_posix_path(self._ar)
             contents += f'<archiver>"{ar_path}" '
         if self._ranlib:
-            ranlib_path = self._ranlib.replace("\\", "/")
+            ranlib_path = _to_posix_path(self._ranlib)
             contents += f'<ranlib>"{ranlib_path}" '
         cxxflags = " ".join(self.conf.get("tools.build:cxxflags", default=[], check_type=list)) + " "
         cflags = " ".join(self.conf.get("tools.build:cflags", default=[], check_type=list)) + " "
@@ -1591,15 +1599,15 @@ class BoostConan(ConanFile):
 
         sysroot = self.conf.get("tools.build:sysroot")
         if sysroot and not is_msvc(self):
-            sysroot = sysroot.replace("\\", "/")
+            sysroot = _to_posix_path(sysroot)
             sysroot = f'"{sysroot}"' if ' ' in sysroot else sysroot
             cppflags += f"--sysroot={sysroot} "
             ldflags += f"--sysroot={sysroot} "
 
         if self._with_stacktrace_backtrace:
             backtrace_aggregated_cpp_info = self.dependencies["libbacktrace"].cpp_info.aggregated_components()
-            backtrace_includedirs = [p.replace("\\", "/") for p in backtrace_aggregated_cpp_info.includedirs]
-            backtrace_libdirs = [p.replace("\\", "/") for p in backtrace_aggregated_cpp_info.libdirs]
+            backtrace_includedirs = [_to_posix_path(p) for p in backtrace_aggregated_cpp_info.includedirs]
+            backtrace_libdirs = [_to_posix_path(p) for p in backtrace_aggregated_cpp_info.libdirs]
             cppflags += " ".join(f"-I{p}" for p in backtrace_includedirs) + " "
             ldflags += " ".join(f"-L{p}" for p in backtrace_libdirs) + " "
 
