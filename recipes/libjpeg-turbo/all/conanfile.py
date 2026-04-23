@@ -46,7 +46,7 @@ class LibjpegTurboConan(ConanFile):
         "java": False,
         "enable12bit": False,
     }
-    
+
     def export_sources(self):
         export_conandata_patches(self)
 
