@@ -1,0 +1,32 @@
+Use GNUInstallDirs from CMake instead of custom one
+Also fix installation when using java support
+
+https://github.com/conan-io/conan-center-index/issues/27762
+https://github.com/conan-io/conan-center-index/pull/29891
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3730326..e39bd00 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -158,7 +158,7 @@ if(CMAKE_INSTALL_PREFIX STREQUAL "${CMAKE_INSTALL_DEFAULT_PREFIX}")
+   endif()
+ endif()
+
+-include(cmakescripts/GNUInstallDirs.cmake)
++include(GNUInstallDirs)
+
+ macro(report_directory var)
+   if(CMAKE_INSTALL_${var} STREQUAL CMAKE_INSTALL_FULL_${var})
+diff --git a/java/CMakeLists.txt b/java/CMakeLists.txt
+index 3d863bd..e3dcac4 100644
+--- a/java/CMakeLists.txt
++++ b/java/CMakeLists.txt
+@@ -77,8 +77,6 @@ endif()
+ if(NOT DEFINED CMAKE_INSTALL_DEFAULT_JAVADIR)
+   set(CMAKE_INSTALL_DEFAULT_JAVADIR "<CMAKE_INSTALL_DATAROOTDIR>/java")
+ endif()
+-GNUInstallDirs_set_install_dir(JAVADIR
+-  "The directory into which Java classes should be installed")
+ GNUInstallDirs_get_absolute_install_dir(CMAKE_INSTALL_FULL_JAVADIR
+   CMAKE_INSTALL_JAVADIR)
+ set(CMAKE_INSTALL_JAVADIR ${CMAKE_INSTALL_JAVADIR} PARENT_SCOPE)
