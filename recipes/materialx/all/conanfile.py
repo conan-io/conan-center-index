@@ -69,7 +69,7 @@ class MaterialXConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openimageio:
-            self.requires("openimageio/3.1.11.0")
+            self.requires("openimageio/[>=2.2]")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             self.requires("opengl/system")
