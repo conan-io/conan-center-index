@@ -670,6 +670,8 @@ class QtConan(ConanFile):
         with_egl = self.options.get_safe("with_egl", False)
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_EGL"] = not with_egl
 
+        tc.variables["FEATURE_wasmdeployqt"] = "OFF"
+
         tc.generate()
 
     def package_id(self):
