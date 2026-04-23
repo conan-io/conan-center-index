@@ -18,10 +18,8 @@ patches:
   "3.1.4.1":
     - patch_file: "patches/3.1.4.1-0001-skip-custom-cmake-install.patch"
   "3.0.2":
-    - patch_file: "patches/3.0.2-0001-fix-java-install.patch"
-  "3.0.1":
-    - patch_file: "patches/3.0.2-0001-fix-java-install.patch"
+    - patch_file: "patches/3.0.2-0001-skip-custom-cmake-install.patch"
   "3.0.0":
-    - patch_file: "patches/3.0.2-0001-fix-java-install.patch"
+    - patch_file: "patches/3.0.2-0001-skip-custom-cmake-install.patch"
   "2.1.5":
-    - patch_file: "patches/3.0.2-0001-fix-java-install.patch"
+    - patch_file: "patches/2.1.5-0001-skip-custom-cmake-install.patch"
