@@ -25,8 +25,9 @@ class ZeroMQConan(ConanFile):
         "with_norm": [True, False],
         "poller": [None, "kqueue", "epoll", "devpoll", "pollset", "poll", "select"],
         "with_draft_api": [True, False],
-        "with_websocket": [True, False],
+        "with_websocket": [False, "plain", "secure"],
         "with_radix_tree": [True, False],
+        "with_libbsd": [True, False]
     }
     default_options = {
         "shared": False,
@@ -37,6 +38,7 @@ class ZeroMQConan(ConanFile):
         "with_draft_api": False,
         "with_websocket": False,
         "with_radix_tree": False,
+        "with_libbsd": True
     }
 
     def export_sources(self):
@@ -58,11 +60,19 @@ class ZeroMQConan(ConanFile):
             self.requires("libsodium/[~1.0.20]")
         if self.options.with_norm:
             self.requires("norm/1.5.9")
+        if self.options.with_websocket == "secure":
+            self.requires("gnutls/[~3.8.7]")
+        if self.options.with_libbsd:
+            self.requires("libbsd/[~0.10.0]")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.with_norm:
             raise ConanInvalidConfiguration(
                 "Norm and ZeroMQ are not compatible on Windows yet"
+            )
+        if self.settings.os == "Windows" and self.options.with_libbsd:
+            raise ConanInvalidConfiguration(
+                "libbsd cannot be used on Windows yet"
             )
 
     def source(self):
@@ -82,8 +92,9 @@ class ZeroMQConan(ConanFile):
         tc.variables["WITH_DOC"] = False
         tc.variables["WITH_NORM"] = self.options.with_norm
         tc.variables["ENABLE_DRAFTS"] = self.options.with_draft_api
-        tc.variables["ENABLE_WS"] = self.options.with_websocket
+        tc.variables["ENABLE_WS"] = self.options.with_websocket != None
         tc.variables["ENABLE_RADIX_TREE"] = self.options.with_radix_tree
+        tc.variables["WITH_LIBBSD"] = self.options.with_libbsd
         if self.options.poller:
             tc.variables["POLLER"] = self.options.poller
         if is_msvc(self):
@@ -143,8 +154,10 @@ class ZeroMQConan(ConanFile):
             self.cpp_info.components["libzmq"].defines.append("ZMQ_STATIC")
         if self.options.with_draft_api:
             self.cpp_info.components["libzmq"].defines.append("ZMQ_BUILD_DRAFT_API")
-        if self.options.with_websocket and self.settings.os != "Windows":
-            self.cpp_info.components["libzmq"].system_libs.append("bsd")
+        if self.options.with_libbsd:
+            self.cpp_info.components["libzmq"].requires.append("libbsd::libbsd")
+        if self.options.with_websocket == "secure":
+            self.cpp_info.components["libzmq"].requires.append("gnutls::gnutls")
 
         self.cpp_info.components["libzmq"].set_property("cmake_target_name", self._libzmq_target)
         if self.options.encryption == "libsodium":
