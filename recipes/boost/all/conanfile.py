@@ -1598,8 +1598,10 @@ class BoostConan(ConanFile):
 
         if self._with_stacktrace_backtrace:
             backtrace_aggregated_cpp_info = self.dependencies["libbacktrace"].cpp_info.aggregated_components()
-            cppflags += " ".join(f"-I{p}" for p in backtrace_aggregated_cpp_info.includedirs) + " "
-            ldflags += " ".join(f"-L{p}" for p in backtrace_aggregated_cpp_info.libdirs) + " "
+            backtrace_includedirs = [p.replace("\\", "/") for p in backtrace_aggregated_cpp_info.includedirs]
+            backtrace_libdirs = [p.replace("\\", "/") for p in backtrace_aggregated_cpp_info.libdirs]
+            cppflags += " ".join(f"-I{p}" for p in backtrace_includedirs) + " "
+            ldflags += " ".join(f"-L{p}" for p in backtrace_libdirs) + " "
 
         if cxxflags.strip():
             contents += f'<cxxflags>"{cxxflags.strip()}" '
