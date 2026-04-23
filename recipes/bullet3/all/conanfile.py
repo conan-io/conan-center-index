@@ -78,9 +78,6 @@ class Bullet3Conan(ConanFile):
         tc.variables["BUILD_UNIT_TESTS"] = False
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        if Version(self.version) < "3.21":
-            # silence warning
-            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0115"] = "OLD"
         if Version(self.version) <= "3.25":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
@@ -180,8 +177,6 @@ class Bullet3Conan(ConanFile):
 
         self.cpp_info.libs = libs
         self.cpp_info.includedirs = ["include", os.path.join("include", "bullet")]
-        if self.options.extras:
-            self.cpp_info.includedirs.append(os.path.join("include", "bullet_robotics"))
         self.cpp_info.defines = self._bullet_definitions
         if self.options.bt2_thread_locks and self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")

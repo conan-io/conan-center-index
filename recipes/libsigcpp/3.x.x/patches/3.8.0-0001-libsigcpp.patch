@@ -1,6 +1,16 @@
---- CMakeLists.txt
-+++ CMakeLists.txt
-@@ -91,8 +91,6 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 360becc..b64faf5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -28,7 +28,6 @@ option (SIGCXX_DISABLE_DEPRECATED "Disable deprecated" OFF)
+ 
+ project (sigc++)
+ 
+-set( CMAKE_CXX_STANDARD 17 )
+ 
+ # Turn on warnings for MSVC. Remove the CMake default of /W3 because when you
+ # add /W4, MSVC will complain about two warning level flags. This default
+@@ -90,8 +89,6 @@ enable_testing()
  
  
  add_subdirectory (sigc++)
@@ -9,9 +19,11 @@
  
  
  set (PROJECT_CMAKE_NAME		"${PROJECT_NAME}-3")
---- sigc++/CMakeLists.txt
-+++ sigc++/CMakeLists.txt
-@@ -24,7 +24,7 @@
+diff --git a/sigc++/CMakeLists.txt b/sigc++/CMakeLists.txt
+index d6945b2..2d93100 100644
+--- a/sigc++/CMakeLists.txt
++++ b/sigc++/CMakeLists.txt
+@@ -23,7 +23,7 @@ set (SOURCE_FILES
  
  set (SIGCPP_LIB_NAME sigc-${SIGCXX_API_VERSION})
  
@@ -20,7 +32,7 @@
  
  set_property (TARGET ${SIGCPP_LIB_NAME} PROPERTY VERSION ${PACKAGE_VERSION})
  set_property(TARGET ${SIGCPP_LIB_NAME}  PROPERTY SOVERSION ${LIBSIGCPP_SOVERSION})
-@@ -43,6 +43,8 @@
+@@ -42,6 +42,8 @@ set (PROJECT_CMAKE_NAME ${PROJECT_NAME}-3)
  install (
      TARGETS ${SIGCPP_LIB_NAME}
      EXPORT "${PROJECT_CMAKE_NAME}Targets"
