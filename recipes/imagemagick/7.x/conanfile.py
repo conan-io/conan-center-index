@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.files import get, copy, rmdir, rm, save, load, apply_conandata_patches, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.env import VirtualRunEnv, Environment
@@ -449,6 +450,13 @@ class ImageMagickConan(ConanFile):
                     tc.configure_args.append("ac_cv_lib_bz2_BZ2_bzDecompress=yes")
                 if self.options.with_jpeg:
                     tc.configure_args.append("ac_cv_lib_jpeg_jpeg_read_header=yes")
+
+        # Workaround: Conan's conanbuildenv (from tool_requires: pkgconf, libtool, etc.) resets PKG_CONFIG_PATH="" because
+        # no tool_requires defines it, stomping the value set by conanautotoolstoolchain.sh. Since PKG_CONFIG_PATH is an
+        # autoconf "precious variable" (AC_ARG_VAR in pkg.m4), passing it on the configure command line takes precedence
+        # over the (empty) environment value.
+        tc.configure_args.append(f"PKG_CONFIG_PATH={os.path.join(self.build_folder, 'conan')}")
+
         tc.generate()
 
     def build(self):
@@ -511,6 +519,7 @@ class ImageMagickConan(ConanFile):
         # and share/ImageMagick-7/ (locale XMLs: english.xml, francais.xml, locale.xml).
         # IM needs these at runtime unless built with zero-configuration (built-in XML blobs).
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         major = self._major_version
