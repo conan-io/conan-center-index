@@ -16,7 +16,7 @@ sources:
     sha256: "bc12bc9dce55300c6bf4342bc233bcc26bd38bf289eedf147360d731c668ddaf"
 patches:
   "3.1.4.1":
-    - patch_file: "patches/3.1.4.1-0001-fix-java-install.patch"
+    - patch_file: "patches/3.1.4.1-0001-skip-custom-cmake-install.patch"
   "3.0.2":
     - patch_file: "patches/3.0.2-0001-fix-java-install.patch"
   "3.0.1":
