@@ -1,6 +1,6 @@
 --- a/CMake/3rdparty.cmake
 +++ b/CMake/3rdparty.cmake
-@@ -25,31 +25,23 @@ mark_as_advanced(DCMTK_USE_FIND_PACKAGE)
+@@ -25,7 +25,7 @@ mark_as_advanced(DCMTK_USE_FIND_PACKAGE)
  if(DCMTK_USE_FIND_PACKAGE)
    # Find TIFF
    if(DCMTK_WITH_TIFF)
@@ -9,10 +9,8 @@
      # turn off library if it could not be found
      if(NOT TIFF_FOUND)
        message(STATUS "Warning: TIFF support will be disabled because libtiff was not found.")
-       set(DCMTK_WITH_TIFF OFF CACHE BOOL "" FORCE)
-       set(WITH_LIBTIFF "")
+@@ -34,22 +34,13 @@ if(DCMTK_USE_FIND_PACKAGE)
      else()
-+      message(STATUS "Info: DCMTK TIFF support will be enabled")
        set(WITH_LIBTIFF 1)
        # libtiff can be compiled with libjpeg support; if available, add libjpeg to library and include path
 -      find_package(JPEG QUIET)
@@ -36,12 +34,12 @@
      if(NOT PNG_FOUND)
        set(DCMTK_WITH_PNG OFF CACHE BOOL "" FORCE)
        message(STATUS "Warning: PNG support will be disabled because libpng was not found.")
-@@ -58,13 +50,13 @@ if(DCMTK_USE_FIND_PACKAGE)
+@@ -58,13 +49,13 @@ if(DCMTK_USE_FIND_PACKAGE)
        message(STATUS "Info: DCMTK PNG support will be enabled")
        set(WITH_LIBPNG 1)
        include_directories(${PNG_INCLUDE_DIR})
 -      set(LIBPNG_LIBS ${PNG_LIBRARY} ${LIBPNG_EXTRA_LIBS_STATIC})
-+      set(LIBPNG_LIBS ${PNG_LIBRARY} PNG::PNG)
++      set(LIBPNG_LIBS PNG::PNG)
      endif()
    endif()
  
@@ -52,7 +50,7 @@
      if(NOT OPENSSL_FOUND)
        message(STATUS "Warning: OPENSSL support will be disabled because openssl was not found.")
        set(WITH_OPENSSL "")
-@@ -76,15 +68,11 @@ if(DCMTK_USE_FIND_PACKAGE)
+@@ -76,15 +67,11 @@ if(DCMTK_USE_FIND_PACKAGE)
        list(APPEND CMAKE_REQUIRED_INCLUDES "${OPENSSL_INCLUDE_DIR}")
        CHECK_CXX_SOURCE_COMPILES("extern \"C\" {\n#include <openssl/ssl.h>\n}\nint main(){\n#if OPENSSL_VERSION_NUMBER < 0x10101000L\n#error OpenSSL too old\n#endif\n}\n" OPENSSL_VERSION_CHECK)
        set(CMAKE_REQUIRED_INCLUDES "${TEMP_INCLUDES}")
@@ -66,11 +64,11 @@
 -        if(HAVE_LIBDL)
 -          set(OPENSSL_LIBS ${OPENSSL_LIBS} dl)
 -        endif()
-+        set(OPENSSL_LIBS ${OPENSSL_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto)
++        set(OPENSSL_LIBS OpenSSL::SSL OpenSSL::Crypto)
        else()
          message(STATUS "Info: DCMTK OPENSSL support will be disabled: DCMTK requires OpenSSL version 1.1.1 or newer")
          set(DCMTK_WITH_OPENSSL OFF CACHE BOOL "" FORCE)
-@@ -95,8 +83,8 @@ if(DCMTK_USE_FIND_PACKAGE)
+@@ -95,8 +82,8 @@ if(DCMTK_USE_FIND_PACKAGE)
  
    # Find libXML2
    if(DCMTK_WITH_XML)
@@ -81,7 +79,7 @@
        message(STATUS "Warning: XML support will be disabled because libxml2 was not found.")
        set(WITH_LIBXML "")
        set(DCMTK_WITH_XML OFF CACHE BOOL "" FORCE)
-@@ -104,13 +92,13 @@ if(DCMTK_USE_FIND_PACKAGE)
+@@ -104,13 +91,13 @@ if(DCMTK_USE_FIND_PACKAGE)
        message(STATUS "Info: DCMTK XML support will be enabled")
        set(WITH_LIBXML 1)
        include_directories(${LIBXML2_INCLUDE_DIR})
@@ -97,7 +95,7 @@
      if(NOT ZLIB_FOUND)
        message(STATUS "Warning: ZLIB support will be disabled because zlib was not found.")
        set(WITH_ZLIB "")
-@@ -119,7 +107,7 @@ if(DCMTK_USE_FIND_PACKAGE)
+@@ -119,7 +106,7 @@ if(DCMTK_USE_FIND_PACKAGE)
        message(STATUS "Info: DCMTK ZLIB support will be enabled")
        set(WITH_ZLIB 1)
        include_directories(${ZLIB_INCLUDE_DIRS})
@@ -106,7 +104,7 @@
      endif()
    endif()
  
-@@ -140,11 +128,10 @@ if(DCMTK_USE_FIND_PACKAGE)
+@@ -140,11 +127,10 @@ if(DCMTK_USE_FIND_PACKAGE)
  
    # Find libiconv
    if(DCMTK_WITH_ICONV)
@@ -121,7 +119,7 @@
          else()
              message(STATUS "Info: found builtin ICONV support inside the C standard library.")
              set(DCMTK_WITH_STDLIBC_ICONV ON CACHE BOOL "" FORCE)
-@@ -154,7 +141,7 @@ if(DCMTK_USE_FIND_PACKAGE)
+@@ -154,7 +140,7 @@ if(DCMTK_USE_FIND_PACKAGE)
              set(LIBICONV_SECOND_ARGUMENT_CONST ${ICONV_SECOND_ARGUMENT_IS_CONST} CACHE INTERNAL "${HELPSTRING}")
          endif()
      endif()
@@ -130,7 +128,17 @@
        message(STATUS "Warning: ICONV support will be disabled because libiconv was not found. Correct LIBICONV_LIBDIR and LIBICONV_INCLUDE_DIR and re-enable DCMTK_WITH_ICONV.")
        set(DCMTK_WITH_ICONV OFF CACHE BOOL "" FORCE)
        set(WITH_LIBICONV "")
-@@ -170,16 +157,16 @@ if(DCMTK_USE_FIND_PACKAGE)
+@@ -162,24 +148,24 @@ if(DCMTK_USE_FIND_PACKAGE)
+       message(STATUS "Info: DCMTK ICONV support will be enabled")
+       set(WITH_LIBICONV 1)
+       set(LIBICONV_INCDIR ${LIBICONV_INCLUDE_DIRS} ${Iconv_INCLUDE_DIRS} ${ICONV_INCLUDE_DIR} ${LIBCHARSET_INCLUDE_DIRS})
+-      set(LIBICONV_LIBDIR ${LIBICONV_LIBDIR})
+-      set(LIBICONV_LIBS ${LIBICONV_LIBRARIES} ${Iconv_LIBRARIES} ${ICONV_LIBRARIES} ${LIBCHARSET_LIBRARY})
++      set(LIBICONV_LIBDIR ${Iconv_LIB_DIRS})
++      set(LIBICONV_LIBS Iconv::Iconv)
+       include_directories(${LIBICONV_INCDIR})
+     endif()
+   endif()
  
    # Find libwrap
    if(DCMTK_WITH_WRAP)
@@ -147,7 +155,7 @@
 -      include_directories(${WRAP_INCLUDE_DIRS})
 -      set(WRAP_LIBS ${WRAP_LIBRARIES} ${WRAP_EXTRA_LIBS_STATIC})
 +      include_directories(${tcp-wrappers_INCLUDE_DIRS})
-+      set(WRAP_LIBS ${WRAP_LIBRARIES} tcp-wrappers::tcp-wrappers)
++      set(WRAP_LIBS tcp-wrappers::tcp-wrappers)
      endif()
    endif()
  

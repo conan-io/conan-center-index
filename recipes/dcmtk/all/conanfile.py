@@ -314,8 +314,6 @@ class DCMTKConan(ConanFile):
                     return ["libiconv::libiconv"]
                 elif self.options.charset_conversion == "icu":
                     return ["icu::icu"]
-                else:
-                    return []
             return []
 
         def zlib():
