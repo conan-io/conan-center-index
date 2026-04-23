@@ -14,7 +14,7 @@ class TestPackageConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
         if can_run(self):
-            self.requires("libpcap/1.10.5")
+            self.requires("libpcap/[>=1.10.1 <2]")
 
     def configure(self):
         if can_run(self):
