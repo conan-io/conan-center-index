@@ -1,13 +1,19 @@
+Fix C1021 fatal error when building DataSQLite with POCO_SQLITE_UNBUNDLED on MSVC
+
+MSVC does not support the #warning preprocessor directive (it is a GCC/Clang extension)
+
+https://github.com/pocoproject/poco/pull/5336
+
 diff --git a/Data/SQLite/src/Utility.cpp b/Data/SQLite/src/Utility.cpp
 index 722d5b9..e620524 100644
 --- a/Data/SQLite/src/Utility.cpp
 +++ b/Data/SQLite/src/Utility.cpp
 @@ -40,7 +40,7 @@ const int Utility::THREAD_MODE_MULTI = SQLITE_CONFIG_MULTITHREAD;
  const int Utility::THREAD_MODE_SERIAL = SQLITE_CONFIG_SERIALIZED;
- 
+
  #if defined(POCO_SQLITE_UNBUNDLED)
 -	#warning "Utility::_threadMode is set based on SQLITE_THREADSAFE, which may not reflect the actual threading mode used by unbundled SQLite"
 +	#pragma message("WARNING: Utility::_threadMode is set based on SQLITE_THREADSAFE, which may not reflect the actual threading mode used by unbundled SQLite")
  #endif
- 
+
  int Utility::_threadMode =
