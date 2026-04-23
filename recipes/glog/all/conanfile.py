@@ -51,7 +51,7 @@ class GlogConan(ConanFile):
 
     def requirements(self):
         if self.options.with_gflags:
-            self.requires("gflags/2.2.2", transitive_headers=True, transitive_libs=True)
+            self.requires("gflags/[>=2.2.2 <3]", transitive_headers=True, transitive_libs=True)
         # 0.4.0 requires libunwind unconditionally
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.8.0", transitive_headers=True, transitive_libs=True)
