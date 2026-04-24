@@ -1,0 +1,4 @@
+sources:
+  "2026.03":
+    url: "https://github.com/NVIDIA/stdexec/archive/refs/tags/gtc-2026.tar.gz"
+    sha256: "25f6a5c881794b2eef03988a6d104e349e98690df57bfe2368040da3ea50eac2"
