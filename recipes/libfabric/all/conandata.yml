@@ -2,3 +2,7 @@ sources:
   "2.5.1":
     url: "https://github.com/ofiwg/libfabric/releases/download/v2.5.1/libfabric-2.5.1.tar.bz2"
     sha256: "ac34788a52b3e4a3a1ef712ec29bc4261c63dfbd9e5e4d6e202a0c3687be368d"
+solution:
+  "2.5.1":
+    url: "https://raw.githubusercontent.com/ofiwg/libfabric/refs/tags/v2.5.1/libfabric.sln"
+    sha256: "e18f4783c7e57765ecd96c335d3a757f05f7ba80917d01c1cfcf23bd1193bff2"
