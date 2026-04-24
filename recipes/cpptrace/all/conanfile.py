@@ -20,11 +20,13 @@ class CpptraceConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "unwind": ["default", "libunwind"],
+        "disable_cxx20_modules": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "unwind": "default",
+        "disable_cxx20_modules": False,
     }
 
     @property
@@ -68,6 +70,7 @@ class CpptraceConan(ConanFile):
         tc.variables["CPPTRACE_CONAN"] = True
         if self.options.unwind == "libunwind":
             tc.variables["CPPTRACE_UNWIND_WITH_LIBUNWIND"] = True
+        tc.variables["CPPTRACE_DISABLE_CXX_20_MODULES"] = self.options.disable_cxx20_modules
         tc.cache_variables["CPPTRACE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         tc.generate()
         tc = CMakeDeps(self)
