@@ -184,16 +184,12 @@ class ArrowConan(ConanFile):
             self.requires("rapidjson/[>=cci.20230929]")
         if self.options.with_llvm:
             self.requires("llvm-core/13.0.0")
-        if self.options.with_openssl:
-            # aws-sdk-cpp requires openssl/1.1.1. it uses deprecated functions in openssl/3.0.0
-            if self.options.with_s3:
-                self.requires("openssl/1.1.1w")
-            else:
-                self.requires("openssl/[>=1.1 <4]")
-        if self.options.get_safe("with_opentelemetry"):
-            self.requires("opentelemetry-cpp/1.21.0")
         if self.options.with_s3:
             self.requires("aws-sdk-cpp/[~1.11]")
+        if self.options.with_openssl:
+            self.requires("openssl/[>=1.1 <4]")
+        if self.options.get_safe("with_opentelemetry"):
+            self.requires("opentelemetry-cpp/1.24.0")
         if self.options.with_brotli:
             self.requires("brotli/1.1.0")
         if self.options.with_bz2:
@@ -249,6 +245,8 @@ class ArrowConan(ConanFile):
                 raise ConanException("'with_thrift' option should be True when 'parquet=True'")
         if self.options.with_flight_rpc and not self.options.with_protobuf:
             raise ConanException("'with_protobuf' option should be True when 'with_flight_rpc=True'")
+        if self.options.with_flight_rpc and not self.options.with_grpc:
+            raise ConanException("'with_grpc' option should be True when 'with_flight_rpc=True'")
 
         check_min_cppstd(self, self._min_cppstd)
 
@@ -269,9 +267,15 @@ class ArrowConan(ConanFile):
         if self.options.parquet and not self.options.with_thrift:
             raise ConanInvalidConfiguration("arrow:parquet requires arrow:with_thrift")
 
+        if self.options.with_grpc:
+            if not self.options.with_zlib or not self.options.with_re2:
+                raise ConanInvalidConfiguration("arrow:grpc requires arrow:with_zlib and arrow:with_re2")
+
     def build_requirements(self):
         if self.options.with_protobuf:
             self.tool_requires("protobuf/<host_version>")
+        if self.options.with_grpc:
+            self.tool_requires("grpc/<host_version>")
         if Version(self.version) >= "22.0.0":
             self.tool_requires("cmake/[>=3.26 <4]")
         elif Version(self.version) >= "20.0.0":
@@ -406,6 +410,7 @@ class ArrowConan(ConanFile):
 
         deps = CMakeDeps(self)
         deps.set_property("mimalloc", "cmake_target_name", "mimalloc::mimalloc")
+        deps.set_property("libbacktrace", "cmake_file_name", "Backtrace")
         deps.generate()
 
     def _patch_sources(self):
@@ -413,7 +418,8 @@ class ArrowConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, "cpp"))
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, "cpp"),
+                        cli_args=["--debug-find-pkg=LibXml2"])
         cmake.build()
 
     def package(self):
