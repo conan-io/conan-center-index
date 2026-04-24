@@ -1,0 +1,70 @@
+diff --git a/bin/autoconf.in b/bin/autoconf.in
+index ff92bba..c584a08 100644
+--- a/bin/autoconf.in
++++ b/bin/autoconf.in
+@@ -1,4 +1,4 @@
+-#! @PERL@
++#! /usr/bin/env perl
+ # -*- Perl -*-
+ # @configure_input@
+ 
+diff --git a/bin/autoheader.in b/bin/autoheader.in
+index f580d10..450f724 100644
+--- a/bin/autoheader.in
++++ b/bin/autoheader.in
+@@ -1,4 +1,4 @@
+-#! @PERL@
++#! /usr/bin/env perl
+ # -*- Perl -*-
+ # @configure_input@
+ 
+diff --git a/bin/autom4te.in b/bin/autom4te.in
+index 72890e5..c528c37 100644
+--- a/bin/autom4te.in
++++ b/bin/autom4te.in
+@@ -1,4 +1,4 @@
+-#! @PERL@
++#! /usr/bin/env perl
+ # -*- perl -*-
+ # @configure_input@
+ 
+diff --git a/bin/autoreconf.in b/bin/autoreconf.in
+index 62bb644..579e8dd 100644
+--- a/bin/autoreconf.in
++++ b/bin/autoreconf.in
+@@ -1,4 +1,4 @@
+-#! @PERL@
++#! /usr/bin/env perl
+ # -*- perl -*-
+ # @configure_input@
+ 
+diff --git a/bin/autoscan.in b/bin/autoscan.in
+index d59ab4a..ffa9e63 100644
+--- a/bin/autoscan.in
++++ b/bin/autoscan.in
+@@ -1,4 +1,4 @@
+-#! @PERL@
++#! /usr/bin/env perl
+ # -*- perl -*-
+ # @configure_input@
+ 
+diff --git a/bin/autoupdate.in b/bin/autoupdate.in
+index 9c2a2cf..4809989 100644
+--- a/bin/autoupdate.in
++++ b/bin/autoupdate.in
+@@ -1,4 +1,4 @@
+-#! @PERL@
++#! /usr/bin/env perl
+ # -*- perl -*-
+ # @configure_input@
+ 
+diff --git a/bin/ifnames.in b/bin/ifnames.in
+index ae9179c..e094b5d 100644
+--- a/bin/ifnames.in
++++ b/bin/ifnames.in
+@@ -1,4 +1,4 @@
+-#! @PERL@
++#! /usr/bin/env perl
+ # -*- perl -*-
+ # @configure_input@
+ 

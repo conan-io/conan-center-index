@@ -14,7 +14,7 @@ patches:
     - patch_file: "patches/2.72-0001-relocatable-autoconf.patch"
       patch_description: "Replace instances where absolute paths are embedded the generated files"
       patch_type: "conan"
-    - patch_file: "patches/2.71-0002-no-perl-path-in-shebang.patch"
+    - patch_file: "patches/2.72-0002-no-perl-path-in-shebang.patch"
       patch_description: "Avoid build machine's perl path to be embedded the generated files"
       patch_type: "conan"
     - patch_file: "patches/2.72-0003-disable-man-regeneration.patch"
