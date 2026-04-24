@@ -1,4 +1,7 @@
 sources:
+  "10.0.2":
+    url: "https://github.com/scipopt/scip/releases/download/v10.0.2/scip-10.0.2.tgz"
+    sha256: "7544647007c9a63a770a71f5884a50ac81da37372bb6958d08588870bd58a50b"
   "10.0.1":
     url: "https://github.com/scipopt/scip/releases/download/v10.0.1/scip-10.0.1.tgz"
     sha256: "1a8a14dc28064748eabcde82c09978d07fc1005f8bc7a8be1a8bc092b7dbfe68"
@@ -32,6 +35,10 @@ patches:
       patch_description: "Change hard-coded paths to conan includes"
       patch_type: "conan"
 version_mappings:
+  "10.0.2":
+    soplex: "8.0.2"
+    default_sym: "snauty"
+    default_tpi: "tny"
   "10.0.1":
     soplex: "8.0.1"
     default_sym: "snauty"

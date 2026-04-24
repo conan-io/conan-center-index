@@ -1,0 +1,4 @@
+sources:
+  "0.2.0":
+    url: "https://github.com/jsrivaya/loon/archive/refs/tags/v0.2.0.tar.gz"
+    sha256: "050093a5e3b17ca107891574b01dbd1bb4cc580d377fab555789f25ed546b0ec"
