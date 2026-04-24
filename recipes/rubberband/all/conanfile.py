@@ -63,9 +63,6 @@ class RubberbandConan(ConanFile):
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # MSVC + static: Meson also installs `librubberband.a` (Meson default) alongside `rubberband-static.lib`
-        if is_msvc(self) and not self.options.shared:
-            rm(self, "librubberband.a", os.path.join(self.package_folder, "lib"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
