@@ -9,16 +9,12 @@ required_conan_version = ">=2.4"
 class SpeexDspConan(ConanFile):
     name = "speexdsp"
     description = "SpeexDSP is a patent-free, Open Source/Free Software DSP library derived from Speex."
-    topics = ("speex", "dsp", "audio", "resampler", "echo-cancellation", "preprocessor")
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.xiph.org/xiph/speexdsp"
-    license = "BSD-3-Clause"
-
+    topics = ("speex", "dsp", "audio", "resampler", "echo-cancellation", "preprocessor")
     package_type = "library"
-    languages = "C"
-    implements = ["auto_shared_fpic"]
     settings = "os", "arch", "compiler", "build_type"
-
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -29,6 +25,8 @@ class SpeexDspConan(ConanFile):
         "fPIC": True,
         "fixed_point": False,
     }
+    implements = ["auto_shared_fpic"]
+    languages = "C"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -56,9 +54,6 @@ class SpeexDspConan(ConanFile):
         rm(self, "*.h.in", os.path.join(self.package_folder, "include"), recursive=True)
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "speexdsp")
-        self.cpp_info.set_property("cmake_target_name", "speexdsp::speexdsp")
-        self.cpp_info.set_property("pkg_config_name", "speexdsp")
         self.cpp_info.libs = ["speexdsp"]
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             self.cpp_info.system_libs.append("m")
