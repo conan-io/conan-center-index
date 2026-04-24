@@ -455,7 +455,8 @@ class ImageMagickConan(ConanFile):
         # no tool_requires defines it, stomping the value set by conanautotoolstoolchain.sh. Since PKG_CONFIG_PATH is an
         # autoconf "precious variable" (AC_ARG_VAR in pkg.m4), passing it on the configure command line takes precedence
         # over the (empty) environment value.
-        tc.configure_args.append(f"PKG_CONFIG_PATH={os.path.join(self.build_folder, 'conan')}")
+        # Force using forward slashes: on Windows/MSYS2, os.path.join produces backslash paths which bash interprets as escapes.
+        tc.configure_args.append(f"PKG_CONFIG_PATH={os.path.join(self.build_folder, 'conan').replace(os.sep, '/')}")
 
         tc.generate()
 
