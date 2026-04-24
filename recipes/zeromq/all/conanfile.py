@@ -92,7 +92,7 @@ class ZeroMQConan(ConanFile):
         tc.variables["WITH_DOC"] = False
         tc.variables["WITH_NORM"] = self.options.with_norm
         tc.variables["ENABLE_DRAFTS"] = self.options.with_draft_api
-        tc.variables["ENABLE_WS"] = self.options.with_websocket != None
+        tc.variables["ENABLE_WS"] = self.options.with_websocket != False
         tc.variables["ENABLE_RADIX_TREE"] = self.options.with_radix_tree
         tc.variables["WITH_LIBBSD"] = self.options.with_libbsd
         if self.options.poller:
