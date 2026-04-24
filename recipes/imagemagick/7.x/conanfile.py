@@ -565,6 +565,17 @@ class ImageMagickConan(ConanFile):
                 "gdi32", "user32", "advapi32", "ole32", "oleaut32",
             ])
 
+        # OpenMP runtime: upstream .pc has -fopenmp in Cflags and -lgomp/-lomp in Libs.private,
+        # but Conan consumers don't read .pc files — we must expose the runtime lib explicitly.
+        # Only needed on Linux/FreeBSD where the runtime is a standalone system library.
+        # Windows: /openmp flag auto-links vcomp.lib (MSVC) or libomp.lib (clang-cl).
+        # macOS: with_openmp is already forced to False (apple-clang has no libomp).
+        if self.options.with_openmp and self.settings.os in ("Linux", "FreeBSD"):
+            if self.settings.compiler == "gcc":
+                self.cpp_info.system_libs.append("gomp")
+            else:
+                self.cpp_info.system_libs.append("omp")
+
         # Expose the config XML directory so consumers can find it at runtime.
         # IM searches MAGICK_CONFIGURE_PATH first, then beside the exe, then hardcoded paths.
         etc_path = os.path.join(self.package_folder, "etc", f"ImageMagick-{self._major_version}")
