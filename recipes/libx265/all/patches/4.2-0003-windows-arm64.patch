@@ -1,8 +1,8 @@
 diff --git source/CMakeLists.txt source/CMakeLists.txt
-index 7f916a0ee..9a7d382c4 100755
+index e81afd730..6f53cd86c 100755
 --- source/CMakeLists.txt
 +++ source/CMakeLists.txt
-@@ -42,7 +42,7 @@ else()
+@@ -48,7 +48,7 @@ else()
  endif()
  set(X86_ALIASES x86 i386 i686 x86_64 amd64)
  set(ARM_ALIASES armv6l armv7l)
