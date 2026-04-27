@@ -1,8 +1,8 @@
 diff --git source/CMakeLists.txt source/CMakeLists.txt
-index d276d7f55..c53d28861 100755
+index 2e3beaaf3..e81afd730 100755
 --- source/CMakeLists.txt
 +++ source/CMakeLists.txt
-@@ -118,20 +118,10 @@ if(UNIX)
+@@ -154,20 +154,10 @@ if(UNIX)
      endif()
      option(ENABLE_LIBNUMA "Enable libnuma usage (Linux only)" ON)
      if(ENABLE_LIBNUMA)
