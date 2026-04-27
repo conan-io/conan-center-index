@@ -4,7 +4,6 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.57.0"
@@ -65,8 +64,6 @@ class LibmodbusConan(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
-        if Version(self.version) < "3.1.8":
-            tc.configure_args.append("--without-documentation")
         tc.configure_args.append("--disable-tests")
         if is_msvc(self) and check_min_vs(self, "180", raise_invalid=False):
             tc.extra_cflags.append("-FS")
