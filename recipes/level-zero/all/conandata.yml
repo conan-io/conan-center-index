@@ -7,10 +7,4 @@ sources:
     sha256: "70473c7262eee80dbe7c17974684ba9d3e34efc15ecba919b85e3cea7b1e180e"
 patches:
   "1.27.0":
-    - patch_file: "patches/1.27.0/001-remove-qspectre.patch"
-      patch_description: "Removed /Qspectre"
-      patch_type: "portability"
-  "1.17.39":
-    - patch_file: "patches/1.17.39/001-patch-remove-qspectre.patch"
-      patch_description: "Removed /Qspectre"
-      patch_type: "portability"
+    - patch_file: "patches/1.27.0-unused-include.patch"

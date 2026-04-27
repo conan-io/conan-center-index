@@ -1,0 +1,28 @@
+diff --git a/source/inc/ze_util.h b/source/inc/ze_util.h
+index e616dc0..6512b6c 100644
+--- a/source/inc/ze_util.h
++++ b/source/inc/ze_util.h
+@@ -41,7 +41,9 @@ inline void getLastErrorString(std::string &errorValue) {
+ #  define putenv_safe _putenv
+ #  define strdup_safe _strdup
+ #else
+-#  include <link.h>
++#  ifndef __APPLE__
++#    include <link.h>
++#  endif
+ #  include <dlfcn.h>
+ #  define HMODULE void*
+ #  define LOAD_DRIVER_LIBRARY(NAME) dlopen(NAME, RTLD_LAZY|RTLD_LOCAL)
+diff --git a/source/loader/ze_loader.cpp b/source/loader/ze_loader.cpp
+index 333f159..bf295fb 100644
+--- a/source/loader/ze_loader.cpp
++++ b/source/loader/ze_loader.cpp
+@@ -684,7 +684,7 @@ namespace loader
+                 {
+                     if (debugTraceEnabled) {
+                         std::string message = "Loading Driver " + driverInfo.path + " succeeded";
+-#if !defined(_WIN32) && !defined(ANDROID)
++#if !defined(_WIN32) && !defined(ANDROID) && !defined(__APPLE__)
+                         // TODO: implement same message for windows, move dlinfo to ze_util.h as a macro
+                         struct link_map *dlinfo_map;
+                         if (dlinfo(handle, RTLD_DI_LINKMAP, &dlinfo_map) == 0) {
