@@ -1,4 +1,8 @@
 sources:
+  "1.91.0":
+    url:
+      - "https://archives.boost.io/release/1.91.0/source/boost_1_91_0.tar.bz2"
+    sha256: "f9566aaef5421789b2f29a020643fae0391d72850b50515c6f9dcccc58bbc5b7"
   "1.90.0":
     url:
       - "https://archives.boost.io/release/1.90.0/source/boost_1_90_0.tar.bz2"
