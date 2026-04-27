@@ -1,10 +1,13 @@
+From https://github.com/coreutils/gnulib/commit/5b8f646ff514891678cd3d5b9c38b10dc7519c35
+
+
 From 5b8f646ff514891678cd3d5b9c38b10dc7519c35 Mon Sep 17 00:00:00 2001
-From: Bruno Haible <bruno@clisp.org>
+From: Bruno Haible
 Date: Thu, 29 Jan 2026 19:04:32 +0100
 Subject: [PATCH] relocatable-prog-wrapper: Fix syntax error on Linux (regr.
  2025-12-09).
 
-Reported by Erik Schnetter <schnetter@gmail.com>
+Reported by Erik Schnetter
 at <https://savannah.gnu.org/bugs/?67987>.
 
 * lib/progreloc.c (find_executable): Remove extraneous brace.

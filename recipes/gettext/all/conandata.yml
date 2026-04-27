@@ -26,11 +26,9 @@ sources:
 patches:
   "1.0":
     - patch_file: "patches/1.0-gnulib-relocatable-prog-wrapper.patch"
-      patch_description: "https://github.com/coreutils/gnulib/commit/5b8f646ff514891678cd3d5b9c38b10dc7519c35"
-      base_path: gettext-runtime
-    - patch_file: "patches/1.0-gnulib-relocatable-prog-wrapper.patch"
-      patch_description: "https://github.com/coreutils/gnulib/commit/5b8f646ff514891678cd3d5b9c38b10dc7519c35"
-      base_path: gettext-tools
+      base_path: gettext-runtime # not duplicated, applied to a different base_path
+    - patch_file: "patches/1.0-gnulib-relocatable-prog-wrapper.patch" 
+      base_path: gettext-tools # not duplicated, applied to a different base_path
   "0.22.5":
     - patch_file: "patches/0004-autopoint-relocatable.patch"
       patch_description: "relocatable autopoint with resources relative to script"
