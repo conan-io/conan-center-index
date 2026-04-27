@@ -2,3 +2,8 @@ sources:
   "1.2.1.cci.20260330":
     url: "https://gitlab.xiph.org/xiph/speexdsp/-/archive/a368d8330b8db31eb67ddfb0c05966f79138e331/speexdsp-a368d8330b8db31eb67ddfb0c05966f79138e331.tar.gz"
     sha256: "6c2a955972f0611bdbf71a97a07987d2ba2360fb2c789c64ce5a54be58f01bbd"
+patches:
+  "1.2.1.cci.20260330":
+    - patch_file: "patches/1.2.1.cci.20260330-0001-add-def-file-to-shared-windows-build.patch"
+      patch_description: "Use .def exports and Windows runtime output name for shared builds"
+      patch_type: "conan"
