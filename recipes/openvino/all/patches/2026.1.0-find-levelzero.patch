@@ -1,0 +1,35 @@
+diff --git a/thirdparty/dependencies.cmake b/thirdparty/dependencies.cmake
+index 95b97fcb77..d1a58835b0 100644
+--- a/thirdparty/dependencies.cmake
++++ b/thirdparty/dependencies.cmake
+@@ -74,17 +74,20 @@ endif()
+
+ if(ENABLE_INTEL_GPU OR ENABLE_INTEL_NPU)
+     if(ENABLE_SYSTEM_LEVEL_ZERO)
+-        pkg_search_module(level_zero QUIET
+-                          IMPORTED_TARGET
+-                          ${OV_PkgConfig_VISIBILITY}
+-                          level-zero)
+-        if(level_zero_FOUND)
+-            add_library(LevelZero::LevelZero ALIAS PkgConfig::level_zero)
+-            message(STATUS "${PKG_CONFIG_EXECUTABLE}: level_zero (${level_zero_VERSION}) is found at ${level_zero_PREFIX}")
++        find_package(level-zero)
++        if(TARGET level-zero::level-zero)
++            add_library(LevelZero::LevelZero ALIAS level-zero::level-zero)
++        else()
++            pkg_search_module(level_zero QUIET
++                            IMPORTED_TARGET
++                            ${OV_PkgConfig_VISIBILITY}
++                            level-zero)
++            if(level_zero_FOUND)
++                add_library(LevelZero::LevelZero ALIAS PkgConfig::level_zero)
++                message(STATUS "${PKG_CONFIG_EXECUTABLE}: level_zero (${level_zero_VERSION}) is found at ${level_zero_PREFIX}")
++            endif()
+         endif()
+-    endif()
+-
+-    if(NOT level_zero_FOUND)
++    else()
+         add_subdirectory(thirdparty/level_zero EXCLUDE_FROM_ALL)
+         add_library(LevelZero::LevelZero ALIAS ze_loader)
+     endif()

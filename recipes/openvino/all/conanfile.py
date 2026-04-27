@@ -3,6 +3,7 @@ from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import functools
 import os
 import yaml
@@ -98,6 +99,10 @@ class OpenvinoConan(ConanFile):
         return self.settings.os != "Macos" and self._target_x86_64
 
     @property
+    def _gpu_needs_levelzero(self):
+        return Version(self.version) > "2026.0.0"
+
+    @property
     def _preprocessing_available(self):
         return "ade" in self._dependencies_versions
 
@@ -153,6 +158,8 @@ class OpenvinoConan(ConanFile):
         if self.options.get_safe("enable_gpu"):
             self.requires("opencl-icd-loader/2023.04.17")
             self.requires("rapidjson/cci.20220822")
+            if self._gpu_needs_levelzero:
+                self.requires("level-zero/1.17.39")
         if self._protobuf_required:
             self.requires("protobuf/3.21.12")
         if self.options.enable_tf_frontend:
@@ -176,7 +183,6 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_INTEL_CPU"] = self.options.enable_cpu
         if self._gpu_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GPU"] = self.options.enable_gpu
-            toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = self.options.enable_gpu
         toolchain.cache_variables["ENABLE_INTEL_NPU"] = False
         # SW plugins
         toolchain.cache_variables["ENABLE_AUTO"] = self.options.enable_auto
@@ -203,6 +209,8 @@ class OpenvinoConan(ConanFile):
             toolchain.cache_variables["ENABLE_SYSTEM_FLATBUFFERS"] = True
         if self.options.get_safe("enable_gpu"):
             toolchain.cache_variables["ENABLE_SYSTEM_OPENCL"] = True
+            if self._gpu_needs_levelzero:
+                toolchain.cache_variables["ENABLE_SYSTEM_LEVEL_ZERO"] = True
         # misc
         if self._preprocessing_available:
             toolchain.cache_variables["ENABLE_GAPI_PREPROCESSING"] = True
@@ -333,6 +341,8 @@ class OpenvinoConan(ConanFile):
                 # utils goes last since all others depend on it
                 libname("openvino_util")
             ])
+            if Version(self.version) > "2026.0.0":
+                openvino_runtime.libs.append(libname("openvino_shutdown"))
             openvino_runtime.libs.append(libname("openvino_common_translators"))
             # set 'openvino' once again for transformations objects files (cyclic dependency)
             # openvino_runtime.libs.append("openvino")
@@ -345,6 +355,8 @@ class OpenvinoConan(ConanFile):
             openvino_runtime.requires.extend(["opencl-icd-loader::opencl-icd-loader", "rapidjson::rapidjson"])
             if self.settings.os == "Windows":
                 openvino_runtime.system_libs.append("setupapi")
+            if self._gpu_needs_levelzero:
+                openvino_runtime.requires.append("level-zero::level-zero")
 
         openvino_runtime_c = self.cpp_info.components["Runtime_C"]
         openvino_runtime_c.set_property("cmake_target_name", "openvino::runtime::c")
