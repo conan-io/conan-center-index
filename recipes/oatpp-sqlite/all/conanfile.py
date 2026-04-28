@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class OatppsqliteConan(ConanFile):
@@ -44,8 +44,7 @@ class OatppsqliteConan(ConanFile):
         self.requires("sqlite3/[>=3.45.0 <4]", transitive_headers=True)
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
         if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared library with msvc")
@@ -78,7 +77,6 @@ class OatppsqliteConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "oatpp-sqlite")
         self.cpp_info.set_property("cmake_target_name", "oatpp::oatpp-sqlite")
-        # TODO: back to global scope in conan v2 once legacy generators removed
         self.cpp_info.components["_oatpp-sqlite"].includedirs = [
             os.path.join("include", f"oatpp-{self.version}", "oatpp-sqlite")
         ]
