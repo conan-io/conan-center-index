@@ -1,4 +1,7 @@
 sources:
+  "2.8.0":
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_8_0/expat-2.8.0.tar.xz"
+    sha256: "a37bfae0aa9775bd8521ebd85dc456d486f0ff31138f6c91fd902ea732624542"
   "2.7.5":
     url: "https://github.com/libexpat/libexpat/releases/download/R_2_7_5/expat-2.7.5.tar.xz"
     sha256: "1032dfef4ff17f70464827daa28369b20f6584d108bc36f17ab1676e1edd2f91"
