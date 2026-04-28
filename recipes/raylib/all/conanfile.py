@@ -57,6 +57,10 @@ class RaylibConan(ConanFile):
     def _support_frame_control(self):
         return Version(self.version) >= "4.6"
 
+    @property
+    def _support_events_waiting(self):
+        return Version(self.version) < "6.0"
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -71,6 +75,8 @@ class RaylibConan(ConanFile):
             del self.options.rprand_generator
         if not self._support_frame_control:
             del self.options.custom_frame_control
+        if not self._support_events_waiting:
+            del self.options.events_waiting
 
     def configure(self):
         if self.options.shared:
@@ -83,7 +89,8 @@ class RaylibConan(ConanFile):
             del self.options.camera_system
             del self.options.gestures_system
             self.options.rm_safe("rprand_generator")
-            del self.options.events_waiting
+            if self._support_events_waiting:
+                del self.options.events_waiting
             self.options.rm_safe("custom_frame_control")
 
     def layout(self):
@@ -118,7 +125,8 @@ class RaylibConan(ConanFile):
         if self.options.customize_build:
             if self._support_custom_modules:
                 tc.variables["SUPPORT_MODULE_RAUDIO"] = self.options.module_raudio
-            tc.variables["SUPPORT_EVENTS_WAITING"] = self.options.events_waiting
+            if self._support_events_waiting:
+                tc.variables["SUPPORT_EVENTS_WAITING"] = self.options.events_waiting
             if self._support_frame_control:
                 tc.variables["SUPPORT_CUSTOM_FRAME_CONTROL"] = self.options.custom_frame_control
 
