@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
-from conan.tools.layout import basic_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
 import os
 
 
@@ -13,17 +13,16 @@ class SintraConan(ConanFile):
     license = "BSD-2-Clause"
     homepage = "https://github.com/imakris/sintra"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Header-only C++17 IPC library using shared-memory ring buffers."
+    description = "Header-only C++20 IPC library using shared-memory ring buffers."
     topics = ("ipc", "shared-memory", "rpc", "pubsub", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
-        check_min_cppstd(self, 17)
+        check_min_cppstd(self, 20)
 
     def package_id(self):
         self.info.clear()
@@ -31,17 +30,26 @@ class SintraConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["SINTRA_BUILD_EXAMPLES"] = "OFF"
+        tc.cache_variables["SINTRA_BUILD_TESTS"] = "OFF"
+        tc.cache_variables["SINTRA_INSTALL"] = "ON"
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+
     def package(self):
-        copy(
-            self,
-            "*",
-            os.path.join(self.source_folder, "include"),
-            os.path.join(self.package_folder, "include"))
+        cmake = CMake(self)
+        cmake.install()
         copy(
             self,
             "LICENSE",
             self.source_folder,
             os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
