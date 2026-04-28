@@ -16,7 +16,7 @@
 
 int main() {
 
-    iox::log::LogManager::GetLogManager().SetDefaultLogLevel(iox::log::LogLevel::kError);
+    iox::log::Logger::init(iox::log::LogLevel::Error);;
     iox::RouDiConfig_t defaultRouDiConfig = iox::RouDiConfig_t().setDefaults();
     iox::roudi::IceOryxRouDiComponents roudiComponents(defaultRouDiConfig);
 
