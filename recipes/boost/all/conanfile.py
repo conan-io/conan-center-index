@@ -851,7 +851,7 @@ class BoostConan(ConanFile):
 
     def build_requirements(self):
         if not self.options.header_only:
-            self.tool_requires("b2/[>=5.2 <6]")
+            self.tool_requires("b2/[>=5.4 <6]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -1595,6 +1595,11 @@ class BoostConan(ConanFile):
             sysroot = f'"{sysroot}"' if ' ' in sysroot else sysroot
             cppflags += f"--sysroot={sysroot} "
             ldflags += f"--sysroot={sysroot} "
+
+        # https://github.com/bfgroup/b2/pull/466
+        if "clang" in str(self.settings.compiler):
+            triple = self.conf.get("tools.gnu:host_triplet", "none")
+            contents += f'<triple>"{triple}" '
 
         if self._with_stacktrace_backtrace:
             backtrace_aggregated_cpp_info = self.dependencies["libbacktrace"].cpp_info.aggregated_components()
