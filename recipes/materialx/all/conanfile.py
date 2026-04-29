@@ -65,8 +65,8 @@ class MaterialXConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_openimageio: 
-            self.requires("openimageio/2.5.14.0")
+        if self.options.with_openimageio:
+            self.requires("openimageio/[>=2.2]")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             self.requires("opengl/system")
@@ -82,7 +82,7 @@ class MaterialXConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.24 <4]")
+        self.tool_requires("cmake/[>=3.26]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -92,10 +92,7 @@ class MaterialXConan(ConanFile):
         tc.variables["MATERIALX_BUILD_TESTS"] = False
         tc.variables["MATERIALX_TEST_RENDER"] = False
         tc.variables["MATERIALX_BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["MATERIALX_BUILD_GEN_MSL"] = self.options.build_gen_msl and is_apple_os
-        # TODO: Remove when Conan 1 support is dropped
-        if not self.settings.compiler.cppstd:
-            tc.variables["MATERIALX_BUILD_USE_CCACHE"] = self._min_cppstd
+        tc.variables["MATERIALX_BUILD_GEN_MSL"] = self.options.build_gen_msl
         tc.variables["MATERIALX_BUILD_USE_CCACHE"] = False
         tc.generate()
 
@@ -127,7 +124,7 @@ class MaterialXConan(ConanFile):
         rm(self, "README.md", self.package_folder)
         rm(self, "CHANGELOG.md", self.package_folder)
         rm(self, "THIRD-PARTY.md", self.package_folder)
-        rm(self, "LICENSE", self.package_folder)    
+        rm(self, "LICENSE", self.package_folder)
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
@@ -148,8 +145,9 @@ class MaterialXConan(ConanFile):
         self.cpp_info.components["MaterialXGenMdl"].libs = ["MaterialXGenMdl"]
         self.cpp_info.components["MaterialXGenMdl"].requires = ["MaterialXCore", "MaterialXGenShader"]
 
-        self.cpp_info.components["MaterialXGenMsl"].libs = ["MaterialXGenMsl"]
-        self.cpp_info.components["MaterialXGenMsl"].requires = ["MaterialXCore", "MaterialXGenShader"]
+        if self.options.build_gen_msl:
+            self.cpp_info.components["MaterialXGenMsl"].libs = ["MaterialXGenMsl"]
+            self.cpp_info.components["MaterialXGenMsl"].requires = ["MaterialXCore", "MaterialXGenShader"]
 
         self.cpp_info.components["MaterialXGenOsl"].libs = ["MaterialXGenOsl"]
         self.cpp_info.components["MaterialXGenOsl"].requires = ["MaterialXCore", "MaterialXGenShader"]
@@ -189,10 +187,6 @@ class MaterialXConan(ConanFile):
         self.cpp_info.components["MaterialXRenderOsl"].libs = ["MaterialXRenderOsl"]
         self.cpp_info.components["MaterialXRenderOsl"].requires = ["MaterialXRender"]
 
-        if self.options.build_gen_msl:
-            self.cpp_info.components["MaterialXGenMsl"].libs = ["MaterialXGenMsl"]
-            self.cpp_info.components["MaterialXGenMsl"].requires = ["MaterialXCore", "MaterialXGenShader"]
-            
         if self.options.build_gen_msl and self.settings.os == "Macos":
             self.cpp_info.components["MaterialXRenderMsl"].libs = ["MaterialXRenderMsl"]
             self.cpp_info.components["MaterialXRenderMsl"].requires = ["MaterialXRenderHw", "MaterialXGenMsl"]
