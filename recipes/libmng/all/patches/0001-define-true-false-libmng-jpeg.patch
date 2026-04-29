@@ -1,0 +1,19 @@
+diff --git a/libmng_jpeg.c b/libmng_jpeg.c
+index f5c43a4bd..50dc12a6b 100644
+--- a/libmng_jpeg.c
++++ b/libmng_jpeg.c
+@@ -57,6 +57,14 @@
+ /* ************************************************************************** */
+ 
+ #include "libmng.h"
++
++/* conan: define TRUE/FALSE for jpeg */
++#ifndef TRUE
++#define TRUE 1
++#endif
++#ifndef FALSE
++#define FALSE 0
++#endif
+ #include "libmng_data.h"
+ #include "libmng_error.h"
+ #include "libmng_trace.h"
