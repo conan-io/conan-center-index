@@ -115,6 +115,7 @@ class AprUtilConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     @property
     def _with_crypto(self):
@@ -126,6 +127,10 @@ class AprUtilConan(ConanFile):
             tc.variables["INSTALL_PDB"] = False
             tc.variables["APU_HAVE_CRYPTO"] = self._with_crypto
             tc.variables["APR_HAS_LDAP"] = self.options.with_ldap
+            if Version(self.version) <= "1.6.1":
+                tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+            else:
+                raise ConanException("Check for new version support of CMake 4 in new version")
             tc.generate()
             deps = CMakeDeps(self)
             deps.generate()
@@ -164,7 +169,6 @@ class AprUtilConan(ConanFile):
             deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         if self.settings.os == "Windows":
             cmake = CMake(self)
             cmake.configure()
