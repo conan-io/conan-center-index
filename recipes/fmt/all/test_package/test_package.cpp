@@ -6,10 +6,14 @@
 #include <limits>
 
 
+#ifdef FMT_TEST_USE_MODULE
+import fmt;
+#else
 #include <fmt/format.h>
 #include <fmt/printf.h>
 #include <fmt/ostream.h>
 #include <fmt/color.h>
+#endif
 
 
 void vreport(const char *format, fmt::format_args args) {
@@ -31,10 +35,17 @@ class Date {
     }
 };
 
+// The ostream_formatter -> formatter<Date> specialization below cannot be
+// exercised when fmt is consumed via `import fmt;`: fmt's module purview
+// includes fmt/ostream.h but does not FMT_EXPORT ostream_formatter or
+// fmt::streamed, so neither the base class nor the helper are reachable
+// from the consumer.
+#ifndef FMT_TEST_USE_MODULE
 #if FMT_VERSION >= 90000
 namespace fmt {
     template <> struct formatter<Date> : ostream_formatter {};
 }
+#endif
 #endif
 
 int main() {
@@ -48,7 +59,9 @@ int main() {
     fmt::format_to(std::back_inserter(buf), "{}", 2.7182818);
     fmt::print("Euler number: {}\n", fmt::to_string(buf));
 
+#ifndef FMT_TEST_USE_MODULE
     fmt::print("The date is {}\n", Date(2012, 12, 9));
+#endif
 
     report("{} {} {}\n", "Conan", 42, 3.14159);
 
