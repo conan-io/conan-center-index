@@ -88,6 +88,21 @@ if (onnxruntime_USE_XNNPACK)
   endif()
 endif()
 
+
+if (onnxruntime_USE_CUDA)
+  find_package(CUDAToolkit REQUIRED)
+
+  # cuDNN is not needed for minimal CUDA builds (e.g., TensorRT-only builds)
+  if(NOT onnxruntime_CUDA_MINIMAL)
+    if(onnxruntime_CUDNN_HOME)
+      file(TO_CMAKE_PATH ${onnxruntime_CUDNN_HOME} onnxruntime_CUDNN_HOME)
+      set(CUDNN_PATH ${onnxruntime_CUDNN_HOME})
+    endif()
+
+    include(cuDNN)
+  endif()
+endif()
+
 if (onnxruntime_USE_MIMALLOC)
   find_package(mimalloc REQUIRED CONFIG)
   add_definitions(-DUSE_MIMALLOC)

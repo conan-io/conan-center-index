@@ -1,0 +1,23 @@
+diff --git a/cmake/external/cuda_configuration.cmake b/cmake/external/cuda_configuration.cmake
+index 00f7d81eda..5d3b129ced 100644
+--- a/cmake/external/cuda_configuration.cmake
++++ b/cmake/external/cuda_configuration.cmake
+@@ -126,13 +126,13 @@ macro(setup_cuda_architectures)
+       # Support for Jetson/Tegra ARM devices
+       set(CMAKE_CUDA_ARCHITECTURES "53;62;72;87") # TX1/Nano, TX2, Xavier, Orin
+     else()
+-      if(CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 12)
+-        # 37, 50 still work in CUDA 11 but are marked deprecated and will be removed in future CUDA version.
+-        set(CMAKE_CUDA_ARCHITECTURES "37;50;52;60;70;75;80;86;89")
+-      elseif(CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 12.8)
++      if(CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 12.8)
+         set(CMAKE_CUDA_ARCHITECTURES "52;60;70;75;80;86;89;90")
+-      else()
++      elseif(CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 13.0)
+         set(CMAKE_CUDA_ARCHITECTURES "60;70;75;80;86;89;90;100;120")
++      else()
++        # 13.x drops support for 60 and 70
++        set(CMAKE_CUDA_ARCHITECTURES "75;80;86;89;90;100;120")
+       endif()
+     endif()
+   endif()
