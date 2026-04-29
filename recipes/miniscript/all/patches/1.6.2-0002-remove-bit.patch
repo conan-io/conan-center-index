@@ -1,0 +1,13 @@
+diff --git a/MiniScript-cpp/src/MiniScript/MiniscriptTypes.cpp b/MiniScript-cpp/src/MiniScript/MiniscriptTypes.cpp
+index c406663..696dacf 100644
+--- a/MiniScript-cpp/src/MiniScript/MiniscriptTypes.cpp
++++ b/MiniScript-cpp/src/MiniScript/MiniscriptTypes.cpp
+@@ -15,7 +15,7 @@
+ 
+ #include <iostream>
+ #include <math.h>
+-#include <bit>
++
+ 
+ namespace MiniScript {
+ 
