@@ -1,0 +1,86 @@
+diff --git a/cmake/XalanDLL.cmake b/cmake/XalanDLL.cmake
+index 858c00c0d..4fa45a8bb 100644
+--- a/cmake/XalanDLL.cmake
++++ b/cmake/XalanDLL.cmake
+@@ -34,3 +34,20 @@ endif()
+ if(MSVC)
+   add_definitions(-D_CRT_SECURE_NO_WARNINGS=1 -D_SCL_SECURE_NO_WARNINGS=1)
+ endif()
++
++# DLL export and import macros
++
++set(XALAN_PLATFORM_EXPORT)
++set(XALAN_PLATFORM_IMPORT)
++set(XALAN_STATIC_LIBRARY)
++if(NOT BUILD_SHARED_LIBS)
++  set(XALAN_STATIC_LIBRARY 1)
++else()
++  if(WIN32)
++    set(XALAN_PLATFORM_EXPORT "__declspec(dllexport)")
++    set(XALAN_PLATFORM_IMPORT "__declspec(dllimport)")
++    if (MSVC)
++      set(XALAN_TEMPLATE_EXTERN)
++    endif()
++  endif()
++endif()
+diff --git a/src/xalanc/Include/PlatformDefinitions.hpp.in b/src/xalanc/Include/PlatformDefinitions.hpp.in
+index 57829a706..96e8ae397 100644
+--- a/src/xalanc/Include/PlatformDefinitions.hpp.in
++++ b/src/xalanc/Include/PlatformDefinitions.hpp.in
+@@ -59,17 +59,11 @@
+ //  These defines provide the platform specific keywords that they need
+ //  to do this.
+ // ---------------------------------------------------------------------------
+-#if defined(_MSC_VER)
+-#define XALAN_PLATFORM_EXPORT     __declspec(dllexport)
+-#define XALAN_PLATFORM_IMPORT     __declspec(dllimport)
++#cmakedefine XALAN_STATIC_LIBRARY 1
++#define XALAN_PLATFORM_EXPORT     @XALAN_PLATFORM_EXPORT@
++#define XALAN_PLATFORM_IMPORT     @XALAN_PLATFORM_IMPORT@
+ #define XALAN_PLATFORM_EXPORT_FUNCTION(T) XALAN_PLATFORM_EXPORT T
+ #define XALAN_PLATFORM_IMPORT_FUNCTION(T) XALAN_PLATFORM_IMPORT T
+-#else
+-#define XALAN_PLATFORM_EXPORT
+-#define XALAN_PLATFORM_IMPORT
+-#define XALAN_PLATFORM_EXPORT_FUNCTION(T) T XALAN_PLATFORM_EXPORT
+-#define XALAN_PLATFORM_IMPORT_FUNCTION(T) T XALAN_PLATFORM_IMPORT
+-#endif
+ 
+ #cmakedefine XALAN_HAVE_GMTIME_R 1
+ #cmakedefine XALAN_HAVE_LOCALTIME_R 1
+diff --git a/src/xalanc/XPathCAPI/XPathCAPI.h b/src/xalanc/XPathCAPI/XPathCAPI.h
+index b754c0054..3fd6e5637 100644
+--- a/src/xalanc/XPathCAPI/XPathCAPI.h
++++ b/src/xalanc/XPathCAPI/XPathCAPI.h
+@@ -20,24 +20,21 @@
+ 
+ 
+ 
+-#if defined(_MSC_VER)
++#include <xalanc/Include/PlatformDefinitions.hpp>
+ 
+-#if defined(XALAN_BUILD_DLL)
+ 
+-#define XALAN_XPATHCAPI_EXPORT __declspec(dllexport)
+-#define XALAN_XPATHCAPI_EXPORT_FUNCTION(T) T __declspec(dllexport)
+ 
+-#else
++#if defined(XALAN_BUILD_DLL)
+ 
+-#define XALAN_XPATHCAPI_EXPORT __declspec(dllimport)
+-#define XALAN_XPATHCAPI_EXPORT_FUNCTION(T) T __declspec(dllimport)
++#define XALAN_XPATHCAPI_EXPORT XALAN_PLATFORM_EXPORT
+ 
+-#endif
++#define XALAN_XPATHCAPI_EXPORT_FUNCTION(T) XALAN_PLATFORM_EXPORT_FUNCTION(T)
+ 
+ #else
+ 
+-#define XALAN_XPATHCAPI_EXPORT
+-#define XALAN_XPATHCAPI_EXPORT_FUNCTION(T) T
++#define XALAN_XPATHCAPI_EXPORT XALAN_PLATFORM_IMPORT
++
++#define XALAN_XPATHCAPI_EXPORT_FUNCTION(T) XALAN_PLATFORM_IMPORT_FUNCTION(T)
+ 
+ #endif
+ 
