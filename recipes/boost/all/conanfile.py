@@ -1554,6 +1554,12 @@ class BoostConan(ConanFile):
         if self._with_zstd:
             contents += create_library_config("zstd", "zstd")
 
+        # As boost >= 1.90.0 searches for libssl, if a system library is installed it will find it.
+        # Unlike lzma etc., none of -sNO_SSL/-sNO_OPENSSL style params worked. So suggested on the
+        # cpplang#boost slack, giving an invalid/empty library search path for openssl prevents
+        # the search to happen and builds without ssl.
+        contents += "\nusing openssl : : <ssl-name>NOSUCHFILE ;"
+
         if not self.options.without_python:
             # https://www.boost.org/doc/libs/1_70_0/libs/python/doc/html/building/configuring_boost_build.html
             contents += f'\nusing python : {self._python_version} : "{self._python_executable}" : "{self._python_includes}" : "{self._python_library_dir}" ;'
