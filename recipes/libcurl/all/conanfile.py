@@ -75,6 +75,7 @@ class LibcurlConan(ConanFile):
         "with_ca_fallback": [True, False],
         "with_form_api": [True, False],
         "with_websockets": [True, False],
+        "with_apple_sectrust": [True, False],
     }
     default_options = {
         "shared": False,
@@ -124,6 +125,7 @@ class LibcurlConan(ConanFile):
         "with_ca_fallback": False,
         "with_form_api": True,
         "with_websockets": True,
+        "with_apple_sectrust": False,
     }
 
     @property
@@ -146,6 +148,8 @@ class LibcurlConan(ConanFile):
             del self.options.fPIC
         if self._is_using_cmake_build:
             del self.options.with_libgsasl
+        if not is_apple_os(self):
+            del self.options.with_apple_sectrust
 
     def configure(self):
         if self.options.shared:
@@ -469,6 +473,9 @@ class LibcurlConan(ConanFile):
         else:
             tc.configure_args.append("--without-libidn2")
 
+        if self.options.get_safe("with_apple_sectrust"):
+            tc.configure_args.append("--with-apple-sectrust")
+
         # Cross building flags
         if cross_building(self):
             if self.settings.os == "Linux" and "arm" in self.settings.arch:
@@ -699,6 +706,8 @@ class LibcurlConan(ConanFile):
             self.cpp_info.components["curl"].frameworks.append("CoreFoundation")
             self.cpp_info.components["curl"].frameworks.append("CoreServices")
             self.cpp_info.components["curl"].frameworks.append("SystemConfiguration")
+            if self.options.get_safe("with_apple_sectrust"):
+                self.cpp_info.components["curl"].frameworks.append("Security")
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("ldap")
 
