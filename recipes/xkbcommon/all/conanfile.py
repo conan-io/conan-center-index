@@ -27,6 +27,7 @@ class XkbcommonConan(ConanFile):
         "with_x11": [True, False],
         "with_wayland": [True, False],
         "xkbregistry": [True, False],
+        "with_xkeyboard_config": [True, False],
     }
     default_options = {
         "shared": False,
@@ -34,6 +35,7 @@ class XkbcommonConan(ConanFile):
         "with_x11": True,
         "with_wayland": True,
         "xkbregistry": True,
+        "with_xkeyboard_config": True
     }
     implements = ["auto_shared_fpic"]
     languages = ["C"]
@@ -48,7 +50,8 @@ class XkbcommonConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("xkeyboard-config/system")
+        if self.options.with_xkeyboard_config:
+            self.requires("xkeyboard-config/system")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
         if self.options.xkbregistry:
@@ -116,7 +119,8 @@ class XkbcommonConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["libxkbcommon"].set_property("pkg_config_name", "xkbcommon")
         self.cpp_info.components["libxkbcommon"].libs = ["xkbcommon"]
-        self.cpp_info.components["libxkbcommon"].requires = ["xkeyboard-config::xkeyboard-config"]
+        if self.options.with_xkeyboard_config:
+            self.cpp_info.components["libxkbcommon"].requires = ["xkeyboard-config::xkeyboard-config"]
         self.cpp_info.components["libxkbcommon"].resdirs = ["res"]
 
         if self.options.get_safe("with_x11"):
