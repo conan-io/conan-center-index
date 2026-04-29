@@ -4,8 +4,9 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class JsbsimConan(ConanFile):
@@ -31,6 +32,8 @@ class JsbsimConan(ConanFile):
 
     @property
     def _min_cppstd(self):
+        if Version(self.version) >= "1.2.4":
+            return "17"
         return "11"
 
     def export_sources(self):
@@ -51,11 +54,11 @@ class JsbsimConan(ConanFile):
         self.requires("expat/[>=2.6.2 <3]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -69,7 +72,6 @@ class JsbsimConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -90,6 +92,3 @@ class JsbsimConan(ConanFile):
             self.cpp_info.system_libs.extend(["wsock32", "ws2_32"])
             if not self.options.shared:
                 self.cpp_info.defines.append("JSBSIM_STATIC_LINK")
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
