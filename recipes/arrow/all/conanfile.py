@@ -418,7 +418,8 @@ class ArrowConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, "cpp"))
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, "cpp"),
+                        cli_args=["--debug-find-pkg=LibXml2"])
         cmake.build()
 
     def package(self):
