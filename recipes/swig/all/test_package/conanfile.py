@@ -1,4 +1,5 @@
 import importlib
+import io
 import os
 import sys
 from pathlib import PurePath
@@ -69,5 +70,14 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             if self._can_build:
                 self._test_swig_module()
-            self.run("swig -version")
-            self.run("swig -swiglib")
+            version_output = io.StringIO()
+            self.run("swig -version", stdout=version_output)
+            version_str = version_output.getvalue()
+            self.output.info(version_str)
+            assert "+pcre" in version_str, f"SWIG was not built with PCRE support:\n{version_str}"
+            swiglib_output = io.StringIO()
+            self.run("swig -swiglib", stdout=swiglib_output)
+            swiglib_raw = swiglib_output.getvalue().strip()
+            self.output.info(f"swig -swiglib raw output: {swiglib_raw}")
+            swiglib_path = PurePath(swiglib_raw)
+            assert swiglib_path.is_absolute(), f"swig -swiglib returned a non-absolute path: {swiglib_path}"
