@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.build import cross_building, stdcpp_library, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rmdir, save, rm, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save, rm, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -40,6 +40,7 @@ class LibjxlConan(ConanFile):
     }
 
     def export_sources(self):
+        export_conandata_patches(self)
         copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
@@ -115,10 +116,12 @@ class LibjxlConan(ConanFile):
             # TODO: add support for the jpegli JPEG encoder library
             tc.variables["JPEGXL_ENABLE_JPEGLI"] = False
             tc.variables["JPEGXL_ENABLE_JPEGLI_LIBJPEG"] = False
-        # TODO: can hopefully be removed in newer versions
+        # Workaround for libjxl#3159: DebugString() in dec_modular.cc uses unqualified scoped enum values
+        # (GlobalData instead of Kind::GlobalData) which MSVC rejects in C++23 mode (-std:c++latest).
+        # Setting JXL_DEBUG_V_LEVEL=0 disables the debug logging code path entirely, avoiding the compile error.
         # https://github.com/libjxl/libjxl/issues/3159
         if Version(self.version) >= "0.9" and self.settings.build_type == "Debug" and is_msvc(self):
-            tc.preprocessor_definitions["JXL_DEBUG_V_LEVEL"] = 1
+            tc.preprocessor_definitions["JXL_DEBUG_V_LEVEL"] = 0
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -136,15 +139,14 @@ class LibjxlConan(ConanFile):
         return self.settings.get_safe("compiler.libcxx") in ["libstdc++", "libstdc++11"]
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         # Disable tools, extras and third_party
         save(self, os.path.join(self.source_folder, "tools", "CMakeLists.txt"), "")
         save(self, os.path.join(self.source_folder, "third_party", "CMakeLists.txt"), "")
         # FindAtomics.cmake values are set by CMakeToolchain instead
         save(self, os.path.join(self.source_folder, "cmake", "FindAtomics.cmake"), "")
 
-        # Allow fPIC to be set by Conan
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)", "")
+        # Allow fPIC to be set by Conan (per-target, the root CMakeLists.txt is handled by patch)
         for cmake_file in ["jxl.cmake", "jxl_threads.cmake", "jxl_cms.cmake", "jpegli.cmake"]:
             path = os.path.join(self.source_folder, "lib", cmake_file)
             if os.path.exists(path):
