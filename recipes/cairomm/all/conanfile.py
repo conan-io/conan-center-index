@@ -60,7 +60,7 @@ class CairommConan(ConanFile):
         self.requires("cairo/1.18.0", transitive_headers=True, transitive_libs=True)
         self.requires("fontconfig/2.15.0", transitive_headers=True, transitive_libs=True)
         if self._abi_version == "1.16":
-            self.requires("libsigcpp/3.0.7", transitive_headers=True, transitive_libs=True)
+            self.requires("libsigcpp/3.8.0", transitive_headers=True, transitive_libs=True)
         else:
             self.requires("libsigcpp/2.10.8", transitive_headers=True, transitive_libs=True)
 
