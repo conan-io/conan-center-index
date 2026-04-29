@@ -1633,6 +1633,10 @@ class QtConan(ConanFile):
                 if os.path.isfile(module):
                     _add_build_module(component_name, module)
 
+                module = os.path.join("lib", "cmake", m, "QtInstallPaths.cmake")
+                if os.path.isfile(module):
+                    _add_build_module(component_name, module)
+
                 for helper_modules in glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake")):
                     _add_build_module(component_name, helper_modules)
                 for helper_modules in glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "Qt6QmlPublic*Helpers.cmake")):
