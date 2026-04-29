@@ -1,0 +1,4 @@
+sources:
+  "1.0.3":
+    url: "https://github.com/neosapience/typecast-sdk/archive/refs/tags/v1.0.3.tar.gz"
+    sha256: "dfc9fe51f7c3d507efe9623f714e2069484e455de399f9b83eb0fa9b6f34999d"
