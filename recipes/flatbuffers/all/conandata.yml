@@ -1,4 +1,10 @@
 sources:
+  "25.12.19-2026-02-06-03fffb2":
+    "url": "https://github.com/google/flatbuffers/archive/refs/tags/v25.12.19-2026-02-06-03fffb2.tar.gz"
+    "sha256": "ccbce58684691de1e7d51f5e87786266b37d06ab66e9dfe2d0ec106fe50aace0"
+  "25.12.19":
+    "url": "https://github.com/google/flatbuffers/archive/refs/tags/v25.12.19.tar.gz"
+    "sha256": "f81c3162b1046fe8b84b9a0dbdd383e24fdbcf88583b9cb6028f90d04d90696a"
   "25.9.23":
     url: "https://github.com/google/flatbuffers/archive/refs/tags/v25.9.23.tar.gz"
     sha256: "9102253214dea6ae10c2ac966ea1ed2155d22202390b532d1dea64935c518ada"

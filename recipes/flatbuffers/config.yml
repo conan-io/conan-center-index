@@ -1,4 +1,8 @@
 versions:
+  "25.12.19-2026-02-06-03fffb2":
+    folder: all
+  "25.12.19":
+    folder: all
   "25.9.23":
     folder: all
   "24.12.23":
