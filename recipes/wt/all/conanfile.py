@@ -295,7 +295,8 @@ class WtConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.components["wtmain"].system_libs = ["ws2_32", "mswsock", "winmm"]
             self.cpp_info.components["wtmain"].system_libs.extend(["dwrite", "d2d1", "shlwapi"])
-        self.cpp_info.components["wtmain"].requires = ["boost::boost"]
+        self.cpp_info.components["wtmain"].requires = ["boost::chrono", "boost::filesystem", "boost::thread",
+                                                       "boost::container", "boost::date_time", "boost::atomic", "boost::system"]
         if self.options.with_ssl:
             self.cpp_info.components["wtmain"].requires.append("openssl::openssl")
         if self.options.get_safe("with_unwind"):
@@ -307,13 +308,13 @@ class WtConan(ConanFile):
         if self.options.with_test:
             self.cpp_info.components["wttest"].set_property("cmake_target_name", "Wt::Test")
             self.cpp_info.components["wttest"].libs = ["wttest{}".format(suffix)]
-            self.cpp_info.components["wttest"].requires = ["wtmain"]
+            self.cpp_info.components["wttest"].requires = ["wtmain", "boost::unit_test_framework", "zlib::zlib"]
 
         # wthttp
         if self.options.connector_http:
             self.cpp_info.components["wthttp"].set_property("cmake_target_name", "Wt::HTTP")
             self.cpp_info.components["wthttp"].libs = ["wthttp{}".format(suffix)]
-            self.cpp_info.components["wthttp"].requires = ["wtmain", "boost::boost", "zlib::zlib"]
+            self.cpp_info.components["wthttp"].requires = ["wtmain", "boost::program_options", "zlib::zlib"]
             if self.options.with_ssl:
                 self.cpp_info.components["wthttp"].requires.append("openssl::openssl")
 
