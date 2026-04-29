@@ -28,7 +28,8 @@ class GnuConfigConan(ConanFile):
 
     def source(self):
         git = Git(self)
-        git.fetch_commit(**self.conan_data["sources"][self.version])
+        git.clone(url=self.conan_data["sources"][self.version]["url"], target=".")
+        git.checkout(commit=self.conan_data["sources"][self.version]["commit"])
         apply_conandata_patches(self)
 
     def build(self):
