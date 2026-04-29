@@ -46,7 +46,7 @@ class ArcusConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("protobuf/[>=4.25.0 <7]")
+        self.requires("protobuf/[>=4.25.0 <8]")
         self.requires("abseil/[*]")
         self.tool_requires("cmake/[>=3.23]")
 
