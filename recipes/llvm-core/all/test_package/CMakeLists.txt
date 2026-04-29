@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(test_package LANGUAGES CXX)
+project(test_package LANGUAGES C CXX)
 
 macro(test_llvm_cmake_variable VARIABLE)
     if(NOT DEFINED ${VARIABLE})
