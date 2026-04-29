@@ -1,4 +1,7 @@
 sources:
+  "0.13.1":
+    url: "https://github.com/LLNL/units/archive/refs/tags/v0.13.1.tar.gz"
+    sha256: "e6a19f84a139ec6a06458d68778cc4e491a6e07428c8ac57faadcd3d6f81d50e"
   "0.9.1":
     url: "https://github.com/LLNL/units/archive/refs/tags/v0.9.1.tar.gz"
     sha256: "7edb83613a07cf55873f22d61c0062e46db6f8cb27d137866858811ec2e1ad4f"
