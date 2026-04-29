@@ -22,8 +22,8 @@ class LuajitConan(ConanFile):
     topics = ("lua", "jit")
     provides = "lua"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False], "lua52compat": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "lua52compat": False}
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -95,6 +95,8 @@ class LuajitConan(ConanFile):
         args = [f"PREFIX={unix_path(self, self.package_folder)}"]
         if is_apple_os(self) and self._macosx_deployment_target:
             args.append(f"MACOSX_DEPLOYMENT_TARGET={self._macosx_deployment_target}")
+        if self.options.lua52compat:
+            args.append("XCFLAGS+=-DLUAJIT_ENABLE_LUA52COMPAT")
         return args
 
     @property
@@ -110,7 +112,8 @@ class LuajitConan(ConanFile):
         if is_msvc(self):
             with chdir(self, os.path.join(self.source_folder, "src")):
                 variant = '' if self.options.shared else 'static'
-                self.run(f"msvcbuild.bat {variant}", env="conanbuild")
+                compat = ' lua52compat' if self.options.lua52compat else ''
+                self.run(f"msvcbuild.bat {variant}{compat}", env="conanbuild")
         else:
             with chdir(self, self.source_folder):
                 autotools = Autotools(self)
