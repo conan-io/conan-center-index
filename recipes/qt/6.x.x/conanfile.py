@@ -27,6 +27,7 @@ class QtConan(ConanFile):
                    "qtremoteobjects", "qtpositioning", "qtlanguageserver",
                    "qtspeech", "qthttpserver", "qtquick3dphysics", "qtgrpc", "qtquickeffectmaker"]
     _submodules += ["qtgraphs"] # new modules for qt 6.6.0
+    _submodules += ["qttasktree", "qtopenapi", "qtcanvaspainter"] # new modules for qt 6.11.0
 
     _module_statuses = ["essential", "addon", "deprecated", "preview"]
 
@@ -357,13 +358,13 @@ class QtConan(ConanFile):
             if is_apple_os(self):
                 self.requires("moltenvk/1.2.2")
         if self.options.with_glib:
-            self.requires("glib/2.78.3")
+            self.requires("glib/[>=2.78 <3")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.3.0")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
-            self.requires("freetype/2.13.2")
+            self.requires("freetype/[>=2.13.2 <3]")
         if self.options.get_safe("with_fontconfig", False):
-            self.requires("fontconfig/2.15.0")
+            self.requires("fontconfig/[>=2.15.0 <3]")
         if self.options.get_safe("with_icu", False):
             self.requires("icu/74.2")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
@@ -668,6 +669,8 @@ class QtConan(ConanFile):
 
         with_egl = self.options.get_safe("with_egl", False)
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_EGL"] = not with_egl
+
+        tc.variables["FEATURE_wasmdeployqt"] = "OFF"
 
         tc.generate()
 
