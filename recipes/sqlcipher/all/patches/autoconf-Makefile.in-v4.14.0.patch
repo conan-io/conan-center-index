@@ -1,0 +1,46 @@
+--- a/autoconf/Makefile.in	2026-03-10 19:14:56.536110136 +0100
++++ b/autoconf/Makefile.in	2026-03-10 19:15:30.725622516 +0100
+@@ -151,7 +151,7 @@
+ sqlite3.o: $(TOP)/sqlite3.h $(TOP)/sqlite3.c
+ 	$(CC) -c $(TOP)/sqlite3.c -o $@ $(CFLAGS) $(CFLAGS.libsqlite3)
+ 
+-libsqlite3.LIB = libsqlite3$(T.lib)
++libsqlite3.LIB = libsqlcipher$(T.lib)
+ libsqlite3.DLL.basename = @SQLITE_DLL_BASENAME@
+ libsqlite3.out.implib = @SQLITE_OUT_IMPLIB@
+ libsqlite3.DLL = $(libsqlite3.DLL.basename)$(T.dll)
+@@ -213,12 +213,12 @@
+ 	$(INSTALL) $(libsqlite3.DLL) "$(install-dir.lib)"
+ 	@echo "Setting up $(libsqlite3.DLL) version symlinks..."; \
+ 	cd "$(install-dir.lib)" || exit $$?; \
+-	rm -f libsqlite3.0$(T.dll) libsqlite3.$(PACKAGE_VERSION)$(T.dll) || exit $$?; \
+-	dllname=libsqlite3.$(PACKAGE_VERSION)$(T.dll); \
++	rm -f libsqlcipher.0$(T.dll) libsqlcipher.$(PACKAGE_VERSION)$(T.dll) || exit $$?; \
++	dllname=libsqlcipher.$(PACKAGE_VERSION)$(T.dll); \
+ 	mv $(libsqlite3.DLL) $$dllname || exit $$?; \
+ 	ln -s $$dllname $(libsqlite3.DLL) || exit $$?; \
+-	ln -s $$dllname libsqlite3.0$(T.dll) || exit $$?; \
+-	ls -la $$dllname $(libsqlite3.DLL) libsqlite3.0$(T.dll)
++	ln -s $$dllname libsqlcipher.0$(T.dll) || exit $$?; \
++	ls -la $$dllname $(libsqlite3.DLL) libsqlcipher.0$(T.dll)
+ 
+ install-dll-1: install-dll-$(libsqlite3.DLL.install-rules)
+ install-dll-0 install-dll-:
+@@ -240,7 +240,7 @@
+ # https://sqlite.org/forum/forumpost/d80ecdaddd
+ ENABLE_STATIC_SHELL = @ENABLE_STATIC_SHELL@
+ sqlite3-shell-link-flags.1 = $(TOP)/sqlite3.c $(LDFLAGS) $(LDFLAGS.libsqlite3)
+-sqlite3-shell-link-flags.0 = $(LDFLAGS) -L. -lsqlite3 $(LDFLAGS.zlib) $(LDFLAGS.math)
++sqlite3-shell-link-flags.0 = $(LDFLAGS) -L. -lsqlcipher $(LDFLAGS.zlib) $(LDFLAGS.math)
+ sqlite3-shell-deps.1 = $(TOP)/sqlite3.c
+ sqlite3-shell-deps.0 = $(libsqlite3.DLL)
+ #
+@@ -286,7 +286,7 @@
+ 
+ clean:
+ 	rm -f *.o sqlite3$(T.exe)
+-	rm -f $(libsqlite3.LIB) $(libsqlite3.DLL) libsqlite3$(T.dll).a
++	rm -f $(libsqlite3.LIB) $(libsqlite3.DLL) libsqlcipher$(T.dll).a
+ 
+ distclean: clean
+ 	rm -f jimsh0$(T.exe) config.* sqlite3.pc sqlite_cfg.h Makefile
