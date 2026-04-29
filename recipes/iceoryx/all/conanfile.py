@@ -97,6 +97,7 @@ class IceoryxConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["INTROSPECTION"] = "ON"
         tc.cache_variables["TOML_CONFIG"] = self.options.toml_config
         if Version(self.version) >= "2.0.0":
             tc.cache_variables["DOWNLOAD_TOML_LIB"] = False
@@ -113,11 +114,13 @@ class IceoryxConan(ConanFile):
             hoofs_dir = os.path.join(self.source_folder, "iceoryx_utils")
 
         # Use acl::acl target, since plain acl fails to link
-        replace_in_file(self, os.path.join(hoofs_dir, "CMakeLists.txt"), " acl", " acl::acl")
+        if Version(self.version) < "2.95.8":
+            replace_in_file(self, os.path.join(hoofs_dir, "CMakeLists.txt"), " acl", " acl::acl")
 
         # Honor fPIC option
         if Version(self.version) >= "2.90":
-            replace_in_file(self, os.path.join(self.source_folder, "iceoryx_hoofs", "cmake", "IceoryxPackageHelper.cmake"),
+            if Version(self.version) < "2.95.8":
+                replace_in_file(self, os.path.join(self.source_folder, "iceoryx_hoofs", "cmake", "IceoryxPackageHelper.cmake"),
                             "set_target_properties( ${IOX_TARGET} PROPERTIES POSITION_INDEPENDENT_CODE ON )", "")
         else:
             cmakelists_list = [
@@ -155,6 +158,8 @@ class IceoryxConan(ConanFile):
         # bring to default package structure
         if Version(self.version) >= "2.0.0":
             include_paths = ["iceoryx_binding_c", "iceoryx_hoofs", "iceoryx_posh", "iceoryx_versions.hpp"]
+            if Version(self.version) >= "2.95.8":
+                include_paths.extend(["iceoryx_platform", "iox", "iceoryx_versions.h"])
             for include_path in include_paths:
                 rename(self, os.path.join(self.package_folder, "include", "iceoryx", f"v{self.version}", include_path),
                              os.path.join(self.package_folder, "include", include_path))
@@ -308,11 +313,13 @@ class IceoryxConan(ConanFile):
                 self.cpp_info.components[lib_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
                 self.cpp_info.components[lib_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 
-        if Version(self.version) >= "2.0.0":
-            _register_components(self._iceoryx_components["2.0.0"])
-        else:
-            _register_components(self._iceoryx_components["1.0.X"])
-
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.env_info.PATH.append(bin_path)
+        if Version(self.version) >= "2.0.0":
+            _register_components(self._iceoryx_components["2.0.0"])
+            self.runenv_info.PATH.append(bin_path)
+            self.buildenv_info.PATH.append(bin_path)
+        else:
+            _register_components(self._iceoryx_components["1.0.X"])
+            self.env_info.PATH.append(bin_path)
+
