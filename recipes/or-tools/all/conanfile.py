@@ -1,0 +1,197 @@
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+import os
+
+
+required_conan_version = ">=2.4"
+
+class OrToolsConan(ConanFile):
+    name = "or-tools"
+    description = "Google OR Tools"
+    license = "Apache-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://developers.google.com/optimization"
+    topics = ("optimization", "linear-programming", "operations-research", "combinatorial-optimization", "or-tools")
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+    implements = ["auto_shared_fpic"]
+    languages = "C++"
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        # transitive headers: ortools/util/proto_tools.h:#include "google/protobuf/message.h"
+        # transitive libs: ortools/util/proto_tools.h  Proto::default_instance().GetDescriptor()
+        self.requires("protobuf/[>=6.32.1 <7]", transitive_headers=True, transitive_libs=True)
+        self.requires("re2/[>=20250812]")
+        self.requires("coin-cbc/2.10.5")
+        # ortools/pdlp/trust_region.h:#include "Eigen/Core"
+        self.requires("eigen/[=3.4.0 <4]", transitive_headers=True)
+        # ortools/math_opt/solvers/highs_solver.h:#include "Highs.h"
+        self.requires("highs/1.12.0")
+        # include/ortools/math_opt/solvers/gscip/gscip_ext.h:#include "scip/scip.h"
+        self.requires("scip/10.0.2", transitive_headers=True)
+        self.requires("soplex/8.0.2")
+        self.requires("coin-cgl/0.60.3")
+        # transitive headers: ortools/set_cover/views.h:#include <absl/types/span.h>
+        # transitive libs: ortools/base/init_google.h absl::ParseCommandLine()
+        self.requires("abseil/[>=20250814.0 <=20260107.1]", transitive_headers=True, transitive_libs=True)
+        self.requires("coin-clp/1.17.7")
+        self.requires("coin-osi/0.108.7")
+        self.requires("coin-utils/2.11.9")
+        self.requires("bzip2/1.0.8")
+        # ortools/base/gzipstring.h:#include <zlib.h>
+        self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
+
+    def validate(self):
+        # INFO: or-tools requires C++17 with C++20 extensions on Unix and C++20 on MSVC
+        # See: github.com/google/or-tools/discussions/4719
+        if is_msvc(self):
+            check_min_cppstd(self, 20)
+        else:
+            check_min_cppstd(self, 17)
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.24]")
+        self.tool_requires("protobuf/<host_version>")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # INFO: Let Conan manage the C++ standard based on self.settings.compiler.cppstd
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD", "#set(CMAKE_CXX_STANDARD")
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "dependencies", "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD", "#set(CMAKE_CXX_STANDARD")
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "cpp.cmake"), "set_target_properties(${PROTO_NAME}_proto PROPERTIES CXX_STANDARD", "#set_target_properties(${PROTO_NAME}_proto PROPERTIES CXX_STANDARD")
+        replace_in_file(self, os.path.join(self.source_folder, "ortools", "third_party_solvers", "CMakeLists.txt"), "CXX_STANDARD ", "# CXX_STANDARD ")
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "flatzinc.cmake"), "CXX_STANDARD ", "# CXX_STANDARD ")
+        # INFO: Skip host.cmake that builds protoc since Conan manages that dependency
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(host)", "set(PROTOC_PRG protobuf::protoc)")
+        # INFO: Let Conan manage the CMAKE_OSX_DEPLOYMENT_TARGET variable
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_OSX_DEPLOYMENT_TARGET", "#set(CMAKE_OSX_DEPLOYMENT_TARGET")
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if is_msvc(self):
+            tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_SAMPLES"] = False
+        tc.cache_variables["BUILD_EXAMPLES"] = False
+        tc.cache_variables["BUILD_CXX_EXAMPLES"] = False
+        tc.cache_variables["BUILD_DEPS"] = False
+        tc.cache_variables["INSTALL_BUILD_DEPS"] = False
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.set_property("scip", "cmake_file_name", "SCIP")
+        deps.set_property("scip", "cmake_target_name", "SCIP::libscip")
+        deps.set_property("coin-utils", "cmake_file_name", "CoinUtils")
+        deps.set_property("coin-utils", "cmake_target_name", "Coin::CoinUtils")
+        deps.set_property("coin-cgl", "cmake_file_name", "Cgl")
+        deps.set_property("coin-cgl", "cmake_target_name", "Coin::Cgl")
+        deps.set_property("coin-cbc", "cmake_file_name", "Cbc")
+        deps.set_property("coin-cbc", "cmake_target_name", "Coin::Cbc")
+        deps.set_property("coin-cbc::libcbc", "cmake_target_name", "Coin::CbcSolver")
+        deps.set_property("coin-cbc::osi-cbc", "cmake_target_name", "Coin::OsiCbc")
+        deps.set_property("coin-clp", "cmake_file_name", "Clp")
+        deps.set_property("coin-clp", "cmake_target_name", "Coin::Clp")
+        deps.set_property("coin-clp::clp", "cmake_target_name", "Coin::ClpSolver")
+        deps.set_property("coin-clp::osi-clp", "cmake_target_name", "Coin::OsiClp")
+        deps.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "ortools")
+        # INFO: In order to use ortools::solve, it requires the experimental Conan generator CMakeConfigDeps
+        self.cpp_info.components["solve"].exe = ["solve"]
+        self.cpp_info.components["solve"].location = os.path.join(self.package_folder, "bin")
+        self.cpp_info.components["solve"].set_property("cmake_target_name", "ortools::solve")
+        # INFO: In order to use ortools::fzn, it requires the experimental Conan generator CMakeConfigDeps
+        self.cpp_info.components["fzn"].exe = ["fzn-cp-sat"]
+        self.cpp_info.components["fzn"].location = os.path.join(self.package_folder, "bin")
+        self.cpp_info.components["fzn"].set_property("cmake_target_name", "ortools::fzn")
+
+        self.cpp_info.components["ortools"].libs = ["ortools"]
+        self.cpp_info.components["ortools"].set_property("cmake_target_name", "ortools::ortools")
+        self.cpp_info.components["ortools"].set_property("cmake_link_feature", "WHOLE_ARCHIVE")
+        self.cpp_info.components["ortools"].defines = ["OR_PROTO_DLL=;USE_MATH_OPT;USE_BOP;USE_CBC;USE_CLP;USE_GLOP;USE_HIGHS;USE_PDLP;USE_SCIP"]
+        self.cpp_info.components["ortools"].requires = [
+            "zlib::zlib",
+            "bzip2::bzip2",
+            "abseil::absl_base",
+            "abseil::absl_core_headers",
+            "abseil::absl_absl_check",
+            "abseil::absl_absl_log",
+            "abseil::absl_check",
+            "abseil::absl_die_if_null",
+            "abseil::absl_flags",
+            "abseil::absl_flags_commandlineflag",
+            "abseil::absl_flags_marshalling",
+            "abseil::absl_flags_parse",
+            "abseil::absl_flags_reflection",
+            "abseil::absl_flags_usage",
+            "abseil::absl_log",
+            "abseil::absl_log_flags",
+            "abseil::absl_log_globals",
+            "abseil::absl_log_initialize",
+            "abseil::absl_log_internal_message",
+            "abseil::absl_cord",
+            "abseil::absl_random_random",
+            "abseil::absl_raw_hash_set",
+            "abseil::absl_hash",
+            "abseil::absl_leak_check",
+            "abseil::absl_memory",
+            "abseil::absl_meta",
+            "abseil::absl_stacktrace",
+            "abseil::absl_status",
+            "abseil::absl_statusor",
+            "abseil::absl_str_format",
+            "abseil::absl_strings",
+            "abseil::absl_synchronization",
+            "abseil::absl_time",
+            "abseil::absl_any",
+            "protobuf::libprotobuf",
+            "re2::re2",
+            "coin-cbc::libcbc",
+            "coin-cbc::osi-cbc",
+            "coin-cgl::coin-cgl",
+            "coin-clp::clp",
+            "coin-clp::osi-clp",
+            "coin-osi::libosi",
+            "coin-utils::coin-utils",
+            "highs::highs",
+            "eigen::eigen3",
+            "scip::scip",
+            "soplex::soplex"
+        ]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["ortools"].system_libs.extend(["m", "pthread", "dl"])
+
+        self.cpp_info.components["flatzinc"].libs = ["ortools_flatzinc"]
+        self.cpp_info.components["flatzinc"].set_property("cmake_target_name", "ortools::flatzinc")
+        self.cpp_info.components["flatzinc"].requires = ["ortools"]
