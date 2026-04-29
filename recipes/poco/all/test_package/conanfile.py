@@ -26,6 +26,7 @@ class TestPackageConan(ConanFile):
         tc.variables["TEST_ENCODINGS"] = poco_options.get_safe("enable_encodings", False)
         tc.variables["TEST_JWT"] = poco_options.get_safe("enable_jwt", False)
         tc.variables["TEST_PROMETHEUS"] = poco_options.get_safe("enable_prometheus", False)
+        tc.variables["TEST_POSTGRESQL"] = poco_options.get_safe("enable_data_postgresql", False)
         tc.generate()
 
     def build(self):
