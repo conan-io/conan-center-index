@@ -1,4 +1,10 @@
 sources:
+  "3.14.3":
+    url: "https://www.python.org/ftp/python/3.14.3/Python-3.14.3.tgz"
+    sha256: "d7fe130d0501ae047ca318fa92aa642603ab6f217901015a1df6ce650d5470cd"
+  "3.13.12":
+    url: "https://www.python.org/ftp/python/3.13.12/Python-3.13.12.tgz"
+    sha256: "12e7cb170ad2d1a69aee96a1cc7fc8de5b1e97a2bdac51683a3db016ec9a2996"
   "3.12.7":
     url: "https://www.python.org/ftp/python/3.12.7/Python-3.12.7.tgz"
     sha256: "73ac8fe780227bf371add8373c3079f42a0dc62deff8d612cd15a618082ab623"
@@ -18,6 +24,23 @@ sources:
     url: "https://www.python.org/ftp/python/3.8.19/Python-3.8.19.tgz"
     sha256: "c7fa55a36e5c7a19ec37d8f90f60a2197548908c9ac8b31e7c0dbffdd470eeac"
 patches:
+  "3.14.3":
+    - patch_file: "patches/3.13/3.13.12-0001-relocatable-python-config.patch"
+      patch_description: "Allow package to be relocatable"
+      patch_type: "conan"
+    - patch_file: "patches/3.14/3.14.3-0001-remove-module-deps.patch"
+      patch_description: "Remove section of solution file forcing projects to be built that might not be used for this recipe"
+      patch_type: "conan"
+  "3.13.12":
+    - patch_file: "patches/3.13/3.13.12-0001-_ctypes-ffi.patch"
+      patch_description: "Support shared libffi"
+      patch_type: "portability"
+    - patch_file: "patches/3.13/3.13.12-0001-relocatable-python-config.patch"
+      patch_description: "Allow package to be relocatable"
+      patch_type: "conan"
+    - patch_file: "patches/3.13/3.13.12-0002-remove-module-deps.patch"
+      patch_description: "Remove section of solution file forcing projects to be built that might not be used for this recipe"
+      patch_type: "conan"
   "3.12.7":
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
       patch_description: "Fix ARM/ARM64 mismatch in project file"
