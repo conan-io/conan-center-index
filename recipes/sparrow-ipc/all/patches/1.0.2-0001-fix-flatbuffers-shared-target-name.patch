@@ -1,0 +1,13 @@
+--- a/cmake/external_dependencies.cmake
++++ b/cmake/external_dependencies.cmake
+@@ -104,8 +104,8 @@ find_package_or_fetch(
+     TAG v25.2.10
+ )
+ 
+-if(NOT TARGET flatbuffers::flatbuffers)
+-    add_library(flatbuffers::flatbuffers ALIAS flatbuffers)
++if(NOT TARGET flatbuffers::flatbuffers_shared)
++    add_library(flatbuffers::flatbuffers_shared ALIAS flatbuffers)
+ endif()
+ unset(FLATBUFFERS_BUILD_TESTS CACHE)
+ 
