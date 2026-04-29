@@ -25,6 +25,7 @@ class Hdf5Conan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_cxx": [True, False],
+        "enable_fortran": [True, False],
         "hl": [True, False],
         "threadsafe": [True, False],
         "with_zlib": [True, False],
@@ -38,6 +39,7 @@ class Hdf5Conan(ConanFile):
         "shared": False,
         "fPIC": True,
         "enable_cxx": True,
+        "enable_fortran": False,
         "hl": True,
         "threadsafe": False,
         "with_zlib": True,
@@ -149,10 +151,12 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_BUILD_TOOLS"] = False
         tc.variables["HDF5_BUILD_EXAMPLES"] = False
         tc.variables["HDF5_BUILD_HL_LIB"] = self.options.hl
-        tc.variables["HDF5_BUILD_FORTRAN"] = False
+        tc.variables["HDF5_BUILD_FORTRAN"] = self.options.enable_fortran
         tc.variables["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
         tc.variables["HDF5_BUILD_JAVA"] = False
         tc.variables["ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
+        if self.options.enable_fortran:
+            tc.variables["CMAKE_Fortran_MODULE_DIRECTORY"] = f"{self.build_folder}/mod"
         tc.generate()
 
     def build(self):
@@ -180,6 +184,10 @@ class Hdf5Conan(ConanFile):
             "hdf5_hl": {"component": "HL", "alias_target": "hdf5_hl", "requirements": ["hdf5_c"]},
             "hdf5_cpp": {"component": "CXX", "alias_target": "hdf5_cpp", "requirements": ["hdf5_c"]},
             "hdf5_hl_cpp": {"component": "HL_CXX", "alias_target": "hdf5_hl_cpp", "requirements": ["hdf5_c", "hdf5_cpp", "hdf5_hl"]},
+            "hdf5_f90cstub": {"component": "F90CSTUB", "alias_target": "hdf5_f90cstub", "requirements": ["hdf5_c"]},
+            "hdf5_hl_f90cstub": {"component": "HL_F90CSTUB", "alias_target": "hdf5_hl_f90cstub", "requirements": ["hdf5_c", "hdf5_f90cstub", "hdf5_hl"]},
+            "hdf5_fortran": {"component": "Fortran", "alias_target": "hdf5_fortran", "requirements": ["hdf5_c", "hdf5_f90cstub"]},
+            "hdf5_hl_fortran": {"component": "HL_Fortran", "alias_target": "hdf5_hl_fortran", "requirements": ["hdf5_c", "hdf5_f90cstub", "hdf5_fortran", "hdf5_hl"]},
         }
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
@@ -285,10 +293,16 @@ class Hdf5Conan(ConanFile):
             self.cpp_info.components["hdf5_c"].defines.append("H5_BUILT_AS_DYNAMIC_LIB")
         if self.options.get_safe("enable_cxx"):
             add_component("hdf5_cpp", **components["hdf5_cpp"])
+        if self.options.get_safe("enable_fortran"):
+            add_component("hdf5_f90cstub", **components["hdf5_f90cstub"])
+            add_component("hdf5_fortran", **components["hdf5_fortran"])
         if self.options.get_safe("hl"):
             add_component("hdf5_hl", **components["hdf5_hl"])
             if self.options.get_safe("enable_cxx"):
                 add_component("hdf5_hl_cpp", **components["hdf5_hl_cpp"])
+            if self.options.get_safe("enable_fortran"):
+                add_component("hdf5_hl_f90cstub", **components["hdf5_hl_f90cstub"])
+                add_component("hdf5_hl_fortran", **components["hdf5_hl_fortran"])
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "HDF5"
