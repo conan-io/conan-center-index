@@ -2,6 +2,11 @@ sources:
   "1.4.5":
     url: "https://github.com/fltk/fltk/archive/refs/tags/release-1.4.5.tar.gz"
     sha256: "7715e69ce081fa9ce6da48bb0dd3b07a4cf2cf937813814c04272f36fff593ea"
+  "1.4.4":
+    url: "https://github.com/fltk/fltk/archive/refs/tags/release-1.4.4.tar.gz"
+    sha256: "cbf5f7846af596206e8e4489e14c9981f98d7b37168110a00dcd26d8d479a669"
 patches:
   "1.4.5":
+    - patch_file: "patches/1.4.4-0001-fix-resources.patch"
+  "1.4.4":
     - patch_file: "patches/1.4.4-0001-fix-resources.patch"
