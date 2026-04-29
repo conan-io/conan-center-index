@@ -2,3 +2,9 @@ sources:
   "0.0.0.cci.20231003":
     url: "https://github.com/WizardMac/librdata/archive/33bd276ecb0bbcd8997ccc71a544149b3da0d940.tar.gz"
     sha256: "fc3e0d655c21d4b5144a0ad73f79a249903b5dde4dc8f7091cd0393d214294a2"
+patches:
+  "0.0.0.cci.20231003":
+    - patch_file: "patches/0001-build-on-windows.patch"
+      patch_description: "Enable to build on Windows"
+      patch_type: "portability"
+      patch_source: "https://github.com/WizardMac/librdata/pull/52/commits/3dc64149cceb3e41cb9284e09db8e34151147990"
