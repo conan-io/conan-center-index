@@ -1,0 +1,24 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 385a2f7..4d4bbbe 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -15,8 +15,8 @@ endif()
+ # --- Dependencies ---
+ find_package(nlohmann_json REQUIRED)
+ find_package(GTest REQUIRED)
+-find_library(READLINE_LIB readline)
+-if(NOT READLINE_LIB)
++find_package(readline REQUIRED)
++if(NOT readline_FOUND)
+     message(FATAL_ERROR "readline library not found - required for REPL functionality")
+ endif()
+ 
+@@ -67,7 +67,7 @@ set_target_properties(computo_app PROPERTIES OUTPUT_NAME computo)
+ 
+ # REPL CLI tool
+ add_executable(computo_repl_app src/repl.cpp src/benchmark.cpp)
+-target_link_libraries(computo_repl_app PRIVATE computorepl ${READLINE_LIB})
++target_link_libraries(computo_repl_app PRIVATE computorepl readline::readline)
+ target_compile_definitions(computo_repl_app PRIVATE REPL)
+ set_target_properties(computo_repl_app PROPERTIES OUTPUT_NAME computo_repl)
+ 
