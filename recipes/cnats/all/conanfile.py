@@ -95,7 +95,8 @@ class PackageConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "cnats")
         self.cpp_info.set_property("cmake_target_name", f"cnats::{lib_name}")
         # Backward compatible with users using targets with debug suffix
-        self.cpp_info.set_property("cmake_target_aliases", [f"cnats::{lib_name}{debug}"])
+        if debug != "":
+            self.cpp_info.set_property("cmake_target_aliases", [f"cnats::{lib_name}{debug}"])
         self.cpp_info.set_property("pkg_config_name", "libnats")
 
         if self.options.enable_streaming:
