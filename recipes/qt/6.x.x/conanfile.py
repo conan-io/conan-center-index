@@ -439,8 +439,18 @@ class QtConan(ConanFile):
 
         if self.options.qtwayland:
             self.tool_requires("wayland/1.22.0")
+
         if cross_building(self):
-            self.tool_requires(f"qt/{self.version}")
+            options = {}
+            if self.settings.os == "iOS":
+                # Tools are required on build host
+                if self.options.get_safe("qtshadertools"):
+                    options["qtshadertools"] = True
+                if self.options.get_safe("qtdeclarative"):
+                    options["qtdeclarative"] = True
+                if self.options.get_safe("qttools"):
+                    options["qttools"] = True
+            self.tool_requires(f"qt/{self.version}", options=options)
 
     def generate(self):
         ms = VirtualBuildEnv(self)
@@ -608,8 +618,7 @@ class QtConan(ConanFile):
         for feature in str(self.options.disabled_features).split():
             tc.variables[f"FEATURE_{feature}"] = "OFF"
 
-
-        if self.settings.os == "Macos":
+        if self.settings.os in ["Macos", "iOS", "tvOS", "watchOS"]:
             tc.variables["FEATURE_framework"] = "OFF"
         elif self.settings.os == "Android":
             tc.variables["CMAKE_ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
@@ -633,19 +642,50 @@ class QtConan(ConanFile):
             tc.variables["QT_QMAKE_DEVICE_OPTIONS"] = f"CROSS_COMPILE={self.options.cross_compile}"
         if cross_building(self):
             # Mainly to locate Qt6HostInfoConfig.cmake
-            tc.cache_variables["QT_HOST_PATH"] = self.dependencies.direct_build["qt"].package_folder
+            qt_build_package_folder = self.dependencies.direct_build["qt"].package_folder.replace("\\", "/")
+            tc.cache_variables["QT_HOST_PATH"] = qt_build_package_folder
             # Stand-in for Qt6CoreTools - which is loaded for the executable targets
-            tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = os.path.join(self.dependencies.direct_build["qt"].package_folder, self._cmake_executables_file)
+            tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = os.path.join(qt_build_package_folder, self._cmake_executables_file)
             # Ensure tools for host are always built
-            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = True
+            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = False
+            # Add build Qt to CMAKE_PREFIX_PATH so qttranslations can find Qt6Tools (LinguistTools)
+            # This is needed for qt_add_lrelease to work during qttranslations configuration
+            # qttranslations uses find_package(Qt6 COMPONENTS LinguistTools) which needs to find
+            # the build Qt installation where qttools was built
+            if self.options.qttranslations and self.options.qttools:
+                # Prepend build Qt to CMAKE_PREFIX_PATH so it's searched first
+                # CMake uses semicolons as list separators on all platforms
+                current_prefix_path = tc.cache_variables.get("CMAKE_PREFIX_PATH", "")
+                if current_prefix_path:
+                    tc.cache_variables["CMAKE_PREFIX_PATH"] = f"{qt_build_package_folder};{current_prefix_path}"
+                else:
+                    tc.cache_variables["CMAKE_PREFIX_PATH"] = qt_build_package_folder
+                # Set Qt6_DIR to help find_package locate Qt6
+                qt6_dir = os.path.join(qt_build_package_folder, "lib", "cmake", "Qt6").replace("\\", "/")
+                tc.cache_variables["Qt6_DIR"] = qt6_dir
+                # Set Qt6LinguistTools_DIR to help find_package locate LinguistTools component
+                qt6_linguist_tools_dir = os.path.join(qt_build_package_folder, "lib", "cmake", "Qt6LinguistTools").replace("\\", "/")
+                tc.cache_variables["Qt6LinguistTools_DIR"] = qt6_linguist_tools_dir
+                # Include Qt6LinguistTools macros so qt_add_lrelease is available before qttranslations configures
+                # This is similar to how we include the executables file for Qt6CoreTools
+                qt6_linguist_tools_macros = os.path.join(qt_build_package_folder, "lib", "cmake", "Qt6LinguistTools", "Qt6LinguistToolsMacros.cmake").replace("\\", "/")
+                if os.path.exists(qt6_linguist_tools_macros):
+                    current_project_include = tc.cache_variables.get("CMAKE_PROJECT_Qt_INCLUDE", "")
+                    if current_project_include:
+                        tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = f"{current_project_include};{qt6_linguist_tools_macros}"
+                    else:
+                        tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = qt6_linguist_tools_macros
 
         tc.variables["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.get_safe("build_type") == "Debug" and not self.options.shared:
             tc.variables["BUILD_WITH_PCH"] = "OFF"  # disabling PCH to save disk space
+        # Disable PCH for iOS builds to avoid build order issues with precompiled headers
+        if self.settings.os == "iOS":
+            tc.variables["BUILD_WITH_PCH"] = "OFF"
 
-                               #"set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
-                               #"set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
-                               #"set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS})\n"
+        #"set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
+        #"set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
+        #"set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS})\n"
 
         current_cpp_std = self.settings.get_safe("compiler.cppstd", default_cppstd(self))
         current_cpp_std = str(current_cpp_std).replace("gnu", "")
@@ -911,11 +951,15 @@ class QtConan(ConanFile):
             targets.append("qsb")
         if self.options.qtdeclarative:
             targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
-            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltc"])
+            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltc", "qmldom"])
+            targets.extend(["qmljsrootgen"])
             if Version(self.version) >= "6.8.3":
                 targets.extend(["qmlaotstats"])
-
+            if self.options.qtsvg:
+                targets.extend(["svgtoqml"])
             # Note: consider "qmltestrunner", see https://github.com/conan-io/conan-center-index/issues/24276
+            # Also: qmleasing, qmlplugindump, qmlscene, qmltime
+
         if self.options.get_safe("qtremoteobjects"):
             targets.append("repc")
         if self.options.get_safe("qtscxml"):
@@ -928,16 +972,15 @@ class QtConan(ConanFile):
                 if os.path.isfile(os.path.join(self.package_folder, path_)):
                     exe_path = path_
                     break
-            else:
-                assert False, f"Could not find executable {target}{extension} in {self.package_folder}"
             if not exe_path:
-                self.output.warning(f"Could not find path to {target}{extension}")
-            filecontents += textwrap.dedent(f"""\
-                if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{target})
-                    add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} IMPORTED)
-                    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../{exe_path})
-                endif()
-                """)
+                self.output.warning(f"Could not find executable {target}{extension} in {self.package_folder}")
+            else:
+                filecontents += textwrap.dedent(f"""\
+                    if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{target})
+                        add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} IMPORTED)
+                        set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../{exe_path})
+                    endif()
+                    """)
 
         filecontents += textwrap.dedent(f"""\
             if(NOT DEFINED QT_DEFAULT_MAJOR_VERSION)
@@ -1365,7 +1408,7 @@ class QtConan(ConanFile):
             self.cpp_info.components["qtAxServer"].system_libs.append("shell32")
             self.cpp_info.components["qtAxServer"].defines.append("QAXSERVER")
             _create_module("AxContainer", ["AxBase"])
-        
+
         if self.options.get_safe("qtcharts"):
             _create_module("Charts", ["Gui", "Widgets"])
         if self.options.get_safe("qtgraphs") and Version(self.version) >= "6.8.0":
