@@ -1,4 +1,9 @@
 sources:
-  "0.12.6":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.12.6/sentry-native.zip"
-    sha256: "617a57ce6c32626828b79acce5271023637151b2b34a3a18732f3ba75099cd15"
+  "0.13.4":
+    url: "https://github.com/getsentry/sentry-native/releases/download/0.13.4/sentry-native.zip"
+    sha256: "cf168686017db533746ff3b3df8a88714cb7793eda33561e5b5678e01716d9cc"
+patches:
+  "0.13.2":
+    - patch_file: "patches/0001-use-system-libunwind.patch"
+      patch_description: "Use system libunwind instead of vendored copy"
+      patch_type: "conan"
