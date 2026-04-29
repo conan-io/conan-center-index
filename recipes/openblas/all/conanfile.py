@@ -76,7 +76,8 @@ class OpenblasConan(ConanFile):
         "use_thread": [True, False],
         "use_locking": [True, False],
         "dynamic_arch": [True, False],
-        "target": [None] + available_openblas_targets
+        "target": [None] + available_openblas_targets,
+        "with_fortran": [True, False]
     }
     default_options = {
         "shared": False,
@@ -87,6 +88,7 @@ class OpenblasConan(ConanFile):
         "use_locking": True,
         "dynamic_arch": False,
         "target": None,
+        "with_fortran": False
     }
     options_description = {
         "build_lapack": "Build LAPACK and LAPACKE",
@@ -95,6 +97,7 @@ class OpenblasConan(ConanFile):
         "use_locking": "Use locks even in single-threaded builds to make them callable from multiple threads",
         "dynamic_arch": "Include support for multiple CPU targets, with automatic selection at runtime (x86/x86_64, aarch64 or ppc only)",
         "target": "OpenBLAS TARGET variable (see TargetList.txt)",
+        "with_fortran": "Build using a Fortran compiler"
     }
     short_paths = True
 
@@ -112,6 +115,8 @@ class OpenblasConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if not self.options.build_lapack:
+            self.options.rm_safe("with_fortran")
 
         # When cross-compiling, OpenBLAS requires explicitly setting TARGET
         if cross_building(self, skip_x64_x86=True) and not self.options.target:
@@ -134,6 +139,8 @@ class OpenblasConan(ConanFile):
                 raise ConanInvalidConfiguration(f'"{self.name}/*:build_relapack=True" option is only supported for GCC and Clang')
 
     def validate_build(self):
+        if self.options.get_safe("with_fortran") and not self._fortran_compiler:
+            raise ConanInvalidConfiguration(f'"{self.name}/*:with_fortran=True" option requires a Fortran compiler in tools.build:compiler_executables.')
         # If we're cross-compiling, and the user didn't provide the target, and
         # we couldn't infer the target from settings.arch, fail
         if cross_building(self, skip_x64_x86=True) and not self.options.target:
@@ -153,7 +160,7 @@ class OpenblasConan(ConanFile):
 
         tc.variables["NOFORTRAN"] = not self.options.build_lapack
         # This checks explicit user-specified fortran compiler
-        if self.options.build_lapack and not self._fortran_compiler:
+        if self.options.build_lapack and not self.options.with_fortran:
             tc.variables["C_LAPACK"] = True
             tc.variables["NOFORTRAN"] = True
             self.output.info("Building LAPACK without a Fortran compiler")
@@ -217,7 +224,7 @@ class OpenblasConan(ConanFile):
             self.cpp_info.components["openblas_component"].system_libs.append("m")
             if self.options.use_thread:
                 self.cpp_info.components["openblas_component"].system_libs.append("pthread")
-            if self.options.build_lapack and self._fortran_compiler:
+            if self.options.build_lapack and self.options.with_fortran:
                 self.cpp_info.components["openblas_component"].system_libs.append("gfortran")
 
         self.buildenv_info.define_path("OpenBLAS_HOME", self.package_folder)
