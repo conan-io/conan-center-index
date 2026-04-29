@@ -4,10 +4,9 @@ import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building, check_min_cppstd, valid_min_cppstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
-from conan.tools.scm import Version
 
 required_conan_version = ">=2.0"
 
@@ -32,7 +31,13 @@ class Hdf5Conan(ConanFile):
         "szip_support": [None, "with_libaec", "with_szip"],
         "szip_encoding": [True, False],
         "parallel": [True, False],
+        "build_tools": [True, False],
         "enable_unsupported": [True, False],
+        "file_locking": [True, False],
+        "direct_vfd": [True, False],
+        "mirror_vfd": [True, False],
+        "map_api": [True, False],
+        "ros3_vfd": [True, False],
     }
     default_options = {
         "shared": False,
@@ -45,7 +50,13 @@ class Hdf5Conan(ConanFile):
         "szip_support": None,
         "szip_encoding": False,
         "parallel": False,
-        "enable_unsupported": False
+        "enable_unsupported": False,
+        "build_tools": False,
+        "file_locking": True,
+        "direct_vfd": False,
+        "mirror_vfd": False,
+        "map_api": False,
+        "ros3_vfd": False,
     }
 
     def export_sources(self):
@@ -81,6 +92,8 @@ class Hdf5Conan(ConanFile):
             self.requires("szip/2.1.1")
         if self.options.parallel:
             self.requires("openmpi/[>=4.1.0 <5]")
+        if self.options.ros3_vfd:
+            self.requires("aws-c-s3/0.9.2")
 
     def validate(self):
         if self.options.parallel and not self.options.enable_unsupported:
@@ -94,18 +107,11 @@ class Hdf5Conan(ConanFile):
             raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
         if self.options.with_zlib and self.options.get_safe("with_zlibng"):
             raise ConanInvalidConfiguration("with_zlib and with_zlibng cannot be enabled at the same time")
-        if self.options.get_safe("with_zlibng") and Version(self.version) < "1.14.5":
-            raise ConanInvalidConfiguration("with_zlibng=True is incompatible with versions prior to v1.14.5")
         if self.options.enable_cxx:
             check_min_cppstd(self, "11")
 
-    def validate_build(self):
-        if cross_building(self) and Version(self.version) < "1.14.4.3":
-            # While building it runs some executables like H5detect
-            raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
-
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.18 <4]")
+        self.tool_requires("cmake/[>=3.26 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -115,14 +121,12 @@ class Hdf5Conan(ConanFile):
         cmakedeps.generate()
 
         tc = CMakeToolchain(self)
-        if self.options.szip_support == "with_libaec":
-            tc.variables["USE_LIBAEC"] = True
         tc.variables["HDF5_EXTERNALLY_CONFIGURED"] = True
         tc.variables["HDF5_EXTERNAL_LIB_PREFIX"] = ""
         tc.variables["HDF5_USE_FOLDERS"] = False
         tc.variables["HDF5_NO_PACKAGES"] = True
-        tc.variables["ALLOW_UNSUPPORTED"] = False
-        tc.variables["ONLY_SHARED_LIBS"] = self.options.shared
+        tc.variables["HDF5_ALLOW_UNSUPPORTED"] = False
+        tc.variables["HDF5_ONLY_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["BUILD_STATIC_EXECS"] = False
         tc.variables["HDF5_ENABLE_COVERAGE"] = False
@@ -130,12 +134,12 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_MEMORY_ALLOC_SANITY_CHECK"] = False
         tc.variables["HDF5_ENABLE_PREADWRITE"] = True
         tc.variables["HDF5_ENABLE_DEPRECATED_SYMBOLS"] = True
-        tc.variables["HDF5_BUILD_GENERATORS"] = False
         tc.variables["HDF5_ENABLE_TRACE"] = False
         if self.settings.build_type == "Debug":
             tc.variables["HDF5_ENABLE_INSTRUMENT"] = False  # Option?
         tc.variables["HDF5_ENABLE_PARALLEL"] = self.options.parallel
-        tc.variables["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
+        tc.variables["HDF5_ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
+        tc.variables["HDF5_ALLOW_EXTERNAL_SUPPORT"] = "NO"
         tc.variables["HDF5_ENABLE_SZIP_SUPPORT"] = bool(self.options.szip_support)
         tc.variables["HDF5_ENABLE_SZIP_ENCODING"] = self.options.get_safe("szip_encoding", False)
         tc.variables["HDF5_USE_ZLIB_NG"] = self.options.get_safe("with_zlibng", False)
@@ -146,13 +150,29 @@ class Hdf5Conan(ConanFile):
 
         tc.variables["HDF5_INSTALL_INCLUDE_DIR"] = "include/hdf5"
 
-        tc.variables["HDF5_BUILD_TOOLS"] = False
+        tc.variables["HDF5_BUILD_TOOLS"] = self.options.build_tools
         tc.variables["HDF5_BUILD_EXAMPLES"] = False
         tc.variables["HDF5_BUILD_HL_LIB"] = self.options.hl
         tc.variables["HDF5_BUILD_FORTRAN"] = False
         tc.variables["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
         tc.variables["HDF5_BUILD_JAVA"] = False
-        tc.variables["ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
+        tc.variables["HDF5_ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
+
+        tc.variables["HDF5_USE_FILE_LOCKING"] = self.options.file_locking
+        tc.variables["HDF5_ENABLE_DIRECT_VFD"] = self.options.direct_vfd
+        tc.variables["HDF5_ENABLE_MIRROR_VFD"] = self.options.mirror_vfd
+        tc.variables["HDF5_ENABLE_MAP_API"] = self.options.map_api
+        tc.variables["HDF5_ENABLE_ROS3_VFD"] = self.options.ros3_vfd
+
+        # Set default plugin directory to /dev/null (or NUL on Windows) to avoid hardcoding build-time paths
+        # This prevents HDF5 from searching non-existent CI build paths while keeping plugin support enabled
+        # Users can still set HDF5_PLUGIN_PATH environment variable at runtime to use plugins
+        # Built-in filters (gzip, shuffle, szip) always work regardless of plugin configuration
+        if self.settings.os == "Windows":
+            tc.variables["H5_DEFAULT_PLUGINDIR"] = "NUL"
+        else:
+            tc.variables["H5_DEFAULT_PLUGINDIR"] = "/dev/null"
+
         tc.generate()
 
     def build(self):
@@ -174,6 +194,8 @@ class Hdf5Conan(ConanFile):
             hdf5_requirements.append("szip::szip")
         if self.options.parallel:
             hdf5_requirements.append("openmpi::openmpi")
+        if self.options.ros3_vfd:
+            hdf5_requirements.append("aws-c-s3::aws-c-s3")
 
         return {
             "hdf5_c": {"component": "C", "alias_target": "hdf5", "requirements": hdf5_requirements},
@@ -216,7 +238,7 @@ class Hdf5Conan(ConanFile):
                             f"conan-official-{self.name}-variables.cmake")
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
         cmake = CMake(self)
         cmake.install()
@@ -224,7 +246,7 @@ class Hdf5Conan(ConanFile):
         rm(self, "libhdf5.settings", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
-        # remove extra libs... building 1.8.21 as shared also outputs static libs on Linux.
+        # remove extra libs that may be built alongside shared libraries
         if self.options.shared:
             for lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
                 if not lib.endswith(".dll.a"):

@@ -21,6 +21,8 @@ class TestPackageConan(ConanFile):
         tc.variables.update({
             "HDF5_CXX": self.dependencies["hdf5"].options.enable_cxx,
             "HDF5_HL": self.dependencies["hdf5"].options.hl,
+            "HDF5_WITH_ZLIB": self.dependencies["hdf5"].options.with_zlib,
+            "HDF5_FILE_LOCKING": self.dependencies["hdf5"].options.file_locking,
         })
         tc.generate()
 
