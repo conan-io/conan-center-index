@@ -143,6 +143,10 @@ class AprConan(ConanFile):
             tc = CMakeToolchain(self)
             tc.variables["INSTALL_PDB"] = False
             tc.variables["APR_BUILD_TESTAPR"] = False
+            if Version(self.version) <= "1.7.4":
+                tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+            else:
+                raise ConanException("Check for new version support of CMake 4 in new version")
             tc.generate()
         else:
             env = VirtualBuildEnv(self)

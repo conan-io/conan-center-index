@@ -8,6 +8,4 @@ patches:
   "1.6.1":
     - patch_file: "patches/0001-fix-cmake.patch"
     - patch_file: "patches/0002-apu-config-prefix-env.patch"
-    - patch_file: "patches/0003-cmake-minimum-required.patch"
-      patch_type: "bugfix"
-      patch_description: "Replace 3.1 as cmake 4 requires 3.5"
+
