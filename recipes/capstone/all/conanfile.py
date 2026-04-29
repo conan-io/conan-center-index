@@ -38,10 +38,16 @@ class CapstoneConan(ConanFile):
     implements = ["auto_shared_fpic"]
     languages = "C"
 
-    _archs = ["arm", "m68k", "mips", "ppc", "sparc", "sysz", "xcore", "x86", "tms320c64x", "m680x", "evm"]
+    _archs = ["arm", "arm64", "aarch64", "m68k", "mips", "ppc", "sparc", "sysz", "xcore", "x86", "tms320c64x", "m680x", "evm"]
     options.update({a: [True, False] for a in _archs})
     default_options.update({a: True for a in _archs})
 
+    def config_options(self):
+        if str(self.version).startswith("5."):
+            del self.options.aarch64
+        else:
+            del self.options.arm64
+        
     def layout(self):
         cmake_layout(self, src_folder="src")
 
