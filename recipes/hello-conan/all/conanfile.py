@@ -5,7 +5,7 @@ from conan.tools.files import save
 from pathlib import Path
 
 required_conan_version = ">=2.12"
-
+# test ci, do not merge !
 class hello_conanRecipe(ConanFile):
     name = "hello-conan"
     package_type = "library"
