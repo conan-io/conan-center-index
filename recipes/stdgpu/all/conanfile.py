@@ -29,7 +29,6 @@ class StdgpuConan(ConanFile):
         "setup_compiler_flags": [True, False],
         "enable_contract_checks": [None, True, False],
         "use_32_bit_index": [True, False],
-        "openmp": ["llvm", "system"],
     }
     default_options = {
         "shared": False,
@@ -38,7 +37,6 @@ class StdgpuConan(ConanFile):
         "setup_compiler_flags": False,
         "enable_contract_checks": None,
         "use_32_bit_index": True,
-        "openmp": "llvm",
     }
 
     @property
@@ -85,10 +83,6 @@ class StdgpuConan(ConanFile):
         elif self.options.backend == "openmp":
             self.options["thrust"].device_system = "omp"
 
-    def package_id(self):
-        if self.info.options.backend != "openmp":
-            del self.info.options.openmp
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -99,11 +93,6 @@ class StdgpuConan(ConanFile):
             # The baseline Thrust version provided by Nvidia and Conan is not compatible with HIP.
             self.output.warning("HIP support requires Thrust with ROCm. "
                                 "Using Thrust from system instead of Conan.")
-        if self.options.backend == "openmp":
-            if self.options.openmp == "llvm":
-                self.requires("llvm-openmp/12.0.1", transitive_headers=True, transitive_libs=True)
-            else:
-                self.output.info("Using OpenMP backend with system OpenMP")
 
     def build_requirements(self):
         if Version(self.version) > "1.3.0":
@@ -119,6 +108,8 @@ class StdgpuConan(ConanFile):
             )
         if self.options.backend == "cuda" and self.dependencies["thrust"].options.device_system != "cuda":
             raise ConanInvalidConfiguration(f"{self.ref} option backend=cuda should use '-o thrust/*:device_system=cuda' as well.")
+        if self.settings.compiler == "apple-clang" and self.options.backend == "openmp":
+            raise ConanInvalidConfiguration("OpenMP support is required, which is not available in Apple Clang")
         if self.options.backend == "openmp" and self.dependencies["thrust"].options.device_system != "omp":
             raise ConanInvalidConfiguration(f"{self.ref} option backend=openmp should use '-o thrust/*:device_system=omp' as well.")
 
@@ -143,6 +134,8 @@ class StdgpuConan(ConanFile):
             tc.variables["STDGPU_ENABLE_CONTRACT_CHECKS"] = self.options.enable_contract_checks
         tc.variables["STDGPU_USE_32_BIT_INDEX"] = self.options.use_32_bit_index
         tc.preprocessor_definitions["THRUST_IGNORE_CUB_VERSION_CHECK"] = "1"
+        # https://github.com/stotko/stdgpu/blob/b70405bc62958f1f1334a936a20cd025351816fb/.github/workflows/windows.yml#L32
+        tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
         deps = CMakeDeps(self)
         # FIXME: should be set by the thrust recipe instead
@@ -182,9 +175,7 @@ class StdgpuConan(ConanFile):
         openmp_flags = []
         if is_msvc(self):
             openmp_flags = ["-openmp"]
-        elif self.settings.compiler in ["clang", "apple-clang"]:
-            openmp_flags = ["-Xpreprocessor", "-fopenmp"]
-        elif self.settings.compiler == "gcc":
+        elif self.settings.compiler in ("clang", "gcc"):
             openmp_flags = ["-fopenmp"]
         elif self.settings.compiler == "intel":
             openmp_flags = ["/Qopenmp"] if self.settings.os == "Windows" else ["-Qopenmp"]
@@ -202,8 +193,7 @@ class StdgpuConan(ConanFile):
         self.cpp_info.libs = ["stdgpu"]
 
         if self.options.backend == "openmp":
-            if self.options.openmp == "system":
-                self._configure_system_openmp()
+            self._configure_system_openmp()
         elif self.options.backend == "cuda":
             module_path = os.path.join("lib", "cmake", "stdgpu-dependencies-cuda.cmake")
             self.cpp_info.set_property("cmake_build_modules", [module_path])

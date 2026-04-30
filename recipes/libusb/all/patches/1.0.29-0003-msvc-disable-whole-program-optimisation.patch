@@ -1,0 +1,11 @@
+diff -urw a/msvc/Base.props b/msvc/Base.props
+--- a/msvc/Base.props	2024-03-09 13:00:27
++++ b/msvc/Base.props	2025-07-10 15:28:30
+@@ -34,7 +34,6 @@
+       <OmitFramePointers>true</OmitFramePointers>
+       <StringPooling>true</StringPooling>
+       <AdditionalOptions>/Gw %(AdditionalOptions)</AdditionalOptions>
+-      <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+     <!--Link Base-->
+     <Link>

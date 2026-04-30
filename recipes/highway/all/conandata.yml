@@ -1,43 +1,10 @@
 sources:
-  "1.2.0":
-    url: "https://github.com/google/highway/archive/1.2.0.tar.gz"
-    sha256: "7e0be78b8318e8bdbf6fa545d2ecb4c90f947df03f7aadc42c1967f019e63343"
+  "1.3.0":
+    url: "https://github.com/google/highway/archive/1.3.0.tar.gz"
+    sha256: "07b3c1ba2c1096878a85a31a5b9b3757427af963b1141ca904db2f9f4afe0bc2"
   "1.1.0":
     url: "https://github.com/google/highway/archive/1.1.0.tar.gz"
     sha256: "354a8b4539b588e70b98ec70844273e3f2741302c4c377bcc4e81b3d1866f7c9"
   "1.0.7":
     url: "https://github.com/google/highway/archive/1.0.7.tar.gz"
     sha256: "5434488108186c170a5e2fca5e3c9b6ef59a1caa4d520b008a9b8be6b8abe6c5"
-  "1.0.6":
-    url: "https://github.com/google/highway/archive/1.0.6.tar.gz"
-    sha256: "d89664a045a41d822146e787bceeefbf648cc228ce354f347b18f2b419e57207"
-  "1.0.5":
-    url: "https://github.com/google/highway/archive/1.0.5.tar.gz"
-    sha256: "99b7dad98b8fa088673b720151458fae698ae5df9154016e39de4afdc23bb927"
-  "1.0.4":
-    url: "https://github.com/google/highway/archive/1.0.4.tar.gz"
-    sha256: "faccd343935c9e98afd1016e9d20e0b8b89d908508d1af958496f8c2d3004ac2"
-  "1.0.3":
-    url: "https://github.com/google/highway/archive/1.0.3.tar.gz"
-    sha256: "566fc77315878473d9a6bd815f7de78c73734acdcb745c3dde8579560ac5440e"
-  "1.0.2":
-    url: "https://github.com/google/highway/archive/1.0.2.tar.gz"
-    sha256: "e8ef71236ac0d97f12d553ec1ffc5b6375d57b5f0b860c7447dd69b6ed1072db"
-  "1.0.1":
-    url: "https://github.com/google/highway/archive/1.0.1.tar.gz"
-    sha256: "7ca6af7dc2e3e054de9e17b9dfd88609a7fd202812b1c216f43cc41647c97311"
-  "1.0.0":
-    url: "https://github.com/google/highway/archive/1.0.0.tar.gz"
-    sha256: "ab4f5f864932268356f9f6aa86f612fa4430a7db3c8de0391076750197e876b8"
-  "0.17.0":
-    url: "https://github.com/google/highway/archive/0.17.0.tar.gz"
-    sha256: "25158fd5c090b70ecea47fc246c860d150f07f801d2434e1e51ec14a6c15822c"
-  "0.12.2":
-    url: "https://github.com/google/highway/archive/0.12.2.tar.gz"
-    sha256: "e1d47ce510429fdcf31f41697ca74fb0dcd59d933196e531a86d51751a56f4cc"
-patches:
-  "1.2.0":
-    - patch_file: "patches/1.2.0-0001-fix-dllexport.patch"
-      patch_description: "fix incorrect DLLEXPORT"
-      patch_type: "backport"
-      patch_source: "https://github.com/google/highway/pull/2229"

@@ -43,10 +43,6 @@ class MinizipNgConan(ConanFile):
         "with_libcomp": True,
     }
 
-    @property
-    def _is_clang_cl(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "clang"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -92,6 +88,7 @@ class MinizipNgConan(ConanFile):
         tc.cache_variables["MZ_FETCH_LIBS"] = False
         tc.cache_variables["MZ_COMPAT"] = self.options.mz_compatibility
         tc.cache_variables["MZ_ZLIB"] = self.options.get_safe("with_zlib", False)
+        tc.cache_variables["MZ_ZLIB_FLAVOR"] = "zlib"
         tc.cache_variables["MZ_BZIP2"] = self.options.with_bzip2
         tc.cache_variables["MZ_LZMA"] = self.options.with_lzma
         tc.cache_variables["MZ_ZSTD"] = self.options.with_zstd
@@ -125,7 +122,6 @@ class MinizipNgConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "MINIZIP::minizip")
         self.cpp_info.set_property("pkg_config_name", "minizip")
 
-        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         suffix = "" if self.options.mz_compatibility else "-ng"
         self.cpp_info.components["minizip"].libs = [f"minizip{suffix}"]
         if self.options.with_lzma:

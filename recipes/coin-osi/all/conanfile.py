@@ -109,6 +109,7 @@ class CoinOsiConan(ConanFile):
         ]:
             if gnu_config:
                 copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
+                copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=os.path.join(self.source_folder, "Osi"))
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()

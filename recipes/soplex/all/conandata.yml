@@ -1,4 +1,16 @@
 sources:
+  "8.0.2":
+    url: "https://github.com/scipopt/soplex/archive/refs/tags/v8.0.2.tar.gz"
+    sha256: "9304fd377e506b380c6b234f6aec221bfc8754541e9ad5f5584f5fbb786a8392"
+  "8.0.1":
+    url: "https://github.com/scipopt/soplex/archive/refs/tags/v8.0.1.tar.gz"
+    sha256: "f989f650e0d489f4e84037af2a50b1d0928f62ab79179ef566111d9197c2b6c8"
+  "8.0.0":
+    url: "https://github.com/scipopt/soplex/archive/refs/tags/v8.0.0.tar.gz"
+    sha256: "59828f88843ff5fd0adddbecf39a84c8a883b47dc26527bc4dedd2a4b98af07c"
+  "7.1.6":
+    url: "https://github.com/scipopt/soplex/archive/refs/tags/release-716.tar.gz"
+    sha256: "f031d60e7ad9a575393b04083c2914fb71a9886ba70ae77931c5a46c76b85ae4"
   "7.1.5":
     url: "https://github.com/scipopt/soplex/archive/refs/tags/release-715.tar.gz"
     sha256: "e6e3998c0215120e452c4298d29bfad71c9dfb7f904a01f04c7919086248c130"

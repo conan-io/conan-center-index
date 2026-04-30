@@ -51,6 +51,7 @@ class FoxiConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["FOXI_WERROR"] = False
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def _patch_sources(self):

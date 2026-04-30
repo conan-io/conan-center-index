@@ -1,4 +1,7 @@
 sources:
-  "1.4.0":
-    url: "https://github.com/ofxa/openfx/archive/refs/tags/OFX_Release_1_4_TAG.tar.gz"
-    sha256: "1f2d057b2cff025979f631f092f138020315524d4c0c0dcc2dccdadc2313a62f"
+  "1.5.1":
+    url: "https://github.com/AcademySoftwareFoundation/openfx/archive/refs/tags/OFX_Release_1.5.1.tar.gz"
+    sha256: "8c5766e2e0896b79fab226a07c9effb52793f6bb14d0d30cf4631fddb5f87e84"
+patches:
+    "1.5.1":
+        - patch_file: "patches/1.5.1-0001-disable-example-requirements.patch"

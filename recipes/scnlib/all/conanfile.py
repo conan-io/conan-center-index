@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc
@@ -60,8 +59,6 @@ class ScnlibConan(ConanFile):
 
     def requirements(self):
         self.requires("fast_float/6.1.0")
-        if Version(self.version) < "3.0":
-            self.requires("simdutf/4.0.5")
         if self.options.get_safe("regex_backend") in ["boost", "boost_icu"]:
             self.requires("boost/1.83.0")
         elif self.options.get_safe("regex_backend") == "re2":
@@ -82,11 +79,9 @@ class ScnlibConan(ConanFile):
         # TODO: This should probably be a del self.options.header_only in config_options once the CI supports it
         if self.options.header_only:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support header only mode.")
-        if Version(self.version) < "3.0.2" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "11":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc 11.x due to std::regex_constants::multiline is not defined.")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16 <4]")
+        self.tool_requires("cmake/[>=3.16]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -151,15 +146,8 @@ class ScnlibConan(ConanFile):
             self.cpp_info.components["_scnlib"].defines = ["SCN_HEADER_ONLY=0"]
             self.cpp_info.components["_scnlib"].libs = ["scn"]
         self.cpp_info.components["_scnlib"].requires.append("fast_float::fast_float")
-        if Version(self.version) < "3.0":
-            self.cpp_info.components["_scnlib"].requires.append("simdutf::simdutf")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_scnlib"].system_libs.append("m")
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "scn"
-        self.cpp_info.names["cmake_find_package_multi"] = "scn"
-        self.cpp_info.components["_scnlib"].names["cmake_find_package"] = target
-        self.cpp_info.components["_scnlib"].names["cmake_find_package_multi"] = target
         self.cpp_info.components["_scnlib"].set_property("cmake_target_name", f"scn::{target}")

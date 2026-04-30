@@ -1,0 +1,12 @@
+diff --git a/msvc/Base.props b/msvc/Base.props
+--- a/msvc/Base.props
++++ b/msvc/Base.props
+@@ -11,7 +11,7 @@
+       <AdditionalIncludeDirectories>.;..\libusb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+       <PreprocessorDefinitions>_WIN32_WINNT=_WIN32_WINNT_VISTA;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+       <WarningLevel>Level4</WarningLevel>
+-      <TreatWarningAsError>true</TreatWarningAsError>
++      <TreatWarningAsError>false</TreatWarningAsError>
+       <IntrinsicFunctions>true</IntrinsicFunctions>
+       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+       <!--Treat sources as utf-8-->

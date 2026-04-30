@@ -1,0 +1,105 @@
+From 6f1105a4c30416a55196db048ef9759e22cdd04e Mon Sep 17 00:00:00 2001
+From: Markus Vieth <mvieth@techfak.uni-bielefeld.de>
+Date: Thu, 22 Aug 2024 20:48:19 +0200
+Subject: [PATCH 1/1] Compatibility with clang-19
+
+---
+ .../registration/correspondence_rejection_features.h  |  6 +++---
+ .../pcl/surface/3rdparty/poisson4/octree_poisson.hpp  | 11 +++++++----
+ .../pcl/surface/3rdparty/poisson4/sparse_matrix.hpp   | 10 +++++++---
+ 3 files changed, 17 insertions(+), 10 deletions(-)
+
+diff --git a/registration/include/pcl/registration/correspondence_rejection_features.h b/registration/include/pcl/registration/correspondence_rejection_features.h
+index 44835c379..f3bab8fef 100644
+--- a/registration/include/pcl/registration/correspondence_rejection_features.h
++++ b/registration/include/pcl/registration/correspondence_rejection_features.h
+@@ -269,9 +269,9 @@ protected:
+       // Check if the representations are valid
+       if (!feature_representation_->isValid(feat_src) ||
+           !feature_representation_->isValid(feat_tgt)) {
+-        PCL_ERROR("[pcl::registration::%s::getCorrespondenceScore] Invalid feature "
+-                  "representation given!\n",
+-                  this->getClassName().c_str());
++        PCL_ERROR(
++            "[pcl::registration::CorrespondenceRejectorFeatures::FeatureContainer::"
++            "getCorrespondenceScore] Invalid feature representation given!\n");
+         return (std::numeric_limits<double>::max());
+       }
+ 
+diff --git a/surface/include/pcl/surface/3rdparty/poisson4/octree_poisson.hpp b/surface/include/pcl/surface/3rdparty/poisson4/octree_poisson.hpp
+index 7ed8aaf9d..e7f45b650 100644
+--- a/surface/include/pcl/surface/3rdparty/poisson4/octree_poisson.hpp
++++ b/surface/include/pcl/surface/3rdparty/poisson4/octree_poisson.hpp
+@@ -746,7 +746,10 @@ namespace pcl
+       Real temp,dist2;
+       if(!children){return this;}
+       for(int i=0;i<Cube::CORNERS;i++){
+-        temp=SquareDistance(children[i].center,p);
++        Point3D<Real> child_center;
++        Real child_width;
++        children[i].centerAndWidth(child_center, child_width);
++        temp=SquareDistance(child_center,p);
+         if(!i || temp<dist2){
+           dist2=temp;
+           nearest=i;
+@@ -807,7 +810,7 @@ namespace pcl
+       children=NULL;
+ 
+       d=node.depth ();
+-      for(i=0;i<DIMENSION;i++){this->offset[i] = node.offset[i];}
++      for(i=0;i<DIMENSION;i++){this->off[i] = node.off[i];}
+       if(node.children){
+         initChildren();
+         for(i=0;i<Cube::CORNERS;i++){children[i] = node.children[i];}
+@@ -817,7 +820,7 @@ namespace pcl
+ 
+     template <class NodeData,class Real>
+     int OctNode<NodeData,Real>::CompareForwardDepths(const void* v1,const void* v2){
+-      return ((const OctNode<NodeData,Real>*)v1)->depth-((const OctNode<NodeData,Real>*)v2)->depth;
++      return ((const OctNode<NodeData,Real>*)v1)->depth()-((const OctNode<NodeData,Real>*)v2)->depth();
+     }
+ 
+     template< class NodeData , class Real >
+@@ -874,7 +877,7 @@ namespace pcl
+ 
+     template <class NodeData,class Real>
+     int OctNode<NodeData,Real>::CompareBackwardDepths(const void* v1,const void* v2){
+-      return ((const OctNode<NodeData,Real>*)v2)->depth-((const OctNode<NodeData,Real>*)v1)->depth;
++      return ((const OctNode<NodeData,Real>*)v2)->depth()-((const OctNode<NodeData,Real>*)v1)->depth();
+     }
+ 
+     template <class NodeData,class Real>
+diff --git a/surface/include/pcl/surface/3rdparty/poisson4/sparse_matrix.hpp b/surface/include/pcl/surface/3rdparty/poisson4/sparse_matrix.hpp
+index 24f0a5402..5e54ac786 100644
+--- a/surface/include/pcl/surface/3rdparty/poisson4/sparse_matrix.hpp
++++ b/surface/include/pcl/surface/3rdparty/poisson4/sparse_matrix.hpp
+@@ -228,14 +228,18 @@ namespace pcl
+     template<class T>
+     void SparseMatrix<T>::SetZero()
+     {
+-      Resize(this->m_N, this->m_M);
++      // copied from operator *=
++      for (int i=0; i<rows; i++)
++      {
++        for(int ii=0;ii<rowSizes[i];ii++){m_ppElements[i][ii].Value=T(0);}
++      }
+     }
+ 
+     template<class T>
+     void SparseMatrix<T>::SetIdentity()
+     {
+       SetZero();
+-      for(int ij=0; ij < Min( this->Rows(), this->Columns() ); ij++)
++      for(int ij=0; ij < std::min<int>( rows, _maxEntriesPerRow ); ij++)
+         (*this)(ij,ij) = T(1);
+     }
+ 
+@@ -388,7 +392,7 @@ namespace pcl
+       T alpha,beta,rDotR;
+       int i;
+ 
+-      solution.Resize(M.Columns());
++      solution.Resize(bb.Dimensions());
+       solution.SetZero();
+ 
+       d=r=bb;

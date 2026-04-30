@@ -46,6 +46,10 @@ class CfitsioConan(ConanFile):
             del self.options.with_curl
         if self.settings.arch not in ["x86", "x86_64"]:
             del self.options.simd_intrinsics
+        if Version(self.version) == "4.4.0":
+            self.license = "NASA-1.3"
+        else:
+            self.license = "CFITSIO"
 
     def configure(self):
         if self.options.shared:
@@ -105,7 +109,10 @@ class CfitsioConan(ConanFile):
         cmake.build()
 
     def package(self):
-        if Version(self.version) >= "4.4.0":
+        if Version(self.version) >= "4.4.1":
+            copy(self, "License.txt", src=os.path.join(self.source_folder, "licenses"),
+                 dst=os.path.join(self.package_folder, "licenses"))
+        elif Version(self.version) >= "4.4.0":
             copy(self, "NASA*", src=os.path.join(self.source_folder, "licenses"),
                  dst=os.path.join(self.package_folder, "licenses"))
         else:

@@ -1,8 +1,9 @@
 import os
 
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, replace_in_file
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -20,16 +21,23 @@ class IMGUIConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "enable_test_engine": [True, False]
+        "enable_test_engine": [True, False],
+        "with_sdl3_binding": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "enable_test_engine": False
+        "enable_test_engine": False,
+        "with_sdl3_binding": False,
     }
+
+    def requirements(self):
+        if self.options.get_safe("with_sdl3_binding"):
+            self.requires("sdl/[>3 <4]", transitive_headers=True)
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -37,6 +45,11 @@ class IMGUIConan(ConanFile):
         if "testengine" not in self.conan_data["sources"][self.version]:
             self.output.warning("No test engine found for this version, removing test engine option")
             del self.options.enable_test_engine
+
+        # sdl3 bindings were introduced with 1.89.3
+        # 1.91.8 is the oldest version that supports the latest sdl headers
+        if Version(self.version) < "1.91.8":
+            del self.options.with_sdl3_binding
 
     def configure(self):
         if self.options.shared:
@@ -54,6 +67,7 @@ class IMGUIConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["IMGUI_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["IMGUI_WITH_SDL3_BINDING"] = self.options.get_safe("with_sdl3_binding", False)
         # test engine is not available for all versions
         if self.options.get_safe("enable_test_engine"):
             tc.preprocessor_definitions["IMGUI_ENABLE_TEST_ENGINE"] = "1"
@@ -62,7 +76,12 @@ class IMGUIConan(ConanFile):
             tc.variables["IMGUI_TEST_ENGINE_DIR"] = os.path.join(self.source_folder, "test_engine").replace("\\", "/")
         tc.generate()
 
+        deps = CMakeDeps(self)
+        deps.generate()
+
     def _patch_sources(self):
+        apply_conandata_patches(self)
+
         # Ensure we take into account export_headers
         replace_in_file(self,
             os.path.join(self.source_folder, "imgui.h"),

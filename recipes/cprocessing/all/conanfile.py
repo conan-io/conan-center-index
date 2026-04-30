@@ -14,6 +14,7 @@ required_conan_version = ">=1.52.0"
 class CProcessingConan(ConanFile):
     name = "cprocessing"
     description = "Processing programming for C++ "
+    deprecated = "upstream no longer publicly visible on github - no longer maintained in Conan Center"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/maksmakuta/CProcessing"

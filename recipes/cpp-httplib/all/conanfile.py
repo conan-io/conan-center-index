@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
@@ -19,6 +20,8 @@ class CpphttplibConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_openssl": [True, False],
+        "with_mbedtls": [True, False],
+        "with_wolfssl": [True, False],
         "with_zlib": [True, False],
         "with_brotli": [True, False],
         "use_macos_keychain_certs": [True, False],
@@ -26,6 +29,8 @@ class CpphttplibConan(ConanFile):
     }
     default_options = {
         "with_openssl": False,
+        "with_mbedtls": False,
+        "with_wolfssl": False,
         "with_zlib": False,
         "with_brotli": False,
         "use_macos_keychain_certs": True,
@@ -33,20 +38,24 @@ class CpphttplibConan(ConanFile):
     }
     no_copy_source = True
 
+    @property
+    def _tls_enabled(self):
+        return self.options.with_openssl or self.options.get_safe("with_mbedtls") or self.options.get_safe("with_wolfssl")
+
     def config_options(self):
         if self.settings.os != "Macos":
             del self.options.use_macos_keychain_certs
-
-        if Version(self.version) < "0.20":
-            del self.options.with_zstd
+        if Version(self.version) < "0.36":
+            del self.options.with_mbedtls
+            del self.options.with_wolfssl
 
     def requirements(self):
         if self.options.with_openssl:
-            if Version(self.version) < "0.15":
-                self.requires("openssl/[>=1.1 <4]")
-            else:
-                # New version of httplib.h requires OpenSSL 3
-                self.requires("openssl/[>=3 <4]")
+            self.requires("openssl/[>=3 <4]")
+        if self.options.get_safe("with_mbedtls"):
+            self.requires("mbedtls/[>=2 <4]")
+        if self.options.get_safe("with_wolfssl"):
+            self.requires("wolfssl/[>=5 <6]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_brotli:
@@ -59,6 +68,10 @@ class CpphttplibConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 11)
+
+        if self.options.get_safe("with_wolfssl"):
+            if not self.dependencies["wolfssl"].options.opensslall:
+                raise ConanInvalidConfiguration(f"{self.ref} requires wolfssl/*:opensslall=True.")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -76,8 +89,13 @@ class CpphttplibConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "httplib"))
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+
         if self.options.with_openssl:
             self.cpp_info.defines.append("CPPHTTPLIB_OPENSSL_SUPPORT")
+        if self.options.get_safe("with_mbedtls"):
+            self.cpp_info.defines.append("CPPHTTPLIB_MBEDTLS_SUPPORT")
+        if self.options.get_safe("with_wolfssl"):
+            self.cpp_info.defines.append("CPPHTTPLIB_WOLFSSL_SUPPORT")
         if self.options.with_zlib:
             self.cpp_info.defines.append("CPPHTTPLIB_ZLIB_SUPPORT")
         if self.options.with_brotli:
@@ -85,9 +103,16 @@ class CpphttplibConan(ConanFile):
         if self.options.get_safe("with_zstd"):
             self.cpp_info.defines.append("CPPHTTPLIB_ZSTD_SUPPORT")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread", "anl"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["crypt32", "cryptui", "ws2_32"]
-        elif self.settings.os == "Macos" and self.options.with_openssl and self.options.get_safe("use_macos_keychain_certs"):
-            self.cpp_info.frameworks = ["CoreFoundation", "Security"]
-            self.cpp_info.defines.append("CPPHTTPLIB_USE_CERTS_FROM_MACOSX_KEYCHAIN")
+        elif self.settings.os == "Macos":
+            if self._tls_enabled and self.options.get_safe("use_macos_keychain_certs"):
+                self.cpp_info.frameworks.extend(["CFNetwork", "CoreFoundation", "Security"])
+                if Version(self.version) < "0.36.0":
+                    self.cpp_info.defines.append("CPPHTTPLIB_USE_CERTS_FROM_MACOSX_KEYCHAIN")
+
+            if not self.options.get_safe("use_macos_keychain_certs") and Version(self.version) >= "0.36.0":
+                self.cpp_info.defines.append("CPPHTTPLIB_DISABLE_MACOSX_AUTOMATIC_ROOT_CERTIFICATES")
+
+        self.cpp_info.defines.append("CPPHTTPLIB_USE_NON_BLOCKING_GETADDRINFO")

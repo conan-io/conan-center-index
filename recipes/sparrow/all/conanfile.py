@@ -24,12 +24,14 @@ class SparrowRecipe(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "use_date_polyfill": [True, False],
+        "export_json_reader": [True, False],
     }
 
     default_options = {
         "shared": False,
         "fPIC": True,
-        "use_date_polyfill": True
+        "use_date_polyfill": True,
+        "export_json_reader": False,
     }
 
     implements = ["auto_shared_fpic"]
@@ -38,17 +40,11 @@ class SparrowRecipe(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        if self.settings.os == "Macos":
-            del self.options.use_date_polyfill
-
-    @property
-    def _uses_date_polyfill(self):
-        # Not an option not to use it on Macos
-        return self.options.get_safe("use_date_polyfill", True)
-
     def requirements(self):
-        if self._uses_date_polyfill:
-            self.requires("date/3.0.3", transitive_headers=True)
+        if self.options.use_date_polyfill:
+            self.requires("date/[>=3.0.3 <4]", transitive_headers=True)
+        if self.options.export_json_reader:
+            self.requires("nlohmann_json/3.12.0", transitive_headers=True)
 
     @property
     def _compilers_minimum_version(self):
@@ -57,7 +53,7 @@ class SparrowRecipe(ConanFile):
         return {
             "apple-clang": "16",
             "clang": "18",
-            "gcc": "11" if Version(self.version) >= "0.6.0" else "13",
+            "gcc": "11",
             "msvc": "194",
         }
 
@@ -67,19 +63,26 @@ class SparrowRecipe(ConanFile):
         if minimum_version and Version(self.settings.compiler.version) < Version(minimum_version):
             raise ConanInvalidConfiguration(f"{self.name} requires {self.settings.compiler} {minimum_version} or newer")
 
+        must_use_date_polyfill = (self.settings.os == "Macos" or
+                                  self.settings.get_safe("compiler.libcxx") not in ["libstdc++", "libstdc++11"])
+        if must_use_date_polyfill and not self.options.use_date_polyfill:
+            raise ConanInvalidConfiguration("macOS and compiler.libcxx not in ['libstdc++', 'libstdc++11'] "
+                                            "needs use_date_polyfill set to True: '&:use_date_polyfill=True'")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.28 <4]")
+        self.tool_requires("cmake/[>=3.28]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["USE_DATE_POLYFILL"] = self._uses_date_polyfill
+        tc.variables["USE_DATE_POLYFILL"] = self.options.use_date_polyfill
         tc.variables["SPARROW_BUILD_SHARED"] = self.options.shared
+        tc.variables["CREATE_JSON_READER_TARGET"] = self.options.export_json_reader
         if is_msvc(self):
             tc.variables["USE_LARGE_INT_PLACEHOLDERS"] = True
         tc.generate()
@@ -103,12 +106,23 @@ class SparrowRecipe(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["sparrow"]
+        postfix = "d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.set_property("cmake_file_name", "sparrow")
-        self.cpp_info.set_property("cmake_target_name", "sparrow::sparrow")
+
+        # Main sparrow component
+        self.cpp_info.components["sparrow"].set_property("cmake_target_name", "sparrow::sparrow")
+        self.cpp_info.components["sparrow"].libs = [f"sparrow{postfix}"]
+
         if not self.options.shared:
-            self.cpp_info.defines.append("SPARROW_STATIC_LIB")
-        if self._uses_date_polyfill:
-            self.cpp_info.defines.append("SPARROW_USE_DATE_POLYFILL")
+            self.cpp_info.components["sparrow"].defines.append("SPARROW_STATIC_LIB")
+        if self.options.use_date_polyfill:
+            self.cpp_info.components["sparrow"].defines.append("SPARROW_USE_DATE_POLYFILL")
+            self.cpp_info.components["sparrow"].requires.append("date::date")
         if is_msvc(self):
-            self.cpp_info.defines.append("SPARROW_USE_LARGE_INT_PLACEHOLDERS")
+            self.cpp_info.components["sparrow"].defines.append("SPARROW_USE_LARGE_INT_PLACEHOLDERS")
+
+        # Optional json_reader component
+        if self.options.export_json_reader:
+            self.cpp_info.components["json_reader"].set_property("cmake_target_name", "sparrow::json_reader")
+            self.cpp_info.components["json_reader"].libs = [f"sparrow_json_reader{postfix}"]
+            self.cpp_info.components["json_reader"].requires = ["sparrow", "nlohmann_json::nlohmann_json"]

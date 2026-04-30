@@ -69,17 +69,17 @@ class PangoConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_freetype:
-            self.requires("freetype/2.13.2")
         if self.options.with_fontconfig:
-            self.requires("fontconfig/2.15.0")
+            self.requires("fontconfig/[>=2.15.0 <3]")
+        if self.options.with_freetype:
+            self.requires("freetype/[>=2.13.2 <3]")
         if self.options.get_safe("with_xft"):
-            self.requires("libxft/2.3.8")
+            self.requires("libxft/[~2.3]")
             self.requires("xorg/system")  # for xorg::xrender
         if self.options.with_cairo:
             # "pango/pangocairo.h" includes "cairo.h"
-            self.requires("cairo/1.18.0", transitive_headers=True)
-        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
+            self.requires("cairo/[>=1.18.0 <2]", transitive_headers=True)
+        self.requires("glib/[>=2.82 <3]", transitive_headers=True, transitive_libs=True)
         self.requires("fribidi/1.0.13")
         # "pango/pango-coverage.h" includes "hb.h"
         self.requires("harfbuzz/[>=8.3.0]", transitive_headers=True)

@@ -1,14 +1,21 @@
---- src/Makefile.in
-+++ src/Makefile.in
-@@ -327,7 +327,7 @@
- localstatedir = @localstatedir@
- mandir = @mandir@
- mkdir_p = @mkdir_p@
--my_CFLAGS = @my_CFLAGS@
-+my_CFLAGS =
- oldincludedir = @oldincludedir@
- pdfdir = @pdfdir@
- prefix = @prefix@
+--- configure.ac
++++ configure.ac
+@@ -135,15 +135,6 @@ AC_CHECK_DECLS([TIOCSRS485], [], [], [[#include <sys/ioctl.h>]])
+ # Check for RTS flags
+ AC_CHECK_DECLS([TIOCM_RTS], [], [], [[#include <sys/ioctl.h>]])
+ 
+-# Wtype-limits is not supported by gcc 4.2 (default on recent Mac OS X)
+-my_CFLAGS="-Wall \
+--Wmissing-declarations -Wmissing-prototypes \
+--Wnested-externs -Wpointer-arith \
+--Wpointer-arith -Wsign-compare -Wchar-subscripts \
+--Wstrict-prototypes -Wshadow \
+--Wformat-security"
+-AC_SUBST([my_CFLAGS])
+-
+ # Build options
+ AC_ARG_ENABLE(tests,
+ 	AS_HELP_STRING([--disable-tests],
 --- src/modbus-private.h
 +++ src/modbus-private.h
 @@ -13,7 +13,7 @@

@@ -95,7 +95,7 @@ class CyrusSaslConan(ConanFile):
         if is_msvc(self) or self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_postgresql"):
-            self.requires("libpq/15.4")
+            self.requires("libpq/[>=15.4 <18]")
         if self.options.get_safe("with_mysql"):
             self.requires("libmysqlclient/8.1.0")
         if self.options.get_safe("with_sqlite3"):
@@ -257,6 +257,3 @@ class CyrusSaslConan(ConanFile):
                 self.cpp_info.system_libs.append("crypt")
         elif is_msvc(self):
             self.cpp_info.system_libs = ["ws2_32"]
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

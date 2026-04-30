@@ -1,28 +1,10 @@
 sources:
+  "0.12.0":
+    url: "https://github.com/ibireme/yyjson/archive/refs/tags/0.12.0.tar.gz"
+    sha256: "b16246f617b2a136c78d73e5e2647c6f1de1313e46678062985bdcf1f40bb75d"
   "0.10.0":
     url: "https://github.com/ibireme/yyjson/archive/refs/tags/0.10.0.tar.gz"
     sha256: "0d901cb2c45c5586e3f3a4245e58c2252d6b24bf4b402723f6179523d389b165"
   "0.9.0":
     url: "https://github.com/ibireme/yyjson/archive/refs/tags/0.9.0.tar.gz"
     sha256: "59902bea55585d870fd7681eabe6091fbfd1a8776d1950f859d2dbbd510c74bd"
-  "0.8.0":
-    url: "https://github.com/ibireme/yyjson/archive/refs/tags/0.8.0.tar.gz"
-    sha256: "b2e39ac4c65f9050820c6779e6f7dd3c0d3fed9c6667f91caec0badbedce00f3"
-  "0.7.0":
-    url: "https://github.com/ibireme/yyjson/archive/refs/tags/0.7.0.tar.gz"
-    sha256: "9b91ee48ac1fe5939f747d49f123d9a522b5f4e1e46165c1871936d583628a06"
-  "0.6.0":
-    url: "https://github.com/ibireme/yyjson/archive/refs/tags/0.6.0.tar.gz"
-    sha256: "75aa65d2944b3f64ce5918aa3da00f738dc695a0e8e0662de0063aafe1a8662f"
-  "0.5.1":
-    url: "https://github.com/ibireme/yyjson/archive/refs/tags/0.5.1.tar.gz"
-    sha256: "b484d40b4e20cc3174a6fdc160d0f20f961417f9cb3f6dc1cf6555fffa8359f3"
-  "0.5.0":
-    url: "https://github.com/ibireme/yyjson/archive/refs/tags/0.5.0.tar.gz"
-    sha256: "1a65c41d25394c979ad26554a0befb8006ecbf9f7f3a5b0130fdae4f2dd03d42"
-  "0.4.0":
-    url: "https://github.com/ibireme/yyjson/archive/refs/tags/0.4.0.tar.gz"
-    sha256: "061fe713391d7f3f85f13e8bb2752a4cdeb8e70ce20d68e1e9e4332bd0bf64fa"
-  "0.3.0":
-    url: "https://github.com/ibireme/yyjson/archive/refs/tags/0.3.0.tar.gz"
-    sha256: "f5ad3e3be40f0307a732c2b8aff9a1ba6014a6b346f3ec0b128459607748e990"

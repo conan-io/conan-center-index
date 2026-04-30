@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index df970d3..69cc15a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -165,7 +165,7 @@ endif()
+ 
+ # Windows CRT selection for static builds
+ #
+-if (WIN32 AND MSVC)
++if (0)
+     if (BUILD_SHARED_LIBS)
+         set(SAIL_WINDOWS_STATIC_CRT_DISPLAY "Default (shared build)")
+     else()

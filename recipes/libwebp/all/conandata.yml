@@ -1,4 +1,7 @@
 sources:
+  "1.6.0":
+    url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz"
+    sha256: "e4ab7009bf0629fd11982d4c2aa83964cf244cffba7347ecd39019a9e38c4564"
   "1.5.0":
     url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.5.0.tar.gz"
     sha256: "7d6fab70cf844bf6769077bd5d7a74893f8ffd4dfb42861745750c63c2a5c92c"
@@ -18,6 +21,10 @@ sources:
     url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.1.0.tar.gz"
     sha256: "98a052268cc4d5ece27f76572a7f50293f439c17a98e67c4ea0c7ed6f50ef043"
 patches:
+  "1.6.0":
+    - patch_file: "patches/1.6.0-0001-fix-cmake.patch"
+      patch_description: "disable PIC, disable prefix library name on MSVC"
+      patch_type: "conan"
   "1.5.0":
     - patch_file: "patches/1.5.0-0001-fix-cmake.patch"
       patch_description: "disable PIC, disable prefix library name on MSVC"

@@ -201,10 +201,25 @@ class VulkanValidationLayersConan(ConanFile):
                 f"set(JSON_API_VERSION \"{sanitized_vk_version}\")",
             )
         if self.settings.os == "Android":
+            # INFO: 1.3.236 tries to do `find_package(PkgConfig REQUIRED QUIET)` on Android, which fails the build
+            # https://github.com/KhronosGroup/Vulkan-ValidationLayers/blob/sdk-1.3.236/CMakeLists.txt#L148
+            if Version(self.version) < '1.3.238':
+                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "(UNIX AND NOT APPLE)",
+                            "(UNIX AND NOT APPLE AND NOT ANDROID)")
+
             # INFO: libVkLayer_utils.a: error: undefined symbol: __android_log_print
             # https://github.com/KhronosGroup/Vulkan-ValidationLayers/commit/a26638ae9fdd8c40b56d4c7b72859a5b9a0952c9
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "VkLayer_utils PUBLIC Vulkan::Headers", "VkLayer_utils PUBLIC Vulkan::Headers -landroid -llog")
+            if Version(self.version) < "1.3.239":
+                cmake_path = os.path.join(self.source_folder, "CMakeLists.txt")
+            else:
+                cmake_path = os.path.join(self.source_folder, "layers", "CMakeLists.txt")
+                # FIXME: Since 1.3.261.0 (https://github.com/KhronosGroup/Vulkan-ValidationLayers/pull/5913), we need to fix the line to be replaced
+                #        Check the patch for newer versions
+            replace_in_file(self, cmake_path, 
+                        "VkLayer_utils PUBLIC Vulkan::Headers",
+                        "VkLayer_utils PUBLIC Vulkan::Headers -landroid -llog")
+
         if not self.options.get_safe("fPIC"):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "CMAKE_POSITION_INDEPENDENT_CODE ON", "CMAKE_POSITION_INDEPENDENT_CODE OFF")

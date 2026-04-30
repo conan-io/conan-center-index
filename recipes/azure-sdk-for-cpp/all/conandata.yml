@@ -1,4 +1,4 @@
 sources:
-  "1.11.3":
-    url: "https://github.com/Azure/azure-sdk-for-cpp/archive/refs/tags/azure-core_1.11.3.tar.gz"
-    sha256: "c67e42622bf1ebafee29aa09f333e41adc24712b0c993ada5dd97c9265b444cc"
+  "1.16.2":
+    url: "https://github.com/Azure/azure-sdk-for-cpp/archive/refs/tags/azure-core_1.16.2.tar.gz"
+    sha256: "647d7206a1eace0664ab8da9912fada0ae1d269097ee5f6397a9ce23a84549cf"

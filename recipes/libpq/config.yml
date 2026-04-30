@@ -1,15 +1,9 @@
 versions:
-  "17.5":
+  "17.7":
     folder: meson
-  "16.8":
+  "16.13":
     folder: all
-  "15.12":
+  "15.17":
     folder: all
-  "15.5":
-    folder: all
-  "15.4":
-    folder: all
-  "15.3":
-    folder: all
-  "14.9":
+  "14.22":
     folder: all

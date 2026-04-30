@@ -1,0 +1,13 @@
+diff --git a/src/proc/color-formats-converter.cpp b/src/proc/color-formats-converter.cpp
+index c25d0bf636..70d61e8f97 100644
+--- a/src/proc/color-formats-converter.cpp
++++ b/src/proc/color-formats-converter.cpp
+@@ -20,7 +20,7 @@
+ #endif
+ #include "neon/image-neon.h"
+
+-#if defined (ANDROID) || (defined (__linux__) && !defined (__x86_64__)) || (defined (__APPLE__) && !defined (__x86_64__))
++#if defined (ANDROID) || !(defined (_M_IX86) || defined (__i386__)) || (defined (__APPLE__) && !defined (__x86_64__))
+
+ bool has_avx() { return false; }
+

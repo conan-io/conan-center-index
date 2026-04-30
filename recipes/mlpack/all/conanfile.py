@@ -48,9 +48,6 @@ class MlpackConan(ConanFile):
         self.requires("cereal/1.3.2")
         self.requires("ensmallen/2.21.0")
         self.requires("stb/cci.20230920")
-        # TODO: MSVC OpenMP is not compatible, enable for MSVC after #22353
-        if not is_msvc(self):
-            self.requires("llvm-openmp/17.0.6")
 
     def package_id(self):
         self.info.clear()
@@ -98,22 +95,18 @@ class MlpackConan(ConanFile):
         if self.settings.get_safe("compiler.libcxx") in ["libstdc++", "libstdc++11"]:
             self.cpp_info.system_libs.append("atomic")
 
-        # FIXME: Review this flags assignment. LLVM-OpenMP is already defining these ones.
-        #        Do we want to depend on llvm-openmp? Only for apple-clang?
-        #        For more info, see this comment https://github.com/conan-io/conan-center-index/pull/22353#issuecomment-2214593855
-        flags = []
-        # Based on https://github.com/Kitware/CMake/blob/v3.28.1/Modules/FindOpenMP.cmake#L104-L135
-        if self.settings.compiler == "clang":
-            flags = ["-fopenmp=libomp"]
-        elif self.settings.compiler == "gcc":
-            flags = ["-fopenmp"]
+        if self.settings.compiler in ("clang", "gcc"):
+            # this is a header only library, so downstream consumers need to enable the openmp flag
+            compiler_flags = ["-fopenmp"]
+            link_flags = ["-fopenmp"]
             if self.settings.os == "Windows":
-                flags.append("-Wa,-mbig-obj")
-        elif self.settings.compiler == "sun-cc":
-            flags = ["-xopenmp"]
+                compiler_flags.append("-Wa,-mbig-obj")
+            self.cpp_info.cflags = compiler_flags
+            self.cpp_info.cxxflags = compiler_flags
+            self.cpp_info.sharedlinkflags = link_flags
+            self.cpp_info.exelinkflags = link_flags
         elif is_msvc(self):
         # https://github.com/mlpack/mlpack/blob/4.3.0/CMakeLists.txt#L164-L175
-            flags = ["-openmp:llvm", "/bigobj", "/Zm200", "/Zc:__cplusplus"]
-        if flags:
-            self.cpp_info.cflags = flags
-            self.cpp_info.cxxflags = flags
+            compiler_flags = ["/openmp", "/bigobj", "/Zm200", "/Zc:__cplusplus"]
+            self.cpp_info.cflags = compiler_flags
+            self.cpp_info.cxxflags = compiler_flags
