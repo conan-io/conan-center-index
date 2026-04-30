@@ -1,9 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, XCRun
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, to_apple_arch, XCRun
 from conan.tools.build import cross_building, check_min_cppstd, stdcpp_library
 from conan.tools.cmake import cmake_layout
-from conan.tools.env import VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import get, copy, rm, rmdir, replace_in_file
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
 from conan.tools.scm import Version
@@ -127,6 +127,9 @@ class GperftoolsConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
@@ -159,21 +162,11 @@ class GperftoolsConan(ConanFile):
         args["with-tcmalloc-alignment"] = self.options.tcmalloc_alignment
         args["with-tcmalloc-pagesize"] = self.options.tcmalloc_pagesize
 
-        # Based on https://github.com/conan-io/conan-center-index/blob/c647b1/recipes/libx264/all/conanfile.py#L94
-        if is_apple_os(self) and self.settings.arch == "armv8":
-            args["host"] = "aarch64-apple-darwin"
-            tc.extra_asflags = ["-arch arm64"]
-            tc.extra_ldflags = ["-arch arm64"]
-            if self.settings.os != "Macos":
-                xcrun = XCRun(self)
-                platform_flags = ["-isysroot", xcrun.sdk_path]
-                apple_min_version_flag = AutotoolsToolchain(self).apple_min_version_flag
-                if apple_min_version_flag:
-                    platform_flags.append(apple_min_version_flag)
-                tc.extra_asflags.extend(platform_flags)
-                tc.extra_cflags.extend(platform_flags)
-                tc.extra_ldflags.extend(platform_flags)
-
+        if cross_building(self) and is_apple_os(self):
+            apple_arch = to_apple_arch(self)
+            if apple_arch:
+                tc.configure_args.append(f"--with-arch={apple_arch}")
+ 
         for k, v in args.items():
             if v in [True, False]:
                 v = "yes" if v else "no"
