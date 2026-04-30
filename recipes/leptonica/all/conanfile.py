@@ -173,7 +173,8 @@ class LeptonicaConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Leptonica")
         self.cpp_info.set_property("cmake_target_name", "leptonica")
         self.cpp_info.set_property("pkg_config_name", "lept")
-        self.cpp_info.libs = ["leptonica"]
+        suffix = f"-{self.version }" if self.settings.os == "Windows" else ""
+        self.cpp_info.libs = ["leptonica" + suffix]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
         self.cpp_info.includedirs.append(os.path.join("include", "leptonica"))
