@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, rmdir, copy, rm
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class ZlibConan(ConanFile):
@@ -68,29 +68,17 @@ class ZlibConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
+
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "ZLIB")
         self.cpp_info.set_property("cmake_target_name", "ZLIB::ZLIB")
-        if not self.options.shared:
-            # The official target name of the static library is ZLIB::ZLIBSTATIC
-            # We add it as only as alias to avoid breaking changes for ZLIB::ZLIB consumers,
-            # but it does not exist upstream in this case
-            self.cpp_info.set_property("cmake_target_aliases", ["ZLIB::ZLIBSTATIC"])
-        self.cpp_info.set_property("cmake_components", ["shared" if self.options.shared else "static"])
         self.cpp_info.set_property("pkg_config_name", "zlib")
-        self.cpp_info.languages = ["C"]
 
-        libname = "z"
-
-        if self.settings.compiler == "msvc":
+        if self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime"):
+            # The recipe patches the CMakeLists.txt to generate different filenames when CMake
+            # detects MINGW (clang, gcc with compiler.runtime undefined and compiler.libcxx defined)
             libname = "zdll" if self.options.shared else "zlib"
-        elif False:
-            libname = ""
-
+        else:
+            libname = "z"
         self.cpp_info.libs = [libname]
-        # TODO:
-        #  _LARGEFILE64_SOURCE definition, which is computed with:
-        #  set(CMAKE_REQUIRED_DEFINITIONS -D_LARGEFILE64_SOURCE=1)
-        #   check_type_size(off64_t OFF64_T)
-        #   unset(CMAKE_REQUIRED_DEFINITIONS) # clear variable
