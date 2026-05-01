@@ -82,7 +82,7 @@ class CycloneDDSConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
-        if self.options.enable_security and not self.options.shared:
+        if Version(self.version) < "11" and self.options.enable_security and not self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} currently do not support"\
                                             "static build and security on")
         if self.settings.compiler.get_safe("cppstd"):
@@ -110,7 +110,10 @@ class CycloneDDSConan(ConanFile):
         tc.cache_variables["ENABLE_LTO"] = False
         # variables which effects build
         tc.variables["ENABLE_SSL"] = self.options.with_ssl
-        tc.variables["ENABLE_SHM"] = self.options.with_shm
+        if Version(self.version) >= "11":
+            tc.variables["ENABLE_ICEORYX"] = self.options.with_shm
+        else:
+            tc.variables["ENABLE_SHM"] = self.options.with_shm
         tc.variables["ENABLE_SECURITY"] = self.options.enable_security
         tc.variables["ENABLE_TYPE_DISCOVERY"] = self.options.enable_discovery
         tc.variables["ENABLE_TOPIC_DISCOVERY"] = self.options.enable_discovery
