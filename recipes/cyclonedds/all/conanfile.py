@@ -53,6 +53,10 @@ class CycloneDDSConan(ConanFile):
             "apple-clang": "10",
         }
 
+    @property
+    def _pre_v11(self):
+        return Version(self.version) < "11"
+
     def _has_idlc(self, info=False):
         # don't build idlc when it makes little sense or not supported
         host_os = self.info.settings.os if info else self.settings.os
@@ -77,12 +81,15 @@ class CycloneDDSConan(ConanFile):
 
     def requirements(self):
         if self.options.with_shm:
-            self.requires("iceoryx/2.0.5")
+            if self._pre_v11:
+                self.requires("iceoryx/2.0.5")
+            else:
+                self.requires("iceoryx/2.0.6")
         if self.options.with_ssl:
             self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
-        if self.options.enable_security and not self.options.shared:
+        if self._pre_v11 and self.options.enable_security and not self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} currently do not support"\
                                             "static build and security on")
         if self.settings.compiler.get_safe("cppstd"):
@@ -110,7 +117,10 @@ class CycloneDDSConan(ConanFile):
         tc.cache_variables["ENABLE_LTO"] = False
         # variables which effects build
         tc.variables["ENABLE_SSL"] = self.options.with_ssl
-        tc.variables["ENABLE_SHM"] = self.options.with_shm
+        if self._pre_v11:
+            tc.variables["ENABLE_SHM"] = self.options.with_shm
+        else:
+            tc.variables["ENABLE_ICEORYX"] = self.options.with_shm
         tc.variables["ENABLE_SECURITY"] = self.options.enable_security
         tc.variables["ENABLE_TYPE_DISCOVERY"] = self.options.enable_discovery
         tc.variables["ENABLE_TOPIC_DISCOVERY"] = self.options.enable_discovery
@@ -147,7 +157,10 @@ class CycloneDDSConan(ConanFile):
         self.cpp_info.components["CycloneDDS"].libs = ["ddsc"]
         requires = []
         if self.options.with_shm:
-            requires.append("iceoryx::iceoryx_binding_c")
+            if self._pre_v11:
+                requires.append("iceoryx::iceoryx_binding_c")
+            elif not self.options.shared:
+                requires.extend(["iceoryx::iceoryx_hoofs", "iceoryx::iceoryx_posh"])
         if self.options.with_ssl:
             requires.append("openssl::openssl")
         self.cpp_info.components["CycloneDDS"].requires = requires
