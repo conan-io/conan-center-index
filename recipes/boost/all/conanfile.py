@@ -599,7 +599,7 @@ class BoostConan(ConanFile):
             if Version(self.version) == "1.86.0" and is_msvc(self):
                 setattr(self.options, "without_process", True)
 
-        if Version(self.version) >= "1.90.0" or Version(self.version) <= "1.91.0":
+        if Version(self.version) >= "1.90.0" and Version(self.version) <= "1.91.0":
             # FIXME: boost.coroutine doesn't support Windows ARM64 due to missing context assembly
             # See https://github.com/boostorg/context/issues/296
             if self._is_windows_platform and "arm" in str(self.settings.arch):
