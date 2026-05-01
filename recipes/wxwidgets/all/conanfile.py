@@ -101,6 +101,7 @@ class wxWidgetsConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("ninja/[>=1.10.2 <2]")
         self.tool_requires("cmake/[>=3.17 <4]")
+        self.tool_requires("gettext/0.26")
 
     def requirements(self):
         if self.settings.os == "Linux":
