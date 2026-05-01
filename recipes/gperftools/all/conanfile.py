@@ -114,6 +114,10 @@ class GperftoolsConan(ConanFile):
         if Version(self.version) >= "2.11.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration(f"{self.ref} does not support gcc < 7.")
 
+        if cross_building(self) and self.options.shared:
+            if Version(self.version) <= "2.17.0" and is_apple_os(self):
+                raise ConanInvalidConfiguration(f"{self.ref} does not support shared when cross-building")
+
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(
                 f"{self.ref} does not currently support Windows. Contributions are welcome."
@@ -162,11 +166,6 @@ class GperftoolsConan(ConanFile):
         args["with-tcmalloc-alignment"] = self.options.tcmalloc_alignment
         args["with-tcmalloc-pagesize"] = self.options.tcmalloc_pagesize
 
-        if cross_building(self) and is_apple_os(self):
-            apple_arch = to_apple_arch(self)
-            if apple_arch:
-                tc.configure_args.append(f"--with-arch={apple_arch}")
- 
         for k, v in args.items():
             if v in [True, False]:
                 v = "yes" if v else "no"
