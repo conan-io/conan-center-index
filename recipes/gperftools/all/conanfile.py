@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building, check_min_cppstd, stdcpp_library
 from conan.tools.cmake import cmake_layout
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import get, copy, rm, rmdir, replace_in_file
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
 from conan.tools.scm import Version
@@ -115,8 +115,8 @@ class GperftoolsConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support gcc < 7.")
 
         if cross_building(self) and self.options.shared:
-            if Version(self.version) <= "2.17.0" and is_apple_os(self):
-                raise ConanInvalidConfiguration(f"{self.ref} does not support shared when cross-building")
+            if Version(self.version) < "2.17" and is_apple_os(self):
+                raise ConanInvalidConfiguration(f"{self.ref} does not support Macos shared library (when crossbuilding)")
 
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(
@@ -131,9 +131,6 @@ class GperftoolsConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
