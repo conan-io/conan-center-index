@@ -1,10 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 project(cmake_wrapper)
 
-if (CMAKE_CXX_STANDARD LESS 17)
-  set(CMAKE_CXX_STANDARD 17)
-endif()
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
 
 find_package(acl)
 if(acl_FOUND)

@@ -97,7 +97,6 @@ class IceoryxConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["INTROSPECTION"] = "ON"
         tc.cache_variables["TOML_CONFIG"] = self.options.toml_config
         if Version(self.version) >= "2.0.0":
             tc.cache_variables["DOWNLOAD_TOML_LIB"] = False
@@ -313,13 +312,11 @@ class IceoryxConan(ConanFile):
                 self.cpp_info.components[lib_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
                 self.cpp_info.components[lib_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
         if Version(self.version) >= "2.0.0":
             _register_components(self._iceoryx_components["2.0.0"])
-            self.runenv_info.PATH.append(bin_path)
-            self.buildenv_info.PATH.append(bin_path)
         else:
             _register_components(self._iceoryx_components["1.0.X"])
-            self.env_info.PATH.append(bin_path)
 
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
+        self.env_info.PATH.append(bin_path)
