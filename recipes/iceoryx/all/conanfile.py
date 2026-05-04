@@ -58,8 +58,7 @@ class IceoryxConan(ConanFile):
         compiler = self.settings.compiler
         version = Version(self.settings.compiler.version)
 
-        if compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 14)
+        check_min_cppstd(self, 14 if Version(self.version) < "2.95.8" else 17)
 
         if is_msvc(self):
             check_min_vs(self, 192)
@@ -162,16 +161,6 @@ class IceoryxConan(ConanFile):
             for include_path in include_paths:
                 rename(self, os.path.join(self.package_folder, "include", "iceoryx", f"v{self.version}", include_path),
                              os.path.join(self.package_folder, "include", include_path))
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        if Version(self.version) >= "2.0.0":
-            self._create_cmake_module_alias_targets(
-                os.path.join(self.package_folder, self._module_file_rel_path),
-                {v["target"]: f"iceoryx::{k}" for k, v in self._iceoryx_components["2.0.0"].items()})
-        else:
-            self._create_cmake_module_alias_targets(
-                os.path.join(self.package_folder, self._module_file_rel_path),
-                {v["target"]: f"iceoryx::{k}" for k, v in self._iceoryx_components["1.0.X"].items()})
 
     @property
     def _iceoryx_components(self):
@@ -278,21 +267,6 @@ class IceoryxConan(ConanFile):
             },
         }
 
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
-
     def package_info(self):
         # FIXME: We should provide 3 CMake config files:
         #        iceoryx_utilsConfig.cmake, iceoryx_poshConfig.cmake and iceoryx_binding_cConfig.cmake
@@ -308,15 +282,8 @@ class IceoryxConan(ConanFile):
                 self.cpp_info.components[lib_name].libs = [lib_name]
                 self.cpp_info.components[lib_name].system_libs = system_libs
                 self.cpp_info.components[lib_name].requires = requires
-                # TODO: to remove in conan v2 once cmake_find_package* generators removed
-                self.cpp_info.components[lib_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-                self.cpp_info.components[lib_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-
         if Version(self.version) >= "2.0.0":
             _register_components(self._iceoryx_components["2.0.0"])
         else:
             _register_components(self._iceoryx_components["1.0.X"])
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.env_info.PATH.append(bin_path)
