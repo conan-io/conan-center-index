@@ -1,5 +1,5 @@
+Upstream PR: https://codereview.qt-project.org/c/qt/qtbase/+/725069
 From 2ec10404d477345a7d7e6506faa99aa08368ba66 Mon Sep 17 00:00:00 2001
-From: Paul Wicking <paul.wicking@qt.io>
 Date: Thu, 26 Mar 2026 07:09:43 +0100
 Subject: [PATCH] qyieldcpu: Fix compilation with macOS 26.4 SDK
 
