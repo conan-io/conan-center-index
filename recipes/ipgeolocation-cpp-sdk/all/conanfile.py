@@ -56,7 +56,7 @@ class IpGeolocationCppSdkConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires("libcurl/[>=8 <9]")
+        self.requires("libcurl/[>=7.78.0 <9]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
