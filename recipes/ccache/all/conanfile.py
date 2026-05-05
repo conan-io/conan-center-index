@@ -4,7 +4,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.microsoft import check_min_vs
 import os
 
 required_conan_version = ">=2.0.9"
@@ -32,15 +32,9 @@ class CcacheConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "20"
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "10",
-            "clang": "12",
-            "apple-clang": "11",
-        }
+        if Version(self.version) >= "4.13":
+            return "20"
+        return "17"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -55,23 +49,12 @@ class CcacheConan(ConanFile):
             else:
                 self.requires("hiredis/1.2.0")
 
-
-
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 192)
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
         if self.settings.compiler== "clang" and Version(self.settings.compiler.version).major == "11" and \
             self.settings.compiler.libcxx == "libstdc++":
             raise ConanInvalidConfiguration(f"{self.ref} requires C++ filesystem library, that is not supported by Clang 11 + libstdc++.")
-
-        if self.settings.os == "Windows" and self.settings.arch == "armv8" and Version(self.version) < "4.10":
-            raise ConanInvalidConfiguration("ccache does not support ARMv8 on Windows before version 4.10")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.18]")
