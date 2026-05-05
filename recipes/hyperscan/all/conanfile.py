@@ -2,11 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2"
 
 
 class HyperscanConan(ConanFile):
@@ -39,10 +39,6 @@ class HyperscanConan(ConanFile):
         "dump_support": "auto",
     }
 
-    @property
-    def _min_cppstd(self):
-        return 11
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -62,25 +58,27 @@ class HyperscanConan(ConanFile):
         if self.options.build_chimera:
             self.requires("pcre/8.45")
 
+    def validate_build(self):
+        if self.settings_build.arch not in ["x86", "x86_64"]:
+            raise ConanInvalidConfiguration(f"Hyperscan only builds on x86 architectures")
+
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 11)
 
         if self.options.shared and self.options.build_chimera:
-            raise ConanInvalidConfiguration("Chimera build requires static building")
+            raise ConanInvalidConfiguration("Chimera builds requires static building")
 
         if self.settings.arch not in ["x86", "x86_64"]:
-            raise ConanInvalidConfiguration("Hyperscan only support x86 architecture")
+            raise ConanInvalidConfiguration(f"Hyperscan only supports x86 architectures")
 
     def build_requirements(self):
         self.tool_requires("ragel/6.10")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
-
         tc = CMakeToolchain(self)
         if self.options.optimise != "auto":
             tc.variables["OPTIMISE"] = self.options.optimise
@@ -92,13 +90,15 @@ class HyperscanConan(ConanFile):
         tc.variables["BUILD_EXAMPLES"] = False
         if self.options.dump_support != "auto":
             tc.variables["DUMP_SUPPORT"] = self.options.dump_support
+        if Version(self.version) <= "5.4.2":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("pcre", "cmake_target_name", "pcre")
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

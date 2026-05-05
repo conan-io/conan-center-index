@@ -1,5 +1,4 @@
 import os
-import sys
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -51,8 +50,7 @@ class OnnxRuntimeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        required_onnx_version = self.conan_data["onnx_version_map"][self.version]
-        self.requires(f"onnx/{required_onnx_version}")
+        self.requires("onnx/[>=1.20.1 <1.21]")
         self.requires("abseil/[>=20240116.1 <=20260107.1]")
         self.requires("protobuf/[>=3.21.12 <7]")
         self.requires("date/[>=3.0.1 <3.1]")
@@ -102,7 +100,6 @@ class OnnxRuntimeConan(ConanFile):
         tc = CMakeToolchain(self)
         # disable downloading dependencies to ensure conan ones are used
         tc.variables["FETCHCONTENT_FULLY_DISCONNECTED"] = True
-
         tc.variables["onnxruntime_BUILD_SHARED_LIB"] = self.options.shared
         tc.variables["onnxruntime_USE_FULL_PROTOBUF"] = not self.dependencies["protobuf"].options.lite
         tc.variables["onnxruntime_USE_XNNPACK"] = self.options.with_xnnpack

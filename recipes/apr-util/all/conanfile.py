@@ -9,7 +9,7 @@ from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class AprUtilConan(ConanFile):
@@ -115,6 +115,7 @@ class AprUtilConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     @property
     def _with_crypto(self):
@@ -126,6 +127,7 @@ class AprUtilConan(ConanFile):
             tc.variables["INSTALL_PDB"] = False
             tc.variables["APU_HAVE_CRYPTO"] = self._with_crypto
             tc.variables["APR_HAS_LDAP"] = self.options.with_ldap
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
             tc.generate()
             deps = CMakeDeps(self)
             deps.generate()
@@ -164,7 +166,6 @@ class AprUtilConan(ConanFile):
             deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         if self.settings.os == "Windows":
             cmake = CMake(self)
             cmake.configure()

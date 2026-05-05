@@ -1,4 +1,7 @@
 sources:
+  "1.26.0":
+    url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/v1.26.0.tar.gz"
+    sha256: "8a878777a18a013e0ee6604629d1b5f29b162354c14489ad1dccd370f14ac372"
   "1.24.0":
     url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/v1.24.0.tar.gz"
     sha256: "7b8e966affca1daf1906272f4d983631cad85fb6ea60fb6f55dcd1811a730604"

@@ -162,14 +162,14 @@ class LibcurlConan(ConanFile):
     def requirements(self):
         if self.options.with_ssl == "openssl":
             self.requires(f"openssl/[>=3 <4]")
-        if self.settings.os == "Linux" and self.options.with_ldap:
-            self.requires("openldap/[>=2.6 <3]")
         elif self.options.with_ssl == "libressl":
             self.requires("libressl/[>=3.5 <4]")
         elif self.options.with_ssl == "wolfssl":
             self.requires("wolfssl/5.6.6")
         elif self.options.with_ssl == "mbedtls":
             self.requires("mbedtls/3.5.0")
+        if self.settings.os == "Linux" and self.options.with_ldap:
+            self.requires("openldap/[>=2.6 <3]")
         if self.options.with_nghttp2:
             self.requires("libnghttp2/[>=1.59.0 <2]")
         if self.options.with_libssh2:
@@ -220,6 +220,13 @@ class LibcurlConan(ConanFile):
         cert_url = self.conf.get("user.libcurl.cert:url", check_type=str) or "https://curl.se/ca/cacert-2025-11-04.pem"
         cert_sha256 = self.conf.get("user.libcurl.cert:sha256", check_type=str) or "8ac40bdd3d3e151a6b4078d2b2029796e8f843e3f86fbf2adbc4dd9f05e79def"
         download(self, cert_url, "cacert.pem", verify=True, sha256=cert_sha256)
+        replace_in_file(self, "CMakeLists.txt", "find_package(NGHTTP2 MODULE)", "find_package(NGHTTP2 CONFIG REQUIRED)")
+        replace_in_file(self, "CMakeLists.txt", "find_package(Cares MODULE REQUIRED)", "find_package(Cares CONFIG REQUIRED)")
+        replace_in_file(self, os.path.join("CMake", "Macros.cmake"), "find_package(${_find_name})", "find_package(${_find_name} CONFIG REQUIRED)")
+        replace_in_file(self, os.path.join("CMake", "Macros.cmake"), "find_package(${_find_name} MODULE)", "find_package(${_find_name} CONFIG REQUIRED)")
+        replace_in_file(self, os.path.join("CMake", "Macros.cmake"), "find_package(${_find_name} REQUIRED)", "find_package(${_find_name} CONFIG REQUIRED)")
+        replace_in_file(self, os.path.join("CMake", "Macros.cmake"), "find_package(${_find_name} MODULE REQUIRED)", "find_package(${_find_name} CONFIG REQUIRED)")
+
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -713,14 +720,14 @@ class LibcurlConan(ConanFile):
 
         if self.options.with_ssl == "openssl":
             self.cpp_info.components["curl"].requires.append("openssl::openssl")
-        if self.settings.os == "Linux" and self.options.with_ldap:
-            self.cpp_info.components["curl"].requires.append("openldap::openldap")
         if self.options.with_ssl == "libressl":
             self.cpp_info.components["curl"].requires.append("libressl::libressl")
         if self.options.with_ssl == "wolfssl":
             self.cpp_info.components["curl"].requires.append("wolfssl::wolfssl")
         if self.options.with_ssl == "mbedtls":
             self.cpp_info.components["curl"].requires.append("mbedtls::mbedtls")
+        if self.settings.os == "Linux" and self.options.with_ldap:
+            self.cpp_info.components["curl"].requires.append("openldap::openldap")
         if self.options.with_nghttp2:
             self.cpp_info.components["curl"].requires.append("libnghttp2::libnghttp2")
         if self.options.with_libssh2:

@@ -53,7 +53,7 @@ class PackageConan(ConanFile):
             self.requires("libsodium/[~1.0.20]")
         # FIXME: C3I Jenkins does not have protobuf-c static x shared deps for now
         if self.options.enable_streaming:
-            self.requires("protobuf-c/1.4.1")
+            self.requires("protobuf-c/[>=1.4.1 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

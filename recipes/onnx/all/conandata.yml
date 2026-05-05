@@ -1,8 +1,7 @@
 sources:
-  "1.20.0":
-    url: "https://github.com/onnx/onnx/archive/refs/tags/v1.20.0.tar.gz"
-    sha256: "e9e9273cd39d460348aa3e2eb370a444b510e138c5f45dfa86ce50461901257b"
+  "1.20.1":
+    url: "https://github.com/onnx/onnx/archive/refs/tags/v1.20.1.tar.gz"
+    sha256: "9bcd6473c689b1ac3aeba8df572891756e01c1a151ae788df5cbc7a4499e5db5"
 patches:
-  "1.20.0":
+  "1.20.1":
     - patch_file: "patches/cmake-absl-proto-targets.patch"
-    - patch_file: "patches/export-visible-symbols.patch"

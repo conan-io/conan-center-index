@@ -1,0 +1,328 @@
+# Component model for ncbi-cxx-toolkit-public 30.x
+# Each component defines: libraries, dependencies (other components),
+# and external Conan package requirements (using Conan target names).
+components:
+  core:
+    libraries:
+      - xconnext
+      - xxconnect2
+      - xalgovmerge
+      - ncbi_xcache_netcache
+      - ncbi_core
+      - xconnserv
+      - xcompress
+      - xthrserv
+      - xregexp
+      - xser
+      - sequtil
+      - xconnect
+      - xdiff
+      - xqueryparse
+      - xutil
+      - tables
+      - xncbi
+      - zcf
+    dependencies: []
+    requires:
+      - zlib::zlib
+      - bzip2::bzip2
+      - lzo::lzo
+      - zstd::zstd
+      - pcre2::pcre2
+      - libuv::libuv
+      - libnghttp2::libnghttp2
+      - backward-cpp::backward-cpp
+      - libunwind::libunwind
+  algo:
+    libraries:
+      - ncbi_algo
+      - prosplign
+      - xalgoalignsplign
+      - cobalt
+      - proteinkmer
+      - xalgocontig_assembly
+      - xalgoalignutil
+      - xblastformat
+      - phytree_format
+      - xblast
+      - xalgoseqqa
+      - xprimer
+      - xalgognomon
+      - xalgowinmask
+      - xalgoblastdbindex
+      - xalgophytree
+      - xalgoseq
+      - xalgoalignnw
+      - xalgodustmask
+      - xalgosegmask
+      - xid_mapper
+      - xalgotext
+      - composition_adjustment
+      - fastme
+      - utrtprof
+    dependencies: [align-format, sqlitewrapp]
+    requires: []
+  algo-ms:
+    libraries: [ncbi_algo_ms, xomssa, omssa, pepXML]
+    dependencies: [algo]
+    requires: []
+  algo-structure:
+    libraries: [ncbi_algo_structure, xcd_utils, xstruct_util, xstruct_thread, xstruct_dp]
+    dependencies: [algo, objects]
+    requires: []
+  align-format:
+    libraries: [xalntool, ncbi_align_format, align_format]
+    dependencies: [loader-genbank, web]
+    requires: []
+  bamread:
+    libraries: [bamread]
+    dependencies: [objects]
+    requires: []
+  blast:
+    libraries:
+      - xngalign
+      - vdb2blast
+      - igblast
+      - ncbi_blastinput
+      - blastinput
+      - blast_sra_input
+      - xmergetree
+      - xalgoblastdbindex_search
+      - gumbelparams
+    dependencies: [loader-blastdb, algo, sraread]
+    requires: []
+  dbapi:
+    libraries:
+      - sdbapi
+      - dbapi_util_blobstore
+      - ncbi_xdbapi_ftds
+      - ncbi_xdbapi_ftds14
+      - ncbi_dbapi
+      - dbapi
+      - ncbi_dbapi_driver
+      - dbapi_driver
+      - ct_ftds14
+      - tds_ftds14
+    dependencies: [core]
+    requires:
+      - libiconv::libiconv
+  eutils:
+    libraries:
+      - eutils_client
+      - ncbi_eutils
+      - eutils
+      - egquery
+      - ehistory
+      - einfo
+      - elink
+      - epost
+      - esearch
+      - espell
+      - esummary
+      - linkout
+      - uilist
+    dependencies: [objects, xmlwrapp]
+    requires: []
+  grpc:
+    libraries: [grpc_integration]
+    dependencies: [core]
+    requires:
+      - grpc::grpc
+      - protobuf::protobuf
+  image:
+    libraries: [ncbi_image, ximage]
+    dependencies: [core]
+    requires:
+      - libjpeg::libjpeg
+      - libpng::libpng
+      - giflib::giflib
+      - libtiff::libtiff
+  loader-asncache:
+    libraries: [ncbi_xloader_asn_cache, asn_cache, ncbi_xcache_bdb, ncbi_bdb, bdb]
+    dependencies: [seqext]
+    requires:
+      - libdb::libdb
+  loader-bam:
+    libraries: [ncbi_xloader_bam]
+    dependencies: [bamread, seqext]
+    requires: []
+  loader-blastdb:
+    libraries: [ncbi_xloader_blastdb_rmt, ncbi_xloader_blastdb]
+    dependencies: [seqext]
+    requires: []
+  loader-cdd:
+    libraries: [ncbi_xloader_cdd, cdd_access]
+    dependencies: [seqext]
+    requires: []
+  loader-genbank:
+    libraries:
+      - ncbi_xobjsimple
+      - xobjsimple
+      - ncbi_xloader_genbank
+      - ncbi_xreader_cache
+      - ncbi_xreader_gicache
+      - ncbi_xreader_id1
+      - ncbi_xreader_id2
+      - ncbi_xreader_pubseqos
+      - ncbi_xreader_pubseqos2
+      - ncbi_xreader
+      - eMyNCBI_result
+    dependencies: [psg-client, dbapi]
+    requires: []
+  loader-lds2:
+    libraries: [ncbi_xloader_lds2, ncbi_lds2, lds2]
+    dependencies: [seqext, sqlitewrapp]
+    requires: []
+  loader-snp:
+    libraries: [ncbi_xloader_snp, dbsnp_ptis]
+    dependencies: [sraread, grpc]
+    requires: []
+  loader-sra:
+    libraries: [ncbi_xloader_sra, ncbi_xloader_csra]
+    dependencies: [sraread]
+    requires: []
+  loader-wgs:
+    libraries: [ncbi_xloader_vdbgraph, ncbi_xloader_wgs]
+    dependencies: [sraread]
+    requires: []
+  loaders:
+    libraries: [xflatfile, data_loaders_util, ncbi_xloader_patcher]
+    dependencies: [loader-asncache, loader-blastdb, loader-genbank, loader-lds2]
+    requires: []
+  objects:
+    libraries:
+      - searchbyrsid
+      - ncbi_trackmgr
+      - gbproj
+      - trackmgrcli
+      - trackmgr
+      - ncbi_mmdb
+      - ncbimime
+      - cdd
+      - cn3d
+      - mmdb
+      - pcassay2
+      - ncbi_misc
+      - proj
+      - remapcli
+      - remap
+      - pcassay
+      - entrezgene
+      - pcsubstance
+      - entrez2cli
+      - biotree
+      - access
+      - docsum
+      - entrez2
+      - featdef
+      - gbseq
+      - genesbyloc
+      - insdseq
+      - mim
+      - objcoords
+      - objprt
+      - tinyseq
+      - gencoll_client
+      - local_taxon
+      - macro
+      - homologene
+      - ncbi_seq
+      - blastdb
+      - xnetblastcli
+      - xnetblast
+      - scoremat
+      - seqedit
+      - submit
+      - genome_collection
+      - seqtest
+      - taxon1
+      - taxon3
+      - variation
+      - seqset
+      - seq
+      - blastxml
+      - blastxml2
+      - seqcode
+      - efetch
+      - ncbi_pub
+      - pub
+      - pubmed
+      - medlars
+      - medline
+      - biblio
+      - ncbi_general
+      - generalasn
+    dependencies: [sqlitewrapp, core]
+    requires: []
+  psg-client:
+    libraries: [psg_client]
+    dependencies: [seqext]
+    requires: []
+  psg-server:
+    libraries: [psg_cache, psg_ipg, psg_myncbi, psg_cassandra, psg_protobuf]
+    dependencies: [objects, xmlwrapp]
+    requires:
+      - lmdb::lmdb
+      - libcurl::libcurl
+      - cassandra-cpp-driver::cassandra-cpp-driver
+      - grpc::grpc
+      - protobuf::protobuf
+  seqext:
+    libraries:
+      - ncbi_validator
+      - xvalidate
+      - ncbi_xdiscrepancy
+      - xdiscrepancy
+      - ncbi_seqext
+      - xobjwrite
+      - xformat
+      - blastdb_format
+      - writedb
+      - seqmasks_io
+      - xcleanup
+      - blast_services
+      - seqdb
+      - variation_utils
+      - xalnmgr
+      - xobjedit
+      - xobjreadex
+      - xobjimport
+      - xunittestutil
+      - id2cli
+      - id2_split
+      - snputil
+      - uudutil
+      - xhugeasn
+      - xobjutil
+      - xobjread
+      - id2
+      - id1cli
+      - xobjmgr
+      - id1
+      - seqsplit
+      - valerr
+      - xobjmanip
+      - valid
+      - xlogging
+    dependencies: [eutils, objects]
+    requires:
+      - lmdb::lmdb
+  sqlitewrapp:
+    libraries: [sqlitewrapp]
+    dependencies: [core]
+    requires:
+      - sqlite3::sqlite3
+  sraread:
+    libraries: [srareadx, sraread]
+    dependencies: [seqext]
+    requires: []
+  xmlwrapp:
+    libraries: [xmlreaders, xmlwrapp]
+    dependencies: [core]
+    requires:
+      - libxml2::libxml2
+      - libxslt::libxslt
+  web:
+    libraries: [xsoap_server, xsoap, ncbi_web, xcgi_redirect, xcgi, xhtml]
+    dependencies: [core]
+    requires: []
