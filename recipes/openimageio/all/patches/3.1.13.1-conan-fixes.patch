@@ -1,8 +1,8 @@
 diff --git CMakeLists.txt CMakeLists.txt
-index 4e9f4e7e4..c44cb8573 100644
+index 81565b47a..8df414e47 100644
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -287,7 +287,7 @@ if (OIIO_BUILD_TOOLS AND NOT BUILD_OIIOUTIL_ONLY)
+@@ -293,7 +293,7 @@ if (OIIO_BUILD_TOOLS AND NOT BUILD_OIIOUTIL_ONLY)
      add_subdirectory (src/iinfo)
      add_subdirectory (src/maketx)
      add_subdirectory (src/oiiotool)
