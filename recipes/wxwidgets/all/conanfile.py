@@ -101,7 +101,7 @@ class wxWidgetsConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("ninja/[>=1.10.2 <2]")
         self.tool_requires("cmake/[>=3.17 <4]")
-        self.tool_requires("gettext/0.26")
+        self.tool_requires("gettext/[>=0.22 <1]")
 
     def requirements(self):
         if self.settings.os == "Linux":
@@ -157,6 +157,7 @@ class wxWidgetsConan(ConanFile):
         tc.cache_variables["wxBUILD_SAMPLES"] = "OFF"
         tc.cache_variables["wxBUILD_TESTS"] = "OFF"
         tc.cache_variables["wxBUILD_DEMOS"] = "OFF"
+        tc.cache_variables["wxBUILD_LOCALES"] = "ON"
         tc.cache_variables["wxBUILD_INSTALL"] = True
         if self.settings.compiler == "clang":
             tc.cache_variables["wxBUILD_PRECOMP"] = "OFF"
@@ -258,7 +259,7 @@ class wxWidgetsConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         # remove cmake files
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        # rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         # copy setup.h
         copy(self, pattern="*setup.h",
              src=os.path.join(self.build_folder, "lib"),
