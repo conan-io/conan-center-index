@@ -289,6 +289,7 @@ class wxWidgetsConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "wxWidgets")
         self.cpp_info.set_property("cmake_target_name", "wxWidgets::wxWidgets")
         self.cpp_info.set_property("pkg_config_name", "wxwidgets")
+        self.conf_info.define("user.wxwidgets:locales", os.path.join(self.package_folder, "share", "locale"))
 
         _version = Version(self.version)
         version_suffix_major_minor = f"-{_version.major}.{_version.minor}"
