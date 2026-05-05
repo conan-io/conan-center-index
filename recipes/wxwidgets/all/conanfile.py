@@ -259,7 +259,7 @@ class wxWidgetsConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         # remove cmake files
-        # rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         # copy setup.h
         copy(self, pattern="*setup.h",
              src=os.path.join(self.build_folder, "lib"),
