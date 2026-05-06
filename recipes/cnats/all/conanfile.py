@@ -90,10 +90,10 @@ class PackageConan(ConanFile):
     def package_info(self):
         suffix = "" if self.options.shared else "_static"
         lib_name = f"nats{suffix}"
-        debug = ""
-        if self.settings.build_type == "Debug":
-            debug = "d"
-            # Backward compatible with users using targets with debug suffix
+        debug = "d" if self.settings.build_type == "Debug" else ""
+        if f"cnats::{lib_name}{debug}" != "cnats::{lib_name}":
+            # older versions of cnats have cmake targets with debug suffix in the name
+            # kept for backwards compatibility, remove in future version
             self.cpp_info.set_property("cmake_target_aliases", [f"cnats::{lib_name}{debug}"])
         self.cpp_info.libs = [f"{lib_name}{debug}"]
         self.cpp_info.set_property("cmake_file_name", "cnats")
