@@ -120,28 +120,28 @@ class LeptonicaConan(ConanFile):
         ## zlib
         replace_in_file(self, cmakelists_src, "${ZLIB_LIBRARIES}", "ZLIB::ZLIB")
         if not self.options.with_zlib:
-            replace_in_file(self, cmakelists_src, "if (ZLIB_LIBRARIES)", "if(0)")
-            replace_in_file(self, cmake_configure, "if (ZLIB_FOUND)", "if(0)")
+            replace_in_file(self, cmakelists_src, "(ZLIB_LIBRARIES)", "(0)")
+            replace_in_file(self, cmake_configure, "(ZLIB_FOUND)", "(0)")
         ## giflib
         replace_in_file(self, cmakelists_src, "${GIF_LIBRARIES}", "GIF::GIF")
         if not self.options.with_gif:
-            replace_in_file(self, cmakelists_src, "if (GIF_LIBRARIES)", "if(0)")
-            replace_in_file(self, cmake_configure, "if (GIF_FOUND)", "if(0)")
+            replace_in_file(self, cmakelists_src, "(GIF_LIBRARIES)", "(0)")
+            replace_in_file(self, cmake_configure, "(GIF_FOUND)", "(0)")
         ## libjpeg
         replace_in_file(self, cmakelists_src, "${JPEG_LIBRARIES}", "JPEG::JPEG")
         if not self.options.with_jpeg:
-            replace_in_file(self, cmakelists_src, "if (JPEG_LIBRARIES)", "if(0)")
-            replace_in_file(self, cmake_configure, "if (JPEG_FOUND)", "if(0)")
+            replace_in_file(self, cmakelists_src, "(JPEG_LIBRARIES)", "(0)")
+            replace_in_file(self, cmake_configure, "(JPEG_FOUND)", "(0)")
         ## libpng
         replace_in_file(self, cmakelists_src, "${PNG_LIBRARIES}", "PNG::PNG")
         if not self.options.with_png:
-            replace_in_file(self, cmakelists_src, "if (PNG_LIBRARIES)", "if(0)")
-            replace_in_file(self, cmake_configure, "if (PNG_FOUND)", "if(0)")
+            replace_in_file(self, cmakelists_src, "(PNG_LIBRARIES)", "(0)")
+            replace_in_file(self, cmake_configure, "(PNG_FOUND)", "(0)")
         ## libtiff
         replace_in_file(self, cmakelists_src, "${TIFF_LIBRARIES}", "TIFF::TIFF")
         if not self.options.with_tiff:
-            replace_in_file(self, cmakelists_src, "if (TIFF_LIBRARIES)", "if(0)")
-            replace_in_file(self, cmake_configure, "if (TIFF_FOUND)", "if(0)")
+            replace_in_file(self, cmakelists_src, "(TIFF_LIBRARIES)", "(0)")
+            replace_in_file(self, cmake_configure, "(TIFF_FOUND)", "(0)")
 
         # Remove detection of fmemopen() on macOS < 10.13
         # CheckFunctionExists will find it in the link library.
