@@ -96,7 +96,7 @@ class WtConan(ConanFile):
         return ["program_options", "filesystem", "thread"]
 
     def requirements(self):
-        self.requires("boost/[>=1.83.0 <1.87.0]", transitive_headers = True)
+        self.requires("boost/[>=1.83.0 <=1.91.0]", transitive_headers = True)
         if self.options.connector_http:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_ssl:
@@ -296,7 +296,7 @@ class WtConan(ConanFile):
             self.cpp_info.components["wtmain"].system_libs = ["ws2_32", "mswsock", "winmm"]
             self.cpp_info.components["wtmain"].system_libs.extend(["dwrite", "d2d1", "shlwapi"])
         self.cpp_info.components["wtmain"].requires = ["boost::chrono", "boost::filesystem", "boost::thread",
-                                                       "boost::container", "boost::date_time", "boost::atomic", "boost::system"]
+                                                       "boost::container", "boost::date_time", "boost::atomic"]
         if self.options.with_ssl:
             self.cpp_info.components["wtmain"].requires.append("openssl::openssl")
         if self.options.get_safe("with_unwind"):
