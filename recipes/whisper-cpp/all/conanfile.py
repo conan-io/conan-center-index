@@ -38,6 +38,7 @@ class WhisperCppConan(ConanFile):
         "with_blas": [True, False],
         "with_openvino": [True, False],
         "with_cuda": [True, False],
+        "with_vulkan": [True, False],
     }
     default_options = {
         "shared": False,
@@ -57,6 +58,7 @@ class WhisperCppConan(ConanFile):
         "with_blas": False,
         "with_openvino": False,
         "with_cuda": False,
+        "with_vulkan": False,
     }
     package_type = "library"
 
@@ -127,6 +129,15 @@ class WhisperCppConan(ConanFile):
                 self.requires("openblas/0.3.24")
         if self.options.get_safe("with_openvino"):
             self.requires("openvino/2023.2.0")
+        if self.options.get_safe("with_vulkan"):
+            self.requires("vulkan-loader/1.4.313.0")
+
+
+    def build_requirements(self):
+        # Benötigt für die Shader-Kompilierung und aktuelle CMake-Features
+        self.tool_requires("cmake/[>=3.23]")
+        if self.options.get_safe("with_vulkan"):
+            self.tool_requires("shaderc/2025.3")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -162,6 +173,17 @@ class WhisperCppConan(ConanFile):
             tc.variables["WHISPER_NO_FMA"] = True
         if self.options.no_f16c:
             tc.variables["WHISPER_NO_F16C"] = True
+
+
+
+        if self.options.get_safe("with_vulkan"):
+            tc.variables["GGML_VULKAN"] = True
+            tc.variables["GGML_VULKAN_SHADERC"] = True
+
+            #Search the path to glslc within the shaderc-package manually, because its often not found otherwise
+            shaderc_bin_path = os.path.join(self.dependencies.build["shaderc"].cpp_info.bindir, "glslc")
+            tc.variables["Vulkan_GLSLC_EXECUTABLE"] = shaderc_bin_path
+
 
         # TODO: Implement OpenMP support
         tc.variables["GGML_OPENMP"] = False
@@ -208,10 +230,21 @@ class WhisperCppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["whisper"]
+
+
         self.cpp_info.libs.extend(["ggml", "ggml-base", "ggml-cpu"])
+
+
+        if self.options.get_safe("with_vulkan"):
+            self.cpp_info.libs.append("ggml-vulkan")
+            self.cpp_info.requires.append("vulkan-loader::vulkan-loader")
+            self.cpp_info.defines.append("GGML_USE_VULKAN")
+
+
         if self.options.get_safe("with_cuda"):
             self.cpp_info.libs.append("ggml-cuda")
         self.cpp_info.resdirs = ["res"]
+
 
         if self.options.get_safe("with_blas"):
             self.cpp_info.libs.extend(["ggml-blas"])
