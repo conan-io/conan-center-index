@@ -88,9 +88,9 @@ class ZeroMQConan(ConanFile):
         tc.variables["ENABLE_DRAFTS"] = self.options.with_draft_api
         tc.variables["ENABLE_WS"] = self.options.with_websocket
         tc.variables["ENABLE_RADIX_TREE"] = self.options.with_radix_tree
-        tc.variables["WITH_LIBBSD"] = False
-        tc.variables["WITH_TLS"] = self.options.with_tls
-        tc.variables["CMAKE_REQUIRE_FIND_PACKAGE_GnuTLS"] = self.options.with_tls
+        tc.cache_variables["WITH_LIBBSD"] = False
+        tc.cache_variables["WITH_TLS"] = self.options.with_tls
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_GnuTLS"] = self.options.with_tls
         if self.options.poller:
             tc.variables["POLLER"] = self.options.poller
         if is_msvc(self):
