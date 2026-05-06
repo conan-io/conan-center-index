@@ -198,6 +198,15 @@ class SqlcipherConan(ConanFile):
         if self.options.shared and is_apple_os(self):
             # INFO: changing install names or rpaths can't be redone for bin/sqlite3 because larger updated load commands do not fit
             tc.extra_ldflags.append("-headerpad_max_install_names")
+        if is_apple_os(self) and self.settings.compiler == "apple-clang" and Version(self.version) >= "4.7.0":
+            # Sqlcipher migrated to autosetup which diverges from autoconf when falling back to compiler when not finding the triplet
+            # https://github.com/sqlcipher/sqlcipher/releases/tag/v4.7.0
+            # Proposed fix for autoconf fallback behavior was rejected:
+            # - https://github.com/sqlcipher/sqlcipher/pull/594
+            # - https://github.com/msteveb/autosetup/issues/84
+            # As Apple is not a cross-compiler, we can just remove the --host arg to use the defaut compiler
+            # https://msteveb.github.io/autosetup/user/crosscompiling/
+            tc.update_configure_args({"--host": None})
         tc.generate()
 
         deps = AutotoolsDeps(self)

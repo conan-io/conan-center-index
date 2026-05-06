@@ -8,7 +8,6 @@ sources:
 patches:
   "4.14.0":
     - patch_file: patches/autoconf-Makefile.in-v4.14.0.patch
-    - patch_file: patches/cc.tcl-cross-compile-fallback-v4.14.0.patch
     - patch_file: patches/main.mk-v4.14.0.patch
     - patch_file: patches/Makefile.msc-v4.14.0.patch
     - patch_file: patches/sqlite-config.tcl-v4.14.0.patch
