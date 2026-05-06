@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeConfigDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 import os
 
@@ -72,34 +72,44 @@ class SDLMixerConan(ConanFile):
         tc.cache_variables["SDLMIXER_DEPS_SHARED"] = False
         tc.cache_variables["SDLMIXER_STRICT"] = True
         tc.cache_variables["SDLMIXER_TESTS"] = False
-        tc.cache_variables["SDLMIXER_EXAMPLES"] = False
+        tc.cache_variables["SDLMIXER_EXAMPLES"] = True
+
         wf = self.options.with_flac
         tc.cache_variables["SDLMIXER_FLAC"] = wf is not False
         tc.cache_variables["SDLMIXER_FLAC_LIBFLAC"] = wf == "flac"
         tc.cache_variables["SDLMIXER_FLAC_DRFLAC"] = wf == "drflac"
+        tc.cache_variables["SDLMIXER_FLAC_LIBFLAC_SHARED"] = self.dependencies["flac"].options.shared if wf == "flac" else False
         tc.cache_variables["SDLMIXER_GME"] = False
         tc.cache_variables["SDLMIXER_MOD"] = False
         tc.cache_variables["SDLMIXER_MP3"] = True
         tc.cache_variables["SDLMIXER_MP3_MPG123"] = self.options.with_mpg123
+        tc.cache_variables["SDLMIXER_MP3_MPG123_SHARED"] = self.dependencies["mpg123"].options.shared if self.options.with_mpg123 else False
         tc.cache_variables["SDLMIXER_MP3_DRMP3"] = True
         tc.cache_variables["SDLMIXER_MIDI"] = False
         tc.cache_variables["SDLMIXER_OPUS"] = self.options.with_opus
+        tc.cache_variables["SDLMIXER_OPUS_SHARED"] = self.dependencies["opusfile"].options.shared if self.options.with_opus else False
         vorbis = self.options.with_vorbis
         tc.cache_variables["SDLMIXER_VORBIS_STB"] = vorbis == "stb"
         tc.cache_variables["SDLMIXER_VORBIS_VORBISFILE"] = vorbis == "vorbisfile"
+        tc.cache_variables["SDLMIXER_VORBIS_VORBISFILE_SHARED"] = (
+            self.dependencies["vorbis"].options.shared if vorbis == "vorbisfile" else False
+        )
         tc.cache_variables["SDLMIXER_VORBIS_TREMOR"] = False
+        tc.cache_variables["SDLMIXER_VORBIS_TREMOR_SHARED"] = False
         tc.cache_variables["SDLMIXER_WAVPACK"] = False
         tc.generate()
-        deps = CMakeDeps(self)
+        deps = CMakeConfigDeps(self)
         if self.options.with_opus:
             deps.set_property("opusfile", "cmake_file_name", "OpusFile")
-            deps.set_property("opusfile", "cmake_target_name", "OpusFile::opusfile")
+            deps.set_property("opusfile::libopusfile", "cmake_target_name", "OpusFile::opusfile")
         if self.options.with_vorbis == "vorbisfile":
             deps.set_property("vorbis", "cmake_file_name", "Vorbis")
             deps.set_property("vorbis::vorbisfile", "cmake_target_name", "Vorbis::vorbisfile")
         if self.options.with_mpg123:
             deps.set_property("mpg123", "cmake_file_name", "mpg123")
             deps.set_property("mpg123", "cmake_target_name", "MPG123::libmpg123")
+        if self.options.shared:
+            deps.set_property("sdl", "cmake_components", ["Headers", "SDL3-shared"])
         deps.generate()
 
     def build(self):
