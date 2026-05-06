@@ -20,10 +20,10 @@ Reviewed-by: Fabian Kosmale <fabian.kosmale@qt.io>
 (cherry picked from commit a76004f16fdc43e1b7af83bfdf3f1a613491b234)
 ---
 
-diff --git a/qtbase/src/corelib/thread/qyieldcpu.h b/qtbase/src/corelib/thread/qyieldcpu.h
+diff --git a/src/corelib/thread/qyieldcpu.h b/src/corelib/thread/qyieldcpu.h
 index c30374f00..c1c85dea5 100644
---- a/qtbase/src/corelib/thread/qyieldcpu.h
-+++ b/qtbase/src/corelib/thread/qyieldcpu.h
+--- a/src/corelib/thread/qyieldcpu.h
++++ b/src/corelib/thread/qyieldcpu.h
 @@ -31,7 +31,9 @@ void qYieldCpu(void)
      noexcept
  #endif
