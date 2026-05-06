@@ -38,15 +38,9 @@ class CapstoneConan(ConanFile):
     implements = ["auto_shared_fpic"]
     languages = "C"
 
-    _archs = ["arm", "arm64", "aarch64", "m68k", "mips", "ppc", "sparc", "sysz", "xcore", "x86", "tms320c64x", "m680x", "evm"]
+    _archs = ["arm", "arm64", "m68k", "mips", "ppc", "sparc", "sysz", "xcore", "x86", "tms320c64x", "m680x", "evm"]
     options.update({a: [True, False] for a in _archs})
     default_options.update({a: True for a in _archs})
-
-    def config_options(self):
-        if str(self.version).startswith("5."):
-            del self.options.aarch64
-        else:
-            del self.options.arm64
         
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -66,6 +60,8 @@ class CapstoneConan(ConanFile):
         tc.cache_variables["CAPSTONE_USE_DEFAULT_ALLOC"] = self.options.use_default_alloc
         for a in self._archs:
             tc.cache_variables[f"CAPSTONE_{a.upper()}_SUPPORT"] = self.options.get_safe(a)
+        # Newer versions have aarch64 naming for arm64
+        tc.cache_variables["CAPSTONE_AARCH64_SUPPORT"] = self.options.get_safe("arm64")
 
         tc.generate()
 
