@@ -61,7 +61,7 @@ class ZeroMQConan(ConanFile):
         if self.options.with_norm:
             self.requires("norm/1.5.9")
         if self.options.with_tls:
-            self.requires("gnutls/3.8.7")
+            self.requires("gnutls/[>=3.8.7 <4]")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.with_norm:
