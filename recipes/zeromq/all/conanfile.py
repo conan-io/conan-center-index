@@ -26,9 +26,8 @@ class ZeroMQConan(ConanFile):
         "poller": [None, "kqueue", "epoll", "devpoll", "pollset", "poll", "select"],
         "with_draft_api": [True, False],
         "with_websocket": [True, False],
-        "with_tls": [True, False],
         "with_radix_tree": [True, False],
-        "with_libbsd": [True, False]
+        "with_tls": [True, False],
     }
     default_options = {
         "shared": False,
@@ -40,7 +39,6 @@ class ZeroMQConan(ConanFile):
         "with_websocket": False,
         "with_tls": False,
         "with_radix_tree": False,
-        "with_libbsd": True
     }
 
     def export_sources(self):
@@ -70,10 +68,6 @@ class ZeroMQConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Norm and ZeroMQ are not compatible on Windows yet"
             )
-        if self.settings.os == "Windows" and self.options.with_libbsd:
-            raise ConanInvalidConfiguration(
-                "libbsd cannot be used on Windows yet"
-            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -92,7 +86,7 @@ class ZeroMQConan(ConanFile):
         tc.variables["WITH_DOC"] = False
         tc.variables["WITH_NORM"] = self.options.with_norm
         tc.variables["ENABLE_DRAFTS"] = self.options.with_draft_api
-        tc.variables["ENABLE_WS"] = self.options.with_websocket != False
+        tc.variables["ENABLE_WS"] = self.options.with_websocket
         tc.variables["ENABLE_RADIX_TREE"] = self.options.with_radix_tree
         tc.variables["WITH_LIBBSD"] = False
         tc.variables["WITH_TLS"] = self.options.with_tls
