@@ -24,16 +24,20 @@ class NloptConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_cxx_routines": [True, False],
+        "enable_luksan": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_cxx_routines": True,
+        "enable_luksan": True,
     }
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "2.9.0":
+            del self.options.enable_luksan
 
     def configure(self):
         if self.options.shared:
@@ -41,9 +45,15 @@ class NloptConan(ConanFile):
         if not self.options.enable_cxx_routines:
             self.settings.rm_safe("compiler.cppstd")
             self.settings.rm_safe("compiler.libcxx")
+        if not self.options.get_safe("enable_luksan", True):
+            self.license = "MIT"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def build_requirements(self):
+        if Version(self.version) >= "2.10.1":
+            self.tool_requires("cmake/[>=3.18]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -56,7 +66,11 @@ class NloptConan(ConanFile):
         tc.variables["NLOPT_OCTAVE"] = False
         tc.variables["NLOPT_MATLAB"] = False
         tc.variables["NLOPT_GUILE"] = False
+        if Version(self.version) >= "2.10.0":
+            tc.variables["NLOPT_JAVA"] = False
         tc.variables["NLOPT_SWIG"] = False
+        if Version(self.version) >= "2.9.0":
+            tc.variables["NLOPT_LUKSAN"] = self.options.enable_luksan
         tc.variables["NLOPT_TESTS"] = False
         tc.variables["WITH_THREADLOCAL"] = True
         tc.generate()
@@ -82,11 +96,12 @@ class NloptConan(ConanFile):
             {"subdir": "cobyla", "license_name": "COPYRIGHT"},
             {"subdir": "direct", "license_name": "COPYING"  },
             {"subdir": "esch"  , "license_name": "COPYRIGHT"},
-            {"subdir": "luskan", "license_name": "COPYRIGHT"},
             {"subdir": "newuoa", "license_name": "COPYRIGHT"},
             {"subdir": "slsqp" , "license_name": "COPYRIGHT"},
             {"subdir": "stogo" , "license_name": "COPYRIGHT"},
         ]
+        if self.options.get_safe("enable_luksan", True):
+            algs_licenses.append({"subdir": "luksan", "license_name": "COPYRIGHT"})
         for alg_license in algs_licenses:
             copy(self, alg_license["license_name"],
                       src=os.path.join(self.source_folder, "src", "algs", alg_license["subdir"]),
