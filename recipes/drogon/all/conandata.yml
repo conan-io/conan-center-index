@@ -1,4 +1,4 @@
 sources:
-  "1.9.12":
-    url: "https://github.com/drogonframework/drogon/archive/v1.9.12.tar.gz"
-    sha256: "becc3c4f3b90f069f814baef164a7e3a2b31476dc6fe249b02ff07a13d032f48"
+  "1.9.13":
+    url: "https://github.com/drogonframework/drogon/archive/v1.9.13.tar.gz"
+    sha256: "c3bd0e276b82576151dc7376c8d4027dd1fcec282d784849e11f84a7e977b2f5"
