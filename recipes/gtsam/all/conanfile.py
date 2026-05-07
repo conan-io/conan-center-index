@@ -262,7 +262,7 @@ class GtsamConan(ConanFile):
             # Fix HandleMetis.cmake incompatibility with METIS from Conan
             save(self, os.path.join(self.source_folder, "cmake", "HandleMetis.cmake"),
                  "find_package(metis REQUIRED CONFIG)\n")
-
+        replace_in_file(self, handle_tbb_path, "find_package(TBB 4.4 ", "find_package(TBB ")
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
