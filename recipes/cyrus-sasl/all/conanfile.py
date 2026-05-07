@@ -104,10 +104,6 @@ class CyrusSaslConan(ConanFile):
     def validate(self):
         if is_msvc(self) and not self.options.shared:
             raise ConanInvalidConfiguration("Static library output is not supported when building with MSVC")
-        if self.options.with_gssapi:
-            raise ConanInvalidConfiguration(
-                f"{self.name}:with_gssapi=True requires krb5 recipe, not yet available in conan-center",
-            )
 
     def build_requirements(self):
         if not is_msvc(self):
