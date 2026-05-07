@@ -48,7 +48,6 @@ class LibcurlConan(ConanFile):
         "with_mqtt": [True, False],
         "with_libssh2": [True, False],
         "with_libidn": [True, False],
-        "with_librtmp": [True, False],
         "with_libgsasl": [True, False],
         "with_libpsl": [True, False],
         "with_largemaxwritesize": [True, False],
@@ -61,7 +60,6 @@ class LibcurlConan(ConanFile):
         "with_proxy": [True, False],
         "with_crypto_auth": [True, False],
         "with_ntlm": [True, False],
-        "with_ntlm_wb": [True, False],
         "with_cookies": [True, False],
         "with_ipv6": [True, False],
         "with_docs": [True, False],
@@ -97,7 +95,6 @@ class LibcurlConan(ConanFile):
         "with_tftp": True,
         "with_libssh2": False,
         "with_libidn": False,
-        "with_librtmp": False,
         "with_libgsasl": False,
         "with_libpsl": False,
         "with_largemaxwritesize": False,
@@ -109,8 +106,7 @@ class LibcurlConan(ConanFile):
         "with_threaded_resolver": True,
         "with_proxy": True,
         "with_crypto_auth": True,
-        "with_ntlm": True,
-        "with_ntlm_wb": True,
+        "with_ntlm": False,
         "with_cookies": True,
         "with_ipv6": True,
         "with_docs": False,
@@ -330,7 +326,6 @@ class LibcurlConan(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
             f"--with-libidn2={self._yes_no(self.options.with_libidn)}",
-            f"--with-librtmp={self._yes_no(self.options.with_librtmp)}",
             f"--with-libpsl={self._yes_no(self.options.with_libpsl)}",
             f"--with-libgsasl={self._yes_no(self.options.with_libgsasl)}",
             f"--with-schannel={self._yes_no(self.options.with_ssl == 'schannel')}",
@@ -360,6 +355,7 @@ class LibcurlConan(ConanFile):
             f"--enable-verbose={self._yes_no(self.options.with_verbose_debug)}",
             f"--enable-symbol-hiding={self._yes_no(self.options.with_symbol_hiding)}",
             f"--enable-unix-sockets={self._yes_no(self.options.get_safe('with_unix_sockets'))}",
+            f"--enable-ntlm={self._yes_no(self.options.with_ntlm)}",
             f"--with-zstd={self._yes_no(self.options.with_zstd)}",
         ])
 
@@ -414,13 +410,6 @@ class LibcurlConan(ConanFile):
 
         if not self.options.with_crypto_auth:
             tc.configure_args.append("--disable-crypto-auth") # also disables NTLM in versions of curl prior to 7.78.0
-
-        # ntlm will default to enabled if any SSL options are enabled
-        if not self.options.with_ntlm:
-            tc.configure_args.append("--disable-ntlm")
-
-        if not self.options.with_ntlm_wb:
-            tc.configure_args.append("--disable-ntlm-wb")
 
         if not self.options.with_ca_bundle:
             tc.configure_args.append("--without-ca-bundle")
@@ -543,7 +532,6 @@ class LibcurlConan(ConanFile):
         if not self.options.with_c_ares:
             tc.variables["ENABLE_THREADED_RESOLVER"] = self.options.with_threaded_resolver
         tc.variables["CURL_DISABLE_PROXY"] = not self.options.with_proxy
-        tc.variables["USE_LIBRTMP"] = self.options.with_librtmp
         tc.variables["USE_LIBIDN2"] = self.options.with_libidn
         if self.options.with_libidn:
             # Conan won't generate this variable as we're setting prefixes,
@@ -561,9 +549,7 @@ class LibcurlConan(ConanFile):
             tc.variables["CURL_DISABLE_WEBSOCKETS"] = not self.options.with_websockets
 
         # Also disables NTLM_WB if set to false
-        if not self.options.with_ntlm:
-            tc.variables["CURL_DISABLE_NTLM"] = True
-        tc.variables["NTLM_WB_ENABLED"] = self.options.with_ntlm_wb
+        tc.variables["CURL_ENABLE_NTLM"] = self.options.with_ntlm
 
         if self.options.with_ca_bundle:
             tc.cache_variables["CURL_CA_BUNDLE"] = str(self.options.with_ca_bundle)
@@ -669,8 +655,6 @@ class LibcurlConan(ConanFile):
         else:
             self.cpp_info.components["curl"].libs = ["curl"]
             if self.settings.os in ["Linux", "FreeBSD"]:
-                if self.options.with_librtmp:
-                    self.cpp_info.components["curl"].libs.append("rtmp")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["curl"].system_libs = ["rt", "pthread"]
