@@ -47,7 +47,7 @@ class KcpConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=4 <5]")
+        self.tool_requires("cmake/[>=4]")
 
     def generate(self):
         tc = CMakeToolchain(self)
