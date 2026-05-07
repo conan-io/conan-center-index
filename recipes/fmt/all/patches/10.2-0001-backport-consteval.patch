@@ -1,3 +1,9 @@
+Backport to fix Apple Clang + C++20 build errors:
+os.cc:215:29: error: call to consteval function 'fmt::basic_format_string<char, const char *>::basic_format_string<FMT_COMPILE_STRING, 0>' is not a constant expression
+
+Extracted from https://github.com/fmtlib/fmt/commit/6797f0c39a4ef13061cbc3bb850c35af7428fdc4
+Related to https://github.com/fmtlib/fmt/issues/4177 and https://github.com/fmtlib/fmt/issues/4740
+
 --- a/include/fmt/core.h
 +++ b/include/fmt/core.h
 @@ -2783,7 +2783,7 @@ class basic_format_string {
