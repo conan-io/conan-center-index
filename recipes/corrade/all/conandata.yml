@@ -1,4 +1,7 @@
 sources:
+  "2020.06.0.cci.20260327":
+    sha256: d8f30e9a857172003b6b02304783f40e8038c36e4127a0cfec7fe14f41c13fd4
+    url: https://github.com/mosra/corrade/archive/22e7ffc6fcdeaa0df96e0d8b3d482ad6abe7dc36.tar.gz
   "2020.06":
     sha256: 2a62492ccc717422b72f2596a3e1a6a105b9574aa9467917f12d19ef3aab1341
     url: https://github.com/mosra/corrade/archive/v2020.06.tar.gz
