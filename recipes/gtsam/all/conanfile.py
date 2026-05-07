@@ -230,6 +230,10 @@ class GtsamConan(ConanFile):
         if self.options.support_nested_dissection:
             deps.set_property("metis", "cmake_target_name", "metis-gtsam-if")
 
+        if self.options.with_TBB:
+            deps.set_property("onetbb::libtbb", "cmake_target_name", "tbb")
+            deps.set_property("onetbb::tbbmalloc", "cmake_target_name", "tbbmalloc")
+
         deps.generate()
 
     def _patch_sources(self):
