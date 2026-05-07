@@ -66,3 +66,9 @@ class OpenclHeadersConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "OpenCL-Headers")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "OpenCLHeaders"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCLHeaders"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
