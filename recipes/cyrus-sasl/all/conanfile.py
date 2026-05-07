@@ -53,7 +53,7 @@ class CyrusSaslConan(ConanFile):
         "with_scram": True,
         "with_otp": True,
         "with_krb4": True,
-        "with_gssapi": True,
+        "with_gssapi": False,
         "with_plain": True,
         "with_anon": True,
         "with_postgresql": False,
