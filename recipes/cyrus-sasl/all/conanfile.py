@@ -8,8 +8,9 @@ from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path, is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild
 import os
+from pathlib import Path
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class CyrusSaslConan(ConanFile):
@@ -63,10 +64,6 @@ class CyrusSaslConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -146,7 +143,7 @@ class CyrusSaslConan(ConanFile):
             "--with-mysql={}".format(rootpath_no(self.options.with_mysql, "libmysqlclient")),
             "--without-sqlite",
             "--with-sqlite3={}".format(rootpath_no(self.options.with_sqlite3, "sqlite3")),
-            "--with-saslauthd={}".format(yes_no(self.options.with_saslauthd)),
+            "--with-saslauthd={}".format(yes_no(self.options.get_safe("with_saslauthd"))),
         ])
         if self.options.with_gssapi:
             tc.configure_args.append("--with-gss_impl=mit")
@@ -187,24 +184,26 @@ class CyrusSaslConan(ConanFile):
         deps.generate()
 
     def _patch_sources_msvc(self):
-        # TODO: to remove once https://github.com/conan-io/conan/pull/12817 available in conan client
-        platform_toolset = MSBuildToolchain(self).toolset
-        import_conan_generators = ""
-        for props_file in ["conantoolchain.props", "conandeps.props"]:
-            props_path = os.path.join(self.generators_folder, props_file)
-            if os.path.exists(props_path):
-                import_conan_generators += f"<Import Project=\"{props_path}\" />"
-        for vcxproj_file in self.source_path.joinpath("win32").glob("*.vcxproj"):
+        conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
+        conandeps_props = os.path.join(self.generators_folder, "conandeps.props")
+        for vcxproj_file in Path(self.source_folder).joinpath("win32").glob("*.vcxproj"):
+            replace_in_file(
+                self, vcxproj_file,
+                """<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.props" />""",
+                f"""<Import Project="{conantoolchain_props}" /><Import Project="$(VCTargetsPath)\\Microsoft.Cpp.props" />""",
+            )
             replace_in_file(self, vcxproj_file,
-                            "<PlatformToolset>v140</PlatformToolset>",
-                            f"<PlatformToolset>{platform_toolset}</PlatformToolset>")
+                '<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.targets" />',
+                f'<Import Project="{conandeps_props}" /><Import Project="$(VCTargetsPath)\\Microsoft.Cpp.targets" />')
             replace_in_file(self, vcxproj_file, "<WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>", "")
-            if props_path:
-                replace_in_file(self, vcxproj_file,
-                                '<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.targets" />',
-                                f'{import_conan_generators}<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.targets" />')
+            if self.settings.arch == "armv8":
+                replace_in_file(self, vcxproj_file, "x64", "ARM64")
+
+        for solution_file in Path(self.source_folder).joinpath("win32").glob("*.sln"):
+            if self.settings.arch == "armv8":
+                replace_in_file(self, solution_file, "x64", "ARM64")
         replace_in_file(self, os.path.join(self.source_folder, "win32", "openssl.props"),
-                        "libeay32.lib;", "")
+                    "libeay32.lib;", "")
         # https://github.com/cyrusimap/cyrus-sasl/issues/730
         copy(self, "md5global.h",
              src=os.path.join(self.source_folder, "win32", "include"),
@@ -253,7 +252,7 @@ class CyrusSaslConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["resolv"]
-            if self.options.with_saslauthd:
+            if self.options.get_safe("with_saslauthd"):
                 self.cpp_info.system_libs.append("crypt")
         elif is_msvc(self):
             self.cpp_info.system_libs = ["ws2_32"]
