@@ -17,6 +17,8 @@ sources:
   "11.1.1":
     url: "https://github.com/fmtlib/fmt/releases/download/11.1.1/fmt-11.1.1.zip"
     sha256: "a25124e41c15c290b214c4dec588385153c91b47198dbacda6babce27edc4b45"
+  "11.1.0":
+    url: "https://github.com/fmtlib/fmt/releases/download/11.1.0/fmt-11.1.0.zip"
   "11.0.2":
     url: "https://github.com/fmtlib/fmt/releases/download/11.0.2/fmt-11.0.2.zip"
     sha256: "40fc58bebcf38c759e11a7bd8fdc163507d2423ef5058bba7f26280c5b9c5465"
@@ -65,3 +67,13 @@ sources:
 patches:
   "5.3.0":
     - patch_file: "patches/fix-install-5.3.0.patch"
+  "10.2.1":
+    - patch_file: "patches/10.2-0001-backport-consteval.patch"
+  "10.2.0":
+    - patch_file: "patches/10.2-0001-backport-consteval.patch"
+  "10.1.1":
+    - patch_file: "patches/10.1.1-0001-backport-consteval.patch"
+  "10.1.0":
+    - patch_file: "patches/10.1.0-0001-backport-consteval.patch"
+  "10.0.0":
+    - patch_file: "patches/10.0.0-0001-backport-consteval.patch"

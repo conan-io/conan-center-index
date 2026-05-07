@@ -1,0 +1,13 @@
+diff --git a/include/fmt/core.h b/include/fmt/core.h
+index bfdca5f..c0b4ee7 100644
+--- a/include/fmt/core.h
++++ b/include/fmt/core.h
+@@ -2739,7 +2739,7 @@ template <typename Char, typename... Args> class basic_format_string {
+                   detail::count_statically_named_args<Args...>()) {
+       using checker =
+           detail::format_string_checker<Char, remove_cvref_t<Args>...>;
+-      detail::parse_format_string<true>(str_, checker(s));
++      detail::parse_format_string<true>(str_, checker(str_));
+     }
+ #else
+     detail::check_format_string<Args...>(s);
