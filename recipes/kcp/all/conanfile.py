@@ -48,8 +48,7 @@ class KcpConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build_requirements(self):
-        if Version(self.version) >= "1.7.1":
-            self.tool_requires("cmake/[>=4 <5]")
+        self.tool_requires("cmake/[>=4 <5]")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -60,15 +59,10 @@ class KcpConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        contents = load(self, cmakelists)
         # Fix shared builds on Windows
-        if " STATIC" in contents:
-            replace_in_file(self, cmakelists, " STATIC", "")
-        if "RUNTIME DESTINATION" not in contents:
-            replace_in_file(self, cmakelists,
-                            "ARCHIVE DESTINATION",
-                            "RUNTIME DESTINATION bin\nARCHIVE DESTINATION")
+        replace_in_file(self, cmakelists,
+                        "ARCHIVE DESTINATION",
+                        "RUNTIME DESTINATION bin\nARCHIVE DESTINATION")
 
     def build(self):
         self._patch_sources()
