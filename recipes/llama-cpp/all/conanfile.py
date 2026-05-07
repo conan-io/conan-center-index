@@ -82,8 +82,6 @@ class LlamaCppConan(ConanFile):
             self.requires("vulkan-loader/[>=1.3 <1.5]")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.23]")
-
         if self.options.get_safe("with_vulkan"):
             self.tool_requires("shaderc/[>=2025.3]")
 
