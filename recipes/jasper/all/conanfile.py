@@ -2,7 +2,8 @@ from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
@@ -59,6 +60,12 @@ class JasperConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+
+        # Skip fatal error when JAS_STDC_VERSION is 0L, as that is the actual value on msvc
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'if (JAS_STDC_VERSION STREQUAL "0L")',
+                        'if(0)')
 
     def generate(self):
         VirtualBuildEnv(self).generate()
@@ -76,7 +83,7 @@ class JasperConan(ConanFile):
         tc.variables["JAS_ENABLE_OPENGL"] = False
         if cross_building(self):
             tc.cache_variables["JAS_CROSSCOMPILING"] = True
-            tc.cache_variables["JAS_STDC_VERSION"] = "199901L"
+            tc.cache_variables["JAS_STDC_VERSION"] = "0L" if is_msvc(self) else "199901L"
         if Version(self.version) >= "4.2.0":
             tc.variables["JAS_PACKAGING"] = True
         tc.generate()
@@ -85,7 +92,6 @@ class JasperConan(ConanFile):
         cmakedeps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

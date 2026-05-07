@@ -1,13 +1,11 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2"
 
 
 class SeqanConan(ConanFile):
@@ -27,33 +25,8 @@ class SeqanConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "5",
-            "clang": "3.4",
-            "apple-clang": "3.4",
-            "msvc": "190",
-            "Visual Studio": "14",
-        }
-
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warning(
-                f"{self.name} requires C++{self._min_cppstd}. "
-                f"Your compiler is unknown. Assuming it supports C++{self._min_cppstd}."
-            )
-        elif Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.name} requires C++{self._min_cppstd}, which your compiler does not fully support."
-            )
+        check_min_cppstd(self, 14)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -71,7 +44,7 @@ class SeqanConan(ConanFile):
              keep_path=True)
         copy(self, "LICENSE",
              dst=os.path.join(self.package_folder, "licenses"),
-             src=self.source_folder)
+             src=os.path.join(self.source_folder, "share", "doc", "seqan"))
 
     def package_info(self):
         self.cpp_info.bindirs = []

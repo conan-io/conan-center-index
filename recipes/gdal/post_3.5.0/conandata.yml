@@ -1,12 +1,12 @@
 sources:
-  "3.12.0":
-    url: "https://github.com/OSGeo/gdal/releases/download/v3.12.0/gdal-3.12.0.tar.gz"
-    sha256: "44c95baabe6c1a047c1ebe5043e38dd73e4936bc4c481db14efbfd03342eab73"
+  "3.12.1":
+    url: "https://github.com/OSGeo/gdal/releases/download/v3.12.1/gdal-3.12.1.tar.gz"
+    sha256: "266cbadf8534d1de831db8834374afd95603e0a6af4f53d0547ae0d46bd3d2d1"
   "3.8.3":
     url: "https://github.com/OSGeo/gdal/releases/download/v3.8.3/gdal-3.8.3.tar.gz"
     sha256: "f7a30387a8239e9da26200f787a02136df2ee6473e86b36d05ad682761a049ea"
 patches:
-  "3.12.0":
+  "3.12.1":
     - patch_file: "patches/3.12.x/0-replace-find-package.patch"
     - patch_file: "patches/3.12.x/2-allow-cycles-in-cmake-targets.patch"
   "3.8.3":

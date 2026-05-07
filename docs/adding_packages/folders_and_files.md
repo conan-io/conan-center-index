@@ -75,7 +75,7 @@ versions:
 
 ### The _recipe folder_
 
-This contains every needed to build packages.
+This contains everything needed to build packages.
 
 #### `conandata.yml`
 

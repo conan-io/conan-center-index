@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, rename
+from conan.tools.files import copy, get, rm, rmdir, rename
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -13,8 +12,8 @@ required_conan_version = ">=2.4"
 class PlutoVGConan(ConanFile):
     name = "plutovg"
     description = "Tiny 2D vector graphics library in C"
-    license = "MIT",
-    topics = ("vector", "graphics", )
+    license = "MIT"
+    topics = ("vector", "graphics")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/sammycage/plutovg"
     package_type = "library"
@@ -31,9 +30,6 @@ class PlutoVGConan(ConanFile):
     implements = ["auto_shared_fpic"]
     languages = "C"
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -44,7 +40,6 @@ class PlutoVGConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = MesonToolchain(self)

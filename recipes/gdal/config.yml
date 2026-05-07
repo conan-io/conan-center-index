@@ -1,5 +1,5 @@
 versions:
-  "3.12.0":
+  "3.12.1":
     folder: "post_3.5.0"
   "3.8.3": # last version to support c++11, newer versions >=3.10 require c++17
     folder: "post_3.5.0"

@@ -2,11 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
-from conan.tools.files import get, copy, rmdir, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import get, copy, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 class AzureSDKForCppConan(ConanFile):
     name = "azure-sdk-for-cpp"
@@ -34,12 +34,8 @@ class AzureSDKForCppConan(ConanFile):
         "transport_curl": True
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
