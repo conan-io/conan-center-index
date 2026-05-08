@@ -96,6 +96,7 @@ class WhisperCppConan(ConanFile):
         if is_apple_os(self):
             del self.options.with_blas
             del self.options.with_cuda
+            del self.options.with_vulkan
         else:
             del self.options.metal
             del self.options.metal_ndebug
@@ -130,12 +131,12 @@ class WhisperCppConan(ConanFile):
         if self.options.get_safe("with_openvino"):
             self.requires("openvino/2023.2.0")
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.4.313.0")
+            self.requires("vulkan-loader/[>=1.3]")
 
 
     def build_requirements(self):
         if self.options.get_safe("with_vulkan"):
-            self.tool_requires("shaderc/2025.3")
+            self.tool_requires("shaderc/[>=2025.3]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -174,12 +175,8 @@ class WhisperCppConan(ConanFile):
 
         if self.options.get_safe("with_vulkan"):
             tc.variables["GGML_VULKAN"] = True
-
-            #Search the path to glslc within the shaderc-package manually, because its often not found otherwise
-            glslc = "glslc.exe" if self.settings_build.os == "Windows" else "glslc"
-            tc.variables["Vulkan_GLSLC_EXECUTABLE"] = os.path.join(
-                self.dependencies.build["shaderc"].cpp_info.bindir, glslc
-            )
+            shaderc_bin_path = os.path.join(self.dependencies.build["shaderc"].cpp_info.bindir, "glslc").replace("\\", "/")
+            tc.variables["Vulkan_GLSLC_EXECUTABLE"] = shaderc_bin_path
 
 
         # TODO: Implement OpenMP support
