@@ -27,7 +27,8 @@ class LlamaCppConan(ConanFile):
         "fPIC": [True, False],
         "with_examples": [True, False],
         "with_cuda": [True, False],
-        "with_curl": [True, F        "with_vulkan": [True, False],
+        "with_curl": [True, False],
+        "with_vulkan": [True, False],
     }
     default_options = {
         "shared": False,
