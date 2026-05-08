@@ -228,7 +228,6 @@ class WhisperCppConan(ConanFile):
         if self.options.get_safe("with_vulkan"):
             self.cpp_info.libs.append("ggml-vulkan")
             self.cpp_info.requires.append("vulkan-loader::vulkan-loader")
-            self.cpp_info.defines.append("GGML_USE_VULKAN")
         if self.options.get_safe("with_cuda"):
             self.cpp_info.libs.append("ggml-cuda")
         self.cpp_info.resdirs = ["res"]
