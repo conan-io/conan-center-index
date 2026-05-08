@@ -238,6 +238,9 @@ class OpenSceneGraphConanFile(ConanFile):
         tc.cache_variables["LIBXML2_LIBRARY"] = "LIBXML2_LIBRARY-NOTFOUND"
         tc.cache_variables["LIBXML2_INCLUDE_DIR"] = "LIBXML2_INCLUDE_DIR-NOTFOUND"
 
+        if (self.options.get_safe("with_avfoundation")):
+            tc.variables["OSG_WITH_AV_FOUNDATION"] = True
+
         if self.settings.os == "Windows":
             # osg has optional quicktime support on Windows
             tc.variables["CMAKE_DISABLE_FIND_PACKAGE_QuickTime"] = True
