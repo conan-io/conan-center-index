@@ -207,6 +207,7 @@ class OpenSceneGraphConanFile(ConanFile):
         tc.variables["OSG_WITH_OPENEXR"] = self.options.get_safe("with_openexr", False)
         tc.variables["OSG_WITH_INVENTOR"] = False
         tc.variables["OSG_WITH_JASPER"] = self.options.with_jasper
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Jasper"] = not self.options.with_jasper
         tc.variables["OSG_WITH_OPENCASCADE"] = False
         tc.variables["OSG_WITH_FBX"] = False
         tc.variables["OSG_WITH_ZLIB"] = self.options.with_zlib
