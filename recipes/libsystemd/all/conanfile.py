@@ -12,7 +12,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 from conan.tools.system import PyEnv
 
-required_conan_version = ">=2.23"
+required_conan_version = ">=2.25"
 
 
 class LibsystemdConan(ConanFile):
