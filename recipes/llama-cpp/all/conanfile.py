@@ -27,8 +27,7 @@ class LlamaCppConan(ConanFile):
         "fPIC": [True, False],
         "with_examples": [True, False],
         "with_cuda": [True, False],
-        "with_curl": [True, False],
-        "with_vulkan": [True, False],
+        "with_curl": [True, F        "with_vulkan": [True, False],
     }
     default_options = {
         "shared": False,
@@ -46,7 +45,6 @@ class LlamaCppConan(ConanFile):
             del self.options.fPIC
         if is_apple_os(self):
             del self.options.with_vulkan
-
 
     @property
     def _is_new_llama(self):
@@ -91,7 +89,6 @@ class LlamaCppConan(ConanFile):
     def build_requirements(self):
         if self.options.get_safe("with_vulkan"):
             self.tool_requires("shaderc/[>=2025.3]")
-
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
