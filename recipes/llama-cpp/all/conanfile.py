@@ -86,10 +86,9 @@ class LlamaCppConan(ConanFile):
             self.requires("libcurl/[>=7.78 <9]")
 
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/[>=1.4]")
+            self.requires("vulkan-loader/[>=1.3 <1.5]")
 
     def build_requirements(self):
-
         if self.options.get_safe("with_vulkan"):
             self.tool_requires("shaderc/[>=2025.3]")
 
@@ -116,7 +115,6 @@ class LlamaCppConan(ConanFile):
         # right now it tries to add_subdirectory to a non-existent folder
         tc.variables["GGML_BUILD_EXAMPLES"] = False
         tc.variables["GGML_CUDA"] = self.options.get_safe("with_cuda")
-
 
         if self.options.get_safe("with_vulkan"):
             tc.variables["GGML_VULKAN"] = True
@@ -210,7 +208,6 @@ class LlamaCppConan(ConanFile):
                 if self.options.shared:
                     self.cpp_info.components[f"ggml-{backend}"].defines.append("GGML_BACKEND_SHARED")
                 self.cpp_info.components["ggml"].defines.append(f"GGML_USE_{backend.upper()}")
-
                 self.cpp_info.components["ggml"].requires.append(f"ggml-{backend}")
 
                 if backend == "vulkan":
