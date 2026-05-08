@@ -134,8 +134,6 @@ class WhisperCppConan(ConanFile):
 
 
     def build_requirements(self):
-        # Benötigt für die Shader-Kompilierung und aktuelle CMake-Features
-        self.tool_requires("cmake/[>=3.23]")
         if self.options.get_safe("with_vulkan"):
             self.tool_requires("shaderc/2025.3")
 
@@ -174,15 +172,14 @@ class WhisperCppConan(ConanFile):
         if self.options.no_f16c:
             tc.variables["WHISPER_NO_F16C"] = True
 
-
-
         if self.options.get_safe("with_vulkan"):
             tc.variables["GGML_VULKAN"] = True
-            tc.variables["GGML_VULKAN_SHADERC"] = True
 
             #Search the path to glslc within the shaderc-package manually, because its often not found otherwise
-            shaderc_bin_path = os.path.join(self.dependencies.build["shaderc"].cpp_info.bindir, "glslc")
-            tc.variables["Vulkan_GLSLC_EXECUTABLE"] = shaderc_bin_path
+            glslc = "glslc.exe" if self.settings_build.os == "Windows" else "glslc"
+            tc.variables["Vulkan_GLSLC_EXECUTABLE"] = os.path.join(
+                self.dependencies.build["shaderc"].cpp_info.bindir, glslc
+            )
 
 
         # TODO: Implement OpenMP support
@@ -230,21 +227,14 @@ class WhisperCppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["whisper"]
-
-
         self.cpp_info.libs.extend(["ggml", "ggml-base", "ggml-cpu"])
-
-
         if self.options.get_safe("with_vulkan"):
             self.cpp_info.libs.append("ggml-vulkan")
             self.cpp_info.requires.append("vulkan-loader::vulkan-loader")
             self.cpp_info.defines.append("GGML_USE_VULKAN")
-
-
         if self.options.get_safe("with_cuda"):
             self.cpp_info.libs.append("ggml-cuda")
         self.cpp_info.resdirs = ["res"]
-
 
         if self.options.get_safe("with_blas"):
             self.cpp_info.libs.extend(["ggml-blas"])
