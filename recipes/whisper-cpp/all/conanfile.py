@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, apply_conandata_patches, export_conandata_patches, get, rm, save
+from conan.tools.files import copy, get, rm, save
 from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
@@ -139,9 +139,6 @@ class WhisperCppConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -205,7 +202,6 @@ class WhisperCppConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

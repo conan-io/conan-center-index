@@ -393,7 +393,7 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_libdrm"):
             self.requires("libdrm/2.4.119")
         if self.options.get_safe("with_whisper"):
-            self.requires("whisper-cpp/1.7.6")
+            self.requires("whisper-cpp/[>=1.7.6 <2]")
         if self.options.get_safe("with_openapv"):
             self.requires("openapv/0.2.0.4")
 
