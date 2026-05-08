@@ -41,6 +41,13 @@ class LlamaCppConan(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
+    def config_options(self):
+            if self.settings.os == "Windows":
+                del self.options.fPIC
+            if is_apple_os(self):
+                del self.options.with_vulkan
+
+
     @property
     def _is_new_llama(self):
         # Structure of llama.cpp libraries was changed after b4079
@@ -82,6 +89,10 @@ class LlamaCppConan(ConanFile):
             self.requires("vulkan-loader/[>=1.3 <1.5]")
 
     def build_requirements(self):
+<<<<<<< HEAD
+=======
+
+>>>>>>> d0a5193b6 (feat: add vulkan support and address maintainer feedback)
         if self.options.get_safe("with_vulkan"):
             self.tool_requires("shaderc/[>=2025.3]")
 
@@ -110,10 +121,15 @@ class LlamaCppConan(ConanFile):
 
         if self.options.get_safe("with_vulkan"):
             tc.variables["GGML_VULKAN"] = True
+<<<<<<< HEAD
             tc.variables["GGML_VULKAN_SHADERC"] = True
 
             shaderc_bin_path = os.path.join(self.dependencies.build["shaderc"].cpp_info.bindir, "glslc")
             tc.variables["Vulkan_GLSLC_EXECUTABLE"] = shaderc_bin_path.replace("\\", "/")
+=======
+            shaderc_bin_path = os.path.join(self.dependencies.build["shaderc"].cpp_info.bindir, "glslc").replace("\\", "/")
+            tc.variables["Vulkan_GLSLC_EXECUTABLE"] = shaderc_bin_path
+>>>>>>> d0a5193b6 (feat: add vulkan support and address maintainer feedback)
 
         tc.generate()
 
