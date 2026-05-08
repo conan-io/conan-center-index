@@ -233,18 +233,6 @@ index 7757916..6f05b5b 100644
                  )
          endif (BUILD_AVX512VBMI)
          add_library(hs_exec_common_shared OBJECT
-diff --git a/chimera/ch_database.h b/chimera/ch_database.h
-index 28bde86..33cda9d 100644
---- a/chimera/ch_database.h
-+++ b/chimera/ch_database.h
-@@ -38,7 +38,6 @@ extern "C"
- {
- #endif
- 
--#define PCRE_STATIC
- #include <pcre.h>
- 
- #include "ch_compile.h" // for CH_MODE_ flags
 diff --git a/cmake/pcre.cmake b/cmake/pcre.cmake
 index e0acda5..0f9e8ac 100644
 --- a/cmake/pcre.cmake
