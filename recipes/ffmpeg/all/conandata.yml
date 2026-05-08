@@ -9,6 +9,10 @@ sources:
     url: "https://ffmpeg.org/releases/ffmpeg-4.4.6.tar.bz2"
     sha256: "822c980717470a2a576e5adba4e8a40977d15c3312b89dcd121547262b730d11"
 patches:
+  "8.1":
+    - patch_file: "patches/8.1-0001-fix-msvc-lib-name-resolution.patch"
+      patch_description: "Fix MSVC -l flag translation: search -L dirs for actual lib file (foo.lib, libfoo.a, etc.) instead of blindly appending .lib. Fixes Meson-built deps like lcms that produce libfoo.a on Windows."
+      patch_type: "portability"
   "4.4.6":
     - patch_file: "patches/4.4-0001-fix-aom_codec_av1_dx_algo.patch"
       patch_description: "Compatibility with shared libaom"

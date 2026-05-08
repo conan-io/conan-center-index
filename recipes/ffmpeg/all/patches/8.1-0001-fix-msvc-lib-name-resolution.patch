@@ -1,0 +1,40 @@
+diff --git a/configure b/configure
+index 1759694..8cc33a7 100644
+--- a/configure
++++ b/configure
+@@ -5110,6 +5110,26 @@ cparser_flags(){
+ }
+ 
+ msvc_common_flags(){
++    # Resolve a library name by searching linker paths for actual files.
++    # Meson-built packages on Windows produce libfoo.a instead of foo.lib
++    # (mesonbuild/meson#7378), so the naive "-lfoo -> foo.lib" fails.
++    # Parse $LDFLAGS for -LIBPATH: entries (set by Conan/env) since test_ld
++    # splits -L and -l flags into separate subshell invocations.
++    _msvc_resolve_lib(){
++        _name="$1"
++        for _flag in $LDFLAGS; do
++            case $_flag in
++                -LIBPATH:*) _dir="${_flag#-LIBPATH:}" ;;
++                -libpath:*) _dir="${_flag#-libpath:}" ;;
++                *) continue ;;
++            esac
++            for _cand in "${_name}.lib" "lib${_name}.a" "lib${_name}.lib" "${_name}.a"; do
++                [ -f "${_dir}/${_cand}" ] && echo "$_cand" && return
++            done
++        done
++        echo "${_name}.lib"
++    }
++
+     for flag; do
+         case $flag in
+             # In addition to specifying certain flags under the compiler
+@@ -5131,7 +5151,7 @@ msvc_common_flags(){
+             -lz)                  echo zlib.lib ;;
+             -lx264)               echo libx264.lib ;;
+             -lstdc++)             ;;
+-            -l*)                  echo ${flag#-l}.lib ;;
++            -l*)                  _msvc_resolve_lib "${flag#-l}" ;;
+             -LARGEADDRESSAWARE)   echo $flag ;;
+             -L*) [ "$_flags_type" = "link" ] && echo -libpath:${flag#-L} ;;
+             -Wl,*)                ;;
