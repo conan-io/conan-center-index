@@ -132,8 +132,6 @@ class WhisperCppConan(ConanFile):
             self.requires("openvino/2023.2.0")
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/[>=1.3]")
-
-
     def build_requirements(self):
         if self.options.get_safe("with_vulkan"):
             self.tool_requires("shaderc/[>=2025.3]")
@@ -174,9 +172,9 @@ class WhisperCppConan(ConanFile):
             tc.variables["WHISPER_NO_F16C"] = True
 
         if self.options.get_safe("with_vulkan"):
-            tc.variables["GGML_VULKAN"] = True
+            tc.cache_variables["GGML_VULKAN"] = True
             shaderc_bin_path = os.path.join(self.dependencies.build["shaderc"].cpp_info.bindir, "glslc").replace("\\", "/")
-            tc.variables["Vulkan_GLSLC_EXECUTABLE"] = shaderc_bin_path
+            tc.cache_variables["Vulkan_GLSLC_EXECUTABLE"] = shaderc_bin_path
 
 
         # TODO: Implement OpenMP support
