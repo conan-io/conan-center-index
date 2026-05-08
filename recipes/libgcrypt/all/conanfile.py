@@ -7,7 +7,7 @@ from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class LibgcryptConan(ConanFile):
@@ -38,7 +38,7 @@ class LibgcryptConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcap/2.69")
+        self.requires("libcap/[>=2.69 <3]")
         self.requires("libgpg-error/1.36", transitive_headers=True)
 
     def validate(self):
@@ -85,6 +85,3 @@ class LibgcryptConan(ConanFile):
         self.cpp_info.libs = ["gcrypt"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
