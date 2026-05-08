@@ -86,15 +86,13 @@ class LlamaCppConan(ConanFile):
             self.requires("libcurl/[>=7.78 <9]")
 
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/[>=1.3 <1.5]")
+            self.requires("vulkan-loader/[>=1.4]")
 
     def build_requirements(self):
-<<<<<<< HEAD
-=======
 
->>>>>>> d0a5193b6 (feat: add vulkan support and address maintainer feedback)
         if self.options.get_safe("with_vulkan"):
             self.tool_requires("shaderc/[>=2025.3]")
+
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -119,17 +117,11 @@ class LlamaCppConan(ConanFile):
         tc.variables["GGML_BUILD_EXAMPLES"] = False
         tc.variables["GGML_CUDA"] = self.options.get_safe("with_cuda")
 
+
         if self.options.get_safe("with_vulkan"):
             tc.variables["GGML_VULKAN"] = True
-<<<<<<< HEAD
-            tc.variables["GGML_VULKAN_SHADERC"] = True
-
-            shaderc_bin_path = os.path.join(self.dependencies.build["shaderc"].cpp_info.bindir, "glslc")
-            tc.variables["Vulkan_GLSLC_EXECUTABLE"] = shaderc_bin_path.replace("\\", "/")
-=======
             shaderc_bin_path = os.path.join(self.dependencies.build["shaderc"].cpp_info.bindir, "glslc").replace("\\", "/")
             tc.variables["Vulkan_GLSLC_EXECUTABLE"] = shaderc_bin_path
->>>>>>> d0a5193b6 (feat: add vulkan support and address maintainer feedback)
 
         tc.generate()
 
@@ -204,6 +196,7 @@ class LlamaCppConan(ConanFile):
             if self.settings.os in ("Linux", "FreeBSD"):
                 self.cpp_info.components["ggml-base"].system_libs.extend(["dl", "m", "pthread"])
 
+
             if self.options.shared:
                 self.cpp_info.components["llama"].defines.append("LLAMA_SHARED")
                 self.cpp_info.components["ggml-base"].defines.append("GGML_SHARED")
@@ -217,6 +210,7 @@ class LlamaCppConan(ConanFile):
                 if self.options.shared:
                     self.cpp_info.components[f"ggml-{backend}"].defines.append("GGML_BACKEND_SHARED")
                 self.cpp_info.components["ggml"].defines.append(f"GGML_USE_{backend.upper()}")
+
                 self.cpp_info.components["ggml"].requires.append(f"ggml-{backend}")
 
                 if backend == "vulkan":
