@@ -42,10 +42,10 @@ class LlamaCppConan(ConanFile):
     implements = ["auto_shared_fpic"]
 
     def config_options(self):
-            if self.settings.os == "Windows":
-                del self.options.fPIC
-            if is_apple_os(self):
-                del self.options.with_vulkan
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        if is_apple_os(self):
+            del self.options.with_vulkan
 
 
     @property
