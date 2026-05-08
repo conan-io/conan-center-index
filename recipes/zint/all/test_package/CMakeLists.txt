@@ -11,11 +11,11 @@ endif()
 find_package(Zint REQUIRED CONFIG)
 
 add_executable(test_package test_package.c)
-target_link_libraries(test_package PRIVATE Zint::Zint)
+target_link_libraries(test_package PRIVATE zint::zint)
 add_test(NAME test_package COMMAND test_package)
 
 if(ZINT_WITH_QT)
     add_executable(test_package_cpp test_package.cpp)
-    target_link_libraries(test_package_cpp PRIVATE Zint::QZint)
+    target_link_libraries(test_package_cpp PRIVATE zint::QZint)
     add_test(NAME test_package_cpp COMMAND test_package_cpp)
 endif()
