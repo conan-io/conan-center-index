@@ -50,15 +50,15 @@ class LibaomAv1Conan(ConanFile):
 
     def build_requirements(self):
         if self.options.get_safe("assembly", False):
-            self.tool_requires("nasm/2.15.05")
+            self.tool_requires("nasm/[*]")
         if self._settings_build.os == "Windows":
-            self.tool_requires("strawberryperl/5.32.1.1")
+            self.tool_requires("strawberryperl/[*]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=Version(self.version) >= "3.3.0")
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -94,8 +94,12 @@ class LibaomAv1Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "aom")
+        self.cpp_info.set_property("cmake_file_name", "AOM")
+        self.cpp_info.set_property("cmake_target_name", "AOM::aom")
+        if not self.options.shared:
+            self.cpp_info.set_property("cmake_target_aliases", ["AOM::aom_static"])
         lib = "aom"
-        if Version(self.version) >= "3.8.0" and self.settings.os == "Windows" and self.options.shared:
+        if self.settings.os == "Windows" and self.options.shared:
             lib = "aom_dll"
         self.cpp_info.libs = [lib]
         if self.settings.os in ("FreeBSD", "Linux"):

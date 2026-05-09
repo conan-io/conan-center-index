@@ -68,6 +68,7 @@ class CpptraceConan(ConanFile):
         tc.variables["CPPTRACE_CONAN"] = True
         if self.options.unwind == "libunwind":
             tc.variables["CPPTRACE_UNWIND_WITH_LIBUNWIND"] = True
+        tc.cache_variables["CPPTRACE_DISABLE_CXX_20_MODULES"] = self.conf.get("tools.cmake.cmaketoolchain:extra_variables", {}).get("CPPTRACE_DISABLE_CXX_20_MODULES", True)
         tc.cache_variables["CPPTRACE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         tc.generate()
         tc = CMakeDeps(self)
