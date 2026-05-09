@@ -109,6 +109,17 @@ class GDCMConan(ConanFile):
 
         tc.generate()
         deps = CMakeDeps(self)
+        if Version(self.version) >= "3.2.6":
+            # reduce patching
+            deps.set_property("expat", "cmake_file_name", "EXPAT")
+            deps.set_property("expat", "cmake_target_name", "EXPAT::EXPAT")
+            deps.set_property("expat", "cmake_find_mode", "config")
+            if self.options.with_json:
+                deps.set_property("json-c", "cmake_file_name", "JSON")
+                deps.set_property("json-c", "cmake_additional_variables_prefixes", ["JSON"])
+            if self.settings.os != "Windows":
+                deps.set_property("util-linux-libuuid", "cmake_file_name", "UUID")
+                deps.set_property("util-linux-libuuid", "cmake_additional_variables_prefixes", ["UUID"])
         deps.generate()
 
     def _patch_sources(self):
