@@ -1,0 +1,32 @@
+sources:
+  "v4.10.0.0":
+    url: "https://github.com/EttusResearch/uhd/archive/refs/tags/v4.10.0.0.tar.gz"
+    md5: "f0aa5cdf3374498c90c6a1fdbeee7434"
+  "v4.9.0.1":
+    url: "https://github.com/EttusResearch/uhd/archive/refs/tags/v4.9.0.1.tar.gz"
+    md5: "f0795227b103e0fe16e360177ac68867"
+  "v4.9.0.0":
+    url: "https://github.com/EttusResearch/uhd/archive/refs/tags/v4.9.0.0.tar.gz"
+    md5: "e70a51fda80e1460275da1cc1f3138bb"
+  "v4.8.0.0":
+    url: "https://github.com/EttusResearch/uhd/archive/refs/tags/v4.8.0.0.tar.gz"
+    md5: "392a4639e6baa93dfa6845483a0eaa57"
+  "v4.7.0.0":
+    url: "https://github.com/EttusResearch/uhd/archive/refs/tags/v4.7.0.0.tar.gz"
+    md5: "8bd35c962d47822e9e4fc8572e2d2845"
+  "v4.6.0.0":
+    url: "https://github.com/EttusResearch/uhd/archive/refs/tags/v4.6.0.0.tar.gz"
+    md5: "3a7611946280fe13ac834483a9aede48"
+dependencies:
+  "v4.10.0.0":
+    dependency: ["boost/1.88.0"]
+  "v4.9.0.1":
+    dependency: ["boost/1.86.0"]
+  "v4.9.0.0":
+    dependency: ["boost/1.86.0"]
+  "v4.8.0.0":
+    dependency: ["boost/1.86.0"]
+  "v4.7.0.0":
+    dependency: ["boost/1.86.0"]
+  "v4.6.0.0":
+    dependency: ["boost/1.86.0"]
