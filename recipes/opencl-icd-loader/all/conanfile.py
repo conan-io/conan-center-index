@@ -87,6 +87,10 @@ class OpenclIcdLoaderConan(ConanFile):
         self.cpp_info.set_property("cmake_module_file_name", "OpenCL")
         self.cpp_info.set_property("cmake_file_name", "OpenCLICDLoader")
         self.cpp_info.set_property("cmake_target_name", "OpenCL::OpenCL")
+        if Version(self.version) >= "2025.07.22":
+            # INFO: Follow correct .pc file name, but avoid breaking existing verions
+            self.cpp_info.set_property("pkg_config_name", "OpenCL")
+            self.cpp_info.set_property("system_package_version", "3.0")
         self.cpp_info.includedirs = []
         self.cpp_info.libs = ["OpenCL"]
         if not self.options.shared:
