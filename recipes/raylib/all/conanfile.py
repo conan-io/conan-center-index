@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -28,7 +27,6 @@ class RaylibConan(ConanFile):
         "camera_system": [True, False],
         "gestures_system": [True, False],
         "rprand_generator": [True, False],
-        "events_waiting": [True, False],
         "custom_frame_control": [True, False]
     }
     default_options = {
@@ -41,26 +39,8 @@ class RaylibConan(ConanFile):
         "camera_system": True,
         "gestures_system": True,
         "rprand_generator": True,
-        "events_waiting": False,
         "custom_frame_control": False
     }
-
-    @property
-    def _support_custom_modules(self):
-        return Version(self.version) >= "4.2.0"
-
-    @property
-    def _support_rprand_generator(self):
-        return Version(self.version) >= "5.0"
-
-    @property
-    def _support_frame_control(self):
-        return Version(self.version) >= "4.6"
-
-    @property
-    def _support_events_waiting(self):
-        # INFO: Dropped by https://github.com/raysan5/raylib/commit/307c998495a769092a8587c91a3efdb526de909c
-        return Version(self.version) < "5.5"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -70,14 +50,6 @@ class RaylibConan(ConanFile):
             del self.options.fPIC
         if self.settings.os == "Android":
             del self.options.opengl_version
-        if not self._support_custom_modules:
-            del self.options.module_raudio
-        if not self._support_rprand_generator:
-            del self.options.rprand_generator
-        if not self._support_frame_control:
-            del self.options.custom_frame_control
-        if not self._support_events_waiting:
-            del self.options.events_waiting
 
     def configure(self):
         if self.options.shared:
@@ -90,8 +62,6 @@ class RaylibConan(ConanFile):
             del self.options.camera_system
             del self.options.gestures_system
             self.options.rm_safe("rprand_generator")
-            if self._support_events_waiting:
-                del self.options.events_waiting
             self.options.rm_safe("custom_frame_control")
 
     def layout(self):
@@ -103,8 +73,7 @@ class RaylibConan(ConanFile):
             self.requires("opengl/system")
 
     def build_requirements(self):
-        if Version(self.version) >= "6.0.0":
-            self.tool_requires("cmake/[>=3.25]")
+        self.tool_requires("cmake/[>=3.25]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -128,18 +97,13 @@ class RaylibConan(ConanFile):
 
         tc.variables["CUSTOMIZE_BUILD"] = self.options.customize_build
         if self.options.customize_build:
-            if self._support_custom_modules:
-                tc.variables["SUPPORT_MODULE_RAUDIO"] = self.options.module_raudio
-            if self._support_events_waiting:
-                tc.variables["SUPPORT_EVENTS_WAITING"] = self.options.events_waiting
-            if self._support_frame_control:
-                tc.variables["SUPPORT_CUSTOM_FRAME_CONTROL"] = self.options.custom_frame_control
+            tc.variables["SUPPORT_MODULE_RAUDIO"] = self.options.module_raudio
+            tc.variables["SUPPORT_CUSTOM_FRAME_CONTROL"] = self.options.custom_frame_control
 
             # this makes it include the headers rcamera.h, rgesture.h and rprand.h
             tc.variables["SUPPORT_CAMERA_SYSTEM"]    = self.options.camera_system
             tc.variables["SUPPORT_GESTURES_SYSTEM"]  = self.options.gestures_system
-            if self._support_rprand_generator:
-                tc.variables["SUPPORT_RPRAND_GENERATOR"] = self.options.rprand_generator
+            tc.variables["SUPPORT_RPRAND_GENERATOR"] = self.options.rprand_generator
 
         # Due to a specific logic of cmakedeps_macros.cmake used by CMakeDeps to try to locate shared libs on Windows
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0054"] = "NEW"
@@ -173,7 +137,7 @@ class RaylibConan(ConanFile):
             copy(self, pattern="*camera.h", dst=include_path, src=os.path.join(self.source_folder, "src"))
         if self.options.get_safe("gestures_system", True):
             copy(self, pattern="*gestures.h", dst=include_path, src=os.path.join(self.source_folder, "src"))
-        if self._support_rprand_generator and self.options.get_safe("rprand_generator", True):
+        if self.options.get_safe("rprand_generator", True):
             copy(self, pattern="rprand.h", dst=include_path, src=os.path.join(self.source_folder, "src", "external"))
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
@@ -196,8 +160,6 @@ class RaylibConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "raylib")
         self.cpp_info.set_property("pkg_config_name", "raylib")
         libname = "raylib"
-        if is_msvc(self) and not self.options.shared and Version(self.version) < "4.0.0":
-            libname += "_static"
         self.cpp_info.libs = [libname]
         if is_msvc(self) and self.options.shared:
             self.cpp_info.defines.append("USE_LIBTYPE_SHARED")
