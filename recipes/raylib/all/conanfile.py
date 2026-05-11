@@ -123,7 +123,7 @@ class RaylibConan(ConanFile):
             tc.variables["OPENGL_VERSION"] = "ES 2.0"
         else:
             tc.variables["USE_EXTERNAL_GLFW"] = "ON"
-            tc.variables["OPENGL_VERSION"] = "OFF" if not self.options.opengl_version else self.options.opengl_version
+            tc.variables["OPENGL_VERSION"] = "OFF" if not self.options.opengl_version else str(self.options.opengl_version).replace("-", " ")
         tc.variables["WITH_PIC"] = self.options.get_safe("fPIC", True)
 
         tc.variables["CUSTOMIZE_BUILD"] = self.options.customize_build
