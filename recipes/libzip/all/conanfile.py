@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
@@ -40,10 +41,6 @@ class LibZipConan(ConanFile):
     def _has_zstd_support(self):
         return Version(self.version) >= "1.8.0"
 
-    @property
-    def _is_apple_os(self):
-        return self.settings.os in ["Macos", "iOS", "tvOS", "watchOS", "visionOS"]
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -57,7 +54,7 @@ class LibZipConan(ConanFile):
             self.options.crypto = "win32"
 
         # Default crypto backend on apple platforms
-        if self._is_apple_os:
+        if is_apple_os(self):
             self.options.crypto = "CommonCrypto"
 
     def configure(self):
@@ -92,7 +89,7 @@ class LibZipConan(ConanFile):
         if self.options.crypto == "win32" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Windows is required to use win32 crypto libraries")
 
-        if self.options.crypto == "CommonCrypto" and not self._is_apple_os:
+        if self.options.crypto == "CommonCrypto" and not is_apple_os(self):
             raise ConanInvalidConfiguration("CommonCrypto is only available on Apple platforms")
 
     def source(self):
