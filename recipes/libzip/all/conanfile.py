@@ -37,18 +37,12 @@ class LibZipConan(ConanFile):
         "tools": True,
     }
 
-    @property
-    def _has_zstd_support(self):
-        return Version(self.version) >= "1.8.0"
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self._has_zstd_support:
-            del self.options.with_zstd
         # Default crypto backend on windows
         if self.settings.os == "Windows":
             self.options.crypto = "win32"
@@ -111,15 +105,12 @@ class LibZipConan(ConanFile):
             # It's an error in gcc >= 14
             # Upstream fixed this silencing this error implicitly from 1.11
             tc.extra_cflags.append("-Wno-incompatible-pointer-types")
-        if self._has_zstd_support:
-            tc.variables["ENABLE_ZSTD"] = self.options.with_zstd
+        tc.variables["ENABLE_ZSTD"] = self.options.with_zstd
         tc.variables["ENABLE_COMMONCRYPTO"] = self.options.crypto == "CommonCrypto"
         tc.variables["ENABLE_GNUTLS"] = self.options.crypto == "gnutls"
         tc.variables["ENABLE_MBEDTLS"] = self.options.crypto == "mbedtls"
         tc.variables["ENABLE_OPENSSL"] = self.options.crypto == "openssl"
         tc.variables["ENABLE_WINDOWS_CRYPTO"] = self.options.crypto == "win32"
-        if Version(self.version) < "1.10":
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         deps = CMakeDeps(self)
