@@ -59,7 +59,8 @@ class RaylibConan(ConanFile):
 
     @property
     def _support_events_waiting(self):
-        return Version(self.version) < "6.0"
+        # INFO: Dropped by https://github.com/raysan5/raylib/commit/307c998495a769092a8587c91a3efdb526de909c
+        return Version(self.version) < "5.5"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -100,6 +101,10 @@ class RaylibConan(ConanFile):
         if self.settings.os not in ["Android", "Emscripten"]:
             self.requires("glfw/3.4")
             self.requires("opengl/system")
+
+    def build_requirements(self):
+        if Version(self.version) >= "6.0.0":
+            self.tool_requires("cmake/[>=3.25]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
