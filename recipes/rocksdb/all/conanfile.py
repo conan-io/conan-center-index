@@ -125,13 +125,15 @@ class RocksDBConan(ConanFile):
         tc.variables["WITH_ZSTD"] = self.options.with_zstd
         tc.variables["WITH_TBB"] = self.options.get_safe("with_tbb", False)
         tc.variables["WITH_JEMALLOC"] = self.options.with_jemalloc
-
         tc.variables["ROCKSDB_BUILD_SHARED"] = self.options.shared
         tc.variables["USE_RTTI"] = self.options.use_rtti
-        if not bool(self.options.enable_sse) or self.options.enable_sse == "sse42":
+        if not bool(self.options.enable_sse):
             tc.variables["PORTABLE"] = True
-        elif self.options.enable_sse == "avx2":
-            tc.variables["PORTABLE"] = False
+        else:
+            if is_msvc(self):
+                tc.variables["PORTABLE"] = "avx2"
+            else:
+                tc.variables["PORTABLE"] = "haswell"
         # not available yet in CCI
         tc.variables["WITH_NUMA"] = False
         tc.generate()
