@@ -128,7 +128,7 @@ class RocksDBConan(ConanFile):
         if is_msvc(self):
             tc.variables["WITH_MD_LIBRARY"] = not is_msvc_static_runtime(self)
         tc.variables["ROCKSDB_INSTALL_ON_WINDOWS"] = self.settings.os == "Windows"
-        tc.variables["WITH_GFLAGS"] = self.options.with_gflags
+        tc.cache_variables["WITH_GFLAGS"] = self.options.with_gflags
         tc.variables["WITH_SNAPPY"] = self.options.with_snappy
         tc.variables["WITH_LZ4"] = self.options.with_lz4
         tc.variables["WITH_ZLIB"] = self.options.with_zlib
