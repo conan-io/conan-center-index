@@ -65,7 +65,7 @@ class Fastnoise2Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["FASTNOISE2_NOISETOOL"] = False
+        tc.cache_variables["FASTNOISE2_TOOLS"] = False
         tc.generate()
 
     def build(self):
