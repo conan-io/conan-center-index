@@ -1,6 +1,12 @@
+Unvendor libunwind to consume from Conan
+
+https://github.com/getsentry/sentry-native/issues/1714
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d156fb4..4c69c81 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -615,14 +615,7 @@
+@@ -645,15 +645,8 @@ endif()
  
  if(SENTRY_WITH_LIBUNWIND)
  	if(LINUX)
@@ -13,7 +19,8 @@
 -				ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 -			)
 -		endif()
-+		find_package(libunwind REQUIRED)
++		find_package(libunwind CONFIG REQUIRED)
 +		target_link_libraries(sentry PRIVATE libunwind::libunwind)
  	endif()
  endif()
+ 
