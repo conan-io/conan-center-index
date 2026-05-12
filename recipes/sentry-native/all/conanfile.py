@@ -33,7 +33,7 @@ class SentryNativeConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "backend": ["none", "inproc", "crashpad", "breakpad"],
+        "backend": ["none", "inproc", "crashpad", "breakpad", "native"],
         "transport": ["none", "curl", "winhttp"],
         "qt": [True, False],
         "with_crashpad": ["google", "sentry"],
