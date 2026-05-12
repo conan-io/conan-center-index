@@ -151,7 +151,6 @@ class SentryNativeConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
-        rmdir(self, os.path.join(self.source_folder, "vendor", "libunwind"))
 
     def generate(self):
         VirtualBuildEnv(self).generate()
@@ -304,4 +303,3 @@ class SentryNativeConan(ConanFile):
             # tools
             self.cpp_info.components["crashpad_tools"].set_property("cmake_target_name", "crashpad::tools")
             self.cpp_info.components["crashpad_tools"].libs = [] if self.options.shared else ["crashpad_tools"]
-
