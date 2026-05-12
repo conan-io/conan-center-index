@@ -5,7 +5,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class BmxConan(ConanFile):
@@ -16,7 +16,7 @@ class BmxConan(ConanFile):
     )
     topics = ("vfx", "image", "picture", "video", "multimedia", "mxf")
     license = "BSD-3-Clause"
-    homepage = "https://github.com/bbc/bmx"
+    homepage = "https://github.com/ebu/bmx"
     url = "https://github.com/conan-io/conan-center-index"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -75,6 +75,7 @@ class BmxConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BMX_BUILD_WITH_LIBCURL"] = self.options.with_libcurl
+        tc.variables["BMX_BUILD_EXPAT_SOURCE"] = False
         tc.generate()
 
         cd = CMakeDeps(self)
@@ -99,16 +100,11 @@ class BmxConan(ConanFile):
     def _add_component(self, name):
         component = self.cpp_info.components[self._conan_comp(name)]
         component.set_property("cmake_target_name", f"bmx::{name}")
-        component.names["cmake_find_package"] = name
-        component.names["cmake_find_package_multi"] = name
         return component
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "bmx")
         self.cpp_info.set_property("pkg_config_name", "bmx")
-
-        self.cpp_info.names["cmake_find_package"] = "bmx"
-        self.cpp_info.names["cmake_find_package_multi"] = "bmx"
 
         # bbc-bmx::MXF
         libmxf = self._add_component("MXF")
