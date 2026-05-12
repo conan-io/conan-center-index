@@ -87,20 +87,10 @@ class RocksDBConan(ConanFile):
             self.requires("folly/2024.08.12.00")
 
     def validate(self):
-        if self.version >= Version("10.7.0"):
-            check_min_cppstd(self, 20)
-        else:
-            check_min_cppstd(self, 17)
+        check_min_cppstd(self, 20)
 
         if self.settings.arch not in ["x86_64", "ppc64le", "ppc64", "mips64", "armv8", "riscv64"]:
             raise ConanInvalidConfiguration("Rocksdb requires 64 bits")
-
-        if is_msvc(self):
-            if self.version >= Version("10.7.0"):
-                if Version(self.settings.compiler.version) < "192":
-                    raise ConanInvalidConfiguration("Rocksdb requires MSVC version >= 192")
-            elif Version(self.settings.compiler.version) < "191":
-                raise ConanInvalidConfiguration("Rocksdb requires MSVC version >= 191")
 
         if self.options.shared and self.options.with_folly:
             # https://github.com/facebook/rocksdb/blob/v10.5.1/CMakeLists.txt#L603
