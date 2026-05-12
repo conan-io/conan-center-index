@@ -1506,6 +1506,17 @@ class QtConan(ConanFile):
             _create_module("Protobuf", [])
             _create_module("Grpc", ["Core", "Protobuf", "Network"])
 
+        if self.options.get_safe("qttasktree"):
+            _create_module("TaskTree", [])
+
+        if self.options.get_safe("qtopenapi"):
+            _create_module("OpenApi", [])
+            self.cpp_info.components["qtOpenApi"].libs = []
+            self.cpp_info.components["qtOpenApi"].libdirs = []
+
+        if self.options.get_safe("qtcanvaspainter") and self.options.gui:
+            _create_module("CanvasPainter", ["Gui"])
+
         if self.settings.os in ["Windows", "iOS"]:
             if self.settings.os == "Windows":
                 self.cpp_info.components["qtEntryPointImplementation"].set_property("cmake_target_name", "Qt6::EntryPointImplementation")
