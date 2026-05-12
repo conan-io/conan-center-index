@@ -5,3 +5,4 @@ sources:
 patches:
   "0.14.0":
     - patch_file: "patches/0.14.0-0001-use-system-libunwind.patch"
+    - patch_file: "patches/0.14.0-0002-fix-windows-arm.patch"
