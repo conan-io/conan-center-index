@@ -198,7 +198,7 @@ class LibcurlConan(ConanFile):
 
     def build_requirements(self):
         if self._is_using_cmake_build:
-            self.tool_requires("cmake/[>=3.17]")
+            self.tool_requires("cmake/[>=3.18]")
             if self._is_win_x_android:
                 self.tool_requires("ninja/[>=1.10.2 <2]")
         else:
