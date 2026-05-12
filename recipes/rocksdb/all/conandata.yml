@@ -1,13 +1,13 @@
 sources:
-  "10.10.1":
-    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v10.10.1.tar.gz"
-    sha256: "DF2FF348F3FAC8578FD4B727EEE7267AAF90CD403C99B55E898D1DB63FA8CFF5"
+  "11.1.1":
+    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v11.1.1.tar.gz"
+    sha256: "63F11183FE40725A0E89A9E392F2C86C94B90064F1D95F5173A02CFE40DE13F7"
   "10.5.1":
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v10.5.1.tar.gz"
     sha256: "7EC942BAAB802B2845188D02BC5D4E42C29236E61BCBC08F5B3A6BDD92290C22"
 patches:
-  "10.10.1":
-    - patch_file: "patches/10.10.x-0001-exclude-thirdparty.patch"
+  "11.1.1":
+    - patch_file: "patches/11.1.x-0001-exclude-thirdparty.patch"
       patch_description: "Do not include thirdparty.inc"
   "10.5.1":
     - patch_file: "patches/9.x.x-0001-exclude-thirdparty.patch"
