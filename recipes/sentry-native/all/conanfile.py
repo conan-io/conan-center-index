@@ -199,7 +199,7 @@ class SentryNativeConan(ConanFile):
         elif self.settings.os == "Android":
             self.cpp_info.components["sentry"].system_libs = ["dl", "log"]
         elif self.settings.os == "Windows":
-            self.cpp_info.components["sentry"].system_libs = ["shlwapi", "dbghelp", "version"]
+            self.cpp_info.components["sentry"].system_libs = ["shlwapi", "dbghelp", "version", "synchronization"]
             if self.options.transport == "winhttp":
                 self.cpp_info.components["sentry"].system_libs.append("winhttp")
         if self.options.transport == "curl":
