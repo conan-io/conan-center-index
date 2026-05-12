@@ -129,7 +129,7 @@ class SentryNativeConan(ConanFile):
                 self.requires("breakpad/cci.20210521")
         if self.options.get_safe("qt"):
             self.requires("qt/[>=5.15.16 <7]")
-        if self.settings.os in ("Linux", "FreeBSD"):
+        if self.settings.os == "Linux":
             self.requires("libunwind/[>=1.6.2 <2]")
 
     def validate(self):
