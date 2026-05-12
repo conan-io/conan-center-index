@@ -10,7 +10,7 @@ class clblastTestConan(ConanFile):
 
     def requirements(self):
         self.test_requires(self.tested_reference_str)
-        self.requires("opencl-clhpp-headers/2025.07.22")
+        self.requires("opencl-headers/2025.07.22")
         if self.settings.os != "Macos":
             self.requires("opencl-icd-loader/2025.07.22", options={"shared": True})
 
