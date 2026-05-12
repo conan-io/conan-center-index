@@ -1,3 +1,5 @@
+skip check_cxx_source_compiles usage for openssl
+
 --- a/Source/Common/CMakeLists.txt
 +++ b/Source/Common/CMakeLists.txt
 @@ -68,18 +68,8 @@ CHECK_CXX_SOURCE_COMPILES(

@@ -599,7 +599,7 @@ class BoostConan(ConanFile):
             if Version(self.version) == "1.86.0" and is_msvc(self):
                 setattr(self.options, "without_process", True)
 
-        if Version(self.version) == "1.90.0":
+        if Version(self.version) in ["1.90.0", "1.91.0"]:
             # FIXME: boost.coroutine doesn't support Windows ARM64 due to missing context assembly
             # See https://github.com/boostorg/context/issues/296
             if self._is_windows_platform and "arm" in str(self.settings.arch):
@@ -629,6 +629,14 @@ class BoostConan(ConanFile):
         if Version(self.version) == "1.85.0":
             # https://github.com/boostorg/stacktrace/blob/boost-1.85.0/build/Jamfile.v2#L143
             return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
+        elif Version(self.version) >= "1.91.0":
+            # INFO: from_exception is built for all targets; only Cygwin is excluded upstream
+            # https://github.com/boostorg/stacktrace/blob/boost-1.91.0/build/Jamfile.v2#L252
+            if self.options.header_only or self.options.without_stacktrace:
+                return False
+            if self.settings.get_safe("os.subsystem") == "cygwin":
+                return False
+            return True
         elif Version(self.version) >= "1.86.0":
             # https://github.com/boostorg/stacktrace/blob/boost-1.86.0/build/Jamfile.v2#L148
             return not self.options.header_only and not self.options.without_stacktrace and self._b2_architecture == "x86"

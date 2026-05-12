@@ -1,12 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
@@ -50,15 +48,13 @@ class LibsecretConan(ConanFile):
     def requirements(self):
         self.requires("glib/[>=2.78.3 <3]", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("crypto") == "libgcrypt":
-            self.requires("libgcrypt/1.10.3")
+            self.requires("libgcrypt/[>=1.10.3 <2]")
         elif self.options.get_safe("crypto") == "gnutls":
             self.requires("gnutls/3.8.7")
 
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} recipe is not yet compatible with Windows.")
-        if self.options.crypto == "gnutls" and Version(self.version) < "0.21.2":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support GnuTLS before version 0.21.2. Use -o '&:crypto=libgcrypt' instead.")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.4.0 <2]")
@@ -77,17 +73,13 @@ class LibsecretConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
         tc = MesonToolchain(self)
         tc.project_options["introspection"] = "false"
         tc.project_options["manpage"] = "false"
         tc.project_options["gtk_doc"] = "false"
-        if Version(self.version) >= "0.21.2":
-            tc.project_options["crypto"] = str(self.options.crypto) if self.options.crypto else "disabled"
-        else:
-            tc.project_options["gcrypt"] = "true" if self.options.crypto == "libgcrypt" else "false"
+        tc.project_options["crypto"] = str(self.options.crypto) if self.options.crypto else "disabled"
         tc.generate()
+
         deps = PkgConfigDeps(self)
         deps.generate()
 
