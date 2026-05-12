@@ -1,3 +1,5 @@
+fix include for json-c
+
 --- a/Source/MediaStorageAndFileFormat/gdcmJSON.cxx
 +++ b/Source/MediaStorageAndFileFormat/gdcmJSON.cxx
 @@ -18,7 +18,7 @@
