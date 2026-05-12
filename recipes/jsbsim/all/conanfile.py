@@ -53,6 +53,9 @@ class JsbsimConan(ConanFile):
     def requirements(self):
         self.requires("expat/[>=2.6.2 <3]")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.18]")
+
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
 
