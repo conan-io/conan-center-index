@@ -68,6 +68,8 @@ class JsbsimConan(ConanFile):
         tc.variables["SYSTEM_EXPAT"] = True
         tc.variables["BUILD_DOCS"] = False
         tc.variables["BUILD_PYTHON_MODULE"] = False
+        if Version(self.version) == "1.1.13":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("expat", "cmake_file_name", "EXPAT")
