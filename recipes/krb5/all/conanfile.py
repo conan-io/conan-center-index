@@ -73,6 +73,16 @@ class Krb5Conan(ConanFile):
             "--enable-dns-for-realm",
             f"--with-keyutils={self.package_folder}",
             ])
+        # Autoconf cannot run several krb5 tests when cross_compiling
+        if cross_building(self):
+            tc.configure_args.extend([
+                # Cannot test for constructor/destructor support when cross compiling
+                "krb5_cv_attr_constructor_destructor=yes,yes",
+                # Cannot test regcomp when cross compiling
+                "ac_cv_func_regcomp=yes",
+                # Cannot test for printf positional argument support when cross compiling
+                "ac_cv_printf_positional=yes",
+            ])
         tc.generate()
 
         pkg = AutotoolsDeps(self)
