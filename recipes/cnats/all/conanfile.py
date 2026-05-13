@@ -50,10 +50,10 @@ class PackageConan(ConanFile):
         if self.options.with_tls:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_sodium:
-            self.requires("libsodium/1.0.20")
+            self.requires("libsodium/[~1.0.20]")
         # FIXME: C3I Jenkins does not have protobuf-c static x shared deps for now
         if self.options.enable_streaming:
-            self.requires("protobuf-c/1.4.1")
+            self.requires("protobuf-c/[>=1.4.1 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -94,8 +94,10 @@ class PackageConan(ConanFile):
         self.cpp_info.libs = [f"{lib_name}{debug}"]
         self.cpp_info.set_property("cmake_file_name", "cnats")
         self.cpp_info.set_property("cmake_target_name", f"cnats::{lib_name}")
-        # Backward compatible with users using targets with debug suffix
-        self.cpp_info.set_property("cmake_target_aliases", [f"cnats::{lib_name}{debug}"])
+        if f"cnats::{lib_name}{debug}" != "cnats::{lib_name}":
+            # older versions of cnats have cmake targets with debug suffix in the name
+            # kept for backwards compatibility, remove in future version
+            self.cpp_info.set_property("cmake_target_aliases", [f"cnats::{lib_name}{debug}"])
         self.cpp_info.set_property("pkg_config_name", "libnats")
 
         if self.options.enable_streaming:

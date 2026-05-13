@@ -271,7 +271,10 @@ class GtsamConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("metis", "cmake_target_name", "metis-gtsam-if")
+
+        if self.options.support_nested_dissection:
+            deps.set_property("metis", "cmake_target_name", "metis-gtsam-if")
+
         deps.generate()
 
     def _patch_sources(self):
@@ -302,9 +305,10 @@ class GtsamConan(ConanFile):
                             'GTSAM_ADDITIONAL_LIBRARIES "tcmalloc"',
                             'GTSAM_ADDITIONAL_LIBRARIES "gperftools::gperftools"')
 
-        # Fix HandleMetis.cmake incompatibility with METIS from Conan
-        save(self, os.path.join(self.source_folder, "cmake", "HandleMetis.cmake"),
-             "find_package(metis REQUIRED CONFIG)\n")
+        if self.options.support_nested_dissection:
+            # Fix HandleMetis.cmake incompatibility with METIS from Conan
+            save(self, os.path.join(self.source_folder, "cmake", "HandleMetis.cmake"),
+                 "find_package(metis REQUIRED CONFIG)\n")
 
         # Fix TBB handling
         handle_tbb_path = os.path.join(self.source_folder, "cmake", "HandleTBB.cmake")

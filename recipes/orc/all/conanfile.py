@@ -86,6 +86,8 @@ class OrcRecipe(ConanFile):
         tc.cache_variables["BUILD_ENABLE_AVX512"] = self.options.get_safe("build_avx512", False)
         tc.cache_variables["STOP_BUILD_ON_WARNING"] = False
         tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        # TODO: Remove after migrating to new generator https://github.com/conan-io/conan/issues/12012
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
 
         protoc_path = os.path.join(self.dependencies.build["protobuf"].cpp_info.bindir, "protoc")
         tc.cache_variables["PROTOBUF_EXECUTABLE"] = protoc_path.replace("\\", "/")

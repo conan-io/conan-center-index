@@ -1,4 +1,7 @@
 sources:
-  "0.12.6":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.12.6/sentry-native.zip"
-    sha256: "617a57ce6c32626828b79acce5271023637151b2b34a3a18732f3ba75099cd15"
+  "0.14.0":
+    url: "https://github.com/getsentry/sentry-native/releases/download/0.14.0/sentry-native.zip"
+    sha256: "c720f82b09fc9ccfdc93f4d6d1426e67435fa4c5ada0088e07575c97287b506b"
+patches:
+  "0.14.0":
+    - patch_file: "patches/0.14.0-0001-use-system-libunwind.patch"
