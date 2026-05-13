@@ -1,0 +1,72 @@
+diff --git apps/CMakeLists.txt apps/CMakeLists.txt
+index e1b706dc..65f32754 100644
+--- apps/CMakeLists.txt
++++ apps/CMakeLists.txt
+@@ -8,7 +8,11 @@ if(MSVC)
+         @ONLY
+     )
+ 
+-    add_link_options("/MANIFEST:EMBED" "/MANIFESTINPUT:${CMAKE_CURRENT_BINARY_DIR}/bmx_windows.generated.manifest")
++    # CMake generates linking and manifest handling differently between Visual Studio & ninja
++    # build generators. So adding it as a source file instead of an explicit linking option,
++    # CMake should cover both cases the right way.
++    set(BMX_WIN_MANIFEST_SRC "${CMAKE_CURRENT_BINARY_DIR}/bmx_windows.generated.manifest")
++    #add_link_options("/MANIFEST:EMBED" "/MANIFESTINPUT:${CMAKE_CURRENT_BINARY_DIR}/bmx_windows.generated.manifest")
+ 
+     # /manifest file is not found when incremental is enabled (default Debug build config), so we disable it.
+     add_link_options("$<$<CONFIG:Debug>:/INCREMENTAL:NO>")
+@@ -24,6 +28,7 @@ add_subdirectory(raw2bmx)
+ 
+ add_executable(bmxtimecode
+     bmxtimecode.cpp
++    ${BMX_WIN_MANIFEST_SRC}
+ )
+ 
+ target_include_directories(bmxtimecode PRIVATE
+diff --git apps/bmxparse/CMakeLists.txt apps/bmxparse/CMakeLists.txt
+index 67ce2733..0b172d39 100644
+--- apps/bmxparse/CMakeLists.txt
++++ apps/bmxparse/CMakeLists.txt
+@@ -1,5 +1,6 @@
+ add_executable(bmxparse
+     bmxparse.cpp
++    ${BMX_WIN_MANIFEST_SRC}
+ )
+ 
+ target_include_directories(bmxparse PRIVATE
+diff --git apps/bmxtranswrap/CMakeLists.txt apps/bmxtranswrap/CMakeLists.txt
+index 0228a9b0..14ee2893 100644
+--- apps/bmxtranswrap/CMakeLists.txt
++++ apps/bmxtranswrap/CMakeLists.txt
+@@ -1,6 +1,7 @@
+ add_executable(bmxtranswrap
+     bmxtranswrap.cpp
+     MXFInputTrack.cpp
++    ${BMX_WIN_MANIFEST_SRC}
+ )
+ 
+ target_include_directories(bmxtranswrap PRIVATE
+diff --git apps/mxf2raw/CMakeLists.txt apps/mxf2raw/CMakeLists.txt
+index 7d4f7c1d..7bd04244 100644
+--- apps/mxf2raw/CMakeLists.txt
++++ apps/mxf2raw/CMakeLists.txt
+@@ -5,6 +5,7 @@ add_executable(mxf2raw
+     AvidInfoOutput.cpp
+     mxf2raw.cpp
+     OutputFileManager.cpp
++    ${BMX_WIN_MANIFEST_SRC}
+ )
+ 
+ target_include_directories(mxf2raw PRIVATE
+diff --git apps/raw2bmx/CMakeLists.txt apps/raw2bmx/CMakeLists.txt
+index fda149e7..c2f09392 100644
+--- apps/raw2bmx/CMakeLists.txt
++++ apps/raw2bmx/CMakeLists.txt
+@@ -1,6 +1,7 @@
+ add_executable(raw2bmx
+     raw2bmx.cpp
+     RawInputTrack.cpp
++    ${BMX_WIN_MANIFEST_SRC}
+ )
+ 
+ target_include_directories(raw2bmx PRIVATE
