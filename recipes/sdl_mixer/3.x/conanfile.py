@@ -108,6 +108,8 @@ class SDLMixerConan(ConanFile):
         if self.options.with_mpg123:
             deps.set_property("mpg123", "cmake_file_name", "mpg123")
             deps.set_property("mpg123", "cmake_target_name", "MPG123::libmpg123")
+        if wf == "flac":
+            deps.set_property("flac", "cmake_file_name", "FLAC")
         if self.options.shared:
             deps.set_property("sdl", "cmake_components", ["Headers", "SDL3-shared"])
         deps.generate()
