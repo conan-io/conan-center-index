@@ -27,6 +27,7 @@ class Md4QtConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("qt/<host_version>")
+        self.tool_requires("cmake/[>=3.19]")
 
     def generate(self):
         tc = CMakeToolchain(self)
