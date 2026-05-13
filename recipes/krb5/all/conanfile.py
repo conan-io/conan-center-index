@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches, chdir
@@ -74,7 +74,7 @@ class Krb5Conan(ConanFile):
             f"--with-keyutils={self.package_folder}",
             ])
         # Autoconf cannot run several krb5 tests when cross_compiling
-        if cross_building(self):
+        if cross_building(self) and (is_apple_os(self) or self.settings.os == "Linux"):
             tc.configure_args.extend([
                 # Cannot test for constructor/destructor support when cross compiling
                 "krb5_cv_attr_constructor_destructor=yes,yes",
