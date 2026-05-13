@@ -5,7 +5,7 @@ from conan.tools.files import copy, get, rmdir
 import os
 
 
-required_conan_version = ">=2.4"
+required_conan_version = ">=2.25"
 
 
 class SDLMixerConan(ConanFile):
