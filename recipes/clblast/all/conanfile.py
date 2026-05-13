@@ -15,14 +15,14 @@ class CLBlastConan(ConanFile):
 
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": True, "fPIC": True}
+    default_options = {"shared": False, "fPIC": True}
 
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("opencl-headers/2025.07.22")        # C headers (CL/opencl.h)
+        self.requires("opencl-headers/2025.07.22", transitive_headers=True)
         if self.settings.os != "Macos":
             self.requires("opencl-icd-loader/2025.07.22", options={"shared": True})
 
@@ -38,9 +38,10 @@ class CLBlastConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["TUNERS"] = "OFF"
-        tc.variables["TESTS"] = "OFF"
-        tc.variables["SAMPLES"] = "OFF"
+        tc.cache_variables["OVERRIDE_MSVC_FLAGS_TO_MT"] = False
+        tc.cache_variables["TUNERS"] = False
+        tc.cache_variables["TESTS"] = False
+        tc.cache_variables["SAMPLES"] = False
         opencl_headers = self.dependencies["opencl-headers"]
         tc.variables["OpenCL_INCLUDE_DIR"] = opencl_headers.cpp_info.aggregated_components().includedirs[0].replace("\\", "/")
         if self.settings.os != "Macos":
@@ -65,5 +66,6 @@ class CLBlastConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["clblast"]
+        self.cpp_info.set_property("cmake_target_name", "clblast")
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.append("OpenCL")
