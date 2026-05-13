@@ -72,7 +72,7 @@ class SDLMixerConan(ConanFile):
         tc.cache_variables["SDLMIXER_DEPS_SHARED"] = False
         tc.cache_variables["SDLMIXER_STRICT"] = True
         tc.cache_variables["SDLMIXER_TESTS"] = False
-        tc.cache_variables["SDLMIXER_EXAMPLES"] = True
+        tc.cache_variables["SDLMIXER_EXAMPLES"] = False
 
         wf = self.options.with_flac
         tc.cache_variables["SDLMIXER_FLAC"] = wf is not False
