@@ -22,6 +22,10 @@ class Md4QtConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def requirements(self):
         self.requires("qt/[>=6.8 <7]", transitive_headers=True)
 
