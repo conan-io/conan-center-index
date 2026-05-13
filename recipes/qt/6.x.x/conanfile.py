@@ -899,7 +899,7 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             targets.extend(["windeployqt"])
         if Version(self.version) >= "6.11.0":
-            targets.append("wasmdeployqt")
+            targets.extend(["wasmdeployqt"])
         if self.options.qttools:
             if "qtattributionsscanner" not in disabled_features:
                 targets.extend(["qtattributionsscanner"])
