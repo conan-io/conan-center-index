@@ -93,6 +93,7 @@ class GlfwConan(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.ref} always loads wayland dependencies dynamically and does not support static linkage")
 
     def build_requirements(self):
+        self.tool_requires("cmake/4.3.2")
         if self.options.get_safe("with_wayland"):
             self.tool_requires("wayland-protocols/1.33")
             if self._has_build_profile:
