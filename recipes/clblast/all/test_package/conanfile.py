@@ -9,10 +9,7 @@ class clblastTestConan(ConanFile):
     generators = "CMakeDeps", "CMakeToolchain"
 
     def requirements(self):
-        self.test_requires(self.tested_reference_str)
-        self.requires("opencl-headers/2025.07.22")
-        if self.settings.os != "Macos":
-            self.requires("opencl-icd-loader/2025.07.22", options={"shared": True})
+        self.requires(self.tested_reference_str)
 
     def layout(self):
         cmake_layout(self)

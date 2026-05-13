@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get, rmdir, copy
 import os
 
@@ -42,14 +42,12 @@ class CLBlastConan(ConanFile):
         tc.cache_variables["TUNERS"] = False
         tc.cache_variables["TESTS"] = False
         tc.cache_variables["SAMPLES"] = False
-        opencl_headers = self.dependencies["opencl-headers"]
-        tc.variables["OpenCL_INCLUDE_DIR"] = opencl_headers.cpp_info.aggregated_components().includedirs[0].replace("\\", "/")
-        if self.settings.os != "Macos":
-            opencl_icd = self.dependencies["opencl-icd-loader"]
-            libdir = opencl_icd.cpp_info.aggregated_components().libdirs[0].replace("\\", "/")
-            lib_name = "OpenCL.lib" if self.settings.os == "Windows" else "libOpenCL.so"
-            tc.variables["OpenCL_LIBRARY"] = os.path.join(libdir, lib_name).replace("\\", "/")
         tc.generate()
+        deps = CMakeDeps(self)
+        if self.settings.os != "Macos":
+            deps.set_property("opencl-icd-loader","cmake_file_name", "OpenCL")
+            deps.set_property("opencl-icd-loader", "cmake_additional_variables_prefixes", ["OPENCL"])
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
