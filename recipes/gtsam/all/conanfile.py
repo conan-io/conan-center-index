@@ -155,9 +155,8 @@ class GtsamConan(ConanFile):
 
         check_min_vs(self, "191")
 
-        if is_msvc(self) and self.options.shared and self.options.support_nested_dissection:
-            raise ConanInvalidConfiguration("Can't build as shared with msvc and -o=gtsam/*:support_nested_dissection=True, "
-                                            "because the metis dependency can not be built as shared due to gklib issues")
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration("Can't build as shared with msvc due to duplicate symbols with mscv")
 
         if self.options.support_nested_dissection and self.dependencies["metis"].options.with_64bit_types:
             raise ConanInvalidConfiguration("GTSAM does not support METIS with 64-bit types")
