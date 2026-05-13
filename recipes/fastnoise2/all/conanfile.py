@@ -70,7 +70,7 @@ class Fastnoise2Conan(ConanFile):
         # INFO: Prevent CPM from downloading FastSIMD, use Conan local copy instead
         tc.cache_variables["CPM_LOCAL_PACKAGES_ONLY"] = True
         tc.cache_variables["CPM_USE_LOCAL_PACKAGES"] = True
-        tc.cache_variables["CPM_FastSIMD_SOURCE"] = os.path.join(self.source_folder, "fastsimd")
+        tc.cache_variables["CPM_FastSIMD_SOURCE"] = os.path.join(self.source_folder, "fastsimd").replace("\\", "/")
         tc.generate()
 
     def build(self):
