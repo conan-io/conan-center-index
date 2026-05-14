@@ -130,7 +130,7 @@ class RocksDBConan(ConanFile):
         if not bool(self.options.enable_sse):
             tc.variables["PORTABLE"] = True
         else:
-            tc.cache_variables["PORTABLE"] = "avx2" if is_mvc(self) else "haswell"
+            tc.cache_variables["PORTABLE"] = "AVX2" if is_msvc(self) else "haswell"
         # not available yet in CCI
         tc.variables["WITH_NUMA"] = False
         tc.generate()
