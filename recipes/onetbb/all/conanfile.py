@@ -46,7 +46,9 @@ class OneTBBConan(ConanFile):
 
     @property
     def _has_tbbproxy(self):
-        return Version(self.version) < "2021.6.0" or self.options.get_safe("tbbproxy")
+        return not (self.settings.os == "Windows" and self.settings.arch == "armv8") and (
+            Version(self.version) < "2021.6.0" or self.options.get_safe("tbbproxy")
+        )
 
     @property
     def _tbbbind_hwloc_version(self):
