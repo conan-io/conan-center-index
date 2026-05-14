@@ -1512,7 +1512,12 @@ class QtConan(ConanFile):
             _create_module("TaskTree", [])
 
         if self.options.get_safe("qtcanvaspainter") and self.options.gui:
-            _create_module("CanvasPainter", ["Gui"])
+            canvas_reqs = ["Gui"]
+            if self.options.get_safe("qtdeclarative") and qt_quick_enabled:
+                canvas_reqs.append("Quick")
+            if self.options.widgets:
+                canvas_reqs.append("Widgets")
+            _create_module("CanvasPainter", canvas_reqs)
 
         if self.settings.os in ["Windows", "iOS"]:
             if self.settings.os == "Windows":
