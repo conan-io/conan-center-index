@@ -7,6 +7,3 @@ patches:
    - patch_file: "patches/1.3-cmake-fixes.patch"
      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
      patch_type: "conan"
-   - patch_file: patches/1.7-cmake-win-largefile-manifest.patch
-     patch_description: "Fix for Windows build where the vendor code only works for Visual Studio builds but not the ninja generator"
-     patch_source: "https://github.com/ebu/bmx/pull/26"
