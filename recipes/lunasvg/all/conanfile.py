@@ -75,8 +75,10 @@ class LunaSVGConan(ConanFile):
             self.requires("plutovg/cci.20220103")
         elif Version(self.version) < "3.0.0":
             self.requires("plutovg/cci.20221030")
-        else:
+        elif Version(self.version) < "3.3.0":
             self.requires("plutovg/0.0.7")
+        else:
+            self.requires("plutovg/1.3.2")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -97,6 +99,8 @@ class LunaSVGConan(ConanFile):
             tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.variables["LUNASVG_BUILD_EXAMPLES"] = False
+        if Version(self.version) >= "3.3.0":
+            tc.cache_variables["USE_SYSTEM_PLUTOVG"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

@@ -1,4 +1,25 @@
 sources:
+  "3.5.0":
+    url: "https://github.com/sammycage/lunasvg/archive/v3.5.0.tar.gz"
+    sha256: "1abf1472ee6c4d19797916e8cc3c2e4b628e0d81178ffac60bdb0d457e32c690"
+  "3.4.0":
+    url: "https://github.com/sammycage/lunasvg/archive/v3.4.0.tar.gz"
+    sha256: "6ef03a7471fe4288def39e9fe55dfe2dbfb4041792d81a7e07e362f649cc7a0b"
+  "3.3.0":
+    url: "https://github.com/sammycage/lunasvg/archive/v3.3.0.tar.gz"
+    sha256: "06045afc30dbbdd87e219e0f5bc0526214a9d8059087ac67ce9df193a682c4b3"
+  "3.2.1":
+    url: "https://github.com/sammycage/lunasvg/archive/v3.2.1.tar.gz"
+    sha256: "3420175c9632007edfcd0198001abc116c5c646af8e928d393cd029985cc4ee8"
+  "3.2.0":
+    url: "https://github.com/sammycage/lunasvg/archive/v3.2.0.tar.gz"
+    sha256: "073629cf858bceff6fe938370d141ac7c0d21ce40acd4ffe1d56109b84d16e0d"
+  "3.1.1":
+    url: "https://github.com/sammycage/lunasvg/archive/v3.1.1.tar.gz"
+    sha256: "90b9c821944b2cddb9ab4d0d1ccd043712a8b12db7dcdcf451663c04737e40e2"
+  "3.1.0":
+    url: "https://github.com/sammycage/lunasvg/archive/v3.1.0.tar.gz"
+    sha256: "2e05791bcc7c30c77efc4fee23557c5c4c9ccd4cf626a3167c0b4a4a316ae2b6"
   "3.0.1":
     url: "https://github.com/sammycage/lunasvg/archive/v3.0.1.tar.gz"
     sha256: "39e3f47d4e40f7992d7958123ca1993ff1a02887539af2af1c638da2855a603c"
@@ -30,6 +51,22 @@ sources:
     url: "https://github.com/sammycage/lunasvg/archive/refs/tags/v2.3.1.tar.gz"
     sha256: "6492bf0f51982f5382f83f1a42f247bb1bbcbaef4a15963bbd53073cd4944a25"
 patches:
+  "3.2.1":
+    - patch_file: "patches/3.1.1-0001-use-cci-package.patch"
+      patch_description: "use cci plutovg and remove submodule fallback"
+      patch_type: "conan"
+  "3.2.0":
+    - patch_file: "patches/3.1.1-0001-use-cci-package.patch"
+      patch_description: "use cci plutovg and remove submodule fallback"
+      patch_type: "conan"
+  "3.1.1":
+    - patch_file: "patches/3.1.1-0001-use-cci-package.patch"
+      patch_description: "use cci plutovg and remove submodule fallback"
+      patch_type: "conan"
+  "3.1.0":
+    - patch_file: "patches/3.0.0-0001-use-cci-package.patch"
+      patch_description: "use cci plutovg"
+      patch_type: "conan"
   "3.0.1":
     - patch_file: "patches/3.0.0-0001-use-cci-package.patch"
       patch_description: "use cci plutovg"
