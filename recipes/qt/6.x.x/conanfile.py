@@ -1511,11 +1511,6 @@ class QtConan(ConanFile):
         if self.options.get_safe("qttasktree"):
             _create_module("TaskTree", [])
 
-        if self.options.get_safe("qtopenapi"):
-            _create_module("OpenApi", [])
-            self.cpp_info.components["qtOpenApi"].libs = []
-            self.cpp_info.components["qtOpenApi"].libdirs = []
-
         if self.options.get_safe("qtcanvaspainter") and self.options.gui:
             _create_module("CanvasPainter", ["Gui"])
 
