@@ -1,4 +1,7 @@
 sources:
+  "2.0.0":
+    url: "https://github.com/skywind3000/kcp/archive/refs/tags/2.0.0.tar.gz"
+    sha256: "ee35cee819dae26a7625e489c00b430846176f8457d5fc6e6258b41c32e4bd2f"
   "1.7.1":
     url: "https://github.com/skywind3000/kcp/archive/refs/tags/1.7.1.tar.gz"
     sha256: "41cb85b2b4c2ea5f534b785c88fe24d86c6aaca62c3ef181d18bf1db3da6758d"
