@@ -1,0 +1,14 @@
+--- Source/Core/CMakeLists.txt
++++ Source/Core/CMakeLists.txt
+@@ -402,6 +402,11 @@ if(RMLUI_SVG_PLUGIN)
+ 	target_link_libraries(rmlui_core PRIVATE lunasvg::lunasvg)
+ endif()
+ 
++if (NOT NO_THIRDPARTY_CONTAINERS)
++	find_package(robin_hood REQUIRED)
++	target_link_libraries(rmlui_core PUBLIC robin_hood::robin_hood)
++endif()
++
+ if(RMLUI_TRACY_PROFILING)
+ 	if(CMAKE_CONFIGURATION_TYPES AND RMLUI_TRACY_CONFIGURATION)
+ 		target_link_libraries(rmlui_core PUBLIC "$<$<CONFIG:Tracy>:Tracy::TracyClient>")

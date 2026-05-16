@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, replace_in_file, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.scm import Version
 import os
 
 
@@ -87,7 +88,7 @@ class RmluiConan(ConanFile):
             self.requires("lua/5.3.5")
 
         if self.options.with_thirdparty_containers:
-            self.requires("robin-hood-hashing/3.11.3", transitive_headers=True)
+            self.requires("robin-hood-hashing/3.11.5", transitive_headers=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -145,5 +146,9 @@ class RmluiConan(ConanFile):
         if self.options.with_lua_bindings:
             self.cpp_info.libs.append("RmlLua")
 
-        self.cpp_info.libs.append("RmlDebugger")
-        self.cpp_info.libs.append("RmlCore")
+        if Version(self.version) < "6.0":
+            self.cpp_info.libs.append("RmlDebugger")
+            self.cpp_info.libs.append("RmlCore")
+        else:
+            self.cpp_info.libs.append("rmlui")
+            self.cpp_info.libs.append("rmlui_debugger")
