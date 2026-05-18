@@ -5,7 +5,7 @@ from conan.tools.microsoft import MSBuild, MSBuildToolchain, vs_layout, VCVars
 from conan.tools.build import cross_building, check_min_cppstd, stdcpp_library
 from conan.tools.cmake import cmake_layout
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, mkdir
+from conan.tools.files import get, copy, rm, rmdir, replace_in_file, mkdir
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
 from conan.tools.scm import Version
 import os
@@ -93,8 +93,7 @@ class GperftoolsConan(ConanFile):
             self.options.rm_safe("enable_stacktrace_via_backtrace")
 
         if self.settings.os == "Windows":
-            #we support only the minimum on windows and default config
-            self.options.rm_safe("fPIC")
+            # we support only the minimum on windows and default config
             self.options.rm_safe("build_cpu_profiler")
             self.options.rm_safe("build_heap_profiler")
             self.options.rm_safe("build_heap_checker")
@@ -110,9 +109,6 @@ class GperftoolsConan(ConanFile):
             self.options.rm_safe("tcmalloc_alignment")
             self.options.rm_safe("tcmalloc_pagesize")
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         if self.settings.os == "Windows":
             vs_layout(self)
@@ -124,12 +120,6 @@ class GperftoolsConan(ConanFile):
 
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration(f"{self.ref} does not support gcc < 7.")
-
-        if self.settings.os == "Windows" and Version(self.version) < "2.17.0":
-            #the tcmalloc.h need to recieve extra configuration prior to 2.17.0
-            raise ConanInvalidConfiguration(
-                f"{self.ref} does not currently support Windows. Contributions are welcome."
-            )
 
     def requirements(self):
         if self.options.get_safe("enable_libunwind", False):
