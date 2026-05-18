@@ -68,6 +68,8 @@ class JsbsimConan(ConanFile):
         tc.variables["SYSTEM_EXPAT"] = True
         tc.variables["BUILD_DOCS"] = False
         tc.variables["BUILD_PYTHON_MODULE"] = False
+        # Ensure find_package-based approach is used
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_PkgConfig"] = True
         if Version(self.version) == "1.1.13":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
