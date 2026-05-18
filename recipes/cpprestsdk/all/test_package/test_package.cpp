@@ -1,4 +1,5 @@
 #include <cpprest/http_msg.h>
+#include <cpprest/http_client.h>
 
 int main()
 {

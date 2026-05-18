@@ -1,0 +1,13 @@
+fix include for json-c
+
+--- a/Source/MediaStorageAndFileFormat/gdcmJSON.cxx
++++ b/Source/MediaStorageAndFileFormat/gdcmJSON.cxx
+@@ -18,7 +18,7 @@
+ #include "gdcmSystem.h"
+ 
+ #ifdef GDCM_USE_SYSTEM_JSON
+-#include <json.h>
++#include <json-c/json.h>
+ #endif
+ 
+ #ifdef GDCM_HAVE_JSON_OBJECT_OBJECT_GET_EX

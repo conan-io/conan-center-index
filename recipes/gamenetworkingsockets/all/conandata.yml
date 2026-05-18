@@ -2,3 +2,7 @@ sources:
   "1.4.1":
     url: "https://github.com/ValveSoftware/GameNetworkingSockets/archive/refs/tags/v1.4.1.tar.gz"
     sha256: "1cfb2bf79c51a08ae4e8b7ff5e9c1266b43cfff6f53ecd3e7bc5e3fcb2a22503"
+patches:
+  "1.4.1":
+    - patch_file: "patches/01-cmake-cxx-standard.patch"
+    - patch_file: "patches/02-support-newer-protobuf.patch"

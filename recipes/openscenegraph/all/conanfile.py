@@ -125,7 +125,7 @@ class OpenSceneGraphConanFile(ConanFile):
         self.requires("opengl/system")
 
         if self.options.use_fontconfig:
-            self.requires("fontconfig/2.14.2")
+            self.requires("fontconfig/[>=2.14.2 <3]")
 
         if self.options.get_safe("with_asio"):
             # Should these be private requires?
@@ -136,7 +136,7 @@ class OpenSceneGraphConanFile(ConanFile):
         if self.options.get_safe("with_dcmtk"):
             self.requires("dcmtk/3.6.7")
         if self.options.with_freetype:
-            self.requires("freetype/2.13.2")
+            self.requires("freetype/[>=2.13.2 <3]")
         if self.options.with_gdal:
             self.requires("gdal/3.8.3")
         if self.options.get_safe("with_gif"):
@@ -241,6 +241,8 @@ class OpenSceneGraphConanFile(ConanFile):
         if is_apple_os(self):
             tc.preprocessor_definitions["GL_SILENCE_DEPRECATION"] = "1"
 
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"  # macOS: use @rpath for shared libs
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support 
         tc.generate()
 
         deps = CMakeDeps(self)

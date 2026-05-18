@@ -1,0 +1,4 @@
+sources:
+  "3.8.0":
+    url: "https://github.com/stack-of-tasks/pinocchio/releases/download/v3.8.0/pinocchio-3.8.0.tar.gz"
+    sha256: "aa4664d95a54af7197354a80f5ad324cb291b00593886b78dd868b1fd13636ca"

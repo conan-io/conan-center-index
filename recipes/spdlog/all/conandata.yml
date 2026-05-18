@@ -1,4 +1,7 @@
 sources:
+  "1.17.0":
+    url: "https://github.com/gabime/spdlog/archive/v1.17.0.tar.gz"
+    sha256: "d8862955c6d74e5846b3f580b1605d2428b11d97a410d86e2fb13e857cd3a744"
   "1.16.0":
     url: "https://github.com/gabime/spdlog/archive/v1.16.0.tar.gz"
     sha256: "8741753e488a78dd0d0024c980e1fb5b5c85888447e309d9cb9d949bdb52aa3e"
@@ -40,6 +43,7 @@ patches:
       patch_source: "https://github.com/gabime/spdlog/pull/2694"
 # Each release is intended to work with some specific versions
 fmt_version_mapping:
+  "1.17.0": "12.1.0"
   "1.16.0": "12.0.0"
   "1.15.3": "11.2.0"
   "1.14.1": "10.2.1"

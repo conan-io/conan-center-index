@@ -12,17 +12,29 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://kaitai.io/"
     topics = ("parsers", "streams", "dsl", "kaitai struct")
-    package_type = "shared-library"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
         "with_zlib": [True, False],
         "with_iconv": [True, False],
     }
     default_options = {
+        "shared": False,
+        "fPIC": True,
         "with_zlib": False,
         "with_iconv": False,
     }
     short_paths = True
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -46,6 +58,8 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
         else:
             tc.variables["STRING_ENCODING_TYPE"] = "NONE"
         tc.variables["BUILD_TESTS"] = False
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_ZLIB"] = not self.options.with_zlib
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Iconv"] = not self.options.with_iconv
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -64,5 +78,7 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["kaitai_struct_cpp_stl_runtime"]
+        if self.options.with_zlib:
+            self.cpp_info.defines.append("KS_ZLIB")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")

@@ -1,32 +1,12 @@
 sources:
-  "8.0.4":
-    url: "https://github.com/ivmai/bdwgc/releases/download/v8.0.4/gc-8.0.4.tar.gz"
-    sha256: "436a0ddc67b1ac0b0405b61a9675bca9e075c8156f4debd1d06f3a56c7cd289d"
   "8.0.6":
     url: "https://github.com/ivmai/bdwgc/releases/download/v8.0.6/gc-8.0.6.tar.gz"
     sha256: "3b4914abc9fa76593596773e4da671d7ed4d5390e3d46fbf2e5f155e121bea11"
-  "8.2.2":
-    url: "https://github.com/ivmai/bdwgc/releases/download/v8.2.2/gc-8.2.2.tar.gz"
-    sha256: "f30107bcb062e0920a790ffffa56d9512348546859364c23a14be264b38836a0"
-  "8.2.4":
-    url: "https://github.com/ivmai/bdwgc/releases/download/v8.2.4/gc-8.2.4.tar.gz"
-    sha256: "3d0d3cdbe077403d3106bb40f0cbb563413d6efdbb2a7e1cd6886595dec48fc2"
-  "8.2.6":
-    url: "https://github.com/ivmai/bdwgc/releases/download/v8.2.6/gc-8.2.6.tar.gz"
-    sha256: "b9183fe49d4c44c7327992f626f8eaa1d8b14de140f243edb1c9dcff7719a7fc"
-  "8.2.8":
-    url: "https://github.com/ivmai/bdwgc/releases/download/v8.2.8/gc-8.2.8.tar.gz"
-    sha256: "7649020621cb26325e1fb5c8742590d92fb48ce5c259b502faf7d9fb5dabb160"
+  "8.2.12":
+    url: "https://github.com/bdwgc/bdwgc/releases/download/v8.2.12/gc-8.2.12.tar.gz"
+    sha256: "42e5194ad06ab6ffb806c83eb99c03462b495d979cda782f3c72c08af833cd4e"
 patches:
-  "8.0.4":
-    - patch_file: "patches/update-cmake-8_0_4.patch"
   "8.0.6":
     - patch_file: "patches/update-cmake-8_0_6.patch"
-  "8.2.2":
-    - patch_file: "patches/update-cmake-8_2_2.patch"
-  "8.2.4":
-    - patch_file: "patches/update-cmake-8_2_4.patch"
-  "8.2.6":
-    - patch_file: "patches/update-cmake-8_2_6.patch"
-  "8.2.8":
-    - patch_file: "patches/update-cmake-8_2_6.patch"
+  "8.2.12":
+    - patch_file: "patches/update-cmake-8_2_12.patch"

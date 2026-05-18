@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import (
@@ -67,7 +68,7 @@ class FastDDSConan(ConanFile):
             raise ConanInvalidConfiguration("Mixing a dll {} library with a static runtime is not supported".format(self.name))
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16.3 <4]")
+        self.tool_requires("cmake/[>=3.16.3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -81,9 +82,13 @@ class FastDDSConan(ConanFile):
         tc.variables["EPROSIMA_INSTALLER_MINION"] = False
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+        tc.cache_variables["TINYXML2_LIBRARY"] = "tinyxml2::tinyxml2"
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("asio", "cmake_file_name", "Asio")
+        deps.set_property("asio", "cmake_target_name", "Asio")
+        deps.set_property("tinyxml2", "cmake_file_name", "TinyXML2")
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -155,4 +160,6 @@ class FastDDSConan(ConanFile):
                 self.cpp_info.system_libs.extend(["iphlpapi", "shlwapi", "mswsock", "ws2_32"])
                 if self.options.shared:
                     self.cpp_info.defines.append("FASTRTPS_DYN_LINK")
+            elif is_apple_os(self):
+                self.cpp_info.frameworks.extend(["CoreFoundation", "IOKit"])
 

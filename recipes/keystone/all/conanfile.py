@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.build import check_max_cppstd
+from conan.tools.build import check_max_cppstd, check_min_cppstd
 import os
 
 required_conan_version = ">=2.1"
@@ -55,6 +55,9 @@ class KeystoneConan(ConanFile):
         apply_conandata_patches(self)
 
     def validate_build(self):
+        # Host compiler must support std::atomic!
+        check_min_cppstd(self, 11)
+
         # INFO: include/llvm/ADT/STLExtras.h:54:34: error: no template named 'binary_function' in namespace 'std'
         # The std::binary_function was removed in C++17
         check_max_cppstd(self, 14)

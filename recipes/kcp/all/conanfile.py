@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.files import copy, export_conandata_patches, get, rmdir
 
 required_conan_version = ">=1.53.0"
 
@@ -46,6 +46,9 @@ class KcpConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=4]")
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
@@ -54,16 +57,7 @@ class KcpConan(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
 
-    def _patch_sources(self):
-        # Fix shared builds on Windows
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        " STATIC", "")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "ARCHIVE DESTINATION",
-                        "RUNTIME DESTINATION bin\nARCHIVE DESTINATION")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

@@ -7,10 +7,9 @@ from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class AprUtilConan(ConanFile):
@@ -92,7 +91,7 @@ class AprUtilConan(ConanFile):
         if self.options.with_expat:
             self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_postgresql:
-            self.requires("libpq/15.4")
+            self.requires("libpq/[>=15.4 <18]")
 
     def validate(self):
         if not self.options.with_expat:
@@ -116,6 +115,7 @@ class AprUtilConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     @property
     def _with_crypto(self):
@@ -127,6 +127,7 @@ class AprUtilConan(ConanFile):
             tc.variables["INSTALL_PDB"] = False
             tc.variables["APU_HAVE_CRYPTO"] = self._with_crypto
             tc.variables["APR_HAS_LDAP"] = self.options.with_ldap
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
             tc.generate()
             deps = CMakeDeps(self)
             deps.generate()
@@ -165,7 +166,6 @@ class AprUtilConan(ConanFile):
             deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         if self.settings.os == "Windows":
             cmake = CMake(self)
             cmake.configure()
@@ -213,9 +213,3 @@ class AprUtilConan(ConanFile):
         libdirs = [p for dep in deps for p in dep.cpp_info.aggregated_components().libdirs]
         aprutil_ldflags = " ".join([f"-L{p}" for p in libdirs])
         self.runenv_info.define("APRUTIL_LDFLAGS", aprutil_ldflags)
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.env_info.APR_UTIL_ROOT = self.package_folder
-        if not is_msvc(self):
-            self.env_info.APRUTIL_LDFLAGS = aprutil_ldflags

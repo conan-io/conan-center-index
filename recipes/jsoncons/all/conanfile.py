@@ -20,7 +20,7 @@ class JsonconsConan(ConanFile):
         "csv-reader", "jsonschema", "json-construction", "streaming-json-read",
         "header-only",
     )
-    pckage_type = "header-library"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -46,4 +46,5 @@ class JsonconsConan(ConanFile):
         self.cpp_info.libdirs = []
 
         self.cpp_info.set_property("cmake_file_name", "jsoncons")
-        self.cpp_info.set_property("cmake_target_name", "jsoncons")
+        self.cpp_info.set_property("cmake_target_name", "jsoncons::jsoncons")
+        self.cpp_info.set_property("cmake_target_aliases", ["jsoncons"])

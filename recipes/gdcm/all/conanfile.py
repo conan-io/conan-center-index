@@ -10,7 +10,7 @@ import os
 import textwrap
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class GDCMConan(ConanFile):
@@ -58,15 +58,14 @@ class GDCMConan(ConanFile):
     def requirements(self):
         self.requires("charls/2.4.2")
         self.requires("expat/[>=2.6.2 <3]")
-        self.requires("openjpeg/2.5.2")
+        self.requires("openjpeg/[>=2.5.2 <3]")
         if self.options.with_zlibng:
             self.requires("zlib-ng/2.2.0")
         else:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.settings.os != "Windows":
             self.requires("util-linux-libuuid/2.39.2")
-            if Version(self.version) >= Version("3.0.20"):
-                self.requires("libiconv/1.17")
+            self.requires("libiconv/1.17")
         if self.options.with_json:
             self.requires("json-c/0.17")
         if self.options.with_openssl:
@@ -109,6 +108,17 @@ class GDCMConan(ConanFile):
 
         tc.generate()
         deps = CMakeDeps(self)
+        if Version(self.version) >= "3.2.6":
+            # reduce patching
+            deps.set_property("expat", "cmake_file_name", "EXPAT")
+            deps.set_property("expat", "cmake_target_name", "EXPAT::EXPAT")
+            deps.set_property("expat", "cmake_find_mode", "config")
+            if self.options.with_json:
+                deps.set_property("json-c", "cmake_file_name", "JSON")
+                deps.set_property("json-c", "cmake_additional_variables_prefixes", ["JSON"])
+            if self.settings.os != "Windows":
+                deps.set_property("util-linux-libuuid", "cmake_file_name", "UUID")
+                deps.set_property("util-linux-libuuid", "cmake_additional_variables_prefixes", ["UUID"])
         deps.generate()
 
     def _patch_sources(self):
@@ -134,9 +144,6 @@ class GDCMConan(ConanFile):
         rm(self, "[!U]*.cmake", os.path.join(self.package_folder, "lib", self._gdcm_subdir)) #leave UseGDCM.cmake untouched
         rmdir(self, os.path.join(self.package_folder, "share"))
         self._create_cmake_variables(os.path.join(self.package_folder, self._gdcm_cmake_variables_path))
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets()
 
     def _create_cmake_variables(self, variables_file):
         v = Version(self.version)
@@ -172,34 +179,13 @@ class GDCMConan(ConanFile):
         """)
         save(self, variables_file, content)
 
-    def _create_cmake_module_alias_targets(self):
-        module_file = os.path.join(self.package_folder, self._gdcm_cmake_module_aliases_path)
-        targets = {library: f"GDCM::{library}" for library in self._gdcm_libraries}
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
     @property
     def _gdcm_builddir(self):
         return os.path.join("lib", self._gdcm_subdir)
 
     @property
-    def _gdcm_cmake_module_aliases_path(self):
-        return os.path.join("lib", self._gdcm_subdir, "conan-official-gdcm-targets.cmake")
-
-    @property
     def _gdcm_cmake_variables_path(self):
         return os.path.join("lib", self._gdcm_subdir, "conan-official-gdcm-variables.cmake")
-
-    @property
-    def _gdcm_build_modules(self):
-        return [self._gdcm_cmake_module_aliases_path, self._gdcm_cmake_variables_path]
 
     @property
     def _gdcm_libraries(self):
@@ -232,11 +218,6 @@ class GDCMConan(ConanFile):
             self.cpp_info.components[lib].includedirs = [os.path.join("include", self._gdcm_subdir)]
             self.cpp_info.components[lib].builddirs.append(self._gdcm_builddir)
 
-            # TODO: to remove in conan v2 once cmake_find_package* generators removed
-            self.cpp_info.components[lib].build_modules["cmake"] = [self._gdcm_cmake_module_aliases_path]
-            self.cpp_info.components[lib].build_modules["cmake_find_package"] = self._gdcm_build_modules
-            self.cpp_info.components[lib].build_modules["cmake_find_package_multi"] = self._gdcm_build_modules
-
         if self.options.with_openssl:
             self.cpp_info.components["gdcmCommon"].requires.append("openssl::openssl")
 
@@ -266,6 +247,3 @@ class GDCMConan(ConanFile):
                 if is_apple_os(self):
                     self.cpp_info.components["gdcmCommon"].frameworks = ["CoreFoundation"]
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "GDCM"
-        self.cpp_info.names["cmake_find_package_multi"] = "GDCM"

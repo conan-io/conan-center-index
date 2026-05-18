@@ -1,4 +1,7 @@
 sources:
+  "3.4.0":
+    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v3.4.0.tar.gz"
+    sha256: "e915cc267f656303dc275ae62841d19cff091cf357695c46918d344680f15627"
   "3.2.1":
     url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v3.2.1.tar.gz"
     sha256: "8c088fb967d39785f1f83454d75308ae6c55fc74fc31de173713bc293635b2fd"
@@ -6,10 +9,14 @@ sources:
     url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.14.3.tar.gz"
     sha256: "292e4170e4689d878eb5ddd38661134a704a1541402a4f564353190e4aadd23d"
 patches:
-  "3.2.1":
-    - patch_file: "patches/3.2.1-0001-fix-find-asio-and-tinyxml2.patch"
+  "3.4.0":
+    - patch_file: "patches/3.2.1-0002-fix-tool-paths.patch"
       patch_type: "conan"
-      patch_description: "Fixup find asio and tinyxml2"
+      patch_description: "Fixup paths in tools to match conan package structure"
+    - patch_file: "patches/3.4.0-0003-remove-werror.patch"
+      patch_type: "conan"
+      patch_description: "Remove werror which fixes kIOMainPortDefault not defined in MacOS < 12"
+  "3.2.1":
     - patch_file: "patches/3.2.1-0002-fix-tool-paths.patch"
       patch_type: "conan"
       patch_description: "Fixup paths in tools to match conan package structure"
@@ -17,9 +24,6 @@ patches:
       patch_type: "conan"
       patch_description: "Remove werror which fixes kIOMainPortDefault not defined in MacOS < 12"
   "2.14.3":
-    - patch_file: "patches/2.14.3-0001-fix-find-asio-and-tinyxml2.patch"
-      patch_type: "conan"
-      patch_description: "Fixup find asio and tinyxml2"
     - patch_file: "patches/2.14.3-0002-fix-tool-paths.patch"
       patch_type: "conan"
       patch_description: "Fixup paths in tools to match conan package structure"

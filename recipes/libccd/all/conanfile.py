@@ -49,6 +49,7 @@ class LibccdConan(ConanFile):
         tc.variables["BUILD_DOCUMENTATION"] = False
         tc.variables["ENABLE_DOUBLE_PRECISION"] = self.options.enable_double_precision
         tc.variables["CCD_HIDE_ALL_SYMBOLS"] = not self.options.shared
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
     def build(self):

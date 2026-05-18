@@ -4,12 +4,12 @@ from conan.tools.files import apply_conandata_patches, copy, get, rmdir, export_
 import os
 
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.0.4"
 
 
 class Atomic_opsConan(ConanFile):
     name = "libatomic_ops"
-    homepage = "https://github.com/ivmai/libatomic_ops"
+    homepage = "https://github.com/bdwgc/libatomic_ops"
     description = "The atomic_ops project (Atomic memory update operations portable implementation)"
     topics = ("conan", "fmt", "format", "iostream", "printf")
     url = "https://github.com/conan-io/conan-center-index"
@@ -67,7 +67,8 @@ class Atomic_opsConan(ConanFile):
         for option, _ in self._cmake_options_defaults:
             tc.variables["enable_{}".format(option)] = self.options.get_safe(option)
         tc.variables["install_headers"] = True
-        tc.variables["build_tests"] = False
+        tc.variables["AO_BUILD_SHARED_LIBS"] = self.options.shared
+        tc.variables["BUILD_TESTING"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         tc = CMakeDeps(self)
@@ -80,7 +81,9 @@ class Atomic_opsConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        for license in ["LICENSE", "COPYING"]:
+            copy(self, license, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
@@ -90,10 +93,6 @@ class Atomic_opsConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Atomic_ops")
         self.cpp_info.set_property("cmake_target_name", "Atomic_ops::atomic_ops_gpl") # workaround to not define an unofficial target
-
-        # TODO: Remove on Conan 2.0
-        self.cpp_info.names["cmake_find_package"] = "Atomic_ops"
-        self.cpp_info.names["cmake_find_package_multi"] = "Atomic_ops"
 
         self.cpp_info.components["atomic_ops"].set_property("cmake_target_name", "Atomic_ops::atomic_ops")
         self.cpp_info.components["atomic_ops"].set_property("pkg_config_name", "atomic_ops")

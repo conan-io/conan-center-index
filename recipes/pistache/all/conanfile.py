@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, collect_libs
+from conan.tools.files import get, copy, rm, rmdir, replace_in_file, collect_libs
 from conan.tools.build import check_min_cppstd
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.meson import Meson, MesonToolchain
@@ -35,9 +35,6 @@ class PistacheConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -53,7 +50,7 @@ class PistacheConan(ConanFile):
 
     def requirements(self):
         self.requires("rapidjson/cci.20230929")
-        self.requires("date/3.0.1")
+        self.requires("date/[^3.0.1]")
         if self.options.with_ssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.settings.os != "Linux" or self.options.get_safe("with_libevent"):
@@ -61,11 +58,6 @@ class PistacheConan(ConanFile):
             self.requires("libevent/2.1.12")
 
     def validate(self):
-        if self.settings.os != "Linux" and Version(self.version) < "0.4.25":
-            raise ConanInvalidConfiguration(f"{self.ref} is only support on Linux.")
-        if self.settings.compiler == "clang" and Version(self.version) < "0.4.25":
-            raise ConanInvalidConfiguration(f"{self.ref}'s clang support is broken. See pistacheio/pistache#835.")
-
         if Version(self.version) == "0.4.25" and self.settings.os == "Windows":
             # See https://github.com/conan-io/conan-center-index/pull/26463#issuecomment-2962541819
             raise ConanInvalidConfiguration("Windows builds are broken - contributions welcome")
@@ -80,7 +72,6 @@ class PistacheConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = MesonToolchain(self)

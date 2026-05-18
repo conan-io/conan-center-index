@@ -1,0 +1,4 @@
+sources:
+  "1.66.3":
+    url: "https://github.com/casbin/casbin-cpp/archive/refs/tags/v1.66.3.tar.gz"
+    sha256: "59527b076e8632cf01abcdc97c212385e216b4dd20e439a807539a0e3d1efe2b"

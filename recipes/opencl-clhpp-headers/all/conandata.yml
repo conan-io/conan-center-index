@@ -1,4 +1,7 @@
 sources:
+  "2025.07.22":
+    url: "https://github.com/KhronosGroup/OpenCL-CLHPP/archive/refs/tags/v2025.07.22.tar.gz"
+    sha256: "c1031afde6e9eb042e6fcfbc17078f4b437a7e8d55482a1ca6e0fa762d262a89"
   "2023.12.14":
     url: "https://github.com/KhronosGroup/OpenCL-CLHPP/archive/refs/tags/v2023.12.14.tar.gz"
     sha256: "9106700634e79cfa0935ebd67197f64689ced24c42da702acf18fa8435bd8a82"
