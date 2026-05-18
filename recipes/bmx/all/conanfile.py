@@ -56,8 +56,7 @@ class BmxConan(ConanFile):
             self.requires("libcurl/[>=7.78.0 <9]")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
         # Symbol export is currently not working properly on Windows so shared
         # libraries are currently deactivated. This can later be revisited based
@@ -72,18 +71,20 @@ class BmxConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BMX_BUILD_WITH_LIBCURL"] = self.options.with_libcurl
-        tc.variables["BMX_BUILD_EXPAT_SOURCE"] = False
+        tc.cache_variables["BMX_BUILD_EXPAT_SOURCE"] = False
+        tc.cache_variables["BUILD_TESTING"] = False
         tc.generate()
 
         cd = CMakeDeps(self)
+        cd.set_property("expat", "cmake_target_name", "EXPAT::EXPAT")
         cd.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
