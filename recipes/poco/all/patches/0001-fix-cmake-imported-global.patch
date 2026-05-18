@@ -1,0 +1,17 @@
+fix(cmake): resolve unbundled dependencies before find_package(OpenSSL)
+
+Custom patch for https://github.com/pocoproject/poco/issues/5330
+Complete patch https://github.com/pocoproject/poco/pull/5331 contains several changes
+
+diff --git a/dependencies/zlib/CMakeLists.txt b/dependencies/zlib/CMakeLists.txt
+index 0c47c68..1bd41d6 100644
+--- a/dependencies/zlib/CMakeLists.txt
++++ b/dependencies/zlib/CMakeLists.txt
+@@ -9,7 +9,6 @@
+
+ if(POCO_UNBUNDLED)
+ 	find_package(ZLIB REQUIRED)
+-	set_target_properties(ZLIB::ZLIB PROPERTIES IMPORTED_GLOBAL TRUE)
+ else()
+
+ 	# Sources

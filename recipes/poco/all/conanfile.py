@@ -117,26 +117,34 @@ class PocoConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.26]")
+
     def requirements(self):
         self.requires("pcre2/[>=10.42 <11]")
         self.requires("utf8proc/[>=2.8.0 <3]")
-        self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.enable_xml:
-            self.requires("expat/[>=2.6.2 <3]", transitive_headers=True)
+            self.requires("expat/[>=2.6.2 <3]")
         if self.options.enable_data_sqlite:
-            self.requires("sqlite3/[>=3.45.0 <4]")
+            # transitive header: Poco/Data/SQLite/Extractor.h:36:#include <sqlite3.h>
+            self.requires("sqlite3/[>=3.45.0 <4]", transitive_headers=True)
         if self.options.enable_apacheconnector:
             self.requires("apr/1.7.4")
             self.requires("apr-util/1.6.1")
         if self.options.enable_netssl or self.options.enable_crypto or \
            self.options.get_safe("enable_jwt"):
+            # transitive header: Poco/Crypto/Crypto.h:26:#include <openssl/err.h>
             self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
         if self.options.enable_data_odbc and self.settings.os != "Windows":
-            self.requires("odbc/2.3.11")
+            # transitive header: Poco/Data/ODBC/Unicode.h:31:#include <sqlucode.h>
+            self.requires("odbc/2.3.11", transitive_headers=True)
         if self.options.get_safe("enable_data_postgresql"):
+            # transitive header: Poco/Data/PostgreSQL/SessionHandle.h:26:#include <libpq-fe.h>
             self.requires("libpq/[>=15.4 <18]", transitive_headers=True)
         if self.options.get_safe("enable_data_mysql"):
-            self.requires("libmysqlclient/8.1.0")
+            # transitive header: Poco/Data/MySQL/SessionHandle.h:22:#include <mysql.h>
+            self.requires("libmysqlclient/8.1.0", transitive_headers=True)
 
     def package_id(self):
         del self.info.options.enable_active_record
@@ -146,9 +154,8 @@ class PocoConan(ConanFile):
         check_min_cppstd(self, 17)
 
     def validate(self):
-        #  1.13.3: https://github.com/pocoproject/poco/blob/d6bd48a94c5f03e3c69cac1b024fdad5120e3a7b/Foundation/CMakeLists.txt#L125-L128
-        #  1.14.2: https://github.com/pocoproject/poco/blob/96d182a99303fb068575294b36f0cc20da2e7b25/Foundation/CMakeLists.txt#L130
-        check_min_cppstd(self, 14)
+        #  1.15.0: https://github.com/pocoproject/poco/blob/poco-1.15.0-release/Foundation/CMakeLists.txt#L120
+        check_min_cppstd(self, 17)
 
         if self.options.enable_apacheconnector:
             # FIXME: missing apache2 recipe + few issues
@@ -176,11 +183,10 @@ class PocoConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CMAKE_BUILD_TYPE"] = self.settings.build_type
         for comp in self._poco_component_tree.values():
             if comp.option:
                 tc.variables[comp.option.upper()] = self.options.get_safe(comp.option, False)
-        tc.variables["POCO_UNBUNDLED"] = True
+        tc.cache_variables["POCO_UNBUNDLED"] = True
         tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
         if is_msvc(self):
             tc.variables["POCO_MT"] = is_msvc_static_runtime(self)
@@ -205,6 +211,11 @@ class PocoConan(ConanFile):
             tc.cache_variables["MYSQL_FOUND"] = True
         if self.options.get_safe("enable_data_postgresql"):
             tc.cache_variables["POSTGRESQL_FOUND"] = True
+        # TODO: pcre2 library type marker, not needed after moving to CMakeConfigDeps. See patch 0003-fix-pcre2-interface-library-type.patch
+        tc.cache_variables["_PCRE2TYPE"] = "SHARED_LIBRARY" if self.dependencies["pcre2"].options.shared else "STATIC_LIBRARY"
+        # Workaround https://github.com/pocoproject/poco/issues/5330
+        # TODO: Not needed for >=1.15.3
+        tc.cache_variables["CMAKE_FIND_PACKAGE_TARGETS_GLOBAL"] = True
         tc.generate()
 
         deps = CMakeDeps(self)

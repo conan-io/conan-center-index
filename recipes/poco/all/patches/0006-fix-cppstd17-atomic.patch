@@ -1,0 +1,17 @@
+Fix expected C++ Atomic Wait when building with C++17
+
+https://github.com/pocoproject/poco/pull/5356
+
+diff --git a/Foundation/include/Poco/Config.h b/Foundation/include/Poco/Config.h
+index e0610cc..431adb4 100644
+--- a/Foundation/include/Poco/Config.h
++++ b/Foundation/include/Poco/Config.h
+@@ -228,7 +228,7 @@
+ 
+ #if defined(__APPLE__) && __has_include(<Availability.h>)
+ 	#include <Availability.h>
+-	#if __MAC_OS_X_VERSION_MIN_REQUIRED >= 110000
++	#if __MAC_OS_X_VERSION_MIN_REQUIRED >= 110000 && POCO_HAVE_CPP20_COMPILER
+ 		 #define POCO_HAVE_ATOMIC_WAIT 1
+ 	#endif
+ #elif defined(__cpp_lib_atomic_wait)
