@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=2.0.9"
@@ -33,6 +33,7 @@ class QtADS(ConanFile):
         "fPIC": True,
     }
     implements = ["auto_shared_fpic"]
+    exports_sources = "patches/*"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -51,6 +52,7 @@ class QtADS(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
