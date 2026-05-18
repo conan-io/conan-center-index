@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -27,9 +27,6 @@ class MinizConan(ConanFile):
         "fPIC": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -49,12 +46,12 @@ class MinizConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) >= "2.2.0":
-            tc.variables["BUILD_EXAMPLES"] = False
-            tc.variables["BUILD_FUZZERS"] = False
-            tc.variables["AMALGAMATE_SOURCES"] = False
-            tc.variables["BUILD_HEADER_ONLY"] = False
-            tc.variables["INSTALL_PROJECT"] = True
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_FUZZERS"] = False
+        tc.variables["AMALGAMATE_SOURCES"] = False
+        tc.variables["BUILD_HEADER_ONLY"] = False
+        tc.variables["INSTALL_PROJECT"] = True
+        tc.cache_variables["BUILD_TESTS"] = False
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         if Version(self.version) <= "3.0.2":
@@ -62,7 +59,6 @@ class MinizConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

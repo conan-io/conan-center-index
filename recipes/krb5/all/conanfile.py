@@ -1,14 +1,13 @@
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class Krb5Conan(ConanFile):
@@ -52,9 +51,6 @@ class Krb5Conan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
@@ -76,7 +72,16 @@ class Krb5Conan(ConanFile):
             "--with-system-verto",
             "--enable-dns-for-realm",
             f"--with-keyutils={self.package_folder}",
-            f"--with-tcl={(self.dependencies['tcl'].package_folder if self.options.get_safe('with_tcl') else 'no')}",
+            ])
+        # Autoconf cannot run several krb5 tests when cross_compiling
+        if cross_building(self) and (is_apple_os(self) or self.settings.os == "Linux"):
+            tc.configure_args.extend([
+                # Cannot test for constructor/destructor support when cross compiling
+                "krb5_cv_attr_constructor_destructor=yes,yes",
+                # Cannot test regcomp when cross compiling
+                "ac_cv_func_regcomp=yes",
+                # Cannot test for printf positional argument support when cross compiling
+                "ac_cv_printf_positional=yes",
             ])
         tc.generate()
 
@@ -89,14 +94,12 @@ class Krb5Conan(ConanFile):
         self.requires("libverto/0.3.2")
         if self.options.get_safe("with_tls") == "openssl":
             self.requires("openssl/[>=1.1 <4]")
-        if self.options.get_safe("with_tcl"):
-            self.requires("tcl/8.6.11")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        self.build_requires("automake/1.16.5")
-        self.build_requires("bison/3.8.2")
+        self.tool_requires("automake/1.16.5")
+        self.tool_requires("bison/3.8.2")
 
     def build(self):
         apply_conandata_patches(self)
@@ -113,42 +116,35 @@ class Krb5Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "var"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.components["mit-krb5"].libs = ["krb5", "k5crypto", "com_err"]
         if self.options.get_safe('with_tls') == "openssl":
             self.cpp_info.components["mit-krb5"].requires = ["openssl::crypto"]
-        self.cpp_info.components["mit-krb5"].names["pkg_config"] = "mit-krb5"
         if self.settings.os == "Linux":
             self.cpp_info.components["mit-krb5"].system_libs = ["resolv"]
 
         self.cpp_info.components["libkrb5"].libs = []
         self.cpp_info.components["libkrb5"].requires = ["mit-krb5"]
-        self.cpp_info.components["libkrb5"].names["pkg_config"] = "krb5"
 
         self.cpp_info.components["mit-krb5-gssapi"].libs = ["gssapi_krb5"]
         self.cpp_info.components["mit-krb5-gssapi"].requires = ["mit-krb5"]
-        self.cpp_info.components["mit-krb5-gssapi"].names["pkg_config"] = "mit-krb5-gssapi"
 
         self.cpp_info.components["krb5-gssapi"].libs = []
         self.cpp_info.components["krb5-gssapi"].requires = ["mit-krb5-gssapi"]
-        self.cpp_info.components["krb5-gssapi"].names["pkg_config"] = "krb5-gssapi"
 
         self.cpp_info.components["gssrpc"].libs = ["gssrpc"]
         self.cpp_info.components["gssrpc"].requires = ["mit-krb5-gssapi"]
-        self.cpp_info.components["gssrpc"].names["pkg_config"] = "gssrpc"
 
         self.cpp_info.components["kadm-client"].libs = ["kadm5clnt_mit"]
         self.cpp_info.components["kadm-client"].requires = ["mit-krb5-gssapi", "gssrpc"]
-        self.cpp_info.components["kadm-client"].names["pkg_config"] = "kadm-client"
 
         self.cpp_info.components["kdb"].libs = ["kdb5"]
         self.cpp_info.components["kdb"].requires = ["mit-krb5-gssapi", "mit-krb5", "gssrpc"]
-        self.cpp_info.components["kdb"].names["pkg_config"] = "kdb-client"
 
         self.cpp_info.components["kadm-server"].libs = ["kadm5srv_mit"]
         self.cpp_info.components["kadm-server"].requires = ["kdb", "mit-krb5-gssapi"]
-        self.cpp_info.components["kadm-server"].names["pkg_config"] = "kadm-server"
 
         self.cpp_info.components["krad"].libs = ["krad"]
         self.cpp_info.components["krad"].requires = ["libkrb5", "libverto::libverto"]
