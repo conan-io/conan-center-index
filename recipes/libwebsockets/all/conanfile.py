@@ -430,18 +430,11 @@ class LibwebsocketsConan(ConanFile):
 
     def _patch_sources(self):
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        if Version(self.version) < "4.5.8":
-            replace_in_file(self,
-                cmakelists,
-                "SET(CMAKE_INSTALL_NAME_DIR \"${CMAKE_INSTALL_PREFIX}/${LWS_INSTALL_LIB_DIR}${LIB_SUFFIX}\")",
-                "",
-            )
-        else:
-            replace_in_file(self,
-                cmakelists,
-                "SET(CMAKE_INSTALL_NAME_DIR \"${CMAKE_INSTALL_PREFIX}/${LWS_INSTALL_LIB_DIR}\")",
-                "",
-            )
+        replace_in_file(self,
+            cmakelists,
+            'SET(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${LWS_INSTALL_LIB_DIR}',
+            '# SET(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${LWS_INSTALL_LIB_DIR}',
+        )
 
         # Early call to find_package(OpenSSL) because its referenced in different places
         if self.options.with_ssl == "openssl":
