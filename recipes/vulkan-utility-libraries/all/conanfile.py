@@ -14,17 +14,18 @@ class VulkanUtilityLibrariesConan(ConanFile):
     topics = ("vulkan-utility-libraries", "vulkan")
     homepage = "https://github.com/KhronosGroup/Vulkan-Utility-Libraries"
     url = "https://github.com/conan-io/conan-center-index"
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
     }
-    implements = ["auto_shared_fpic"]
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def layout(self):
         cmake_layout(self, src_folder="src")
