@@ -151,7 +151,7 @@ class PocoConan(ConanFile):
         del self.info.options.log_debug
 
     def validate_build(self):
-        check_min_cppstd(self, 20)
+        check_min_cppstd(self, 17)
 
     def validate(self):
         #  1.15.0: https://github.com/pocoproject/poco/blob/poco-1.15.0-release/Foundation/CMakeLists.txt#L120
