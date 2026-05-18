@@ -213,6 +213,9 @@ class PocoConan(ConanFile):
             tc.cache_variables["POSTGRESQL_FOUND"] = True
         # TODO: pcre2 library type marker, not needed after moving to CMakeConfigDeps
         tc.cache_variables["PCRE2_SHARED"] = self.dependencies["pcre2"].options.shared
+        # Workaround https://github.com/pocoproject/poco/issues/5330
+        # TODO: Not needed for >=1.15.3
+        tc.cache_variables["CMAKE_FIND_PACKAGE_TARGETS_GLOBAL"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
