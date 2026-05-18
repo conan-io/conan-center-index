@@ -1,0 +1,13 @@
+diff --git a/src/simgear/xml/CMakeLists.txt b/src/simgear/xml/CMakeLists.txt
+index 0874697..9309a92 100644
+--- a/src/simgear/xml/CMakeLists.txt
++++ b/src/simgear/xml/CMakeLists.txt
+@@ -31,7 +31,7 @@ add_library(Xml OBJECT ${SOURCES})
+ 
+ if(SYSTEM_EXPAT)
+   target_compile_definitions(Xml PRIVATE SYSTEM_EXPAT)
+-  if (PkgConfig_FOUND)
++  if (0)
+     pkg_check_modules(PC_EXPAT IMPORTED_TARGET expat)
+     target_link_libraries(Xml PkgConfig::PC_EXPAT)
+   else()

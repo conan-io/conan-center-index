@@ -32,7 +32,7 @@ class JsbsimConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        if Version(self.version) >= "1.2.4":
+        if Version(self.version) >= "1.3.1":
             return "17"
         return "11"
 
