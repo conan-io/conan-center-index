@@ -9,3 +9,4 @@ patches:
     - patch_file: "patches/0003-fix-pcre2-interface-library-type.patch"
     - patch_file: "patches/0004-fix-win-pragma-warning.patch"
     - patch_file: "patches/0005-cmake-cppstd.patch"
+    - patch_file: "patches/0006-fix-cppstd17-atomic.patch"
