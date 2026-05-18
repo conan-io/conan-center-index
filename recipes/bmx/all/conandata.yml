@@ -1,7 +1,7 @@
 sources:
   "1.7":
-    url: "https://github.com/ebu/bmx/archive/v1.7.tar.gz"
-    sha256: "fbdbba241e8d0e8f30a5f8419e0f0a9059d072e58e37c761f6cd4c1c62c0edb5"
+    url: "https://github.com/ebu/bmx/releases/download/v1.7/bmx-1.7.tar.gz"
+    sha256: "448242a31c77517a472eab8aa05bbe98d6c50814d7990d17696444c0564bfb34"
 patches:
   "1.7":
    - patch_file: "patches/1.7-cmake-fixes.patch"
