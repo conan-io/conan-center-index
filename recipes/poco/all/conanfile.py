@@ -211,8 +211,8 @@ class PocoConan(ConanFile):
             tc.cache_variables["MYSQL_FOUND"] = True
         if self.options.get_safe("enable_data_postgresql"):
             tc.cache_variables["POSTGRESQL_FOUND"] = True
-        # TODO: pcre2 library type marker, not needed after moving to CMakeConfigDeps
-        tc.cache_variables["PCRE2_SHARED"] = self.dependencies["pcre2"].options.shared
+        # TODO: pcre2 library type marker, not needed after moving to CMakeConfigDeps. See patch 0003-fix-pcre2-interface-library-type.patch
+        tc.cache_variables["_PCRE2TYPE"] = "SHARED_LIBRARY" if self.dependencies["pcre2"].options.shared else "STATIC_LIBRARY"
         # Workaround https://github.com/pocoproject/poco/issues/5330
         # TODO: Not needed for >=1.15.3
         tc.cache_variables["CMAKE_FIND_PACKAGE_TARGETS_GLOBAL"] = True

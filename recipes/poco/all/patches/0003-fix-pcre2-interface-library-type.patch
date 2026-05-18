@@ -8,24 +8,14 @@ The EMBEDDED_PCRE2_SOURCES are private source from pcre2, which should be compil
 The static library is expected to be linked against the system pcre2 library, so the embedded sources should not be compiled in that case.
 
 diff --git a/Foundation/CMakeLists.txt b/Foundation/CMakeLists.txt
-index bf141ba..d5b80df 100644
+index bf141ba..3a54d7d 100644
 --- a/Foundation/CMakeLists.txt
 +++ b/Foundation/CMakeLists.txt
-@@ -42,8 +42,15 @@ if(POCO_UNBUNDLED)
- 		POCO_SOURCES(SRCS RegExp ${EMBEDDED_PCRE2_SOURCES} )
- 	elseif ("${_PCRE2TYPE}" STREQUAL "STATIC_LIBRARY")
- 		message(STATUS "PCRE2: linking static library.")
--	else()
--		message(WARNING "PCRE2: unknown library type: ${_PCRE2TYPE}")
-+	elseif("${_PCRE2TYPE}" STREQUAL "INTERFACE_LIBRARY")
-+		if(PCRE2_SHARED)
-+			# FIXME: CMakeDeps generates INTERFACE targets for both shared and static libraries.
-+			# This is a workaround to ensure that the embedded sources are only compiled when linking against a shared library.
-+			# Fixed by CMakeConfigDeps usage
-+			POCO_SOURCES(SRCS RegExp ${EMBEDDED_PCRE2_SOURCES} )
-+		else()
-+			message(STATUS "PCRE2: linking static library via interface target.")
-+		endif()
- 	endif()
-
- 	unset(_PCRE2TYPE)
+@@ -35,7 +35,6 @@ if(POCO_UNBUNDLED)
+ 
+ 	# pcre2 source files are linked with Foundation when shared library pcre2 is linked.
+ 	# When linking pcre2 as static library the symbols are accessible.
+-	get_target_property(_PCRE2TYPE Pcre2::Pcre2 TYPE)
+ 	if("${_PCRE2TYPE}" STREQUAL "SHARED_LIBRARY")
+ 		# HACK: Unicode.cpp requires functions from these files.
+ 		# They can't be used directly from the library
