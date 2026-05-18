@@ -57,6 +57,10 @@ class WaylandConan(ConanFile):
         self.requires("expat/[>=2.6.2 <3]")
 
     def validate(self):
+        if self.settings.compiler == "msvc":
+            # use of getopt.h, unistd.h, `-include` flag
+            # it's clear wayland-scanner does not support msvc
+            raise ConanInvalidConfiguration("msvc is not supported")
         if self.settings.os not in ("Linux", "Android") and self.options.enable_libraries:
             raise ConanInvalidConfiguration(f"wayland libraries only supported Linux or Android, set 'enable_libraries=False' to build wayland-scanner")
 
