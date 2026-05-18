@@ -115,6 +115,7 @@ class CouchbaseCxxClientConan(ConanFile):
         tc.cache_variables["OPENSSL_USABLE"] = True
         # Force try_compile checks to use the current single-config build type to avoid looking for missing *_DEBUG imported targets
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+        tc.cache_variables["COUCHBASE_CXX_CLIENT_BUILD_OPENTELEMETRY"] = "OFF"
         tc.generate()
 
     def build(self):

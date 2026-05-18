@@ -90,6 +90,7 @@ class MinizipNgConan(ConanFile):
         tc.cache_variables["MZ_ZLIB"] = self.options.get_safe("with_zlib", False)
         tc.cache_variables["MZ_ZLIB_FLAVOR"] = "zlib"
         tc.cache_variables["MZ_BZIP2"] = self.options.with_bzip2
+        tc.cache_variables["MZ_PPMD"] = False
         tc.cache_variables["MZ_LZMA"] = self.options.with_lzma
         tc.cache_variables["MZ_ZSTD"] = self.options.with_zstd
         tc.cache_variables["MZ_OPENSSL"] = self.options.with_openssl

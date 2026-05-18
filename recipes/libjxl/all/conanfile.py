@@ -3,11 +3,9 @@ import os
 from conan import ConanFile
 from conan.tools.build import cross_building, stdcpp_library, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir, save, rm, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
 required_conan_version = ">=2"
 
@@ -45,7 +43,7 @@ class LibjxlConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.arch not in ["x86", "x86_64"] or Version(self.version) < "0.9":
+        if self.settings.arch not in ["x86", "x86_64"]:
             del self.options.avx512
             del self.options.avx512_spr
             del self.options.avx512_zen4
@@ -62,7 +60,7 @@ class LibjxlConan(ConanFile):
         self.requires("highway/1.1.0")
         self.requires("lcms/[>=2.16 <3]")
         if self.options.with_tcmalloc:
-            self.requires("gperftools/2.15")
+            self.requires("gperftools/[>=2.15 <3]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -71,14 +69,12 @@ class LibjxlConan(ConanFile):
     def build_requirements(self):
         # Require newer CMake, which allows INCLUDE_DIRECTORIES to be set on INTERFACE targets
         # Also, v0.9+ require CMake 3.16
-        self.tool_requires("cmake/[>=3.19 <4]")
+        self.tool_requires("cmake/[>=3.19]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
-
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_PROJECT_LIBJXL_INCLUDE"] = "conan_deps.cmake"
         tc.variables["BUILD_TESTING"] = False
@@ -111,13 +107,11 @@ class LibjxlConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         # Skip the buggy custom FindAtomic and force the use of atomic library directly for libstdc++
         tc.variables["ATOMICS_LIBRARIES"] = "atomic" if self._atomic_required else ""
-        if Version(self.version) >= "0.8":
-            # TODO: add support for the jpegli JPEG encoder library
-            tc.variables["JPEGXL_ENABLE_JPEGLI"] = False
-            tc.variables["JPEGXL_ENABLE_JPEGLI_LIBJPEG"] = False
+        tc.variables["JPEGXL_ENABLE_JPEGLI"] = False
+        tc.variables["JPEGXL_ENABLE_JPEGLI_LIBJPEG"] = False
         # TODO: can hopefully be removed in newer versions
         # https://github.com/libjxl/libjxl/issues/3159
-        if Version(self.version) >= "0.9" and self.settings.build_type == "Debug" and is_msvc(self):
+        if self.settings.build_type == "Debug" and is_msvc(self):
             tc.preprocessor_definitions["JXL_DEBUG_V_LEVEL"] = 1
         tc.generate()
 
@@ -166,17 +160,12 @@ class LibjxlConan(ConanFile):
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
             rm(self, "*-static.lib", os.path.join(self.package_folder, "lib"))
 
-    def _lib_name(self, name):
-        if Version(self.version) < "0.9" and not self.options.shared and self.settings.os == "Windows":
-            return name + "-static"
-        return name
-
     def package_info(self):
         libcxx = stdcpp_library(self)
 
         # jxl
         self.cpp_info.components["jxl"].set_property("pkg_config_name", "libjxl")
-        self.cpp_info.components["jxl"].libs = [self._lib_name("jxl")]
+        self.cpp_info.components["jxl"].libs = ["jxl"]
         self.cpp_info.components["jxl"].requires = ["brotli::brotli", "highway::highway", "lcms::lcms"]
         if self.options.with_tcmalloc:
             self.cpp_info.components["jxl"].requires.append("gperftools::tcmalloc_minimal")
@@ -188,28 +177,18 @@ class LibjxlConan(ConanFile):
             self.cpp_info.components["jxl"].system_libs.append(libcxx)
 
         # jxl_cms
-        if Version(self.version) >= "0.9.0":
-            self.cpp_info.components["jxl_cms"].set_property("pkg_config_name", "libjxl_cms")
-            self.cpp_info.components["jxl_cms"].libs = [self._lib_name("jxl_cms")]
-            self.cpp_info.components["jxl_cms"].requires = ["lcms::lcms", "highway::highway"]
-            if not self.options.shared:
-                self.cpp_info.components["jxl"].defines.append("JXL_CMS_STATIC_DEFINE")
-            if libcxx:
-                self.cpp_info.components["jxl_cms"].system_libs.append(libcxx)
-            self.cpp_info.components["jxl"].requires.append("jxl_cms")
-
-        # jxl_dec
-        if Version(self.version) < "0.9.0":
-            if not self.options.shared:
-                self.cpp_info.components["jxl_dec"].set_property("pkg_config_name", "libjxl_dec")
-                self.cpp_info.components["jxl_dec"].libs = [self._lib_name("jxl_dec")]
-                self.cpp_info.components["jxl_dec"].requires = ["brotli::brotli", "highway::highway", "lcms::lcms"]
-                if libcxx:
-                    self.cpp_info.components["jxl_dec"].system_libs.append(libcxx)
+        self.cpp_info.components["jxl_cms"].set_property("pkg_config_name", "libjxl_cms")
+        self.cpp_info.components["jxl_cms"].libs = ["jxl_cms"]
+        self.cpp_info.components["jxl_cms"].requires = ["lcms::lcms", "highway::highway"]
+        if not self.options.shared:
+            self.cpp_info.components["jxl"].defines.append("JXL_CMS_STATIC_DEFINE")
+        if libcxx:
+            self.cpp_info.components["jxl_cms"].system_libs.append(libcxx)
+        self.cpp_info.components["jxl"].requires.append("jxl_cms")
 
         # jxl_threads
         self.cpp_info.components["jxl_threads"].set_property("pkg_config_name", "libjxl_threads")
-        self.cpp_info.components["jxl_threads"].libs = [self._lib_name("jxl_threads")]
+        self.cpp_info.components["jxl_threads"].libs = ["jxl_threads"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["jxl_threads"].system_libs = ["pthread"]
         if not self.options.shared:

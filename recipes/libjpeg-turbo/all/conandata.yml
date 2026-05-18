@@ -14,3 +14,12 @@ sources:
   "2.1.5":
     url: "https://sourceforge.net/projects/libjpeg-turbo/files/2.1.5/libjpeg-turbo-2.1.5.tar.gz"
     sha256: "bc12bc9dce55300c6bf4342bc233bcc26bd38bf289eedf147360d731c668ddaf"
+patches:
+  "3.1.4.1":
+    - patch_file: "patches/3.1.4.1-0001-skip-custom-cmake-install.patch"
+  "3.0.2":
+    - patch_file: "patches/3.0.2-0001-skip-custom-cmake-install.patch"
+  "3.0.0":
+    - patch_file: "patches/3.0.2-0001-skip-custom-cmake-install.patch"
+  "2.1.5":
+    - patch_file: "patches/2.1.5-0001-skip-custom-cmake-install.patch"
