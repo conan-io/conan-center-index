@@ -4,6 +4,6 @@ sources:
     sha256: "fbdbba241e8d0e8f30a5f8419e0f0a9059d072e58e37c761f6cd4c1c62c0edb5"
 patches:
   "1.7":
-   - patch_file: "patches/1.3-cmake-fixes.patch"
+   - patch_file: "patches/1.7-cmake-fixes.patch"
      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
      patch_type: "conan"
