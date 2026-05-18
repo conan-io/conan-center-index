@@ -148,9 +148,10 @@ class CycloneDDSConan(ConanFile):
         if self.settings.os == "Windows":
             for p in ("*.pdb", "concrt*.dll", "msvcp*.dll", "vcruntime*.dll"):
                 rm(self, p, os.path.join(self.package_folder, "bin"))
-        replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS", "idlc", "Generate.cmake"),
-                        "if (TARGET CycloneDDS::libidlc)",
-                        "if (0)")
+        if not self._pre_v11:
+            replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS", "idlc", "Generate.cmake"),
+                            "if (TARGET CycloneDDS::libidlc)",
+                            "if (0)")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CycloneDDS")
