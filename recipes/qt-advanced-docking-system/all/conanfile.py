@@ -60,7 +60,7 @@ class QtADS(ConanFile):
         # The upstream CMakeLists.txt only sets CMAKE_MODULE_PATH inside an
         # if(NOT ADS_VERSION) block. Since we supply ADS_VERSION, that block is
         # skipped and src/CMakeLists.txt cannot find Versioning.cmake.
-        tc.cache_variables["CMAKE_MODULE_PATH"] = f"{self.source_folder}/cmake/modules"
+        tc.cache_variables["CMAKE_MODULE_PATH"] = os.path.join(self.source_folder, "cmake", "modules").replace("\\", "/")
 
         qt_tools_rootdir = self.conf.get("user.qt:tools_directory", None)
         if qt_tools_rootdir:
