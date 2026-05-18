@@ -1,8 +1,10 @@
 import os
 
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 
 required_conan_version = ">=2.0.9"
 
@@ -42,6 +44,11 @@ class QtADS(ConanFile):
         self.tool_requires("qt/<host_version>")
         self.tool_requires("cmake/[>=3.27 <5]") # to be able to use CMAKE_AUTOMOC_EXECUTABLE
 
+    def validate(self):
+        if Version(self.dependencies["qt"].ref.version) >= "6.0.0":
+            # Qt6 requires C++17 as a minimum
+            check_min_cppstd(self, 17)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -79,7 +86,7 @@ class QtADS(ConanFile):
 
     def package_info(self):
         # Detect Qt major version from installed include directory name
-        qt_major = 6 if os.path.isdir(os.path.join(self.package_folder, "include", "qtadvanceddocking-qt6")) else 5
+        qt_major = 6 if Version(self.dependencies["qt"].ref.version) >= "6.0.0" else 5
 
         base_name = f"qtadvanceddocking-qt{qt_major}"
         self.cpp_info.includedirs.append(os.path.join("include", base_name))
