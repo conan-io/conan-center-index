@@ -77,7 +77,7 @@ patches:
       "base_path": "qtwebengine/src/3rdparty"
     - "patch_file": "patches/6.8.3-fix-macos-26.4.diff"
       "base_path": "qtbase"
-  "6.10.1":
-    - "patch_file": "patches/6.10.1-fix-macos-26.4.diff"
+  "6.10.3":
+    - "patch_file": "patches/6.10.3-fix-macos-26.4.diff"
       "base_path": "qtbase"
 
