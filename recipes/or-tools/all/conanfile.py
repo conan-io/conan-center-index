@@ -34,7 +34,7 @@ class OrToolsConan(ConanFile):
     def requirements(self):
         # transitive headers: ortools/util/proto_tools.h:#include "google/protobuf/message.h"
         # transitive libs: ortools/util/proto_tools.h  Proto::default_instance().GetDescriptor()
-        self.requires("protobuf/[>=6.32.1 <7]", transitive_headers=True, transitive_libs=True)
+        self.requires("protobuf/[>=6.33.5 <7]", transitive_headers=True, transitive_libs=True)
         self.requires("re2/[>=20250812]")
         self.requires("coin-cbc/2.10.5")
         # ortools/pdlp/trust_region.h:#include "Eigen/Core"
@@ -47,7 +47,7 @@ class OrToolsConan(ConanFile):
         self.requires("coin-cgl/0.60.3")
         # transitive headers: ortools/set_cover/views.h:#include <absl/types/span.h>
         # transitive libs: ortools/base/init_google.h absl::ParseCommandLine()
-        self.requires("abseil/[>=20250814.0 <=20260107.1]", transitive_headers=True, transitive_libs=True)
+        self.requires("abseil/[>=20250814.1 <=20260107.1]", transitive_headers=True, transitive_libs=True)
         self.requires("coin-clp/1.17.7")
         self.requires("coin-osi/0.108.7")
         self.requires("coin-utils/2.11.9")
