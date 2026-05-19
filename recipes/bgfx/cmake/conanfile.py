@@ -140,9 +140,7 @@ class bgfxConan(ConanFile):
             self.cpp_info.components["bgfx"].requires.extend(["xorg::xorg", "opengl::opengl", "wayland::wayland"])
         elif is_apple_os(self):
             self.cpp_info.components["bgfx"].frameworks = ["Cocoa", "Metal", "QuartzCore", "IOKit", "CoreFoundation"]
-        # multithreaded rendering is enabled by default via BGFX_CONFIG_MULTITHREADED
-        self.cpp_info.components["bgfx"].defines.extend(["BGFX_CONFIG_MULTITHREADED=1",
-                                                   f"BGFX_CONFIG_DEBUG_ANNOTATION={1 if self.settings.build_type == 'Debug' else 0}",])
+        self.cpp_info.components["bgfx"].defines.append(f"BGFX_CONFIG_DEBUG_ANNOTATION={1 if self.settings.build_type == 'Debug' else 0}")
 
         if self.options.tools:
             for tool in ["bin2c", "texturec", "texturev", "geometryc", "geometryv", "shaderc"]:
