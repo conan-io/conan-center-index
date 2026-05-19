@@ -75,7 +75,8 @@ class BmxConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.add_rpath_link = True
+        if self.settings.os == "Linux":
+            tc.add_rpath_link = True
         tc.variables["BMX_BUILD_WITH_LIBCURL"] = self.options.with_libcurl
         tc.cache_variables["BMX_BUILD_EXPAT_SOURCE"] = False
         tc.cache_variables["BUILD_TESTING"] = False
