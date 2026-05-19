@@ -119,8 +119,9 @@ class FltkConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "CMake"))
         rm(self, "fltk-config*", os.path.join(self.package_folder, "bin"))
         if self.options.shared:
+            for lib_to_remove in ["fltk.lib", "fltk_forms.lib", "fltk_images.lib", "fltk_gl.lib"]:
+                rm(self, lib_to_remove, os.path.join(self.package_folder, "lib"))
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.lib", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "fltk")
