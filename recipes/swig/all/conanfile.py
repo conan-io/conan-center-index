@@ -79,10 +79,9 @@ class SwigConan(ConanFile):
             "--with-swiglibdir=${prefix}/bin/swiglib",
             f"--with-{pcre}-prefix={self.dependencies[pcre].package_folder}",
         ]
-        env.define("PCRE2_LIBS", " ".join("-l" + lib for lib in self.dependencies["pcre2"].cpp_info.libs))
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            tc.configure_args.append("LIBS=-ldl")
+            tc.configure_args.append("LIBS=-ldl -lpcre2-8")
             tc.extra_defines.append("HAVE_UNISTD_H=1")
         elif self.settings.os == "Windows":
             if is_msvc(self):
