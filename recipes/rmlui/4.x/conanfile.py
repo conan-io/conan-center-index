@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, replace_in_file, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.scm import Version
 import os
 
 
@@ -23,6 +24,7 @@ class RmluiConan(ConanFile):
         "matrix_mode": ["column_major", "row_major"],
         "shared": [True, False],
         "with_lua_bindings": [True, False],
+        "with_svg": [True, False],
         "with_thirdparty_containers": [True, False]
     }
     default_options = {
@@ -31,6 +33,7 @@ class RmluiConan(ConanFile):
         "matrix_mode": "column_major",
         "shared": False,
         "with_lua_bindings": False,
+        "with_svg": False,
         "with_thirdparty_containers": True
     }
 
@@ -65,6 +68,9 @@ class RmluiConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
 
+        if self.options.with_svg and Version(self.version) < "4.4":
+            raise ConanInvalidConfiguration(f"{self.ref} with_svg option is only available for versions >= 4.4")
+
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
@@ -86,6 +92,9 @@ class RmluiConan(ConanFile):
         if self.options.with_lua_bindings:
             self.requires("lua/5.3.5")
 
+        if self.options.with_svg:
+            self.requires("lunasvg/2.3.8")
+
         if self.options.with_thirdparty_containers:
             self.requires("robin-hood-hashing/3.11.3", transitive_headers=True)
 
@@ -106,6 +115,8 @@ class RmluiConan(ConanFile):
         tc.cache_variables["MATRIX_ROW_MAJOR"] = self.options.matrix_mode == "row_major"
         tc.cache_variables["NO_FONT_INTERFACE_DEFAULT"] = not self.options.font_interface
         tc.cache_variables["NO_THIRDPARTY_CONTAINERS"] = not self.options.with_thirdparty_containers
+        if Version(self.version) >= "4.4":
+            tc.cache_variables["ENABLE_SVG_PLUGIN"] = self.options.with_svg
         tc.generate()
 
         deps = CMakeDeps(self)
