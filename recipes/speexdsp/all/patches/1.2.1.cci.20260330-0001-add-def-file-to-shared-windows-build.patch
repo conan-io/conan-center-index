@@ -1,0 +1,16 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7c1fdb7..c6fb3e1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -106,6 +106,11 @@ list(REMOVE_ITEM SPEEXDSP_SOURCES
+     ${CMAKE_SOURCE_DIR}/libspeexdsp/testresample2.c
+ )
+ 
+ add_library(speexdsp ${SPEEXDSP_SOURCES})
+ 
++if(WIN32 AND BUILD_SHARED_LIBS)
++    target_sources(speexdsp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/win32/libspeexdsp.def)
++    set_target_properties(speexdsp PROPERTIES RUNTIME_OUTPUT_NAME "libspeexdsp")
++endif()
++
+ # Link math library if available
