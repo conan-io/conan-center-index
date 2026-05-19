@@ -7,7 +7,6 @@ from conan.tools.files import apply_conandata_patches, chdir, copy, export_conan
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -172,13 +171,3 @@ class SwigConan(ConanFile):
         self.cpp_info.set_property("cmake_build_modules", [self._cmake_module_rel_path])
 
         self.buildenv_info.define_path("SWIG_LIB", os.path.join(self.package_folder, "bin", "swiglib"))
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "SWIG"
-        self.cpp_info.names["cmake_find_package_multi"] = "SWIG"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._cmake_module_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._cmake_module_rel_path]
-
-        bindir = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bindir)
-        self.env_info.SWIG_LIB = os.path.join(self.package_folder, "bin", "swiglib")
