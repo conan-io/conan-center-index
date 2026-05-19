@@ -1,0 +1,33 @@
+From 1eb216e0f086faa6b00c4559ed971942883f3fcb Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Fri, 31 Oct 2025 14:05:13 +0100
+Subject: [PATCH 5/5] Add missing FMI includes and libs in runtime tests
+
+---
+ Config.cmake/runtime_test.cmake | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/Config.cmake/runtime_test.cmake b/Config.cmake/runtime_test.cmake
+index f0ded27..c09ba94 100644
+--- a/Config.cmake/runtime_test.cmake
++++ b/Config.cmake/runtime_test.cmake
+@@ -16,6 +16,7 @@ set(TEST_OUTPUT_FOLDER ${CMAKE_CURRENT_BINARY_DIR}/Testing)
+ 
+ # Only the directories that are specific to tests.
+ set(FMIL_TEST_INCLUDE_DIRS
++    ${FMILIB_FMI_STANDARD_HEADERS}
+     ${FMILIB_TESTCONFIG_INCLUDE_DIR}
+     ${FMIL_TEST_DIR} 
+     ${FMIL_TEST_DIR}/FMI1
+@@ -45,7 +46,7 @@ if(FMILIB_BUILD_SHARED_LIB AND (FMILIB_LINK_TEST_TO_SHAREDLIB OR NOT FMILIB_BUIL
+     set(FMILIBFORTEST fmilib_shared fmi_testutil)
+     target_link_libraries(fmi_testutil PRIVATE fmilib_shared)
+ else()
+-    set(FMILIBFORTEST fmilib fmi_testutil)
++    set(FMILIBFORTEST fmilib fmi_testutil minizip zlib expat)
+     target_link_libraries(fmi_testutil PRIVATE fmilib)
+ endif()
+ 
+-- 
+2.39.5
+
