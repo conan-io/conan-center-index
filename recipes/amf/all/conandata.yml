@@ -1,0 +1,5 @@
+sources:
+  "1.5.0":
+    url: "https://github.com/GPUOpen-LibrariesAndSDKs/AMF/releases/download/v1.5.0/AMF-headers-v1.5.0.tar.gz"
+    sha256: "d569647fa26f289affe81a206259fa92f819d06db1e80cc334559953e82a3f01"
+
