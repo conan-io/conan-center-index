@@ -40,15 +40,8 @@ class SwigConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    @property
-    def _use_pcre2(self):
-        return Version(self.version) >= "4.1"
-
     def requirements(self):
-        if self._use_pcre2:
-            self.requires("pcre2/10.43")
-        else:
-            self.requires("pcre/8.45")
+        self.requires("pcre2/[>=10.43 <11]")
         if is_apple_os(self):
             self.requires("libgettext/0.22")
 
@@ -62,18 +55,11 @@ class SwigConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
             if is_msvc(self):
                 self.tool_requires("cccl/1.3")
-        if Version(self.version) >= "4.2":
-            if is_msvc(self):
-                # bison 3.8.2 is not ready for msvc
-                self.tool_requires("bison/3.7.6")
-            else:
-                self.tool_requires("bison/3.8.2")
+        if is_msvc(self):
+            # bison 3.8.2 is not ready for msvc
+            self.tool_requires("bison/3.7.6")
         else:
-            if is_msvc(self):
-                self.tool_requires("winflexbison/2.5.25")
-            else:
-                self.tool_requires("bison/3.8.2")
-        self.tool_requires("automake/1.16.5")
+            self.tool_requires("bison/3.8.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -86,14 +72,13 @@ class SwigConan(ConanFile):
         tc.extra_defines.append("HAVE_PCRE=1")
         env = tc.environment()
 
-        pcre = "pcre2" if self._use_pcre2 else "pcre"
+        pcre = "pcre2"
         tc.configure_args += [
             f"--host={self.settings.arch}",
             "--with-swiglibdir=${prefix}/bin/swiglib",
             f"--with-{pcre}-prefix={self.dependencies[pcre].package_folder}",
         ]
-        if self._use_pcre2:
-            env.define("PCRE2_LIBS", " ".join("-l" + lib for lib in self.dependencies["pcre2"].cpp_info.libs))
+        env.define("PCRE2_LIBS", " ".join("-l" + lib for lib in self.dependencies["pcre2"].cpp_info.libs))
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             tc.configure_args.append("LIBS=-ldl")
