@@ -5,7 +5,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
 import os
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.26"
 
 
 class BmxConan(ConanFile):
@@ -75,6 +75,8 @@ class BmxConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if self.settings.os == "Linux":
+            tc.add_rpath_link = True
         tc.variables["BMX_BUILD_WITH_LIBCURL"] = self.options.with_libcurl
         tc.cache_variables["BMX_BUILD_EXPAT_SOURCE"] = False
         tc.cache_variables["BUILD_TESTING"] = False
@@ -135,4 +137,4 @@ class BmxConan(ConanFile):
             libbmx.requires.append("libuuid::libuuid")
 
         if self.options.with_libcurl:
-            libbmx.requires.append("libcurl::libcurl")
+            libbmx.requires.append("libcurl::curl")
