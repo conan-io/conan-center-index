@@ -115,6 +115,7 @@ class PistacheConan(ConanFile):
         self.cpp_info.components["libpistache"].requires = ["rapidjson::rapidjson"]
         if  self.settings.os != "Linux" or self.options.get_safe("with_libevent"):
             self.cpp_info.components["libpistache"].requires.append("libevent::libevent")
+            self.cpp_info.components["libpistache"].defines = ["PISTACHE_FORCE_LIBEVENT"]
         self.cpp_info.components["libpistache"].requires.append("date::date")
         if self.options.with_ssl:
             self.cpp_info.components["libpistache"].requires.append("openssl::openssl")
