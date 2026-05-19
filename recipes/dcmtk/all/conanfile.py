@@ -71,10 +71,6 @@ class DCMTKConan(ConanFile):
             self.options.rm_safe("fPIC")
             self.options.rm_safe("with_tcpwrappers")
             self.options.default_dict = "builtin"
-        if Version(self.version) >= "3.6.9":
-            self.options["charset_conversion"].rm_safe("icu")
-        if Version(self.version) < "3.6.8":
-            self.options["charset_conversion"].rm_safe("oficonv")
 
     def configure(self):
         if self.options.shared:
@@ -129,6 +125,10 @@ class DCMTKConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 11)
+        if Version(self.version) >= "3.6.9" and self.options.charset_conversion == "icu":
+            raise ConanInvalidConfiguration("Support for ICU was removed in DCMTK 3.6.9. Please choose another character set conversion library.")
+        if Version(self.version) < "3.6.8" and self.options.charset_conversion == "oficonv":
+            raise ConanInvalidConfiguration("The oficonv module is not available in DCMTK versions lower than 3.6.8. Please choose another character set conversion library.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
