@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
@@ -27,6 +27,9 @@ class OrToolsConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
     languages = "C++"
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -69,16 +72,7 @@ class OrToolsConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        # INFO: Let Conan manage the C++ standard based on self.settings.compiler.cppstd
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD", "#set(CMAKE_CXX_STANDARD")
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "dependencies", "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD", "#set(CMAKE_CXX_STANDARD")
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "cpp.cmake"), "set_target_properties(${PROTO_NAME}_proto PROPERTIES CXX_STANDARD", "#set_target_properties(${PROTO_NAME}_proto PROPERTIES CXX_STANDARD")
-        replace_in_file(self, os.path.join(self.source_folder, "ortools", "third_party_solvers", "CMakeLists.txt"), "CXX_STANDARD ", "# CXX_STANDARD ")
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "flatzinc.cmake"), "CXX_STANDARD ", "# CXX_STANDARD ")
-        # INFO: Skip host.cmake that builds protoc since Conan manages that dependency
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(host)", "set(PROTOC_PRG protobuf::protoc)")
-        # INFO: Let Conan manage the CMAKE_OSX_DEPLOYMENT_TARGET variable
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_OSX_DEPLOYMENT_TARGET", "#set(CMAKE_OSX_DEPLOYMENT_TARGET")
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
