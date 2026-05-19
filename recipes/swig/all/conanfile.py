@@ -83,6 +83,7 @@ class SwigConan(ConanFile):
         build_env.generate()
 
         tc = AutotoolsToolchain(self)
+        tc.extra_defines.append("HAVE_PCRE=1")
         env = tc.environment()
 
         pcre = "pcre2" if self._use_pcre2 else "pcre"
@@ -91,7 +92,6 @@ class SwigConan(ConanFile):
             "--with-swiglibdir=${prefix}/bin/swiglib",
             f"--with-{pcre}-prefix={self.dependencies[pcre].package_folder}",
         ]
-        tc.extra_cflags.append("-DHAVE_PCRE=1")
         if self._use_pcre2:
             env.define("PCRE2_LIBS", " ".join("-l" + lib for lib in self.dependencies["pcre2"].cpp_info.libs))
 
