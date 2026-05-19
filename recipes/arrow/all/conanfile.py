@@ -167,7 +167,7 @@ class ArrowConan(ConanFile):
         if self.options.with_grpc:
             self.requires("grpc/[>=1.50.0 <2]")
         if self.options.with_protobuf:
-            self.requires("protobuf/[>=3.21.12 <7]")
+            self.requires("protobuf/[>=3.21.12 <8]")
         if self.options.with_jemalloc:
             self.requires("jemalloc/5.3.0")
         if self.options.with_mimalloc:

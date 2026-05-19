@@ -44,7 +44,7 @@ class GameNetworkingSocketsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("protobuf/[>=3.21.12 <7]")
+        self.requires("protobuf/[>=3.21.12 <8]")
         if self.options.encryption == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         elif self.options.encryption == "libsodium":

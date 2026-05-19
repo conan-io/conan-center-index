@@ -97,7 +97,7 @@ class OpenTelemetryCppConan(ConanFile):
 
         if self._needs_proto:
             # This will resolve to the pinned version coming from grpc
-            self.requires("protobuf/[>=4.25.3 <7]", transitive_headers=True, transitive_libs=True)
+            self.requires("protobuf/[>=4.25.3 <8]", transitive_headers=True, transitive_libs=True)
 
         if (self.options.with_zipkin or
            self.options.with_elasticsearch or

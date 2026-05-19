@@ -43,7 +43,7 @@ class LibProtobufMutatorConan(ConanFile):
 
     def requirements(self):
         # Protobuf headers are required by public src/binary_format.h and
-        self.requires("protobuf/[>=4.25.3 <7]", transitive_headers=True)
+        self.requires("protobuf/[>=4.25.3 <8]", transitive_headers=True)
         # Abseil headers are required by public src/field_instance.h
         self.requires("abseil/[*]") # use version from protobuf
 

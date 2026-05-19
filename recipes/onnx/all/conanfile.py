@@ -49,7 +49,7 @@ class OnnxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("protobuf/[>=4.25.3 <7]", transitive_headers=True, transitive_libs=True)
+        self.requires("protobuf/[>=4.25.3 <8]", transitive_headers=True, transitive_libs=True)
         self.requires("abseil/[>=20230802.1 <=20260107.1]")
 
     def validate(self):
