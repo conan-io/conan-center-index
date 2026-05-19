@@ -15,7 +15,7 @@ class SentryCrashpadConan(ConanFile):
     name = "sentry-crashpad"
     description = "Crashpad is a crash-reporting system."
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/getsentry/sentry-native"
+    homepage = "https://github.com/getsentry/crashpad"
     license = "Apache-2.0"
     topics = ("crashpad", "error-reporting", "crash-reporting")
     provides = "crashpad", "mini_chromium"
