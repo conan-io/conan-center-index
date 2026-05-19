@@ -61,7 +61,10 @@ class XtensorConan(ConanFile):
                 "The options 'tbb' and 'openmp' can not be used together."
             )
 
-        check_min_cppstd(self, 14 if Version(self.version) < "0.26.0" else 17)
+        if Version(self.version) >= 0.27:
+            check_min_cppstd(self, 20)
+        else:
+            check_min_cppstd(self, 14 if Version(self.version) < "0.26.0" else 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
