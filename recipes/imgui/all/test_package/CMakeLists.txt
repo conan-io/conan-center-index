@@ -16,5 +16,9 @@ if(ENABLE_TEST_ENGINE)
     target_compile_definitions(${PROJECT_NAME} PRIVATE -DENABLE_TEST_ENGINE)
 endif()
 
+if(USE_WCHAR32)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE -DUSE_WCHAR32)
+endif()
+
 target_compile_definitions(${PROJECT_NAME} PUBLIC "IMGUI_USER_CONFIG=\"${CMAKE_CURRENT_SOURCE_DIR}/my_imgui_config.h\"")
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)

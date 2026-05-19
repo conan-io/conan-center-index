@@ -19,9 +19,11 @@ class TestPackageConan(ConanFile):
     def generate(self):
         with_docking = self.dependencies[self.tested_reference_str].conf_info.get("user.imgui:with_docking", False)
         with_test_engine = self.dependencies[self.tested_reference_str].options.get_safe("enable_test_engine", False)
+        use_wchar32 = self.dependencies[self.tested_reference_str].options.use_wchar32
         tc = CMakeToolchain(self)
         tc.variables["DOCKING"] = with_docking
         tc.variables["ENABLE_TEST_ENGINE"] = with_test_engine
+        tc.variables["USE_WCHAR32"] = use_wchar32
         tc.generate()
 
     def build(self):
