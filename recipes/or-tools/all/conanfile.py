@@ -59,12 +59,8 @@ class OrToolsConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
 
     def validate(self):
-        # INFO: or-tools requires C++17 with C++20 extensions on Unix and C++20 on MSVC
-        # See: github.com/google/or-tools/discussions/4719
-        if is_msvc(self):
-            check_min_cppstd(self, 20)
-        else:
-            check_min_cppstd(self, 17)
+        # OR-tools requires C++17 with C++20 extensions: github.com/google/or-tools/discussions/4719
+        check_min_cppstd(self, 17)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24]")
