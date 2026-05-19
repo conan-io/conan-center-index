@@ -27,6 +27,8 @@ class FmtConan(ConanFile):
         "with_fmt_alias": [True, False],
         "with_os_api": [True, False],
         "with_unicode": [True, False],
+        # Build fmt as a C++20 module; consumers can then `import fmt;`.
+        "with_module": [True, False],
     }
     default_options = {
         "header_only": False,
@@ -35,6 +37,7 @@ class FmtConan(ConanFile):
         "with_fmt_alias": False,
         "with_os_api": True,
         "with_unicode": True,
+        "with_module": False,
     }
 
     @property
@@ -63,6 +66,7 @@ class FmtConan(ConanFile):
             self.options.rm_safe("fPIC")
             self.options.rm_safe("shared")
             self.options.rm_safe("with_os_api")
+            self.options.rm_safe("with_module")
         elif self.options.shared:
             self.options.rm_safe("fPIC")
 
@@ -81,6 +85,8 @@ class FmtConan(ConanFile):
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, 11)
+        if self.options.get_safe("with_module"):
+            check_min_cppstd(self, 20)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -96,6 +102,12 @@ class FmtConan(ConanFile):
                 tc.cache_variables["FMT_OS"] = bool(self.options.with_os_api)
             if self._has_with_unicode_option:
                 tc.cache_variables["FMT_UNICODE"] = bool(self.options.with_unicode)
+            if self.options.get_safe("with_module"):
+                tc.cache_variables["FMT_MODULE"] = True
+                # fmt's CMakeLists only emits a FILE_SET CXX_MODULES on
+                # fmt::fmt when CMake >= 3.28 and the generator is Ninja;
+                # otherwise consumers can't `import fmt;`.
+                tc.generator = "Ninja"
             tc.generate()
 
     def build(self):
@@ -115,12 +127,22 @@ class FmtConan(ConanFile):
         else:
             cmake = CMake(self)
             cmake.install()
-            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+            # Keep upstream lib/cmake for module builds: CMakeDeps can't yet
+            # propagate FILE_SET CXX_MODULES, so consumers fall back on
+            # fmt-config.cmake. Pattern mirrors recipes/mp-units.
+            if not self.options.get_safe("with_module"):
+                rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "res"))
             rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        if self.options.get_safe("with_module"):
+            # See package(). TODO: drop when CMakeDeps propagates C++20 modules.
+            self.cpp_info.set_property("cmake_find_mode", "none")
+            self.cpp_info.builddirs = ["."]
+            return
+
         target = "fmt-header-only" if self.options.header_only else "fmt"
         self.cpp_info.set_property("cmake_file_name", "fmt")
         self.cpp_info.set_property("cmake_target_name", f"fmt::{target}")
