@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=2.0.9"
@@ -33,7 +33,6 @@ class QtADS(ConanFile):
         "fPIC": True,
     }
     implements = ["auto_shared_fpic"]
-    exports_sources = "patches/*"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -43,12 +42,14 @@ class QtADS(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("qt/<host_version>")
-        self.tool_requires("cmake/[>=3.27 <5]") # to be able to use CMAKE_AUTOMOC_EXECUTABLE
+        self.tool_requires("cmake/[>=3.27]") # to be able to use CMAKE_AUTOMOC_EXECUTABLE
 
     def validate(self):
         if Version(self.dependencies["qt"].ref.version) >= "6.0.0":
-            # Qt6 requires C++17 as a minimum
-            check_min_cppstd(self, 17)
+            check_min_cppstd(self, 17) # Qt6 requires C++17 as a minimum
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

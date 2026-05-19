@@ -5,5 +5,3 @@ sources:
 patches:
   "4.5.0":
     - patch_file: "patches/fix-versioning-no-git.patch"
-      patch_description: "Versioning.cmake unconditionally overwrites PROJECT_VERSION_* with empty strings when git is unavailable (e.g. tarball builds), causing malformed Windows RC files. Only update version variables when git returns a valid tag."
-      patch_type: "bugfix"
