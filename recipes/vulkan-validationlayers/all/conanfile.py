@@ -75,8 +75,7 @@ class VulkanValidationLayersConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        for text in ["set(CMAKE_CXX_STANDARD 17)", "set(CMAKE_CXX_STANDARD_REQUIRED ON)",
-                     "set(CMAKE_POSITION_INDEPENDENT_CODE ON)"]:
+        for text in ["set(CMAKE_CXX_STANDARD 17)", "set(CMAKE_CXX_STANDARD_REQUIRED ON)"]:
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             text, "")
 
