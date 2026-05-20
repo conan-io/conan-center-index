@@ -1,8 +1,8 @@
 diff --git CMakeLists.txt CMakeLists.txt
-index 76899758..2a559ff2 100755
+index dfd1c4ce..ddbdcf35 100755
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -517,7 +517,7 @@ install(
+@@ -515,7 +515,7 @@ install(
      FILE ${OCIO_TARGETS_EXPORT_NAME}
  )
  
