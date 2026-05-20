@@ -2,8 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, export_conandata_patches, get, rm, rmdir, replace_in_file
-from conan.tools.apple import is_apple_os
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.scm import Version
 import os
 
@@ -31,14 +30,10 @@ class MaterialXConan(ConanFile):
         "build_gen_msl": True
     }
 
-    short_paths = True
 
     @property
     def _min_cppstd(self):
-        if Version(self.version) >= "1.39.0":
-            return 17
-        else:
-            return 14
+        17
 
     @property
     def _compilers_minimum_version(self):
@@ -50,8 +45,6 @@ class MaterialXConan(ConanFile):
             "Visual Studio": "15",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -66,7 +59,7 @@ class MaterialXConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openimageio:
-            self.requires("openimageio/[>=2.2]")
+            self.requires("openimageio/[>=2.2 <3]")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             self.requires("opengl/system")
