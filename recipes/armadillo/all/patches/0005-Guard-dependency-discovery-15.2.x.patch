@@ -1,3 +1,5 @@
+* Add guards to prevent usage of custom cmake find package scripts.
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index ee702f836..631d04699 100644
 --- a/CMakeLists.txt

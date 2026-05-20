@@ -93,6 +93,8 @@ class ArmadilloConan(ConanFile):
             # Macos will default to Accelerate framework
             self.options.use_blas = "framework_accelerate"
             self.options.use_lapack = "framework_accelerate"
+        if Version(self.version) < "14":
+            del self.options.header_only
 
         # According with the CMakeLists file in armadillo, MinGW doesn't correctly handle thread_local.
         # If any of MINGW, MSYS, CYGWIN or MSVC are True in during cmake configure, the ARMA_USE_EXTERN_RNG option will be set to false.
@@ -102,7 +104,7 @@ class ArmadilloConan(ConanFile):
             del self.options.use_extern_rng
 
     def configure(self):
-        if self.options.header_only:
+        if self.options.get_safe("header_only"):
             self.options.rm_safe("fPIC")
             self.options.rm_safe("shared")
             self.options.rm_safe("use_wrapper")
@@ -120,9 +122,6 @@ class ArmadilloConan(ConanFile):
                 check_min_cppstd(self, 14)
             else:
                 check_min_cppstd(self, 11)
-
-        if Version(self.version) < "14" and self.options.header_only:
-            raise ConanInvalidConfiguration("The header_only option is only available for armadillo version 14 or higher.")
 
         if self.settings.os != "Macos" and (
             self.options.use_blas == "framework_accelerate"
@@ -177,13 +176,13 @@ class ArmadilloConan(ConanFile):
                 f"DEPRECATION NOTICE: Value {opt} uses armadillo's default dependency search and will be replaced when this package becomes available in ConanCenter"
             )
 
-        if not self.options.header_only:
+        if not self.options.get_safe("header_only"):
             # Ignore use_extern_rng when the option has been removed
             if self.options.use_wrapper and not self.options.get_safe("use_extern_rng", True):
                 raise ConanInvalidConfiguration(
                     "The wrapper requires the use of an external RNG. Set use_extern_rng=True and try again."
                 )
-        
+
             if not self.options.shared and self.options.use_wrapper:
                 raise ConanInvalidConfiguration("Building the armadillo run-time wrapper library requires armadillo/*:shared=True")
 
@@ -312,7 +311,7 @@ class ArmadilloConan(ConanFile):
         save(self, module_file, content)
 
     def package_id(self):
-        if self.info.options.header_only:
+        if self.info.options.get_safe("header_only"):
             self.info.clear()
 
     def package(self):
@@ -325,16 +324,14 @@ class ArmadilloConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_vars_rel_path))
 
-
     def package_info(self):
-        
         self.cpp_info.set_property("pkg_config_name", "armadillo")
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "Armadillo")
         self.cpp_info.set_property("cmake_target_name", "Armadillo::Armadillo")
         self.cpp_info.set_property("cmake_target_aliases", ["armadillo", "armadillo::armadillo"])
-        
-        if self.options.header_only:
+
+        if self.options.get_safe("header_only"):
             self.cpp_info.bindirs = []
             self.cpp_info.libdirs = []
             self.cpp_info.defines.append("ARMA_HEADER_ONLY")
