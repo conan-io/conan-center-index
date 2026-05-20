@@ -6,7 +6,7 @@ from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 class MaterialXConan(ConanFile):
     name = "materialx"
@@ -31,21 +31,6 @@ class MaterialXConan(ConanFile):
     }
 
 
-    @property
-    def _min_cppstd(self):
-        17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -65,14 +50,7 @@ class MaterialXConan(ConanFile):
             self.requires("opengl/system")
 
     def validate(self):
-        # validate the minimum cpp standard supported. For C++ projects only
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.26]")
