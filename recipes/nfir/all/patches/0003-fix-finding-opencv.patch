@@ -1,0 +1,44 @@
+From d85f484c4393dd31787e66018b11dff8642c4c82 Mon Sep 17 00:00:00 2001
+From: Tomas Krupa <tomas.krupa@innovatrics.com>
+Date: Wed, 26 Feb 2025 22:23:28 +0100
+Subject: [PATCH] fix finding opencv
+
+---
+ src/lib/CMakeLists.txt | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/src/lib/CMakeLists.txt b/src/lib/CMakeLists.txt
+index 12b3047..0a93f56 100644
+--- a/src/lib/CMakeLists.txt
++++ b/src/lib/CMakeLists.txt
+@@ -15,12 +15,15 @@ add_library( ${PROJECT_NAME} ${sources} )
+ # )
+ 
+ 
++find_package(OpenCV REQUIRED)
++target_link_libraries(${PROJECT_NAME} opencv::opencv)
++
+ if(_WIN32_64)
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
+   message(STATUS "LIB: CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+ 
+   # To access OpenCV, use either these two lines below:
+-  include(D:/OpenCV/opencv-4.5.0/build/x64/vc15/lib/OpenCVConfig.cmake)
++  #include(D:/OpenCV/opencv-4.5.0/build/x64/vc15/lib/OpenCVConfig.cmake)
+   target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+ 
+   # Or to access OpenCV, use these two lines below:
+@@ -42,8 +45,8 @@ if(_WIN32_64)
+   
+ else()
+   message(STATUS "LIB: CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+-	find_package(PkgConfig REQUIRED)
+-	pkg_check_modules(OPENCV REQUIRED opencv4)
++	# find_package(PkgConfig REQUIRED)
++	# pkg_check_modules(OPENCV REQUIRED opencv4)
+ 	target_link_libraries(${PROJECT_NAME} ${OPENCV_LINK_LIBRARIES})
+ 	target_include_directories(${PROJECT_NAME} PUBLIC ${OPENCV_INCLUDE_DIRS})
+ 	target_compile_options(${PROJECT_NAME} PUBLIC ${OPENCV_CFLAGS_OTHER})
+-- 
+2.34.1
+
