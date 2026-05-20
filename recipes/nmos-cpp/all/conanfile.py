@@ -1,13 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools import build, files
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, rm, rmdir
 from conan.tools.scm import Version
 import json
 import os
 import re
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.2"
 
 class NmosCppConan(ConanFile):
     name = "nmos-cpp"
@@ -34,7 +35,7 @@ class NmosCppConan(ConanFile):
     short_paths = True
 
     def export_sources(self):
-        files.export_conandata_patches(self)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,23 +74,21 @@ class NmosCppConan(ConanFile):
         self.tool_requires("cmake/[>=3.17 <4]")
 
     def validate(self):
-        if self.info.settings.os in ["Macos"]:
-            raise ConanInvalidConfiguration(f"{self.ref} is not currently supported on {self.info.settings.os}. Contributions welcomed.")
-        if self.info.settings.compiler.get_safe("cppstd"):
-            build.check_min_cppstd(self, 11)
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration(f"{self.ref} is not currently supported on {self.settings.os}. Contributions welcomed.")
+        check_min_cppstd(self, 11)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
-        files.rm(self, "conanfile.txt", os.path.join(self.source_folder, "Development"))
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+        rm(self, "conanfile.txt", os.path.join(self.source_folder, "Development"))
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # prefer config-file packages created by cmake_find_package_multi
-        # over any system-installed find-module packages
+        # prefer config-file packages created by CMakeDeps over any system-installed find-module packages
         tc.cache_variables["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = True
         # disable cmake-conan, consume conan packages in local cache to avoid incompatible requirements
         # between this recipe and project's conanfile.txt
@@ -107,24 +106,24 @@ class NmosCppConan(ConanFile):
         deps.generate()
 
     def build(self):
-        files.apply_conandata_patches(self)
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure(build_script_folder="Development")
         cmake.build()
 
     def package(self):
-        files.copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
         cmake_folder = os.path.join(self.package_folder, "lib", "cmake")
         self._create_components_file_from_cmake_target_file(os.path.join(cmake_folder, "nmos-cpp", "nmos-cpp-targets.cmake"))
         # remove the project's own generated config-file package
-        files.rmdir(self, cmake_folder)
+        rmdir(self, cmake_folder)
 
     def _create_components_file_from_cmake_target_file(self, target_file_path):
         components = {}
 
-        target_content = files.load(self, target_file_path)
+        target_content = load(self, target_file_path)
 
         cmake_functions = re.findall(r"(?P<func>add_executable|add_library|set_target_properties)[\n|\s]*\([\n|\s]*(?P<args>[^)]*)\)", target_content)
         for (cmake_function_name, cmake_function_args) in cmake_functions:
@@ -172,15 +171,15 @@ class NmosCppConan(ConanFile):
                                 if dependency == "nmos-cpp":
                                     dependency = "nmos-cpp-lib"
                                 # Conan packages for Boost, cpprestsdk, websocketpp, OpenSSL and Avahi have component names that (except for being lowercase) match the CMake targets
-                                # json-schema-validator overrides cmake_find_package[_multi] names and v2 cmake_target_name
+                                # json-schema-validator overrides cmake_target_name
                                 elif dependency == "nlohmann_json_schema_validator":
                                     dependency = "json-schema-validator::json-schema-validator"
-                                # mdnsresponder overrides cmake_find_package[_multi] names
+                                # mdnsresponder overrides cmake_target_name
                                 elif dependency == "DNSSD::DNSSD":
                                     dependency = "mdnsresponder::mdnsresponder"
                                 components[component_name].setdefault("requires" if not match_private else "requires_private", []).append(dependency.lower())
                             elif "${_IMPORT_PREFIX}/lib/" in dependency:
-                                self.output.warn(f"{self.name} recipe does not handle {property_type} {dependency} (yet)")
+                                self.output.warning(f"{self.name} recipe does not handle {property_type} {dependency} (yet)")
                             else:
                                 components[component_name].setdefault("system_libs", []).append(dependency)
                     elif property_type == "INTERFACE_COMPILE_DEFINITIONS":
@@ -189,7 +188,7 @@ class NmosCppConan(ConanFile):
                     elif property_type == "INTERFACE_COMPILE_FEATURES":
                         for property_value in property_values:
                             if property_value not in ["cxx_std_11"]:
-                                self.output.warn(f"{self.name} recipe does not handle {property_type} {property_value} (yet)")
+                                self.output.warning(f"{self.name} recipe does not handle {property_type} {property_value} (yet)")
                     elif property_type == "INTERFACE_COMPILE_OPTIONS":
                         for property_value in property_values:
                             # handle forced include (Visual Studio /FI, gcc -include) by relying on includedirs containing "include"
@@ -198,7 +197,7 @@ class NmosCppConan(ConanFile):
                     elif property_type == "INTERFACE_INCLUDE_DIRECTORIES":
                         for property_value in property_values:
                             if property_value not in ["${_IMPORT_PREFIX}/include"]:
-                                self.output.warn(f"{self.name} recipe does not handle {property_type} {property_value} (yet)")
+                                self.output.warning(f"{self.name} recipe does not handle {property_type} {property_value} (yet)")
                     elif property_type == "INTERFACE_LINK_OPTIONS":
                         for property_value in property_values:
                             # workaround required because otherwise "/ignore:4099" gets converted to "\ignore:4099.obj"
@@ -210,7 +209,7 @@ class NmosCppConan(ConanFile):
                             property_value = re.sub(r"^/", r"-", property_value)
                             components[component_name].setdefault("linkflags", []).append(property_value)
                     else:
-                        self.output.warn(f"{self.name} recipe does not handle {property_type} (yet)")
+                        self.output.warning(f"{self.name} recipe does not handle {property_type} (yet)")
 
         # until https://github.com/sony/nmos-cpp/commit/9489d84098ddc8cc514b7e4d5afe740dee4518ee
         # direct dependency on nlohmann_json was missing
@@ -237,12 +236,11 @@ class NmosCppConan(ConanFile):
         self.cpp_info.libdirs = [libdir]
 
         def _register_components():
-            components_json_file = files.load(self, self._components_helper_filepath)
+            components_json_file = load(self, self._components_helper_filepath)
             components = json.loads(components_json_file)
             for component_name, values in components.items():
                 cmake_target = values["cmake_target"]
-                self.cpp_info.components[component_name].names["cmake_find_package"] = cmake_target
-                self.cpp_info.components[component_name].names["cmake_find_package_multi"] = cmake_target
+                self.cpp_info.components[component_name].set_property("cmake_target_name", f"nmos-cpp::{cmake_target}")
                 self.cpp_info.components[component_name].bindirs = [bindir] if values.get("exe") else []
                 self.cpp_info.components[component_name].libs = values.get("libs", [])
                 self.cpp_info.components[component_name].libdirs = [libdir]
@@ -261,4 +259,4 @@ class NmosCppConan(ConanFile):
 
         # add nmos-cpp-registry and nmos-cpp-node to the path
         bin_path = os.path.join(self.package_folder, bindir)
-        self.env_info.PATH.append(bin_path)
+        self.runenv_info.append_path("PATH", bin_path)
