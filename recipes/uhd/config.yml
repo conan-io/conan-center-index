@@ -1,0 +1,13 @@
+versions:
+  "v4.10.0.0":
+    folder: all
+  "v4.9.0.1":
+    folder: all
+  "v4.9.0.0":
+    folder: all
+  "v4.8.0.0":
+    folder: all
+  "v4.7.0.0":
+    folder: all
+  "v4.6.0.0":
+    folder: all
