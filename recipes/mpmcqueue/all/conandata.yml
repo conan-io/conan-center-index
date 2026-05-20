@@ -1,4 +1,7 @@
 sources:
+  "1.0.cci.20230918":
+    url: "https://github.com/rigtorp/MPMCQueue/archive/b9808ede08f26fa9df4df4e081d19cace8f6c6ea.tar.gz"
+    sha256: "bdfcf2429aebe892eb7b4a2edbc2d889365fa52264bf9501d937e8484166ec6a"
   "1.0":
     url: "https://github.com/rigtorp/MPMCQueue/archive/refs/tags/v1.0.tar.gz"
     sha256: "f009ef10b66f2b8bc6e3a4f50577efbdfea0c163464cd7de368378f173007b75"
