@@ -106,6 +106,7 @@ class BoostConan(ConanFile):
         "visibility": ["global", "protected", "hidden"],
         "addr2line_location": ["ANY"],
         "with_stacktrace_backtrace": [True, False],
+        "with_stacktrace_from_exception": [True, False],
         "buildid": [None, "ANY"],
         "python_buildid": [None, "ANY"],
         "system_use_utf8": [True, False],
@@ -145,6 +146,7 @@ class BoostConan(ConanFile):
         "visibility": "hidden",
         "addr2line_location": "/usr/bin/addr2line",
         "with_stacktrace_backtrace": True,
+        "with_stacktrace_from_exception": True,
         "buildid": None,
         "python_buildid": None,
         "system_use_utf8": False,
@@ -626,6 +628,8 @@ class BoostConan(ConanFile):
 
     @property
     def _stacktrace_from_exception_available(self):
+        if not self.options.get_safe("with_stacktrace_from_exception", True):
+            return False
         if Version(self.version) == "1.85.0":
             # https://github.com/boostorg/stacktrace/blob/boost-1.85.0/build/Jamfile.v2#L143
             return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
@@ -675,6 +679,7 @@ class BoostConan(ConanFile):
 
         if self.options.get_safe("without_stacktrace", True):
             self.options.rm_safe("with_stacktrace_backtrace")
+            self.options.rm_safe("with_stacktrace_from_exception")
 
         if self.options.without_fiber:
             self.options.rm_safe("numa")
@@ -1734,6 +1739,13 @@ class BoostConan(ConanFile):
             # https://github.com/boostorg/boost/issues/1051
             rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
             rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
+
+        # boostorg/stacktrace#208: from_exception.o defines __cxa_allocate_exception,
+        # which collides with libstdc++'s eh_alloc.o when linking -static-libstdc++.
+        # b2 has no per-target gate to skip just this library, so prune it here when
+        # the consumer opts out via with_stacktrace_from_exception=False.
+        if not self.options.get_safe("with_stacktrace_from_exception", True):
+            rm(self, "*boost_stacktrace_from_exception*", os.path.join(self.package_folder, "lib"))
 
     def _create_emscripten_libs(self):
         # Boost Build doesn't create the libraries, but it gets close,
