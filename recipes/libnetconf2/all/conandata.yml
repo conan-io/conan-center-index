@@ -1,0 +1,4 @@
+sources:
+  "4.1.2":
+    url: "https://github.com/CESNET/libnetconf2/archive/refs/tags/v4.1.2.tar.gz"
+    sha256: "c202c5e39e38caf4b29f0f90f496ba9917836f0e2ece56dc7dc0bf2c9910fad0"
