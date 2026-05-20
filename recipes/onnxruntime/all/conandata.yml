@@ -5,3 +5,5 @@ sources:
 patches:
   "1.24.4":
     - patch_file: "patches/fix-cutlass-cuda-provider.patch"
+    - patch_file: "patches/fix-cuda-architectures.patch"
+    - patch_file: "patches/fix-logging-ortchar.patch"
