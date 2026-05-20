@@ -1,0 +1,7 @@
+sources:
+  "0.3.1":
+    url: "hhttps://github.com/sciplot/sciplot/archive/refs/tags/v0.3.1.tar.gz"
+    strip_root: true
+  "0.2.2":
+    url: "https://github.com/sciplot/sciplot/archive/refs/tags/v0.2.2.tar.gz" 
+    strip_root: true
