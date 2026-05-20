@@ -1,0 +1,14 @@
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -134,9 +134,8 @@ if(ENABLE_ICEORYX)
+   else()
+     set(iceoryx_required QUIET)
+   endif()
+-  find_package(iceoryx_hoofs ${iceoryx_required})
+-  find_package(iceoryx_posh ${iceoryx_required})
+-  if(${iceoryx_hoofs_FOUND} AND ${iceoryx_posh_FOUND})
++  find_package(iceoryx ${iceoryx_required})
++  if(${iceoryx_FOUND})
+     set(ENABLE_ICEORYX "ON")
+   else()
+     set(ENABLE_ICEORYX "OFF")
