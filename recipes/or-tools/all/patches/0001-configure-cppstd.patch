@@ -1,3 +1,5 @@
+Custom patch: Let Conan decide the C++ standard used to build
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 69bf10b..9b688b8 100644
 --- a/CMakeLists.txt
