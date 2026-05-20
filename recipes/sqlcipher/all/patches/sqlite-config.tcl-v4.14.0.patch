@@ -1,0 +1,49 @@
+--- a/autosetup/sqlite-config.tcl	2026-03-10 19:14:56.552776564 +0100
++++ b/autosetup/sqlite-config.tcl	2026-03-10 19:16:03.038501714 +0100
+@@ -882,13 +882,13 @@
+   }
+   switch -exact -- $soname {
+     none - "" { return 0 }
+-    legacy    { set soname libsqlite3.so.0 }
++    legacy    { set soname libsqlcipher.so.0 }
+     default {
+-      if {[string match libsqlite3.* $soname]} {
++      if {[string match libsqlcipher.* $soname]} {
+         # use it as-is
+       } else {
+         # Assume it's a suffix
+-        set soname "libsqlite3.so.${soname}"
++        set soname "libsqlcipher.so.${soname}"
+       }
+     }
+   }
+@@ -1575,16 +1575,16 @@
+ proc sqlite-handle-dll-basename {} {
+   if {[proj-opt-was-provided dll-basename]} {
+     set dn [join [opt-val dll-basename] ""]
+-    if {$dn in {none default}} { set dn libsqlite3 }
++    if {$dn in {none default}} { set dn libsqlcipher }
+   } else {
+-    set dn libsqlite3
++    set dn libsqlcipher
+   }
+   if {$dn in {auto ""}} {
+     switch -glob -- [get-define host] {
+       *-*-cygwin  { set dn cygsqlite3-0 }
+-      *-*-ming*   { set dn libsqlite3-0 }
++      *-*-ming*   { set dn libsqlcipher-0 }
+       *-*-msys    { set dn msys-sqlite3-0 }
+-      default     { set dn libsqlite3 }
++      default     { set dn libsqlcipher }
+     }
+   }
+   define SQLITE_DLL_BASENAME $dn
+@@ -1624,7 +1624,7 @@
+   if {[proj-opt-was-provided out-implib]} {
+     set olBaseName [join [opt-val out-implib] ""]
+     if {$olBaseName in {auto ""}} {
+-      set olBaseName "libsqlite3" ;# [get-define SQLITE_DLL_BASENAME]
++      set olBaseName "libsqlcipher" ;# [get-define SQLITE_DLL_BASENAME]
+       # Based on discussions with mingw/msys users, the import lib
+       # should always be called libsqlite3.dll.a even on platforms
+       # which rename libsqlite3.dll to something else.
