@@ -159,6 +159,7 @@ class MaterialXConan(ConanFile):
         self.cpp_info.components["MaterialXRender"].requires = ["MaterialXGenShader"]
         if self.options.with_openimageio:
             self.cpp_info.components["MaterialXRender"].requires.append("openimageio::openimageio")
+            self.cpp_info.components["MaterialXRender"].defines.append("MATERIALX_BUILD_OIIO")
 
         self.cpp_info.components["MaterialXRenderGlsl"].libs = ["MaterialXRenderGlsl"]
         self.cpp_info.components["MaterialXRenderGlsl"].requires = ["MaterialXRenderHw", "MaterialXGenGlsl"]
@@ -190,7 +191,7 @@ class MaterialXConan(ConanFile):
         if self.options.build_gen_msl and self.settings.os == "Macos":
             self.cpp_info.components["MaterialXRenderMsl"].libs = ["MaterialXRenderMsl"]
             self.cpp_info.components["MaterialXRenderMsl"].requires = ["MaterialXRenderHw", "MaterialXGenMsl"]
-            self.cpp_info.frameworks.extend(["CoreFoundation", "OpenGL", "AppKit", "Metal"])
+            self.cpp_info.frameworks.extend(["CoreFoundation", "OpenGL", "AppKit", "Metal", "MetalPerformanceShaders"])
             if self.settings.os == "Macos":
                 self.cpp_info.includedirs.extend(["include/compat/osx"])
             else:
