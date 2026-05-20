@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(miniscript LANGUAGES CXX)
+project(Miniscript LANGUAGES C CXX)
 
 set(MINISCRIPT_SRC
     ${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src/MiniScript/Dictionary.cpp
@@ -39,26 +39,50 @@ set(MINISCRIPT_INC
     ${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src/MiniScript/UnitTest.h
 )
 
-
-add_library(miniscript ${MINISCRIPT_SRC})
-target_include_directories(miniscript PRIVATE ${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src)
-set_target_properties(miniscript PROPERTIES
+add_library(miniscript-cpp ${MINISCRIPT_SRC})
+target_include_directories(miniscript-cpp PRIVATE ${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src)
+set_target_properties(miniscript-cpp PROPERTIES
     PUBLIC_HEADER "${MINISCRIPT_INC}"
-    WINDOWS_EXPORT_ALL_SYMBOLS ON
     C_EXTENSIONS OFF
 )
-target_compile_features(miniscript PRIVATE cxx_std_11)
+target_compile_features(miniscript-cpp PRIVATE cxx_std_11)
 
 if(MSVC)
-    target_compile_options(miniscript PRIVATE /EHsc /wd4068)
+    target_compile_options(miniscript-cpp PRIVATE /EHsc /wd4068)
 endif()
 
 find_library(LIBM m)
-target_link_libraries(miniscript PRIVATE $<$<BOOL:${LIBM}>:${LIBM}>)
+target_link_libraries(miniscript-cpp PRIVATE $<$<BOOL:${LIBM}>:${LIBM}>)
+
+set(MINICMD_HEADERS
+	${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src/OstreamSupport.h
+	${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src/ShellIntrinsics.h
+	${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src/editline/editline.h
+	${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src/editline/unix.h
+)
+
+if(NOT WIN32)
+	set(EDITLINE_SRC
+		${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src/editline/complete.c
+		${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src/editline/editline.c
+		${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src/editline/sysunix.c
+	)
+endif()
+
+add_executable(minicmd
+	${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src/main.cpp
+	${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src/OstreamSupport.cpp
+	${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src/ShellIntrinsics.cpp
+	${EDITLINE_SRC}
+	${MINICMD_HEADERS}
+)
+target_include_directories(minicmd PRIVATE ${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src/editline)
+target_link_libraries(minicmd PRIVATE miniscript-cpp)
+target_compile_features(minicmd PRIVATE cxx_std_11)
 
 include(GNUInstallDirs)
 install(
-    TARGETS miniscript
+    TARGETS miniscript-cpp minicmd
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
