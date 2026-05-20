@@ -194,3 +194,5 @@ class JemallocConan(ConanFile):
             self.cpp_info.defines = ["JEMALLOC_EXPORT="]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "pthread", "rt"])
+        if self.options.prefix:
+            self.cpp_info.defines.append("JEMALLOC_MANGLE")
