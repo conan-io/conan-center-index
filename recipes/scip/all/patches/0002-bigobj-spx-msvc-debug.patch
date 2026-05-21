@@ -1,0 +1,22 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 10698253fe..2e14563423 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1210,6 +1210,17 @@ target_link_libraries(scip
+     ${LPS_LIBRARIES}
+ )
+
++if("${LPS}" STREQUAL "spx")
++  foreach(_target IN ITEMS liblpi libscip scip)
++    if(TARGET ${_target})
++      target_compile_options(${_target}
++        PRIVATE
++          $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANG_AND_ID:CXX,MSVC>>:/bigobj>
++      )
++    endif()
++  endforeach()
++endif()
++
+ add_dependencies(libscip scip_update_githash)
+ add_dependencies(scip scip_update_githash)
+ 
