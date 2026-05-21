@@ -28,6 +28,7 @@ class WolfSSLConan(ConanFile):
         "fPIC": [True, False],
         "opensslextra": [True, False],
         "opensslall": [True, False],
+        "opensslcoexist": [True, False],
         "sslv3": [True, False],
         "alpn": [True, False],
         "des3": [True, False],
@@ -42,12 +43,15 @@ class WolfSSLConan(ConanFile):
         "with_quic": [True, False],
         "with_experimental": [True, False],
         "with_rpk": [True, False],
+        "keylog_export": [True, False],
+        "asio": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "opensslextra": False,
         "opensslall": False,
+        "opensslcoexist": False,
         "sslv3": False,
         "alpn": False,
         "des3": False,
@@ -62,6 +66,8 @@ class WolfSSLConan(ConanFile):
         "with_quic": False,
         "with_experimental": False,
         "with_rpk": False,
+        "keylog_export": False,
+        "asio": False,
     }
 
     def config_options(self):
@@ -102,9 +108,12 @@ class WolfSSLConan(ConanFile):
             "--disable-examples",
             "--disable-crypttests",
             "--enable-harden",
+            "--enable-asio={}".format(yes_no(self.options.asio)),
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
+            "--enable-keylog-export={}".format(yes_no(self.options.keylog_export)),
             "--enable-opensslall={}".format(yes_no(self.options.opensslall)),
             "--enable-opensslextra={}".format(yes_no(self.options.opensslextra)),
+            "--enable-opensslcoexist={}".format(yes_no(self.options.opensslcoexist)),
             "--enable-sslv3={}".format(yes_no(self.options.sslv3)),
             "--enable-alpn={}".format(yes_no(self.options.alpn)),
             "--enable-des3={}".format(yes_no(self.options.des3)),
@@ -153,6 +162,7 @@ class WolfSSLConan(ConanFile):
         autotools.install()
         os.unlink(os.path.join(self.package_folder, "bin", "wolfssl-config"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)
