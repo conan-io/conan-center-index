@@ -184,7 +184,6 @@ class LibjxlConan(ConanFile):
             self.cpp_info.components["jxl"].system_libs.append("atomic")
         if not self.options.shared:
             self.cpp_info.components["jxl"].defines.append("JXL_STATIC_DEFINE")
-        if not self.options.shared:
             if libcxx:
                 self.cpp_info.components["jxl"].system_libs.append(libcxx)
 
@@ -195,7 +194,6 @@ class LibjxlConan(ConanFile):
             self.cpp_info.components["jxl_cms"].requires = ["lcms::lcms", "highway::highway"]
             if not self.options.shared:
                 self.cpp_info.components["jxl"].defines.append("JXL_CMS_STATIC_DEFINE")
-            if not self.options.shared:
                 if libcxx:
                     self.cpp_info.components["jxl_cms"].system_libs.append(libcxx)
             self.cpp_info.components["jxl"].requires.append("jxl_cms")
@@ -206,9 +204,8 @@ class LibjxlConan(ConanFile):
                 self.cpp_info.components["jxl_dec"].set_property("pkg_config_name", "libjxl_dec")
                 self.cpp_info.components["jxl_dec"].libs = [self._lib_name("jxl_dec")]
                 self.cpp_info.components["jxl_dec"].requires = ["brotli::brotli", "highway::highway", "lcms::lcms"]
-                if not self.options.shared:
-                    if libcxx:
-                        self.cpp_info.components["jxl_dec"].system_libs.append(libcxx)
+                if libcxx:
+                    self.cpp_info.components["jxl_dec"].system_libs.append(libcxx)
 
         # jxl_threads
         self.cpp_info.components["jxl_threads"].set_property("pkg_config_name", "libjxl_threads")
@@ -217,6 +214,5 @@ class LibjxlConan(ConanFile):
             self.cpp_info.components["jxl_threads"].system_libs = ["pthread"]
         if not self.options.shared:
             self.cpp_info.components["jxl_threads"].defines.append("JXL_THREADS_STATIC_DEFINE")
-        if not self.options.shared:
             if libcxx:
                 self.cpp_info.components["jxl_threads"].system_libs.append(libcxx)
