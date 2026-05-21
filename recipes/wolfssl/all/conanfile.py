@@ -43,7 +43,7 @@ class WolfSSLConan(ConanFile):
         "with_quic": [True, False],
         "with_experimental": [True, False],
         "with_rpk": [True, False],
-        "with_keylog_export": [True, False],
+        "keylog_export": [True, False],
     }
     default_options = {
         "shared": False,
@@ -65,7 +65,7 @@ class WolfSSLConan(ConanFile):
         "with_quic": False,
         "with_experimental": False,
         "with_rpk": False,
-        "with_keylog_export": False,
+        "keylog_export": False,
     }
 
     def config_options(self):
@@ -107,6 +107,7 @@ class WolfSSLConan(ConanFile):
             "--disable-crypttests",
             "--enable-harden",
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
+            "--enable-keylog-export={}".format(yes_no(self.options.get_safe("keylog_export"))),
             "--enable-opensslall={}".format(yes_no(self.options.opensslall)),
             "--enable-opensslextra={}".format(yes_no(self.options.opensslextra)),
             "--enable-opensslcoexist={}".format(yes_no(self.options.opensslcoexist)),
@@ -127,8 +128,6 @@ class WolfSSLConan(ConanFile):
             tc.configure_args.append("--enable-curl")
         if self.options.get_safe("with_quic"):
             tc.configure_args.append("--enable-quic")
-        if self.options.get_safe("with_keylog_export"):
-            tc.configure_args.append("--enable-keylog-export")
         if self.options.get_safe("with_experimental"):
             tc.configure_args.append("--enable-experimental")
         if self.options.get_safe("with_rpk"):
