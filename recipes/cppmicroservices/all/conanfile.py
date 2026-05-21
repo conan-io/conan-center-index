@@ -9,7 +9,7 @@ from conan.errors import ConanInvalidConfiguration, ConanException
 
 
 class CppMicroServicesConan(ConanFile):
-    name = "mw-cppmicroservices"
+    name = "cppmicroservices"
     description = "An OSGi-inspired dynamic module framework for C++"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
