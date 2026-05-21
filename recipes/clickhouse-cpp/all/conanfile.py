@@ -1,12 +1,13 @@
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain,CMakeDeps, cmake_layout
 from conan.tools.files import copy, get, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
+
 
 class ClickHouseCppConan(ConanFile):
     name = "clickhouse-cpp"
@@ -39,13 +40,9 @@ class ClickHouseCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "2.6.0":
-            self.requires("lz4/[>=1.9.4 <2]")
-            self.requires("abseil/[>=20230125.3 <=20260107.1]", transitive_headers=True)
-            self.requires("zstd/[~1.5]")
-        else:
-            self.requires("lz4/1.9.4")
-            self.requires("abseil/[>=20230125.3 <=20250127.0]", transitive_headers=True)
+        self.requires("lz4/[>=1.9.4 <2]")
+        self.requires("abseil/[>=20230125.3 <=20260107.1]", transitive_headers=True)
+        self.requires("zstd/[~1.5]")
         self.requires("cityhash/1.0.1")
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
@@ -55,7 +52,7 @@ class ClickHouseCppConan(ConanFile):
         abseil_cppstd = self.dependencies.host['abseil'].info.settings.compiler.cppstd
         if abseil_cppstd != self.settings.compiler.cppstd:
             raise ConanInvalidConfiguration(f"abseil must be built with the same compiler.cppstd setting")
-        if self.settings.os == "Windows" and self.options.shared:
+        if (self.settings.compiler == "msvc" or is_apple_os(self)) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared library on Windows.")
             # look at https://github.com/ClickHouse/clickhouse-cpp/pull/226
 
@@ -63,15 +60,10 @@ class ClickHouseCppConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         # Let's avoid upstream setting the CMAKE_CXX_STANDARD 17
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "USE_CXX17", "# USE_CXX17")
-        if Version(self.version) >= "2.6.0":
-            # Conan's zstd recipe exports `zstd::libzstd` (alias) rather than the
-            # `zstd::zstd` target upstream's Findzstd.cmake creates.
-            replace_in_file(self, os.path.join(self.source_folder, "clickhouse", "CMakeLists.txt"),
-                            "zstd::zstd", "zstd::libzstd")
-            # Drop upstream's -Werror so consumers building with a newer C++ standard
-            # (e.g. C++20's -Wdeprecated-enum-enum-conversion) aren't blocked by warnings.
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "-Wall -Wextra -Werror", "-Wall -Wextra")
+        # Drop upstream's -Werror so consumers building with a newer C++ standard
+        # (e.g. C++20's -Wdeprecated-enum-enum-conversion) aren't blocked by warnings.
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "-Werror", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -80,14 +72,12 @@ class ClickHouseCppConan(ConanFile):
         tc.cache_variables["WITH_SYSTEM_ABSEIL"] = True
         tc.cache_variables["WITH_SYSTEM_LZ4"] = True
         tc.cache_variables["WITH_SYSTEM_CITYHASH"] = True
-        if Version(self.version) >= "2.6.0":
-            tc.cache_variables["WITH_SYSTEM_ZSTD"] = True
+        tc.cache_variables["WITH_SYSTEM_ZSTD"] = True
         tc.cache_variables["DEBUG_DEPENDENCIES"] = False
-        if Version(self.version) <= "2.5.1":
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         cd = CMakeDeps(self)
+        cd.set_property("zstd", "cmake_target_name", "zstd::zstd")
         cd.generate()
 
     def build(self):
