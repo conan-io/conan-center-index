@@ -1,7 +1,9 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
@@ -16,11 +18,25 @@ class FcarougeKalmanConan(ConanFile):
     topics = ("kalman", "control", "filter", "estimation")
     package_type = "header-library"
     settings = "compiler", "os", "build_type", "arch"
-
     implements = ["auto_header_only"]
+
+    @property
+    def _minimum_compilers_version(self):
+        # Compilers need to support C++23 and print library
+        return {
+            "msvc": "193",
+            "gcc": "14",
+            "clang": "18",
+            "apple-clang": "16",
+        }
 
     def validate(self):
         check_min_cppstd(self, 23)
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires at least version {minimum_version} of the {self.settings.compiler} compiler."
+            )
 
     def layout(self):
         cmake_layout(self, src_folder="src")
