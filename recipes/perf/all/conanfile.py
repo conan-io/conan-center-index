@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
+from conan.errors import ConanException
 
 required_conan_version = ">=1.47.0"
 
@@ -19,6 +20,23 @@ class Perf(ConanFile):
 
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
+
+    def _get_perf_arch(self):
+        # perf has a strict set of values it can take for the ARCH env variable
+        # it must match the name of one of the subfolders from the arch folder
+        conan_arch_prefix_to_perf_arch_map = {
+            "armv7": "arm",
+            "armv8": "arm64",
+            "x86": "x86",
+            "mips": "mips",
+            "riscv": "riscv",
+        }
+
+        for conan_arch_prefix, perf_arch in conan_arch_prefix_to_perf_arch_map.items():
+            if str(self.settings.arch).startswith(conan_arch_prefix):
+                return perf_arch
+
+        raise ConanException(f'{self.settings.arch} not yet supported by this recipe')
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -44,6 +62,7 @@ class Perf(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.make_args += ["NO_LIBPYTHON=1"]
         tc.make_args += ["WERROR=0"]
+        tc.make_args += [f"ARCH={self._get_perf_arch()}"]
         tc.generate()
 
     def build(self):
