@@ -52,9 +52,12 @@ class ClickHouseCppConan(ConanFile):
         abseil_cppstd = self.dependencies.host['abseil'].info.settings.compiler.cppstd
         if abseil_cppstd != self.settings.compiler.cppstd:
             raise ConanInvalidConfiguration(f"abseil must be built with the same compiler.cppstd setting")
-        if (self.settings.compiler == "msvc" or is_apple_os(self)) and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} does not support shared library on Windows.")
-            # look at https://github.com/ClickHouse/clickhouse-cpp/pull/226
+        if self.options.shared:
+            if self.settings.compiler == "msvc":
+                raise ConanInvalidConfiguration(f"{self.ref} does not support shared library on msvc.")
+                # look at https://github.com/ClickHouse/clickhouse-cpp/pull/226
+            elif is_apple_os(self):
+                raise ConanInvalidConfiguration(f"{self.ref} does not support shared library on Apple OS.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
