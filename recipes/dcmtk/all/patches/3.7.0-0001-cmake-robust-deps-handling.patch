@@ -38,7 +38,7 @@
        message(STATUS "Info: DCMTK PNG support will be enabled")
        set(WITH_LIBPNG 1)
        include_directories(${PNG_INCLUDE_DIR})
--      set(LIBPNG_LIBS ${PNG_LIBRARY})
+-      set(LIBPNG_LIBS ${PNG_LIBRARY} ${LIBPNG_EXTRA_LIBS_STATIC})
 +      set(LIBPNG_LIBS PNG::PNG)
      endif()
    endif()
@@ -68,7 +68,7 @@
        else()
          message(STATUS "Info: DCMTK OPENSSL support will be disabled: DCMTK requires OpenSSL version 1.1.1 or newer")
          set(DCMTK_WITH_OPENSSL OFF CACHE BOOL "" FORCE)
-@@ -95,7 +82,7 @@ if(DCMTK_USE_FIND_PACKAGE)
+@@ -95,8 +82,8 @@ if(DCMTK_USE_FIND_PACKAGE)
  
    # Find libXML2
    if(DCMTK_WITH_XML)
@@ -78,6 +78,7 @@
 +    if(NOT LibXml2_FOUND)
        message(STATUS "Warning: XML support will be disabled because libxml2 was not found.")
        set(WITH_LIBXML "")
+       set(DCMTK_WITH_XML OFF CACHE BOOL "" FORCE)
 @@ -104,13 +91,13 @@ if(DCMTK_USE_FIND_PACKAGE)
        message(STATUS "Info: DCMTK XML support will be enabled")
        set(WITH_LIBXML 1)

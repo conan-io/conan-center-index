@@ -1,6 +1,6 @@
 --- a/CMake/dcmtkPrepare.cmake
-+++ b/CMake/dcmtkPrepare.cmake
-@@ -681,21 +681,24 @@ if(DCMTK_WITH_OPENSSL)
++++ b/CMake/dcmtkPrepare.cmake	
+@@ -703,21 +703,23 @@ if(DCMTK_WITH_OPENSSL)
    CHECK_INCLUDE_FILE_CXX("openssl/provider.h" HAVE_OPENSSL_PROVIDER_H)
  
    # test presence of functions, constants and macros needed for the dcmtls module
@@ -15,7 +15,6 @@
 -  CHECK_FUNCTIONWITHHEADER_EXISTS("TS_VERIFY_CTX_set0_store(0,0)" "openssl/ts.h" HAVE_OPENSSL_PROTOTYPE_TS_VERIFY_CTX_SET0_STORE)
 +  include(CheckSymbolExists)
 +  include(CheckCSourceCompiles)
-+
 +  check_symbol_exists("NID_dsa_with_SHA512" "openssl/obj_mac.h" HAVE_OPENSSL_PROTOTYPE_NID_DSA_WITH_SHA512)
 +  check_symbol_exists("NID_ecdsa_with_SHA3_256" "openssl/obj_mac.h" HAVE_OPENSSL_PROTOTYPE_NID_ECDSA_WITH_SHA3_256)
 +  check_symbol_exists("NID_sha512_256WithRSAEncryption" "openssl/obj_mac.h" HAVE_OPENSSL_PROTOTYPE_NID_SHA512_256WITHRSAENCRYPTION)
