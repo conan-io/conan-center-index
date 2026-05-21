@@ -6,7 +6,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
 required_conan_version = ">=2.0.9"
 
@@ -34,24 +33,11 @@ class CloudiniConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # LZ4 and ZSTD are PRIVATE-linked in upstream and not exposed in
-        # public headers, so consumers do not need their includes.
-        self.requires("lz4/1.10.0", transitive_headers=False)
-        self.requires("zstd/1.5.7", transitive_headers=False)
+        self.requires("lz4/[>=1.9.4 <2]")
+        self.requires("zstd/[>=1.5 <1.6]")
 
     def validate(self):
         check_min_cppstd(self, 20)
-        min_versions = {
-            "gcc": "10",
-            "clang": "12",
-            "apple-clang": "13",
-        }
-        compiler = str(self.settings.compiler)
-        minv = min_versions.get(compiler)
-        if minv and Version(self.settings.compiler.version) < minv:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires {compiler} >= {minv} for C++20 support"
-            )
         if is_msvc(self):
             raise ConanInvalidConfiguration(
                 f"{self.ref} has not been tested with MSVC. "
@@ -59,7 +45,7 @@ class CloudiniConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16 <4]")
+        self.tool_requires("cmake/[>=3.16]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
