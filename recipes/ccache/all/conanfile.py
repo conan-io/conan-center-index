@@ -4,7 +4,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.microsoft import check_min_vs
 import os
 
 required_conan_version = ">=2.0.9"
@@ -32,47 +32,26 @@ class CcacheConan(ConanFile):
 
     @property
     def _min_cppstd(self):
+        if Version(self.version) >= "4.13":
+            return "20"
         return "17"
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "8",
-            "clang": "9",
-            "apple-clang": "11",
-        }
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("zstd/[>=1.5 <1.6]")
+        self.requires("fmt/[>=10.2.1 <=11.1.1]") # Explicitly tested with all versions in this range
+        self.requires("xxhash/[~0.8]")
         if self.options.redis_storage_backend:
-            if Version(self.version) >= "4.12":
-                self.requires("hiredis/1.3.0")
-            else:
-                self.requires("hiredis/1.2.0")
-
-        if Version(self.version) >= "4.10":
-            self.requires("fmt/[>=10.2.1 <=11.1.1]") # Explicitly tested with all versions in this range
-            self.requires("xxhash/[~0.8]")
-
+            self.requires("hiredis/[>=1.3.0 <2]")
 
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 192)
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
         if self.settings.compiler== "clang" and Version(self.settings.compiler.version).major == "11" and \
             self.settings.compiler.libcxx == "libstdc++":
             raise ConanInvalidConfiguration(f"{self.ref} requires C++ filesystem library, that is not supported by Clang 11 + libstdc++.")
-
-        if self.settings.os == "Windows" and self.settings.arch == "armv8" and Version(self.version) < "4.10":
-            raise ConanInvalidConfiguration("ccache does not support ARMv8 on Windows before version 4.10")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.18]")
@@ -92,19 +71,15 @@ class CcacheConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        if Version(self.version) >= "4.10":
-            deps.set_property("fmt", "cmake_file_name", "Fmt")
-            deps.set_property("fmt", "cmake_find_mode", "module")
-            deps.set_property("fmt", "cmake_target_name", "dep_fmt")
-            deps.set_property("zstd", "cmake_file_name", "Zstd")
-            deps.set_property("zstd", "cmake_target_name", "dep_zstd")
-            deps.set_property("hiredis", "cmake_file_name", "Hiredis")
-            deps.set_property("hiredis", "cmake_target_name", "dep_hiredis")
-        else:
-            deps.set_property("hiredis", "cmake_target_name", "HIREDIS::HIREDIS")
-            deps.set_property("zstd", "cmake_target_name", "ZSTD::ZSTD")
-        deps.set_property("zstd", "cmake_find_mode", "module")
+        deps.set_property("fmt", "cmake_file_name", "Fmt")
+        deps.set_property("fmt", "cmake_find_mode", "module")
+        deps.set_property("fmt", "cmake_target_name", "dep_fmt")
+        deps.set_property("hiredis", "cmake_file_name", "Hiredis")
+        deps.set_property("hiredis", "cmake_target_name", "dep_hiredis")
         deps.set_property("hiredis", "cmake_find_mode", "module")
+        deps.set_property("zstd", "cmake_file_name", "Zstd")
+        deps.set_property("zstd", "cmake_target_name", "dep_zstd")
+        deps.set_property("zstd", "cmake_find_mode", "module")
         deps.generate()
 
     def build(self):

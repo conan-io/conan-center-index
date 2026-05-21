@@ -68,8 +68,7 @@ class TinyEXIFConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        libpostfix = "d" if self.settings.build_type == "Debug" else ""
-        self.cpp_info.libs = [f"TinyEXIF{libpostfix}"]
+        self.cpp_info.libs = [f"TinyEXIF"]
 
         self.cpp_info.set_property("cmake_file_name", "TinyEXIF")
         self.cpp_info.set_property("cmake_target_name", "TinyEXIF::TinyEXIF")

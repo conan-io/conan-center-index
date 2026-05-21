@@ -6,10 +6,9 @@ from conan.tools.files import copy, get, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 
 class WolfSSLConan(ConanFile):
@@ -65,21 +64,9 @@ class WolfSSLConan(ConanFile):
         "with_rpk": False,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "5.2.0":
-            del self.options.with_curl
-        if Version(self.version) < "5.5.0":
-            del self.options.with_quic
-        if Version(self.version) < "5.7.0":
-            del self.options.with_experimental
-        if Version(self.version) < "5.7.2":
-            del self.options.with_rpk
 
     def configure(self):
         if self.options.shared:
@@ -97,7 +84,7 @@ class WolfSSLConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
         self.tool_requires("cmake/[>=3.22 <4]")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -182,8 +169,6 @@ class WolfSSLConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.extend(["m", "pthread"])
             elif self.settings.os == "Windows":
-                self.cpp_info.system_libs.extend(["advapi32", "ws2_32"])
-                if Version(self.version) >= "5.6.0":
-                    self.cpp_info.system_libs.append("crypt32")
-            elif is_apple_os(self) and Version(self.version) >= "5.6.0":
+                self.cpp_info.system_libs.extend(["advapi32", "ws2_32", "crypt32"])
+            elif is_apple_os(self):
                 self.cpp_info.frameworks.extend(["CoreFoundation", "Security"])
