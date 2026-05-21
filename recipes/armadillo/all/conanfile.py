@@ -31,6 +31,7 @@ class ArmadilloConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     package_type = "library"
     options = {
+        "header_only": [True, False],
         "shared": [True, False],
         "fPIC": [True, False],
         "use_blas": [
@@ -56,6 +57,7 @@ class ArmadilloConan(ConanFile):
         "use_wrapper": [True, False],
     }
     default_options = {
+        "header_only": False,
         "shared": False,
         "fPIC": True,
         "use_blas": "openblas",
@@ -91,15 +93,22 @@ class ArmadilloConan(ConanFile):
             # Macos will default to Accelerate framework
             self.options.use_blas = "framework_accelerate"
             self.options.use_lapack = "framework_accelerate"
+        if Version(self.version) < "14":
+            del self.options.header_only
 
         # According with the CMakeLists file in armadillo, MinGW doesn't correctly handle thread_local.
         # If any of MINGW, MSYS, CYGWIN or MSVC are True in during cmake configure, the ARMA_USE_EXTERN_RNG option will be set to false.
         # Therefore, in these cases we remove the `use_extern_rng` option in conan
-        if self.settings.os == "Windows":
+        # The option ARMA_USE_EXTERN_RNG was removed completely from version 12.6.2 onwards
+        if self.settings.os == "Windows" or Version(self.version) >= "12.6.2":
             del self.options.use_extern_rng
 
     def configure(self):
-        if self.options.shared:
+        if self.options.get_safe("header_only"):
+            self.options.rm_safe("fPIC")
+            self.options.rm_safe("shared")
+            self.options.rm_safe("use_wrapper")
+        elif self.options.shared:
             self.options.rm_safe("fPIC")
 
         if self.options.use_blas == "openblas":
@@ -109,7 +118,10 @@ class ArmadilloConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+            if Version(self.version) >= "15":
+                check_min_cppstd(self, 14)
+            else:
+                check_min_cppstd(self, 11)
 
         if self.settings.os != "Macos" and (
             self.options.use_blas == "framework_accelerate"
@@ -164,14 +176,15 @@ class ArmadilloConan(ConanFile):
                 f"DEPRECATION NOTICE: Value {opt} uses armadillo's default dependency search and will be replaced when this package becomes available in ConanCenter"
             )
 
-        # Ignore use_extern_rng when the option has been removed
-        if self.options.use_wrapper and not self.options.get_safe("use_extern_rng", True):
-            raise ConanInvalidConfiguration(
-                "The wrapper requires the use of an external RNG. Set use_extern_rng=True and try again."
-            )
+        if not self.options.get_safe("header_only"):
+            # Ignore use_extern_rng when the option has been removed
+            if self.options.use_wrapper and not self.options.get_safe("use_extern_rng", True):
+                raise ConanInvalidConfiguration(
+                    "The wrapper requires the use of an external RNG. Set use_extern_rng=True and try again."
+                )
 
-        if not self.options.shared and self.options.use_wrapper:
-            raise ConanInvalidConfiguration("Building the armadillo run-time wrapper library requires armadillo/*:shared=True")
+            if not self.options.shared and self.options.use_wrapper:
+                raise ConanInvalidConfiguration("Building the armadillo run-time wrapper library requires armadillo/*:shared=True")
 
     def requirements(self):
         # Optional requirements
@@ -186,11 +199,11 @@ class ArmadilloConan(ConanFile):
         if self.options.use_hdf5 and Version(self.version) < "12":
             # Use the conan dependency if the system lib isn't being used
             # Libraries not required to be propagated transitively when the armadillo run-time wrapper is used
-            self.requires("hdf5/1.14.3", transitive_headers=True, transitive_libs=not self.options.use_wrapper)
+            self.requires("hdf5/1.14.3", transitive_headers=True, transitive_libs=not self.options.get_safe("use_wrapper"))
 
         if self.options.use_blas == "openblas":
             # Libraries not required to be propagated transitively when the armadillo run-time wrapper is used
-            self.requires("openblas/0.3.25", transitive_libs=not self.options.use_wrapper)
+            self.requires("openblas/[>=0.3.30 <4]", transitive_libs=not self.options.get_safe("use_wrapper"))
         if (
             self.options.use_blas == "intel_mkl"
             and self.options.use_lapack == "intel_mkl"
@@ -209,15 +222,19 @@ class ArmadilloConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if Version(self.version) >= "14":
+            tc.cache_variables["HEADER_ONLY"] = self.options.header_only
+
         tc.variables["ARMA_USE_LAPACK"] = self.options.use_lapack
         tc.variables["ARMA_USE_BLAS"] = self.options.use_blas
         tc.variables["ARMA_USE_ATLAS"] = self.options.use_lapack == "system_atlas"
         tc.variables["ARMA_USE_HDF5"] = self.options.use_hdf5
         tc.variables["ARMA_USE_HDF5_CMAKE"] = self.options.use_hdf5
         tc.variables["ARMA_USE_ARPACK"] = self.options.use_arpack
-        tc.variables["ARMA_USE_EXTERN_RNG"] = self.options.get_safe("use_exern_rng", default=False)
+        if Version(self.version) < "12.6.2":
+            tc.cache_variables["ARMA_USE_EXTERN_RNG"] = self.options.get_safe("use_extern_rng", default=False)
         tc.variables["ARMA_USE_SUPERLU"] = self.options.use_superlu
-        tc.variables["ARMA_USE_WRAPPER"] = self.options.use_wrapper
+        tc.variables["ARMA_USE_WRAPPER"] = self.options.get_safe("use_wrapper")
         tc.variables["ARMA_USE_ACCELERATE"] = (
             self.options.use_blas == "framework_accelerate"
             or self.options.use_lapack == "framework_accelerate"
@@ -237,7 +254,10 @@ class ArmadilloConan(ConanFile):
         tc.variables["ALLOW_OPENBLAS_MACOS"] = self.options.use_blas == "openblas" and self.settings.os == "Macos"
         tc.variables["OPENBLAS_PROVIDES_LAPACK"] = self.options.use_lapack == "openblas"
         tc.variables["ALLOW_BLAS_LAPACK_MACOS"] = self.options.use_blas != "framework_accelerate"
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
+        if Version(self.version) >= "14":
+            tc.cache_variables["STATIC_LIB"] = not self.options.get_safe("shared")
+        else:
+            tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_SMOKE_TEST"] = False
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if Version(self.version) < "14.0.0": # pylint: disable=conan-condition-evals-to-constant
@@ -252,7 +272,6 @@ class ArmadilloConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -291,24 +310,34 @@ class ArmadilloConan(ConanFile):
         """)
         save(self, module_file, content)
 
-    def package(self):
-        cmake = CMake(self)
-        cmake.install()
+    def package_id(self):
+        if self.info.options.get_safe("header_only"):
+            self.info.clear()
 
+    def package(self):
         copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, "NOTICE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+
+        cmake = CMake(self)
+        cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_vars_rel_path))
 
-
     def package_info(self):
-        self.cpp_info.libs = ["armadillo"]
         self.cpp_info.set_property("pkg_config_name", "armadillo")
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "Armadillo")
         self.cpp_info.set_property("cmake_target_name", "Armadillo::Armadillo")
         self.cpp_info.set_property("cmake_target_aliases", ["armadillo", "armadillo::armadillo"])
+
+        if self.options.get_safe("header_only"):
+            self.cpp_info.bindirs = []
+            self.cpp_info.libdirs = []
+            self.cpp_info.defines.append("ARMA_HEADER_ONLY")
+            self.cpp_info.defines.append("ARMA_DONT_USE_WRAPPER")
+        else:
+            self.cpp_info.libs = ["armadillo"]
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
 
         if self.options.get_safe("use_extern_rng"):
@@ -319,7 +348,7 @@ class ArmadilloConan(ConanFile):
 
         # The wrapper library links everything together. If disabled, system libs must be
         # linked manually
-        if not self.options.use_wrapper:
+        if not self.options.get_safe("use_wrapper"):
             self.cpp_info.defines.append("ARMA_DONT_USE_WRAPPER")
             if self.options.use_blas == "framework_accelerate":
                 self.cpp_info.frameworks.append("Accelerate")
