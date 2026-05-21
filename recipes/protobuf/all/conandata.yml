@@ -1,5 +1,5 @@
 sources:
-  "6.35.0":
+  "7.35.0":
     url: "https://github.com/protocolbuffers/protobuf/releases/download/v35.0/protobuf-35.0.tar.gz"
     sha256: "8f907baca4b34a3b4854103ba5811e418fb6e2ff11fe0d8df9e8280b11d79926"
   "6.33.5":
@@ -10,7 +10,7 @@ sources:
     sha256: "877bf9f880631aa31daf2c09896276985696728137fcd43cc534a28c5566d9ba"
 absl_deps:
   # reference: https://github.com/protocolbuffers/protobuf/blob/main/cmake/abseil-cpp.cmake
-  "6.35.0":
+  "7.35.0":
     - absl_absl_check
     - absl_absl_log
     - absl_algorithm
