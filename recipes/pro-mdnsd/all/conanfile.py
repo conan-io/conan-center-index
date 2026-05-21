@@ -51,6 +51,7 @@ class mdnsdConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def _get_log_level(self):
         return {
@@ -67,14 +68,18 @@ class mdnsdConan(ConanFile):
         tc.variables["MDNSD_ENABLE_SANITIZERS"] = False
         tc.variables["MDNSD_COMPILE_AS_CXX"] = self.options.compile_as_cpp
         tc.variables["MDNSD_LOGLEVEL"] = self._get_log_level()
+        if "clang" in self.settings.compiler:
+            # newer compilers would complain about
+            # ../../src/mquery.c:141:21: error: incompatible integer to pointer conversion
+            # passing 'unsigned long' to parameter of type 'struct sockaddr *' [-Wint-conversion]
+            tc.extra_cflags.append("-Wno-int-conversion")
         tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if Version(self.version) > "0.8.4": # pylint: disable=conan-unreachable-upper-version
+        if Version(self.version) > "0.8.4.1": # pylint: disable=conan-unreachable-upper-version
             raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
 
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -96,3 +101,5 @@ class mdnsdConan(ConanFile):
         self.cpp_info.libs = ["mdnsd"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32", "wsock32"]
+        if not self.options.shared:
+            self.cpp_info.defines.append("MDNSD_STATIC_DEFINE")
