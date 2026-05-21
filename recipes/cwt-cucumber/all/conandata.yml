@@ -2,6 +2,9 @@ sources:
   "2.7":
     url: "https://github.com/ThoSe1990/cwt-cucumber/archive/refs/tags/2.7.tar.gz"
     sha256: "12a38587fc50990dbb7f80a18e401011ea8d7e5d1dd82a13e66cb294a02bbd78"
+  "2.8":
+    url: "https://github.com/ThoSe1990/cwt-cucumber/archive/refs/tags/2.8.tar.gz"
+    sha256: "30576a39a9ce2c4a915ed8f0e46f3f0ef149febf995989dfb02a05866ff38f57"
 patches:
   "2.7":
     - patch_file: "patches/0001-2.7-disable-tests-and-examples.patch"
