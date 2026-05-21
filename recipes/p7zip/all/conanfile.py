@@ -43,37 +43,14 @@ class PSevenZipConan(ConanFile):
         tc.generate()
 
     def _patch_compiler(self):
-        compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
-        cc_from_conf = compilers_from_conf.get("c", "")
-        if cc_from_conf:
-            cc = cc_from_conf
-        else:
-            cc = "clang" if "clang" in str(self.settings.compiler) else str(self.settings.compiler)
-
-        cxx_from_conf = compilers_from_conf.get("cpp", "")
-        if cxx_from_conf:
-            cxx = cxx_from_conf
-        else:
-            cxx = "clang++" if "clang" in str(self.settings.compiler) else str(self.settings.compiler)
-            if self.settings.compiler == "gcc":
-                cxx = "g++"
-
-        # Replace the hard-coded compilers instead of using the 40 different Makefile permutations
+        # let the script fall back to the default compiler (environment, or from AutotoolsToolchain)
         replace_in_file(self, os.path.join(self.source_folder, "makefile.machine"),
-                              "CC=gcc", f"CC={cc}")
+                              "CC=gcc", "CC ?= cc")
         replace_in_file(self, os.path.join(self.source_folder, "makefile.machine"),
-                              "CXX=g++", f"CXX={cxx}")
-
-        optflags = ''
-        if is_apple_os(self):
-            optflags = '-arch ' + to_apple_arch(self)
-        # Manually modify the -O flag here based on the build type
-        optflags += " -O2" if self.settings.build_type == "Release" else " -O0"
-        # Silence the warning about `-s` not being valid on clang
-        if cc != "clang":
-            optflags += ' -s'
+                              "CXX=g++", "CXX ?= c++")
+        # respect the CFLAGS set by AutotoolsToolchain
         replace_in_file(self, os.path.join(self.source_folder, "makefile.machine"),
-                            "OPTFLAGS=-O -s", "OPTFLAGS=" + optflags)
+                                "OPTFLAGS=", "OPTFLAGS := $(CFLAGS) ")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
