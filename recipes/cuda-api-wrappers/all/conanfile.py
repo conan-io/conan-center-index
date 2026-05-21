@@ -3,9 +3,8 @@ import os
 from conan import ConanFile
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2"
 
 
 class CudaApiWrappersConan(ConanFile):
@@ -46,8 +45,5 @@ class CudaApiWrappersConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.set_property("cmake_target_name", "cuda-api-wrappers::runtime-and-driver")
-        if Version(self.version) < "0.7.0":
-            # For previously published versions the target name was different, maintain compatibility
-            self.cpp_info.set_property("cmake_target_aliases", ["cuda-api-wrappers::cuda-api-wrappers"])
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]

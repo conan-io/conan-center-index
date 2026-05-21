@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, apply_conandata_patches, export_conandata_patches, get, rm, save
+from conan.tools.files import copy, get, rm, save
 from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
@@ -38,6 +38,7 @@ class WhisperCppConan(ConanFile):
         "with_blas": [True, False],
         "with_openvino": [True, False],
         "with_cuda": [True, False],
+        "with_vulkan": [True, False],
     }
     default_options = {
         "shared": False,
@@ -57,6 +58,7 @@ class WhisperCppConan(ConanFile):
         "with_blas": False,
         "with_openvino": False,
         "with_cuda": False,
+        "with_vulkan": False,
     }
     package_type = "library"
 
@@ -94,6 +96,7 @@ class WhisperCppConan(ConanFile):
         if is_apple_os(self):
             del self.options.with_blas
             del self.options.with_cuda
+            del self.options.with_vulkan
         else:
             del self.options.metal
             del self.options.metal_ndebug
@@ -127,12 +130,14 @@ class WhisperCppConan(ConanFile):
                 self.requires("openblas/0.3.24")
         if self.options.get_safe("with_openvino"):
             self.requires("openvino/2023.2.0")
+        if self.options.get_safe("with_vulkan"):
+            self.requires("vulkan-loader/[>=1.3]")
+    def build_requirements(self):
+        if self.options.get_safe("with_vulkan"):
+            self.tool_requires("shaderc/[>=2025.3]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -163,6 +168,12 @@ class WhisperCppConan(ConanFile):
         if self.options.no_f16c:
             tc.variables["WHISPER_NO_F16C"] = True
 
+        if self.options.get_safe("with_vulkan"):
+            tc.cache_variables["GGML_VULKAN"] = True
+            shaderc_bin_path = os.path.join(self.dependencies.build["shaderc"].cpp_info.bindir, "glslc").replace("\\", "/")
+            tc.cache_variables["Vulkan_GLSLC_EXECUTABLE"] = shaderc_bin_path
+
+
         # TODO: Implement OpenMP support
         tc.variables["GGML_OPENMP"] = False
 
@@ -191,7 +202,6 @@ class WhisperCppConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -209,6 +219,9 @@ class WhisperCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["whisper"]
         self.cpp_info.libs.extend(["ggml", "ggml-base", "ggml-cpu"])
+        if self.options.get_safe("with_vulkan"):
+            self.cpp_info.libs.append("ggml-vulkan")
+            self.cpp_info.requires.append("vulkan-loader::vulkan-loader")
         if self.options.get_safe("with_cuda"):
             self.cpp_info.libs.append("ggml-cuda")
         self.cpp_info.resdirs = ["res"]

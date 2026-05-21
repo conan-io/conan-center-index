@@ -1,13 +1,13 @@
 sources:
-  "2.5.0":
-    url: "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/v2.5.0.tar.gz"
-    sha256: "124e2bfa8a9071959d6ddbb64ffbf78d3f6fe3c923ae23e96a6bbadde1af55b6"
+  "2.5.1":
+    url: "https://github.com/AcademySoftwareFoundation/OpenColorIO/releases/download/v2.5.1/OpenColorIO-2.5.1.tar.gz"
+    sha256: "49ab04d023d7a7a7237e24f2cfead3171b0ff7f466ce20e6e32859ec8c7cc94b"
   "2.4.2":
     url: "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/v2.4.2.tar.gz"
     sha256: "2d8f2c47c40476d6e8cea9d878f6601d04f6d5642b47018eaafa9e9f833f3690"
 patches:
-  "2.5.0":
-    - patch_file: "patches/2.5.0-0001-fix-cmake-source-dir-and-targets.patch"
+  "2.5.1":
+    - patch_file: "patches/2.5.1-0001-fix-cmake-source-dir-and-targets.patch"
       patch_description: "use cci package, use PROJECT_BINARY_DIR/PROJECT_SOURCE_DIR"
       patch_type: "conan"
   "2.4.2":

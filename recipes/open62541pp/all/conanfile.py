@@ -35,7 +35,7 @@ class Open62541ppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("open62541/1.4.6", transitive_headers=True, transitive_libs=True)
+        self.requires("open62541/[~1.4.14]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         check_min_cppstd(self, 17)

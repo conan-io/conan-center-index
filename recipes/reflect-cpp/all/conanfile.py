@@ -100,7 +100,7 @@ class ReflectCppConan(ConanFile):
         if self.options.with_ubjson:
             self.requires("jsoncons/0.176.0", transitive_headers=True)
         if self.options.with_xml:
-            self.requires("pugixml/1.14", transitive_headers=True)
+            self.requires("pugixml/1.15", transitive_headers=True)
         if self.options.with_yaml:
             self.requires("yaml-cpp/0.8.0", transitive_headers=True)
 
@@ -112,7 +112,9 @@ class ReflectCppConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++20 features, which your compiler does not fully support.")
-
+        if Version(self.version) < "0.22" and self.settings.compiler == "msvc" and self.options.shared:
+            raise ConanInvalidConfiguration("Old versions of this library do not support MSVC-shared builds")
+    
     def layout(self):
         cmake_layout(self, src_folder="src")
 

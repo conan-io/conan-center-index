@@ -599,6 +599,12 @@ class BoostConan(ConanFile):
             if Version(self.version) == "1.86.0" and is_msvc(self):
                 setattr(self.options, "without_process", True)
 
+        if Version(self.version) in ["1.90.0", "1.91.0"]:
+            # FIXME: boost.coroutine doesn't support Windows ARM64 due to missing context assembly
+            # See https://github.com/boostorg/context/issues/296
+            if self._is_windows_platform and "arm" in str(self.settings.arch):
+                self.options.without_coroutine = True
+
     @property
     def _configure_options(self):
         return self._dependencies["configure_options"]
@@ -623,6 +629,14 @@ class BoostConan(ConanFile):
         if Version(self.version) == "1.85.0":
             # https://github.com/boostorg/stacktrace/blob/boost-1.85.0/build/Jamfile.v2#L143
             return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
+        elif Version(self.version) >= "1.91.0":
+            # INFO: from_exception is built for all targets; only Cygwin is excluded upstream
+            # https://github.com/boostorg/stacktrace/blob/boost-1.91.0/build/Jamfile.v2#L252
+            if self.options.header_only or self.options.without_stacktrace:
+                return False
+            if self.settings.get_safe("os.subsystem") == "cygwin":
+                return False
+            return True
         elif Version(self.version) >= "1.86.0":
             # https://github.com/boostorg/stacktrace/blob/boost-1.86.0/build/Jamfile.v2#L148
             return not self.options.header_only and not self.options.without_stacktrace and self._b2_architecture == "x86"
@@ -691,6 +705,8 @@ class BoostConan(ConanFile):
             libraries.append("thread")
         if Version(self.version) >= "1.85.0":
             libraries.append("system")
+        if Version(self.version) >= "1.89.0":
+            libraries.append("atomic")
         libraries.sort()
         return list(filter(lambda library: f"without_{library}" in self.options, libraries))
 
@@ -838,6 +854,8 @@ class BoostConan(ConanFile):
             del self.info.options.python_executable  # PATH to the interpreter is not important, only version matters
             if self.info.options.without_python:
                 del self.info.options.python_version
+            if Version(self.version) >= "1.89.0":
+                del self.info.options.system_use_utf8
 
     def build_requirements(self):
         if not self.options.header_only:
@@ -1173,7 +1191,7 @@ class BoostConan(ConanFile):
 
     @property
     def _b2_address_model(self):
-        if self.settings.arch in ("x86_64", "ppc64", "ppc64le", "mips64", "armv8", "armv8.3", "sparcv9", "s390x", "riscv64"):
+        if self.settings.arch in ("x86_64", "ppc64", "ppc64le", "mips64", "armv8", "armv8.3", "sparcv9", "s390x", "riscv64", "wasm64"):
             return "64"
 
         return "32"
@@ -1628,7 +1646,7 @@ class BoostConan(ConanFile):
             return "clang-win" if self.settings.compiler.get_safe("toolset") == "ClangCL" else "msvc"
         if self.settings.os == "Windows" and self.settings.compiler == "clang":
             return "clang-win"
-        if self.settings.os == "Emscripten" and self.settings.compiler == "clang":
+        if self.settings.os == "Emscripten" and self.settings.compiler in ("clang", "emcc"):
             return "emscripten"
         if self.settings.compiler == "gcc" and is_apple_os(self):
             return "darwin"

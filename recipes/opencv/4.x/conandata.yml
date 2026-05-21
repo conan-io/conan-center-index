@@ -1,11 +1,11 @@
 sources:
-  "4.12.0":
-    - url: "https://github.com/opencv/opencv/archive/refs/tags/4.12.0.tar.gz"
-      sha256: "44c106d5bb47efec04e531fd93008b3fcd1d27138985c5baf4eafac0e1ec9e9d"
-    - url: "https://github.com/opencv/opencv_contrib/archive/refs/tags/4.12.0.tar.gz"
-      sha256: "4197722b4c5ed42b476d42e29beb29a52b6b25c34ec7b4d589c3ae5145fee98e"
+  "4.13.0":
+    - url: "https://github.com/opencv/opencv/archive/refs/tags/4.13.0.tar.gz"
+      sha256: "1d40ca017ea51c533cf9fd5cbde5b5fe7ae248291ddf2af99d4c17cf8e13017d"
+    - url: "https://github.com/opencv/opencv_contrib/archive/refs/tags/4.13.0.tar.gz"
+      sha256: "1e0077a4fd2960a7d2f4c9e49d6ba7bb891cac2d1be36d7e8e47aa97a9d1039b"
 patches:
-  "4.12.0":
+  "4.13.0":
     - patch_file: "patches/4.5.5-0001-find-openexr.patch"
       patch_description: "Robust discovery & injection of OpenEXR"
       patch_type: "conan"
@@ -30,7 +30,3 @@ patches:
     - patch_file: "patches/4.12.0-0001-fix-libwebp-find.patch"
       patch_description: "Add find_package for libwebp"
       patch_type: "conan"
-    - patch_file: "patches/4.12.0-0002-fix-eigen-version-uses.patch"
-      patch_description: "Fix Eigen legacy version variable uses"
-      patch_type: "backport"
-      patch_source: "https://github.com/opencv/opencv/pull/27536"

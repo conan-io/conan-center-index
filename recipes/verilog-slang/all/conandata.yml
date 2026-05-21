@@ -1,0 +1,5 @@
+sources:
+  "9.1":
+    url:
+    - "https://github.com/MikePopoloski/slang/archive/refs/tags/v9.1.tar.gz"
+    sha256: "8261eefd36c757772d5b529c84172ecdb4b87a93180ebde8cbea24a35af4da90"

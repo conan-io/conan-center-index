@@ -31,11 +31,11 @@ class AwsCS3(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("aws-c-common/0.12.3", transitive_headers=True, transitive_libs=True)
-        self.requires("aws-c-cal/0.9.2")
-        self.requires("aws-c-auth/0.9.0", transitive_headers=True)
-        self.requires("aws-c-http/0.10.2")
-        self.requires("aws-c-io/0.21.0", transitive_headers=True)
+        self.requires("aws-c-common/0.12.5", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-cal/0.9.8")
+        self.requires("aws-c-auth/0.9.1", transitive_headers=True)
+        self.requires("aws-c-http/0.10.5")
+        self.requires("aws-c-io/0.23.2", transitive_headers=True)
         self.requires("aws-checksums/0.2.6")
 
     def source(self):
@@ -44,6 +44,7 @@ class AwsCS3(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables['AWS_STATIC_MSVC_RUNTIME_LIBRARY'] = self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime") == "static"
         tc.generate()
 
         deps = CMakeDeps(self)

@@ -18,9 +18,13 @@ int main() {
   // config is optional
   std::shared_ptr<maddy::ParserConfig> config =
       std::make_shared<maddy::ParserConfig>();
+#ifdef MADDY_VERSION_1_4
+  config->enabledParsers &= ~maddy::types::EMPHASIZED_PARSER;
+  config->enabledParsers |= maddy::types::HTML_PARSER;
+#else
   config->isEmphasizedParserEnabled = true; // default
   config->isHTMLWrappedInParagraph = true;  // default
-
+#endif
   std::shared_ptr<maddy::Parser> parser =
       std::make_shared<maddy::Parser>(config);
   std::string htmlOutput = parser->Parse(markdownInput);

@@ -1,0 +1,73 @@
+Allow using Conan dependencies instead of running CMake fetchcontent to download and build them.
+
+See https://github.com/google-deepmind/mujoco/issues/1137 for more details.
+
+A few dependencies listed in MujocoDependencies.cmake are not needed for the library:
+* Abseil: only used for tests and Python bindings
+* Google Benchmark: only used for tests
+* Google Test: only used for tests
+* Eigen: only used for Python bindings
+
+Mujoco expects being using CCD as a static library always,
+and by defining CCD_STATIC_DEFINE,
+it disables the use of __declspec(dllimport) in the headers of libccd.
+
+Fix include header path for qhull:
+src/user/user_mesh.cc:71:10: fatal error: qhull_ra.h: No such file or directory
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2ade5c7..2b51d26 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -64,7 +64,12 @@ endif()
+
+ include(MujocoOptions)
+ include(MujocoMacOS)
+-include(MujocoDependencies)
++find_package(ccd REQUIRED CONFIG)
++find_package(lodepng REQUIRED CONFIG)
++find_package(Qhull REQUIRED CONFIG)
++find_package(tinyobjloader REQUIRED CONFIG)
++find_package(tinyxml2 REQUIRED CONFIG)
++find_package(MarchingCubeCpp REQUIRED CONFIG)
+
+ set(MUJOCO_HEADERS
+     include/mujoco/mjdata.h
+@@ -134,7 +139,7 @@ if(EMSCRIPTEN)
+ endif()
+
+
+-target_compile_definitions(mujoco PRIVATE _GNU_SOURCE CCD_STATIC_DEFINE MUJOCO_DLL_EXPORTS -DMC_IMPLEM_ENABLE)
++target_compile_definitions(mujoco PRIVATE _GNU_SOURCE MUJOCO_DLL_EXPORTS -DMC_IMPLEM_ENABLE)
+ if(MUJOCO_ENABLE_AVX_INTRINSICS)
+   target_compile_definitions(mujoco PUBLIC mjUSEPLATFORMSIMD)
+ endif()
+@@ -156,10 +161,11 @@ target_link_options(
+ target_link_libraries(
+   mujoco
+   PRIVATE ccd
+-          lodepng
+-          qhullstatic_r
+-          tinyobjloader
+-          tinyxml2
++          lodepng::lodepng
++          $<IF:$<TARGET_EXISTS:Qhull::qhull_r>,Qhull::qhull_r,Qhull::qhullstatic_r>
++          tinyobjloader::tinyobjloader
++          tinyxml2::tinyxml2
++          marchingcubecpp::marchingcubecpp
+ )
+
+ set_target_properties(
+diff --git a/src/user/user_mesh.cc b/src/user/user_mesh.cc
+index db85272..a546d9f 100644
+--- a/src/user/user_mesh.cc
++++ b/src/user/user_mesh.cc
+@@ -68,7 +68,7 @@
+ #include "user/user_util.h"
+
+ extern "C" {
+-#include "qhull_ra.h"
++#include <libqhull_r/qhull_ra.h>
+ }
+
+ namespace {

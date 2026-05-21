@@ -66,15 +66,15 @@ class Opene57Conan(ConanFile):
 
     def requirements(self):
         if self.options.with_tools:
-            self.requires("boost/1.84.0")
+            self.requires("boost/1.90.0")
 
         if self.options.with_docs:
             self.requires("doxygen/[>=1.8 <2]")
 
         if self.settings.os != "Windows":
-            self.requires("icu/74.1")
+            self.requires("icu/78.1")
 
-        self.requires("xerces-c/3.2.4")
+        self.requires("xerces-c/3.3.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):

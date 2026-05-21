@@ -22,7 +22,7 @@ class Sqlpp11Conan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11 if Version(self.version) < "0.61" else 14
+        return 14
 
     @property
     def _compilers_minimum_version(self):
@@ -38,7 +38,7 @@ class Sqlpp11Conan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("date/3.0.1")
+        self.requires("date/[^3.0.1]")
 
     def package_id(self):
         self.info.clear()
@@ -63,6 +63,3 @@ class Sqlpp11Conan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "Sqlpp11")
         self.cpp_info.set_property("cmake_target_name", "sqlpp11::sqlpp11")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

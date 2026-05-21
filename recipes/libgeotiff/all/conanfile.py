@@ -1,8 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
-import textwrap
 
 required_conan_version = ">=2.1"
 
@@ -43,9 +43,9 @@ class LibgeotiffConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # libgeotiff/include/xtiffio.h includes libtiff/include/tiffio.h
-        self.requires("libtiff/4.6.0", transitive_headers=True, transitive_libs=True)
         self.requires("proj/9.3.1")
+        # libgeotiff/include/xtiffio.h includes libtiff/include/tiffio.h
+        self.requires("libtiff/[>=4.6.0 <5]", transitive_headers=True, transitive_libs=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -54,6 +54,8 @@ class LibgeotiffConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["WITH_UTILITIES"] = False
         tc.variables["WITH_TOWGS84"] = True
+        if Version(self.version) < "1.7.4":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

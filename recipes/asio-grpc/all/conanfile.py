@@ -26,7 +26,7 @@ class AsioGrpcConan(ConanFile):
     no_copy_source = True
 
     def requirements(self):
-        self.requires("grpc/1.67.1", transitive_headers=True, transitive_libs=True)
+        self.requires("grpc/[>=1.67.1 <2]", transitive_headers=True, transitive_libs=True)
         if self.options.backend == "boost":
             self.requires(f"boost/1.88.0", transitive_headers=True)
         if self.options.backend == "asio":
