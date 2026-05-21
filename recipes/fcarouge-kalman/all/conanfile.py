@@ -29,9 +29,9 @@ class FcarougeKalmanConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        toolchain = CMakeToolchain(self)
-        toolchain.variables["BUILD_TESTING"] = False
-        toolchain.generate()
+        tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -41,12 +41,7 @@ class FcarougeKalmanConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        copy(
-            self,
-            "LICENSE.txt",
-            src=self.source_folder,
-            dst=os.path.join(self.package_folder, "licenses"),
-        )
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
