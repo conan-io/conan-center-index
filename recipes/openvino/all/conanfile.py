@@ -93,9 +93,6 @@ class OpenvinoConan(ConanFile):
         rmdir(self, f"{self.source_folder}/src/plugins/intel_gpu/thirdparty/rapidjson")
         apply_conandata_patches(self)
 
-    def export(self):
-        copy(self, f"dependencies/{self._dependencies_filename}", self.recipe_folder, self.export_folder)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -132,7 +129,7 @@ class OpenvinoConan(ConanFile):
             self.requires("rapidjson/cci.20220822")
             self.requires("level-zero/1.17.39")
         if self._protobuf_required:
-            self.requires("protobuf/3.21.12")
+            self.requires("protobuf/4.25.3")
         if self.options.enable_tf_frontend:
             self.requires("snappy/1.1.10")
         if self.options.enable_onnx_frontend:
