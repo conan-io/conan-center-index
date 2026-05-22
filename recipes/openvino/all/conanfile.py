@@ -96,10 +96,6 @@ class OpenvinoConan(ConanFile):
     def _gpu_option_available(self):
         return self.settings.os != "Macos" and self._target_x86_64
 
-    @property
-    def _preprocessing_available(self):
-        return "ade" in self._dependencies_versions
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["openvino"], strip_root=True)
         get(self, **self.conan_data["sources"][self.version]["onednn_cpu"], strip_root=True,
@@ -161,8 +157,6 @@ class OpenvinoConan(ConanFile):
             self.requires(self._require("onnx"))
         if self.options.enable_tf_lite_frontend:
             self.requires("flatbuffers/23.5.26")
-        if self._preprocessing_available:
-            self.requires(self._require("ade"))
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -208,8 +202,6 @@ class OpenvinoConan(ConanFile):
             toolchain.cache_variables["ENABLE_SYSTEM_OPENCL"] = True
             toolchain.cache_variables["ENABLE_SYSTEM_LEVEL_ZERO"] = True
         # misc
-        if self._preprocessing_available:
-            toolchain.cache_variables["ENABLE_GAPI_PREPROCESSING"] = True
         toolchain.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         toolchain.cache_variables["CPACK_GENERATOR"] = "CONAN"
         toolchain.cache_variables["ENABLE_PROFILING_ITT"] = False
@@ -266,16 +258,12 @@ class OpenvinoConan(ConanFile):
         openvino_runtime.set_property("cmake_target_name", "openvino::runtime")
         openvino_runtime.requires = ["onetbb::libtbb", "pugixml::pugixml", "nlohmann_json::nlohmann_json"]
         openvino_runtime.libs = [libname("openvino")]
-        if self._preprocessing_available:
-            openvino_runtime.requires.append("ade::ade")
         if self._target_x86_64:
             openvino_runtime.requires.append("xbyak::xbyak")
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             openvino_runtime.system_libs = ["m", "dl", "pthread"]
         if self.settings.os == "Windows":
             openvino_runtime.system_libs.append("shlwapi")
-            if self._preprocessing_available:
-                openvino_runtime.system_libs.extend(["wsock32", "ws2_32"])
 
         # Have to expose all internal libraries for static libraries case
         if not self.options.shared:
@@ -307,9 +295,6 @@ class OpenvinoConan(ConanFile):
                 openvino_runtime.libs.append(libname("openvino_hetero_plugin"))
             if self.options.enable_auto_batch:
                 openvino_runtime.libs.append(libname("openvino_auto_batch_plugin"))
-            # Preprocessing should come after plugins, because plugins depend on it
-            if self._preprocessing_available:
-                openvino_runtime.libs.extend([libname("openvino_gapi_preproc"), libname("fluid")])
             # Frontends
             if self.options.enable_ir_frontend:
                 openvino_runtime.libs.append(libname("openvino_ir_frontend"))
