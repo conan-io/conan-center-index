@@ -63,24 +63,6 @@ class OpenvinoConan(ConanFile):
     }
 
     @property
-    def _dependencies_filename(self):
-        return f"dependencies-{self.version}.yml"
-
-    @property
-    @functools.lru_cache(1)
-    def _dependencies_versions(self):
-        dependencies_filepath = os.path.join(self.recipe_folder, "dependencies", self._dependencies_filename)
-        if not os.path.isfile(dependencies_filepath):
-            raise ConanException(f"Cannot find {dependencies_filepath}")
-        cached_dependencies = yaml.safe_load(open(dependencies_filepath, encoding='UTF-8'))
-        return cached_dependencies
-
-    def _require(self, dependency):
-        if dependency not in self._dependencies_versions:
-            raise ConanException(f"{dependency} is missing in {self._dependencies_filename}")
-        return f"{dependency}/{self._dependencies_versions[dependency]}"
-
-    @property
     def _protobuf_required(self):
         return self.options.enable_tf_frontend or self.options.enable_onnx_frontend or self.options.enable_paddle_frontend
 
@@ -154,7 +136,7 @@ class OpenvinoConan(ConanFile):
         if self.options.enable_tf_frontend:
             self.requires("snappy/1.1.10")
         if self.options.enable_onnx_frontend:
-            self.requires(self._require("onnx"))
+            self.requires("onnx/1.20.1")
         if self.options.enable_tf_lite_frontend:
             self.requires("flatbuffers/23.5.26")
 
