@@ -39,7 +39,7 @@ class UhdConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("boost/[>=1.83.0 <1.92.0]")
+        self.requires("boost/[>=1.83.0 <1.90.0]")
 
     def validate(self):
         check_min_cppstd(self, 20)
