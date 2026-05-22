@@ -86,10 +86,3 @@ index 6892bf2fc..3d6b53fd5 100644
          }
      }
  
-diff --git a/version.txt b/version.txt
-index 21ba7a4e0..51ff4180d 100644
---- a/version.txt
-+++ b/version.txt
-@@ -1 +1 @@
--0.4.32.20250118
-+0.4.32.20250121
