@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 import os
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=2.4"
 
 
 class TypecastConan(ConanFile):
@@ -13,7 +13,6 @@ class TypecastConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/neosapience/typecast-sdk"
     topics = ("tts", "text-to-speech", "speech-synthesis", "typecast", "ai", "voice")
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -24,17 +23,8 @@ class TypecastConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        # Pure C library
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
+    implements = ["auto_shared_fpic"]
+    languages = "C"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -47,10 +37,10 @@ class TypecastConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["TYPECAST_BUILD_SHARED"] = self.options.shared
-        tc.variables["TYPECAST_BUILD_STATIC"] = not self.options.shared
-        tc.variables["TYPECAST_BUILD_EXAMPLES"] = False
-        tc.variables["TYPECAST_BUILD_TESTS"] = False
+        tc.cache_variables["TYPECAST_BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["TYPECAST_BUILD_STATIC"] = not self.options.shared
+        tc.cache_variables["TYPECAST_BUILD_EXAMPLES"] = False
+        tc.cache_variables["TYPECAST_BUILD_TESTS"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -79,7 +69,6 @@ class TypecastConan(ConanFile):
             self.cpp_info.libs = ["typecast_static"]
             self.cpp_info.defines = ["TYPECAST_STATIC"]
 
-        self.cpp_info.requires = ["libcurl::libcurl"]
 
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs = ["m"]
