@@ -1,11 +1,9 @@
 from conan import ConanFile
-from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-import functools
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir
 import os
-import yaml
 
 required_conan_version = ">=2.1"
 
