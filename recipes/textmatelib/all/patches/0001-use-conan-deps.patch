@@ -1,23 +1,25 @@
+diff --git a/packages/tml-cpp/CMakeLists.txt b/packages/tml-cpp/CMakeLists.txt
+index 1773778..09d1c3f 100644
 --- a/packages/tml-cpp/CMakeLists.txt
 +++ b/packages/tml-cpp/CMakeLists.txt
-@@ -88,10 +88,12 @@
+@@ -94,10 +94,12 @@ if(NOT USE_WASM_BUILD)
      endif()
  endif()
-
+ 
 +find_package(oniguruma REQUIRED CONFIG)
 +find_package(RapidJSON REQUIRED CONFIG)
 +
  # Include directories
  include_directories(
      ${CMAKE_CURRENT_SOURCE_DIR}/src
--    ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/rapidjson/include
+-    ${THIRDPARTY_DIR}/rapidjson/include
  )
-
+ 
  # Source files
-@@ -150,79 +152,13 @@
+@@ -156,79 +158,13 @@ set(TEXTMATE_HEADERS
      src/wasm/bigint_bindings.h
  )
-
+ 
 -include(ExternalProject)
 -
 -# Find Oniguruma library (skip for WASM builds, will build for WASM)
@@ -76,7 +78,7 @@
 -
 -    ExternalProject_Add(
 -        oniguruma
--        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/oniguruma
+-        SOURCE_DIR ${THIRDPARTY_DIR}/oniguruma
 -        BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/oniguruma/build
 -        CMAKE_ARGS ${ONIG_CMAKE_ARGS}
 -        BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE}
@@ -88,15 +90,15 @@
 -else()
 +if(USE_WASM_BUILD)
      message(STATUS "Building for WASM - oniguruma will be built from source")
-
+ 
      # Build oniguruma for WASM
      set(ONIG_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/oniguruma-wasm)
-
+ 
 +    include(ExternalProject)
      ExternalProject_Add(
          oniguruma_wasm
-         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/oniguruma
-@@ -363,15 +299,8 @@
+         SOURCE_DIR ${THIRDPARTY_DIR}/oniguruma
+@@ -369,15 +305,8 @@ if(USE_WASM_BUILD)
      target_include_directories(tml PUBLIC "${ONIGURUMA_INCLUDE_DIR}")
      target_include_directories(tml-browser PUBLIC "${ONIGURUMA_INCLUDE_DIR}")
  else()
@@ -112,12 +114,12 @@
 +    target_link_libraries(tml PUBLIC oniguruma::onig)
 +    target_link_libraries(tml PRIVATE rapidjson)
  endif()
-
+ 
  # Install targets
-@@ -385,17 +314,6 @@
+@@ -395,17 +324,6 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tml_export.h
      DESTINATION include/tml
  )
-
+ 
 -# Enable testing (skip for WASM builds and shared library builds)
 -# Tests should only use the static library version for proper linking
 -if(NOT USE_WASM_BUILD AND NOT BUILD_SHARED_LIBS)
