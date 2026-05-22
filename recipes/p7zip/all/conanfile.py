@@ -35,6 +35,10 @@ class PSevenZipConan(ConanFile):
         if self.info.settings.arch not in ("armv8", "x86_64"):
             raise ConanInvalidConfiguration(f"{self.ref} is only supported by x86_64 and armv8")
 
+    def build_requirements(self):
+        if not self.conf.get("tools.gnu:make_program", check_type=str):
+            self.tool_requires("make/[>=4.0 <5]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
