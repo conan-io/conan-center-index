@@ -1,10 +1,11 @@
 import os
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd, stdcpp_library
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.scm import Git, Version
-from conan.tools.files import apply_conandata_patches, get, replace_in_file, patch, copy, export_conandata_patches, mkdir, rename, replace_in_file, rmdir, save, rm
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import get, copy
+from conan.tools.system import PipEnv
+
 
 required_conan_version = ">=2.23"
 
@@ -42,7 +43,7 @@ class UhdConan(ConanFile):
         self.requires("boost/[>=1.83.0 <1.90.0]")
 
     def validate(self):
-        check_min_cppstd(self, 20)
+        check_min_cppstd(self, 17)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -88,7 +89,7 @@ class UhdConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
- 
+
         lib_path = os.path.join(self.package_folder, "lib")
         self.output.info(f"Appending LD_LIBRARY_PATH environment variable: {lib_path}")
         self.env_info.LD_LIBRARY_PATH.append(lib_path)
