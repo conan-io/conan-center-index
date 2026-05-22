@@ -104,8 +104,15 @@ class OpenvinoConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
             if self._protobuf_required:
-                # even though OpenVINO can work with dynamic protobuf, it's still recommended to use static
-                self.options["protobuf"].shared = False
+                # When openvino is shared, protobuf must also be shared.
+                # openvino_onnx_common (a static helper lib) links against onnx_proto with
+                # PUBLIC visibility, so its code is compiled into libopenvino_frontend_onnx.
+                # If onnx_proto is static, both libonnx and the frontend plugin contain
+                # onnx_proto's AddDescriptors() code. When the plugin is dlopen'd, both
+                # try to register onnx/onnx-ml.proto to the same pool → SIGABRT.
+                # Using shared protobuf keeps onnx_proto as a standalone dylib so
+                # AddDescriptors() for each descriptor runs exactly once.
+                self.options["protobuf"].shared = True
 
     def build_requirements(self):
         if self._target_arm:
