@@ -35,7 +35,7 @@ class PistacheConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
-    def exports_sources(self):
+    def export_sources(self):
         export_conandata_patches(self)
 
     def layout(self):
