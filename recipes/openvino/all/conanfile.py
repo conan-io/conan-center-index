@@ -127,7 +127,7 @@ class OpenvinoConan(ConanFile):
             self.requires("rapidjson/cci.20220822")
             self.requires("level-zero/1.17.39")
         if self._protobuf_required:
-            self.requires("protobuf/4.25.3")
+            self.requires("protobuf/[>=4.25.3 <7]")
         if self.options.enable_tf_frontend:
             self.requires("snappy/1.1.10")
         if self.options.enable_onnx_frontend:
