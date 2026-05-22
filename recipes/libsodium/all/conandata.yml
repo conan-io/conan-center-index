@@ -2,3 +2,6 @@ sources:
   "1.0.21":
     url: "https://github.com/jedisct1/libsodium/archive/1.0.21-RELEASE.tar.gz"
     sha256: "42E0CA94FAAEC901F4FBEDA84B1B94B18F5309C360C66345CF52A7AB515B245B"
+patches:
+  "1.0.21":
+    - patch_file: "patches/1.0.21-0001-fix-aarch64-gcc-build.patch"

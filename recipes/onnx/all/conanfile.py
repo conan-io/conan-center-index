@@ -1,5 +1,4 @@
 import os
-import sys
 
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
