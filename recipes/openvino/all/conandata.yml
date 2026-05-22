@@ -16,8 +16,8 @@ sources:
       url: "https://github.com/openvinotoolkit/mlas/archive/d1bc25ec4660cddd87804fcf03b2411b5dfb2e94.tar.gz"
       sha256: "0a44fbfd4b13e8609d66ddac4b11a27c90c1074cde5244c91ad197901666004c"
     "onednn_gpu":
-      url: "https://github.com/oneapi-src/oneDNN/archive/refs/tags/v3.12-rc.tar.gz"
-      sha256: "e2ff86da952f33af3f0490a8b347f72e65d287e6ca827b9f41369f72e453e412"
+      url: "https://github.com/oneapi-src/oneDNN/archive/470e87eb07bdc805937a9f6d45d5c3a0fe4d27e7.tar.gz"
+      sha256: "4181ad0fd5ddfe63084fce39a1cd4e0f3656f75e84f32e688e902b2d3a79b537"
 patches:
   "2026.1.0":
     - patch_file: "patches/2026.1.0-system-levelzero-fix.patch"
