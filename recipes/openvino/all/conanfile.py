@@ -198,6 +198,8 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_SYSTEM_PUGIXML"] = True
         if self._protobuf_required:
             toolchain.cache_variables["ENABLE_SYSTEM_PROTOBUF"] = True
+        if self.options.enable_onnx_frontend:
+            toolchain.cache_variables["ENABLE_SYSTEM_ONNX"] = True
         if self.options.enable_tf_frontend:
             toolchain.cache_variables["ENABLE_SYSTEM_SNAPPY"] = True
         if self.options.enable_tf_lite_frontend:
