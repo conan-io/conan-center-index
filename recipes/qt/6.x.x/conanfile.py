@@ -908,7 +908,9 @@ class QtConan(ConanFile):
                 # and `qhelpgenerator` is a subdirectory of assistant in qttools
                 targets.extend(["qhelpgenerator"])
             if "linguist" not in disabled_features:
-                targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
+                targets.extend(["lconvert", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
+                if Version(self.version) < "6.11.0":
+                    targets.extend(["lprodump"]) # Removed: https://doc.qt.io/qt-6/whatsnew611.html#qt-linguist
         if self.options.qtshadertools:
             targets.append("qsb")
         if self.options.qtdeclarative:
