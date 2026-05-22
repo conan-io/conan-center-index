@@ -1,6 +1,8 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
+from conan.tools.env import VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir
 import os
 
 required_conan_version = ">=2.0.5"
@@ -30,16 +32,41 @@ class XalanCConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            self.options.rm_safe("fPIC")
+            
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def build_requirements(self):
+        self.tool_requires("xerces-c/<host_version>", run=True)
 
     def requirements(self):
         self.requires("xerces-c/[^3.2.2]", transitive_headers=True, transitive_libs=True)
 
+        
+    def validate(self):
+        if (self.settings.os == "Windows"
+            and not self.dependencies.direct_host["xerces-c"].options.shared
+            and self.options.shared):
+            raise ConanInvalidConfiguration("shared Xalan-C cannot link to static Xerces-C on Windows")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_CXX_STANDARD 14)",
+                        "## set(CMAKE_CXX_STANDARD 14)")
+
     def generate(self):
+        env = VirtualRunEnv(self)
+        env.generate(scope="build")
+            
         tc = CMakeToolchain(self)
         # Because upstream overrides BUILD_SHARED_LIBS as a CACHE variable
         tc.cache_variables["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
