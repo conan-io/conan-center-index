@@ -176,6 +176,8 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_INTEL_CPU"] = self.options.enable_cpu
         if self._gpu_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GPU"] = self.options.enable_gpu
+        # NPU plugin requires other dependencies like gflags and yaml-cpp and
+        # a custom build of the Intel NPU SDK: https://github.com/openvinotoolkit/npu_compiler (not in CCI)
         toolchain.cache_variables["ENABLE_INTEL_NPU"] = False
         # SW plugins
         toolchain.cache_variables["ENABLE_AUTO"] = self.options.enable_auto
