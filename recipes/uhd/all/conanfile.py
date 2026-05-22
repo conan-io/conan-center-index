@@ -6,42 +6,43 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.scm import Git, Version
 from conan.tools.files import apply_conandata_patches, get, replace_in_file, patch, copy, export_conandata_patches, mkdir, rename, replace_in_file, rmdir, save, rm
 
+required_conan_version = ">=2.23"
 
-class uhdRecipe(ConanFile):
+class UhdConan(ConanFile):
     name = "uhd"
-
-    # Optional metadata
-    license = "GPL-3.0-only"
-    author = "EttusResearch"
-    url = "https://github.com/EttusResearch/uhd"
-    description = "UHD is the USRP Hardware Driver, a software driver for Ettus Research's Universal Software Radio Peripheral (USRP) hardware."
-    topics = ("UHD", "SDR", "USRP", "Ettus", "Software Radio", "Driver")
-    no_copy_source = True
-    # Binary configuration
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": True, "fPIC": True}
+    description = (
+        "The USRP Hardware Driver (UHD) software for Ettus Research USRP "
+        "software-defined radio devices."
+    )
+    license = "GPL-3.0-or-later"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/EttusResearch/uhd"
+    topics = ("sdr", "usrp", "uhd", "radio", "driver")
+    languages = "C", "C++"
     package_type = "library"
+    settings = "os", "compiler", "build_type", "arch"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+    no_copy_source = True
 
-
-    # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = "CMakeLists.txt", "*"
-
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16]")
+    def config_options(self):
+        if self.settings.os == "Windows":
+            self.options.rm_safe("fPIC")
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
-        for deps in self.conan_data["dependencies"][self.version].get("dependency", []):
-            self.run("echo 'Adding dependency: {}'".format(deps))
-            self.requires(deps)
+        self.requires("boost/[>=1.83.0 <1.92.0]")
 
-    def system_requirements(self):
-        import pip
-        if hasattr(pip, "main"):
-            pip.main(["install", "Mako"])
-        else:
-            from pip._internal import main
-            main(['install', "Mako"])
+    def validate(self):
+        check_min_cppstd(self, 20)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -50,37 +51,26 @@ class uhdRecipe(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
+        PipEnv(self).install(["Mako~=1.3"])
+        PipEnv(self).generate()
+
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
+        tc.cache_variables["ENABLE_PYTHON_API"] = False
+        tc.cache_variables["ENABLE_EXAMPLES"] = False
+        tc.cache_variables["ENABLE_TESTS"] = False
+        tc.cache_variables["ENABLE_B100"] = False
+        tc.cache_variables["ENABLE_USRP1"] = False
+        tc.cache_variables["ENABLE_X300"] = False
+        tc.cache_variables["ENABLE_MPMD"] = False
+        tc.cache_variables["ENABLE_OCTOCLOCK"] = False
         tc.generate()
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder="host", cli_args=[
-            "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
-            "-DENABLE_LIBUHD=ON",
-            "-DENABLE_C_API=ON",
-            "-DENABLE_PYTHON_API=OFF",
-            "-DENABLE_EXAMPLES=OFF",
-            "-DENABLE_TESTS=OFF",
-            "-DENABLE_PYMOD_UTILS=OFF",
-            "-DENABLE_USB=ON",
-            "-DENABLE_B100=OFF",
-            "-DENABLE_B200=ON",
-            "-DENABLE_USRP1=OFF",
-            "-DENABLE_USRP2=ON",
-            "-DENABLE_X300=OFF",
-            "-DENABLE_MPMD=OFF",
-            "-DENABLE_SIM=OFF",
-            "-DENABLE_N300=OFF",
-            "-DENABLE_N320=OFF",
-            "-DENABLE_E300=OFF",
-            "-DENABLE_OCTOCLOCK=OFF",
-            "-DENABLE_DPDK=OFF"])
+        cmake.configure(build_script_folder="host")
         cmake.build()
 
     def package(self):
@@ -89,12 +79,10 @@ class uhdRecipe(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
-        # Binaries to link
-        self.cpp_info.libs = ["uhd"]  # The libs to link against
-        # Directories
-        self.cpp_info.includedirs = ['include']  # Ordered list of include paths
-        self.cpp_info.libdirs = ['lib']  # Directories where libraries can be found
-        self.cpp_info.bindirs = ['bin']  # Directories where executables and shared libs can be found
+        self.cpp_info.libs = ["uhd"]
+        self.cpp_info.includedirs = ['include']
+        self.cpp_info.libdirs = ['lib']
+        self.cpp_info.bindirs = ['bin']
         self.cpp_info.set_property("cmake_find_mode", "both")
 
         bin_path = os.path.join(self.package_folder, "bin")
