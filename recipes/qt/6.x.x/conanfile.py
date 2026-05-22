@@ -909,8 +909,10 @@ class QtConan(ConanFile):
                 targets.extend(["qhelpgenerator"])
             if "linguist" not in disabled_features:
                 targets.extend(["lconvert", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
-                if Version(self.version) < "6.11.0":
+                if ver < "6.11.0":
                     targets.extend(["lprodump"]) # Removed: https://doc.qt.io/qt-6/whatsnew611.html#qt-linguist
+                if ver >= "6.11.0":
+                    targets.extend(["lcheck", "ltext2id"]) # Added: https://doc.qt.io/qt-6/whatsnew611.html#qt-linguist
         if self.options.qtshadertools:
             targets.append("qsb")
         if self.options.qtdeclarative:
