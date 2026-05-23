@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+Subject: [PATCH] libelf: do not bundle libeu crc32.o into libelf.a
+
+Starting with elfutils 0.195, libelf/Makefile.am bundles every object
+listed in lib/libeu.manifest directly into libelf.a via libelf_a_LIBADD.
+One of those objects is lib/crc32.o, which exports a public `crc32`
+symbol identical in name (and CRC-32 polynomial) to the one in zlib.
+
+When elfutils tools such as eu-strip are statically linked, libelf.a
+ends up providing `crc32`, and libz.a's crc32.c.o is also pulled in via
+references from inflate.o/deflate.o.  Both .o files define the public
+`crc32` symbol and the linker fails with a multiple-definition error.
+
+libelf's own internal users of crc32 already go through the hidden
+__libelf_crc32 wrapper (libelf_crc32.o), and libdwfl uses its own
+__libdwfl_crc32 wrapper, so removing the raw crc32.o from libelf.a's
+bundle does not affect the libraries' internal functionality.
+crc32_file.o (still bundled) references `crc32`, which is then resolved
+from the always-linked zlib (functionally equivalent implementation).
+---
+ libelf/Makefile.am | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/libelf/Makefile.am b/libelf/Makefile.am
+--- a/libelf/Makefile.am
++++ b/libelf/Makefile.am
+@@ -123,7 +123,10 @@ libelf.so: $(srcdir)/libelf.map $(libelf_so_LIBS) $(libelf_so_DEPS)
+ 	@$(textrel_check)
+ 	$(AM_V_at)ln -fs $@ $@.$(VERSION)
+
+-libeu_objects = $(shell cat ../lib/libeu.manifest)
++# Exclude lib/crc32.o: it exports a public `crc32` symbol that collides
++# with zlib's crc32 when both static archives are linked into the same
++# binary.  libelf internals already use the hidden __libelf_crc32.
++libeu_objects = $(filter-out crc32.o,$(shell cat ../lib/libeu.manifest))
+ libelf_a_LIBADD = $(addprefix ../lib/,$(libeu_objects))
+
+ install: install-am libelf.so
