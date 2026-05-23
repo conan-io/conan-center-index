@@ -1,4 +1,7 @@
 sources:
+  "0.195":
+    url: "https://sourceware.org/elfutils/ftp/0.195/elfutils-0.195.tar.bz2"
+    sha256: "37629fdf7f1f3dc2818e138fca2b8094177d6c2d0f701d3bb650a561218dc026"
   "0.190":
     url: "https://sourceware.org/elfutils/ftp/0.190/elfutils-0.190.tar.bz2"
     sha256: "8e00a3a9b5f04bc1dc273ae86281d2d26ed412020b391ffcc23198f10231d692"
@@ -12,6 +15,13 @@ sources:
     url: "https://sourceware.org/elfutils/ftp/0.180/elfutils-0.180.tar.bz2"
     sha256: "b827b6e35c59d188ba97d7cf148fa8dc6f5c68eb6c5981888dfdbb758c0b569d"
 patches:
+  "0.195":
+    - patch_file: "patches/0.195-0002-add-enable-static-option-to-configure.patch"
+      patch_description: "Enable static library building."
+      patch_type: "conan"
+    - patch_file: "patches/0.195-0003-fix-libelf-libadd-crc32-conflict.patch"
+      patch_description: "Avoid public crc32 symbol collision with zlib when statically linking elfutils binaries."
+      patch_type: "bugfix"
   "0.190":
     - patch_file: "patches/0.189-0002-add-enable-static-option-to-configure.patch"
       patch_description: "Enable static library building."
