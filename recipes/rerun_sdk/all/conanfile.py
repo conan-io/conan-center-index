@@ -2,9 +2,10 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools import files
+from conan.tools.files import get, rmdir, copy
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
+required_conan_version = ">=2.0"
 
 class Package(ConanFile):
     name = "rerun_sdk"
@@ -30,7 +31,7 @@ class Package(ConanFile):
                 return "rerun_c__win_x64.lib"
             elif self.settings.os == "Macos":
                 return "librerun_c__macos_x64.a"
-        elif self.settings.arch == "arm64":
+        elif self.settings.arch == "armv8":
             if self.settings.os == "Linux":
                 return "librerun_c__linux_arm64.a"
             elif self.settings.os == "Macos":
@@ -51,7 +52,7 @@ class Package(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -59,8 +60,7 @@ class Package(ConanFile):
 
         tc = CMakeToolchain(self)
         tc.variables["RERUN_DOWNLOAD_AND_BUILD_ARROW"] = "OFF"
-        tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options["fPIC"]
-        tc.variables["BUILD_SHARED_LIBS"] = self.options["shared"]
+        tc.variables["RERUN_ARROW_LINK_SHARED"] = bool(self.dependencies["arrow"].options.shared)
         tc.generate()
 
     def build(self):
@@ -69,11 +69,33 @@ class Package(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, "LICENSE-*", self.source_folder, os.path.join(self.package_folder, "licenses"))
+
         cmake = CMake(self)
         cmake.install()
 
         # Remove installed cmake config files
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["rerun_sdk", self._get_additional_lib()]
+        self.cpp_info.requires = ["arrow::libarrow"]
+
+        if self.settings.os == "Macos":
+            self.cpp_info.frameworks = ["CoreFoundation", "IOKit", "Security"]
+        elif self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["m", "dl", "pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = [
+                "Crypt32",
+                "Iphlpapi",
+                "Ncrypt",
+                "Netapi32",
+                "ntdll",
+                "Pdh",
+                "PowrProf",
+                "Psapi",
+                "Secur32",
+                "Userenv",
+                "ws2_32",
+            ]
