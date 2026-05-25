@@ -1,7 +1,7 @@
 diff --git a/src/frontends/onnx/onnx_common/CMakeLists.txt b/src/frontends/onnx/onnx_common/CMakeLists.txt
 --- a/src/frontends/onnx/onnx_common/CMakeLists.txt
 +++ b/src/frontends/onnx/onnx_common/CMakeLists.txt
-@@ -33,7 +33,12 @@ target_include_directories(${TARGET_NAME}
+@@ -30,6 +30,13 @@
  
  target_link_libraries(${TARGET_NAME} PRIVATE openvino::runtime openvino::util)
  
