@@ -31,10 +31,14 @@ class CMakeConan(ConanFile):
         if self.settings.os == "Windows" and self.settings.arch == "armv8" and Version(self.version) < "3.24":
             raise ConanInvalidConfiguration("CMake only supports ARM64 binaries on Windows starting from 3.24")
 
+    def layout(self):
+        self.folders.build = "build"
+        self.cpp.build.bindirs = ["bin"]
+
     def build(self):
         arch = str(self.settings.arch) if self.settings.os != "Macos" else "universal"
         get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][arch],
-            destination=self.source_folder, strip_root=True)
+            destination=self.build_folder, strip_root=True)
 
     def package_id(self):
         if self.info.settings.os == "Macos":
