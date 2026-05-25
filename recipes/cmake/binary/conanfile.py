@@ -18,6 +18,11 @@ class CMakeConan(ConanFile):
     license = "BSD-3-Clause"
     settings = "os", "arch"
 
+    # Disable generation of build and run environment.
+    # They are not needed, as nothing is being build/run.
+    virtualbuildenv = False
+    virtualrunenv = False
+
     def validate(self):
         if self.settings.arch not in ["x86_64", "armv8"]:
             raise ConanInvalidConfiguration("CMake binaries are only provided for x86_64 and armv8 architectures. " +
