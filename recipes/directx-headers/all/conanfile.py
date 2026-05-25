@@ -20,9 +20,6 @@ class DirectXHeadersConan(ConanFile):
     topics = ("3d", "d3d", "d3d12", "direct", "direct3d", "directx", "graphics")
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"fPIC": [True, False]}
-    default_options = {"fPIC": True}
-    implements = ["auto_shared_fpic"]
 
     def layout(self):
         basic_layout(self, src_folder="src")
