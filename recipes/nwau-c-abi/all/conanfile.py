@@ -40,12 +40,21 @@ class NwauCAbiConan(ConanFile):
         )
 
     def build(self):
+        profile_args = []
+        if self.settings.build_type == "Release":
+            profile_args.append("--release")
+
         self.run(
-            "cargo build --release --locked -p nwau-c-abi",
+            "cargo build {} --locked -p nwau-c-abi".format(" ".join(profile_args)),
             cwd=os.path.join(self.source_folder, "rust"),
         )
 
     def package(self):
+        profile_dir = "debug"
+        if self.settings.build_type == "Release":
+            profile_dir = "release"
+        artifact_dir = os.path.join(self.source_folder, "rust", "target", profile_dir)
+
         copy(
             self,
             "nwau_abi.h",
@@ -54,41 +63,50 @@ class NwauCAbiConan(ConanFile):
             ),
             dst=os.path.join(self.package_folder, "include"),
         )
-        copy(
-            self,
-            "libnwau_c_abi.a",
-            src=os.path.join(self.source_folder, "rust", "target", "release"),
-            dst=os.path.join(self.package_folder, "lib"),
-            keep_path=False,
-        )
-        copy(
-            self,
-            "libnwau_c_abi.so*",
-            src=os.path.join(self.source_folder, "rust", "target", "release"),
-            dst=os.path.join(self.package_folder, "lib"),
-            keep_path=False,
-        )
-        copy(
-            self,
-            "libnwau_c_abi*.dylib",
-            src=os.path.join(self.source_folder, "rust", "target", "release"),
-            dst=os.path.join(self.package_folder, "lib"),
-            keep_path=False,
-        )
-        copy(
-            self,
-            "nwau_c_abi.lib",
-            src=os.path.join(self.source_folder, "rust", "target", "release"),
-            dst=os.path.join(self.package_folder, "lib"),
-            keep_path=False,
-        )
-        copy(
-            self,
-            "nwau_c_abi.dll",
-            src=os.path.join(self.source_folder, "rust", "target", "release"),
-            dst=os.path.join(self.package_folder, "bin"),
-            keep_path=False,
-        )
+        if self.options.shared:
+            copy(
+                self,
+                "libnwau_c_abi.so*",
+                src=artifact_dir,
+                dst=os.path.join(self.package_folder, "lib"),
+                keep_path=False,
+            )
+            copy(
+                self,
+                "libnwau_c_abi*.dylib",
+                src=artifact_dir,
+                dst=os.path.join(self.package_folder, "lib"),
+                keep_path=False,
+            )
+            copy(
+                self,
+                "nwau_c_abi.dll",
+                src=artifact_dir,
+                dst=os.path.join(self.package_folder, "bin"),
+                keep_path=False,
+            )
+            copy(
+                self,
+                "nwau_c_abi.lib",
+                src=artifact_dir,
+                dst=os.path.join(self.package_folder, "lib"),
+                keep_path=False,
+            )
+        else:
+            copy(
+                self,
+                "libnwau_c_abi.a",
+                src=artifact_dir,
+                dst=os.path.join(self.package_folder, "lib"),
+                keep_path=False,
+            )
+            copy(
+                self,
+                "nwau_c_abi.lib",
+                src=artifact_dir,
+                dst=os.path.join(self.package_folder, "lib"),
+                keep_path=False,
+            )
         copy(
             self,
             "LICENSE",
