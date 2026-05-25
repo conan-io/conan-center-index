@@ -1,8 +1,9 @@
 #include <cstdlib>
 #include <wintoastlib.h>
+#include <iostream>
 
 int main()
 {
-	WinToastLib::WinToast::isCompatible();
+	std::cout << "Compatible?: " << WinToastLib::WinToast::isCompatible() << std::endl;
     return EXIT_SUCCESS;
 }
