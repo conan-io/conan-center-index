@@ -7,6 +7,7 @@ message(STATUS "SRC_FILES: ${SRC_FILES}")
 if(NOT WIRINGPI_WITH_WPI_EXTENSIONS)
   list(FILTER SRC_FILES EXCLUDE REGEX ".*wpiExtensions.c")
   list(FILTER SRC_FILES EXCLUDE REGEX ".*drcNet.c")
+  list(FILTER SRC_FILES EXCLUDE REGEX "WiringpiV1.c")
 endif()
 
 add_library(${PROJECT_NAME} ${SRC_FILES})
