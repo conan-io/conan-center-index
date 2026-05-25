@@ -4,7 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, copy
-from conan.tools.system import PipEnv
+from conan.tools.system import PyEnv
 
 
 required_conan_version = ">=2.23"
@@ -52,9 +52,14 @@ class UhdConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        pyenv = PyEnv(self)
+        pyenv.install(["Mako~=1.3"])
+        pyenv.generate()
+
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
+        tc.cache_variables["PYTHON_EXECUTABLE"] = pyenv.env_exe
         tc.cache_variables["ENABLE_PYTHON_API"] = False
         tc.cache_variables["ENABLE_EXAMPLES"] = False
         tc.cache_variables["ENABLE_TESTS"] = False
@@ -64,10 +69,6 @@ class UhdConan(ConanFile):
         tc.cache_variables["ENABLE_MPMD"] = False
         tc.cache_variables["ENABLE_OCTOCLOCK"] = False
         tc.generate()
-
-        VirtualBuildEnv(self).generate()
-        PipEnv(self).install(["Mako~=1.3"])
-        PipEnv(self).generate()
 
 
     def build(self):
