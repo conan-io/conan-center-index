@@ -58,7 +58,7 @@ class IceoryxConan(ConanFile):
         compiler = self.settings.compiler
         version = Version(self.settings.compiler.version)
 
-        check_min_cppstd(self, 14 if Version(self.version) < "2.95.8" else 17)
+        check_min_cppstd(self, 17 if Version(self.version) >= "2.95.8" or self.settings.compiler == "msvc" else 14)
 
         if is_msvc(self):
             check_min_vs(self, 192)
