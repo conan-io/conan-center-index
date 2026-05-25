@@ -52,10 +52,6 @@ class UhdConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
-        PipEnv(self).install(["Mako~=1.3"])
-        PipEnv(self).generate()
-
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
@@ -68,6 +64,11 @@ class UhdConan(ConanFile):
         tc.cache_variables["ENABLE_MPMD"] = False
         tc.cache_variables["ENABLE_OCTOCLOCK"] = False
         tc.generate()
+
+        VirtualBuildEnv(self).generate()
+        PipEnv(self).install(["Mako~=1.3"])
+        PipEnv(self).generate()
+
 
     def build(self):
         cmake = CMake(self)
