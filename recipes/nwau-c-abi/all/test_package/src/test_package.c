@@ -7,7 +7,7 @@ int main(void) {
     if (nwau_abi_version_minor() != 1) {
         return 2;
     }
-    if (nwau_abi_status_message(NWAU_ABI_STATUS_OK).ptr == 0) {
+    if (nwau_abi_status_message(NWAU_ABI_STATUS_OK).ptr == NULL) {
         return 3;
     }
     return 0;
