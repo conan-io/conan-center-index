@@ -10,6 +10,7 @@ required_conan_version = ">=2.1"
 
 class Etc2compConan(ConanFile):
     name = "etc2comp"
+    deprecated = "upstream repository is archived and recipe will no longer be maintained"
     description = "Open source c++ skeletal animation library and toolset."
     license = ("Apache-2.0",)
     url = "https://github.com/conan-io/conan-center-index"
