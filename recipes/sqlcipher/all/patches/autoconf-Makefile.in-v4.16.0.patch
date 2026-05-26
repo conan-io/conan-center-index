@@ -1,6 +1,12 @@
---- a/autoconf/Makefile.in	2026-03-10 19:14:56.536110136 +0100
-+++ b/autoconf/Makefile.in	2026-03-10 19:15:30.725622516 +0100
-@@ -151,7 +151,7 @@
+# Rename libsqlite3 to libsqlcipher in the autoconf Makefile template.
+
+--- a/autoconf/Makefile.in
++++ b/autoconf/Makefile.in
+@@ -134,15 +134,15 @@
+   $(LDFLAGS.zlib) $(LDFLAGS.icu) \
+   $(LDFLAGS.rt) $(LDFLAGS.configure)
+ CFLAGS.libsqlite3 = -I. $(CFLAGS.core) $(CFLAGS.icu) $(OPT_FEATURE_FLAGS)
+ 
  sqlite3.o: $(TOP)/sqlite3.h $(TOP)/sqlite3.c
  	$(CC) -c $(TOP)/sqlite3.c -o $@ $(CFLAGS) $(CFLAGS.libsqlite3)
  
@@ -9,7 +15,15 @@
  libsqlite3.DLL.basename = @SQLITE_DLL_BASENAME@
  libsqlite3.out.implib = @SQLITE_OUT_IMPLIB@
  libsqlite3.DLL = $(libsqlite3.DLL.basename)$(T.dll)
-@@ -213,12 +213,12 @@
+ libsqlite3.DLL.install-rules = @SQLITE_DLL_INSTALL_RULES@
+ 
+ $(libsqlite3.DLL): sqlite3.o
+ 	$(CC) -o $@  sqlite3.o $(LDFLAGS.shlib) \
+@@ -196,20 +196,20 @@
+ install-dll-mingw:  install-dll-msys
+ install-dll-cygwin: install-dll-msys
+ 
+ install-dll-darwin: $(install-dir.lib) $(libsqlite3.DLL)
  	$(INSTALL) $(libsqlite3.DLL) "$(install-dir.lib)"
  	@echo "Setting up $(libsqlite3.DLL) version symlinks..."; \
  	cd "$(install-dir.lib)" || exit $$?; \
@@ -26,7 +40,15 @@
  
  install-dll-1: install-dll-$(libsqlite3.DLL.install-rules)
  install-dll-0 install-dll-:
-@@ -240,7 +240,7 @@
+ install-dll: install-dll-$(ENABLE_LIB_SHARED)
+ install: install-dll
+ 
+ install-lib-1: $(install-dir.lib) $(libsqlite3.LIB)
+@@ -223,15 +223,15 @@
+ # (ENABLE_STATIC_SHELL==1) or libsqlite3.so (ENABLE_STATIC_SHELL==0).
+ #
+ # Maintenance reminder: placement of $(LDFLAGS) is more relevant for
+ # some platforms than others:
  # https://sqlite.org/forum/forumpost/d80ecdaddd
  ENABLE_STATIC_SHELL = @ENABLE_STATIC_SHELL@
  sqlite3-shell-link-flags.1 = $(TOP)/sqlite3.c $(LDFLAGS) $(LDFLAGS.libsqlite3)
@@ -35,7 +57,15 @@
  sqlite3-shell-deps.1 = $(TOP)/sqlite3.c
  sqlite3-shell-deps.0 = $(libsqlite3.DLL)
  #
-@@ -286,7 +286,7 @@
+ # STATIC_CLI_SHELL = 1 to statically link sqlite3$(T.exe), else
+ # 0. Requires static versions of all requisite libraries. Primarily
+ # intended for use with static-friendly environments like Alpine
+ # Linux.
+@@ -269,15 +269,15 @@
+ 
+ install-man1: $(TOP)/sqlite3.1 $(install-dir.man1)
+ 	$(INSTALL.noexec) $(TOP)/sqlite3.1 "$(install-dir.man1)"
+ install: install-man1
  
  clean:
  	rm -f *.o sqlite3$(T.exe)
@@ -44,3 +74,7 @@
  
  distclean: clean
  	rm -f jimsh0$(T.exe) config.* sqlite3.pc sqlite_cfg.h Makefile
+ 
+ DIST_FILES := \
+   README.txt VERSION \
+   auto.def autosetup configure tea \

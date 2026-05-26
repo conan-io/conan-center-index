@@ -1,16 +1,16 @@
 sources:
-  "4.14.0":
-    url: "https://github.com/sqlcipher/sqlcipher/archive/v4.14.0.zip"
-    sha256: "c422da32e212537871395b24dfe37cea4a389444048ad429268a26ae60592b34"
+  "4.16.0":
+    url: "https://github.com/sqlcipher/sqlcipher/archive/refs/tags/v4.16.0.tar.gz"
+    sha256: "d687bf981199ac019c6c87b11f92a5900aec777855e7ba5b30e5e1192933ce8a"
   "4.6.1":
     url: "https://github.com/sqlcipher/sqlcipher/archive/v4.6.1.zip"
     sha256: "93a7475183d47e2d33f85aefa7518e8730796f103612d36ae191ae56209104e0"
 patches:
-  "4.14.0":
-    - patch_file: patches/autoconf-Makefile.in-v4.14.0.patch
-    - patch_file: patches/main.mk-v4.14.0.patch
-    - patch_file: patches/Makefile.msc-v4.14.0.patch
-    - patch_file: patches/sqlite-config.tcl-v4.14.0.patch
+  "4.16.0":
+    - patch_file: patches/autoconf-Makefile.in-v4.16.0.patch
+    - patch_file: patches/main.mk-v4.16.0.patch
+    - patch_file: patches/Makefile.msc-v4.16.0.patch
+    - patch_file: patches/sqlite-config.tcl-v4.16.0.patch
   "4.6.1":
     - patch_file: patches/Makefile.in-v4.6.1.patch
     - patch_file: patches/Makefile.msc-v4.6.1.patch
