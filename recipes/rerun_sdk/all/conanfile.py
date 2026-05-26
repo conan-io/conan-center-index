@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, rmdir, copy
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.build import check_min_cppstd
 
 required_conan_version = ">=2.0"
 
@@ -40,6 +41,7 @@ class Package(ConanFile):
         return None
 
     def validate(self):
+        check_min_cppstd(self, 20)
         if self._get_additional_lib() is None:
             raise ConanInvalidConfiguration(
                 f"Unsupported combination of architecture {self.settings.arch} and os {self.settings.os}"
