@@ -57,6 +57,13 @@ class Opene57Conan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "message(FATAL_ERROR", "# ")
+        # Disable clang-format auto execution which fails in Windows
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "src", "cmake", "clang_format.cmake"),
+            "function(target_clangformat_setup target)",
+            "function(target_clangformat_setup target)\nreturn()",
+        )
 
     def generate(self):
         tc = CMakeToolchain(self)
