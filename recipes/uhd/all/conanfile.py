@@ -68,6 +68,7 @@ class UhdConan(ConanFile):
         tc.cache_variables["ENABLE_X300"] = False
         tc.cache_variables["ENABLE_MPMD"] = False
         tc.cache_variables["ENABLE_OCTOCLOCK"] = False
+        tc.cache_variables["ENABLE_STATIC_LIBS"] = not self.options.shared
         tc.generate()
 
 
