@@ -63,7 +63,7 @@ class UnitsConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.preprocessor_definitions["UNITS_CMAKE_PROJECT_NAME"] = "LLNL-UNITS"
-        tc.preprocessor_definitions["UNITS_ENABLE_TESTS"] = "OFF"
+        tc.cache_variables["UNITS_ENABLE_TESTS"] = "OFF"
         tc.preprocessor_definitions["UNITS_BUILD_SHARED_LIBRARY"] = self.options.shared
         tc.preprocessor_definitions[
             "UNITS_BUILD_STATIC_LIBRARY"
@@ -97,7 +97,7 @@ class UnitsConan(ConanFile):
         base_type = self.conf.get("user.llnl-units:base_type", check_type=str, default="uint32_t")
         self.cpp_info.defines = [f"UNITS_BASE_TYPE={base_type}"]
         if namespace:
-            self.cpp_info.defines.append(f"UNITS_NAMESPACE={units_namespace}")
+            self.cpp_info.defines.append(f"UNITS_NAMESPACE={namespace}")
 
         self.cpp_info.set_property("cmake_file_name", "units")
         self.cpp_info.set_property("cmake_target_name", "units::units")
