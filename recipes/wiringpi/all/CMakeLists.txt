@@ -9,6 +9,9 @@ if(NOT WIRINGPI_WITH_WPI_EXTENSIONS)
   list(FILTER SRC_FILES EXCLUDE REGEX ".*drcNet.c")
 endif()
 
+# WiringpiV1 is not part of any object in the upstream Makefile
+list(FILTER SRC_FILES EXCLUDE REGEX "WiringpiV1.c")
+
 add_library(${PROJECT_NAME} ${SRC_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${WIRINGPI_SRC_DIR}/wiringPi)
 
