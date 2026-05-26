@@ -5,6 +5,7 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.files import get, copy, rmdir
 from conan.tools.system import PyEnv
+from conan.tools.scm import Version
 
 
 required_conan_version = ">=2.23"
