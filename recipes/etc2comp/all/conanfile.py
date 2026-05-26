@@ -5,7 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class Etc2compConan(ConanFile):
@@ -42,14 +42,14 @@ class Etc2compConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):
