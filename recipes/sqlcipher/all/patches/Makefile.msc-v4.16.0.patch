@@ -1,4 +1,5 @@
 # Use sqlcipher.dll and sqlcipher.lib as MSVC DLL and static import library names.
+# Drop /NODEFAULTLIB:msvcrt from LDFLAGS so /MD host tools (e.g. lemon) link with UCRT.
 
 --- a/Makefile.msc
 +++ b/Makefile.msc
@@ -57,6 +58,27 @@
  !ENDIF
  
  # These are additional linker options used for the shell executable.
+@@ -1238,17 +1238,17 @@
+ LTLINKOPTS = $(LTLINKOPTS) /NODEFAULTLIB:libucrt.lib /DEFAULTLIB:ucrt.lib
+ !ENDIF
+ !ENDIF
+ 
+ # If either debugging or symbols are enabled, enable PDBs.
+ #
+ !IF $(DEBUG)>1 || $(SYMBOLS)!=0
+-LDFLAGS = /NODEFAULTLIB:msvcrt /DEBUG $(LDOPTS)
+-!ELSE
+-LDFLAGS = /NODEFAULTLIB:msvcrt $(LDOPTS)
++LDFLAGS = /DEBUG $(LDOPTS)
++!ELSE
++LDFLAGS = $(LDOPTS)
+ !ENDIF
+ 
+ # <<mark>>
+ # ^^^^^^^^-- content between mark and /mark omitted from autoconf/Makefile.msc
+ #
+ # Start with the Tcl related linker options.
+ #
 @@ -1610,15 +1610,15 @@
    $(TOP)\ext\misc\unionvtab.c \
    $(TOP)\ext\misc\wholenumber.c \
