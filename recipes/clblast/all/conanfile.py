@@ -22,9 +22,9 @@ class CLBlastConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("opencl-headers/2025.07.22", transitive_headers=True)
         if self.settings.os != "Macos":
-            self.requires("opencl-icd-loader/2025.07.22", options={"shared": True})
+            self.requires("opencl-headers/2025.07.22", transitive_headers=True)
+            self.requires("opencl-icd-loader/2025.07.22")
 
     def configure(self):
         if self.options.shared:
