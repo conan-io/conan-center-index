@@ -1,14 +1,12 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, export_conandata_patches, get, replace_in_file
+from conan.tools.files import copy, get, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 
-required_conan_version = ">=2.0.0"
+required_conan_version = ">=2.1"
 
 
 class Opene57Conan(ConanFile):
@@ -24,34 +22,13 @@ class Opene57Conan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_tools": [True, False],
-        "with_docs":  [True, False],
         "xml_backend": ["xerces", "libxml2", "pugixml"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_tools": False,
-        "with_docs":  False,
         "xml_backend": "xerces"
     }
-
-    @property
-    def _min_cppstd(self):
-        return "17"
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "15",
-            "msvc": "191",
-            "gcc": "7",
-            "clang": "6",
-            "apple-clang": "10",
-        }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -60,16 +37,11 @@ class Opene57Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.options.with_tools:
-            self.options["boost"].multithreading = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_tools:
-            self.requires("boost/1.91.0")
-        
         if self.options.xml_backend == "xerces":
             self.requires("xerces-c/3.3.0")
             if self.settings.os != "Windows":
@@ -79,53 +51,30 @@ class Opene57Conan(ConanFile):
         else:
             self.requires("pugixml/1.15")
 
-        if self.options.with_docs:
-            self.requires("doxygen/[>=1.8 <2]")
-
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
-        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "message(FATAL_ERROR", "# ")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["PROJECT_VERSION"] = self.version
-        tc.variables["BUILD_EXAMPLES"] = False
-        tc.variables["BUILD_TOOLS"] = self.options.with_tools
-        tc.variables["BUILD_TESTS"] = False
-        tc.variables["BUILD_DOCS"] = self.options.with_docs
-        tc.variables["E57_XML_BACKEND"] = self.options.xml_backend
+        tc.cache_variables["PROJECT_VERSION"] = self.version
+        tc.cache_variables["BUILD_EXAMPLES"] = False
+        tc.cache_variables["BUILD_TOOLS"] = False
+        tc.cache_variables["BUILD_TESTS"] = False
+        tc.cache_variables["BUILD_DOCS"] = False
+        tc.cache_variables["E57_XML_BACKEND"] = self.options.xml_backend
 
         if is_msvc(self):
-            tc.variables["BUILD_WITH_MT"] = is_msvc_static_runtime(self)
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
+            tc.cache_variables["BUILD_WITH_MT"] = is_msvc_static_runtime(self)
+        tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        # Do not raise an error for shared builds
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "message(FATAL_ERROR", "# ")
-        compiler_opts = os.path.join(self.source_folder, "src", "cmake", "compiler_options.cmake")
-        # Disable ASan and UBSan as these require linking against asan and ubsan runtime libraries
-        # FIXME: Figure out how to link against these using Conan
-        replace_in_file(self, compiler_opts, "$<$<CONFIG:DEBUG>:-fsanitize=address>", "")
-        replace_in_file(self, compiler_opts, "$<$<CONFIG:DEBUG>:-fsanitize=undefined>", "")
-        if self.settings.compiler == "apple-clang":
-            replace_in_file(self, compiler_opts, "$<$<CONFIG:DEBUG>:-fsanitize=leak>", "")
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8":
-            replace_in_file(self, compiler_opts, "-fstack-clash-protection", "")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -140,11 +89,3 @@ class Opene57Conan(ConanFile):
     def package_info(self):
         lib_suffix = "-d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = [f"openE57{lib_suffix}", f"openE57las{lib_suffix}"]
-
-        self.cpp_info.defines.append(f"E57_REFIMPL_REVISION_ID={self.name}-{self.version}")
-        self.cpp_info.defines.append("XERCES_STATIC_LIBRARY")
-        self.cpp_info.defines.append("CRCPP_INCLUDE_ESOTERIC_CRC_DEFINITIONS")
-        self.cpp_info.defines.append("CRCPP_USE_CPP11")
-
-        backend_name = str(self.options.xml_backend).upper().replace("-", "")
-        self.cpp_info.defines.append(f"E57_XML_BACKEND_{backend_name}")
