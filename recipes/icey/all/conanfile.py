@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 import os
 
@@ -31,8 +31,12 @@ class IceyConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
         # INFO: Let Conan handle the C++ standard version, instead of hardcoding it in the CMakeLists.txt
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 20)", "")
 
