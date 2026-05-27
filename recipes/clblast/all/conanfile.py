@@ -65,5 +65,6 @@ class CLBlastConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["clblast"]
         self.cpp_info.set_property("cmake_target_name", "clblast")
+        self.cpp_info.set_property("cmake_file_name", "CLBlast")
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.append("OpenCL")
