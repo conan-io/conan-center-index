@@ -1,4 +1,4 @@
 sources:
-  "0.20251124.0":
-    url: "https://github.com/google/boringssl/releases/download/0.20251124.0/boringssl-0.20251124.0.tar.gz"
-    sha256: "d47f89b894bf534c82071d7426c5abf1e5bd044fee242def53cd5d3d0f656c09"
+  "0.20260508.0":
+    url: "https://github.com/google/boringssl/releases/download/0.20260508.0/boringssl-0.20260508.0.tar.gz"
+    sha256: "de3371d3fe085afd34778a4c988fb7840b9c92cb21504e674f33ebefd98edc00"
