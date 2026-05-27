@@ -1,9 +1,14 @@
+Use find_package(level-zero) instead of pkg_search_module so the
+Conan-generated config is consumed (LevelZero::LevelZero and
+level_zero_FOUND are injected via CMakeDeps in conanfile.py). Also guard
+the onnx/onnx_proto ALIAS creation with `AND NOT TARGET <name>` because
+Conan's ONNXConfig.cmake already defines those unprefixed targets.
+
 diff --git a/thirdparty/dependencies.cmake b/thirdparty/dependencies.cmake
-index 95b97fcb77..d1a58835b0 100644
 --- a/thirdparty/dependencies.cmake
 +++ b/thirdparty/dependencies.cmake
-@@ -74,17 +74,20 @@ endif()
-
+@@ -74,12 +74,5 @@
+ 
  if(ENABLE_INTEL_GPU OR ENABLE_INTEL_NPU)
      if(ENABLE_SYSTEM_LEVEL_ZERO)
 -        pkg_search_module(level_zero QUIET
@@ -13,27 +18,10 @@ index 95b97fcb77..d1a58835b0 100644
 -        if(level_zero_FOUND)
 -            add_library(LevelZero::LevelZero ALIAS PkgConfig::level_zero)
 -            message(STATUS "${PKG_CONFIG_EXECUTABLE}: level_zero (${level_zero_VERSION}) is found at ${level_zero_PREFIX}")
+-        endif()
 +        find_package(level-zero)
-+        if(TARGET level-zero::level-zero)
-+            add_library(LevelZero::LevelZero ALIAS level-zero::level-zero)
-+        else()
-+            pkg_search_module(level_zero QUIET
-+                            IMPORTED_TARGET
-+                            ${OV_PkgConfig_VISIBILITY}
-+                            level-zero)
-+            if(level_zero_FOUND)
-+                add_library(LevelZero::LevelZero ALIAS PkgConfig::level_zero)
-+                message(STATUS "${PKG_CONFIG_EXECUTABLE}: level_zero (${level_zero_VERSION}) is found at ${level_zero_PREFIX}")
-+            endif()
-         endif()
--    endif()
--
--    if(NOT level_zero_FOUND)
-+    else()
-         add_subdirectory(thirdparty/level_zero EXCLUDE_FROM_ALL)
-         add_library(LevelZero::LevelZero ALIAS ze_loader)
      endif()
-@@ -544,13 +547,13 @@ if(ENABLE_OV_ONNX_FRONTEND)
+@@ -544,10 +537,10 @@ if(ENABLE_OV_ONNX_FRONTEND)
      if(ONNX_FOUND)
          # conan and vcpkg create imported targets 'onnx' and 'onnx_proto'
          # newer versions of ONNX in vcpkg has ONNX:: prefix, let's create aliases
@@ -46,6 +34,3 @@ index 95b97fcb77..d1a58835b0 100644
              add_library(onnx_proto ALIAS ONNX::onnx_proto)
          endif()
      else()
-         add_subdirectory(thirdparty/onnx)
-     endif()
- endif()

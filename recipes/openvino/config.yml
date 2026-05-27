@@ -1,3 +1,5 @@
 versions:
   "2026.1.0":
     folder: "all"
+  "2025.4.0":
+    folder: "all"
