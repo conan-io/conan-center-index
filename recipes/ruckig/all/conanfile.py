@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get
+from conan.tools.files import copy, get, rmdir
+import os
 
 
 class RuckigRecipe(ConanFile):
@@ -32,10 +33,10 @@ class RuckigRecipe(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
-        tc.variables["BUILD_EXAMPLES"] = False
-        tc.variables["BUILD_TESTS"] = False
-        tc.variables["BUILD_PYTHON_MODULE"] = False
+        tc.cache_variables["BUILD_EXAMPLES"] = False
+        tc.cache_variables["BUILD_TESTS"] = False
+        tc.cache_variables["BUILD_PYTHON_MODULE"] = False
+        tc.cache_variables["BUILD_CLOUD_CLIENT"] = False
         tc.generate()
 
     def build(self):
