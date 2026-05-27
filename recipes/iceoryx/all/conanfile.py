@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rmdir, save, rm
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rmdir, rm
 from conan.tools.microsoft import check_min_vs
 from conan.tools.scm import Version
 
@@ -59,7 +59,7 @@ class IceoryxConan(ConanFile):
         compiler = self.settings.compiler
         version = Version(self.settings.compiler.version)
 
-        check_min_cppstd(self, 17 if Version(self.version) >= "2.95.8" or self.settings.compiler == "msvc" else 14)
+        check_min_cppstd(self, 17 if version >= "2.95.8" or compiler == "msvc" else 14)
 
         check_min_vs(self, 192)
         if compiler == "gcc":
@@ -78,7 +78,7 @@ class IceoryxConan(ConanFile):
             if (
                 version == "7.0"
                 and compiler.get_safe("libcxx") == "libc++"
-                and self.options.shared
+                and self.options.get_safe("shared")
                 and self.settings.build_type == "Debug"
             ):
                 raise ConanInvalidConfiguration("shared Debug with clang 7.0 and libc++ not supported")
@@ -108,21 +108,16 @@ class IceoryxConan(ConanFile):
             replace_in_file(self, os.path.join(hoofs_dir, "CMakeLists.txt"), " acl", " acl::acl")
 
         # Honor fPIC option
-        if Version(self.version) >= "2.90":
-            if Version(self.version) < "2.95.8":
-                replace_in_file(self, os.path.join(self.source_folder, "iceoryx_hoofs", "cmake", "IceoryxPackageHelper.cmake"),
-                            "set_target_properties( ${IOX_TARGET} PROPERTIES POSITION_INDEPENDENT_CODE ON )", "")
-        else:
-            cmakelists_list = [
-                os.path.join(self.source_folder, "iceoryx_dds", "CMakeLists.txt"),
-                os.path.join(self.source_folder, "iceoryx_posh", "CMakeLists.txt"),
-                os.path.join(self.source_folder, "tools", "introspection", "CMakeLists.txt"),
-                os.path.join(hoofs_dir, "CMakeLists.txt"),
-                os.path.join(self.source_folder, "iceoryx_binding_c", "CMakeLists.txt"),
-                os.path.join(hoofs_dir, "platform", "CMakeLists.txt"),
-            ]
-            for cmakelists in cmakelists_list:
-                replace_in_file(self, cmakelists, "POSITION_INDEPENDENT_CODE ON", "")
+        cmakelists_list = [
+            os.path.join(self.source_folder, "iceoryx_dds", "CMakeLists.txt"),
+            os.path.join(self.source_folder, "iceoryx_posh", "CMakeLists.txt"),
+            os.path.join(self.source_folder, "tools", "introspection", "CMakeLists.txt"),
+            os.path.join(hoofs_dir, "CMakeLists.txt"),
+            os.path.join(self.source_folder, "iceoryx_binding_c", "CMakeLists.txt"),
+            os.path.join(hoofs_dir, "platform", "CMakeLists.txt"),
+        ]
+        for cmakelists in cmakelists_list:
+            replace_in_file(self, cmakelists, "POSITION_INDEPENDENT_CODE ON", "")
 
     def build(self):
         cmake = CMake(self)
@@ -233,4 +228,3 @@ class IceoryxConan(ConanFile):
                 self.cpp_info.components[lib_name].system_libs = system_libs
                 self.cpp_info.components[lib_name].requires = requires
         _register_components(self._iceoryx_components["2.0.0"])
-

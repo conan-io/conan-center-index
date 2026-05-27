@@ -31,7 +31,7 @@ class LibcurlConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "build_executable": [True, False],
-        "with_ssl": [False, "openssl", "wolfssl", "schannel", "darwinssl", "mbedtls", "libressl"],
+        "with_ssl": [False, "openssl", "wolfssl", "schannel", "mbedtls", "libressl"],
         "with_file": [True, False],
         "with_ftp": [True, False],
         "with_http": [True, False],
@@ -48,7 +48,6 @@ class LibcurlConan(ConanFile):
         "with_mqtt": [True, False],
         "with_libssh2": [True, False],
         "with_libidn": [True, False],
-        "with_librtmp": [True, False],
         "with_libgsasl": [True, False],
         "with_libpsl": [True, False],
         "with_largemaxwritesize": [True, False],
@@ -61,7 +60,6 @@ class LibcurlConan(ConanFile):
         "with_proxy": [True, False],
         "with_crypto_auth": [True, False],
         "with_ntlm": [True, False],
-        "with_ntlm_wb": [True, False],
         "with_cookies": [True, False],
         "with_ipv6": [True, False],
         "with_docs": [True, False],
@@ -75,6 +73,7 @@ class LibcurlConan(ConanFile):
         "with_ca_fallback": [True, False],
         "with_form_api": [True, False],
         "with_websockets": [True, False],
+        "with_apple_sectrust": [True, False],
     }
     default_options = {
         "shared": False,
@@ -91,13 +90,12 @@ class LibcurlConan(ConanFile):
         "with_mqtt": True,
         "with_pop3": True,
         "with_rtsp": True,
-        "with_smb": True,
+        "with_smb": False,
         "with_smtp": True,
         "with_telnet": True,
         "with_tftp": True,
         "with_libssh2": False,
         "with_libidn": False,
-        "with_librtmp": False,
         "with_libgsasl": False,
         "with_libpsl": False,
         "with_largemaxwritesize": False,
@@ -109,8 +107,7 @@ class LibcurlConan(ConanFile):
         "with_threaded_resolver": True,
         "with_proxy": True,
         "with_crypto_auth": True,
-        "with_ntlm": True,
-        "with_ntlm_wb": True,
+        "with_ntlm": False,
         "with_cookies": True,
         "with_ipv6": True,
         "with_docs": False,
@@ -124,6 +121,7 @@ class LibcurlConan(ConanFile):
         "with_ca_fallback": False,
         "with_form_api": True,
         "with_websockets": True,
+        "with_apple_sectrust": False,
     }
 
     @property
@@ -146,6 +144,8 @@ class LibcurlConan(ConanFile):
             del self.options.fPIC
         if self._is_using_cmake_build:
             del self.options.with_libgsasl
+        if not is_apple_os(self):
+            del self.options.with_apple_sectrust
 
     def configure(self):
         if self.options.shared:
@@ -165,7 +165,7 @@ class LibcurlConan(ConanFile):
         elif self.options.with_ssl == "libressl":
             self.requires("libressl/[>=3.5 <4]")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/5.6.6")
+            self.requires("wolfssl/[>=5.6.6 <6]")
         elif self.options.with_ssl == "mbedtls":
             self.requires("mbedtls/3.5.0")
         if self.settings.os == "Linux" and self.options.with_ldap:
@@ -191,17 +191,18 @@ class LibcurlConan(ConanFile):
     def validate(self):
         if self.options.with_ssl == "schannel" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("schannel only suppported on Windows.")
-        if self.options.with_ssl == "darwinssl":
-            raise ConanInvalidConfiguration("darwinssl (Secure Transport) is no longer supported as of libcurl 8.15.0 - please choose a different SSL backend.")
         if self.options.with_ssl == "openssl":
             openssl = self.dependencies["openssl"]
             if self.options.with_ntlm and openssl.options.no_des:
                 raise ConanInvalidConfiguration("option with_ntlm=True requires openssl/*:no_des=False")
         if self.options.with_ssl == "wolfssl" and not self.dependencies["wolfssl"].options.with_curl:
             raise ConanInvalidConfiguration("option with_ssl=wolfssl requires wolfssl/*:with_curl=True")
+        if self.options.get_safe("with_apple_sectrust") and self.options.with_ssl != "openssl":
+            raise ConanInvalidConfiguration("Apple SecTrust is only supported for OpenSSL/GnuTLS builds")
 
     def build_requirements(self):
         if self._is_using_cmake_build:
+            self.tool_requires("cmake/[>=3.18]")
             if self._is_win_x_android:
                 self.tool_requires("ninja/[>=1.10.2 <2]")
         else:
@@ -265,7 +266,6 @@ class LibcurlConan(ConanFile):
     def _patch_sources(self):
         self._patch_misc_files()
         self._patch_autotools()
-        self._patch_cmake()
 
     def _patch_misc_files(self):
         if self.options.with_largemaxwritesize:
@@ -319,26 +319,6 @@ class LibcurlConan(ConanFile):
                 added_content = load(self, os.path.join(self.folders.base_source, "lib_Makefile_add.am"))
                 save(self, lib_makefile, added_content, append=True)
 
-    def _patch_cmake(self):
-        if not self._is_using_cmake_build:
-            return
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        location_fix_pattern = 'get_target_property(_libname "${_lib}" LOCATION)'
-
-        # INTERFACE_LIBRARY (generated by the cmake_find_package generator) targets doesn't have the LOCATION property.
-        # So skipp the LOCATION check in the CMakeLists.txt
-        replace_in_file(
-            self,
-            cmakelists,
-            location_fix_pattern,
-            """get_target_property(_type "${_lib}" TYPE)
-    if(${_type} STREQUAL "INTERFACE_LIBRARY")
-      # Reading the INTERFACE_LIBRARY property on non-imported target will error out.
-      continue()
-    endif()
-    """ + location_fix_pattern
-        )
-
     def _yes_no(self, value):
         return "yes" if value else "no"
 
@@ -350,7 +330,6 @@ class LibcurlConan(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
             f"--with-libidn2={self._yes_no(self.options.with_libidn)}",
-            f"--with-librtmp={self._yes_no(self.options.with_librtmp)}",
             f"--with-libpsl={self._yes_no(self.options.with_libpsl)}",
             f"--with-libgsasl={self._yes_no(self.options.with_libgsasl)}",
             f"--with-schannel={self._yes_no(self.options.with_ssl == 'schannel')}",
@@ -380,6 +359,7 @@ class LibcurlConan(ConanFile):
             f"--enable-verbose={self._yes_no(self.options.with_verbose_debug)}",
             f"--enable-symbol-hiding={self._yes_no(self.options.with_symbol_hiding)}",
             f"--enable-unix-sockets={self._yes_no(self.options.get_safe('with_unix_sockets'))}",
+            f"--enable-ntlm={self._yes_no(self.options.with_ntlm)}",
             f"--with-zstd={self._yes_no(self.options.with_zstd)}",
         ])
 
@@ -435,13 +415,6 @@ class LibcurlConan(ConanFile):
         if not self.options.with_crypto_auth:
             tc.configure_args.append("--disable-crypto-auth") # also disables NTLM in versions of curl prior to 7.78.0
 
-        # ntlm will default to enabled if any SSL options are enabled
-        if not self.options.with_ntlm:
-            tc.configure_args.append("--disable-ntlm")
-
-        if not self.options.with_ntlm_wb:
-            tc.configure_args.append("--disable-ntlm-wb")
-
         if not self.options.with_ca_bundle:
             tc.configure_args.append("--without-ca-bundle")
         elif self.options.with_ca_bundle != "auto":
@@ -475,6 +448,9 @@ class LibcurlConan(ConanFile):
             tc.configure_args.append(f"--with-libidn2={path}")
         else:
             tc.configure_args.append("--without-libidn2")
+
+        if self.options.get_safe("with_apple_sectrust"):
+            tc.configure_args.append("--with-apple-sectrust")
 
         # Cross building flags
         if cross_building(self):
@@ -559,10 +535,10 @@ class LibcurlConan(ConanFile):
         tc.variables["CURL_USE_LIBPSL"] = self.options.with_libpsl
         tc.variables["CURL_USE_LIBSSH2"] = self.options.with_libssh2
         tc.variables["ENABLE_ARES"] = self.options.with_c_ares
+        tc.variables["CURL_ENABLE_SMB"] = self.options.with_smb
         if not self.options.with_c_ares:
             tc.variables["ENABLE_THREADED_RESOLVER"] = self.options.with_threaded_resolver
         tc.variables["CURL_DISABLE_PROXY"] = not self.options.with_proxy
-        tc.variables["USE_LIBRTMP"] = self.options.with_librtmp
         tc.variables["USE_LIBIDN2"] = self.options.with_libidn
         if self.options.with_libidn:
             # Conan won't generate this variable as we're setting prefixes,
@@ -580,9 +556,7 @@ class LibcurlConan(ConanFile):
             tc.variables["CURL_DISABLE_WEBSOCKETS"] = not self.options.with_websockets
 
         # Also disables NTLM_WB if set to false
-        if not self.options.with_ntlm:
-            tc.variables["CURL_DISABLE_NTLM"] = True
-        tc.variables["NTLM_WB_ENABLED"] = self.options.with_ntlm_wb
+        tc.variables["CURL_ENABLE_NTLM"] = self.options.with_ntlm
 
         if self.options.with_ca_bundle:
             tc.cache_variables["CURL_CA_BUNDLE"] = str(self.options.with_ca_bundle)
@@ -687,9 +661,6 @@ class LibcurlConan(ConanFile):
             self.cpp_info.components["curl"].libs = ["libcurl_imp"] if self.options.shared else ["libcurl"]
         else:
             self.cpp_info.components["curl"].libs = ["curl"]
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                if self.options.with_librtmp:
-                    self.cpp_info.components["curl"].libs.append("rtmp")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["curl"].system_libs = ["rt", "pthread"]
@@ -706,6 +677,8 @@ class LibcurlConan(ConanFile):
             self.cpp_info.components["curl"].frameworks.append("CoreFoundation")
             self.cpp_info.components["curl"].frameworks.append("CoreServices")
             self.cpp_info.components["curl"].frameworks.append("SystemConfiguration")
+            if self.options.get_safe("with_apple_sectrust"):
+                self.cpp_info.components["curl"].frameworks.append("Security")
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("ldap")
 
