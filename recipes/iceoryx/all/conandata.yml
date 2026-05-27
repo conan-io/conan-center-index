@@ -10,7 +10,7 @@ sources:
     sha256: "bf6de70e3edee71223f993a29bff5e61af95ce4871104929d8bd1729f544bafb"
 patches:
   "2.0.6":
-    - patch_file: "patches/2.0.6-001-missing-chrono-include.patch"
+    - patch_file: "patches/2.0.5-001-missing-chrono-include.patch"
   "2.0.5":
     - patch_file: "patches/2.0.5-001-missing-chrono-include.patch"
   "1.0.3":
