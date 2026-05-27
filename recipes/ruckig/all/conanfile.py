@@ -5,11 +5,11 @@ from conan.tools.files import get
 
 class RuckigRecipe(ConanFile):
     name = "ruckig"
-    version = "0.17.3"
     license = "MIT"
     description = "Online trajectory generation with jerk limits"
     homepage = "https://github.com/pantor/ruckig"
-    url = "https://github.com/pantor/ruckig"
+    url = "https://github.com/conan-io/conan-center-index"
+    topics = ("robotics", "trajectory", "motion-generation", "jerk")
     package_type = "library"
 
     settings = "os", "compiler", "build_type", "arch"
@@ -44,10 +44,15 @@ class RuckigRecipe(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ruckig")
         self.cpp_info.set_property("cmake_target_name", "ruckig::ruckig")
         self.cpp_info.libs = ["ruckig"]
+        if self.settings.compiler == "msvc":
+            self.cpp_info.defines.append("_USE_MATH_DEFINES")
