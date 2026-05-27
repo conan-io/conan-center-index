@@ -56,6 +56,9 @@ class IceyConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.21]")
+
     def generate(self):
         deps = CMakeDeps(self)
         deps.generate()
@@ -76,7 +79,7 @@ class IceyConan(ConanFile):
         tc.cache_variables["WITH_FFMPEG"] = self.options.with_ffmpeg
         tc.cache_variables["WITH_OPENCV"] = self.options.with_opencv
         tc.generate()
-        
+
     def validate(self):
         check_min_cppstd(self, 20)
 
@@ -102,11 +105,11 @@ class IceyConan(ConanFile):
             self.cpp_info.components["base"].frameworks = ["Foundation", "AVFoundation"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["base"].system_libs = ["ws2_32", "iphlpapi", "psapi", "userenv"]
-        
+
         self.cpp_info.components["archo"].set_property("cmake_target_name", "icey::archo")
         self.cpp_info.components["archo"].libs = ["icy_archo"]
         self.cpp_info.components["archo"].requires = ["base", "minizip::minizip"]
-        
+
         self.cpp_info.components["av"].set_property("cmake_target_name", "icey::av")
         self.cpp_info.components["av"].libs = ["icy_av"]
         self.cpp_info.components["av"].requires = ["base"]
@@ -114,43 +117,43 @@ class IceyConan(ConanFile):
             self.cpp_info.components["av"].requires.append("ffmpeg::ffmpeg")
         if self.options.with_opencv:
             self.cpp_info.components["av"].requires.append("opencv::opencv")
-            
+
         self.cpp_info.components["crypto"].set_property("cmake_target_name", "icey::crypto")
         self.cpp_info.components["crypto"].libs = ["icy_crypto"]
         self.cpp_info.components["crypto"].requires = ["base", "openssl::openssl"]
-        
+
         self.cpp_info.components["net"].set_property("cmake_target_name", "icey::net")
         self.cpp_info.components["net"].libs = ["icy_net"]
         self.cpp_info.components["net"].requires = ["base", "crypto", "openssl::openssl"]
-        
+
         self.cpp_info.components["http"].set_property("cmake_target_name", "icey::http")
         self.cpp_info.components["http"].libs = ["icy_http"]
         self.cpp_info.components["http"].requires = ["base", "net", "crypto", "llhttp::llhttp", "openssl::openssl"]
-        
+
         self.cpp_info.components["json"].set_property("cmake_target_name", "icey::json")
         self.cpp_info.components["json"].libs = ["icy_json"]
         self.cpp_info.components["json"].requires = ["base", "nlohmann_json::nlohmann_json"]
-        
+
         self.cpp_info.components["sched"].set_property("cmake_target_name", "icey::sched")
         self.cpp_info.components["sched"].libs = ["icy_sched"]
         self.cpp_info.components["sched"].requires = ["base", "json"]
-        
+
         self.cpp_info.components["speech"].set_property("cmake_target_name", "icey::speech")
         self.cpp_info.components["speech"].libs = ["icy_speech"]
         self.cpp_info.components["speech"].requires = ["base", "av", "json"]
-        
+
         self.cpp_info.components["stun"].set_property("cmake_target_name", "icey::stun")
         self.cpp_info.components["stun"].libs = ["icy_stun"]
         self.cpp_info.components["stun"].requires = ["base", "net", "crypto", "openssl::openssl"]
-        
+
         self.cpp_info.components["symple"].set_property("cmake_target_name", "icey::symple")
         self.cpp_info.components["symple"].libs = ["icy_symple"]
         self.cpp_info.components["symple"].requires = ["base", "crypto", "net", "http", "json", "openssl::openssl"]
-        
+
         self.cpp_info.components["turn"].set_property("cmake_target_name", "icey::turn")
         self.cpp_info.components["turn"].libs = ["icy_turn"]
         self.cpp_info.components["turn"].requires = ["base", "net", "stun", "crypto"]
-        
+
         self.cpp_info.components["vision"].set_property("cmake_target_name", "icey::vision")
         self.cpp_info.components["vision"].libs = ["icy_vision"]
         self.cpp_info.components["vision"].requires = ["base", "av", "json"]
