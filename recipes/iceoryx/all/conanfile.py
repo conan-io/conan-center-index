@@ -97,27 +97,26 @@ class IceoryxConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.set_property("cpptoml", "cmake_target_name", "cpptoml")
+        tc.set_property("acl", "cmake_target_name", "acl")
         tc.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        hoofs_dir = os.path.join(self.source_folder, "iceoryx_hoofs")
 
         # Use acl::acl target, since plain acl fails to link
         if Version(self.version) < "2.95.8":
-            replace_in_file(self, os.path.join(hoofs_dir, "CMakeLists.txt"), " acl", " acl::acl")
-
-        # Honor fPIC option
-        cmakelists_list = [
-            os.path.join(self.source_folder, "iceoryx_dds", "CMakeLists.txt"),
-            os.path.join(self.source_folder, "iceoryx_posh", "CMakeLists.txt"),
-            os.path.join(self.source_folder, "tools", "introspection", "CMakeLists.txt"),
-            os.path.join(hoofs_dir, "CMakeLists.txt"),
-            os.path.join(self.source_folder, "iceoryx_binding_c", "CMakeLists.txt"),
-            os.path.join(hoofs_dir, "platform", "CMakeLists.txt"),
-        ]
-        for cmakelists in cmakelists_list:
-            replace_in_file(self, cmakelists, "POSITION_INDEPENDENT_CODE ON", "")
+            hoofs_dir = os.path.join(self.source_folder, "iceoryx_hoofs")
+            # Honor fPIC option
+            cmakelists_list = [
+                os.path.join(self.source_folder, "iceoryx_dds", "CMakeLists.txt"),
+                os.path.join(self.source_folder, "iceoryx_posh", "CMakeLists.txt"),
+                os.path.join(self.source_folder, "tools", "introspection", "CMakeLists.txt"),
+                os.path.join(hoofs_dir, "CMakeLists.txt"),
+                os.path.join(self.source_folder, "iceoryx_binding_c", "CMakeLists.txt"),
+                os.path.join(hoofs_dir, "platform", "CMakeLists.txt"),
+            ]
+            for cmakelists in cmakelists_list:
+                replace_in_file(self, cmakelists, "POSITION_INDEPENDENT_CODE ON", "")
 
     def build(self):
         cmake = CMake(self)
@@ -227,4 +226,5 @@ class IceoryxConan(ConanFile):
                 self.cpp_info.components[lib_name].libs = [lib_name]
                 self.cpp_info.components[lib_name].system_libs = system_libs
                 self.cpp_info.components[lib_name].requires = requires
+
         _register_components(self._iceoryx_components["2.0.0"])
