@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, replace_in_file, rmdir
 import os
 
 
@@ -34,6 +34,9 @@ class RuckigRecipe(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "target_compile_features(ruckig PUBLIC cxx_std_20)",
+                        "")
 
     def generate(self):
         tc = CMakeToolchain(self)
