@@ -5,7 +5,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
 
@@ -102,11 +101,6 @@ class PdalConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "PDAL")
         self.cpp_info.set_property("pkg_config_name", "pdal")
         self.cpp_info.libs = ["pdalcpp"]
-        self.cpp_info.set_property(
-            "cmake_extra_variables", {
-                "PDAL_VERSION_MAJOR": str(Version(self.version).major),
-                "PDAL_VERSION_MINOR": str(Version(self.version).minor),
-                "PDAL_VERSION_PATCH": str(Version(self.version).patch)})
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "m", "pthread"]
         elif self.settings.os == "Windows":
