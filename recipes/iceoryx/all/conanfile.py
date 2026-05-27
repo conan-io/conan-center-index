@@ -97,7 +97,7 @@ class IceoryxConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.set_property("cpptoml", "cmake_target_name", "cpptoml")
-        tc.set_property("acl", "cmake_target_name", "acl")
+        tc.set_property("acl", "cmake_target_aliases", ["acl"])
         tc.generate()
 
     def _patch_sources(self):
