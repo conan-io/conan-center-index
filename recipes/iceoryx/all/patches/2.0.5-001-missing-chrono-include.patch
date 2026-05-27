@@ -1,5 +1,5 @@
 diff --git a/iceoryx_hoofs/platform/win/include/iceoryx_hoofs/platform/time.hpp b/iceoryx_hoofs/platform/win/include/iceoryx_hoofs/platform/time.hpp
-index b168fb262..6e5dfb455 100644
+index b168fb2..6e5dfb4 100644
 --- a/iceoryx_hoofs/platform/win/include/iceoryx_hoofs/platform/time.hpp
 +++ b/iceoryx_hoofs/platform/win/include/iceoryx_hoofs/platform/time.hpp
 @@ -21,6 +21,7 @@

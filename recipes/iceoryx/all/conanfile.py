@@ -1,15 +1,14 @@
 import os
-import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rmdir, save, rm
-from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.microsoft import check_min_vs
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2"
 
 
 class IceoryxConan(ConanFile):
@@ -40,9 +39,11 @@ class IceoryxConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.shared
+            self.package_type = "static-library"
 
     def configure(self):
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def layout(self):
@@ -60,13 +61,8 @@ class IceoryxConan(ConanFile):
 
         check_min_cppstd(self, 17 if Version(self.version) >= "2.95.8" or self.settings.compiler == "msvc" else 14)
 
-        if is_msvc(self):
-            check_min_vs(self, 192)
-            if self.options.shared:
-                raise ConanInvalidConfiguration(
-                    'Using Iceoryx with Visual Studio currently just possible with "shared=False"'
-                )
-        elif compiler == "gcc":
+        check_min_vs(self, 192)
+        if compiler == "gcc":
             if version < "6":
                 raise ConanInvalidConfiguration("Using Iceoryx with gcc requires gcc 6 or higher.")
             if version < "9" and compiler.get_safe("libcxx") == "libstdc++":
@@ -88,17 +84,16 @@ class IceoryxConan(ConanFile):
                 raise ConanInvalidConfiguration("shared Debug with clang 7.0 and libc++ not supported")
 
     def build_requirements(self):
-        if Version(self.version) >= "2.0.0":
-            self.tool_requires("cmake/[>=3.16 <4]")
+        self.tool_requires("cmake/[>=3.16]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["TOML_CONFIG"] = self.options.toml_config
-        if Version(self.version) >= "2.0.0":
-            tc.cache_variables["DOWNLOAD_TOML_LIB"] = False
+        tc.cache_variables["DOWNLOAD_TOML_LIB"] = False
         tc.generate()
         tc = CMakeDeps(self)
         tc.set_property("cpptoml", "cmake_target_name", "cpptoml")
@@ -106,10 +101,7 @@ class IceoryxConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if Version(self.version) >= "2.0.0":
-            hoofs_dir = os.path.join(self.source_folder, "iceoryx_hoofs")
-        else:
-            hoofs_dir = os.path.join(self.source_folder, "iceoryx_utils")
+        hoofs_dir = os.path.join(self.source_folder, "iceoryx_hoofs")
 
         # Use acl::acl target, since plain acl fails to link
         if Version(self.version) < "2.95.8":
@@ -126,19 +118,15 @@ class IceoryxConan(ConanFile):
                 os.path.join(self.source_folder, "iceoryx_posh", "CMakeLists.txt"),
                 os.path.join(self.source_folder, "tools", "introspection", "CMakeLists.txt"),
                 os.path.join(hoofs_dir, "CMakeLists.txt"),
+                os.path.join(self.source_folder, "iceoryx_binding_c", "CMakeLists.txt"),
+                os.path.join(hoofs_dir, "platform", "CMakeLists.txt"),
             ]
-            if Version(self.version) >= "2.0.0":
-                cmakelists_list += [
-                    os.path.join(self.source_folder, "iceoryx_binding_c", "CMakeLists.txt"),
-                    os.path.join(hoofs_dir, "platform", "CMakeLists.txt"),
-                ]
             for cmakelists in cmakelists_list:
                 replace_in_file(self, cmakelists, "POSITION_INDEPENDENT_CODE ON", "")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self.source_path.parent)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.path.pardir))
         cmake.build()
 
     def package(self):
@@ -154,13 +142,12 @@ class IceoryxConan(ConanFile):
                          os.path.join(self.package_folder, "res", "roudi_config.toml"))
         rmdir(self, os.path.join(self.package_folder, "etc"))
         # bring to default package structure
-        if Version(self.version) >= "2.0.0":
-            include_paths = ["iceoryx_binding_c", "iceoryx_hoofs", "iceoryx_posh", "iceoryx_versions.hpp"]
-            if Version(self.version) >= "2.95.8":
-                include_paths.extend(["iceoryx_platform", "iox", "iceoryx_versions.h"])
-            for include_path in include_paths:
-                rename(self, os.path.join(self.package_folder, "include", "iceoryx", f"v{self.version}", include_path),
-                             os.path.join(self.package_folder, "include", include_path))
+        include_paths = ["iceoryx_binding_c", "iceoryx_hoofs", "iceoryx_posh", "iceoryx_versions.hpp"]
+        if Version(self.version) >= "2.95.8":
+            include_paths.extend(["iceoryx_platform", "iox", "iceoryx_versions.h"])
+        for include_path in include_paths:
+            rename(self, os.path.join(self.package_folder, "include", "iceoryx", f"v{self.version}", include_path),
+                         os.path.join(self.package_folder, "include", include_path))
 
     @property
     def _iceoryx_components(self):
@@ -184,43 +171,6 @@ class IceoryxConan(ConanFile):
             return [libcxx] if libcxx and not self.options.shared else []
 
         return {
-            "1.0.X": {
-                "iceoryx_platform": {
-                    "target": "iceoryx_utils::iceoryx_platform",
-                    "system_libs": pthread(),
-                    "requires": [],
-                },
-                "iceoryx_utils": {
-                    "target": "iceoryx_utils::iceoryx_utils",
-                    "system_libs": pthread() + rt() + atomic(),
-                    "requires": ["iceoryx_platform"] + acl(),
-                },
-                "iceoryx_posh": {
-                    "target": "iceoryx_posh::iceoryx_posh",
-                    "system_libs": pthread(),
-                    "requires": ["iceoryx_utils"],
-                },
-                "iceoryx_posh_roudi": {
-                    "target": "iceoryx_posh::iceoryx_posh_roudi",
-                    "system_libs": pthread(),
-                    "requires": ["iceoryx_utils", "iceoryx_posh"] + cpptoml(),
-                },
-                "iceoryx_posh_gateway": {
-                    "target": "iceoryx_posh::iceoryx_posh_gateway",
-                    "system_libs": pthread(),
-                    "requires": ["iceoryx_utils", "iceoryx_posh"],
-                },
-                "iceoryx_posh_config": {
-                    "target": "iceoryx_posh::iceoryx_posh_config",
-                    "system_libs": pthread(),
-                    "requires": ["iceoryx_posh_roudi", "iceoryx_utils", "iceoryx_posh"],
-                },
-                "iceoryx_binding_c": {
-                    "target": "iceoryx_binding_c::iceoryx_binding_c",
-                    "system_libs": pthread() + libcxx(),
-                    "requires": ["iceoryx_utils", "iceoryx_posh"],
-                },
-            },
             "2.0.0": {
                 "iceoryx_platform": {
                     "target": "iceoryx_hoofs::iceoryx_platform",
@@ -282,8 +232,5 @@ class IceoryxConan(ConanFile):
                 self.cpp_info.components[lib_name].libs = [lib_name]
                 self.cpp_info.components[lib_name].system_libs = system_libs
                 self.cpp_info.components[lib_name].requires = requires
-        if Version(self.version) >= "2.0.0":
-            _register_components(self._iceoryx_components["2.0.0"])
-        else:
-            _register_components(self._iceoryx_components["1.0.X"])
+        _register_components(self._iceoryx_components["2.0.0"])
 
