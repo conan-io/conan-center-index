@@ -1,4 +1,5 @@
 import os
+import shutil
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
@@ -92,6 +93,8 @@ class PdalConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        shutil.copy(os.path.join(self.source_folder, "vendor", "arbiter", "LICENSE"), os.path.join(self.package_folder, "licenses", "arbiter_LICENSE.txt"))
+        shutil.copy(os.path.join(self.source_folder, "vendor", "utfcpp", "LICENSE"), os.path.join(self.package_folder, "licenses", "utfcpp_LICENSE.txt"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
