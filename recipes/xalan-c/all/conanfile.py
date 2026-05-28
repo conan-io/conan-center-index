@@ -39,7 +39,7 @@ class XalanCConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-    
+
         if self.settings.os == "Windows":
             del self.options.shared
             self.package_type = "shared-library"
@@ -73,7 +73,7 @@ class XalanCConan(ConanFile):
 
         tc = CMakeToolchain(self)
         # Because upstream overrides BUILD_SHARED_LIBS as a CACHE variable
-        tc.cache_variables["BUILD_SHARED_LIBS"] = "ON" if self.options.get_safe("shared") else "OFF"
+        tc.cache_variables["BUILD_SHARED_LIBS"] = "ON" if self.options.get_safe("shared", True) else "OFF"
         tc.variables["transcoder"] = "default" # icu is currently not supported
         tc.generate()
 
