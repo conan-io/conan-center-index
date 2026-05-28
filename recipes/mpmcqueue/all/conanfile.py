@@ -18,7 +18,6 @@ class MpmcqueueConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
