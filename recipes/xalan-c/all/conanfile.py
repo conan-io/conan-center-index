@@ -57,7 +57,7 @@ class XalanCConan(ConanFile):
     def validate(self):
         if (self.settings.os == "Windows"
             and not self.dependencies.direct_host["xerces-c"].options.shared
-            and self.options.shared):
+            and self.options.get_safe("shared")):
             raise ConanInvalidConfiguration("shared Xalan-C cannot link to static Xerces-C on Windows")
 
     def source(self):
@@ -73,7 +73,7 @@ class XalanCConan(ConanFile):
 
         tc = CMakeToolchain(self)
         # Because upstream overrides BUILD_SHARED_LIBS as a CACHE variable
-        tc.cache_variables["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
+        tc.cache_variables["BUILD_SHARED_LIBS"] = "ON" if self.options.get_safe("shared") else "OFF"
         tc.variables["transcoder"] = "default" # icu is currently not supported
         tc.generate()
 
