@@ -7,6 +7,7 @@ from conan.tools.scm import Version
 
 required_conan_version = ">=2.4"
 
+
 class WiringpiConan(ConanFile):
     name = "wiringpi"
     description = "GPIO Interface library for the Raspberry Pi"
@@ -49,11 +50,6 @@ class WiringpiConan(ConanFile):
         if self.settings.compiler == "gcc" and \
             Version(self.settings.compiler.version) < 8:
             raise ConanInvalidConfiguration(f"{self.ref} requires gcc >= 8")
-        # wiringPi.c:1755:9: error: case label does not reduce to an integer constant
-        if self.settings.compiler == "gcc" and \
-            Version(self.settings.compiler.version).major == 11 and \
-            self.settings.build_type == "Debug":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc 11 in Debug build")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

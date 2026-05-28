@@ -136,10 +136,11 @@ class FltkConan(ConanFile):
         elif is_apple_os(self):
             self.cpp_info.frameworks = [
                 "AppKit", "ApplicationServices", "Carbon", "Cocoa", "CoreFoundation", "CoreGraphics",
-                "CoreText", "CoreVideo", "Foundation", "IOKit",
+                "CoreText", "CoreVideo", "Foundation", "IOKit"
             ]
-            self.cpp_info.sharedlinkflags.append("-Wl,-weak_framework,ScreenCaptureKit")
-            self.cpp_info.exelinkflags.append("-Wl,-weak_framework,ScreenCaptureKit")
+            for weak_framework in ["ScreenCaptureKit", "UniformTypeIdentifiers"]:
+                self.cpp_info.sharedlinkflags.append(f"-Wl,-weak_framework,{weak_framework}")
+                self.cpp_info.exelinkflags.append(f"-Wl,-weak_framework,{weak_framework}")
             if self.options.with_gl:
                 self.cpp_info.frameworks.append("OpenGL")
         elif self.settings.os == "Windows":
