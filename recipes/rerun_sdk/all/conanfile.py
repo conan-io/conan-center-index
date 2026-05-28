@@ -30,8 +30,6 @@ class Package(ConanFile):
                 return "librerun_c__linux_x64.a"
             elif self.settings.os == "Windows":
                 return "rerun_c__win_x64.lib"
-            elif self.settings.os == "Macos":
-                return "librerun_c__macos_x64.a"
         elif self.settings.arch == "armv8":
             if self.settings.os == "Linux":
                 return "librerun_c__linux_arm64.a"
