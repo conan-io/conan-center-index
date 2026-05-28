@@ -1106,7 +1106,7 @@ class OpenCVConan(ConanFile):
             self.requires("glog/0.7.0")
         # text module dependencies
         if self.options.get_safe("with_tesseract"):
-            self.requires("tesseract/5.3.3")
+            self.requires("tesseract/5.5.2")
 
     def package_id(self):
         # deprecated options

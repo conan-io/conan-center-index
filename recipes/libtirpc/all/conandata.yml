@@ -1,0 +1,4 @@
+sources:
+  "1.3.7":
+    url: "https://downloads.sourceforge.net/libtirpc/libtirpc-1.3.7.tar.bz2"
+    sha256: "b47d3ac19d3549e54a05d0019a6c400674da716123858cfdb6d3bdd70a66c702"

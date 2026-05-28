@@ -5,3 +5,6 @@ sources:
   "2.4.13":
     url: "https://github.com/efmsoft/logme/archive/refs/tags/v2.4.13.tar.gz"
     sha256: "60625105dad590f677416e128315cb0644db16212b05e66ff22ff9326ff992b8"
+  "2.4.17":
+    url: "https://github.com/efmsoft/logme/archive/refs/tags/v2.4.17.tar.gz"
+    sha256: "3d83423224ac33f768c6ed0ed8ecf2345b760629c58bbb7e5bea428e3bb49b94"

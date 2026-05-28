@@ -1,4 +1,4 @@
 sources:
-  "1.2.1":
-    url: "https://github.com/couchbase/couchbase-cxx-client/archive/refs/tags/1.2.1.tar.gz"
-    sha256: "57163e40ab01028e28a67dc87c5f937724d62bedc3b44a44d4bf182896ee84b2"
+  "1.3.1":
+    url: "https://github.com/couchbase/couchbase-cxx-client/archive/refs/tags/1.3.1.tar.gz"
+    sha256: "9c497d8ba6f3e4a12376826ae1c172356e16190bb44584f087d7d1a81278dc0f"

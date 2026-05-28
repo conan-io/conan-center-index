@@ -42,7 +42,7 @@ class CouchbaseCxxClientConan(ConanFile):
     def requirements(self):
         # these should match https://github.com/couchbase/couchbase-cxx-client/blob/main/couchbase-sdk-cxx-black-duck-manifest.yaml
         # as best as possible
-        self.requires("spdlog/[~1.15.0]")
+        self.requires("spdlog/[>=1.15 <2]")
         self.requires("fmt/[*]")
         self.requires("ms-gsl/4.0.0")
         self.requires("snappy/[~1.2.1]")
@@ -115,6 +115,7 @@ class CouchbaseCxxClientConan(ConanFile):
         tc.cache_variables["OPENSSL_USABLE"] = True
         # Force try_compile checks to use the current single-config build type to avoid looking for missing *_DEBUG imported targets
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+        tc.cache_variables["COUCHBASE_CXX_CLIENT_BUILD_OPENTELEMETRY"] = "OFF"
         tc.generate()
 
     def build(self):
