@@ -6,6 +6,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.files import get, copy, rmdir
 from conan.tools.system import PyEnv
 from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 
 
 required_conan_version = ">=2.23"
@@ -45,6 +46,9 @@ class UhdConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
+
+        if self.settings.os == "Windows" and not self.options.shared:
+            raise ConanInvalidConfiguration("There is a bug in Windows-Static: https://github.com/EttusResearch/uhd/issues/925")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
