@@ -21,22 +21,35 @@ class Perf(ConanFile):
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
 
-    def _get_perf_arch(self):
-        # perf has a strict set of values it can take for the ARCH env variable
-        # it must match the name of one of the subfolders from the arch folder
-        conan_arch_prefix_to_perf_arch_map = {
-            "armv7": "arm",
-            "armv8": "arm64",
-            "x86": "x86",
-            "mips": "mips",
-            "riscv": "riscv",
-        }
-
-        for conan_arch_prefix, perf_arch in conan_arch_prefix_to_perf_arch_map.items():
-            if str(self.settings.arch).startswith(conan_arch_prefix):
-                return perf_arch
-
-        raise ConanException(f'{self.settings.arch} not yet supported by this recipe')
+    def _get_linux_arch(self):
+        # INFO: Map based on https://github.com/torvalds/linux/tree/master/arch
+        arch = str(self.settings.arch)
+        if arch.startswith("armv8"):
+            return "arm64"
+        if arch.startswith("armv"):
+            return "arm"
+        if arch.startswith("ppc"):
+            return "powerpc"
+        if arch.startswith("e2k-"):
+            return "e2k"
+        if arch.startswith("xtensa"):
+            return "xtensa"
+        if arch.startswith("tc"):
+            return "arc"
+        if arch.startswith("riscv"):
+            return "riscv"
+        if arch.startswith("sparc"):
+            return "sparc"
+        if arch.startswith("mips"):
+            return "mips"
+        if arch.startswith("s390"):
+            return "s390"
+        if arch.startswith("x86"):
+            return "x86"
+        if arch.startswith("avr"):
+            return "avr"
+        if arch.startswith("sh4le"):
+            return "sh"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -50,6 +63,8 @@ class Perf(ConanFile):
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("perf is supported only on Linux")
+        if not self._get_linux_arch():
+            raise ConanInvalidConfiguration(f"Unsupported architecture: {self.settings.arch}")
 
     def build_requirements(self):
         self.tool_requires("flex/2.6.4")
@@ -62,7 +77,7 @@ class Perf(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.make_args += ["NO_LIBPYTHON=1"]
         tc.make_args += ["WERROR=0"]
-        tc.make_args += [f"ARCH={self._get_perf_arch()}"]
+        tc.make_args += [f"ARCH={self._get_linux_arch()}"]
         tc.generate()
 
     def build(self):
