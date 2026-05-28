@@ -52,7 +52,6 @@ class ArmadilloConan(ConanFile):
         ],
         "use_hdf5": [True, False],
         "use_superlu": [False, "system_superlu"],
-        "use_extern_rng": [True, False],
         "use_arpack": [False, "system_arpack"],
         "use_wrapper": [True, False],
     }
@@ -64,7 +63,6 @@ class ArmadilloConan(ConanFile):
         "use_lapack": "openblas",
         "use_hdf5": True,
         "use_superlu": False,
-        "use_extern_rng": False,
         "use_arpack": False,
         "use_wrapper": False,
     }
@@ -96,13 +94,6 @@ class ArmadilloConan(ConanFile):
         if Version(self.version) < "14":
             del self.options.header_only
 
-        # According with the CMakeLists file in armadillo, MinGW doesn't correctly handle thread_local.
-        # If any of MINGW, MSYS, CYGWIN or MSVC are True in during cmake configure, the ARMA_USE_EXTERN_RNG option will be set to false.
-        # Therefore, in these cases we remove the `use_extern_rng` option in conan
-        # The option ARMA_USE_EXTERN_RNG was removed completely from version 12.6.2 onwards
-        if self.settings.os == "Windows" or Version(self.version) >= "12.6.2":
-            del self.options.use_extern_rng
-
     def configure(self):
         if self.options.get_safe("header_only"):
             self.options.rm_safe("fPIC")
@@ -116,12 +107,14 @@ class ArmadilloConan(ConanFile):
                 self.options.use_lapack == "openblas"
             )
 
+    def validate_build(self):
+        if self.options.use_hdf5 and cross_building(self):
+            raise ConanInvalidConfiguration(
+                "Armadillo does not support cross building with hdf5. Set use_hdf5=False and try again."
+            )
+
     def validate(self):
-        if self.settings.compiler.cppstd:
-            if Version(self.version) >= "15":
-                check_min_cppstd(self, 14)
-            else:
-                check_min_cppstd(self, 11)
+        check_min_cppstd(self, 14 if Version(self.version) >= "15" else 11)
 
         if self.settings.os != "Macos" and (
             self.options.use_blas == "framework_accelerate"
@@ -129,11 +122,6 @@ class ArmadilloConan(ConanFile):
         ):
             raise ConanInvalidConfiguration(
                 "framework_accelerate can only be used on Macos"
-            )
-
-        if self.options.use_hdf5 and Version(self.version) > "12" and cross_building(self):
-            raise ConanInvalidConfiguration(
-                "Armadillo does not support cross building with hdf5. Set use_hdf5=False and try again."
             )
 
         for value, options in self._co_dependencies.items():
@@ -177,12 +165,6 @@ class ArmadilloConan(ConanFile):
             )
 
         if not self.options.get_safe("header_only"):
-            # Ignore use_extern_rng when the option has been removed
-            if self.options.use_wrapper and not self.options.get_safe("use_extern_rng", True):
-                raise ConanInvalidConfiguration(
-                    "The wrapper requires the use of an external RNG. Set use_extern_rng=True and try again."
-                )
-
             if not self.options.shared and self.options.use_wrapper:
                 raise ConanInvalidConfiguration("Building the armadillo run-time wrapper library requires armadillo/*:shared=True")
 
@@ -192,14 +174,6 @@ class ArmadilloConan(ConanFile):
         # TODO: "superlu/5.2.2" # Pending https://github.com/conan-io/conan-center-index/issues/6756
         # TODO: "arpack/1.0" # Pending https://github.com/conan-io/conan-center-index/issues/6755
         # TODO: "flexiblas/3.0.4" # Pending https://github.com/conan-io/conan-center-index/issues/6827
-
-        # The armadillo library no longer takes any responsibility for linking hdf5 as of v12.x. This means
-        # it will have to be linked manually by consumers if desired.
-        # See https://gitlab.com/conradsnicta/armadillo-code/-/issues/227 for more information.
-        if self.options.use_hdf5 and Version(self.version) < "12":
-            # Use the conan dependency if the system lib isn't being used
-            # Libraries not required to be propagated transitively when the armadillo run-time wrapper is used
-            self.requires("hdf5/1.14.3", transitive_headers=True, transitive_libs=not self.options.get_safe("use_wrapper"))
 
         if self.options.use_blas == "openblas":
             # Libraries not required to be propagated transitively when the armadillo run-time wrapper is used
@@ -231,8 +205,6 @@ class ArmadilloConan(ConanFile):
         tc.variables["ARMA_USE_HDF5"] = self.options.use_hdf5
         tc.variables["ARMA_USE_HDF5_CMAKE"] = self.options.use_hdf5
         tc.variables["ARMA_USE_ARPACK"] = self.options.use_arpack
-        if Version(self.version) < "12.6.2":
-            tc.cache_variables["ARMA_USE_EXTERN_RNG"] = self.options.get_safe("use_extern_rng", default=False)
         tc.variables["ARMA_USE_SUPERLU"] = self.options.use_superlu
         tc.variables["ARMA_USE_WRAPPER"] = self.options.get_safe("use_wrapper")
         tc.variables["ARMA_USE_ACCELERATE"] = (
