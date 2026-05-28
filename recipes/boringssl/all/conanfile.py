@@ -72,7 +72,6 @@ class BoringSSLConan(ConanFile):
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["crypto"].system_libs.append("pthread")
 
-        ssl = self.cpp_info.components["ssl"]
         self.cpp_info.components["ssl"].set_property("cmake_target_name", "OpenSSL::SSL")
         self.cpp_info.components["ssl"].libs = ["ssl"]
         self.cpp_info.components["ssl"].requires = ["crypto"]
