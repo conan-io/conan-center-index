@@ -10,5 +10,3 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             self.run("perf --version", env="conanrun")
-
-
