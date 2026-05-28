@@ -1,16 +1,10 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import (
-    copy,
-    get,
-    rmdir,
-    replace_in_file
-)
-from conan.tools.microsoft import is_msvc
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir, replace_in_file
 import os
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.1"
 
 
 class BoringSSLConan(ConanFile):
@@ -22,17 +16,14 @@ class BoringSSLConan(ConanFile):
     topics = ("tls", "ssl", "crypto", "openssl", "boringssl")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
     }
-
     default_options = {
         "shared": False,
         "fPIC": True,
     }
-
     provides = "openssl"
     implements = ["auto_shared_fpic"]
 
@@ -60,43 +51,28 @@ class BoringSSLConan(ConanFile):
         tc.cache_variables["BUILD_TESTING"] = False
         tc.generate()
 
-        deps = CMakeDeps(self)
-        deps.generate()
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
-        copy(
-            self,
-            "LICENSE",
-            self.source_folder,
-            os.path.join(self.package_folder, "licenses"),
-        )
-
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        # So consumers can use: find_package(OpenSSL CONFIG)
         self.cpp_info.set_property("cmake_file_name", "OpenSSL")
 
-        # OpenSSL::Crypto
-        crypto = self.cpp_info.components["crypto"]
-        crypto.set_property("cmake_target_name", "OpenSSL::Crypto")
-        crypto.libs = ["crypto"]
-
+        self.cpp_info.components["crypto"].set_property("cmake_target_name", "OpenSSL::Crypto")
+        self.cpp_info.components["crypto"].libs = ["crypto"]
         if self.settings.os == "Windows":
-            # Upstream adds ws2_32 on Windows
-            crypto.system_libs.append("ws2_32")
+            self.cpp_info.components["crypto"].system_libs.append("ws2_32")
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            crypto.system_libs.append("pthread")
+            self.cpp_info.components["crypto"].system_libs.append("pthread")
 
-        # OpenSSL::SSL
         ssl = self.cpp_info.components["ssl"]
-        ssl.set_property("cmake_target_name", "OpenSSL::SSL")
-        ssl.libs = ["ssl"]
-        ssl.requires = ["crypto"]
+        self.cpp_info.components["ssl"].set_property("cmake_target_name", "OpenSSL::SSL")
+        self.cpp_info.components["ssl"].libs = ["ssl"]
+        self.cpp_info.components["ssl"].requires = ["crypto"]
