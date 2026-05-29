@@ -8,6 +8,7 @@ required_conan_version = ">=1.50.0"
 
 class ConanGTK(ConanFile):
     name = "gtk"
+    version = "system"
     url = "https://github.com/conan-io/conan-center-index"
     license = "LGPL-2.1-or-later"
     homepage = "https://www.gtk.org"
@@ -46,6 +47,9 @@ class ConanGTK(ConanFile):
 
         pkg = package_manager.Pkg(self)
         pkg.install([f"gtk{self.options.version}"], update=True, check=True)
+
+        alpine = package_manager.Apk(self)
+        alpine.install([f"gtk+{self.options.version}.0-dev"], update=True, check=True)
 
     def package_info(self):
         for name in [f"gtk+-{self.options.version}.0"]:
