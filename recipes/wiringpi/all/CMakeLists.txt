@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 project(wiringPi LANGUAGES C)
 
+add_compile_definitions(_GNU_SOURCE)
+
 file(GLOB SRC_FILES ${WIRINGPI_SRC_DIR}/wiringPi/*.c)
 
 message(STATUS "SRC_FILES: ${SRC_FILES}")
