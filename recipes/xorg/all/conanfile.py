@@ -9,6 +9,7 @@ required_conan_version = ">=1.50.0"
 
 class XorgConan(ConanFile):
     name = "xorg"
+    version = "system"
     package_type = "shared-library"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
@@ -99,8 +100,7 @@ class XorgConan(ConanFile):
                      "xcb-dri3", "xcb-cursor", "xcb-dri2", "xcb-dri3", "xcb-glx", "xcb-present",
                      "xcb-composite", "xcb-ewmh", "xcb-res"] + ([] if self.settings.os == "FreeBSD" else ["uuid"]):
             pkg_config = PkgConfig(self, name)
-            pkg_config.fill_cpp_info(
-                self.cpp_info.components[name], is_system=self.settings.os != "FreeBSD")
+            pkg_config.fill_cpp_info(self.cpp_info.components[name])
             self.cpp_info.components[name].version = pkg_config.version
             self.cpp_info.components[name].set_property(
                 "pkg_config_name", name)
