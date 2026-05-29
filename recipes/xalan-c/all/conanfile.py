@@ -46,6 +46,11 @@ class XalanCConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        # cmake >=3.25 required to use `cmake -E env --modify` patch
+        if self.settings.os == "Windows":
+            self.tool_requires("cmake/[>=3.25]")
+
     def requirements(self):
         self.requires("xerces-c/[>=3.2.2 <4]", transitive_headers=True)
 
