@@ -11,7 +11,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import VCVars, is_msvc, is_msvc_static_runtime, NMakeToolchain, NMakeDeps
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.15"
+required_conan_version = ">=2.4"
 
 
 class SqlcipherConan(ConanFile):
