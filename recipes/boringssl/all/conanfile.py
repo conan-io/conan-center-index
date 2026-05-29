@@ -80,8 +80,7 @@ class BoringSSLConan(ConanFile):
         if self.options.shared:
             self.cpp_info.components["crypto"].defines = ["BORINGSSL_SHARED_LIBRARY"]
         elif stdcpp_library(self):
-            stdcpplib = stdcpp_library(self)
-            self.cpp_info.components["crypto"].system_libs.append(stdcpplib)
+            self.cpp_info.components["crypto"].system_libs.append(stdcpp_library(self))
         if self.settings.os == "Windows":
             self.cpp_info.components["crypto"].system_libs = ["ws2_32"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
@@ -93,5 +92,4 @@ class BoringSSLConan(ConanFile):
         if self.options.shared:
             self.cpp_info.components["ssl"].defines = ["BORINGSSL_SHARED_LIBRARY"]
         elif stdcpp_library(self):
-            stdcpplib = stdcpp_library(self)
-            self.cpp_info.components["ssl"].system_libs.append(stdcpplib)
+            self.cpp_info.components["ssl"].system_libs.append(stdcpp_library(self))
