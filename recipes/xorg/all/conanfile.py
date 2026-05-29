@@ -69,10 +69,10 @@ class XorgConan(ConanFile):
                               "libxss", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
                               "libxxf86vm", "libxv", "xcb-util", "util-linux-libs", "xcb-util-cursor"], update=True, check=True)
 
-        package_manager.Pkg(self).install(["libX11", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
-                           "libxdamage", "libxdmcp", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
+        package_manager.Pkg(self).install(["libX11", "libfontenc", "libICE", "libSM", "libXaw", "libXcomposite", "libXcursor",
+                           "libXdamage", "libXdmcp", "libXtst", "libXinerama", "libxkbfile", "libXrandr", "libXres",
                            "libXScrnSaver", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
-                           "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util", "xcb-util-cursor"], update=True, check=True)
+                           "libXxf86vm", "libXv", "xkeyboard-config", "xcb-util", "xcb-util-cursor"], update=True, check=True)
 
         if Version(conan_version) >= "2.0.10":
             alpine = package_manager.Apk(self)
