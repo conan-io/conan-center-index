@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain
-from conan.tools.files import copy, rm, rmdir, get
+from conan.tools.files import copy, rmdir, get
 
 
 class UnitsConan(ConanFile):
@@ -62,7 +62,7 @@ class UnitsConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["UNITS_ENABLE_TESTS"] = "OFF"
+        tc.cache_variables["UNITS_ENABLE_TESTS"] = False
         tc.generate()
 
     def build(self):
