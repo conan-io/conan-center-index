@@ -45,10 +45,6 @@ class BoringSSLConan(ConanFile):
         if self.settings.get_safe("compiler.cstd"):
             check_min_cstd(self, 11)
 
-    def package_id(self):
-        self.info.settings.rm_safe("compiler.libcxx")
-        self.info.settings.rm_safe("compiler.cppstd")
-
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)], strip_root=True)
         # INFO: Let Conan manage the C++ standard from settings.compiler.cppstd
