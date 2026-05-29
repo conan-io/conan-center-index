@@ -5,8 +5,4 @@ sources:
 patches:
   "1.12.0":
     - patch_file: "patches/0001-do-not-build-tests-and-samples.patch"
-      patch_description: "Do not build tests and samples"
-      patch_type: "conan"
     - patch_file: "patches/0002-fix-gcc-15.patch"
-      patch_description: "Fix build on macOS"
-      patch_type: "portability"

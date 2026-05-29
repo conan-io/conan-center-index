@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
 import os
@@ -47,18 +46,18 @@ class XalanCConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        # cmake >=3.25 required to use `cmake -E env --modify` patch
         if self.settings.os == "Windows":
+            # cmake >=3.25 required to use `cmake -E env --modify` patch
             self.tool_requires("cmake/[>=3.25]")
 
     def requirements(self):
         self.requires("xerces-c/[>=3.2.2 <4]", transitive_headers=True)
 
     def validate(self):
-        # shared xalan-c with static xerces-c fails at runtime in the consumer during Static initialisation
-        # when calling  xercesc::XMLPlatformUtils::Initialize() + xalanc::XalanTransformer::initialize(); as documented
-        # presumably because symbols from xerces-c end up in both the consumer and the xalan-c DLL
         if (self.settings.os == "Windows" and not self.dependencies.direct_host["xerces-c"].options.shared):
+            # shared xalan-c with static xerces-c fails at runtime in the consumer during Static initialisation
+            # when calling  xercesc::XMLPlatformUtils::Initialize() + xalanc::XalanTransformer::initialize(); as documented
+            # presumably because symbols from xerces-c end up in both the consumer and the xalan-c DLL
             raise ConanInvalidConfiguration("shared Xalan-C does not work with static Xerces-C on Windows (builds but fails at runtime)")
 
     def source(self):
@@ -82,6 +81,7 @@ class XalanCConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         if self.settings.os == "Windows":
+            # `MsgCreator` is built and run during the build - modify the environment on Windows to find the DLL dependency
             replace_in_file(self, os.path.join(self.source_folder, "src/xalanc/Utils/CMakeLists.txt"),
                             'COMMAND "$<TARGET_FILE:MsgCreator>"',
                             'COMMAND ${CMAKE_COMMAND} -E env --modify "PATH=path_list_prepend:$<JOIN:${CONAN_RUNTIME_LIB_DIRS},;>" "$<TARGET_FILE:MsgCreator>"')
