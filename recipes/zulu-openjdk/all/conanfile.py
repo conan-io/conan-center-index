@@ -15,6 +15,8 @@ class ZuluOpenJDK(ConanFile):
     topics = ("java", "jdk", "openjdk")
     package_type = "application"
     settings = "os", "arch"
+    upload_policy = "skip"
+    build_policy = "missing"
 
     def layout(self):
         basic_layout(self, src_folder="src")
