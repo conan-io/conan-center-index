@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy
-from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 import os
 
@@ -41,7 +40,7 @@ class ZuluOpenJDK(ConanFile):
         # INFO: Azul is changing the directory layout inside macOS bundles so that only the Contents directory
         # https://foojay.io/today/azul-zulu-april-2026-quarterly-update-released/
         build_folder = self.build_folder
-        if Version(self.version) >= "21.0.11" and self.settings.os == "Macos":
+        if self.settings.os == "Macos":
             build_folder = os.path.join(build_folder, "Contents", "Home")
 
         copy(self, pattern="*", dst=os.path.join(self.package_folder, "bin"),
