@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd, check_min_cstd
+from conan.tools.build import check_min_cppstd, check_min_cstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, replace_in_file
 import os
@@ -79,6 +79,9 @@ class BoringSSLConan(ConanFile):
         self.cpp_info.components["crypto"].libs = ["crypto"]
         if self.options.shared:
             self.cpp_info.components["crypto"].defines = ["BORINGSSL_SHARED_LIBRARY"]
+        elif stdcpp_library(self):
+            stdcpplib = stdcpp_library(self)
+            self.cpp_info.components["crypto"].system_libs.append(stdcpplib)
         if self.settings.os == "Windows":
             self.cpp_info.components["crypto"].system_libs = ["ws2_32"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
@@ -89,3 +92,6 @@ class BoringSSLConan(ConanFile):
         self.cpp_info.components["ssl"].requires = ["crypto"]
         if self.options.shared:
             self.cpp_info.components["ssl"].defines = ["BORINGSSL_SHARED_LIBRARY"]
+        elif stdcpp_library(self):
+            stdcpplib = stdcpp_library(self)
+            self.cpp_info.components["ssl"].system_libs.append(stdcpplib)
