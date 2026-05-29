@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, chmod, mkdir
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, mkdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import VCVars, is_msvc, is_msvc_static_runtime, NMakeToolchain, NMakeDeps
@@ -76,10 +76,6 @@ class SqlcipherConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
-        if Version(self.version) > "4.6.1":
-            chmod(self, "autosetup/autosetup", execute=True)
-            chmod(self, "autosetup/autosetup-find-tclsh", execute=True)
-        chmod(self, "configure", execute=True)
 
     @property
     def _temp_store_nmake_value(self):
