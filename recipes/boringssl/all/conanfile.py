@@ -15,7 +15,7 @@ class BoringSSLConan(ConanFile):
     homepage = "https://boringssl.googlesource.com/boringssl/"
     topics = ("tls", "ssl", "crypto", "openssl", "boringssl")
     package_type = "library"
-    languages = "C"
+    languages = ("C",)
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -37,7 +37,7 @@ class BoringSSLConan(ConanFile):
         if self.settings.os == "Windows" and str(self.settings.arch) in ("x86", "x86_64"):
             self.tool_requires("nasm/2.16.01")
 
-    def build_validate(self):
+    def validate_build(self):
         # BoringSSL requires C++17 when building, but public interface is C
         check_min_cppstd(self, 17)
 
