@@ -218,14 +218,6 @@ class SqlcipherConan(ConanFile):
         ]:
             if gnu_config:
                 copy(self, os.path.basename(gnu_config), os.path.dirname(gnu_config), os.path.join(self.source_folder, "build-aux"))
-        configure = os.path.join(self.source_folder, "configure")
-        # avoid SIP issues on macOS when dependencies are shared
-        if is_apple_os(self) and Version(self.version) <= "4.6.1":
-            libdirs = sum([dep.cpp_info.libdirs for dep in self.dependencies.values()], [])
-            libpaths = ":".join(libdirs)
-            replace_in_file(self, configure,
-                            "#! /bin/sh\n",
-                            f"#! /bin/sh\nexport DYLD_LIBRARY_PATH={libpaths}:$DYLD_LIBRARY_PATH\n")
 
     def build(self):
         if is_msvc(self):
