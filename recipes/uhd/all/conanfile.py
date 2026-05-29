@@ -9,7 +9,7 @@ from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
 
-required_conan_version = ">=2.23"
+required_conan_version = ">=2.26"
 
 class UhdConan(ConanFile):
     name = "uhd"
@@ -32,7 +32,6 @@ class UhdConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    no_copy_source = True
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -42,7 +41,7 @@ class UhdConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("boost/[>=1.83.0 <1.90.0]")
+        self.requires("boost/[>=1.83.0 <2]")
 
     def validate(self):
         check_min_cppstd(self, 17)
@@ -96,12 +95,7 @@ class UhdConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "uhd")
         self.cpp_info.set_property("cmake_target_name", "uhd::uhd")
         self.cpp_info.libs = ["uhd"]
-        self.cpp_info.includedirs = ['include']
-        self.cpp_info.libdirs = ['lib']
-        self.cpp_info.bindirs = ['bin']
 
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
 
         lib_path = os.path.join(self.package_folder, "lib")
-        self.output.info(f"Appending LD_LIBRARY_PATH environment variable: {lib_path}")
