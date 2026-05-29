@@ -15,7 +15,7 @@ class BoringSSLConan(ConanFile):
     homepage = "https://boringssl.googlesource.com/boringssl/"
     topics = ("tls", "ssl", "crypto", "openssl", "boringssl")
     package_type = "library"
-    languages = ("C",)
+    languages = ("C", "C++")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -44,6 +44,10 @@ class BoringSSLConan(ConanFile):
     def validate(self):
         if self.settings.get_safe("compiler.cstd"):
             check_min_cstd(self, 11)
+
+    def package_id(self):
+        self.info.settings.rm_safe("compiler.libcxx")
+        self.info.settings.rm_safe("compiler.cppstd")
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)], strip_root=True)
