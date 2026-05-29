@@ -62,12 +62,7 @@ class UnitsConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.preprocessor_definitions["UNITS_CMAKE_PROJECT_NAME"] = "LLNL-UNITS"
         tc.cache_variables["UNITS_ENABLE_TESTS"] = "OFF"
-        tc.preprocessor_definitions["UNITS_BUILD_SHARED_LIBRARY"] = self.options.shared
-        tc.preprocessor_definitions[
-            "UNITS_BUILD_STATIC_LIBRARY"
-        ] = not self.options.shared
         tc.generate()
 
     def build(self):
@@ -84,20 +79,9 @@ class UnitsConan(ConanFile):
         )
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = ["units"]
-        namespace = self.conf.get("user.llnl-units:namespace", check_type=str)
-        base_type = self.conf.get("user.llnl-units:base_type", check_type=str, default="uint32_t")
-        self.cpp_info.defines = [f"UNITS_BASE_TYPE={base_type}"]
-        if namespace:
-            self.cpp_info.defines.append(f"UNITS_NAMESPACE={namespace}")
-
         self.cpp_info.set_property("cmake_file_name", "units")
         self.cpp_info.set_property("cmake_target_name", "units::units")
