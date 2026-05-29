@@ -10,9 +10,7 @@ required_conan_version = ">=2.0.5"
 
 class XalanCConan(ConanFile):
     name = "xalan-c"
-    description = (
-        "Xalan-C++ is a library to transform XML documents using XSLT"
-    )
+    description = "Xalan-C++ is a library to transform XML documents using XSLT"
     topics = ("xalan", "XML", "XSLT")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://apache.github.io/xalan-c"
@@ -47,18 +45,15 @@ class XalanCConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def build_requirements(self):
-        self.tool_requires("xerces-c/<host_version>", run=True)
-
     def requirements(self):
-        self.requires("xerces-c/[^3.2.2]", transitive_headers=True, transitive_libs=True)
-
+        self.requires("xerces-c/[>=3.2.2 <4]", transitive_headers=True)
 
     def validate(self):
-        if (self.settings.os == "Windows"
-            and not self.dependencies.direct_host["xerces-c"].options.shared
-            and self.options.get_safe("shared")):
-            raise ConanInvalidConfiguration("shared Xalan-C cannot link to static Xerces-C on Windows")
+        # shared xalan-c with static xerces-c fails at runtime in the consumer during Static initialisation
+        # when calling  xercesc::XMLPlatformUtils::Initialize() + xalanc::XalanTransformer::initialize(); as documented
+        # presumably because symbols from xerces-c end up in both the consumer and the xalan-c DLL
+        if (self.settings.os == "Windows" and not self.dependencies.direct_host["xerces-c"].options.shared):
+            raise ConanInvalidConfiguration("shared Xalan-C does not work with static Xerces-C on Windows (builds but fails at runtime)")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -68,13 +63,11 @@ class XalanCConan(ConanFile):
                         "## set(CMAKE_CXX_STANDARD 14)")
 
     def generate(self):
-        env = VirtualRunEnv(self)
-        env.generate(scope="build")
-
         tc = CMakeToolchain(self)
         # Because upstream overrides BUILD_SHARED_LIBS as a CACHE variable
-        tc.cache_variables["BUILD_SHARED_LIBS"] = "ON" if self.options.get_safe("shared", True) else "OFF"
-        tc.variables["transcoder"] = "default" # icu is currently not supported
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.get_safe("shared", True)
+        tc.cache_variables["transcoder"] = "default" # icu is currently not supported
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -82,6 +75,11 @@ class XalanCConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        if self.settings.os == "Windows":
+            replace_in_file(self, os.path.join(self.source_folder, "src/xalanc/Utils/CMakeLists.txt"),
+                            'COMMAND "$<TARGET_FILE:MsgCreator>"',
+                            'COMMAND ${CMAKE_COMMAND} -E env --modify "PATH=path_list_prepend:$<JOIN:${CONAN_RUNTIME_LIB_DIRS},;>" "$<TARGET_FILE:MsgCreator>"')
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -91,9 +89,7 @@ class XalanCConan(ConanFile):
             copy(self, license_file, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
@@ -102,5 +98,3 @@ class XalanCConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "XalanC::XalanC")
         self.cpp_info.set_property("pkg_config_name", "xalan-c")
         self.cpp_info.libs = collect_libs(self)
-
-        self.runenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
