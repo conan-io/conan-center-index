@@ -2,7 +2,8 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=2.0.5"
@@ -95,6 +96,14 @@ class XalanCConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "XalanC")
-        self.cpp_info.set_property("cmake_target_name", "XalanC::XalanC")
         self.cpp_info.set_property("pkg_config_name", "xalan-c")
-        self.cpp_info.libs = collect_libs(self)
+
+        _debug_postfix = "D" if self.settings.build_type == "Debug" else ""
+        self.cpp_info.components["xalan-c"].libs = [f"Xalan-C_1{_debug_postfix}"] if is_msvc(self) else ["xalan-c"]
+        self.cpp_info.components["xalan-c"].set_property("cmake_target_name", "XalanC::XalanC")
+        self.cpp_info.components["xalan-c"].requires = ["xalanMsg"]
+
+        self.cpp_info.components["xalanMsg"].libs = [f"XalanMsgLib_1{_debug_postfix}"] if is_msvc(self) else ["xalanMsg"]
+        self.cpp_info.components["xalanMsg"].set_property("cmake_target_name", "XalanC::XalanMsg")
+        self.cpp_info.components["xalanMsg"].requires = ["xerces-c::xerces-c"]
+
