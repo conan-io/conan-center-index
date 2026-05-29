@@ -6,6 +6,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
 
@@ -30,6 +31,8 @@ class Opene57Conan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_tools": False,
+        "with_docs": False,
         "xml_backend": "xerces"
     }
 
