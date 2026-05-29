@@ -5,6 +5,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy, replace_in_file, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake
+import os
 
 required_conan_version = ">=2.1"
 
