@@ -1,10 +1,10 @@
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, check_min_cstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, replace_in_file
 import os
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=2.4"
 
 
 class BoringSSLConan(ConanFile):
@@ -15,6 +15,7 @@ class BoringSSLConan(ConanFile):
     homepage = "https://boringssl.googlesource.com/boringssl/"
     topics = ("tls", "ssl", "crypto", "openssl", "boringssl")
     package_type = "library"
+    languages = "C"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -31,13 +32,18 @@ class BoringSSLConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.22 <4]")
+        self.tool_requires("cmake/[>=3.22]")
 
         if self.settings.os == "Windows" and str(self.settings.arch) in ("x86", "x86_64"):
             self.tool_requires("nasm/2.16.01")
 
-    def validate(self):
+    def build_validate(self):
+        # BoringSSL requires C++17 when building, but public interface is C
         check_min_cppstd(self, 17)
+
+    def validate(self):
+        if self.settings.get_safe("compiler.cstd"):
+            check_min_cstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)], strip_root=True)
@@ -67,11 +73,15 @@ class BoringSSLConan(ConanFile):
 
         self.cpp_info.components["crypto"].set_property("cmake_target_name", "OpenSSL::Crypto")
         self.cpp_info.components["crypto"].libs = ["crypto"]
+        if self.options.shared:
+            self.cpp_info.components["crypto"].defines = ["BORINGSSL_SHARED_LIBRARY"]
         if self.settings.os == "Windows":
-            self.cpp_info.components["crypto"].system_libs.append("ws2_32")
+            self.cpp_info.components["crypto"].system_libs = ["ws2_32"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["crypto"].system_libs.append("pthread")
+            self.cpp_info.components["crypto"].system_libs = ["pthread"]
 
         self.cpp_info.components["ssl"].set_property("cmake_target_name", "OpenSSL::SSL")
         self.cpp_info.components["ssl"].libs = ["ssl"]
         self.cpp_info.components["ssl"].requires = ["crypto"]
+        if self.options.shared:
+            self.cpp_info.components["ssl"].defines = ["BORINGSSL_SHARED_LIBRARY"]
