@@ -112,7 +112,7 @@ class SqlcipherConan(ConanFile):
         if self.options.enable_column_metadata:
             opt_feature_flags.append("-DSQLITE_ENABLE_COLUMN_METADATA")
         if Version(self.version) > "4.6.1":
-            # INFO: These flags are mandatory: https://github.com/sqlcipher/sqlcipher/blob/v4.14.0/README.md#compiling
+            # INFO: These flags are mandatory: https://github.com/sqlcipher/sqlcipher/blob/v4.16.0/README.md#compiling
             opt_feature_flags.append("-DHAVE_STDINT_H")
             opt_feature_flags.append("-DSQLITE_EXTRA_INIT=sqlcipher_extra_init")
             opt_feature_flags.append("-DSQLITE_EXTRA_SHUTDOWN=sqlcipher_extra_shutdown")
@@ -169,7 +169,7 @@ class SqlcipherConan(ConanFile):
                 tc.extra_defines.append("SQLITE_DISABLE_LFS=1")
         tc.extra_defines.append("SQLITE_HAS_CODEC")
         if Version(self.version) > "4.6.1":
-            # INFO: These flags are mandatory: https://github.com/sqlcipher/sqlcipher/blob/v4.14.0/README.md#compiling
+            # INFO: These flags are mandatory: https://github.com/sqlcipher/sqlcipher/blob/v4.16.0/README.md#compiling
             tc.extra_defines.append("SQLITE_EXTRA_INIT=sqlcipher_extra_init")
             tc.extra_defines.append("SQLITE_EXTRA_SHUTDOWN=sqlcipher_extra_shutdown")
 
@@ -197,7 +197,7 @@ class SqlcipherConan(ConanFile):
             # Proposed fix for autoconf fallback behavior was rejected:
             # - https://github.com/sqlcipher/sqlcipher/pull/594
             # - https://github.com/msteveb/autosetup/issues/84
-            # As Apple is not a cross-compiler, we can just remove the --host arg to use the defaut compiler
+            # As Apple Clang is not a cross-compiler, we can just remove the --host arg to use the defaut compiler
             # https://msteveb.github.io/autosetup/user/crosscompiling/
             tc.update_configure_args({"--host": None})
         tc.generate()
