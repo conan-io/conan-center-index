@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, rmdir, get
 
 
@@ -35,20 +36,6 @@ class UnitsConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -67,6 +54,9 @@ class UnitsConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["UNITS_ENABLE_TESTS"] = False
         tc.generate()
+
+    def validate(self):
+        check_min_cppstd(self, 14)
 
     def build(self):
         cmake = CMake(self)
