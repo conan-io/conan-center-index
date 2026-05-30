@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
-from conan.tools.files import apply_conandata_patches, get, export_conandata_patches
+from conan.tools.files import copy, get, rmdir
+import os
 
 
 required_conan_version = ">=2.1"
@@ -18,9 +19,6 @@ class EVEConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -32,14 +30,13 @@ class EVEConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["EVE_BUILD_DOCUMENTATION"] = False
-        tc.variables["EVE_BUILD_TEST"] = False
-        tc.variables["EVE_BUILD_INTEGRATION"] = False
-        tc.variables["EVE_BUILD_BENCHMARKS"] = False
+        tc.cache_variables["EVE_BUILD_DOCUMENTATION"] = False
+        tc.cache_variables["EVE_BUILD_TEST"] = False
+        tc.cache_variables["EVE_BUILD_INTEGRATION"] = False
+        tc.cache_variables["EVE_BUILD_BENCHMARKS"] = False
         tc.generate()
 
     def build(self):
@@ -47,14 +44,14 @@ class EVEConan(ConanFile):
         cmake.configure()
 
     def package(self):
-        # License is installed into the doc folder by the cmake install routine.
+        copy(self, "LICENSE.md", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.includedirs = [f"include/eve-{self.version}"]
-        self.cpp_info.set_property("cmake_file_name", "eve")
-        self.cpp_info.set_property("cmake_target_name", "eve::eve")
         
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
