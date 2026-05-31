@@ -63,7 +63,8 @@ class Opene57Conan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_tools:
+        # Versions prior to 1.9.0 require Boost Libraries for the tools
+        if self.options.with_tools and self.version < "1.9.0":
             self.requires("boost/1.90.0")
 
         if self.options.with_docs:
