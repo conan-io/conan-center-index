@@ -2,7 +2,6 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.files import get, copy, rmdir
 from conan.tools.system import PyEnv
 from conan.tools.scm import Version
@@ -65,6 +64,9 @@ class UhdConan(ConanFile):
             deps.set_property("boost::headers", "cmake_target_aliases", ["Boost::system"])
         deps.generate()
         tc = CMakeToolchain(self)
+        if is_apple_os(self):
+            tc.cache_variables["CMAKE_INSTALL_NAME_DIR"] = "@rpath"
+            tc.cache_variables["CMAKE_INSTALL_RPATH"] = ""
         tc.cache_variables["PYTHON_EXECUTABLE"] = pyenv.env_exe
         tc.cache_variables["ENABLE_PYTHON_API"] = False
         tc.cache_variables["ENABLE_EXAMPLES"] = False
@@ -89,7 +91,6 @@ class UhdConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "uhd")
