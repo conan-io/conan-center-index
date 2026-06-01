@@ -1,0 +1,9 @@
+sources:
+  "9.15":
+    url: "https://github.com/google/or-tools/releases/download/v9.15/or-tools-9.15.tar.gz"
+    sha256: "599c870319bb127441d92c452d8f79bca46ca6fd295c1deb8031ed303a361311"
+patches:
+  "9.15":
+    - patch_file: "patches/0001-configure-cppstd.patch"
+    - patch_file: "patches/0002-use-conan-protobuf.patch"
+    - patch_file: "patches/0003-conan-osx-target.patch"

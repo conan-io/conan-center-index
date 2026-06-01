@@ -26,22 +26,26 @@ class CMakeConan(ConanFile):
         if self.settings.os == "Windows" and self.settings.arch == "armv8" and Version(self.version) < "3.24":
             raise ConanInvalidConfiguration("CMake only supports ARM64 binaries on Windows starting from 3.24")
 
+    @property
+    def _unzipped_folder(self):
+        return os.path.join(self.build_folder, "unzipped")
+        
     def build(self):
         arch = str(self.settings.arch) if self.settings.os != "Macos" else "universal"
         get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][arch],
-            destination=self.source_folder, strip_root=True)
+            destination=self._unzipped_folder, strip_root=True)
 
     def package_id(self):
         if self.info.settings.os == "Macos":
             del self.info.settings.arch
 
     def package(self):
-        copy(self, "*", src=self.build_folder, dst=self.package_folder)
+        copy(self, "*", src=self._unzipped_folder, dst=self.package_folder)
 
         if self.settings.os == "Macos":
-            docs_folder = os.path.join(self.build_folder, "CMake.app", "Contents", "doc", "cmake")
+            docs_folder = os.path.join(self._unzipped_folder, "CMake.app", "Contents", "doc", "cmake")
         else:
-            docs_folder = os.path.join(self.build_folder, "doc", "cmake")
+            docs_folder = os.path.join(self._unzipped_folder, "doc", "cmake")
 
         licensefile = "LICENSE.rst" if Version(self.version) >= "4.0.0" else "Copyright.txt"
         copy(self, licensefile, src=docs_folder, dst=os.path.join(self.package_folder, "licenses"), keep_path=False)

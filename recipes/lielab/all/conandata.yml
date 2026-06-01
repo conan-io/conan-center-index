@@ -1,4 +1,4 @@
 sources:
-  "0.5.1":
-    url: "https://github.com/sandialabs/Lielab/archive/refs/tags/v0.5.1.tar.gz"
-    sha256: "5a7545a675f630418634d9827e8db5035949bf8ae165f17600c03bf5a6da35af"
+  "0.5.2":
+    url: "https://github.com/sandialabs/Lielab/archive/refs/tags/v0.5.2.tar.gz"
+    sha256: "D98DDF93FA317165891B69944C5FFAB48C3955FD7C1C9428B06A0452F8FCA453"

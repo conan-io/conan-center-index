@@ -87,13 +87,10 @@ class RocksDBConan(ConanFile):
             self.requires("folly/2024.08.12.00")
 
     def validate(self):
-        check_min_cppstd(self, 17)
+        check_min_cppstd(self, 20)
 
         if self.settings.arch not in ["x86_64", "ppc64le", "ppc64", "mips64", "armv8", "riscv64"]:
             raise ConanInvalidConfiguration("Rocksdb requires 64 bits")
-
-        if is_msvc(self) and Version(self.settings.compiler.version) < "191":
-            raise ConanInvalidConfiguration("Rocksdb requires MSVC version >= 191")
 
         if self.options.shared and self.options.with_folly:
             # https://github.com/facebook/rocksdb/blob/v10.5.1/CMakeLists.txt#L603
@@ -121,27 +118,19 @@ class RocksDBConan(ConanFile):
         if is_msvc(self):
             tc.variables["WITH_MD_LIBRARY"] = not is_msvc_static_runtime(self)
         tc.variables["ROCKSDB_INSTALL_ON_WINDOWS"] = self.settings.os == "Windows"
-        tc.variables["WITH_GFLAGS"] = self.options.with_gflags
+        tc.cache_variables["WITH_GFLAGS"] = self.options.with_gflags
         tc.variables["WITH_SNAPPY"] = self.options.with_snappy
         tc.variables["WITH_LZ4"] = self.options.with_lz4
         tc.variables["WITH_ZLIB"] = self.options.with_zlib
         tc.variables["WITH_ZSTD"] = self.options.with_zstd
         tc.variables["WITH_TBB"] = self.options.get_safe("with_tbb", False)
         tc.variables["WITH_JEMALLOC"] = self.options.with_jemalloc
-
         tc.variables["ROCKSDB_BUILD_SHARED"] = self.options.shared
-        tc.variables["ROCKSDB_LIBRARY_EXPORTS"] = self.settings.os == "Windows" and self.options.shared
-        tc.variables["ROCKSDB_DLL" ] = self.settings.os == "Windows" and self.options.shared
         tc.variables["USE_RTTI"] = self.options.use_rtti
         if not bool(self.options.enable_sse):
             tc.variables["PORTABLE"] = True
-            tc.variables["FORCE_SSE42"] = False
-        elif self.options.enable_sse == "sse42":
-            tc.variables["PORTABLE"] = True
-            tc.variables["FORCE_SSE42"] = True
-        elif self.options.enable_sse == "avx2":
-            tc.variables["PORTABLE"] = False
-            tc.variables["FORCE_SSE42"] = False
+        else:
+            tc.cache_variables["PORTABLE"] = "AVX2" if is_msvc(self) else "haswell"
         # not available yet in CCI
         tc.variables["WITH_NUMA"] = False
         tc.generate()

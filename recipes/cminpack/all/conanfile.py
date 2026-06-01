@@ -1,9 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.apple import is_apple_os
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class CMinpackConan(ConanFile):
@@ -43,8 +44,9 @@ class CMinpackConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_EXAMPLES"] = "OFF"
-        tc.variables["CMINPACK_LIB_INSTALL_DIR"] = "lib"
+        tc.cache_variables["BUILD_EXAMPLES"] = "OFF"
+        tc.cache_variables["CMINPACK_LIB_INSTALL_DIR"] = "lib"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):
@@ -75,26 +77,21 @@ class CMinpackConan(ConanFile):
         self.cpp_info.components['cminpack-double'].libs = ['cminpack' + self._library_postfix()]
         self.cpp_info.components['cminpack-double'].includedirs.append(minpack_include_dir)
         self.cpp_info.components["cminpack-double"].set_property("cmake_target_name", "cminpack::cminpack")
-        self.cpp_info.components["cminpack-double"].names["cmake_find_package"] = "cminpack"
-        self.cpp_info.components["cminpack-double"].names["cmake_find_package_multi"] = "cminpack"
-        self.cpp_info.components["cminpack-double"].names["pkg_config"] = "cminpack"
 
         # the single precision version
         self.cpp_info.components['cminpack-single'].libs = ['cminpacks' + self._library_postfix()]
         self.cpp_info.components['cminpack-single'].includedirs.append(minpack_include_dir)
         self.cpp_info.components['cminpack-single'].defines.append("__cminpack_float__")
         self.cpp_info.components["cminpack-single"].set_property("cmake_target_name", "cminpack::cminpacks")
-        self.cpp_info.components["cminpack-single"].names["cmake_find_package"] = "cminpacks"
-        self.cpp_info.components["cminpack-single"].names["cmake_find_package_multi"] = "cminpacks"
-        self.cpp_info.components["cminpack-single"].names["pkg_config"] = "cminpacks"
 
         if self.settings.os != "Windows":
             self.cpp_info.components['cminpack-double'].system_libs.append("m")
             self.cpp_info.components['cminpack-single'].system_libs.append("m")
 
         # required apple frameworks
-        self.cpp_info.components['cminpack-double'].frameworks.append("Accelerate")
-        self.cpp_info.components['cminpack-single'].frameworks.append("Accelerate")
+        if is_apple_os(self):
+            self.cpp_info.components['cminpack-double'].frameworks.append("Accelerate")
+            self.cpp_info.components['cminpack-single'].frameworks.append("Accelerate")
 
         if not self.options.shared and self.settings.os == "Windows":
             self.cpp_info.components['cminpack-double'].defines.append("CMINPACK_NO_DLL")

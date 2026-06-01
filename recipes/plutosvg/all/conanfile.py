@@ -38,7 +38,7 @@ class PlutoSVGConan(ConanFile):
         # Public symbols and used in headers
         self.requires("plutovg/1.0.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_freetype:
-            self.requires("freetype/2.13.2")
+            self.requires("freetype/[>=2.13.2 <3]")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")

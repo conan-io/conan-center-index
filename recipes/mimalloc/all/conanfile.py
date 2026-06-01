@@ -81,15 +81,6 @@ class MimallocConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        # Currently, mimalloc some version do not work properly with shared MD builds.
-        # https://github.com/conan-io/conan-center-index/pull/10333#issuecomment-1114110046
-        if  Version(self.version) == "1.7.6" and \
-            self.options.shared and \
-            is_msvc(self) and \
-            not is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration(
-                f"Currently, {self.ref} doesn't work properly with shared MD builds in CCI. Contributions welcomed")
-
         # Shared overriding requires dynamic runtime for MSVC:
         if self.options.override and \
            self.options.shared and \
@@ -112,7 +103,7 @@ class MimallocConan(ConanFile):
             raise ConanInvalidConfiguration("Single object is incompatible with library injection")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.18 <4]")
+        self.tool_requires("cmake/[>=3.18]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -128,8 +119,6 @@ class MimallocConan(ConanFile):
         tc.variables["MI_WIN_REDIRECT"] = "ON" if self.options.get_safe("win_redirect") else "OFF"
         tc.variables["MI_INSTALL_TOPLEVEL"] = "ON"
         tc.variables["MI_GUARDED"] = self.options.get_safe("guarded", False)
-        if Version(self.version) <= "1.7.6":
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         venv = VirtualBuildEnv(self)
         venv.generate(scope="build")
