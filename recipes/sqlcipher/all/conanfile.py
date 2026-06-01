@@ -107,6 +107,7 @@ class SqlcipherConan(ConanFile):
         env.define("OPTS", f'-I{crypto_dep.includedir} -DSQLITE_HAS_CODEC')
         env.define("NO_TCL", "1")
         env.define("USE_AMALGAMATION", "1")
+        env.define("SYMBOLS", 0) # Avoid generating .pdb files
         opt_feature_flags = ["-DSQLCIPHER_CRYPTO_OPENSSL"]
         tc.extra_ldflags.append("-lcrypto")
         if self.options.enable_column_metadata:
