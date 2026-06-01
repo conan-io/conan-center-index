@@ -10,6 +10,7 @@ patches:
     - patch_file: patches/autoconf-Makefile.in-v4.16.0.patch
     - patch_file: patches/main.mk-v4.16.0.patch
     - patch_file: patches/Makefile.msc-v4.16.0.patch
+    - patch_file: patches/Fix-msvcrt-v4.16.0.patch
     - patch_file: patches/sqlite-config.tcl-v4.16.0.patch
   "4.6.1":
     - patch_file: patches/Makefile.in-v4.6.1.patch
