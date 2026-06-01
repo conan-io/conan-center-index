@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -46,6 +46,9 @@ class LibjpegTurboConan(ConanFile):
         "java": False,
         "enable12bit": False,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -91,6 +94,7 @@ class LibjpegTurboConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     @property
     def _is_arithmetic_encoding_enabled(self):
@@ -126,13 +130,11 @@ class LibjpegTurboConan(ConanFile):
             tc.variables["CMAKE_MACOSX_BUNDLE"] = False # avoid configuration error if building for iOS/tvOS/watchOS
         if Version(self.version) < "3.0.2":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if self.options.get_safe("java", False):
+            tc.cache_variables["CMAKE_INSTALL_JAVADIR"] = os.path.join(self.package_folder, "lib", "java")
         tc.generate()
 
     def _patch_sources(self):
-        # use standard GNUInstallDirs.cmake - custom one is broken
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                              "include(cmakescripts/GNUInstallDirs.cmake)",
-                              "include(GNUInstallDirs)")
         # do not override /MT by /MD if shared
         replace_in_file(self, os.path.join(self.source_folder, "sharedlib", "CMakeLists.txt"),
                               """string(REGEX REPLACE "/MT" "/MD" ${var} "${${var}}")""",

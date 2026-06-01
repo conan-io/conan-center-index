@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, apply_conandata_patches, copy, export_conandata_patches, rmdir, replace_in_file
+from conan.tools.files import get, apply_conandata_patches, copy, export_conandata_patches, rmdir
 from conan.tools.build import check_min_cppstd
 import os
 
@@ -15,19 +14,15 @@ class LevelZeroConan(ConanFile):
     description = "OneAPI Level Zero Specification Headers and Loader"
     topics = ("api-headers", "loader", "level-zero", "oneapi")
     package_type = "shared-library"
-
-    # Binary configuration
     settings = "os", "arch", "compiler", "build_type"
 
     def requirements(self):
-        self.requires("spdlog/1.14.1")
+        self.requires("spdlog/[>=1.14.1 <1.18]")
 
     def source(self):
         version_data = self.conan_data["sources"][self.version]
         get(self, **version_data, strip_root=True)
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "source", "loader","ze_loader.cpp"),
-                        "#ifdef __linux__", "#if defined(__linux__) || defined(__APPLE__)")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -39,17 +34,16 @@ class LevelZeroConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-        toolchain = CMakeToolchain(self)
-        toolchain.generate()
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def validate(self):
-        if is_apple_os(self):
-            self.output.warning("Level Zero is not known to support Apple platforms")
+        if self.settings.os not in ["Windows", "Linux"]:
+            raise ConanInvalidConfiguration(f"{self.ref} is only supported on Windows and Linux.")
         if self.settings.os == "Windows" and self.settings.get_safe("subsystem") == "uwp":
             raise ConanInvalidConfiguration(f"{self.ref} does not support UWP on Windows.")
 
-        min_cpp_std = "14"
-        check_min_cppstd(self, min_cpp_std)
+        check_min_cppstd(self, 14)
 
     def build(self):
         cmake = CMake(self)
