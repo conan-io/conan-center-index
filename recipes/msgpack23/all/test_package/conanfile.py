@@ -16,7 +16,6 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["IS_NEW_API"] = self.dependencies[self.tested_reference_str].ref.version >= "3.0"
         tc.generate()
 
     def build(self):
