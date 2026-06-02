@@ -28,9 +28,6 @@ class KahipConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 11)
 
-    def package_id(self):
-        self.info.clear()
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
