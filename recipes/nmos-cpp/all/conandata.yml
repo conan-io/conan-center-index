@@ -1,5 +1,8 @@
 sources:
   # see https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#what-version-should-packages-use-for-libraries-without-official-releases
+  "cci.20260602":
+    url: "https://github.com/sony/nmos-cpp/archive/079620d88756aa138ede92d3f52a0102370307fe.tar.gz"
+    sha256: "5ffd8520de3b3203441fe22f55592f8ac10324dc1481ab75f0302699496644a1"
   "cci.20240223":
     url: "https://github.com/sony/nmos-cpp/archive/27dff31919e06a132651291648293ff7b6b38b38.tar.gz"
     sha256: "25c5fec843c9ced8061231b44f00942886766008ddbb171b351bf5616c07eccc"
