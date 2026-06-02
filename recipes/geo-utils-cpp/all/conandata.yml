@@ -1,4 +1,7 @@
 sources:
+  "1.0.2":
+    url: "https://github.com/gistrec/geo-utils-cpp/archive/v1.0.2.tar.gz"
+    sha256: "be01e145e38341544ba283ebd7ca9896e9b488659167b72ce662960fe4d58bb4"
   "1.0.1":
     url: "https://github.com/gistrec/geo-utils-cpp/archive/v1.0.1.tar.gz"
     sha256: "2594b5dd736dab3ee99dc586dd326f699b90243b6074df582a32547f90b82a08"
