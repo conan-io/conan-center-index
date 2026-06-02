@@ -76,8 +76,6 @@ class IMGUIConan(ConanFile):
             tc.preprocessor_definitions["IMGUI_TEST_ENGINE_ENABLE_COROUTINE_STDTHREAD_IMPL"] = "1"
             tc.variables["IMGUI_ENABLE_TEST_ENGINE"] = "ON"
             tc.variables["IMGUI_TEST_ENGINE_DIR"] = os.path.join(self.source_folder, "test_engine").replace("\\", "/")
-        if self.options.use_wchar32:
-            tc.preprocessor_definitions["IMGUI_USE_WCHAR32"] = "1"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -94,6 +92,10 @@ class IMGUIConan(ConanFile):
         )
 
     def build(self):
+        if self.options.use_wchar32:
+            replace_in_file(self,
+                os.path.join(self.source_folder, "imconfig.h"),
+                "//#define IMGUI_USE_WCHAR32", "#define IMGUI_USE_WCHAR32")
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
@@ -120,8 +122,6 @@ class IMGUIConan(ConanFile):
         _is_docking_branch = "docking" in str(self.version)
         self.conf_info.define("user.imgui:with_docking", _is_docking_branch)
         self.cpp_info.libs = ["imgui"]
-        if self.options.use_wchar32:
-            self.cpp_info.defines.append("IMGUI_USE_WCHAR32")
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
         if self.settings.os == "Windows":
