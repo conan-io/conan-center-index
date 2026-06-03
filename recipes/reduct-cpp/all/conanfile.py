@@ -15,7 +15,7 @@ class ReductCppConan(ConanFile):
     description = "Reduct Storage Client SDK for C++"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://www.reduct.store/docs/getting-started/with-cpp"
+    homepage = "https://github.com/reductstore/reduct-cpp"
     topics = ("reduct-storage", "http-client", "http-api")
     package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
@@ -39,7 +39,7 @@ class ReductCppConan(ConanFile):
             self.package_type = "static-library"
 
     def requirements(self):
-        self.requires("fmt/[>=10 <12]")
+        self.requires("fmt/[>=10 <12]", options={"header_only": True})
         self.requires("cpp-httplib/[>=0.20 <0.21]")
         self.requires("nlohmann_json/[>=3.11 <3.12]")
         self.requires("openssl/[>=3.0.13 <4]")
@@ -80,6 +80,9 @@ class ReductCppConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        # CMake does not use the proper target for a header-only variant of fmt,
+        # while the library code contains #define FMT_HEADER_ONLY 1
+        deps.set_property("fmt", "cmake_target_name", "fmt::fmt")
         deps.generate()
 
     def build(self):
