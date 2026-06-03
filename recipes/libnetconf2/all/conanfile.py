@@ -26,7 +26,7 @@ class LibNetconf2Conan(ConanFile):
     }
 
     def requirements(self):
-        self.requires("libyang/4.2.2", transitive_headers=True)
+        self.requires("libyang/5.4.9", transitive_headers=True)
         self.requires("openssl/[>=1.1 <4]")
         self.requires("libssh/[>=0.10.6 <0.12]")
         self.requires("libcurl/[>=7.78 <9]")
