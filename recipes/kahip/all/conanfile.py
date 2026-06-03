@@ -1,10 +1,12 @@
 from conan import ConanFile
-from conan.tools.files import copy, get
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import copy, get, rm
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
 required_conan_version = ">=2.1"
+
 
 class KahipConan(ConanFile):
     name = "kahip"
@@ -27,6 +29,9 @@ class KahipConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 11)
+        if self.settings.os == "Windows" and self.options.shared:
+            # shared=True is not supported on Windows because the upstream build does not generate the ".lib" for the shared DLL.
+            raise ConanInvalidConfiguration("shared=True is not supported on Windows")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -48,6 +53,14 @@ class KahipConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        rm(self, "*.pc", self.package_folder, recursive=True)
+        if self.options.shared:
+            rm(self, "*.a", self.package_folder, recursive=True)
+            rm(self, "*_static*", self.package_folder, recursive=True)
+        else:
+            rm(self, "*.dll", self.package_folder, recursive=True)
+            rm(self, "*.so", self.package_folder, recursive=True)
+            rm(self, "*.dylib", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "KaHIP")
