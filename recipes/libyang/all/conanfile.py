@@ -24,17 +24,20 @@ class LibYangConan(ConanFile):
         "fPIC": True
     }
 
-
     def validate(self):
         # TODO For Windows support: https://github.com/CESNET/libyang?tab=readme-ov-file#windows-build-requirements
         # CMake Error at CMakeLists.txt:386 (find_package):
         #   By not providing "Findpthreads.cmake" in CMAKE_MODULE_PATH this project has
+        # Newer major 5.x uses an unavailable dependency in Windows too
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(
                 f"{self.ref} Conan recipe is not prepared to work on Windows. Contributions are welcome.")
 
     def requirements(self):
         self.requires("pcre2/10.42", transitive_headers=True)
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.22]")
 
     def configure(self):
         if self.options.shared:
