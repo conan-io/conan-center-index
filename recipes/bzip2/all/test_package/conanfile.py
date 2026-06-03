@@ -28,6 +28,6 @@ class TestPackageConan(ConanFile):
             if self.dependencies["bzip2"].options.build_executable:
                 with open("file.txt", "w", encoding="utf-8") as f:
                     f.write("Hello Conan world")
-                bin_name = "bzip2.exe" if self.settings.os == "Windows" else "bzip2"
-                self.run(f"{bin_name} file.txt", env="conanrun")
-                self.run("bzcat file.txt.bz2", env="conanrun")
+                suffix = ".exe" if self.settings.os == "Windows" else ""
+                self.run(f"bzip2{suffix} file.txt", env="conanrun")
+                self.run(f"bzcat{suffix} file.txt.bz2", env="conanrun")

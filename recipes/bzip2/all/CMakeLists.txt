@@ -50,16 +50,16 @@ if(BZ2_BUILD_EXE)
     install(PROGRAMS ${BZ2_SRC_DIR}/bzmore DESTINATION ${CMAKE_INSTALL_BINDIR})
     install(PROGRAMS ${BZ2_SRC_DIR}/bzdiff DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-    # Install extra tools which are either copies or sumlinks of other tools
-    # This is a 1:1 mapping of what the originam makefile does.
+    # Install extra tools which are either copies or symlinks of other tools
+    # This is a 1:1 mapping of what the original makefile does.
     # bunzip2 and bzcat are copies of bzip2 (not symlinks)
     install(CODE "
         execute_process(COMMAND \${CMAKE_COMMAND} -E copy
-            \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/bzip2\"
-            \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/bunzip2\")
+            \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/bzip2${CMAKE_EXECUTABLE_SUFFIX}\"
+            \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/bunzip2${CMAKE_EXECUTABLE_SUFFIX}\")
         execute_process(COMMAND \${CMAKE_COMMAND} -E copy
-            \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/bzip2\"
-            \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/bzcat\")
+            \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/bzip2${CMAKE_EXECUTABLE_SUFFIX}\"
+            \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/bzcat${CMAKE_EXECUTABLE_SUFFIX}\")
     ")
 
     # Create symlinks
