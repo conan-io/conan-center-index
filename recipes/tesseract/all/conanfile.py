@@ -77,6 +77,7 @@ class TesseractConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -97,7 +98,6 @@ class TesseractConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         if self.dependencies["leptonica"].options.get_safe("with_tiff"):
             # version <=5.2 do not contain this check, and if not replaced it fail, strict=False is safe
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), 
