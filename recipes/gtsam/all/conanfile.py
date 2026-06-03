@@ -3,11 +3,9 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import check_min_vs, is_msvc, msvc_runtime_flag
-from conan.tools.scm import Version
 import os
-import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class GtsamConan(ConanFile):
@@ -44,12 +42,6 @@ class GtsamConan(ConanFile):
         "with_TBB": [True, False],
         "with_eigen_MKL": [True, False],
         "with_eigen_MKL_OPENMP": [True, False],
-
-        # Removed since v4.1
-        "build_wrap": [True, False],
-        "install_cython_toolbox": [True, False],
-        "typedef_points_to_vectors": [True, False],
-        "wrap_serialization": [True, False],
     }
     default_options = {
         "shared": False,
@@ -73,12 +65,6 @@ class GtsamConan(ConanFile):
         "with_TBB": True,
         "with_eigen_MKL": False,
         "with_eigen_MKL_OPENMP": False,
-
-        # < v4.1 only
-        "build_wrap": False,
-        "install_cython_toolbox": False,
-        "typedef_points_to_vectors": False,
-        "wrap_serialization": True,
     }
     options_description = {
         "allow_deprecated": "Allow use of deprecated methods/functions",
@@ -102,12 +88,6 @@ class GtsamConan(ConanFile):
         "with_TBB": "Use Intel Threaded Building Blocks (TBB)",
         "with_eigen_MKL": "Eigen will use Intel MKL if available",
         "with_eigen_MKL_OPENMP": "Eigen, when using Intel MKL, will also use OpenMP for multithreading if available",
-
-        # < v4.1 only
-        "build_wrap": "Build Matlab/Cython wrap utility (necessary for Matlab/Cython interface)",
-        "install_cython_toolbox": "Install Cython toolbox",
-        "typedef_points_to_vectors": "Typedef Point2 and Point3 to Eigen::Vector equivalents",
-        "wrap_serialization": "Allow wrapped objects to be saved via boost.serialization",
     }
 
     def export_sources(self):
@@ -116,13 +96,6 @@ class GtsamConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) >= "4.1":
-            del self.options.build_wrap
-            del self.options.install_cython_toolbox
-            del self.options.typedef_points_to_vectors
-            del self.options.wrap_serialization
-        else:
-            del self.options.slow_but_correct_betweenfactor
 
     def configure(self):
         if self.options.shared:
@@ -137,12 +110,9 @@ class GtsamConan(ConanFile):
         self.requires("boost/1.84.0", transitive_headers=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.with_TBB:
-            if Version(self.version) >= "4.1":
-                self.requires("onetbb/2021.10.0", transitive_headers=True, transitive_libs=True)
-            else:
-                self.requires("onetbb/2020.3.3", transitive_headers=True, transitive_libs=True)
+            self.requires("onetbb/[>=2021.10.0 <2024]", transitive_headers=True, transitive_libs=True)
         if self.options.default_allocator == "tcmalloc":
-            self.requires("gperftools/2.15")
+            self.requires("gperftools/[>=2.15 <3]")
         if self.options.support_nested_dissection:
             # Used in a public header here:
             # https://github.com/borglab/gtsam/blob/4.2.0/gtsam_unstable/partition/FindSeparator-inl.h#L23-L27
@@ -185,13 +155,8 @@ class GtsamConan(ConanFile):
 
         check_min_vs(self, "191")
 
-        if Version(self.version) >= "4.1" and is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} does not support shared builds with MSVC. See"
-                "https://github.com/borglab/gtsam/issues/1087"
-                if Version(self.version) < "4.2"
-                else "https://github.com/borglab/gtsam/issues/1541"
-            )
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration("Can't build as shared with msvc due to duplicate symbols with mscv")
 
         if self.options.support_nested_dissection and self.dependencies["metis"].options.with_64bit_types:
             raise ConanInvalidConfiguration("GTSAM does not support METIS with 64-bit types")
@@ -220,9 +185,7 @@ class GtsamConan(ConanFile):
         tc.variables["GTSAM_ALLOW_DEPRECATED_SINCE_V42"] = self.options.allow_deprecated
         tc.variables["GTSAM_SUPPORT_NESTED_DISSECTION"] = self.options.support_nested_dissection
         tc.variables["GTSAM_TANGENT_PREINTEGRATION"] = self.options.tangent_preintegration
-        # Added in 4.1+
-        if Version(self.version) >= "4.1":
-            tc.variables["GTSAM_SLOW_BUT_CORRECT_BETWEENFACTOR"] = self.options.slow_but_correct_betweenfactor
+        tc.variables["GTSAM_SLOW_BUT_CORRECT_BETWEENFACTOR"] = self.options.slow_but_correct_betweenfactor
         tc.variables["GTSAM_BUILD_WITH_CCACHE"] = False
         # https://github.com/borglab/gtsam/blob/4.2.0/cmake/HandleAllocators.cmake
         if self.options.default_allocator is not None:
@@ -251,22 +214,8 @@ class GtsamConan(ConanFile):
         tc.variables["GTSAM_BUILD_DOCS"] = False
         tc.variables["GTSAM_BUILD_DOC_HTML"] = False
         tc.variables["GTSAM_BUILD_DOC_LATEX"] = False
-
-        # Removed in 4.1+
-        if Version(self.version) < "4.1":
-            # https://github.com/borglab/gtsam/blob/4.0.3/CMakeLists.txt
-            tc.variables["GTSAM_BUILD_WRAP"] = self.options.build_wrap
-            tc.variables["GTSAM_INSTALL_CYTHON_TOOLBOX"] = self.options.install_cython_toolbox
-            tc.variables["GTSAM_TYPEDEF_POINTS_TO_VECTORS"] = self.options.typedef_points_to_vectors
-            # https://github.com/borglab/gtsam/blob/4.0.3/wrap/CMakeLists.txt#L15
-            tc.variables["GTSAM_WRAP_SERIALIZATION"] = self.options.wrap_serialization
-
         tc.variables["Boost_USE_STATIC_LIBS"] = not self.dependencies["boost"].options.shared
         tc.variables["Boost_NO_SYSTEM_PATHS"] = True
-
-        if Version(self.version) < "4.1":
-            # Fix "The practice of declaring the Bind placeholders (_1, _2, ...) in the global namespace is deprecated"
-            tc.preprocessor_definitions["BOOST_BIND_GLOBAL_PLACEHOLDERS"] = ""
 
         tc.generate()
 
@@ -274,6 +223,10 @@ class GtsamConan(ConanFile):
 
         if self.options.support_nested_dissection:
             deps.set_property("metis", "cmake_target_name", "metis-gtsam-if")
+
+        if self.options.with_TBB:
+            deps.set_property("onetbb::libtbb", "cmake_target_name", "tbb")
+            deps.set_property("onetbb::tbbmalloc", "cmake_target_name", "tbbmalloc")
 
         deps.generate()
 
@@ -294,8 +247,6 @@ class GtsamConan(ConanFile):
         # Fix tcmalloc / gperftools handling
         if self.options.default_allocator == "tcmalloc":
             handle_allocators_path = os.path.join(self.source_folder, "cmake", "HandleAllocators.cmake")
-            if Version(self.version) < "4.1":
-                handle_allocators_path = os.path.join(self.source_folder, "CMakeLists.txt")
             replace_in_file(self, handle_allocators_path,
                             "if(GOOGLE",
                             ("find_package(gperftools REQUIRED)\n"
@@ -310,16 +261,10 @@ class GtsamConan(ConanFile):
             save(self, os.path.join(self.source_folder, "cmake", "HandleMetis.cmake"),
                  "find_package(metis REQUIRED CONFIG)\n")
 
+
         # Fix TBB handling
         handle_tbb_path = os.path.join(self.source_folder, "cmake", "HandleTBB.cmake")
-        if Version(self.version) < "4.1":
-            handle_tbb_path = os.path.join(self.source_folder, "CMakeLists.txt")
         replace_in_file(self, handle_tbb_path, "find_package(TBB 4.4 ", "find_package(TBB ")
-        if Version(self.version) < "4.2.1":
-            replace_in_file(self, handle_tbb_path,
-                            "list(APPEND GTSAM_ADDITIONAL_LIBRARIES tbb tbbmalloc)",
-                            "list(APPEND GTSAM_ADDITIONAL_LIBRARIES TBB::tbb TBB::tbbmalloc)")
-
 
     def build(self):
         self._patch_sources()
@@ -335,32 +280,6 @@ class GtsamConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "CMake"))
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {
-                "gtsam": "GTSAM::gtsam",
-                "gtsam_unstable": "GTSAM::gtsam_unstable",
-                "metis-gtsam": "GTSAM::metis-gtsam",
-                "CppUnitLite": "GTSAM::CppUnitLite",
-            }
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
-
     def package_info(self):
         # GTSAM uses targets without a namespace prefix:
         # https://github.com/borglab/gtsam/blob/4.2.0/cmake/example_cmake_find_gtsam/CMakeLists.txt
@@ -372,14 +291,11 @@ class GtsamConan(ConanFile):
         gtsam.requires = [f"boost::{component}" for component in self._required_boost_components]
         gtsam.requires.append("eigen::eigen")
         if self.options.with_TBB:
-            gtsam.requires.append("onetbb::onetbb")
+            gtsam.requires.extend(["onetbb::libtbb", "onetbb::tbbmalloc"])
         if self.options.default_allocator == "tcmalloc":
             gtsam.requires.append("gperftools::gperftools")
         if self.settings.os == "Windows":
             gtsam.system_libs = ["dbghelp"]
-        if Version(self.version) < "4.1":
-            # Fix "The practice of declaring the Bind placeholders (_1, _2, ...) in the global namespace is deprecated"
-            gtsam.defines.append("BOOST_BIND_GLOBAL_PLACEHOLDERS")
 
         if self.options.build_unstable:
             gtsam_unstable = self.cpp_info.components["libgtsam_unstable"]
@@ -402,19 +318,3 @@ class GtsamConan(ConanFile):
         if self.options.build_type_postfixes and self.settings.build_type != "Release":
             for component in self.cpp_info.components.values():
                 component.libs = [f"{lib}{self.settings.build_type}" for lib in component.libs]
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "GTSAM"
-        self.cpp_info.names["cmake_find_package_multi"] = "GTSAM"
-        for component_name, lib_name in [
-            ("libgtsam", "gtsam"),
-            ("libgtsam_unstable", "gtsam_unstable"),
-            ("libmetis-gtsam", "metis-gtsam"),
-            ("gtsam_CppUnitLite", "CppUnitLite"),
-        ]:
-            if component_name in self.cpp_info.components:
-                component = self.cpp_info.components[component_name]
-                component.names["cmake_find_package"] = lib_name
-                component.names["cmake_find_package_multi"] = lib_name
-                component.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-                component.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

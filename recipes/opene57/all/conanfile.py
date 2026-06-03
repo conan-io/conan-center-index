@@ -4,11 +4,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, export_conandata_patches, get, replace_in_file
+from conan.tools.files import copy, get, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class Opene57Conan(ConanFile):
@@ -25,13 +25,15 @@ class Opene57Conan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_tools": [True, False],
-        "with_docs":  [True, False]
+        "with_docs":  [True, False],
+        "xml_backend": ["xerces", "libxml2", "pugixml"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_tools": False,
-        "with_docs":  False
+        "with_docs": False,
+        "xml_backend": "xerces"
     }
 
     @property
@@ -47,10 +49,6 @@ class Opene57Conan(ConanFile):
             "clang": "6",
             "apple-clang": "10",
         }
-
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -71,10 +69,14 @@ class Opene57Conan(ConanFile):
         if self.options.with_docs:
             self.requires("doxygen/[>=1.8 <2]")
 
-        if self.settings.os != "Windows":
-            self.requires("icu/78.1")
-
-        self.requires("xerces-c/3.3.0")
+        if self.options.xml_backend == "xerces":
+            self.requires("xerces-c/3.3.0")
+            if self.settings.os != "Windows":
+                self.requires("icu/78.2")
+        elif self.options.xml_backend == "libxml2":
+            self.requires("libxml2/2.15.3")
+        else:
+            self.requires("pugixml/1.15")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -96,6 +98,7 @@ class Opene57Conan(ConanFile):
         tc.variables["BUILD_TOOLS"] = self.options.with_tools
         tc.variables["BUILD_TESTS"] = False
         tc.variables["BUILD_DOCS"] = self.options.with_docs
+        tc.cache_variables["E57_XML_BACKEND"] = self.options.xml_backend
 
         if is_msvc(self):
             tc.variables["BUILD_WITH_MT"] = is_msvc_static_runtime(self)
@@ -107,16 +110,13 @@ class Opene57Conan(ConanFile):
     def _patch_sources(self):
         # Do not raise an error for shared builds
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "message(FATAL_ERROR", "# ")
-        compiler_opts = os.path.join(self.source_folder, "src", "cmake", "compiler_options.cmake")
-        # Disable ASan and UBSan as these require linking against asan and ubsan runtime libraries
-        # FIXME: Figure out how to link against these using Conan
-        replace_in_file(self, compiler_opts, "$<$<CONFIG:DEBUG>:-fsanitize=address>", "")
-        replace_in_file(self, compiler_opts, "$<$<CONFIG:DEBUG>:-fsanitize=undefined>", "")
-        if self.settings.compiler == "apple-clang":
-            replace_in_file(self, compiler_opts, "$<$<CONFIG:DEBUG>:-fsanitize=leak>", "")
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8":
-            replace_in_file(self, compiler_opts, "-fstack-clash-protection", "")
-
+        # Disable clang-format auto execution which fails in Windows
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "src", "cmake", "clang_format.cmake"),
+            "function(target_clangformat_setup target)",
+            "function(target_clangformat_setup target)\nreturn()",
+        )
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
@@ -133,13 +133,3 @@ class Opene57Conan(ConanFile):
     def package_info(self):
         lib_suffix = "-d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = [f"openE57{lib_suffix}", f"openE57las{lib_suffix}"]
-
-        self.cpp_info.defines.append(f"E57_REFIMPL_REVISION_ID={self.name}-{self.version}")
-        self.cpp_info.defines.append("XERCES_STATIC_LIBRARY")
-        self.cpp_info.defines.append("CRCPP_INCLUDE_ESOTERIC_CRC_DEFINITIONS")
-        self.cpp_info.defines.append("CRCPP_USE_CPP11")
-
-        # TODO: to remove in conan v2
-        if self.options.with_tools:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.env_info.PATH.append(bin_path)

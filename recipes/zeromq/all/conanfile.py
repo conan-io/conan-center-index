@@ -27,6 +27,7 @@ class ZeroMQConan(ConanFile):
         "with_draft_api": [True, False],
         "with_websocket": [True, False],
         "with_radix_tree": [True, False],
+        "with_tls": [True, False],
     }
     default_options = {
         "shared": False,
@@ -36,6 +37,7 @@ class ZeroMQConan(ConanFile):
         "poller": None,
         "with_draft_api": False,
         "with_websocket": False,
+        "with_tls": False,
         "with_radix_tree": False,
     }
 
@@ -58,6 +60,8 @@ class ZeroMQConan(ConanFile):
             self.requires("libsodium/[~1.0.20]")
         if self.options.with_norm:
             self.requires("norm/1.5.9")
+        if self.options.with_tls:
+            self.requires("gnutls/[>=3.8.7 <4]")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.with_norm:
@@ -84,6 +88,9 @@ class ZeroMQConan(ConanFile):
         tc.variables["ENABLE_DRAFTS"] = self.options.with_draft_api
         tc.variables["ENABLE_WS"] = self.options.with_websocket
         tc.variables["ENABLE_RADIX_TREE"] = self.options.with_radix_tree
+        tc.cache_variables["WITH_LIBBSD"] = False
+        tc.cache_variables["WITH_TLS"] = self.options.with_tls
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_GnuTLS"] = self.options.with_tls
         if self.options.poller:
             tc.variables["POLLER"] = self.options.poller
         if is_msvc(self):
@@ -143,8 +150,8 @@ class ZeroMQConan(ConanFile):
             self.cpp_info.components["libzmq"].defines.append("ZMQ_STATIC")
         if self.options.with_draft_api:
             self.cpp_info.components["libzmq"].defines.append("ZMQ_BUILD_DRAFT_API")
-        if self.options.with_websocket and self.settings.os != "Windows":
-            self.cpp_info.components["libzmq"].system_libs.append("bsd")
+        if self.options.with_tls:
+            self.cpp_info.components["libzmq"].requires.append("gnutls::gnutls")
 
         self.cpp_info.components["libzmq"].set_property("cmake_target_name", self._libzmq_target)
         if self.options.encryption == "libsodium":

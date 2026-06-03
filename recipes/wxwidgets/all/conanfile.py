@@ -101,6 +101,7 @@ class wxWidgetsConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("ninja/[>=1.10.2 <2]")
         self.tool_requires("cmake/[>=3.17 <4]")
+        self.tool_requires("gettext/[>=0.22 <1]")
 
     def requirements(self):
         if self.settings.os == "Linux":
@@ -156,6 +157,7 @@ class wxWidgetsConan(ConanFile):
         tc.cache_variables["wxBUILD_SAMPLES"] = "OFF"
         tc.cache_variables["wxBUILD_TESTS"] = "OFF"
         tc.cache_variables["wxBUILD_DEMOS"] = "OFF"
+        tc.cache_variables["wxBUILD_LOCALES"] = "ON"
         tc.cache_variables["wxBUILD_INSTALL"] = True
         if self.settings.compiler == "clang":
             tc.cache_variables["wxBUILD_PRECOMP"] = "OFF"
@@ -287,6 +289,7 @@ class wxWidgetsConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "wxWidgets")
         self.cpp_info.set_property("cmake_target_name", "wxWidgets::wxWidgets")
         self.cpp_info.set_property("pkg_config_name", "wxwidgets")
+        self.conf_info.define("user.wxwidgets:locales", os.path.join(self.package_folder, "share", "locale"))
 
         _version = Version(self.version)
         version_suffix_major_minor = f"-{_version.major}.{_version.minor}"

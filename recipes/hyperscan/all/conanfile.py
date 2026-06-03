@@ -111,16 +111,22 @@ class HyperscanConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        # Canonical path is include/hs/ (#include <hs/hs.h>); include/ kept for backwards compatibility.
+        hs_include_dirs = ["include", os.path.join("include", "hs")]
+
         self.cpp_info.components["hs"].set_property("pkg_config_name", "libhs")
         self.cpp_info.components["hs"].libs = ["hs"]
         self.cpp_info.components["hs"].requires = ["boost::headers"]
+        self.cpp_info.components["hs"].includedirs = hs_include_dirs
 
         self.cpp_info.components["hs_runtime"].libs = ["hs_runtime"]
+        self.cpp_info.components["hs_runtime"].includedirs = hs_include_dirs
 
         if self.options.build_chimera:
             self.cpp_info.components["chimera"].set_property("pkg_config_name", "libch")
             self.cpp_info.components["chimera"].libs = ["chimera"]
             self.cpp_info.components["chimera"].requires = ["pcre::libpcre", "hs"]
+            self.cpp_info.components["chimera"].includedirs = hs_include_dirs
 
         if not self.options.shared:
             if self.settings.os in ["Linux", "FreeBSD"]:
