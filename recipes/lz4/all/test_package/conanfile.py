@@ -37,7 +37,7 @@ class TestPackageConan(ConanFile):
                 if self.settings.os == "Windows":
                     # lzcat and unlz4 are only available on UNIX
                     # https://github.com/lz4/lz4/blob/dev/build/cmake/CMakeLists.txt#L317
-                   self.run("lz4.exe file.txt file.txt.lz4", env="conanrun")
+                    self.run("lz4.exe file.txt file.txt.lz4", env="conanrun")
                 else:
                     self.run("lz4 file.txt file.txt.lz4", env="conanrun")
                     self.run("lz4cat file.txt.lz4", env="conanrun")
