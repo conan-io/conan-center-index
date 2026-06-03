@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
@@ -36,8 +35,6 @@ class SdlnetConan(ConanFile):
         self.requires("sdl/[>=3.2.6 <4]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if Version(self.version).major != Version(self.dependencies["sdl"].ref.version).major:
-            raise ConanInvalidConfiguration("sdl & sdl_net must have the same major version")
         if self.options.shared != self.dependencies["sdl"].options.shared:
             raise ConanInvalidConfiguration("sdl & sdl_net must be built with the same 'shared' option value")
 

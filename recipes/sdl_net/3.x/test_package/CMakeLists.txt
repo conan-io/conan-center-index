@@ -5,8 +5,4 @@ find_package(SDL3_net REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
 
-if(TARGET SDL3_net::SDL3_net)
-    target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_net::SDL3_net)
-else()
-    target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_net::SDL3_net-static)
-endif()
+target_link_libraries(${PROJECT_NAME} PRIVATE $<IF:$<TARGET_EXISTS:SDL3_net::SDL3_net>,SDL3_net::SDL3_net,SDL3_net::SDL3_net-static>)
