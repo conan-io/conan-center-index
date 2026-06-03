@@ -3,7 +3,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy, rmdir, replace_in_file, rm
 from conan.tools.system import PyEnv
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
@@ -54,6 +54,7 @@ class UhdConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "host", "CMakeLists.txt"), "add_subdirectory(docs)", "#add_subdirectory(docs)")
 
     def generate(self):
         pyenv = PyEnv(self)
@@ -92,6 +93,10 @@ class UhdConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if not self.options.shared:
+            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dylib*", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dll*", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "uhd")
