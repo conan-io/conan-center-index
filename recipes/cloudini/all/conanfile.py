@@ -6,6 +6,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 required_conan_version = ">=2.0.9"
 
@@ -38,11 +39,11 @@ class CloudiniConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 20)
-        if is_msvc(self):
-            raise ConanInvalidConfiguration(
-                f"{self.ref} has not been tested with MSVC. "
-                "Please open an issue at https://github.com/facontidavide/cloudini if you need MSVC support."
-            )
+        # MSVC support landed in 1.2.2 (the non-portable __builtin_expect was replaced
+        # by the C++20 [[likely]]/[[unlikely]] attributes); earlier versions still fail
+        # to compile under MSVC.
+        if is_msvc(self) and Version(self.version) < "1.2.2":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support MSVC; use cloudini/1.2.2 or newer.")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16]")
