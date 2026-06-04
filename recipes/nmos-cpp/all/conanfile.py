@@ -93,9 +93,6 @@ class NmosCppConan(ConanFile):
         tc.variables["NMOS_CPP_BUILD_EXAMPLES"] = True
         tc.generate()
         deps = CMakeDeps(self)
-        deps.set_property("json-schema-validator", "cmake_target_name", "nlohmann_json_schema_validator::nlohmann_json_schema_validator")
-        if self.options.get_safe("with_dnssd") == "avahi":
-            deps.set_property("avahi", "cmake_target_name", "Avahi::compat-libdns_sd")
         deps.generate()
 
     def build(self):
