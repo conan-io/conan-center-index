@@ -22,12 +22,10 @@ class ReductCppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_chrono": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_chrono": False,
     }
 
     implements = ["auto_shared_fpic"]
@@ -44,8 +42,6 @@ class ReductCppConan(ConanFile):
         self.requires("nlohmann_json/[>=3.11 <3.12]")
         self.requires("openssl/[>=3.0.13 <4]")
         self.requires("concurrentqueue/1.0.4")
-        if not self.options.with_chrono:
-            self.requires("date/[>=3.0.1 <4]")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.23]")
@@ -64,11 +60,11 @@ class ReductCppConan(ConanFile):
         if not httplib.options.with_zlib:
             raise ConanInvalidConfiguration("cpp-httplib must be built with zlib")
 
-        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "15":
-            raise ConanInvalidConfiguration("Apple-clang versions prior to 15 have missing C++20 support")
-
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "14" and self.options.with_chrono:
-            raise ConanInvalidConfiguration("ReductCpp with chrono requires GCC 14 or higher. ")
+        # if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "15":
+        #     raise ConanInvalidConfiguration("Apple-clang versions prior to 15 have missing C++20 support")
+        #
+        # if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "14":
+        #     raise ConanInvalidConfiguration("ReductCpp requires GCC 14 or higher. ")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -78,8 +74,6 @@ class ReductCppConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.options.with_chrono:
-            tc.cache_variables["REDUCT_CPP_USE_STD_CHRONO"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
