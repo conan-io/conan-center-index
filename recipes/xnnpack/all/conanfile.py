@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file
-from conan.tools.microsoft import check_min_vs
+from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 import os
 
@@ -44,29 +44,27 @@ class XnnpackConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    @property
+    def _with_kleidiai(self):
+        return Version(self.version) >= "cci.20241203" and "arm" in str(self.settings.arch) and not is_msvc(self)
+
     def requirements(self):
-        if self.version in ["cci.20220801", "cci.20220621", "cci.20211210"]:
-            self.requires("cpuinfo/cci.20220618")
-        else:
-            self.requires("cpuinfo/cci.20231129")
+        self.requires("cpuinfo/[>=cci.20231129]")
         self.requires("fp16/cci.20210320")
         #  https://github.com/google/XNNPACK/blob/ed5f9c0562e016a08b274a4579de5ef500fec134/include/xnnpack.h#L15
         self.requires("pthreadpool/cci.20231129", transitive_headers=True)
         self.requires("fxdiv/cci.20200417")
+        if self._with_kleidiai:
+            self.requires("kleidiai/1.18.0")
 
     def validate(self):
         check_min_vs(self, 192)
         compiler = self.settings.compiler
         compiler_version = Version(compiler.version)
-        if Version(self.version) < "cci.20230715":
-            if (compiler == "gcc" and compiler_version < "6") or \
-                (compiler == "clang" and compiler_version < "5"):
-                raise ConanInvalidConfiguration(f"{self.ref} doesn't support {compiler} {compiler.version}")
-        else:
-            # since cci.20230715, xnnpack requires avx512 header file
-            if (compiler == "gcc" and compiler_version < "11") or \
-                (compiler == "clang" and compiler_version < "8"):
-                raise ConanInvalidConfiguration(f"{self.ref} doesn't support {compiler} {compiler.version}")
+        # xnnpack requires avx512 header file
+        if (compiler == "gcc" and compiler_version < "11") or \
+            (compiler == "clang" and compiler_version < "8"):
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support {compiler} {compiler.version}")
         if self.options.assembly and compiler == "clang" and self.settings.arch == "armv6":
             # clang assembly validator fails on XNNPACK's math.h for armv6:
             # https://github.com/google/XNNPACK/issues/4348#issuecomment-1445437613
@@ -77,12 +75,8 @@ class XnnpackConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.settings.arch == "armv8":
-            if self.settings.os == "Linux":
-                tc.variables["CONAN_XNNPACK_SYSTEM_PROCESSOR"] = "aarch64"
-            else:
-                # Not defined by Conan for Apple Silicon. See https://github.com/conan-io/conan/pull/8026
-                tc.variables["CONAN_XNNPACK_SYSTEM_PROCESSOR"] = "arm64"
+        if self.settings.arch == "armv8" and self.settings.os == "Windows":
+            tc.cache_variables["XNNPACK_ENABLE_ARM_FP16_SCALAR"] = False
         tc.cache_variables["XNNPACK_LIBRARY_TYPE"] = "shared" if self.options.shared else "static"
         tc.cache_variables["CMAKE_PROJECT_XNNPACK_INCLUDE"] = os.path.join(self.source_folder, "xnnpack_project_include.cmake")
         tc.variables["XNNPACK_ENABLE_ASSEMBLY"] = self.options.assembly
@@ -97,6 +91,8 @@ class XnnpackConan(ConanFile):
         tc.variables["CMAKE_SKIP_INSTALL_ALL_DEPENDENCY"] = True
         # To export symbols for shared msvc
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        if Version(self.version) >= "cci.20241203":
+            tc.cache_variables["XNNPACK_ENABLE_KLEIDIAI"] = self._with_kleidiai
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -110,6 +106,7 @@ class XnnpackConan(ConanFile):
         deps.set_property("pthreadpool", "cmake_target_name", "pthreadpool")
         deps.set_property("fp16", "cmake_target_name", "fp16")
         deps.set_property("fxdiv", "cmake_target_name", "fxdiv")
+        deps.set_property("kleidiai", "cmake_target_name", "kleidiai")
         deps.generate()
 
     def _patch_sources(self):
@@ -135,6 +132,26 @@ class XnnpackConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["XNNPACK"]
+        self.cpp_info.components["xnnpack"].libs = ["XNNPACK"]
+        self.cpp_info.components["xnnpack"].requires = [
+            "fxdiv::fxdiv",
+            "fp16::fp16",
+            "cpuinfo::cpuinfo",
+            "pthreadpool::pthreadpool",
+        ]
+
+        if Version(self.version) >= "cci.20241203":
+            self.cpp_info.components["microkernels-prod"].libs = ["microkernels-prod"]
+            self.cpp_info.components["microkernels-prod"].requires = [
+                "fxdiv::fxdiv",
+            ]
+            self.cpp_info.components["xnnpack"].requires.append("microkernels-prod")
+            if self._with_kleidiai:
+                self.cpp_info.components["microkernels-prod"].requires.append("kleidiai::kleidiai")
+                self.cpp_info.components["xnnpack"].requires.append("kleidiai::kleidiai")
+
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["microkernels-prod"].system_libs = ["m"]
+
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["m"]
+            self.cpp_info.components["xnnpack"].system_libs = ["m"]

@@ -5,9 +5,9 @@ from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.microsoft import msvc_runtime_flag
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+
+required_conan_version = ">=2.0"
 
 
 class FltkConan(ConanFile):
@@ -38,14 +38,6 @@ class FltkConan(ConanFile):
         "with_xft": False,
     }
 
-    @property
-    def _is_cl_like(self):
-        return self.settings.compiler.get_safe("runtime") is not None
-
-    @property
-    def _is_cl_like_static_runtime(self):
-        return self._is_cl_like and "MT" in msvc_runtime_flag(self)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -58,12 +50,8 @@ class FltkConan(ConanFile):
         if self.options.abi_version == None:
             _version_token = self.version.split(".")
             _version_major = int(_version_token[0])
-            if len(_version_token) >= 3:
-                _version_minor = int(_version_token[1])
-                _version_patch = int(_version_token[2])
-            elif len(_version_token) >= 2:
-                _version_minor = int(_version_token[1])
-                _version_patch = 0
+            _version_minor = int(_version_token[1])
+            _version_patch = int(_version_token[2]) if len(_version_token) >= 3 else 0
             self.options.abi_version = str(
                 int(_version_major) * 10000 + int(_version_minor) * 100 + int(_version_patch)
             )
@@ -77,62 +65,47 @@ class FltkConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("libjpeg/9e")
+        self.requires("libjpeg/[>=9e]")
         self.requires("libpng/[>=1.6 <2]")
+        # If Version >= 1.4.1, it also depends on FLTK_BACKEND_X11, but it's not introduced
+        # in the recipe for now
+        if not is_apple_os(self):
+            self.requires("fontconfig/[>=2.15.0 <3]")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.with_gl:
                 self.requires("opengl/system")
                 self.requires("glu/system")
-            self.requires("fontconfig/2.15.0")
             self.requires("xorg/system")
             if self.options.with_xft:
-                self.requires("libxft/2.3.8")
-            if Version(self.version) >= "1.4.0":
-                self.requires("gtk/system", options={"version": "3"})
-                self.requires("wayland/1.22.0")
-                self.requires("xkbcommon/1.6.0")
-                self.requires("dbus/1.15.8")
+                self.requires("libxft/[~2.3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["FLTK_BUILD_TEST"] = False
-        tc.variables["FLTK_BUILD_EXAMPLES"] = False
-        if Version(self.version) < "1.4.0":
-            tc.variables["OPTION_BUILD_SHARED_LIBS"] = self.options.shared
-            tc.variables["OPTION_USE_GL"] = self.options.with_gl
-            tc.variables["OPTION_USE_THREADS"] = self.options.with_threads
-            tc.variables["OPTION_BUILD_HTML_DOCUMENTATION"] = False
-            tc.variables["OPTION_BUILD_PDF_DOCUMENTATION"] = False
-            tc.variables["OPTION_USE_XFT"] = self.options.with_xft
-            if self.options.abi_version:
-                tc.variables["OPTION_ABI_VERSION"] = self.options.abi_version
-            tc.variables["OPTION_USE_SYSTEM_LIBJPEG"] = True
-            tc.variables["OPTION_USE_SYSTEM_ZLIB"] = True
-            tc.variables["OPTION_USE_SYSTEM_LIBPNG"] = True
-        else:
-            tc.variables["FLTK_BUILD_SHARED_LIBS"] = self.options.shared
-            tc.variables["FLTK_BUILD_GL"] = self.options.with_gl
-            tc.variables["FLTK_USE_PTHREADS"] = self.options.with_threads
-            tc.variables["FLTK_BUILD_HTML_DOCS"] = False
-            tc.variables["FLTK_BUILD_PDF_DOCS"] = False
-            tc.variables["FLTK_USE_XFT"] = self.options.with_xft
-            if self.options.abi_version:
-                tc.variables["FLTK_ABI_VERSION"] = self.options.abi_version
-            tc.variables["FLTK_USE_SYSTEM_LIBJPEG"] = True
-            tc.variables["FLTK_USE_SYSTEM_ZLIB"] = True
-            tc.variables["FLTK_USE_SYSTEM_LIBPNG"] = True
-            tc.variables["FLTK_BUILD_FLUID"] = False
-        if Version(self.version) >= "1.3.9" and self._is_cl_like:
-            tc.variables["FLTK_MSVC_RUNTIME_DLL"] = not self._is_cl_like_static_runtime
+        tc.cache_variables["FLTK_BUILD_TEST"] = False
+        tc.cache_variables["FLTK_BUILD_EXAMPLES"] = False
+        tc.cache_variables["FLTK_BUILD_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["FLTK_BUILD_GL"] = self.options.with_gl
+        tc.cache_variables["FLTK_USE_PTHREADS"] = self.options.with_threads
+        tc.cache_variables["FLTK_BUILD_HTML_DOCS"] = False
+        tc.cache_variables["FLTK_BUILD_PDF_DOCS"] = False
+        tc.cache_variables["FLTK_USE_XFT"] = self.options.with_xft
+        if self.options.abi_version:
+            tc.cache_variables["FLTK_ABI_VERSION"] = self.options.abi_version
+        tc.cache_variables["FLTK_USE_SYSTEM_LIBJPEG"] = True
+        tc.cache_variables["FLTK_USE_SYSTEM_ZLIB"] = True
+        tc.cache_variables["FLTK_USE_SYSTEM_LIBPNG"] = True
+        tc.cache_variables["FLTK_BUILD_FLUID"] = False
+        if self.settings.compiler.get_safe("runtime") is not None:
+            tc.cache_variables["FLTK_MSVC_RUNTIME_DLL"] = "MT" not in msvc_runtime_flag(self)
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -159,8 +132,11 @@ class FltkConan(ConanFile):
         elif is_apple_os(self):
             self.cpp_info.frameworks = [
                 "AppKit", "ApplicationServices", "Carbon", "Cocoa", "CoreFoundation", "CoreGraphics",
-                "CoreText", "CoreVideo", "Foundation", "IOKit",
+                "CoreText", "CoreVideo", "Foundation", "IOKit"
             ]
+            for weak_framework in ["ScreenCaptureKit", "UniformTypeIdentifiers"]:
+                self.cpp_info.sharedlinkflags.append(f"-Wl,-weak_framework,{weak_framework}")
+                self.cpp_info.exelinkflags.append(f"-Wl,-weak_framework,{weak_framework}")
             if self.options.with_gl:
                 self.cpp_info.frameworks.append("OpenGL")
         elif self.settings.os == "Windows":
@@ -171,5 +147,5 @@ class FltkConan(ConanFile):
                 self.cpp_info.system_libs.append("gdiplus")
             if self.options.with_gl:
                 self.cpp_info.system_libs.append("opengl32")
-            if Version(self.version) >= "1.4.0":
-                self.cpp_info.system_libs.append("ws2_32")
+
+            self.cpp_info.system_libs.append("ws2_32")

@@ -48,9 +48,9 @@ class MongoCxxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("mongo-c-driver/1.28.0")
+        self.requires("mongo-c-driver/1.29.0")
         if self.options.polyfill == "boost":
-            self.requires("boost/1.82.0", transitive_headers=True)
+            self.requires("boost/[>=1.86.0 <=1.90.0]", transitive_headers=True)
 
     @property
     def _minimal_std_version(self):
@@ -130,7 +130,7 @@ class MongoCxxConan(ConanFile):
         if not valid_min_cppstd(self, self._minimal_std_version):
             tc.variables["CMAKE_CXX_STANDARD"] = self._minimal_std_version
         tc.variables["ENABLE_TESTS"] = False
-        if Version(self.version) >= "3.10.1" and is_msvc(self):
+        if is_msvc(self):
             tc.variables["ENABLE_ABI_TAG_IN_LIBRARY_FILENAMES"] = False
         tc.generate()
 
@@ -169,32 +169,20 @@ class MongoCxxConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "mongocxx")
         self.cpp_info.set_property("cmake_target_name", f"mongo::{mongocxx_target}")
 
-        self.cpp_info.filenames["cmake_find_package"] = "mongocxx"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "mongocxx"
-        self.cpp_info.names["cmake_find_package"] = "mongo"
-        self.cpp_info.names["cmake_find_package_multi"] = "mongo"
-
         # mongocxx
         self.cpp_info.components["mongocxx"].set_property("cmake_target_name", f"mongo::{mongocxx_target}")
         self.cpp_info.components["mongocxx"].set_property("pkg_config_name", "libmongocxx" if self.options.shared else "libmongocxx-static")
-
-        self.cpp_info.components["mongocxx"].names["cmake_find_package"] = mongocxx_target
-        self.cpp_info.components["mongocxx"].names["cmake_find_package_multi"] = mongocxx_target
 
         self.cpp_info.components["mongocxx"].libs = ["mongocxx" if self.options.shared else "mongocxx-static"]
         if not self.options.shared:
             self.cpp_info.components["mongocxx"].defines.append("MONGOCXX_STATIC")
         self.cpp_info.components["mongocxx"].requires = ["mongo-c-driver::mongoc", "bsoncxx"]
-        if Version(self.version) >= "3.10.1":
-            self.cpp_info.components["mongocxx"].includedirs.append(os.path.join("include", "mongocxx", "v_noabi"))
+        self.cpp_info.components["mongocxx"].includedirs.append(os.path.join("include", "mongocxx", "v_noabi"))
 
         # bsoncxx
         bsoncxx_target = "bsoncxx_shared" if self.options.shared else "bsoncxx_static"
         self.cpp_info.components["bsoncxx"].set_property("cmake_target_name", f"mongo::{bsoncxx_target}")
         self.cpp_info.components["bsoncxx"].set_property("pkg_config_name", "libbsoncxx" if self.options.shared else "libbsoncxx-static")
-
-        self.cpp_info.components["bsoncxx"].names["cmake_find_package"] = bsoncxx_target
-        self.cpp_info.components["bsoncxx"].names["cmake_find_package_multi"] = bsoncxx_target
 
         self.cpp_info.components["bsoncxx"].libs = ["bsoncxx" if self.options.shared else "bsoncxx-static"]
         if not self.options.shared:
@@ -202,5 +190,5 @@ class MongoCxxConan(ConanFile):
         self.cpp_info.components["bsoncxx"].requires = ["mongo-c-driver::bson"]
         if self.options.polyfill == "boost":
             self.cpp_info.components["bsoncxx"].requires.append("boost::headers")
-        if Version(self.version) >= "3.10.1":
-            self.cpp_info.components["bsoncxx"].includedirs.append(os.path.join("include", "bsoncxx", "v_noabi"))
+
+        self.cpp_info.components["bsoncxx"].includedirs.append(os.path.join("include", "bsoncxx", "v_noabi"))

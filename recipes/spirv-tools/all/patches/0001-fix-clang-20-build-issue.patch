@@ -1,0 +1,26 @@
+From 4b46b76c7c68f838f18906c6d3ca275eef207ca7 Mon Sep 17 00:00:00 2001
+From: Elvis Dukaj <elvis.dukaj@dynatrace.com>
+Date: Thu, 24 Apr 2025 14:36:21 +0200
+Subject: [PATCH] fix clang-20 build issue
+
+---
+ tools/diff/diff.cpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/tools/diff/diff.cpp b/tools/diff/diff.cpp
+index d60edb2e..349ec092 100644
+--- a/tools/diff/diff.cpp
++++ b/tools/diff/diff.cpp
+@@ -87,7 +87,8 @@ std::unique_ptr<spvtools::opt::IRContext> load_module(const char* path) {
+     return spvtools::BuildModule(
+         kDefaultEnvironment, spvtools::utils::CLIMessageConsumer,
+         std::string(contents.begin(), contents.end()),
+-        spvtools::SpirvTools::kDefaultAssembleOption |
++        static_cast<spv_text_to_binary_options_t>(
++            spvtools::SpirvTools::kDefaultAssembleOption) |
+             SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS);
+   }
+ 
+-- 
+2.43.0
+

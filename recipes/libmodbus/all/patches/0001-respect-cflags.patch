@@ -1,0 +1,78 @@
+Respect user-provided CFLAGS
+
+https://github.com/stephane/libmodbus/pull/836
+https://github.com/stephane/libmodbus/commit/b2b37ef6a38d38c08e4bf710e089ca2ad058bb55
+
+diff --git a/configure.ac b/configure.ac
+index cb4cec68..7b745caf 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -30,6 +30,10 @@ AC_INIT([libmodbus],
+ AC_CONFIG_SRCDIR([src/modbus.c])
+ AC_CONFIG_AUX_DIR([build-aux])
+ AM_INIT_AUTOMAKE([foreign 1.11 silent-rules tar-pax subdir-objects])
++
++# Check if user provided CFLAGS before AC_PROG_CC sets defaults
++user_set_cflags="${CFLAGS+set}"
++
+ AC_PROG_CC
+ AC_USE_SYSTEM_EXTENSIONS
+ AC_SYS_LARGEFILE
+@@ -178,13 +182,18 @@ AC_ARG_ENABLE([debug],
+   [enable_debug=$enableval],
+   [enable_debug=no])
+ 
++# Set project-specific optimization flags based on debug mode.
++# These are added via AM_CFLAGS in Makefile.am, preserving user's CFLAGS.
+ AS_IF([test "x$enable_debug" = "xyes"], [
+-  CFLAGS="-g -O0"
+-  CXXFLAGS="-g -O0"
++  LIBMODBUSCFLAGS="-g -O0"
++  # Clear AC_PROG_CC's default -O2 so debug mode works, unless user set CFLAGS
++  AS_IF([test "x$user_set_cflags" != "xset"], [
++    CFLAGS="-g"
++  ])
+ ], [
+-  CFLAGS="-O2"
+-  CXXFLAGS="-O2"
++  LIBMODBUSCFLAGS="-O2"
+ ])
++AC_SUBST([LIBMODBUSCFLAGS])
+ 
+ AC_OUTPUT
+ AC_MSG_RESULT([
+@@ -197,7 +206,7 @@ AC_MSG_RESULT([
+         includedir:             ${includedir}
+ 
+         compiler:               ${CC}
+-        cflags:                 ${CFLAGS} ${WARNING_CFLAGS}
++        cflags:                 ${LIBMODBUSCFLAGS} ${WARNING_CFLAGS} ${CFLAGS}
+         ldflags:                ${LDFLAGS}
+ 
+         tests:                  ${enable_tests}
+diff --git a/src/Makefile.am b/src/Makefile.am
+index fc6c8dbb..157e9200 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -7,7 +7,7 @@ AM_CPPFLAGS = \
+     -DLIBEXECDIR=\""$(libexecdir)"\" \
+     -I${top_srcdir}/src
+ 
+-AM_CFLAGS = ${WARNING_CFLAGS}
++AM_CFLAGS = $(LIBMODBUSCFLAGS) $(WARNING_CFLAGS)
+ 
+ libmodbus_la_SOURCES = \
+         modbus.c \
+diff --git a/tests/Makefile.am b/tests/Makefile.am
+index 79a66c22..a18badba 100644
+--- a/tests/Makefile.am
++++ b/tests/Makefile.am
+@@ -44,7 +44,7 @@ AM_CPPFLAGS = \
+     -I${top_srcdir}/src \
+     -I${top_builddir}/src
+ 
+-AM_CFLAGS = ${WARNING_CFLAGS}
++AM_CFLAGS = $(LIBMODBUSCFLAGS) $(WARNING_CFLAGS)
+ 
+ CLEANFILES = *~ *.log
+ 

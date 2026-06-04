@@ -1,0 +1,18 @@
+Prevent sanitisation of LDFLAGS that removes duplicate -rpath flags
+See related upstream issue: https://github.com/open-mpi/ompi/issues/324
+
+diff --git a/opal/mca/pmix/pmix3x/pmix/configure b/opal/mca/pmix/pmix3x/pmix/configure
+index b9e6104..d5129d2 100755
+--- a/opal/mca/pmix/pmix3x/pmix/configure
++++ b/opal/mca/pmix/pmix3x/pmix/configure
+@@ -53146,6 +53146,10 @@ fi
+                 pmix_found=0
+                 pmix_i=`expr $pmix_count + 1`
+                 ;;
++        -Wl,-rpath)
++                pmix_found=0
++                pmix_i=`expr $pmix_count + 1`
++                ;;
+         esac
+ 
+         # If we didn't find the token, add it to the "array"

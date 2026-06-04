@@ -1,15 +1,15 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import check_min_vs, is_msvc, unix_path, unix_path_package_info_legacy
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2.1"
 
 class GetTextConan(ConanFile):
     name = "gettext"
@@ -20,10 +20,6 @@ class GetTextConan(ConanFile):
     homepage = "https://www.gnu.org/software/gettext"
     license = "GPL-3.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -41,18 +37,14 @@ class GetTextConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
 
-    def validate(self):
-        if Version(self.version) < "0.21" and is_msvc(self):
-            raise ConanInvalidConfiguration("MSVC builds of gettext for versions < 0.21 are not supported.")  # FIXME: it used to be possible. What changed?
-
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         
         if self.version >= Version("0.22") or is_msvc(self):
-            self.build_requires("automake/1.16.5")
+            self.tool_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -81,6 +73,10 @@ class GetTextConan(ConanFile):
             "--disable-curses",
         ])
 
+        if is_apple_os(self) and Version(self.version) >= "0.26":
+            # not guessed properly when cross-building
+            tc.configure_args.append("gl_cv_func_access_slash_works=yes")
+
         if is_msvc(self):
             if check_min_vs(self, "180", raise_invalid=False):
                 tc.extra_cflags.append("-FS") #TODO: reference github issue
@@ -98,6 +94,7 @@ class GetTextConan(ConanFile):
             if self.settings.build_type == "Debug":
                 tc.configure_args.extend(['gl_cv_func_printf_directive_n=no'])
 
+
             # The flag above `--with-libiconv-prefix` fails to correctly detect libiconv on windows+msvc
             # so it needs an extra nudge. We could use `AutotoolsDeps` but it's currently affected by the
             # following outstanding issue: https://github.com/conan-io/conan/issues/12784
@@ -105,7 +102,10 @@ class GetTextConan(ConanFile):
             iconv_libdir = unix_path(self, libiconv.cpp_info.aggregated_components().libdirs[0])
             tc.extra_cflags.append(f"-I{iconv_includedir}")
             tc.extra_ldflags.append(f"-L{iconv_libdir}")
+        tc.generate()
 
+        if is_msvc(self):
+            # Generate this _after_ AutotoolsToolchain to ensure we override the CC variable
             env = Environment()
             compile_wrapper = self.dependencies.build["automake"].conf_info.get("user.automake:compile-wrapper")
             lib_wrapper = self.dependencies.build["automake"].conf_info.get("user.automake:lib-wrapper")
@@ -120,11 +120,10 @@ class GetTextConan(ConanFile):
             # rather than a C compiler flag
             env.prepend("CPPFLAGS", f"-I{iconv_includedir}")
 
-            windres_arch = {"x86": "i686", "x86_64": "x86-64"}[str(self.settings.arch)]
-            env.define("RC", f"windres --target=pe-{windres_arch}")
+            if str(self.settings.arch) in ("x86", "x86_64"):
+                windres_arch = {"x86": "i686", "x86_64": "x86-64"}[str(self.settings.arch)]
+                env.define("RC", f"windres --target=pe-{windres_arch}")
             env.vars(self).save_script("conanbuild_msvc")
-
-        tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -153,8 +152,3 @@ class GetTextConan(ConanFile):
         autopoint = os.path.join(self.package_folder, "bin", "autopoint")
         self.buildenv_info.append_path("ACLOCAL_PATH", aclocal)
         self.buildenv_info.define_path("AUTOPOINT", autopoint)
-
-        # TODO: the following can be removed when the recipe supports Conan >= 2.0 only
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(unix_path_package_info_legacy(self, aclocal))
-        self.env_info.AUTOPOINT = unix_path_package_info_legacy(self, autopoint)

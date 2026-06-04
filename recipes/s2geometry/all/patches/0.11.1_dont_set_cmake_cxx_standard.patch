@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f7b5e47..26dad9a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -20,8 +20,8 @@ endif()
+ # end up defined differently.  There is probably a better way to achieve
+ # this than assuming what absl used.
+ # Using CACHE allows the user to override the default.
+-set(CMAKE_CXX_STANDARD 14 CACHE STRING "The C++ standard to build with")
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
++# set(CMAKE_CXX_STANDARD 14 CACHE STRING "The C++ standard to build with")
++# set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ # No compiler-specific extensions, i.e. -std=c++14, not -std=gnu++14.
+ set(CMAKE_CXX_EXTENSIONS OFF)
+ 

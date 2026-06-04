@@ -1,4 +1,7 @@
 sources:
+  "2.2.0":
+    url: "https://github.com/arturbac/fixed_math/archive/refs/tags/v2.2.0.tar.gz"
+    sha256: "d746306e9e3b94ba30d529087a51acdfadf9bb1429dcb8d6ee05a4f6e41f05e7"
   "2.0.0":
     url: "https://github.com/arturbac/fixed_math/archive/refs/tags/v2.0.0.tar.gz"
     sha256: "a02efd417592f9cb3d21fc39877aba76fe5c37b3e68b11769065202f71242f66"

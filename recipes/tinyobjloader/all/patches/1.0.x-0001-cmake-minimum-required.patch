@@ -4,7 +4,7 @@
  #Tiny Object Loader Cmake configuration file.
  #This configures the Cmake system with multiple properties, depending
  #on the platform and configuration it is set to build in.
-+cmake_minimum_required(VERSION 3.1)
++cmake_minimum_required(VERSION 3.5)
  project(tinyobjloader)
 -cmake_minimum_required(VERSION 2.8.11)
  set(TINYOBJLOADER_SOVERSION 1)

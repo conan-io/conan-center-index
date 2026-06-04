@@ -3,16 +3,14 @@ import os
 import textwrap
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd, valid_min_cppstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import (
-    apply_conandata_patches, collect_libs, copy, export_conandata_patches, get,
+    collect_libs, copy, get,
     load, rename, replace_in_file, rmdir, save
 )
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
 
@@ -60,34 +58,9 @@ class OpenCascadeConan(ConanFile):
     def _is_linux(self):
         return self.settings.os in ["Linux", "FreeBSD"]
 
-    @property
-    def _link_tk(self):
-        if Version(self.version) >= "7.6.0":
-            return self.options.with_tk
-        else:
-            return True
-
-    @property
-    def _link_opengl(self):
-        if Version(self.version) >= "7.6.0":
-            return self.options.with_opengl
-        else:
-            return True
-
-    @property
-    def _min_cppstd(self):
-        return "11"
-
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "7.6.0":
-            del self.options.with_tk
-            del self.options.with_draco
-            del self.options.with_opengl
         if self.settings.build_type != "Debug":
             del self.options.extended_debug_messages
 
@@ -100,17 +73,17 @@ class OpenCascadeConan(ConanFile):
 
     def requirements(self):
         self.requires("tcl/8.6.10")
-        if self._link_tk:
+        if self.options.with_tk:
             self.requires("tk/8.6.10")
-        self.requires("freetype/2.13.2")
-        if self._link_opengl:
+        if self.options.with_opengl:
             self.requires("opengl/system")
         if self._is_linux:
-            self.requires("fontconfig/2.13.93")
+            self.requires("fontconfig/[>=2.13.93 <3]")
             self.requires("xorg/system")
+        self.requires("freetype/[>=2.13.2 <3]")
         # TODO: add vtk support?
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/6.0")
+            self.requires("ffmpeg/[>=6.0 <8]")
         if self.options.with_freeimage:
             self.requires("freeimage/3.18.0")
         if self.options.with_openvr:
@@ -120,14 +93,10 @@ class OpenCascadeConan(ConanFile):
         if self.options.get_safe("with_draco"):
             self.requires("draco/1.5.6")
         if self.options.with_tbb:
-            self.requires("onetbb/2021.10.0")
+            self.requires("onetbb/[>=2021.10.0 <=2022.3.0]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        if self.settings.compiler == "clang" and self.settings.compiler.version == "6.0" and \
-           self.settings.build_type == "Release":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Clang 6.0 if Release build type")
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -135,9 +104,8 @@ class OpenCascadeConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
-        # Inject C++ standard from profile since we have removed hardcoded C++ standard from upstream build files
-        if not valid_min_cppstd(self, self._min_cppstd):
-            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        cppstd = str(self.settings.compiler.cppstd).replace("gnu", "").upper()
+        tc.cache_variables["BUILD_CPP_STANDARD"] = f"C++{cppstd}"
 
         tc.cache_variables["BUILD_LIBRARY_TYPE"] = "Shared" if self.options.shared else "Static"
         tc.cache_variables["INSTALL_TEST_CASES"] = False
@@ -173,22 +141,22 @@ class OpenCascadeConan(ConanFile):
         tc.cache_variables["USE_FFMPEG"] = self.options.with_ffmpeg
         tc.cache_variables["USE_TBB"] = self.options.with_tbb
         tc.cache_variables["USE_RAPIDJSON"] = self.options.with_rapidjson
-        if Version(self.version) >= "7.6.0":
-            tc.cache_variables["USE_DRACO"] = self.options.with_draco
-            tc.cache_variables["USE_TK"] = self.options.with_tk
-            tc.cache_variables["USE_OPENGL"] = self.options.with_opengl
+
+        tc.cache_variables["USE_DRACO"] = self.options.with_draco
+        tc.cache_variables["USE_TK"] = self.options.with_tk
+        tc.cache_variables["USE_OPENGL"] = self.options.with_opengl
 
         # Relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        if Version(self.version) < "7.9.0": # pylint: disable=conan-condition-evals-to-constant
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
+        def _replace_find_package(cmakelists, file, package_name):
+            pattern = f"list (APPEND OCCT_3RDPARTY_CMAKE_LIST \"adm/cmake/{file}\")"
+            replace_in_file(self, cmakelists, pattern, f"find_package({package_name} REQUIRED)")
 
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         cmakelists_tools = os.path.join(self.source_folder, "tools", "CMakeLists.txt")
@@ -238,85 +206,58 @@ class OpenCascadeConan(ConanFile):
 
         ## freetype
         deps_targets.append("Freetype::Freetype")
-        replace_in_file(
-            self,
-            cmakelists,
-            "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/freetype\")",
-            "find_package(Freetype REQUIRED MODULE)",
-        )
+        _replace_find_package(cmakelists, "freetype", "Freetype")
         freetype_libs = " ".join(self.dependencies["freetype"].cpp_info.aggregated_components().libs)
         replace_in_file(
             self,
             occt_csf_cmake,
             "set (CSF_FREETYPE \"freetype\")",
-            f"set (CSF_FREETYPE \"{freetype_libs}\")",
+            f"set (CSF_FREETYPE \"{freetype_libs}\")"
         )
         ## tcl
         deps_targets.append("tcl::tcl")
-        replace_in_file(self, cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/tcl\")", "find_package(TCL REQUIRED)")
+        _replace_find_package(cmakelists, "tcl", "TCL")
         tcl_libs = " ".join(self.dependencies["tcl"].cpp_info.aggregated_components().libs)
         csf_tcl_libs = f"set (CSF_TclLibs \"{tcl_libs}\")"
         replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs     \"tcl86\")", csf_tcl_libs)
         replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   Tcl)", csf_tcl_libs)
-        if Version(self.version) >= "7.6.0":
-            replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   \"tcl8.6\")", csf_tcl_libs)
-        else:
-            replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs     \"tcl8.6\")", csf_tcl_libs)
+        replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   \"tcl8.6\")", csf_tcl_libs)
+
         ## tk
-        if self._link_tk:
+        if self.options.with_tk:
             deps_targets.append("tk::tk")
-            replace_in_file(self, cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/tk\")", "find_package(tk REQUIRED)")
+            _replace_find_package(cmakelists, "tk", "tk")
             tk_libs = " ".join(self.dependencies["tk"].cpp_info.aggregated_components().libs)
             csf_tk_libs = f"set (CSF_TclTkLibs \"{tk_libs}\")"
             replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs   \"tk86\")", csf_tk_libs)
             replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs Tk)", csf_tk_libs)
-            if Version(self.version) >= "7.6.0":
-                replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs \"tk8.6\")", csf_tk_libs)
-            else:
-                replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs   \"tk8.6\")", csf_tk_libs)
+            replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs \"tk8.6\")", csf_tk_libs)
+
         ## fontconfig
         if self._is_linux:
             deps_targets.append("Fontconfig::Fontconfig")
             fontconfig_libs = " ".join(self.dependencies["fontconfig"].cpp_info.aggregated_components().libs)
-            if Version(self.version) >= "7.6.0":
-                replace_in_file(
-                    self,
-                    occt_csf_cmake,
-                    "set (CSF_fontconfig \"fontconfig\")",
-                    f"find_package(Fontconfig REQUIRED)\nset (CSF_fontconfig \"{fontconfig_libs}\")",
-                )
-            else:
-                replace_in_file(
-                    self,
-                    occt_csf_cmake,
-                    "set (CSF_fontconfig  \"fontconfig\")",
-                    f"find_package(Fontconfig REQUIRED)\nset (CSF_fontconfig  \"{fontconfig_libs}\")",
-                )
-        ## onetbb
-        if self.options.with_tbb:
-            deps_targets.append("TBB::tbb")
             replace_in_file(
                 self,
-                cmakelists,
-                "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/tbb\")",
-                "find_package(TBB REQUIRED)",
+                occt_csf_cmake,
+                "set (CSF_fontconfig \"fontconfig\")",
+                f"find_package(Fontconfig REQUIRED)\nset (CSF_fontconfig \"{fontconfig_libs}\")",
             )
-            tbb_libs = " ".join(self.dependencies["onetbb"].cpp_info.aggregated_components().libs)
+
+        ## onetbb
+        if self.options.with_tbb:
+            deps_targets.extend(["TBB::tbb", "TBB::tbbmalloc"])
+            _replace_find_package(cmakelists, "tbb", "TBB")
             replace_in_file(
                 self,
                 occt_csf_cmake,
                 "set (CSF_TBB \"tbb tbbmalloc\")",
-                f"set (CSF_TBB \"{tbb_libs}\")",
+                f"set (CSF_TBB \"TBB::tbb TBB::tbbmalloc\")",
             )
         ## ffmpeg
         if self.options.with_ffmpeg:
             deps_targets.append("ffmpeg::ffmpeg")
-            replace_in_file(
-                self,
-                cmakelists,
-                "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/ffmpeg\")",
-                "find_package(ffmpeg REQUIRED)",
-            )
+            _replace_find_package(cmakelists, "ffmpeg", "ffmpeg")
             ffmpeg_libs = " ".join(self.dependencies["ffmpeg"].cpp_info.aggregated_components().libs)
             replace_in_file(
                 self,
@@ -327,11 +268,7 @@ class OpenCascadeConan(ConanFile):
         ## freeimage
         if self.options.with_freeimage:
             deps_targets.append("freeimage::freeimage")
-            replace_in_file(
-                self, cmakelists,
-                "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/freeimage\")",
-                "find_package(freeimage REQUIRED)",
-            )
+            _replace_find_package(cmakelists, "freeimage", "freeimage")
             freeimage_libs = " ".join(self.dependencies["freeimage"].cpp_info.aggregated_components().libs)
             replace_in_file(
                 self,
@@ -342,12 +279,7 @@ class OpenCascadeConan(ConanFile):
         ## openvr
         if self.options.with_openvr:
             deps_targets.append("openvr::openvr")
-            replace_in_file(
-                self,
-                cmakelists,
-                "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/openvr\")",
-                "find_package(openvr REQUIRED)",
-            )
+            _replace_find_package(cmakelists, "openvr", "openvr")
             openvr_libs = " ".join(self.dependencies["openvr"].cpp_info.aggregated_components().libs)
             replace_in_file(
                 self,
@@ -358,21 +290,11 @@ class OpenCascadeConan(ConanFile):
         ## rapidjson
         if self.options.with_rapidjson:
             deps_targets.append("rapidjson")
-            replace_in_file(
-                self,
-                cmakelists,
-                "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/rapidjson\")",
-                "find_package(RapidJSON REQUIRED)",
-            )
+            _replace_find_package(cmakelists, "rapidjson", "RapidJSON")
         ## draco
         if self.options.get_safe("with_draco"):
             deps_targets.append("draco::draco")
-            replace_in_file(
-                self,
-                cmakelists,
-                "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/draco\")",
-                "find_package(draco REQUIRED)",
-            )
+            _replace_find_package(cmakelists, "draco", "draco")
         ## opengl
         replace_in_file(
             self,
@@ -380,7 +302,7 @@ class OpenCascadeConan(ConanFile):
             "set (CSF_OpenGlLibs ",
             "find_package(OpenGL)\n# set (CSF_OpenGlLibs ",
         )
-        if self._link_opengl:
+        if self.options.with_opengl:
             deps_targets.append("OpenGL::GL")
 
         ## Inject dependencies targets
@@ -392,49 +314,21 @@ class OpenCascadeConan(ConanFile):
         )
 
         # Do not install pdb files
-        if Version(self.version) >= "7.6.0":
-            replace_in_file(
-                self,
-                occt_toolkit_cmake,
-                """    install (FILES  ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bin\\${OCCT_INSTALL_BIN_LETTER}/${PROJECT_NAME}.pdb
+        replace_in_file(
+            self,
+            occt_toolkit_cmake,
+            r"""install (FILES  ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bin\${OCCT_INSTALL_BIN_LETTER}/${PROJECT_NAME}.pdb
              CONFIGURATIONS Debug ${aReleasePdbConf} RelWithDebInfo
-             DESTINATION "${INSTALL_DIR_BIN}\\${OCCT_INSTALL_BIN_LETTER}")""",
-                "",
-            )
-        else:
-            replace_in_file(
-                self,
-                occt_toolkit_cmake,
-                """    install (FILES  ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bin\\${OCCT_INSTALL_BIN_LETTER}/${PROJECT_NAME}.pdb
-             CONFIGURATIONS Debug RelWithDebInfo
-             DESTINATION "${INSTALL_DIR_BIN}\\${OCCT_INSTALL_BIN_LETTER}")""",
-                "",
-            )
+             DESTINATION "${INSTALL_DIR_BIN}\${OCCT_INSTALL_BIN_LETTER}")""",
+            "",
+        )
 
         # Honor fPIC option, compiler.cppstd and compiler.libcxx
         replace_in_file(self, occt_defs_flags_cmake, "-fPIC", "")
-        replace_in_file(self, occt_defs_flags_cmake, "-std=c++0x", "")
-        replace_in_file(self, occt_defs_flags_cmake, "-std=gnu++0x", "")
         replace_in_file(self, occt_defs_flags_cmake, "-stdlib=libc++", "")
         replace_in_file(self, occt_csf_cmake,
                               "set (CSF_ThreadLibs  \"pthread rt stdc++\")",
                               "set (CSF_ThreadLibs  \"pthread rt\")")
-
-        # No hardcoded link through #pragma
-        if Version(self.version) < "7.6.0":
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "src", "Font", "Font_FontMgr.cxx"),
-                "#pragma comment (lib, \"freetype.lib\")",
-                "",
-            )
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "src", "Draw", "Draw.cxx"),
-                """#pragma comment (lib, "tcl" STRINGIZE2(TCL_MAJOR_VERSION) STRINGIZE2(TCL_MINOR_VERSION) ".lib")
-#pragma comment (lib, "tk"  STRINGIZE2(TCL_MAJOR_VERSION) STRINGIZE2(TCL_MINOR_VERSION) ".lib")""",
-                ""
-            )
 
     def build(self):
         self._patch_sources()
@@ -473,15 +367,17 @@ class OpenCascadeConan(ConanFile):
             "CSF_fontconfig": {"externals": ["fontconfig::fontconfig"] if self._is_linux else []},
             "CSF_XwLibs": {"externals": ["xorg::xorg"] if self._is_linux else []},
             # Optional dependencies
-            "CSF_OpenGlLibs": {"externals": ["opengl::opengl"] if self._link_opengl else []},
-            "CSF_TclTkLibs": {"externals": ["tk::tk"] if self._link_tk else []},
+            "CSF_OpenGlLibs": {"externals": ["opengl::opengl"] if self.options.with_opengl else []},
+            "CSF_TclTkLibs": {"externals": ["tk::tk"] if self.options.with_tk else []},
             "CSF_FFmpeg": {"externals": ["ffmpeg::ffmpeg"] if self.options.with_ffmpeg else []},
             "CSF_FreeImagePlus": {"externals": ["freeimage::freeimage"] if self.options.with_freeimage else []},
             "CSF_OpenVR": {"externals": ["openvr::openvr"] if self.options.with_openvr else []},
             "CSF_RapidJSON": {"externals": ["rapidjson::rapidjson"] if self.options.with_rapidjson else []},
             "CSF_Draco": {"externals": ["draco::draco"] if self.options.get_safe("with_draco") else []},
-            "CSF_TBB": {"externals": ["onetbb::onetbb"] if self.options.with_tbb else []},
+            "CSF_TBB": {"externals": ["onetbb::libtbb", "onetbb::tbbmalloc"] if self.options.with_tbb else []},
             "CSF_VTK": {},
+            # TODO: If requested, allow jemalloc/tbb instead of default native
+            "CSF_MMGR": {},
             # Android system libs
             "CSF_androidlog": {"system_libs": ["log"] if self.settings.os == "Android" else []},
             # Linux system libs
@@ -546,11 +442,6 @@ class OpenCascadeConan(ConanFile):
         def _register_components(modules_dict):
             for module, targets in modules_dict.items():
                 conan_component_module_name = _to_qualified_name(module)
-                # FIXME: in this "module" target we would like to model COMPONENTS for find_package() but
-                #       for the moment it generates in CMakeDeps some weird component name like
-                #       opencascade::FoundationClasses instead of FoundationClasses.
-                #       see https://github.com/conan-io/conan/issues/10258
-                self.cpp_info.components[conan_component_module_name].set_property("cmake_target_name", module)
 
                 for target_lib, target_deps in targets.items():
                     conan_component_target_name = _to_qualified_name(target_lib)

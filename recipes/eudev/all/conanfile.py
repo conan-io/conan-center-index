@@ -55,8 +55,8 @@ class EudevConan(ConanFile):
 
     def requirements(self):
         self.requires("acl/2.3.1")
-        self.requires("libcap/2.69")
-        self.requires("libxslt/1.1.42")
+        self.requires("libcap/[>=2.69 <3]")
+        self.requires("libxslt/[^1.1]")
         self.requires("linux-headers-generic/6.5.9")
 
         if self.options.with_kmod:

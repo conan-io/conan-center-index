@@ -8,7 +8,7 @@ import glob
 import os
 import textwrap
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2"
 
 
 class Bullet3Conan(ConanFile):
@@ -49,13 +49,7 @@ class Bullet3Conan(ConanFile):
 
     short_paths = True
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -84,9 +78,8 @@ class Bullet3Conan(ConanFile):
         tc.variables["BUILD_UNIT_TESTS"] = False
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        if Version(self.version) < "3.21":
-            # silence warning
-            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0115"] = "OLD"
+        if Version(self.version) <= "3.25":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
     def build(self):
@@ -184,15 +177,7 @@ class Bullet3Conan(ConanFile):
 
         self.cpp_info.libs = libs
         self.cpp_info.includedirs = ["include", os.path.join("include", "bullet")]
-        if self.options.extras:
-            self.cpp_info.includedirs.append(os.path.join("include", "bullet_robotics"))
         self.cpp_info.defines = self._bullet_definitions
         if self.options.bt2_thread_locks and self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Bullet"
-        self.cpp_info.names["cmake_find_package_multi"] = "Bullet"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.names["pkg_config"] = "bullet"

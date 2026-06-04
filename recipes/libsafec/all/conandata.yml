@@ -1,4 +1,7 @@
 sources:
+  "3.9.1":
+    url: "https://github.com/rurban/safeclib/releases/download/v3.9.1/safeclib-3.9.1.tar.gz"
+    sha256: "167502713a4f1a37017b8b830535b31b5762be4bef512bebe19072f17f436dd4"
   "3.7.1":
     url: "https://github.com/rurban/safeclib/archive/v3.7.1.tar.gz"
     sha256: "baac28b60f8f46ae0f273155f4968b20e84380016629247ed2a4d7e3fbeb4d98"

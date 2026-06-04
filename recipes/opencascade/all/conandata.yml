@@ -1,42 +1,4 @@
 sources:
-  "7.6.2":
-    url: "https://github.com/Open-Cascade-SAS/OCCT/archive/refs/tags/V7_6_2.tar.gz"
-    sha256: "dea04077d71507c666aaa7ccaeacc73ab580d6572d7f75e90a1984c4c0302a7a"
-  "7.6.0":
-    url: "https://github.com/Open-Cascade-SAS/OCCT/archive/refs/tags/V7_6_0.tar.gz"
-    sha256: "73f8f71be02c1d9a977e854bcc9202502184d339f1f212c19797a5f23baefabe"
-  "7.5.0":
-    url: "https://github.com/Open-Cascade-SAS/OCCT/archive/V7_5_0.tar.gz"
-    sha256: "dbe1d62a9317ad1516bd4575293d9aab2dc20206ca7a60a7705c9a3b77dc59c9"
-patches:
-  "7.6.2":
-    - patch_file: "patches/7.5.0-0001-fix-compile-error-cxx17.patch"
-      patch_description: "Fix compilation error with C++17"
-      patch_source: "https://git.dev.opencascade.org/gitweb/?p=occt.git;a=commitdiff;h=7021de2fe7a69d4c788ccf43b8b096dbcc8597c8"
-      patch_type: "portability"
-    - patch_file: "patches/7.5.0-0002-fix-compile-error-cxx20.patch"
-      patch_description: "Fix compilation error with C++20"
-      patch_source: "https://git.dev.opencascade.org/gitweb/?p=occt.git;a=commitdiff;h=73035770f6fced4ec7dc7e6a0276ee894daa479a"
-      patch_type: "portability"
-  "7.6.0":
-    - patch_file: "patches/7.5.0-0001-fix-compile-error-cxx17.patch"
-      patch_description: "Fix compilation error with C++17"
-      patch_source: "https://git.dev.opencascade.org/gitweb/?p=occt.git;a=commitdiff;h=7021de2fe7a69d4c788ccf43b8b096dbcc8597c8"
-      patch_type: "portability"
-    - patch_file: "patches/7.5.0-0002-fix-compile-error-cxx20.patch"
-      patch_description: "Fix compilation error with C++20"
-      patch_source: "https://git.dev.opencascade.org/gitweb/?p=occt.git;a=commitdiff;h=73035770f6fced4ec7dc7e6a0276ee894daa479a"
-      patch_type: "portability"
-  "7.5.0":
-    - patch_file: "patches/7.5.0-0001-fix-compile-error-cxx17.patch"
-      patch_description: "Fix compilation error with C++17"
-      patch_source: "https://git.dev.opencascade.org/gitweb/?p=occt.git;a=commitdiff;h=7021de2fe7a69d4c788ccf43b8b096dbcc8597c8"
-      patch_type: "portability"
-    - patch_file: "patches/7.5.0-0002-fix-compile-error-cxx20.patch"
-      patch_description: "Fix compilation error with C++20"
-      patch_source: "https://git.dev.opencascade.org/gitweb/?p=occt.git;a=commitdiff;h=73035770f6fced4ec7dc7e6a0276ee894daa479a"
-      patch_type: "portability"
-    - patch_file: "patches/7.5.0-0003-undefined-ref-ncollection-lerp.patch"
-      patch_description: "Fix undefined reference with Visual Studio 2015"
-      patch_source: "https://git.dev.opencascade.org/gitweb/?p=occt.git;a=commitdiff;h=026aec186081397e553e492db1632ee606f01fad"
-      patch_type: "portability"
+  "7.9.1":
+    url: "https://github.com/Open-Cascade-SAS/OCCT/archive/refs/tags/V7_9_1.tar.gz"
+    sha256: "de442298cd8860f5580b01007f67f0ecd0b8900cfa4da467fa3c823c2d1a45df"

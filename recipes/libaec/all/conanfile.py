@@ -28,6 +28,9 @@ class LibaecConan(ConanFile):
         "fPIC": True,
     }
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.26]")
+
     def export_sources(self):
         copy(self, "set_runtime_output_dir.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
@@ -60,6 +63,8 @@ class LibaecConan(ConanFile):
         tc.cache_variables["CMAKE_PROJECT_libaec_INCLUDE"] = "set_runtime_output_dir.cmake"
         tc.cache_variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        if Version(self.version) >= "1.1.4":
+            tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.generate()
 
     def _patch_sources(self):
@@ -67,10 +72,11 @@ class LibaecConan(ConanFile):
         replace_in_file(self, cmakelists, "set(CMAKE_C_STANDARD 99)", "set(CMAKE_C_STANDARD 11)")
         replace_in_file(self, cmakelists, "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
         targets = "aec_shared sz_shared" if self.options.shared else "aec_static sz_static"
-        aec_client = " aec_client" if Version(self.version) < "1.1" else ""
-        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
-                        f"install(TARGETS aec_static aec_shared sz_static sz_shared{aec_client})",
-                        f"install(TARGETS {targets}{aec_client} ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin)")
+        if Version(self.version) < "1.1.4":
+            aec_client = " aec_client" if Version(self.version) < "1.1" else ""
+            replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
+                            f"install(TARGETS aec_static aec_shared sz_static sz_shared{aec_client})",
+                            f"install(TARGETS {targets}{aec_client} ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin)")
 
     def build(self):
         self._patch_sources()
@@ -85,8 +91,10 @@ class LibaecConan(ConanFile):
         copy(self, "*.h", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
         copy(self, "libaec.h", os.path.join(self.build_folder, "include"), os.path.join(self.package_folder, "include"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))              # top-level (just in case)
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))       # <-- remove lib/cmake tree
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libaec")

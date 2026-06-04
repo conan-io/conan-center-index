@@ -5,7 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class Log4cxxConan(ConanFile):
@@ -71,7 +71,6 @@ class Log4cxxConan(ConanFile):
     def requirements(self):
         self.requires("apr/1.7.4")
         self.requires("apr-util/1.6.1")
-        self.requires("expat/2.6.4")
         if self.options.get_safe("with_odbc_appender") and self.settings.os != "Windows":
             self.requires("odbc/2.3.11")
         if self.options.get_safe("with_smtp_appender"):
@@ -79,7 +78,7 @@ class Log4cxxConan(ConanFile):
         if self.options.get_safe("with_fmt_layout"):
             self.requires("fmt/10.2.1")
         if self.options.get_safe("with_qt"):
-            self.requires("qt/[~5.15]")
+            self.requires("qt/[>=5.15.16 <7]")
 
     def validate(self):
         if self.options.get_safe("with_multiprocess_rolling_file_appender"):
@@ -116,9 +115,6 @@ class Log4cxxConan(ConanFile):
         deps.set_property("apr", "cmake_file_name", "APR")
         deps.set_property("apr-util", "cmake_file_name", "APR-Util")
         deps.set_property("apr-util", "cmake_additional_variables_prefixes", ["APR_UTIL"])
-        deps.set_property("expat", "cmake_file_name", "EXPAT")
-        deps.set_property("expat", "cmake_find_mode", "config")
-        deps.set_property("expat", "cmake_target_name", "EXPAT::EXPAT")
         deps.generate()
 
     def build(self):

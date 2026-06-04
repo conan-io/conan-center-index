@@ -1,14 +1,12 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class TgbotConan(ConanFile):
@@ -30,32 +28,6 @@ class TgbotConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        # tgbot requiroes C++17 since 1.7.3
-        return "14" if Version(self.version) < "1.7.3" else "17"
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "17": {
-                # tgbot/>= 1.7.3 require C++17 filesystem
-                "gcc": "9",
-                "clang": "9",
-                "apple-clang": "13",
-                "Visual Studio": "16",
-                "msvc": "192",
-            },
-            "14": {
-                "gcc": "5",
-                "clang": "3",
-                "apple-clang": "10",
-                "Visual Studio": "15",
-                "msvc": "191",
-            }
-        }.get(self._min_cppstd, {})
-
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -69,33 +41,13 @@ class TgbotConan(ConanFile):
 
     def requirements(self):
         # tgbot/Api.h:#include <boost/property_tree/ptree.hpp>
-        self.requires("boost/1.83.0", transitive_headers=True, transitive_libs=True)
+        self.requires("boost/[>=1.83.0 <1.90.0]", transitive_headers=True)
         # tgbot/net/CurlHttpClient.h:#include <curl/curl.h>
         self.requires("libcurl/[>=7.78 <9]", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
 
-    @property
-    def _required_boost_components(self):
-        return ["system"]
-
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
-
-        miss_boost_required_comp = any(
-            self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
-            for boost_comp in self._required_boost_components
-        )
-        if self.dependencies["boost"].options.header_only or miss_boost_required_comp:
-            raise ConanInvalidConfiguration(
-                f"{self.name} requires non header-only boost with these components: "
-                + ", ".join(self._required_boost_components)
-            )
+        check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -144,3 +96,5 @@ class TgbotConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["ws2_32"])

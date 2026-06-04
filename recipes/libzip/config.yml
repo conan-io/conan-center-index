@@ -1,15 +1,5 @@
 versions:
-  "1.11.3":
-    folder: all
-  "1.11.2":
-    folder: all
-  "1.11.1":
+  "1.11.4":
     folder: all
   "1.10.1":
-    folder: all
-  "1.9.2":
-    folder: all
-  "1.8.0":
-    folder: all
-  "1.7.3":
     folder: all

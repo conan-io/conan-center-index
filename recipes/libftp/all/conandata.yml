@@ -1,4 +1,7 @@
 sources:
+  "1.5.0":
+    url: "https://github.com/deniskovalchuk/libftp/archive/refs/tags/v1.5.0.tar.gz"
+    sha256: "fe24d5d6ae8f28e1ea35f2ffd09461cc21351a0d4f7e2c0f52550d8ce6ebd64f"
   "1.4.0":
     url: "https://github.com/deniskovalchuk/libftp/archive/refs/tags/v1.4.0.tar.gz"
     sha256: "0d8c9f8ea36ef010c4b7be79e3c4ad46830d2f644bcecd608d83f69274a2aa9e"

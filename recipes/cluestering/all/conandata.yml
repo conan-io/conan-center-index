@@ -1,0 +1,4 @@
+sources:
+  "2.9.0":
+    url: "https://github.com/cms-patatrack/CLUEstering/archive/refs/tags/2.9.0.tar.gz"
+    sha256: "00e0c228f75f9d140896fcc91a0741f958985769dd09618e7effef339f2e2f6a"

@@ -420,6 +420,11 @@ class OpenSSLConan(ConanFile):
             env.define_path("CROSS_SDK", os.path.basename(xcrun.sdk_path))
             env.define_path("CROSS_TOP", os.path.dirname(os.path.dirname(xcrun.sdk_path)))
 
+        if is_apple_os(self) and self.options.shared:
+            # Inject -headerpad_max_install_names for shared library, otherwise fix_apple_shared_install_name() may fail.
+            # See https://github.com/conan-io/conan-center-index/issues/27424
+            tc.extra_ldflags.append("-headerpad_max_install_names")
+
         self._create_targets(tc.cflags, tc.cxxflags, tc.defines, tc.ldflags)
         tc.generate(env)
 
@@ -541,9 +546,9 @@ class OpenSSLConan(ConanFile):
 
     def _replace_runtime_in_file(self, filename):
         runtime = msvc_runtime_flag(self)
-        for e in ["MDd", "MTd", "MD", "MT"]:
-            replace_in_file(self, filename, f"/{e} ", f"/{runtime} ", strict=False)
-            replace_in_file(self, filename, f"/{e}\"", f"/{runtime}\"", strict=False)
+        for e in ["MDd", "MD", "MT"]:
+            replace_in_file(self, filename, f"/{e} ", f"/{runtime} ")
+            replace_in_file(self, filename, f"/{e}\"", f"/{runtime}\"")
 
     def package(self):
         copy(self, "*LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))

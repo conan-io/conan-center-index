@@ -1,0 +1,5 @@
+sources:
+  "1.1.13":
+    url: "https://github.com/jeremydumais/CPP-SMTPClient-library/archive/refs/tags/v1.1.13.zip"
+    sha256: "fea5c463a9d5717adcc62760527c180d09b556f0119468ed934429e6e15f0096"
+

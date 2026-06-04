@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
@@ -49,8 +48,6 @@ class LibsndfileConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.with_alsa
-        if Version(self.version) < "1.1.0":
-            del self.options.with_mpeg
 
     def configure(self):
         if self.options.shared:
@@ -70,14 +67,14 @@ class LibsndfileConan(ConanFile):
         if self.options.with_sndio:
             self.requires("libsndio/1.9.0", options={"with_alsa": self.options.get_safe("with_alsa")})
         if self.options.get_safe("with_alsa"):
-            self.requires("libalsa/1.2.10")
+            self.requires("libalsa/[>=1.2 <1.3]")
         if self.options.with_external_libs:
             self.requires("ogg/1.3.5")
             self.requires("vorbis/1.3.7")
             self.requires("flac/1.4.2")
-            self.requires("opus/1.4")
+            self.requires("opus/[>=1.4 <2]")
         if self.options.get_safe("with_mpeg"):
-            self.requires("mpg123/1.31.2")
+            self.requires("mpg123/[>=1.31.2 <2]")
             self.requires("libmp3lame/3.100")
 
     def source(self):
@@ -100,14 +97,13 @@ class LibsndfileConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         tc.variables["ENABLE_CPACK"] = False
         tc.variables["ENABLE_EXPERIMENTAL"] = self.options.experimental
-        if is_msvc(self) and Version(self.version) < "1.0.30":
-            tc.variables["ENABLE_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.variables["BUILD_REGTEST"] = False
-        # https://github.com/libsndfile/libsndfile/commit/663a59aa6ea5e24cf5159b8e1c2b0735712ea74e#diff-1e7de1ae2d059d21e1dd75d5812d5a34b0222cef273b7c3a2af62eb747f9d20a
-        if Version(self.version) >= "1.1.0":
-            tc.variables["ENABLE_MPEG"] = self.options.with_mpeg
+        # https://github.com/libsndfile/libsndfile/commit/663a59aa6ea5e24cf5159b8e1c2b0735712ea74e#diff-1e7de1ae2d059d21e1dd75d5812d5a34b0222cef273b7c3a2af62eb747f9d20a:
+        tc.variables["ENABLE_MPEG"] = self.options.with_mpeg
         # Fix iOS/tvOS/watchOS
         tc.variables["CMAKE_MACOSX_BUNDLE"] = False
+        if Version(self.version) <= "1.2.2":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

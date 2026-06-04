@@ -1,15 +1,12 @@
-#define INCBIN_PREFIX g_
-#define INCBIN_STYLE INCBIN_STYLE_SNAKE
-#include "incbin.h"
-
-INCBIN(cmake, INCBIN_FILE);
-
+#include <incbin.h>
 #include <stdio.h>
 
-int main(int argc, char* argv[]) {
-    (void)g_cmake_data[0];
-    (void)*g_cmake_end;
-    printf(INCBIN_FILE" size is %d\n", g_cmake_size);
+#if INCBIN_ALIGNMENT == 0
+#error "INCBIN_ALIGNMENT must be non-zero"
+#endif
 
+int main(void)
+{
+    printf("INCBIN_ALIGNMENT=%d\n", INCBIN_ALIGNMENT);
     return 0;
 }

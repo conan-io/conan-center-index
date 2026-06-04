@@ -1,0 +1,12 @@
+diff --git a/iceoryx_hoofs/platform/win/include/iceoryx_hoofs/platform/time.hpp b/iceoryx_hoofs/platform/win/include/iceoryx_hoofs/platform/time.hpp
+index b168fb2..6e5dfb4 100644
+--- a/iceoryx_hoofs/platform/win/include/iceoryx_hoofs/platform/time.hpp
++++ b/iceoryx_hoofs/platform/win/include/iceoryx_hoofs/platform/time.hpp
+@@ -21,6 +21,7 @@
+ #include "iceoryx_hoofs/platform/win32_errorHandling.hpp"
+ #include "iceoryx_hoofs/platform/windows.hpp"
+ 
++#include <chrono>
+ #include <cstdint>
+ #include <cstdio>
+ #include <ctime>

@@ -34,7 +34,8 @@ class RsyncConan(ConanFile):
         "with_lz4": True,
         "enable_acl": False
     }
-    
+    languages = "C"
+
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
@@ -56,7 +57,7 @@ class RsyncConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
 
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[>=1.5.5 <1.6]")
 
         if self.options.with_lz4:
             self.requires("lz4/1.9.2")
@@ -81,10 +82,9 @@ class RsyncConan(ConanFile):
             f"--enable-acl-support={yes_no(self.options.enable_acl)}",
             f"--with-included-zlib={yes_no(not self.options.with_zlib)}",            
             "--disable-openssl" if not self.options.with_openssl else "--enable-openssl",
-            f"--with-zstd={yes_no(self.options.with_zstd)}",
-            f"--with-lz4={yes_no(self.options.with_lz4)}",
-            f"--with-xxhash={yes_no(self.options.with_xxhash)}",
-
+            "--disable-zstd" if not self.options.with_zstd else "--enable-zstd",
+            "--disable-lz4" if not self.options.with_lz4 else "--enable-lz4",
+            "--disable-xxhash" if not self.options.with_xxhash else "--enable-xxhash",
             "--enable-manpages=no",
         ])        
 

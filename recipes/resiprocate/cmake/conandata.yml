@@ -1,4 +1,7 @@
 sources:
+  "1.13.2":
+    url: "https://github.com/resiprocate/resiprocate/archive/refs/tags/resiprocate-1.13.2.tar.gz"
+    sha256: "059fda8f63c456fd61130d468a67655cfeafb5ba8ff5c1d0a55dc383f83e4fba"
   "1.13.1":
     url: "https://github.com/resiprocate/resiprocate/archive/refs/tags/resiprocate-1.13.1.tar.gz"
     sha256: "df8d0cbf17793077d59c2863b23a6da8e9c77aba88327d1a494accaded1ef605"

@@ -1,14 +1,14 @@
 from conan import ConanFile
-
+from conan.tools.build import can_run
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "VirtualBuildEnv"
     test_type = "explicit"
 
-    def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def test(self):
-        extension = ".exe" if self.settings.os == "Windows" else ""
-        self.run(f"m4{extension} --version")
+        if can_run(self):
+            extension = ".exe" if self.settings.os == "Windows" else ""
+            self.run(f"m4{extension} --version", env="conanrun")

@@ -137,3 +137,6 @@ class UtilLinuxLibuuidConan(ConanFile):
 
         self.cpp_info.libs = ["uuid"]
         self.cpp_info.includedirs.append(os.path.join("include", "uuid"))
+
+        if self.settings.os == "Linux" and Version(self.version) >= "2.41.2":
+            self.cpp_info.system_libs.extend(["pthread"])

@@ -1,8 +1,17 @@
 sources:
+  "6.3.0":
+    url: "https://sourceforge.net/projects/qwt/files/qwt/6.3.0/qwt-6.3.0.zip"
+    sha256: "268d8d41974d263014fea13168324452f41e02880db573794f559995a4e11331"
   "6.2.0":
     url: "https://sourceforge.net/projects/qwt/files/qwt/6.2.0/qwt-6.2.0.zip"
     sha256: "3e9632a9be6a883db5c496e42ce74cbbf8da02cc3328faa89e2c43e434a2eb76"
 patches:
+  "6.3.0":
+    - patch_file: "patches/0001-cmake-support.patch"
+      patch_source: "https://github.com/MehdiChinoune/qwt/blob/cmake/CMakeLists.txt"
+    - patch_file: "patches/0002-cmake-support-patch.patch"
+    - patch_file: "patches/0003-Fix-Build-error-with-Qt6-which-requires-CPP-17.patch"
+      patch_source: "https://github.com/ashley-b/qwt/commit/75aa20749186a263fd6942a764731826d5bac137"
   "6.2.0":
     - patch_file: "patches/0001-cmake-support.patch"
       patch_source: "https://github.com/MehdiChinoune/qwt/blob/cmake/CMakeLists.txt"
