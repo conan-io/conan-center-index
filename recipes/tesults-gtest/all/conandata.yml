@@ -1,0 +1,4 @@
+sources:
+  "1.0.2":
+    url: "https://github.com/tesults/tesults-gtest/archive/refs/tags/v1.0.2.tar.gz"
+    sha256: "e757dd90d95b96ba62e8bff7bbce1842f284c3fc45a10f77506d65815efbb206"
