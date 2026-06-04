@@ -60,11 +60,8 @@ class ReductCppConan(ConanFile):
         if not httplib.options.with_zlib:
             raise ConanInvalidConfiguration("cpp-httplib must be built with zlib")
 
-        # if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "15":
-        #     raise ConanInvalidConfiguration("Apple-clang versions prior to 15 have missing C++20 support")
-        #
-        # if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "14":
-        #     raise ConanInvalidConfiguration("ReductCpp requires GCC 14 or higher. ")
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "15":
+            raise ConanInvalidConfiguration("Apple-clang versions prior to 15 have missing C++20 support")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
