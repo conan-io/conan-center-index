@@ -53,6 +53,9 @@ class ReductCppConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 20)
 
+        if not seld.dependencies["fmt"].options.header_only:
+            raise ConanInvalidConfiguration("fmt must be built with header_only option")
+
         httplib = self.dependencies["cpp-httplib"]
 
         if not httplib.options.with_openssl:
