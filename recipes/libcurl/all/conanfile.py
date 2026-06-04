@@ -286,7 +286,10 @@ class LibcurlConan(ConanFile):
         # zlib naming is not always very consistent
         if self.options.with_zlib:
             configure_ac = os.path.join(self.source_folder, "configure.ac")
-            zlib_name = self.dependencies["zlib"].cpp_info.aggregated_components().libs[0]
+            zlib_cpp_info = self.dependencies["zlib"].cpp_info.aggregated_components()
+            # A system wrapper (PkgConfig.fill_cpp_info(..., is_system=True)) routes
+            # library names into system_libs, leaving libs empty.
+            zlib_name = (zlib_cpp_info.libs or zlib_cpp_info.system_libs or ["z"])[0]
             replace_in_file(self, configure_ac,
                                   "AC_CHECK_LIB(z,",
                                   f"AC_CHECK_LIB({zlib_name},")
