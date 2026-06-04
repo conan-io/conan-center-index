@@ -250,7 +250,3 @@ class NmosCppConan(ConanFile):
                 #self.cpp_info.components[component_name].requires.extend([(r, "private") for r in values.get("requires_private", [])])
                 self.cpp_info.components[component_name].requires.extend(values.get("requires_private", []))
         _register_components()
-
-        # add nmos-cpp-registry and nmos-cpp-node to the path
-        bin_path = os.path.join(self.package_folder, bindir)
-        self.runenv_info.append_path("PATH", bin_path)
