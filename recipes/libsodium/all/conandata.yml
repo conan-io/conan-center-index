@@ -1,4 +1,7 @@
 sources:
+  "1.0.22":
+    url: "https://github.com/jedisct1/libsodium/archive/refs/tags/1.0.22-RELEASE.tar.gz"
+    sha256: "5838BB0C3DA6148C24EBE531D1ED1297DE9A87AEA77D426BCD99F289E681631C"
   "1.0.21":
     url: "https://github.com/jedisct1/libsodium/archive/1.0.21-RELEASE.tar.gz"
     sha256: "42E0CA94FAAEC901F4FBEDA84B1B94B18F5309C360C66345CF52A7AB515B245B"
