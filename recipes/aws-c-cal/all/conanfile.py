@@ -81,7 +81,8 @@ class AwsCCal(ConanFile):
 
         if self._needs_openssl:
             self.cpp_info.requires.append("openssl::crypto")
-            if not self.dependencies["openssl"].options.shared:
+            # get_safe so system-wrapper openssl (which omits the `shared` option) works.
+            if not self.dependencies["openssl"].options.get_safe("shared", default=True):
                 # aws-c-cal does not statically link to openssl and searches dynamically for openssl symbols .
                 # Mark these as undefined so the linker will include them.
                 # This avoids dynamical look-up for a system crypto library.
