@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, rm, rmdir
+from conan.tools.files import copy, get, load, rm, rmdir
 from conan.tools.scm import Version
 import json
 import os
@@ -30,11 +30,6 @@ class NmosCppConan(ConanFile):
         "fPIC": True,
         "with_dnssd": "mdnsresponder",
     }
-
-    short_paths = True
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -100,10 +95,12 @@ class NmosCppConan(ConanFile):
         tc.variables["NMOS_CPP_BUILD_EXAMPLES"] = True
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("json-schema-validator", "cmake_target_name", "nlohmann_json_schema_validator::nlohmann_json_schema_validator")
+        if self.options.get_safe("with_dnssd") == "avahi":
+            deps.set_property("avahi", "cmake_target_name", "Avahi::compat-libdns_sd")
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure(build_script_folder="Development")
         cmake.build()

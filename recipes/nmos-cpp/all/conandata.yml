@@ -21,20 +21,3 @@ sources:
   "cci.20220120":
     url: "https://github.com/sony/nmos-cpp/archive/46750381f33d19ce6b12a2f760db2f2f5faf2818.tar.gz"
     sha256: "cd6fd81b1a5a10fd0a917fec362aae517a72f13889ec4418c29beb3ec8996df7"
-patches:
-  "cci.20220620":
-    - patch_file: "patches/cmakedeps-targets.patch"
-      patch_type: "conan"
-      patch_description: "Fix upstream/CMakeDeps target names"
-  "cci.20220428":
-    - patch_file: "patches/cmakedeps-targets.patch"
-      patch_type: "conan"
-      patch_description: "Fix upstream/CMakeDeps target names"
-  "cci.20220208":
-    - patch_file: "patches/cmakedeps-targets.patch"
-      patch_type: "conan"
-      patch_description: "Fix upstream/CMakeDeps target names"
-  "cci.20220120":
-    - patch_file: "patches/cmakedeps-targets.patch"
-      patch_type: "conan"
-      patch_description: "Fix upstream/CMakeDeps target names"
