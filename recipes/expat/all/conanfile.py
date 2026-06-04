@@ -62,8 +62,6 @@ class ExpatConan(ConanFile):
             tc.variables["EXPAT_MSVC_STATIC_CRT"] = is_msvc_static_runtime(self)
         tc.variables["EXPAT_BUILD_PKGCONFIG"] = False
         tc.variables["EXPAT_LARGE_SIZE"] = self.options.large_size
-        if self.options.char_type == "wchar_t" and self.settings.os != "Windows":
-            tc.extra_cflags.append("-fshort-wchar")
         tc.generate()
 
     def build(self):
@@ -94,9 +92,6 @@ class ExpatConan(ConanFile):
             self.cpp_info.defines.append("XML_UNICODE")
         if self.options.get_safe("char_type") == "wchar_t":
             self.cpp_info.defines.append("XML_UNICODE_WCHAR_T")
-            if self.settings.os != "Windows":
-                self.cpp_info.cflags.append("-fshort-wchar")
-                self.cpp_info.cxxflags.append("-fshort-wchar")
         if self.options.large_size:
             self.cpp_info.defines.append("XML_LARGE_SIZE")
 
