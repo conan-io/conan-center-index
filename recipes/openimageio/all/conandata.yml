@@ -1,12 +1,12 @@
 sources:
-  "3.1.13.1":
-    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/releases/download/v3.1.13.1/OpenImageIO-3.1.13.1.tar.gz"
-    sha256: "b0d81f4f041fd72f034bd2a6c5ad9db1880008f67af101233cf3992f9e59217f"
+  "3.1.14.0":
+    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/releases/download/v3.1.14.0/OpenImageIO-3.1.14.0.tar.gz"
+    sha256: "ced98eff58fe27fc2fad5b789ee9cb43dda5f415700bb2f36229ad7fd32a6ea9"
   "2.5.19.1":
     url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.5.19.1.tar.gz"
     sha256: "adb73f270f2eaae81c3c7cde311239944ae9faf6d206552da4ee12d746628b26"
 patches:
-  "3.1.13.1":
+  "3.1.14.0":
     - patch_file: "patches/3.1.13.1-conan-fixes.patch"
   "2.5.19.1":
     - patch_file: "patches/2.5.19.1-conan-fixes.patch"
