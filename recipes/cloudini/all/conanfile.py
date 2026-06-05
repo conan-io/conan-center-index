@@ -39,11 +39,6 @@ class CloudiniConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 20)
-        # MSVC support landed in 1.2.2 (the non-portable __builtin_expect was replaced
-        # by the C++20 [[likely]]/[[unlikely]] attributes); earlier versions still fail
-        # to compile under MSVC.
-        if is_msvc(self) and Version(self.version) < "1.2.2":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support MSVC; use cloudini/1.2.2 or newer.")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16]")
