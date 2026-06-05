@@ -1478,6 +1478,7 @@ class OpenCVConan(ConanFile):
 
         if self.settings.os == "Android":
             tc.variables["BUILD_ANDROID_EXAMPLES"] = False
+        tc.cache_variables["CV_TRACE"] = False
 
         tc.generate()
 
