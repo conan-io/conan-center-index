@@ -64,5 +64,5 @@ class KahipConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "KaHIP")
-        self.cpp_info.set_property("cmake_target_name", "KaHIP::KaHIP")
+        self.cpp_info.set_property("cmake_target_name", "KaHIP::kahip")
         self.cpp_info.libs = ["kahip"] if self.options.shared else ["kahip_static"]
