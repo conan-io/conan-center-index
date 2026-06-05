@@ -1537,14 +1537,16 @@ class BoostConan(ConanFile):
 
         def create_library_config(deps_name, name):
             aggregated_cpp_info = self.dependencies[deps_name].cpp_info.aggregated_components()
-            if len(aggregated_cpp_info.libs) == 0:
+            # Fall back to system_libs so system-wrapper deps (which omit cpp_info.libs) work.
+            libs = aggregated_cpp_info.libs or aggregated_cpp_info.system_libs
+            if not libs:
                 return ""
 
             includedir = aggregated_cpp_info.includedirs[0].replace("\\", "/")
             includedir = f"\"{includedir}\""
             libdir = aggregated_cpp_info.libdirs[0].replace("\\", "/")
             libdir = f"\"{libdir}\""
-            lib = aggregated_cpp_info.libs[0]
+            lib = libs[0]
             version = self.dependencies[deps_name].ref.version
             return f"\nusing {name} : {version} : " \
                    f"<include>{includedir} " \
