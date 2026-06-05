@@ -20,7 +20,7 @@
 +  if(FALSE)
      set(_find_package_args)
      # For some reason passing the HDF5 version requirement cause a linking error of the libkea driver on Conda Windows builds...
-     if (_GCP_VERSION AND NOT ("${name}" STREQUAL "TileDB") AND NOT ("${name}" STREQUAL "HDF5"))
+     if (_GCP_VERSION AND NOT ("${name}" STREQUAL "TileDB")
 --- cmake/helpers/CheckDependentLibraries.cmake
 +++ cmake/helpers/CheckDependentLibraries.cmake
 @@ -176,8 +176,8 @@
