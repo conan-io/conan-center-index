@@ -182,7 +182,7 @@ class MimallocConan(ConanFile):
     def _lib_name(self):
         name = "mimalloc" if self.settings.os == "Windows" else "libmimalloc"
 
-        if self.settings.os == "Windows" and not self.options.shared:
+        if Version(self.version) == "2.1.2" and self.settings.os == "Windows" and not self.options.shared:
             name += "-static"
         if self.options.secure:
             name += "-secure"
@@ -209,7 +209,7 @@ class MimallocConan(ConanFile):
             self.cpp_info.libdirs = []
             self.cpp_info.bindirs = []
         else:
-            self.cpp_info.libs = collect_libs(self)
+            self.cpp_info.libs = [self._lib_name]
 
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
