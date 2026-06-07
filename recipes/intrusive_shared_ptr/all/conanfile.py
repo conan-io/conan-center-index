@@ -2,9 +2,10 @@ from pathlib import Path
 
 from conan import ConanFile
 from conan.tools.layout import basic_layout
-from conan.tools.files import get, copy, rm, rmdir
+from conan.tools.files import get, copy, replace_in_file, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake
+import os
 
 required_conan_version = ">=2.1"
 
@@ -37,6 +38,9 @@ class IsptrRecipe(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "add_subdirectory(test)",
+                        "# add_subdirectory(test)")
 
     def build(self):
         cmake = CMake(self)
