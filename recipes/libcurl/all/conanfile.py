@@ -283,17 +283,6 @@ class LibcurlConan(ConanFile):
         subdirs_to_build = "lib src" if self.options.build_executable else "lib"
         replace_in_file(self, top_makefile, "SUBDIRS = lib docs src scripts", f"SUBDIRS = {subdirs_to_build}")
 
-        # zlib naming is not always very consistent
-        if self.options.with_zlib:
-            configure_ac = os.path.join(self.source_folder, "configure.ac")
-            zlib_name = self.dependencies["zlib"].cpp_info.aggregated_components().libs[0]
-            replace_in_file(self, configure_ac,
-                                  "AC_CHECK_LIB(z,",
-                                  f"AC_CHECK_LIB({zlib_name},")
-            replace_in_file(self, configure_ac,
-                                  "-lz",
-                                  f"-l{zlib_name} ")
-
         if self._is_mingw and self.options.shared:
             # patch for shared mingw build
             lib_makefile = os.path.join(self.source_folder, "lib", "Makefile.am")
@@ -401,8 +390,7 @@ class LibcurlConan(ConanFile):
             tc.configure_args.append("--without-nghttp2")
 
         if self.options.with_zlib:
-            path = unix_path(self, self.dependencies["zlib"].package_folder)
-            tc.configure_args.append(f"--with-zlib={path}")
+            tc.configure_args.append("--with-zlib")
         else:
             tc.configure_args.append("--without-zlib")
 
