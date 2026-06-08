@@ -180,7 +180,7 @@ class MimallocConan(ConanFile):
 
     @property
     def _lib_name(self):
-        name = "mimalloc" if self.settings.os == "Windows" else "libmimalloc"
+        name = "mimalloc"
 
         if Version(self.version) == "2.1.2" and self.settings.os == "Windows" and not self.options.shared:
             name += "-static"
