@@ -108,7 +108,6 @@ class CBlosc2Conan(ConanFile):
 
         deps = CMakeDeps(self)
         if self.options.with_lz4:
-            deps.set_property("lz4", "cmake_file_name", "LZ4")
             # Sources do not make distinction of shared-static target name difference
             deps.set_property("lz4", "cmake_target_name", "LZ4::lz4")
         if self.options.with_zlib =="zlib-ng":
