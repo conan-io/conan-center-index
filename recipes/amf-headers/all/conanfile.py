@@ -15,6 +15,7 @@ class AMFHeadersConan(ConanFile):
     homepage = "https://github.com/GPUOpen-LibrariesAndSDKs/AMF"
     topics = ("amd", "amf", "ffmpeg", "header-only")
     package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     def layout(self):
