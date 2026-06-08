@@ -115,7 +115,7 @@ class AeronConan(ConanFile):
         archive_include_dir = os.path.join(self.source_folder, "aeron-archive", "src", "main", "cpp", "client")
         copy(self, "*.h", src=archive_include_dir, dst=os.path.join(self.package_folder, "include", "aeron-archive"))
 
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        # rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
         lib_folder = os.path.join(self.package_folder, "lib")
         bin_folder = os.path.join(self.package_folder, "bin")
@@ -141,6 +141,7 @@ class AeronConan(ConanFile):
         self.cpp_info.includedirs.extend([
             os.path.join("include", "wrapper"),
             os.path.join("include", "aeron"),
+            os.path.join("include", "aeronmd"),
         ])
         if is_msvc(self):
             self.cpp_info.defines.append("_ENABLE_EXTENDED_ALIGNED_STORAGE")
