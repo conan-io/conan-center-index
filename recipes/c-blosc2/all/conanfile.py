@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 import os
 import glob
@@ -80,6 +81,8 @@ class CBlosc2Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if Version(self.version) >= "3.0.0":
+            tc.cache_variables["BLOSC_DEPENDENCY_MODE"] = "EXTERNAL"
         tc.cache_variables["BLOSC_IS_SUBPROJECT"] = False
         tc.cache_variables["BLOSC_INSTALL"] = True
         tc.cache_variables["BUILD_STATIC"] = not bool(self.options.shared)
@@ -106,11 +109,13 @@ class CBlosc2Conan(ConanFile):
         deps = CMakeDeps(self)
         if self.options.with_lz4:
             deps.set_property("lz4", "cmake_file_name", "LZ4")
+            # Sources do not make distinction of shared-static target name difference
+            deps.set_property("lz4", "cmake_target_name", "LZ4::lz4")
         if self.options.with_zlib =="zlib-ng":
-            deps.set_property("zlib-ng", "cmake_file_name", "ZLIB_NG")
-            deps.set_property("zlib-ng", "cmake_target_name", "ZLIB_NG::ZLIB_NG")
+            deps.set_property("zlib-ng", "cmake_target_name", "zlib-ng::zlib")
         if self.options.with_zstd:
-            deps.set_property("zstd", "cmake_file_name", "ZSTD")
+            # Sources do not make distinction of shared-static target name difference
+            deps.set_property("zstd", "cmake_target_name", "zstd::libzstd")
         deps.generate()
 
     def _patch_sources(self):

@@ -1,7 +1,10 @@
 sources:
-  "2.21.3":
-    url: "https://github.com/Blosc/c-blosc2/archive/v2.21.3.tar.gz"
-    sha256: "4ac2e8b7413624662767b4348626f54ad621d6fbd315d0ba8be32a6ebaa21d41"
+  "2.23.1":
+    url: "https://github.com/Blosc/c-blosc2/archive/v2.23.1.tar.gz"
+    sha256: "3a1a55d1e3794fb2b51a12e722d611b3e577443abb7ff9951666511f576ea3da"
+  "3.1.2":
+    url: "https://github.com/Blosc/c-blosc2/archive/v3.1.2.tar.gz"
+    sha256: "b4fbad51de56abf2f4660bd1cb9801bc044662db3ea009ede454b4fd36fd98eb"
 patches:
   "2.21.3":
     - patch_file: "patches/2.21.3-0001-fix-cmake.patch"
