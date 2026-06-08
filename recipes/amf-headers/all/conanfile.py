@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import copy, get, download
+from conan.tools.layout import basic_layout
 import os
 
 
@@ -15,6 +16,9 @@ class AMFHeadersConan(ConanFile):
     topics = ("amd", "amf", "ffmpeg", "header-only")
     package_type = "header-library"
     no_copy_source = True
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
