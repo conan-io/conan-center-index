@@ -2,12 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, export_conandata_patches, get, rm, rmdir, replace_in_file
-from conan.tools.apple import is_apple_os
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 class MaterialXConan(ConanFile):
     name = "materialx"
@@ -31,27 +30,6 @@ class MaterialXConan(ConanFile):
         "build_gen_msl": True
     }
 
-    short_paths = True
-
-    @property
-    def _min_cppstd(self):
-        if Version(self.version) >= "1.39.0":
-            return 17
-        else:
-            return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -65,24 +43,17 @@ class MaterialXConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_openimageio: 
-            self.requires("openimageio/2.5.14.0")
+        if self.options.with_openimageio:
+            self.requires("openimageio/[>=2.5.14.0 <4]")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             self.requires("opengl/system")
 
     def validate(self):
-        # validate the minimum cpp standard supported. For C++ projects only
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.24 <4]")
+        self.tool_requires("cmake/[>=3.26]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -92,10 +63,7 @@ class MaterialXConan(ConanFile):
         tc.variables["MATERIALX_BUILD_TESTS"] = False
         tc.variables["MATERIALX_TEST_RENDER"] = False
         tc.variables["MATERIALX_BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["MATERIALX_BUILD_GEN_MSL"] = self.options.build_gen_msl and is_apple_os
-        # TODO: Remove when Conan 1 support is dropped
-        if not self.settings.compiler.cppstd:
-            tc.variables["MATERIALX_BUILD_USE_CCACHE"] = self._min_cppstd
+        tc.variables["MATERIALX_BUILD_GEN_MSL"] = self.options.build_gen_msl
         tc.variables["MATERIALX_BUILD_USE_CCACHE"] = False
         tc.generate()
 
@@ -127,7 +95,7 @@ class MaterialXConan(ConanFile):
         rm(self, "README.md", self.package_folder)
         rm(self, "CHANGELOG.md", self.package_folder)
         rm(self, "THIRD-PARTY.md", self.package_folder)
-        rm(self, "LICENSE", self.package_folder)    
+        rm(self, "LICENSE", self.package_folder)
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
@@ -148,8 +116,9 @@ class MaterialXConan(ConanFile):
         self.cpp_info.components["MaterialXGenMdl"].libs = ["MaterialXGenMdl"]
         self.cpp_info.components["MaterialXGenMdl"].requires = ["MaterialXCore", "MaterialXGenShader"]
 
-        self.cpp_info.components["MaterialXGenMsl"].libs = ["MaterialXGenMsl"]
-        self.cpp_info.components["MaterialXGenMsl"].requires = ["MaterialXCore", "MaterialXGenShader"]
+        if self.options.build_gen_msl:
+            self.cpp_info.components["MaterialXGenMsl"].libs = ["MaterialXGenMsl"]
+            self.cpp_info.components["MaterialXGenMsl"].requires = ["MaterialXCore", "MaterialXGenShader"]
 
         self.cpp_info.components["MaterialXGenOsl"].libs = ["MaterialXGenOsl"]
         self.cpp_info.components["MaterialXGenOsl"].requires = ["MaterialXCore", "MaterialXGenShader"]
@@ -161,6 +130,7 @@ class MaterialXConan(ConanFile):
         self.cpp_info.components["MaterialXRender"].requires = ["MaterialXGenShader"]
         if self.options.with_openimageio:
             self.cpp_info.components["MaterialXRender"].requires.append("openimageio::openimageio")
+            self.cpp_info.components["MaterialXRender"].defines.append("MATERIALX_BUILD_OIIO")
 
         self.cpp_info.components["MaterialXRenderGlsl"].libs = ["MaterialXRenderGlsl"]
         self.cpp_info.components["MaterialXRenderGlsl"].requires = ["MaterialXRenderHw", "MaterialXGenGlsl"]
@@ -189,14 +159,10 @@ class MaterialXConan(ConanFile):
         self.cpp_info.components["MaterialXRenderOsl"].libs = ["MaterialXRenderOsl"]
         self.cpp_info.components["MaterialXRenderOsl"].requires = ["MaterialXRender"]
 
-        if self.options.build_gen_msl:
-            self.cpp_info.components["MaterialXGenMsl"].libs = ["MaterialXGenMsl"]
-            self.cpp_info.components["MaterialXGenMsl"].requires = ["MaterialXCore", "MaterialXGenShader"]
-            
         if self.options.build_gen_msl and self.settings.os == "Macos":
             self.cpp_info.components["MaterialXRenderMsl"].libs = ["MaterialXRenderMsl"]
             self.cpp_info.components["MaterialXRenderMsl"].requires = ["MaterialXRenderHw", "MaterialXGenMsl"]
-            self.cpp_info.frameworks.extend(["CoreFoundation", "OpenGL", "AppKit", "Metal"])
+            self.cpp_info.frameworks.extend(["CoreFoundation", "OpenGL", "AppKit", "Metal", "MetalPerformanceShaders"])
             if self.settings.os == "Macos":
                 self.cpp_info.includedirs.extend(["include/compat/osx"])
             else:

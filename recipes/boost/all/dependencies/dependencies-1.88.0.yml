@@ -80,6 +80,7 @@ dependencies:
   - container
   - system
   locale:
+  - charconv
   - thread
   log:
   - atomic

@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/fpagliughi/sockpp/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "818477fae6eb29b9daacef71a3d0c494de9e48f6fd267a7fc5a4c332db211bc5"

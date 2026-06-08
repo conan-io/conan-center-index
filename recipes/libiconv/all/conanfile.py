@@ -15,7 +15,6 @@ from conan.tools.files import (
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
@@ -24,7 +23,7 @@ required_conan_version = ">=2.1"
 class LibiconvConan(ConanFile):
     name = "libiconv"
     description = "Convert text to and from Unicode"
-    license = ("LGPL-2.0-or-later", "LGPL-2.1-or-later")
+    license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/libiconv/"
     topics = ("iconv", "text", "encoding", "locale", "unicode", "conversion")
@@ -47,7 +46,9 @@ class LibiconvConan(ConanFile):
 
     @property
     def _msvc_tools(self):
-        return ("clang-cl", "llvm-lib", "lld-link") if self._is_clang_cl else ("cl", "lib", "link")
+        compilers = self.conf.get("tools.build:compiler_executables", default={})
+        compiler = compilers.get("c") or compilers.get("cpp")
+        return (compiler or "clang-cl", "llvm-lib", "lld-link") if self._is_clang_cl else ("cl", "lib", "link")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -61,10 +62,6 @@ class LibiconvConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-        if Version(self.version) >= "1.17":
-            self.license = "LGPL-2.1-or-later"
-        else:
-            self.license = "LGPL-2.0-or-later"
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -99,11 +96,13 @@ class LibiconvConan(ConanFile):
         env = tc.environment()
         if is_msvc(self) or self._is_clang_cl:
             cc, lib, link = self._msvc_tools
+            if cc.endswith("cl"):
+                cc = f"{cc} -nologo"
             build_aux_path = os.path.join(self.source_folder, "build-aux")
             lt_compile = unix_path(self, os.path.join(build_aux_path, "compile"))
             lt_ar = unix_path(self, os.path.join(build_aux_path, "ar-lib"))
-            env.define("CC", f"{lt_compile} {cc} -nologo")
-            env.define("CXX", f"{lt_compile} {cc} -nologo")
+            env.define("CC", f"{lt_compile} {cc}")
+            env.define("CXX", f"{lt_compile} {cc}")
             env.define("LD", link)
             env.define("STRIP", ":")
             env.define("AR", f"{lt_ar} {lib}")

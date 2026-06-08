@@ -1,0 +1,7 @@
+sources:
+  "0.0.0.cci.20230202":
+    url: "https://github.com/Maratyszcza/NNPACK/archive/70a77f485e8b934224f3a79efd8edcd84cd377b8.tar.gz"
+    sha256: "3d8e1462a390dd0309924edbaefb15139d7135ee6be127cc82950b75bd9835bc"
+patches:
+    "0.0.0.cci.20230202":
+      - patch_file: "patches/001-conan-dependencies.patch"

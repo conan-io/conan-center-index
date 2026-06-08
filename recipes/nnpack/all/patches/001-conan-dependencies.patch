@@ -1,0 +1,121 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5ecd2df..8c3b750 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12 FATAL_ERROR)
++CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
+ 
+ INCLUDE(GNUInstallDirs)
+ INCLUDE(CheckCSourceCompiles)
+@@ -80,7 +80,7 @@ IF(NNPACK_BACKEND STREQUAL "auto")
+   ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+     SET(NNPACK_BACKEND "scalar")
+   ELSEIF(NOT CMAKE_SYSTEM_PROCESSOR)
+-    MESSAGE(WARNING "CMAKE_SYSTEM_PROCESSOR is not defined, using PSIMD backend")    
++    MESSAGE(WARNING "CMAKE_SYSTEM_PROCESSOR is not defined, using PSIMD backend")
+     SET(NNPACK_BACKEND "psimd")
+   ELSEIF(NNPACK_TARGET_PROCESSOR STREQUAL "x86_64" AND NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+     # ---[ CMAKE_SYSTEM_PROCESSOR will show x86_64 when we're compiling on 32 bit systems on 64 bit cpus
+@@ -177,7 +177,7 @@ IF(NNPACK_BACKEND STREQUAL "x86-64")
+   ENDIF()
+ ENDIF()
+ 
+-IF(NOT DEFINED CPUINFO_SOURCE_DIR)
++IF(0)
+   MESSAGE(STATUS "Downloading cpuinfo to ${CONFU_DEPENDENCIES_SOURCE_DIR}/cpuinfo (define CPUINFO_SOURCE_DIR to avoid it)")
+   CONFIGURE_FILE(cmake/DownloadCpuinfo.cmake "${CONFU_DEPENDENCIES_BINARY_DIR}/cpuinfo-download/CMakeLists.txt")
+   EXECUTE_PROCESS(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
+@@ -187,7 +187,7 @@ IF(NOT DEFINED CPUINFO_SOURCE_DIR)
+   SET(CPUINFO_SOURCE_DIR "${CONFU_DEPENDENCIES_SOURCE_DIR}/cpuinfo" CACHE STRING "cpuinfo source directory")
+ ENDIF()
+ 
+-IF(NOT DEFINED FP16_SOURCE_DIR)
++IF(0)
+   MESSAGE(STATUS "Downloading FP16 to ${CONFU_DEPENDENCIES_SOURCE_DIR}/fp16 (define FP16_SOURCE_DIR to avoid it)")
+   CONFIGURE_FILE(cmake/DownloadFP16.cmake "${CONFU_DEPENDENCIES_BINARY_DIR}/fp16-download/CMakeLists.txt")
+   EXECUTE_PROCESS(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
+@@ -197,7 +197,7 @@ IF(NOT DEFINED FP16_SOURCE_DIR)
+   SET(FP16_SOURCE_DIR "${CONFU_DEPENDENCIES_SOURCE_DIR}/fp16" CACHE STRING "FP16 source directory")
+ ENDIF()
+ 
+-IF(NOT DEFINED FXDIV_SOURCE_DIR)
++IF(0)
+   MESSAGE(STATUS "Downloading FXdiv to ${CONFU_DEPENDENCIES_SOURCE_DIR}/fxdiv (define FXDIV_SOURCE_DIR to avoid it)")
+   CONFIGURE_FILE(cmake/DownloadFXdiv.cmake "${CONFU_DEPENDENCIES_BINARY_DIR}/fxdiv-download/CMakeLists.txt")
+   EXECUTE_PROCESS(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
+@@ -207,7 +207,7 @@ IF(NOT DEFINED FXDIV_SOURCE_DIR)
+   SET(FXDIV_SOURCE_DIR "${CONFU_DEPENDENCIES_SOURCE_DIR}/fxdiv" CACHE STRING "FXdiv source directory")
+ ENDIF()
+ 
+-IF(NOT DEFINED PSIMD_SOURCE_DIR)
++IF(0)
+   MESSAGE(STATUS "Downloading PSimd to ${CONFU_DEPENDENCIES_SOURCE_DIR}/psimd (define PSIMD_SOURCE_DIR to avoid it)")
+   CONFIGURE_FILE(cmake/DownloadPSimd.cmake "${CONFU_DEPENDENCIES_BINARY_DIR}/psimd-download/CMakeLists.txt")
+   EXECUTE_PROCESS(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
+@@ -217,7 +217,7 @@ IF(NOT DEFINED PSIMD_SOURCE_DIR)
+   SET(PSIMD_SOURCE_DIR "${CONFU_DEPENDENCIES_SOURCE_DIR}/psimd" CACHE STRING "PSimd source directory")
+ ENDIF()
+ 
+-IF(NOT DEFINED PTHREADPOOL_SOURCE_DIR)
++IF(0)
+   MESSAGE(STATUS "Downloading pthreadpool to ${CONFU_DEPENDENCIES_SOURCE_DIR}/pthreadpool (define PTHREADPOOL_SOURCE_DIR to avoid it)")
+   CONFIGURE_FILE(cmake/DownloadPThreadPool.cmake "${CONFU_DEPENDENCIES_BINARY_DIR}/pthreadpool-download/CMakeLists.txt")
+   EXECUTE_PROCESS(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
+@@ -496,7 +496,8 @@ NNPACK_TARGET_ENABLE_C99(nnpack_reference_layers)
+ TARGET_INCLUDE_DIRECTORIES(nnpack_reference_layers PUBLIC include)
+ 
+ # ---[ Configure cpuinfo
+-IF(NOT TARGET cpuinfo)
++find_package(cpuinfo REQUIRED CONFIG)
++IF(0)
+   SET(CPUINFO_BUILD_TOOLS OFF CACHE BOOL "")
+   SET(CPUINFO_BUILD_UNIT_TESTS OFF CACHE BOOL "")
+   SET(CPUINFO_BUILD_MOCK_TESTS OFF CACHE BOOL "")
+@@ -508,13 +509,15 @@ ENDIF()
+ TARGET_LINK_LIBRARIES(nnpack PRIVATE cpuinfo)
+ 
+ # ---[ Configure pthreadpool
+-IF(NOT TARGET pthreadpool)
++find_package(pthreadpool REQUIRED CONFIG)
++IF(0)
+   SET(PTHREADPOOL_BUILD_TESTS OFF CACHE BOOL "")
+   SET(PTHREADPOOL_BUILD_BENCHMARKS OFF CACHE BOOL "")
+   ADD_SUBDIRECTORY(
+     "${PTHREADPOOL_SOURCE_DIR}"
+     "${CONFU_DEPENDENCIES_BINARY_DIR}/pthreadpool")
+ ENDIF()
++# TODO: CHECK THIS, DOES LIBTORCH USE A CUSTOM ONE?
+ IF(NNPACK_CUSTOM_THREADPOOL)
+   # Depend on pthreadpool interface, but not on implementation.
+   # This is used when NNPACK user (e.g. Caffe2) provides its own threadpool implementation.
+@@ -525,7 +528,8 @@ ENDIF()
+ TARGET_LINK_LIBRARIES(nnpack_reference_layers PUBLIC pthreadpool)
+ 
+ # ---[ Configure FXdiv
+-IF(NOT TARGET fxdiv)
++find_package(fxdiv REQUIRED CONFIG)
++IF(0)
+   SET(FXDIV_BUILD_TESTS OFF CACHE BOOL "")
+   SET(FXDIV_BUILD_BENCHMARKS OFF CACHE BOOL "")
+   ADD_SUBDIRECTORY(
+@@ -535,7 +539,8 @@ ENDIF()
+ TARGET_LINK_LIBRARIES(nnpack PRIVATE fxdiv)
+ 
+ # ---[ Configure psimd
+-IF(NOT TARGET psimd)
++find_package(psimd REQUIRED CONFIG)
++IF(0)
+   ADD_SUBDIRECTORY(
+     "${PSIMD_SOURCE_DIR}"
+     "${CONFU_DEPENDENCIES_BINARY_DIR}/psimd")
+@@ -543,7 +548,8 @@ ENDIF()
+ TARGET_LINK_LIBRARIES(nnpack PRIVATE psimd)
+ 
+ # ---[ Configure FP16
+-IF(NOT TARGET fp16)
++find_package(fp16 REQUIRED CONFIG)
++IF(0)
+   SET(FP16_BUILD_TESTS OFF CACHE BOOL "")
+   SET(FP16_BUILD_BENCHMARKS OFF CACHE BOOL "")
+   ADD_SUBDIRECTORY(

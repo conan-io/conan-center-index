@@ -1,4 +1,7 @@
 sources:
+  "0.9.0":
+    url: "https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.9.0.tar.gz"
+    sha256: "25cb043240f828a8c51beb830569634bc7ac603978e0f69d6b63558dadefd49a"
   "0.8.0":
     url: "https://github.com/jbeder/yaml-cpp/archive/refs/tags/0.8.0.tar.gz"
     sha256: "fbe74bbdcee21d656715688706da3c8becfd946d92cd44705cc6098bb23b3a16"
@@ -18,3 +21,8 @@ patches:
       patch_description: "Adds assert to enable compilation with libcxx + gcc"
       patch_type: "portability"
       patch_source: "https://github.com/jbeder/yaml-cpp/pull/947"
+  "0.8.0":
+    - patch_file: "patches/0003-fix-gcc-15-1.patch"
+      patch_description: "Fix compilation error with GCC 15.1"
+      patch_type: "portability"
+      patch_source: "https://github.com/jbeder/yaml-cpp/pull/1310"
