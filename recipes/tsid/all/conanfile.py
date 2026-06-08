@@ -2,14 +2,15 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, rmdir, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, rmdir, copy, replace_in_file
 
 required_conan_version = ">=2"
 
 class TsidConan(ConanFile):
     name = "tsid"
-    package_type = "library"
+    package_type = "shared-library"
     license = ("BSD 2-Clause")
     url = "https://github.com/conan-io/conan-center-index"
     description = (
@@ -21,26 +22,13 @@ class TsidConan(ConanFile):
         )
 
     settings = "os", "compiler", "build_type", "arch"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-        }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-        }
-    
-    implements = ["auto_shared_fpic"]
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("eiquadprog/1.2.9", transitive_headers=True)
-        self.requires("pinocchio/3.7.0", options={"shared":True}, transitive_headers=True, transitive_libs=True)
+        self.requires("eiquadprog/1.2.9")
+        self.requires("pinocchio/3.8.0", transitive_libs=True, transitive_headers=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.22 <4]")
@@ -48,6 +36,7 @@ class TsidConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "msvc":
             raise ConanInvalidConfiguration("MSVC is not supported")
+        check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -56,13 +45,18 @@ class TsidConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
-        # todo: need eigenpy https://github.com/stack-of-tasks/eigenpy
+        tc.cache_variables["BUILD_DOCUMENTATION"] = False # jrl-cmakemodules default: BUILD_DOCUMENTATION=ON,
         tc.cache_variables["BUILD_PYTHON_INTERFACE"] = False
         tc.cache_variables["BUILD_TESTING"] = False
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "CMakeLists.txt"),
+            "add_project_dependency(pinocchio 2.3.1 REQUIRED)",
+            "add_project_dependency(pinocchio 3.0.0 REQUIRED)",
+        )
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -71,9 +65,6 @@ class TsidConan(ConanFile):
         copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["tsid"]

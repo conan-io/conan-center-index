@@ -1,7 +1,4 @@
 sources:
-  "1.8.0":
-    url: "https://github.com/stack-of-tasks/tsid/releases/download/v1.8.0/tsid-1.8.0.tar.gz"
-    sha256: "e6be1045aa5afa0c2a7bf814ea37ef1a62dc84487138805336a2006a542a715d"
-patches:
-  "1.8.0":
-    - patch_file: "patches/1.1.0-0001-fix-cmake-for-conan.patch"
+  "1.10.0":
+    url: "https://github.com/stack-of-tasks/tsid/archive/refs/tags/v1.10.0.tar.gz"
+    sha256: "c31f3c61a1a40c9d6e2411ef224da3db51c8a1fdb185425fc6ce84e06fe33862"
