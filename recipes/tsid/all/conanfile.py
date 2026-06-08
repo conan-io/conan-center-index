@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, rmdir, copy, replace_in_file
+from conan.tools.files import get, rm, copy, replace_in_file
 
 required_conan_version = ">=2"
 
@@ -40,6 +40,19 @@ class TsidConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "CMakeLists.txt"),
+            "add_project_dependency(pinocchio 2.3.1 REQUIRED)",
+            "add_project_dependency(pinocchio 3.0.0 REQUIRED)",
+        )
+        # Stop generating the *Config.cmake
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "CMakeLists.txt"),
+            "set(PROJECT_USE_CMAKE_EXPORT TRUE)",
+            "set(PROJECT_USE_CMAKE_EXPORT FALSE)",
+        )
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -51,12 +64,6 @@ class TsidConan(ConanFile):
         tc.generate()
 
     def build(self):
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            "add_project_dependency(pinocchio 2.3.1 REQUIRED)",
-            "add_project_dependency(pinocchio 3.0.0 REQUIRED)",
-        )
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -65,6 +72,7 @@ class TsidConan(ConanFile):
         copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rm(self, "*.pc", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.libs = ["tsid"]
