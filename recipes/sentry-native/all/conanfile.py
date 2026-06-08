@@ -34,7 +34,7 @@ class SentryNativeConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "backend": ["none", "inproc", "crashpad", "breakpad", "native"],
-        "transport": ["none", "curl", "winhttp"],
+        "transport": ["none", "curl", "winhttp", "custom"],
         "qt": [True, False],
         "with_crashpad": ["google", "sentry"],
         "crashpad_with_tls": ["openssl", False],
@@ -168,7 +168,10 @@ class SentryNativeConan(ConanFile):
         if self.options.get_safe("wer", False):
             tc.variables["CRASHPAD_WER_ENABLED"] = True
         tc.generate()
-        CMakeDeps(self).generate()
+        deps = CMakeDeps(self)
+        if self.settings.os == "Linux":
+            deps.set_property("libunwind", "cmake_target_name", "unwind")
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -303,3 +306,9 @@ class SentryNativeConan(ConanFile):
             # tools
             self.cpp_info.components["crashpad_tools"].set_property("cmake_target_name", "crashpad::tools")
             self.cpp_info.components["crashpad_tools"].libs = [] if self.options.shared else ["crashpad_tools"]
+
+            if self.options.backend == "native":
+                if self.settings.os == "Windows":
+                    self.cpp_info.components["sentry_wer"].libs = ["sentry-wer"]
+                    self.cpp_info.components["sentry_wer"].type = "shared-library"
+                    self.cpp_info.components["sentry"].requires.append("sentry_wer")
