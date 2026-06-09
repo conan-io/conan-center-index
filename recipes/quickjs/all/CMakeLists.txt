@@ -15,9 +15,7 @@ set(QUICKJS_SRC
     ${QUICKJS_SRC_DIR}/quickjs-libc.c
 )
 
-if(QUICKJS_2025_OR_LATER)
-    list(APPEND QUICKJS_SRC ${QUICKJS_SRC_DIR}/dtoa.c)
-endif()
+list(APPEND QUICKJS_SRC ${QUICKJS_SRC_DIR}/dtoa.c)
 
 set(QUICKJS_INC
     ${QUICKJS_SRC_DIR}/cutils.h
@@ -32,11 +30,6 @@ set(QUICKJS_INC
     ${QUICKJS_SRC_DIR}/quickjs.h
     ${QUICKJS_SRC_DIR}/unicode_gen_def.h
 )
-
-if(USE_BIGNUM)
-    list(APPEND QUICKJS_SRC ${QUICKJS_SRC_DIR}/libbf.c)
-    list(APPEND QUICKJS_INC ${QUICKJS_SRC_DIR}/libbf.h)
-endif()
 
 add_library(quickjs ${QUICKJS_SRC})
 target_include_directories(quickjs PRIVATE ${QUICKJS_SRC_DIR})
