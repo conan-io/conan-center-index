@@ -1,0 +1,18 @@
+diff --git a/src/frontends/onnx/onnx_common/CMakeLists.txt b/src/frontends/onnx/onnx_common/CMakeLists.txt
+--- a/src/frontends/onnx/onnx_common/CMakeLists.txt
++++ b/src/frontends/onnx/onnx_common/CMakeLists.txt
+@@ -30,6 +30,13 @@
+ 
+ target_link_libraries(${TARGET_NAME} PRIVATE openvino::runtime openvino::util)
+ 
+-ov_link_system_libraries(${TARGET_NAME} PUBLIC onnx_proto onnx)
++# Do not link onnx_proto separately alongside onnx.
++# The onnx cmake build compiles ONNX_PROTO_SRCS into *both* libonnx and
++# libonnx_proto (see onnx/CMakeLists.txt). When both are built as shared
++# libraries, each dylib registers onnx/onnx-ml.proto descriptors independently.
++# Loading both in the same process causes a duplicate-registration SIGABRT.
++# libonnx already exposes every symbol from libonnx_proto, so the separate
++# onnx_proto link entry is redundant and must be removed for shared builds.
++ov_link_system_libraries(${TARGET_NAME} PUBLIC onnx)
+ 
+ ov_add_clang_format_target(${TARGET_NAME}_clang FOR_TARGETS ${TARGET_NAME})

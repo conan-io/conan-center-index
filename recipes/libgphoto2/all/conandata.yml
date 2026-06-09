@@ -1,4 +1,7 @@
 sources:
+  "2.5.33":
+    url: "https://github.com/gphoto/libgphoto2/releases/download/v2.5.33/libgphoto2-2.5.33.tar.xz"
+    sha256: "28825f767a85544cb58f6e15028f8e53a5bb37a62148b3f1708b524781c3bef2"
   "2.5.31":
     url: "https://github.com/gphoto/libgphoto2/releases/download/v2.5.31/libgphoto2-2.5.31.tar.xz"
     sha256: "8fc7bf40f979459509b87dd4ff1aae9b6c1c2b4724d37db576081eec15406ace"

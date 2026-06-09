@@ -1,0 +1,56 @@
+Patch CMakeLists.txt to use the same filenames on Windows as 1.3.1:
+- For versions up to 1.3.1, the recipe was altering the filename in some cases
+- Version 1.3.2 uses filenames that are not final and will be changed in a future release
+- Ensure the DLL has the same name as before - in all cases
+
+Dont package the PDB
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e103c40..6c03482 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -149,16 +149,23 @@ set(ZLIB_SRCS
+     uncompr.c
+     zutil.c)
+ 
+-if(WIN32)
+-    set(zlib_static_suffix "s")
+-    set(CMAKE_DEBUG_POSTFIX "d")
+-endif(WIN32)
++if(WIN32 AND NOT MINGW)
++    set(zlib_static_suffix "lib")
++endif(WIN32 AND NOT MINGW)
+ 
+ if(ZLIB_BUILD_SHARED)
+     add_library(
+         zlib SHARED ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS}
+                     $<$<OR:$<BOOL:${WIN32}>,$<BOOL:${CYGWIN}>>:win32/zlib1.rc>)
+     add_library(ZLIB::ZLIB ALIAS zlib)
++    if(WIN32)
++        # always zlib1.dll on Windows (consistency with previous versions of the recipe)
++        set_target_properties(zlib PROPERTIES PREFIX "" RUNTIME_OUTPUT_NAME "zlib1")
++        if(WIN32 AND NOT MINGW)
++            # "zdll.lib" import library for "zlib1.dll" on Windows
++            set_target_properties(zlib PROPERTIES ARCHIVE_OUTPUT_NAME "zdll")
++        endif()
++    endif()
+     target_include_directories(
+         zlib
+         PUBLIC $<BUILD_INTERFACE:${zlib_BINARY_DIR}>
+@@ -237,14 +244,14 @@ if(ZLIB_INSTALL)
+             NAMESPACE ZLIB::
+             DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/zlib)
+ 
+-        if(MSVC)
++        if(0)
+             install(
+                 FILES $<TARGET_PDB_FILE:zlib>
+                 COMPONENT Runtime
+                 DESTINATION ${CMAKE_INSTALL_BINDIR}
+                 CONFIGURATIONS Debug OR RelWithDebInfo
+                 OPTIONAL)
+-        endif(MSVC)
++        endif(0)
+     endif(ZLIB_BUILD_SHARED)
+ 
+     if(ZLIB_BUILD_STATIC)
