@@ -90,7 +90,6 @@ class LibbaseConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libbase")
-        self.cpp_info.set_property("cmake_target_name", None)
 
         self.cpp_info.components["core"].libs = ["libbase"]
         self.cpp_info.components["core"].set_property("cmake_target_name", "libbase::libbase")
