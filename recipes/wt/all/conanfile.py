@@ -96,7 +96,7 @@ class WtConan(ConanFile):
         return ["program_options", "filesystem", "thread"]
 
     def requirements(self):
-        self.requires("boost/[>=1.83.0 <1.87.0]", transitive_headers = True)
+        self.requires("boost/[>=1.83.0 <=1.91.0]", transitive_headers = True)
         if self.options.connector_http:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_ssl:
@@ -112,7 +112,7 @@ class WtConan(ConanFile):
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.7.2")
         if self.options.with_haru:
-            self.requires("libharu/2.4.3")
+            self.requires("libharu/[>=2.4.6 <3]")
             
     def validate(self):
         miss_boost_required_comp = any(self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
@@ -212,9 +212,7 @@ class WtConan(ConanFile):
             tc.variables["MYSQL_DEFINITIONS"] = ";".join(f"-D{d}" for d in libmysqlclient_cppinfo.defines)
             tc.variables["MYSQL_FOUND"] = True
         if self.options.get_safe("with_postgres"):
-            tc.variables["POSTGRES_PREFIX"] = self._cmakify_path_list([self.dependencies["libpq"].package_folder])
-            tc.variables["POSTGRES_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libpq"))
-            tc.variables["POSTGRES_INCLUDE"] = self._cmakify_path_list(self.dependencies["libpq"].cpp_info.aggregated_components().includedirs)
+            # There's alredy a patch to call find_package(PostgreSQL REQUIRED CONFIG)
             tc.variables["POSTGRES_FOUND"] = True
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
             tc.variables["ODBC_PREFIX"] = self._cmakify_path_list([self.dependencies["odbc"].package_folder])
@@ -234,6 +232,7 @@ class WtConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("libpq", "cmake_additional_variables_prefixes", ["POSTGRES"])
         deps.generate()
 
     def _patch_sources(self):
@@ -296,7 +295,8 @@ class WtConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.components["wtmain"].system_libs = ["ws2_32", "mswsock", "winmm"]
             self.cpp_info.components["wtmain"].system_libs.extend(["dwrite", "d2d1", "shlwapi"])
-        self.cpp_info.components["wtmain"].requires = ["boost::boost"]
+        self.cpp_info.components["wtmain"].requires = ["boost::chrono", "boost::filesystem", "boost::thread",
+                                                       "boost::container", "boost::date_time", "boost::atomic"]
         if self.options.with_ssl:
             self.cpp_info.components["wtmain"].requires.append("openssl::openssl")
         if self.options.get_safe("with_unwind"):
@@ -308,13 +308,13 @@ class WtConan(ConanFile):
         if self.options.with_test:
             self.cpp_info.components["wttest"].set_property("cmake_target_name", "Wt::Test")
             self.cpp_info.components["wttest"].libs = ["wttest{}".format(suffix)]
-            self.cpp_info.components["wttest"].requires = ["wtmain"]
+            self.cpp_info.components["wttest"].requires = ["wtmain", "boost::unit_test_framework", "zlib::zlib"]
 
         # wthttp
         if self.options.connector_http:
             self.cpp_info.components["wthttp"].set_property("cmake_target_name", "Wt::HTTP")
             self.cpp_info.components["wthttp"].libs = ["wthttp{}".format(suffix)]
-            self.cpp_info.components["wthttp"].requires = ["wtmain", "boost::boost", "zlib::zlib"]
+            self.cpp_info.components["wthttp"].requires = ["wtmain", "boost::program_options", "zlib::zlib"]
             if self.options.with_ssl:
                 self.cpp_info.components["wthttp"].requires.append("openssl::openssl")
 

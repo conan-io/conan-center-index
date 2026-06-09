@@ -116,7 +116,12 @@ class OpenTelemetryCppConan(ConanFile):
             self.requires("prometheus-cpp/1.1.0")
 
     def validate(self):
-        check_min_cppstd(self, 14)
+        protobuf_requires_cppstd17 = self._needs_proto and Version(self.dependencies["protobuf"].ref.version) >= "6.30"
+        grpc_requires_cppstd17 = self.options.with_otlp_grpc and Version(self.dependencies["grpc"].ref.version) >= "1.70.0"
+        require_cppstd_17 = protobuf_requires_cppstd17 or grpc_requires_cppstd17
+
+        # opentelemetry-cpp itself requires C++14, but newer protobuf/grpc require the consumer to build with C++17
+        check_min_cppstd(self, 17 if require_cppstd_17 else 14)
 
         if self.options.with_otlp_grpc:
             if not self.dependencies["grpc"].options.cpp_plugin:

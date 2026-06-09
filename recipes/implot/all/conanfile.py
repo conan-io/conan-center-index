@@ -38,20 +38,10 @@ class ImplotConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        if Version(self.version) >= "0.14":
-            self.requires("imgui/1.90.5", transitive_headers=True)
-        elif Version(self.version) >= "0.13":
-            # imgui 1.89 renamed ImGuiKeyModFlags_* to  ImGuiModFlags_*
-            self.requires("imgui/1.88", transitive_headers=True)
-        else:
-            self.requires("imgui/1.86", transitive_headers=True)
+        self.requires("imgui/1.92.5", transitive_headers=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-
-    def validate(self):
-        if Version(self.version) < "0.13" and is_msvc(self) and self.dependencies["imgui"].options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared imgui.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -59,22 +49,11 @@ class ImplotConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["IMPLOT_SRC_DIR"] = self.source_folder.replace("\\", "/")
-        if Version(self.version) < "0.16":
-            # Set in code since v0.16 https://github.com/epezent/implot/commit/33c5a965f55f80057f197257d1d1cdb06523e963
-            tc.preprocessor_definitions["IMGUI_DEFINE_MATH_OPERATORS"] = ""
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        if Version(self.version) == "0.14" and Version(self.dependencies["imgui"].ref.version) >= "1.89.7":
-            # https://github.com/ocornut/imgui/commit/51f564eea6333bae9242f40c983a3e29d119a9c2
-            replace_in_file(self, os.path.join(self.source_folder, "implot.cpp"),
-                            "ImGuiButtonFlags_AllowItemOverlap",
-                            "ImGuiButtonFlags_AllowOverlap")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()

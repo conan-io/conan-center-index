@@ -1,4 +1,7 @@
 sources:
+  "1.4.350.0":
+    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/vulkan-sdk-1.4.350.0.tar.gz"
+    sha256: "91f88fc43abb36821a568c7fbb3f815e9baf946d5fe187928df279708d45e509"
   "1.4.313.0":
     url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/vulkan-sdk-1.4.313.0.tar.gz"
     sha256: "c736fa79d974c3513f5573b74249ed002aab59f1d15d1c13fc1d00644830869a"
@@ -20,9 +23,6 @@ sources:
   "1.3.239.0":
     url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.239.0.tar.gz"
     sha256: "fa2078408793b2173f174173a8784de56b6bbfbcb5fb958a07e46ef126c7eada"
-  "1.2.198.0":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.2.198.0.tar.gz"
-    sha256: "7d5d56296dcd88af84ed0fde969038370cac8600c4ef7e328788b7422d9025bb"
 patches:
   "1.3.268.0":
     - patch_file: "patches/1.3.268.0-0001-fix-apple-arm.patch"

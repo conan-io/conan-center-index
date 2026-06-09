@@ -80,7 +80,7 @@ class Hdf5Conan(ConanFile):
         elif self.options.szip_support == "with_szip":
             self.requires("szip/2.1.1")
         if self.options.parallel:
-            self.requires("openmpi/4.1.0")
+            self.requires("openmpi/[>=4.1.0 <5]")
 
     def validate(self):
         if self.options.parallel and not self.options.enable_unsupported:

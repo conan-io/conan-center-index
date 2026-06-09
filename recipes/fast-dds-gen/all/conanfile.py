@@ -78,5 +78,5 @@ class FastDdsGenConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "fastddsgen")
         self.cpp_info.set_property("cmake_target_name", "fastddsgen::fastddsgen")
 
-        fastdds_version = self.conan_data.get("fastdds_versions", {}).get(str(self.version), "3.2.1")
+        fastdds_version = self.conan_data.get("fastdds_versions", {}).get(str(self.version), "3.4.0")
         self.conf_info.define("user.fast-dds-gen:fastdds_version", fastdds_version)

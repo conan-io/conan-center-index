@@ -96,20 +96,12 @@ class OpenvinoConan(ConanFile):
         return self.settings.arch == "x86_64"
 
     @property
-    def _gna_option_available(self):
-        return self.settings.os in ["Linux", "Windows"] and self._target_x86_64 and Version(self.version) < "2024.0.0"
-
-    @property
     def _npu_option_available(self):
         return self.settings.os in ["Linux", "Windows"] and self._target_x86_64 and Version(self.version) >= "2024.1.0"
 
     @property
     def _gpu_option_available(self):
         return self.settings.os != "Macos" and self._target_x86_64
-
-    @property
-    def _preprocessing_available(self):
-        return "ade" in self._dependencies_versions
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["openvino"], strip_root=True)
@@ -165,22 +157,33 @@ class OpenvinoConan(ConanFile):
         if self.options.get_safe("enable_gpu"):
             self.requires("opencl-icd-loader/2023.04.17")
             self.requires("rapidjson/cci.20220822")
+            if Version(self.version) >= "2026.1.0":
+                self.requires("level-zero/1.28.2")
         if self._protobuf_required:
-            self.requires("protobuf/3.21.12")
+            if Version(self.version) >= "2026.1.0":
+                self.requires("protobuf/[>=4.25.3 <7]")
+            else:
+                self.requires("protobuf/3.21.12")
         if self.options.enable_tf_frontend:
             self.requires("snappy/1.1.10")
         if self.options.enable_onnx_frontend:
             self.requires(self._require("onnx"))
         if self.options.enable_tf_lite_frontend:
             self.requires("flatbuffers/23.5.26")
-        if self._preprocessing_available:
-            self.requires(self._require("ade"))
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def generate(self):
         deps = CMakeDeps(self)
+        if self.options.get_safe("enable_gpu") and Version(self.version) >= "2026.1.0":
+            # patches/2026.1.0-system-deps.patch turns the pkg_search_module
+            # call into find_package(level-zero) and drops the inline alias/
+            # message block, so CMakeDeps must provide both LevelZero::LevelZero
+            # (used by intel_gpu/intel_npu) and level_zero_FOUND (read by the
+            # fallback branch right below it).
+            deps.set_property("level-zero", "cmake_target_aliases", ["LevelZero::LevelZero"])
+            deps.set_property("level-zero", "cmake_extra_variables", {"level_zero_FOUND": "TRUE"})
         deps.generate()
 
         toolchain = CMakeToolchain(self)
@@ -193,8 +196,6 @@ class OpenvinoConan(ConanFile):
                 or not self.options.enable_cpu
                 or self.options.shared
             )
-        if self._gna_option_available:
-            toolchain.cache_variables["ENABLE_INTEL_GNA"] = False
         if self._npu_option_available:
             toolchain.cache_variables["ENABLE_INTEL_NPU"] = False
         # SW plugins
@@ -223,9 +224,9 @@ class OpenvinoConan(ConanFile):
             toolchain.cache_variables["ENABLE_SYSTEM_FLATBUFFERS"] = True
         if self.options.get_safe("enable_gpu"):
             toolchain.cache_variables["ENABLE_SYSTEM_OPENCL"] = True
+            if Version(self.version) >= "2026.1.0":
+                toolchain.cache_variables["ENABLE_SYSTEM_LEVEL_ZERO"] = True
         # misc
-        if self._preprocessing_available:
-            toolchain.cache_variables["ENABLE_GAPI_PREPROCESSING"] = True
         toolchain.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         toolchain.cache_variables["CPACK_GENERATOR"] = "CONAN"
         toolchain.cache_variables["ENABLE_PROFILING_ITT"] = False
@@ -295,18 +296,12 @@ class OpenvinoConan(ConanFile):
         if Version(self.version) >= "2025.1.0":
             openvino_runtime.requires.append("nlohmann_json::nlohmann_json")
         openvino_runtime.libs = [f"openvino{lib_suffix}"]
-        if self._preprocessing_available:
-            openvino_runtime.requires.append("ade::ade")
         if self._target_x86_64:
             openvino_runtime.requires.append("xbyak::xbyak")
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             openvino_runtime.system_libs = ["m", "dl", "pthread"]
         if self.settings.os == "Windows":
             openvino_runtime.system_libs.append("shlwapi")
-            if self._preprocessing_available:
-                openvino_runtime.system_libs.extend(["wsock32", "ws2_32"])
-        if Version(self.version) < "2024.0.0":
-            openvino_runtime.includedirs.append(os.path.join("include", "ie"))
 
         # Have to expose all internal libraries for static libraries case
         if not self.options.shared:
@@ -336,9 +331,6 @@ class OpenvinoConan(ConanFile):
                 openvino_runtime.libs.append(f"openvino_hetero_plugin{lib_suffix}")
             if self.options.enable_auto_batch:
                 openvino_runtime.libs.append(f"openvino_auto_batch_plugin{lib_suffix}")
-            # Preprocessing should come after plugins, because plugins depend on it
-            if self._preprocessing_available:
-                openvino_runtime.libs.extend([f"openvino_gapi_preproc{lib_suffix}", f"fluid{lib_suffix}"])
             # Frontends
             if self.options.enable_ir_frontend:
                 openvino_runtime.libs.append(f"openvino_ir_frontend{lib_suffix}")
@@ -359,8 +351,6 @@ class OpenvinoConan(ConanFile):
             if self.options.enable_pytorch_frontend:
                 openvino_runtime.libs.append(f"openvino_pytorch_frontend{lib_suffix}")
             # Common private dependencies should go last, because they satisfy dependencies for all other libraries
-            if Version(self.version) < "2024.0.0":
-                openvino_runtime.libs.append(f"openvino_builders{lib_suffix}")
             openvino_runtime.libs.extend([
                 f"openvino_reference{lib_suffix}",
                 f"openvino_shape_inference{lib_suffix}",
@@ -368,6 +358,8 @@ class OpenvinoConan(ConanFile):
                 # utils goes last since all others depend on it
                 f"openvino_util{lib_suffix}"
             ])
+            if Version(self.version) >= "2026.1.0":
+                openvino_runtime.libs.append(f"openvino_shutdown{lib_suffix}")
             if Version(self.version) >= "2025.1.0":
                 openvino_runtime.libs.append(f"openvino_common_translators{lib_suffix}")
             # set 'openvino' once again for transformations objects files (cyclic dependency)
@@ -381,6 +373,8 @@ class OpenvinoConan(ConanFile):
             openvino_runtime.requires.extend(["opencl-icd-loader::opencl-icd-loader", "rapidjson::rapidjson"])
             if self.settings.os == "Windows":
                 openvino_runtime.system_libs.append("setupapi")
+            if Version(self.version) >= "2026.1.0":
+                openvino_runtime.requires.append("level-zero::level-zero")
 
         openvino_runtime_c = self.cpp_info.components["Runtime_C"]
         openvino_runtime_c.set_property("cmake_target_name", "openvino::runtime::c")

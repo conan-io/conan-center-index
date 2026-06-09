@@ -1,12 +1,13 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
-import textwrap
 
-required_conan_version = ">=1.53.0"
+
+required_conan_version = ">=2.0"
 
 
 class ArcusConan(ConanFile):
@@ -45,58 +46,45 @@ class ArcusConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("protobuf/3.21.12")
+        self.requires("protobuf/[>=4.25.0 <7]")
+        self.requires("abseil/[*]")
+        self.tool_requires("cmake/[>=3.23]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        # Newer versions of protobuf require higher versions of C++ than arcus itself
+        protobuf_version = Version(self.dependencies["protobuf"].ref.version)
+        protobuf_release = Version(f"{protobuf_version.minor}.{protobuf_version.patch}")
+        min_cpp_std = 17 if protobuf_release >= Version("30.1") else 14
+        check_min_cppstd(self, min_cpp_std)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_PYTHON"] = False
-        tc.variables["BUILD_EXAMPLES"] = False
-        tc.variables["BUILD_STATIC"] = not self.options.shared
+        tc.cache_variables["BUILD_PYTHON"] = False
+        tc.cache_variables["BUILD_EXAMPLES"] = False
+        tc.cache_variables["BUILD_STATIC"] = not self.options.shared
         if is_msvc(self):
-            tc.variables["MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+            tc.cache_variables["MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        cmake = CMake(self)
-        cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {"Arcus": "Arcus::Arcus"}
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
+        copy(self, pattern="*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, pattern="*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, pattern="*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, pattern="*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, pattern="*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+        copy(self, pattern="*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Arcus")
@@ -106,9 +94,3 @@ class ArcusConan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "pthread"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Arcus"
-        self.cpp_info.names["cmake_find_package_multi"] = "Arcus"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

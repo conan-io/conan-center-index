@@ -61,11 +61,16 @@ class Fastnoise2Conan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version]["fastsimd"], strip_root=True, destination=os.path.join(self.source_folder, "fastsimd"))
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["FASTNOISE2_NOISETOOL"] = False
+        tc.cache_variables["FASTNOISE2_TOOLS"] = False
+        # INFO: Prevent CPM from downloading FastSIMD, use Conan local copy instead
+        tc.cache_variables["CPM_LOCAL_PACKAGES_ONLY"] = True
+        tc.cache_variables["CPM_USE_LOCAL_PACKAGES"] = True
+        tc.cache_variables["CPM_FastSIMD_SOURCE"] = os.path.join(self.source_folder, "fastsimd").replace("\\", "/")
         tc.generate()
 
     def build(self):
@@ -82,11 +87,16 @@ class Fastnoise2Conan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        lib_suffix = "D" if self.settings.build_type == "Debug" else ""
-        self.cpp_info.libs = [f"FastNoise{lib_suffix}"]
-
         self.cpp_info.set_property("cmake_file_name", "FastNoise2")
-        self.cpp_info.set_property("cmake_target_name", "FastNoise2::FastNoise")
 
+        lib_suffix = "D" if self.settings.build_type == "Debug" else ""
+        self.cpp_info.components["fastnoise2"].libs = [f"FastNoise{lib_suffix}"]
+        self.cpp_info.components["fastnoise2"].set_property("cmake_target_name", "FastNoise2::FastNoise")
+        if not self.options.shared:
+            self.cpp_info.components["fastnoise2"].defines.append("FASTNOISE_STATIC_LIB")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["fastnoise2"].system_libs.append("m")
+
+        # INFO: FastNoise2 packages FastSIMD header files and export a CMake target
+        self.cpp_info.components["fastsimd"].set_property("cmake_target_name", "FastNoise2::FastSIMD")
+        self.cpp_info.components["fastsimd"].libs = []

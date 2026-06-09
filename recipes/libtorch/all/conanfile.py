@@ -1,5 +1,4 @@
 import os
-import sys
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
@@ -10,11 +9,12 @@ from conan.tools.files import (
     rmdir, copy,
 )
 from conan.tools.apple import is_apple_os
-from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from pathlib import Path
-from conan.tools.system import PipEnv
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.system import PyEnv
 
-required_conan_version = ">=2.23"
+required_conan_version = ">=2.26"
 
 class LibtorchRecipe(ConanFile):
     name = "libtorch"
@@ -47,6 +47,11 @@ class LibtorchRecipe(ConanFile):
     implements = ["auto_shared_fpic"]
 
     @property
+    def _is_clang_cl(self):
+        return self.settings.compiler == "clang" and self.settings.os == "Windows" and \
+               self.settings.compiler.get_safe("runtime")
+
+    @property
     def _has_backtrace(self):
         # Even though backtrace is Windows compatible, libtorch expects to find it only on Unix-like systems
         # Failing otherwise as it will include headers not present in windows
@@ -58,7 +63,7 @@ class LibtorchRecipe(ConanFile):
 
     @property
     def _has_qnnpack(self):
-        return self.settings.compiler != "msvc"
+        return not is_msvc(self) and not self._is_clang_cl
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -74,7 +79,7 @@ class LibtorchRecipe(ConanFile):
 
     def requirements(self):
         self.requires("concurrentqueue/1.0.4", transitive_headers=True)
-        self.requires("cpp-httplib/0.27.0")
+        self.requires("cpp-httplib/[~0.30]")
         self.requires("cpuinfo/[>=cci.20250321]", transitive_headers=True)
         self.requires("eigen/[>=3 <4]")
         # mobile_bytecode_generated.h is fixed to 24.12.23. If we want to support other versions, we will need to regenerate the header
@@ -135,6 +140,10 @@ class LibtorchRecipe(ConanFile):
 
     def generate(self):
         # torchgen/gen.py includes pyyaml and typing_extensions modules
+        # VirtualBuildEnv first so PipEnv's PATH (generated last) takes
+        # precedence when CMake runs
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
 
         deps = CMakeDeps(self)
         deps.set_property("concurrentqueue", "cmake_target_name", "moodycamel")
@@ -205,16 +214,15 @@ class LibtorchRecipe(ConanFile):
         tc.cache_variables["USE_NNPACK"] = self.options.get_safe("with_nnpack")
         tc.cache_variables["USE_NUMA"] = self.options.get_safe("with_numa")
 
-        tc.cache_variables['Python_FIND_UNVERSIONED_NAMES'] = 'FIRST'
-        tc.cache_variables['Python_FIND_STRATEGY'] = 'LOCATION'
-        tc.cache_variables["Python_ROOT_DIR"] = os.path.join(self.build_folder, "conan_pipenv").replace("\\", "/")
-        tc.cache_variables["Python_EXECUTABLE"] = os.path.join(self.build_folder, "conan_pipenv", "bin" if sys.platform != "win32" else "Scripts", "python" + (".exe" if sys.platform == "win32" else "")).replace("\\", "/")
+        pyenv = PyEnv(self)
+        pyenv.install(["pyyaml", "typing-extensions"])
+        pyenv.generate()
+        # PyEnv is set up to put the virtual env first in PATH
+        # but CMake's default behaviour may prioritise other locations
+        tc.cache_variables['Python_ROOT_DIR'] = pyenv.env_dir
+        tc.cache_variables['Python_EXECUTABLE'] = pyenv.env_exe
 
         tc.generate()
-
-        pip = PipEnv(self)
-        pip.install(["pyyaml", "typing-extensions"])
-        pip.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -249,6 +257,8 @@ class LibtorchRecipe(ConanFile):
             return component
 
         self.cpp_info.set_property("cmake_file_name", "Torch")
+        # Make it compatible with upstream example usages
+        self.cpp_info.set_property("cmake_additional_variables_prefixes", ["TORCH"])
 
         # C10 component
         c10 = _whole_archive(self.cpp_info.components["c10"], "c10")

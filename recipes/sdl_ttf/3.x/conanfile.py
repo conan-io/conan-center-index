@@ -36,7 +36,7 @@ class SdlttfConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("freetype/2.13.2")
+        self.requires("freetype/[>=2.13.2 <3]")
         self.requires("sdl/[>=3.2.6 <4]", transitive_headers=True)
         if self.options.with_harfbuzz:
             self.requires("harfbuzz/[>=8.3.0]")
