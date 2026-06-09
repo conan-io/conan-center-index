@@ -36,7 +36,6 @@ patches:
       patch_type: "conan"
   "10.0.2":
     - patch_file: "patches/0002-bigobj-spx-msvc-debug.patch"
-      patch_description: "Add missing /bigobj flag for LPS=spx in MSVC debug mode, proposed in upstream as https://github.com/scipopt/scip/pull/200"
 version_mappings:
   "10.0.2":
     soplex: "8.0.2"
