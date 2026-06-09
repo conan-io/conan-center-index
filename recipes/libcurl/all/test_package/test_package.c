@@ -3,39 +3,6 @@
 
 int main(void)
 {
-  CURL *curl;
-  int retval = 0;
-  const char *const *proto;
-  const char *const *feat;
-  curl_version_info_data* id = curl_version_info(CURLVERSION_NOW);
-  if (!id)
-    return 1;
-
-  printf("protocols: ");
-  for(proto = id->protocols; *proto; proto++) {
-    printf("%s ", *proto);
-  }
-  printf("\nversion: %s\nssl version: %s\n", id->version, id->ssl_version);
-
-  printf("features: ");
-  for(feat = id->feature_names; *feat; feat++) {
-    printf("%s ", *feat);
-  }
-
-  curl = curl_easy_init();
-  if(curl) {
-    char errbuf[CURL_ERROR_SIZE];
-
-    /* provide a buffer to store errors in */
-    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
-
-    /* always cleanup */
-    curl_easy_cleanup(curl);
-    printf("Succeed\n");
-  } else {
-    printf("Failed to init curl\n");
-    retval = 3;
-  }
-
-  return retval;
+  printf("libcurl version %s\n", curl_version());
+  return 0;
 }

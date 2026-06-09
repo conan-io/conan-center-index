@@ -127,6 +127,10 @@ class GStreamerConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "GStreamer")
+        self.cpp_info.set_property("cmake_target_name", "GStreamer::GStreamer")
+        # INFO: Keep backwards compatibility with old CMake target
+        self.cpp_info.set_property("cmake_target_aliases", ["gstreamer::gstreamer"])
         gst_plugin_path = os.path.join(self.package_folder, "lib", "gstreamer-1.0")
 
         pkgconfig_variables = {
@@ -144,6 +148,8 @@ class GStreamerConan(ConanFile):
         pkgconfig_custom_content = "\n".join("{}={}".format(key, value) for key, value in pkgconfig_variables.items())
 
         self.cpp_info.components["gstreamer-1.0"].set_property("pkg_config_name", "gstreamer-1.0")
+        self.cpp_info.components["gstreamer-1.0"].set_property("cmake_target_name", "GStreamer::gstreamer-1.0")
+        self.cpp_info.components["gstreamer-1.0"].set_property("cmake_target_aliases", ["gstreamer::gstreamer-1.0"])
         self.cpp_info.components["gstreamer-1.0"].names["pkg_config"] = "gstreamer-1.0"
         self.cpp_info.components["gstreamer-1.0"].requires = ["glib::glib-2.0", "glib::gobject-2.0"]
         if not self.options.shared:
@@ -152,10 +158,12 @@ class GStreamerConan(ConanFile):
         self.cpp_info.components["gstreamer-1.0"].libs = ["gstreamer-1.0"]
         self.cpp_info.components["gstreamer-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
         if self.settings.os == "Linux":
-            self.cpp_info.components["gstreamer-1.0"].system_libs = ["m", "dl", "nsl"]
+            self.cpp_info.components["gstreamer-1.0"].system_libs = ["m", "dl"]
         self.cpp_info.components["gstreamer-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
 
         self.cpp_info.components["gstreamer-base-1.0"].set_property("pkg_config_name", "gstreamer-base-1.0")
+        self.cpp_info.components["gstreamer-base-1.0"].set_property("cmake_target_name", "GStreamer::gstreamer-base-1.0")
+        self.cpp_info.components["gstreamer-base-1.0"].set_property("cmake_target_aliases", ["gstreamer::gstreamer-base-1.0"])
         self.cpp_info.components["gstreamer-base-1.0"].names["pkg_config"] = "gstreamer-base-1.0"
         self.cpp_info.components["gstreamer-base-1.0"].requires = ["gstreamer-1.0"]
         self.cpp_info.components["gstreamer-base-1.0"].libs = ["gstbase-1.0"]
@@ -163,6 +171,8 @@ class GStreamerConan(ConanFile):
         self.cpp_info.components["gstreamer-base-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
 
         self.cpp_info.components["gstreamer-controller-1.0"].set_property("pkg_config_name", "gstreamer-controller-1.0")
+        self.cpp_info.components["gstreamer-controller-1.0"].set_property("cmake_target_name", "GStreamer::gstreamer-controller-1.0")
+        self.cpp_info.components["gstreamer-controller-1.0"].set_property("cmake_target_aliases", ["gstreamer::gstreamer-controller-1.0"])
         self.cpp_info.components["gstreamer-controller-1.0"].names["pkg_config"] = "gstreamer-controller-1.0"
         self.cpp_info.components["gstreamer-controller-1.0"].requires = ["gstreamer-1.0"]
         self.cpp_info.components["gstreamer-controller-1.0"].libs = ["gstcontroller-1.0"]
@@ -172,6 +182,8 @@ class GStreamerConan(ConanFile):
         self.cpp_info.components["gstreamer-controller-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
 
         self.cpp_info.components["gstreamer-net-1.0"].set_property("pkg_config_name", "gstreamer-net-1.0")
+        self.cpp_info.components["gstreamer-net-1.0"].set_property("cmake_target_name", "GStreamer::gstreamer-net-1.0")
+        self.cpp_info.components["gstreamer-net-1.0"].set_property("cmake_target_aliases", ["gstreamer::gstreamer-net-1.0"])
         self.cpp_info.components["gstreamer-net-1.0"].names["pkg_config"] = "gstreamer-net-1.0"
         self.cpp_info.components["gstreamer-net-1.0"].requires = ["gstreamer-1.0", "glib::gio-2.0"]
         if Version(self.version) >= "1.21.1" and self.settings.os != "Windows":
@@ -181,6 +193,8 @@ class GStreamerConan(ConanFile):
         self.cpp_info.components["gstreamer-net-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
 
         self.cpp_info.components["gstreamer-check-1.0"].set_property("pkg_config_name", "gstreamer-check-1.0")
+        self.cpp_info.components["gstreamer-check-1.0"].set_property("cmake_target_name", "GStreamer::gstreamer-check-1.0")
+        self.cpp_info.components["gstreamer-check-1.0"].set_property("cmake_target_aliases", ["gstreamer::gstreamer-check-1.0"])
         self.cpp_info.components["gstreamer-check-1.0"].names["pkg_config"] = "gstreamer-check-1.0"
         self.cpp_info.components["gstreamer-check-1.0"].requires = ["gstreamer-1.0"]
         self.cpp_info.components["gstreamer-check-1.0"].libs = ["gstcheck-1.0"]
@@ -192,6 +206,8 @@ class GStreamerConan(ConanFile):
         # gstcoreelements and gstcoretracers are plugins which should be loaded dynamically, and not linked to directly
         if not self.options.shared:
             self.cpp_info.components["gstcoreelements"].set_property("pkg_config_name", "gstcoreelements")
+            self.cpp_info.components["gstcoreelements"].set_property("cmake_target_name", "GStreamer::gstcoreelements")
+            self.cpp_info.components["gstcoreelements"].set_property("cmake_target_aliases", ["gstreamer::gstcoreelements"])
             self.cpp_info.components["gstcoreelements"].names["pkg_config"] = "gstcoreelements"
             self.cpp_info.components["gstcoreelements"].requires = ["glib::gobject-2.0", "glib::glib-2.0", "gstreamer-1.0", "gstreamer-base-1.0"]
             self.cpp_info.components["gstcoreelements"].libs = ["gstcoreelements"]
@@ -199,6 +215,8 @@ class GStreamerConan(ConanFile):
             self.cpp_info.components["gstcoreelements"].libdirs = [gst_plugin_path]
 
             self.cpp_info.components["gstcoretracers"].set_property("pkg_config_name", "gstcoretracers")
+            self.cpp_info.components["gstcoretracers"].set_property("cmake_target_name", "GStreamer::gstcoretracers")
+            self.cpp_info.components["gstcoretracers"].set_property("cmake_target_aliases", ["gstreamer::gstcoretracers"])
             self.cpp_info.components["gstcoretracers"].names["pkg_config"] = "gstcoretracers"
             self.cpp_info.components["gstcoretracers"].requires = ["gstreamer-1.0"]
             self.cpp_info.components["gstcoretracers"].libs = ["gstcoretracers"]

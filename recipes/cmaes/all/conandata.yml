@@ -1,0 +1,4 @@
+sources:
+  "0.10.2":
+    url: "https://github.com/CMA-ES/libcmaes/archive/refs/tags/v0.10.2.tar.gz"
+    sha256: "466e2775db4166f8a0662f0d986c637a7e36c9b8e93bc0c12cb15a884620e23d"

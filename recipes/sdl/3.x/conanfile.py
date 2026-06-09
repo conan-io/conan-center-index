@@ -1,11 +1,10 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.files import get, replace_in_file, copy, rmdir
+from conan.tools.files import get, copy, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2"
@@ -22,6 +21,7 @@ _subsystems = [
     ("power", []),
     ("sensor", []),
     ("dialog", []),
+    ("tray", []),
 ]
 
 class SDLConan(ConanFile):
@@ -95,7 +95,7 @@ class SDLConan(ConanFile):
             "metal": True,
             "directx": True,
             ## Hidapi
-            "libusb": True,
+            "libusb": False,
             ## Other
             "libudev": True,
             "dbus": True,
@@ -161,7 +161,9 @@ class SDLConan(ConanFile):
             self.options.rm_safe("xshape")
             self.options.rm_safe("xsync")
 
-        if not self.options.get_safe("hidapi"):
+        if not self.options.get_safe("hidapi") or self.settings.os in ["Android", "iOS", "tvOS", "visionOS", "watchOS"]:
+            # libusb is only an option if hidapi is enabled: https://github.com/libsdl-org/SDL/blob/db3a35e9bc3aa245dfbe67585b3f67d7b4b62845/cmake/sdlchecks.cmake#L1111
+            # libusb is not available on Android/iOS/tvOS/visionOS/watchOS https://github.com/libsdl-org/SDL/blob/db3a35e9bc3aa245dfbe67585b3f67d7b4b62845/CMakeLists.txt#L159-L160
             self.options.rm_safe("libusb")
 
     def validate(self):
@@ -173,11 +175,6 @@ class SDLConan(ConanFile):
                         raise ConanInvalidConfiguration(f'-o="&:{subsystem}=True" subsystem requires -o="&:{dependency}=True"')
 
     def validate_build(self):
-        # TODO: Remove this one new CMakeDeps is default
-        if conan_version >= "2.12" and self._needs_libusb and self.dependencies["libusb"].options.get_safe("shared", True)\
-            and not self.conf.get("tools.cmake.cmakedeps:new"):
-            raise ConanInvalidConfiguration("SDL with shared libusb requires new CMakeDeps generator")
-
         if self.settings.os == "Android" and not self.conf.get("user.sdl:android", False):
             raise ConanInvalidConfiguration("SDL builds on android require extra configuration on the user's side. "
                                             "Set -c user.sdl:android=True if you understand it and want to build it")
@@ -188,16 +185,16 @@ class SDLConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+        # Prevent inspecting target properties for libusb to derive the name of the .so/.dll
+        # instead, just link the library normally, see
+        # https://github.com/libsdl-org/SDL/blob/96292a5b464258a2b926e0a3d72f8b98c2a81aa6/cmake/sdlchecks.cmake#L1107-L1113
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "sdlchecks.cmake"),
+                        "target_get_dynamic_library(dynamic_libusb", "#target_get_dynamic_library(dynamic_libusb")
+
     @property
     def _is_unix_sys(self):
         """ True for UNIX but not Macos/Android"""
         return self.settings.os in ("Linux", "FreeBSD")
-
-    @property
-    def _needs_libusb(self):
-        return (self.options.get_safe("libusb") and
-                (not is_apple_os(self) or self.settings.os == "Macos") and
-                self.settings.os != "Android")
 
     @property
     def _supports_opengl(self):
@@ -216,7 +213,7 @@ class SDLConan(ConanFile):
     def requirements(self):
         if self.options.get_safe("libiconv"):
             self.requires("libiconv/1.17")
-        if self._needs_libusb:
+        if self.options.get_safe("libusb"):
             self.requires("libusb/1.0.26")
         if self._supports_opengl:
             self.requires("opengl/system")
@@ -231,8 +228,9 @@ class SDLConan(ConanFile):
         if self.options.get_safe("sndio"):
             self.requires("libsndio/1.9.0")
         if self.options.get_safe("wayland"):
-            self.requires("wayland/1.22.0")
             self.requires("xkbcommon/1.6.0")
+            # Version comes from xkbcommon
+            self.requires("wayland/[^1.22]")
             self.requires("egl/system")
         if self.options.get_safe("x11"):
             self.requires("xorg/system")
@@ -261,15 +259,15 @@ class SDLConan(ConanFile):
         for subsystem in _subsystems:
             tc.cache_variables[f"SDL_{subsystem[0].upper()}"] = self.options.get_safe(subsystem[0])
 
-        if self._supports_opengl:
-            tc.cache_variables["SDL_OPENGL"] = True
-        if self._supports_opengles:
-            tc.cache_variables["SDL_OPENGLES"] = True
+        tc.cache_variables["SDL_OPENGL"] = bool(self._supports_opengl)
+        tc.cache_variables["SDL_OPENGLES"] = bool(self._supports_opengles)
 
-        tc.cache_variables["SDL_HIDAPI_LIBUSB"] = self._needs_libusb
-        if self._needs_libusb:
-            # TODO: This is a supported configuration in upstream
-            tc.cache_variables["SDL_HIDAPI_LIBUSB_SHARED"] = self.dependencies["libusb"].options.get_safe("shared", True)
+        if self.options.hidapi:
+            tc.cache_variables["SDL_HIDAPI_LIBUSB"] = self.options.get_safe("libusb")
+            # Prevent loading shared libusb during runtime
+            # This just means it will be linked traditionally, even when libusb is shared
+            # See https://github.com/libsdl-org/SDL/blob/96292a5b464258a2b926e0a3d72f8b98c2a81aa6/cmake/sdlchecks.cmake#L1107-L1113
+            tc.cache_variables["SDL_HIDAPI_LIBUSB_SHARED"] = False
 
         tc.variables["SDL_VULKAN"] = self.options.get_safe("vulkan")
         tc.variables["SDL_METAL"] = self.options.get_safe("metal")
@@ -319,18 +317,7 @@ class SDLConan(ConanFile):
         pcdeps = PkgConfigDeps(self)
         pcdeps.generate()
 
-    def _patch_sources(self):
-        # TODO: Once new CMakeDeps is default, remove this
-        # Right now this would fail at runtime for shared libusb, but we're
-        # validating it out for now. The new incubating cmakedeps in 2.12 is required
-        # to build that configuration, else remove the failing line in the old one
-        if conan_version < "2.12" or not self.conf.get("tools.cmake.cmakedeps:new"):
-            replace_in_file(self, os.path.join(self.source_folder, "cmake", "sdlchecks.cmake"),
-                        "target_get_dynamic_library(dynamic_libusb LibUSB::LibUSB)",
-                        "")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -342,7 +329,6 @@ class SDLConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-
 
     @property
     def _is_clang_cl(self):
@@ -376,7 +362,7 @@ class SDLConan(ConanFile):
         if self.options.get_safe("libudev"):
             self.cpp_info.components["sdl3"].requires.append("libudev::libudev")
 
-        if self._needs_libusb:
+        if self.options.get_safe("libusb"):
             self.cpp_info.components["sdl3"].requires.append("libusb::libusb")
 
         if self.options.get_safe("dbus"):
@@ -437,7 +423,6 @@ class SDLConan(ConanFile):
             if self.options.get_safe("camera"):
                 if self.settings.os in ("Macos", "iOS"):
                     self.cpp_info.components["sdl3"].frameworks.append("CoreMedia")
-                if Version(self.version) >= "3.2.14":
                     self.cpp_info.components["sdl3"].frameworks.append("AVFoundation")
 
             if self.options.get_safe("joystick"):

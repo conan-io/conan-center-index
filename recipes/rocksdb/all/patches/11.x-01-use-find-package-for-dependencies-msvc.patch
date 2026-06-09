@@ -1,0 +1,16 @@
+Ensure that find_package is used for third-party dependencies,
+even when building on Windows with MSVC.
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c476731..ec0ff69 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -106,7 +106,7 @@ endif()
+ 
+ include(CMakeDependentOption)
+ 
+-if(MSVC)
++if(0)
+   option(WITH_GFLAGS "build with GFlags" OFF)
+   option(WITH_XPRESS "build with windows built in compression" OFF)
+   option(ROCKSDB_SKIP_THIRDPARTY "skip thirdparty.inc" OFF)

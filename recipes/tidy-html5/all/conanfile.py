@@ -5,7 +5,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 
 class TidyHtml5Conan(ConanFile):
@@ -28,6 +28,7 @@ class TidyHtml5Conan(ConanFile):
         "fPIC": True,
         "support_localizations": True,
     }
+    languages = "C"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -39,8 +40,6 @@ class TidyHtml5Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -50,15 +49,16 @@ class TidyHtml5Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_TAB2SPACE"] = False
-        tc.variables["BUILD_SAMPLE_CODE"] = False
-        tc.variables["TIDY_COMPAT_HEADERS"] = False
-        tc.variables["SUPPORT_CONSOLE_APP"] = False
-        tc.variables["SUPPORT_LOCALIZATIONS"] = self.options.support_localizations
-        tc.variables["ENABLE_DEBUG_LOG"] = False
-        tc.variables["ENABLE_ALLOC_DEBUG"] = False
-        tc.variables["ENABLE_MEMORY_DEBUG"] = False
-        tc.variables["BUILD_SHARED_LIB"] = self.options.shared
+        tc.cache_variables["BUILD_TAB2SPACE"] = False
+        tc.cache_variables["BUILD_SAMPLE_CODE"] = False
+        tc.cache_variables["TIDY_COMPAT_HEADERS"] = False
+        tc.cache_variables["SUPPORT_CONSOLE_APP"] = False
+        tc.cache_variables["SUPPORT_LOCALIZATIONS"] = self.options.support_localizations
+        tc.cache_variables["ENABLE_DEBUG_LOG"] = False
+        tc.cache_variables["ENABLE_ALLOC_DEBUG"] = False
+        tc.cache_variables["ENABLE_MEMORY_DEBUG"] = False
+        tc.cache_variables["BUILD_SHARED_LIB"] = self.options.shared
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):

@@ -8,7 +8,7 @@ from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">2.1"
 
 
 class S2GeometryConan(ConanFile):
@@ -29,20 +29,6 @@ class S2GeometryConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "6",
-            "clang": "7",
-            "apple-clang": "10",
-            "Visual Studio": "15",
-            "msvc": "191",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -58,21 +44,24 @@ class S2GeometryConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("abseil/20230802.1", transitive_headers=True, transitive_libs=True)
+        abseil_lower_bound = "20230802.1" if Version(self.version) < "0.12.0" else "20240116.1"
+        # tested up to 20250127.0, increase if known to be compatible with newer versions
+        self.requires(f"abseil/[>={abseil_lower_bound} <=20250127.0]", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
 
-    def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+    def build_requirements(self):
+        if Version(self.version) >= "0.12.0":
+            self.tool_requires("cmake/[>=3.18 <4]")
 
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+    def validate(self):
+        check_min_cppstd(self, 14 if Version(self.version) < "0.12.0" else 17)
 
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared with Visual Studio")
+
+        abseil_cppstd = self.dependencies.host['abseil'].info.settings.compiler.cppstd
+        if abseil_cppstd != self.settings.compiler.cppstd:
+            raise ConanInvalidConfiguration(f"s2geometry and abseil must be built with the same compiler.cppstd setting")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

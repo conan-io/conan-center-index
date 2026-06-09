@@ -11,3 +11,5 @@ versions:
     folder: cmake
   "24.09":
     folder: cmake
+  "25.05":
+    folder: cmake

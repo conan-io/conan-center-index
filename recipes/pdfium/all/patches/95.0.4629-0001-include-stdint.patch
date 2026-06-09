@@ -1,0 +1,10 @@
+--- a/core/fxcodec/fx_codec.h
++++ b/core/fxcodec/fx_codec.h
+@@ -7,6 +7,7 @@
+ #ifndef CORE_FXCODEC_FX_CODEC_H_
+ #define CORE_FXCODEC_FX_CODEC_H_
+
++#include <stdint.h>
+ #include <map>
+
+ #include "third_party/base/optional.h"

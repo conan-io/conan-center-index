@@ -76,7 +76,7 @@ class FollyConan(ConanFile):
         self.requires("double-conversion/3.3.0", transitive_headers=True, transitive_libs=True)
         if Version(self.version) > "2024.08.26.00":
             self.requires("fast_float/8.0.2")
-        self.requires("gflags/2.2.2")
+        self.requires("gflags/[>=2.2.2 <3]")
         self.requires("glog/0.7.1", transitive_headers=True, transitive_libs=True)
         self.requires("libevent/2.1.12", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
@@ -86,11 +86,11 @@ class FollyConan(ConanFile):
         self.requires("zstd/[~1.5]", transitive_libs=True)
         if not is_msvc(self):
             self.requires("libdwarf/0.9.1")
-        self.requires("libsodium/1.0.20")
+        self.requires("libsodium/[~1.0.20]")
         self.requires("xz_utils/[>=5.4.5 <6]")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("libiberty/9.1.0")
-            self.requires("libunwind/1.8.0")
+            self.requires("libunwind/[>=1.8.0 <2]")
         if self.settings.os == "Linux":
             if Version(self.version) >= "2025.02.24.00":
                 # folly/io/async/IoUringZeroCopyBufferPool.h:57

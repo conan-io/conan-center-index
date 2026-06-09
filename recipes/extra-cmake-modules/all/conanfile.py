@@ -2,8 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy
-from conan.tools.scm import Version
+from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
 
 required_conan_version = ">=1.50.0"
 
@@ -22,15 +21,18 @@ class ExtracmakemodulesConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def package_id(self):
         self.info.clear()
 
     def build_requirements(self):
-        if Version(self.version) >= "5.84.0":
-            self.tool_requires("cmake/[>=3.16 <4]")
+        self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)

@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, rmdir
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
@@ -9,7 +9,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 class DacapClipConan(ConanFile):
     name = "dacap-clip"
@@ -33,10 +33,6 @@ class DacapClipConan(ConanFile):
         "with_image": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 11
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -59,8 +55,7 @@ class DacapClipConan(ConanFile):
             self.requires("xorg/system")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 11)
         if is_msvc(self) and self.info.settings.build_type == "Debug" and self.info.options.shared == True:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support MSVC debug shared build (now).")
 
@@ -75,6 +70,8 @@ class DacapClipConan(ConanFile):
         toolchain.variables["CLIP_ENABLE_IMAGE"] = self.options.get_safe("with_image", False)
         if is_msvc(self):
             toolchain.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = bool(self.options.shared)
+        if Version(self.version) < "1.10":
+            toolchain.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         toolchain.generate()
 
         deps = CMakeDeps(self)
@@ -87,11 +84,18 @@ class DacapClipConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "clip.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
-        copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        if Version(self.version) >= "1.10":
+            cmake = CMake(self)
+            cmake.install()
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        else:
+            copy(self, "clip.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
+            copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        # FIXME: Upstream does not support shared libraries on Windows, we should not have allowed this option
+        # but keep this as not to break existing consumers
         copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
 
     def package_info(self):
@@ -115,7 +119,3 @@ class DacapClipConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "clip")
         self.cpp_info.set_property("cmake_target_name", "clip::clip")
-
-    # TODO: Remove on Conan 2.0
-        self.cpp_info.names["cmake_find_package"] = "clip"
-        self.cpp_info.names["cmake_find_package_multi"] = "clip"

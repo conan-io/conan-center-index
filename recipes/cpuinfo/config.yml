@@ -1,4 +1,8 @@
 versions:
+  "cci.20251210":
+    folder: all
+  "cci.20250110":
+    folder: all
   "cci.20231129":
     folder: all
   "cci.20230118":

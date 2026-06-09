@@ -2,18 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import (
-    apply_conandata_patches,
-    copy,
-    export_conandata_patches,
-    get,
-    rmdir,
-)
+from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 
 class GinkgoConan(ConanFile):
@@ -33,35 +26,31 @@ class GinkgoConan(ConanFile):
         "fPIC": [True, False],
         "openmp": [True, False],
         "cuda": [True, False],
+        "half": [True, False],
+        "bfloat16": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": False,
         "openmp": False,
         "cuda": False,
+        "half": True,
+        "bfloat16": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return "14"
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "193",
-            "gcc": "5.4",
-            "clang": "3.9",
-            "apple-clang": "10.0",
-            "intel": "18",
-        }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        is_mingw = self.settings.os == "Windows" and self.settings.compiler == "gcc"
+        if is_mingw or is_msvc(self):
+            # option was added in 1.9.0
+            # option not supported for msvc/mingw (build system forces it to OFF anyway)
+            # see https://github.com/ginkgo-project/ginkgo/blob/d7e1450b6ba9ee90dbaa839f4b4b5a5ad59e28cc/CMakeLists.txt#L46-L51
+            del self.options.half
+            # option was added in 1.10.0
+            # same reason to force it of as for half
+            del self.options.bfloat16
 
     def configure(self):
         if self.options.shared:
@@ -71,27 +60,10 @@ class GinkgoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
-        def loose_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
-
-        minimum_version = self._minimum_compilers_version.get(
-            str(self.settings.compiler)
-        )
-        if minimum_version and loose_lt_semver(
-            str(self.settings.compiler.version), minimum_version
-        ):
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
         if is_msvc(self) and self.options.shared:
-            if self.settings.build_type == "Debug" and Version(self.version) >= "1.7.0":
+            if self.settings.build_type == "Debug":
                 raise ConanInvalidConfiguration(
                     "Ginkgo >= 1.7.0 cannot be built in shared debug mode on Windows"
                 )
@@ -101,8 +73,7 @@ class GinkgoConan(ConanFile):
                 )
 
     def build_requirements(self):
-        if Version(self.version) >= "1.7.0":
-            self.tool_requires("cmake/[>=3.16 <4]")
+        self.tool_requires("cmake/[>=3.18]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -117,16 +88,17 @@ class GinkgoConan(ConanFile):
         tc.variables["GINKGO_BUILD_OMP"] = self.options.openmp
         tc.variables["GINKGO_BUILD_CUDA"] = self.options.cuda
         tc.variables["GINKGO_BUILD_HIP"] = False
-        if Version(self.version) >= "1.7.0":
-            tc.variables["GINKGO_BUILD_SYCL"] = False
-        else:
-            tc.variables["GINKGO_BUILD_DPCPP"] = False
+        tc.variables["GINKGO_BUILD_SYCL"] = False
+
         tc.variables["GINKGO_BUILD_HWLOC"] = False
         tc.variables["GINKGO_BUILD_MPI"] = False
+        if "half" in self.options:
+            tc.variables["GINKGO_ENABLE_HALF"] = self.options.half
+        if "bfloat16" in self.options:
+            tc.variables["GINKGO_ENABLE_BFLOAT16"] = self.options.bfloat16
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -149,9 +121,8 @@ class GinkgoConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "ginkgo")
 
         debug_suffix = "d" if self.settings.build_type == "Debug" else ""
-        has_dpcpp_device = Version(self.version) >= "1.4.0"
         # Shared MSVC builds ues a separate library for part of Ginkgo since 1.8.0
-        has_config_library = Version(self.version) >= "1.8.0" and self.options.shared and self.settings.os == "Windows"
+        has_config_library = self.options.shared and self.settings.os == "Windows"
 
         self.cpp_info.components["ginkgo_core"].set_property(
             "cmake_target_name", "Ginkgo::ginkgo"
@@ -191,44 +162,35 @@ class GinkgoConan(ConanFile):
             "ginkgo_reference" + debug_suffix
         ]
 
-        if has_dpcpp_device:  # Always add these components
-            # See https://github.com/conan-io/conan-center-index/pull/7044#discussion_r698181588
-            self.cpp_info.components["ginkgo_core"].requires += ["ginkgo_dpcpp"]
-            self.cpp_info.components["ginkgo_core"].requires += ["ginkgo_device"]
+        # See https://github.com/conan-io/conan-center-index/pull/7044#discussion_r698181588
+        self.cpp_info.components["ginkgo_core"].requires += ["ginkgo_dpcpp"]
+        self.cpp_info.components["ginkgo_core"].requires += ["ginkgo_device"]
 
-            self.cpp_info.components["ginkgo_dpcpp"].set_property(
-                "cmake_target_name", "Ginkgo::ginkgo_dpcpp"
-            )
-            self.cpp_info.components["ginkgo_dpcpp"].libs = [
-                "ginkgo_dpcpp" + debug_suffix
-            ]
+        self.cpp_info.components["ginkgo_dpcpp"].set_property(
+            "cmake_target_name", "Ginkgo::ginkgo_dpcpp"
+        )
+        self.cpp_info.components["ginkgo_dpcpp"].libs = [
+            "ginkgo_dpcpp" + debug_suffix
+        ]
 
-            self.cpp_info.components["ginkgo_device"].set_property(
-                "cmake_target_name", "Ginkgo::ginkgo_device"
-            )
-            self.cpp_info.components["ginkgo_device"].libs = [
-                "ginkgo_device" + debug_suffix
-            ]
+        self.cpp_info.components["ginkgo_device"].set_property(
+            "cmake_target_name", "Ginkgo::ginkgo_device"
+        )
+        self.cpp_info.components["ginkgo_device"].libs = [
+            "ginkgo_device" + debug_suffix
+        ]
 
-            self.cpp_info.components["ginkgo_omp"].requires += [
-                "ginkgo_dpcpp",
-                "ginkgo_device",
-            ]
-            self.cpp_info.components["ginkgo_reference"].requires += ["ginkgo_device"]
-            self.cpp_info.components["ginkgo_hip"].requires += ["ginkgo_device"]
-            self.cpp_info.components["ginkgo_cuda"].requires += ["ginkgo_device"]
-            self.cpp_info.components["ginkgo_dpcpp"].requires += ["ginkgo_device"]
+        self.cpp_info.components["ginkgo_omp"].requires += [
+            "ginkgo_dpcpp",
+            "ginkgo_device",
+        ]
+        self.cpp_info.components["ginkgo_reference"].requires += ["ginkgo_device"]
+        self.cpp_info.components["ginkgo_hip"].requires += ["ginkgo_device"]
+        self.cpp_info.components["ginkgo_cuda"].requires += ["ginkgo_device"]
+        self.cpp_info.components["ginkgo_dpcpp"].requires += ["ginkgo_device"]
         
         if has_config_library:
             self.cpp_info.components["ginkgo_core"].requires += ["ginkgo_config"]
 
             self.cpp_info.components["ginkgo_config"].set_property("cmake_target_name", "Ginkgo::ginkgo_core")
             self.cpp_info.components["ginkgo_config"].libs = ["ginkgo_core" + debug_suffix]
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Ginkgo"
-        self.cpp_info.names["cmake_find_package_multi"] = "Ginkgo"
-        self.cpp_info.components["ginkgo_core"].names["cmake_find_package"] = "ginkgo"
-        self.cpp_info.components["ginkgo_core"].names[
-            "cmake_find_package_multi"
-        ] = "ginkgo"

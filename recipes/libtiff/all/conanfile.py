@@ -6,7 +6,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class LibtiffConan(ConanFile):
@@ -37,10 +37,10 @@ class LibtiffConan(ConanFile):
         "lzma": True,
         "jpeg": "libjpeg",
         "zlib": True,
-        "libdeflate": True,
-        "zstd": True,
-        "jbig": True,
-        "webp": True,
+        "libdeflate": False,
+        "zstd": False,
+        "jbig": False,
+        "webp": False,
         "cxx":  True,
     }
 
@@ -65,33 +65,32 @@ class LibtiffConan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.libdeflate:
-            self.requires("libdeflate/[>=1.19 <=1.22]") #tested with this range
+            self.requires("libdeflate/[>=1.19 <2]")
         if self.options.lzma:
             self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.2")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         elif self.options.jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.5")
+            self.requires("mozjpeg/[>=4.1.5 <5]")
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[~1.5]")
         if self.options.webp:
-            self.requires("libwebp/1.3.2")
+            self.requires("libwebp/[>=1.3.2 <2]")
 
     def validate(self):
         if self.options.libdeflate and not self.options.zlib:
             raise ConanInvalidConfiguration("libtiff:libdeflate=True requires libtiff:zlib=True")
 
     def build_requirements(self):
-        if Version(self.version) >= "4.5.1":
-            # https://github.com/conan-io/conan/issues/3482#issuecomment-662284561
-            self.tool_requires("cmake/[>=3.18 <4]")
+        self.tool_requires("cmake/[>=3.18]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -104,26 +103,27 @@ class LibtiffConan(ConanFile):
         tc.variables["zstd"] = self.options.zstd
         tc.variables["webp"] = self.options.webp
         tc.variables["lerc"] = False # TODO: add lerc support for libtiff versions >= 4.3.0
-        if Version(self.version) >= "4.5.0":
-            # Disable tools, test, contrib, man & html generation
-            tc.variables["tiff-tools"] = False
-            tc.variables["tiff-tests"] = False
-            tc.variables["tiff-contrib"] = False
-            tc.variables["tiff-docs"] = False
-        tc.variables["cxx"] = self.options.cxx
+
+        # Disable tools, test, contrib, man & html generation
+        tc.variables["tiff-tools"] = False
+        tc.variables["tiff-tests"] = False
+        tc.variables["tiff-contrib"] = False
+        tc.variables["tiff-docs"] = False
+        cxx_option_name = "cxx" if Version(self.version) < "4.7.1" else "tiff-cxx"
+        tc.variables[cxx_option_name] = self.options.cxx
         # BUILD_SHARED_LIBS must be set in command line because defined upstream before project()
         tc.cache_variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
         tc.cache_variables["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = True
+        tc.cache_variables["HAVE_JPEGTURBO_DUAL_MODE_8_12"] = self.options.jpeg == "libjpeg-turbo"
         tc.generate()
         deps = CMakeDeps(self)
-        if Version(self.version) >= "4.5.1":
-            deps.set_property("jbig", "cmake_file_name", "JBIG")
-            deps.set_property("jbig", "cmake_target_name", "JBIG::JBIG")
-            deps.set_property("xz_utils", "cmake_file_name", "liblzma")
-            deps.set_property("xz_utils", "cmake_target_name", "liblzma::liblzma")
-            deps.set_property("libdeflate", "cmake_file_name", "Deflate")
-            deps.set_property("libdeflate", "cmake_target_name", "Deflate::Deflate")
-            deps.set_property("zstd", "cmake_file_name", "ZSTD")
+        deps.set_property("jbig", "cmake_file_name", "JBIG")
+        deps.set_property("jbig", "cmake_target_name", "JBIG::JBIG")
+        deps.set_property("xz_utils", "cmake_file_name", "liblzma")
+        deps.set_property("xz_utils", "cmake_target_name", "liblzma::liblzma")
+        deps.set_property("libdeflate", "cmake_file_name", "Deflate")
+        deps.set_property("libdeflate", "cmake_target_name", "Deflate::Deflate")
+        deps.set_property("zstd", "cmake_file_name", "ZSTD")
         deps.generate()
 
     def _patch_sources(self):
@@ -138,21 +138,13 @@ class LibtiffConan(ConanFile):
                               "set_target_properties(tiffxx PROPERTIES SOVERSION ${SO_COMPATVERSION})",
                               "set_target_properties(tiffxx PROPERTIES SOVERSION ${SO_COMPATVERSION} WINDOWS_EXPORT_ALL_SYMBOLS ON)")
 
-        # Disable tools, test, contrib, man & html generation
-        if Version(self.version) < "4.5.0":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                  "add_subdirectory(tools)\nadd_subdirectory(test)\nadd_subdirectory(contrib)\nadd_subdirectory(build)\n"
-                                  "add_subdirectory(man)\nadd_subdirectory(html)", "")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
-        license_file = "COPYRIGHT" if Version(self.version) < "4.5.0" else "LICENSE.md"
-        copy(self, license_file, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"), ignore_case=True, keep_path=False)
+        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"), ignore_case=True, keep_path=False)
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))

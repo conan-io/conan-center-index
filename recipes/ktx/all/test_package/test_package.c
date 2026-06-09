@@ -10,6 +10,6 @@ int main(int argc, char **argv)
                                             KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT,
                                             &texture);
 
-    printf("Test: %s\n", ktxErrorString(result));
+    printf("Test: %s (expected)\n", ktxErrorString(result));
     return 0;
 }

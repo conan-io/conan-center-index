@@ -1,0 +1,23 @@
+From 6f0c4e732bc4231498caa85c0634033dfbce9723 Mon Sep 17 00:00:00 2001
+Date: Wed, 18 Feb 2026 06:05:13 -0800
+Subject: [PATCH] CMake: Add TESTONLY flag to heterogeneous_lookup_testing
+
+note: This fix https://github.com/abseil/abseil-cpp/issues/2018
+PiperOrigin-RevId: 871830812
+Change-Id: Ic83f23637f1ba8e38fafe36b9c2ec63f9a4340e7
+---
+ absl/container/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/absl/container/CMakeLists.txt b/absl/container/CMakeLists.txt
+index 365c6ea3a61..d12e585ed11 100644
+--- a/absl/container/CMakeLists.txt
++++ b/absl/container/CMakeLists.txt
+@@ -1119,6 +1119,7 @@ absl_cc_library(
+     absl::config
+     absl::test_instance_tracker
+     GTest::gmock
++  TESTONLY
+ )
+ 
+ absl_cc_library(

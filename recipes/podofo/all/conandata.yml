@@ -1,9 +1,16 @@
 sources:
-  "0.9.7":
-    url: "https://netcologne.dl.sourceforge.net/project/podofo/podofo/0.9.7/podofo-0.9.7.tar.gz"
-    sha256: "7cf2e716daaef89647c54ffcd08940492fd40c385ef040ce7529396bfadc1eb8"
+  "1.0.3":
+    url: "https://github.com/podofo/podofo/archive/refs/tags/1.0.3.tar.gz"
+    sha256: "02815b21a51632c2849d41b067597e9356bbc54bad0efcd84c902b555c203ce7"
+  "0.10.5":
+    url: "https://github.com/podofo/podofo/archive/refs/tags/0.10.5.tar.gz"
+    sha256: "49b159e88ba177ad2561b5cf6cbd68ecbe83272f5488bc527e44f97dbf695273"
 patches:
-  "0.9.7":
-    - patch_file: "patches/0001-fix-cmake-0.9.7.patch"
-      patch_description: "Link to conan libs and allow to build the tools without the tests and the examples"
+  "1.0.3":
+    - patch_file: "patches/0001-unvendor-libs-1.0.3.patch"
+      patch_description: "Unvendor date, fmt, utf8cpp, utf8proc, tcb-span and fast-float. Remove C++ hardcoded standard"
+      patch_type: "conan"
+  "0.10.5":
+    - patch_file: "patches/0001-unvendor-libs-0.10.5.patch"
+      patch_description: "Unvendor date, fmt, utf8cpp, tcb-span and fast-float. Remove C++ hardcoded standard"
       patch_type: "conan"
