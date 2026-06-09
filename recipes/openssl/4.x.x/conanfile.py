@@ -151,7 +151,7 @@ class OpenSSLConan(ConanFile):
         args = " ".join(self._configure_args)
         perl = "perl" if "strawberryperl" in self.dependencies.build else ""
         configure = os.path.join(self.source_folder, "Configure").replace('\\', '/')
-        self.run(f"{perl} {configure} {args}", env="conanbuild")
+        self.run(f'{perl} "{configure}" {args}', env="conanbuild")
         self.run(f"{perl} ./configdata.pm --dump", env="conanbuild")
         self.run(f"{self._make_program} -j{build_jobs(self)}", env="conanbuild")
         if self._msvc_abi:
@@ -163,7 +163,7 @@ class OpenSSLConan(ConanFile):
     def package(self):
         copy(self, "*LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         destdir = self.package_folder.replace('\\', '/')
-        self.run(f"{self._make_program} install -j1 DESTDIR={destdir}", env="conanbuild")
+        self.run(f'{self._make_program} install -j1 DESTDIR="{destdir}"', env="conanbuild")
         if is_apple_os(self):
             fix_apple_shared_install_name(self)
         if self._msvc_abi:
