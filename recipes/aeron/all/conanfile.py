@@ -68,7 +68,7 @@ class AeronConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.30]")
-        self.tool_requires("zulu-openjdk/17.0.9")
+        self.tool_requires("zulu-openjdk/[>=17]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
