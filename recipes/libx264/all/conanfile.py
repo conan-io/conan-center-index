@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os, XCRun, fix_apple_shared_install_name
-from conan.tools.build import cross_building
-from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import copy, rename, get, rmdir
+from conan.tools.env import Environment
+from conan.tools.files import copy, rename, get, rmdir, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -111,7 +110,6 @@ class LibX264Conan(ConanFile):
             env.define("AS", unix_path(self, os.path.join(self.dependencies.build["nasm"].package_folder, "bin", "nasm{}".format(".exe" if self.settings.os == "Windows" else ""))))
             env.vars(self).save_script("conanbuild_nasm")
 
-
         if is_msvc(self):
             env = Environment()
             env.define("CC", "cl -nologo")
@@ -136,14 +134,16 @@ class LibX264Conan(ConanFile):
         tc.generate()
 
     def build(self):
-        autotools = Autotools(self)
-        autotools.configure()
-        autotools.make()
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            autotools.configure()
+            autotools.make()
 
     def package(self):
         copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        autotools = Autotools(self)
-        autotools.install()
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            autotools.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         if is_msvc(self):
             ext = ".dll.lib" if self.options.shared else ".lib"

@@ -49,7 +49,7 @@ class libdatachannelConan(ConanFile):
         self.requires("usrsctp/0.9.5.0")
         self.requires("libsrtp/2.6.0")
         if self.options.with_nice:
-            self.requires("libnice/0.1.21")
+            self.requires("libnice/0.1.23")
         self.requires("libjuice/1.7.0", transitive_headers=True, transitive_libs=True)
 
     def validate(self):

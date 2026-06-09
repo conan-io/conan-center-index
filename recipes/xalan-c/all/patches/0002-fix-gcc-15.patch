@@ -1,0 +1,25 @@
+This is the same patch used in:
+- fedora: https://src.fedoraproject.org/rpms/xalan-c/blob/rawhide/f/gcc_15_fixes.patch
+- archlinux: https://gitlab.archlinux.org/archlinux/packaging/packages/xalan-c/-/blob/main/0003-gcc_15_fixes.patch?ref_type=heads
+- debian: https://sources.debian.org/patches/xalan/1.12-12/gcc_15_fixes.patch/?utm_source
+
+diff --git a/src/xalanc/XMLSupport/XalanOtherEncodingWriter.hpp b/src/xalanc/XMLSupport/XalanOtherEncodingWriter.hpp
+index 8c1f0e2..03aa344 100644
+--- a/src/xalanc/XMLSupport/XalanOtherEncodingWriter.hpp
++++ b/src/xalanc/XMLSupport/XalanOtherEncodingWriter.hpp
+@@ -320,13 +320,13 @@ public:
+                 {
+                     XalanUnicodeChar    value = decodeUTF16SurrogatePair(ch, theChars[i+1],  getMemoryManager());
+ 
+-                    if (this->m_isPresentable(value))
++                    if (m_predicate(value))
+                     {
+                         write(value);
+                     }
+                     else
+                     {
+-                        this->writeNumberedEntityReference(value);
++                        writeNumericCharacterReference(value);
+                     }
+ 
+                     ++i;

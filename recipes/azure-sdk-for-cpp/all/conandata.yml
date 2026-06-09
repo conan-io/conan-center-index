@@ -1,9 +1,4 @@
 sources:
-  "1.16.1":
-    url: "https://github.com/Azure/azure-sdk-for-cpp/archive/refs/tags/azure-core_1.16.1.tar.gz"
-    sha256: "4d2a85be0a5b7ced9a75cb89434fa6c0712784fb3dfd5d378514197bf9d21e96"
-patches:
-  "1.16.1":
-    - patch_file: "patches/0001-llvm-linux-datetime-portability.patch"
-      patch_type: "portability"
-      patch_description: "https://github.com/Azure/azure-sdk-for-cpp/pull/6732/commits/4c5b085d6c2a50ab262aa7d42f6fc20132e46fb4"
+  "1.16.2":
+    url: "https://github.com/Azure/azure-sdk-for-cpp/archive/refs/tags/azure-core_1.16.2.tar.gz"
+    sha256: "647d7206a1eace0664ab8da9912fada0ae1d269097ee5f6397a9ce23a84549cf"

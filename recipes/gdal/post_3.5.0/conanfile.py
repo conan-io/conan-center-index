@@ -618,6 +618,7 @@ class GdalConan(ConanFile):
             "podofo":                     "PODOFO::Podofo",
             "poppler":                    "Poppler::Poppler",
             "shapelib":                   "SHAPELIB::shp",
+            "sqlite3::sqlite":            "SQLite3::SQLite3",
             "tiledb":                     "TileDB::tiledb_shared",
             "xz_utils":                   "LibLZMA::LibLZMA",
             "zstd":                       "ZSTD::zstd",

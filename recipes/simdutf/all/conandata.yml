@@ -1,7 +1,7 @@
 sources:
-  "8.0.0":
-    url: "https://github.com/simdutf/simdutf/archive/v8.0.0.tar.gz"
-    sha256: "a21c34c52d91a229591e4ebc8822a876604cf2fffeac9ec065bfda7cbfb9d680"
-  "7.7.1":
-    url: "https://github.com/simdutf/simdutf/archive/v7.7.1.tar.gz"
-    sha256: "3b119d55c47196f6310f5b7b300563e6f2789b7de352536809438a3de1eb4432"
+  "9.0.0":
+    url: "https://github.com/simdutf/simdutf/archive/v9.0.0.tar.gz"
+    sha256: "fd2ce975f29809a975a8da8843cfb3a7265af3f71be548f199d23cf65e101764"
+  "8.2.0":
+    url: "https://github.com/simdutf/simdutf/archive/v8.2.0.tar.gz"
+    sha256: "033a91b1d7d1cb818c1eff49e61faaa1b64a3a530d59ef9efef0195e56bda8b1"
