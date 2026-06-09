@@ -83,7 +83,7 @@ class PackageConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["capypdf"]
-        self.cpp_info.includedirs = [os.path.join("include", "capypdf")]
+        self.cpp_info.includedirs = [os.path.join("include", "capypdf-0")]
         if not self.options.shared:
             self.cpp_info.defines = ["CAPYPDF_STATIC"]
         if self.settings.os in ["Linux", "FreeBSD"]:
