@@ -64,7 +64,7 @@ class CBlosc2Conan(ConanFile):
 
     def requirements(self):
         if self.options.with_lz4:
-            self.requires("lz4/1.9.4")
+            self.requires("lz4/[>=1.9.4 <2]")
         if self.options.with_zlib in ["zlib-ng", "zlib-ng-compat"]:
             self.requires("zlib-ng/[>=2.2 <3]")
         elif self.options.with_zlib == "zlib":
@@ -83,6 +83,8 @@ class CBlosc2Conan(ConanFile):
         tc = CMakeToolchain(self)
         if Version(self.version) >= "3.0.0":
             tc.cache_variables["BLOSC_DEPENDENCY_MODE"] = "EXTERNAL"
+            # Not available in Conan Center
+            tc.cache_variables["BLOSC_ENABLE_ZFP"] = False
         tc.cache_variables["BLOSC_IS_SUBPROJECT"] = False
         tc.cache_variables["BLOSC_INSTALL"] = True
         tc.cache_variables["BUILD_STATIC"] = not bool(self.options.shared)
