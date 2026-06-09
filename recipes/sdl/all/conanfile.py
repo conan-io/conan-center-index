@@ -151,10 +151,11 @@ class SDLConan(ConanFile):
         if self.options.get_safe("iconv", False):
             self.requires("libiconv/1.17")
         if self.settings.os == "Linux":
-            if self.options.alsa:
-                self.requires("libalsa/[>=1.2 <1.3]")
             if self.options.pulse:
                 self.requires("pulseaudio/14.2")
+            if self.options.alsa:
+                # Version comes from pulseaudio
+                self.requires("libalsa/[>=1.2 <1.3]")
             if self.options.opengl:
                 self.requires("opengl/system")
             if self.options.nas:
