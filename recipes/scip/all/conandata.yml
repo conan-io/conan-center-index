@@ -30,12 +30,12 @@ sources:
     url: "https://github.com/scipopt/scip/archive/refs/tags/v803.tar.gz"
     sha256: "fe7636f8165a8c9298ff55ed3220d084d4ea31ba9b69d2733beec53e0e4335d6"
 patches:
+  "10.0.2":
+    - patch_file: "patches/0002-bigobj-spx-msvc-debug.patch"
   "9.2.0":
     - patch_file: "patches/0001-bliss-include-dir.patch"
       patch_description: "Change hard-coded paths to conan includes"
       patch_type: "conan"
-  "10.0.2":
-    - patch_file: "patches/0002-bigobj-spx-msvc-debug.patch"
 version_mappings:
   "10.0.2":
     soplex: "8.0.2"
