@@ -1,22 +1,13 @@
+#include <cstdlib>
 #include <iostream>
 
 #include "capypdf.hpp"
 #include "capypdf.h"
 
-int main()
-{
+int main() {
     CapyPDF_DocumentProperties *opt{};
-
-    if (auto rc = capy_document_properties_new(&opt)) {
-        std::cerr << capy_error_message(rc) << '\n';
-        return 1;
-    }
-
-    if (auto rc = capy_document_properties_destroy(opt)) {
-        std::cerr << capy_error_message(rc) << '\n';
-        return 1;
-    }
-
-    std::cout << CAPYPDF_VERSION_STR << '\n';
-    return 0;
+    auto rc = capy_document_properties_new(&opt);
+    capy_document_properties_destroy(opt);
+    std::cout << "CapyPDF version: " << CAPYPDF_VERSION_STR << std::endl;
+    return EXIT_SUCCESS;
 }
