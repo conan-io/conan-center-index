@@ -1,3 +1,7 @@
+Unvendor libunwind to consume from Conan
+
+https://github.com/getsentry/sentry-native/issues/1714
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 76b2377..be3b566 100644
 --- a/CMakeLists.txt
