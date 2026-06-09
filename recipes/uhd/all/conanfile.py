@@ -11,6 +11,7 @@ from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=2.26"
 
+
 class UhdConan(ConanFile):
     name = "uhd"
     description = (
@@ -27,15 +28,32 @@ class UhdConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "python_api": [True, False],
+        "examples": [True, False],
+        "tests": [True, False],
+        "b100": [True, False],
+        "usrp1": [True, False],
+        "x300": [True, False],
+        "mpmd": [True, False],
+        "octoclock": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "python_api": False,
+        "examples": False,
+        "tests": False,
+        "b100": False,
+        "usrp1": False,
+        "x300": False,
+        "mpmd": False,
+        "octoclock": False,
     }
 
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -51,6 +69,9 @@ class UhdConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+        self.cpp.build.libdirs = ["lib"]
+        self.cpp.source.includedirs = ["host/include"]
+        self.cpp.build.includedirs = ["include"]
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -70,17 +91,16 @@ class UhdConan(ConanFile):
             tc.cache_variables["CMAKE_INSTALL_NAME_DIR"] = "@rpath"
             tc.cache_variables["CMAKE_INSTALL_RPATH"] = ""
         tc.cache_variables["PYTHON_EXECUTABLE"] = pyenv.env_exe
-        tc.cache_variables["ENABLE_PYTHON_API"] = False
-        tc.cache_variables["ENABLE_EXAMPLES"] = False
-        tc.cache_variables["ENABLE_TESTS"] = False
-        tc.cache_variables["ENABLE_B100"] = False
-        tc.cache_variables["ENABLE_USRP1"] = False
-        tc.cache_variables["ENABLE_X300"] = False
-        tc.cache_variables["ENABLE_MPMD"] = False
-        tc.cache_variables["ENABLE_OCTOCLOCK"] = False
+        tc.cache_variables["ENABLE_PYTHON_API"] = self.options.python_api
+        tc.cache_variables["ENABLE_EXAMPLES"] = self.options.examples
+        tc.cache_variables["ENABLE_TESTS"] = self.options.tests
+        tc.cache_variables["ENABLE_B100"] = self.options.b100
+        tc.cache_variables["ENABLE_USRP1"] = self.options.usrp1
+        tc.cache_variables["ENABLE_X300"] = self.options.x300
+        tc.cache_variables["ENABLE_MPMD"] = self.options.mpmd
+        tc.cache_variables["ENABLE_OCTOCLOCK"] = self.options.octoclock
         tc.cache_variables["ENABLE_STATIC_LIBS"] = not self.options.shared
         tc.generate()
-
 
     def build(self):
         cmake = CMake(self)
