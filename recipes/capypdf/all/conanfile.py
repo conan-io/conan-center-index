@@ -42,7 +42,7 @@ class PackageConan(ConanFile):
         self.requires("libjpeg-turbo/[>=3.0.0 <4]")
         self.requires("libpng/[>=1.6 <2]")
         self.requires("lcms/[>=2.16 <3]")
-        self.requires("freetype/2.13.2")
+        self.requires("freetype/2.14.3")
         self.requires("libtiff/[>=4.6.0 <5]")
 
     def build_requirements(self):
@@ -89,7 +89,6 @@ class PackageConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["capypdf"]
         self.cpp_info.includedirs = ['include', 'include/capypdf-0']
-        self.cpp_info.set_property("pkg_config_name", "capypdf")
         if not self.options.shared:
             self.cpp_info.defines = ["CAPYPDF_STATIC"]
         if self.settings.os in ["Linux", "FreeBSD"]:
