@@ -8,7 +8,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.1"
 
 
 class PackageConan(ConanFile):
@@ -30,11 +30,6 @@ class PackageConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.options["libtiff"].jpeg = "libjpeg-turbo"
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -43,7 +38,7 @@ class PackageConan(ConanFile):
         self.requires("libpng/[>=1.6 <2]")
         self.requires("lcms/[>=2.16 <3]")
         self.requires("freetype/2.14.3")
-        self.requires("libtiff/[>=4.6.0 <5]")
+        self.requires("libtiff/[>=4.6.0 <5]", options={"jpeg": "libjpeg-turbo"})
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.10.0 <2]")
@@ -53,7 +48,7 @@ class PackageConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 23)
         if self.dependencies["libtiff"].options.get_safe("jpeg") != "libjpeg-turbo":
-            raise ConanInvalidConfiguration("capypdf requires libtiff built with JPEG support")
+            raise ConanInvalidConfiguration("capypdf requires libtiff built with JPEG support. Use -o 'libtiff/*:jpeg=libjpeg-turbo'")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
