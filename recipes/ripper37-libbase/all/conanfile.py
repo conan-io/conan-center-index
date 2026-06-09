@@ -7,7 +7,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir
 
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.1"
 
 
 class LibbaseConan(ConanFile):
@@ -44,19 +44,21 @@ class LibbaseConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # https://github.com/RippeR37/libbase/blob/v1.1.2/src/base/logging.h#L20
+        # google::LogMessage is consumed in public header
         self.requires("glog/0.7.1", transitive_headers=True, transitive_libs=True)
         if self.options.module_net:
-            self.requires("libcurl/[>=8.12 <9.0]")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.module_wx:
-            self.requires("wxwidgets/3.2.6")
+            self.requires("wxwidgets/3.3.2")
 
     def validate(self):
         check_min_cppstd(self, 17)
         if self.settings.os not in ["Windows", "Linux", "Macos"]:
-            raise ConanInvalidConfiguration(f"{self.ref} not supported on {self.settings.os}")
+            raise ConanInvalidConfiguration(f"{self.ref} not supported on {self.settings.os}. Only Windows, Linux and Macos are supported.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -83,22 +85,21 @@ class LibbaseConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        # Core `libbase`
         self.cpp_info.set_property("cmake_file_name", "libbase")
-        self.cpp_info.set_property("cmake_target_name", "libbase::libbase")
-        self.cpp_info.requires = ["core"]
+        self.cpp_info.set_property("cmake_target_name", None)
+
         self.cpp_info.components["core"].libs = ["libbase"]
         self.cpp_info.components["core"].set_property("cmake_target_name", "libbase::libbase")
-        self.cpp_info.components["core"].defines = [f"LIBBASE_IS_{str(self.settings.os).upper()}"]
+        self.cpp_info.components["core"].defines = [f"LIBBASE_IS_{str(self.settings.os).upper()}", "LIBBASE_ENABLE_TRACING"]
         self.cpp_info.components["core"].includedirs = ["include/libbase"]
         self.cpp_info.components["core"].requires = ["glog::glog"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["core"].system_libs = ["pthread"]
 
-        # Optional components
         components_info = [
             ("net", ["libcurl::libcurl"]),
             ("win", []),
