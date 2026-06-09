@@ -4,19 +4,10 @@
 #  - The most recent FIPS validated version
 #  Note: please do not maintain multiple patch versions of the same minor,
 #        unless required by the above.
-
-versions:
-  "4.0.1":
-    folder: "4.x.x"
-  "3.6.3":
-    folder: "3.x.x"
-  "3.5.7":
-    folder: "3.x.x"
-  "3.4.6":
-    folder: "3.x.x"
-  "3.1.2":
-    folder: "3.x.x"
-  "3.0.21":
-    folder: "3.x.x"
-  "1.1.1w":
-    folder: "1.x.x"
+sources:
+  "4.0.0":
+    url: "https://github.com/openssl/openssl/releases/download/openssl-4.0.0/openssl-4.0.0.tar.gz"
+    sha256: c32cf49a959c4f345f9606982dd36e7d28f7c58b19c2e25d75624d2b3d2f79ac
+patches:
+  "4.0.0":
+    - patch_file: "patches/01-msvc-use-z7-to-enable-parallel-builds.patch"
