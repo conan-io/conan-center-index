@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, download, get, load, replace_in_file, rm, rmdir, save
+from conan.tools.files import copy, download, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -134,7 +134,7 @@ class LibcurlConan(ConanFile):
 
     @property
     def _is_using_cmake_build(self):
-        return is_msvc(self) or self._is_win_x_android
+        return is_msvc(self) or self._is_win_x_android or self._is_mingw
 
     def export_sources(self):
         copy(self, "lib_Makefile_add.am", self.recipe_folder, self.export_sources_folder)
@@ -283,31 +283,6 @@ class LibcurlConan(ConanFile):
         subdirs_to_build = "lib src" if self.options.build_executable else "lib"
         replace_in_file(self, top_makefile, "SUBDIRS = lib docs src scripts", f"SUBDIRS = {subdirs_to_build}")
 
-        if self._is_mingw and self.options.shared:
-            # patch for shared mingw build
-            lib_makefile = os.path.join(self.source_folder, "lib", "Makefile.am")
-            replace_in_file(self, lib_makefile,
-                                  "noinst_LTLIBRARIES = libcurlu.la",
-                                  "")
-            replace_in_file(self, lib_makefile,
-                                  "noinst_LTLIBRARIES =",
-                                  "")
-            replace_in_file(self, lib_makefile,
-                                  "lib_LTLIBRARIES = libcurl.la",
-                                  "noinst_LTLIBRARIES = libcurl.la")
-
-            if self.options.build_executable:
-                # Link libcurl.dll.a to curl.exe
-                replace_in_file(self, os.path.join(self.source_folder, "src", "Makefile.am"),
-                                        "curl_LDADD = $(top_builddir)/lib/libcurl.la",
-                                        "curl_LDADD = $(top_builddir)/lib/libcurl.la $(top_builddir)/lib/libcurl.dll.a")
-            # add directives to build dll
-            # used only for native mingw-make
-            if not cross_building(self) or self._is_mingw:
-                # The patch file is located in the base src folder
-                added_content = load(self, os.path.join(self.folders.base_source, "lib_Makefile_add.am"))
-                save(self, lib_makefile, added_content, append=True)
-
     def _yes_no(self, value):
         return "yes" if value else "no"
 
@@ -454,16 +429,6 @@ class LibcurlConan(ConanFile):
                 pass # this just works, conan is great!
 
         env = tc.environment()
-
-        # tweaks for mingw
-        if self._is_mingw:
-            rcflags = "-O COFF"
-            if self.settings.arch == "x86":
-                rcflags += " --target=pe-i386"
-            elif self.settings.arch == "x86_64":
-                rcflags += " --target=pe-x86-64"
-                tc.extra_defines.append("_AMD64_")
-            env.define("RCFLAGS", rcflags)
 
         if self.settings.os != "Windows":
             tc.fpic = self.options.get_safe("fPIC", True)
@@ -630,11 +595,6 @@ class LibcurlConan(ConanFile):
             autotools.install()
             rmdir(self, os.path.join(self.package_folder, "share"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-            if self._is_mingw and self.options.shared:
-                # Handle only mingw libs
-                copy(self, pattern="*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
-                copy(self, pattern="*.dll.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-                copy(self, pattern="*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
             fix_apple_shared_install_name(self)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
