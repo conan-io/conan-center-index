@@ -93,13 +93,7 @@ class AeronConan(ConanFile):
         )
         tc.generate()
 
-    def _patch_sources(self):
-        if is_msvc(self):
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "/MTd", "")
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "/MT", "")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -115,7 +109,7 @@ class AeronConan(ConanFile):
         archive_include_dir = os.path.join(self.source_folder, "aeron-archive", "src", "main", "cpp", "client")
         copy(self, "*.h", src=archive_include_dir, dst=os.path.join(self.package_folder, "include", "aeron-archive"))
 
-        # rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
         lib_folder = os.path.join(self.package_folder, "lib")
         bin_folder = os.path.join(self.package_folder, "bin")
@@ -150,5 +144,3 @@ class AeronConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["winmm", "wsock32", "ws2_32", "iphlpapi"]
             self.cpp_info.defines.append("HAVE_WSAPOLL")
-        elif is_apple_os(self):
-            self.cpp_info.defines.append("Darwin")
