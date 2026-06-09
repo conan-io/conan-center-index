@@ -1,4 +1,6 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.files import copy, get, download
 from conan.tools.layout import basic_layout
 import os
@@ -17,6 +19,10 @@ class AMFHeadersConan(ConanFile):
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+
+    def validate(self):
+        if is_apple_os(self):
+            raise ConanInvalidConfiguration(f"{self.ref} does not support macOS: there is no AMD GPU runtime.")
 
     def layout(self):
         basic_layout(self, src_folder="src")
