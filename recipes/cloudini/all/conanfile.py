@@ -30,6 +30,7 @@ class CloudiniConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
+            del self.options.fPIC
             del self.options.shared
             self.package_type = "static-library"
 
