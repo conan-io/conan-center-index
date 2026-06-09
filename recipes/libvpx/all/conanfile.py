@@ -6,14 +6,12 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import stdcpp_library
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, \
-    rename
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2.0"
 
 
 class LibVPXConan(ConanFile):
@@ -72,11 +70,10 @@ class LibVPXConan(ConanFile):
             raise ConanInvalidConfiguration(f"Unsupported compiler {self.settings.compiler}")
         if self.settings.os == "iOS" and (self.settings.os.sdk != "iphonesimulator" and self.settings.arch in ["x86_64", "x86"]):
             raise ConanInvalidConfiguration("iOS platform with x86/x86_64 architectures only supports 'iphonesimulator' SDK option")
-        if is_msvc(self) and self.settings.arch in ("armv8", "arm64ec") and Version(self.version) < "1.15.2":
-            raise ConanInvalidConfiguration("Unsupported ARM64 for MSVC on versions lower than 1.15.2")
 
     def build_requirements(self):
-        self.tool_requires("yasm/1.3.0")
+        if self.settings.arch in ["x86", "x86_64"]:
+            self.tool_requires("yasm/1.3.0")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -99,6 +96,11 @@ class LibVPXConan(ConanFile):
                 'mips': 'mips32',
                 'mips64': 'mips64',
                 'sparc': 'sparc'}.get(str(self.settings.arch))
+        if arch is None:
+            # Fallback for unknown architectures. This is supported by upstream to be used
+            # when no specific target set is provided by the configure script.
+            return 'generic-gnu'
+
         compiler = str(self.settings.compiler)
         os_name = str(self.settings.os)
         if str(self.settings.compiler) == "Visual Studio":
@@ -106,7 +108,7 @@ class LibVPXConan(ConanFile):
             compiler = f"vs{vc_version}"
         elif is_msvc(self):
             vc_version = str(self.settings.compiler.version)
-            vc_version = {"170": "11", "180": "12", "190": "14", "191": "15", "192": "16", "193": "17", "194": "17"}[vc_version]
+            vc_version = {"170": "11", "180": "12", "190": "14", "191": "15", "192": "16", "193": "17", "194": "17", "195": "18"}[vc_version]
             compiler = f"vs{vc_version}"
         elif self.settings.compiler in ["gcc", "clang", "apple-clang"]:
             compiler = 'gcc'
@@ -190,6 +192,7 @@ class LibVPXConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+
         # Disable LTO for Visual Studio when CFLAGS doesn't contain -GL
         if is_msvc(self):
             cflags = " ".join(self.conf.get("tools.build:cflags", default=[], check_type=list))

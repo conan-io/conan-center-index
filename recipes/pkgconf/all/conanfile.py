@@ -5,7 +5,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import is_msvc, unix_path_package_info_legacy
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 
@@ -14,6 +14,7 @@ required_conan_version = ">=1.57.0"
 
 class PkgConfConan(ConanFile):
     name = "pkgconf"
+    package_type = "application"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("build", "configuration")
     homepage = "https://git.sr.ht/~kaniini/pkgconf"
@@ -56,7 +57,7 @@ class PkgConfConan(ConanFile):
             del self.info.settings.compiler
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/[>=1.2.2 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -128,7 +129,6 @@ class PkgConfConan(ConanFile):
             self.cpp_info.libdirs = []
 
         bindir = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bindir)
 
         exesuffix = ".exe" if self.settings.os == "Windows" else ""
         pkg_config = os.path.join(bindir, "pkgconf" + exesuffix).replace("\\", "/")
@@ -138,8 +138,3 @@ class PkgConfConan(ConanFile):
         self.buildenv_info.prepend_path("ACLOCAL_PATH", pkgconf_aclocal)
         # TODO: evaluate if `ACLOCAL_PATH` is enough and we can stop using `AUTOMAKE_CONAN_INCLUDES`
         self.buildenv_info.prepend_path("AUTOMAKE_CONAN_INCLUDES", pkgconf_aclocal)
-
-        # TODO: remove in conanv2
-        automake_extra_includes = unix_path_package_info_legacy(self, pkgconf_aclocal.replace("\\", "/"))
-        self.env_info.PKG_CONFIG = pkg_config
-        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_extra_includes)

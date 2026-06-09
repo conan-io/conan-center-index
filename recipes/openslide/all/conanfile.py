@@ -53,22 +53,22 @@ class OpenSlideConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cairo/1.18.0")
-        self.requires("gdk-pixbuf/2.42.10")
-        self.requires("glib/2.78.3")
+        self.requires("cairo/1.18.4")
+        self.requires("gdk-pixbuf/2.44.4")
+        self.requires("glib/[^2.78.3]")
         self.requires("libdicom/1.0.5")
         self.requires("libpng/[>=1.6 <2]")
-        self.requires("libtiff/4.6.0")
+        self.requires("libtiff/[>=4.6.0 <5]")
         self.requires("libxml2/[>=2.12.5 <3]")
-        self.requires("openjpeg/2.5.2")
-        self.requires("sqlite3/3.45.3")
+        self.requires("openjpeg/[>=2.5.2 <3]")
+        self.requires("sqlite3/[>=3.45.3 <4]")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.2")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         elif self.options.jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.5")
+            self.requires("mozjpeg/[>=4.1.5 <5]")
 
     def validate(self):
         if is_msvc(self):

@@ -1,0 +1,21 @@
+ssize_t is pre-defined in config.h as int on Windows, because Windows doesn't have ssize_t.
+This patch adds a check to avoid redefining ssize_t on Windows, which causes a compilation error:
+  src\modbus-private.h(17): error C2632: 'int' followed by 'int' is illegal
+
+https://github.com/stephane/libmodbus/pull/847
+
+diff --git a/src/modbus-private.h b/src/modbus-private.h
+index ea83187..f108fe6 100644
+--- a/src/modbus-private.h
++++ b/src/modbus-private.h
+@@ -14,8 +14,10 @@
+ #else
+ # include "stdint.h"
+ # include <time.h>
++#ifndef ssize_t
+ typedef int ssize_t;
+ #endif
++#endif
+ // clang-format on
+ #include <config.h>
+ #include <sys/types.h>

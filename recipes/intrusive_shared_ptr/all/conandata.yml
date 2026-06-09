@@ -1,0 +1,4 @@
+sources:
+  "1.11":
+    url: "https://github.com/gershnik/intrusive_shared_ptr/archive/refs/tags/v1.11.tar.gz"
+    sha256: "f2a7055b43c7a509c47cd4eed735dae0f2ed37b9015417cad992d7368434a4cf"

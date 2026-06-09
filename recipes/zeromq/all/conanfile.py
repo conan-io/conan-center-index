@@ -12,7 +12,7 @@ required_conan_version = ">=2.1"
 class ZeroMQConan(ConanFile):
     name = "zeromq"
     description = "ZeroMQ is a community of projects focused on decentralized messaging and computing"
-    license = ("DocumentRef-ZeroMQ:LicenseRef-LGPL-3.0-or-later-ZeroMQ-Linking-Exception", "MPL-2.0")
+    license = "MPL-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zeromq/libzmq"
     topics = ("zmq", "libzmq", "message-queue", "asynchronous")
@@ -27,6 +27,7 @@ class ZeroMQConan(ConanFile):
         "with_draft_api": [True, False],
         "with_websocket": [True, False],
         "with_radix_tree": [True, False],
+        "with_tls": [True, False],
     }
     default_options = {
         "shared": False,
@@ -36,6 +37,7 @@ class ZeroMQConan(ConanFile):
         "poller": None,
         "with_draft_api": False,
         "with_websocket": False,
+        "with_tls": False,
         "with_radix_tree": False,
     }
 
@@ -45,10 +47,6 @@ class ZeroMQConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) >= "4.3.5":
-            self.license = "MPL-2.0"
-        else:
-            self.license = "DocumentRef-ZeroMQ:LicenseRef-LGPL-3.0-or-later-ZeroMQ-Linking-Exception"
 
     def configure(self):
         if self.options.shared:
@@ -59,9 +57,11 @@ class ZeroMQConan(ConanFile):
 
     def requirements(self):
         if self.options.encryption == "libsodium":
-            self.requires("libsodium/1.0.20")
+            self.requires("libsodium/[~1.0.20]")
         if self.options.with_norm:
             self.requires("norm/1.5.9")
+        if self.options.with_tls:
+            self.requires("gnutls/[>=3.8.7 <4]")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.with_norm:
@@ -88,6 +88,9 @@ class ZeroMQConan(ConanFile):
         tc.variables["ENABLE_DRAFTS"] = self.options.with_draft_api
         tc.variables["ENABLE_WS"] = self.options.with_websocket
         tc.variables["ENABLE_RADIX_TREE"] = self.options.with_radix_tree
+        tc.cache_variables["WITH_LIBBSD"] = False
+        tc.cache_variables["WITH_TLS"] = self.options.with_tls
+        tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_GnuTLS"] = self.options.with_tls
         if self.options.poller:
             tc.variables["POLLER"] = self.options.poller
         if is_msvc(self):
@@ -106,12 +109,7 @@ class ZeroMQConan(ConanFile):
             cpp_info_sodium = self.dependencies["libsodium"].cpp_info
             sodium_config = cpp_info_sodium.get_property("cmake_file_name") or "libsodium"
             sodium_target = cpp_info_sodium.get_property("cmake_target_name") or "libsodium::libsodium"
-            if Version(self.version) < "4.3.3":
-                find_sodium = "find_package(Sodium)"
-            elif Version(self.version) < "4.3.5":
-                find_sodium = "find_package(\"Sodium\")"
-            else:
-                find_sodium = "find_package(\"sodium\")"
+            find_sodium = "find_package(\"sodium\")"
             replace_in_file(self, cmakelists, find_sodium, f"find_package({sodium_config} REQUIRED CONFIG)")
             replace_in_file(self, cmakelists, "SODIUM_FOUND", f"{sodium_config}_FOUND")
             replace_in_file(self, cmakelists, "SODIUM_INCLUDE_DIRS", f"{sodium_config}_INCLUDE_DIRS")
@@ -124,10 +122,7 @@ class ZeroMQConan(ConanFile):
         cmake.build()
 
     def package(self):
-        if Version(self.version) >= "4.3.5":
-            copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        else:
-            copy(self, "COPYING*", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
@@ -155,8 +150,8 @@ class ZeroMQConan(ConanFile):
             self.cpp_info.components["libzmq"].defines.append("ZMQ_STATIC")
         if self.options.with_draft_api:
             self.cpp_info.components["libzmq"].defines.append("ZMQ_BUILD_DRAFT_API")
-        if self.options.with_websocket and self.settings.os != "Windows":
-            self.cpp_info.components["libzmq"].system_libs.append("bsd")
+        if self.options.with_tls:
+            self.cpp_info.components["libzmq"].requires.append("gnutls::gnutls")
 
         self.cpp_info.components["libzmq"].set_property("cmake_target_name", self._libzmq_target)
         if self.options.encryption == "libsodium":

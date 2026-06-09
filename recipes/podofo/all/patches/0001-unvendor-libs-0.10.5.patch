@@ -1,0 +1,84 @@
+diff --git a/3rdparty/pdfium/third_party/base/span.h b/3rdparty/pdfium/third_party/base/span.h
+index 1defed7..713715b 100644
+--- a/3rdparty/pdfium/third_party/base/span.h
++++ b/3rdparty/pdfium/third_party/base/span.h
+@@ -1,6 +1,6 @@
+ #pragma once
+ 
+-#include <podofo/auxiliary/span.hpp>
++#include <tcb/span.hpp>
+ 
+ namespace pdfium
+ {
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7dc21ab..3bf7f17 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -102,9 +102,6 @@ endif()
+ # with compiler options as CMAKE_CXX_STANDARD (or any other
+ # CMake construct) won't really do it.
+ # See https://discourse.cmake.org/t/how-to-limit-maximum-cxx-standard-to-prevent-accidental-c-17-or-above-code/9862/2
+-set(CMAKE_CXX_STANDARD 17)
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-set(CMAKE_CXX_EXTENSIONS ON)
+ if (MSVC)
+     # Set the compiler less permissive and add some warnings
+     # /we4287: unsigned/negative constant mismatch
+@@ -222,6 +219,18 @@ if(LIBIDN_FOUND)
+     list(APPEND PODOFO_HEADERS_DEPENDS ${LIBIDN_INCLUDE_DIR})
+ endif()
+ 
++
++# Conan: Unvendor 3rd party libraries
++find_package(fmt REQUIRED CONFIG)
++# Cant be unvendored because this project is using private headers not (yet) packaged by conan pdfium package
++# find_package(pdfium REQUIRED CONFIG)
++# find_package(numerics REQUIRED CONFIG) # This package does not exist in CCI
++find_package(utf8cpp REQUIRED CONFIG)
++find_package(FastFloat REQUIRED CONFIG)
++find_package(date REQUIRED CONFIG)
++find_package(tcb-span REQUIRED CONFIG)
++list(APPEND PODOFO_LIB_DEPENDS fmt::fmt utf8::cpp FastFloat::fast_float date::date tcb-span::tcb-span)
++
+ # Create the config file. It'll be appended to as the subdirs run though
+ # then dependency information will be written to it at the end of the
+ # build.
+diff --git a/src/podofo/auxiliary/span.h b/src/podofo/auxiliary/span.h
+index db43d85..2dece83 100644
+--- a/src/podofo/auxiliary/span.h
++++ b/src/podofo/auxiliary/span.h
+@@ -2,7 +2,7 @@
+ #define AUX_SPAN_H
+ #pragma once
+ 
+-#include "span.hpp"
++#include <tcb/span.hpp>
+ 
+ namespace PoDoFo
+ {
+diff --git a/src/podofo/private/charconv_compat.h b/src/podofo/private/charconv_compat.h
+index 1f72d9d..b20c860 100644
+--- a/src/podofo/private/charconv_compat.h
++++ b/src/podofo/private/charconv_compat.h
+@@ -15,7 +15,7 @@
+ #endif
+ 
+ #if defined(WANT_CHARS_FORMAT) || defined(WANT_FROM_CHARS)
+-#include <fast_float.h>
++#include <fast_float/fast_float.h>
+ #endif
+ 
+ #ifdef WANT_TO_CHARS
+diff --git a/tools/private/MainEntryPoint.cpp b/tools/private/MainEntryPoint.cpp
+index 7fd3165..1adda2f 100644
+--- a/tools/private/MainEntryPoint.cpp
++++ b/tools/private/MainEntryPoint.cpp
+@@ -3,7 +3,7 @@
+ #include <iostream>
+ 
+ #include <utf8cpp/utf8.h>
+-#include <podofo/auxiliary/span.hpp>
++#include <tcb/span.hpp>
+ #include <podofo/main/PdfError.h>
+ 
+ using namespace std;

@@ -3,11 +3,10 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=2"
+required_conan_version = ">=2.4"
 
 
 class OpusConan(ConanFile):
@@ -31,30 +30,21 @@ class OpusConan(ConanFile):
         "fixed_point": False,
         "stack_protector": True,
     }
+    implements = ["auto_shared_fpic"]
+    languages = "C"
 
     def build_requirements(self):
-        if Version(self.version) >= "1.5.2":
-            self.tool_requires("cmake/[>=3.16 <4]")
+        self.tool_requires("cmake/[>=3.16 <5]")
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
         check_min_vs(self, 190)
-        if Version(self.version) >= "1.5.2" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8":
             raise ConanInvalidConfiguration(f"{self.ref} GCC-{self.settings.compiler.version} not supported due to lack of AVX2 support. Use GCC >=8.")
 
     def source(self):
@@ -66,10 +56,8 @@ class OpusConan(ConanFile):
         tc.cache_variables["OPUS_BUILD_SHARED_LIBRARY"] = self.options.shared
         tc.cache_variables["OPUS_FIXED_POINT"] = self.options.fixed_point
         tc.cache_variables["OPUS_STACK_PROTECTOR"] = self.options.stack_protector
-        if Version(self.version) >= "1.5.2" and is_msvc(self):
+        if is_msvc(self):
             tc.cache_variables["OPUS_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
-        if Version(self.version) < "1.5":
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
     def build(self):

@@ -49,7 +49,7 @@ class BasuConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_libcap"):
-            self.requires("libcap/2.69")
+            self.requires("libcap/[>=2.69 <3]")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:

@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get, copy, rmdir, replace_in_file, apply_conandata_patches, export_conandata_patches
-from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
@@ -107,25 +107,25 @@ class SpdlogConan(ConanFile):
     def generate(self):
         if not self.options.header_only:
             tc = CMakeToolchain(self)
-            tc.variables["SPDLOG_BUILD_EXAMPLE"] = False
-            tc.variables["SPDLOG_BUILD_EXAMPLE_HO"] = False
-            tc.variables["SPDLOG_BUILD_TESTS"] = False
-            tc.variables["SPDLOG_BUILD_TESTS_HO"] = False
-            tc.variables["SPDLOG_BUILD_BENCH"] = False
+            tc.cache_variables["SPDLOG_BUILD_EXAMPLE"] = False
+            tc.cache_variables["SPDLOG_BUILD_EXAMPLE_HO"] = False
+            tc.cache_variables["SPDLOG_BUILD_TESTS"] = False
+            tc.cache_variables["SPDLOG_BUILD_TESTS_HO"] = False
+            tc.cache_variables["SPDLOG_BUILD_BENCH"] = False
             if not self.options.get_safe("use_std_fmt"):
                 fmt = self.dependencies["fmt"]
-                tc.variables["SPDLOG_FMT_EXTERNAL"] = not fmt.options.header_only
-                tc.variables["SPDLOG_FMT_EXTERNAL_HO"] = fmt.options.header_only
-            tc.variables["SPDLOG_BUILD_SHARED"] = not self.options.header_only and self.options.shared
-            tc.variables["SPDLOG_WCHAR_SUPPORT"] = self.options.get_safe("wchar_support", False)
-            tc.variables["SPDLOG_WCHAR_FILENAMES"] = self.options.get_safe("wchar_filenames", False)
+                tc.cache_variables["SPDLOG_FMT_EXTERNAL"] = not fmt.options.header_only
+                tc.cache_variables["SPDLOG_FMT_EXTERNAL_HO"] = fmt.options.header_only
+            tc.cache_variables["SPDLOG_BUILD_SHARED"] = not self.options.header_only and self.options.shared
+            tc.cache_variables["SPDLOG_WCHAR_SUPPORT"] = self.options.get_safe("wchar_support", False)
+            tc.cache_variables["SPDLOG_WCHAR_FILENAMES"] = self.options.get_safe("wchar_filenames", False)
             if Version(self.version) >= "1.15.0":
-                tc.variables["SDPLOG_WCHAR_CONSOLE"] = self.options.get_safe("wchar_console", False)
-            tc.variables["SPDLOG_INSTALL"] = True
-            tc.variables["SPDLOG_NO_EXCEPTIONS"] = self.options.no_exceptions
-            tc.variables["SPDLOG_USE_STD_FORMAT"] = self.options.get_safe("use_std_fmt")
+                tc.cache_variables["SPDLOG_WCHAR_CONSOLE"] = self.options.get_safe("wchar_console", False)
+            tc.cache_variables["SPDLOG_INSTALL"] = True
+            tc.cache_variables["SPDLOG_NO_EXCEPTIONS"] = self.options.no_exceptions
+            tc.cache_variables["SPDLOG_USE_STD_FORMAT"] = self.options.get_safe("use_std_fmt")
             if self.settings.os in ("iOS", "tvOS", "watchOS"):
-                tc.variables["SPDLOG_NO_TLS"] = True
+                tc.cache_variables["SPDLOG_NO_TLS"] = True
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
             tc.generate()
         cmake_deps = CMakeDeps(self)

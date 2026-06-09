@@ -1,4 +1,7 @@
 sources:
+  "1.1.4":
+    url: "https://gitlab.dkrz.de/k202009/libaec/-/archive/v1.1.4/libaec-v1.1.4.tar.bz2"
+    sha256: "cf869c166656a83857adf62a092311a0069855c6ced3446e3f090a6d52279f65"
   "1.1.2":
     url: "https://gitlab.dkrz.de/k202009/libaec/-/archive/v1.1.2/libaec-v1.1.2.tar.bz2"
     sha256: "bdad8c7923537c3695327aa85afdcd714fb3d30a5f956a27ba2971ef98c043ac"
