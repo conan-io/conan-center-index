@@ -1,4 +1,4 @@
-grpc_version: 1.78.1
+grpc_version: 1.81.0
 grpc_targets:
     - name: "address_sorting"
       lib: "address_sorting"
@@ -83,10 +83,13 @@ grpc_targets:
       frameworks: ['CoreFoundation']
     - name: "upb_base_lib"
       lib: "upb_base_lib"
+    - name: "upb_descriptor_lib"
+      lib: "upb_descriptor_lib"
     - name: "upb_mini_descriptor_lib"
       lib: "upb_mini_descriptor_lib"
       requires:
         - upb_mini_table_lib
+        - abseil::absl_strings
     - name: "upb_wire_lib"
       lib: "upb_wire_lib"
       requires:
@@ -123,6 +126,7 @@ grpc_targets:
       lib: "upb_reflection_lib"
       requires:
         - upb_mini_descriptor_lib
+        - upb_descriptor_lib
         - upb_wire_lib
     - name: "utf8_range_lib"
       lib: "utf8_range_lib"
@@ -218,7 +222,6 @@ grpc_targets:
         - abseil::absl_strings
         - abseil::absl_synchronization
         - abseil::absl_time
-        - abseil::absl_optional
         - abseil::absl_span
         - abseil::absl_utility
         - protobuf::libprotobuf
