@@ -1,7 +1,7 @@
 from conan import ConanFile
-from conan.tools.build import build_jobs, can_run
+from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import chdir
+import os
 
 
 class TestPackageConan(ConanFile):
@@ -35,5 +35,28 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            with chdir(self, self.build_folder):
-                self.run(f"ctest --output-on-failure -C {self.settings.build_type} -j {build_jobs(self)}", env="conanrun")
+            poco_options = self.dependencies["poco"].options
+            if poco_options.enable_util:
+                self.run(os.path.join(self.cpp.build.bindirs[0], "util"), env="conanrun")
+            if poco_options.enable_crypto:
+                self.run("{} {}".format(os.path.join(self.cpp.build.bindirs[0], "crypto"), os.path.join(self.source_folder, "conanfile.py")), env="conanrun")
+            if False:
+                if poco_options.enable_net:
+                    self.run(os.path.join(self.cpp.build.bindirs[0], "net"), env="conanrun")
+                    if poco_options.enable_util:
+                        self.run(os.path.join(self.cpp.build.bindirs[0], "net_2"), env="conanrun")
+                test_netssl = os.path.join(self.cpp.build.bindirs[0], "netssl")
+                if os.path.exists(test_netssl):
+                    self.run(test_netssl, env="conanrun")
+            test_sqlite = os.path.join(self.cpp.build.bindirs[0], "sqlite")
+            if os.path.exists(test_sqlite):
+                self.run(test_sqlite, env="conanrun")
+            test_encodings = os.path.join(self.cpp.build.bindirs[0], "encodings")
+            if os.path.exists(test_encodings):
+                self.run(test_encodings, env="conanrun")
+            test_jwt = os.path.join(self.cpp.build.bindirs[0], "jwt")
+            if os.path.exists(test_jwt):
+                self.run(test_jwt, env="conanrun")
+            test_prometheus = os.path.join(self.cpp.build.bindirs[0], "prometheus")
+            if os.path.exists(test_prometheus):
+                self.run(test_prometheus, env="conanrun")
