@@ -218,7 +218,9 @@ class FollyConan(ConanFile):
         # Make sure will consume Conan dependencies
         folly_deps = os.path.join(self.source_folder, "CMake", "folly-deps.cmake")
         replace_in_file(self, folly_deps, " MODULE", " REQUIRED CONFIG")
-        replace_in_file(self, folly_deps, "${Boost_LIBRARIES}", f"{' '.join(self._required_boost_cmake_targets)}")
+        # Upstream removed global ${Boost_LIBRARIES} linkage in 2026.06.08.00; Boost is linked per-target via EXTERNAL_DEPS
+        if Version(self.version) < "2026.06.08.00":
+            replace_in_file(self, folly_deps, "${Boost_LIBRARIES}", f"{' '.join(self._required_boost_cmake_targets)}")
         replace_in_file(self, folly_deps, "OpenSSL 1.1.1", "OpenSSL")
         # Disable example
         save(self, os.path.join(self.source_folder, "folly", "logging", "example", "CMakeLists.txt"), "")
