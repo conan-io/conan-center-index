@@ -11,10 +11,14 @@ class XtransConan(ConanFile):
     version = "system"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
+    package_type = "shared-library"
     homepage = "https://www.x.org/wiki/"
     description = "X Network Transport layer shared code"
     settings = "os", "arch", "compiler", "build_type"
     topics = ("x11", "xorg")
+
+    def layout(self):
+        pass
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
