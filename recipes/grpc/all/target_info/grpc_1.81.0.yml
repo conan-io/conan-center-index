@@ -222,7 +222,6 @@ grpc_targets:
         - abseil::absl_strings
         - abseil::absl_synchronization
         - abseil::absl_time
-        - abseil::absl_optional
         - abseil::absl_span
         - abseil::absl_utility
         - protobuf::libprotobuf
