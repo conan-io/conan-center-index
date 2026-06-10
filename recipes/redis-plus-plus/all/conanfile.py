@@ -64,6 +64,13 @@ class RedisPlusPlusConan(ConanFile):
         tc.variables["REDIS_PLUS_PLUS_BUILD_STATIC"] = not self.options.shared
         tc.variables["REDIS_PLUS_PLUS_BUILD_SHARED"] = self.options.shared
         tc.variables["REDIS_PLUS_PLUS_BUILD_STATIC_WITH_PIC"] = self.options.shared
+
+        if self.options.build_async and not self.options.shared:
+            tc.blocks["user_toolchain"].template = """
+add_library(uv_a INTERFACE IMPORTED)
+    target_link_libraries(uv_a INTERFACE libuv::uv_a)
+"""
+
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
