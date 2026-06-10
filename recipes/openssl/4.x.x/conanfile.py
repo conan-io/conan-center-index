@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanException
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import build_jobs
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, replace_in_file, rename, rm, rmdir
@@ -101,7 +101,7 @@ class OpenSSLConan(ConanFile):
         }
         key = (str(self.settings.os), str(self.settings.arch))
         if key not in targets:
-            raise ConanInvalidConfiguration(
+            raise ConanException(
                 f"Unable to map configuration for {key[0]}/{key[1]}.\n"
                 f"Set the user.openssl:target configuration to a built-in "
                 f"OpenSSL target to override, or open an issue at {self.url}."
