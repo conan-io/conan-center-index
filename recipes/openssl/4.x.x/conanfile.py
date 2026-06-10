@@ -157,7 +157,8 @@ class OpenSSLConan(ConanFile):
         if self._msvc_abi:
             # patch generated Makefile not correctly escaping a backslash
             replace_in_file(self, "Makefile", "INSTALLTOP_dir=\\", "INSTALLTOP_dir=/")
-        if self._is_mingw and self.options.shared:
+        if not self._msvc_abi and self.options.shared:
+            # supress installation of static libs when shared is enabled
             replace_in_file(self, "Makefile", "INSTALL_LIBS=libcrypto.a libssl.a", "INSTALL_LIBS=")
 
     def package(self):
