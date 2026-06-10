@@ -2,9 +2,6 @@ sources:
   "2.14.2":
     url: "https://github.com/edenhill/librdkafka/archive/v2.14.2.tar.gz"
     sha256: "d7eec9c31c817fa44402f679c252dfbf97e4c338a849a25c3579a31fd127beb8"
-  "2.14.0":
-    url: "https://github.com/edenhill/librdkafka/archive/v2.14.0.tar.gz"
-    sha256: "c05c03ef00a13a8463fac3e8918c04843c416f11ced58c889d806a88ca92cf99"
   "2.13.0":
     url: "https://github.com/edenhill/librdkafka/archive/v2.13.0.tar.gz"
     sha256: "3bd351601d8ebcbc99b9a1316cae1b83b00edbcf9411c34287edf1791c507600"
