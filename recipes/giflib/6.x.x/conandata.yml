@@ -1,0 +1,9 @@
+sources:
+  "6.1.3":
+    url: "https://downloads.sourceforge.net/project/giflib/giflib-6.x/giflib-6.1.3.tar.gz"
+    sha256: "b65b66b99f0424b93525f987386f22fc5efb9da2bfc92ad4a532249aaffbab0e"
+patches:
+  "6.1.3":
+    - patch_file: "patches/6.1.3-0001-msvc-export.patch"
+      patch_description: "export symbols with MSVC"
+      patch_type: "portability"
