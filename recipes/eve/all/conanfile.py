@@ -51,7 +51,12 @@ class EVEConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.includedirs = [f"include/eve-{self.version}"]
+        # For version 2023.02.15, EVE uses 2023.02.15 in the Git tag which we also
+        # use in Conan to satisfy the linter. However, internally, the library
+        # uses 2023.2.15 and puts the files in that directory on install. The following
+        # line handles this mismatch.
+        eve_version = ".".join(str(int(p)) for p in self.version.split("."))
+        self.cpp_info.includedirs = [f"include/eve-{eve_version}"]
         
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
