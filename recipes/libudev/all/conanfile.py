@@ -44,7 +44,7 @@ class LibUDEVConan(ConanFile):
         zypper.install_substitutes(["libudev-devel"], ["systemd-devel"], update=True, check=True)
 
         alpine = package_manager.Apk(self)
-        alpine.install(["libudev-zero-dev"], update=True, check=True)
+        alpine.install(["eudev-dev"], update=True, check=True)
 
     def package_info(self):
         self.cpp_info.includedirs = []
