@@ -97,8 +97,6 @@ void test_provider(const char *name, const char *digest_alg,
     OSSL_PROVIDER_unload(prov);
 }
 
-/* ─── Entry point ──────────────────────────────────────────────── */
-
 int main(void)
 {
     printf("OpenSSL version: %s\n", OpenSSL_version(OPENSSL_VERSION));
