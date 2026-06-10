@@ -60,13 +60,13 @@ class ITKConan(ConanFile):
         self.requires("eigen/[>=3.4.0 <4]")
         self.requires("expat/[>=2.6.2 <3]")
         self.requires("fftw/3.3.10")
-        self.requires("gdcm/3.0.24")
+        self.requires("gdcm/3.2.6")
         self.requires("hdf5/1.14.6")
         self.requires("libjpeg/[>=9f]")
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/4.7.0")
         self.requires("openjpeg/[>=2.5.2 <3]")
-        self.requires("onetbb/2022.2.0")
+        self.requires("onetbb/2022.0.0")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_opencv:
             self.requires("opencv/[>=4.10.0 <5]")
@@ -75,7 +75,7 @@ class ITKConan(ConanFile):
         self.tool_requires("cmake/[>=3.16.3]")
 
     def validate(self):
-        min_cppstd = 17 if Version(self.version) >= "5.4.0" else 14
+        min_cppstd = 17
         check_min_cppstd(self, min_cppstd)
         if self.options.shared and not self.dependencies["hdf5"].options.shared:
             raise ConanInvalidConfiguration("When building a shared itk, hdf5 needs to be shared too (or not linked to by the consumer).\n"
@@ -221,9 +221,6 @@ class ITKConan(ConanFile):
 
         # Disabled because Vxl vidl is not built anymore
         tc.variables["Module_ITKVideoBridgeVXL"] = False
-        if Version(self.version) < "5.4.0":
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        tc.generate()
 
         tc = CMakeDeps(self)
         tc.generate()
@@ -478,8 +475,7 @@ class ITKConan(ConanFile):
     @property
     def _itk_modules_files(self):
         cmake_files = []
-        if Version(self.version) >= "5.3":
-            cmake_files.extend(["ITKFactoryRegistration.cmake", "ITKInitializeCXXStandard.cmake"])
+        cmake_files.extend(["ITKFactoryRegistration.cmake", "ITKInitializeCXXStandard.cmake"])
         cmake_files.append("UseITK.cmake")
         return cmake_files
 
