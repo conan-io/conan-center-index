@@ -30,12 +30,11 @@ class FoxgloveSchemasProtobufConan(ConanFile):
     generators = "CMakeDeps", "CMakeToolchain"
     package_type = "library"
 
-    def configure(self):
+    def config_options(self):
         if self.settings.os == "Windows":
+            del self.options.fPIC
             del self.options.shared
             self.package_type = "static-library"
-        if self.options.get_safe("shared"):
-            self.options.rm_safe("fPIC")
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=(self.export_sources_folder + "/src"))
@@ -62,7 +61,6 @@ class FoxgloveSchemasProtobufConan(ConanFile):
 
     def package(self):
         cmake = CMake(self)
-        cmake.configure()
         cmake.install()
         copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
