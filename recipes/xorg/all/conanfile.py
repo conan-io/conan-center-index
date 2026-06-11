@@ -106,8 +106,8 @@ class XorgConan(ConanFile):
                 "pkg_config_name", name)
             self.cpp_info.components[name].set_property(
                 "component_version", pkg_config.version)
+            self.cpp_info.components[name].bindirs = []
             if self.settings.os == "Linux":
-                self.cpp_info.components[name].bindirs = []
                 self.cpp_info.components[name].includedirs = []
                 self.cpp_info.components[name].libdirs = []
             self.cpp_info.components[name].set_property("pkg_config_custom_content",
