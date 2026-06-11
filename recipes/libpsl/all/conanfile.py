@@ -16,7 +16,7 @@ class LibPslConan(ConanFile):
     description = "C library for the Public Suffix List"
     homepage = "https://github.com/rockdaboot/libpsl"
     topics = ("psl", "suffix", "TLD", "gTLD", ".com", ".net")
-    license = "GPL-2.0-or-later"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -64,6 +64,7 @@ class LibPslConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     @property
     def _idna_option(self):
@@ -87,7 +88,6 @@ class LibPslConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
         meson.build()

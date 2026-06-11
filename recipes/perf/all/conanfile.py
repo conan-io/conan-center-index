@@ -6,7 +6,7 @@ from conan.tools.files import apply_conandata_patches, chdir, copy, export_conan
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=2.0"
 
 
 class Perf(ConanFile):
@@ -20,6 +20,36 @@ class Perf(ConanFile):
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
 
+    def _get_linux_arch(self):
+        # INFO: Map based on https://github.com/torvalds/linux/tree/master/arch
+        arch = str(self.settings.arch)
+        if arch.startswith("armv8"):
+            return "arm64"
+        if arch.startswith("armv"):
+            return "arm"
+        if arch.startswith("ppc"):
+            return "powerpc"
+        if arch.startswith("e2k-"):
+            return "e2k"
+        if arch.startswith("xtensa"):
+            return "xtensa"
+        if arch.startswith("tc"):
+            return "arc"
+        if arch.startswith("riscv"):
+            return "riscv"
+        if arch.startswith("sparc"):
+            return "sparc"
+        if arch.startswith("mips"):
+            return "mips"
+        if arch.startswith("s390"):
+            return "s390"
+        if arch.startswith("x86"):
+            return "x86"
+        if arch.startswith("avr"):
+            return "avr"
+        if arch.startswith("sh4le"):
+            return "sh"
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -32,6 +62,8 @@ class Perf(ConanFile):
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("perf is supported only on Linux")
+        if not self._get_linux_arch():
+            raise ConanInvalidConfiguration(f"Unsupported architecture: {self.settings.arch}")
 
     def build_requirements(self):
         self.tool_requires("flex/2.6.4")
@@ -44,6 +76,7 @@ class Perf(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.make_args += ["NO_LIBPYTHON=1"]
         tc.make_args += ["WERROR=0"]
+        tc.make_args += [f"ARCH={self._get_linux_arch()}"]
         tc.generate()
 
     def build(self):
@@ -68,8 +101,3 @@ class Perf(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
-
-        # TODO: remove in conan v2
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.env_info.PATH.append(bin_path)

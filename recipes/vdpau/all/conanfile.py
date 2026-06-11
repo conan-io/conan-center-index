@@ -45,6 +45,9 @@ class SysConfigVDPAUConan(ConanFile):
 
         pkg = package_manager.Pkg(self)
         pkg.install(["libvdpau"], update=True, check=True)
+    
+        alpine = package_manager.Apk(self)
+        alpine.install(["libvdpau-dev"], update=True, check=True)
 
     def package_info(self):
         self.cpp_info.includedirs = []
