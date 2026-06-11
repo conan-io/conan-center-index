@@ -10,17 +10,14 @@ class CorogramConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/corogram/corogram"
     topics = ("telegram", "bot", "coroutine", "drogon", "cpp20")
-    package_type = "header-library"  # "library" yerine
-    settings = "os", "arch", "compiler", "build_type"
+    package_type = "header-library"
+    no_copy_source = True  # header-only için şart
+    settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
         "with_redis": [True, False],
         "with_ed25519": [True, False],
     }
     default_options = {
-        "shared": False,
-        "fPIC": True,
         "with_redis": False,
         "with_ed25519": False,
     }
@@ -32,13 +29,6 @@ class CorogramConan(ConanFile):
         if self.options.with_redis:
             self.requires("hiredis/1.2.0")
 
-
-    def config_options(self):
-        del self.options.fPIC
-
-    def configure(self):
-        self.options.rm_safe("fPIC")
-        self.options.rm_safe("shared")
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -60,14 +50,20 @@ class CorogramConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        cmake = CMake(self)
-        cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        copy(self, "LICENSE",
+             self.source_folder,
+             os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.hpp",
+             os.path.join(self.source_folder, "include"),
+             os.path.join(self.package_folder, "include"))
+
+    def package_id(self):
+        self.info.clear()  # header-only: settings farketmez
 
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.set_property("cmake_file_name", "corogram")
         self.cpp_info.set_property("cmake_target_name", "corogram::corogram")
         if self.settings.os == "Windows":
             self.cpp_info.defines = ["NOMINMAX", "WIN32_LEAN_AND_MEAN"]
