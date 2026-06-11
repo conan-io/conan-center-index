@@ -1,6 +1,6 @@
 Use find_package and cmake target for libuv
 
-https://github.com/feihongmeilian/redis-plus-plus/commit/e46c7785c94ed9c89d0b67e41fa54d5e8a596133
+https://github.com/sewenew/redis-plus-plus/commit/e46c7785c94ed9c89d0b67e41fa54d5e8a596133
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 71ca13f0..9b3e7574 100644
