@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
@@ -31,6 +30,13 @@ class FoxgloveSchemasProtobufConan(ConanFile):
     generators = "CMakeDeps", "CMakeToolchain"
     package_type = "library"
 
+    def configure(self):
+        if self.settings.os == "Windows":
+            del self.options.shared
+            self.package_type = "static-library"
+        if self.options.get_safe("shared"):
+            self.options.rm_safe("fPIC")
+
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=(self.export_sources_folder + "/src"))
 
@@ -39,11 +45,9 @@ class FoxgloveSchemasProtobufConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Windows shared builds are not supported yet.")
 
     def requirements(self):
-        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
+        self.requires("protobuf/[>=3.21.12 <7]", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         self.tool_requires("protobuf/<host_version>")
