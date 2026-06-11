@@ -1,22 +1,9 @@
 #include <iostream>
-#include <yojimbo/reliable.h>
-#include <yojimbo/serialize.h>
-#include <yojimbo/tlsf.h>
-#include <yojimbo/yojimbo.h>
-
-using namespace yojimbo;
+#include <yojimbo.h>
 
 int main() {
-  if (!InitializeYojimbo()) {
-    std::cout << "Failed to initialize Yojimbo!\n";
-    return 1;
-  }
-
-  std::cout << "Succesfully initialized Yojimbo\n";
-
-  reliable_log_level(1);
-
-  ShutdownYojimbo();
-
+  uint8_t buffer[10] = {0};
+  yojimbo_random_bytes(buffer, sizeof(buffer));
+  std::cout << "Yojimbo random byte: " << buffer[1] << std::endl;
   return 0;
 }

@@ -19,10 +19,7 @@ class YojimboConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"fPIC": [True, False]}
     default_options = {"fPIC": True}
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -31,6 +28,7 @@ class YojimboConan(ConanFile):
         self.requires("libsodium/1.0.20")
 
     def build_requirements(self):
+        # INFO: include_prerelease - only because all available versions are pre-release. 
         self.tool_requires("premake/[>=5 <6, include_prerelease]")
 
     def source(self):
@@ -45,8 +43,8 @@ class YojimboConan(ConanFile):
         deps.generate()
         tc = PremakeToolchain(self)
         # Disable internal tests per project
-        tc.project("netcode").extra_defines = ["NETCODE_ENABLE_TESTS=False"]
-        tc.project("reliable").extra_defines = ["RELIABLE_ENABLE_TESTS=False"]
+        tc.project("netcode").extra_defines = ["NETCODE_ENABLE_TESTS=0"]
+        tc.project("reliable").extra_defines = ["RELIABLE_ENABLE_TESTS=0"]
         tc.generate()
 
     def build(self):
@@ -58,8 +56,7 @@ class YojimboConan(ConanFile):
     def package(self):
         copy(self, "LICENCE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         for folder in ("include", "tlsf", "netcode", "reliable", "serialize"):
-            # Add a namespace to avoid conflicts with other libraries
-            copy(self, "*.h", os.path.join(self.source_folder, folder), os.path.join(self.package_folder, "include", "yojimbo"))
+            copy(self, "*.h", os.path.join(self.source_folder, folder), os.path.join(self.package_folder, "include"))
         for lib in ("*.lib", "*.a"):
             copy(self, lib, os.path.join(self.build_folder, "bin"), os.path.join(self.package_folder, "lib"), keep_path=False)
 
@@ -67,6 +64,8 @@ class YojimboConan(ConanFile):
         # Netcode component
         self.cpp_info.components["netcode"].libs = ['netcode']
         self.cpp_info.components["netcode"].requires = ["libsodium::libsodium"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["netcode"].system_libs = ["Ws2_32", "Iphlpapi"]
 
         # Reliable component
         self.cpp_info.components["reliable"].libs = ['reliable']
