@@ -221,6 +221,7 @@ class ITKConan(ConanFile):
 
         # Disabled because Vxl vidl is not built anymore
         tc.variables["Module_ITKVideoBridgeVXL"] = False
+        tc.generate()
 
         tc = CMakeDeps(self)
         tc.generate()
