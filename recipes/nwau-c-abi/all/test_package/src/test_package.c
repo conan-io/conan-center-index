@@ -1,3 +1,5 @@
+#include <stddef.h>
+
 #include <nwau_abi.h>
 
 int main(void) {

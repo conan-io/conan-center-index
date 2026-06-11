@@ -23,5 +23,6 @@ class NwauCAbiTestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            cmd = os.path.join(self.cpp.build.bindir, "test_package")
+            executable = "test_package.exe" if self.settings.os == "Windows" else "test_package"
+            cmd = os.path.join(self.cpp.build.bindir, executable)
             self.run(cmd, env="conanrun")
