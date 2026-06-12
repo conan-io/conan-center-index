@@ -195,14 +195,13 @@ class GperftoolsConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        # Disable building of tests and benchmarks in Makefile
+        makefile_in = os.path.join(self.source_folder, "Makefile.in")
+        # Disable building of test programs and benchmark programs
         for pattern in ["noinst_PROGRAMS = ", "TESTS = "]:
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "Makefile.in"),
-                pattern,
-                f"{pattern}\n_{pattern}",
-            )
+            replace_in_file(self, makefile_in, pattern, f"{pattern}\n_{pattern}")
+        # Avoid building gtest and bencmark by default (no option)
+        replace_in_file(self, makefile_in, "libgtest.la ", "")
+        replace_in_file(self, makefile_in, " librun_benchmark.la", "")
 
     def build(self):
         if is_msvc(self):
