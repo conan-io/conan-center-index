@@ -63,6 +63,8 @@ class GperftoolsConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            # INFO: Supports only tcmalloc_minimal on Windows
+            # https://github.com/gperftools/gperftools/blob/master/INSTALL#L116
             del self.options.build_cpu_profiler
             del self.options.build_heap_profiler
             del self.options.build_heap_checker
@@ -115,6 +117,13 @@ class GperftoolsConan(ConanFile):
     def requirements(self):
         if self.options.get_safe("enable_libunwind", False):
             self.requires("libunwind/[>=1.6.2 <2]")
+
+    def build_requirements(self):
+        if self.settings_build.os == "Windows" and not is_msvc(self):
+            self.tool_requires("libtool/2.4.7")
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -217,6 +226,7 @@ class GperftoolsConan(ConanFile):
             autotools = Autotools(self)
             autotools.install()
 
+        rmdir(self, os.path.join(self.package_folder, "mingw64"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
