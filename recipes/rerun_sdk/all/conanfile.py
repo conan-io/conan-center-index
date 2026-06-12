@@ -46,7 +46,7 @@ class Package(ConanFile):
             )
 
     def requirements(self):
-        self.requires("arrow/24.0.0")
+        self.requires("arrow/25.0.1")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
