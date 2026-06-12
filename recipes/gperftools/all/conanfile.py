@@ -259,7 +259,7 @@ class GperftoolsConan(ConanFile):
                 component.cflags.append("-pthread")
                 component.cxxflags.append("-pthread")
             elif self.settings.os == "Windows":
-                component.system_libs.extend(["Psapi", "Synchronization"])
+                component.system_libs.extend(["Psapi", "Synchronization", "shlwapi"])
                 if not self.options.shared:
                     component.defines.append("PERFTOOLS_DLL_DECL=")
             if self.options.get_safe("enable_libunwind"):
