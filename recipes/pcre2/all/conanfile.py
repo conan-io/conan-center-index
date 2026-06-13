@@ -117,12 +117,13 @@ class PCRE2Conan(ConanFile):
         # FindPackageHandleStandardArgs.cmake which can break conan generators
         if Version(self.version) < "10.34":
             replace_in_file(self, cmakelists, "SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
-        else:
+        elif Version(self.version) < "10.47":
             replace_in_file(self, cmakelists, "LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
         # Avoid CMP0006 error (macos bundle)
-        replace_in_file(self, cmakelists,
-                              "RUNTIME DESTINATION bin",
-                              "RUNTIME DESTINATION bin BUNDLE DESTINATION bin")
+        if Version(self.version) < "10.47":
+            replace_in_file(self, cmakelists,
+                                  "RUNTIME DESTINATION bin",
+                                  "RUNTIME DESTINATION bin BUNDLE DESTINATION bin")
         # pcre2-config does not correctly include '-static' in static library names
         if is_msvc(self):
             replace = None
@@ -143,13 +144,18 @@ class PCRE2Conan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENCE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if Version(self.version) < "10.47":
+            copy(self, "LICENCE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        else:
+            copy(self, "LICENCE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         rmdir(self, os.path.join(self.package_folder, "man"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if Version(self.version) >= "10.47":
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "PCRE2")
