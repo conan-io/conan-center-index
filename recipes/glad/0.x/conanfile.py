@@ -108,6 +108,7 @@ class GladConan(ConanFile):
         tc.variables["GLAD_EXPORT"] = True
         tc.variables["GLAD_INSTALL"] = True
         tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
+        tc.cache_variables["GLAD_REPRODUCIBLE"] = True  # Use bundled specs instead of downloading new ones.
         tc.generate()
 
     def build(self):
