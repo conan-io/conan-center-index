@@ -45,7 +45,7 @@ class Blake3Conan(ConanFile):
 
     def requirements(self):
         if self.options.with_tbb:
-            self.requires("onetbb/2022.0.0")
+            self.requires("onetbb/2023.0.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
