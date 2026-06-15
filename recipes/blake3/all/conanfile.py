@@ -79,5 +79,6 @@ class Blake3Conan(ConanFile):
         self.cpp_info.libs = ["blake3"]
         if self.options.with_tbb:
             self.cpp_info.requires = ["onetbb::libtbb"]
+            self.cpp_info.defines.append("BLAKE3_USE_TBB")
         if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.defines = ["BLAKE3_DLL"]
+            self.cpp_info.defines.append("BLAKE3_DLL")
