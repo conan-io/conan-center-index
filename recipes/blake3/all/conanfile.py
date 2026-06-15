@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, rmdir
 import os
 
 required_conan_version = ">=2.0.0"
@@ -69,8 +69,8 @@ class Blake3Conan(ConanFile):
         copy(self, "LICENSE_CC0", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self,os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self,os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "blake3")
