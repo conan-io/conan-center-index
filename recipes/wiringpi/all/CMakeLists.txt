@@ -14,6 +14,7 @@ list(FILTER SRC_FILES EXCLUDE REGEX "WiringpiV1.c")
 
 add_library(${PROJECT_NAME} ${SRC_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${WIRINGPI_SRC_DIR}/wiringPi)
+target_compile_definitions(${PROJECT_NAME} PRIVATE _GNU_SOURCE)
 
 if(WIRINGPI_WITH_DEV_LIB)
     file(GLOB SRC_FILES ${WIRINGPI_SRC_DIR}/devLib/*.c)
