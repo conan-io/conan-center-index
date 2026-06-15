@@ -2,76 +2,39 @@ sources:
   "10.0.2":
     url: "https://github.com/scipopt/scip/releases/download/v10.0.2/scip-10.0.2.tgz"
     sha256: "7544647007c9a63a770a71f5884a50ac81da37372bb6958d08588870bd58a50b"
-  "10.0.1":
-    url: "https://github.com/scipopt/scip/releases/download/v10.0.1/scip-10.0.1.tgz"
-    sha256: "1a8a14dc28064748eabcde82c09978d07fc1005f8bc7a8be1a8bc092b7dbfe68"
   "10.0.0":
     url: "https://github.com/scipopt/scip/releases/download/v10.0.0/scip-10.0.0.tgz"
     sha256: "b91d2ed32c422a13c502c37cf296eb9550e55d6bd311e61bfa6dfb9811b03d87"
-  "9.2.4":
-    url: "https://github.com/scipopt/scip/archive/refs/tags/v924.tar.gz"
-    sha256: "780cc185e006ac09163d66d5fed2dbeabd1fdbe660232e7e46e9e51c77c3ab5d"
   "9.2.3":
     url: "https://github.com/scipopt/scip/archive/refs/tags/v923.tar.gz"
     sha256: "876227c75475a295e586871996281582d10cfdebf5792c10183e1c336a197d11"
-  "9.2.0":
-    url: "https://github.com/scipopt/scip/archive/refs/tags/v920.tar.gz"
-    sha256: "a22dc20f44e99bfec071889fd5af2bfc57c4af14b76d777d1312006616346f7c"
   "9.0.1":
     url: "https://github.com/scipopt/scip/archive/refs/tags/v901.tar.gz"
     sha256: "08ad3e7ad6f84f457d95bb70ab21fa7fc648dd43103099359ef8a8f30fcce32e"
-  "8.1.0":
-    url: "https://github.com/scipopt/scip/archive/refs/tags/v810.tar.gz"
-    sha256: "b6daf54c37d02564b12fb32ec3bb7a105710eb0026adeafc602af4435fa94685"
   "8.0.4":
     url: "https://github.com/scipopt/scip/archive/refs/tags/v804.tar.gz"
     sha256: "48be3f568763e3fc209803e9426389df107491371cfcce38f73dcc99ede69a51"
-  "8.0.3":
-    url: "https://github.com/scipopt/scip/archive/refs/tags/v803.tar.gz"
-    sha256: "fe7636f8165a8c9298ff55ed3220d084d4ea31ba9b69d2733beec53e0e4335d6"
 patches:
-  "9.2.0":
-    - patch_file: "patches/0001-bliss-include-dir.patch"
-      patch_description: "Change hard-coded paths to conan includes"
-      patch_type: "conan"
+  "10.0.2":
+    - patch_file: "patches/0002-bigobj-spx-msvc-debug.patch"
 version_mappings:
   "10.0.2":
     soplex: "8.0.2"
-    default_sym: "snauty"
-    default_tpi: "tny"
-  "10.0.1":
-    soplex: "8.0.1"
     default_sym: "snauty"
     default_tpi: "tny"
   "10.0.0":
     soplex: "8.0.0"
     default_sym: "snauty"
     default_tpi: "tny"
-  "9.2.4":
-    soplex: "7.1.6"
-    default_sym: "snauty"
-    default_tpi: False
   "9.2.3":
     soplex: "7.1.5"
-    default_sym: "snauty"
-    default_tpi: False
-  "9.2.0":
-    soplex: "7.1.2"
     default_sym: "snauty"
     default_tpi: False
   "9.0.1":
     soplex: "7.0.1"
     default_sym: "bliss"
     default_tpi: False
-  "8.1.0":
-    soplex: "6.0.4"
-    default_sym: "bliss"
-    default_tpi: False
   "8.0.4":
     soplex: "6.0.4"
-    default_sym: "bliss"
-    default_tpi: False
-  "8.0.3":
-    soplex: "6.0.3"
     default_sym: "bliss"
     default_tpi: False

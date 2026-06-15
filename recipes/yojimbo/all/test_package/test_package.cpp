@@ -1,19 +1,9 @@
 #include <iostream>
 #include <yojimbo.h>
 
-using namespace yojimbo;
-
-int main()
-{
-    if (!InitializeYojimbo())
-    {
-        std::cout << "Failed to initialize Yojimbo!\n";
-        return 1;
-    }
-    
-    std::cout << "Succesfully initialized Yojimbo\n";
-    
-    ShutdownYojimbo();
-    
-    return 0;
+int main() {
+  uint8_t buffer[10] = {0};
+  yojimbo_random_bytes(buffer, sizeof(buffer));
+  std::cout << "Yojimbo random byte: " << buffer[1] << std::endl;
+  return 0;
 }
