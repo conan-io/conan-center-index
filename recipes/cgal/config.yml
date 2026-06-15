@@ -29,5 +29,7 @@ versions:
     folder: all
   "6.1":
     folder: all
-  "6.1.2":
+  "6.1.1":
+    folder: all
+  "6.2":
     folder: all
