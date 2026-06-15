@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 import os
 import shutil
 
-required_conan_version = ">=2.28"
+required_conan_version = ">=2"
 
 
 class MimallocConan(ConanFile):
@@ -209,12 +209,6 @@ class MimallocConan(ConanFile):
             self.cpp_info.bindirs = []
         else:
             self.cpp_info.libs = [self._lib_name]
-            if self.settings.os == "Windows" and self.options.shared:
-                # When redirection is enabled, there will be a few dlls, we need to ensure
-                # CMake finds the proper mimalloc.dll one and not the redirection dll.
-                self.cpp_info.type = "shared-library"
-                self.cpp_info.link_location = os.path.join(self.package_folder, "lib", f"{self._lib_name}.dll.lib")
-                self.cpp_info.location = os.path.join(self.package_folder, "bin", f"{self._lib_name}.dll")
 
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")

@@ -14,6 +14,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         venv = VirtualRunEnv(self)
+        # Show an extensive output when running the test_package app
         venv.environment().define("MIMALLOC_VERBOSE", "1")
         venv.generate()
 
