@@ -1,0 +1,4 @@
+sources:
+  "0.3.4":
+    url: "https://github.com/google/wuffs/archive/refs/tags/v0.3.4.tar.gz"
+    sha256: "fec09526c9d86acb55cfc4742d8c0d298af16de8978ced336ea2071ee2ca6e18"
