@@ -1,11 +1,14 @@
+import os
+
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
-import os
+from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
 
@@ -18,30 +21,57 @@ class Krb5Conan(ConanFile):
     topics = ("kerberos", "network", "authentication", "protocol", "client", "server", "cryptography")
     license = "DocumentRef-NOTICE:LicenseRef-"
     url = "https://github.com/conan-io/conan-center-index"
-    package_type = "shared-library"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
         "use_thread": [True, False],
         "use_dns_realms": [True, False],
         "with_tls": [False, "openssl"],
     }
     default_options = {
+        "shared": True,
+        "fPIC": True,
         "use_thread": True,
         "use_dns_realms": False,
-        "with_tls": "openssl"
+        "with_tls": "openssl",
     }
     options_description = {
+        "shared": "Build shared libraries",
+        "fPIC": "Build with position-independent code (ignored when shared=True)",
         "use_thread": "Enable thread support",
         "use_dns_realms": "Enable DNS for realms",
         "with_tls": "Enable TLS support with OpenSSL",
     }
-    settings = "os", "arch", "compiler", "build_type"
 
     def export_sources(self):
         export_conandata_patches(self)
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} is not prepared for Windows yet. Contributions are welcome!"
+            )
+        # k5tls plugin links krb5/krb5support before openssl in its linker command,
+        # causing undefined references when OpenSSL is also static. Only affects shared
+        # krb5 builds (static builds do not produce a loadable k5tls plugin).
+        if self.options.shared and self.options.with_tls == "openssl":
+            if not self.dependencies["openssl"].options.shared:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} shared build requires shared OpenSSL due to k5tls plugin "
+                    "link order. Use '-o openssl/*:shared=True'."
+                )
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -51,28 +81,38 @@ class Krb5Conan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
-        tls_impl = {"openssl": "openssl",}.get(str(self.options.get_safe('with_tls')))
+
+        # GCC 10+ and Clang changed the default from -fcommon to -fno-common,
+        # which breaks some krb5 translation units that rely on tentative definitions.
+        if (self.settings.compiler == "gcc" and Version(self.settings.compiler.version) >= "10") \
+                or self.settings.compiler == "clang":
+            tc.extra_cflags.append("-fcommon")
+
+        tls_impl = {"openssl": "openssl"}.get(str(self.options.get_safe("with_tls")))
         tc.configure_args.extend([
-            f"--enable-thread-support={yes_no(self.options.get_safe('use_thread'))}",
+            f"--enable-shared={yes_no(self.options.shared)}",
+            f"--enable-static={yes_no(not self.options.shared)}",
+            f"--enable-thread-support={yes_no(self.options.use_thread)}",
             f"--enable-dns-for-realm={yes_no(self.options.use_dns_realms)}",
             f"--enable-pkinit={yes_no(self.options.get_safe('with_tls'))}",
-            f"--with-crypto-impl={(tls_impl or 'builtin')}",
+            f"--with-crypto-impl={tls_impl or 'builtin'}",
             f"--with-spake-openssl={yes_no(self.options.get_safe('with_tls') == 'openssl')}",
-            f"--with-tls-impl={(tls_impl or 'no')}",
+            f"--with-tls-impl={tls_impl or 'no'}",
             "--disable-nls",
             "--disable-rpath",
             "--without-libedit",
             "--without-readline",
             "--with-system-verto",
-            "--enable-dns-for-realm",
-            f"--with-keyutils={self.package_folder}",
-            ])
+            "--without-keyutils",
+        ])
         # Autoconf cannot run several krb5 tests when cross_compiling
         if cross_building(self) and (is_apple_os(self) or self.settings.os == "Linux"):
             tc.configure_args.extend([
@@ -122,7 +162,7 @@ class Krb5Conan(ConanFile):
         self.cpp_info.components["mit-krb5"].libs = ["krb5", "k5crypto", "com_err"]
         if self.options.get_safe('with_tls') == "openssl":
             self.cpp_info.components["mit-krb5"].requires = ["openssl::crypto"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ("Linux", "FreeBSD") or is_apple_os(self):
             self.cpp_info.components["mit-krb5"].system_libs = ["resolv"]
 
         self.cpp_info.components["libkrb5"].libs = []
@@ -150,5 +190,4 @@ class Krb5Conan(ConanFile):
         self.cpp_info.components["krad"].requires = ["libkrb5", "libverto::libverto"]
 
         krb5_config = os.path.join(self.package_folder, "bin", "krb5-config").replace("\\", "/")
-        self.output.info("Appending KRB5_CONFIG environment variable: {}".format(krb5_config))
         self.runenv_info.define_path("KRB5_CONFIG", krb5_config)
