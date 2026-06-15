@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import copy, get, rm, rmdir, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -37,9 +37,6 @@ class EmbreeConan(ConanFile):
     def _has_neon(self):
         return "arm" in self.settings.arch
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -49,14 +46,6 @@ class EmbreeConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 14)
-
-        if self.settings.arch in ["armv8", "arm64"]:
-            if self.settings.compiler != "clang":
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} only supports the 'clang' compiler when building for ARM64 architectures. "
-                    f"Current compiler is '{self.settings.compiler}'."
-                )
-                
         # See https://github.com/RenderKit/embree/blob/master/CMakeLists.txt#L538
         if (
             self.settings.compiler == "apple-clang"
@@ -96,7 +85,6 @@ class EmbreeConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self) 
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
