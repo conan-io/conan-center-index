@@ -121,14 +121,13 @@ class GtsamConan(ConanFile):
     @property
     def _required_boost_components(self):
         # Based on https://github.com/borglab/gtsam/blob/4.2.1/cmake/HandleBoost.cmake#L26
-        components = [
+        return [
             "chrono",
             "filesystem",
             "program_options",
             "serialization",
             "timer",
         ]
-        return components
 
     def validate(self):
         miss_boost_required_comp = any(
