@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import check_min_vs, is_msvc, msvc_runtime_flag
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2"
@@ -121,7 +120,7 @@ class GtsamConan(ConanFile):
 
     @property
     def _required_boost_components(self):
-        # Based on https://github.com/borglab/gtsam/blob/4.2.0/cmake/HandleBoost.cmake#L26
+        # Based on https://github.com/borglab/gtsam/blob/4.2.1/cmake/HandleBoost.cmake#L26
         components = [
             "chrono",
             "filesystem",
@@ -129,13 +128,6 @@ class GtsamConan(ConanFile):
             "serialization",
             "timer",
         ]
-        if Version(self.version) <= "4.2":
-            components += [
-                "date_time",
-                "regex",
-                "system",
-                "thread",
-            ]
         return components
 
     def validate(self):
@@ -221,6 +213,9 @@ class GtsamConan(ConanFile):
         tc.variables["GTSAM_BUILD_DOC_LATEX"] = False
         tc.variables["Boost_USE_STATIC_LIBS"] = not self.dependencies["boost"].options.shared
         tc.variables["Boost_NO_SYSTEM_PATHS"] = True
+        tc.cache_variables["Boost_SERIALIZATION_LIBRARY"] = True
+        tc.cache_variables["Boost_FILESYSTEM_LIBRARY"] = True
+        tc.cache_variables["Boost_TIMER_LIBRARY"] = True
 
         tc.generate()
 
