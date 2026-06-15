@@ -9,7 +9,7 @@ required_conan_version = ">=2.0.0"
 class Blake3Conan(ConanFile):
     name = "blake3"
     description = "BLAKE3 is a cryptographic hash function that is much faster than MD5, SHA-1, SHA-2, SHA-3, and BLAKE2."
-    license = "CC0-1.0 OR Apache-2.0"
+    license = "CC0-1.0 OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/BLAKE3-team/BLAKE3"
     topics = ("blake3", "hash", "crypto", "cryptography")
