@@ -28,12 +28,10 @@ set(HEADER_FILES
     ${MINIZIP_SRC_DIR}/unzip.h
     ${MINIZIP_SRC_DIR}/zip.h
     ${MINIZIP_SRC_DIR}/mztools.h
+    ${MINIZIP_SRC_DIR}/ints.h
 )
 if(WIN32)
     list(APPEND HEADER_FILES ${MINIZIP_SRC_DIR}/iowin32.h)
-endif()
-if(MINIZIP_VERSION VERSION_GREATER_EQUAL "1.3.2")
-    list(APPEND HEADER_FILES ${MINIZIP_SRC_DIR}/ints.h)
 endif()
 
 add_library(minizip ${SOURCE_FILES})
