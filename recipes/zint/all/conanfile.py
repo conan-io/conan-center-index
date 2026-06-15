@@ -130,6 +130,8 @@ class ZintConan(ConanFile):
         self.cpp_info.components["libzint"].libs = ["zint-static" if use_static_suffix else "zint"]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.components["libzint"].defines = ["ZINT_DLL"]
+        if self.settings.os != "Windows":
+            self.cpp_info.components["libzint"].system_libs = ["m"]
         if self.options.with_libpng:
             self.cpp_info.components["libzint"].requires.extend(["libpng::libpng", "zlib::zlib"])
 
