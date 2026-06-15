@@ -26,7 +26,6 @@ class ZintConan(ConanFile):
         "fPIC": [True, False],
         "with_libpng": [True, False],
         "with_qt": [True, False],
-        "with_frontend": [True, False],
         "with_gs1se": [True, False],
         "with_qt6": [True, False],
     }
@@ -35,7 +34,6 @@ class ZintConan(ConanFile):
         "fPIC": True,
         "with_libpng": True,
         "with_qt": False,
-        "with_frontend": False,
         "with_gs1se": False,
         "with_qt6": False,
     }
@@ -47,7 +45,6 @@ class ZintConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if Version(self.version) < "2.16.0":
-            del self.options.with_frontend
             del self.options.with_gs1se
             del self.options.with_qt6
 
@@ -91,7 +88,7 @@ class ZintConan(ConanFile):
             # 2.16.0+ uses explicit ZINT_SHARED/ZINT_STATIC instead of BUILD_SHARED_LIBS
             tc.variables["ZINT_SHARED"] = self.options.shared
             tc.variables["ZINT_STATIC"] = not self.options.shared
-            tc.variables["ZINT_FRONTEND"] = self.options.with_frontend
+            tc.variables["ZINT_FRONTEND"] = False
             tc.variables["ZINT_USE_GS1SE"] = self.options.with_gs1se
             tc.variables["ZINT_QT6"] = self.options.with_qt6
         tc.generate()
