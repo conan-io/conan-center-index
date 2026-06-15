@@ -67,7 +67,7 @@ class UriparserConan(ConanFile):
         cmake.build()
 
     def package(self):
-        if Version(self.version) < "1.0.0": # pylint: disable=conan-condition-evals-to-constant
+        if Version(self.version) < "1.0.0":
             copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         else:
             copy(self, "COPYING.BSD-3-Clause", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
