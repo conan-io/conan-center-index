@@ -15,10 +15,6 @@ class ZintConan(ConanFile):
     homepage = "https://www.zint.org.uk"
     license = "BSD-3-Clause", "GPL-3.0"
     topics = ("barcode", "barcode-generator", "qr-code", "2d-barcodes", "gs1")
-
-    def init(self):
-        if Version(self.version) < "2.16.0":
-            self.license = "GPL-3.0"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -37,6 +33,10 @@ class ZintConan(ConanFile):
         "with_gs1se": False,
         "with_qt6": False,
     }
+
+    def init(self):
+        if Version(self.version) < "2.16.0":
+            self.license = "GPL-3.0"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -66,7 +66,7 @@ class ZintConan(ConanFile):
             if self.options.get_safe("with_qt6"):
                 self.requires("qt/[>=6.0 <7]")
             else:
-                self.requires("qt/5.15.10")
+                self.requires("qt/[>=5.15 <6]")
 
     def validate(self):
         if self.options.with_qt and not self.dependencies["qt"].options.gui:
@@ -88,6 +88,7 @@ class ZintConan(ConanFile):
             # 2.16.0+ uses explicit ZINT_SHARED/ZINT_STATIC instead of BUILD_SHARED_LIBS
             tc.variables["ZINT_SHARED"] = self.options.shared
             tc.variables["ZINT_STATIC"] = not self.options.shared
+            # disabling front-end compilation is intentional
             tc.variables["ZINT_FRONTEND"] = False
             tc.variables["ZINT_USE_GS1SE"] = self.options.with_gs1se
             tc.variables["ZINT_QT6"] = self.options.with_qt6
