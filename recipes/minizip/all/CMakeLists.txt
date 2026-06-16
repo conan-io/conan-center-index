@@ -28,9 +28,7 @@ set(HEADER_FILES
     ${MINIZIP_SRC_DIR}/unzip.h
     ${MINIZIP_SRC_DIR}/zip.h
     ${MINIZIP_SRC_DIR}/mztools.h
-    ${MINIZIP_SRC_DIR}/ints.h
     ${MINIZIP_SRC_DIR}/crypt.h
-    ${MINIZIP_SRC_DIR}/skipset.h
 )
 if(WIN32)
     list(APPEND HEADER_FILES ${MINIZIP_SRC_DIR}/iowin32.h)
@@ -41,6 +39,13 @@ target_link_libraries(minizip PUBLIC ZLIB::ZLIB)
 target_compile_definitions(minizip PRIVATE -D_ZLIB_H)
 target_include_directories(minizip PUBLIC ${MINIZIP_SRC_DIR})
 set_target_properties(minizip PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+if(EXISTS "${MINIZIP_SRC_DIR}/ints.h")
+    target_sources(minizip PRIVATE "${MINIZIP_SRC_DIR}/ints.h")
+endif()
+if(EXISTS "${MINIZIP_SRC_DIR}/skipset.h")
+    target_sources(minizip PRIVATE "${MINIZIP_SRC_DIR}/skipset.h")
+endif()
 
 if(MINIZIP_ENABLE_BZIP2)
     target_compile_definitions(minizip PUBLIC HAVE_BZIP2=1)
