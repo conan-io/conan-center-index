@@ -1,4 +1,7 @@
 sources:
+  "5.9.5.2":
+    url: "https://sourceforge.net/projects/net-snmp/files/net-snmp/5.9.5.2/net-snmp-5.9.5.2.zip/download"
+    sha256: "3818c4394f68219a060cf07fdbfe78acfbb9721e4537cf42c659e60836a0f63d"
   "5.9.4":
     url: "https://sourceforge.net/projects/net-snmp/files/net-snmp/5.9.4/net-snmp-5.9.4.zip/download"
     sha256: "ceea0c876f23b87731de2073e6a3a683ea610c66a5a67b5cabf4986b7813c22b"

@@ -32,11 +32,19 @@ class NetSnmpConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_ipv6": [True, False],
+        "with_agent": [True, False],
+        "with_mibs": [True, False],
+        "with_mini_agent": [True, False],
+        "with_pcre": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_ipv6": True,
+        "with_agent": False,
+        "with_mibs": False,
+        "with_mini_agent": False,
+        "with_pcre": False,
     }
 
     def export_sources(self):
@@ -57,7 +65,8 @@ class NetSnmpConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
-        self.requires("pcre/8.45")
+        if self.options.with_pcre:
+            self.requires("pcre/8.45")
         self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
@@ -96,23 +105,21 @@ class NetSnmpConan(ConanFile):
                 env = VirtualRunEnv(self)
                 env.generate(scope="build")
             tc = AutotoolsToolchain(self)
-            debug_flag = "enable" if self._is_debug else "disable"
-            ipv6_flag = "enable" if self.options.with_ipv6 else "disable"
-            openssl_path = self.dependencies["openssl"].package_folder
-            zlib_path = self.dependencies["zlib"].package_folder
             tc.configure_args += [
-                f"--with-openssl={openssl_path}",
-                f"--with-zlib={zlib_path}",
-                f"--{debug_flag}-debugging",
-                f"--{ipv6_flag}-ipv6",
+                f"--with-openssl={self.dependencies['openssl'].package_folder}",
+                f"--with-zlib={self.dependencies['zlib'].package_folder}",
+                f"--{'enable' if self._is_debug else 'disable'}-debugging",
+                f"--{'enable' if self.options.with_ipv6 else 'disable'}-ipv6",
                 "--with-defaults",
                 "--without-rpm",
-                "--without-pcre",
-                "--disable-agent",
+                f"--{'with' if self.options.with_pcre else 'without'}-pcre",
+                f"--{'enable' if self.options.with_agent else 'disable'}-agent",
+                f"--{'enable' if self.options.with_mini_agent else 'disable'}-mini-agent",
                 "--disable-applications",
                 "--disable-manuals",
                 "--disable-scripts",
-                "--disable-mibs",
+                f"--{'enable' if self.options.with_mibs else 'disable'}-mibs",
+                "--disable-mib-loading",
                 "--disable-embedded-perl",
             ]
             if self.settings.os in ["Linux"]:
@@ -205,6 +212,20 @@ class NetSnmpConan(ConanFile):
                      src=os.path.join(self.source_folder, "win32"))
         else:
             autotools = Autotools(self)
+            # The build() step only compiles snmplib, so agent/mibgroup subdirectories
+            # are never created in the build tree. installsubdirs descends into agent/
+            # and tries to compile files that output into these missing directories.
+            # Mirror the source tree's directory structure to prevent "No such file or
+            # directory" errors during compilation (e.g. mibgroup/snmpv3/usmConf.o).
+            if self.options.with_agent or self.options.with_mini_agent:
+                src_mibgroup = os.path.join(self.source_folder, "agent", "mibgroup")
+                build_mibgroup = os.path.join(self.build_folder, "agent", "mibgroup")
+                for root, dirs, _ in os.walk(src_mibgroup):
+                    for d in dirs:
+                        os.makedirs(
+                            os.path.join(build_mibgroup, os.path.relpath(os.path.join(root, d), src_mibgroup)),
+                            exist_ok=True,
+                        )
             #only install with -j1 as parallel install will break dependencies. Probably a bug in the dependencies
             #install specific targets instead of just everything as it will try to do perl stuff on you host machine
             autotools.install(args=["-j1"], target="installsubdirs installlibs installprogs installheaders")
@@ -214,8 +235,26 @@ class NetSnmpConan(ConanFile):
             fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libs = ["netsnmp"]
+        # Legacy target (backward compat)
+        self.cpp_info.set_property("cmake_target_name", "net-snmp::net-snmp")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["rt", "pthread", "m"])
+            self.cpp_info.components["netsnmp"].system_libs.extend(["rt", "pthread", "m"])
         if is_apple_os(self):
-            self.cpp_info.frameworks.extend(["CoreFoundation", "DiskArbitration", "IOKit"])
+            self.cpp_info.components["netsnmp"].frameworks.extend(["CoreFoundation", "DiskArbitration", "IOKit"])
+
+        # base SNMP library — always shipped
+        self.cpp_info.components["netsnmp"].libs = ["netsnmp"]
+        self.cpp_info.components["netsnmp"].requires = ["openssl::openssl", "zlib::zlib"]
+        if self.options.with_pcre:
+            self.cpp_info.components["netsnmp"].requires.extends("pcre::pcre")
+
+        # libnetsnmpagent holds the handler/table/tdata/cache helper API
+        if self.options.with_agent or self.options.with_mini_agent:
+            self.cpp_info.components["netsnmpagent"].libs = ["netsnmpagent"]
+            self.cpp_info.components["netsnmpagent"].requires = ["netsnmp"]
+            if self.settings.os in ("Linux", "FreeBSD"):
+                self.cpp_info.components["netsnmpagent"].system_libs = []
+
+            # libnetsnmpmibs holds the compiled-in MIB modules (mibII, etc.)
+            self.cpp_info.components["netsnmpmibs"].libs = ["netsnmpmibs"]
+            self.cpp_info.components["netsnmpmibs"].requires = ["netsnmpagent"]
