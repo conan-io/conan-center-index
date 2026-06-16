@@ -29,6 +29,8 @@ set(HEADER_FILES
     ${MINIZIP_SRC_DIR}/zip.h
     ${MINIZIP_SRC_DIR}/mztools.h
     ${MINIZIP_SRC_DIR}/ints.h
+    ${MINIZIP_SRC_DIR}/crypt.h
+    ${MINIZIP_SRC_DIR}/skipset.h
 )
 if(WIN32)
     list(APPEND HEADER_FILES ${MINIZIP_SRC_DIR}/iowin32.h)
