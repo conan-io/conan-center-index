@@ -45,7 +45,8 @@ class Blake3Conan(ConanFile):
 
     def requirements(self):
         if self.options.with_tbb:
-            self.requires("onetbb/2023.0.0")
+            # INFO: Requires oneapi::tbb::parallel_invoke available since 2021.1.1
+            self.requires("onetbb/[>=2021.7.0 <2024.0.0]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
