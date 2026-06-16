@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.apple import is_apple_os
 from conan.tools.microsoft import is_msvc
@@ -48,7 +49,8 @@ class bgfxConan(ConanFile):
         # INFO: glflags and spirv-tools are vendored only. No need to add them as dependencies
 
     def validate(self):
-        check_min_cppstd(self, 17)
+        min_cppstd = 20 if Version(str(self.version)) >= Version("1.146.9299-547") else 17
+        check_min_cppstd(self, min_cppstd)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -70,7 +72,9 @@ class bgfxConan(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         if self.settings.os == "Linux":
-            deps.set_property("miniz", "cmake_additional_variables_prefixes", ["MINIZ",])
+            # miniz is always required but its vendored fallback in bgfx.cmake handles
+            # the include path correctly. Not setting additional_variables_prefixes for miniz
+            # means MINIZ_LIBRARIES is not set, letting the vendored fallback run.
             deps.set_property("tinyexr", "cmake_additional_variables_prefixes", ["TINYEXR",])
             deps.set_property("libsquish", "cmake_additional_variables_prefixes", ["LIBSQUISH",])
             deps.set_property("wayland", "cmake_target_name", "wayland-egl")
