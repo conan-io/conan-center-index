@@ -2,9 +2,6 @@ sources:
   "3.3.2":
     url: "https://github.com/microsoft/mimalloc/archive/v3.3.2.tar.gz"
     sha256: "ca02384e007f46950598500dfaebde5ff9948c1d231f5a81b058799afa64bbbb"
-  "3.2.8":
-    url: "https://github.com/microsoft/mimalloc/archive/v3.2.8.tar.gz"
-    sha256: "68163666575518c213a6593850099adce3863b340ca2751103dbd1f253664e05"
   "2.2.4":
     url: "https://github.com/microsoft/mimalloc/archive/v2.2.4.tar.gz"
     sha256: "754a98de5e2912fddbeaf24830f982b4540992f1bab4a0a8796ee118e0752bda"
@@ -23,32 +20,3 @@ patches:
     - patch_file: "patches/2.1.2-0002-support-older-compiler.patch"
       patch_description: "fix compilation errors on older compilers"
       patch_type: "portability"
-  "2.0.9":
-    - patch_file: "patches/2.0.9-0001-change-install-paths.patch"
-      patch_description: "fix install paths"
-      patch_type: "conan"
-    - patch_file: "patches/2.0.9-0002-support-older-compiler.patch"
-      patch_description: "fix compilation errors on older compilers"
-      patch_type: "portability"
-  "1.8.7":
-    - patch_file: "patches/1.8.7-0002-support-older-compiler.patch"
-      patch_description: "fix compilation errors on older compilers"
-      patch_type: "portability"
-  "1.8.2":
-    - patch_file: "patches/1.8.2-0001-change-install-paths.patch"
-      patch_description: "fix install paths"
-      patch_type: "conan"
-    - patch_file: "patches/1.8.2-0002-support-older-compiler.patch"
-      patch_description: "fix compilation errors on older compilers"
-      patch_type: "portability"
-  "1.7.9":
-    - patch_file: "patches/1.7.9-0001-change-install-paths.patch"
-      patch_description: "fix install paths"
-      patch_type: "conan"
-    - patch_file: "patches/1.7.9-0002-support-older-compiler.patch"
-      patch_description: "fix compilation errors on older compilers"
-      patch_type: "portability"
-  "1.7.6":
-    - patch_file: "patches/1.7.5-0001-change-install-paths.patch"
-      patch_description: "fix install paths"
-      patch_type: "conan"

@@ -1,9 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, collect_libs
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, VCVars
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.scm import Version
 import os
 import shutil
@@ -107,6 +106,7 @@ class MimallocConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -120,15 +120,12 @@ class MimallocConan(ConanFile):
         tc.variables["MI_INSTALL_TOPLEVEL"] = "ON"
         tc.variables["MI_GUARDED"] = self.options.get_safe("guarded", False)
         tc.generate()
-        venv = VirtualBuildEnv(self)
-        venv.generate(scope="build")
 
         if is_msvc(self):
             vcvars = VCVars(self)
             vcvars.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         if is_msvc(self) and self.settings.arch == "x86" and self.options.shared:
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "mimalloc-redirect.lib",
@@ -153,16 +150,18 @@ class MimallocConan(ConanFile):
 
         if self.settings.os == "Windows" and self.options.shared:
             if self.settings.arch == "x86_64":
-                copy(self, "mimalloc-redirect.dll",
-                    src=os.path.join(self.source_folder, "bin"),
-                    dst=os.path.join(self.package_folder, "bin"))
+                if self.options.get_safe("win_redirect"):
+                    copy(self, "mimalloc-redirect.dll",
+                        src=os.path.join(self.source_folder, "bin"),
+                        dst=os.path.join(self.package_folder, "bin"))
                 copy(self, "minject.exe",
                     src=os.path.join(self.source_folder, "bin"),
                     dst=os.path.join(self.package_folder, "bin"))
             elif self.settings.arch == "x86":
-                copy(self, "mimalloc-redirect32.dll",
-                    src=os.path.join(self.source_folder, "bin"),
-                    dst=os.path.join(self.package_folder, "bin"))
+                if self.options.get_safe("win_redirect"):
+                    copy(self, "mimalloc-redirect32.dll",
+                        src=os.path.join(self.source_folder, "bin"),
+                        dst=os.path.join(self.package_folder, "bin"))
                 copy(self, "minject32.exe",
                     src=os.path.join(self.source_folder, "bin"),
                     dst=os.path.join(self.package_folder, "bin"))
@@ -180,9 +179,9 @@ class MimallocConan(ConanFile):
 
     @property
     def _lib_name(self):
-        name = "mimalloc" if self.settings.os == "Windows" else "libmimalloc"
+        name = "mimalloc"
 
-        if self.settings.os == "Windows" and not self.options.shared:
+        if Version(self.version) == "2.1.2" and self.settings.os == "Windows" and not self.options.shared:
             name += "-static"
         if self.options.secure:
             name += "-secure"
@@ -209,7 +208,7 @@ class MimallocConan(ConanFile):
             self.cpp_info.libdirs = []
             self.cpp_info.bindirs = []
         else:
-            self.cpp_info.libs = collect_libs(self)
+            self.cpp_info.libs = [self._lib_name]
 
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
