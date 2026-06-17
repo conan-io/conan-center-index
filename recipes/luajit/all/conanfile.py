@@ -22,8 +22,16 @@ class LuajitConan(ConanFile):
     topics = ("lua", "jit")
     provides = "lua"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_gc64": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_gc64": False, # note: on by default in later versions
+    }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -31,6 +39,8 @@ class LuajitConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self._is_host_32bit:
+            del self.options.with_gc64
 
     def configure(self):
         if self.options.shared:
@@ -40,6 +50,10 @@ class LuajitConan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
+
+    @property
+    def _is_host_32bit(self):
+        return self.settings.arch in ["armv7", "x86"]
 
     def validate(self):
         if self.settings.os == "Macos" and self.settings.arch == "armv8" and cross_building(self):
@@ -93,6 +107,8 @@ class LuajitConan(ConanFile):
     @property
     def _make_arguments(self):
         args = [f"PREFIX={unix_path(self, self.package_folder)}"]
+        if self.options.get_safe("with_gc64", False):
+            args.append("XCFLAGS=-DLUAJIT_ENABLE_GC64")
         if is_apple_os(self) and self._macosx_deployment_target:
             args.append(f"MACOSX_DEPLOYMENT_TARGET={self._macosx_deployment_target}")
         return args
@@ -109,8 +125,10 @@ class LuajitConan(ConanFile):
         self._patch_sources()
         if is_msvc(self):
             with chdir(self, os.path.join(self.source_folder, "src")):
-                variant = '' if self.options.shared else 'static'
-                self.run(f"msvcbuild.bat {variant}", env="conanbuild")
+                build_opts = "gc64" if self.options.get_safe("with_gc64", False) else ""
+                if not self.options.shared:
+                    build_opts += " static"
+                self.run(f"msvcbuild.bat {build_opts}", env="conanbuild")
         else:
             with chdir(self, self.source_folder):
                 autotools = Autotools(self)
