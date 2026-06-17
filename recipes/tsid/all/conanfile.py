@@ -31,11 +31,9 @@ class TsidConan(ConanFile):
         self.requires("pinocchio/3.8.0", transitive_libs=True, transitive_headers=True)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.22 <4]")
+        self.tool_requires("cmake/[>=3.22]")
 
     def validate(self):
-        if self.settings.compiler == "msvc":
-            raise ConanInvalidConfiguration("MSVC is not supported")
         check_min_cppstd(self, 17)
 
     def source(self):
@@ -45,13 +43,6 @@ class TsidConan(ConanFile):
             os.path.join(self.source_folder, "CMakeLists.txt"),
             "add_project_dependency(pinocchio 2.3.1 REQUIRED)",
             "add_project_dependency(pinocchio 3.0.0 REQUIRED)",
-        )
-        # Stop generating the *Config.cmake
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            "set(PROJECT_USE_CMAKE_EXPORT TRUE)",
-            "set(PROJECT_USE_CMAKE_EXPORT FALSE)",
         )
 
     def generate(self):
@@ -73,6 +64,7 @@ class TsidConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rm(self, "*.pc", self.package_folder, recursive=True)
+        rm(self, "*.cmake", os.path.join(self.package_folder, "lib", "cmake", "tsid"))
 
     def package_info(self):
         self.cpp_info.libs = ["tsid"]
