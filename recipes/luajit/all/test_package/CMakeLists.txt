@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.14)
 project(test_package C)
 
 find_package(luajit REQUIRED CONFIG)
