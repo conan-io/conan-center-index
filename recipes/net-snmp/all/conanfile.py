@@ -1,11 +1,12 @@
 import os
+import re
 import stat
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, chdir
+from conan.tools.files import copy, get, load, replace_in_file, rm, rmdir, save, chdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, NMakeToolchain
@@ -33,7 +34,6 @@ class NetSnmpConan(ConanFile):
         "fPIC": [True, False],
         "with_ipv6": [True, False],
         "with_agent": [True, False],
-        "with_mibs": [True, False],
         "with_mini_agent": [True, False],
         "with_pcre": [True, False],
     }
@@ -42,13 +42,9 @@ class NetSnmpConan(ConanFile):
         "fPIC": True,
         "with_ipv6": True,
         "with_agent": False,
-        "with_mibs": False,
         "with_mini_agent": False,
         "with_pcre": False,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -93,6 +89,10 @@ class NetSnmpConan(ConanFile):
     def _is_debug(self):
         return self.settings.build_type == "Debug"
 
+    @property
+    def _with_agent(self):
+        return self.options.with_agent or self.options.with_mini_agent
+
     def generate(self):
         if is_msvc(self):
             tc = NMakeToolchain(self)
@@ -118,7 +118,7 @@ class NetSnmpConan(ConanFile):
                 "--disable-applications",
                 "--disable-manuals",
                 "--disable-scripts",
-                f"--{'enable' if self.options.with_mibs else 'disable'}-mibs",
+                "--disable-mibs",
                 "--disable-mib-loading",
                 "--disable-embedded-perl",
             ]
@@ -133,30 +133,53 @@ class NetSnmpConan(ConanFile):
             deps = PkgConfigDeps(self)
             deps.generate()
 
-    def _patch_msvc(self):
-        ssl_info = self.dependencies["openssl"]
-        openssl_root = ssl_info.package_folder.replace("\\", "/")
-        search_replace = [
-            (r'$default_openssldir . "\\include"', f"'{openssl_root}/include'"),
-            (r'$default_openssldir . "\\lib\\VC"', f"'{openssl_root}/lib'"),
-            ("$openssl = false", "$openssl = true"),
-        ]
-        if self._is_debug:
-            search_replace.append(("$debug = false", "$debug = true"))
-        if self.options.shared:
-            search_replace.append(("$link_dynamic = false", "$link_dynamic = true"))
-        if self.options.with_ipv6:
-            search_replace.append(("$b_ipv6 = false", "$b_ipv6 = true"))
-        for search, replace in search_replace:
-            replace_in_file(self, "build.pl", search, replace)
-        replace_in_file(self, "Configure", '"/runtime', f'"/{msvc_runtime_flag(self)}')
-        link_lines = "\n".join(
-            f'#    pragma comment(lib, "{lib}.lib")'
-            for lib in ssl_info.cpp_info.libs + ssl_info.cpp_info.system_libs
-        )
-        config = r"net-snmp\net-snmp-config.h.in"
-        replace_in_file(self, config, "/* Conan: system_libs */", link_lines)
 
+    # ---------------- Windows / MSVC ----------------
+    def _configure_msvc(self):
+        # win32/Configure is the autotools-equivalent: feature flags go here, not to nmake.
+        # --with-sslinc/libdir point it straight at Conan's OpenSSL (confirmed against
+        # net-snmp's own OpenSSL-3 Windows build), so no build.pl patching and no openssl
+        # pragma rewriting are needed.
+        ssl = self.dependencies["openssl"].package_folder.replace("\\", "/")
+        prefix = self.package_folder.replace("\\", "/")
+        args = [
+            "perl", "Configure",
+            f"--config={'debug' if self._is_debug else 'release'}",
+            f"--linktype={'dynamic' if self.options.shared else 'static'}",
+            "--with-ssl",
+            f'--with-sslincdir="{ssl}/include"',
+            f'--with-ssllibdir="{ssl}/lib"',
+            f'--prefix="{prefix}"',
+        ]
+        if self.options.with_ipv6:
+            args.append("--with-ipv6")
+        self.run(" ".join(args))
+
+    def _patch_msvc(self):
+        # The one irreducible win32 edit. StrawberryPerl is a mingw/gcc build, so net-snmp's
+        # Configure folds ExtUtils::Embed::ccopts() (gcc flags) into the cl.exe command line
+        # and breaks the build. We only build C libraries, no embedded Perl, so drop them.
+        replace_in_file(self, "Configure", "ExtUtils::Embed::ccopts()", "''", strict=False)
+        # Configure hard-codes the dynamic CRT (/MD,/MDd) chosen by --config, which already
+        # matches a dynamic-runtime profile. Swap to the static CRT only when one is asked for.
+        if "MT" in msvc_runtime_flag(self):
+            replace_in_file(self, "Configure", "/MDd", "/MTd", strict=False)
+            replace_in_file(self, "Configure", "/MD ", "/MT ", strict=False)
+        # net-snmp-config.h.in #pragma-links OpenSSL by a hard-coded name that varies by
+        # version/arch/runtime — 5.9.4 emits libcrypto64MDd.lib, 5.9.5.x emits libcrypto.lib —
+        # and none of those match Conan's OpenSSL. Strip the OpenSSL pragmas (this carries into
+        # the shipped net-snmp-config.h); consumers already pull OpenSSL + its system_libs via
+        # net-snmp's openssl::openssl requirement, so they link the right libs. Non-OpenSSL
+        # pragmas in the block (gdi32/user32) are left intact.
+        cfg = r"net-snmp\net-snmp-config.h.in"
+        content = load(self, cfg)
+        content = re.sub(
+            r'#[ \t]*pragma[ \t]+comment\(lib,[ \t]*"(?:lib)?(?:crypto|ssl|eay32|ssleay)[^"]*\.lib"\)[ \t]*\r?\n',
+            "", content)
+        save(self, cfg, content)
+
+
+    # ---------------- Linux / autotools ----------------
     def _patch_unix(self):
         for gnu_config in [
             self.conf.get("user.gnu-config:config_guess", check_type=str),
@@ -168,6 +191,8 @@ class NetSnmpConan(ConanFile):
         replace_in_file(self, configure_path,
                         "-install_name \\$rpath/",
                         "-install_name @rpath/")
+        # net-snmp's openssl detection links only -lcrypto; a static Conan OpenSSL also needs
+        # its own system_libs, so thread them through configure's link checks + final link.
         crypto_libs = self.dependencies["openssl"].cpp_info.system_libs
         if len(crypto_libs) != 0:
             crypto_link_flags = " -l".join(crypto_libs)
@@ -179,12 +204,13 @@ class NetSnmpConan(ConanFile):
                             f'LIBS="-lcrypto -l{crypto_link_flags} $LIBS"')
 
     def build(self):
-        apply_conandata_patches(self)
         if is_msvc(self):
             with chdir(self, os.path.join(self.source_folder, "win32")):
                 self._patch_msvc()
-                self.run("perl build.pl")
+                self._configure_msvc()
                 self.run("nmake /nologo libsnmp")
+                if self._with_agent:
+                    self.run("nmake /nologo libagent netsnmpmibs")
         else:
             self._patch_unix()
             configure_path = os.path.join(self.source_folder, "configure")
@@ -193,6 +219,8 @@ class NetSnmpConan(ConanFile):
             autotools.autoreconf()
             autotools.configure()
             autotools.make(target="snmplib", args=["NOAUTODEPS=1"])
+            if self._with_agent:
+                autotools.make(target="agent", args=["NOAUTODEPS=1"])
 
     def package(self):
         copy(self, "COPYING",
@@ -200,9 +228,14 @@ class NetSnmpConan(ConanFile):
              src=self.source_folder)
         if is_msvc(self):
             cfg = "debug" if self._is_debug else "release"
+            libsrc = os.path.join(self.source_folder, rf"win32\lib\{cfg}")
             copy(self, "netsnmp.lib",
-                 dst=os.path.join(self.package_folder, "lib"),
-                 src=os.path.join(self.source_folder, rf"win32\lib\{cfg}"))
+                 dst=os.path.join(self.package_folder, "lib"), src=libsrc)
+            if self._with_agent:
+                copy(self, "netsnmpagent.lib",
+                     dst=os.path.join(self.package_folder, "lib"), src=libsrc)
+                copy(self, "netsnmpmibs.lib",
+                     dst=os.path.join(self.package_folder, "lib"), src=libsrc)
             copy(self, "include/net-snmp/*.h",
                  dst=self.package_folder,
                  src=self.source_folder)
@@ -212,20 +245,6 @@ class NetSnmpConan(ConanFile):
                      src=os.path.join(self.source_folder, "win32"))
         else:
             autotools = Autotools(self)
-            # The build() step only compiles snmplib, so agent/mibgroup subdirectories
-            # are never created in the build tree. installsubdirs descends into agent/
-            # and tries to compile files that output into these missing directories.
-            # Mirror the source tree's directory structure to prevent "No such file or
-            # directory" errors during compilation (e.g. mibgroup/snmpv3/usmConf.o).
-            if self.options.with_agent or self.options.with_mini_agent:
-                src_mibgroup = os.path.join(self.source_folder, "agent", "mibgroup")
-                build_mibgroup = os.path.join(self.build_folder, "agent", "mibgroup")
-                for root, dirs, _ in os.walk(src_mibgroup):
-                    for d in dirs:
-                        os.makedirs(
-                            os.path.join(build_mibgroup, os.path.relpath(os.path.join(root, d), src_mibgroup)),
-                            exist_ok=True,
-                        )
             #only install with -j1 as parallel install will break dependencies. Probably a bug in the dependencies
             #install specific targets instead of just everything as it will try to do perl stuff on you host machine
             autotools.install(args=["-j1"], target="installsubdirs installlibs installprogs installheaders")
@@ -235,7 +254,7 @@ class NetSnmpConan(ConanFile):
             fix_apple_shared_install_name(self)
 
     def package_info(self):
-        # Legacy target (backward compat)
+        # Legacy aggregate target (backward compat)
         self.cpp_info.set_property("cmake_target_name", "net-snmp::net-snmp")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["netsnmp"].system_libs.extend(["rt", "pthread", "m"])
@@ -246,15 +265,12 @@ class NetSnmpConan(ConanFile):
         self.cpp_info.components["netsnmp"].libs = ["netsnmp"]
         self.cpp_info.components["netsnmp"].requires = ["openssl::openssl", "zlib::zlib"]
         if self.options.with_pcre:
-            self.cpp_info.components["netsnmp"].requires.extends("pcre::pcre")
+            self.cpp_info.components["netsnmp"].requires.append("pcre::pcre")
 
-        # libnetsnmpagent holds the handler/table/tdata/cache helper API
-        if self.options.with_agent or self.options.with_mini_agent:
+        # libnetsnmpagent holds the handler/table/tdata/cache helper API;
+        # libnetsnmpmibs holds the compiled-in MIB modules and depends on the agent.
+        if self._with_agent:
             self.cpp_info.components["netsnmpagent"].libs = ["netsnmpagent"]
             self.cpp_info.components["netsnmpagent"].requires = ["netsnmp"]
-            if self.settings.os in ("Linux", "FreeBSD"):
-                self.cpp_info.components["netsnmpagent"].system_libs = []
-
-            # libnetsnmpmibs holds the compiled-in MIB modules (mibII, etc.)
             self.cpp_info.components["netsnmpmibs"].libs = ["netsnmpmibs"]
             self.cpp_info.components["netsnmpmibs"].requires = ["netsnmpagent"]
