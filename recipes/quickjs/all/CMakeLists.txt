@@ -12,10 +12,9 @@ set(QUICKJS_SRC
     ${QUICKJS_SRC_DIR}/libregexp.c
     ${QUICKJS_SRC_DIR}/libunicode.c
     ${QUICKJS_SRC_DIR}/cutils.c
-    ${QUICKJS_SRC_DIR}/quickjs-libc.c
-)
-
-list(APPEND QUICKJS_SRC ${QUICKJS_SRC_DIR}/dtoa.c)
+    ${QUICKJS_SRC_DIR}/quickjs-libc.c  
+    ${QUICKJS_SRC_DIR}/dtoa.c  
+)  
 
 set(QUICKJS_INC
     ${QUICKJS_SRC_DIR}/cutils.h
