@@ -7,23 +7,39 @@ endif()
 
 set(STANDARD_ASN1_FILES
  BIT_STRING.c
+ BIT_STRING_oer.c
  INTEGER.c
- NativeEnumerated.c
+ INTEGER_oer.c
  NativeInteger.c
+ NativeInteger_oer.c
  OBJECT_IDENTIFIER.c
  OCTET_STRING.c
+ OCTET_STRING_oer.c
+ OPEN_TYPE.c
+ OPEN_TYPE_oer.c
  asn_SEQUENCE_OF.c
  asn_SET_OF.c
+ asn_application.c
+ asn_bit_data.c
  asn_codecs_prim.c
+ asn_internal.c
+ asn_random_fill.c
  ber_decoder.c
  ber_tlv_length.c
  ber_tlv_tag.c
+ constr_CHOICE.c
+ constr_CHOICE_oer.c
  constr_SEQUENCE.c
+ constr_SEQUENCE_oer.c
  constr_SEQUENCE_OF.c
  constr_SET_OF.c
+ constr_SET_OF_oer.c
  constr_TYPE.c
  constraints.c
  der_encoder.c
+ oer_decoder.c
+ oer_encoder.c
+ oer_support.c
  per_decoder.c
  per_encoder.c
  per_opentype.c

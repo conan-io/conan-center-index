@@ -66,7 +66,11 @@ class Asn1cConan(ConanFile):
             env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
-        tc.configure_args += ["--datarootdir=${prefix}/res"]
+        tc.configure_args += [
+            "--datarootdir=${prefix}/res",
+            "--disable-test-asan",
+            "--disable-test-ubsan",
+        ]
         tc.generate()
 
     def build(self):
@@ -94,8 +98,3 @@ class Asn1cConan(ConanFile):
         # so `SUPPORT_PATH` should be propagated to command line invocation to `-S` argument
         support_path = os.path.join(self.package_folder, "res", "asn1c")
         self.buildenv_info.define_path("SUPPORT_PATH", support_path)
-
-        # TODO: to remove in conan v2
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bin_path)
-        self.env_info.SUPPORT_PATH = support_path

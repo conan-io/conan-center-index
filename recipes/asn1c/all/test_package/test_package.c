@@ -5,7 +5,7 @@
 
 int main() {
 	/* Define an OBJECT IDENTIFIER value */
-	int oid[] = { 1, 3, 6, 1, 4, 1, 9363, 1, 5, 0 }; /* or whatever */
+	asn_oid_arc_t oid[] = { 1, 3, 6, 1, 4, 1, 9363, 1, 5, 0 }; /* or whatever */
 
 	/* Declare a pointer to a new instance of MyTypes type */
 	MyTypes_t *myType;
@@ -23,7 +23,7 @@ int main() {
 	 * Fill in myObjectId
 	 */
 	ret = OBJECT_IDENTIFIER_set_arcs(&myType->myObjectId,
-			oid, sizeof(oid[0]), sizeof(oid) / sizeof(oid[0]));
+			oid, sizeof(oid) / sizeof(oid[0]));
 	assert(ret == 0);
 
 	/*

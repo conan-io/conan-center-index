@@ -1,4 +1,4 @@
 sources:
-  "0.9.28":
-    url: "https://github.com/vlm/asn1c/releases/download/v0.9.28/asn1c-0.9.28.tar.gz"
-    sha256: "8007440b647ef2dd9fb73d931c33ac11764e6afb2437dbe638bb4e5fc82386b9"
+  "cci.20260617":
+    url: "https://github.com/vlm/asn1c/archive/2f7f40dab3973f707d66f4a67cae0cc1bc8e62b5.tar.gz"
+    sha256: "abe8064f70f51940c5e0ac7251b6313dfda18ad7448dd1f8f57e8ecdeb427519"
