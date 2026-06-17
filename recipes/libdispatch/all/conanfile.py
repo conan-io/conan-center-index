@@ -4,9 +4,9 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rmdir, replace_in_file
 
-required_conan_version = ">=2"
+required_conan_version = ">=1.53.0"
 
 
 class LibDispatchConan(ConanFile):
@@ -31,10 +31,13 @@ class LibDispatchConan(ConanFile):
         "fPIC": True,
     }
 
-    implements = ["auto_shared_fpic"]
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
-    def export_sources(self):
-        export_conandata_patches(self)
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -45,18 +48,17 @@ class LibDispatchConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "modules", "DispatchCompilerWarnings.cmake"),
                         "-Werror", "")
 
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
