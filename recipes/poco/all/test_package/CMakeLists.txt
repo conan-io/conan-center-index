@@ -52,7 +52,6 @@ endif()
 if(TEST_CRYPTO)
     add_executable(crypto test_crypto.cpp)
     target_link_libraries(crypto PRIVATE Poco::Crypto)
-    set_property(TARGET crypto PROPERTY OUTPUT_NAME "crypto")
 endif()
 
 if(TEST_NET)

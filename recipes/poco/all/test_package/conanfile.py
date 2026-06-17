@@ -38,4 +38,3 @@ class TestPackageConan(ConanFile):
                 if poco_options.get_safe("enable_{}".format(option), False):
                     test_executable = os.path.join(self.cpp.build.bindir, option)
                     self.run(test_executable, env="conanrun")
-            
