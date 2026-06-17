@@ -23,8 +23,16 @@ class LuajitConan(ConanFile):
     topics = ("lua", "jit")
     provides = "lua"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_gc64": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_gc64": False, # note: on by default in later versions
+    }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -32,6 +40,8 @@ class LuajitConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self._is_host_32bit:
+            del self.options.with_gc64
 
     def configure(self):
         if self.options.shared:
@@ -106,6 +116,8 @@ class LuajitConan(ConanFile):
         args = [f"PREFIX={unix_path(self, self.package_folder)}"]
         if "clang" in str(self.settings.compiler):
             args.append("DEFAULT_CC=clang")
+        if self.options.get_safe("with_gc64", False):
+            args.append("XCFLAGS=-DLUAJIT_ENABLE_GC64")
 
         # upstream doesn't read CPPFLAGS, inject them manually
         cppflags = AutotoolsToolchain(self).environment().vars(self).get("CPPFLAGS")
@@ -160,8 +172,10 @@ class LuajitConan(ConanFile):
         self._patch_sources()
         if is_msvc(self):
             with chdir(self, os.path.join(self.source_folder, "src")):
-                variant = '' if self.options.shared else 'static'
-                self.run(f"msvcbuild.bat {variant}", env="conanbuild")
+                build_opts = "gc64" if self.options.get_safe("with_gc64", False) else ""
+                if not self.options.shared:
+                    build_opts += " static"
+                self.run(f"msvcbuild.bat {build_opts}", env="conanbuild")
         else:
             with chdir(self, self.source_folder):
                 autotools = Autotools(self)
