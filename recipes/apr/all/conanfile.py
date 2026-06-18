@@ -140,6 +140,8 @@ class AprConan(ConanFile):
             tc = CMakeToolchain(self)
             tc.variables["INSTALL_PDB"] = False
             tc.variables["APR_BUILD_TESTAPR"] = False
+            tc.cache_variables["APR_BUILD_SHARED"] = self.options.shared
+            tc.cache_variables["APR_BUILD_STATIC"] = not self.options.shared
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
             tc.generate()
         else:
@@ -162,7 +164,7 @@ class AprConan(ConanFile):
         if is_msvc(self):
             cmake = CMake(self)
             cmake.configure()
-            cmake.build(target="libapr-1" if self.options.shared else "apr-1")
+            cmake.build()
         else:
             autotools = Autotools(self)
             if self._should_call_autoreconf:
@@ -175,6 +177,7 @@ class AprConan(ConanFile):
         if is_msvc(self):
             cmake = CMake(self)
             cmake.install()
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         else:
             autotools = Autotools(self)
             autotools.install()
@@ -200,5 +203,5 @@ class AprConan(ConanFile):
             self.cpp_info.defines = ["APR_DECLARE_STATIC"]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs = ["crypt", "dl", "pthread", "rt"]
-            if self.settings.os == "Windows":
-                self.cpp_info.system_libs = ["mswsock", "rpcrt4", "ws2_32"]
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["mswsock", "rpcrt4", "ws2_32"]
