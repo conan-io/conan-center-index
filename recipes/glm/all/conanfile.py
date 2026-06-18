@@ -41,6 +41,7 @@ class GlmConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "glm")
-        self.cpp_info.set_property("cmake_target_name", "glm::glm")
+        self.cpp_info.set_property("cmake_target_name", "glm::glm-header-only")
+        self.cpp_info.set_property("cmake_target_aliases", ["glm::glm"])
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
