@@ -69,9 +69,6 @@ class UhdConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-        self.cpp.build.libdirs = ["lib"]
-        self.cpp.source.includedirs = ["host/include"]
-        self.cpp.build.includedirs = ["include"]
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
