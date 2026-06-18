@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, XCRun
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building, check_min_cppstd, stdcpp_library
 from conan.tools.cmake import cmake_layout
 from conan.tools.env import VirtualRunEnv
@@ -9,7 +9,8 @@ from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
+
 
 class GperftoolsConan(ConanFile):
     name = "gperftools"
@@ -57,22 +58,6 @@ class GperftoolsConan(ConanFile):
         "tcmalloc_pagesize": None,
     }
 
-    @property
-    def _min_cppstd(self):
-        return "11" if Version(self.version) < "2.16" else "17"
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "17": {
-            "gcc": "8",
-            "clang": "7",
-            "apple-clang": "12",
-            "Visual Studio": "16",
-            "msvc": "192",
-            },
-        }.get(self._min_cppstd, {})
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -103,15 +88,9 @@ class GperftoolsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
-        if Version(self.version) >= "2.11.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration(f"{self.ref} does not support gcc < 7.")
 
         if self.settings.os == "Windows":
@@ -121,10 +100,11 @@ class GperftoolsConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("enable_libunwind", False):
-            self.requires("libunwind/1.6.2")
+            self.requires("libunwind/[>=1.6.2 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         if not cross_building(self):
@@ -159,21 +139,6 @@ class GperftoolsConan(ConanFile):
         args["with-tcmalloc-alignment"] = self.options.tcmalloc_alignment
         args["with-tcmalloc-pagesize"] = self.options.tcmalloc_pagesize
 
-        # Based on https://github.com/conan-io/conan-center-index/blob/c647b1/recipes/libx264/all/conanfile.py#L94
-        if is_apple_os(self) and self.settings.arch == "armv8":
-            args["host"] = "aarch64-apple-darwin"
-            tc.extra_asflags = ["-arch arm64"]
-            tc.extra_ldflags = ["-arch arm64"]
-            if self.settings.os != "Macos":
-                xcrun = XCRun(self)
-                platform_flags = ["-isysroot", xcrun.sdk_path]
-                apple_min_version_flag = AutotoolsToolchain(self).apple_min_version_flag
-                if apple_min_version_flag:
-                    platform_flags.append(apple_min_version_flag)
-                tc.extra_asflags.extend(platform_flags)
-                tc.extra_cflags.extend(platform_flags)
-                tc.extra_ldflags.extend(platform_flags)
-
         for k, v in args.items():
             if v in [True, False]:
                 v = "yes" if v else "no"
@@ -195,7 +160,6 @@ class GperftoolsConan(ConanFile):
             )
 
     def build(self):
-        self._patch_sources()
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()

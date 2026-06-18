@@ -1,15 +1,22 @@
+# Versions to keep:
+#  - The last patch version of the supported releases, as per https://openssl-library.org/source/
+#  - The last patch version of the current LTS release
+#  - The most recent FIPS validated version
+#  Note: please do not maintain multiple patch versions of the same minor,
+#        unless required by the above.
+
 versions:
-  "3.5.1":
+  "4.0.1":
+    folder: "4.x.x"
+  "3.6.3":
     folder: "3.x.x"
-  "3.4.2":
+  "3.5.7":
     folder: "3.x.x"
-  "3.3.4":
-    folder: "3.x.x"
-  "3.2.5":
+  "3.4.6":
     folder: "3.x.x"
   "3.1.2":
     folder: "3.x.x"
-  "3.0.17":
+  "3.0.21":
     folder: "3.x.x"
   "1.1.1w":
     folder: "1.x.x"

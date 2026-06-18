@@ -10,6 +10,7 @@ required_conan_version = ">=1.53.0"
 
 class sqlpp11Conan(ConanFile):
     name = "sqlpp11-connector-sqlite3"
+    deprecated = "project no longer maintained by author"
     description = "A C++ wrapper for sqlite3 meant to be used in combination with sqlpp11."
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"

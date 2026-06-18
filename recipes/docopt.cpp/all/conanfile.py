@@ -59,6 +59,7 @@ class DocoptCppConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.variables["USE_BOOST_REGEX"] = self.options.boost_regex
         tc.generate()
 

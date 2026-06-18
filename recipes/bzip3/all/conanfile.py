@@ -11,7 +11,7 @@ class BZip3Conan(ConanFile):
     description = "A better and stronger spiritual successor to BZip2."
     license = "LGPL-3.0"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/kspalaiologos/bzip3"
+    homepage = "https://github.com/iczelia/bzip3"
     topics = ("bzip2", "lzma", "compression")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"

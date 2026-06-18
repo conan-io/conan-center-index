@@ -1,17 +1,15 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import (
-    apply_conandata_patches, copy, export_conandata_patches, get,
-    rm, rmdir
-)
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.64.0 <2 || >=2.2.0"
+required_conan_version = ">=2.1"
 
 
 class FontconfigConan(ConanFile):
@@ -30,9 +28,7 @@ class FontconfigConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
+    package_type = "library"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -48,14 +44,14 @@ class FontconfigConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("freetype/2.13.2")
+        self.requires("freetype/[>=2.13.2 <3]")
         self.requires("expat/[>=2.6.2 <3]")
 
     def build_requirements(self):
         self.tool_requires("gperf/3.1")
-        self.tool_requires("meson/1.4.0")
+        self.tool_requires("meson/[>=1.4.0 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.1 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -78,11 +74,7 @@ class FontconfigConan(ConanFile):
         })
         tc.generate()
 
-    def _patch_files(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_files()
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -96,7 +88,9 @@ class FontconfigConan(ConanFile):
         rm(self, "*.def", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         fix_apple_shared_install_name(self)
-        fix_msvc_libname(self)
+        if Version(self.version) <= "2.15.0":
+            # TODO: Keep this for versions <= 2.15.0, remove in future versions
+            fix_msvc_libname(self)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
@@ -109,11 +103,6 @@ class FontconfigConan(ConanFile):
 
         fontconfig_path = os.path.join(self.package_folder, "res", "etc", "fonts")
         self.runenv_info.append_path("FONTCONFIG_PATH", fontconfig_path)
-
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "Fontconfig"
-        self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"
-        self.env_info.FONTCONFIG_PATH = fontconfig_path
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""

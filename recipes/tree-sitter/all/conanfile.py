@@ -26,18 +26,13 @@ class TreeSitterConan(ConanFile):
         "shared": False,
     }
 
-    def export_sources(self):
-        if Version(self.version) < "0.24.1":
-            copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            if Version(self.version) >= "0.24.1":
-                self.package_type = "static-library"
+            self.package_type = "static-library"
 
     def configure(self):
-        if Version(self.version) >= "0.24.1" and self.settings.os == "Windows":
+        if self.settings.os == "Windows":
             self.options.rm_safe("shared")
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
@@ -51,20 +46,17 @@ class TreeSitterConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = CMakeToolchain(self)
-        if Version(self.version) < "0.24.1":
-            tc.variables["TREE_SITTER_SRC_DIR"] = self.source_folder.replace("\\", "/")
-            tc.variables["TREE_SITTER_VERSION"] = str(self.version)
-        else:
-            tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.get_safe("shared", False)
+        tc = CMakeToolchain(self)        
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.get_safe("shared", False)
         tc.generate()
 
     def build(self):
         cmake = CMake(self)
-        if Version(self.version) < "0.24.1":
-            cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
-        else:
+        # CMakeLists.txt moved from lib/ to root in 0.26.x
+        if Version(self.version) < "0.26":
             cmake.configure(build_script_folder=os.path.join(self.source_folder, "lib"))
+        else:
+            cmake.configure()
         cmake.build()
 
     def package(self):
@@ -78,6 +70,7 @@ class TreeSitterConan(ConanFile):
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = ["tree-sitter"]

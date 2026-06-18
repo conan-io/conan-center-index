@@ -2,14 +2,13 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import collect_libs, copy, get, replace_in_file, rename, rm
+from conan.tools.files import collect_libs, copy, get, rename, rm, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import glob
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class AeronConan(ConanFile):
@@ -59,8 +58,7 @@ class AeronConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
@@ -68,28 +66,24 @@ class AeronConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("This platform (os=Macos arch=armv8) is not yet supported by this recipe")
-
     def build_requirements(self):
-        self.tool_requires("zulu-openjdk/11.0.19")
+        self.tool_requires("cmake/[>=3.30]")
+        self.tool_requires("zulu-openjdk/[>=17]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_AERON_DRIVER"] = self.options.build_aeron_driver
         tc.cache_variables["BUILD_AERON_ARCHIVE_API"] = self.options.build_aeron_archive_api
         tc.cache_variables["AERON_TESTS"] = False
         tc.cache_variables["AERON_SYSTEM_TESTS"] = False
+        tc.cache_variables["AERON_UNIT_TESTS"] = False
         tc.cache_variables["AERON_SLOW_SYSTEM_TESTS"] = False
         tc.cache_variables["AERON_BUILD_SAMPLES"] = False
         tc.cache_variables["AERON_BUILD_DOCUMENTATION"] = False
         tc.cache_variables["AERON_INSTALL_TARGETS"] = True
-        tc.cache_variables["AERON_ENABLE_NONSTANDARD_OPTIMIZATIONS"] = True
         # The finite-math-only optimization has no effect and can cause linking errors
         # when linked against glibc >= 2.31
         tc.blocks["cmake_flags_init"].template += (
@@ -98,12 +92,7 @@ class AeronConan(ConanFile):
         )
         tc.generate()
 
-    def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "/MTd", "")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "/MT", "")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -118,6 +107,8 @@ class AeronConan(ConanFile):
 
         archive_include_dir = os.path.join(self.source_folder, "aeron-archive", "src", "main", "cpp", "client")
         copy(self, "*.h", src=archive_include_dir, dst=os.path.join(self.package_folder, "include", "aeron-archive"))
+
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
         lib_folder = os.path.join(self.package_folder, "lib")
         bin_folder = os.path.join(self.package_folder, "bin")
@@ -140,6 +131,11 @@ class AeronConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.includedirs.extend([
+            os.path.join("include", "wrapper"),
+            os.path.join("include", "aeron"),
+            os.path.join("include", "aeronmd"),
+        ])
         if is_msvc(self):
             self.cpp_info.defines.append("_ENABLE_EXTENDED_ALIGNED_STORAGE")
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -147,6 +143,3 @@ class AeronConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["winmm", "wsock32", "ws2_32", "iphlpapi"]
             self.cpp_info.defines.append("HAVE_WSAPOLL")
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

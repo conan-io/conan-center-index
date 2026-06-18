@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
-from conan.tools.files import chdir, get, replace_in_file, copy
+from conan.tools.files import chdir, get, replace_in_file, copy, trim_conandata
 from conan.tools.layout import basic_layout
 import fnmatch
 import os
@@ -9,7 +9,7 @@ import subprocess
 import errno
 import ctypes
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=2.2"
 
 
 class lock:
@@ -51,7 +51,7 @@ class MSYS2Conan(ConanFile):
     }
     default_options = {
         "exclude_files": "*/link.exe",
-        "packages": "base-devel,binutils,gcc",
+        #"packages": "base-devel,binutils,gcc", # see config_options
         "additional_packages": None,
         "no_kill": False,
     }
@@ -61,14 +61,31 @@ class MSYS2Conan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def export(self):
+        # this will ensure locally-exported recipes match the recipe revision from
+        # the Conan Center remote
+        trim_conandata(self)
+
     def package_id(self):
         del self.info.options.no_kill
 
-    def validate(self):
+    def config_options(self):
+        default_packages = "base-devel,binutils,gcc"
+        if self.settings_target is not None and self.settings_target.arch == "armv8":
+            # The mingw-w64-cross-mingwarm64-gcc contains tools required to target arm64
+            default_packages += ",mingw-w64-cross-mingwarm64-gcc"
+        self.options.packages = default_packages
+
+    def validate_build(self):
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only Windows supported")
         if self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Only Windows x64 supported")
+
+    def compatibility(self):
+        if self.settings.arch == "armv8":
+            # Fallback on x86_64 package when natively on Windows arm64
+            return [{"settings": [("arch", "x86_64")]}]
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -191,7 +208,10 @@ class MSYS2Conan(ConanFile):
         self.conf_info.define("tools.microsoft.bash:subsystem", "msys2")
         self.conf_info.define("tools.microsoft.bash:path", os.path.join(msys_bin, "bash.exe"))
 
-        # conan v1 specific stuff
-        self.env_info.MSYS_ROOT = msys_root
-        self.env_info.MSYS_BIN = msys_bin
-        self.env_info.path.append(msys_bin)
+        if self.settings_target is not None and \
+            self.settings_target.os == "Windows" and \
+            self.settings_target.arch == "armv8":
+            # Expose /opt/bin to PATH, so that aarch64-w64-mingw32- prefixed tools can be found
+            # Define autotools host/build triplet so that the right tools are used
+            self.cpp_info.bindirs.insert(0, os.path.join(msys_root, "opt", "bin"))
+            self.conf_info.define("tools.gnu:host_triplet", "aarch64-w64-mingw32")

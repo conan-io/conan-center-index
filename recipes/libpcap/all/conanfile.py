@@ -98,6 +98,7 @@ class LibPcapConan(ConanFile):
                 # to inject this compilation flag themselves
                 tc.variables["USE_STATIC_RT"] = False
             tc.cache_variables["DISABLE_DPDK"] = True
+            tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_OpenSSL"] = True
 
             if Version(self.version) >= "1.10.5":
                 self.output.warning("PCAP on Windows is currently built with package capture capabilities - only support is for reading/writing capture files")

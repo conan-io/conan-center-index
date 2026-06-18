@@ -1,0 +1,4 @@
+sources:
+  "1.19.1":
+    url: "https://github.com/reductstore/reduct-cpp/archive/refs/tags/v1.19.1.tar.gz"
+    sha256: "843b6b525dfeb250394fa98609e9046de68d1f26b0bad4a2d2a308a07c97095f"

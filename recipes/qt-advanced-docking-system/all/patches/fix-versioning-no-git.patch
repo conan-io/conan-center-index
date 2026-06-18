@@ -1,0 +1,22 @@
+Versioning.cmake unconditionally overwrites PROJECT_VERSION_* with empty strings when git is unavailable
+causing malformed Windows RC files. The package build is not built from git.
+
+--- a/cmake/modules/Versioning.cmake
++++ b/cmake/modules/Versioning.cmake
+@@ -24,10 +24,12 @@ string(REGEX REPLACE "^v" "" GIT_DESC "${GIT_DESC_RAW}")
+
+ # Extract major.minor.patch
+ string(REGEX MATCH "^([0-9]+)\\.([0-9]+)\\.([0-9]+)" _ "${GIT_DESC}")
+-set(PROJECT_VERSION_MAJOR "${CMAKE_MATCH_1}")
+-set(PROJECT_VERSION_MINOR "${CMAKE_MATCH_2}")
+-set(PROJECT_VERSION_PATCH "${CMAKE_MATCH_3}")
+-
++if(CMAKE_MATCH_1)
++    set(PROJECT_VERSION_MAJOR "${CMAKE_MATCH_1}")
++    set(PROJECT_VERSION_MINOR "${CMAKE_MATCH_2}")
++    set(PROJECT_VERSION_PATCH "${CMAKE_MATCH_3}")
++endif()
++# If git is not available, PROJECT_VERSION_* retain values set by project()
+ set(PROJECT_VERSION_STRING
+     "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
+ )
