@@ -118,7 +118,11 @@ class PCRE2Conan(ConanFile):
             replace_in_file(self, cmakelists,
                             "RUNTIME DESTINATION bin",
                             "RUNTIME DESTINATION bin BUNDLE DESTINATION bin")
-
+        else:
+            # Avoid CMP0006 error (macos bundle)
+            replace_in_file(self, cmakelists,
+                            "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}",
+                            "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}")
         # pcre2-config does not correctly include '-static' in static library names
         if is_msvc(self):
             replace = None
