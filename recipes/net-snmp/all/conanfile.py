@@ -1,12 +1,11 @@
 import os
-import re
 import stat
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import copy, get, load, replace_in_file, rm, rmdir, save, chdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir, chdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, NMakeToolchain
@@ -33,17 +32,11 @@ class NetSnmpConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_ipv6": [True, False],
-        "with_agent": [True, False],
-        "with_mini_agent": [True, False],
-        "with_pcre": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_ipv6": True,
-        "with_agent": False,
-        "with_mini_agent": False,
-        "with_pcre": False,
     }
 
     def config_options(self):
@@ -61,8 +54,7 @@ class NetSnmpConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
-        if self.options.with_pcre:
-            self.requires("pcre/8.45")
+        self.requires("pcre/8.45")
         self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
@@ -89,10 +81,6 @@ class NetSnmpConan(ConanFile):
     def _is_debug(self):
         return self.settings.build_type == "Debug"
 
-    @property
-    def _with_agent(self):
-        return self.options.with_agent or self.options.with_mini_agent
-
     def generate(self):
         if is_msvc(self):
             tc = NMakeToolchain(self)
@@ -105,21 +93,23 @@ class NetSnmpConan(ConanFile):
                 env = VirtualRunEnv(self)
                 env.generate(scope="build")
             tc = AutotoolsToolchain(self)
+            debug_flag = "enable" if self._is_debug else "disable"
+            ipv6_flag = "enable" if self.options.with_ipv6 else "disable"
+            openssl_path = self.dependencies["openssl"].package_folder
+            zlib_path = self.dependencies["zlib"].package_folder
             tc.configure_args += [
-                f"--with-openssl={self.dependencies['openssl'].package_folder}",
-                f"--with-zlib={self.dependencies['zlib'].package_folder}",
-                f"--{'enable' if self._is_debug else 'disable'}-debugging",
-                f"--{'enable' if self.options.with_ipv6 else 'disable'}-ipv6",
+                f"--with-openssl={openssl_path}",
+                f"--with-zlib={zlib_path}",
+                f"--{debug_flag}-debugging",
+                f"--{ipv6_flag}-ipv6",
                 "--with-defaults",
                 "--without-rpm",
-                f"--{'with' if self.options.with_pcre else 'without'}-pcre",
-                f"--{'enable' if self.options.with_agent else 'disable'}-agent",
-                f"--{'enable' if self.options.with_mini_agent else 'disable'}-mini-agent",
+                "--without-pcre",
+                "--disable-agent",
                 "--disable-applications",
                 "--disable-manuals",
                 "--disable-scripts",
                 "--disable-mibs",
-                "--disable-mib-loading",
                 "--disable-embedded-perl",
             ]
             if self.settings.os in ["Linux"]:
@@ -165,18 +155,6 @@ class NetSnmpConan(ConanFile):
         if "MT" in msvc_runtime_flag(self):
             replace_in_file(self, "Configure", "/MDd", "/MTd", strict=False)
             replace_in_file(self, "Configure", "/MD ", "/MT ", strict=False)
-        # net-snmp-config.h.in #pragma-links OpenSSL by a hard-coded name that varies by
-        # version/arch/runtime — 5.9.4 emits libcrypto64MDd.lib, 5.9.5.x emits libcrypto.lib —
-        # and none of those match Conan's OpenSSL. Strip the OpenSSL pragmas (this carries into
-        # the shipped net-snmp-config.h); consumers already pull OpenSSL + its system_libs via
-        # net-snmp's openssl::openssl requirement, so they link the right libs. Non-OpenSSL
-        # pragmas in the block (gdi32/user32) are left intact.
-        cfg = r"net-snmp\net-snmp-config.h.in"
-        content = load(self, cfg)
-        content = re.sub(
-            r'#[ \t]*pragma[ \t]+comment\(lib,[ \t]*"(?:lib)?(?:crypto|ssl|eay32|ssleay)[^"]*\.lib"\)[ \t]*\r?\n',
-            "", content)
-        save(self, cfg, content)
 
 
     # ---------------- Linux / autotools ----------------
@@ -209,8 +187,6 @@ class NetSnmpConan(ConanFile):
                 self._patch_msvc()
                 self._configure_msvc()
                 self.run("nmake /nologo libsnmp")
-                if self._with_agent:
-                    self.run("nmake /nologo libagent netsnmpmibs")
         else:
             self._patch_unix()
             configure_path = os.path.join(self.source_folder, "configure")
@@ -219,8 +195,6 @@ class NetSnmpConan(ConanFile):
             autotools.autoreconf()
             autotools.configure()
             autotools.make(target="snmplib", args=["NOAUTODEPS=1"])
-            if self._with_agent:
-                autotools.make(target="agent", args=["NOAUTODEPS=1"])
 
     def package(self):
         copy(self, "COPYING",
@@ -228,14 +202,9 @@ class NetSnmpConan(ConanFile):
              src=self.source_folder)
         if is_msvc(self):
             cfg = "debug" if self._is_debug else "release"
-            libsrc = os.path.join(self.source_folder, rf"win32\lib\{cfg}")
             copy(self, "netsnmp.lib",
-                 dst=os.path.join(self.package_folder, "lib"), src=libsrc)
-            if self._with_agent:
-                copy(self, "netsnmpagent.lib",
-                     dst=os.path.join(self.package_folder, "lib"), src=libsrc)
-                copy(self, "netsnmpmibs.lib",
-                     dst=os.path.join(self.package_folder, "lib"), src=libsrc)
+                 dst=os.path.join(self.package_folder, "lib"),
+                 src=os.path.join(self.source_folder, rf"win32\lib\{cfg}"))
             copy(self, "include/net-snmp/*.h",
                  dst=self.package_folder,
                  src=self.source_folder)
@@ -254,23 +223,8 @@ class NetSnmpConan(ConanFile):
             fix_apple_shared_install_name(self)
 
     def package_info(self):
-        # Legacy aggregate target (backward compat)
-        self.cpp_info.set_property("cmake_target_name", "net-snmp::net-snmp")
+        self.cpp_info.libs = ["netsnmp"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["netsnmp"].system_libs.extend(["rt", "pthread", "m"])
+            self.cpp_info.system_libs.extend(["rt", "pthread", "m"])
         if is_apple_os(self):
-            self.cpp_info.components["netsnmp"].frameworks.extend(["CoreFoundation", "DiskArbitration", "IOKit"])
-
-        # base SNMP library — always shipped
-        self.cpp_info.components["netsnmp"].libs = ["netsnmp"]
-        self.cpp_info.components["netsnmp"].requires = ["openssl::openssl", "zlib::zlib"]
-        if self.options.with_pcre:
-            self.cpp_info.components["netsnmp"].requires.append("pcre::pcre")
-
-        # libnetsnmpagent holds the handler/table/tdata/cache helper API;
-        # libnetsnmpmibs holds the compiled-in MIB modules and depends on the agent.
-        if self._with_agent:
-            self.cpp_info.components["netsnmpagent"].libs = ["netsnmpagent"]
-            self.cpp_info.components["netsnmpagent"].requires = ["netsnmp"]
-            self.cpp_info.components["netsnmpmibs"].libs = ["netsnmpmibs"]
-            self.cpp_info.components["netsnmpmibs"].requires = ["netsnmpagent"]
+            self.cpp_info.frameworks.extend(["CoreFoundation", "DiskArbitration", "IOKit"])
