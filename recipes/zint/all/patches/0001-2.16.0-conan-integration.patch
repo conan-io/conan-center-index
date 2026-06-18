@@ -40,3 +40,85 @@ index f9a1227..7c35579 100644
      else()
          message(STATUS "Could NOT find Qt5")
      endif()
+diff --git a/backend/CMakeLists.txt b/backend/CMakeLists.txt
+index 12cd994..2f7be6e 100644
+--- a/backend/CMakeLists.txt
++++ b/backend/CMakeLists.txt
+@@ -126,7 +126,7 @@ endif()
+ 
+ if(MSVC)
+     if(ZINT_SHARED)
+-        target_compile_definitions(zint PRIVATE DLL_EXPORT)
++        target_compile_definitions(zint PRIVATE ZINT_BUILD_DLL)
+     endif()
+ endif()
+ 
+diff --git a/backend/zint.h b/backend/zint.h
+index 2dea2af..2ef0cf4 100644
+--- a/backend/zint.h
++++ b/backend/zint.h
+@@ -388,7 +388,7 @@ extern "C" {
+ #define ZINT_DEBUG_TEST         0x0002  /* For internal test use only */
+ 
+ #ifdef _WIN32
+-#  if defined(DLL_EXPORT) || defined(PIC) || defined(_USRDLL)
++#  if defined(ZINT_BUILD_DLL)
+ #    define ZINT_EXTERN __declspec(dllexport)
+ #  elif defined(ZINT_DLL)
+ #    define ZINT_EXTERN __declspec(dllimport)
+diff --git a/backend_qt/CMakeLists.txt b/backend_qt/CMakeLists.txt
+index 9c7e744..17d3347 100644
+--- a/backend_qt/CMakeLists.txt
++++ b/backend_qt/CMakeLists.txt
+@@ -13,7 +13,7 @@ else()
+     qt5_wrap_cpp(QZint_SRCS qzint.h)
+ endif()
+ 
+-add_library(${PROJECT_NAME} STATIC ${QZint_SRCS})
++add_library(${PROJECT_NAME} ${QZint_SRCS})
+ 
+ set_target_properties(${PROJECT_NAME} PROPERTIES  SOVERSION "${ZINT_VERSION_MAJOR}.${ZINT_VERSION_MINOR}"
+                                         VERSION ${ZINT_VERSION})
+@@ -22,6 +22,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/.
+ 
+ if(ZINT_SHARED)
+     target_link_libraries(${PROJECT_NAME} zint)
++    if(MSVC)
++        target_compile_definitions(${PROJECT_NAME} PRIVATE QZINT_BUILD_DLL)
++    endif()
+ else()
+     target_link_libraries(${PROJECT_NAME} zint-static)
+ endif()
+diff --git a/backend_qt/qzint.h b/backend_qt/qzint.h
+index f7e7704..ba4de41 100644
+--- a/backend_qt/qzint.h
++++ b/backend_qt/qzint.h
+@@ -45,7 +45,18 @@ public:
+ struct QZintXdimDpVars; // Forward reference to Printing Scale settings, see end
+ 
+ /* Interface */
+-class QZint : public QObject
++#ifdef _WIN32
++# ifdef QZINT_BUILD_DLL
++#  define QZINT_EXTERN __declspec(dllexport)
++# elif defined(QZINT_DLL)
++#  define QZINT_EXTERN __declspec(dllimport)
++# else
++#  define QZINT_EXTERN
++# endif
++#else
++# define QZINT_EXTERN
++#endif
++class QZINT_EXTERN QZint : public QObject
+ {
+     Q_OBJECT
+ 
+@@ -420,7 +431,7 @@ private:
+ };
+ 
+ /* Printing Scale settings */
+-struct QZintXdimDpVars {
++struct QZINT_EXTERN QZintXdimDpVars {
+     double x_dim = 0.0; // X-dimension in `x_dim_units`
+     int x_dim_units = 0; // 0 for mm, 1 for inches
+     int resolution = 0; // Dot density in `resolution_units`

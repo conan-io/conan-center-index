@@ -52,7 +52,9 @@ class ZintConan(ConanFile):
             self.requires("libpng/[>=1.6 <2]")
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_qt:
-            self.requires("qt/[>=5.15 <7]", transitive_headers=True, transitive_libs=True)
+            # Upstream does not allow compiling with Qt 6 on Windows when building a shared library
+            qt_upper_bound = "6" if self.settings.os == "Windows" and self.options.shared else "7"
+            self.requires(f"qt/[>=5.15 <{qt_upper_bound}]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.options.with_qt and not self.dependencies["qt"].options.gui:
@@ -72,7 +74,6 @@ class ZintConan(ConanFile):
         tc.cache_variables["ZINT_USE_PNG"] = self.options.with_libpng
         tc.cache_variables["ZINT_SHARED"] = self.options.shared
         tc.cache_variables["ZINT_STATIC"] = not self.options.shared
-        # disabling front-end compilation is intentional
         tc.cache_variables["ZINT_FRONTEND"] = False
         tc.generate()
         deps = CMakeDeps(self)
@@ -94,6 +95,8 @@ class ZintConan(ConanFile):
         self.cpp_info.components["libzint"].set_property("cmake_target_name", "Zint::Zint")
         use_static_suffix = not self.options.shared and self.settings.os == "Windows"
         self.cpp_info.components["libzint"].libs = ["zint-static" if use_static_suffix else "zint"]
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.components["libzint"].defines = ["ZINT_DLL"]
         if self.settings.os != "Windows":
             self.cpp_info.components["libzint"].system_libs = ["m"]
         if self.options.with_libpng:
@@ -101,12 +104,13 @@ class ZintConan(ConanFile):
 
         if self.options.with_qt:
             self.cpp_info.components["libqzint"].set_property("cmake_target_name", "Zint::QZint")
-            self.cpp_info.components["libqzint"].type = "static-library"
             self.cpp_info.components["libqzint"].libs = ["QZint"]
             self.cpp_info.components["libqzint"].requires.extend([
                 "libzint",
                 "qt::qtGui",
             ])
+            if self.settings.os == "Windows" and self.options.shared:
+                self.cpp_info.components["libqzint"].defines = ["QZINT_DLL"]
 
         # Trick to only define Zint::QZint and Zint::Zint in CMakeDeps generator
         self.cpp_info.set_property("cmake_target_name", "Zint::QZint" if self.options.with_qt else "Zint::Zint")
