@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, collect_libs
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, VCVars
 from conan.tools.scm import Version
 import os
@@ -177,18 +177,6 @@ class MimallocConan(ConanFile):
             name += "-{}".format(str(self.settings.build_type).lower())
         return name
 
-    @property
-    def _lib_name(self):
-        name = "mimalloc"
-
-        if Version(self.version) == "2.1.2" and self.settings.os == "Windows" and not self.options.shared:
-            name += "-static"
-        if self.options.secure:
-            name += "-secure"
-        if self.settings.build_type not in ("Release", "RelWithDebInfo", "MinSizeRel"):
-            name += "-{}".format(str(self.settings.build_type).lower())
-        return name
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "mimalloc")
         self.cpp_info.set_property("cmake_target_name", "mimalloc" if self.options.shared else "mimalloc-static")
@@ -208,7 +196,7 @@ class MimallocConan(ConanFile):
             self.cpp_info.libdirs = []
             self.cpp_info.bindirs = []
         else:
-            self.cpp_info.libs = [self._lib_name]
+            self.cpp_info.libs = collect_libs(self)
 
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
