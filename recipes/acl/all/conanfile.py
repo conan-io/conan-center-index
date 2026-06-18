@@ -38,7 +38,7 @@ class AclConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libattr/2.5.1")
+        self.requires("libattr/2.5.2")
 
     def validate(self):
         if self.settings.os != "Linux":
