@@ -131,8 +131,6 @@ class LibVPXConan(ConanFile):
             os_name = 'solaris'
         elif host_os == 'Android':
             os_name = 'android'
-        if compiler == 'emcc':
-            return 'generic-gnu'
         return f"{arch}-{os_name}-{compiler}"
 
     def generate(self):
