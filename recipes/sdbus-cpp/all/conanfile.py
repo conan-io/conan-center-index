@@ -6,7 +6,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
 
@@ -33,19 +32,6 @@ class SdbusCppConan(ConanFile):
         "with_code_gen": False,
         "with_sdbus": "systemd",
     }
-
-    @property
-    def _minimum_cpp_standard(self):
-        return 17
-
-    @property
-    def _minimum_compilers_version(self):
-        # non-trivial designated initializers are not supported in gcc < 8
-        # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55606
-        return {
-            "gcc": "8",
-            "clang": "6",
-        }
 
     @property
     def _with_sdbus(self):
@@ -78,11 +64,7 @@ class SdbusCppConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} does not support {self.settings.os}")
 
-        check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if min_version and Version(self.settings.compiler.version) < min_version:
-            raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+        check_min_cppstd(self, 20)
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
