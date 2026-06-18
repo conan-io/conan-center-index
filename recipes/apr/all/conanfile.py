@@ -6,7 +6,6 @@ from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -145,8 +144,6 @@ class AprConan(ConanFile):
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
             tc.generate()
         else:
-            env = VirtualBuildEnv(self)
-            env.generate()
             tc = AutotoolsToolchain(self)
             tc.configure_args.append("--with-installbuilddir=${prefix}/res/build-1")
             if cross_building(self):
@@ -164,7 +161,9 @@ class AprConan(ConanFile):
         if is_msvc(self):
             cmake = CMake(self)
             cmake.configure()
-            cmake.build()
+            cmake.build(target=("libapr-1" if self.options.shared else "apr-1")
+                        if Version(self.version) < "1.7.6" else
+                        None)
         else:
             autotools = Autotools(self)
             if self._should_call_autoreconf:
