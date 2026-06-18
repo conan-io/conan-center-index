@@ -1,5 +1,5 @@
 sources:
-  "1.81.0":
+  "1.81.1":
     url: "https://github.com/grpc/grpc/archive/refs/tags/v1.81.1.tar.gz"
     sha256: "48ae0d05f87206112d9e9144a923191ee1e482141a70686ec58dc86d0b40fddc"
   "1.69.0": # this is the last version that supports C++14
