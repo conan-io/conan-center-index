@@ -119,8 +119,6 @@ class MimallocConan(ConanFile):
         tc.variables["MI_WIN_REDIRECT"] = "ON" if self.options.get_safe("win_redirect") else "OFF"
         tc.variables["MI_INSTALL_TOPLEVEL"] = "ON"
         tc.variables["MI_GUARDED"] = self.options.get_safe("guarded", False)
-        # Make sure passing build type when using Visual Studio generator, otherwise it fallback to Release always
-        tc.cache_variables["CMAKE_BUILD_TYPE"] = str(self.settings.build_type)
         tc.generate()
 
         if is_msvc(self):
