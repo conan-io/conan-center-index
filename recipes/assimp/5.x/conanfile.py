@@ -1,13 +1,12 @@
+import os
 from pathlib import Path
 
 from conan import ConanFile
 from conan.tools.build import stdcpp_library, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import collect_libs, copy, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
-import os
 
 required_conan_version = ">=2"
 
