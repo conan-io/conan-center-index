@@ -23,6 +23,7 @@ class EmbreeConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False]
     }
+
     default_options = {
         "shared": False,
         "fPIC": True
@@ -42,7 +43,7 @@ class EmbreeConan(ConanFile):
 
     def requirements(self):
         if self.settings.os != "Emscripten":
-            self.requires("onetbb/2022.3.0")
+            self.requires("onetbb/2021.12.0")
 
     def validate(self):
         check_min_cppstd(self, 14)
