@@ -126,7 +126,7 @@ class PCRE2Conan(ConanFile):
         # pcre2-config does not correctly include '-static' in static library names
         if is_msvc(self):
             replace = None
-            if Version(self.version) == "10.43":
+            if Version(self.version) >= "10.43":
                 replace = "configure_file(pcre2-config.in"
             elif Version(self.version) == "10.42":
                 replace = "CONFIGURE_FILE(pcre2-config.in"
