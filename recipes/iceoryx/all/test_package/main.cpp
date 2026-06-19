@@ -15,10 +15,15 @@
 #include <thread>
 
 int main() {
-
     iox::log::LogManager::GetLogManager().SetDefaultLogLevel(iox::log::LogLevel::kError);
-    iox::RouDiConfig_t defaultRouDiConfig = iox::RouDiConfig_t().setDefaults();
-    iox::roudi::IceOryxRouDiComponents roudiComponents(defaultRouDiConfig);
+    // This might cause stack overflows if actually run
+    // Compilers are not able to optimize this away because of the volatile keyword,
+    // so we at least check for linking errors and that the code compiles.
+    volatile bool trick = false;
+    if (trick) {
+      iox::RouDiConfig_t defaultRouDiConfig = iox::RouDiConfig_t().setDefaults();
+      iox::roudi::IceOryxRouDiComponents roudiComponents(defaultRouDiConfig);
+    }
 
     return 0;
 }
