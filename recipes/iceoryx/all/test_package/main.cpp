@@ -15,11 +15,8 @@
 #include <thread>
 
 int main() {
-#ifdef OLD_SYNTAX
+
     iox::log::LogManager::GetLogManager().SetDefaultLogLevel(iox::log::LogLevel::kError);
-#else
-    iox::log::Logger::init(iox::log::LogLevel::Error);
-#endif
     iox::RouDiConfig_t defaultRouDiConfig = iox::RouDiConfig_t().setDefaults();
     iox::roudi::IceOryxRouDiComponents roudiComponents(defaultRouDiConfig);
 
