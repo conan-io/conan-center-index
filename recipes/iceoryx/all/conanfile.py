@@ -97,13 +97,14 @@ class IceoryxConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.set_property("cpptoml", "cmake_target_name", "cpptoml")
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            tc.set_property("acl", "cmake_target_aliases", ["acl"])
         tc.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
         hoofs_dir = os.path.join(self.source_folder, "iceoryx_hoofs")
+
+        # Use acl::acl target, since plain acl fails to link
+        replace_in_file(self, os.path.join(hoofs_dir, "CMakeLists.txt"), " acl", " acl::acl")
 
         # Honor fPIC option
         cmakelists_list = [
