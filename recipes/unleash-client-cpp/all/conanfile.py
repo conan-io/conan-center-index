@@ -72,8 +72,7 @@ class UnleashConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ENABLE_TESTING"] = False
-        tc.variables["ENABLE_TESTING_COVERAGE"] = False
+        tc.variables["UNLEASH_ENABLE_TESTING"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
