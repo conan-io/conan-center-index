@@ -115,13 +115,16 @@ class UniAlgoConan(ConanFile):
             self.cpp_info.bindirs = []
             self.cpp_info.libdirs = []
         else:
+            ver = Version(self.version)
+            lib_name = f"{self.name}" if self.settings.os != "Windows" else f"{self.name}-v{ver.major}-{ver.minor}"
+
             if self.settings.build_type == "Debug":
                 if Version(self.version) < "0.7":
-                    self.cpp_info.libs = [f"{self.name}d"]
+                    self.cpp_info.libs = [f"{lib_name}d"]
                 else:
-                    self.cpp_info.libs = [f"{self.name}-debug"]
+                    self.cpp_info.libs = [f"{lib_name}-debug"]
             else:
-                self.cpp_info.libs = [f"{self.name}"]
+                self.cpp_info.libs = [f"{lib_name}"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
