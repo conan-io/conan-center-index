@@ -11,3 +11,7 @@ patches:
     - patch_file: "patches/2.1.0-beta3-0001-remove-mac-deploy.patch"
       patch_type: "conan"
       patch_description: "Do not enforce default value for MACOSX_DEPLOYMENT_TARGET"
+    - patch_file: "patches/2.1.0-beta3-intel-static.diff"
+      patch_description: "Fix static build on Intel CPUs"
+      patch_source: "https://github.com/LuaJIT/LuaJIT/commit/2240d84464cc3dcb22fd976f1db162b36b5b52d5"
+      patch_type: "bugfix"

@@ -1,0 +1,24 @@
+diff --git a/src/vm_x64.dasc b/src/vm_x64.dasc
+index 8c46ea59e9..b8ecb8687c 100644
+--- a/src/vm_x64.dasc
++++ b/src/vm_x64.dasc
+@@ -4898,7 +4898,6 @@ static void emit_asm_debug(BuildCtx *ctx)
+ 	  "LEFDEY:\n\n", fcsize);
+     }
+ #endif
+-    fprintf(ctx->fp, ".subsections_via_symbols\n");
+     }
+     break;
+ #endif
+diff --git a/src/vm_x86.dasc b/src/vm_x86.dasc
+index 9c5ae384db..1994c0a0ca 100644
+--- a/src/vm_x86.dasc
++++ b/src/vm_x86.dasc
+@@ -5769,7 +5769,6 @@ static void emit_asm_debug(BuildCtx *ctx)
+ 	  fprintf(ctx->fp, "L_%s$stub:\n\t.indirect_symbol _%s\n\t.ascii \"\\364\\364\\364\\364\\364\"\n", *xn, *xn);
+     }
+ #endif
+-    fprintf(ctx->fp, ".subsections_via_symbols\n");
+     }
+     break;
+ #endif
