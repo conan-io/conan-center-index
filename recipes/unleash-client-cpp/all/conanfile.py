@@ -1,8 +1,11 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 import os
+
+from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
 
@@ -41,6 +44,10 @@ class UnleashConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
+        if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "195":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} uses std::regex::multiline which was not implemented until MSVC 19.5"
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
