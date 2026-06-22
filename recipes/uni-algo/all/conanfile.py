@@ -117,10 +117,7 @@ class UniAlgoConan(ConanFile):
             lib_name = f"{self.name}-v{ver.major}-{ver.minor}" if (self.settings.os == "Windows" and self.options.shared) else f"{self.name}"
 
             if self.settings.build_type == "Debug":
-                if Version(self.version) < "0.7":
-                    self.cpp_info.libs = [f"{lib_name}d"]
-                else:
-                    self.cpp_info.libs = [f"{lib_name}-debug"]
+                self.cpp_info.libs = [f"{lib_name}-debug"]
             else:
                 self.cpp_info.libs = [f"{lib_name}"]
         if self.settings.os in ["Linux", "FreeBSD"]:
