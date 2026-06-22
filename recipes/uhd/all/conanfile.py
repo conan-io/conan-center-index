@@ -28,26 +28,10 @@ class UhdConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "python_api": [True, False],
-        "examples": [True, False],
-        "tests": [True, False],
-        "b100": [True, False],
-        "usrp1": [True, False],
-        "x300": [True, False],
-        "mpmd": [True, False],
-        "octoclock": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "python_api": False,
-        "examples": False,
-        "tests": False,
-        "b100": False,
-        "usrp1": False,
-        "x300": False,
-        "mpmd": False,
-        "octoclock": False,
     }
 
     def config_options(self):
@@ -60,6 +44,7 @@ class UhdConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/[>=1.83.0 <2]")
+        self.requires("libusb/1.0.29")
 
     def validate(self):
         check_min_cppstd(self, 17)
@@ -84,18 +69,23 @@ class UhdConan(ConanFile):
             deps.set_property("boost::headers", "cmake_target_aliases", ["Boost::system"])
         deps.generate()
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.cache_variables["UHD_VERSION"] = str(self.version)
+        tc.cache_variables["UHD_GIT_BRANCH_OVERRIDE"] = f"UHD-{self.version}"
         if is_apple_os(self):
             tc.cache_variables["CMAKE_INSTALL_NAME_DIR"] = "@rpath"
             tc.cache_variables["CMAKE_INSTALL_RPATH"] = ""
         tc.cache_variables["PYTHON_EXECUTABLE"] = pyenv.env_exe
-        tc.cache_variables["ENABLE_PYTHON_API"] = self.options.python_api
-        tc.cache_variables["ENABLE_EXAMPLES"] = self.options.examples
-        tc.cache_variables["ENABLE_TESTS"] = self.options.tests
-        tc.cache_variables["ENABLE_B100"] = self.options.b100
-        tc.cache_variables["ENABLE_USRP1"] = self.options.usrp1
-        tc.cache_variables["ENABLE_X300"] = self.options.x300
-        tc.cache_variables["ENABLE_MPMD"] = self.options.mpmd
-        tc.cache_variables["ENABLE_OCTOCLOCK"] = self.options.octoclock
+        tc.cache_variables["ENABLE_PYTHON_API"] = False
+        tc.cache_variables["ENABLE_EXAMPLES"] = False
+        tc.cache_variables["ENABLE_TESTS"] = False
+        tc.cache_variables["ENABLE_B100"] = True
+        tc.cache_variables["ENABLE_B200"] = True
+        tc.cache_variables["ENABLE_USRP1"] = True
+        tc.cache_variables["ENABLE_USRP2"] = True
+        tc.cache_variables["ENABLE_X300"] = True
+        tc.cache_variables["ENABLE_MPMD"] = True
+        tc.cache_variables["ENABLE_OCTOCLOCK"] = True
         tc.cache_variables["ENABLE_STATIC_LIBS"] = not self.options.shared
         tc.generate()
 
