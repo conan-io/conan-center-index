@@ -2,6 +2,3 @@ sources:
   "1.5.2":
     url: "https://github.com/aruizs/unleash-client-cpp/archive/refs/tags/v1.5.2.tar.gz"
     sha256: "7a0cc927d8910ddcb46c2c0f566fa17ef1286bd4ea4e0dd3e79a85273a2f291e"
-  "1.3.0":
-    url: "https://github.com/aruizs/unleash-client-cpp/archive/refs/tags/v1.3.0.tar.gz"
-    sha256: "fa0b8d6101c6dbd08db23a3d353f386c17e9436a63d658f88c7d0b8619b8d501"
