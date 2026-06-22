@@ -1,17 +1,17 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, rm, copy, replace_in_file
+from conan.tools.files import get, rmdir, copy, replace_in_file
 
 required_conan_version = ">=2"
 
 class TsidConan(ConanFile):
     name = "tsid"
     package_type = "shared-library"
-    license = ("BSD 2-Clause")
+    license = "BSD-2-Clause"
+    homepage = "https://github.com/stack-of-tasks/tsid"
     url = "https://github.com/conan-io/conan-center-index"
     description = (
         "TSID is a C++ library for optimization-based inverse-dynamics control based on the rigid "
@@ -63,8 +63,8 @@ class TsidConan(ConanFile):
         copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        rm(self, "*.pc", self.package_folder, recursive=True)
-        rm(self, "*.cmake", os.path.join(self.package_folder, "lib", "cmake", "tsid"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["tsid"]
