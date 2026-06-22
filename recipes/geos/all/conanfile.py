@@ -43,13 +43,6 @@ class GeosConan(ConanFile):
                 "Visual Studio": "15",
                 "msvc": "191",
             },
-            "17": {
-                "gcc": "7",
-                "clang": "7",
-                "apple-clang": "10",
-                "Visual Studio": "15",
-                "msvc": "191",
-            },
         }.get(self._min_cppstd, {})
 
     def config_options(self):
@@ -77,8 +70,6 @@ class GeosConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_BENCHMARKS"] = False
-        tc.cache_variables["CMAKE_BUILD_TYPE"] = str(self.settings.build_type)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_DOCUMENTATION"] = False
         tc.variables["BUILD_ASTYLE"] = False

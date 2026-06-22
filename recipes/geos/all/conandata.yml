@@ -2,9 +2,6 @@ sources:
   "3.14.1":
     url: "https://github.com/libgeos/geos/releases/download/3.14.1/geos-3.14.1.tar.bz2"
     sha256: "3c20919cda9a505db07b5216baa980bacdaa0702da715b43f176fb07eff7e716"
-  "3.13.1":
-    url: "https://github.com/libgeos/geos/releases/download/3.13.1/geos-3.13.1.tar.bz2"
-    sha256: "df2c50503295f325e7c8d7b783aca8ba4773919cde984193850cf9e361dfd28c"
   "3.12.2":
     url: "https://github.com/libgeos/geos/releases/download/3.12.2/geos-3.12.2.tar.bz2"
     sha256: "34c7770bf0090ee88488af98767d08e779f124fa33437e0aabec8abd4609fec6"
