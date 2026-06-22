@@ -67,6 +67,8 @@ class UhdConan(ConanFile):
         deps = CMakeDeps(self)
         if Version(self.dependencies["boost"].ref.version) >= "1.89.0":
             deps.set_property("boost::headers", "cmake_target_aliases", ["Boost::system"])
+        deps.set_property("libusb", "cmake_file_name", "LIBUSB")
+        deps.set_property("libusb", "cmake_target_name", "LIBUSB::LIBUSB")
         deps.generate()
         tc = CMakeToolchain(self)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
