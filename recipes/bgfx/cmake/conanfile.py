@@ -1,11 +1,9 @@
 from conan import ConanFile
 from conan.tools.files import copy, get, rmdir, rm, replace_in_file
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.apple import is_apple_os
 from conan.tools.microsoft import is_msvc
-from conan.errors import ConanInvalidConfiguration
 import os
 
 
