@@ -58,6 +58,7 @@ class UhdConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         replace_in_file(self, os.path.join(self.source_folder, "host", "CMakeLists.txt"), "add_subdirectory(docs)", "#add_subdirectory(docs)")
+        replace_in_file(self, os.path.join(self.source_folder, "host", "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 20)", "")
 
     def generate(self):
         pyenv = PyEnv(self)
