@@ -1,0 +1,7 @@
+sources:
+  "3.1.1":
+    url: "https://github.com/richgel999/miniz/archive/refs/tags/3.1.1.tar.gz"
+    sha256: "8bb29c7bd6f22356e5583e794bed4a0b3e6dfcbcadb49974fc9270ccca1e5557"
+  "3.0.1":
+    url: "https://github.com/richgel999/miniz/archive/refs/tags/3.0.1.tar.gz"
+    sha256: "53c29ed75bf1a9dd838349982ec8890f95269c422b17399d3880fd2d0f703af8"
