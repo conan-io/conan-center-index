@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake
+from conan.tools.cmake import CMake, CMakeToolchain
 
 required_conan_version = ">=2.1"
 
@@ -18,7 +18,6 @@ class IsptrRecipe(ConanFile):
     homepage = "https://github.com/gershnik/intrusive_shared_ptr"
     topics = ("smart-pointer", "intrusive", "header-only", "header-library")
 
-    generators = "CMakeToolchain"
     settings = "os", "arch", "build_type", "compiler"
     package_type = "header-library"
     no_copy_source = True
@@ -37,10 +36,15 @@ class IsptrRecipe(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+    
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(variables={"BUILD_TESTING": "OFF"})
+        cmake.configure()
         cmake.build()
 
     def package(self):
