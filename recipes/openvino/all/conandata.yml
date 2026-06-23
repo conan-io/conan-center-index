@@ -1,8 +1,8 @@
 sources:
-  "2026.2.0":
+  "2026.2.1":
     "openvino":
-      url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2026.2.0.tar.gz"
-      sha256: "886818c55f887ecc62893c900f259a39ec6c09555ce4dd3d379653ae5b0d6e62"
+      url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2026.2.1.tar.gz"
+      sha256: "9255a1cd87ad330242ed5063c2bcb2d04cc6897ab50b9fc95da5ac4a4625ae4d"
     "arm_compute":
       url: "https://github.com/ARM-software/ComputeLibrary/archive/refs/tags/v53.0.0.tar.gz"
       sha256: "370c480385493c5be9c639dfcfabaa4bc8eac74fe21332905b1630a4c0cb3a87"
@@ -38,9 +38,9 @@ sources:
       url: "https://github.com/oneapi-src/oneDNN/archive/29d64fe0ec0f1f20d7f80aa76630d58a6011a869.tar.gz"
       sha256: "90139a1193b9773f94ff3310cd6118d3b6ccf1adb24461c84aa87890caa5ee77"
 patches:
-  "2026.2.0":
-    - patch_file: "patches/2026.2.0-system-levelzero-fix.patch"
-    - patch_file: "patches/2026.2.0-system-deps.patch"
-    - patch_file: "patches/2026.2.0-onnx-proto-dedup.patch"
+  "2026.2.1":
+    - patch_file: "patches/2026.2.1-system-levelzero-fix.patch"
+    - patch_file: "patches/2026.2.1-system-deps.patch"
+    - patch_file: "patches/2026.2.1-onnx-proto-dedup.patch"
   "2025.4.0":
     - patch_file: "patches/2025.4.0-CPU-ARM-Define-HWCAP2_I8MM-constant-properly-33060.patch"
