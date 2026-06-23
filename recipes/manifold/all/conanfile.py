@@ -37,7 +37,7 @@ class ManifoldConan(ConanFile):
 
     def requirements(self):
         # For CrossSection for 2D support
-        self.requires("clipper2/1.4.0")
+        self.requires("clipper2/2.0.1")
         if self.options.with_parallel_acceleration:
             self.requires("onetbb/2022.0.0")
 
