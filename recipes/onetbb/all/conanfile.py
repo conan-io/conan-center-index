@@ -41,25 +41,6 @@ class OneTBBConan(ConanFile):
     }
 
     @property
-    def _has_tbbmalloc(self):
-        return Version(self.version) < "2021.5.0" or self.options.get_safe("tbbmalloc")
-
-    @property
-    def _has_tbbproxy(self):
-        return Version(self.version) < "2021.6.0" or self.options.get_safe("tbbproxy")
-
-    @property
-    def _tbbbind_hwloc_version(self):
-        # TBB expects different variables depending on the version
-        return "2_5" if Version(self.version) >= "2021.4.0" else "2_4"
-
-    @property
-    def _tbbbind_supported(self):
-        if is_apple_os(self):
-            return self.settings.os == "Macos" and Version(self.version) >= "2021.11.0"
-        return True
-
-    @property
     def _tbb_apple_frameworks_supported(self):
         if is_apple_os(self):
             # if the version is 2021.13.0 or later, the build_apple_frameworks option is supported on macOS
@@ -67,40 +48,36 @@ class OneTBBConan(ConanFile):
         return False
 
     @property
-    def _tbbbind_build(self):
-        return self.options.get_safe("tbbbind", False) and self._tbbbind_supported
-
-    @property
     def _tbbbind_explicit_hwloc(self):
         # during cross-compilation, oneTBB does not search for HWLOC and we need to specify it explicitly
         # but then oneTBB creates an imported SHARED target from provided paths, so we have to set shared=True
-        return self._tbbbind_build and cross_building(self)
+        return self.options.get_safe("tbbbind") and cross_building(self)
 
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
-        if Version(self.version) < "2021.5.0":
-            del self.options.tbbmalloc
-        if Version(self.version) < "2021.6.0":
+        if self.settings.os == "Windows" and self.settings.arch == "armv8":
             del self.options.tbbproxy
-        if not self._tbbbind_supported:
+
+        tbbbind_supported = self.settings.os != "Macos" or Version(self.version) >= "2021.11.0"
+        if not tbbbind_supported:
             del self.options.tbbbind
-        if Version(self.version) < "2021.6.0" or self.settings.os == "Android":
+        if self.settings.os == "Android":
             del self.options.interprocedural_optimization
         if not self._tbb_apple_frameworks_supported:
             del self.options.build_apple_frameworks
 
     def configure(self):
-        if Version(self.version) >= "2021.6.0" and not self.options.tbbmalloc:
+        if not self.options.tbbmalloc:
             self.options.rm_safe("tbbproxy")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self._tbbbind_build:
-            self.requires("hwloc/2.12.2")
+        if self.options.get_safe("tbbbind"):
+            self.requires("hwloc/2.12.2", options={'shared': True})
 
     def validate(self):
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "11.0":
@@ -111,7 +88,7 @@ class OneTBBConan(ConanFile):
             raise ConanInvalidConfiguration(f"ontbb requires option hwloc/*:shared=True to be built.")
 
     def build_requirements(self):
-        if self._tbbbind_build and not self._tbbbind_explicit_hwloc:
+        if self.options.get_safe("tbbbind") and not self._tbbbind_explicit_hwloc:
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
                 self.tool_requires("pkgconf/2.1.0")
 
@@ -125,24 +102,23 @@ class OneTBBConan(ConanFile):
         toolchain = CMakeToolchain(self)
         toolchain.variables["TBB_TEST"] = False
         toolchain.variables["TBB_STRICT"] = False
-        if Version(self.version) >= "2021.5.0":
-            toolchain.variables["TBBMALLOC_BUILD"] = self.options.tbbmalloc
+        toolchain.variables["TBBMALLOC_BUILD"] = self.options.tbbmalloc
         if self.options.get_safe("interprocedural_optimization") is not None:
             toolchain.variables["TBB_ENABLE_IPO"] = self.options.interprocedural_optimization
-        if Version(self.version) >= "2021.6.0" and self.options.get_safe("tbbmalloc"):
+        if self.options.get_safe("tbbmalloc"):
             toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.tbbproxy
-        toolchain.variables["TBB_DISABLE_HWLOC_AUTOMATIC_SEARCH"] = not self._tbbbind_build
-        if self._tbbbind_explicit_hwloc:
+        toolchain.variables["TBB_DISABLE_HWLOC_AUTOMATIC_SEARCH"] = not self.options.get_safe("tbbbind")
+        if self.options.get_safe("tbbbind") and self._tbbbind_explicit_hwloc:
             hwloc_package_folder = self.dependencies["hwloc"].package_folder
             hwloc_lib_name = ("hwloc.lib" if self.settings.os == "Windows" else
                               "libhwloc.dylib" if self.settings.os == "Macos" else
                               "libhwloc.so")
-            toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_LIBRARY_PATH"] = \
+            toolchain.variables[f"CMAKE_HWLOC_2_5_LIBRARY_PATH"] = \
                 os.path.join(hwloc_package_folder, "lib", hwloc_lib_name).replace("\\", "/")
-            toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_INCLUDE_PATH"] = \
+            toolchain.variables[f"CMAKE_HWLOC_2_5_INCLUDE_PATH"] = \
                 os.path.join(hwloc_package_folder, "include").replace("\\", "/")
             if self.settings.os == "Windows":
-                toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_DLL_PATH"] = \
+                toolchain.variables[f"CMAKE_HWLOC_2_5_DLL_PATH"] = \
                     os.path.join(hwloc_package_folder, "bin", "hwloc.dll").replace("\\", "/")
         if self.options.get_safe("build_apple_frameworks"):
             toolchain.variables["TBB_BUILD_APPLE_FRAMEWORKS"] = True
@@ -208,7 +184,7 @@ class OneTBBConan(ConanFile):
             tbb.system_libs = ["m", "dl", "rt", "pthread"]
 
         # tbbmalloc
-        if self._has_tbbmalloc:
+        if self.options.get_safe("tbbmalloc"):
             tbbmalloc = self.cpp_info.components["tbbmalloc"]
 
             tbbmalloc.set_property("cmake_target_name", "TBB::tbbmalloc")
@@ -223,7 +199,7 @@ class OneTBBConan(ConanFile):
                 tbbmalloc.system_libs = ["dl", "pthread"]
 
             # tbbmalloc_proxy
-            if self._has_tbbproxy:
+            if self.options.get_safe("tbbproxy"):
                 tbbproxy = self.cpp_info.components["tbbmalloc_proxy"]
 
                 tbbproxy.set_property("cmake_target_name", "TBB::tbbmalloc_proxy")

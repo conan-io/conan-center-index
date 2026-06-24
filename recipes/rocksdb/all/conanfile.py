@@ -80,7 +80,7 @@ class RocksDBConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/[~1.5]")
         if self.options.get_safe("with_tbb"):
-            self.requires("onetbb/2021.10.0")
+            self.requires("onetbb/[>=2021.10.0 <2024]")
         if self.options.with_jemalloc:
             self.requires("jemalloc/5.3.0")
         if self.options.with_folly:
@@ -190,7 +190,7 @@ class RocksDBConan(ConanFile):
         if self.options.with_zstd:
             self.cpp_info.components["librocksdb"].requires.append("zstd::zstd")
         if self.options.get_safe("with_tbb"):
-            self.cpp_info.components["librocksdb"].requires.append("onetbb::onetbb")
+            self.cpp_info.components["librocksdb"].requires.append("onetbb::libtbb")
         if self.options.with_jemalloc:
             self.cpp_info.components["librocksdb"].requires.append("jemalloc::jemalloc")
         if self.options.with_folly:

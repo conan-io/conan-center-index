@@ -22,21 +22,6 @@ class TinyDnnConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"with_tbb": [True, False]}
     default_options = {"with_tbb": False}
-    no_copy_source = True
-
-    @property
-    def _min_cppstd(self):
-        return "14"
-
-    @property
-    def _min_compilers_version(self):
-        return {
-            "gcc": "5",
-            "clang": "3.4",
-            "apple-clang": "10",
-            "msvc": "190",
-            "Visual Studio": "14",
-        }
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -45,14 +30,13 @@ class TinyDnnConan(ConanFile):
         self.requires("cereal/1.3.1")
         self.requires("stb/cci.20210713")
         if self.options.with_tbb:
-            self.requires("onetbb/2020.3")
+            self.requires("onetbb/[>=2020.3 <2024]")
 
     def package_id(self):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 14)
 
         compiler = str(self.settings.compiler)
         version = Version(self.settings.compiler.version)
@@ -98,12 +82,4 @@ class TinyDnnConan(ConanFile):
             self.cpp_info.components["tinydnn"].system_libs = ["pthread"]
         if self.options.with_tbb:
             self.cpp_info.components["tinydnn"].defines = ["CNN_USE_TBB=1"]
-            self.cpp_info.components["tinydnn"].requires.append("onetbb::onetbb")
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "tinydnn"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "tinydnn"
-        self.cpp_info.names["cmake_find_package"] = "TinyDNN"
-        self.cpp_info.names["cmake_find_package_multi"] = "TinyDNN"
-        self.cpp_info.components["tinydnn"].names["cmake_find_package"] = "tiny_dnn"
-        self.cpp_info.components["tinydnn"].names["cmake_find_package_multi"] = "tiny_dnn"
+            self.cpp_info.components["tinydnn"].requires.append("onetbb::libtbb")

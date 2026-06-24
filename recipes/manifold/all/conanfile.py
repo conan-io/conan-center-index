@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.0.9"
@@ -39,7 +38,7 @@ class ManifoldConan(ConanFile):
         # For CrossSection for 2D support
         self.requires("clipper2/2.0.1")
         if self.options.with_parallel_acceleration:
-            self.requires("onetbb/2022.0.0")
+            self.requires("onetbb/[>=2022.0.0 <2024]")
 
     def validate(self):
         check_min_cppstd(self, 17)
