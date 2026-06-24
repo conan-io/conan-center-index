@@ -28,6 +28,9 @@ sources:
     sha256: "95c0663192c6bff7a098b50afcb05d22a34dd0fd8e6be2e1b61edad2b9675fde"
 patches:
   "0.4.0":
+    - patch_file: "patches/0.4.0-0001-make-fast_float-external.patch"
+      patch_description: "use cci's fast_float recipe"
+      patch_type: "conan"
   "0.2.5":
     - patch_file: "patches/0.2.5-0001-make-fast_float-external.patch"
       patch_description: "use cci's fast_float recipe"
