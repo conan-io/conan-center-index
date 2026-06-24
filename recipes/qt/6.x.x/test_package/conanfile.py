@@ -51,7 +51,7 @@ Prefix = {path}""")
             self.run(bin_path, env="conanrun")
             # Related to https://github.com/conan-io/conan-center-index/issues/20574
             if self.settings.os == "Macos":
-                bin_macos_path = os.path.join(self.cpp.build.bindirs[0], "test_macos_bundle.app", "Contents", "MacOS", "test_macos_bundle")
+                bin_macos_path = os.path.join(self.cpp.build.bindirs[0], "test_package.app", "Contents", "MacOS", "test_package")
                 self.run(bin_macos_path, env="conanrun")
 
         # Check that the directory exposed in the configuration exists and includes moc
