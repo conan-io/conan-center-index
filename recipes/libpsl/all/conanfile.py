@@ -78,6 +78,8 @@ class LibPslConan(ConanFile):
         tc.project_options["runtime"] = self._idna_option
         if Version(self.version) >= "0.21.5":
             tc.project_options["tests"] = "false"  # disable tests and fuzzes
+        else:
+            tc.project_options["builtin"] = self._idna_option
         if not self.options.shared:
             tc.preprocessor_definitions["PSL_STATIC"] = "1"
         tc.generate()
