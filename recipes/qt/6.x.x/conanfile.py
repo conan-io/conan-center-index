@@ -840,6 +840,10 @@ class QtConan(ConanFile):
     def _cmake_platform_target_setup_file(self):
         return os.path.join("lib", "cmake", "Qt6", "conan_qt_platform_target_setup.cmake")
 
+    @property
+    def _cmake_config_file(self):
+        return os.path.join("lib", "cmake", "Qt6", "conan_qt_config.cmake")
+
     def _cmake_qt6_private_file(self, module):
         return os.path.join("lib", "cmake", f"Qt6{module}", f"conan_qt_qt6_{module.lower()}private.cmake")
 
@@ -1032,6 +1036,28 @@ class QtConan(ConanFile):
                         INTERFACE "$<${no_unicode_condition}:UNICODE$<SEMICOLON>_UNICODE>")
                 endif()""")
             save(self, os.path.join(self.package_folder, self._cmake_platform_target_setup_file), contents)
+
+        # additional config options
+        # taken from https://github.com/qt/qtbase/blob/6.11.1/cmake/QtConfig.cmake.in#L66-L84
+        # fixes https://github.com/conan-io/conan-center-index/issues/30474
+        contents = textwrap.dedent("""\
+            get_filename_component(_qt_import_prefix "${CMAKE_CURRENT_LIST_FILE}" PATH)
+            get_filename_component(_qt_import_prefix "${_qt_import_prefix}" REALPATH)
+
+            if(APPLE)
+                if(NOT CMAKE_SYSTEM_NAME OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+                    set(__qt_internal_cmake_apple_support_files_path "${_qt_import_prefix}/macos")
+                elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+                    set(__qt_internal_cmake_apple_support_files_path "${_qt_import_prefix}/ios")
+                elseif(CMAKE_SYSTEM_NAME STREQUAL "visionOS")
+                    set(__qt_internal_cmake_apple_support_files_path "${_qt_import_prefix}/visionos")
+                endif()
+            endif()
+
+            if(WIN32)
+                set(__qt_internal_cmake_windows_support_files_path "${_qt_import_prefix}/windows")
+            endif()""")
+        save(self, os.path.join(self.package_folder, self._cmake_config_file), contents)
 
     def package_info(self):
         disabled_features = str(self.options.disabled_features).split()
@@ -1675,6 +1701,7 @@ class QtConan(ConanFile):
 
         build_modules_list = [
             os.path.join(self.package_folder, "lib", "cmake", "Qt6", "QtInstallPaths.cmake"),
+            self._cmake_config_file
         ]
 
         if self.options.qtdeclarative:
