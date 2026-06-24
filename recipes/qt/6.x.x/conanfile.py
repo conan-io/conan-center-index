@@ -1673,7 +1673,9 @@ class QtConan(ConanFile):
                     self.cpp_info.components[component].exelinkflags.extend(obj_files)
                     self.cpp_info.components[component].sharedlinkflags.extend(obj_files)
 
-        build_modules_list = []
+        build_modules_list = [
+            os.path.join(self.package_folder, "lib", "cmake", "Qt6", "QtInstallPaths.cmake"),
+        ]
 
         if self.options.qtdeclarative:
             build_modules_list.append(os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_policies.cmake"))
