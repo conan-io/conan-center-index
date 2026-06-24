@@ -63,6 +63,8 @@ class PugiXmlConan(ConanFile):
         if self.options.get_safe("shared") and self.options.wchar_mode:
             # The app crashes with error "The procedure entry point ... could not be located in the dynamic link library"
             raise ConanInvalidConfiguration("Combination of 'shared' and 'wchar_mode' options is not supported")
+    
+    def validate_build(self):
         if self.options.get_safe("charconv_float"):
             # PUGIXML_CHARCONV_FLOAT requires at least C++17
             check_min_cppstd(self, "17")
