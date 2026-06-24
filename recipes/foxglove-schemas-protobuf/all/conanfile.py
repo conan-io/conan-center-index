@@ -43,7 +43,7 @@ class FoxgloveSchemasProtobufConan(ConanFile):
             raise ConanInvalidConfiguration("Windows shared builds are not supported yet.")
 
     def requirements(self):
-        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
+        self.requires("protobuf/[>=3.21.12 <7]", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         self.tool_requires("protobuf/<host_version>")
@@ -58,7 +58,6 @@ class FoxgloveSchemasProtobufConan(ConanFile):
 
     def package(self):
         cmake = CMake(self)
-        cmake.configure()
         cmake.install()
         copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 

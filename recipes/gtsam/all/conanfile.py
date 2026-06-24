@@ -120,16 +120,12 @@ class GtsamConan(ConanFile):
 
     @property
     def _required_boost_components(self):
-        # Based on https://github.com/borglab/gtsam/blob/4.2.0/cmake/HandleBoost.cmake#L26
+        # Based on https://github.com/borglab/gtsam/blob/4.2.1/cmake/HandleBoost.cmake#L26
         return [
             "chrono",
-            "date_time",
             "filesystem",
             "program_options",
-            "regex",
             "serialization",
-            "system",
-            "thread",
             "timer",
         ]
 
@@ -216,6 +212,9 @@ class GtsamConan(ConanFile):
         tc.variables["GTSAM_BUILD_DOC_LATEX"] = False
         tc.variables["Boost_USE_STATIC_LIBS"] = not self.dependencies["boost"].options.shared
         tc.variables["Boost_NO_SYSTEM_PATHS"] = True
+        tc.cache_variables["Boost_SERIALIZATION_LIBRARY"] = True
+        tc.cache_variables["Boost_FILESYSTEM_LIBRARY"] = True
+        tc.cache_variables["Boost_TIMER_LIBRARY"] = True
 
         tc.generate()
 
