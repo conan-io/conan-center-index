@@ -38,11 +38,6 @@ class TinyDnnConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 14)
 
-        compiler = str(self.settings.compiler)
-        version = Version(self.settings.compiler.version)
-        if compiler in self._min_compilers_version and version < self._min_compilers_version[compiler]:
-            raise ConanInvalidConfiguration(f"{self.name} requires a compiler that supports at least C++{self._min_cppstd}")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
