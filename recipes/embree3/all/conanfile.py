@@ -14,6 +14,7 @@ required_conan_version = ">=1.53.0"
 
 class EmbreeConan(ConanFile):
     name = "embree3"
+    deprecated = "Please use the embree recipe at version >4"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("embree", "raytracing", "rendering")
@@ -119,8 +120,11 @@ class EmbreeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_tbb:
-            self.requires("onetbb/[>=2021.7.0 <2024")
+        pass
+        # Never worked, fails with:
+        #     INSTALL TARGETS given target "TBB" which does not exist.
+        # if self.options.with_tbb:
+        #     self.requires("onetbb/[>=2021.7.0 <2024]")
 
     def validate(self):
         if not (self._has_sse_avx or self._has_neon):
@@ -131,6 +135,9 @@ class EmbreeConan(ConanFile):
             raise ConanInvalidConfiguration("Clang < 4 is not supported")
 
         check_min_vs(self, 191)
+
+        if self.options.with_tbb:
+            raise ConanInvalidConfiguration("with_tbb option never implemented correctly. Please use embree 4")
 
         if self.settings.os == "Linux" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
             raise ConanInvalidConfiguration(f"{self.ref} cannot be built with clang libc++, use libstdc++ instead")
@@ -171,6 +178,7 @@ class EmbreeConan(ConanFile):
         tc.variables["EMBREE_ISA_AVX"] = self.options.get_safe("avx", False)
         tc.variables["EMBREE_ISA_AVX2"] = self.options.get_safe("avx2", False)
         tc.variables["EMBREE_ISA_AVX512"] = self.options.get_safe("avx512", False)
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
         deps = CMakeDeps(self)
