@@ -14,7 +14,7 @@ required_conan_version = ">=1.53.0"
 
 class EmbreeConan(ConanFile):
     name = "embree3"
-    deprecated = "Please use the embree recipe at version >4"
+    deprecated = "Please use the embree recipe at version >=4"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("embree", "raytracing", "rendering")
