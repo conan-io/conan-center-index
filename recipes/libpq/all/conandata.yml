@@ -1,18 +1,17 @@
 sources:
-  "16.13":
-    url: "https://ftp.postgresql.org/pub/source/v16.13/postgresql-16.13.tar.bz2"
-    sha256: "dc2ddbbd245c0265a689408e3d2f2f3f9ba2da96bd19318214b313cdd9797287"
-  "15.17":
-    url: "https://ftp.postgresql.org/pub/source/v15.17/postgresql-15.17.tar.bz2"
-    sha256: "ae14f24c14727e0b2ded1c5553031666099bd1054db3ef44bfa6e2bd6d554a56"
-  "14.22":
-    url: "https://ftp.postgresql.org/pub/source/v14.22/postgresql-14.22.tar.bz2"
-    sha256: "f57938ad30067077720277f6d7db05aafc07d1545efd2ed82f199ba828a7ad34"
+  "16.14":
+    url: "https://ftp.postgresql.org/pub/source/v16.14/postgresql-16.14.tar.bz2"
+    sha256: "f6d077142737920858ce958ccdb75c6ee137a63b5b0853c70693d401ac7e3471"
+  "15.18":
+    url: "https://ftp.postgresql.org/pub/source/v15.18/postgresql-15.18.tar.bz2"
+    sha256: "11df0df97fe3ea4ba9a791faaf39cee1d2fe571e78885b5b55d8517d27c323b4"
+  "14.23":
+    url: "https://ftp.postgresql.org/pub/source/v14.23/postgresql-14.23.tar.bz2"
+    sha256: "cc7216822b546330e29c2f91e123c8734a4c41795082145bb962aa712e8c94a5"
 patches:
-  "16.13":
+  "16.14":
     - patch_file: "patches/16/001-mingw-build-static-libraries.patch"
-  "15.17":
+  "15.18":
     - patch_file: "patches/15/001-mingw-build-static-libraries.patch"
-  "14.22":
+  "14.23":
     - patch_file: "patches/14/002-mingw-build-static-libraries.patch"
-
