@@ -16,7 +16,7 @@ int main(int argc, char *argv[]){
     QCoreApplication::setApplicationName("Application Example");
     QCoreApplication::setApplicationVersion("1.0.0");
 
-    QString name = argc > 0 ? argv[1] : "";
+    QString name = argc > 1 ? argv[1] : "";
     if (name.isEmpty()) {
         name = "World";
     }
