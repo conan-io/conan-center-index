@@ -33,7 +33,7 @@ class GlmConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-    
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["GLM_BUILD_INSTALL"] = True
@@ -41,7 +41,7 @@ class GlmConan(ConanFile):
         tc.generate()
 
     def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
+        if self.settings.os == "Windows" and self.options.get_safe("shared"):
             raise ConanInvalidConfiguration("GLM does not export symbols when built as shared library on Windows.")
 
     def build(self):
