@@ -47,12 +47,13 @@ Prefix = {path}""")
     def test(self):
         if can_run(self):
             copy(self, "qt.conf", src=self.generators_folder, dst=os.path.join(self.cpp.build.bindirs[0]))
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            self.run(bin_path, env="conanrun")
-            # Related to https://github.com/conan-io/conan-center-index/issues/20574
-            if self.settings.os == "Macos":
-                bin_macos_path = os.path.join(self.cpp.build.bindirs[0], "test_package.app", "Contents", "MacOS", "test_package")
-                self.run(bin_macos_path, env="conanrun")
+
+            if self.settings.os != "Macos":
+                bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+                self.run(bin_path, env="conanrun")
+            else: # Related to https://github.com/conan-io/conan-center-index/issues/20574
+                bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package.app", "Contents", "MacOS", "test_package")
+                self.run(bin_path, env="conanrun")
 
         # Check that the directory exposed in the configuration exists and includes moc
         qt_tools_dir = self.dependencies.host["qt"].conf_info.get("user.qt:tools_directory")
