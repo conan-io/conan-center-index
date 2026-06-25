@@ -38,7 +38,7 @@ class GliConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glm/1.0.1")
+        self.requires("glm/1.0.3")
 
     def package_id(self):
         self.info.clear()
