@@ -29,7 +29,6 @@ class RocksDBConan(ConanFile):
         "with_lz4": [True, False],
         "with_zlib": [True, False],
         "with_zstd": [True, False],
-        "with_tbb": [True, False],
         "with_folly": [True, False],
         "with_jemalloc": [True, False],
         "enable_sse": [False, "sse42", "avx2"],
@@ -43,7 +42,6 @@ class RocksDBConan(ConanFile):
         "with_zlib": False,
         "with_zstd": False,
         "with_gflags": False,
-        "with_tbb": False,
         "with_jemalloc": False,
         "with_folly": False,
         "enable_sse": False,
@@ -56,8 +54,6 @@ class RocksDBConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.arch != "x86_64":
-            del self.options.with_tbb
         if self.settings.build_type == "Debug":
             self.options.use_rtti = True  # Rtti are used in asserts for debug mode...
 
@@ -79,8 +75,6 @@ class RocksDBConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
             self.requires("zstd/[~1.5]")
-        if self.options.get_safe("with_tbb"):
-            self.requires("onetbb/[>=2021.10.0 <2024]")
         if self.options.with_jemalloc:
             self.requires("jemalloc/5.3.0")
         if self.options.with_folly:
@@ -123,7 +117,6 @@ class RocksDBConan(ConanFile):
         tc.variables["WITH_LZ4"] = self.options.with_lz4
         tc.variables["WITH_ZLIB"] = self.options.with_zlib
         tc.variables["WITH_ZSTD"] = self.options.with_zstd
-        tc.variables["WITH_TBB"] = self.options.get_safe("with_tbb", False)
         tc.variables["WITH_JEMALLOC"] = self.options.with_jemalloc
         tc.variables["ROCKSDB_BUILD_SHARED"] = self.options.shared
         tc.variables["USE_RTTI"] = self.options.use_rtti
@@ -189,8 +182,6 @@ class RocksDBConan(ConanFile):
             self.cpp_info.components["librocksdb"].requires.append("zlib::zlib")
         if self.options.with_zstd:
             self.cpp_info.components["librocksdb"].requires.append("zstd::zstd")
-        if self.options.get_safe("with_tbb"):
-            self.cpp_info.components["librocksdb"].requires.append("onetbb::libtbb")
         if self.options.with_jemalloc:
             self.cpp_info.components["librocksdb"].requires.append("jemalloc::jemalloc")
         if self.options.with_folly:
