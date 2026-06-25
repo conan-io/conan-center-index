@@ -44,7 +44,6 @@ class EmbreeConan(ConanFile):
         "ray_masking": [True, False],
         "backface_culling": [True, False],
         "ignore_invalid_rays": [True, False],
-        "with_tbb": [True, False],
     }
 
     default_options = {
@@ -68,7 +67,6 @@ class EmbreeConan(ConanFile):
         "ray_masking": False,
         "backface_culling": False,
         "ignore_invalid_rays": False,
-        "with_tbb": False,
     }
 
     @property
@@ -119,13 +117,6 @@ class EmbreeConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def requirements(self):
-        pass
-        # Never worked, fails with:
-        #     INSTALL TARGETS given target "TBB" which does not exist.
-        # if self.options.with_tbb:
-        #     self.requires("onetbb/[>=2021.7.0 <2024]")
-
     def validate(self):
         if not (self._has_sse_avx or self._has_neon):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support {self.settings.arch}")
@@ -135,9 +126,6 @@ class EmbreeConan(ConanFile):
             raise ConanInvalidConfiguration("Clang < 4 is not supported")
 
         check_min_vs(self, 191)
-
-        if self.options.with_tbb:
-            raise ConanInvalidConfiguration("with_tbb option never implemented correctly. Please use embree 4")
 
         if self.settings.os == "Linux" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
             raise ConanInvalidConfiguration(f"{self.ref} cannot be built with clang libc++, use libstdc++ instead")
@@ -168,7 +156,7 @@ class EmbreeConan(ConanFile):
         tc.variables["EMBREE_BACKFACE_CULLING"] = self.options.backface_culling
         tc.variables["EMBREE_IGNORE_INVALID_RAYS"] = self.options.ignore_invalid_rays
         tc.variables["EMBREE_ISPC_SUPPORT"] = False
-        tc.variables["EMBREE_TASKING_SYSTEM"] = "TBB" if self.options.with_tbb else "INTERNAL"
+        tc.variables["EMBREE_TASKING_SYSTEM"] = "INTERNAL"
         tc.variables["EMBREE_MAX_ISA"] = "NONE"
         tc.variables["EMBREE_ISA_NEON"] = self.options.get_safe("neon", False)
         tc.variables["EMBREE_ISA_NEON2X"] = self.options.get_safe("neon2x", False)

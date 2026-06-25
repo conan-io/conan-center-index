@@ -12,6 +12,7 @@ required_conan_version = ">=1.52.0"
 
 class TinyDnnConan(ConanFile):
     name = "tiny-dnn"
+    deprecated = "This project is no longer maintained by its authors and is not recommended for us"
     description = "tiny-dnn is a C++14 implementation of deep learning."
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
@@ -20,8 +21,6 @@ class TinyDnnConan(ConanFile):
 
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"with_tbb": [True, False]}
-    default_options = {"with_tbb": False}
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -29,8 +28,6 @@ class TinyDnnConan(ConanFile):
     def requirements(self):
         self.requires("cereal/1.3.1")
         self.requires("stb/cci.20210713")
-        if self.options.with_tbb:
-            self.requires("onetbb/[>=2020.3 <2024]")
 
     def package_id(self):
         self.info.clear()
@@ -43,8 +40,8 @@ class TinyDnnConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["USE_TBB"] = self.options.with_tbb
         tc.variables["USE_GEMMLOWP"] = False
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -75,6 +72,3 @@ class TinyDnnConan(ConanFile):
         self.cpp_info.components["tinydnn"].requires = ["cereal::cereal", "stb::stb"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["tinydnn"].system_libs = ["pthread"]
-        if self.options.with_tbb:
-            self.cpp_info.components["tinydnn"].defines = ["CNN_USE_TBB=1"]
-            self.cpp_info.components["tinydnn"].requires.append("onetbb::libtbb")
