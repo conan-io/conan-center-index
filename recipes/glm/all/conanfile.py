@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import copy, get, rmdir
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=2.1"
@@ -38,6 +39,10 @@ class GlmConan(ConanFile):
         tc.cache_variables["GLM_BUILD_INSTALL"] = True
         tc.cache_variables["GLM_BUILD_LIBRARY"] = not self.options.header_only
         tc.generate()
+
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("GLM does not export symbols when built as shared library on Windows.")
 
     def build(self):
         cmake = CMake(self)
