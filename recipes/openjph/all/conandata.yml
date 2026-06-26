@@ -1,9 +1,9 @@
 sources:
-  "0.27.0":
-    url: "https://github.com/aous72/OpenJPH/archive/0.27.0.tar.gz"
-    sha256: "f6768e927d8e4e4884a2efcf500a88d1b6714a48d69516332a9256803a3c8343"
+  "0.30.1":
+    url: "https://github.com/aous72/OpenJPH/archive/refs/tags/0.30.1.tar.gz"
+    sha256: "fb3ccf71af838ed2a42c6ea669308a2adaba115ae9d5862dfb1e2865b43eb5b8"
 patches:
-  "0.27.0":
-    - patch_file: "patches/0.27.0-cmake-cxx-standard-pic.patch"
+  "0.30.1":
+    - patch_file: "patches/0.30.1-cmake-cxx-standard-pic.patch"
       patch_description: "Remove setting of CXX standard to a fixed value overriding the toolchain provided by Conan and PIC hardcoded option"
       patch_type: "conan"
