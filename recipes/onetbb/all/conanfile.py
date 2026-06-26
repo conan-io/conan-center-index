@@ -92,7 +92,7 @@ class OneTBBConan(ConanFile):
         if self.options.get_safe("interprocedural_optimization") is not None:
             toolchain.variables["TBB_ENABLE_IPO"] = self.options.interprocedural_optimization
         if self.options.get_safe("tbbmalloc"):
-            toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.tbbproxy
+            toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.get_safe("tbbproxy")
         toolchain.variables["TBB_DISABLE_HWLOC_AUTOMATIC_SEARCH"] = not self.options.get_safe("tbbbind")
         if self.options.get_safe("tbbbind") and self._tbbbind_explicit_hwloc:
             hwloc_package_folder = self.dependencies["hwloc"].package_folder
