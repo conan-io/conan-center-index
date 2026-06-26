@@ -14,24 +14,24 @@
 -  find_package(DCMTK REQUIRED NO_MODULE)
 +  find_package(DCMTK REQUIRED)
  else(ITK_USE_SYSTEM_DCMTK)
-   # Copied and mofified from DCMTK/CMake/3rdparty.cmake
-   if(NOT DEFINED DCMTK_USE_ICU)
+   # Change default from OFF to ON for portability.
+   option(DCMTK_ENABLE_BUILTIN_OFICONV_DATA "Embed oficonv data files into oficonv library" ON)
 --- Modules/ThirdParty/Eigen3/CMakeLists.txt
 +++ Modules/ThirdParty/Eigen3/CMakeLists.txt
 @@ -52,9 +52,9 @@
  
  if(ITK_USE_SYSTEM_EIGEN)
    set(_Eigen3_SYSTEM_OR_INTERNAL "Eigen3")
--  find_package(${_Eigen3_SYSTEM_OR_INTERNAL} ${_Eigen3_min_version} REQUIRED CONFIG)
+-  find_package(${_Eigen3_SYSTEM_OR_INTERNAL} REQUIRED CONFIG)
 -  set(Eigen3_DIR_INSTALL ${Eigen3_DIR})
 -  set(Eigen3_DIR_BUILD ${Eigen3_DIR})
-+  find_package(${_Eigen3_SYSTEM_OR_INTERNAL} ${_Eigen3_min_version} REQUIRED)
++  find_package(${_Eigen3_SYSTEM_OR_INTERNAL} REQUIRED)
 +  set(Eigen3_DIR_INSTALL ${Eigen3_INCLUDE_DIR})
 +  set(Eigen3_DIR_BUILD ${Eigen3_INCLUDE_DIR})
  else()
    set(_Eigen3_SYSTEM_OR_INTERNAL "ITKInternalEigen3")
-   find_package(${_Eigen3_SYSTEM_OR_INTERNAL} ${_Eigen3_min_version} REQUIRED CONFIG)
-@@ -66,7 +66,7 @@
+   find_package(${_Eigen3_SYSTEM_OR_INTERNAL} REQUIRED CONFIG)
+@@ -69,7 +69,7 @@
  # Eigen3 is header only, but there are compile definitions that we want to provide
  # to enforce use of MPL only code, and to disable warnings.
  # We only need to add the location of the header itk_eigen.h used internally.
@@ -40,26 +40,32 @@
  set(ITKEigen3_INCLUDE_DIRS
    ${Eigen_INCLUDE_DIRS}
    ${ITKEigen3_BINARY_DIR}/src # For the generated itk_eigen.h
-@@ -75,14 +75,10 @@
+@@ -78,20 +78,10 @@
  # When this module is loaded by an app, load Eigen too.
  # Load ITKInternalEigen3 or Eigen3 depending on ITK_USE_SYSTEM_EIGEN
  set(ITKEigen3_EXPORT_CODE_INSTALL "
 -set(ITK_USE_SYSTEM_EIGEN \"${ITK_USE_SYSTEM_EIGEN}\")
 -set(${_Eigen3_SYSTEM_OR_INTERNAL}_DIR \"${Eigen3_DIR_INSTALL}\")
--find_package(${_Eigen3_SYSTEM_OR_INTERNAL} ${_Eigen3_min_version} REQUIRED CONFIG)
-+find_package(${_Eigen3_SYSTEM_OR_INTERNAL} ${_Eigen3_min_version} REQUIRED)
+-find_package(${_Eigen3_SYSTEM_OR_INTERNAL} REQUIRED CONFIG)
+-if(${_Eigen3_SYSTEM_OR_INTERNAL}_VERSION VERSION_LESS ${_Eigen3_min_version})
+-  message(FATAL_ERROR \"Eigen3 version ${_Eigen3_min_version} or later is required.\")
+-endif()
++find_package(${_Eigen3_SYSTEM_OR_INTERNAL} REQUIRED)
  ")
  set(ITKEigen3_EXPORT_CODE_BUILD "
 -set(ITK_USE_SYSTEM_EIGEN \"${ITK_USE_SYSTEM_EIGEN}\")
 -set(${_Eigen3_SYSTEM_OR_INTERNAL}_DIR \"${Eigen3_DIR_BUILD}\")
--find_package(${_Eigen3_SYSTEM_OR_INTERNAL} ${_Eigen3_min_version} REQUIRED CONFIG)
-+find_package(${_Eigen3_SYSTEM_OR_INTERNAL} ${_Eigen3_min_version} REQUIRED)
+-find_package(${_Eigen3_SYSTEM_OR_INTERNAL} REQUIRED CONFIG)
+-if(${_Eigen3_SYSTEM_OR_INTERNAL}_VERSION VERSION_LESS ${_Eigen3_min_version})
+-  message(FATAL_ERROR \"Eigen3 version ${_Eigen3_min_version} or later is required.\")
+-endif()
++find_package(${_Eigen3_SYSTEM_OR_INTERNAL} REQUIRED)
  ")
  
  # Eigen3 targets are not installed if ITK_USE_SYSTEM_EIGEN==True
 --- Modules/ThirdParty/Eigen3/src/itk_eigen.h.in
 +++ Modules/ThirdParty/Eigen3/src/itk_eigen.h.in
-@@ -43,10 +43,10 @@
+@@ -43,7 +43,7 @@
    set(Eigen3_DIR ${ITKInternalEigen3_DIR})
  endif()
  message(STATUS "From ITK: Eigen3_DIR: ${Eigen3_DIR}")
@@ -68,18 +74,9 @@
  add_executable(main main.cpp)
  target_link_libraries(main PUBLIC ${ITK_LIBRARIES})
  target_link_libraries(main PUBLIC Eigen3::Eigen)
- \endcode
-  *
-  * Then, the user can use Eigen3 as usual:
 --- Modules/ThirdParty/JPEG/CMakeLists.txt
 +++ Modules/ThirdParty/JPEG/CMakeLists.txt
-@@ -6,13 +6,13 @@
- 
- if(ITK_USE_SYSTEM_JPEG)
-   find_package(JPEG REQUIRED)
-   set(ITKJPEG_INCLUDE_DIRS
-     ${ITKJPEG_BINARY_DIR}/src
-     )
+@@ -12,7 +12,7 @@
    set(ITKJPEG_SYSTEM_INCLUDE_DIRS
      ${JPEG_INCLUDE_DIR}
      )
@@ -118,11 +115,14 @@
    set(ITKExpat_INCLUDE_DIRS
 --- Modules/ThirdParty/HDF5/CMakeLists.txt
 +++ Modules/ThirdParty/HDF5/CMakeLists.txt
-@@ -19,25 +19,9 @@ if(CMAKE_LINKER MATCHES "link.exe$")
+@@ -19,26 +19,10 @@
  endif()
-
+ 
  if(ITK_USE_SYSTEM_HDF5)
--
++  find_package(HDF5 REQUIRED)
++  set(HDF5_C_SHARED_LIBRARY HDF5::HDF5)
++  set(HDF5_C_STATIC_LIBRARY HDF5::HDF5)
+ 
 -  if(HDF5_DIR)
 -    set(_HDF5_DIR_CODE "set(HDF5_DIR \"${HDF5_DIR}\")")
 -  endif()
@@ -141,12 +141,10 @@
 -  find_package(HDF5 ${_HDF5_NO_MODULE_ARG} REQUIRED COMPONENTS CXX C HL)
 -endif()
 -")
-+  find_package(HDF5 REQUIRED)
-+  set(HDF5_C_SHARED_LIBRARY HDF5::HDF5)
-+  set(HDF5_C_STATIC_LIBRARY HDF5::HDF5)
-
+-
    if(BUILD_SHARED_LIBS)
      if (TARGET hdf5-shared)
+       set(ITKHDF5_LIBRARIES hdf5_cpp-shared hdf5-shared hdf5_hl-shared)
 --- Modules/ThirdParty/OpenJPEG/src/CMakeLists.txt
 +++ Modules/ThirdParty/OpenJPEG/src/CMakeLists.txt
 @@ -4,5 +4,8 @@
@@ -162,28 +160,28 @@
 +install(TARGETS itkopenjpeg EXPORT ${ITK3P_INSTALL_EXPORT_NAME}) 
 --- Modules/ThirdParty/TBB/CMakeLists.txt
 +++ Modules/ThirdParty/TBB/CMakeLists.txt
-@@ -8,14 +8,14 @@ set(ITKTBB_NO_SRC 1)
- # When this module is loaded by an app, load TBB too.
+@@ -9,7 +9,7 @@
  set(ITKTBB_EXPORT_CODE_INSTALL "
  set(TBB_DIR \"${TBB_DIR}\")
+ find_package(Threads REQUIRED)
 -find_package(TBB REQUIRED CONFIG)
 +find_package(TBB REQUIRED)
  ")
  
  # When this module is configured by an app, configure TBB too.
- set(ITKTBB_EXPORT_CODE_BUILD "
+@@ -17,7 +17,7 @@
  if(NOT ITK_BINARY_DIR)
    set(TBB_DIR \"${TBB_DIR}\")
+   find_package(Threads REQUIRED)
 -  find_package(TBB REQUIRED CONFIG)
 +  find_package(TBB REQUIRED)
  endif()
  ")
  
-diff --git a/Modules/ThirdParty/TBB/itk-module-init.cmake b/Modules/ThirdParty/TBB/itk-module-init.cmake
-index 1b7ee20a..0859ef33 100644
---- a/Modules/ThirdParty/TBB/itk-module-init.cmake
-+++ b/Modules/ThirdParty/TBB/itk-module-init.cmake
-@@ -1,2 +1,2 @@
+--- Modules/ThirdParty/TBB/itk-module-init.cmake
++++ Modules/ThirdParty/TBB/itk-module-init.cmake
+@@ -1,3 +1,3 @@
+ find_package(Threads REQUIRED) # TBB depends on Threads::Threads
 -find_package(TBB REQUIRED CONFIG) # must have TBBConfig.cmake, provided since version tbb2017_20170604oss
-+find_package(TBB REQUIRED)
++find_package(TBB REQUIRED) # must have TBBConfig.cmake, provided since version tbb2017_20170604oss
  get_target_property(TBB_INCLUDE_DIRS TBB::tbb INTERFACE_INCLUDE_DIRECTORIES)
