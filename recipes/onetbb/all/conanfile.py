@@ -3,8 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, load, rmdir, rm
+from conan.tools.files import copy, get, load, rmdir, rm
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import os
@@ -41,31 +40,21 @@ class OneTBBConan(ConanFile):
     }
 
     @property
-    def _tbb_apple_frameworks_supported(self):
-        if is_apple_os(self):
-            # if the version is 2021.13.0 or later, the build_apple_frameworks option is supported on macOS
-            return Version(self.version) >= "2021.13.0"
-        return False
-
-    @property
     def _tbbbind_explicit_hwloc(self):
         # during cross-compilation, oneTBB does not search for HWLOC and we need to specify it explicitly
         # but then oneTBB creates an imported SHARED target from provided paths, so we have to set shared=True
         return self.options.get_safe("tbbbind") and cross_building(self)
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows" and self.settings.arch == "armv8":
             del self.options.tbbproxy
 
-        tbbbind_supported = self.settings.os != "Macos" or Version(self.version) >= "2021.11.0"
+        tbbbind_supported = self.settings.os != "Macos"
         if not tbbbind_supported:
             del self.options.tbbbind
         if self.settings.os == "Android":
             del self.options.interprocedural_optimization
-        if not self._tbb_apple_frameworks_supported:
+        if not is_apple_os(self):
             del self.options.build_apple_frameworks
 
     def configure(self):
@@ -96,9 +85,6 @@ class OneTBBConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         toolchain = CMakeToolchain(self)
         toolchain.variables["TBB_TEST"] = False
         toolchain.variables["TBB_STRICT"] = False
@@ -122,8 +108,6 @@ class OneTBBConan(ConanFile):
                     os.path.join(hwloc_package_folder, "bin", "hwloc.dll").replace("\\", "/")
         if self.options.get_safe("build_apple_frameworks"):
             toolchain.variables["TBB_BUILD_APPLE_FRAMEWORKS"] = True
-        if Version(self.version) <= "2021.10.0":
-            toolchain.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
 
         if self.package_type == "shared-library":
             # already the default in CMakeLists, just being explicit
@@ -135,7 +119,6 @@ class OneTBBConan(ConanFile):
             deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
