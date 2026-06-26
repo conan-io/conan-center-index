@@ -1,0 +1,4 @@
+sources:
+  "2.47.0":
+    url: "https://github.com/ecmwf/eccodes/archive/refs/tags/2.47.0.tar.gz"
+    sha256: "6318a6a1e296d6698bcd83719212cf630b9bb45c054723c22bbc449090ae0c0e"
