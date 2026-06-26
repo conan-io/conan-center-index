@@ -66,7 +66,7 @@ class ITKConan(ConanFile):
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/4.7.0")
         self.requires("openjpeg/[>=2.5.2 <3]")
-        self.requires("onetbb/2022.0.0")
+        self.requires("onetbb/[>=2022.0.0 <2024]")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_opencv:
             self.requires("opencv/[>=4.10.0 <5]")
