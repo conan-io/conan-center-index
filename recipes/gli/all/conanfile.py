@@ -15,7 +15,7 @@ class GliConan(ConanFile):
     topics = ("opengl", "image")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/g-truc/gli"
-    license = "LicenseRef-copying.txt"
+    license = "LicenseRef-HappyBunny OR MIT"
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
@@ -38,7 +38,7 @@ class GliConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glm/1.0.1")
+        self.requires("glm/1.0.3")
 
     def package_id(self):
         self.info.clear()
