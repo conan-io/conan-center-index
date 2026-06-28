@@ -23,6 +23,12 @@ sources:
   "6.0":
     url: "https://github.com/mikke89/RmlUi/archive/refs/tags/6.0.tar.gz"
     sha256: "aba3d4b8691076750eee6bf52d722db7880dfe74c18aebd8c6d676e43175fb78"
+  "6.1":
+    url: "https://github.com/mikke89/RmlUi/archive/refs/tags/6.1.tar.gz"
+    sha256: "b6088bf31858d31bfe657caecf49fd12d5a34f9a37fa1c3061757410c4eb0089"
+  "6.2":
+    "url": "https://github.com/mikke89/RmlUi/archive/refs/tags/6.2.tar.gz"
+    sha256: "814c3ff7b9666280338d8f0dda85979f5daf028d01c85fc8975431d1e2fd8e8b"
 patches:
   "4.0":
     - patch_file: "patches/4.0-fix-cmake-targets-and-config.patch"
@@ -57,5 +63,13 @@ patches:
       patch_type: "conan"
   "6.0":
     - patch_file: "patches/6.0-fix-cmake-targets-and-config.patch"
+      patch_description: "Make external libraries work when provided by conan and remove the generation of a config file"
+      patch_type: "conan"
+  "6.1":
+    - patch_file: "patches/6.1-fix-cmake-targets-and-config.patch"
+      patch_description: "Make external libraries work when provided by conan and remove the generation of a config file"
+      patch_type: "conan"
+  "6.2":
+    - patch_file: "patches/6.2-fix-cmake-targets-and-config.patch"
       patch_description: "Make external libraries work when provided by conan and remove the generation of a config file"
       patch_type: "conan"

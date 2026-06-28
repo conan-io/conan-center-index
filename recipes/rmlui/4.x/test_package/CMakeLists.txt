@@ -3,6 +3,10 @@ project(test_package CXX)
 
 find_package(rmlui REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} example.cpp)
+if (rmlui_VERSION_STRING VERSION_LESS "6.0")
+    add_executable(${PROJECT_NAME} example.cpp)
+else()
+    add_executable(${PROJECT_NAME} example6.cpp)
+endif()
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
 target_link_libraries(${PROJECT_NAME} PRIVATE rmlui::rmlui)

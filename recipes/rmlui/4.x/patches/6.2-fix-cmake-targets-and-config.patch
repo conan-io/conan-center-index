@@ -1,6 +1,8 @@
+diff --git a/Source/Core/CMakeLists.txt b/Source/Core/CMakeLists.txt
+index 3ac5facf..7e334f26 100644
 --- a/Source/Core/CMakeLists.txt
 +++ b/Source/Core/CMakeLists.txt
-@@ -423,6 +423,9 @@ endif()
+@@ -435,6 +435,9 @@ endif()
  if(NOT RMLUI_THIRDPARTY_CONTAINERS)
  	target_compile_definitions(rmlui_core PUBLIC "RMLUI_NO_THIRDPARTY_CONTAINERS")
  	message(STATUS "Disabling third-party containers for RmlUi.")

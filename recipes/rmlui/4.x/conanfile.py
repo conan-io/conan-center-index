@@ -106,7 +106,11 @@ class RmluiConan(ConanFile):
         tc.cache_variables["ENABLE_TRACY_PROFILING"] = False
         tc.cache_variables["MATRIX_ROW_MAJOR"] = self.options.matrix_mode == "row_major"
         tc.cache_variables["NO_FONT_INTERFACE_DEFAULT"] = not self.options.font_interface
-        tc.cache_variables["NO_THIRDPARTY_CONTAINERS"] = not self.options.with_thirdparty_containers
+
+        if Version(self.version) < "6.0":
+            tc.cache_variables["NO_THIRDPARTY_CONTAINERS"] = not self.options.with_thirdparty_containers
+        else:
+            tc.cache_variables["RMLUI_THIRDPARTY_CONTAINERS"] = self.options.with_thirdparty_containers
         tc.generate()
 
         deps = CMakeDeps(self)
