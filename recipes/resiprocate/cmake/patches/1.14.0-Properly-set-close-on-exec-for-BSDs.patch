@@ -1,0 +1,50 @@
+From b23900cda7af5d0ba84cd5775b421beefacb68a3 Mon Sep 17 00:00:00 2001
+From: Gregor Jasny <gjasny@googlemail.com>
+Date: Mon, 29 Jun 2026 17:30:51 +0200
+Subject: [PATCH] Properly set close on exec for BSDs
+
+---
+ resip/stack/InternalTransport.cxx | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/resip/stack/InternalTransport.cxx b/resip/stack/InternalTransport.cxx
+index 5a19deff0..b5485d430 100644
+--- a/resip/stack/InternalTransport.cxx
++++ b/resip/stack/InternalTransport.cxx
+@@ -4,11 +4,13 @@
+ 
+ #include <iostream>
+ 
++#include <fcntl.h>
++
+ #if defined(HAVE_SYS_SOCKIO_H)
+ #include <sys/sockio.h>
+ #endif
+ 
+-#if defined(WIN32)
++#ifndef SOCK_CLOEXEC
+ #define SOCK_CLOEXEC 0
+ #endif
+ 
+@@ -112,6 +114,18 @@ InternalTransport::socket(TransportType type, IpVersion ipVer)
+       ErrLog(<< "Failed to set handle information: " << strError(e));
+       throw Transport::Exception("Failed SetHandleInformation", __FILE__, __LINE__);
+    }
++#else
++   int flags = fcntl(fd, F_GETFD);
++   if (flags == -1) {
++      int e = getErrno();
++      ErrLog (<< "Failed to get socket flags: " << strError(e));
++      throw Transport::Exception("Can't get socket flags", __FILE__,__LINE__);
++   }
++   if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) == -1) {
++      int e = getErrno();
++      ErrLog (<< "Failed to set socket flags: " << strError(e));
++      throw Transport::Exception("Can't set socket flags", __FILE__,__LINE__);
++   }
+ #endif
+ 
+ #ifdef USE_IPV6
+-- 
+2.54.0
+
