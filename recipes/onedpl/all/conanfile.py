@@ -39,11 +39,6 @@ class OneDplConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 17)
 
-        # TODO: check this
-        # if self.settings.get_safe("compiler.libcxx") == "libstdc++":
-        #     # https://stackoverflow.com/a/67924408/2997179
-        #     raise ConanInvalidConfiguration("libstdc++ is not supported")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
