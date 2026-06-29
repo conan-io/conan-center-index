@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rmdir
 import os
 
 required_conan_version = ">=2.0.9"
@@ -27,9 +27,6 @@ class ManifoldConan(ConanFile):
         "with_parallel_acceleration": False,
     }
     implements = ["auto_shared_fpic"]
-    
-    def export_sources(self):
-        export_conandata_patches(self)
         
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -48,7 +45,6 @@ class ManifoldConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
