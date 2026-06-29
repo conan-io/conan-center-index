@@ -1,0 +1,4 @@
+sources:
+  "2.6.6":
+    url: "https://github.com/Hical61/Hical/archive/refs/tags/v2.6.6.tar.gz"
+    sha256: "74b1c473df23e03f53ba5bb7e6cafa393cbca8a241e48633b2171f1c75027b5f"
