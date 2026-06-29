@@ -1,15 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, load, rmdir, rm
-from conan.tools.gnu import PkgConfigDeps
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rm, rmdir, save
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 import re
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class OneTBBConan(ConanFile):
@@ -39,12 +38,6 @@ class OneTBBConan(ConanFile):
         "build_apple_frameworks": False,
     }
 
-    @property
-    def _tbbbind_explicit_hwloc(self):
-        # during cross-compilation, oneTBB does not search for HWLOC and we need to specify it explicitly
-        # but then oneTBB creates an imported SHARED target from provided paths, so we have to set shared=True
-        return self.options.get_safe("tbbbind") and cross_building(self)
-
     def config_options(self):
         if self.settings.os == "Windows" and self.settings.arch == "armv8":
             del self.options.tbbproxy
@@ -72,53 +65,38 @@ class OneTBBConan(ConanFile):
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "11.0":
             raise ConanInvalidConfiguration(f"{self.ref} couldn't be built by apple-clang < 11.0")
 
-        # Old versions used to have shared option before hwloc dependency was moved to shared only
         if "hwloc" in self.dependencies.direct_host and self.dependencies["hwloc"].package_type != "shared-library":
             raise ConanInvalidConfiguration(f"ontbb requires option hwloc/*:shared=True to be built.")
-
-    def build_requirements(self):
-        if self.options.get_safe("tbbbind") and not self._tbbbind_explicit_hwloc:
-            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        toolchain = CMakeToolchain(self)
-        toolchain.variables["TBB_TEST"] = False
-        toolchain.variables["TBB_STRICT"] = False
-        toolchain.variables["TBBMALLOC_BUILD"] = self.options.tbbmalloc
+        tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_PROJECT_TBB_INCLUDE"] = os.path.join(self.build_folder, "find_hwloc.cmake")
+        tc.cache_variables["TBB_TEST"] = False
+        tc.cache_variables["TBB_STRICT"] = False
+        tc.cache_variables["TBBMALLOC_BUILD"] = self.options.tbbmalloc
         if self.options.get_safe("interprocedural_optimization") is not None:
-            toolchain.variables["TBB_ENABLE_IPO"] = self.options.interprocedural_optimization
+            tc.cache_variables["TBB_ENABLE_IPO"] = self.options.interprocedural_optimization
         if self.options.get_safe("tbbmalloc"):
-            toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.get_safe("tbbproxy")
-        toolchain.variables["TBB_DISABLE_HWLOC_AUTOMATIC_SEARCH"] = not self.options.get_safe("tbbbind")
-        if self.options.get_safe("tbbbind") and self._tbbbind_explicit_hwloc:
-            hwloc_package_folder = self.dependencies["hwloc"].package_folder
-            hwloc_lib_name = ("hwloc.lib" if self.settings.os == "Windows" else
-                              "libhwloc.dylib" if self.settings.os == "Macos" else
-                              "libhwloc.so")
-            toolchain.variables[f"CMAKE_HWLOC_2_5_LIBRARY_PATH"] = \
-                os.path.join(hwloc_package_folder, "lib", hwloc_lib_name).replace("\\", "/")
-            toolchain.variables[f"CMAKE_HWLOC_2_5_INCLUDE_PATH"] = \
-                os.path.join(hwloc_package_folder, "include").replace("\\", "/")
-            if self.settings.os == "Windows":
-                toolchain.variables[f"CMAKE_HWLOC_2_5_DLL_PATH"] = \
-                    os.path.join(hwloc_package_folder, "bin", "hwloc.dll").replace("\\", "/")
+            tc.cache_variables["TBBMALLOC_PROXY_BUILD"] = self.options.get_safe("tbbproxy")
+        tc.cache_variables["TBB_DISABLE_HWLOC_AUTOMATIC_SEARCH"] = True
         if self.options.get_safe("build_apple_frameworks"):
-            toolchain.variables["TBB_BUILD_APPLE_FRAMEWORKS"] = True
+            tc.cache_variables["TBB_BUILD_APPLE_FRAMEWORKS"] = True
 
         if self.package_type == "shared-library":
             # already the default in CMakeLists, just being explicit
-            toolchain.cache_variables["BUILD_SHARED_LIBS"] = True
-        toolchain.generate()
+            tc.cache_variables["BUILD_SHARED_LIBS"] = True
+        tc.generate()
 
-        if "hwloc" in self.dependencies.direct_host:
-            deps = PkgConfigDeps(self)
-            deps.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("hwloc", "cmake_target_name", "HWLOC::hwloc_2_5")
+        deps.generate()
 
     def build(self):
+        if self.options.get_safe("tbbbind"):
+            save(self, os.path.join(self.build_folder, "find_hwloc.cmake"), "find_package(hwloc REQUIRED)")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -150,19 +128,7 @@ class OneTBBConan(ConanFile):
             tbb.frameworkdirs.append(os.path.join(self.package_folder, "lib"))
             tbb.frameworks.append("tbb")
         else:
-            tbb.libs = [lib_name("tbb")]
-        if self.settings.os == "Windows":
-            version_info = load(self,
-                os.path.join(self.package_folder, "include", "oneapi", "tbb",
-                             "version.h"))
-            binary_version = re.sub(
-                r".*" + re.escape("#define __TBB_BINARY_VERSION ") +
-                r"(\d+).*",
-                r"\1",
-                version_info,
-                flags=re.MULTILINE | re.DOTALL,
-            )
-            tbb.libs.append(lib_name(f"tbb{binary_version}"))
+            tbb.libs = [lib_name("tbb12" if is_msvc(self) else "tbb")]
         if self.settings.os in ["Linux", "FreeBSD"]:
             tbb.system_libs = ["m", "dl", "rt", "pthread"]
 
