@@ -73,7 +73,8 @@ class OneTBBConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["CMAKE_PROJECT_TBB_INCLUDE"] = os.path.join(self.build_folder, "find_hwloc.cmake")
+        if self.options.get_safe("tbbbind"):
+            tc.cache_variables["CMAKE_PROJECT_TBB_INCLUDE"] = os.path.join(self.build_folder, "find_hwloc.cmake")
         tc.cache_variables["TBB_TEST"] = False
         tc.cache_variables["TBB_STRICT"] = False
         tc.cache_variables["TBBMALLOC_BUILD"] = self.options.tbbmalloc
