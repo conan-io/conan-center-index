@@ -36,7 +36,7 @@ class HictkConan(ConanFile):
             if Version(self.version) < "2.2.0":
                 self.requires("arrow/[>=16.1.0 <21]")
             else:
-                self.requires("arrow/[>=16.1.0]")
+                self.requires("arrow/[>=16.1.0 <25]")
         if Version(self.version) < "2.0.0":
             self.requires("bshoshany-thread-pool/4.1.0")
         else:
