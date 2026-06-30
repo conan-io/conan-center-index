@@ -22,7 +22,6 @@ class RmluiConan(ConanFile):
         "matrix_mode": ["column_major", "row_major"],
         "shared": [True, False],
         "with_lua_bindings": [True, False],
-        "with_thirdparty_containers": [True, False]
     }
     default_options = {
         "font_interface": "freetype",
@@ -30,7 +29,6 @@ class RmluiConan(ConanFile):
         "matrix_mode": "column_major",
         "shared": False,
         "with_lua_bindings": False,
-        "with_thirdparty_containers": True
     }
 
     def export_sources(self):
@@ -54,9 +52,8 @@ class RmluiConan(ConanFile):
         if self.options.with_lua_bindings:
             self.requires("lua/5.5.0")
 
-        if self.options.with_thirdparty_containers:
-            self.requires("robin-hood-hashing/3.11.5", transitive_headers=True)
-            self.requires("itlib/1.11.4", transitive_headers=True)
+        self.requires("robin-hood-hashing/3.11.5", transitive_headers=True)
+        self.requires("itlib/1.11.4", transitive_headers=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -65,18 +62,20 @@ class RmluiConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
         apply_conandata_patches(self)
+        rmdir(self, os.path.join(self.source_folder, "include", "RmlUi", "Core", "Containers"))
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["RMLUI_LUA_BINDINGS"] = self.options.with_lua_bindings
         tc.cache_variables["RMLUI_SAMPLES"] = False
-        tc.cache_variables["RMLUI_INSTALL_RUNTIME_DEPENDENCIES"] = False
         tc.cache_variables["RMLUI_CUSTOM_RTTI"] = False
         tc.cache_variables["RMLUI_PRECOMPILED_HEADERS"] = True
         tc.cache_variables["RMLUI_TRACY_PROFILING"] = False
+        tc.cache_variables["RMLUI_THIRDPARTY_CONTAINERS"] = True
         tc.cache_variables["RMLUI_MATRIX_ROW_MAJOR"] = self.options.matrix_mode == "row_major"
         tc.cache_variables["RMLUI_FONT_ENGINE"] = str(self.options.font_interface)
-        tc.cache_variables["RMLUI_THIRDPARTY_CONTAINERS"] = self.options.with_thirdparty_containers
+        if self.settings.os == "Windows":
+            tc.cache_variables["RMLUI_INSTALL_RUNTIME_DEPENDENCIES"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -102,16 +101,13 @@ class RmluiConan(ConanFile):
         core = self.cpp_info.components["core"]
         core.libs = ["rmlui"]
         core.set_property("cmake_target_name", "RmlUi::Core")
+        core.requires = ["robin-hood-hashing::robin-hood-hashing", "itlib::itlib"]
         if self.options.font_interface == "freetype":
             core.requires.append("freetype::freetype")
         if self.options.matrix_mode == "row_major":
             core.defines.append("RMLUI_MATRIX_ROW_MAJOR")
         if not self.options.shared:
             core.defines.append("RMLUI_STATIC_LIB")
-        if not self.options.with_thirdparty_containers:
-            core.defines.append("RMLUI_NO_THIRDPARTY_CONTAINERS")
-        else:
-            core.requires.extend(["robin-hood-hashing::robin-hood-hashing", "itlib::itlib"])
 
         # Lua component
         if self.options.with_lua_bindings:
