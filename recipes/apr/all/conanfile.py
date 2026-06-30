@@ -202,5 +202,5 @@ class AprConan(ConanFile):
             self.cpp_info.defines = ["APR_DECLARE_STATIC"]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs = ["crypt", "dl", "pthread", "rt"]
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["mswsock", "rpcrt4", "ws2_32"]
+            if self.settings.os == "Windows":
+                self.cpp_info.system_libs = ["mswsock", "rpcrt4", "ws2_32"]
