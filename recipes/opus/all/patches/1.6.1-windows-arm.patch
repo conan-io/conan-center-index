@@ -1,0 +1,24 @@
+From e19605be6ac07992b0870413f02c705df97ef8ae Mon Sep 17 00:00:00 2001
+From: Terry Chen <terry@example.com>
+Date: Mon, 27 Apr 2026 22:46:05 -0400
+Subject: [PATCH] Gate ARM DNN RTCD source on DNN builds
+
+---
+ CMakeLists.txt | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index aa7b1ae17..913768856 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -563,7 +563,9 @@ if(NOT OPUS_DISABLE_INTRINSICS)
+         target_compile_definitions(opus PRIVATE OPUS_HAVE_RTCD)
+         add_sources_group(opus celt ${celt_sources_arm_rtcd})
+         add_sources_group(opus silk ${silk_sources_arm_rtcd})
+-        add_sources_group(opus lpcnet ${dnn_sources_arm_rtcd})
++        if (OPUS_DNN)
++          add_sources_group(opus lpcnet ${dnn_sources_arm_rtcd})
++        endif()
+       else()
+         message(ERROR "Runtime cpu capability detection needed for MAY_HAVE_NEON")
+       endif()
