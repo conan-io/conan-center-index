@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
 import os
 
 
@@ -21,7 +20,7 @@ class PackageConan(ConanFile):
     no_copy_source = True
 
     def layout(self):
-        basic_layout(self, src_folder=".")
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
