@@ -136,6 +136,12 @@ class FollyConan(ConanFile):
             # https://github.com/facebook/folly/issues/2266
             raise ConanInvalidConfiguration(f"{self.ref} could not be built by apple-clang < 14.0. Use apple-clang >= 14.0")
 
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "17" and self.settings.arch == "x86_64":
+            # macOS 26 SDK (Xcode 26 / apple-clang 17) added _Float16 declarations to math.h without architecture guards.
+            # Clang rejects _Float16 on x86_64 (requires AVX-512 FP16, unavailable on Apple hardware).
+            raise ConanInvalidConfiguration(f"Cannot be built for x86_64 with apple-clang >= 17 (Xcode 26+): "
+                                            f"macOS 26 SDK declares _Float16 in math.h without x86_64 guards.")
+
         boost = self.dependencies["boost"]
         if boost.options.header_only:
             raise ConanInvalidConfiguration(f"{self.ref} could not be built with a header only Boost. Use -o 'boost/*:header_only=False'")
@@ -149,8 +155,6 @@ class FollyConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=False)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_PROJECT_folly_INCLUDE"] = "conan_deps.cmake"
         # Folly fails to check Gflags: https://github.com/conan-io/conan/issues/12012
@@ -220,6 +224,8 @@ class FollyConan(ConanFile):
         if Version(self.version) < "2026.06.08.00":
             replace_in_file(self, folly_deps, "${Boost_LIBRARIES}", f"{' '.join(self._required_boost_cmake_targets)}")
         replace_in_file(self, folly_deps, "OpenSSL 1.1.1", "OpenSSL")
+        # Avoid annoying warning: 'GLOG_USE_GLOG_EXPORT' macro redefined
+        replace_in_file(self, folly_deps, "list(APPEND FOLLY_CXX_FLAGS -DGLOG_USE_GLOG_EXPORT)", "##")
         # Disable example
         save(self, os.path.join(self.source_folder, "folly", "logging", "example", "CMakeLists.txt"), "")
         # Disable custom find modules to use Conan CMakeDeps instead
@@ -240,6 +246,45 @@ class FollyConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+    def _add_folly_debugging_components(self):
+        # exception tracer (renamed + granular)
+        cmp_exc = "folly_debugging_exception_tracer_"
+        for lib in [
+            "exception_tracer_base",
+            "exception_tracer",
+            "exception_tracer_callbacks",
+            "exception_counter",
+            "exception_counter_static_registration",
+            "stacktrace",
+            "smart_exception_tracer_singleton",
+            "smart_exception_tracer",
+            "smart_exception_stack_trace_hooks",
+        ]:
+            self.cpp_info.components[cmp_exc + lib].set_property("cmake_target_name", f"Folly::{cmp_exc}{lib}")
+            self.cpp_info.components[cmp_exc + lib].libs = [cmp_exc + lib]
+            self.cpp_info.components[cmp_exc + lib].requires = ["libfolly"]
+
+        # symbolizer
+        cmp_sym = "folly_debugging_symbolizer_"
+        for lib in [
+            "elf",
+            "elf_cache",
+            "line_reader",
+            "symbolized_frame",
+            "dwarf",
+            "stack_trace",
+            "detail_debug",
+            "symbolizer",
+        ]:
+            self.cpp_info.components[cmp_sym + lib].set_property("cmake_target_name", f"Folly::{cmp_sym}{lib}")
+            self.cpp_info.components[cmp_sym + lib].libs = [cmp_sym + lib]
+            self.cpp_info.components[cmp_sym + lib].requires = ["libfolly"]
+
+        # interface-only (no .a produced)
+        for lib in ["signal_handler", "symbolize_printer"]:
+            self.cpp_info.components[cmp_sym + lib].set_property("cmake_target_name", f"Folly::{cmp_sym}{lib}")
+            self.cpp_info.components[cmp_sym + lib].requires = [f"{cmp_sym}symbolizer"]
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "folly")
@@ -295,17 +340,20 @@ class FollyConan(ConanFile):
         self.cpp_info.components["folly_test_util"].requires = ["libfolly"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["folly_exception_tracer_base"].set_property("cmake_target_name", "Folly::folly_exception_tracer_base")
-            self.cpp_info.components["folly_exception_tracer_base"].set_property("pkg_config_name", "libfolly_exception_tracer_base")
-            self.cpp_info.components["folly_exception_tracer_base"].libs = ["folly_exception_tracer_base"]
-            self.cpp_info.components["folly_exception_tracer_base"].requires = ["libfolly"]
+            if Version(self.version) >= "2026.06.29.00":
+                self._add_folly_debugging_components()
+            else:
+                self.cpp_info.components["folly_exception_tracer_base"].set_property("cmake_target_name", "Folly::folly_exception_tracer_base")
+                self.cpp_info.components["folly_exception_tracer_base"].set_property("pkg_config_name", "libfolly_exception_tracer_base")
+                self.cpp_info.components["folly_exception_tracer_base"].libs = ["folly_exception_tracer_base"]
+                self.cpp_info.components["folly_exception_tracer_base"].requires = ["libfolly"]
 
-            self.cpp_info.components["folly_exception_tracer"].set_property("cmake_target_name", "Folly::folly_exception_tracer")
-            self.cpp_info.components["folly_exception_tracer"].set_property("pkg_config_name", "libfolly_exception_tracer")
-            self.cpp_info.components["folly_exception_tracer"].libs = ["folly_exception_tracer"]
-            self.cpp_info.components["folly_exception_tracer"].requires = ["folly_exception_tracer_base"]
+                self.cpp_info.components["folly_exception_tracer"].set_property("cmake_target_name", "Folly::folly_exception_tracer")
+                self.cpp_info.components["folly_exception_tracer"].set_property("pkg_config_name", "libfolly_exception_tracer")
+                self.cpp_info.components["folly_exception_tracer"].libs = ["folly_exception_tracer"]
+                self.cpp_info.components["folly_exception_tracer"].requires = ["folly_exception_tracer_base"]
 
-            self.cpp_info.components["folly_exception_counter"].set_property("cmake_target_name", "Folly::folly_exception_counter")
-            self.cpp_info.components["folly_exception_counter"].set_property("pkg_config_name", "libfolly_exception_counter")
-            self.cpp_info.components["folly_exception_counter"].libs = ["folly_exception_counter"]
-            self.cpp_info.components["folly_exception_counter"].requires = ["folly_exception_tracer"]
+                self.cpp_info.components["folly_exception_counter"].set_property("cmake_target_name", "Folly::folly_exception_counter")
+                self.cpp_info.components["folly_exception_counter"].set_property("pkg_config_name", "libfolly_exception_counter")
+                self.cpp_info.components["folly_exception_counter"].libs = ["folly_exception_counter"]
+                self.cpp_info.components["folly_exception_counter"].requires = ["folly_exception_tracer"]
