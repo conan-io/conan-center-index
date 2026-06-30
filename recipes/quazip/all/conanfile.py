@@ -48,7 +48,8 @@ class QuaZIPConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True)
+        qt_version = "[>=5.15 <7]" if Version(self.version) >= "1.7.2" else "[~5.15]"
+        self.requires(f"qt/{qt_version}", transitive_headers=True, transitive_libs=True)
         self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
         if Version(self.version) >= "1.4":
             self.requires("bzip2/1.0.8")
@@ -61,6 +62,8 @@ class QuaZIPConan(ConanFile):
         tc.variables["QUAZIP_QT_MAJOR_VERSION"] = self._qt_major
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+        if self._qt_major == 6 and Version(self.version) >= "1.6":
+            tc.variables["QUAZIP_ENABLE_QTEXTCODEC"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         tc = CMakeDeps(self)
