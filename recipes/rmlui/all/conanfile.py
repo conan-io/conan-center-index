@@ -49,7 +49,7 @@ class RmluiConan(ConanFile):
 
     def requirements(self):
         if self.options.font_interface == "freetype":
-            self.requires("freetype/2.10.4")
+            self.requires("freetype/[>=2.13 <3]")
 
         if self.options.with_lua_bindings:
             self.requires("lua/5.5.0")
@@ -70,6 +70,7 @@ class RmluiConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["RMLUI_LUA_BINDINGS"] = self.options.with_lua_bindings
         tc.cache_variables["RMLUI_SAMPLES"] = False
+        tc.cache_variables["RMLUI_INSTALL_RUNTIME_DEPENDENCIES"] = False
         tc.cache_variables["RMLUI_CUSTOM_RTTI"] = False
         tc.cache_variables["RMLUI_PRECOMPILED_HEADERS"] = True
         tc.cache_variables["RMLUI_TRACY_PROFILING"] = False
