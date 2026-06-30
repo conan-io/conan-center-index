@@ -854,6 +854,18 @@ class QtConan(ConanFile):
         for module in self._get_module_tree:
             if not getattr(self.options, module):
                 rmdir(self, os.path.join(self.package_folder, "licenses", module))
+        if self.options.with_pcre2:
+            # moc and libQt6Core have RUNPATH=$ORIGIN/../lib (resp. $ORIGIN), so
+            # they look for shared libraries inside Qt's own lib/. pcre2 lives in
+            # a separate Conan package and is not copied there by cmake --install.
+            # Copy libpcre2-16.so* into Qt's lib/ to satisfy the existing RUNPATH
+            # without requiring consumers to manipulate LD_LIBRARY_PATH. No-op if
+            # pcre2 was built as a static library (no .so files to copy).
+            pcre2_libdir = os.path.join(self.dependencies["pcre2"].package_folder, "lib")
+            copy(self, "libpcre2-16.so*",
+                 src=pcre2_libdir,
+                 dst=os.path.join(self.package_folder, "lib"))
+
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
             rm(self, mask, self.package_folder, recursive=True, excludes="Qt6HostInfoConfig.cmake")
