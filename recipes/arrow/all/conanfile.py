@@ -452,7 +452,7 @@ class ArrowConan(ConanFile):
 
         if self.options.get_safe("substrait"):
             self.cpp_info.components["libarrow_substrait"].set_property("pkg_config_name", "arrow_substrait")
-            self.cpp_info.components["libarrow_substrait"].set_property("cmake_target_name", f"Arrow::arrow_substrait_{cmake_suffix}")
+            self.cpp_info.components["libarrow_substrait"].set_property("cmake_target_name", f"ArrowSubstrait::arrow_substrait_{cmake_suffix}")
             self.cpp_info.components["libarrow_substrait"].libs = [f"arrow_substrait{suffix}"]
             self.cpp_info.components["libarrow_substrait"].requires = ["libparquet"]
             if self.options.dataset_modules:
@@ -479,6 +479,9 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow_compute"].set_property("cmake_target_name", f"ArrowCompute::arrow_compute_{cmake_suffix}")
             self.cpp_info.components["libarrow_compute"].libs = [f"arrow_compute{suffix}"]
             self.cpp_info.components["libarrow_compute"].requires = ["libarrow"]
+            if not self.options.shared:
+                # arrow/compute/visibility.h checks ARROW_COMPUTE_STATIC
+                self.cpp_info.components["libarrow_compute"].defines = ["ARROW_COMPUTE_STATIC"]
 
         if self.options.gandiva:
             self.cpp_info.components["libgandiva"].set_property("pkg_config_name", "gandiva")
