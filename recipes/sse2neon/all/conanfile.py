@@ -44,6 +44,3 @@ class PackageConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        if is_msvc(self):
-            # cf https://github.com/DLTcollab/sse2neon/blob/v1.9.1/sse2neon.h#L365
-            self.cpp_info.cxxflags.append("/Zc:preprocessor")
