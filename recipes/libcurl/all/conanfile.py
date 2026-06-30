@@ -356,12 +356,8 @@ class LibcurlConan(ConanFile):
         if not self.options.with_ssl:
             tc.configure_args.append("--without-ssl")
 
-        if self.options.with_ssl == "openssl":
-            path = unix_path(self, self.dependencies["openssl"].package_folder)
-            tc.configure_args.append(f"--with-openssl={path}")
-        elif self.options.with_ssl == "libressl":
-            path = unix_path(self, self.dependencies["libressl"].package_folder)
-            tc.configure_args.append(f"--with-openssl={path}")
+        if self.options.with_ssl in ("openssl", "libressl"):
+            tc.configure_args.append("--with-openssl")
         else:
             tc.configure_args.append("--without-openssl")
 
