@@ -93,9 +93,7 @@ class FollyConan(ConanFile):
             self.requires("libunwind/[>=1.8.0 <2]")
         if self.settings.os == "Linux":
             if Version(self.version) >= "2025.02.24.00":
-                # folly/io/async/IoUringZeroCopyBufferPool.h:57
-                # Requires io_uring_zcrx_cqe (liburing >= 2.10)
-                self.requires("liburing/2.11")
+                self.requires("liburing/[>=2.15 <3]")
             else:
                 self.requires("liburing/2.6")
 
