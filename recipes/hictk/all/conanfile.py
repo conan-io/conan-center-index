@@ -127,3 +127,6 @@ class HictkConan(ConanFile):
             self.cpp_info.defines.append("HICTK_WITH_ARROW")
         if self.options.with_eigen:
             self.cpp_info.defines.append("HICTK_WITH_EIGEN")
+        if self.settings.os == "Windows":
+            # https://github.com/paulsengroup/hictk/blob/v2.2.0/CMakeLists.txt#L124
+            self.cpp_info.defines.append("NOMINMAX")
