@@ -20,9 +20,6 @@ sources:
 patches:
   "1.11.1":
     - patch_file: "patches/libssh2-1.11.1-CVE2026-55200.patch"
-      patch_description: "Fix CVE2026-55200"
-      patch_type: "vulnerability"
-      patch_source: "https://github.com/libssh2/libssh2/pull/2052"
   "1.9.0":
     - patch_file: "patches/libssh2-1.9.0-CVE2020-22218.patch"
       patch_description: "Fix CVE2020-22218"

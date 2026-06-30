@@ -1,3 +1,9 @@
+Fix for CVE2026-55200
+
+Add additional bounds checking on packet length to prevent OOB write.
+
+Backported from https://github.com/libssh2/libssh2/pull/2052
+
 diff --git a/src/transport.c b/src/transport.c
 index e1120656..d147505b 100644
 --- a/src/transport.c
