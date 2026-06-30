@@ -639,6 +639,9 @@ class BoostConan(ConanFile):
             return True
         elif Version(self.version) >= "1.86.0":
             # https://github.com/boostorg/stacktrace/blob/boost-1.86.0/build/Jamfile.v2#L148
+            # from_exception.cpp uses POSIX/ELF APIs not available with MinGW (GCC targeting Windows)
+            if cross_building(self) and self.settings.os == "Windows" and str(self.settings.compiler) not in ("Visual Studio", "msvc"):
+                return False
             return not self.options.header_only and not self.options.without_stacktrace and self._b2_architecture == "x86"
 
     def configure(self):
@@ -1952,11 +1955,13 @@ class BoostConan(ConanFile):
             def filter_transform_module_libraries(names):
                 libs = []
                 for name in names:
-                    if name in ("boost_stacktrace_windbg", "boost_stacktrace_windbg_cached") and self.settings.os != "Windows":
+                    if name in ("boost_stacktrace_windbg", "boost_stacktrace_windbg_cached") and (self.settings.os != "Windows" or cross_building(self)):
                         continue
                     if name in ("boost_math_c99l", "boost_math_tr1l") and (str(self.settings.arch).startswith("ppc") or (Version(self.version) >= "1.87.0" and self.settings.os == "Emscripten")):
                         continue
-                    if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic") and self.settings.os == "Windows":
+                    if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace") and self.settings.os == "Windows":
+                        continue
+                    if name == "boost_stacktrace_basic" and self.settings.os == "Windows" and not cross_building(self):
                         continue
                     if name == "boost_stacktrace_from_exception" and not self._stacktrace_from_exception_available:
                         continue
@@ -2079,7 +2084,7 @@ class BoostConan(ConanFile):
 
             if not self.options.get_safe("without_process"):
                 if self.settings.os == "Windows":
-                    self.cpp_info.components["process"].system_libs.extend(["ntdll", "shell32", "advapi32", "user32"])
+                    self.cpp_info.components["process"].system_libs.extend(["ntdll", "shell32", "advapi32", "user32", "ws2_32"])
                 if self._shared:
                     self.cpp_info.components["process"].defines.append("BOOST_PROCESS_DYN_LINK")
 
