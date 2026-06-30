@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 79451c5..c93511a 100644
+index f107c45..10b6ea4 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -76,7 +76,7 @@ set(C4CORE_SRC_FILES
+@@ -86,7 +86,7 @@ set(C4CORE_SRC_FILES
  if(C4CORE_WITH_FASTFLOAT)
      list(APPEND C4CORE_SRC_FILES
          c4/ext/fast_float.hpp
@@ -11,7 +11,7 @@ index 79451c5..c93511a 100644
          )
  endif()
  set(C4CORE_AMALGAMATED ${C4CORE_SRC_DIR}/../src_singleheader/c4/c4core_all.hpp)
-@@ -95,7 +95,10 @@ c4_add_library(c4core
+@@ -105,7 +105,10 @@ c4_add_library(c4core
      SOURCE_ROOT ${C4CORE_SRC_DIR}
      SOURCES ${C4CORE_SRC_FILES}
  )
@@ -24,11 +24,11 @@ index 79451c5..c93511a 100644
  endif()
  if(C4CORE_NO_DEBUG_BREAK)
 diff --git a/src/c4/ext/fast_float.hpp b/src/c4/ext/fast_float.hpp
-index 4bf3c0d..b6a3a77 100644
+index d7c9fb2..128bfcf 100644
 --- a/src/c4/ext/fast_float.hpp
 +++ b/src/c4/ext/fast_float.hpp
-@@ -20,7 +20,7 @@
- #   pragma GCC diagnostic ignored "-Wold-style-cast"
+@@ -26,7 +26,7 @@
+ #   endif
  #endif
  
 -#include "c4/ext/fast_float_all.h"
