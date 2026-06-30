@@ -1,13 +1,14 @@
 from conan import ConanFile
 from conan.tools.files import get, copy, rmdir, replace_in_file, rm
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
 import os
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=2.0.9"
 
 
 class ReflectCppConan(ConanFile):
@@ -69,6 +70,12 @@ class ReflectCppConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
+    def config_options(self):
+        if self.settings.get_safe("os") == "Windows":
+            self.options.rm_safe("fPIC")
+        if Version(self.version) < "0.17.0":
+            del self.options.with_capnproto
+
     def requirements(self):
         self.requires("ctre/3.9.0", transitive_headers=True)
         # INFO: include/rfl/json/Writer.hpp includes yyjson.h
@@ -76,14 +83,22 @@ class ReflectCppConan(ConanFile):
         self.requires("yyjson/0.10.0", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_capnproto"):
             self.requires("capnproto/1.1.0", transitive_headers=True)
-        if self.options.with_cbor or self.options.with_ubjson:
-            self.requires("jsoncons/0.176.0", transitive_headers=True)
+        if self.options.with_cbor:
+            if Version(self.version) >= Version("0.17.0"):
+                self.requires("jsoncons/0.176.0", transitive_headers=True)
+            else:
+                self.requires("tinycbor/0.6.0", transitive_headers=True)
         if self.options.with_flatbuffers:
             self.requires("flatbuffers/24.3.25", transitive_headers=True)
         if self.options.with_msgpack:
             self.requires("msgpack-c/6.0.0", transitive_headers=True)
         if self.options.with_toml:
-            self.requires("tomlplusplus/3.4.0", transitive_headers=True)
+            if Version(self.version) == Version("0.18.0"):
+                self.requires("toml11/4.4.0", transitive_headers=True)
+            else:
+                self.requires("tomlplusplus/3.4.0", transitive_headers=True)
+        if self.options.with_ubjson:
+            self.requires("jsoncons/0.176.0", transitive_headers=True)
         if self.options.with_xml:
             self.requires("pugixml/1.15", transitive_headers=True)
         if self.options.with_yaml:
@@ -97,7 +112,9 @@ class ReflectCppConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++20 features, which your compiler does not fully support.")
-
+        if Version(self.version) < "0.22" and self.settings.compiler == "msvc" and self.options.shared:
+            raise ConanInvalidConfiguration("Old versions of this library do not support MSVC-shared builds")
+    
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -107,6 +124,8 @@ class ReflectCppConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 20)", "")
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         deps = CMakeDeps(self)
         if self.options.with_flatbuffers:
             deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
@@ -148,5 +167,3 @@ class ReflectCppConan(ConanFile):
         self.cpp_info.libs = ["reflectcpp"]
         self.cpp_info.set_property("cmake_target_name", "reflectcpp::reflectcpp")
         self.cpp_info.set_property("cmake_file_name", "reflectcpp")
-        if self.options.shared:
-            self.cpp_info.defines.append("RFL_BUILD_SHARED")
