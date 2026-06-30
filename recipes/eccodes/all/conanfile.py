@@ -121,7 +121,7 @@ class EccodesConan(ConanFile):
         with open(cmakelists, "r", encoding="utf-8") as f:
             content = f.read()
         
-        target_str = (
+        target_str_127 = (
             "if( eccodes_HAVE_ECKIT_GEO AND NOT TARGET eckit_geo )\n"
             "    ecbuild_find_package(NAME eckit VERSION 1.27 REQUIRED)\n"
             "    if( NOT TARGET eckit_geo )\n"
@@ -129,11 +129,21 @@ class EccodesConan(ConanFile):
             "    endif()\n"
             "endif()"
         )
+        target_str_21 = (
+            "if( eccodes_HAVE_ECKIT_GEO AND NOT TARGET eckit_geo )\n"
+            "    ecbuild_find_package(NAME eckit VERSION 2.1 REQUIRED)\n"
+            "    if( NOT TARGET eckit_geo )\n"
+            "        ecbuild_critical(\"eckit has not been built with ECKIT_GEO enabled\")\n"
+            "    endif()\n"
+            "endif()"
+        )
         
-        if target_str in content:
-            content = content.replace(target_str, replacement)
+        if target_str_127 in content:
+            content = content.replace(target_str_127, replacement)
+        elif target_str_21 in content:
+            content = content.replace(target_str_21, replacement)
         else:
-            self.output.warn("Could not find expected eckit_geo check in CMakeLists.txt to patch")
+            self.output.warning("Could not find expected eckit_geo check in CMakeLists.txt to patch")
             
         if self.options.with_netcdf:
             netcdf_patch = (
