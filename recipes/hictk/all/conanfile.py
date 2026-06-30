@@ -72,9 +72,16 @@ class HictkConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.25]")
 
+    @property
+    def project_options_version(self):
+        if Version(self.version) < "2.0.0":
+            return "0.33.0"
+        else:
+            return "0.36.6"
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        unzip(self, os.path.join(self.source_folder, "external", "project_options-v0.36.6.tar.xz"), os.path.join(self.source_folder, "external"))
+        unzip(self, os.path.join(self.source_folder, "external", f"project_options-v{self.project_options_version}.tar.xz"), os.path.join(self.source_folder, "external"))
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -86,7 +93,7 @@ class HictkConan(ConanFile):
         tc.cache_variables["HICTK_ENABLE_FUZZY_TESTING"] = "OFF"
         tc.cache_variables["HICTK_WITH_ARROW"] = self.options.get_safe("with_arrow", False)
         tc.cache_variables["HICTK_WITH_EIGEN"] = self.options.with_eigen
-        tc.cache_variables["FETCHCONTENT_SOURCE_DIR__HICTK_PROJECT_OPTIONS"] = os.path.join(self.source_folder, "external", "project_options-0.36.6")
+        tc.cache_variables["FETCHCONTENT_SOURCE_DIR__HICTK_PROJECT_OPTIONS"] = os.path.join(self.source_folder, "external", f"project_options-{self.project_options_version}")
         tc.generate()
 
         cmakedeps = CMakeDeps(self)
