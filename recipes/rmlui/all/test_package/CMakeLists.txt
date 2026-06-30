@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package CXX)
 
-find_package(rmlui REQUIRED CONFIG)
-
-if (rmlui_VERSION_STRING VERSION_LESS "6.0")
-    add_executable(${PROJECT_NAME} example.cpp)
-else()
-    add_executable(${PROJECT_NAME} example6.cpp)
-endif()
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
-target_link_libraries(${PROJECT_NAME} PRIVATE rmlui::rmlui)
+find_package(RmlUi REQUIRED CONFIG)
+add_executable(${PROJECT_NAME} example.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE RmlUi::RmlUi)
