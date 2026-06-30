@@ -62,7 +62,7 @@ class RmluiConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
         apply_conandata_patches(self)
-        rmdir(self, os.path.join(self.source_folder, "include", "RmlUi", "Core", "Containers"))
+        rmdir(self, os.path.join(self.source_folder, "Include", "RmlUi", "Core", "Containers"))
 
     def generate(self):
         tc = CMakeToolchain(self)
