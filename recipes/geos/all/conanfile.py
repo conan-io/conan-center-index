@@ -70,6 +70,8 @@ class GeosConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_BUILD_TYPE"] = str(self.settings.build_type)
+
         tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_DOCUMENTATION"] = False
         tc.variables["BUILD_ASTYLE"] = False
