@@ -55,7 +55,7 @@ class EigenConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_TESTING"] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
-        if Version(self.version) >= "5.0.0":
+        if Version(self.version) >= "3.4.1":
             # TODO consider making EIGEN_BUILD_{BLAS,LAPACK} tunable
             tc.cache_variables["EIGEN_BUILD_BLAS"] = False
             tc.cache_variables["EIGEN_BUILD_LAPACK"] = False
