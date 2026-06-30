@@ -7,6 +7,7 @@ import os
 
 required_conan_version = ">=2.1"
 
+
 class RmluiConan(ConanFile):
     name = "rmlui"
     description = "RmlUi - The HTML/CSS User Interface Library Evolved"
@@ -59,8 +60,7 @@ class RmluiConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
         apply_conandata_patches(self)
         rmdir(self, os.path.join(self.source_folder, "include", "RmlUi", "Core", "Containers"))
 
@@ -88,7 +88,13 @@ class RmluiConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, pattern="*LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder, excludes=("Samples/*", "Tests/*"))
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(
+            self,
+            "LICENSE.txt",
+            src=os.path.join(self.source_folder, "Source", "Debugger"),
+            dst=os.path.join(self.package_folder, "licenses", "Source", "Debugger"),
+        )
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
