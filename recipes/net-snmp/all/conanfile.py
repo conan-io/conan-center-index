@@ -126,10 +126,7 @@ class NetSnmpConan(ConanFile):
 
     # ---------------- Windows / MSVC ----------------
     def _configure_msvc(self):
-        # win32/Configure is the autotools-equivalent: feature flags go here, not to nmake.
-        # --with-sslinc/libdir point it straight at Conan's OpenSSL (confirmed against
-        # net-snmp's own OpenSSL-3 Windows build), so no build.pl patching and no openssl
-        # pragma rewriting are needed.
+        # Mirror Linux patch/configure/build steps
         ssl = self.dependencies["openssl"].package_folder.replace("\\", "/")
         prefix = self.package_folder.replace("\\", "/")
         args = [
@@ -146,12 +143,8 @@ class NetSnmpConan(ConanFile):
         self.run(" ".join(args))
 
     def _patch_msvc(self):
-        # The one irreducible win32 edit. StrawberryPerl is a mingw/gcc build, so net-snmp's
-        # Configure folds ExtUtils::Embed::ccopts() (gcc flags) into the cl.exe command line
-        # and breaks the build. We only build C libraries, no embedded Perl, so drop them.
+        # net-snmp version-independent patching, instead of using patch files
         replace_in_file(self, "Configure", "ExtUtils::Embed::ccopts()", "''", strict=False)
-        # Configure hard-codes the dynamic CRT (/MD,/MDd) chosen by --config, which already
-        # matches a dynamic-runtime profile. Swap to the static CRT only when one is asked for.
         if "MT" in msvc_runtime_flag(self):
             replace_in_file(self, "Configure", "/MDd", "/MTd", strict=False)
             replace_in_file(self, "Configure", "/MD ", "/MT ", strict=False)
@@ -169,8 +162,6 @@ class NetSnmpConan(ConanFile):
         replace_in_file(self, configure_path,
                         "-install_name \\$rpath/",
                         "-install_name @rpath/")
-        # net-snmp's openssl detection links only -lcrypto; a static Conan OpenSSL also needs
-        # its own system_libs, so thread them through configure's link checks + final link.
         crypto_libs = self.dependencies["openssl"].cpp_info.system_libs
         if len(crypto_libs) != 0:
             crypto_link_flags = " -l".join(crypto_libs)
@@ -185,7 +176,7 @@ class NetSnmpConan(ConanFile):
         if is_msvc(self):
             with chdir(self, os.path.join(self.source_folder, "win32")):
                 self._patch_msvc()
-                self._configure_msvc()
+                self._configure_msvc() # replaced build.pl patching
                 self.run("nmake /nologo libsnmp")
         else:
             self._patch_unix()
