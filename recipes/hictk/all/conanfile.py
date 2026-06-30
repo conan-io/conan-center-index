@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, unzip
 from conan.tools.scm import Version
 
 required_conan_version = ">=2.0"
@@ -74,6 +74,7 @@ class HictkConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        unzip(self, os.path.join(self.source_folder, "external", "project_options-v0.36.6.tar.xz"), os.path.join(self.source_folder, "external"))
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -85,6 +86,7 @@ class HictkConan(ConanFile):
         tc.cache_variables["HICTK_ENABLE_FUZZY_TESTING"] = "OFF"
         tc.cache_variables["HICTK_WITH_ARROW"] = self.options.get_safe("with_arrow", False)
         tc.cache_variables["HICTK_WITH_EIGEN"] = self.options.with_eigen
+        tc.cache_variables["FETCHCONTENT_SOURCE_DIR__HICTK_PROJECT_OPTIONS"] = os.path.join(self.source_folder, "external", "project_options-0.36.6")
         tc.generate()
 
         cmakedeps = CMakeDeps(self)
