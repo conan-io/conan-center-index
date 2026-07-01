@@ -39,6 +39,9 @@ class CPythonConan(ConanFile):
         "with_tkinter": [True, False],
         "with_curses": [True, False],
         "with_lzma": [True, False],
+        "free_threaded": [True, False],
+        "with_jit": [True, False],
+        "with_zstd": [True, False],
 
         # options that don't change package id
         "env_vars": [True, False],  # set environment variables
@@ -57,6 +60,9 @@ class CPythonConan(ConanFile):
         "with_tkinter": True,
         "with_curses": True,
         "with_lzma": True,
+        "free_threaded": False,
+        "with_jit": False,
+        "with_zstd": True,
 
         # options that don't change package id
         "env_vars": True,
@@ -86,6 +92,13 @@ class CPythonConan(ConanFile):
             del self.options.with_curses
             del self.options.with_gdbm
             del self.options.with_nis
+        if Version(self.version) < "3.13":
+            del self.options.free_threaded
+            del self.options.with_jit
+        if Version(self.version) < "3.14":
+            del self.options.with_zstd
+        if Version(self.version) >= "3.13" and not is_msvc(self):
+            del self.options.with_nis
 
         self.settings.compiler.rm_safe("libcxx")
         self.settings.compiler.rm_safe("cppstd")
@@ -98,6 +111,7 @@ class CPythonConan(ConanFile):
             self.options.rm_safe("with_sqlite3")
             self.options.rm_safe("with_tkinter")
             self.options.rm_safe("with_lzma")
+            self.options.rm_safe("with_zstd")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -105,6 +119,8 @@ class CPythonConan(ConanFile):
     def build_requirements(self):
         if Version(self.version) >= "3.11" and not is_msvc(self) and not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
+        if self.options.get_safe("with_jit", False):
+            self.tool_requires("llvm-core/19.1.7")
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
@@ -120,12 +136,14 @@ class CPythonConan(ConanFile):
         if self.settings.os != "Windows":
             if not is_apple_os(self):
                 self.requires("util-linux-libuuid/2.39.2")
-            # In <3.9 and lower patch versions of 3.9/10/11, crypt.h was exposed in Python.h
-            # This was removed in 3.11 and backported: https://github.com/python/cpython/issues/88914
-            # For the sake of this recipe, we only have later patch versions, so this version check
-            # may be slightly inaccurate if a lower patch version is desired.
-            transitive_crypt = Version(self.version) < "3.9"
-            self.requires("libxcrypt/4.4.36", transitive_headers=transitive_crypt, transitive_libs=transitive_crypt)
+            if Version(self.version) < "3.13":
+                # In <3.9 and lower patch versions of 3.9/10/11, crypt.h was exposed in Python.h
+                # This was removed in 3.11 and backported: https://github.com/python/cpython/issues/88914
+                # For the sake of this recipe, we only have later patch versions, so this version check
+                # may be slightly inaccurate if a lower patch version is desired.
+                # The crypt module was removed entirely in 3.13 (PEP 594).
+                transitive_crypt = Version(self.version) < "3.9"
+                self.requires("libxcrypt/4.4.36", transitive_headers=transitive_crypt, transitive_libs=transitive_crypt)
         if self.options.get_safe("with_bz2"):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_gdbm", False):
@@ -134,7 +152,10 @@ class CPythonConan(ConanFile):
             # TODO: Add nis when available.
             raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.45.2")
+            if Version(self.version) >= "3.13":
+                self.requires("sqlite3/[>=3.45.2 <4]")
+            else:
+                self.requires("sqlite3/3.45.2")
         if self.options.get_safe("with_tkinter"):
             self.requires("tk/8.6.10")
         if self.options.get_safe("with_curses", False):
@@ -143,6 +164,8 @@ class CPythonConan(ConanFile):
             self.requires("ncurses/6.4", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_lzma", False):
             self.requires("xz_utils/5.4.5")
+        if self.options.get_safe("with_zstd", False):
+            self.requires("zstd/1.5.7")
 
     def package_id(self):
         del self.info.options.env_vars
@@ -186,6 +209,10 @@ class CPythonConan(ConanFile):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == 9 and Version(self.version) >= "3.12":
             raise ConanInvalidConfiguration("FIXME: GCC 9 produces an internal compiler error locally, and a link error in CCI")
 
+        if self.options.get_safe("with_jit"):
+            if str(self.settings.arch) not in ("x86_64", "armv8"):
+                raise ConanInvalidConfiguration("JIT compilation is only supported on x86_64 and armv8 architectures")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -208,6 +235,10 @@ class CPythonConan(ConanFile):
             tc.configure_args.append("--with-system-ffi")
         if Version(self.version) >= "3.10":
             tc.configure_args.append("--disable-test-modules")
+        if self.options.get_safe("free_threaded"):
+            tc.configure_args.append("--disable-gil")
+        if self.options.get_safe("with_jit"):
+            tc.configure_args.append("--enable-experimental-jit")
         if self.options.get_safe("with_sqlite3"):
             tc.configure_args.append("--enable-loadable-sqlite-extensions={}".format(
                 yes_no(not self.dependencies["sqlite3"].options.omit_load_extension)
@@ -314,14 +345,22 @@ class CPythonConan(ConanFile):
         replace_in_file(self, self._msvc_project_path("_hashlib"), '<Import Project="openssl.props" />', "")
         replace_in_file(self, self._msvc_project_path("_ssl"), '<Import Project="openssl.props" />', "")
 
-        # For mpdecimal, we need to remove all headers and all c files *except* the main module file, _decimal.c
-        self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\.*\.h.*', "")
-        self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\libmpdec\\.*\.c.*', "")
-        # There is also an assembly file with a complicated build step as part of the mpdecimal build
-        replace_in_file(self, self._msvc_project_path("_decimal"), "<CustomBuild", "<!--<CustomBuild")
-        replace_in_file(self, self._msvc_project_path("_decimal"), "</CustomBuild>", "</CustomBuild>-->")
-        # Remove extra include directory
-        replace_in_file(self, self._msvc_project_path("_decimal"), r"..\Modules\_decimal\libmpdec;", "")
+        if Version(self.version) >= "3.13":
+            # 3.13+ uses $(mpdecimalDir) for mpdecimal paths
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\$\(mpdecimalDir\)\\.*\.h.*', "")
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\$\(mpdecimalDir\)\\.*\.c.*', "")
+            replace_in_file(self, self._msvc_project_path("_decimal"), "<CustomBuild", "<!--<CustomBuild")
+            replace_in_file(self, self._msvc_project_path("_decimal"), "</CustomBuild>", "</CustomBuild>-->")
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'\$\(mpdecimalDir\)[^;]*;', "")
+        else:
+            # For mpdecimal, we need to remove all headers and all c files *except* the main module file, _decimal.c
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\.*\.h.*', "")
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\libmpdec\\.*\.c.*', "")
+            # There is also an assembly file with a complicated build step as part of the mpdecimal build
+            replace_in_file(self, self._msvc_project_path("_decimal"), "<CustomBuild", "<!--<CustomBuild")
+            replace_in_file(self, self._msvc_project_path("_decimal"), "</CustomBuild>", "</CustomBuild>-->")
+            # Remove extra include directory
+            replace_in_file(self, self._msvc_project_path("_decimal"), r"..\Modules\_decimal\libmpdec;", "")
 
         # Don't include vendored sqlite3
         replace_in_file(self, self._msvc_project_path("_sqlite3"),
@@ -400,7 +439,10 @@ class CPythonConan(ConanFile):
         self._inject_conan_props_file("_ctypes", "libffi", self._supports_modules)
         self._inject_conan_props_file("_decimal", "mpdecimal", self._supports_modules)
         self._inject_conan_props_file("_lzma", "xz_utils", self.options.get_safe("with_lzma"))
-        self._inject_conan_props_file("_bsddb", "libdb", self.options.get_safe("with_bsddb"))
+        if Version(self.version) < "3.12":
+            self._inject_conan_props_file("_bsddb", "libdb", self.options.get_safe("with_bsddb"))
+        if self.options.get_safe("with_zstd"):
+            self._inject_conan_props_file("_zstd", "zstd")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -509,6 +551,8 @@ class CPythonConan(ConanFile):
             discarded.add("_tkinter")
         if not self.options.with_lzma:
             discarded.add("_lzma")
+        if not self.options.get_safe("with_zstd", True):
+            discarded.add("_zstd")
         return discarded
 
     @property
@@ -532,7 +576,12 @@ class CPythonConan(ConanFile):
         sln = os.path.join(self.source_folder, "PCbuild", "pcbuild.sln")
         # FIXME: Solution files do not pick up the toolset automatically.
         cmd = msbuild.command(sln, targets=projects)
-        self.run(f"{cmd} /p:PlatformToolset={msvs_toolset(self)}")
+        extra_props = f"/p:PlatformToolset={msvs_toolset(self)}"
+        if self.options.get_safe("free_threaded"):
+            extra_props += " /p:DisableGil=true"
+        if self.options.get_safe("with_jit"):
+            extra_props += " /p:EnableJIT=true"
+        self.run(f"{cmd} {extra_props}")
 
     def build(self):
         self._patch_sources()
@@ -577,7 +626,10 @@ class CPythonConan(ConanFile):
         build_path = self._msvc_artifacts_path
         infix = "_d" if self.settings.build_type == "Debug" else ""
         # FIXME: if cross building, use a build python executable here
-        python_built = os.path.join(build_path, f"python{infix}.exe")
+        if self.options.get_safe("free_threaded"):
+            python_built = os.path.join(build_path, f"python{self._version_suffix}{self._ft_suffix}{infix}.exe")
+        else:
+            python_built = os.path.join(build_path, f"python{infix}.exe")
         layout_args = [
             os.path.join(self.source_folder, "PC", "layout", "main.py"),
             "-v",
@@ -615,7 +667,7 @@ class CPythonConan(ConanFile):
         copy(self, "*.pyd",
              src=build_path,
              dst=os.path.join(self.package_folder, self._msvc_install_subprefix, "DLLs"))
-        copy(self, f"python{self._version_suffix}{infix}.lib",
+        copy(self, f"python{self._version_suffix}{self._ft_suffix}{infix}.lib",
              src=build_path,
              dst=os.path.join(self.package_folder, self._msvc_install_subprefix, "libs"))
         copy(self, "*",
@@ -752,13 +804,13 @@ class CPythonConan(ConanFile):
                         while [ -L "$__file__" ]; do
                             __file__="$(dirname "$__file__")/$(readlink "$__file__")"
                         done
-                        exec "$(dirname "$__file__")/python{self._version_suffix}" "$0" "$@"
+                        exec "$(dirname "$__file__")/python{self._version_suffix}{self._abi_suffix}" "$0" "$@"
                         '''
                         """).encode())
                     fn.write(text)
 
             if not os.path.exists(self._cpython_symlink):
-                os.symlink(f"python{self._version_suffix}", self._cpython_symlink)
+                os.symlink(f"python{self._version_suffix}{self._ft_suffix}", self._cpython_symlink)
         fix_apple_shared_install_name(self)
 
         self._write_cmake_findpython_wrapper_file()
@@ -774,10 +826,14 @@ class CPythonConan(ConanFile):
     def _cpython_interpreter_name(self):
         python = "python"
         if is_msvc(self):
+            if self.options.get_safe("free_threaded"):
+                python += self._version_suffix + "t"
             if self.settings.build_type == "Debug":
                 python += "_d"
         else:
             python += self._version_suffix
+            if self.options.get_safe("free_threaded"):
+                python += "t"
         if self.settings.os == "Windows":
             python += ".exe"
         return python
@@ -789,9 +845,15 @@ class CPythonConan(ConanFile):
     @property
     def _abi_suffix(self):
         res = ""
+        if self.options.get_safe("free_threaded"):
+            res += "t"
         if self.settings.build_type == "Debug":
             res += "d"
         return res
+
+    @property
+    def _ft_suffix(self):
+        return "t" if self.options.get_safe("free_threaded") else ""
 
     @property
     def _lib_name(self):
@@ -800,9 +862,9 @@ class CPythonConan(ConanFile):
                 lib_ext = "_d"
             else:
                 lib_ext = ""
+            return f"python{self._version_suffix}{self._ft_suffix}{lib_ext}"
         else:
-            lib_ext = self._abi_suffix
-        return f"python{self._version_suffix}{lib_ext}"
+            return f"python{self._version_suffix}{self._abi_suffix}"
 
     def package_info(self):
         py_version = Version(self.version)
@@ -825,11 +887,13 @@ class CPythonConan(ConanFile):
                 self.cpp_info.components["python"].system_libs.extend(
                     ["pathcch", "shlwapi", "version", "ws2_32"]
                 )
+        if self.options.get_safe("free_threaded"):
+            self.cpp_info.components["python"].defines.append("Py_GIL_DISABLED")
         self.cpp_info.components["python"].requires = ["zlib::zlib"]
-        if self.settings.os != "Windows":
+        if self.settings.os != "Windows" and Version(self.version) < "3.13":
             self.cpp_info.components["python"].requires.append("libxcrypt::libxcrypt")
         self.cpp_info.components["python"].set_property(
-            "pkg_config_name", f"python-{py_version.major}.{py_version.minor}"
+            "pkg_config_name", f"python-{py_version.major}.{py_version.minor}{self._ft_suffix}"
         )
         self.cpp_info.components["python"].set_property(
             "pkg_config_aliases", [f"python{py_version.major}"]
@@ -841,7 +905,7 @@ class CPythonConan(ConanFile):
         self.cpp_info.components["embed"].libdirs = [libdir]
         self.cpp_info.components["embed"].includedirs = []
         self.cpp_info.components["embed"].set_property(
-            "pkg_config_name", f"python-{py_version.major}.{py_version.minor}-embed"
+            "pkg_config_name", f"python-{py_version.major}.{py_version.minor}{self._ft_suffix}-embed"
         )
         self.cpp_info.components["embed"].set_property(
             "pkg_config_aliases", [f"python{py_version.major}-embed"]
@@ -867,7 +931,8 @@ class CPythonConan(ConanFile):
             if self.settings.os != "Windows":
                 if not is_apple_os(self):
                     self.cpp_info.components["_hidden"].requires.append("util-linux-libuuid::util-linux-libuuid")
-                self.cpp_info.components["_hidden"].requires.append("libxcrypt::libxcrypt")
+                if Version(self.version) < "3.13":
+                    self.cpp_info.components["_hidden"].requires.append("libxcrypt::libxcrypt")
             if self.options.with_bz2:
                 self.cpp_info.components["_hidden"].requires.append("bzip2::bzip2")
             if self.options.get_safe("with_gdbm", False):
@@ -880,9 +945,11 @@ class CPythonConan(ConanFile):
                 self.cpp_info.components["_hidden"].requires.append("xz_utils::xz_utils")
             if self.options.get_safe("with_tkinter"):
                 self.cpp_info.components["_hidden"].requires.append("tk::tk")
+            if self.options.get_safe("with_zstd", False):
+                self.cpp_info.components["_hidden"].requires.append("zstd::zstd")
             self.cpp_info.components["_hidden"].includedirs = []
             self.cpp_info.components["_hidden"].libdirs = []
-            if self.settings.os in ["Linux", "FreeBSD"]:
+            if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) < "3.13":
                 self.cpp_info.components["_hidden"].system_libs.append("nsl")
 
         if self.options.env_vars:
