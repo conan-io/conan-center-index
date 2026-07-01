@@ -1,0 +1,4 @@
+sources:
+  "1.2.1.cci.20250625":
+    url: "https://github.com/xiph/speex/archive/05895229896dc942d453446eba6f9f5ddcf95422.tar.gz"
+    sha256: "adcf98e09a59a5f07baefb5007e4619b6da7692c1fd563db6d617198f6e9e021"
