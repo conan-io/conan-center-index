@@ -68,6 +68,10 @@ class QuaZIPConan(ConanFile):
         if self._qt_major == 6 and Version(self.version) >= "1.6":
             tc.variables["QUAZIP_ENABLE_QTEXTCODEC"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        qt_tools_rootdir = self.conf.get("user.qt:tools_directory", None)
+        if qt_tools_rootdir:
+            moc_name = "moc.exe" if self.settings_build.os == "Windows" else "moc"
+            tc.cache_variables["CMAKE_AUTOMOC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, moc_name)
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
