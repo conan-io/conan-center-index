@@ -5,7 +5,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, chdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir, chdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, NMakeToolchain
@@ -38,9 +38,6 @@ class NetSnmpConan(ConanFile):
         "fPIC": True,
         "with_ipv6": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -126,30 +123,34 @@ class NetSnmpConan(ConanFile):
             deps = PkgConfigDeps(self)
             deps.generate()
 
-    def _patch_msvc(self):
-        ssl_info = self.dependencies["openssl"]
-        openssl_root = ssl_info.package_folder.replace("\\", "/")
-        search_replace = [
-            (r'$default_openssldir . "\\include"', f"'{openssl_root}/include'"),
-            (r'$default_openssldir . "\\lib\\VC"', f"'{openssl_root}/lib'"),
-            ("$openssl = false", "$openssl = true"),
-        ]
-        if self._is_debug:
-            search_replace.append(("$debug = false", "$debug = true"))
-        if self.options.shared:
-            search_replace.append(("$link_dynamic = false", "$link_dynamic = true"))
-        if self.options.with_ipv6:
-            search_replace.append(("$b_ipv6 = false", "$b_ipv6 = true"))
-        for search, replace in search_replace:
-            replace_in_file(self, "build.pl", search, replace)
-        replace_in_file(self, "Configure", '"/runtime', f'"/{msvc_runtime_flag(self)}')
-        link_lines = "\n".join(
-            f'#    pragma comment(lib, "{lib}.lib")'
-            for lib in ssl_info.cpp_info.libs + ssl_info.cpp_info.system_libs
-        )
-        config = r"net-snmp\net-snmp-config.h.in"
-        replace_in_file(self, config, "/* Conan: system_libs */", link_lines)
 
+    # ---------------- Windows / MSVC ----------------
+    def _configure_msvc(self):
+        # Mirror Linux patch/configure/build steps
+        ssl = self.dependencies["openssl"].package_folder.replace("\\", "/")
+        prefix = self.package_folder.replace("\\", "/")
+        args = [
+            "perl", "Configure",
+            f"--config={'debug' if self._is_debug else 'release'}",
+            f"--linktype={'dynamic' if self.options.shared else 'static'}",
+            "--with-ssl",
+            f'--with-sslincdir="{ssl}/include"',
+            f'--with-ssllibdir="{ssl}/lib"',
+            f'--prefix="{prefix}"',
+        ]
+        if self.options.with_ipv6:
+            args.append("--with-ipv6")
+        self.run(" ".join(args))
+
+    def _patch_msvc(self):
+        # net-snmp version-independent patching, instead of using patch files
+        replace_in_file(self, "Configure", "ExtUtils::Embed::ccopts()", "''", strict=False)
+        if "MT" in msvc_runtime_flag(self):
+            replace_in_file(self, "Configure", "/MDd", "/MTd", strict=False)
+            replace_in_file(self, "Configure", "/MD ", "/MT ", strict=False)
+
+
+    # ---------------- Linux / autotools ----------------
     def _patch_unix(self):
         for gnu_config in [
             self.conf.get("user.gnu-config:config_guess", check_type=str),
@@ -172,11 +173,10 @@ class NetSnmpConan(ConanFile):
                             f'LIBS="-lcrypto -l{crypto_link_flags} $LIBS"')
 
     def build(self):
-        apply_conandata_patches(self)
         if is_msvc(self):
             with chdir(self, os.path.join(self.source_folder, "win32")):
                 self._patch_msvc()
-                self.run("perl build.pl")
+                self._configure_msvc() # replaced build.pl patching
                 self.run("nmake /nologo libsnmp")
         else:
             self._patch_unix()
