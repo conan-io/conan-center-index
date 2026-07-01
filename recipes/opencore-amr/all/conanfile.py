@@ -69,6 +69,8 @@ class OpencoreAmrConan(ConanFile):
             tc.extra_cxxflags.append("-EHsc")
             if check_min_vs(self, "180", raise_invalid=False):
                 tc.extra_cxxflags.append("-FS")
+        else:
+            tc.extra_cxxflags.append("-fwrapv")
         tc.generate()
 
         if is_msvc(self):
