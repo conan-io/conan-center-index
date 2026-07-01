@@ -265,7 +265,8 @@ class FollyConan(ConanFile):
             "smart_exception_stack_trace_hooks",
         ]:
             self.cpp_info.components[cmp_exc + lib].set_property("cmake_target_name", f"Folly::{cmp_exc}{lib}")
-            self.cpp_info.components[cmp_exc + lib].libs = [cmp_exc + lib]
+            if not self.options.shared:
+                self.cpp_info.components[cmp_exc + lib].libs = [cmp_exc + lib]
             self.cpp_info.components[cmp_exc + lib].requires = ["libfolly"]
 
         # symbolizer
@@ -281,7 +282,8 @@ class FollyConan(ConanFile):
             "symbolizer",
         ]:
             self.cpp_info.components[cmp_sym + lib].set_property("cmake_target_name", f"Folly::{cmp_sym}{lib}")
-            self.cpp_info.components[cmp_sym + lib].libs = [cmp_sym + lib]
+            if not self.options.shared:
+                self.cpp_info.components[cmp_sym + lib].libs = [cmp_sym + lib]
             self.cpp_info.components[cmp_sym + lib].requires = ["libfolly"]
 
         # interface-only (no .a produced)
