@@ -10,7 +10,7 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def requirements(self):
-        self.requires(self.tested_reference_str)
+        self.requires(self.tested_reference_str, run=True)
 
     def layout(self):
         cmake_layout(self)
@@ -24,3 +24,10 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
+
+            if self.dependencies["bzip2"].options.build_executable:
+                with open("file.txt", "w", encoding="utf-8") as f:
+                    f.write("Hello Conan world")
+                suffix = ".exe" if self.settings.os == "Windows" else ""
+                self.run(f"bzip2{suffix} file.txt", env="conanrun")
+                self.run(f"bzcat{suffix} file.txt.bz2", env="conanrun")
