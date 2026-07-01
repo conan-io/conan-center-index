@@ -1,0 +1,34 @@
+diff --git a/Generate.cmake b/Generate.cmake
+index 3bc3a15..3e3eab3 100644
+--- a/cmake/Modules/Generate.cmake
++++ b/cmake/Modules/Generate.cmake
+@@ -17,7 +17,7 @@ function(IDLC_GENERATE)
+   cmake_parse_arguments(
+     IDLC "${options}" "${one_value_keywords}" "${multi_value_keywords}" "" ${ARGN})
+ 
+-  if (TARGET CycloneDDS::libidlc)
++  if (0)
+     set(_idlc_backend "$<TARGET_FILE:CycloneDDS::libidlc>")
+     if (NOT DEFINED _idlc_generate_skipreport)
+       message(STATUS "Building internal IDLC backend")
+@@ -31,8 +31,18 @@ function(IDLC_GENERATE)
+       # For now, building for a Windows target on a Linux host with w64-mingw is supported by this workaround.
+       list(APPEND CMAKE_FIND_LIBRARY_SUFFIXES ".so")
+     endif()
+-    find_library(_idlc_backend "cycloneddsidlc" NO_CMAKE_FIND_ROOT_PATH)
+-    if (_idlc_backend)
++    find_library(_idlc_backend_tmp "cycloneddsidlc" NO_CMAKE_FIND_ROOT_PATH)
++    if (_idlc_backend_tmp)
++      if (WIN32)
++        get_filename_component(_backend_folder ${_idlc_backend_tmp} DIRECTORY)
++        find_file(_idlc_backend
++            NAMES cycloneddsidlc.dll
++            PATHS "${_backend_folder}/../bin/"
++            NO_DEFAULT_PATH
++        )
++      else()
++        set(_idlc_backend ${_idlc_backend_tmp})
++      endif()
+       if (NOT DEFINED _idlc_generate_skipreport)
+         message(STATUS "Using external IDLC backend: ${_idlc_backend}")
+         set(_idlc_generate_skipreport 1 CACHE INTERNAL "")
