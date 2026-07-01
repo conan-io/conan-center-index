@@ -1,0 +1,4 @@
+sources:
+  "0.1.2":
+    url: "https://github.com/sigrokproject/libserialport/releases/download/libserialport-0.1.2/libserialport-0.1.2.tar.gz"
+    sha256: "5deb92b5ca72c0347b07b786848350deca2dcfd975ce613b8e0e1d947a4b4ca9"
