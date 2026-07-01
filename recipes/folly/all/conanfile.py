@@ -136,11 +136,13 @@ class FollyConan(ConanFile):
             # https://github.com/facebook/folly/issues/2266
             raise ConanInvalidConfiguration(f"{self.ref} could not be built by apple-clang < 14.0. Use apple-clang >= 14.0")
 
-        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "17" and self.settings.arch == "x86_64":
-            # macOS 26 SDK (Xcode 26 / apple-clang 17) added _Float16 declarations to math.h without architecture guards.
-            # Clang rejects _Float16 on x86_64 (requires AVX-512 FP16, unavailable on Apple hardware).
-            raise ConanInvalidConfiguration(f"Cannot be built for x86_64 with apple-clang >= 17 (Xcode 26+): "
-                                            f"macOS 26 SDK declares _Float16 in math.h without x86_64 guards.")
+        if Version(self.version) >= "2026.06.29.00":
+            if (self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "17"
+                and self.settings.arch == "x86_64"):
+                # macOS 26 SDK (Xcode 26 / apple-clang 17) added _Float16 declarations to math.h without architecture guards.
+                # Clang rejects _Float16 on x86_64 (requires AVX-512 FP16, unavailable on Apple hardware).
+                raise ConanInvalidConfiguration(f"Cannot be built for x86_64 with apple-clang >= 17 (Xcode 26+): "
+                                                f"macOS 26 SDK declares _Float16 in math.h without x86_64 guards.")
 
         boost = self.dependencies["boost"]
         if boost.options.header_only:
@@ -153,6 +155,7 @@ class FollyConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=False)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -224,8 +227,9 @@ class FollyConan(ConanFile):
         if Version(self.version) < "2026.06.08.00":
             replace_in_file(self, folly_deps, "${Boost_LIBRARIES}", f"{' '.join(self._required_boost_cmake_targets)}")
         replace_in_file(self, folly_deps, "OpenSSL 1.1.1", "OpenSSL")
-        # Avoid annoying warning: 'GLOG_USE_GLOG_EXPORT' macro redefined
-        replace_in_file(self, folly_deps, "list(APPEND FOLLY_CXX_FLAGS -DGLOG_USE_GLOG_EXPORT)", "##")
+        if Version(self.version) >= "2026.06.29.00":
+            # Avoid annoying warning: 'GLOG_USE_GLOG_EXPORT' macro redefined
+            replace_in_file(self, folly_deps, "list(APPEND FOLLY_CXX_FLAGS -DGLOG_USE_GLOG_EXPORT)", "##")
         # Disable example
         save(self, os.path.join(self.source_folder, "folly", "logging", "example", "CMakeLists.txt"), "")
         # Disable custom find modules to use Conan CMakeDeps instead
@@ -235,7 +239,6 @@ class FollyConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "gen_pkgconfig_vars(FOLLY_PKGCONFIG folly_deps)", "")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
