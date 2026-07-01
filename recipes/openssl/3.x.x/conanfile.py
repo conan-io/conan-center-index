@@ -552,6 +552,11 @@ class OpenSSLConan(ConanFile):
 
     def package(self):
         copy(self, "*LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        # clang-cl: /Zi is treated as /Z7 (embedded debug info), so ossl_static.pdb
+        # is never created — but the Makefile's install_sw tries to copy it.
+        # Create a dummy so install doesn't fail; rm(*.pdb) below deletes it anyway.
+        if self._is_clang_cl and not self.options.shared:
+            save(self, os.path.join(self.source_folder, "ossl_static.pdb"), "")
         self._make_install()
         if is_apple_os(self):
             fix_apple_shared_install_name(self)
