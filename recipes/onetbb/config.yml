@@ -1,27 +1,3 @@
 versions:
   "2023.0.0":
     folder: all
-  "2022.3.0":
-    folder: all
-  "2022.0.0":
-    folder: all
-  "2021.12.0":
-    folder: all
-  "2021.10.0":
-    folder: all
-  "2021.9.0":
-    folder: all
-  "2021.7.0":
-    folder: all
-  "2020.3.3":
-    folder: "2020.x"
-  "2020.3":
-    folder: "2020.x"
-  "2020.2":
-    folder: "2020.x"
-  "2020.1":
-    folder: "2020.x"
-  "2020.0":
-    folder: "2020.x"
-  "2019_u9":
-    folder: "2020.x"

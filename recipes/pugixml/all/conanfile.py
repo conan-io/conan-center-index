@@ -1,11 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import collect_libs, copy, get, load, replace_in_file, rmdir, save
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2"
 
 
 class PugiXmlConan(ConanFile):
@@ -24,6 +26,7 @@ class PugiXmlConan(ConanFile):
         "header_only": [True, False],
         "wchar_mode": [True, False],
         "no_exceptions": [True, False],
+        "charconv_float": [True, False],
     }
     default_options = {
         "shared": False,
@@ -31,11 +34,14 @@ class PugiXmlConan(ConanFile):
         "header_only": False,
         "wchar_mode": False,
         "no_exceptions": False,
+        "charconv_float": False,
     }
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "1.16":
+            del self.options.charconv_float
 
     def configure(self):
         if self.options.shared or self.options.header_only:
@@ -57,6 +63,11 @@ class PugiXmlConan(ConanFile):
         if self.options.get_safe("shared") and self.options.wchar_mode:
             # The app crashes with error "The procedure entry point ... could not be located in the dynamic link library"
             raise ConanInvalidConfiguration("Combination of 'shared' and 'wchar_mode' options is not supported")
+    
+    def validate_build(self):
+        if self.options.get_safe("charconv_float"):
+            # PUGIXML_CHARCONV_FLOAT requires at least C++17
+            check_min_cppstd(self, "17")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -77,6 +88,8 @@ class PugiXmlConan(ConanFile):
                 replace_in_file(self, header_file, "// #define PUGIXML_WCHAR_MODE", "#define PUGIXML_WCHAR_MODE")
             if self.options.no_exceptions:
                 replace_in_file(self, header_file, "// #define PUGIXML_NO_EXCEPTIONS", "#define PUGIXML_NO_EXCEPTIONS")
+            if self.options.get_safe("charconv_float"):
+                replace_in_file(self, header_file, "// #define PUGIXML_CHARCONV_FLOAT", "#define PUGIXML_CHARCONV_FLOAT")
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
@@ -107,6 +120,8 @@ class PugiXmlConan(ConanFile):
                 self.cpp_info.defines.append("PUGIXML_WCHAR_MODE")
             if self.options.no_exceptions:
                 self.cpp_info.defines.append("PUGIXML_NO_EXCEPTIONS")
+            if self.options.get_safe("charconv_float"):
+                self.cpp_info.defines.append("PUGIXML_CHARCONV_FLOAT")
             self.cpp_info.bindirs = []
             self.cpp_info.libdirs = []
         else:

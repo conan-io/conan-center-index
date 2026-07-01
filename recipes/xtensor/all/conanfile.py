@@ -46,7 +46,7 @@ class XtensorConan(ConanFile):
             else:
                 self.requires("xsimd/13.2.0")
         if self.options.tbb:
-            self.requires("onetbb/2021.10.0")
+            self.requires("onetbb/[>=2021.10.0 <2024]")
 
     def build_requirements(self):
         # required by newer versions of xtensor
