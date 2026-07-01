@@ -1,4 +1,7 @@
 sources:
+  "2026.06.29.00":
+    url: "https://github.com/facebook/folly/releases/download/v2026.06.29.00/folly-v2026.06.29.00.tar.gz"
+    sha256: "0e38243aa067bd85772de7997135a04eff5359166cf1f48c983aef1dcce65332"
   "2024.08.12.00":
     url: "https://github.com/facebook/folly/releases/download/v2024.08.12.00/folly-v2024.08.12.00.tar.gz"
     sha256: "18d7be721721db547cb9c5dd5cc50df05cd88b0a8e683e3126ec6f9ce2c41c4d"

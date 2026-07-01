@@ -34,7 +34,12 @@ class FollyConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 17
+        if Version(self.version) >= "2025.07.14.00" or (is_msvc(self) and Version(self.settings.compiler.version) >= 194):
+            # https://github.com/facebook/folly/commit/97f90a3c2488132dbba27e6d2287dc8c39612325
+            # https://github.com/conan-io/conan-center-index/pull/27995#issuecomment-3317452387
+            return 20
+        else:
+            return 17
 
     @property
     def _compilers_minimum_version(self):
@@ -69,6 +74,8 @@ class FollyConan(ConanFile):
         self.requires("boost/1.85.0", transitive_headers=True, transitive_libs=True)
         self.requires("bzip2/1.0.8")
         self.requires("double-conversion/3.3.0", transitive_headers=True, transitive_libs=True)
+        if Version(self.version) > "2024.08.26.00":
+            self.requires("fast_float/8.0.2")
         self.requires("gflags/[>=2.2.2 <3]")
         self.requires("glog/0.7.1", transitive_headers=True, transitive_libs=True)
         self.requires("libevent/2.1.12", transitive_headers=True, transitive_libs=True)
@@ -76,7 +83,7 @@ class FollyConan(ConanFile):
         self.requires("lz4/1.10.0", transitive_libs=True)
         self.requires("snappy/1.2.1")
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("zstd/1.5.5", transitive_libs=True)
+        self.requires("zstd/[~1.5]", transitive_libs=True)
         if not is_msvc(self):
             self.requires("libdwarf/0.9.1")
         self.requires("libsodium/[~1.0.20]")
@@ -85,13 +92,23 @@ class FollyConan(ConanFile):
             self.requires("libiberty/9.1.0")
             self.requires("libunwind/[>=1.8.0 <2]")
         if self.settings.os == "Linux":
-            self.requires("liburing/2.6")
-        # INFO: Folly does not support fmt 11 on MSVC: https://github.com/facebook/folly/issues/2250
-        self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
+            if Version(self.version) >= "2025.02.24.00":
+                self.requires("liburing/[>=2.15 <3]")
+            else:
+                self.requires("liburing/2.6")
+
+            self.requires("libaio/0.3.113")
+        if Version(self.version) < "2024.10.07.00":
+            # INFO: Folly does not support fmt 11 on MSVC
+            self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
+        else:
+            # MSVC-fmt weirdness was fixed with fmt 11.1 and/or folly 2024.10.07.00
+            # # https://github.com/facebook/folly/commit/1cc9a3aeb8099104ba0297601d3e56b6e61e2f96
+            self.requires("fmt/11.2.0", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
-        # INFO: Required due ZIP_LISTS CMake feature in conan_deps.cmake
-        self.tool_requires("cmake/[>=3.17 <4]")
+        # INFO: Required due ZIP_LISTS CMake (3.17) feature in conan_deps.cmake
+        self.tool_requires("cmake/[>=3.17]")
 
     @property
     def _required_boost_components(self):
@@ -119,6 +136,14 @@ class FollyConan(ConanFile):
             # https://github.com/facebook/folly/issues/2266
             raise ConanInvalidConfiguration(f"{self.ref} could not be built by apple-clang < 14.0. Use apple-clang >= 14.0")
 
+        if Version(self.version) >= "2026.06.29.00":
+            if (self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "17"
+                and self.settings.arch == "x86_64"):
+                # macOS 26 SDK (Xcode 26 / apple-clang 17) added _Float16 declarations to math.h without architecture guards.
+                # Clang rejects _Float16 on x86_64 (requires AVX-512 FP16, unavailable on Apple hardware).
+                raise ConanInvalidConfiguration(f"Cannot be built for x86_64 with apple-clang >= 17 (Xcode 26+): "
+                                                f"macOS 26 SDK declares _Float16 in math.h without x86_64 guards.")
+
         boost = self.dependencies["boost"]
         if boost.options.header_only:
             raise ConanInvalidConfiguration(f"{self.ref} could not be built with a header only Boost. Use -o 'boost/*:header_only=False'")
@@ -130,10 +155,9 @@ class FollyConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=False)
+        self._patch_sources()
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_PROJECT_folly_INCLUDE"] = "conan_deps.cmake"
         # Folly fails to check Gflags: https://github.com/conan-io/conan/issues/12012
@@ -154,10 +178,8 @@ class FollyConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         # Honor Boost_ROOT set by boost recipe
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0074"] = "NEW"
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if Version(self.version) > "2024.08.12.00": # pylint: disable=conan-unreachable-upper-version
-            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
-
+        if Version(self.version) < "2025.04.07.00": # folly changed their own minimum CMake version to 3.5 to work with CMake 4 in 2025.04.07.00
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
 
         # 2019.10.21.00 -> either MSVC_ flags or CXX_STD
         if is_msvc(self):
@@ -177,6 +199,8 @@ class FollyConan(ConanFile):
         deps.set_property("boost", "cmake_file_name", "Boost")
         deps.set_property("bzip2", "cmake_file_name", "BZip2")
         deps.set_property("double-conversion", "cmake_file_name", "DoubleConversion")
+        if Version(self.version) > "2024.08.26.00":
+            deps.set_property("fast_float", "cmake_file_name", "FastFloat")
         deps.set_property("fmt", "cmake_file_name", "fmt")
         deps.set_property("gflags", "cmake_file_name", "Gflags")
         deps.set_property("glog", "cmake_file_name", "Glog")
@@ -186,6 +210,7 @@ class FollyConan(ConanFile):
         deps.set_property("libsodium", "cmake_file_name", "Libsodium")
         deps.set_property("libunwind", "cmake_file_name", "LibUnwind")
         deps.set_property("liburing", "cmake_file_name", "LibUring")
+        deps.set_property("libaio", "cmake_file_name", "LibAIO")
         deps.set_property("lz4", "cmake_file_name", "LZ4")
         deps.set_property("openssl", "cmake_file_name", "OpenSSL")
         deps.set_property("snappy", "cmake_file_name", "Snappy")
@@ -198,8 +223,13 @@ class FollyConan(ConanFile):
         # Make sure will consume Conan dependencies
         folly_deps = os.path.join(self.source_folder, "CMake", "folly-deps.cmake")
         replace_in_file(self, folly_deps, " MODULE", " REQUIRED CONFIG")
-        replace_in_file(self, folly_deps, "${Boost_LIBRARIES}", f"{' '.join(self._required_boost_cmake_targets)}")
+        # Upstream removed global ${Boost_LIBRARIES} linkage in 2026.06.08.00; Boost is linked per-target via EXTERNAL_DEPS
+        if Version(self.version) < "2026.06.08.00":
+            replace_in_file(self, folly_deps, "${Boost_LIBRARIES}", f"{' '.join(self._required_boost_cmake_targets)}")
         replace_in_file(self, folly_deps, "OpenSSL 1.1.1", "OpenSSL")
+        if Version(self.version) >= "2026.06.29.00":
+            # Avoid annoying warning: 'GLOG_USE_GLOG_EXPORT' macro redefined
+            replace_in_file(self, folly_deps, "list(APPEND FOLLY_CXX_FLAGS -DGLOG_USE_GLOG_EXPORT)", "##")
         # Disable example
         save(self, os.path.join(self.source_folder, "folly", "logging", "example", "CMakeLists.txt"), "")
         # Disable custom find modules to use Conan CMakeDeps instead
@@ -209,7 +239,6 @@ class FollyConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "gen_pkgconfig_vars(FOLLY_PKGCONFIG folly_deps)", "")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -220,6 +249,47 @@ class FollyConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+    def _add_folly_debugging_components(self):
+        # exception tracer (renamed + granular)
+        cmp_exc = "folly_debugging_exception_tracer_"
+        for lib in [
+            "exception_tracer_base",
+            "exception_tracer",
+            "exception_tracer_callbacks",
+            "exception_counter",
+            "exception_counter_static_registration",
+            "stacktrace",
+            "smart_exception_tracer_singleton",
+            "smart_exception_tracer",
+            "smart_exception_stack_trace_hooks",
+        ]:
+            self.cpp_info.components[cmp_exc + lib].set_property("cmake_target_name", f"Folly::{cmp_exc}{lib}")
+            if not self.options.shared:
+                self.cpp_info.components[cmp_exc + lib].libs = [cmp_exc + lib]
+            self.cpp_info.components[cmp_exc + lib].requires = ["libfolly"]
+
+        # symbolizer
+        cmp_sym = "folly_debugging_symbolizer_"
+        for lib in [
+            "elf",
+            "elf_cache",
+            "line_reader",
+            "symbolized_frame",
+            "dwarf",
+            "stack_trace",
+            "detail_debug",
+            "symbolizer",
+        ]:
+            self.cpp_info.components[cmp_sym + lib].set_property("cmake_target_name", f"Folly::{cmp_sym}{lib}")
+            if not self.options.shared:
+                self.cpp_info.components[cmp_sym + lib].libs = [cmp_sym + lib]
+            self.cpp_info.components[cmp_sym + lib].requires = ["libfolly"]
+
+        # interface-only (no .a produced)
+        for lib in ["signal_handler", "symbolize_printer"]:
+            self.cpp_info.components[cmp_sym + lib].set_property("cmake_target_name", f"Folly::{cmp_sym}{lib}")
+            self.cpp_info.components[cmp_sym + lib].requires = [f"{cmp_sym}symbolizer"]
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "folly")
@@ -243,12 +313,14 @@ class FollyConan(ConanFile):
             "libsodium::libsodium",
             "xz_utils::xz_utils",
         ]
+        if Version(self.version) > "2024.08.26.00":
+            self.cpp_info.components["libfolly"].requires.append("fast_float::fast_float")
         if not is_msvc(self):
             self.cpp_info.components["libfolly"].requires.append("libdwarf::libdwarf")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libfolly"].requires.extend(["libiberty::libiberty", "libunwind::libunwind"])
         if self.settings.os == "Linux":
-            self.cpp_info.components["libfolly"].requires.append("liburing::liburing")
+            self.cpp_info.components["libfolly"].requires.extend(["liburing::liburing", "libaio::libaio"])
             self.cpp_info.components["libfolly"].system_libs.extend(["pthread", "dl", "rt"])
             self.cpp_info.components["libfolly"].defines.extend(["FOLLY_HAVE_ELF", "FOLLY_HAVE_DWARF"])
         elif self.settings.os == "Windows":
@@ -272,7 +344,9 @@ class FollyConan(ConanFile):
         self.cpp_info.components["folly_test_util"].libs = ["folly_test_util"]
         self.cpp_info.components["folly_test_util"].requires = ["libfolly"]
 
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "2026.06.29.00":
+            self._add_folly_debugging_components()
+        elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["folly_exception_tracer_base"].set_property("cmake_target_name", "Folly::folly_exception_tracer_base")
             self.cpp_info.components["folly_exception_tracer_base"].set_property("pkg_config_name", "libfolly_exception_tracer_base")
             self.cpp_info.components["folly_exception_tracer_base"].libs = ["folly_exception_tracer_base"]
