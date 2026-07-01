@@ -106,6 +106,8 @@ class RapidYAMLConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "ryml")
         self.cpp_info.set_property("cmake_target_name", "ryml::ryml")
         self.cpp_info.libs = ["ryml"]
+        if Version(self.version) >= "0.15.2" and self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("C4CORE_SHARED")
 
         self.cpp_info.names["cmake_find_package"] = "ryml"
         self.cpp_info.names["cmake_find_package_multi"] = "ryml"
