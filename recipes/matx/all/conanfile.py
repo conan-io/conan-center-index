@@ -1,76 +1,51 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, rmdir, get
-
+from conan.tools.files import copy, get, rmdir
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.30"
+
 
 class MatxConan(ConanFile):
-    
-    """
-    MatX Conan recipe for GPU-accelerated numerical computing.
-    
-    NOTE: Network Dependency During Package Creation
-    ==================================================
-    During 'conan create .', the package() method runs CMake's configure phase, which 
-    automatically fetches CCCL (CUDA C++ Core Libraries) from GitHub via CPM. This means
-    internet access is required for packaging, even in offline scenarios.
-    
-    For offline/air-gapped deployments:
-    1. On an internet-enabled system, export CPM_SOURCE_CACHE and run 'conan create .'
-    2. Transfer the populated CPM cache to the offline system
-    3. Set CPM_SOURCE_CACHE before using the offline package
-    
-    See the build documentation for detailed offline deployment instructions.
-    """
-
     name = "matx"
-    version = "1.0.0"
     description = (
         "MatX is a modern C++ library for numerical computing on NVIDIA GPUs and CPUs. "
         "Near-native performance can be achieved while using a simple syntax common in higher-level languages such as Python or MATLAB."
     )
-    license = "BSD 3-Clause \"New\" or \"Revised\" License"
-    url = "https://github.com/NVIDIA/MatX/"
-    hoempage = "nvidia.github.io/MatX"
+    license = "BSD-3-Clause"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/NVIDIA/MatX"
     topics = ("hpc", "gpu", "cuda", "gpgpu", "gpu-computing")
-    
     package_type = "header-library"
     no_copy_source = True
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = "CMakeLists.txt", "include/*", "cmake/*", "public/*", "LICENSE"
-    
-    generators = "CMakeToolchain"
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
-        check_min_cppstd(self, 17)
-
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.25]")
+        if self.settings.os not in ("Linux", "FreeBSD", "Windows"):
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
+        # matx/1.0.0 needs cuda-toolkit >=13.x as it depends on CCCL > 3.3.0
+        # This recipe is not calling CPM
+        min_cppstd = 17 if Version(self.version) < "1.0.0" else 20
+        check_min_cppstd(self, min_cppstd)
 
     def source(self):
-        get(
-            self,
-            **self.conan_data["sources"][self.version],
-            strip_root=True
-        )
-    
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.install()
+        copy(self, "*", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
+        rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.libs = ["matx"]
-
-        self.cpp_info.set_property("cmake_file_name", "matx")
-        self.cpp_info.set_property("cmake_target_name", "matx::matx")
-        self.cpp_info.set_property("cmake_find_mode", "none")
-
-        self.cpp_info.builddirs = ["lib/cmake/matx"]
-        self.cpp_info.includedirs = ["include"]
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        # Upstream: https://github.com/NVIDIA/MatX/blob/v1.0.0/CMakeLists.txt#L135-L136
+        self.cpp_info.includedirs.append(os.path.join("include", "matx", "kernels"))
+        self.cpp_info.set_property("cmake_extra_dependencies", ["CUDAToolkit"])
+        self.cpp_info.set_property("cmake_extra_interface_libs", ["CUDA::cuda_driver", "CUDA::cudart"])

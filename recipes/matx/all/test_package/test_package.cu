@@ -1,7 +1,4 @@
 #include "matx.h"
-
-#include <cassert>
-#include <cstdio>
 #include <math.h>
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv)

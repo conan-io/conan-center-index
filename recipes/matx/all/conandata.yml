@@ -2,3 +2,7 @@ sources:
   "1.0.0":
     url: "https://github.com/NVIDIA/MatX/archive/refs/tags/v1.0.0.tar.gz"
     sha256: "5cb252a8e72215133e5b5bdf30bace539a3cdebfa82b86d4063a2b6d80bc5203"
+  "0.9.4":
+    url: "https://github.com/NVIDIA/MatX/archive/refs/tags/v0.9.4.tar.gz"
+    sha256: "8c5a2fa78477ce419a0b23f4cc681d726b389b583a6a352ea6dd8da74b4560ea"
+
