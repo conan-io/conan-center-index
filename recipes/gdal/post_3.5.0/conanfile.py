@@ -183,7 +183,7 @@ class GdalConan(ConanFile):
         if self.options.with_armadillo:
             self.requires("armadillo/12.6.4")
         if self.options.with_arrow:
-            if self.options.with_arrow and Version(self.version) >= "3.13.0":
+            if Version(self.version) >= "3.13.0":
                 self.requires("arrow/[>=14.0.2 <25]")
             else:
                 self.requires("arrow/[>=14.0.2 <20]")
