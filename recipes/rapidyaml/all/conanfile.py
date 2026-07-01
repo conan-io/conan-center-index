@@ -11,7 +11,8 @@ required_conan_version = ">=1.53.0"
 class RapidYAMLConan(ConanFile):
     name = "rapidyaml"
     description = "a library to parse and emit YAML, and do it fast."
-    license = "MIT",
+    license = "MIT"
+    package_type = "library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/biojppm/rapidyaml"
     topics = ("yaml", "parser", "emitter")
