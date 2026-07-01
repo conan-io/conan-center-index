@@ -1,0 +1,8 @@
+sources:
+  "10.1.1":
+    url:
+    - "https://github.com/gopro/cineform-sdk/archive/refs/tags/v10.1.1.tar.gz"
+    sha256: "f82ac3e841185329a8a4a7a0752d7342159b71bab1cbf0a4eb0ca32e4a9ed48b"
+patches:
+  "10.1.1":
+    - patch_file: "patches/10.1.1-0001-fix-separate.patch"
