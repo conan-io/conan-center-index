@@ -2,9 +2,9 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, export_conandata_patches, get, replace_in_file
+from conan.tools.files import copy, get, replace_in_file
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class EnkiTSConan(ConanFile):
@@ -26,9 +26,6 @@ class EnkiTSConan(ConanFile):
         "fPIC": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -45,9 +42,10 @@ class EnkiTSConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ENKITS_INSTALL"] = True
-        tc.variables["ENKITS_BUILD_EXAMPLES"] = False
-        tc.variables["ENKITS_BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["ENKITS_INSTALL"] = True
+        tc.cache_variables["ENKITS_BUILD_EXAMPLES"] = False
+        tc.cache_variables["ENKITS_BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def _patch_sources(self):
