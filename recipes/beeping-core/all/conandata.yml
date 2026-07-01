@@ -1,0 +1,4 @@
+sources:
+  "0.8.1":
+    url: "https://github.com/beeping-io/beeping-core/archive/refs/tags/v0.8.1.tar.gz"
+    sha256: "794a460617170b10030d45a0633f4db850b54ab2a026d53738c8179816b13455"
