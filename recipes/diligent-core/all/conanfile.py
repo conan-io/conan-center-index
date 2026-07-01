@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.files import rm, get, rmdir, rename, collect_libs, export_conandata_patches, copy, apply_conandata_patches, replace_in_file
+from conan.tools.files import rm, get, rmdir, collect_libs, export_conandata_patches, copy, apply_conandata_patches, replace_in_file
 from conan.tools.microsoft import visual
 from conan.tools.apple import is_apple_os
 import os
@@ -13,11 +13,12 @@ required_conan_version = ">=1.52.0"
 
 class DiligentCoreConan(ConanFile):
     name = "diligent-core"
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/DiligentGraphics/DiligentCore"
     description = "Diligent Core is a modern cross-platfrom low-level graphics API."
     license = "Apache-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/DiligentGraphics/DiligentCore"
     topics = ("graphics")
+    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -62,7 +63,7 @@ class DiligentCoreConan(ConanFile):
     def export_sources(self):
         copy(self, "conan_deps.cmake", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"), keep_path=False)
         export_conandata_patches(self)
-        
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -107,6 +108,11 @@ class DiligentCoreConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "project(DiligentCore)",
                         "project(DiligentCore)\n\ninclude(conan_deps.cmake)")
+
+        # Always install core files: fix android and emscripten installations
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(DILIGENT_INSTALL_CORE OFF)",
+                        "set(DILIGENT_INSTALL_CORE ON)")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
@@ -230,3 +236,5 @@ class DiligentCoreConan(ConanFile):
             self.cpp_info.frameworks = ["CoreFoundation", 'Cocoa', 'AppKit']
         if self.settings.os == 'Windows':
             self.cpp_info.system_libs = ["dxgi", "shlwapi"]
+        if self.settings.os == "Android":
+            self.cpp_info.system_libs.extend(["android", "log"])
