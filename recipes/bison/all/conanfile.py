@@ -35,6 +35,7 @@ class BisonConan(ConanFile):
 
     def requirements(self):
         self.requires("m4/1.4.19")
+        self.requires("libiconv/1.18")
 
     def validate(self):
         if is_msvc(self) and self.version == "3.8.2":
@@ -62,6 +63,7 @@ class BisonConan(ConanFile):
             "--enable-relocatable",
             "--disable-nls",
             "--datarootdir=${prefix}/res",
+            f"--with-libiconv-prefix={self.dependencies['libiconv'].package_folder}",
         ])
         if self.settings.compiler == "apple-clang":
             tc.configure_args.append("gl_cv_compiler_check_decl_option=")
