@@ -452,7 +452,7 @@ class ArrowConan(ConanFile):
 
         if self.options.get_safe("substrait"):
             self.cpp_info.components["libarrow_substrait"].set_property("pkg_config_name", "arrow_substrait")
-            self.cpp_info.components["libarrow_substrait"].set_property("cmake_target_name", f"Arrow::arrow_substrait_{cmake_suffix}")
+            self.cpp_info.components["libarrow_substrait"].set_property("cmake_target_name", f"ArrowSubstrait::arrow_substrait_{cmake_suffix}")
             self.cpp_info.components["libarrow_substrait"].libs = [f"arrow_substrait{suffix}"]
             self.cpp_info.components["libarrow_substrait"].requires = ["libparquet"]
             if self.options.dataset_modules:
@@ -470,12 +470,18 @@ class ArrowConan(ConanFile):
             if Version(self.version) >= "21.0.0" and self.options.compute:
                 # libacero depends on compute
                 self.cpp_info.components["libacero"].requires.append("libarrow_compute")
+            if not self.options.shared:
+                # arrow/acero/visibility.h checks ARROW_ACERO_STATIC
+                self.cpp_info.components["libacero"].defines = ["ARROW_ACERO_STATIC"]
 
         if Version(self.version) >= "21.0.0" and self.options.compute:
             self.cpp_info.components["libarrow_compute"].set_property("pkg_config_name", "arrow_compute")
             self.cpp_info.components["libarrow_compute"].set_property("cmake_target_name", f"ArrowCompute::arrow_compute_{cmake_suffix}")
             self.cpp_info.components["libarrow_compute"].libs = [f"arrow_compute{suffix}"]
             self.cpp_info.components["libarrow_compute"].requires = ["libarrow"]
+            if not self.options.shared:
+                # arrow/compute/visibility.h checks ARROW_COMPUTE_STATIC
+                self.cpp_info.components["libarrow_compute"].defines = ["ARROW_COMPUTE_STATIC"]
 
         if self.options.gandiva:
             self.cpp_info.components["libgandiva"].set_property("pkg_config_name", "gandiva")
@@ -501,11 +507,20 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow_flight_sql"].requires = ["libarrow", "libarrow_flight"]
 
         if self.options.dataset_modules:
-            self.cpp_info.components["dataset"].libs = ["arrow_dataset"]
+            self.cpp_info.components["dataset"].set_property(
+                "cmake_target_name", f"ArrowDataset::arrow_dataset_{cmake_suffix}"
+            )
+            self.cpp_info.components["dataset"].libs = [f"arrow_dataset{suffix}"]
+            _dataset_requires = []
             if self.options.parquet:
-                self.cpp_info.components["dataset"].requires = ["libparquet"]
+                _dataset_requires.append("libparquet")
             if self.options.acero:
-                self.cpp_info.components["dataset"].requires = ["libacero"]
+                _dataset_requires.append("libacero")
+            if _dataset_requires:
+                self.cpp_info.components["dataset"].requires = _dataset_requires
+            if not self.options.shared:
+                # arrow/dataset/visibility.h checks ARROW_DS_STATIC
+                self.cpp_info.components["dataset"].defines = ["ARROW_DS_STATIC"]
 
         if self.options.with_boost:
             if self.options.gandiva:
