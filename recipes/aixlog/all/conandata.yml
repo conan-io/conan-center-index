@@ -1,0 +1,4 @@
+sources:
+  "1.5.0":
+    url: "https://github.com/badaix/aixlog/archive/refs/tags/v1.5.0.tar.gz"
+    sha256: "c32b2b2e7ed2632fab53aba01f731fce1e7b150fe7d08bccdafc250e5cb836a8"
