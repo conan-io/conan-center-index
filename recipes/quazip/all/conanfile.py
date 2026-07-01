@@ -54,6 +54,9 @@ class QuaZIPConan(ConanFile):
         if Version(self.version) >= "1.4":
             self.requires("bzip2/1.0.8")
 
+    def build_requirements(self):
+        self.tool_requires("qt/<host_version>")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
