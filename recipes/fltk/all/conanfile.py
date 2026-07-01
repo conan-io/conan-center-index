@@ -118,6 +118,10 @@ class FltkConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "FLTK.framework"))
         rmdir(self, os.path.join(self.package_folder, "CMake"))
         rm(self, "fltk-config*", os.path.join(self.package_folder, "bin"))
+        if self.options.shared:
+            for lib_to_remove in ["fltk.lib", "fltk_forms.lib", "fltk_images.lib", "fltk_gl.lib"]:
+                rm(self, lib_to_remove, os.path.join(self.package_folder, "lib"))
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "fltk")
@@ -140,8 +144,6 @@ class FltkConan(ConanFile):
             if self.options.with_gl:
                 self.cpp_info.frameworks.append("OpenGL")
         elif self.settings.os == "Windows":
-            if self.options.shared:
-                self.cpp_info.defines.append("FL_DLL")
             self.cpp_info.system_libs = ["gdi32", "imm32", "msimg32", "ole32", "oleaut32", "uuid", "comctl32"]
             if self.options.get_safe("with_gdiplus"):
                 self.cpp_info.system_libs.append("gdiplus")
