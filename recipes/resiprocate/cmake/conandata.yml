@@ -17,4 +17,4 @@ patches:
     - patch_file: "patches/1.14.0-Properly-set-close-on-exec-for-BSDs.patch"
       patch_type: "portability"
       patch_description: "Properly set close-on-exec for BSDs"
-      patch_source: "https://github.com/resiprocate/resiprocate/pull/474"
+      patch_source: "https://github.com/resiprocate/resiprocate/commit/067fe453da0845e2179f408ebc6b8d288e03951d"
