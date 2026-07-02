@@ -87,7 +87,9 @@ dependencies:
   - thread
   log_setup:
   - log
-  math: []
+  math:
+  - random
+  - container
   math_c99:
   - math
   math_c99f:
@@ -154,6 +156,9 @@ dependencies:
   wave:
   - filesystem
   - serialization
+  - thread
+  - regex
+  - container
   wserialization:
   - serialization
 libs:

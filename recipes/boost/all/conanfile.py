@@ -2004,7 +2004,9 @@ class BoostConan(ConanFile):
                 # still built for compatibility, but linking to it is no longer
                 # necessary.
                 # https://www.boost.org/doc/libs/1_75_0/libs/system/doc/html/system.html#changes_in_boost_1_69
-                if module == "system":
+                # Boost 1.87 and 1.88 link compiled libraries to the Boost.System
+                # compatibility library, so it must remain in the component metadata.
+                if Version(self.version) < "1.87.0" and module == "system":
                     module_libraries = []
 
                 self.cpp_info.components[module].libs = module_libraries

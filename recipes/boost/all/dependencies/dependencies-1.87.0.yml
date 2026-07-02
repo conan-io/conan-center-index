@@ -92,7 +92,10 @@ dependencies:
   - thread
   log_setup:
   - log
-  math: []
+  math:
+  - random
+  - system
+  - container
   math_c99:
   - math
   math_c99f:
@@ -121,6 +124,7 @@ dependencies:
   - filesystem
   - system
   - context
+  - date_time
   program_options: []
   python: []
   random:
@@ -164,6 +168,8 @@ dependencies:
   wave:
   - filesystem
   - serialization
+  - thread
+  - container
   wserialization:
   - serialization
 libs:
