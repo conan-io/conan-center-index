@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.files import get, copy, rmdir
 from conan.tools.scm import Version
@@ -52,6 +53,10 @@ class QuaZIPConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("qt/<host_version>")
         self.tool_requires("cmake/[>=3.27]")
+
+    def validate(self):
+        if Version(self.dependencies["qt"].ref.version) >= "6":
+            check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
