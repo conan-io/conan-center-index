@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
+from conan.tools.files import get, copy, rmdir
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class QuaZIPConan(ConanFile):
@@ -16,7 +16,7 @@ class QuaZIPConan(ConanFile):
     )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/stachenov/quazip"
-    license = "LGPL-2.1-linking-exception"
+    license = "LGPL-2.1-only WITH LicenseRef-QuaZip-Static-Linking-Exception"
     topics = ("zip", "unzip", "compress")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -33,9 +33,6 @@ class QuaZIPConan(ConanFile):
     def _qt_major(self):
         return Version(self.dependencies["qt"].ref.version).major
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -48,11 +45,9 @@ class QuaZIPConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        qt_version = "[>=5.15 <7]" if Version(self.version) >= "1.7.2" else "[~5.15]"
-        self.requires(f"qt/{qt_version}", transitive_headers=True, transitive_libs=True)
+        self.requires(f"qt/[>=5.15 <7]", transitive_headers=True, transitive_libs=True)
         self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
-        if Version(self.version) >= "1.4":
-            self.requires("bzip2/1.0.8")
+        self.requires("bzip2/[>=1.0.8 <2]")
 
     def build_requirements(self):
         self.tool_requires("qt/<host_version>")
@@ -66,7 +61,7 @@ class QuaZIPConan(ConanFile):
         tc.variables["QUAZIP_QT_MAJOR_VERSION"] = self._qt_major
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        if self._qt_major == 6 and Version(self.version) >= "1.6":
+        if self._qt_major == 6:
             tc.variables["QUAZIP_ENABLE_QTEXTCODEC"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         qt_tools_rootdir = self.conf.get("user.qt:tools_directory", None)
@@ -78,7 +73,6 @@ class QuaZIPConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -101,10 +95,3 @@ class QuaZIPConan(ConanFile):
         self.cpp_info.includedirs = [os.path.join("include", f"QuaZip-Qt{self._qt_major}-{self.version}")]
         if not self.options.shared:
             self.cpp_info.defines.append("QUAZIP_STATIC")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
-        self.cpp_info.filenames["cmake_find_package"] = f"QuaZip-Qt{self._qt_major}"
-        self.cpp_info.filenames["cmake_find_package_multi"] = f"QuaZip-Qt{self._qt_major}"
-        self.cpp_info.names["cmake_find_package"] = "QuaZip"
-        self.cpp_info.names["cmake_find_package_multi"] = "QuaZip"
-        self.cpp_info.names["pkg_config"] = f"quazip{quazip_major}-qt{self._qt_major}"
