@@ -11,7 +11,8 @@ required_conan_version = ">=1.53.0"
 class RapidYAMLConan(ConanFile):
     name = "rapidyaml"
     description = "a library to parse and emit YAML, and do it fast."
-    license = "MIT",
+    license = "MIT"
+    package_type = "library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/biojppm/rapidyaml"
     topics = ("yaml", "parser", "emitter")
@@ -62,6 +63,8 @@ class RapidYAMLConan(ConanFile):
     def requirements(self):
         if Version(self.version) < "0.6.0":
             self.requires("c4core/0.1.11", transitive_headers=True)
+        elif Version(self.version) >= "0.15.2":
+            self.requires("c4core/0.4.0", transitive_headers=True)
         else:
             self.requires("c4core/0.2.0", transitive_headers=True)
 
@@ -104,6 +107,8 @@ class RapidYAMLConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "ryml")
         self.cpp_info.set_property("cmake_target_name", "ryml::ryml")
         self.cpp_info.libs = ["ryml"]
+        if Version(self.version) >= "0.15.2" and self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("C4CORE_SHARED")
 
         self.cpp_info.names["cmake_find_package"] = "ryml"
         self.cpp_info.names["cmake_find_package_multi"] = "ryml"
