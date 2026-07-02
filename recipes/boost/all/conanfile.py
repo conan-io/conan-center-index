@@ -180,7 +180,7 @@ class BoostConan(ConanFile):
             cppstd_flags.setdefault("17", "17" if gcc_version >= "5.2" else "1z" if gcc_version >= "5" else None)
             cppstd_flags.setdefault("20", "2a" if gcc_version >= "8" else "20" if gcc_version >= "12" else None)
             cppstd_flags.setdefault("23", "2b" if gcc_version >= "11" else None)
-            cppstd_flags.setdefault("26", "26" if gcc_version >= "14" else "2c" if gcc_version >= "13" else None)
+            cppstd_flags.setdefault("26", "26" if gcc_version >= "14" else None)
             return cppstd_flags.get(cppstd.lstrip("gnu"))
 
         def _cppstd_clang(clang_version, cppstd):
@@ -192,7 +192,7 @@ class BoostConan(ConanFile):
             cppstd_flags.setdefault("17", "17" if clang_version >= "5" else "1z" if clang_version >= "3.5" else None)
             cppstd_flags.setdefault("20", "2a" if clang_version >= "6" else "20" if clang_version >= "12" else None)
             cppstd_flags.setdefault("23", "2b" if clang_version >= "13"  else "23" if clang_version >= "17" else None)
-            cppstd_flags.setdefault("26", "26" if clang_version >= "20" else "2c" if clang_version >= "17" else None)
+            cppstd_flags.setdefault("26", "26" if clang_version >= "17" None)
             return cppstd_flags.get(cppstd.lstrip("gnu"))
 
 
@@ -205,7 +205,7 @@ class BoostConan(ConanFile):
             cppstd_flags.setdefault("17", "17" if clang_version >= "9.1" else "1z" if clang_version >= "6.1" else None)
             cppstd_flags.setdefault("20", "20" if clang_version >= "13.0" else "2a" if clang_version >= "10.0" else None)
             cppstd_flags.setdefault("23", "2b" if clang_version >= "13.0" else None)
-            cppstd_flags.setdefault("26", "26" if clang_version >= "17.0" else "2c" if clang_version >= "13.0" else None)
+            cppstd_flags.setdefault("26", "26" if clang_version >= "17.0" else else None)
             return cppstd_flags.get(cppstd.lstrip("gnu"))
 
         def _cppstd_msvc(visual_version, cppstd):
@@ -217,6 +217,7 @@ class BoostConan(ConanFile):
             cppstd_flags.setdefault("17", "17" if visual_version >= "191" else "latest" if visual_version >= "190" else None)
             cppstd_flags.setdefault("20", "20" if visual_version >= "192" else "latest" if visual_version >= "191" else None)
             cppstd_flags.setdefault("23", "latest" if visual_version >= "193" else None)
+            cppstd_flags.setdefault("26", "latest" if visual_version >= "195" else None)
             return cppstd_flags.get(cppstd)
 
         func = {"gcc": _cppstd_gcc, "clang": _cppstd_clang, "apple-clang": _cppstd_apple_clang, "msvc": _cppstd_msvc}.get(compiler)
