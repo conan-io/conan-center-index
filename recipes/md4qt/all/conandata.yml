@@ -1,4 +1,4 @@
 sources:
-  "5.1.1":
-    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/5.1.1.tar.gz"
-    sha256: "e457a8a993b72876f265c4de6fa642d286fc0449825f410c4d85f1163e9794d6"
+  "5.1.3":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/5.1.3.tar.gz"
+    sha256: "e03474d5ec13f757ea8ec3394c131054262aa498bf8af5a570187e358819c4ac"
