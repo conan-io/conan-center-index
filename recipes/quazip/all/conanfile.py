@@ -48,10 +48,15 @@ class QuaZIPConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True)
+        qt_version = "[>=5.15 <7]" if Version(self.version) >= "1.7.2" else "[~5.15]"
+        self.requires(f"qt/{qt_version}", transitive_headers=True, transitive_libs=True)
         self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
         if Version(self.version) >= "1.4":
             self.requires("bzip2/1.0.8")
+
+    def build_requirements(self):
+        self.tool_requires("qt/<host_version>")
+        self.tool_requires("cmake/[>=3.27]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -61,7 +66,13 @@ class QuaZIPConan(ConanFile):
         tc.variables["QUAZIP_QT_MAJOR_VERSION"] = self._qt_major
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+        if self._qt_major == 6 and Version(self.version) >= "1.6":
+            tc.variables["QUAZIP_ENABLE_QTEXTCODEC"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        qt_tools_rootdir = self.conf.get("user.qt:tools_directory", None)
+        if qt_tools_rootdir:
+            moc_name = "moc.exe" if self.settings_build.os == "Windows" else "moc"
+            tc.cache_variables["CMAKE_AUTOMOC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, moc_name)
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()

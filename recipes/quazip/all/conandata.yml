@@ -1,4 +1,7 @@
 sources:
+  "1.7.2":
+    url: "https://github.com/stachenov/quazip/archive/v1.7.2.tar.gz"
+    sha256: "5240f4a3475648773ba10af8b0ebe549cbfc5d6de00470a517330a80068a4f78"
   "1.4":
     url: "https://github.com/stachenov/quazip/archive/v1.4.tar.gz"
     sha256: "79633fd3a18e2d11a7d5c40c4c79c1786ba0c74b59ad752e8429746fe1781dd6"
