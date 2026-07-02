@@ -28,7 +28,7 @@ class MatxConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os not in ("Linux", "FreeBSD", "Windows"):
+        if self.settings.os not in ("Linux", "Windows"):
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
         # matx/1.0.0 needs cuda-toolkit >=13.x as it depends on CCCL > 3.3.0
         # This recipe is not calling CPM
