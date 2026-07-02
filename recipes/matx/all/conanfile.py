@@ -1,10 +1,11 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, save
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
+import textwrap
 
 required_conan_version = ">=2.30"
 
@@ -41,6 +42,19 @@ class MatxConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         copy(self, "*", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
         rmdir(self, os.path.join(self.package_folder, "lib"))
+        # Upstream creates this file with rapids_cmake_write_version_file(include/version_config.h)
+        # As we are not using cmake.install(), we have to create it by our own
+        matx_version = Version(self.version)
+        save(
+            self,
+            os.path.join(self.package_folder, "include/matx/version_config.h"),
+            textwrap.dedent(f"""
+                #pragma once
+                #define MATX_VERSION_MAJOR {matx_version.major}
+                #define MATX_VERSION_MINOR {matx_version.minor}
+                #define MATX_VERSION_PATCH {matx_version.patch}
+            """),
+        )
 
     def package_info(self):
         self.cpp_info.bindirs = []
@@ -48,4 +62,16 @@ class MatxConan(ConanFile):
         # Upstream: https://github.com/NVIDIA/MatX/blob/v1.0.0/CMakeLists.txt#L135-L136
         self.cpp_info.includedirs.append(os.path.join("include", "matx", "kernels"))
         self.cpp_info.set_property("cmake_extra_dependencies", ["CUDAToolkit"])
-        self.cpp_info.set_property("cmake_extra_interface_libs", ["CUDA::cuda_driver", "CUDA::cudart"])
+        self.cpp_info.set_property(
+            "cmake_extra_interface_libs",
+            [
+                "CUDA::cublas",
+                "CUDA::cublasLt",
+                "CUDA::cuda_driver",
+                "CUDA::cudart",
+                "CUDA::cufft",
+                "CUDA::curand",
+                "CUDA::cusolver",
+                "CUDA::cusparse",
+            ],
+        )
