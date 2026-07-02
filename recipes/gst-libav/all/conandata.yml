@@ -1,4 +1,4 @@
 sources:
-  "1.19.1":
-    url: "https://gitlab.freedesktop.org/gstreamer/gst-libav/-/archive/1.19.1/gst-libav-1.19.1.tar.bz2"
-    sha256 : "771b55f9de7f81153b12c0d2d562e82d4119fcb6e5983bcf51c872dfbe2f5edc"
+  "1.28.7":
+    url: "https://gstreamer.freedesktop.org/src/gst-libav/gst-libav-1.28.7.tar.xz"
+    sha256: "58da51dd39ecf1cf6faade34cc6412001be2e2e145bca8ae0f45336f60a36ab2"
