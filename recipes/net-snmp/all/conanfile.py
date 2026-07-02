@@ -123,10 +123,7 @@ class NetSnmpConan(ConanFile):
             deps = PkgConfigDeps(self)
             deps.generate()
 
-
-    # ---------------- Windows / MSVC ----------------
     def _configure_msvc(self):
-        # Mirror Linux patch/configure/build steps
         ssl = self.dependencies["openssl"].package_folder.replace("\\", "/")
         prefix = self.package_folder.replace("\\", "/")
         args = [
@@ -148,9 +145,11 @@ class NetSnmpConan(ConanFile):
         if "MT" in msvc_runtime_flag(self):
             replace_in_file(self, "Configure", "/MDd", "/MTd", strict=False)
             replace_in_file(self, "Configure", "/MD ", "/MT ", strict=False)
+        # Conan's OpenSSL uses the same lib names for static and shared, adjust MSVC pragma block
+        config_h_in = os.path.join("net-snmp", "net-snmp-config.h.in")
+        replace_in_file(self, config_h_in, "libcrypto_static.lib", "libcrypto.lib", strict=False)
+        replace_in_file(self, config_h_in, "libssl_static.lib", "libssl.lib", strict=False)
 
-
-    # ---------------- Linux / autotools ----------------
     def _patch_unix(self):
         for gnu_config in [
             self.conf.get("user.gnu-config:config_guess", check_type=str),
@@ -176,7 +175,7 @@ class NetSnmpConan(ConanFile):
         if is_msvc(self):
             with chdir(self, os.path.join(self.source_folder, "win32")):
                 self._patch_msvc()
-                self._configure_msvc() # replaced build.pl patching
+                self._configure_msvc()
                 self.run("nmake /nologo libsnmp")
         else:
             self._patch_unix()
