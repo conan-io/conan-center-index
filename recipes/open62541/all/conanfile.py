@@ -189,7 +189,8 @@ class Open62541Conan(ConanFile):
         if self.options.web_socket:
             self.requires("libwebsockets/4.3.2")
         if self.options.discovery == "With Multicast" or "multicast" in str(self.options.discovery):
-            self.requires("pro-mdnsd/0.8.4")
+            if Version(self.version) < "1.5.5":
+                self.requires("pro-mdnsd/0.8.4")
         if self.options.get_safe("nodeset_loader"):
             if Version(self.version) >= "1.5.0":
                 self.requires("libxml2/[>=2.12.5 <3]")
