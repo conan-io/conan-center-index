@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanException
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, replace_in_file
 import os
@@ -36,7 +36,7 @@ class StormlibConan(ConanFile):
 
     def validate(self):
         if self.settings.os == "Macos" and self.options.shared:
-            raise ConanException("Macos framework libs upstream installation is not complete")
+            raise ConanInvalidConfiguration("Macos framework libs upstream installation is not complete")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
