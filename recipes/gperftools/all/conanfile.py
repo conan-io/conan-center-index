@@ -101,6 +101,8 @@ class GperftoolsConan(ConanFile):
         elif self.options.get_safe("enable_libunwind"):
             # enable_stacktrace_via_backtrace has no effect if libunwind is enabled
             self.options.rm_safe("enable_stacktrace_via_backtrace")
+        if self.settings.os == "Windows" and not is_msvc(self):
+            self.win_bash = True
 
     def layout(self):
         if is_msvc(self):
