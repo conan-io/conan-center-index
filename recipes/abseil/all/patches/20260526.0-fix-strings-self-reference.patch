@@ -1,0 +1,28 @@
+Backport https://github.com/abseil/abseil-cpp/commit/d21659a5affab9def3333ae70c1123c3fe1a9873
+
+From d21659a5affab9def3333ae70c1123c3fe1a9873 Mon Sep 17 00:00:00 2001
+From: Derek Mauro
+Date: Wed, 1 Jul 2026 09:20:33 -0700
+Subject: [PATCH] Fix CMake target absl_strings so that it does not link to
+ itself
+
+Fixes #2091
+
+PiperOrigin-RevId: 941136680
+Change-Id: I7705296238d73d4d1619d27533cc5147fbad6d2c
+---
+ absl/strings/CMakeLists.txt | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/absl/strings/CMakeLists.txt b/absl/strings/CMakeLists.txt
+index b6f2aa715b1..964094f8a05 100644
+--- a/absl/strings/CMakeLists.txt
++++ b/absl/strings/CMakeLists.txt
+@@ -88,7 +88,6 @@ absl_cc_library(
+     absl::nullability
+     absl::raw_logging_internal
+     absl::source_location
+-    absl::strings
+     absl::throw_delegate
+     absl::type_traits
+   PUBLIC

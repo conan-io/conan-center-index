@@ -124,9 +124,7 @@ class AbseilConan(ConanFile):
                         values_list = target_property[1].replace('"', "").split(";")
                         for dependency in values_list:
                             if dependency.startswith("absl::"): # abseil targets
-                                dep_name = dependency.replace("absl::", "absl_")
-                                if dep_name != potential_lib_name:
-                                    components[potential_lib_name].setdefault("requires", []).append(dep_name)
+                                components[potential_lib_name].setdefault("requires", []).append(dependency.replace("absl::", "absl_"))
                             else: # system libs or frameworks
                                 if self.settings.os in ["Linux", "FreeBSD"]:
                                     if dependency == "Threads::Threads":

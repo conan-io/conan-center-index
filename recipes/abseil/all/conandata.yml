@@ -33,6 +33,8 @@ sources:
     url: "https://github.com/abseil/abseil-cpp/archive/20230125.3.tar.gz"
     sha256: "5366D7E7FA7BA0D915014D387B66D0D002C03236448E1BA9EF98122C13B35C36"
 patches:
+  "20260526.0":
+    - patch_file: "patches/20260526.0-fix-strings-self-reference.patch"
   "20260107.1":
     - patch_file: "patches/20260107.1-0001-fix-heterogeneous_lookup-flag.patch"
   "20240722.1":
