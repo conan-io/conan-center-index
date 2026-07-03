@@ -56,7 +56,7 @@ class ResiprocateConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on msvc, it does not export required symbols.")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.21 <4]")
+        self.tool_requires("cmake/[>=3.21]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
 
