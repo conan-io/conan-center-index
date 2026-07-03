@@ -182,20 +182,22 @@ class FollyConan(ConanFile):
         self.cpp_info.components["libfolly"].set_property("cmake_target_name", "Folly::folly")
         self.cpp_info.components["libfolly"].set_property("pkg_config_name", "libfolly")
         self.cpp_info.components["libfolly"].libs = ["folly"]
-        self.cpp_info.components["libfolly"].requires = ["fmt::fmt"] + [f"boost::{comp}" for comp in self._required_boost_components] + [
-            "gflags::gflags",
-            "glog::glog",
-            "libevent::libevent",
-            "lz4::lz4",
-            "openssl::openssl",
-            "bzip2::bzip2",
-            "snappy::snappy",
-            "zlib::zlib",
-            "zstd::zstd",
-            "libsodium::libsodium",
-            "xz_utils::xz_utils",
-        ]
-        self.cpp_info.components["libfolly"].requires.append("fast_float::fast_float")
+        self.cpp_info.components["libfolly"].requires = (
+                ["fmt::fmt"] +
+                [f"boost::{comp}" for comp in self._required_boost_components] +
+                ["gflags::gflags",
+                 "glog::glog",
+                 "libevent::libevent",
+                 "lz4::lz4",
+                 "openssl::openssl",
+                 "bzip2::bzip2",
+                 "snappy::snappy",
+                 "zlib::zlib",
+                 "zstd::zstd",
+                 "libsodium::libsodium",
+                 "xz_utils::xz_utils",
+                 "fast_float::fast_float"]
+        )
         if not is_msvc(self):
             self.cpp_info.components["libfolly"].requires.append("libdwarf::libdwarf")
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -225,7 +227,7 @@ class FollyConan(ConanFile):
         self.cpp_info.components["folly_test_util"].libs = ["folly_test_util"]
         self.cpp_info.components["folly_test_util"].requires = ["libfolly"]
 
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD"] and not self.options.shared:
             # exception tracer (renamed + granular)
             cmp_exc = "folly_debugging_exception_tracer_"
             for lib in [
@@ -240,8 +242,7 @@ class FollyConan(ConanFile):
                 "smart_exception_stack_trace_hooks",
             ]:
                 self.cpp_info.components[cmp_exc + lib].set_property("cmake_target_name", f"Folly::{cmp_exc}{lib}")
-                if not self.options.shared:
-                    self.cpp_info.components[cmp_exc + lib].libs = [cmp_exc + lib]
+                self.cpp_info.components[cmp_exc + lib].libs = [cmp_exc + lib]
                 self.cpp_info.components[cmp_exc + lib].requires = ["libfolly"]
 
             # symbolizer
@@ -257,11 +258,5 @@ class FollyConan(ConanFile):
                 "symbolizer",
             ]:
                 self.cpp_info.components[cmp_sym + lib].set_property("cmake_target_name", f"Folly::{cmp_sym}{lib}")
-                if not self.options.shared:
-                    self.cpp_info.components[cmp_sym + lib].libs = [cmp_sym + lib]
+                self.cpp_info.components[cmp_sym + lib].libs = [cmp_sym + lib]
                 self.cpp_info.components[cmp_sym + lib].requires = ["libfolly"]
-
-            # interface-only (no .a produced)
-            for lib in ["signal_handler", "symbolize_printer"]:
-                self.cpp_info.components[cmp_sym + lib].set_property("cmake_target_name", f"Folly::{cmp_sym}{lib}")
-                self.cpp_info.components[cmp_sym + lib].requires = [f"{cmp_sym}symbolizer"]
