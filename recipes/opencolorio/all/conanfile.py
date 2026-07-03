@@ -53,6 +53,8 @@ class OpenColorIOConan(ConanFile):
         self.requires("pystring/1.1.4")
         self.requires("yaml-cpp/0.8.0")
         self.requires("minizip-ng/[>=4.0.3 <5]")
+        if self.settings.arch == "armv8" and str(self.settings.os) in ["Windows", "Macos"]:
+            self.requires("sse2neon/1.9.1")
 
         # for tools only
         self.requires("lcms/[>=2.16 <3]")
