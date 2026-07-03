@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -37,7 +38,7 @@ class PCRE2Conan(ConanFile):
         "build_pcre2_8": True,
         "build_pcre2_16": True,
         "build_pcre2_32": True,
-        "build_pcre2grep": True,
+        #"build_pcre2grep": True,   #see config_options()
         "with_zlib": True,
         "with_bzip2": True,
         "support_jit": False,
@@ -51,6 +52,9 @@ class PCRE2Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        # by default, dont build the pcre2grep executable on iOS derivatives
+        self.options.build_pcre2grep = not (is_apple_os(self) and not self.settings.os == "Macos")
 
     def configure(self):
         if self.options.shared:
@@ -111,24 +115,16 @@ class PCRE2Conan(ConanFile):
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
 
         if Version(self.version) < "10.47":
-            # Do not add ${PROJECT_SOURCE_DIR}/cmake because it contains a custom
-            # FindPackageHandleStandardArgs.cmake which can break conan generators
+            # Do not add ${PROJECT_SOURCE_DIR}/cmake because versions older than 10.47 contain
+            #  a custom FindPackageHandleStandardArgs.cmake which can break conan generators
             replace_in_file(self, cmakelists, "LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
-            # Avoid CMP0006 error (macos bundle)
-            replace_in_file(self, cmakelists,
-                            "RUNTIME DESTINATION bin",
-                            "RUNTIME DESTINATION bin BUNDLE DESTINATION bin")
-        else:
-            # Avoid CMP0006 error (macos bundle)
-            replace_in_file(self, cmakelists,
-                            "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}",
-                            "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}")
+
         # pcre2-config does not correctly include '-static' in static library names
         if is_msvc(self):
             replace = None
             if Version(self.version) >= "10.43":
                 replace = "configure_file(pcre2-config.in"
-            elif Version(self.version) == "10.42":
+            else:
                 replace = "CONFIGURE_FILE(pcre2-config.in"
             postfix = "-static" if not self.options.shared else ""
             if replace:
