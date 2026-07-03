@@ -18,3 +18,6 @@ patches:
       patch_type: "portability"
       patch_description: "Properly set close-on-exec for BSDs"
       patch_source: "https://github.com/resiprocate/resiprocate/commit/067fe453da0845e2179f408ebc6b8d288e03951d"
+    - patch_file: "patches/1.14.0-rutil-downgrade-c-ares-deprecation-errors-to-warning.patch"
+      patch_type: "portability"
+      patch_description: "Do not error out on recent c-ares deprecation notices"
