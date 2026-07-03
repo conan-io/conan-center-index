@@ -1,8 +1,8 @@
 import os
 import stat
+import textwrap
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir, chdir
@@ -56,12 +56,6 @@ class NetSnmpConan(ConanFile):
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
         self.requires("pcre/8.45")
         self.requires("zlib/[>=1.2.11 <2]")
-
-    def validate(self):
-        if is_msvc(self) and self.options.shared:
-            # FIXME: Linker errors against third-party dependencies:
-            # snmp_openssl.obj : error LNK2019: unresolved external symbol CRYPTO_free referenced in function _extract_oname
-            raise ConanInvalidConfiguration(f"{self.ref} fails when building as shared library, use -o '&:shared=False'. Contributions are welcome!")
 
     def build_requirements(self):
         if is_msvc(self):
@@ -141,14 +135,31 @@ class NetSnmpConan(ConanFile):
 
     def _patch_msvc(self):
         # net-snmp version-independent patching, instead of using patch files
-        replace_in_file(self, "Configure", "ExtUtils::Embed::ccopts()", "''", strict=False)
         if "MT" in msvc_runtime_flag(self):
-            replace_in_file(self, "Configure", "/MDd", "/MTd", strict=False)
-            replace_in_file(self, "Configure", "/MD ", "/MT ", strict=False)
-        # Conan's OpenSSL uses the same lib names for static and shared, adjust MSVC pragma block
-        config_h_in = os.path.join("net-snmp", "net-snmp-config.h.in")
-        replace_in_file(self, config_h_in, "libcrypto_static.lib", "libcrypto.lib", strict=False)
-        replace_in_file(self, config_h_in, "libssl_static.lib", "libssl.lib", strict=False)
+            replace_in_file(self, "Configure", "/MD", "/MT", strict=False)
+        ssl_info = self.dependencies["openssl"].cpp_info
+        zlib_info = self.dependencies["zlib"].cpp_info
+        extra_libs = zlib_info.libs + \
+            ssl_info.components["ssl"].libs + ssl_info.components["ssl"].system_libs + \
+            ssl_info.components["crypto"].libs + ssl_info.components["crypto"].system_libs
+        replace_in_file(self,
+                        os.path.join("net-snmp", "net-snmp-config.h.in"),
+                        textwrap.dedent("""\
+                            #    ifdef _DLL
+                            #      pragma comment(lib, "libcrypto.lib")
+                            #      pragma comment(lib, "libssl.lib")
+                            #    else
+                            #      pragma comment(lib, "libcrypto_static.lib")
+                            #      pragma comment(lib, "libssl_static.lib")
+                            #    endif"""
+                        ),
+                        "\n".join(f'#    pragma comment(lib, "{lib}.lib")' for lib in extra_libs))
+        if self.options.shared:
+            replace_in_file(self,
+                            os.path.join("libsnmp_dll", "Makefile.in"),
+                            "LINK32_FLAGS=advapi32.lib ws2_32.lib kernel32.lib user32.lib",
+                            "LINK32_FLAGS=" + " ".join(f"{lib}.lib" for lib in extra_libs) + \
+                                ' /libpath:"{}"'.format(zlib_info.libdirs[0].replace("\\", "/")))
 
     def _patch_unix(self):
         for gnu_config in [
@@ -161,15 +172,6 @@ class NetSnmpConan(ConanFile):
         replace_in_file(self, configure_path,
                         "-install_name \\$rpath/",
                         "-install_name @rpath/")
-        crypto_libs = self.dependencies["openssl"].cpp_info.system_libs
-        if len(crypto_libs) != 0:
-            crypto_link_flags = " -l".join(crypto_libs)
-            replace_in_file(self, configure_path,
-                'LIBCRYPTO="-l${CRYPTO}"',
-                'LIBCRYPTO="-l${CRYPTO} -l%s"' % (crypto_link_flags,))
-            replace_in_file(self, configure_path,
-                            'LIBS="-lcrypto  $LIBS"',
-                            f'LIBS="-lcrypto -l{crypto_link_flags} $LIBS"')
 
     def build(self):
         if is_msvc(self):
@@ -178,7 +180,6 @@ class NetSnmpConan(ConanFile):
                 self._configure_msvc()
                 self.run("nmake /nologo libsnmp")
         else:
-            self._patch_unix()
             configure_path = os.path.join(self.source_folder, "configure")
             os.chmod(configure_path, os.stat(configure_path).st_mode | stat.S_IEXEC)
             autotools = Autotools(self)
@@ -195,6 +196,10 @@ class NetSnmpConan(ConanFile):
             copy(self, "netsnmp.lib",
                  dst=os.path.join(self.package_folder, "lib"),
                  src=os.path.join(self.source_folder, rf"win32\lib\{cfg}"))
+            if self.options.shared:
+                copy(self, "netsnmp.dll",
+                     dst=os.path.join(self.package_folder, "bin"),
+                     src=os.path.join(self.source_folder, rf"win32\bin\{cfg}"))
             copy(self, "include/net-snmp/*.h",
                  dst=self.package_folder,
                  src=self.source_folder)
@@ -210,6 +215,8 @@ class NetSnmpConan(ConanFile):
             rm(self, "README", self.package_folder, recursive=True)
             rmdir(self, os.path.join(self.package_folder, "bin"))
             rm(self, "*.la", self.package_folder, recursive=True)
+            for lib in ["libnetsnmpagent", "libnetsnmpmibs", "libnetsnmphelpers"]:
+                rm(self, f"{lib}.*", os.path.join(self.package_folder, "lib"))
             fix_apple_shared_install_name(self)
 
     def package_info(self):
