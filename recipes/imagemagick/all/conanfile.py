@@ -87,37 +87,37 @@ class ImageMagicConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.3.2")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_bzlib:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.8.3")
+            self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.with_lcms:
-            self.requires("lcms/2.17")
+            self.requires("lcms/[>=2.16 <3]")
         if self.options.with_openexr:
-            self.requires("openexr/3.4.12")
+            self.requires("openexr/[>=3.2.3 <4]")
         if self.options.with_heic:
-            self.requires("libheif/1.20.1")
+            self.requires("libheif/[>=1.16 <2]")
         if self.options.with_jbig:
             self.requires("jbig/20160605")
         if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9f")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.1.4.1")
+            self.requires("libjpeg-turbo/[>=3 <4]")
         if self.options.with_openjp2:
-            self.requires("openjpeg/2.5.4")
+            self.requires("openjpeg/[>=2.5.2 <3]")
         if self.options.with_pango:
-            self.requires("pango/1.57.0")
+            self.requires("pango/[>=1.50.7 <2]")
         if self.options.with_png:
-            self.requires("libpng/1.6.58")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_tiff:
-            self.requires("libtiff/4.7.1")
+            self.requires("libtiff/[>=4.6.0 <5]")
         if self.options.with_webp:
-            self.requires("libwebp/1.6.0")
+            self.requires("libwebp/[>=1.3 <2]")
         if self.options.with_xml2:
-            self.requires("libxml2/2.15.3")
+            self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_freetype:
-            self.requires("freetype/2.14.3")
+            self.requires("freetype/[>=2.13 <3]")
         if self.options.with_djvu:
             # FIXME: missing djvu recipe
             self.output.warning(
@@ -126,7 +126,7 @@ class ImageMagicConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("pkgconf/2.2.0")
+        self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def validate(self):
         if self.settings.os == "Windows":
