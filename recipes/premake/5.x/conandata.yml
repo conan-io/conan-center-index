@@ -1,4 +1,16 @@
 sources:
-  "5.0.0-beta7":
-    url: "https://github.com/premake/premake-core/releases/download/v5.0.0-beta7/premake-5.0.0-beta7-src.zip"
-    sha256: "d39874aed04e317a46bdd281b193fe58c70457cd07bbd50e1bdcb4729c3a4860"
+  "5.0.0-beta8":
+    url: "https://github.com/premake/premake-core/archive/refs/tags/v5.0.0-beta8.tar.gz"
+    sha256: "2a55195fd2b27e5aa3de8ff6d22cdb127232a86f801d06e7f673d30a0eba09ac"
+
+bootstrap:
+  "5.0.0-beta8":
+    Linux:
+      url: "https://github.com/premake/premake-core/releases/download/v5.0.0-beta8/premake-5.0.0-beta8-linux.tar.gz"
+      sha256: "63edd3e7461eebdd45b500a3c7e8ad4e7a67d68f230010f9a97cbb71b4ec59c8"
+    Macos:
+      url: "https://github.com/premake/premake-core/releases/download/v5.0.0-beta8/premake-5.0.0-beta8-macosx.tar.gz"
+      sha256: "fa73a46f093fa6f17494a3d063421aa6cae3ea825a61c62dd59fc2f07a256d03"
+    Windows:
+      url: "https://github.com/premake/premake-core/releases/download/v5.0.0-beta8/premake-5.0.0-beta8-windows.zip"
+      sha256: "e64ce2ed8778e0098f63674cca61fe33941b5f0c8d9a4afd651152bdea3758ab"

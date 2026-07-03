@@ -1,6 +1,5 @@
 import glob
 import os
-import re
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -51,21 +50,25 @@ class PremakeConan(ConanFile):
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
+        if self.settings.os == "FreeBSD":
+            raise ConanInvalidConfiguration("FreeBSD is not supported (no pre-built bootstrap binary available)")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=False)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _ide_version(self):
         compiler_version = str(self.settings.compiler.version)
         if str(self.settings.compiler) == "Visual Studio":
-            return {"17": "2022",
+            return {"18": "2026",
+                    "17": "2022",
                     "16": "2019",
                     "15": "2017",
                     "14": "2015",
                     "12": "2013"}.get(compiler_version)
         else:
-            return {"194": "2022",
+            return {"195": "2026",
+                    "194": "2022",
                     "193": "2022",
                     "192": "2019",
                     "191": "2017",
@@ -75,18 +78,6 @@ class PremakeConan(ConanFile):
     @property
     def _msvc_build_dir(self):
         return os.path.join(self.source_folder, "build", f"vs{self._ide_version}")
-
-    def _version_info(self, version):
-        res = []
-        for p in re.split("[.-]|(alpha|beta)", version):
-            if p is None:
-                continue
-            try:
-                res.append(int(p))
-                continue
-            except ValueError:
-                res.append(p)
-        return tuple(res)
 
     @property
     def _gmake_platform(self):
@@ -125,12 +116,32 @@ class PremakeConan(ConanFile):
             deps = AutotoolsDeps(self)
             deps.generate()
 
+    def _generate_build_files(self):
+        """Download pre-built premake and use it to generate build files."""
+        # Download pre-built premake binary for the build platform
+        bootstrap_data = self.conan_data["bootstrap"][self.version][str(self.settings.os)]
+        bootstrap_dir = os.path.join(self.source_folder, "build", "bootstrap")
+        get(self, **bootstrap_data, destination=bootstrap_dir)
+
+        premake_bin = "premake5.exe" if self.settings.os == "Windows" else "premake5"
+        bootstrap_premake = os.path.join(bootstrap_dir, premake_bin)
+
+        with chdir(self, self.source_folder):
+            if is_msvc(self):
+                self.run(f".\\{os.path.relpath(bootstrap_premake, self.source_folder)} embed")
+                self.run(f".\\{os.path.relpath(bootstrap_premake, self.source_folder)} --to=build/vs{self._ide_version} vs{self._ide_version}")
+            else:
+                os.chmod(bootstrap_premake, 0o755)
+                self.run(f"{bootstrap_premake} embed")
+                self.run(f"{bootstrap_premake} --to={self._gmake_build_dir} gmake")
+
     def _patch_sources(self):
         if self.options.get_safe("lto", None) is False:
             for fn in glob.glob(os.path.join(self._gmake_build_dir, "*.make")):
                 replace_in_file(self, fn, "-flto", "", strict=False)
 
     def build(self):
+        self._generate_build_files()
         self._patch_sources()
         if is_msvc(self):
             with chdir(self, self._msvc_build_dir):
