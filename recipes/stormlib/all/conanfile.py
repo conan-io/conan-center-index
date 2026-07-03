@@ -1,9 +1,10 @@
 from conan import ConanFile
+from conan.errors import ConanException
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, replace_in_file
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 
 class StormlibConan(ConanFile):
@@ -24,13 +25,7 @@ class StormlibConan(ConanFile):
         "fPIC": True,
     }
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -39,13 +34,19 @@ class StormlibConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("bzip2/1.0.8")
 
+    def validate(self):
+        if self.settings.os == "Macos" and self.options.shared:
+            raise ConanException("Macos framework libs upstream installation is not complete")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_CXX_STANDARD 11)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["STORM_USE_BUNDLED_LIBRARIES"] = False
-        tc.variables["STORM_BUILD_TESTS"] = False
+        tc.cache_variables["STORM_USE_BUNDLED_LIBRARIES"] = False
+        tc.cache_variables["STORM_BUILD_TESTS"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -64,6 +65,9 @@ class StormlibConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "StormLib")
         self.cpp_info.set_property("cmake_target_name", "StormLib::storm")
-        self.cpp_info.libs = ["storm"]
+
+        libname = "storm"
         if self.settings.os == "Windows":
+            libname = "StormLib"
             self.cpp_info.system_libs = ["wininet"]
+        self.cpp_info.libs = [libname]
