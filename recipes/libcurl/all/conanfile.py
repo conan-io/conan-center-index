@@ -173,7 +173,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_nghttp2:
             self.requires("libnghttp2/[>=1.59.0 <2]")
         if self.options.with_libssh2:
-            self.requires("libssh2/1.11.0")
+            self.requires("libssh2/[>=1.11.0 <2]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_brotli:
@@ -356,12 +356,8 @@ class LibcurlConan(ConanFile):
         if not self.options.with_ssl:
             tc.configure_args.append("--without-ssl")
 
-        if self.options.with_ssl == "openssl":
-            path = unix_path(self, self.dependencies["openssl"].package_folder)
-            tc.configure_args.append(f"--with-openssl={path}")
-        elif self.options.with_ssl == "libressl":
-            path = unix_path(self, self.dependencies["libressl"].package_folder)
-            tc.configure_args.append(f"--with-openssl={path}")
+        if self.options.with_ssl in ("openssl", "libressl"):
+            tc.configure_args.append("--with-openssl")
         else:
             tc.configure_args.append("--without-openssl")
 
