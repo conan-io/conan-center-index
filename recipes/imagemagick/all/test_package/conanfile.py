@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanException
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, cmake_layout
 
@@ -35,7 +36,7 @@ class TestPackageConan(ConanFile):
         def check(option, token):
             self.output.info("checking feature %s..." % token)
             if option and token not in content.split():
-                raise Exception("feature %s wasn't enabled!" % token)
+                raise ConanException("feature %s wasn't enabled!" % token)
             self.output.info("checking feature %s... OK!" % token)
 
         check(options.with_zlib, "zlib")
