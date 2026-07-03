@@ -1,0 +1,14 @@
+Backport from https://github.com/dougbinks/enkiTS/commit/2405c77dfe7be6d5b95ee7fda5b0ee7eff4cd7ed
+
+diff --git a/src/TaskScheduler.h b/src/TaskScheduler.h
+index 7cfee7a..8cb447a 100644
+--- a/src/TaskScheduler.h
++++ b/src/TaskScheduler.h
+@@ -23,6 +23,7 @@
+ #include <condition_variable>
+ #include <stdint.h>
+ #include <functional>
++#include <initializer_list>
+ 
+ // ENKITS_TASK_PRIORITIES_NUM can be set from 1 to 5.
+ // 1 corresponds to effectively no priorities.
