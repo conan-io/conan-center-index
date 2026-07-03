@@ -8,7 +8,6 @@ from conan.tools.env import VirtualRunEnv
 from conan.tools.files import get, copy, rm, rmdir, replace_in_file
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
 from conan.tools.scm import Version
-from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=2"
@@ -69,16 +68,6 @@ class GperftoolsConan(ConanFile):
             del self.options.build_heap_profiler
             del self.options.build_heap_checker
             del self.options.build_debugalloc
-            del self.options.dynamic_sized_delete_support
-            del self.options.emergency_malloc
-            del self.options.enable_aggressive_decommit_by_default
-            del self.options.enable_frame_pointers
-            del self.options.enable_large_alloc_report
-            del self.options.enable_libunwind
-            del self.options.enable_stacktrace_via_backtrace
-            del self.options.sized_delete
-            del self.options.tcmalloc_alignment
-            del self.options.tcmalloc_pagesize
 
     @property
     def _build_minimal(self):
@@ -87,7 +76,7 @@ class GperftoolsConan(ConanFile):
             self.options.get_safe("build_cpu_profiler")
             or self.options.get_safe("build_heap_profiler")
             or self.options.get_safe("build_heap_checker")
-        )
+        ) or self.settings.os == "Windows"
 
     def configure(self):
         if self.options.shared:
@@ -101,11 +90,9 @@ class GperftoolsConan(ConanFile):
         elif self.options.get_safe("enable_libunwind"):
             # enable_stacktrace_via_backtrace has no effect if libunwind is enabled
             self.options.rm_safe("enable_stacktrace_via_backtrace")
-        if self.settings.os == "Windows" and not is_msvc(self):
-            self.win_bash = True
 
     def layout(self):
-        if is_msvc(self):
+        if self.settings.os == "Windows":
             cmake_layout(self, src_folder="src")
         else:
             basic_layout(self, src_folder="src")
@@ -125,10 +112,18 @@ class GperftoolsConan(ConanFile):
         self._patch_sources()
 
     def generate(self):
-        if is_msvc(self):
+        if self.settings.os == "Windows":
             tc = CMakeToolchain(self)
             tc.cache_variables["BUILD_TESTING"] = False
             tc.cache_variables["gperftools_enable_broken_install_targets"] = True
+            tc.cache_variables["gperftools_dynamic_sized_delete_support"] = self.options.dynamic_sized_delete_support
+            tc.cache_variables["gperftools_enable_large_alloc_report"] = self.options.enable_large_alloc_report
+            tc.cache_variables["gperftools_enable_aggressive_decommit_by_default"] = self.options.enable_aggressive_decommit_by_default
+            tc.cache_variables["gperftools_sized_delete"] = self.options.sized_delete
+            if self.options.get_safe("tcmalloc_alignment"):
+                tc.cache_variables["gperftools_tcmalloc_alignment"] = self.options.tcmalloc_alignment
+            if self.options.get_safe("tcmalloc_pagesize"):
+                tc.cache_variables["gperftools_tcmalloc_pagesize"] = self.options.tcmalloc_pagesize
             tc.generate()
             return
 
@@ -184,7 +179,7 @@ class GperftoolsConan(ConanFile):
         replace_in_file(self, makefile_in, " librun_benchmark.la", "")
 
     def build(self):
-        if is_msvc(self):
+        if self.settings.os == "Windows":
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
@@ -195,12 +190,13 @@ class GperftoolsConan(ConanFile):
 
     def package(self):
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        if is_msvc(self):
+        if self.settings.os == "Windows":
             cmake = CMake(self)
             cmake.install()
             copy(self, "*.h", src=os.path.join(self.source_folder, "src", "gperftools"), dst=os.path.join(self.package_folder, "include", "gperftools"))
             if not self.options.shared:
                 copy(self, "common.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
+                copy(self, "libcommon.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
         else:
             autotools = Autotools(self)
             autotools.install()
@@ -219,7 +215,7 @@ class GperftoolsConan(ConanFile):
 
     def package_info(self):
         self._add_component("tcmalloc_minimal")
-        if is_msvc(self) and not self.options.shared:
+        if self.settings.os == "Windows" and not self.options.shared:
             self._add_component("common")
             self.cpp_info.components["tcmalloc_minimal"].requires = ["common"]
         if self.options.get_safe("build_debugalloc"):
