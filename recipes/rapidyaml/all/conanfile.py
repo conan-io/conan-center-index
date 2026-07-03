@@ -44,8 +44,6 @@ class RapidYAMLConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "0.4.0":
-            del self.options.with_tab_tokens
         if Version(self.version) < "0.6.0":
             del self.options.with_default_callback_uses_exceptions
             del self.options.with_assert
@@ -79,8 +77,7 @@ class RapidYAMLConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["RYML_DEFAULT_CALLBACKS"] = self.options.with_default_callbacks
-        if Version(self.version) >= "0.4.0":
-            tc.variables["RYML_WITH_TAB_TOKENS"] = self.options.with_tab_tokens
+        tc.variables["RYML_WITH_TAB_TOKENS"] = self.options.with_tab_tokens
         if Version(self.version) >= "0.6.0":
             tc.variables["RYML_DEFAULT_CALLBACK_USES_EXCEPTIONS"] = self.options.with_default_callback_uses_exceptions
             tc.variables["RYML_USE_ASSERT"] = self.options.with_assert
@@ -109,6 +106,3 @@ class RapidYAMLConan(ConanFile):
         self.cpp_info.libs = ["ryml"]
         if Version(self.version) >= "0.15.2" and self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("C4CORE_SHARED")
-
-        self.cpp_info.names["cmake_find_package"] = "ryml"
-        self.cpp_info.names["cmake_find_package_multi"] = "ryml"
