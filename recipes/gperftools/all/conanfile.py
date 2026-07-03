@@ -118,13 +118,6 @@ class GperftoolsConan(ConanFile):
         if self.options.get_safe("enable_libunwind", False):
             self.requires("libunwind/[>=1.6.2 <2]")
 
-    def build_requirements(self):
-        if self.settings_build.os == "Windows" and not is_msvc(self):
-            self.tool_requires("libtool/2.4.7")
-            self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
-                self.tool_requires("msys2/cci.latest")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         self._patch_sources()
