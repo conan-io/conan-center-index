@@ -69,5 +69,7 @@ class StormlibConan(ConanFile):
         libname = "storm"
         if self.settings.os == "Windows":
             libname = "StormLib"
+            # Disabled #pragma comment(lib, "StormLib{R/D}A{S/D}.lib")
+            self.cpp_info.defines.append("__STORMLIB_NO_STATIC_LINK__")
             self.cpp_info.system_libs = ["wininet"]
         self.cpp_info.libs = [libname]
