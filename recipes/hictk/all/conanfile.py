@@ -4,8 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
-from conan.tools.scm import Version
+from conan.tools.files import copy, get, rmdir, unzip
 
 required_conan_version = ">=2.0"
 
@@ -33,21 +32,15 @@ class HictkConan(ConanFile):
 
     def requirements(self):
         if self.options.with_arrow:
-            self.requires("arrow/[>=16.1.0 <21]")
-        if Version(self.version) < "2.0.0":
-            self.requires("bshoshany-thread-pool/4.1.0")
-        else:
-            self.requires("bshoshany-thread-pool/5.0.0")
+            self.requires("arrow/[>=16.1.0 <25]")
+        self.requires("bshoshany-thread-pool/5.0.0")
         self.requires("concurrentqueue/1.0.4")
         self.requires("fast_float/6.1.1")
         if self.options.with_eigen:
             self.requires("eigen/[>=3.4.0 <4]")
         self.requires("fmt/10.2.1")
         self.requires("hdf5/1.14.3")
-        if Version(self.version) < "2.1.5":
-            self.requires("highfive/[>=2.9.0 <3]")
-        else:
-            self.requires("highfive/[>=2.9.0 <4]")
+        self.requires("highfive/[>=2.9.0 <4]")
         self.requires("libdeflate/1.22")
         self.requires("parallel-hashmap/1.3.12") # Note: v1.3.12 is more recent than v1.37
         self.requires("readerwriterqueue/1.0.6")
@@ -69,8 +62,13 @@ class HictkConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.25]")
 
+    @property
+    def _project_options_version(self):
+        return "0.36.6"
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        unzip(self, os.path.join(self.source_folder, "external", f"project_options-v{self._project_options_version}.tar.xz"), os.path.join(self.source_folder, "external"))
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -82,6 +80,10 @@ class HictkConan(ConanFile):
         tc.cache_variables["HICTK_ENABLE_FUZZY_TESTING"] = "OFF"
         tc.cache_variables["HICTK_WITH_ARROW"] = self.options.get_safe("with_arrow", False)
         tc.cache_variables["HICTK_WITH_EIGEN"] = self.options.with_eigen
+
+        project_options_dir = os.path.join(self.source_folder, "external", f"project_options-{self._project_options_version}")
+        # prevent a download during the build for FetchContent_Declare(_hictk_project_options ...)
+        tc.cache_variables["FETCHCONTENT_SOURCE_DIR__HICTK_PROJECT_OPTIONS"] = project_options_dir
         tc.generate()
 
         cmakedeps = CMakeDeps(self)
