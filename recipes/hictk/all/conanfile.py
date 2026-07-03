@@ -46,7 +46,7 @@ class HictkConan(ConanFile):
         if self.options.with_eigen:
             self.requires("eigen/[>=3.4.0 <4]")
         self.requires("fmt/10.2.1")
-        self.requires("hdf5/1.14.6")
+        self.requires("hdf5/1.14.3")
         if Version(self.version) < "2.1.5":
             self.requires("highfive/[>=2.9.0 <3]")
         else:
