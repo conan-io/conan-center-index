@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import chdir, copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 
@@ -41,9 +41,6 @@ class UserspaceRCUConan(ConanFile):
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration(f"Building for {self.settings.os} unsupported")
-        if self.version == "0.11.4" and self.settings.compiler == "apple-clang":
-            # Fails with "cds_hlist_add_head_rcu.c:19:10: fatal error: 'urcu/urcu-memb.h' file not found"
-            raise ConanInvalidConfiguration(f"{self.ref} is not compatible with apple-clang")
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
@@ -75,7 +72,7 @@ class UserspaceRCUConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        for lib_type in ["", "-bp", "-cds", "-mb", "-memb", "-qsbr", "-signal"]:
+        for lib_type in ["", "-bp", "-cds", "-mb", "-memb", "-qsbr"]:
             component_name = f"urcu{lib_type}"
             self.cpp_info.components[component_name].libs = ["urcu-common", component_name]
             self.cpp_info.components[component_name].set_property("pkg_config_name", f"lib{component_name}")
@@ -85,4 +82,3 @@ class UserspaceRCUConan(ConanFile):
 
         # Some definitions needed for MB and Signal variants
         self.cpp_info.components["urcu-mb"].defines = ["RCU_MB"]
-        self.cpp_info.components["urcu-signal"].defines = ["RCU_SIGNAL"]
