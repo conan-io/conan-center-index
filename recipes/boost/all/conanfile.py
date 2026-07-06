@@ -1977,9 +1977,6 @@ class BoostConan(ConanFile):
                     libs.append(new_name)
                 return libs
 
-            # b2 builds boost_numpy only when numpy headers are detected, othherwise b2 silently skips it
-            numpy_built = True
-
             for module in self._dependencies["dependencies"].keys():
                 missing_depmodules = list(depmodule for depmodule in self._all_dependent_modules(module) if self.options.get_safe(f"without_{depmodule}", False))
                 if missing_depmodules:
@@ -1991,12 +1988,8 @@ class BoostConan(ConanFile):
                 if self._dependencies["libs"][module] and not module_libraries:
                     continue
 
+                # b2 builds boost_numpy only when numpy headers are detected, otherwise b2 silently skips it
                 if module == "numpy" and not set(module_libraries).intersection(all_detected_libraries):
-                    self.output.warning(
-                        "Boost.Numpy library was not built. Skipping the 'numpy' component. "
-                        "Install numpy and rebuild boost to enable it."
-                    )
-                    numpy_built = False
                     continue
 
                 all_expected_libraries = all_expected_libraries.union(module_libraries)
@@ -2084,7 +2077,9 @@ class BoostConan(ConanFile):
                 if not self._shared:
                     self.cpp_info.components["python"].defines.append("BOOST_PYTHON_STATIC_LIB")
 
-                if numpy_built:
+                # b2 builds boost_numpy only when numpy headers are detected, otherwise b2 silently skips it
+                numpy_libraries = filter_transform_module_libraries(self._dependencies["libs"]["numpy"])
+                if set(numpy_libraries).intersection(all_detected_libraries):
                     numpy_versioned_component_name = f"numpy{pyversion.major}{pyversion.minor}"
                     self.cpp_info.components[numpy_versioned_component_name].requires = ["numpy"]
                     self.cpp_info.components[numpy_versioned_component_name].set_property("cmake_target_name", "Boost::" + numpy_versioned_component_name)
