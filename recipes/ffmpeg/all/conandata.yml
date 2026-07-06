@@ -1,7 +1,7 @@
 sources:
-  "8.1.1":
-    url: "https://ffmpeg.org/releases/ffmpeg-8.1.1.tar.xz"
-    sha256: "b6863adde98898f42602017462871b5f6333e65aec803fdd7a6308639c52edf3"
-  "7.1.4":
-    url: "https://ffmpeg.org/releases/ffmpeg-7.1.4.tar.bz2"
-    sha256: "de02003e8a7f7b08179ddf4a1fdc2599570ca02725fec9a1e465374fd4e514aa"
+  "8.1.2":
+    url: "https://ffmpeg.org/releases/ffmpeg-8.1.2.tar.xz"
+    sha256: "464beb5e7bf0c311e68b45ae2f04e9cc2af88851abb4082231742a74d97b524c"
+  "7.1.5":
+    url: "https://ffmpeg.org/releases/ffmpeg-7.1.5.tar.xz"
+    sha256: "de668509caf9e35e3cd162473441fdb29538c6d96ed080292b3cf9e6fc5d558f"
