@@ -138,6 +138,7 @@ grpc_targets:
         - abseil::absl_layout
         - abseil::absl_absl_check
         - abseil::absl_absl_log
+        - abseil::absl_charset
         - abseil::absl_strings_internal
         - _grpc
         - protobuf::libprotobuf
@@ -161,6 +162,7 @@ grpc_targets:
         - abseil::absl_layout
         - abseil::absl_absl_check
         - abseil::absl_absl_log
+        - abseil::absl_charset
         - abseil::absl_strings_internal
         - grpc_unsecure
         - protobuf::libprotobuf
@@ -196,6 +198,7 @@ grpc_targets:
         - abseil::absl_config
         - abseil::absl_core_headers
         - abseil::absl_dynamic_annotations
+        - abseil::absl_no_destructor
         - abseil::absl_prefetch
         - abseil::absl_cleanup
         - abseil::absl_btree
@@ -222,6 +225,7 @@ grpc_targets:
         - abseil::absl_strings
         - abseil::absl_synchronization
         - abseil::absl_time
+        - abseil::absl_optional
         - abseil::absl_span
         - abseil::absl_utility
         - protobuf::libprotobuf
