@@ -111,6 +111,7 @@ class FollyConan(ConanFile):
         if (is_apple_os(self) or self.settings.os == "Linux") and cross_building(self):
             # Fix cross-compilation failure on arm64-[macos|linux]
             # CMake Error: try_run() invoked in cross-compiling mode
+            tc.cache_variables["CMAKE_CROSSCOMPILING"] = True
             tc.cache_variables["FOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE"] = 0
             tc.cache_variables["FOLLY_HAVE_WEAK_SYMBOLS_EXITCODE"] = 0
             tc.cache_variables["FOLLY_HAVE_LINUX_VDSO_EXITCODE"] = 0
