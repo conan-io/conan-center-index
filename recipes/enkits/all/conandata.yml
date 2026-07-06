@@ -1,8 +1,4 @@
 sources:
-  "1.11":
-    url: "https://github.com/dougbinks/enkiTS/archive/v1.11.tar.gz"
-    sha256: "b57a782a6a68146169d29d180d3553bfecb9f1a0e87a5159082331920e7d297e"
-
-patches:
-  "1.11":
-    - patch_file: "patches/1.11-fix-missing-include-initializer-list.patch"
+  "1.12":
+    url: "https://github.com/dougbinks/enkiTS/archive/refs/tags/v1.12.tar.gz"
+    sha256: "8373b6199d56816bd3ba58432eae74e2ebd5afcfdffb723073cc34730b189fd5"

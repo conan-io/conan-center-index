@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import copy, get
 
 required_conan_version = ">=2.1"
 
@@ -26,9 +26,6 @@ class EnkiTSConan(ConanFile):
         "fPIC": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -42,26 +39,15 @@ class EnkiTSConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["ENKITS_INSTALL"] = True
         tc.cache_variables["ENKITS_BUILD_EXAMPLES"] = False
         tc.cache_variables["ENKITS_BUILD_SHARED"] = self.options.shared
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
-    def _patch_sources(self):
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            'install(TARGETS enkiTS DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/enkiTS")',
-            "install(TARGETS enkiTS ARCHIVE LIBRARY RUNTIME)",
-        )
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
