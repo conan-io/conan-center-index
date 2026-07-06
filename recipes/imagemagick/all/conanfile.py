@@ -65,10 +65,6 @@ class ImageMagicConan(ConanFile):
                 "Windows builds of ImageMagick require MFC which cannot currently be sourced from CCI."
             )
 
-    @property
-    def _major(self):
-        return Version(self.version).major
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -178,7 +174,7 @@ class ImageMagicConan(ConanFile):
 
     def _libname(self, library):
         suffix = "HDRI" if self.options.hdri else ""
-        return "{}-{}.Q{}{}".format(library, self._major, self.options.quantum_depth, suffix)
+        return "{}-{}.Q{}{}".format(library, Version(self.version).major, self.options.quantum_depth, suffix)
 
     def package_info(self):
         # FIXME model official FindImageMagick https://cmake.org/cmake/help/latest/module/FindImageMagick.html
@@ -217,7 +213,7 @@ class ImageMagicConan(ConanFile):
             "_MAGICKDLL_=1" if self.options.shared else "_MAGICKLIB_=1"
         )
 
-        imagemagick_include_dir = "include/ImageMagick-%s" % self._major
+        imagemagick_include_dir = "include/ImageMagick-%s" % Version(self.version).major
 
         self.cpp_info.components["MagickCore"].includedirs = [imagemagick_include_dir]
         self.cpp_info.components["MagickCore"].libs.append(self._libname("MagickCore"))
