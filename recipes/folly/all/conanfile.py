@@ -111,12 +111,21 @@ class FollyConan(ConanFile):
         if (is_apple_os(self) or self.settings.os == "Linux") and cross_building(self):
             # Fix cross-compilation failure on arm64-[macos|linux]
             # CMake Error: try_run() invoked in cross-compiling mode
-            tc.cache_variables["CMAKE_CROSSCOMPILING"] = True
-            tc.cache_variables["FOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE"] = 0
-            tc.cache_variables["FOLLY_HAVE_WEAK_SYMBOLS_EXITCODE"] = 0
-            tc.cache_variables["FOLLY_HAVE_LINUX_VDSO_EXITCODE"] = 0
-            tc.cache_variables["FOLLY_HAVE_WCHAR_SUPPORT_EXITCODE"] = 0
-            tc.cache_variables["HAVE_VSNPRINTF_ERRORS_EXITCODE"] = 0
+            # Presetting only the *_EXITCODE cache vars is not enough: check_cxx_source_runs()
+            # still calls try_run() unconditionally, and on some toolchains (e.g. CCI's pinned
+            # Xcode when cross-building x86_64 on an arm64 host) try_run() actually executes the
+            # test binary instead of honoring the cached exit code, so it can still abort the
+            # configure. Presetting the check's result variable itself makes check_cxx_source_runs()
+            # skip try_run() entirely.
+            for check_var in (
+                "FOLLY_HAVE_UNALIGNED_ACCESS",
+                "FOLLY_HAVE_WEAK_SYMBOLS_EXITCODE",
+                "FOLLY_HAVE_LINUX_VDSO",
+                "FOLLY_HAVE_WCHAR_SUPPORT",
+                "HAVE_VSNPRINTF_ERRORS",
+            ):
+                tc.cache_variables[check_var] = 1
+                tc.cache_variables[f"{check_var}_EXITCODE"] = 0
 
         if is_msvc(self):
             cxx_std_value = "c++latest" if str(self.settings.compiler.cppstd) > "20" else f"c++20"
