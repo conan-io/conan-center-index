@@ -52,13 +52,16 @@ class ZintConan(ConanFile):
             self.requires("libpng/[>=1.6 <2]")
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_qt:
-            # Upstream does not allow compiling with Qt 6 on Windows when building a shared library
-            qt_upper_bound = "6" if self.settings.os == "Windows" and self.options.shared else "7"
-            self.requires(f"qt/[>=5.15 <{qt_upper_bound}]", transitive_headers=True, transitive_libs=True)
+            self.requires("qt/[>=5.15 <7]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.options.with_qt and not self.dependencies["qt"].options.gui:
             raise ConanInvalidConfiguration(f"{self.ref} needs qt:gui=True")
+        if self.settings.os == "Windows" and self.options.shared and self.options.with_qt:
+            # Upstream does not export DLL symbols on libqzint. The following clases are not exported:
+            # - https://github.com/zint/zint/blob/2.16.0/backend_qt/qzint.h#L48
+            # - https://github.com/zint/zint/blob/2.16.0/backend_qt/qzint.h#L423
+            raise ConanInvalidConfiguration(f"{self.ref} does not support shared build on Windows with_qt enabled")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -109,8 +112,10 @@ class ZintConan(ConanFile):
                 "libzint",
                 "qt::qtGui",
             ])
-            if self.settings.os == "Windows" and self.options.shared:
-                self.cpp_info.components["libqzint"].defines = ["QZINT_DLL"]
+            # qzint is a static library. Previous recipe revisions patched this but that required maintaining
+            # multiple patches in order to support Windows + Shared. We will keep it simple in
+            # this version and mimic upstream behavior
+            self.cpp_info.components["libqzint"].type = "static-library"
 
         # Trick to only define Zint::QZint and Zint::Zint in CMakeDeps generator
         self.cpp_info.set_property("cmake_target_name", "Zint::QZint" if self.options.with_qt else "Zint::Zint")
