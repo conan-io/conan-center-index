@@ -19,9 +19,6 @@ sources:
     sha256: "db11c06e958a82dac52cf3c65cb4dd2c3f339c8a988665110e0d24d19312ad8d"
 patches:
   "1.0.30":
-    - patch_file: "patches/1.0.30-0001-relax-windows-sdk-restriction.patch"
-      patch_description: "Relax Windows SDK restriction"
-      patch_type: "conan"
     - patch_file: "patches/1.0.29-0002-warnings-not-errors.patch"
       patch_description: "Do not treat warnings as errors (required for VS2022)"
       patch_type: "conan"
