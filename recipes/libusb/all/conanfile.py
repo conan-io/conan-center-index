@@ -82,7 +82,10 @@ class LibUSBConan(ConanFile):
         if is_msvc(self):
             tc = MSBuildToolchain(self)
             tc.configuration = self._msbuild_configuration
-            tc.properties["WholeProgramOptimization"] = "false"
+            tc.compile_options = {
+                "TreatWarningAsError": "false",
+                "WholeProgramOptimization": "false",
+            }
             tc.generate()
         else:
             VirtualBuildEnv(self).generate()
