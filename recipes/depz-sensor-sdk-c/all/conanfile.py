@@ -59,9 +59,9 @@ class DepzSensorSdkCConan(ConanFile):
         cmake.build()
 
     def package(self):
-        # The monorepo ships a single top-level MIT license file.
+        # The C package ships its own MIT license file.
         copy(self, "LICENSE",
-             src=os.path.join(self.source_folder, "packages", "depz-sensor-sdk-cpp"),
+             src=os.path.join(self.source_folder, self._subfolder),
              dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
