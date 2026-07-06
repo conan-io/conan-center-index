@@ -85,21 +85,16 @@ reading the changelog of the library, the documentation, or any statement by the
 
 ### Format and Conventions
 
-Patch files are preferred over programmatic `replace_in_file` statements. This makes it easier to review and prevent
-unwanted side effects when new versions are added. They will be listed in [`conandata.yml`](conandata_yml_format.md)
-file and exported together with the recipe. Patches should include the required [patch fields](conandata_yml_format.md#patches-fields).
+* Patch files must be located in the recipe folder in a `patches/` sub-directory
+* Should be listed in `conandata.yml` as an entry under `patches` (per-version)
+* File name must be minimally descriptive - other relevant information and details must be included in the patchfile's own preamble, and should always be justified in the PR description.
+* In cases where patches may need to be applied in a specific order, please add a number prefix in the filename (e.g `01-`, `02`, ...)
 
-Patches must be located in the recipe folder in a `patches/` sub-directory.
+### Patch files vs replace_in_file
 
-There are a few recommendations about naming patches:
+In some instances, patch files are preferred when they need to modify multiple files, or several lines in the same file. Note that while patch files may help keep the recipe (`conanfile.py`) tidier - they can also make it more tedious to update the recipe to support newer versions if the patches' hunk headers and context lines no are no longer applicable. It is for these reasons that we now aim for patches to *not* be needed in newer yet-to-be-released versions, by reporting issues upstreams (see policy below).
 
-* be descriptive but terse
-* number them so they can be re-used
-* note the specific version
-
-By clearly indicating what the patch does, when it's applied, and how it relates to existing patches, you can
-help make the [review process](../review_process.md) easier for readers and help speed up your pull requests.
-
+The use of `replace_in_file` is perfectly acceptable for simple cases (e.g. single lines), and when the patches are more likely to survive multiple versions.
 
 ### Policy on patches
 
