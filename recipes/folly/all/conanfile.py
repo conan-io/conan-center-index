@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import (get, copy, rmdir, replace_in_file, save, rm,
+from conan.tools.files import (get, copy, rmdir, replace_in_file,
                                export_conandata_patches, apply_conandata_patches)
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
@@ -237,7 +237,7 @@ class FollyConan(ConanFile):
         self.cpp_info.components["folly_test_util"].libs = ["folly_test_util"]
         self.cpp_info.components["folly_test_util"].requires = ["libfolly"]
 
-        if self.settings.os in ["Linux", "FreeBSD"] and not self.options.shared:
+        if self.settings.os in ["Linux", "FreeBSD"] and not self.options.get_safe("shared"):
             # exception tracer (renamed + granular)
             cmp_exc = "folly_debugging_exception_tracer_"
             for lib in [

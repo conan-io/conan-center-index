@@ -61,7 +61,7 @@ class Liburing(ConanFile):
             if self.options.with_libc:
                 tc.configure_args.append("--use-libc")
         elif not self.options.with_libc:
-                tc.configure_args.append("--nolibc")
+            tc.configure_args.append("--nolibc")
 
         tc.update_configure_args({
             "--host": None,
