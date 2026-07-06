@@ -201,7 +201,6 @@ class GperftoolsConan(ConanFile):
             autotools = Autotools(self)
             autotools.install()
 
-        rmdir(self, os.path.join(self.package_folder, "mingw64"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
