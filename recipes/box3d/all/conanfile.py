@@ -4,7 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
-required_conan_version = ">=2"
+required_conan_version = ">=2.4"
 
 
 class Box3dConan(ConanFile):
@@ -19,29 +19,23 @@ class Box3dConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "sanitize": [True, False],
-        "disable_simd": [True, False]
+        "disable_simd": [True, False],
+        "double_precision": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "sanitize": False,
-        "disable_simd": False
+        "disable_simd": False,
+        "double_precision": False,
     }
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def validate(self):
         check_min_cppstd(self, 17)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.22 <5]")
+        self.tool_requires("cmake/[>=3.22]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -51,17 +45,19 @@ class Box3dConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BOX3D_SANITIZE"] =  self.options.sanitize
-        tc.variables["BOX3D_DISABLE_SIMD"] = self.options.disable_simd
-        tc.variables["BOX3D_COMPILE_WARNING_AS_ERROR"] = False
-
-        tc.variables["BOX3D_SAMPLES"] = False
-        tc.variables["BOX3D_BENCHMARKS"] = False
-        tc.variables["BOX3D_DOCS"] = False
-        tc.variables["BOX3D_PROFILE"] = False
-        tc.variables["BOX3D_VALIDATE"] = False
-        tc.variables["BOX3D_UNIT_TESTS"] = False
-        tc.variables["BOX3D_BUILD_SHADERS"] = False
+        tc.cache_variables["BOX3D_DISABLE_SIMD"] = self.options.disable_simd
+        tc.cache_variables["BOX3D_DOUBLE_PRECISION"] = self.options.double_precision
+        tc.cache_variables["BOX3D_COMPILE_WARNING_AS_ERROR"] = False
+        tc.cache_variables["BOX3D_SANITIZE"] =  False
+        tc.cache_variables["BOX3D_SAMPLES"] = False
+        tc.cache_variables["BOX3D_BENCHMARKS"] = False
+        tc.cache_variables["BOX3D_DOCS"] = False
+        tc.cache_variables["BOX3D_PROFILE"] = False
+        # Off by default, not set so that users can override from profile,
+        # useful only in Debug builds
+        # tc.cache_variables["BOX3D_VALIDATE"] = False
+        tc.cache_variables["BOX3D_UNIT_TESTS"] = False
+        tc.cache_variables["BOX3D_BUILD_SHADERS"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -83,3 +79,7 @@ class Box3dConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "box3d")
         self.cpp_info.set_property("cmake_target_name", "box3d::box3d")
         self.cpp_info.libs = ["box3d"]
+        if self.options.double_precision:
+            self.cpp_info.defines.append("BOX3D_DOUBLE_PRECISION")
+        if self.options.shared and self.settings.compiler == "msvc":
+            self.cpp_info.defines.append("BOX3D_DLL")
