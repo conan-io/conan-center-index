@@ -157,9 +157,8 @@ class NetSnmpConan(ConanFile):
         if self.options.shared:
             replace_in_file(self,
                             os.path.join("libsnmp_dll", "Makefile.in"),
-                            "LINK32_FLAGS=advapi32.lib ws2_32.lib kernel32.lib user32.lib",
-                            "LINK32_FLAGS=" + " ".join(f"{lib}.lib" for lib in extra_libs) + \
-                                ' /libpath:"{}"'.format(zlib_info.libdirs[0].replace("\\", "/")))
+                            "$(LDFLAGS)",
+                            '$(LDFLAGS) /libpath:"{}"'.format(zlib_info.libdirs[0].replace("\\", "/")))
 
     def _patch_unix(self):
         for gnu_config in [
@@ -172,6 +171,7 @@ class NetSnmpConan(ConanFile):
         replace_in_file(self, configure_path,
                         "-install_name \\$rpath/",
                         "-install_name @rpath/")
+        os.chmod(configure_path, os.stat(configure_path).st_mode | stat.S_IEXEC)
 
     def build(self):
         if is_msvc(self):
@@ -180,8 +180,7 @@ class NetSnmpConan(ConanFile):
                 self._configure_msvc()
                 self.run("nmake /nologo libsnmp")
         else:
-            configure_path = os.path.join(self.source_folder, "configure")
-            os.chmod(configure_path, os.stat(configure_path).st_mode | stat.S_IEXEC)
+            self._patch_unix()
             autotools = Autotools(self)
             autotools.autoreconf()
             autotools.configure()
@@ -209,14 +208,12 @@ class NetSnmpConan(ConanFile):
                      src=os.path.join(self.source_folder, "win32"))
         else:
             autotools = Autotools(self)
-            #only install with -j1 as parallel install will break dependencies. Probably a bug in the dependencies
-            #install specific targets instead of just everything as it will try to do perl stuff on you host machine
-            autotools.install(args=["-j1"], target="installsubdirs installlibs installprogs installheaders")
+            autotools.install(target="installheaders")
+            with chdir(self, os.path.join(self.build_folder, "snmplib")):
+                autotools.install()
+
             rm(self, "README", self.package_folder, recursive=True)
-            rmdir(self, os.path.join(self.package_folder, "bin"))
             rm(self, "*.la", self.package_folder, recursive=True)
-            for lib in ["libnetsnmpagent", "libnetsnmpmibs", "libnetsnmphelpers"]:
-                rm(self, f"{lib}.*", os.path.join(self.package_folder, "lib"))
             fix_apple_shared_install_name(self)
 
     def package_info(self):
