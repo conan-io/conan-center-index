@@ -59,6 +59,12 @@ class ImageMagicConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration(
+                "Windows builds of ImageMagick require MFC which cannot currently be sourced from CCI."
+            )
+
     @property
     def _major(self):
         return Version(self.version).major
@@ -102,12 +108,6 @@ class ImageMagicConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("pkgconf/[>=2.2 <3]")
-
-    def validate(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(
-                "Windows builds of ImageMagick require MFC which cannot currently be sourced from CCI."
-            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
