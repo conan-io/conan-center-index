@@ -1,0 +1,19 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -735,10 +735,13 @@ if(WITH_TURBOJPEG OR WITH_TOOLS OR WITH_TESTS)
+   boolean_number(WITH_SYSTEM_SPNG)
+   report_option(WITH_SYSTEM_SPNG "System-supplied libspng")
+   if(WITH_SYSTEM_SPNG)
+-    include(FindPkgConfig)
+-    pkg_check_modules(spng REQUIRED spng IMPORTED_TARGET)
+     unset(SPNG_STATIC_SOURCES)
+-    set(SPNG_LIBRARY PkgConfig::spng)
++    find_package(SPNG REQUIRED)
++    if(TARGET spng::spng)
++      set(SPNG_LIBRARY spng::spng)
++    else()
++      set(SPNG_LIBRARY spng::spng_static)
++    endif()
+   else()
+     option(WITH_SYSTEM_ZLIB
+       "Build ${CMAKE_PROJECT_NAME} against the system-supplied zlib implementation rather than the implementation in the ${CMAKE_PROJECT_NAME} source tree"

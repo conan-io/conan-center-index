@@ -1,4 +1,7 @@
 sources:
+  "3.2.0":
+    url: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.2.0/libjpeg-turbo-3.2.0.tar.gz"
+    sha256: "6f30092cef9fb839779646608f4ee14ae3cbac989c47fa05e841b0841f09878e"
   "3.1.4.1":
     url: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.4.1/libjpeg-turbo-3.1.4.1.tar.gz"
     sha256: "ecae8008e2cc9ade2f2c1bb9d5e6d4fb73e7c433866a056bd82980741571a022"
@@ -15,6 +18,10 @@ sources:
     url: "https://sourceforge.net/projects/libjpeg-turbo/files/2.1.5/libjpeg-turbo-2.1.5.tar.gz"
     sha256: "bc12bc9dce55300c6bf4342bc233bcc26bd38bf289eedf147360d731c668ddaf"
 patches:
+  "3.2.0":
+    - patch_file: "patches/3.2.0-0001-skip-custom-cmake-install.patch"
+    - patch_file: "patches/3.2.0-0002-find-conan-packages.patch"
+    - patch_file: "patches/3.2.0-0003-fix-msvc-runtime.patch"
   "3.1.4.1":
     - patch_file: "patches/3.1.4.1-0001-skip-custom-cmake-install.patch"
   "3.0.2":

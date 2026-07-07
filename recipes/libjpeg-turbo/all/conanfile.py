@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -56,6 +56,8 @@ class LibjpegTurboConan(ConanFile):
         if Version(self.version) >= "3.0.0":
             del self.options.enable12bit
             del self.options.mem_src_dst
+        if Version(self.version) >= "3.2.0":
+            del self.options.java # not implemented
 
     def configure(self):
         if self.options.shared:
@@ -64,7 +66,7 @@ class LibjpegTurboConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
         if self.options.get_safe("enable12bit"):
-            del self.options.java
+            self.options.rm_safe("java")
             del self.options.turbojpeg
         if self.options.get_safe("enable12bit") or self.settings.os == "Emscripten":
             del self.options.SIMD
@@ -76,6 +78,11 @@ class LibjpegTurboConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        if Version(self.version) >= "3.2.0" and self.options.get_safe("turbojpeg", False):
+            self.requires("libspng/0.7.4")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.options.get_safe("enable12bit") and (self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility):
@@ -119,7 +126,13 @@ class LibjpegTurboConan(ConanFile):
         tc.variables["WITH_JPEG7"] = self.options.libjpeg7_compatibility
         tc.variables["WITH_JPEG8"] = self.options.libjpeg8_compatibility
         tc.variables["WITH_TURBOJPEG"] = self.options.get_safe("turbojpeg", False)
-        tc.variables["WITH_JAVA"] = self.options.get_safe("java", False)
+        if Version(self.version) < "3.2.0":
+            tc.variables["WITH_JAVA"] = self.options.get_safe("java", False)
+        else:
+            tc.variables["WITH_JNA"] = False # not implemented
+            if self.options.get_safe("turbojpeg", False):
+                tc.variables["WITH_SYSTEM_SPNG"] = True
+                tc.variables["WITH_SYSTEM_ZLIB"] = True
         tc.cache_variables["WITH_TOOLS"] = False
         if Version(self.version) < "3.0.0":
             tc.variables["WITH_MEM_SRCDST"] = self.options.get_safe("mem_src_dst", False)
@@ -134,11 +147,16 @@ class LibjpegTurboConan(ConanFile):
             tc.cache_variables["CMAKE_INSTALL_JAVADIR"] = os.path.join(self.package_folder, "lib", "java")
         tc.generate()
 
+        if Version(self.version) >= "3.2.0" and self.options.get_safe("turbojpeg", False):
+            deps = CMakeDeps(self)
+            deps.generate()
+
     def _patch_sources(self):
-        # do not override /MT by /MD if shared
-        replace_in_file(self, os.path.join(self.source_folder, "sharedlib", "CMakeLists.txt"),
-                              """string(REGEX REPLACE "/MT" "/MD" ${var} "${${var}}")""",
-                              "")
+        if Version(self.version) < "3.2.0":
+            # do not override /MT by /MD if shared
+            replace_in_file(self, os.path.join(self.source_folder, "sharedlib", "CMakeLists.txt"),
+                                  """string(REGEX REPLACE "/MT" "/MD" ${var} "${${var}}")""",
+                                  "")
 
     def build(self):
         self._patch_sources()
