@@ -100,9 +100,8 @@ class CycloneDDSConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
         if Version(self.version) == "11.0.1" and not self.options.shared and self.settings.compiler == "msvc":
-            # https://github.com/eclipse-cyclonedds/cyclonedds/blob/6cc667fdc5c4f315844ef0cb634512e2ac74950a/.github/workflows/windows.yml#L63z
-            # Upstream also disabled Windows static for their test suite because they acknowledge it's broken
-            raise ConanInvalidConfiguration("Windows static builds not supported for this version")
+            # FIXME: ddsc.lib(cdtors.c.obj) : error LNK2005: tls_callback_func already defined in string.c.obj
+            raise ConanInvalidConfiguration("Windows static build is not support due linker error. See https://github.com/eclipse-cyclonedds/cyclonedds/issues/2422")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
