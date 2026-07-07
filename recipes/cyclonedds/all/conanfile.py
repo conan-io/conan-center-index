@@ -118,9 +118,11 @@ class CycloneDDSConan(ConanFile):
         # variables which effects build
         tc.variables["ENABLE_SSL"] = self.options.with_ssl
         if self._pre_v11:
-            tc.variables["ENABLE_SHM"] = self.options.with_shm
+            # INFO: deprecated in 11.0.0:
+            # https://github.com/eclipse-cyclonedds/cyclonedds/commit/9f354f462d9e8b374da408efc89050f3161322f4
+            tc.cache_variables["ENABLE_SHM"] = self.options.with_shm
         else:
-            tc.variables["ENABLE_ICEORYX"] = self.options.with_shm
+            tc.cache_variables["ENABLE_ICEORYX"] = self.options.with_shm
         tc.variables["ENABLE_SECURITY"] = self.options.enable_security
         tc.variables["ENABLE_TYPE_DISCOVERY"] = self.options.enable_discovery
         tc.variables["ENABLE_TOPIC_DISCOVERY"] = self.options.enable_discovery
