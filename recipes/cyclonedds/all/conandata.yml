@@ -17,8 +17,6 @@ sources:
 patches:
   "11.0.1":
     - patch_file: "patches/11.0.1-0001-fix-find-iceoryx.patch"
-      patch_description: "Fix cmake find for iceoryx package"
-      patch_type: "conan"
     - patch_file: "patches/11.0.1-0002-generate-cmakedeps-compat.patch"
   "0.10.5":
     - patch_file: "patches/0.10.2-0001-fix-find-iceoryx.patch"
