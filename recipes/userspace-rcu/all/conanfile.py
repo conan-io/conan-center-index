@@ -72,13 +72,16 @@ class UserspaceRCUConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        for lib_type in ["", "-bp", "-cds", "-mb", "-memb", "-qsbr"]:
+        for lib_type in ["", "-bp", "-cds", "-mb", "-memb", "-qsbr", "-common"]:
             component_name = f"urcu{lib_type}"
-            self.cpp_info.components[component_name].libs = ["urcu-common", component_name]
+            self.cpp_info.components[component_name].libs = [component_name]
             self.cpp_info.components[component_name].set_property("pkg_config_name", f"lib{component_name}")
             self.cpp_info.components[component_name].set_property("pkg_config_aliases", [component_name])
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components[component_name].system_libs = ["pthread"]
 
-        # Some definitions needed for MB and Signal variants
+            if lib_type != "-common":
+                self.cpp_info.components[component_name].requires = ["urcu-common"]
+
+        # Some definitions needed for MB variants
         self.cpp_info.components["urcu-mb"].defines = ["RCU_MB"]
