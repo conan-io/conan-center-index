@@ -81,10 +81,7 @@ class CycloneDDSConan(ConanFile):
 
     def requirements(self):
         if self.options.with_shm:
-            if self._pre_v11:
-                self.requires("iceoryx/2.0.5")
-            else:
-                self.requires("iceoryx/2.0.6")
+            self.requires("iceoryx/2.0.5")
         if self.options.with_ssl:
             self.requires("openssl/[>=1.1 <4]")
 
