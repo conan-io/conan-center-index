@@ -2,3 +2,6 @@ sources:
   "9.31":
     url: "https://github.com/ladislav-zezula/StormLib/archive/v9.31.tar.gz"
     sha256: "c8d77e626cc907c8f2d00bb5c48f9d6c70344848d49cab4468f6234afaf815c1"
+patches:
+  "9.31":
+      - patch_file: "patches/0001-9.31-unvendor-tommath.patch"

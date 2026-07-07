@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.files import copy, get, download, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 import os
 
 required_conan_version = ">=2.4"
@@ -27,12 +27,16 @@ class StormlibConan(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("bzip2/1.0.8")
+        self.requires("libtommath/1.3.0")
 
     def validate(self):
         if self.settings.os == "Macos" and self.options.shared:
@@ -42,6 +46,12 @@ class StormlibConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "set(CMAKE_CXX_STANDARD 11)", "")
+        apply_conandata_patches(self)
+        # The recipe vendorizes libtomcrypt, copy its license for later repackaging
+        download(self,
+                 url="https://raw.githubusercontent.com/libtom/libtomcrypt/a68fa19bc2b532f66a6f18ca457daec53054a312/LICENSE",
+                 filename=os.path.join(self.source_folder, "LICENSE-thirdparty-libtomcrypt"),
+                 sha256="2fa64b163659f41965c9815882a8296d3d03ff546b76153e11445f9bdecf955a")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -58,6 +68,7 @@ class StormlibConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE-thirdparty-libtomcrypt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
