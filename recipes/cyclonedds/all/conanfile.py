@@ -161,7 +161,7 @@ class CycloneDDSConan(ConanFile):
         if self.options.with_shm:
             if self._pre_v11:
                 requires.append("iceoryx::iceoryx_binding_c")
-            elif not self.options.shared:
+            else:
                 requires.extend(["iceoryx::iceoryx_hoofs", "iceoryx::iceoryx_posh"])
         if self.options.with_ssl:
             requires.append("openssl::openssl")
