@@ -127,6 +127,8 @@ class FltkConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "fltk")
         self.cpp_info.set_property("cmake_target_name", "fltk::fltk")
+        if self.options.shared:
+            self.cpp_info.set_property("cmake_target_aliases", ["fltk::fltk-shared"])
         self.cpp_info.libs = collect_libs(self)
 
         if self.settings.os in ("Linux", "FreeBSD"):
