@@ -2,3 +2,6 @@ sources:
   "1.12":
     url: "https://github.com/dougbinks/enkiTS/archive/refs/tags/v1.12.tar.gz"
     sha256: "8373b6199d56816bd3ba58432eae74e2ebd5afcfdffb723073cc34730b189fd5"
+patches:
+  "1.12":
+    - patch_file: "patches/1.12-0001-install-runtime-destination.patch"
