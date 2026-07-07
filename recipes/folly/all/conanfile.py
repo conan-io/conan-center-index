@@ -1,8 +1,7 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import (get, copy, rmdir, replace_in_file,
                                export_conandata_patches, apply_conandata_patches)
@@ -43,7 +42,7 @@ class FollyConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if is_msvc(self):
+        if self.settings.os == "Windows":
             # Folly does not support shared library on Windows: https://github.com/facebook/folly/issues/962
             self.package_type = "static-library"
             del self.options.shared
@@ -64,7 +63,7 @@ class FollyConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("zstd/[~1.5]", transitive_libs=True)
         if not is_msvc(self):
-            self.requires("libdwarf/0.9.1")
+            self.requires("libdwarf/2.1.0")
         self.requires("libsodium/[~1.0.20]")
         self.requires("xz_utils/[>=5.4.5 <6]")
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -73,12 +72,13 @@ class FollyConan(ConanFile):
             if self.settings.os == "Linux":
                 self.requires("liburing/[>=2.15 <3]")
                 self.requires("libaio/0.3.113")
-        # MSVC-fmt weirdness was fixed with fmt 11.1 and/or folly 2024.10.07.00
-        # # https://github.com/facebook/folly/commit/1cc9a3aeb8099104ba0297601d3e56b6e61e2f96
         self.requires("fmt/[>=11.2.0 <12]", transitive_headers=True, transitive_libs=True)
 
     @property
     def _required_boost_components(self):
+        # Folly's CMake find_package(Boost REQUIRED COMPONENTS ...) call needs all of these
+        # to be present at configure time, even though program_options is never actually linked
+        # (folly/cli, its only consumer, isn't built by the CMake build).
         cmps = ["context", "filesystem", "program_options", "regex"]
         if self.settings.os == "Windows":
             cmps.append("thread")
@@ -181,7 +181,7 @@ class FollyConan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        #rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
@@ -194,7 +194,7 @@ class FollyConan(ConanFile):
         self.cpp_info.components["libfolly"].libs = ["folly"]
         self.cpp_info.components["libfolly"].requires = (
                 ["fmt::fmt"] +
-                [f"boost::{comp}" for comp in self._required_boost_components] +
+                [f"boost::{comp}" for comp in self._required_boost_components if comp != "program_options"] +
                 ["gflags::gflags",
                  "glog::glog",
                  "libevent::libevent",
@@ -219,54 +219,64 @@ class FollyConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.components["libfolly"].system_libs.extend(["ws2_32", "iphlpapi", "crypt32"])
 
-        if  self.settings.get_safe("compiler.libcxx") == "libstdc++" or \
-            (self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) == "9.0" and \
-              self.settings.get_safe("compiler.libcxx") == "libc++"):
+        if  self.settings.get_safe("compiler.libcxx") == "libstdc++":
             self.cpp_info.components["libfolly"].system_libs.append("atomic")
 
-        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) >= "11.0":
+        if is_apple_os(self):
             self.cpp_info.components["libfolly"].system_libs.append("c++abi")
+
+        self.cpp_info.components["folly_benchmark_util"].set_property("cmake_target_name", "Folly::folly_benchmark_util")
+        self.cpp_info.components["folly_benchmark_util"].set_property("pkg_config_name", "libfolly_benchmark_util")
+        self.cpp_info.components["folly_benchmark_util"].libs = ["folly_benchmark_util"]
+        self.cpp_info.components["folly_benchmark_util"].requires = ["libfolly"]
 
         self.cpp_info.components["follybenchmark"].set_property("cmake_target_name", "Folly::follybenchmark")
         self.cpp_info.components["follybenchmark"].set_property("pkg_config_name", "libfollybenchmark")
         self.cpp_info.components["follybenchmark"].libs = ["follybenchmark"]
-        self.cpp_info.components["follybenchmark"].requires = ["libfolly"]
+        self.cpp_info.components["follybenchmark"].requires = ["libfolly", "folly_benchmark_util"]
 
         self.cpp_info.components["folly_test_util"].set_property("cmake_target_name", "Folly::folly_test_util")
         self.cpp_info.components["folly_test_util"].set_property("pkg_config_name", "libfolly_test_util")
         self.cpp_info.components["folly_test_util"].libs = ["folly_test_util"]
         self.cpp_info.components["folly_test_util"].requires = ["libfolly"]
 
-        if self.settings.os in ["Linux", "FreeBSD"] and not self.options.get_safe("shared"):
-            # exception tracer (renamed + granular)
-            cmp_exc = "folly_debugging_exception_tracer_"
-            for lib in [
-                "exception_tracer_base",
-                "exception_tracer",
-                "exception_tracer_callbacks",
-                "exception_counter",
-                "exception_counter_static_registration",
-                "stacktrace",
-                "smart_exception_tracer_singleton",
-                "smart_exception_tracer",
-                "smart_exception_stack_trace_hooks",
-            ]:
-                self.cpp_info.components[cmp_exc + lib].set_property("cmake_target_name", f"Folly::{cmp_exc}{lib}")
+        # exception tracer (renamed + granular)
+        cmp_exc = "folly_debugging_exception_tracer_"
+        exc_header_only = {"compatibility", "exception_abi"}
+        for lib in [
+            "compatibility",
+            "exception_abi",
+            "exception_tracer_base",
+            "exception_tracer",
+            "exception_tracer_callbacks",
+            "exception_counter",
+            "exception_counter_static_registration",
+            "stacktrace",
+            "smart_exception_tracer_singleton",
+            "smart_exception_tracer",
+            "smart_exception_stack_trace_hooks",
+        ]:
+            self.cpp_info.components[cmp_exc + lib].set_property("cmake_target_name", f"Folly::{cmp_exc}{lib}")
+            if not self.options.get_safe("shared") and lib not in exc_header_only:
                 self.cpp_info.components[cmp_exc + lib].libs = [cmp_exc + lib]
-                self.cpp_info.components[cmp_exc + lib].requires = ["libfolly"]
+            self.cpp_info.components[cmp_exc + lib].requires = ["libfolly"]
 
-            # symbolizer
-            cmp_sym = "folly_debugging_symbolizer_"
-            for lib in [
-                "elf",
-                "elf_cache",
-                "line_reader",
-                "symbolized_frame",
-                "dwarf",
-                "stack_trace",
-                "detail_debug",
-                "symbolizer",
-            ]:
-                self.cpp_info.components[cmp_sym + lib].set_property("cmake_target_name", f"Folly::{cmp_sym}{lib}")
+        # symbolizer
+        cmp_sym = "folly_debugging_symbolizer_"
+        sym_header_only = {"signal_handler", "symbolize_printer"}
+        for lib in [
+            "elf",
+            "elf_cache",
+            "line_reader",
+            "symbolized_frame",
+            "dwarf",
+            "stack_trace",
+            "detail_debug",
+            "symbolizer",
+            "signal_handler",
+            "symbolize_printer",
+        ]:
+            self.cpp_info.components[cmp_sym + lib].set_property("cmake_target_name", f"Folly::{cmp_sym}{lib}")
+            if not self.options.get_safe("shared") and lib not in sym_header_only:
                 self.cpp_info.components[cmp_sym + lib].libs = [cmp_sym + lib]
-                self.cpp_info.components[cmp_sym + lib].requires = ["libfolly"]
+            self.cpp_info.components[cmp_sym + lib].requires = ["libfolly"]
