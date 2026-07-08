@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/ByteMe6/chess-engine/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "860a8455095e97393a7244074e5358a3d0904e5502a8bff86d59638307d8f295"
