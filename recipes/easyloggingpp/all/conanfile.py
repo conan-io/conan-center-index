@@ -24,6 +24,7 @@ class EasyloggingppConan(ConanFile):
         "enable_thread_safe": [True, False],
         "enable_debug_errors": [True, False],
         "enable_default_logfile": [True, False],
+        "enable_perfomance_tracking": [True, False],
         "disable_logs": [True, False],
         "disable_debug_logs": [True, False],
         "disable_info_logs": [True, False],
@@ -40,6 +41,7 @@ class EasyloggingppConan(ConanFile):
         "enable_thread_safe": False,
         "enable_debug_errors": False,
         "enable_default_logfile": True,
+        "enable_performance_tracking": False,
         "disable_logs": False,
         "disable_debug_logs": False,
         "disable_info_logs": False,
@@ -75,6 +77,8 @@ class EasyloggingppConan(ConanFile):
             defines.append("ELPP_DEBUG_ERRORS")
         if not self.options.enable_default_logfile:
             defines.append("ELPP_NO_DEFAULT_LOG_FILE")
+        if self.options.enable_performance_tracking:
+            defines.append("ELPP_FEATURE_PERFORMANCE_TRACKING")
         if self.options.disable_logs:
             defines.append("ELPP_DISABLE_LOGS")
         if self.options.disable_debug_logs:
