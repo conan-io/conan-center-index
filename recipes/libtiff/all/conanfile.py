@@ -113,8 +113,8 @@ class LibtiffConan(ConanFile):
         cxx_option_name = "cxx" if Version(self.version) < "4.7.1" else "tiff-cxx"
         tc.variables[cxx_option_name] = self.options.cxx
         # Disable framwork option for libtiff on Apple/iOS
-        if is_apple_os(self) and Version(self.version) >= "4.7.2":
-            tc.variables["tiff-framework"] = False
+        if is_apple_os(self) and self.settings.os != "Macos" and Version(self.version) >= "4.7.2":
+            tc.cache_variables["tiff-framework"] = False
         # BUILD_SHARED_LIBS must be set in command line because defined upstream before project()
         tc.cache_variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
         tc.cache_variables["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = True
