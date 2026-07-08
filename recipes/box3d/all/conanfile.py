@@ -30,9 +30,7 @@ class Box3dConan(ConanFile):
     }
 
     implements = ["auto_shared_fpic"]
-
-    def validate(self):
-        check_min_cppstd(self, 17)
+    languages = "C"
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.22]")
@@ -78,7 +76,10 @@ class Box3dConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "box3d")
         self.cpp_info.set_property("cmake_target_name", "box3d::box3d")
-        self.cpp_info.libs = ["box3d"]
+        postfix = "d" if self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = [f"box3d{postfix}"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.system_libs.append("m")
         if self.options.double_precision:
             self.cpp_info.defines.append("BOX3D_DOUBLE_PRECISION")
         if self.options.shared and self.settings.compiler == "msvc":
