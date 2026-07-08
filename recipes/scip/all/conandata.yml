@@ -17,6 +17,8 @@ sources:
 patches:
   "10.0.2":
     - patch_file: "patches/0002-bigobj-spx-msvc-debug.patch"
+    - patch_file: "patches/format_msvc_stdext.patch"
+      patch_description: "Remove usage of stdext when building with MSVC 1915 or higher, see https://github.com/scipopt/scip/commit/6bf141d17f33fa7b6a2fc4fa18f1c2ed59048d7f"
 version_mappings:
   "10.0.2":
     soplex: "8.0.2"
