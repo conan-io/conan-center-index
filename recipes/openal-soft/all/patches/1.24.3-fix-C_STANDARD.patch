@@ -1,15 +1,14 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 060a74085..18505c61a 100644
+index 060a74085..148a585b3 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -78,9 +78,7 @@ endif()
- set(ALSOFT_STD_VERSION_PROPS
+@@ -79,8 +79,7 @@ set(ALSOFT_STD_VERSION_PROPS
      # Require C++17.
      CXX_STANDARD 17
--    CXX_STANDARD_REQUIRED TRUE
+     CXX_STANDARD_REQUIRED TRUE
 -    # Prefer C17, but support earlier when necessary.
 -    C_STANDARD 17)
-+    CXX_STANDARD_REQUIRED TRUE)
++    C_STANDARD 11)
  
  set(CMAKE_MODULE_PATH "${OpenAL_SOURCE_DIR}/cmake")
  
