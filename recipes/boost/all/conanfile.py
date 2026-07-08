@@ -1992,6 +1992,10 @@ class BoostConan(ConanFile):
                 if self._dependencies["libs"][module] and not module_libraries:
                     continue
 
+                # b2 builds boost_numpy only when numpy headers are detected, otherwise b2 silently skips it
+                if module == "numpy" and not set(module_libraries).intersection(all_detected_libraries):
+                    continue
+
                 all_expected_libraries = all_expected_libraries.union(module_libraries)
                 if set(module_libraries).difference(all_detected_libraries):
                     incomplete_components.append(module)
@@ -2077,9 +2081,12 @@ class BoostConan(ConanFile):
                 if not self._shared:
                     self.cpp_info.components["python"].defines.append("BOOST_PYTHON_STATIC_LIB")
 
-                numpy_versioned_component_name = f"numpy{pyversion.major}{pyversion.minor}"
-                self.cpp_info.components[numpy_versioned_component_name].requires = ["numpy"]
-                self.cpp_info.components[numpy_versioned_component_name].set_property("cmake_target_name", "Boost::" + numpy_versioned_component_name)
+                # b2 builds boost_numpy only when numpy headers are detected, otherwise b2 silently skips it
+                numpy_libraries = filter_transform_module_libraries(self._dependencies["libs"]["numpy"])
+                if set(numpy_libraries).intersection(all_detected_libraries):
+                    numpy_versioned_component_name = f"numpy{pyversion.major}{pyversion.minor}"
+                    self.cpp_info.components[numpy_versioned_component_name].requires = ["numpy"]
+                    self.cpp_info.components[numpy_versioned_component_name].set_property("cmake_target_name", "Boost::" + numpy_versioned_component_name)
 
             if not self.options.get_safe("without_process"):
                 if self.settings.os == "Windows":
