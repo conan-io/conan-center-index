@@ -1,13 +1,14 @@
 from conan import ConanFile
-from conan.errors import ConanException
+from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import build_jobs
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, replace_in_file, rename, rm, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, replace_in_file, rename, rm, rmdir, save
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 
 import os
+import re
 
 
 required_conan_version = ">=2.25"
@@ -26,7 +27,13 @@ class OpenSSLConan(ConanFile):
         "fPIC": [True, False],
         "no_fips": [True, False],
         "openssldir": [None, "ANY"],
-        "extra_build_opts": [None, "ANY"], # comma separated 
+        "extra_build_opts": [None, "ANY"], # comma separated
+        # An option (not a conf / extra_build_opts) on purpose: a variant build
+        # yields a distinct, non-interchangeable artifact (different SONAME /
+        # symbol-version / link name), so it must affect the package_id. It is
+        # also not settable on OpenSSL's command line (it is a target-file only
+        # attribute), so it cannot be passed through extra_build_opts.
+        "shlib_variant": [None, "ANY"],
     }
     default_options = {
         "shared": False,
@@ -34,6 +41,7 @@ class OpenSSLConan(ConanFile):
         "no_fips": False,
         "openssldir": None,
         "extra_build_opts": None,
+        "shlib_variant": None,
     }
 
     @property
@@ -46,6 +54,21 @@ class OpenSSLConan(ConanFile):
     def _msvc_abi(self):
         return self.settings.os == "Windows" and self.settings.compiler.get_safe("runtime")
 
+    @property
+    def _shlib_variant(self):
+        # OpenSSL inserts the "shlib variant" identifier between the base shared
+        # library name and its extension (e.g. libssl.so.3 -> libssl-abc.so.3 on
+        # unixy platforms, libssl-3.dll -> libssl-3-abc.dll on MSVC), see
+        # Configurations/README.md. It applies to *shared* builds on unixy
+        # platforms (Linux, *BSD, Solaris, macOS) and on MSVC; MinGW ignores it
+        # and static archives are never renamed. Note: on Windows only the DLL
+        # is renamed, not the import library, so this must not reach the link
+        # name in cpp_info.libs (see package_info).
+        variant = self.options.get_safe("shlib_variant")
+        if variant and self.options.shared and not self._is_mingw:
+            return str(variant)
+        return None
+
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
@@ -55,6 +78,16 @@ class OpenSSLConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+
+    def validate(self):
+        shlib_variant = self.options.get_safe("shlib_variant")
+        if shlib_variant and not re.fullmatch(r"[A-Za-z0-9_-]+", str(shlib_variant)):
+            # OpenSSL derives a symbol-version macro from the variant by
+            # uppercasing letters and mapping non-alphanumerics to '_', so
+            # restrict it to a safe character set to avoid a malformed name.
+            raise ConanInvalidConfiguration(
+                "shlib_variant may only contain letters, digits, '-' and '_'"
+            )
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -79,11 +112,11 @@ class OpenSSLConan(ConanFile):
     def _target(self):
         # Map the Conan os/arch to a built-in OpenSSL Configure target (see `./Configure LIST`).
         # Conan's "armv8" is arm64/aarch64. Anything not listed must be supplied explicitly
-        # via the user.openssl:target conf.     
+        # via the user.openssl:target conf.
         custom_target = self.conf.get("user.openssl:target", check_type=str)
         if custom_target:
             return custom_target
-        
+
         targets = {
             ("Android", "armv8"): "android-arm64",
             ("Linux", "x86_64"): "linux-x86_64",
@@ -108,6 +141,26 @@ class OpenSSLConan(ConanFile):
             )
         return targets[key]
 
+    @property
+    def _configure_target(self):
+        # shlib_variant can only be set as a Configurations/*.conf target
+        # attribute (there is no Configure command-line option for it), so when
+        # requested we build through a derived target defined in _write_shlib_variant_config.
+        return "conan-shlib-variant" if self._shlib_variant else self._target
+
+    def _write_shlib_variant_config(self):
+        # Emit a derived target that inherits the built-in one and only adds the
+        # shlib_variant attribute. Configure auto-globs Configurations/*.conf.
+        config = (
+            'my %targets = (\n'
+            '    "conan-shlib-variant" => {\n'
+            f'        inherit_from => [ "{self._target}" ],\n'
+            f'        shlib_variant => "{self._shlib_variant}",\n'
+            '    },\n'
+            ');\n'
+        )
+        save(self, os.path.join(self.source_folder, "Configurations", "20-conan.conf"), config)
+
     def generate(self):
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
@@ -119,7 +172,7 @@ class OpenSSLConan(ConanFile):
     @property
     def _configure_args(self):
         args = [
-            f'"{self._target}"',
+            f'"{self._configure_target}"',
             "shared" if self.options.shared else "no-shared",
             "--debug" if self.settings.build_type == "Debug" else "--release",
             "no-fips" if self.options.no_fips else "enable-fips",
@@ -139,7 +192,7 @@ class OpenSSLConan(ConanFile):
             args.extend(flag.strip() for flag in str(self.options.extra_build_opts).split(",") if flag.strip())
 
         return args
-    
+
     @property
     def _make_program(self):
         if self._msvc_abi:
@@ -148,6 +201,8 @@ class OpenSSLConan(ConanFile):
             return self.conf.get("tools.gnu:make_program", default="make")
 
     def build(self):
+        if self._shlib_variant:
+            self._write_shlib_variant_config()
         args = " ".join(self._configure_args)
         perl = "perl" if "strawberryperl" in self.dependencies.build else ""
         configure = os.path.join(self.source_folder, "Configure").replace('\\', '/')
@@ -188,10 +243,16 @@ class OpenSSLConan(ConanFile):
                                                              'OPENSSL_SSL_LIBRARY': 'OpenSSL::SSL',
                                                              'OPENSSL_SSL_LIBRARIES': 'OpenSSL::SSL',
                                                              'OPENSSL_LIBRARIES': 'OpenSSL::SSL;OpenSSL::Crypto'})
-        
+
         prefix = "lib" if self._msvc_abi else ""
-        self.cpp_info.components["ssl"].libs = [f"{prefix}ssl"]
-        self.cpp_info.components["crypto"].libs = [f"{prefix}crypto"]
+        # On unixy platforms the variant is part of the shared library file name
+        # (libssl.so.3 -> libssl-abc.so.3), so the link name must carry it too.
+        # On Windows only the DLL is renamed; the import library that is actually
+        # linked keeps the base name, so the variant must NOT be added here.
+        variant = self._shlib_variant if self.settings.os != "Windows" else None
+        variant = variant or ""
+        self.cpp_info.components["ssl"].libs = [f"{prefix}ssl{variant}"]
+        self.cpp_info.components["crypto"].libs = [f"{prefix}crypto{variant}"]
         self.cpp_info.components["ssl"].requires = ["crypto"]
 
         if self.settings.os == "Windows":
