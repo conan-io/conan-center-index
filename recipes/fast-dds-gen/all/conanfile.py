@@ -14,7 +14,6 @@ class FastDdsGenConan(ConanFile):
     homepage = "https://github.com/eProsima/Fast-DDS-Gen"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("idl", "code-generation", "fastdds")
-
     package_type = "application"
     settings = "os", "arch"
 
@@ -26,6 +25,9 @@ class FastDdsGenConan(ConanFile):
 
     def requirements(self):
         self.requires("openjdk/19.0.2")
+
+    def package_id(self):
+        self.info.clear()
 
     def build_requirements(self):
         self.tool_requires("openjdk/<host_version>")
