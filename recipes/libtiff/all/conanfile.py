@@ -119,6 +119,7 @@ class LibtiffConan(ConanFile):
         tc.cache_variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
         tc.cache_variables["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = True
         tc.cache_variables["HAVE_JPEGTURBO_DUAL_MODE_8_12"] = self.options.jpeg == "libjpeg-turbo"
+        tc.cache_variables["jpeg-prefer-standard"] = self.options.jpeg == "libjpeg"
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("jbig", "cmake_file_name", "JBIG")
