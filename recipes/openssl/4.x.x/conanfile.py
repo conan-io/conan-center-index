@@ -146,14 +146,19 @@ class OpenSSLConan(ConanFile):
         # shlib_variant can only be set as a Configurations/*.conf target
         # attribute (there is no Configure command-line option for it), so when
         # requested we build through a derived target defined in _write_shlib_variant_config.
-        return "conan-shlib-variant" if self._shlib_variant else self._target
+        # The derived name keeps the built-in target as a prefix on purpose: some
+        # of OpenSSL's build.info files gate sources on the *selected* target name
+        # (e.g. apps/lib compiles win32_init.c only IF target =~ /^(?:VC-|mingw|BC-)/),
+        # so the derived target must preserve that prefix or those sources are
+        # dropped (undefined win32_utf8argv at link time on MSVC).
+        return f"{self._target}-conan-shlib-variant" if self._shlib_variant else self._target
 
     def _write_shlib_variant_config(self):
         # Emit a derived target that inherits the built-in one and only adds the
         # shlib_variant attribute. Configure auto-globs Configurations/*.conf.
         config = (
             'my %targets = (\n'
-            '    "conan-shlib-variant" => {\n'
+            f'    "{self._configure_target}" => {{\n'
             f'        inherit_from => [ "{self._target}" ],\n'
             f'        shlib_variant => "{self._shlib_variant}",\n'
             '    },\n'
