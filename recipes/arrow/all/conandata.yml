@@ -1,4 +1,7 @@
 sources:
+  "25.0.0":
+    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-25.0.0/apache-arrow-25.0.0.tar.gz?action=download"
+    sha256: "12afc2dc8137bdd4a68876cec939f664c9d55cfc7b75f55b45163ebb4e344d81"
   "24.0.0":
     url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-24.0.0/apache-arrow-24.0.0.tar.gz?action=download"
     sha256: "9a8094d24fa33b90c672ab77fdda253f29300c8b0dd3f0b8e55a29dbd98b82c9"

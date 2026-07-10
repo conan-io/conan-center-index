@@ -1,4 +1,6 @@
 versions:
+  "25.0.0":
+    folder: all
   "24.0.0":
     folder: all
   "23.0.1":
