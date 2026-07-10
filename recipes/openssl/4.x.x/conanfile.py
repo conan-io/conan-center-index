@@ -29,10 +29,10 @@ class OpenSSLConan(ConanFile):
         "openssldir": [None, "ANY"],
         "extra_build_opts": [None, "ANY"], # comma separated
         # An option (not a conf / extra_build_opts) on purpose: a variant build
-        # yields a distinct, non-interchangeable artifact (different SONAME /
-        # symbol-version / link name), so it must affect the package_id. It is
-        # also not settable on OpenSSL's command line (it is a target-file only
-        # attribute), so it cannot be passed through extra_build_opts.
+        # yields a distinct, non-interchangeable artifact (different SONAME and
+        # versioned library file name / symbol versions), so it must affect the
+        # package_id. It is also not settable on OpenSSL's command line (it is a
+        # target-file only attribute), so it cannot go through extra_build_opts.
         "shlib_variant": [None, "ANY"],
     }
     default_options = {
@@ -56,14 +56,14 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _shlib_variant(self):
-        # OpenSSL inserts the "shlib variant" identifier between the base shared
-        # library name and its extension (e.g. libssl.so.3 -> libssl-abc.so.3 on
-        # unixy platforms, libssl-3.dll -> libssl-3-abc.dll on MSVC), see
-        # Configurations/README.md. It applies to *shared* builds on unixy
-        # platforms (Linux, *BSD, Solaris, macOS) and on MSVC; MinGW ignores it
-        # and static archives are never renamed. Note: on Windows only the DLL
-        # is renamed, not the import library, so this must not reach the link
-        # name in cpp_info.libs (see package_info).
+        # OpenSSL inserts the "shlib variant" identifier into the versioned
+        # shared library file name and its SONAME (e.g. libssl.so.3 ->
+        # libssl-abc.so.3 on unixy platforms, libssl-3.dll -> libssl-3-abc.dll on
+        # MSVC), see Configurations/README.md. It applies to *shared* builds on
+        # unixy platforms (Linux, *BSD, Solaris, macOS) and on MSVC; MinGW
+        # ignores it and static archives are never renamed. Note the development
+        # symlink (libssl.so) and the MSVC import library keep the base name, so
+        # this must NOT reach cpp_info.libs (see package_info).
         variant = self.options.get_safe("shlib_variant")
         if variant and self.options.shared and not self._is_mingw:
             return str(variant)
@@ -250,14 +250,14 @@ class OpenSSLConan(ConanFile):
                                                              'OPENSSL_LIBRARIES': 'OpenSSL::SSL;OpenSSL::Crypto'})
 
         prefix = "lib" if self._msvc_abi else ""
-        # On unixy platforms the variant is part of the shared library file name
-        # (libssl.so.3 -> libssl-abc.so.3), so the link name must carry it too.
-        # On Windows only the DLL is renamed; the import library that is actually
-        # linked keeps the base name, so the variant must NOT be added here.
-        variant = self._shlib_variant if self.settings.os != "Windows" else None
-        variant = variant or ""
-        self.cpp_info.components["ssl"].libs = [f"{prefix}ssl{variant}"]
-        self.cpp_info.components["crypto"].libs = [f"{prefix}crypto{variant}"]
+        # The link name is intentionally NOT suffixed with the shlib variant.
+        # OpenSSL applies the variant only to the *versioned* shared object and
+        # its SONAME (libssl-abc.so.4); the development symlink that is actually
+        # linked against keeps the base name (libssl.so -> libssl-abc.so.4).
+        # Likewise on Windows only the DLL is renamed, not the import library.
+        # So consumers link with -lssl as usual and pick up the variant SONAME.
+        self.cpp_info.components["ssl"].libs = [f"{prefix}ssl"]
+        self.cpp_info.components["crypto"].libs = [f"{prefix}crypto"]
         self.cpp_info.components["ssl"].requires = ["crypto"]
 
         if self.settings.os == "Windows":
