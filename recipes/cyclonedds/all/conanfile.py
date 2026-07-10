@@ -207,6 +207,8 @@ class CycloneDDSConan(ConanFile):
             self.cpp_info.components["idl"].build_modules["cmake_find_package_multi"] = build_modules
             self.cpp_info.components["idl"].requires = ["CycloneDDS"]
 
-            self.cpp_info.components["libidlc"].set_property("cmake_target_name", "CycloneDDS::libidlc")
-            self.cpp_info.components["libidlc"].libs = ["cycloneddsidlc"]
-            self.cpp_info.components["libidlc"].requires = ["idl", "CycloneDDS"]
+            if Version(self.version) >= "11.0.0":
+                # https://github.com/eclipse-cyclonedds/cyclonedds/pull/1752
+                self.cpp_info.components["libidlc"].set_property("cmake_target_name", "CycloneDDS::libidlc")
+                self.cpp_info.components["libidlc"].libs = ["cycloneddsidlc"]
+                self.cpp_info.components["libidlc"].requires = ["idl", "CycloneDDS"]
