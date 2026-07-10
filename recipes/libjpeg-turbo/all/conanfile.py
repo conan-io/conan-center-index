@@ -139,6 +139,7 @@ class LibjpegTurboConan(ConanFile):
     def _patch_sources(self):
         if Version(self.version) < "3.2.0":
             # do not override /MT by /MD if shared
+            # Fixed by https://github.com/libjpeg-turbo/libjpeg-turbo/commit/c39ea08d81553657da649bc870a206365163b822
             replace_in_file(self, os.path.join(self.source_folder, "sharedlib", "CMakeLists.txt"),
                                   """string(REGEX REPLACE "/MT" "/MD" ${var} "${${var}}")""",
                                   "")
