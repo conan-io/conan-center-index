@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -46,9 +46,6 @@ class LibjpegTurboConan(ConanFile):
         "java": False,
         "enable12bit": False,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -94,7 +91,6 @@ class LibjpegTurboConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     @property
     def _is_arithmetic_encoding_enabled(self):
@@ -111,6 +107,7 @@ class LibjpegTurboConan(ConanFile):
         env.generate()
 
         tc = CMakeToolchain(self)
+        tc.blocks.remove("output_dirs")
         tc.variables["ENABLE_STATIC"] = not self.options.shared
         tc.variables["ENABLE_SHARED"] = self.options.shared
         tc.variables["WITH_SIMD"] = self.options.get_safe("SIMD", False)
