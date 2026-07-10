@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -135,10 +135,6 @@ class LibjpegTurboConan(ConanFile):
         if self.options.get_safe("java", False):
             tc.cache_variables["CMAKE_INSTALL_JAVADIR"] = os.path.join(self.package_folder, "lib", "java")
         tc.generate()
-
-        if Version(self.version) >= "3.2.0" and self.options.get_safe("turbojpeg", False):
-            deps = CMakeDeps(self)
-            deps.generate()
 
     def _patch_sources(self):
         if Version(self.version) < "3.2.0":
