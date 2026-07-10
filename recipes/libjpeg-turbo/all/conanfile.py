@@ -80,11 +80,6 @@ class LibjpegTurboConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def requirements(self):
-        if Version(self.version) >= "3.2.0" and self.options.get_safe("turbojpeg", False):
-            self.requires("libspng/0.7.4")
-            self.requires("zlib/[>=1.2.11 <2]")
-
     def validate(self):
         if self.options.get_safe("enable12bit") and (self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility):
             raise ConanInvalidConfiguration("12-bit samples is not allowed with libjpeg v7/v8 API/ABI")
@@ -129,10 +124,6 @@ class LibjpegTurboConan(ConanFile):
         tc.variables["WITH_TURBOJPEG"] = self.options.get_safe("turbojpeg", False)
         if Version(self.version) < "3.2.0":
             tc.variables["WITH_JAVA"] = self.options.get_safe("java", False)
-        else:
-            if self.options.get_safe("turbojpeg", False):
-                tc.variables["WITH_SYSTEM_SPNG"] = True
-                tc.variables["WITH_SYSTEM_ZLIB"] = True
         tc.cache_variables["WITH_TOOLS"] = False
         if Version(self.version) < "3.0.0":
             tc.variables["WITH_MEM_SRCDST"] = self.options.get_safe("mem_src_dst", False)
