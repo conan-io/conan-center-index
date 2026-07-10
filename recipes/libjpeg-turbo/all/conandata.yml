@@ -20,7 +20,6 @@ sources:
 patches:
   "3.2.0":
     - patch_file: "patches/3.2.0-0001-skip-custom-cmake-install.patch"
-    - patch_file: "patches/3.2.0-0002-find-conan-packages.patch"
     - patch_file: "patches/3.2.0-0003-fix-msvc-runtime.patch"
   "3.1.4.1":
     - patch_file: "patches/3.1.4.1-0001-skip-custom-cmake-install.patch"
