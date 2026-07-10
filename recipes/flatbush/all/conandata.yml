@@ -1,4 +1,4 @@
 sources:
-  "1.4.0":
-    url: "https://github.com/chusitoo/flatbush/archive/refs/tags/v1.4.0.zip"
-    sha256: "e96f223500f62b3f09aeb8e31e0efcfb113c4dd7f002e835e34f544a5a70e51f"
+  "1.4.1":
+    url: "https://github.com/chusitoo/flatbush/archive/refs/tags/v1.4.1.zip"
+    sha256: "1d531c49700d11bdc4941d6e8e997ce8e309f24abe849ae294e8aee563c25a47"
