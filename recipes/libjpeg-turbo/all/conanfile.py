@@ -57,7 +57,8 @@ class LibjpegTurboConan(ConanFile):
             del self.options.enable12bit
             del self.options.mem_src_dst
         if Version(self.version) >= "3.2.0":
-            del self.options.java # not implemented
+            # Replaced by JNA: https://github.com/libjpeg-turbo/libjpeg-turbo/blob/3.2.0/jna/README.md
+            del self.options.java
 
     def configure(self):
         if self.options.shared:
@@ -129,7 +130,6 @@ class LibjpegTurboConan(ConanFile):
         if Version(self.version) < "3.2.0":
             tc.variables["WITH_JAVA"] = self.options.get_safe("java", False)
         else:
-            tc.variables["WITH_JNA"] = False # not implemented
             if self.options.get_safe("turbojpeg", False):
                 tc.variables["WITH_SYSTEM_SPNG"] = True
                 tc.variables["WITH_SYSTEM_ZLIB"] = True
