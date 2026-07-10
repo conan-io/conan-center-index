@@ -63,6 +63,9 @@ class OpenALSoftConan(ConanFile):
         if self.settings.os == "Linux":
             self.requires("libalsa/1.2.10")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.21]")
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
