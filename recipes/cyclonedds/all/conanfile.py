@@ -176,6 +176,7 @@ class CycloneDDSConan(ConanFile):
                 "iphlpapi"
             ]
 
+        # TODO: CMakeConfigDeps + cpp_info.exe can replace CycloneDDS_idlc.cmake
         build_modules = [
             os.path.join("lib", "cmake", "CycloneDDS", "CycloneDDS_idlc.cmake"),
             os.path.join("lib", "cmake", "CycloneDDS", "idlc", "Generate.cmake"),
@@ -204,3 +205,8 @@ class CycloneDDSConan(ConanFile):
             self.cpp_info.components["idl"].set_property("cmake_target_name", "CycloneDDS::idl")
             self.cpp_info.components["idl"].build_modules["cmake_find_package"] = build_modules
             self.cpp_info.components["idl"].build_modules["cmake_find_package_multi"] = build_modules
+            self.cpp_info.components["idl"].requires = ["CycloneDDS"]
+
+            self.cpp_info.components["libidlc"].set_property("cmake_target_name", "CycloneDDS::libidlc")
+            self.cpp_info.components["libidlc"].libs = ["cycloneddsidlc"]
+            self.cpp_info.components["libidlc"].requires = ["idl", "CycloneDDS"]
