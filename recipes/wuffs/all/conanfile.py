@@ -3,7 +3,7 @@ from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2.0"
 
 
 class WuffsConan(ConanFile):
@@ -43,6 +43,5 @@ class WuffsConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.set_property("cmake_file_name", "wuffs")
-        self.cpp_info.set_property("cmake_target_name", "wuffs::wuffs")
+
 
