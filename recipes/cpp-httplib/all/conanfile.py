@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
+from conan.tools.apple import is_apple_os
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
@@ -106,13 +107,21 @@ class CpphttplibConan(ConanFile):
             self.cpp_info.system_libs = ["pthread", "anl"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["crypt32", "cryptui", "ws2_32"]
-        elif self.settings.os == "Macos":
-            if self._tls_enabled and self.options.get_safe("use_macos_keychain_certs"):
-                self.cpp_info.frameworks.extend(["CFNetwork", "CoreFoundation", "Security"])
-                if Version(self.version) < "0.36.0":
-                    self.cpp_info.defines.append("CPPHTTPLIB_USE_CERTS_FROM_MACOSX_KEYCHAIN")
+        elif is_apple_os(self):
+            # CPPHTTPLIB_USE_NON_BLOCKING_GETADDRINFO (added unconditionally below)
+            # compiles the CFHost-based asynchronous DNS resolver in
+            # getaddrinfo_with_timeout(), which references CoreFoundation and
+            # CFNetwork symbols on every Apple platform (macOS, iOS, ...). These
+            # frameworks must therefore be linked whenever the define is set, not
+            # only in the macOS keychain-certs case.
+            self.cpp_info.frameworks.extend(["CoreFoundation", "CFNetwork"])
+            if self.settings.os == "Macos":
+                if self._tls_enabled and self.options.get_safe("use_macos_keychain_certs"):
+                    self.cpp_info.frameworks.append("Security")
+                    if Version(self.version) < "0.36.0":
+                        self.cpp_info.defines.append("CPPHTTPLIB_USE_CERTS_FROM_MACOSX_KEYCHAIN")
 
-            if not self.options.get_safe("use_macos_keychain_certs") and Version(self.version) >= "0.36.0":
-                self.cpp_info.defines.append("CPPHTTPLIB_DISABLE_MACOSX_AUTOMATIC_ROOT_CERTIFICATES")
+                if not self.options.get_safe("use_macos_keychain_certs") and Version(self.version) >= "0.36.0":
+                    self.cpp_info.defines.append("CPPHTTPLIB_DISABLE_MACOSX_AUTOMATIC_ROOT_CERTIFICATES")
 
         self.cpp_info.defines.append("CPPHTTPLIB_USE_NON_BLOCKING_GETADDRINFO")
