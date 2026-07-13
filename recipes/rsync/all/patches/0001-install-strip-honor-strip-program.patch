@@ -1,10 +1,20 @@
 --- a/Makefile.in
 +++ b/Makefile.in
-@@ -100,6 +100,6 @@
+@@ -21,6 +21,7 @@
+ 
+ INSTALLCMD=@INSTALL@
+ INSTALLMAN=@INSTALL@
++STRIP ?= strip
+ 
+ srcdir=@srcdir@
+ MKDIR_P=@MKDIR_P@
+@@ -100,7 +101,8 @@
  install-all: install install-ssl-daemon
  
  install-strip:
 -	$(MAKE) INSTALL_STRIP='-s' install
-+	$(MAKE) INSTALL_STRIP='-s --strip-program=$(or $(STRIP),strip)' install
++	$(MAKE) install
++	$(STRIP) $(DESTDIR)$(bindir)/rsync$(EXEEXT)
  
  rsync$(EXEEXT): $(OBJS)
+ 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
