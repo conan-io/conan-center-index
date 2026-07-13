@@ -5,6 +5,6 @@ sources:
 patches:
   "3.2.7":
     - patch_file: "patches/0001-install-strip-honor-strip-program.patch"
-      patch_description: "install-strip: strip with --strip-program=$(STRIP) so cross-compiled binaries use the cross strip instead of the host strip"
+      patch_description: "install-strip: install then strip the binary with $(STRIP) (honoring the toolchain strip, defaulting to strip) so cross-compiled binaries use the cross strip instead of the host strip"
       patch_type: "portability"
       patch_source: "https://github.com/RsyncProject/rsync/pull/1024"
