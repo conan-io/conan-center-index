@@ -66,9 +66,9 @@ class Open62541Conan(ConanFile):
         # False: UA_ENABLE_DISCOVERY=Off
         # True: UA_ENABLE_DISCOVERY=On
         # With Multicast: Deprecated. Use 'multicast' instead
-        # multicast: UA_ENABLE_DISCOVERY_MULTICAST=On
+        # multicast: UA_ENABLE_DISCOVERY_MULTICAST=On (<1.5.0) / UA_ENABLE_DISCOVERY_MULTICAST=MDNSD (>=1.5.0)
         # semaphore: UA_ENABLE_DISCOVERY_SEMAPHORE=On
-        # multicast,semaphore: UA_ENABLE_DISCOVERY_MULTICAST=On and UA_ENABLE_DISCOVERY_SEMAPHORE=On
+        # multicast,semaphore: UA_ENABLE_DISCOVERY_MULTICAST=On/MDNSD and UA_ENABLE_DISCOVERY_SEMAPHORE=On        "discovery": [True, False, "With Multicast", "multicast", "semaphore", "multicast,semaphore"],
         "discovery": [True, False, "With Multicast", "multicast", "semaphore", "multicast,semaphore"],
         # Deprecated. Use discovery=semaphore instead
         "discovery_semaphore": [True, False],
@@ -310,11 +310,15 @@ class Open62541Conan(ConanFile):
         tc.variables["UA_ENABLE_DISCOVERY"] = self.options.discovery != False
 
         if self.options.discovery != False:
-            mdnsd_variable = "UA_ENABLE_DISCOVERY_MULTICAST" if Version(self.version) < "1.5.0" \
-                else "UA_ENABLE_DISCOVERY_MULTICAST_MDNSD"
-            tc.variables[mdnsd_variable] = \
-                self.options.discovery == "With Multicast" or "multicast" in str(
-                    self.options.discovery)
+            multicast_enabled = self.options.discovery == "With Multicast" or "multicast" in str(
+                self.options.discovery)
+            # For >=1.5.0 UA_ENABLE_DISCOVERY_MULTICAST is an enum (OFF/MDNSD/AVAHI); the
+            # UA_ENABLE_DISCOVERY_MULTICAST_MDNSD boolean is derived from it and cannot be
+            # set directly. For <1.5.0 the variable is a plain ON/OFF boolean.
+            if version < "1.5.0":
+                tc.variables["UA_ENABLE_DISCOVERY_MULTICAST"] = multicast_enabled
+            else:
+                tc.variables["UA_ENABLE_DISCOVERY_MULTICAST"] = "MDNSD" if multicast_enabled else "OFF"
             tc.variables["UA_ENABLE_DISCOVERY_SEMAPHORE"] = \
                 self.options.discovery_semaphore or "semaphore" in str(
                     self.options.discovery)
