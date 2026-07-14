@@ -1,0 +1,20 @@
+From 6624c1d8adb6238db3ef23dd7510c8d076369776 Mon Sep 17 00:00:00 2001
+Date: Wed, 1 Mar 2023 18:30:26 +0300
+Subject: [PATCH] Add algorithm include
+
+---
+ src/draco/io/ply_reader.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/draco/io/ply_reader.cc b/src/draco/io/ply_reader.cc
+index ea7f2689a..0da9ab5fe 100644
+--- a/src/draco/io/ply_reader.cc
++++ b/src/draco/io/ply_reader.cc
+@@ -14,6 +14,7 @@
+ //
+ #include "draco/io/ply_reader.h"
+ 
++#include <algorithm>
+ #include <array>
+ #include <regex>
+ 
