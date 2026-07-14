@@ -127,8 +127,6 @@ class LibjpegTurboConan(ConanFile):
             tc.variables["CMAKE_MACOSX_BUNDLE"] = False # avoid configuration error if building for iOS/tvOS/watchOS
         if Version(self.version) < "3.0.2":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if self.options.get_safe("java", False):
-            tc.cache_variables["CMAKE_INSTALL_JAVADIR"] = os.path.join(self.package_folder, "lib", "java")
         tc.generate()
 
     def _patch_sources(self):
@@ -149,7 +147,7 @@ class LibjpegTurboConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         # remove unneeded directories
-        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "share", "doc"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "doc"))
