@@ -68,25 +68,25 @@ class DracoConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["DRACO_POINT_CLOUD_COMPRESSION"] = self.options.enable_point_cloud_compression
-        tc.variables["DRACO_MESH_COMPRESSION"] = self.options.enable_mesh_compression
+        tc.cache_variables["DRACO_POINT_CLOUD_COMPRESSION"] = self.options.enable_point_cloud_compression
+        tc.cache_variables["DRACO_MESH_COMPRESSION"] = self.options.enable_mesh_compression
         if self.options.enable_mesh_compression:
-            tc.variables["DRACO_STANDARD_EDGEBREAKER"] = self.options.enable_standard_edgebreaker
-            tc.variables["DRACO_PREDICTIVE_EDGEBREAKER"] = self.options.enable_predictive_edgebreaker
-        tc.variables["DRACO_ANIMATION_ENCODING"] = False
-        tc.variables["DRACO_BACKWARDS_COMPATIBILITY"] = self.options.enable_backwards_compatibility
-        tc.variables["DRACO_DECODER_ATTRIBUTE_DEDUPLICATION"] = False
-        tc.variables["DRACO_FAST"] = False
+            tc.cache_variables["DRACO_STANDARD_EDGEBREAKER"] = self.options.enable_standard_edgebreaker
+            tc.cache_variables["DRACO_PREDICTIVE_EDGEBREAKER"] = self.options.enable_predictive_edgebreaker
+        tc.cache_variables["DRACO_ANIMATION_ENCODING"] = False
+        tc.cache_variables["DRACO_BACKWARDS_COMPATIBILITY"] = self.options.enable_backwards_compatibility
+        tc.cache_variables["DRACO_DECODER_ATTRIBUTE_DEDUPLICATION"] = False
+        tc.cache_variables["DRACO_FAST"] = False
         # DRACO_GLTF True overrides options by enabling
         #   DRACO_MESH_COMPRESSION_SUPPORTED,
         #   DRACO_NORMAL_ENCODING_SUPPORTED,
         #   DRACO_STANDARD_EDGEBREAKER_SUPPORTED
-        tc.variables["DRACO_GLTF"] = False
-        tc.variables["DRACO_JS_GLUE"] = False
-        tc.variables["DRACO_MAYA_PLUGIN"] = False
-        tc.variables["DRACO_TESTS"] = False
-        tc.variables["DRACO_UNITY_PLUGIN"] = False
-        tc.variables["DRACO_WASM"] = False
+        tc.cache_variables["DRACO_GLTF"] = False
+        tc.cache_variables["DRACO_JS_GLUE"] = False
+        tc.cache_variables["DRACO_MAYA_PLUGIN"] = False
+        tc.cache_variables["DRACO_TESTS"] = False
+        tc.cache_variables["DRACO_UNITY_PLUGIN"] = False
+        tc.cache_variables["DRACO_WASM"] = False
         tc.generate()
 
     def build(self):
