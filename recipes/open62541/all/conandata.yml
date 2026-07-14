@@ -10,6 +10,9 @@ patches:
     - patch_file: "patches/0004-include-iphlpapi-1.5.0.patch"
       patch_description: "Include iphlpapi.h for SecureZeroMemory"
       patch_type: "conan"
+    - patch_file: "patches/1002-add-inet-to-libmdnsd.patch"
+      patch_description: "Add inet.h/inet.c to the libmdnsd headers and sources"
+      patch_type: "conan"
   "1.4.14":
     - patch_file: "patches/0004-include-iphlpapi.patch"
       patch_description: "Include iphlpapi.h for SecureZeroMemory"
