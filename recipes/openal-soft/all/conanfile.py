@@ -149,6 +149,8 @@ class OpenALSoftConan(ConanFile):
                 self.cpp_info.frameworks.append("ApplicationServices")
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["winmm", "ole32", "shell32", "user32"])
+            if Version(self.version) >= "1.24.0":
+                self.cpp_info.system_libs.append("avrt")
         if not self.options.shared:
             libcxx = stdcpp_library(self)
             if libcxx:
