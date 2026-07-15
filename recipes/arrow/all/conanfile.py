@@ -269,6 +269,11 @@ class ArrowConan(ConanFile):
         if self.options.parquet and not self.options.with_thrift:
             raise ConanInvalidConfiguration("arrow:parquet requires arrow:with_thrift")
 
+        if (Version(self.version) >= "25.0.0" and self.options.simd_level == "disabled" and self.options.runtime_simd_level == "disabled"):
+            # arrow >= 25.0.0 always resolves xsimd for CpuInfo, even when SIMD is disabled
+            # see: https://github.com/apache/arrow/blob/apache-arrow-25.0.0/cpp/cmake_modules/ThirdpartyToolchain.cmake#L2848-L2855
+            raise ConanInvalidConfiguration("arrow >= 25.0.0 always requires xsimd")
+
     def build_requirements(self):
         if self.options.with_protobuf:
             self.tool_requires("protobuf/<host_version>")
