@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -46,9 +46,6 @@ class LibjpegTurboConan(ConanFile):
         "java": False,
         "enable12bit": False,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -97,7 +94,6 @@ class LibjpegTurboConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     @property
     def _is_arithmetic_encoding_enabled(self):
@@ -114,6 +110,7 @@ class LibjpegTurboConan(ConanFile):
         env.generate()
 
         tc = CMakeToolchain(self)
+        tc.blocks.remove("output_dirs")
         tc.variables["ENABLE_STATIC"] = not self.options.shared
         tc.variables["ENABLE_SHARED"] = self.options.shared
         tc.variables["WITH_SIMD"] = self.options.get_safe("SIMD", False)
@@ -132,8 +129,6 @@ class LibjpegTurboConan(ConanFile):
             tc.variables["WITH_CRT_DLL"] = True # avoid replacing /MD by /MT in compiler flags
         if Version(self.version) < "3.0.2":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if self.options.get_safe("java", False):
-            tc.cache_variables["CMAKE_INSTALL_JAVADIR"] = os.path.join(self.package_folder, "lib", "java")
         tc.generate()
 
     def _patch_sources(self):
@@ -156,7 +151,7 @@ class LibjpegTurboConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         # remove unneeded directories
-        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "share", "doc"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "doc"))

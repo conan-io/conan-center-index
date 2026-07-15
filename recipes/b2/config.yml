@@ -25,3 +25,5 @@ versions:
     folder: portable
   "5.4.2":
     folder: portable
+  "5.5.1":
+    folder: portable
