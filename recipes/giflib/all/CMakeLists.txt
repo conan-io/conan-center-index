@@ -3,7 +3,9 @@ project(gif LANGUAGES C)
 
 include(GNUInstallDirs)
 
-add_library(gif
+# In giflib 6.x, quantize.c is part of the core library (see upstream Makefile
+# SOURCES), unlike 5.x where it lived in the utility helper library.
+set(GIFLIB_SOURCES
     "${GIFLIB_SRC_DIR}/dgif_lib.c"
     "${GIFLIB_SRC_DIR}/egif_lib.c"
     "${GIFLIB_SRC_DIR}/gifalloc.c"
@@ -12,6 +14,12 @@ add_library(gif
     "${GIFLIB_SRC_DIR}/gif_hash.c"
     "${GIFLIB_SRC_DIR}/openbsd-reallocarray.c"
 )
+# In giflib 6.x, quantize.c is part of the core library (see upstream Makefile
+# SOURCES), unlike 5.x where it lived in the utility helper library.
+if(GIFLIB_VERSION VERSION_GREATER "6.0.0")
+    list(APPEND GIFLIB_SOURCES "${GIFLIB_SRC_DIR}/quantize.c")
+endif()
+add_library(gif ${GIFLIB_SOURCES})
 if(WIN32)
     if(BUILD_SHARED_LIBS)
         set_property(TARGET gif PROPERTY PREFIX "")
@@ -33,11 +41,14 @@ install(
 )
 
 if(UTILS)
-    add_library(giflib_util STATIC
+    set(GIFLIB_UTIL_SOURCES
         "${GIFLIB_SRC_DIR}/qprintf.c"
-        "${GIFLIB_SRC_DIR}/quantize.c"
         "${GIFLIB_SRC_DIR}/getarg.c"
     )
+    if(GIFLIB_VERSION VERSION_LESS "6.0.0")
+        list(APPEND GIFLIB_UTIL_SOURCES "${GIFLIB_SRC_DIR}/quantize.c")
+    endif()
+    add_library(giflib_util STATIC ${GIFLIB_UTIL_SOURCES})
     target_link_libraries(giflib_util PRIVATE gif)
 
     set(GIF_UTILS

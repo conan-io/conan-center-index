@@ -54,6 +54,7 @@ class GiflibConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["GIFLIB_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["GIFLIB_VERSION"] = self.version
         tc.variables["UTILS"] = self.options.utils
         tc.generate()
 
