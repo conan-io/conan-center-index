@@ -1,4 +1,10 @@
 sources:
+  "1.4.0":
+    url: "https://github.com/erikerlandson/st_tree/archive/refs/tags/version_1.4.0.tar.gz"
+    sha256: "fca5c74921ddd27ccf068f8ac74acbf7584054a67c33a6f11380b2e99efcf419"
+  "1.3.0":
+    url: "https://github.com/erikerlandson/st_tree/archive/refs/tags/version_1.3.0.tar.gz"
+    sha256: "c45933efc7ac839dd6191b5becfed4b8a88fa0a29bfbce8c2603695ebea6f5d0"
   "1.2.2":
     url: "https://github.com/erikerlandson/st_tree/archive/version_1.2.2.tar.gz"
     sha256: "7accf5e257407512c2025e074c9d990ebb1bf4beff22b4204b432e9b6c2b5e49"
