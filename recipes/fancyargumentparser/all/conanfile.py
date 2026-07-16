@@ -9,7 +9,7 @@ class FancyArgumentParserConan(ConanFile):
     name = "fancyargumentparser"
     description = "A fancy and easy-to-use command-line argument parser for C++."
     license = "MIT"
-    url = "https://github.com"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/simfeo/FancyArgumentParser"
     topics = ("command-line", "parser", "arguments", "header-only")
     package_type = "header-library"
@@ -32,5 +32,3 @@ class FancyArgumentParserConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        # Сообщаем системе сборки, как называется компонент
-        self.cpp_info.components["fancyargumentparser_lib"].libs = []
