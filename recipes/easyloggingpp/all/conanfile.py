@@ -24,7 +24,7 @@ class EasyloggingppConan(ConanFile):
         "enable_thread_safe": [True, False],
         "enable_debug_errors": [True, False],
         "enable_default_logfile": [True, False],
-        "enable_perfomance_tracking": [True, False],
+        "enable_performance_tracking": [True, False],
         "disable_logs": [True, False],
         "disable_debug_logs": [True, False],
         "disable_info_logs": [True, False],
