@@ -1,0 +1,4 @@
+sources:
+  "0.3.4":
+    url: "https://github.com/google/wuffs-mirror-release-c/archive/refs/tags/v0.3.4.tar.gz"
+    sha256: "d1c1e269ddbcef7c0452f8b9f645a4cb78b149f4bc679552d43b50fc41b549c3"
