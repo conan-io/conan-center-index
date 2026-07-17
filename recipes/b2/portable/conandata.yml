@@ -44,3 +44,6 @@ sources:
   "5.5.2":
     url: "https://github.com/bfgroup/b2/releases/download/5.5.2/b2-5.5.2.tar.bz2"
     sha256: "9e9031b3d702b39d8f6ba6c26f0b5d60451a09c4e5def3bdc3e4a2d4b0d954e5"
+  "5.5.3":
+    url: "https://github.com/bfgroup/b2/releases/download/5.5.3/b2-5.5.3.tar.bz2"
+    sha256: "d3b914917f8ccf615ee7ec78e59b96c7b49c39f551d5b73525871b2f44cf70d5"
