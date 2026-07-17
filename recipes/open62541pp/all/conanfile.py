@@ -3,9 +3,8 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rm, rmdir, replace_in_file
+from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
 
@@ -22,12 +21,10 @@ class Open62541ppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "ipo": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "ipo": False,
     }
 
     implements = ["auto_shared_fpic"]
@@ -43,7 +40,6 @@ class Open62541ppConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -52,23 +48,9 @@ class Open62541ppConan(ConanFile):
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
 
-        if Version(self.version) < "0.21.0":
-            tc.variables["open62541_ipo"] = self.options.ipo
-        else:
-            tc.variables["CMAKE_INTERPROCEDURAL_OPTIMISATION"] = self.options.ipo
-
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
-
-    def _patch_sources(self):        
-        if Version(self.version) < "0.21.0":
-            # Otherwise fails with
-            #   INTERFACE_LIBRARY targets may only have whitelisted properties.  The
-            #   property "INTERPROCEDURAL_OPTIMIZATION" is not allowed.
-            # Set this in CMakeToolchain instead
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "get_target_property(open62541_ipo open62541::open62541 INTERPROCEDURAL_OPTIMIZATION)", "")
 
     def build(self):
         cmake = CMake(self)
