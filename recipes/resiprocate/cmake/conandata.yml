@@ -1,7 +1,23 @@
 sources:
+  "1.14.0":
+    url: "https://github.com/resiprocate/resiprocate/archive/refs/tags/resiprocate-1.14.0.tar.gz"
+    sha256: "f132e4d0fcae0c155f91e5dad608a9985e199e4e3c09b6029a70b1b3b6d0b156"
   "1.13.2":
     url: "https://github.com/resiprocate/resiprocate/archive/refs/tags/resiprocate-1.13.2.tar.gz"
     sha256: "059fda8f63c456fd61130d468a67655cfeafb5ba8ff5c1d0a55dc383f83e4fba"
   "1.13.1":
     url: "https://github.com/resiprocate/resiprocate/archive/refs/tags/resiprocate-1.13.1.tar.gz"
     sha256: "df8d0cbf17793077d59c2863b23a6da8e9c77aba88327d1a494accaded1ef605"
+patches:
+  "1.14.0":
+    - patch_file: "patches/1.14.0-Fix-POSIX-build-error.patch"
+      patch_type: "portability"
+      patch_description: "Fix POSIX build error"
+      patch_source: "https://github.com/resiprocate/resiprocate/commit/fe7d6307100ba251691ccf6bc98b5d6351420522"
+    - patch_file: "patches/1.14.0-Properly-set-close-on-exec-for-BSDs.patch"
+      patch_type: "portability"
+      patch_description: "Properly set close-on-exec for BSDs"
+      patch_source: "https://github.com/resiprocate/resiprocate/commit/067fe453da0845e2179f408ebc6b8d288e03951d"
+    - patch_file: "patches/1.14.0-rutil-downgrade-c-ares-deprecation-errors-to-warning.patch"
+      patch_type: "portability"
+      patch_description: "Do not error out on recent c-ares deprecation notices"
