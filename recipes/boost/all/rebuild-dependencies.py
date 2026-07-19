@@ -8,6 +8,7 @@ import pprint
 import re
 import subprocess
 import tempfile
+from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -117,7 +118,7 @@ class BoostDependencyBuilder(object):
 
     @property
     def boost_path(self) -> Path:
-        return self.tmppath / "boost"
+        return Path(self.tmppath) / "boost"
 
     def do_git_update(self) -> None:
         if not self.boost_path.exists():
@@ -226,6 +227,22 @@ class BoostDependencyBuilder(object):
             unknown_libs.add(req)
         return list(conan_requirements), system_libs, list(unknown_libs)
 
+    def _get_secondary_dependencies(self, buildable) -> dict:
+        secondary_deps = None
+        with chdir(self, self.boost_path):
+            secondary_deps = subprocess.check_output([self._boostdep, "--csv", "--track-sources", "--secondary", buildable], text=True)
+        secondary_deps = [it.strip() for it in secondary_deps.splitlines()]
+        # first two lines are csv headers
+        secondary_deps = secondary_deps[2:]
+        secondary_deps_dict = defaultdict(list)
+        for line in secondary_deps:
+            if not line:
+                continue
+            secondary_deps_dict[line.split(",")[0].strip()].append(line.split(",")[1].strip())
+        print(f"Secondary dependencies for {buildable}: {secondary_deps_dict}")
+        return secondary_deps_dict
+
+
     def do_boostdep_collect(self) -> BoostDependencies:
         with chdir(self, self.boost_path):
             buildables = subprocess.check_output([self._boostdep, "--list-buildable"], text=True)
@@ -255,6 +272,18 @@ class BoostDependencyBuilder(object):
 
         configure_options = []
         for conf_option in CONFIGURE_OPTIONS:
+            # get all dependencies in second level for this configuration option
+            secondary_dependencies = self._get_secondary_dependencies(conf_option)
+            for secondary_dep, deps in secondary_dependencies.items():
+                # in case its directly dependency is not buildable (header-only)
+                if secondary_dep not in buildables:
+                    for dep in deps:
+                        # And transitive dependency is buildable
+                        if dep in buildables and dep not in filtered_dependency_tree[conf_option]:
+                            # Add it to the dependency tree as well
+                            log.warning("Adding secondary dependency %s for %s", dep, conf_option)
+                            filtered_dependency_tree[conf_option].append(dep)
+
             if conf_option in filtered_dependency_tree:
                 configure_options.append(conf_option)
             else:
