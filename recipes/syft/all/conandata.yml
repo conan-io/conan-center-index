@@ -1,0 +1,10 @@
+sources:
+  "1.18.0":
+    Linux:
+      x86_64:
+        url: "https://github.com/anchore/syft/releases/download/v1.18.0/syft_1.18.0_linux_amd64.tar.gz"
+        sha256: "0b6fd1e0dd5b00b19585e5cde8e1c1f4ef60dc8fba8b41fab55f00852a2fbb8d"
+    Windows:
+      x86_64:
+        sha256: "e7c5face12a70cd1a480da5ba3092e5ab4ac49cc9467fd3f056167c58b929a1d"
+        url: "https://github.com/anchore/syft/releases/download/v1.18.0/syft_1.18.0_windows_amd64.zip"
