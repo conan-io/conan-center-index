@@ -1,0 +1,94 @@
+import os
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm
+from conan.tools.scm import Version
+
+
+required_conan_version = ">=2"
+
+
+class LibmemConan(ConanFile):
+    name = "libmem"
+    description = "Cross-platform game hacking library for C, C++, Rust, and Python, supporting process/memory hacking, hooking, detouring, and DLL/SO injection."
+    license = "AGPL-3.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/rdbo/libmem"
+    topics = ("game-hacking", "memory", "hooking", "detouring", "injection", "process")
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+    implements = ["auto_shared_fpic"]
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        check_min_cppstd(self, 17, gnu_extensions=self.settings.os != "Windows")
+        if is_apple_os(self):
+            raise ConanInvalidConfiguration(f"{self.ref} does not support macOS")
+        if self.settings.os == "Android":
+            # Check Android NDK API level >= 24
+            api_level = self.settings.get_safe("os.api_level")
+            if api_level and Version(api_level) < "24":
+                raise ConanInvalidConfiguration(f"{self.ref} requires Android NDK API level >= 24")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.22]")
+
+    def requirements(self):
+        self.requires("capstone/5.0.6")
+        self.requires("keystone/0.9.2")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        # Remove PreLoad.cmake to avoid forcing the generator
+        rm(self, "PreLoad.cmake", self.source_folder)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["LIBMEM_BUILD_TESTS"] = False
+        tc.cache_variables["LIBMEM_DEEP_TESTS"] = False
+        tc.cache_variables["LIBMEM_BUILD_STATIC"] = not self.options.shared
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
+        cmake.install()
+
+    def package_info(self):
+        self.cpp_info.libs = ["libmem"]
+        self.cpp_info.defines.append("LM_EXPORT")
+
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["user32", "psapi", "ntdll", "shell32", "ole32"])
+            if self.settings.compiler == "gcc":
+                self.cpp_info.system_libs.append("uuid")
+        elif self.settings.os == "Linux":
+            self.cpp_info.system_libs.extend(["dl", "m"])
+        elif self.settings.os == "FreeBSD":
+            self.cpp_info.system_libs.extend(["dl", "kvm", "procstat", "elf", "m"])
