@@ -56,6 +56,8 @@ class EnkiTSConan(ConanFile):
         copy(self, "License.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        # INFO: DLL missed in install step: https://github.com/dougbinks/enkiTS/pull/148
+        copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
