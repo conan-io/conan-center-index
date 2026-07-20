@@ -66,13 +66,20 @@ class LaszipConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        # The license file was renamed from "COPYING" to "COPYING.txt" in 3.5.0
+        license_file = "COPYING.txt" if Version(self.version) >= "3.5.0" else "COPYING"
+        copy(self, license_file, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
         suffix = Version(self.version).major if self.settings.os == "Windows" else ""
         self.cpp_info.libs = [f"laszip{suffix}"]
+        if Version(self.version) >= "3.5.0":
+            # Since 3.5.0, laszip_api.h only uses the installed include layout
+            # (<laszip/laszip_common.h>) when LASZIP_API_VERSION is defined; otherwise
+            # it falls back to the in-tree <laszip_common.h> which we do not ship.
+            self.cpp_info.defines.append("LASZIP_API_VERSION")
         if self.options.shared:
             self.cpp_info.defines.append("LASZIP_DYN_LINK")
         else:
