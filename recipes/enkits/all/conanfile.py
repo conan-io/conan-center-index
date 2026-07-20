@@ -60,6 +60,8 @@ class EnkiTSConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["enkiTS"]
+        self.cpp_info.set_property("cmake_file_name", "enkiTS")
+        self.cpp_info.set_property("cmake_target_name", "enkiTS::enkiTS")
 
         if self.options.shared:
             self.cpp_info.defines.append("ENKITS_DLL=1")
