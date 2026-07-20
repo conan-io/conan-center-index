@@ -27,7 +27,7 @@ class CpphttplibConan(ConanFile):
         "with_brotli": [True, False],
         "use_macos_keychain_certs": [True, False],
         "with_zstd": [True, False],
-        "with_non_blocking_getaddrinfo": [True, False],
+        "use_non_blocking_getaddrinfo": [True, False],
     }
     default_options = {
         "with_openssl": False,
@@ -37,7 +37,7 @@ class CpphttplibConan(ConanFile):
         "with_brotli": False,
         "use_macos_keychain_certs": True,
         "with_zstd": False,
-        "with_non_blocking_getaddrinfo": True,
+        "use_non_blocking_getaddrinfo": True,
     }
     no_copy_source = True
 
@@ -107,9 +107,7 @@ class CpphttplibConan(ConanFile):
             self.cpp_info.defines.append("CPPHTTPLIB_ZSTD_SUPPORT")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
-            # getaddrinfo_a() (glibc async resolver) lives in libanl and is only
-            # used by the non-blocking getaddrinfo path.
-            if self.options.with_non_blocking_getaddrinfo:
+            if self.options.use_non_blocking_getaddrinfo:
                 self.cpp_info.system_libs.append("anl")
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["crypt32", "cryptui", "ws2_32"]
@@ -122,11 +120,8 @@ class CpphttplibConan(ConanFile):
 
                 if not self.options.get_safe("use_macos_keychain_certs") and Version(self.version) >= "0.36.0":
                     self.cpp_info.defines.append("CPPHTTPLIB_DISABLE_MACOSX_AUTOMATIC_ROOT_CERTIFICATES")
-            # The non-blocking getaddrinfo path compiles the CFHost-based resolver
-            # in getaddrinfo_with_timeout(), which references CoreFoundation and
-            # CFNetwork symbols on every Apple platform (macOS, iOS, ...).
-            if self.options.with_non_blocking_getaddrinfo:
+            if self.options.use_non_blocking_getaddrinfo:
                 self.cpp_info.frameworks.extend(["CoreFoundation", "CFNetwork"])
 
-        if self.options.with_non_blocking_getaddrinfo:
+        if self.options.use_non_blocking_getaddrinfo:
             self.cpp_info.defines.append("CPPHTTPLIB_USE_NON_BLOCKING_GETADDRINFO")
