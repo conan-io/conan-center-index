@@ -83,8 +83,8 @@ class ArrowConan(ConanFile):
         "filesystem_layer": True,
         "hdfs_bridgs": False,
         "plasma": "deprecated",
-        #"simd_level": "default", # see config_options
-        # "runtime_simd_level": "max", # see config_options
+        "simd_level": "default",
+        "runtime_simd_level": "max",
         "with_backtrace": False,
         "with_boost": True,
         "with_brotli": False,
@@ -137,15 +137,8 @@ class ArrowConan(ConanFile):
         if is_msvc(self):
             self.options.with_boost = True
 
-        if is_msvc(self) and self.settings.arch == "armv8":
-            # xsimd does not yet support msvc+arm64
-            # see: https://github.com/xtensor-stack/xsimd/issues/611
-            # see: https://github.com/xtensor-stack/xsimd/pull/612
-            self.options.simd_level = "disabled"
-            self.options.runtime_simd_level = "disabled"
-        else:
-            self.options.simd_level = "default"
-            self.options.runtime_simd_level = "max"
+        self.options.simd_level = "default"
+        self.options.runtime_simd_level = "max"
 
         if Version(self.version) >= "22.0.0":
             del self.options.skyhook
@@ -203,7 +196,7 @@ class ArrowConan(ConanFile):
         if self.options.with_snappy:
             self.requires("snappy/1.1.9")
         if self.options.simd_level != "disabled" or self.options.runtime_simd_level != "disabled":
-            self.requires("xsimd/14.0.0")
+            self.requires("xsimd/14.2.0")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
