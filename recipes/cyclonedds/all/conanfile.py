@@ -27,6 +27,7 @@ class CycloneDDSConan(ConanFile):
         "with_shm" : [True, False],
         "enable_security" : [True, False],
         "enable_discovery" : [True, False],
+        "enable_qos_provider" : [True, False],
     }
     default_options = {
         "shared": False,
@@ -35,6 +36,7 @@ class CycloneDDSConan(ConanFile):
         "with_shm": False,
         "enable_security": False,
         "enable_discovery": True,
+        "enable_qos_provider": True,
     }
 
     short_paths = True
@@ -69,6 +71,8 @@ class CycloneDDSConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self._pre_v11:
+            del self.options.enable_qos_provider
 
     def configure(self):
         if self.options.shared:
@@ -96,7 +100,7 @@ class CycloneDDSConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-        if Version(self.version) == "11.0.1" and not self.options.shared and self.settings.compiler == "msvc":
+        if Version(self.version) >= "11.0.1" and not self.options.shared and self.settings.compiler == "msvc":
             # FIXME: ddsc.lib(cdtors.c.obj) : error LNK2005: tls_callback_func already defined in string.c.obj
             raise ConanInvalidConfiguration("Windows static build is not support due linker error. See https://github.com/eclipse-cyclonedds/cyclonedds/issues/2422")
 
@@ -126,6 +130,8 @@ class CycloneDDSConan(ConanFile):
         tc.variables["ENABLE_SECURITY"] = self.options.enable_security
         tc.variables["ENABLE_TYPE_DISCOVERY"] = self.options.enable_discovery
         tc.variables["ENABLE_TOPIC_DISCOVERY"] = self.options.enable_discovery
+        if not self._pre_v11:
+            tc.variables["ENABLE_QOS_PROVIDER"] = self.options.enable_qos_provider
         tc.generate()
 
         cd = CMakeDeps(self)
