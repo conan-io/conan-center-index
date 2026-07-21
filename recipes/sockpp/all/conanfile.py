@@ -18,10 +18,12 @@ class SockppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_can": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_can": False,
     }
     implements = ["auto_shared_fpic"]
     languages = "C++"
@@ -34,8 +36,11 @@ class SockppConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        SOCKPP_WITH_OPENSSL
+        SOCKPP_WITH_MBEDTLS
         tc.cache_variables["SOCKPP_BUILD_SHARED"] = self.options.shared
         tc.cache_variables["SOCKPP_BUILD_STATIC"] = not self.options.shared
+        tc.cache_variables["SOCKPP_BUILD_CAN"] = self.options.with_can
         tc.generate()
 
     def validate(self):
