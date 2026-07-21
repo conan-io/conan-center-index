@@ -137,8 +137,6 @@ class ArrowConan(ConanFile):
         if is_msvc(self):
             self.options.with_boost = True
 
-        self.options.simd_level = "default"
-        self.options.runtime_simd_level = "max"
 
         if Version(self.version) >= "22.0.0":
             del self.options.skyhook
