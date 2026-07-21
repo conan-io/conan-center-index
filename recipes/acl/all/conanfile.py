@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
@@ -38,7 +38,12 @@ class AclConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libattr/2.5.2")
+        if self.version == Version("2.4.0"):
+            self.requires("libattr/2.6.0")
+        elif self.version == Version("2.3.2"):
+            self.requires("libattr/2.5.2")
+        else:
+            raise ConanInvalidConfiguration(f"{self.name} {self.version} is not supported")
 
     def validate(self):
         if self.settings.os != "Linux":
