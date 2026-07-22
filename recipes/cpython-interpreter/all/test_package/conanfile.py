@@ -2,6 +2,7 @@ from io import StringIO
 
 from conan import ConanFile
 from conan.tools.build import can_run
+from conan.tools.env import Environment
 
 
 class TestPackageConan(ConanFile):
@@ -9,6 +10,14 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+
+    def generate(self):
+        # Disable Conan's automatic run env so a profile's [runenv] PATH entry
+        # can't outrank this package's bindir below.
+        self.virtualrunenv = False
+        env = Environment()
+        env.prepend_path("PATH", self.dependencies[self.tested_reference_str].cpp_info.bindir)
+        env.vars(self, scope="run").save_script("conanrunenv")
 
     def test(self):
         if not can_run(self):
