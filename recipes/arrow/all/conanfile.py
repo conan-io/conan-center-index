@@ -553,7 +553,7 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("lz4::lz4")
         if self.options.with_snappy:
             self.cpp_info.components["libarrow"].requires.append("snappy::snappy")
-        if if Version(self.version) >= "25.0.0" or (self.options.simd_level != "disabled" or self.options.runtime_simd_level != "disabled"):
+        if Version(self.version) >= "25.0.0" or (self.options.simd_level != "disabled" or self.options.runtime_simd_level != "disabled"):
             self.cpp_info.components["libarrow"].requires.append("xsimd::xsimd")
         if self.options.with_zlib:
             self.cpp_info.components["libarrow"].requires.append("zlib::zlib")
