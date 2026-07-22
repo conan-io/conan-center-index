@@ -6,6 +6,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.scm import Version
 
 required_conan_version = ">=2"
 
@@ -50,7 +51,7 @@ class OnnxRuntimeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("onnx/[>=1.20.1 <1.21]")
+        self.requires("onnx/[>=1.20.1 <1.22]")
         self.requires("abseil/[>=20240116.1 <=20260107.1]")
         self.requires("protobuf/[>=3.21.12 <7]")
         self.requires("date/[>=3.0.1 <3.1]")
@@ -73,7 +74,8 @@ class OnnxRuntimeConan(ConanFile):
         self.requires("cpuinfo/[>=cci.20250110]")
 
     def validate(self):
-        check_min_cppstd(self, 17)
+        min_cppstd = 20 if Version(self.version) >= "1.25.0" else 17
+        check_min_cppstd(self, min_cppstd)
         onnx = self.dependencies["onnx"]
         if not onnx.options.disable_static_registration:
             raise ConanInvalidConfiguration(
@@ -111,15 +113,17 @@ class OnnxRuntimeConan(ConanFile):
         tc.variables["onnxruntime_DISABLE_RTTI"] = False
         tc.variables["onnxruntime_DISABLE_EXCEPTIONS"] = False
 
-        tc.variables["onnxruntime_ARMNN_RELU_USE_CPU"] = False
-        tc.variables["onnxruntime_ARMNN_BN_USE_CPU"] = False
         tc.variables["onnxruntime_ENABLE_CPU_FP16_OPS"] = False
-        tc.variables["onnxruntime_ENABLE_EAGER_MODE"] = False
         tc.variables["onnxruntime_ENABLE_LAZY_TENSOR"] = False
+        if Version(self.version) < "1.25.0":
+            tc.variables["onnxruntime_ARMNN_RELU_USE_CPU"] = False
+            tc.variables["onnxruntime_ARMNN_BN_USE_CPU"] = False
+            tc.variables["onnxruntime_ENABLE_EAGER_MODE"] = False
 
         tc.variables["onnxruntime_ENABLE_CUDA_EP_INTERNAL_TESTS"] = False
-        tc.variables["onnxruntime_USE_NEURAL_SPEED"] = False
         tc.variables["onnxruntime_USE_MEMORY_EFFICIENT_ATTENTION"] = False
+        if Version(self.version) < "1.25.0":
+            tc.variables["onnxruntime_USE_NEURAL_SPEED"] = False
 
         # Disable a warning that gets converted to an error
         tc.preprocessor_definitions["_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS"] = "1"
