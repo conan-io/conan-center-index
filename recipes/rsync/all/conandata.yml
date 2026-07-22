@@ -2,3 +2,9 @@ sources:
   "3.2.7":
     url: "https://download.samba.org/pub/rsync/src/rsync-3.2.7.tar.gz"
     sha256: "4e7d9d3f6ed10878c58c5fb724a67dacf4b6aac7340b13e488fb2dc41346f2bb"
+patches:
+  "3.2.7":
+    - patch_file: "patches/0001-install-strip-honor-strip-program.patch"
+      patch_description: "install-strip: install then strip the binary with $(STRIP) (honoring the toolchain strip, defaulting to strip) so cross-compiled binaries use the cross strip instead of the host strip"
+      patch_type: "portability"
+      patch_source: "https://github.com/RsyncProject/rsync/pull/1024"
