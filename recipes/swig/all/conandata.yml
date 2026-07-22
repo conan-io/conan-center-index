@@ -2,6 +2,3 @@ sources:
   "4.4.1":
     url: "https://github.com/swig/swig/archive/refs/tags/v4.4.1.tar.gz"
     sha256: "8bf32042beb7ee1eeb5c71aa15a62513d964893f84234f2cd77e4a8e2ed41e87"
-  "4.4.0":
-    url: "https://github.com/swig/swig/archive/refs/tags/v4.4.0.tar.gz"
-    sha256: "00735db2dc5abfae43c702dd927fc81a439e32d875839200cc0b5681cc70f66e"
