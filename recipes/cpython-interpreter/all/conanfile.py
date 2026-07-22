@@ -2,8 +2,8 @@ import os
 from pathlib import Path
 
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.files import get, copy, rm
+from conan.tools.files import get, copy
+from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 
@@ -16,9 +16,13 @@ class CpythonInterpreterConan(ConanFile):
     package_type = "application"
     description = "Portable CPython interpreter from python-build-standalone."
     topics = ("python", "installer", "interpreter")
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/astral-sh/python-build-standalone"
     license = "PSF-2.0"
     settings = "os", "arch"
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.arch == "x86" and self.settings.os != "Windows":
@@ -34,10 +38,8 @@ class CpythonInterpreterConan(ConanFile):
             destination=self.source_folder)
 
     def package(self):
-        source_folder = os.path.join(self.build_folder, "python")
+        source_folder = os.path.join(self.source_folder, "python")
         copy(self, "*", src=source_folder, dst=self.package_folder)
-        rm(self, "*.pdb", self.package_folder, recursive=True)
-        rm(self, "*.pc", self.package_folder, recursive=True)
 
         if self.settings.os == "Windows":
             license_folder = source_folder
