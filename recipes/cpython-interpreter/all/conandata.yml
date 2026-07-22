@@ -121,25 +121,3 @@ sources:
       x86_64:
         url: "https://github.com/astral-sh/python-build-standalone/releases/download/20260718/cpython-3.10.20+20260718-x86_64-pc-windows-msvc-install_only.tar.gz"
         sha256: "97a6d248dcd27d8abdf0fbf225d183c4a40d24a25b9ac2e146c82c64053bedaa"
-  "3.9.20":
-    Linux:
-      armv8:
-        url: "https://github.com/astral-sh/python-build-standalone/releases/download/20241002/cpython-3.9.20+20241002-aarch64-unknown-linux-gnu-install_only.tar.gz"
-        sha256: "0d84fa0884e843828312a1fcbfd8756abe3d6cf3c27086f79cd7352bad13ac4c"
-      x86_64:
-        url: "https://github.com/astral-sh/python-build-standalone/releases/download/20241002/cpython-3.9.20+20241002-x86_64-unknown-linux-gnu-install_only.tar.gz"
-        sha256: "fec849569158e5e46610621d7da91b02dca2cc5f66dd49cc0f85d7469c8f5a84"
-    Macos:
-      armv8:
-        url: "https://github.com/astral-sh/python-build-standalone/releases/download/20241002/cpython-3.9.20+20241002-aarch64-apple-darwin-install_only.tar.gz"
-        sha256: "dc5f3b4c54deea7a42479b3f81b1c1b3a330f721aea3aff7df9833567bbfa8ea"
-      x86_64:
-        url: "https://github.com/astral-sh/python-build-standalone/releases/download/20241002/cpython-3.9.20+20241002-x86_64-apple-darwin-install_only.tar.gz"
-        sha256: "a07be8fddd5f6f6a0db7abd16f2b2a8a94a891e54091e4f45b64e822597e4d7d"
-    Windows:
-      x86:
-        url: "https://github.com/astral-sh/python-build-standalone/releases/download/20241002/cpython-3.9.20+20241002-i686-pc-windows-msvc-install_only.tar.gz"
-        sha256: "bd2c7cf4d7eba224ada44dfbccf5248d313ba5072462c71aa753c824354704f3"
-      x86_64:
-        url: "https://github.com/astral-sh/python-build-standalone/releases/download/20241002/cpython-3.9.20+20241002-x86_64-pc-windows-msvc-install_only.tar.gz"
-        sha256: "94000af8e9d9f5aba6d2325963a6b3403afbf310f6790edff3dfe8becd8197de"
