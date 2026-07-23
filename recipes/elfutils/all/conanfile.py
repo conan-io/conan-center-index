@@ -31,6 +31,7 @@ class ElfutilsConan(ConanFile):
         "with_lzma": [True, False],
         "with_zstd": [True, False],
         "with_sqlite3": [True, False],
+        "sanitize_memory": [True, False],
     }
     default_options = {
         "shared": False,
@@ -41,6 +42,7 @@ class ElfutilsConan(ConanFile):
         "with_lzma": True,
         "with_zstd": True,
         "with_sqlite3": False,
+        "sanitize_memory": False,
     }
 
     @property
@@ -56,6 +58,8 @@ class ElfutilsConan(ConanFile):
         if Version(self.version) < "0.186":
             del self.options.libdebuginfod
             del self.options.with_zstd
+        if Version(self.version) < "0.189":
+            del self.options.sanitize_memory
 
     def configure(self):
         if self.options.shared:
@@ -132,6 +136,8 @@ class ElfutilsConan(ConanFile):
         ])
         if Version(self.version) >= "0.186":
             tc.configure_args.append("--enable-libdebuginfod" if self.options.libdebuginfod else "--disable-libdebuginfod")
+        if self.options.sanitize_memory:
+            tc.configure_args.append("--enable-sanitize-memory")
         tc.configure_args.append(f"BUILD_STATIC={'0' if self.options.shared else '1'}")
         if self.options.get_safe("with_zstd"):
             # ./configure ignores system_libs
@@ -199,11 +205,11 @@ class ElfutilsConan(ConanFile):
         # utilities
         bin_path = os.path.join(self.package_folder, "bin")
         lib_path = os.path.join(self.package_folder, "lib")
-        self.output.info("Appending PATH env var with : {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)                 # Conan V1
-        self.env_info.LD_LIBRARY_PATH.append(lib_path)      # Conan V1
-        self.buildenv_info.append_path("PATH", bin_path)    # Conan V2
-        self.buildenv_info.append_path("LD_LIBRARY_PATH", lib_path)
+        self.output.info("Prepending PATH env var with : {}".format(bin_path))
+        self.env_info.PATH.insert(0, bin_path)              # Conan V1
+        self.env_info.LD_LIBRARY_PATH.insert(0, lib_path)   # Conan V1
+        self.buildenv_info.prepend_path("PATH", bin_path)   # Conan V2
+        self.buildenv_info.prepend_path("LD_LIBRARY_PATH", lib_path)
 
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
 
