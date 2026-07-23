@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import textwrap
 
 from conan import ConanFile
@@ -96,7 +97,7 @@ class OpenCascadeConan(ConanFile):
             self.requires("onetbb/[>=2021.10.0 <2024]")
 
     def validate(self):
-        check_min_cppstd(self, 11)
+        check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -145,6 +146,10 @@ class OpenCascadeConan(ConanFile):
         tc.cache_variables["USE_DRACO"] = self.options.with_draco
         tc.cache_variables["USE_TK"] = self.options.with_tk
         tc.cache_variables["USE_OPENGL"] = self.options.with_opengl
+        if not self.options.with_rapidjson:
+            # OCCT 8's DRAWEXE still includes XSDRAWGLTF.hxx after the GLTF
+            # toolkits are removed, so omit the optional Draw module too.
+            tc.cache_variables["BUILD_MODULE_Draw"] = False
 
         # Relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
@@ -159,7 +164,6 @@ class OpenCascadeConan(ConanFile):
             replace_in_file(self, cmakelists, pattern, f"find_package({package_name} REQUIRED)")
 
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        cmakelists_tools = os.path.join(self.source_folder, "tools", "CMakeLists.txt")
         occt_toolkit_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_toolkit.cmake")
         occt_csf_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_csf.cmake")
         occt_defs_flags_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_defs_flags.cmake")
@@ -171,16 +175,16 @@ class OpenCascadeConan(ConanFile):
         replace_in_file(
             self,
             cmakelists,
-            "project (OCCT)",
+            "PROJECT (OCCT)",
             textwrap.dedent(f"""\
-                project (OCCT)
+                PROJECT (OCCT)
                 add_definitions({deps_defines})
             """),
         )
 
         # Avoid to add system include/libs directories and inject directories
         # from conan dependencies instead
-        for cmake_file in [cmakelists, cmakelists_tools]:
+        for cmake_file in [cmakelists]:
             deps_includedirs = ";".join([p.replace("\\", "/") for dep in sorted_deps for p in dep.cpp_info.aggregated_components().includedirs])
             replace_in_file(
                 self,
@@ -240,7 +244,7 @@ class OpenCascadeConan(ConanFile):
             replace_in_file(
                 self,
                 occt_csf_cmake,
-                "set (CSF_fontconfig \"fontconfig\")",
+                "set (CSF_fontconfig \"fontconfig expat\")",
                 f"find_package(Fontconfig REQUIRED)\nset (CSF_fontconfig \"{fontconfig_libs}\")",
             )
 
@@ -411,13 +415,24 @@ class OpenCascadeConan(ConanFile):
             components_list = [component for component in module_components[1:] if component in packaged_libs_list]
             for component_name in components_list:
                 component_deps = {}
-                # EXTERNLIB: stores dependencies of each component. External dependencies are prefixed with CSF_
-                externlib_content = load(self, os.path.join(self.source_folder, "src", component_name, "EXTERNLIB"))
-                for dependency in externlib_content.splitlines():
+                # OCCT 8 stores each toolkit below its module and expresses
+                # dependencies in EXTERNLIB.cmake.
+                externlib_content = load(
+                    self,
+                    os.path.join(
+                        self.source_folder,
+                        "src",
+                        module_components[0],
+                        component_name,
+                        "EXTERNLIB.cmake",
+                    ),
+                )
+                dependencies = re.findall(r"\b(?:TK|CSF_)[A-Za-z0-9_]+\b", externlib_content)
+                for dependency in dependencies:
                     if dependency.startswith("TK") and dependency in packaged_libs_list:
                         component_deps.setdefault("internals", []).append(dependency)
                     elif dependency.startswith("CSF_"):
-                        deps_dict = csf_to_conan_dependencies[dependency]
+                        deps_dict = csf_to_conan_dependencies.get(dependency, {})
                         for dep_type, deps in deps_dict.items():
                             if deps:
                                 component_deps.setdefault(dep_type, []).extend(deps)
