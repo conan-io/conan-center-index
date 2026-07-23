@@ -1,0 +1,4 @@
+sources:
+  "0.9.0":
+    url: "https://github.com/wirestead/wirestead/archive/refs/tags/v0.9.0.tar.gz"
+    sha256: "110a44774356b8c3b2a4a15ecb526ca63917855003be0ae85fca2e244cbef144"
