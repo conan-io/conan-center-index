@@ -1,16 +1,10 @@
-From 870365b670c9dc3fe802ef0703f52494b775f7c3 Mon Sep 17 00:00:00 2001
-From: Stefan Vigerske
-Date: Tue, 7 Jul 2026 16:41:12 +0200
-Subject: [PATCH] do not enable FMT_SECURE_SCL if MSVC >= 2026
+Fix build failure with Visual Studio 2026
 
-- it requires std::unchecked_array_iterator, which has been dropped with this compiler version for C++ >= 17
-- fixes scipopt/scip#209
-- https://github.com/scipopt/scip/commit/07818c722d5c016d22b756dac949471b3a44b344
----
-
+https://github.com/scipopt/soplex/issues/52
+https://github.com/scipopt/scip/commit/796fbc52a71936a0b6199d330b27cf10fad69c8c
 
 diff --git a/src/amplmp/include/mp/format.h b/src/amplmp/include/mp/format.h
-index cad10da4c3..93f77e01c5 100644
+index cad10da4c3..d14063347e 100644
 --- a/src/amplmp/include/mp/format.h
 +++ b/src/amplmp/include/mp/format.h
 @@ -40,7 +40,8 @@
@@ -19,7 +13,7 @@ index cad10da4c3..93f77e01c5 100644
 
 -#ifdef _SECURE_SCL
 +// std::unchecked_array_iterator removed for C++ >= 17 with MSVC 2026
-+#if defined(_SECURE_SCL) && (!defined(_MSC_VER) || _MSC_VER < 1915)
++#if defined(_SECURE_SCL) && (!defined(_MSC_VER) || _MSC_VER < 1951)
  # define FMT_SECURE_SCL _SECURE_SCL
  #else
  # define FMT_SECURE_SCL 0
