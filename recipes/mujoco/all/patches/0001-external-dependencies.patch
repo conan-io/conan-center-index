@@ -16,11 +16,12 @@ Fix include header path for qhull:
 src/user/user_mesh.cc:71:10: fatal error: qhull_ra.h: No such file or directory
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 2ade5c7..2b51d26 100644
+index b35975af..1eae703b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -64,7 +64,12 @@ endif()
-
+@@ -108,9 +108,15 @@ if(APPLE AND (MUJOCO_BUILD_EXAMPLES OR MUJOCO_BUILD_SIMULATE OR MUJOCO_USE_FILAM
+ endif()
+ 
  include(MujocoOptions)
  include(MujocoMacOS)
 -include(MujocoDependencies)
@@ -30,19 +31,24 @@ index 2ade5c7..2b51d26 100644
 +find_package(tinyobjloader REQUIRED CONFIG)
 +find_package(tinyxml2 REQUIRED CONFIG)
 +find_package(MarchingCubeCpp REQUIRED CONFIG)
-
++find_package(miniz REQUIRED CONFIG)
+ 
  set(MUJOCO_HEADERS
+     include/mujoco/mjassert.h
      include/mujoco/mjdata.h
-@@ -134,7 +139,7 @@ if(EMSCRIPTEN)
+@@ -180,9 +186,9 @@ if(EMSCRIPTEN)
+   add_subdirectory(wasm)
  endif()
-
-
+ 
+ 
 -target_compile_definitions(mujoco PRIVATE _GNU_SOURCE CCD_STATIC_DEFINE MUJOCO_DLL_EXPORTS -DMC_IMPLEM_ENABLE)
 +target_compile_definitions(mujoco PRIVATE _GNU_SOURCE MUJOCO_DLL_EXPORTS -DMC_IMPLEM_ENABLE)
  if(MUJOCO_ENABLE_AVX_INTRINSICS)
    target_compile_definitions(mujoco PUBLIC mjUSEPLATFORMSIMD)
  endif()
-@@ -156,10 +161,11 @@ target_link_options(
+ 
+@@ -202,12 +208,14 @@ target_link_options(
+ 
  target_link_libraries(
    mujoco
    PRIVATE ccd
@@ -55,19 +61,23 @@ index 2ade5c7..2b51d26 100644
 +          tinyobjloader::tinyobjloader
 +          tinyxml2::tinyxml2
 +          marchingcubecpp::marchingcubecpp
++          miniz::miniz
  )
-
- set_target_properties(
+ 
+ if(NOT EMSCRIPTEN)
+   target_link_libraries(mujoco PRIVATE Threads::Threads)
 diff --git a/src/user/user_mesh.cc b/src/user/user_mesh.cc
-index db85272..a546d9f 100644
+index ece381b4..1656112f 100644
 --- a/src/user/user_mesh.cc
 +++ b/src/user/user_mesh.cc
-@@ -68,7 +68,7 @@
+@@ -67,9 +67,9 @@
+ #include "user/user_resource.h"
  #include "user/user_util.h"
-
+ 
  extern "C" {
 -#include "qhull_ra.h"
 +#include <libqhull_r/qhull_ra.h>
  }
-
+ 
  namespace {
+   using mujoco::user::FilePath;
