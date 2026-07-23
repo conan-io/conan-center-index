@@ -35,6 +35,7 @@ class ICUConan(ConanFile):
         "dat_package_file": [None, "ANY"],
         "with_icuio": [True, False],
         "with_extras": [True, False],
+        "disable_renaming": [True, False],
     }
     default_options = {
         "shared": False,
@@ -44,6 +45,7 @@ class ICUConan(ConanFile):
         "dat_package_file": None,
         "with_icuio": True,
         "with_extras": False,
+        "disable_renaming": False,
     }
 
     @property
@@ -150,6 +152,9 @@ class ICUConan(ConanFile):
             "--disable-tests",
             "--disable-samples",
         ])
+        if self.options.disable_renaming:
+            tc.configure_args.extend(["--disable-renaming"])
+
         if cross_building(self):
             base_path = unix_path(self, self.dependencies.build["icu"].package_folder)
             tc.configure_args.append(f"--with-cross-build={base_path}")
@@ -323,6 +328,17 @@ class ICUConan(ConanFile):
             self.cpp_info.components["icu-io"].set_property("pkg_config_name", "icu-io")
             self.cpp_info.components["icu-io"].libs = [f"{prefix}icuio{suffix}"]
             self.cpp_info.components["icu-io"].requires = ["icu-i18n", "icu-uc"]
+
+        # When the library is built with --disable-renaming it exports unversioned
+        # symbols (e.g. u_strToUpper instead of u_strToUpper_78). The installed
+        # uconfig.h still defaults U_DISABLE_RENAMING to 0, so consumers must define
+        # it to 1 to keep urename.h from renaming and to match the exported symbols.
+        if self.options.disable_renaming:
+            self.cpp_info.components["icu-data"].defines.append("U_DISABLE_RENAMING=1")
+            self.cpp_info.components["icu-uc"].defines.append("U_DISABLE_RENAMING=1")
+            self.cpp_info.components["icu-i18n"].defines.append("U_DISABLE_RENAMING=1")
+            if self.options.with_icuio:
+                self.cpp_info.components["icu-io"].defines.append("U_DISABLE_RENAMING=1")
 
         if self.settings.os != "Windows" and self.options.data_packaging in ["files", "archive"]:
             self.cpp_info.components["icu-data"].resdirs = ["res"]
