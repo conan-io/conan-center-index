@@ -73,9 +73,10 @@ class OpenCascadeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("tcl/8.6.10")
-        if self.options.with_tk:
-            self.requires("tk/8.6.10")
+        if self.options.with_rapidjson:
+            self.requires("tcl/8.6.10")
+            if self.options.with_tk:
+                self.requires("tk/8.6.10")
         if self.options.with_opengl:
             self.requires("opengl/system")
         if self._is_linux:
@@ -219,7 +220,8 @@ class OpenCascadeConan(ConanFile):
             f"set (CSF_FREETYPE \"{freetype_libs}\")"
         )
         ## tcl
-        deps_targets.append("tcl::tcl")
+        if self.options.with_rapidjson:
+            deps_targets.append("tcl::tcl")
         _replace_find_package(cmakelists, "tcl", "TCL")
         tcl_libs = " ".join(self.dependencies["tcl"].cpp_info.aggregated_components().libs)
         csf_tcl_libs = f"set (CSF_TclLibs \"{tcl_libs}\")"
@@ -229,7 +231,8 @@ class OpenCascadeConan(ConanFile):
 
         ## tk
         if self.options.with_tk:
-            deps_targets.append("tk::tk")
+            if self.options.with_rapidjson:
+                deps_targets.append("tk::tk")
             _replace_find_package(cmakelists, "tk", "tk")
             tk_libs = " ".join(self.dependencies["tk"].cpp_info.aggregated_components().libs)
             csf_tk_libs = f"set (CSF_TclTkLibs \"{tk_libs}\")"
@@ -427,6 +430,7 @@ class OpenCascadeConan(ConanFile):
                         "EXTERNLIB.cmake",
                     ),
                 )
+                externlib_content = re.sub(r"#.*", "", externlib_content)
                 dependencies = re.findall(r"\b(?:TK|CSF_)[A-Za-z0-9_]+\b", externlib_content)
                 for dependency in dependencies:
                     if dependency.startswith("TK") and dependency in packaged_libs_list:
