@@ -1,0 +1,7 @@
+sources:
+  "1.0.2":
+    url: "https://github.com/simfeo/FancyArgumentParser/archive/refs/tags/v1.0.2.tar.gz"
+    sha256: "7e6b9d66f77f7cf4407c874af0f615c0e2b1d13a9dfe3b8fb161669e74001a43"
+  "1.0.1":
+    url: "https://github.com/simfeo/FancyArgumentParser/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: "e578158ec171515e82b9e7431150f39066a84b51db004468365aa2b5c33bde12"
