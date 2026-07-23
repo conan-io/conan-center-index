@@ -1,0 +1,19 @@
+sources:
+  "6.1.3":
+    url: "https://downloads.sourceforge.net/project/giflib/giflib-6.x/giflib-6.1.3.tar.gz"
+    sha256: "b65b66b99f0424b93525f987386f22fc5efb9da2bfc92ad4a532249aaffbab0e"
+  "5.2.2":
+    url: "https://downloads.sourceforge.net/project/giflib/giflib-5.x/giflib-5.2.2.tar.gz"
+    sha256: "be7ffbd057cadebe2aa144542fd90c6838c6a083b5e8a9048b8ee3b66b29d5fb"
+patches:
+  "6.1.3":
+    - patch_file: "patches/6.1.3-0001-msvc-export.patch"
+      patch_description: "export symbols with MSVC"
+      patch_type: "portability"
+  "5.2.2":
+    - patch_file: "patches/0000-msvc-strtok_r.patch"
+      patch_description: "Use strtok_s instead of strtok_r with MSVC"
+      patch_type: "portability"
+    - patch_file: "patches/5.2.2-0001-msvc-export.patch"
+      patch_description: "export symbols with MSVC"
+      patch_type: "portability"

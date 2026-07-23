@@ -3,6 +3,8 @@ project(gif LANGUAGES C)
 
 include(GNUInstallDirs)
 
+# In giflib 6.x, quantize.c is part of the core library (see upstream Makefile
+# SOURCES), unlike 5.x where it lived in the utility helper library.
 add_library(gif
     "${GIFLIB_SRC_DIR}/dgif_lib.c"
     "${GIFLIB_SRC_DIR}/egif_lib.c"
@@ -11,6 +13,7 @@ add_library(gif
     "${GIFLIB_SRC_DIR}/gif_font.c"
     "${GIFLIB_SRC_DIR}/gif_hash.c"
     "${GIFLIB_SRC_DIR}/openbsd-reallocarray.c"
+    "${GIFLIB_SRC_DIR}/quantize.c"
 )
 if(WIN32)
     if(BUILD_SHARED_LIBS)
@@ -35,7 +38,6 @@ install(
 if(UTILS)
     add_library(giflib_util STATIC
         "${GIFLIB_SRC_DIR}/qprintf.c"
-        "${GIFLIB_SRC_DIR}/quantize.c"
         "${GIFLIB_SRC_DIR}/getarg.c"
     )
     target_link_libraries(giflib_util PRIVATE gif)
