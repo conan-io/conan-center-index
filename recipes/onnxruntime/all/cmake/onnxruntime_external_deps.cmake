@@ -93,6 +93,16 @@ if (onnxruntime_USE_MIMALLOC)
   add_definitions(-DUSE_MIMALLOC)
 endif()
 
+if (onnxruntime_USE_CUDA)
+  find_package(CUDAToolkit REQUIRED)
+
+  if(onnxruntime_CUDNN_HOME)
+    file(TO_CMAKE_PATH ${onnxruntime_CUDNN_HOME} onnxruntime_CUDNN_HOME)
+    set(CUDNN_PATH ${onnxruntime_CUDNN_HOME})
+  endif()
+
+  include(cuDNN)
+endif()
 
 set(onnxruntime_EXTERNAL_LIBRARIES ${onnxruntime_EXTERNAL_LIBRARIES_XNNPACK} ${WIL_TARGET} nlohmann_json::nlohmann_json
                                    onnx onnx_proto ${PROTOBUF_LIB} re2::re2 Boost::mp11 safeint_interface
