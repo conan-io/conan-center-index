@@ -35,3 +35,7 @@ sources:
   "6.0.3":
     url: "https://github.com/scipopt/soplex/archive/refs/tags/release-603.tar.gz"
     sha256: "2bdf9adc9ac6ad48f98056679b7b852e626ac4aaaf277e7d4ce17794ed1097be"
+patches:
+  "8.0.2":
+    - patch_file: "patches/format_msvc_stdext.patch"
+      patch_description: "Remove usage of stdext when building with MSVC 1915 or higher, see https://github.com/scipopt/soplex/issues/52"

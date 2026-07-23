@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get
+from conan.tools.files import collect_libs, copy, get, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
 from os.path import join
 
@@ -75,6 +75,9 @@ class SoPlexConan(ConanFile):
         if self.options.with_boost:
             self.requires("boost/1.84.0", transitive_headers=True)  # also update Boost_VERSION_MACRO below!
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
@@ -89,6 +92,7 @@ class SoPlexConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        apply_conandata_patches(self)
         tc = CMakeToolchain(self)
         tc.variables["MPFR"] = False
         tc.variables["GMP"] = self.options.with_gmp
