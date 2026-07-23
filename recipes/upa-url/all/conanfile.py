@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2"
@@ -14,7 +15,7 @@ class upa_urlRecipe(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/upa-url/upa"
     description = "An implementation of the WHATWG URL Standard in C++"
-    topics = ("url", "parser", "psl", "whatwg")
+    topics = ("url", "urlpattern", "parser", "psl", "whatwg")
 
     # Binary configuration
     package_type = "library"
@@ -49,6 +50,8 @@ class upa_urlRecipe(ConanFile):
         cmake.install()
         # Remove unused files
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        if Version(self.version) >= "2.5.0":
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "upa")
