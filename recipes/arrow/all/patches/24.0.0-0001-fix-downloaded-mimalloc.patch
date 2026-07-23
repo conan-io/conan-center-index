@@ -1,8 +1,7 @@
 diff --git a/cpp/cmake_modules/ThirdpartyToolchain.cmake b/cpp/cmake_modules/ThirdpartyToolchain.cmake
-index b95d649..4bed100 100644
 --- a/cpp/cmake_modules/ThirdpartyToolchain.cmake
 +++ b/cpp/cmake_modules/ThirdpartyToolchain.cmake
-@@ -2319,6 +2319,9 @@ endif()
+@@ -2345,6 +2345,9 @@ endif()
  # mimalloc - Cross-platform high-performance allocator, from Microsoft
  
  if(ARROW_MIMALLOC)
