@@ -64,6 +64,8 @@ class EnkiTSConan(ConanFile):
         self.cpp_info.libs = ["enkiTS"]
         self.cpp_info.set_property("cmake_file_name", "enkiTS")
         self.cpp_info.set_property("cmake_target_name", "enkiTS::enkiTS")
+        # INFO: Custom target to avoid breaking existing consumers
+        self.cpp_info.set_property("cmake_target_aliases", ["enkits::enkits"])
 
         if self.options.shared:
             self.cpp_info.defines.append("ENKITS_DLL=1")
