@@ -1,7 +1,7 @@
 sources:
   "4.14.0":
     - url: "https://github.com/opencv/opencv/archive/refs/tags/4.14.0.tar.gz"
-      sha256: "4f17abd1bc7f88e19c3380c8de7cbf2d863aced5b5ee8d8934cc7902b67d42c9"
+      sha256: "ee8fb9b30eb60850431b4656447080e3737b56e45719c92b67f245950609f86e"
     - url: "https://github.com/opencv/opencv_contrib/archive/refs/tags/4.14.0.tar.gz"
       sha256: "4f17abd1bc7f88e19c3380c8de7cbf2d863aced5b5ee8d8934cc7902b67d42c9"
 patches:
