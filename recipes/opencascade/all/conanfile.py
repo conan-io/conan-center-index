@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import textwrap
 
 from conan import ConanFile
@@ -58,6 +59,14 @@ class OpenCascadeConan(ConanFile):
     def _is_linux(self):
         return self.settings.os in ["Linux", "FreeBSD"]
 
+    @property
+    def _with_draw(self):
+        return bool(self.options.with_rapidjson)
+
+    @property
+    def _with_tk(self):
+        return self._with_draw and bool(self.options.with_tk)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -72,9 +81,10 @@ class OpenCascadeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("tcl/8.6.10")
-        if self.options.with_tk:
-            self.requires("tk/8.6.10")
+        if self._with_draw:
+            self.requires("tcl/8.6.10")
+            if self._with_tk:
+                self.requires("tk/8.6.10")
         if self.options.with_opengl:
             self.requires("opengl/system")
         if self._is_linux:
@@ -96,7 +106,7 @@ class OpenCascadeConan(ConanFile):
             self.requires("onetbb/[>=2021.10.0 <2024]")
 
     def validate(self):
-        check_min_cppstd(self, 11)
+        check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -143,8 +153,12 @@ class OpenCascadeConan(ConanFile):
         tc.cache_variables["USE_RAPIDJSON"] = self.options.with_rapidjson
 
         tc.cache_variables["USE_DRACO"] = self.options.with_draco
-        tc.cache_variables["USE_TK"] = self.options.with_tk
+        tc.cache_variables["USE_TK"] = self._with_tk
         tc.cache_variables["USE_OPENGL"] = self.options.with_opengl
+        if not self._with_draw:
+            # OCCT 8's DRAWEXE still includes XSDRAWGLTF.hxx after the GLTF
+            # toolkits are removed, so omit the optional Draw module too.
+            tc.cache_variables["BUILD_MODULE_Draw"] = False
 
         # Relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
@@ -159,7 +173,6 @@ class OpenCascadeConan(ConanFile):
             replace_in_file(self, cmakelists, pattern, f"find_package({package_name} REQUIRED)")
 
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        cmakelists_tools = os.path.join(self.source_folder, "tools", "CMakeLists.txt")
         occt_toolkit_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_toolkit.cmake")
         occt_csf_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_csf.cmake")
         occt_defs_flags_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_defs_flags.cmake")
@@ -171,16 +184,16 @@ class OpenCascadeConan(ConanFile):
         replace_in_file(
             self,
             cmakelists,
-            "project (OCCT)",
+            "PROJECT (OCCT)",
             textwrap.dedent(f"""\
-                project (OCCT)
+                PROJECT (OCCT)
                 add_definitions({deps_defines})
             """),
         )
 
         # Avoid to add system include/libs directories and inject directories
         # from conan dependencies instead
-        for cmake_file in [cmakelists, cmakelists_tools]:
+        for cmake_file in [cmakelists]:
             deps_includedirs = ";".join([p.replace("\\", "/") for dep in sorted_deps for p in dep.cpp_info.aggregated_components().includedirs])
             replace_in_file(
                 self,
@@ -214,24 +227,24 @@ class OpenCascadeConan(ConanFile):
             "set (CSF_FREETYPE \"freetype\")",
             f"set (CSF_FREETYPE \"{freetype_libs}\")"
         )
-        ## tcl
-        deps_targets.append("tcl::tcl")
-        _replace_find_package(cmakelists, "tcl", "TCL")
-        tcl_libs = " ".join(self.dependencies["tcl"].cpp_info.aggregated_components().libs)
-        csf_tcl_libs = f"set (CSF_TclLibs \"{tcl_libs}\")"
-        replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs     \"tcl86\")", csf_tcl_libs)
-        replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   Tcl)", csf_tcl_libs)
-        replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   \"tcl8.6\")", csf_tcl_libs)
+        ## tcl/tk (used by the optional Draw module)
+        if self._with_draw:
+            deps_targets.append("tcl::tcl")
+            _replace_find_package(cmakelists, "tcl", "TCL")
+            tcl_libs = " ".join(self.dependencies["tcl"].cpp_info.aggregated_components().libs)
+            csf_tcl_libs = f"set (CSF_TclLibs \"{tcl_libs}\")"
+            replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs     \"tcl86\")", csf_tcl_libs)
+            replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   Tcl)", csf_tcl_libs)
+            replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   \"tcl8.6\")", csf_tcl_libs)
 
-        ## tk
-        if self.options.with_tk:
-            deps_targets.append("tk::tk")
-            _replace_find_package(cmakelists, "tk", "tk")
-            tk_libs = " ".join(self.dependencies["tk"].cpp_info.aggregated_components().libs)
-            csf_tk_libs = f"set (CSF_TclTkLibs \"{tk_libs}\")"
-            replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs   \"tk86\")", csf_tk_libs)
-            replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs Tk)", csf_tk_libs)
-            replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs \"tk8.6\")", csf_tk_libs)
+            if self._with_tk:
+                deps_targets.append("tk::tk")
+                _replace_find_package(cmakelists, "tk", "tk")
+                tk_libs = " ".join(self.dependencies["tk"].cpp_info.aggregated_components().libs)
+                csf_tk_libs = f"set (CSF_TclTkLibs \"{tk_libs}\")"
+                replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs   \"tk86\")", csf_tk_libs)
+                replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs Tk)", csf_tk_libs)
+                replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs \"tk8.6\")", csf_tk_libs)
 
         ## fontconfig
         if self._is_linux:
@@ -240,7 +253,7 @@ class OpenCascadeConan(ConanFile):
             replace_in_file(
                 self,
                 occt_csf_cmake,
-                "set (CSF_fontconfig \"fontconfig\")",
+                "set (CSF_fontconfig \"fontconfig expat\")",
                 f"find_package(Fontconfig REQUIRED)\nset (CSF_fontconfig \"{fontconfig_libs}\")",
             )
 
@@ -363,12 +376,12 @@ class OpenCascadeConan(ConanFile):
         csf_to_conan_dependencies = {
             # Mandatory dependencies
             "CSF_FREETYPE": {"externals": ["freetype::freetype"]},
-            "CSF_TclLibs": {"externals": ["tcl::tcl"]},
+            "CSF_TclLibs": {"externals": ["tcl::tcl"] if self._with_draw else []},
             "CSF_fontconfig": {"externals": ["fontconfig::fontconfig"] if self._is_linux else []},
             "CSF_XwLibs": {"externals": ["xorg::xorg"] if self._is_linux else []},
             # Optional dependencies
             "CSF_OpenGlLibs": {"externals": ["opengl::opengl"] if self.options.with_opengl else []},
-            "CSF_TclTkLibs": {"externals": ["tk::tk"] if self.options.with_tk else []},
+            "CSF_TclTkLibs": {"externals": ["tk::tk"] if self._with_tk else []},
             "CSF_FFmpeg": {"externals": ["ffmpeg::ffmpeg"] if self.options.with_ffmpeg else []},
             "CSF_FreeImagePlus": {"externals": ["freeimage::freeimage"] if self.options.with_freeimage else []},
             "CSF_OpenVR": {"externals": ["openvr::openvr"] if self.options.with_openvr else []},
@@ -401,9 +414,14 @@ class OpenCascadeConan(ConanFile):
         }
 
         modules = {}
+        source_code_folder = self.source_folder
+        if not os.path.isfile(os.path.join(source_code_folder, "adm", "MODULES")):
+            source_code_folder = os.path.normpath(
+                os.path.join(self.build_folder, os.pardir, os.pardir, "src")
+            )
 
         # MODULES: lists all modules and all possible components per module
-        modules_content = load(self, os.path.join(self.source_folder, "adm", "MODULES"))
+        modules_content = load(self, os.path.join(source_code_folder, "adm", "MODULES"))
         packaged_libs_list = collect_libs(self, "lib")
         for module_line in modules_content.splitlines():
             components = {}
@@ -411,13 +429,25 @@ class OpenCascadeConan(ConanFile):
             components_list = [component for component in module_components[1:] if component in packaged_libs_list]
             for component_name in components_list:
                 component_deps = {}
-                # EXTERNLIB: stores dependencies of each component. External dependencies are prefixed with CSF_
-                externlib_content = load(self, os.path.join(self.source_folder, "src", component_name, "EXTERNLIB"))
-                for dependency in externlib_content.splitlines():
+                # OCCT 8 stores each toolkit below its module and expresses
+                # dependencies in EXTERNLIB.cmake.
+                externlib_content = load(
+                    self,
+                    os.path.join(
+                        source_code_folder,
+                        "src",
+                        module_components[0],
+                        component_name,
+                        "EXTERNLIB.cmake",
+                    ),
+                )
+                externlib_content = re.sub(r"#.*", "", externlib_content)
+                dependencies = re.findall(r"\b(?:TK|CSF_)[A-Za-z0-9_]+\b", externlib_content)
+                for dependency in dependencies:
                     if dependency.startswith("TK") and dependency in packaged_libs_list:
                         component_deps.setdefault("internals", []).append(dependency)
                     elif dependency.startswith("CSF_"):
-                        deps_dict = csf_to_conan_dependencies[dependency]
+                        deps_dict = csf_to_conan_dependencies.get(dependency, {})
                         for dep_type, deps in deps_dict.items():
                             if deps:
                                 component_deps.setdefault(dep_type, []).extend(deps)
