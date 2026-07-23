@@ -59,6 +59,14 @@ class OpenCascadeConan(ConanFile):
     def _is_linux(self):
         return self.settings.os in ["Linux", "FreeBSD"]
 
+    @property
+    def _with_draw(self):
+        return bool(self.options.with_rapidjson)
+
+    @property
+    def _with_tk(self):
+        return self._with_draw and bool(self.options.with_tk)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -73,9 +81,9 @@ class OpenCascadeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_rapidjson:
+        if self._with_draw:
             self.requires("tcl/8.6.10")
-            if self.options.with_tk:
+            if self._with_tk:
                 self.requires("tk/8.6.10")
         if self.options.with_opengl:
             self.requires("opengl/system")
@@ -145,9 +153,9 @@ class OpenCascadeConan(ConanFile):
         tc.cache_variables["USE_RAPIDJSON"] = self.options.with_rapidjson
 
         tc.cache_variables["USE_DRACO"] = self.options.with_draco
-        tc.cache_variables["USE_TK"] = self.options.with_tk
+        tc.cache_variables["USE_TK"] = self._with_tk
         tc.cache_variables["USE_OPENGL"] = self.options.with_opengl
-        if not self.options.with_rapidjson:
+        if not self._with_draw:
             # OCCT 8's DRAWEXE still includes XSDRAWGLTF.hxx after the GLTF
             # toolkits are removed, so omit the optional Draw module too.
             tc.cache_variables["BUILD_MODULE_Draw"] = False
@@ -219,26 +227,24 @@ class OpenCascadeConan(ConanFile):
             "set (CSF_FREETYPE \"freetype\")",
             f"set (CSF_FREETYPE \"{freetype_libs}\")"
         )
-        ## tcl
-        if self.options.with_rapidjson:
+        ## tcl/tk (used by the optional Draw module)
+        if self._with_draw:
             deps_targets.append("tcl::tcl")
-        _replace_find_package(cmakelists, "tcl", "TCL")
-        tcl_libs = " ".join(self.dependencies["tcl"].cpp_info.aggregated_components().libs)
-        csf_tcl_libs = f"set (CSF_TclLibs \"{tcl_libs}\")"
-        replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs     \"tcl86\")", csf_tcl_libs)
-        replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   Tcl)", csf_tcl_libs)
-        replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   \"tcl8.6\")", csf_tcl_libs)
+            _replace_find_package(cmakelists, "tcl", "TCL")
+            tcl_libs = " ".join(self.dependencies["tcl"].cpp_info.aggregated_components().libs)
+            csf_tcl_libs = f"set (CSF_TclLibs \"{tcl_libs}\")"
+            replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs     \"tcl86\")", csf_tcl_libs)
+            replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   Tcl)", csf_tcl_libs)
+            replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   \"tcl8.6\")", csf_tcl_libs)
 
-        ## tk
-        if self.options.with_tk:
-            if self.options.with_rapidjson:
+            if self._with_tk:
                 deps_targets.append("tk::tk")
-            _replace_find_package(cmakelists, "tk", "tk")
-            tk_libs = " ".join(self.dependencies["tk"].cpp_info.aggregated_components().libs)
-            csf_tk_libs = f"set (CSF_TclTkLibs \"{tk_libs}\")"
-            replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs   \"tk86\")", csf_tk_libs)
-            replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs Tk)", csf_tk_libs)
-            replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs \"tk8.6\")", csf_tk_libs)
+                _replace_find_package(cmakelists, "tk", "tk")
+                tk_libs = " ".join(self.dependencies["tk"].cpp_info.aggregated_components().libs)
+                csf_tk_libs = f"set (CSF_TclTkLibs \"{tk_libs}\")"
+                replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs   \"tk86\")", csf_tk_libs)
+                replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs Tk)", csf_tk_libs)
+                replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs \"tk8.6\")", csf_tk_libs)
 
         ## fontconfig
         if self._is_linux:
@@ -370,12 +376,12 @@ class OpenCascadeConan(ConanFile):
         csf_to_conan_dependencies = {
             # Mandatory dependencies
             "CSF_FREETYPE": {"externals": ["freetype::freetype"]},
-            "CSF_TclLibs": {"externals": ["tcl::tcl"]},
+            "CSF_TclLibs": {"externals": ["tcl::tcl"] if self._with_draw else []},
             "CSF_fontconfig": {"externals": ["fontconfig::fontconfig"] if self._is_linux else []},
             "CSF_XwLibs": {"externals": ["xorg::xorg"] if self._is_linux else []},
             # Optional dependencies
             "CSF_OpenGlLibs": {"externals": ["opengl::opengl"] if self.options.with_opengl else []},
-            "CSF_TclTkLibs": {"externals": ["tk::tk"] if self.options.with_tk else []},
+            "CSF_TclTkLibs": {"externals": ["tk::tk"] if self._with_tk else []},
             "CSF_FFmpeg": {"externals": ["ffmpeg::ffmpeg"] if self.options.with_ffmpeg else []},
             "CSF_FreeImagePlus": {"externals": ["freeimage::freeimage"] if self.options.with_freeimage else []},
             "CSF_OpenVR": {"externals": ["openvr::openvr"] if self.options.with_openvr else []},
@@ -408,9 +414,14 @@ class OpenCascadeConan(ConanFile):
         }
 
         modules = {}
+        source_code_folder = self.source_folder
+        if not os.path.isfile(os.path.join(source_code_folder, "adm", "MODULES")):
+            source_code_folder = os.path.normpath(
+                os.path.join(self.build_folder, os.pardir, os.pardir, "src")
+            )
 
         # MODULES: lists all modules and all possible components per module
-        modules_content = load(self, os.path.join(self.source_folder, "adm", "MODULES"))
+        modules_content = load(self, os.path.join(source_code_folder, "adm", "MODULES"))
         packaged_libs_list = collect_libs(self, "lib")
         for module_line in modules_content.splitlines():
             components = {}
@@ -423,7 +434,7 @@ class OpenCascadeConan(ConanFile):
                 externlib_content = load(
                     self,
                     os.path.join(
-                        self.source_folder,
+                        source_code_folder,
                         "src",
                         module_components[0],
                         component_name,
