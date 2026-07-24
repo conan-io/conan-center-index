@@ -2,7 +2,7 @@ diff --git a/src/server/ua_discovery_mdns.c b/src/server/ua_discovery_mdns.c
 index 1111111..2222222 100644
 --- a/src/server/ua_discovery_mdns.c
 +++ b/src/server/ua_discovery_mdns.c
-@@ -900,7 +900,9 @@
+@@ -884,7 +884,9 @@
      int rr = message_parse(&mm, (unsigned char*)msg.data);
      if(rr == 0) { /* 0 = success in new mdnsd API */
 -        struct sockaddr_in *sa = (struct sockaddr_in*)infoptr->ai_addr;
@@ -14,7 +14,7 @@ index 1111111..2222222 100644
      }
      freeaddrinfo(infoptr);
  }
-@@ -914,9 +916,8 @@
+@@ -898,9 +900,8 @@
 -    struct in_addr ip;
 -    memset(&ip, 0, sizeof(struct in_addr));
 +    inet_addr_t to;
