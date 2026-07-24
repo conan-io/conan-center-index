@@ -1,0 +1,42 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f9a1227..7c35579 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -159,33 +159,25 @@ elseif(ZINT_QT6 OR ($ENV{CMAKE_PREFIX_PATH} MATCHES "6[.][0-9][.][0-9]"))
+     message(STATUS "Using Qt6")
+     cmake_policy(SET CMP0012 NEW) # Recognize constants in if()
+     cmake_policy(SET CMP0072 NEW) # Choose OpenGL over legacy GL
+-    find_package(Qt6Widgets)
+-    find_package(Qt6Gui)
+-    find_package(Qt6UiTools)
+-    find_package(Qt6Svg)
++    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets Gui UiTools Svg REQUIRED)
+ 
+-    if(Qt6Widgets_FOUND AND Qt6Gui_FOUND AND Qt6UiTools_FOUND AND Qt6Svg_FOUND)
++    if(1)
+         message(STATUS "Qt version: " ${Qt6Core_VERSION_MAJOR}.${Qt6Core_VERSION_MINOR}.${Qt6Core_VERSION_PATCH})
+         add_subdirectory(backend_qt)
+-        add_subdirectory(frontend_qt)
+     else()
+         message(STATUS "Could NOT find Qt6")
+     endif()
+ else()
+     message(STATUS "Using Qt5")
+-    find_package(Qt5Widgets)
+-    find_package(Qt5Gui)
+-    find_package(Qt5UiTools)
+-    find_package(Qt5Svg)
++    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets Gui UiTools Svg REQUIRED)
+ 
+-    if(Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5UiTools_FOUND AND Qt5Svg_FOUND)
++    if(1)
+         message(STATUS "Qt version: " ${Qt5Core_VERSION_STRING})
+         # Old Qt does not provide QT_VERSION_MAJOR
+         if (NOT QT_VERSION_MAJOR)
+             string(SUBSTRING ${Qt5Core_VERSION_STRING} 0 1 QT_VERSION_MAJOR)
+         endif()
+         add_subdirectory(backend_qt)
+-        add_subdirectory(frontend_qt)
+     else()
+         message(STATUS "Could NOT find Qt5")
+     endif()
