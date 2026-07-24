@@ -24,6 +24,7 @@ class SQLGenConan(ConanFile):
         "with_mysql": [True, False],
         "with_postgres": [True, False],
         "with_sqlite3": [True, False],
+        "with_duckdb": [True, False],
     }
     default_options = {
         "shared": False,
@@ -31,18 +32,21 @@ class SQLGenConan(ConanFile):
         "with_mysql": False,
         "with_postgres": True,
         "with_sqlite3": True,
+        "with_duckdb": False,
     }
     implements = ["auto_shared_fpic"]
 
     def requirements(self):
         self.requires("reflect-cpp/0.22.0", transitive_headers=True)
-        # All three dependencies fail with undefined symbols without transitive_libs
+        # All dependencies fail with undefined symbols without transitive_libs
         if self.options.with_mysql:
             self.requires("mariadb-connector-c/3.4.3", transitive_headers=True, transitive_libs=True)
         if self.options.with_postgres:
             self.requires("libpq/[>=16.4 <18]", transitive_headers=True, transitive_libs=True)
         if self.options.with_sqlite3:
             self.requires("sqlite3/[>=3.49.1 <4]", transitive_headers=True, transitive_libs=True)
+        if self.options.with_duckdb:
+            self.requires("duckdb/[>=1.4.3 <2]", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.23]")
@@ -58,11 +62,16 @@ class SQLGenConan(ConanFile):
 
     def generate(self):
         deps = CMakeDeps(self)
+        if self.options.with_duckdb:
+            deps.set_property("duckdb", "cmake_file_name", "DuckDB")
+            deps.set_property("duckdb", "cmake_target_name", "duckdb")
         deps.generate()
         tc = CMakeToolchain(self)
+        tc.cache_variables["SQLGEN_BUILD_SHARED"] = self.options.shared
         tc.cache_variables["SQLGEN_MYSQL"] = self.options.with_mysql
         tc.cache_variables["SQLGEN_POSTGRES"] = self.options.with_postgres
         tc.cache_variables["SQLGEN_SQLITE3"] = self.options.with_sqlite3
+        tc.cache_variables["SQLGEN_DUCKDB"] = self.options.with_duckdb
         tc.cache_variables["SQLGEN_USE_VCPKG"] = False
         tc.generate()
 
