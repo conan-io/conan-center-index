@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 12db977..204b964 100644
+index 5bdf371..b61da31 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -1,7 +1,6 @@
+@@ -1,16 +1,10 @@
  cmake_minimum_required(VERSION 3.10)
  
  project(LASZIP CXX C)
@@ -10,3 +10,52 @@ index 12db977..204b964 100644
  string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
  
  set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
+ 
+-if (MSVC)
+-  add_compile_options("/std:c++17")
+-else()
+-  add_compile_options(-std=c++17)
+-endif()
+ 
+ if(CMAKE_GNU_COMPILER_ID OR CMAKE_Clang_COMPILER_ID)
+     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-format-security -Wno-format-truncation")
+@@ -124,4 +118,3 @@ add_subdirectory(dll)
+ 
+ #
+ add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+-
+diff --git a/cmake/macros.cmake b/cmake/macros.cmake
+index eb03871..44d5289 100644
+--- a/cmake/macros.cmake
++++ b/cmake/macros.cmake
+@@ -64,7 +64,6 @@ macro(LASZIP_ADD_LIBRARY _name)
+         CLEAN_DIRECT_OUTPUT 1
+         FOLDER Libraries
+     )
+-    set_property(TARGET ${_name} PROPERTY CXX_STANDARD 11)
+ 
+     install(TARGETS ${_name}
+         EXPORT LASZIPTargets
+diff --git a/cmake/unix_compiler_options.cmake b/cmake/unix_compiler_options.cmake
+index 0a6550f..8391222 100644
+--- a/cmake/unix_compiler_options.cmake
++++ b/cmake/unix_compiler_options.cmake
+@@ -2,18 +2,12 @@ set(LASZIP_COMMON_CXX_FLAGS "-Wextra -Wall -Wno-unused-parameter -Wno-unused-var
+ )
+ 
+ if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
+-    if (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 4.7)
+-       set(CXX_STANDARD "-std=c++0x")
+-    else()
+-       set(CXX_STANDARD "-std=c++11")
+-    endif()
+     if (${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER 4.6)
+         set(LASZIP_NO_AS_NEEDED_START "-Wl,--no-as-needed")
+         set(LASZIP_NO_AS_NEEDED_END "-Wl,--as-needed")
+     endif()
+     set(LASZIP_COMPILER_GCC 1)
+ elseif (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+-    set(CXX_STANDARD "-std=c++11")
+     set(LASZIP_COMPILER_CLANG 1)
+ else()
+     message(FATAL_ERROR "Unsupported C++ compiler")
