@@ -16,6 +16,9 @@ patches:
     - patch_file: "patches/1003-mdnsd-inet-addr-api.patch"
       patch_description: "Adapt ua_discovery_mdns.c mdnsd_in/mdnsd_out calls to the inet_addr_t mdnsd API"
       patch_type: "conan"
+    - patch_file: "patches/1004-findServersOnNetwork-dont-skip.patch"
+      patch_description: "Fix Service_FindServersOnNetwork to advance the iterator correctly"
+      patch_type: "conan"
   "1.4.14":
     - patch_file: "patches/0004-include-iphlpapi.patch"
       patch_description: "Include iphlpapi.h for SecureZeroMemory"
