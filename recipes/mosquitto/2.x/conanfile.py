@@ -51,7 +51,9 @@ class Mosquitto(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if not self.options.clients:
+        # mosquitto 2.1 requires cJSON unconditionally (libmosquitto_common),
+        # so only tie cjson to clients for older versions.
+        if not self.options.clients and Version(self.version) < "2.1":
             self.options.rm_safe("cjson")
         if not self.options.broker:
             self.options.rm_safe("websockets")
@@ -65,7 +67,7 @@ class Mosquitto(ConanFile):
     def requirements(self):
         if self.options.ssl:
             self.requires("openssl/[>=1.1 <4]")
-        if self.options.get_safe("cjson"):
+        if self.options.get_safe("cjson") or Version(self.version) >= "2.1":
             self.requires("cjson/1.7.16")
         if self.options.get_safe("websockets"):
             self.requires("libwebsockets/4.3.2")
@@ -83,6 +85,12 @@ class Mosquitto(ConanFile):
         deps = CMakeDeps(self)
         if self.options.get_safe("threading") and self.settings.os == "Windows" and Version(self.version) >= "2.0.21":
             deps.set_property("pthreads4w", "cmake_target_aliases", ["PThreads4W::PThreads4W"])
+        if Version(self.version) >= "2.1":
+            # mosquitto 2.1 links a bare `cJSON` target (see libcommon/CMakeLists.txt),
+            # which is normally provided by its bundled cmake/FindcJSON.cmake. Alias
+            # Conan's cjson target to that name so the include dirs propagate when the
+            # Conan config package is used instead of the module finder.
+            deps.set_property("cjson", "cmake_target_aliases", ["cJSON"])
         deps.generate()
 
         tc = CMakeToolchain(self)
@@ -105,9 +113,19 @@ class Mosquitto(ConanFile):
             tc.variables["WITH_THREADING"] = self.options.threading
         tc.variables["WITH_WEBSOCKETS"] = self.options.get_safe("websockets", False)
         tc.variables["STATIC_WEBSOCKETS"] = self.options.get_safe("websockets", False) and not self.dependencies["libwebsockets"].options.shared
-        tc.variables["DOCUMENTATION"] = False
+        tc.variables["WITH_DOCS"] = False
+        tc.variables["WITH_TESTS"] = False
         tc.variables["CMAKE_INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res").replace("\\", "/")
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        if Version(self.version) >= "2.1":
+            # mosquitto 2.1's static library target (libmosquitto_static) omits the
+            # bundled-deps include dir that only the shared target adds via
+            # `if(WITH_BUNDLED_DEPS)` in lib/CMakeLists.txt. As a result headers like
+            # utlist.h/uthash.h from deps/ aren't found when building the static lib.
+            # Add the include dir explicitly for all targets.
+            deps_dir = os.path.join(self.source_folder, "deps").replace("\\", "/")
+            tc.extra_cflags.append(f"-I{deps_dir}")
+            tc.extra_cxxflags.append(f"-I{deps_dir}")
         tc.generate()
 
     def build(self):
