@@ -39,10 +39,13 @@ class PcapplusplusConan(ConanFile):
             self.requires("libpcap/1.10.1")
 
     def validate(self):
-        if Version(self.version) <= "25.05" and self.options.shared and self.settings.os == "Windows":
+        if Version(self.version) <= "26.07" and self.options.shared and self.settings.os == "Windows":
             # https://github.com/seladb/PcapPlusPlus/issues/1396
             raise ConanInvalidConfiguration(f"{self.ref} does not support Windows shared builds for now")
-        check_min_cppstd(self, 11)
+        if Version(self.version) >= "26.07":
+            check_min_cppstd(self, 14)
+        else:
+            check_min_cppstd(self, 11)
         if self.settings.os not in ("FreeBSD", "Linux", "Macos", "Windows"):
             raise ConanInvalidConfiguration(f"{self.settings.os} is not supported")
 
@@ -68,8 +71,9 @@ class PcapplusplusConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def _patch_sources(self):
+        cxx_standard_default = "14" if Version(self.version) >= "26.07" else "11"
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "set(CMAKE_CXX_STANDARD 11)",
+                        f"set(CMAKE_CXX_STANDARD {cxx_standard_default})",
                         "")
         if Version(self.version) >= "24.09":
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
