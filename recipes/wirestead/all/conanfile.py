@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
@@ -41,8 +42,24 @@ class WiresteadConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    @property
+    def _minimum_compilers_version(self):
+        # Conservative floor for full, non-buggy C++20 concepts support
+        return {
+            "gcc": "11",
+            "clang": "14",
+            "apple-clang": "14",
+            "msvc": "192",
+        }
+
     def validate(self):
         check_min_cppstd(self, 20)
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++20 concepts support, which {self.settings.compiler} "
+                f"{self.settings.compiler.version} does not provide (minimum: {minimum_version})."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
