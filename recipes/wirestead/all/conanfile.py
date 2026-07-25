@@ -44,11 +44,13 @@ class WiresteadConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
-        # Conservative floor for full, non-buggy C++20 concepts support
+        # Binding constraint is std::source_location::current() (logger.hpp
+        # default arguments), not just concepts (builder/ibuilder.hpp) - it
+        # lands later per https://en.cppreference.com/cpp/compiler_support/20
         return {
             "gcc": "11",
-            "clang": "14",
-            "apple-clang": "14",
+            "clang": "15",
+            "apple-clang": "15",
             "msvc": "192",
         }
 
