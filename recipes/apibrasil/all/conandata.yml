@@ -1,0 +1,4 @@
+sources:
+  "0.0.2":
+    url: "https://github.com/APIBrasil/apigratis-sdk-cpp/archive/refs/tags/v0.0.2.tar.gz"
+    sha256: "de2c3c0ecc9f8a356f3eb2fdcf4acb0d1ab13f7ef04b8e7a08f6ca1c8a384caf"
