@@ -1,0 +1,4 @@
+sources:
+  "2.1.2":
+    url: "https://github.com/bhouvana/Chronicle/archive/refs/tags/v2.1.2.tar.gz"
+    sha256: "6a5a733dd5dafc2d070d508000946a4a7915f0f87938369a426352ad1f3d1139"
