@@ -1,9 +1,11 @@
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2.0"
+
 
 class FancyArgumentParserConan(ConanFile):
     name = "fancyargumentparser"
@@ -22,8 +24,14 @@ class FancyArgumentParserConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
+    def validate(self):
+        check_min_cppstd(self, 11)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
