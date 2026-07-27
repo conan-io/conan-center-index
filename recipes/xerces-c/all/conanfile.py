@@ -62,6 +62,8 @@ class XercesCConan(ConanFile):
             self.options.mutex_manager = "posix"
         elif self.settings.os == "Linux":
             self.options.mutex_manager = "posix"
+        elif self.settings.os in ["Android", "iOS", "tvOS", "watchOS"]:
+            self.options.transcoder = "iconv"
 
     def configure(self):
         if self.options.shared:
@@ -92,16 +94,14 @@ class XercesCConan(ConanFile):
             raise ConanInvalidConfiguration(f"Option '{option}={value}' is only supported on {host_os}")
 
     def validate(self):
-        if self.settings.os not in ("Windows", "Macos", "Linux"):
-            raise ConanInvalidConfiguration("OS is not supported")
         self._validate("char_type", "wchar_t", ("Windows", ))
         self._validate("network_accessor", "winsock", ("Windows", ))
         self._validate("network_accessor", "cfurl", ("Macos", ))
-        self._validate("network_accessor", "socket", ("Linux", "Macos"))
+        self._validate("network_accessor", "socket", ("Linux", "Macos", "Android", "iOS", "tvOS", "watchOS"))
         self._validate("network_accessor", "curl", ("Linux", "Macos"))
         self._validate("transcoder", "macosunicodeconverter", ("Macos", ))
         self._validate("transcoder", "windows", ("Windows", ))
-        self._validate("mutex_manager", "posix", ("Linux", "Macos"))
+        self._validate("mutex_manager", "posix", ("Linux", "Macos", "Android", "iOS", "tvOS", "watchOS"))
         self._validate("mutex_manager", "windows", ("Windows", ))
 
     def build_requirements(self):
@@ -123,7 +123,7 @@ class XercesCConan(ConanFile):
 
         # Prevent linking against unused found library
         tc.cache_variables["NSL_LIBRARY"] = "NSL_LIBRARY-NOTFOUND"
-        
+
         # https://xerces.apache.org/xerces-c/build-3.html
         tc.variables["network"] =  self.options.network
         if self.options.network:
