@@ -1,0 +1,114 @@
+Temporary patch for issue https://github.com/grpc/grpc/issues/41436
+diff --git a/src/core/call/call_filters.h b/src/core/call/call_filters.h
+index 4ec8ac8473..95be3e008c 100644
+--- a/src/core/call/call_filters.h
++++ b/src/core/call/call_filters.h
+@@ -1627,17 +1627,26 @@ constexpr bool MethodHasChannelAccess<R (T::*)(A, C)> = true;
+ template <typename... Ts>
+ constexpr bool AnyMethodHasChannelAccess = (MethodHasChannelAccess<Ts> || ...);
+ 
++// Helper for CallHasChannelAccess() that accepts method pointers as function
++// arguments to avoid MSVC C3539 errors when methods have deduced return types
++// (e.g. for FusedFilter types whose Call methods have auto return types).
++template <typename T1, typename T2, typename T3, typename T4, typename T5,
++          typename T6>
++inline constexpr bool CallHasChannelAccessHelper(T1, T2, T3, T4, T5, T6) {
++  return AnyMethodHasChannelAccess<T1, T2, T3, T4, T5, T6>;
++}
++
+ // Composite for a given channel type to determine if any of its interceptors
+ // fall into this category: later code should use this.
+ template <typename Derived>
+ inline constexpr bool CallHasChannelAccess() {
+-  return AnyMethodHasChannelAccess<
+-      decltype(&Derived::Call::OnClientInitialMetadata),
+-      decltype(&Derived::Call::OnClientToServerMessage),
+-      decltype(&Derived::Call::OnServerInitialMetadata),
+-      decltype(&Derived::Call::OnServerToClientMessage),
+-      decltype(&Derived::Call::OnServerTrailingMetadata),
+-      decltype(&Derived::Call::OnFinalize)>;
++  return CallHasChannelAccessHelper(
++      &Derived::Call::OnClientInitialMetadata,
++      &Derived::Call::OnClientToServerMessage,
++      &Derived::Call::OnServerInitialMetadata,
++      &Derived::Call::OnServerToClientMessage,
++      &Derived::Call::OnServerTrailingMetadata,
++      &Derived::Call::OnFinalize);
+ }
+ }  // namespace filters_detail
+ 
+diff --git a/src/core/lib/channel/promise_based_filter.h b/src/core/lib/channel/promise_based_filter.h
+index 15fa55a4e7..178c12af8e 100644
+--- a/src/core/lib/channel/promise_based_filter.h
++++ b/src/core/lib/channel/promise_based_filter.h
+@@ -1122,6 +1122,37 @@ MakeFilterCall(Derived* derived) {
+   return GetContext<Arena>()->ManagedNew<FilterCallData<Derived>>(derived);
+ }
+ 
++// Helper functions for ImplementChannelFilter::MakeCallPromise() that accept
++// method pointers as function arguments to avoid MSVC C3539 errors when
++// methods have deduced return types (e.g. for FusedFilter types).
++template <typename HookFn, typename HalfCloseFn, typename Derived>
++inline void RunInterceptClientToServerMessage(HookFn, HalfCloseFn,
++                                               FilterCallData<Derived>* call,
++                                               const CallArgs& call_args) {
++  InterceptClientToServerMessage<HookFn, HalfCloseFn, Derived>::Run(call,
++                                                                     call_args);
++}
++
++template <typename MethodFn, typename Derived>
++inline void RunInterceptServerInitialMetadata(MethodFn,
++                                              FilterCallData<Derived>* call,
++                                              const CallArgs& call_args) {
++  InterceptServerInitialMetadata<Derived, MethodFn>::Run(call, call_args);
++}
++
++template <typename MethodFn, typename Derived>
++inline void RunInterceptServerToClientMessage(MethodFn,
++                                              FilterCallData<Derived>* call,
++                                              const CallArgs& call_args) {
++  InterceptServerToClientMessage<Derived, MethodFn>::Run(call, call_args);
++}
++
++template <typename MethodFn, typename Derived>
++inline void RunInterceptFinalize(MethodFn, Derived* channel,
++                                 typename Derived::Call* call) {
++  InterceptFinalize<Derived, MethodFn>::Run(channel, call);
++}
++
+ }  // namespace promise_filter_detail
+ 
+ // Base class for promise-based channel filters.
+@@ -1192,22 +1223,16 @@ class ImplementChannelFilter : public ChannelFilter,
+       CallArgs call_args, NextPromiseFactory next_promise_factory) final {
+     auto* call = promise_filter_detail::MakeFilterCall<Derived>(
+         static_cast<Derived*>(this));
+-    promise_filter_detail::InterceptClientToServerMessage<
+-        decltype(&Derived::Call::OnClientToServerMessage),
+-        decltype(&Derived::Call::OnClientToServerHalfClose),
+-        Derived>::Run(call, call_args);
+-    promise_filter_detail::InterceptServerInitialMetadata<
+-        Derived,
+-        decltype(&Derived::Call::OnServerInitialMetadata)>::Run(call,
+-                                                                call_args);
+-    promise_filter_detail::InterceptServerToClientMessage<
+-        Derived,
+-        decltype(&Derived::Call::OnServerToClientMessage)>::Run(call,
+-                                                                call_args);
+-    promise_filter_detail::
+-        InterceptFinalize<Derived, decltype(&Derived::Call::OnFinalize)>::Run(
+-            static_cast<Derived*>(this),
+-            static_cast<typename Derived::Call*>(&call->call));
++    promise_filter_detail::RunInterceptClientToServerMessage(
++        &Derived::Call::OnClientToServerMessage,
++        &Derived::Call::OnClientToServerHalfClose, call, call_args);
++    promise_filter_detail::RunInterceptServerInitialMetadata(
++        &Derived::Call::OnServerInitialMetadata, call, call_args);
++    promise_filter_detail::RunInterceptServerToClientMessage(
++        &Derived::Call::OnServerToClientMessage, call, call_args);
++    promise_filter_detail::RunInterceptFinalize(
++        &Derived::Call::OnFinalize, static_cast<Derived*>(this),
++        static_cast<typename Derived::Call*>(&call->call));
+     return promise_filter_detail::MapResult(
+         &Derived::Call::OnServerTrailingMetadata,
+         promise_filter_detail::RaceAsyncCompletion<

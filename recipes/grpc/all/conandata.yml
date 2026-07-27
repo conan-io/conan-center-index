@@ -9,5 +9,7 @@ sources:
     url: "https://github.com/grpc/grpc/archive/v1.54.3.tar.gz"
     sha256: "17e4e1b100657b88027721220cbfb694d86c4b807e9257eaf2fb2d273b41b1b1"
 patches:
+  "1.82.0":
+    - patch_file: "patches/v1.82.0/fix-msvc-auto-return-type-template-arg.patch"
   "1.54.3":
     - patch_file: "patches/v1.50.x/002-CMake-Add-gRPC_USE_SYSTEMD-option-34384.patch"
