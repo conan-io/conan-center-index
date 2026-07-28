@@ -4,6 +4,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
@@ -58,13 +59,19 @@ class HwlocConan(ConanFile):
             deps.generate()
             tc = CMakeToolchain(self)
             tc.cache_variables["HWLOC_ENABLE_TESTING"] = 'OFF'
+            tc.cache_variables["HWLOC_ENABLE_PLUGINS"] = 'OFF'
             tc.cache_variables["HWLOC_SKIP_LSTOPO"] = 'ON'
             tc.cache_variables["HWLOC_SKIP_TOOLS"] = 'ON'
             tc.cache_variables["HWLOC_SKIP_INCLUDES"] = 'OFF'
+            tc.cache_variables["HWLOC_WITH_LIBXML2"] = self.options.with_libxml2
             tc.cache_variables["HWLOC_WITH_OPENCL"] = 'OFF'
             tc.cache_variables["HWLOC_WITH_CUDA"] = 'OFF'
-            tc.cache_variables["HWLOC_BUILD_SHARED_LIBS"] = True
-            tc.cache_variables["HWLOC_WITH_LIBXML2"] = self.options.with_libxml2
+
+            if Version(self.version) >= "2.13.0":
+                tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+            else:
+                tc.cache_variables["HWLOC_BUILD_SHARED_LIBS"] = True
+
             tc.generate()
         else:
             deps = PkgConfigDeps(self)
