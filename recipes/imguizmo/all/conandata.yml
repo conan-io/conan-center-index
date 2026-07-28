@@ -1,4 +1,10 @@
 sources:
+  "1.10":
+    url: "https://github.com/CedricGuillemet/ImGuizmo/archive/refs/tags/1.10.tar.gz"
+    sha256: "a467155ee60a262430478a06c6534ab56fe62b053b896308581f5aa7057f5094"
+  "1.10-docking":
+    url: "https://github.com/CedricGuillemet/ImGuizmo/archive/refs/tags/1.10.tar.gz"
+    sha256: "a467155ee60a262430478a06c6534ab56fe62b053b896308581f5aa7057f5094"
   "cci.20231114":
     url: "https://github.com/CedricGuillemet/ImGuizmo/archive/ba662b119d64f9ab700bb2cd7b2781f9044f5565.zip"
     sha256: "5a63baebb5bce96d83e5e3d6daa4598844ba8d5d0e3cb1ee385fcc54cf996115"
