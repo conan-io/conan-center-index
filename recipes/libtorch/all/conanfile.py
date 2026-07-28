@@ -10,6 +10,7 @@ from conan.tools.files import (
 )
 from conan.tools.apple import is_apple_os
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
+from conan.tools.scm import Version
 from pathlib import Path
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.system import PyEnv
@@ -214,7 +215,13 @@ class LibtorchRecipe(ConanFile):
         tc.cache_variables["USE_NNPACK"] = self.options.get_safe("with_nnpack")
         tc.cache_variables["USE_NUMA"] = self.options.get_safe("with_numa")
 
-        pyenv = PyEnv(self)
+        # PyTorch 2.13+ requires Python >= 3.10 even when BUILD_PYTHON=OFF
+        # (codegen / version scripts). Use UV via py_version so macOS CLT
+        # Python 3.9 is not picked up as the venv base interpreter.
+        if Version(self.version) >= "2.13.0":
+            pyenv = PyEnv(self, py_version="3.10")
+        else:
+            pyenv = PyEnv(self)
         pyenv.install(["pyyaml", "typing-extensions"])
         pyenv.generate()
         # PyEnv is set up to put the virtual env first in PATH
