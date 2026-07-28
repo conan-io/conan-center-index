@@ -8,12 +8,6 @@ sources:
 patches:
   "0.195":
     - patch_file: "patches/0.195-0002-add-enable-static-option-to-configure.patch"
-      patch_description: "Enable static library building."
-      patch_type: "conan"
     - patch_file: "patches/0.195-0003-fix-libelf-libadd-crc32-conflict.patch"
-      patch_description: "Avoid public crc32 symbol collision with zlib when statically linking elfutils binaries."
-      patch_type: "bugfix"
   "0.190":
     - patch_file: "patches/0.189-0002-add-enable-static-option-to-configure.patch"
-      patch_description: "Enable static library building."
-      patch_type: "conan"

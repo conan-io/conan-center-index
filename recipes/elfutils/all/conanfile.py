@@ -6,10 +6,9 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import unix_path, is_msvc
-from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.15"
 
 
 class ElfutilsConan(ConanFile):
@@ -55,11 +54,6 @@ class ElfutilsConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
-        if Version(self.version) < "0.186":
-            del self.options.libdebuginfod
-            del self.options.with_zstd
-        if Version(self.version) < "0.189":
-            del self.options.sanitize_memory
 
     def configure(self):
         if self.options.shared:
@@ -105,14 +99,10 @@ class ElfutilsConan(ConanFile):
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration("elfutils does not support macOS.")
 
-        if Version(self.version) >= "0.186":
-            if self.settings.compiler == "apple-clang" or is_msvc(self):
-                raise ConanInvalidConfiguration(f"Your compiler {self.settings.compiler} is not supported. "
-                                                "elfutils only supports GCC and Clang.")
-        else:
-            if self.settings.compiler in ("clang", "apple-clang") or is_msvc(self):
-                raise ConanInvalidConfiguration(f"Your compiler {self.settings.compiler} is not supported. "
-                                                "elfutils only supports GCC.")
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"Your compiler {self.settings.compiler} is not supported. "
+                                            "elfutils only supports GCC and Clang.")
+
         if self.settings.compiler != "gcc":
             self.output.warning(f"Your compiler {self.settings.compiler} is not GCC.")
 
@@ -134,8 +124,7 @@ class ElfutilsConan(ConanFile):
             "--with-zstd" if self.options.get_safe("with_zstd") else "--without-zstd",
             "--enable-debuginfod" if self.options.debuginfod else "--disable-debuginfod",
         ])
-        if Version(self.version) >= "0.186":
-            tc.configure_args.append("--enable-libdebuginfod" if self.options.libdebuginfod else "--disable-libdebuginfod")
+        tc.configure_args.append("--enable-libdebuginfod" if self.options.libdebuginfod else "--disable-libdebuginfod")
         if self.options.sanitize_memory:
             tc.configure_args.append("--enable-sanitize-memory")
         tc.configure_args.append(f"BUILD_STATIC={'0' if self.options.shared else '1'}")
@@ -209,78 +198,5 @@ class ElfutilsConan(ConanFile):
         # utilities
         bin_path = os.path.join(self.package_folder, "bin")
         lib_path = os.path.join(self.package_folder, "lib")
-        self.output.info("Prepending PATH env var with : {}".format(bin_path))
-        self.env_info.PATH.insert(0, bin_path)              # Conan V1
-        self.env_info.LD_LIBRARY_PATH.insert(0, lib_path)   # Conan V1
-        self.buildenv_info.prepend_path("PATH", bin_path)   # Conan V2
+        self.buildenv_info.prepend_path("PATH", bin_path)
         self.buildenv_info.prepend_path("LD_LIBRARY_PATH", lib_path)
-
-        bin_ext = ".exe" if self.settings.os == "Windows" else ""
-
-        addr2line = unix_path(self, os.path.join(self.package_folder, "bin", "eu-addr2line" + bin_ext))
-        self.output.info("Setting ADDR2LINE to {}".format(addr2line))
-        self.env_info.ADDR2LINE = addr2line
-
-        ar = unix_path(self, os.path.join(self.package_folder, "bin", "eu-ar" + bin_ext))
-        self.output.info("Setting AR to {}".format(ar))
-        self.env_info.AR = ar
-
-        elfclassify = unix_path(self, os.path.join(self.package_folder, "bin", "eu-elfclassify" + bin_ext))
-        self.output.info("Setting ELFCLASSIFY to {}".format(elfclassify))
-        self.env_info.ELFCLASSIFY = elfclassify
-
-        elfcmp = unix_path(self, os.path.join(self.package_folder, "bin", "eu-elfcmp" + bin_ext))
-        self.output.info("Setting ELFCMP to {}".format(elfcmp))
-        self.env_info.ELFCMP = elfcmp
-
-        elfcompress = unix_path(self, os.path.join(self.package_folder, "bin", "eu-elfcompress" + bin_ext))
-        self.output.info("Setting ELFCOMPRESS to {}".format(elfcompress))
-        self.env_info.ELFCOMPRESS = elfcompress
-
-        elflint = unix_path(self, os.path.join(self.package_folder, "bin", "eu-elflint" + bin_ext))
-        self.output.info("Setting ELFLINT to {}".format(elflint))
-        self.env_info.ELFLINT = elflint
-
-        findtextrel = unix_path(self, os.path.join(self.package_folder, "bin", "eu-findtextrel" + bin_ext))
-        self.output.info("Setting FINDTEXTREL to {}".format(findtextrel))
-        self.env_info.FINDTEXTREL = findtextrel
-
-        make_debug_archive = unix_path(self, os.path.join(self.package_folder, "bin", "eu-make-debug-archive" + bin_ext))
-        self.output.info("Setting MAKE_DEBUG_ARCHIVE to {}".format(make_debug_archive))
-        self.env_info.MAKE_DEBUG_ARCHIVE = make_debug_archive
-
-        nm = unix_path(self, os.path.join(self.package_folder, "bin", "eu-nm" + bin_ext))
-        self.output.info("Setting NM to {}".format(nm))
-        self.env_info.NM = nm
-
-        objdump = unix_path(self, os.path.join(self.package_folder, "bin", "eu-objdump" + bin_ext))
-        self.output.info("Setting OBJDUMP to {}".format(objdump))
-        self.env_info.OBJDUMP = objdump
-
-        ranlib = unix_path(self, os.path.join(self.package_folder, "bin", "eu-ranlib" + bin_ext))
-        self.output.info("Setting RANLIB to {}".format(ranlib))
-        self.env_info.RANLIB = ranlib
-
-        readelf = unix_path(self, os.path.join(self.package_folder, "bin", "eu-readelf" + bin_ext))
-        self.output.info("Setting READELF to {}".format(readelf))
-        self.env_info.READELF = readelf
-
-        size = unix_path(self, os.path.join(self.package_folder, "bin", "eu-size" + bin_ext))
-        self.output.info("Setting SIZE to {}".format(size))
-        self.env_info.SIZE = size
-
-        stack = unix_path(self, os.path.join(self.package_folder, "bin", "eu-stack" + bin_ext))
-        self.output.info("Setting STACK to {}".format(stack))
-        self.env_info.STACK = stack
-
-        strings = unix_path(self, os.path.join(self.package_folder, "bin", "eu-strings" + bin_ext))
-        self.output.info("Setting STRINGS to {}".format(strings))
-        self.env_info.STRINGS = strings
-
-        strip = unix_path(self, os.path.join(self.package_folder, "bin", "eu-strip" + bin_ext))
-        self.output.info("Setting STRIP to {}".format(strip))
-        self.env_info.STRIP = strip
-
-        unstrip = unix_path(self, os.path.join(self.package_folder, "bin", "eu-unstrip" + bin_ext))
-        self.output.info("Setting UNSTRIP to {}".format(unstrip))
-        self.env_info.UNSTRIP = unstrip
