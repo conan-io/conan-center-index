@@ -1,3 +1,5 @@
+Reported at https://sourceware.org/bugzilla/show_bug.cgi?id=34403
+
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 Subject: [PATCH] libelf: do not bundle libeu crc32.o into libelf.a
 
