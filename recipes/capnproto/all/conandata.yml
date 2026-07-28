@@ -15,6 +15,8 @@ sources:
     url: "https://github.com/capnproto/capnproto/archive/v1.0.2.tar.gz"
     sha256: "3cfd0ed58080d78b3a3381305489f2175cdaf1ef1cb55425d8fc8246a76bdff3"
 patches:
+  "1.5.0":
+    - patch_file: "patches/0015-disable-tests-for-1.0.0.patch"
   "1.4.0":
     - patch_file: "patches/0015-disable-tests-for-1.0.0.patch"
   "1.3.0":
