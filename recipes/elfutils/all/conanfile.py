@@ -142,6 +142,10 @@ class ElfutilsConan(ConanFile):
         if self.options.get_safe("with_zstd"):
             # ./configure ignores system_libs
             tc.extra_ldflags.append("-pthread")
+
+        if self.settings.os == "Linux":
+            libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
+            tc.extra_ldflags.extend([f"-Wl,-rpath-link,{libdir}" for libdir in libdirs_host])
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
