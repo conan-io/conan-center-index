@@ -121,7 +121,6 @@ class LibtorchRecipe(ConanFile):
         self.tool_requires("protobuf/<host_version>")
 
     def validate(self):
-        check_min_cppstd(self, 17)
         check_min_cppstd(self, 20)
 
     def layout(self):
