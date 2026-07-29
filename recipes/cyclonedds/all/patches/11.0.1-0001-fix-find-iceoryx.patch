@@ -1,0 +1,22 @@
+Conan CMakeDeps generator does not support generating find modules for components of a package.
+This patch fixes the situation by using the generated Conan CMakeDeps config cmake file,
+so that the find_package(iceoryx) call will work correctly.
+
+The Conan generate CMakeConfigDeps is capable of generating a cmake config file per component.
+
+This is a custom patch produced by Conan Center Index.
+
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -134,9 +134,8 @@ if(ENABLE_ICEORYX)
+   else()
+     set(iceoryx_required QUIET)
+   endif()
+-  find_package(iceoryx_hoofs ${iceoryx_required})
+-  find_package(iceoryx_posh ${iceoryx_required})
+-  if(${iceoryx_hoofs_FOUND} AND ${iceoryx_posh_FOUND})
++  find_package(iceoryx ${iceoryx_required})
++  if(${iceoryx_FOUND})
+     set(ENABLE_ICEORYX "ON")
+   else()
+     set(ENABLE_ICEORYX "OFF")
