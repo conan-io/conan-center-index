@@ -45,7 +45,7 @@ class SioxxConan(ConanFile):
         )
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.28 <4]")
+        self.tool_requires("cmake/[>=3.28]")
 
     def validate(self):
         check_min_cppstd(self, 17)
