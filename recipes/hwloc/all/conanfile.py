@@ -67,9 +67,7 @@ class HwlocConan(ConanFile):
             tc.cache_variables["HWLOC_WITH_OPENCL"] = 'OFF'
             tc.cache_variables["HWLOC_WITH_CUDA"] = 'OFF'
 
-            if Version(self.version) >= "2.13.0":
-                tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
-            else:
+            if Version(self.version) < "2.13.0":
                 tc.cache_variables["HWLOC_BUILD_SHARED_LIBS"] = True
 
             tc.generate()
