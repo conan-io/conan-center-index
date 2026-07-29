@@ -59,10 +59,6 @@ class OpenCascadeConan(ConanFile):
     def _is_linux(self):
         return self.settings.os in ["Linux", "FreeBSD"]
 
-    @property
-    def _disable_draw_for_static_without_rapidjson(self):
-        return not self.options.shared and not self.options.with_rapidjson
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -77,10 +73,9 @@ class OpenCascadeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if not self._disable_draw_for_static_without_rapidjson:
-            self.requires("tcl/8.6.10")
-            if self.options.with_tk:
-                self.requires("tk/8.6.10")
+        self.requires("tcl/8.6.10")
+        if self.options.with_tk:
+            self.requires("tk/8.6.10")
         if self.options.with_opengl:
             self.requires("opengl/system")
         if self._is_linux:
@@ -149,15 +144,8 @@ class OpenCascadeConan(ConanFile):
         tc.cache_variables["USE_RAPIDJSON"] = self.options.with_rapidjson
 
         tc.cache_variables["USE_DRACO"] = self.options.with_draco
-        tc.cache_variables["USE_TK"] = (
-            self.options.with_tk and not self._disable_draw_for_static_without_rapidjson
-        )
+        tc.cache_variables["USE_TK"] = self.options.with_tk
         tc.cache_variables["USE_OPENGL"] = self.options.with_opengl
-        if self._disable_draw_for_static_without_rapidjson:
-            # OCCT 8 removes the GLTF toolkits when RapidJSON is disabled.
-            # Static builds define OCCT_NO_PLUGINS, causing DRAWEXE to register
-            # plugins directly while still referencing XSDRAWGLTF unconditionally.
-            tc.cache_variables["BUILD_MODULE_Draw"] = False
 
         # Relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
@@ -226,24 +214,24 @@ class OpenCascadeConan(ConanFile):
             "set (CSF_FREETYPE \"freetype\")",
             f"set (CSF_FREETYPE \"{freetype_libs}\")"
         )
-        ## tcl/tk (used by the optional Draw module)
-        if not self._disable_draw_for_static_without_rapidjson:
-            deps_targets.append("tcl::tcl")
-            _replace_find_package(cmakelists, "tcl", "TCL")
-            tcl_libs = " ".join(self.dependencies["tcl"].cpp_info.aggregated_components().libs)
-            csf_tcl_libs = f"set (CSF_TclLibs \"{tcl_libs}\")"
-            replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs     \"tcl86\")", csf_tcl_libs)
-            replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   Tcl)", csf_tcl_libs)
-            replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   \"tcl8.6\")", csf_tcl_libs)
+        ## tcl
+        deps_targets.append("tcl::tcl")
+        _replace_find_package(cmakelists, "tcl", "TCL")
+        tcl_libs = " ".join(self.dependencies["tcl"].cpp_info.aggregated_components().libs)
+        csf_tcl_libs = f"set (CSF_TclLibs \"{tcl_libs}\")"
+        replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs     \"tcl86\")", csf_tcl_libs)
+        replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   Tcl)", csf_tcl_libs)
+        replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   \"tcl8.6\")", csf_tcl_libs)
 
-            if self.options.with_tk:
-                deps_targets.append("tk::tk")
-                _replace_find_package(cmakelists, "tk", "tk")
-                tk_libs = " ".join(self.dependencies["tk"].cpp_info.aggregated_components().libs)
-                csf_tk_libs = f"set (CSF_TclTkLibs \"{tk_libs}\")"
-                replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs   \"tk86\")", csf_tk_libs)
-                replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs Tk)", csf_tk_libs)
-                replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs \"tk8.6\")", csf_tk_libs)
+        ## tk
+        if self.options.with_tk:
+            deps_targets.append("tk::tk")
+            _replace_find_package(cmakelists, "tk", "tk")
+            tk_libs = " ".join(self.dependencies["tk"].cpp_info.aggregated_components().libs)
+            csf_tk_libs = f"set (CSF_TclTkLibs \"{tk_libs}\")"
+            replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs   \"tk86\")", csf_tk_libs)
+            replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs Tk)", csf_tk_libs)
+            replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs \"tk8.6\")", csf_tk_libs)
 
         ## fontconfig
         if self._is_linux:
@@ -375,23 +363,12 @@ class OpenCascadeConan(ConanFile):
         csf_to_conan_dependencies = {
             # Mandatory dependencies
             "CSF_FREETYPE": {"externals": ["freetype::freetype"]},
-            "CSF_TclLibs": {
-                "externals": (
-                    [] if self._disable_draw_for_static_without_rapidjson
-                    else ["tcl::tcl"]
-                )
-            },
+            "CSF_TclLibs": {"externals": ["tcl::tcl"]},
             "CSF_fontconfig": {"externals": ["fontconfig::fontconfig"] if self._is_linux else []},
             "CSF_XwLibs": {"externals": ["xorg::xorg"] if self._is_linux else []},
             # Optional dependencies
             "CSF_OpenGlLibs": {"externals": ["opengl::opengl"] if self.options.with_opengl else []},
-            "CSF_TclTkLibs": {
-                "externals": (
-                    ["tk::tk"]
-                    if self.options.with_tk and not self._disable_draw_for_static_without_rapidjson
-                    else []
-                )
-            },
+            "CSF_TclTkLibs": {"externals": ["tk::tk"] if self.options.with_tk else []},
             "CSF_FFmpeg": {"externals": ["ffmpeg::ffmpeg"] if self.options.with_ffmpeg else []},
             "CSF_FreeImagePlus": {"externals": ["freeimage::freeimage"] if self.options.with_freeimage else []},
             "CSF_OpenVR": {"externals": ["openvr::openvr"] if self.options.with_openvr else []},
