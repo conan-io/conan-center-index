@@ -1,0 +1,100 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1c00fb3..4efd50d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -144,6 +144,11 @@ if(GMP_FOUND)
+     set(libs ${libs} ${GMP_LIBRARIES})
+ endif()
+ 
++find_package(fmt CONFIG REQUIRED)
++include_directories(${fmt_INCLUDE_DIRS})
++find_package(zstr CONFIG REQUIRED)
++include_directories(${zstr_INCLUDE_DIRS})
++
+ if(QUADMATH)
+    find_package(Quadmath)
+ endif()
+@@ -254,7 +259,7 @@ set(EXTRA_CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
+ configure_file(${PROJECT_SOURCE_DIR}/soplex-config.cmake.in "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/soplex-config.cmake" @ONLY)
+ 
+ add_subdirectory(src)
+-add_subdirectory(tests/c_interface)
+-add_subdirectory(check)
++#add_subdirectory(tests/c_interface)
++#add_subdirectory(check)
+ 
+ enable_testing()
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index f3758e1..60ea2c3 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -220,28 +220,6 @@ set_target_properties(soplex PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/$
+ install(FILES ${headers} ${PROJECT_BINARY_DIR}/soplex/config.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/soplex)
+ install(FILES soplex.h soplex.hpp soplex_interface.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ 
+-install(FILES
+-     ${PROJECT_SOURCE_DIR}/src/soplex/external/fmt/chrono.h
+-     ${PROJECT_SOURCE_DIR}/src/soplex/external/fmt/color.h
+-     ${PROJECT_SOURCE_DIR}/src/soplex/external/fmt/compile.h
+-     ${PROJECT_SOURCE_DIR}/src/soplex/external/fmt/core.h
+-     ${PROJECT_SOURCE_DIR}/src/soplex/external/fmt/format-inl.h
+-     ${PROJECT_SOURCE_DIR}/src/soplex/external/fmt/format.h
+-     ${PROJECT_SOURCE_DIR}/src/soplex/external/fmt/locale.h
+-     ${PROJECT_SOURCE_DIR}/src/soplex/external/fmt/os.h
+-     ${PROJECT_SOURCE_DIR}/src/soplex/external/fmt/ostream.h
+-     ${PROJECT_SOURCE_DIR}/src/soplex/external/fmt/posix.h
+-     ${PROJECT_SOURCE_DIR}/src/soplex/external/fmt/printf.h
+-     ${PROJECT_SOURCE_DIR}/src/soplex/external/fmt/ranges.h
+-     DESTINATION include/soplex/external/fmt)
+-
+-# TODO this is necessary only if ZLIB_FOUND?
+-install(FILES
+-     ${PROJECT_SOURCE_DIR}/src/soplex/external/zstr/zstr.hpp
+-     ${PROJECT_SOURCE_DIR}/src/soplex/external/zstr/strict_fstream.hpp
+-     DESTINATION include/soplex/external/zstr)
+-install(FILES ${PROJECT_SOURCE_DIR}/src/soplex/external/zstr/License.txt DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/soplex/zstr)
+-
+ # install the binary and the library to appropriate lcoations and add them to an export group
+ install(TARGETS soplex libsoplex libsoplex-pic libsoplexshared EXPORT soplex-targets
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+@@ -255,7 +233,6 @@ endif()
+ 
+ # install license files of soplex and fmt
+ install(FILES ${PROJECT_SOURCE_DIR}/LICENSE DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/soplex)
+-install(FILES ${PROJECT_SOURCE_DIR}/src/soplex/external/fmt/LICENSE.rst DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/soplex/fmt)
+ 
+ # Add library targets to the build-tree export set
+ export(TARGETS libsoplex libsoplex-pic libsoplexshared
+diff --git a/src/soplex/fmt.hpp b/src/soplex/fmt.hpp
+index 54c7dca..b8e1d94 100644
+--- a/src/soplex/fmt.hpp
++++ b/src/soplex/fmt.hpp
+@@ -36,11 +36,11 @@
+ 
+ /* to provide backwards compatibility use fmt of PaPILO <= 2.3 due to breaking changes in fmt 7 */
+ #if !defined(SOPLEX_WITH_PAPILO) || PAPILO_VERSION_MAJOR > 2 || (PAPILO_VERSION_MAJOR == 2 && PAPILO_VERSION_MINOR > 3)
+-#include "soplex/external/fmt/format.h"
+-#include "soplex/external/fmt/ostream.h"
++#include "fmt/format.h"
++#include "fmt/ostream.h"
+ #else
+-#include "papilo/external/fmt/format.h"
+-#include "papilo/external/fmt/ostream.h"
++#include "fmt/format.h"
++#include "fmt/ostream.h"
+ #endif
+ 
+ #endif
+diff --git a/src/soplex/spxfileio.h b/src/soplex/spxfileio.h
+index 89edb9d..90bc7be 100644
+--- a/src/soplex/spxfileio.h
++++ b/src/soplex/spxfileio.h
+@@ -41,7 +41,7 @@
+  *-----------------------------------------------------------------------------
+  */
+ #ifdef SOPLEX_WITH_ZLIB
+-#include "soplex/external/zstr/zstr.hpp"
++#include "zstr.hpp"
+ #endif // WITH_GSZSTREAM
+ 
+ namespace soplex
