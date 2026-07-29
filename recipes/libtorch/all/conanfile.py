@@ -122,6 +122,7 @@ class LibtorchRecipe(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
+        check_min_cppstd(self, 20)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -265,6 +266,7 @@ class LibtorchRecipe(ConanFile):
 
         # C10 component
         c10 = _whole_archive(self.cpp_info.components["c10"], "c10")
+        c10.bindirs = ["lib"]
         c10.requires = [
             "eigen::eigen",
             "fmt::fmt",
@@ -341,6 +343,7 @@ class LibtorchRecipe(ConanFile):
 
         # Torch global component
         self.cpp_info.components["torch"].libs = ["torch"]
+        self.cpp_info.components["torch"].bindirs = ["lib"]
         self.cpp_info.components["torch"].requires = ["torch_cpu"]
         self.cpp_info.components["torch"].includedirs = ["include/torch/csrc/api/include", "include"]
 
