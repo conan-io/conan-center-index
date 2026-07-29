@@ -1,12 +1,9 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get, rm, rmdir, apply_conandata_patches, export_conandata_patches
-from conan.tools.scm import Version
+from conan.tools.files import get, rm, rmdir, apply_conandata_patches, export_conandata_patches
 import os
-from os.path import join
 
 required_conan_version = ">=2"
 
@@ -56,7 +53,6 @@ class SoPlexConan(ConanFile):
             self.requires("gmp/6.3.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_boost:
             self.requires("boost/1.84.0", transitive_headers=True)  # also update Boost_VERSION_MACRO below!
-        # Unvendored fmt and zstr
         self.requires("fmt/[>=11 <13]", transitive_headers=True)
         self.requires("zstr/[>1 <2]", transitive_headers=True)
 
@@ -65,14 +61,16 @@ class SoPlexConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Vendorized fmt and zstr
+        rmdir(self, os.path.join(self.source_folder, "src", "soplex", "external"))
         apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["MPFR"] = False
-        tc.variables["GMP"] = self.options.with_gmp
-        tc.variables["BOOST"] = self.options.with_boost
-        tc.variables["Boost_VERSION_MACRO"] = "108400"
+        tc.cache_variables["MPFR"] = False
+        tc.cache_variables["GMP"] = self.options.with_gmp
+        tc.cache_variables["BOOST"] = self.options.with_boost
+        tc.cache_variables["Boost_VERSION_MACRO"] = "108400"
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
@@ -101,16 +99,15 @@ class SoPlexConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         fix_apple_shared_install_name(self)
 
-    def _determine_lib_name(self):
-        if self.options.shared:
-            return "soplexshared"
-        elif self.options.get_safe("fPIC"):
-            return "soplex-pic"
-        else:
-            return "soplex"
-
     def package_info(self):
-        self.cpp_info.libs = [self._determine_lib_name()]
+        if self.options.shared:
+            libname = "soplexshared"
+        elif self.options.get_safe("fPIC"):
+            libname = "soplex-pic"
+        else:
+            libname = "soplex"
+
+        self.cpp_info.libs = [libname]
         # https://github.com/conan-io/conan-center-index/pull/16017#discussion_r1156484737
         self.cpp_info.set_property("cmake_target_name", "soplex")
         if self.settings.os in ["Linux", "FreeBSD"]:
