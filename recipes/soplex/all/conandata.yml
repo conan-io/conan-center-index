@@ -2,6 +2,11 @@ sources:
   "8.0.3":
     url: "https://github.com/scipopt/soplex/archive/refs/tags/v8.0.3.tar.gz"
     sha256: "224eca4c49a2509a2a893a1d4b63e510e2ddb4ff374699cc6afc36f12af4e621"
+  "8.0.2":
+    url: "https://github.com/scipopt/soplex/archive/refs/tags/v8.0.2.tar.gz"
+    sha256: "9304fd377e506b380c6b234f6aec221bfc8754541e9ad5f5584f5fbb786a8392"
 patches:
   "8.0.3":
+    - patch_file: "patches/0001-unvendor-fmt-zstr.patch"
+  "8.0.2":
     - patch_file: "patches/0001-unvendor-fmt-zstr.patch"
