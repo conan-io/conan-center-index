@@ -1,6 +1,8 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 12db977..5bdf371 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -81,15 +81,11 @@ file(MAKE_DIRECTORY "${LASZIP_OUTPUT_BIN_DIR}")
+@@ -92,15 +92,11 @@ file(MAKE_DIRECTORY "${LASZIP_OUTPUT_BIN_DIR}")
  # per http://www.cmake.org/Wiki/CMake_RPATH_handling
  SET(CMAKE_SKIP_BUILD_RPATH FALSE)
  SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
@@ -16,9 +18,11 @@
  
  # wipe lib/ drectory on clean. It will have plugins that could be out of date
  # in the next build
+diff --git a/cmake/macros.cmake b/cmake/macros.cmake
+index cd23260..eb03871 100644
 --- a/cmake/macros.cmake
 +++ b/cmake/macros.cmake
-@@ -71,8 +71,6 @@ macro(LASZIP_ADD_LIBRARY _name)
+@@ -72,8 +72,6 @@ macro(LASZIP_ADD_LIBRARY _name)
          LIBRARY DESTINATION ${LASZIP_LIB_INSTALL_DIR}
          ARCHIVE DESTINATION ${LASZIP_LIB_INSTALL_DIR})
      if (APPLE)
