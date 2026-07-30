@@ -27,10 +27,10 @@ index 1c00fb3..712b737 100644
  
  enable_testing()
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index f3758e1..4ba0d68 100644
+index f3758e1..a06fda0 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -192,58 +192,25 @@ target_include_directories(libsoplexshared BEFORE PUBLIC
+@@ -192,70 +192,36 @@ target_include_directories(libsoplexshared BEFORE PUBLIC
  target_link_libraries(libsoplexshared libsoplex ${libs})
  set_target_properties(libsoplexshared PROPERTIES CXX_VISIBILITY_PRESET default)
  
@@ -90,7 +90,12 @@ index f3758e1..4ba0d68 100644
      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-@@ -255,7 +222,6 @@ endif()
+     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ 
+ if(MSVC)
+-    install(FILES $<TARGET_PDB_FILE:libsoplexshared> $<TARGET_PDB_FILE:soplex> DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)
++    install(FILES $<TARGET_PDB_FILE:libsoplexshared> DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)
+ endif()
  
  # install license files of soplex and fmt
  install(FILES ${PROJECT_SOURCE_DIR}/LICENSE DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/soplex)
