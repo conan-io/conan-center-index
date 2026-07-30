@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, rm, rmdir, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import get, rm, rmdir, apply_conandata_patches, export_conandata_patches, copy
 import os
 
 required_conan_version = ">=2"
@@ -84,17 +84,19 @@ class SoPlexConan(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        if not self.options.shared:
+        if self.options.shared:
+            rm(self, "*.lib", os.path.join(self.package_folder, "lib"), excludes=["libsoplexshared*"])
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+        else:
             rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dylib*", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.dll*", os.path.join(self.package_folder, "lib"))
-        else:
-            rm(self, "*.lib", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
-        if not self.options.get_safe("fPIC"):
-            rm(self, "soplex-pic.*", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dll*", os.path.join(self.package_folder, "bin"))
+            if not self.options.get_safe("fPIC"):
+                rm(self, "*soplex-pic.*", os.path.join(self.package_folder, "lib"))
+
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         fix_apple_shared_install_name(self)
