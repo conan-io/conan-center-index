@@ -98,6 +98,8 @@ class SoPlexConan(ConanFile):
             rm(self, "*.lib", os.path.join(self.package_folder, "lib"), excludes=excludes)
             rm(self, "*.a", os.path.join(self.package_folder, "lib"), excludes=excludes)
 
+        rm(self, "soplex.exe" if self.settings.os == "Windows" else "soplex",
+           os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         fix_apple_shared_install_name(self)
