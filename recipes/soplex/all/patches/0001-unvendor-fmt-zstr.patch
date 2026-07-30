@@ -1,20 +1,22 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 1c00fb3..4efd50d 100644
+index 1c00fb3..712b737 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -144,6 +144,11 @@ if(GMP_FOUND)
+@@ -144,6 +144,13 @@ if(GMP_FOUND)
      set(libs ${libs} ${GMP_LIBRARIES})
  endif()
  
 +find_package(fmt CONFIG REQUIRED)
 +include_directories(${fmt_INCLUDE_DIRS})
++set(libs ${libs} ${fmt_LIBRARIES})
 +find_package(zstr CONFIG REQUIRED)
 +include_directories(${zstr_INCLUDE_DIRS})
++set(libs ${libs} ${zstr_LIBRARIES})
 +
  if(QUADMATH)
     find_package(Quadmath)
  endif()
-@@ -254,7 +259,7 @@ set(EXTRA_CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
+@@ -254,7 +261,7 @@ set(EXTRA_CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
  configure_file(${PROJECT_SOURCE_DIR}/soplex-config.cmake.in "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/soplex-config.cmake" @ONLY)
  
  add_subdirectory(src)
