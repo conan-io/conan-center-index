@@ -293,6 +293,7 @@ class LibtorchRecipe(ConanFile):
         if self._has_qnnpack:
             # TODO: is linking with 'log' in Android, check
             self.cpp_info.components["clog"].libs = ["clog"]
+            self.cpp_info.components["clog"].type = "static-library"
 
             self.cpp_info.components["pytorch_qnnpack"].libs = ["pytorch_qnnpack"]
             self.cpp_info.components["pytorch_qnnpack"].requires = [
