@@ -5,7 +5,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, rm, rmdir, apply_conandata_patches, export_conandata_patches, copy
 import os
 
-required_conan_version = ">=2"
+required_conan_version = ">=2.4"
 
 
 class SoPlexConan(ConanFile):
@@ -94,8 +94,9 @@ class SoPlexConan(ConanFile):
             rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dylib*", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dll*", os.path.join(self.package_folder, "bin"))
-            if not self.options.get_safe("fPIC"):
-                rm(self, "*soplex-pic.*", os.path.join(self.package_folder, "lib"))
+            excludes = ["libsoplex-pic.*"] if self.options.get_safe("fPIC") else ["libsoplex.*"]
+            rm(self, "*.lib", os.path.join(self.package_folder, "lib"), excludes=excludes)
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"), excludes=excludes)
 
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
