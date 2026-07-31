@@ -1,13 +1,19 @@
+From 74c544ecc3e665f996e7ee76ed3468bc175773bf Mon Sep 17 00:00:00 2001
+Date: Fri, 17 Jul 2026 16:26:52 +0200
+Subject: [PATCH] Fix windows array
+
+---
 diff --git a/src/soplex/external/fmt/format.h b/src/soplex/external/fmt/format.h
-index a51ba231..3b7b4db8 100644
+index a51ba231..6ab0a651 100644
 --- a/src/soplex/external/fmt/format.h
 +++ b/src/soplex/external/fmt/format.h
-@@ -354,7 +354,7 @@ inline typename Container::value_type* get_data(Container& c) {
+@@ -354,7 +354,8 @@ inline typename Container::value_type* get_data(Container& c) {
    return c.data();
  }
-
+ 
 -#if defined(_SECURE_SCL) && _SECURE_SCL
-+#if defined(_SECURE_SCL) && (!defined(_MSC_VER) || _MSC_VER < 1951)
++// stdext::checked_array_iterator removed with MSVC 14.51
++#if defined(_SECURE_SCL) && _SECURE_SCL && (!defined(_MSC_VER) || _MSC_VER < 1951)
  // Make a checked iterator to avoid MSVC warnings.
  template <typename T> using checked_ptr = stdext::checked_array_iterator<T*>;
  template <typename T> checked_ptr<T> make_checked(T* p, size_t size) {

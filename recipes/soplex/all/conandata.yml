@@ -2,40 +2,6 @@ sources:
   "8.0.2":
     url: "https://github.com/scipopt/soplex/archive/refs/tags/v8.0.2.tar.gz"
     sha256: "9304fd377e506b380c6b234f6aec221bfc8754541e9ad5f5584f5fbb786a8392"
-  "8.0.1":
-    url: "https://github.com/scipopt/soplex/archive/refs/tags/v8.0.1.tar.gz"
-    sha256: "f989f650e0d489f4e84037af2a50b1d0928f62ab79179ef566111d9197c2b6c8"
-  "8.0.0":
-    url: "https://github.com/scipopt/soplex/archive/refs/tags/v8.0.0.tar.gz"
-    sha256: "59828f88843ff5fd0adddbecf39a84c8a883b47dc26527bc4dedd2a4b98af07c"
-  "7.1.6":
-    url: "https://github.com/scipopt/soplex/archive/refs/tags/release-716.tar.gz"
-    sha256: "f031d60e7ad9a575393b04083c2914fb71a9886ba70ae77931c5a46c76b85ae4"
-  "7.1.5":
-    url: "https://github.com/scipopt/soplex/archive/refs/tags/release-715.tar.gz"
-    sha256: "e6e3998c0215120e452c4298d29bfad71c9dfb7f904a01f04c7919086248c130"
-  "7.1.2":
-    url: "https://github.com/scipopt/soplex/archive/refs/tags/release-712.tar.gz"
-    sha256: "a1a7d7f7e30d1db65548b32f75d6f2ed9bd0bf289f639eb4481d3d141c67a332"
-  "7.1.1":
-    url: "https://github.com/scipopt/soplex/archive/refs/tags/release-711.tar.gz"
-    sha256: "75752dca395e219e350f3b462f1f4c08e9d3c2deb2782414862f546a9489cdeb"
-  "7.1.0":
-    url: "https://github.com/scipopt/soplex/archive/refs/tags/release-710.tar.gz"
-    sha256: "ec177fdb688346287d5f211dd7ec4a0195c8ec9b3a5314d38aca383b6fa1418e"
-  "7.0.1":
-    url: "https://github.com/scipopt/soplex/archive/refs/tags/release-701.tar.gz"
-    sha256: "80cce994dcbe45fd52b60e31a3aeb5d2c60a7ddbaae495e0ce6bf58481675696"
-  "7.0.0":
-    url: "https://github.com/scipopt/soplex/archive/refs/tags/release-700.tar.gz"
-    sha256: "ab1906d3afb1793a6f129a5baef9dd8eee929ee945aade427cb9f0b17888239c"
-  "6.0.4":
-    url: "https://github.com/scipopt/soplex/archive/refs/tags/release-604.tar.gz"
-    sha256: "691f5b593cb85c2586522d5de5a5a7692958d22ff1ddffb4fc395f4696590b6f"
-  "6.0.3":
-    url: "https://github.com/scipopt/soplex/archive/refs/tags/release-603.tar.gz"
-    sha256: "2bdf9adc9ac6ad48f98056679b7b852e626ac4aaaf277e7d4ce17794ed1097be"
 patches:
   "8.0.2":
     - patch_file: "patches/format_msvc_stdext.patch"
-      patch_description: "Remove usage of stdext when building with MSVC 1915 or higher, see https://github.com/scipopt/soplex/issues/52"
