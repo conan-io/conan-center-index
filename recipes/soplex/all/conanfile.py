@@ -69,9 +69,9 @@ class SoPlexConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD", "##")
+        apply_conandata_patches(self)
 
     def generate(self):
-        apply_conandata_patches(self)
         tc = CMakeToolchain(self)
         tc.variables["MPFR"] = False
         tc.variables["GMP"] = self.options.with_gmp
