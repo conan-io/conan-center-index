@@ -48,8 +48,7 @@ class ScipPlusPlus(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        # see https://github.com/scipopt/SCIPpp/blob/1.0.0/conanfile.py#L25
-        self.requires(f"scip/{self.conan_data['scip_mapping'][self.version]}", transitive_headers=True)
+        self.requires(f"scip/[>=10.0.0 <10.1]", transitive_headers=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
