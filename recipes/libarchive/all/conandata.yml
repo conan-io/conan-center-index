@@ -1,4 +1,7 @@
 sources:
+  "3.8.7":
+    url: "https://github.com/libarchive/libarchive/releases/download/v3.8.7/libarchive-3.8.7.tar.xz"
+    sha256: "d3a8ba457ae25c27c84fd2830a2efdcc5b1d40bf585d4eb0d35f47e99e5d4774"
   "3.8.1":
     url: "https://github.com/libarchive/libarchive/releases/download/v3.8.1/libarchive-3.8.1.tar.xz"
     sha256: "19f917d42d530f98815ac824d90c7eaf648e9d9a50e4f309c812457ffa5496b5"
@@ -21,6 +24,16 @@ sources:
     url: "https://github.com/libarchive/libarchive/releases/download/v3.7.2/libarchive-3.7.2.tar.xz"
     sha256: "04357661e6717b6941682cde02ad741ae4819c67a260593dfb2431861b251acb"
 patches:
+  "3.8.7":
+    - patch_file: "patches/0003-3.8.7-cmake.patch"
+      patch_description: "Make CMake build-system compatible with Conan"
+      patch_type: "conan"
+    - patch_file: "patches/0005-3.8.7-try-compile-cmakedeps.patch"
+      patch_description: "Patch try_compile check to work with imported CMake targets from Conan packages"
+      patch_type: "conan"
+    - patch_file: "patches/0006-3.8.7-fix-msvc-build.patch"
+      patch_description: "Fix MSVC build"
+      patch_type: "conan"
   "3.8.1":
     - patch_file: "patches/0003-3.8.1-cmake.patch"
       patch_description: "Make CMake build-system compatible with Conan"

@@ -1,4 +1,7 @@
 sources:
+  "1.1.0":
+    url: "https://github.com/gsl-lite/gsl-lite/archive/v1.1.0.tar.gz"
+    sha256: "bc786258eda511980942b973f5f394c854705bb0462ee46f82a8c39b5e19ea03"
   "1.0.1":
     url: "https://github.com/gsl-lite/gsl-lite/archive/v1.0.1.tar.gz"
     sha256: "063a0b4248a2afd8154b2b5fe9d64472868a166d3963682e823f81516194af79"

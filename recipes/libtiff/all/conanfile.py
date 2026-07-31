@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc
@@ -111,10 +112,14 @@ class LibtiffConan(ConanFile):
         tc.variables["tiff-docs"] = False
         cxx_option_name = "cxx" if Version(self.version) < "4.7.1" else "tiff-cxx"
         tc.variables[cxx_option_name] = self.options.cxx
+        # Disable framwork option for libtiff on Apple/iOS
+        if is_apple_os(self) and self.settings.os != "Macos" and Version(self.version) >= "4.7.2":
+            tc.cache_variables["tiff-framework"] = False
         # BUILD_SHARED_LIBS must be set in command line because defined upstream before project()
         tc.cache_variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
         tc.cache_variables["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = True
         tc.cache_variables["HAVE_JPEGTURBO_DUAL_MODE_8_12"] = self.options.jpeg == "libjpeg-turbo"
+        tc.cache_variables["jpeg-prefer-standard"] = self.options.jpeg == "libjpeg"
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("jbig", "cmake_file_name", "JBIG")

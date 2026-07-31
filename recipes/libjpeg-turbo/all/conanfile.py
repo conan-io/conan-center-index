@@ -53,6 +53,9 @@ class LibjpegTurboConan(ConanFile):
         if Version(self.version) >= "3.0.0":
             del self.options.enable12bit
             del self.options.mem_src_dst
+        if Version(self.version) >= "3.2.0":
+            # Replaced by JNA: https://github.com/libjpeg-turbo/libjpeg-turbo/blob/3.2.0/jna/README.md
+            del self.options.java
 
     def configure(self):
         if self.options.shared:
@@ -61,7 +64,7 @@ class LibjpegTurboConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
         if self.options.get_safe("enable12bit"):
-            del self.options.java
+            self.options.rm_safe("java")
             del self.options.turbojpeg
         if self.options.get_safe("enable12bit") or self.settings.os == "Emscripten":
             del self.options.SIMD
@@ -77,8 +80,11 @@ class LibjpegTurboConan(ConanFile):
     def validate(self):
         if self.options.get_safe("enable12bit") and (self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility):
             raise ConanInvalidConfiguration("12-bit samples is not allowed with libjpeg v7/v8 API/ABI")
-        if self.options.get_safe("java") and not self.options.shared:
-            raise ConanInvalidConfiguration("java wrapper requires shared libjpeg-turbo")
+        if self.options.get_safe("java"):
+            if not self.options.shared:
+                raise ConanInvalidConfiguration("java wrapper requires shared libjpeg-turbo")
+            if not self.options.get_safe("turbojpeg") and Version(self.version) >= "3.1.4.1":
+                raise ConanInvalidConfiguration("java wrapper needs to be built with turbojpeg API")
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(f"{self.ref} shared can't be built with static vc runtime")
 
@@ -104,6 +110,7 @@ class LibjpegTurboConan(ConanFile):
         env.generate()
 
         tc = CMakeToolchain(self)
+        tc.blocks.remove("output_dirs")
         tc.variables["ENABLE_STATIC"] = not self.options.shared
         tc.variables["ENABLE_SHARED"] = self.options.shared
         tc.variables["WITH_SIMD"] = self.options.get_safe("SIMD", False)
@@ -112,28 +119,25 @@ class LibjpegTurboConan(ConanFile):
         tc.variables["WITH_JPEG7"] = self.options.libjpeg7_compatibility
         tc.variables["WITH_JPEG8"] = self.options.libjpeg8_compatibility
         tc.variables["WITH_TURBOJPEG"] = self.options.get_safe("turbojpeg", False)
-        tc.variables["WITH_JAVA"] = self.options.get_safe("java", False)
+        if Version(self.version) < "3.2.0":
+            tc.variables["WITH_JAVA"] = self.options.get_safe("java", False)
         tc.cache_variables["WITH_TOOLS"] = False
         if Version(self.version) < "3.0.0":
             tc.variables["WITH_MEM_SRCDST"] = self.options.get_safe("mem_src_dst", False)
             tc.variables["WITH_12BIT"] = self.options.enable12bit
         if is_msvc(self):
             tc.variables["WITH_CRT_DLL"] = True # avoid replacing /MD by /MT in compiler flags
-        if Version(self.version) <= "2.1.0":
-            tc.variables["CMAKE_MACOSX_BUNDLE"] = False # avoid configuration error if building for iOS/tvOS/watchOS
         if Version(self.version) < "3.0.2":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def _patch_sources(self):
-        # use standard GNUInstallDirs.cmake - custom one is broken
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                              "include(cmakescripts/GNUInstallDirs.cmake)",
-                              "include(GNUInstallDirs)")
-        # do not override /MT by /MD if shared
-        replace_in_file(self, os.path.join(self.source_folder, "sharedlib", "CMakeLists.txt"),
-                              """string(REGEX REPLACE "/MT" "/MD" ${var} "${${var}}")""",
-                              "")
+        if Version(self.version) < "3.2.0":
+            # do not override /MT by /MD if shared
+            # Fixed by https://github.com/libjpeg-turbo/libjpeg-turbo/commit/c39ea08d81553657da649bc870a206365163b822
+            replace_in_file(self, os.path.join(self.source_folder, "sharedlib", "CMakeLists.txt"),
+                                  """string(REGEX REPLACE "/MT" "/MD" ${var} "${${var}}")""",
+                                  "")
 
     def build(self):
         self._patch_sources()
@@ -147,7 +151,7 @@ class LibjpegTurboConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         # remove unneeded directories
-        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "share", "doc"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "doc"))

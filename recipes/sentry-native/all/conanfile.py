@@ -5,8 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
@@ -26,11 +25,15 @@ class SentryNativeConan(ConanFile):
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "backend": ["none", "inproc", "crashpad", "breakpad"],
-        "transport": ["none", "curl", "winhttp"],
+        "backend": ["none", "inproc", "crashpad", "breakpad", "native"],
+        "transport": ["none", "curl", "winhttp", "custom"],
         "qt": [True, False],
         "with_crashpad": ["google", "sentry"],
         "crashpad_with_tls": ["openssl", False],
@@ -125,6 +128,8 @@ class SentryNativeConan(ConanFile):
                 self.requires("breakpad/cci.20210521")
         if self.options.get_safe("qt"):
             self.requires("qt/[>=5.15.16 <7]")
+        if self.settings.os == "Linux":
+            self.requires("libunwind/[>=1.6.2 <2]")
 
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
@@ -141,13 +146,13 @@ class SentryNativeConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os == "Windows":
-            self.tool_requires("cmake/[>=3.16.4 <4]")
+            self.tool_requires("cmake/[>=3.16.4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
+        apply_conandata_patches(self)
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
         tc = CMakeToolchain(self)
         tc.variables["SENTRY_BACKEND"] = self.options.backend
         if self.options.backend == "breakpad":
@@ -161,7 +166,10 @@ class SentryNativeConan(ConanFile):
         if self.options.get_safe("wer", False):
             tc.variables["CRASHPAD_WER_ENABLED"] = True
         tc.generate()
-        CMakeDeps(self).generate()
+        deps = CMakeDeps(self)
+        if self.settings.os == "Linux":
+            deps.set_property("libunwind", "cmake_target_name", "unwind")
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -186,12 +194,13 @@ class SentryNativeConan(ConanFile):
             self.cpp_info.components["sentry"].sharedlinkflags = ["-Wl,-E,--build-id=sha1"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["sentry"].system_libs = ["pthread", "dl"]
+            self.cpp_info.components["sentry"].requires.append("libunwind::unwind")
         elif is_apple_os(self):
             self.cpp_info.components["sentry"].frameworks = ["CoreGraphics", "CoreText"]
         elif self.settings.os == "Android":
             self.cpp_info.components["sentry"].system_libs = ["dl", "log"]
         elif self.settings.os == "Windows":
-            self.cpp_info.components["sentry"].system_libs = ["shlwapi", "dbghelp", "version"]
+            self.cpp_info.components["sentry"].system_libs = ["shlwapi", "dbghelp", "version", "synchronization"]
             if self.options.transport == "winhttp":
                 self.cpp_info.components["sentry"].system_libs.append("winhttp")
         if self.options.transport == "curl":
@@ -237,6 +246,11 @@ class SentryNativeConan(ConanFile):
             self.cpp_info.components["crashpad_util"].set_property("cmake_target_name", "crashpad::util")
             self.cpp_info.components["crashpad_util"].libs = [] if self.options.shared else ["crashpad_util"]
             self.cpp_info.components["crashpad_util"].requires = ["crashpad_compat", "crashpad_mini_chromium", "zlib::zlib"]
+
+            self.cpp_info.components["crashpad_mpack"].set_property("cmake_target_name", "crashpad::mpack")
+            self.cpp_info.components["crashpad_mpack"].libs = [] if self.options.shared else ["crashpad_mpack"]
+            self.cpp_info.components["crashpad_util"].requires.append ("crashpad_mpack")
+
             if self.settings.os in ("Linux", "FreeBSD"):
                 self.cpp_info.components["crashpad_util"].system_libs.extend(["pthread", "rt"])
             elif self.settings.os == "Windows":
@@ -291,6 +305,8 @@ class SentryNativeConan(ConanFile):
             self.cpp_info.components["crashpad_tools"].set_property("cmake_target_name", "crashpad::tools")
             self.cpp_info.components["crashpad_tools"].libs = [] if self.options.shared else ["crashpad_tools"]
 
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH environment variable: {bin_path}")
-            self.env_info.PATH.append(bin_path)
+            if self.options.backend == "native":
+                if self.settings.os == "Windows":
+                    self.cpp_info.components["sentry_wer"].libs = ["sentry-wer"]
+                    self.cpp_info.components["sentry_wer"].type = "shared-library"
+                    self.cpp_info.components["sentry"].requires.append("sentry_wer")

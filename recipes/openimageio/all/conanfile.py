@@ -104,7 +104,7 @@ class OpenImageIOConan(ConanFile):
         self.requires("pugixml/1.14")
         self.requires("libsquish/1.15")
         self.requires("tsl-robin-map/1.2.1")
-        self.requires("fmt/10.2.1", transitive_headers=True)
+        self.requires("fmt/[>=10.2.1 <13]", transitive_headers=True)
 
         # Optional libraries
         if self.options.with_libpng:
@@ -116,7 +116,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_opencv:
             self.requires("opencv/[>=4.8.1 <5]")
         if self.options.with_tbb:
-            self.requires("onetbb/2021.10.0")
+            self.requires("onetbb/[>=2021.10.0 <2024]")
         if self.options.with_dicom:
             self.requires("dcmtk/3.6.7")
         if self.options.with_ffmpeg:
@@ -133,7 +133,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.get_safe("with_openjph", False):
             self.requires("openjph/[>=0.16.0 <1]")
         if self.options.with_openvdb:
-            self.requires("openvdb/8.0.1")
+            self.requires("openvdb/[>=8.0.1 <13]")
         if self.options.with_ptex:
             self.requires("ptex/2.4.2")
         if self.options.with_libwebp:
@@ -318,7 +318,7 @@ class OpenImageIOConan(ConanFile):
                 ["dl", "m", "pthread"]
             )
         if self.options.with_tbb:
-            open_image_io_util.requires.append("onetbb::onetbb")
+            open_image_io_util.requires.append("onetbb::libtbb")
 
         # OpenImageIO::OpenImageIO
         open_image_io = self._add_component("OpenImageIO")

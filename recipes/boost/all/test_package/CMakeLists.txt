@@ -69,21 +69,27 @@ if(NOT HEADER_ONLY)
     endif()
 
     if(WITH_PYTHON)
-        find_package(Boost COMPONENTS python REQUIRED)
+        find_package(Boost COMPONENTS python REQUIRED OPTIONAL_COMPONENTS numpy)
         add_library(hello_ext MODULE python.cpp)
         set_property(TARGET hello_ext PROPERTY PREFIX "")
 
-        find_package(Python ${PYTHON_VERSION_TO_SEARCH} COMPONENTS Interpreter Development NumPy REQUIRED)
+        find_package(Python ${PYTHON_VERSION_TO_SEARCH} COMPONENTS Interpreter Development REQUIRED OPTIONAL_COMPONENTS NumPy)
 
         target_link_libraries(hello_ext PRIVATE Boost::python Python::Python)
         if(WIN32)
             set_target_properties(hello_ext PROPERTIES SUFFIX ".pyd")
         endif()
-        set_property(TEST boost_python PROPERTY ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:hello_ext>")
+        add_custom_command(TARGET hello_ext POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=$<TARGET_FILE_DIR:hello_ext>" ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/python.py"
+            WORKING_DIRECTORY $<TARGET_FILE_DIR:hello_ext>
+            COMMENT "Running Boost.Python test"
+        )
 
-        add_executable(test_boost_numpy numpy.cpp)
-        target_link_libraries(test_boost_numpy PRIVATE Boost::numpy Python::Python Python::NumPy)
-        set_target_properties(test_boost_numpy PROPERTIES ENVIRONMENT "PYTHONPATH=${Python_SITELIB}")
+        if(TARGET Boost::numpy AND Python_NumPy_FOUND)
+            add_executable(test_boost_numpy numpy.cpp)
+            target_link_libraries(test_boost_numpy PRIVATE Boost::numpy Python::Python Python::NumPy)
+            set_target_properties(test_boost_numpy PROPERTIES ENVIRONMENT "PYTHONPATH=${Python_SITELIB}")
+        endif()
     endif()
 
     if(WITH_URL)

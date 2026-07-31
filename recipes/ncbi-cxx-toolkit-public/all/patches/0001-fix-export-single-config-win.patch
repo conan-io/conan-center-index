@@ -1,0 +1,24 @@
+--- a/src/build-system/cmake/CMake.NCBIptb.install.cmake
++++ b/src/build-system/cmake/CMake.NCBIptb.install.cmake
+@@ -135,7 +135,11 @@
+         if(NCBI_PTBCFG_PACKAGING)
+             foreach(_cfg IN LISTS NCBI_CONFIGURATION_TYPES)
+                 if(_doexport)
+-                    set(_exp EXPORT ${NCBI_PTBCFG_INSTALL_EXPORT}${_cfg})
++                    if(NCBI_GENERATOR_IS_MULTI_CONFIG)
++                        set(_exp EXPORT ${NCBI_PTBCFG_INSTALL_EXPORT}${_cfg})
++                    else()
++                        set(_exp EXPORT ${NCBI_PTBCFG_INSTALL_EXPORT})
++                    endif()
+                 endif()
+                 if (DEFINED _dest_ar)
+                     install(
+@@ -371,7 +375,7 @@
+     endif()
+ 
+     if(NCBI_PTBCFG_PACKAGING)
+-        if (WIN32 OR XCODE)
++        if ((WIN32 OR XCODE) AND NCBI_GENERATOR_IS_MULTI_CONFIG)
+             install( DIRECTORY ${NCBI_CFGINC_ROOT}/$<CONFIG>/ DESTINATION ${NCBI_DIRNAME_INCLUDE})
+         else()
+             install( DIRECTORY ${NCBI_CFGINC_ROOT}/ DESTINATION ${NCBI_DIRNAME_INCLUDE})

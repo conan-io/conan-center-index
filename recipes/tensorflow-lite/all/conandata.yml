@@ -20,6 +20,9 @@ patches:
     - patch_file: "patches/2.15.0-0003-use-cci-dependencies.patch"
       patch_description: "Dependency compatibility: Patch CMakeLists.txt, updating package names, target names, etc"
       patch_type: "conan"
+    - patch_file: "patches/2.15.0-0004-fix-clang-21.patch"
+      patch_description: "Fixes building with recent LLVM versions including Xcode 26.4"
+      patch_type: "backport"
   "2.12.0":
     - patch_file: "patches/2.12.0-0001-remove_simple_memory_arena_debug_dump.patch"
       patch_description: "Shared build fails on Windows with error LNK2005. Resolve the conflict by removing the conflicting implementation for now."

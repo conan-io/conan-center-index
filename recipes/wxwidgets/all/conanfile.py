@@ -1,8 +1,7 @@
 from conan import ConanFile
-from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rmdir
-from conan.tools.microsoft import is_msvc
+from conan.tools.files import copy, get, replace_in_file, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 from conan.tools.system import package_manager
 from conan.errors import ConanInvalidConfiguration
@@ -18,7 +17,7 @@ class wxWidgetsConan(ConanFile):
     topics = ("wxwidgets", "gui", "ui")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.wxwidgets.org"
-    license = "wxWidgets"
+    license = "WxWindows-exception-3.1"
     settings = "os", "arch", "compiler", "build_type"
 
     package_type = "library"
@@ -62,8 +61,6 @@ class wxWidgetsConan(ConanFile):
                "richtext": True,
                "sockets": True,
                "stc": True,
-               # WebKitGTK for GTK2 is not available as a system dependency on modern distros.
-               # When gtk/system defaults to GTK3, turn this back on.
                "webview": False,
                "xml": True,
                "xrc": True,
@@ -77,6 +74,9 @@ class wxWidgetsConan(ConanFile):
                "custom_disables": ""
     }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
@@ -88,60 +88,37 @@ class wxWidgetsConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-    @property
-    def _gtk_version(self):
-        if self.settings.os == "Linux":
-            return f"gtk{self.dependencies['gtk'].options.version}"
-
     def system_requirements(self):
-        apt = package_manager.Apt(self)
-        packages = []
-        if self.options.get_safe("secretstore"):
-            # TODO: Move to Conan libsecret package after using GTK from Conan
-            # libsecret and GTK need glib, which mixes with system deps from GTK
-            packages.append("libsecret-1-dev")
         if self.options.webview:
-            if self._gtk_version == "gtk2":
-                packages.extend(["libsoup2.4-dev",
-                                 "libwebkitgtk-dev"])
-            else:
-                packages.extend(["libsoup3.0-dev",
-                                 "libwebkit2gtk-4.0-dev"])
-        if self.options.get_safe("cairo"):
-            packages.append("libcairo2-dev")
-        apt.install(packages)
+            # https://packages.debian.org/sid/libwebkit2gtk-4.1-dev
+            apt = package_manager.Apt(self)
+            apt.install(["libwebkit2gtk-4.1-dev",])
 
-        yum = package_manager.Yum(self)
-        packages = []
-        if self.options.get_safe("secretstore"):
-            packages.append("libsecret-devel")
-        if self.options.webview:
-                packages.extend(["libsoup3-devel",
-                                 "webkit2gtk4.1-devel"])
-        if self.options.get_safe("cairo"):
-            packages.append("cairo-devel")
-        yum.install(packages)
+            # https://packages.fedoraproject.org/pkgs/webkitgtk/
+            yum = package_manager.Yum(self)
+            yum.install(["libwebkit2gtk-4.1-devel",])
 
     def build_requirements(self):
         self.tool_requires("ninja/[>=1.10.2 <2]")
         self.tool_requires("cmake/[>=3.17 <4]")
+        self.tool_requires("gettext/[>=0.22 <1]")
 
-    # TODO: add support for gtk non system version when it's ready for Conan 2
     def requirements(self):
         if self.settings.os == "Linux":
             self.requires("xorg/system")
-            self.requires("gtk/system")
+            if self.options.get_safe("cairo"):
+                self.requires("cairo/[>=1.17.4 <2]")
+            self.requires("gtk/[>=3.24 <4]")
             if self.options.get_safe("opengl", default=False):
                 self.requires("opengl/system")
-            self.requires("xkbcommon/1.6.0", options={"with_x11": True})
-            # FIXME: Conan Cairo result in linkage errors due mixed system deps from GTK
-            # if self.options.get_safe("cairo"):
-            #    self.requires("cairo/1.18.0")
+            self.requires("xkbcommon/[>=1.6.0 <2]")
             if self.options.mediactrl:
                 self.requires("gstreamer/1.22.3")
                 self.requires("gst-plugins-base/1.19.2")
             self.requires("libcurl/[>=7.78.0 <9]")
 
+        if self.options.get_safe("secretstore"):
+            self.requires("libsecret/[>=0.21.7 <1]")
         if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/[>=9e]")
         elif self.options.jpeg == "libjpeg-turbo":
@@ -150,11 +127,15 @@ class wxWidgetsConan(ConanFile):
             self.requires("mozjpeg/[>=4.1.5 <5]")
 
         self.requires("libpng/[>=1.6 <2]")
-        self.requires("libtiff/4.6.0")
+        self.requires("libtiff/[>=4.6.0 <5]")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("expat/[>=2.6.2 <3]")
         self.requires("pcre2/10.42")
         self.requires("nanosvg/cci.20231025")
+        if Version(self.version) >= "3.3.0":
+            self.requires("libwebp/[>=1.6.0 <2]")
+        if self.options.webview:
+            self.requires("libsoup/3.6.6")
 
     def validate(self):
         if self.settings.os == "Linux":
@@ -166,76 +147,78 @@ class wxWidgetsConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
 
         # generic build options
-        tc.variables["wxBUILD_SHARED"] = self.options.shared
-        tc.variables["wxBUILD_SAMPLES"] = "OFF"
-        tc.variables["wxBUILD_TESTS"] = "OFF"
-        tc.variables["wxBUILD_DEMOS"] = "OFF"
-        tc.variables["wxBUILD_INSTALL"] = True
+        tc.cache_variables["wxBUILD_SHARED"] = self.options.shared
+        tc.cache_variables["wxBUILD_SAMPLES"] = "OFF"
+        tc.cache_variables["wxBUILD_TESTS"] = "OFF"
+        tc.cache_variables["wxBUILD_DEMOS"] = "OFF"
+        tc.cache_variables["wxBUILD_LOCALES"] = "ON"
+        tc.cache_variables["wxBUILD_INSTALL"] = True
         if self.settings.compiler == "clang":
-            tc.variables["wxBUILD_PRECOMP"] = "OFF"
+            tc.cache_variables["wxBUILD_PRECOMP"] = "OFF"
 
         # platform-specific options
         if is_msvc(self):
-            tc.variables["wxBUILD_USE_STATIC_RUNTIME"] = "MT" in str(self.settings.compiler.runtime)
-            tc.variables["wxBUILD_MSVC_MULTIPROC"] = True
+            tc.cache_variables["wxBUILD_USE_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+            tc.cache_variables["wxBUILD_MSVC_MULTIPROC"] = True
         if self.settings.os == "Linux":
-            tc.variables["wxBUILD_TOOLKIT"] = self._gtk_version
-            tc.variables["wxUSE_CAIRO"] = self.options.cairo
+            tc.cache_variables["wxBUILD_TOOLKIT"] = "gtk3"
+            tc.cache_variables["wxUSE_CAIRO"] = self.options.cairo
         # Disable some optional libraries that will otherwise lead to non-deterministic builds
         if self.settings.os != "Windows":
-            tc.variables["wxUSE_LIBSDL"] = "OFF"
-            tc.variables["wxUSE_LIBICONV"] = "OFF"
-            tc.variables["wxUSE_LIBNOTIFY"] = "OFF"
-            tc.variables["wxUSE_LIBMSPACK"] = "OFF"
-            tc.variables["wxUSE_LIBGNOMEVFS"] = "OFF"
+            tc.cache_variables["wxUSE_LIBSDL"] = "OFF"
+            tc.cache_variables["wxUSE_LIBICONV"] = "OFF"
+            tc.cache_variables["wxUSE_LIBNOTIFY"] = "OFF"
+            tc.cache_variables["wxUSE_LIBMSPACK"] = "OFF"
+            tc.cache_variables["wxUSE_LIBGNOMEVFS"] = "OFF"
 
-        tc.variables["wxUSE_LIBPNG"] = "sys"
-        tc.variables["wxUSE_LIBJPEG"] = "sys"
-        tc.variables["wxUSE_LIBTIFF"] = "sys"
-        tc.variables["wxUSE_ZLIB"] = "sys"
-        tc.variables["wxUSE_EXPAT"] = "sys"
-        tc.variables["wxUSE_REGEX"] = "sys"
-        tc.variables["wxUSE_NANOSVG"] = "sys"
+        tc.cache_variables["wxUSE_LIBPNG"] = "sys"
+        tc.cache_variables["wxUSE_LIBJPEG"] = "sys"
+        tc.cache_variables["wxUSE_LIBTIFF"] = "sys"
+        tc.cache_variables["wxUSE_ZLIB"] = "sys"
+        tc.cache_variables["wxUSE_EXPAT"] = "sys"
+        tc.cache_variables["wxUSE_REGEX"] = "sys"
+        tc.cache_variables["wxUSE_NANOSVG"] = "sys"
+        if Version(self.version) >= "3.3.0":
+            tc.cache_variables["wxUSE_LIBWEBP"] = "sys"
 
         # wxWidgets features
-        tc.variables["wxUSE_SECRETSTORE"] = self.options.get_safe("secretstore")
+        tc.cache_variables["wxUSE_SECRETSTORE"] = "ON" if self.options.get_safe("secretstore") else "OFF"
 
         # wxWidgets libraries
-        tc.variables["wxUSE_AUI"] = self.options.aui
-        tc.variables["wxUSE_OPENGL"] = self.options.get_safe("opengl", default=False)
-        tc.variables["wxUSE_HTML"] = self.options.html
-        tc.variables["wxUSE_MEDIACTRL"] = self.options.mediactrl
-        tc.variables["wxUSE_PROPGRID"] = self.options.propgrid
-        tc.variables["wxUSE_DEBUGREPORT"] = self.options.debugreport
-        tc.variables["wxUSE_RIBBON"] = self.options.ribbon
-        tc.variables["wxUSE_RICHTEXT"] = self.options.richtext
-        tc.variables["wxUSE_SOCKETS"] = self.options.sockets
-        tc.variables["wxUSE_STC"] = self.options.stc
-        tc.variables["wxUSE_WEBVIEW"] = self.options.webview
-        tc.variables["wxUSE_XML"] = self.options.xml
-        tc.variables["wxUSE_XRC"] = self.options.xrc
-        tc.variables["wxUSE_HELP"] = self.options.help
-        tc.variables["wxUSE_WXHTML_HELP"] = self.options.html_help
-        tc.variables["wxUSE_URL"] = self.options.protocol
-        tc.variables["wxUSE_PROTOCOL"] = self.options.protocol
-        tc.variables["wxUSE_FS_INET"] = self.options.fs_inet
+        tc.cache_variables["wxUSE_AUI"] = self.options.aui
+        tc.cache_variables["wxUSE_OPENGL"] = self.options.get_safe("opengl", default=False)
+        tc.cache_variables["wxUSE_HTML"] = self.options.html
+        tc.cache_variables["wxUSE_MEDIACTRL"] = self.options.mediactrl
+        tc.cache_variables["wxUSE_PROPGRID"] = self.options.propgrid
+        tc.cache_variables["wxUSE_DEBUGREPORT"] = self.options.debugreport
+        tc.cache_variables["wxUSE_RIBBON"] = self.options.ribbon
+        tc.cache_variables["wxUSE_RICHTEXT"] = self.options.richtext
+        tc.cache_variables["wxUSE_SOCKETS"] = self.options.sockets
+        tc.cache_variables["wxUSE_STC"] = self.options.stc
+        tc.cache_variables["wxUSE_WEBVIEW"] = self.options.webview
+        tc.cache_variables["wxUSE_XML"] = self.options.xml
+        tc.cache_variables["wxUSE_XRC"] = self.options.xrc
+        tc.cache_variables["wxUSE_HELP"] = self.options.help
+        tc.cache_variables["wxUSE_WXHTML_HELP"] = self.options.html_help
+        tc.cache_variables["wxUSE_URL"] = self.options.url
+        tc.cache_variables["wxUSE_PROTOCOL"] = self.options.protocol
+        tc.cache_variables["wxUSE_FS_INET"] = self.options.fs_inet
         tc.cache_variables["CMAKE_CONFIGURATION_TYPES"] = "Debug;Release;RelWithDebInfo;MinSizeRel"
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-
+        if self.settings.os == "Linux":
+            tc.cache_variables["XKBCOMMON_FOUND"] = True
         for item in str(self.options.custom_enables).split(","):
             if len(item) > 0:
-                tc.variables[item] = True
+                tc.cache_variables[item] = True
         for item in str(self.options.custom_disables).split(","):
             if len(item) > 0:
-                tc.variables[item] = False
-
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
-
+                tc.cache_variables[item] = False
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -243,9 +226,18 @@ class wxWidgetsConan(ConanFile):
         deps.set_property("expat", "cmake_target_name", "EXPAT")
         deps.set_property("nanosvg", "cmake_file_name", "NanoSVG")
         deps.set_property("nanosvg", "cmake_target_name", "NanoSVG::nanosvg")
+        if self.settings.os == "Linux":
+            deps.set_property("gtk", "cmake_file_name", "GTK3")
+            deps.set_property("xkbcommon", "cmake_file_name", "XKBCommon")
+            deps.set_property("xkbcommon", "cmake_additional_variables_prefixes", ["XKBCOMMON",])
+        if self.options.get_safe("secretstore"):
+            deps.set_property("libsecret", "cmake_file_name", "LIBSECRET")
+        if self.options.webview:
+            deps.set_property("libsoup", "cmake_file_name", "LIBSOUP")
         deps.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         # Don't change library names when cross-compiling
         replace_in_file(self, os.path.join(self.source_folder, "build", "cmake", "functions.cmake"),
                         'set(cross_target "-${CMAKE_SYSTEM_NAME}")',
@@ -255,17 +247,7 @@ class wxWidgetsConan(ConanFile):
                         "CMAKE_OSX_DEPLOYMENT_TARGET",
                         "CMAKE_OSX_DEPLOYMENT_TARGET_IGNORED")
 
-        # Fix for strcpy_s on Apple platforms (fix upstream?)
-        if is_apple_os(self):
-            cmake_version = "3.0"
-            if Version(self.version) >= "3.2.7":
-                cmake_version = "3.0...3.31"
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            f'cmake_minimum_required(VERSION {cmake_version})',
-                            f'cmake_minimum_required(VERSION {cmake_version})\nadd_definitions(-D__STDC_WANT_LIB_EXT1__)')
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -307,6 +289,7 @@ class wxWidgetsConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "wxWidgets")
         self.cpp_info.set_property("cmake_target_name", "wxWidgets::wxWidgets")
         self.cpp_info.set_property("pkg_config_name", "wxwidgets")
+        self.conf_info.define("user.wxwidgets:locales", os.path.join(self.package_folder, "share", "locale"))
 
         _version = Version(self.version)
         version_suffix_major_minor = f"-{_version.major}.{_version.minor}"
@@ -320,7 +303,7 @@ class wxWidgetsConan(ConanFile):
 
         if self.settings.os == "Linux":
             prefix = "wx_"
-            toolkit = self._gtk_version
+            toolkit = "gtk3"
             version = ""
             suffix = version_suffix_major_minor
         elif self.settings.os == "Macos":
@@ -373,6 +356,8 @@ class wxWidgetsConan(ConanFile):
             if not self.options.shared:
                 scintilla_suffix = "{debug}" if self.settings.os == "Windows" else "{suffix}"
                 libs.append("wxscintilla" + scintilla_suffix)
+                if Version(self.version) >= "3.3.0":
+                    libs.append("wxlexilla" + scintilla_suffix)
             libs.append(library_pattern("stc"))
         if self.options.webview:
             libs.append(library_pattern("webview"))
@@ -426,8 +411,8 @@ class wxWidgetsConan(ConanFile):
 
             arch_suffix = "_x64" if self.settings.arch == "x86_64" else ""
             lib_suffix = "_dll" if self.options.shared else "_lib"
-            libdir = f"{compiler_prefix}{arch_suffix}{lib_suffix}"
-            libdir = os.path.join("lib", libdir)
+            basedir = f"{compiler_prefix}{arch_suffix}{lib_suffix}"
+            libdir = os.path.join("lib", basedir)
             self.cpp_info.bindirs.append(libdir)
             self.cpp_info.libdirs.append(libdir)
             self.cpp_info.defines.append("__WXMSW__")
@@ -451,6 +436,8 @@ class wxWidgetsConan(ConanFile):
                                           "wxNO_MEDIA_LIB",
                                           "wxNO_STC_LIB",
                                           "wxNO_WEBVIEW_LIB"])
+            if Version(self.version) >= "3.3.0":
+                self.cpp_info.defines.append("wxNO_WEBP_LIB")
             self.cpp_info.system_libs.extend(["kernel32",
                                               "user32",
                                               "gdi32",

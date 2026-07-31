@@ -1,4 +1,7 @@
 sources:
+  "2.6.2":
+    url: "https://github.com/CLIUtils/CLI11/archive/v2.6.2.tar.gz"
+    sha256: "c6ea6b2e5608b3ea8617999bd5f47420c71b2ebdb8dc4767c1034d1da5785711"
   "2.6.0":
     url: "https://github.com/CLIUtils/CLI11/archive/v2.6.0.tar.gz"
     sha256: "8c11bc049090a66cb71c3e90350cddaa792b2a45e0a7841799900b95ca38b101"

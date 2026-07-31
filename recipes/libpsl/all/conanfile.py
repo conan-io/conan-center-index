@@ -16,7 +16,7 @@ class LibPslConan(ConanFile):
     description = "C library for the Public Suffix List"
     homepage = "https://github.com/rockdaboot/libpsl"
     topics = ("psl", "suffix", "TLD", "gTLD", ".com", ".net")
-    license = "GPL-2.0-or-later"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -64,6 +64,7 @@ class LibPslConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     @property
     def _idna_option(self):
@@ -76,9 +77,10 @@ class LibPslConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options["runtime"] = self._idna_option
         if Version(self.version) >= "0.21.5":
-            tc.project_options["builtin"] = "true" if self.options.with_idna else "false"
             tc.project_options["tests"] = "false"  # disable tests and fuzzes
         else:
+            # INFO: Version 0.21.2 replaced idna with builtin option
+            # https://github.com/rockdaboot/libpsl/commit/aa4909766c24c17bd1d9000ca419f6dc6b32c238
             tc.project_options["builtin"] = self._idna_option
         if not self.options.shared:
             tc.preprocessor_definitions["PSL_STATIC"] = "1"
@@ -87,7 +89,6 @@ class LibPslConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
         meson.build()

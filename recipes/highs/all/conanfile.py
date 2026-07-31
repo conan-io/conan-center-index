@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, replace_in_file
 
 required_conan_version = ">=1.54.0"
 
@@ -41,6 +41,8 @@ class HiGHSConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_CXX_STANDARD ", "## set(CMAKE_CXX_STANDARD ")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -67,6 +69,7 @@ class HiGHSConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "highs")

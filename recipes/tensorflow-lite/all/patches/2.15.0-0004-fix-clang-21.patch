@@ -1,0 +1,44 @@
+tflite: disambiguate std::abs for AbsEval/EvalImpl (Clang 21 / libc++)
+
+Upstream (LLVM integration PR that included this hunk):
+  https://github.com/tensorflow/tensorflow/pull/95894
+
+Issue:
+  AbsEval passes a callable into EvalImpl<T>, whose third parameter is
+  std::function<T(T)>. Using std::abs<float> / std::abs<int32_t> here is
+  brittle: std::abs is overloaded, and some toolchain combinations (e.g.
+  Apple Clang 21 with the libc++ shipped in Xcode 26.4) no longer select a
+  viable overload when constructing std::function, so the build fails.
+
+Fix:
+  Wrap the call in lambdas with exact signatures T(T) that forward to
+  std::abs inside the lambda body, where overload resolution is
+  straightforward.
+
+API/ABI:
+  No change to TensorFlow Lite public API or stable ABI for consumers.
+  Internal kernel implementation only; supported types and operator
+  semantics are unchanged.
+
+--- a/tensorflow/lite/kernels/elementwise.cc
++++ b/tensorflow/lite/kernels/elementwise.cc
+@@ -293,7 +293,8 @@
+   const TfLiteType type = input->type;
+   switch (type) {
+     case kTfLiteFloat32:
+-      return EvalImpl<float>(context, node, std::abs<float>, type);
++      return EvalImpl<float>(
++          context, node, [](float f) { return std::abs(f); }, type);
+     case kTfLiteInt8:
+       return AbsEvalQuantized<int8_t>(context, node, type);
+     case kTfLiteInt16:
+@@ -301,7 +302,8 @@
+                  ? AbsInt16EvalImpl(context, node, type)
+                  : AbsEvalQuantized<int16_t>(context, node, type);
+     case kTfLiteInt32:
+-      return EvalImpl<int32_t>(context, node, std::abs<int32_t>, type);
++      return EvalImpl<int32_t>(
++          context, node, [](int32_t i) { return std::abs(i); }, type);
+     default:
+       TF_LITE_KERNEL_LOG(context, "Current data type %s is not supported.",
+                          TfLiteTypeGetName(type));

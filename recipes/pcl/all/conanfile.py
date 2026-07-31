@@ -534,6 +534,10 @@ class PclConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         'if("${CMAKE_CXX_FLAGS}" STREQUAL "")',
                         'if(1)')
+        # fix ignoring conan cxx flags
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'set(CMAKE_CXX_FLAGS "',
+                        'string(APPEND CMAKE_CXX_FLAGS " ')
 
     def build(self):
         cmake = CMake(self)

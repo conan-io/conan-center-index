@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -29,9 +29,6 @@ class OpenclIcdLoaderConan(ConanFile):
         "disable_openclon12": False,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -51,6 +48,9 @@ class OpenclIcdLoaderConan(ConanFile):
         self.requires(f"opencl-headers/{self.version}", transitive_headers=True)
         self.requires(f"opencl-clhpp-headers/{self.version}", transitive_headers=True)
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -69,7 +69,6 @@ class OpenclIcdLoaderConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -88,6 +87,10 @@ class OpenclIcdLoaderConan(ConanFile):
         self.cpp_info.set_property("cmake_module_file_name", "OpenCL")
         self.cpp_info.set_property("cmake_file_name", "OpenCLICDLoader")
         self.cpp_info.set_property("cmake_target_name", "OpenCL::OpenCL")
+        if Version(self.version) >= "2025.07.22":
+            # INFO: Follow correct .pc file name, but avoid breaking existing verions
+            self.cpp_info.set_property("pkg_config_name", "OpenCL")
+            self.cpp_info.set_property("system_package_version", "3.0")
         self.cpp_info.includedirs = []
         self.cpp_info.libs = ["OpenCL"]
         if not self.options.shared:

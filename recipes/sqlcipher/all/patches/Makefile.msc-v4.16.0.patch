@@ -1,0 +1,74 @@
+Rename the output files to sqlcipher instead of sqlite3.
+This is needed to avoid conflicts with the official SQLite library when both are installed on the same system.
+Custom patch provided by the Conan Center Index.
+
+diff --git a/Makefile.msc b/Makefile.msc
+index ea66f18..be24078 100644
+--- a/Makefile.msc
++++ b/Makefile.msc
+@@ -307,9 +307,9 @@ SQLITE3H = sqlite3.h
+ #
+ !IFNDEF SQLITE3DLL
+ !IF $(FOR_WIN10)!=0
+-SQLITE3DLL = winsqlite3.dll
++SQLITE3DLL = sqlcipher.dll
+ !ELSE
+-SQLITE3DLL = sqlite3.dll
++SQLITE3DLL = sqlcipher.lib
+ !ENDIF
+ !ENDIF
+ 
+@@ -729,7 +729,7 @@ SHELL_CORE_SRC = $(SQLITE3C)
+ SHELL_CORE_DEP = $(SQLITE3DLL)
+ # <<mark>>
+ !ELSEIF $(USE_AMALGAMATION)==0
+-SHELL_CORE_DEP = libsqlite3.lib
++SHELL_CORE_DEP = sqlcipher.lib
+ # <</mark>>
+ !ELSE
+ SHELL_CORE_DEP =
+@@ -752,7 +752,7 @@ TESTFIXTURE_DEP = zlib $(TESTFIXTURE_DEP)
+ SHELL_CORE_LIB = $(SQLITE3LIB)
+ # <<mark>>
+ !ELSEIF $(USE_AMALGAMATION)==0
+-SHELL_CORE_LIB = libsqlite3.lib
++SHELL_CORE_LIB = sqlcipher.lib
+ # <</mark>>
+ !ELSE
+ SHELL_CORE_LIB =
+@@ -1804,7 +1804,7 @@ ALL_TCL_TARGETS =
+ # This is the default Makefile target.  The objects listed here
+ # are what get build when you type just "make" with no arguments.
+ #
+-core:	dll libsqlite3.lib shell
++core:	dll sqlcipher.lib shell
+ 
+ # Targets that require the Tcl library.
+ #
+@@ -1828,11 +1828,11 @@ jimsh0.exe:	$(TOP)\autosetup\jimsh0.c
+ 	cl -DHAVE__FULLPATH=1 $(TOP)\autosetup\jimsh0.c
+ 
+ # <<mark>>
+-libsqlite3.lib:	$(LIBOBJ)
++sqlcipher.lib:	$(LIBOBJ)
+ 	$(LTLIB) $(LTLIBOPTS) /OUT:$@ $(LIBOBJ) $(TLIBS)
+ 
+-libtclsqlite3.lib:	tclsqlite.lo libsqlite3.lib
+-	$(LTLIB) $(LTLIBOPTS) $(TCLLIBPATHS) $(LTLIBPATHS) /OUT:$@ tclsqlite.lo libsqlite3.lib $(LIBTCLSTUB) $(TLIBS)
++libtclsqlite3.lib:	tclsqlite.lo sqlcipher.lib
++	$(LTLIB) $(LTLIBOPTS) $(TCLLIBPATHS) $(LTLIBPATHS) /OUT:$@ tclsqlite.lo sqlcipher.lib $(LIBTCLSTUB) $(TLIBS)
+ 
+ tclsqlite3.def:	tclsqlite.lo
+ 	echo EXPORTS > tclsqlite3.def
+@@ -1870,9 +1870,9 @@ $(SQLITE3DLL):	$(LIBOBJ) $(LIBRESOBJS) $(CORE_LINK_DEP)
+ 	$(LD) $(LDFLAGS) $(LTLINKOPTS) $(LTLIBPATHS) /DLL $(CORE_LINK_OPTS) /OUT:$@ $(LIBOBJ) $(LIBRESOBJS) $(LTLIBS) $(TLIBS)
+ 
+ # <<block2>>
+-sqlite3.def:	libsqlite3.lib $(JIM_TCLSH)
++sqlite3.def:	sqlcipher.lib $(JIM_TCLSH)
+ 	echo EXPORTS > sqlite3.def
+-	dumpbin /all libsqlite3.lib \
++	dumpbin /all sqlcipher.lib \
+ 		| $(JIM_TCLSH) $(TOP)\tool\replace.tcl include "^\s+1 _?(sqlite3(?:session|changeset|changegroup|rebaser|rbu)?_[^@]*)(?:@\d+)?$$" \1 \
+ 		| sort >> sqlite3.def
+ # <</block2>>

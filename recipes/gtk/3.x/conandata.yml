@@ -1,0 +1,7 @@
+sources:
+  "3.24.51":
+    url: "https://download.gnome.org/sources/gtk/3.24/gtk-3.24.51.tar.xz"
+    sha256: "0013877c6bd23c2dbe42ad7c70a053d0e449be66736574e37867c49c5f905a4f"
+patches:
+  "3.24.51":
+    - patch_file: "patches/0001-win32-guard-egl.patch"

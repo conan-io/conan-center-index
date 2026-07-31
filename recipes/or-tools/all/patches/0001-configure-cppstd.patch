@@ -1,0 +1,107 @@
+Custom patch: Let Conan decide the C++ standard used to build
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 69bf10b..9b688b8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -28,11 +28,6 @@ message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION} release: ${RELEASE}"
+ #message(STATUS "minor: ${PROJECT_VERSION_MINOR}")
+ #message(STATUS "patch: ${PROJECT_VERSION_PATCH}")
+ 
+-if(MSVC)
+-  set(CMAKE_CXX_STANDARD 20)
+-else()
+-  set(CMAKE_CXX_STANDARD 17)
+-endif()
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+ 
+diff --git a/cmake/cpp.cmake b/cmake/cpp.cmake
+index 3cf0921..3120cc5 100644
+--- a/cmake/cpp.cmake
++++ b/cmake/cpp.cmake
+@@ -500,11 +500,6 @@ function(generate_proto_library)
+  # Create library
+  add_library(${PROTO_NAME}_proto OBJECT ${PROTO_SRCS} ${PROTO_HDRS})
+  target_compile_features(${PROTO_NAME}_proto PUBLIC $<IF:$<CXX_COMPILER_ID:MSVC>,cxx_std_20,cxx_std_17>)
+- if(MSVC)
+-   set_target_properties(${PROTO_NAME}_proto PROPERTIES CXX_STANDARD 20)
+- else()
+-   set_target_properties(${PROTO_NAME}_proto PROPERTIES CXX_STANDARD 17)
+- endif()
+  set_target_properties(${PROTO_NAME}_proto PROPERTIES
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
+@@ -579,11 +574,6 @@ endif()
+ # Main Target
+ add_library(${PROJECT_NAME} "")
+ # Compile options
+-if(MSVC)
+-  set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20)
+-else()
+-  set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
+-endif()
+ set_target_properties(${PROJECT_NAME} PROPERTIES
+   CXX_STANDARD_REQUIRED ON
+   CXX_EXTENSIONS OFF)
+diff --git a/cmake/dependencies/CMakeLists.txt b/cmake/dependencies/CMakeLists.txt
+index 6621130..faddda5 100644
+--- a/cmake/dependencies/CMakeLists.txt
++++ b/cmake/dependencies/CMakeLists.txt
+@@ -426,7 +426,6 @@ endif()
+ # Coinutils
+ # ##############################################################################
+ # Coin-OR does not support C++17/C++20 (use of 'register' storage class specifier)
+-set(CMAKE_CXX_STANDARD 11)
+ if(WIN32)
+   set(BUILD_SHARED_LIBS OFF)
+ endif()
+@@ -536,11 +535,6 @@ endif()
+ if(WIN32)
+   set(BUILD_SHARED_LIBS ON)
+ endif()
+-if(MSVC)
+-  set(CMAKE_CXX_STANDARD 20)
+-else()
+-  set(CMAKE_CXX_STANDARD 17)
+-endif()
+ 
+ ###############
+ ##  TESTING  ##
+diff --git a/cmake/flatzinc.cmake b/cmake/flatzinc.cmake
+index 525903e..998b18d 100644
+--- a/cmake/flatzinc.cmake
++++ b/cmake/flatzinc.cmake
+@@ -79,7 +79,6 @@ target_include_directories(flatzinc PUBLIC
+   )
+ ## Compile options
+ set_target_properties(flatzinc PROPERTIES
+-  CXX_STANDARD 17
+   CXX_STANDARD_REQUIRED ON
+   CXX_EXTENSIONS OFF
+   OUTPUT_NAME ${PROJECT_NAME}_flatzinc
+@@ -126,7 +125,6 @@ target_include_directories(fzn PRIVATE
+   )
+ ## Compile options
+ set_target_properties(fzn PROPERTIES
+-  CXX_STANDARD 17
+   CXX_STANDARD_REQUIRED ON
+   CXX_EXTENSIONS OFF
+   OUTPUT_NAME fzn-cp-sat
+diff --git a/ortools/third_party_solvers/CMakeLists.txt b/ortools/third_party_solvers/CMakeLists.txt
+index 97232c4..2bfd94e 100644
+--- a/ortools/third_party_solvers/CMakeLists.txt
++++ b/ortools/third_party_solvers/CMakeLists.txt
+@@ -16,7 +16,6 @@ set(NAME ${PROJECT_NAME}_third_party_solvers)
+ 
+ add_library(${NAME} OBJECT ${_SRCS})
+ set_target_properties(${NAME} PROPERTIES
+-  CXX_STANDARD 17
+   CXX_STANDARD_REQUIRED ON
+   CXX_EXTENSIONS OFF
+   POSITION_INDEPENDENT_CODE ON
+@@ -33,4 +32,3 @@ target_link_libraries(${NAME} PRIVATE
+   absl::strings
+   absl::str_format
+   absl::synchronization)
+-

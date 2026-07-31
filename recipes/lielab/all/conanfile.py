@@ -20,9 +20,11 @@ class LielabConan(ConanFile):
     license = "MIT"
     options = {
         "fPIC": [True, False],
+        "with_assertions": [True, False],
     }
     default_options = {
         "fPIC": True,
+        "with_assertions": True,
     }
 
     def config_options(self):
@@ -31,6 +33,7 @@ class LielabConan(ConanFile):
 
     def requirements(self):
         self.requires("eigen/[>=5.0.0 <6]", transitive_headers=True)
+        self.requires("fmt/[>=12.0.0 <13]")
 
     def validate(self):
         check_min_cppstd(self, 20)
@@ -47,6 +50,7 @@ class LielabConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["LIELAB_WITH_ASSERTIONS"] = self.options.with_assertions
         tc.variables["LIELAB_INSTALL_LIBRARY"] = True
         tc.variables["LIELAB_BUILD_TESTS"] = False
         tc.variables["LIELAB_BUILD_PYTHON"] = False
@@ -61,6 +65,7 @@ class LielabConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "SCR", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.configure()
         cmake.install()
@@ -70,3 +75,5 @@ class LielabConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Lielab")
         self.cpp_info.set_property("cmake_target_name", "Lielab::Lielab")
         self.cpp_info.libs = ["Lielab"]
+        if self.options.with_assertions:
+            self.cpp_info.defines.append("LIELAB_INCLUDE_ASSERTS")

@@ -1,4 +1,4 @@
 sources:
-  "1.129.8930-495":
-    url: "https://github.com/bkaradzic/bgfx.cmake/releases/download/v1.129.8930-495/bgfx.cmake.v1.129.8930-495.tar.gz"
-    sha256: "55e8df8b9041b78b5754f9df21d3279521ae8fe500ddf306158a3d5e770876ca"
+  "1.146.9306-550":
+    url: "https://github.com/bkaradzic/bgfx.cmake/releases/download/v1.146.9306-550/bgfx.cmake.v1.146.9306-550.tar.gz"
+    sha256: "3e32eb43bf5f92a9105d637d84794a38be211de62af315cab824fd8e134a07f6"

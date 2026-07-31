@@ -53,6 +53,9 @@ class SysConfigGLUConan(ConanFile):
         pkg_util = package_manager.PkgUtil(self)
         pkg_util.install(["mesalibs"], update=True, check=True)
 
+        alpine = package_manager.Apk(self)
+        alpine.install(["glu-dev"], update=True, check=True)
+
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.includedirs = []

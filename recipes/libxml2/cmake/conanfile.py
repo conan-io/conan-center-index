@@ -125,7 +125,9 @@ class Libxml2Conan(ConanFile):
     def package_info(self):
         postfix = ""
         prefix = "lib" if self.settings.os == "Windows" else ""
-        if is_msvc(self):
+        # compiler.runtime distinguishes clang-cl (has MSVC runtime, e.g. "dynamic") from clang targeting libc++ (no compiler.runtime setting)
+        msvc_like = self.settings.os == "Windows" and self.settings.compiler in ["msvc", "clang"] and self.settings.get_safe("compiler.runtime")
+        if msvc_like:
             static_postfix = "s" if not self.options.shared else ""
             debug_postfix = "d" if self.settings.build_type == "Debug" else ""
             postfix = f"{static_postfix}{debug_postfix}"
@@ -144,7 +146,7 @@ class Libxml2Conan(ConanFile):
         self.cpp_info.set_property("cmake_additional_variables_prefixes", ["LIBXML2"])
         self.cpp_info.set_property("pkg_config_name", "libxml-2.0")
 
-        is_unix = self.settings.os in ["Linux", "FreeBSD", "Macos"] or is_apple_os(self)
+        is_unix = self.settings.os in ["Linux", "FreeBSD", "Macos", "Android"] or is_apple_os(self)
 
         if is_unix:
             self.cpp_info.system_libs.append("m")

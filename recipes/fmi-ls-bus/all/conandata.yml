@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/modelica/fmi-ls-bus/releases/download/v1.0.0/FMI-LS-BUS-1.0.0.zip"
+    sha256: "c2f40471a5fd4c48c0c7b66c5982ac2db837f73aeaa317e740a6f770ec570126"

@@ -1,0 +1,124 @@
+Backport
+https://github.com/postgres/postgres/commit/a516b3f00d7469cbd1885a2c5903fbd62430a2ac
+
+diff --git a/meson.build b/meson.build
+index e19b737..1cdf332 100644
+--- a/meson.build
++++ b/meson.build
+@@ -2322,7 +2322,11 @@ int main(void)
+ }
+ '''
+ 
+-  if cc.links(prog, name: '__crc32cb, __crc32ch, __crc32cw, and __crc32cd without -march=armv8-a+crc',
++  # Vendor-supported versions of Windows for AArch64 require at least ARMv8.1,
++  # which is where CRC extension support became mandatory.  Thus, use it
++  # unconditionally on MSVC/AArch64.
++  if (host_cpu == 'aarch64' and cc.get_id() == 'msvc') or \
++        cc.links(prog, name: '__crc32cb, __crc32ch, __crc32cw, and __crc32cd without -march=armv8-a+crc',
+       args: test_c_args)
+     # Use ARM CRC Extension unconditionally
+     cdata.set('USE_ARMV8_CRC32C', 1)
+diff --git a/src/include/storage/s_lock.h b/src/include/storage/s_lock.h
+index 29ac6cd..53b6ba1 100644
+--- a/src/include/storage/s_lock.h
++++ b/src/include/storage/s_lock.h
+@@ -688,13 +688,24 @@ typedef LONG slock_t;
+ 
+ #define SPIN_DELAY() spin_delay()
+ 
+-/* If using Visual C++ on Win64, inline assembly is unavailable.
+- * Use a _mm_pause intrinsic instead of rep nop.
+- */
+-#if defined(_WIN64)
++#ifdef _M_ARM64
++static __forceinline void
++spin_delay(void)
++{
++	/*
++	 * Research indicates ISB is better than __yield() on AArch64.  See
++	 * https://postgr.es/m/1c2a29b8-5b1e-44f7-a871-71ec5fefc120%40app.fastmail.com.
++	 */
++	__isb(_ARM64_BARRIER_SY);
++}
++#elif defined(_WIN64)
+ static __forceinline void
+ spin_delay(void)
+ {
++	/*
++	 * If using Visual C++ on Win64, inline assembly is unavailable.
++	 * Use a _mm_pause intrinsic instead of rep nop.
++	 */
+ 	_mm_pause();
+ }
+ #else
+@@ -709,10 +720,20 @@ spin_delay(void)
+ #include <intrin.h>
+ #pragma intrinsic(_ReadWriteBarrier)
+ 
++#ifdef _M_ARM64
++
++/* _ReadWriteBarrier() is insufficient on non-TSO architectures. */
++#pragma intrinsic(_InterlockedExchange)
++#define S_UNLOCK(lock) _InterlockedExchange(lock, 0)
++
++#else
++
++#pragma intrinsic(_ReadWriteBarrier)
+ #define S_UNLOCK(lock)	\
+ 	do { _ReadWriteBarrier(); (*(lock)) = 0; } while (0)
+ 
+ #endif
++#endif
+ 
+ 
+ #endif	/* !defined(HAS_TEST_AND_SET) */
+diff --git a/src/port/pg_crc32c_armv8.c b/src/port/pg_crc32c_armv8.c
+index d47d838..e48ae2c 100644
+--- a/src/port/pg_crc32c_armv8.c
++++ b/src/port/pg_crc32c_armv8.c
+@@ -14,7 +14,11 @@
+  */
+ #include "c.h"
+ 
++#ifdef _MSC_VER
++#include <intrin.h>
++#else
+ #include <arm_acle.h>
++#endif
+ 
+ #include "port/pg_crc32c.h"
+ 
+diff --git a/src/tools/msvc_gendef.pl b/src/tools/msvc_gendef.pl
+index 404076d..18f1f72 100644
+--- a/src/tools/msvc_gendef.pl
++++ b/src/tools/msvc_gendef.pl
+@@ -120,9 +120,9 @@ sub writedef
+ 	{
+ 		my $isdata = $def->{$f} eq 'data';
+ 
+-		# Strip the leading underscore for win32, but not x64
++		# Strip the leading underscore for win32, but not x64 and aarch64
+ 		$f =~ s/^_//
+-		  unless ($arch eq "x86_64");
++		  unless ($arch eq "x86_64" || $arch eq "aarch64");
+ 
+ 		# Emit just the name if it's a function symbol, or emit the name
+ 		# decorated with the DATA option for variables.
+@@ -143,7 +143,7 @@ sub writedef
+ sub usage
+ {
+ 	die("Usage: msvc_gendef.pl --arch <arch> --deffile <deffile> --tempdir <tempdir> files-or-directories\n"
+-		  . "    arch: x86 | x86_64\n"
++		  . "    arch: x86 | x86_64 | aarch64\n"
+ 		  . "    deffile: path of the generated file\n"
+ 		  . "    tempdir: directory for temporary files\n"
+ 		  . "    files or directories: object files or directory containing object files\n"
+@@ -160,7 +160,7 @@ GetOptions(
+ 	'tempdir:s' => \$tempdir,) or usage();
+ 
+ usage("arch: $arch")
+-  unless ($arch eq 'x86' || $arch eq 'x86_64');
++  unless ($arch eq 'x86' || $arch eq 'x86_64' || $arch eq 'aarch64');
+ 
+ my @files;
+ 

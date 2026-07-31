@@ -305,8 +305,6 @@ class OpenCVConan(ConanFile):
             self.options.with_msmf_dxva = False
         if self.settings.os == "Linux":
             # Use Wayland by default, but fallback to GTK for old OpenCV versions.
-            # gtk/system is problematic for this recpe, there might be side effects
-            # in a big dependency graph
             if not self._has_with_wayland_option:
                 self.options.with_gtk = True
 
@@ -1039,13 +1037,13 @@ class OpenCVConan(ConanFile):
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.parallel == "tbb":
-            self.requires("onetbb/2021.10.0")
+            self.requires("onetbb/[>=2021.10.0 <2024]")
         if self.options.with_ipp == "intel-ipp":
             self.requires("intel-ipp/2020")
         # dnn module dependencies
         if self.options.get_safe("with_protobuf"):
             # Symbols are exposed https://github.com/conan-io/conan-center-index/pull/16678#issuecomment-1507811867
-            self.requires("protobuf/3.21.12", transitive_libs=True)
+            self.requires("protobuf/[>=3.21.12 <8]", transitive_libs=True)
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-headers/1.3.268.0")
         if self.options.get_safe("with_openvino"):
@@ -1055,12 +1053,12 @@ class OpenCVConan(ConanFile):
             self.requires("ade/0.1.2d")
         # highgui module dependencies
         if self.options.get_safe("with_gtk"):
-            self.requires("gtk/system")
+            self.requires("gtk/3.24.51")
         if self.options.get_safe("with_qt"):
             self.requires("qt/5.15.12")
         if self.options.get_safe("with_wayland"):
             self.requires("xkbcommon/1.6.0")
-            self.requires("wayland/1.22.0")
+            self.requires("wayland/[>=1.22.0 <2]")
         # imgcodecs module dependencies
         if self.options.get_safe("with_avif"):
             self.requires("libavif/1.0.4")
@@ -1094,7 +1092,7 @@ class OpenCVConan(ConanFile):
             self.requires("ffmpeg/[>=4.4.4 <8]")
         # freetype module dependencies
         if self.options.freetype:
-            self.requires("freetype/2.13.2")
+            self.requires("freetype/[>=2.13.2 <3]")
             self.requires("harfbuzz/[>=8.3.0]")
         # hdf module dependencies
         if self.options.hdf:
@@ -1108,7 +1106,7 @@ class OpenCVConan(ConanFile):
             self.requires("glog/0.7.0")
         # text module dependencies
         if self.options.get_safe("with_tesseract"):
-            self.requires("tesseract/5.3.3")
+            self.requires("tesseract/5.5.2")
 
     def package_id(self):
         # deprecated options
@@ -1143,8 +1141,14 @@ class OpenCVConan(ConanFile):
 
     def validate(self):
         self._check_mandatory_options(self._opencv_modules)
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        # INFO: Newer versions of protobuf require higher versions of C++ than OpenCV itself
+        # See https://opensource.google/documentation/policies/cplusplus-support
+        min_cppstd = 11
+        if self.options.get_safe("with_protobuf"):
+            protobuf_version = Version(self.dependencies["protobuf"].ref.version)
+            protobuf_release = Version(f"{protobuf_version.minor}.{protobuf_version.patch}")
+            min_cppstd = 17 if protobuf_release >= Version("30.1") else 14
+        check_min_cppstd(self, min_cppstd)
         if self.options.shared and self._is_cl_like and self._is_cl_like_static_runtime:
             raise ConanInvalidConfiguration("MSVC or clang-cl with static runtime are not supported for shared library.")
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "4":
@@ -1384,7 +1388,7 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_LAPACK"] = False
 
         tc.variables["WITH_GTK"] = self.options.get_safe("with_gtk", False)
-        tc.variables["WITH_GTK_2_X"] = self._is_gtk_version2
+        tc.variables["WITH_GTK_2_X"] = False
         tc.variables["WITH_WEBP"] = self.options.get_safe("with_webp", False)
         tc.variables["WITH_JPEG"] = bool(self.options.get_safe("with_jpeg", False))
         tc.variables["WITH_PNG"] = self.options.get_safe("with_png", False)
@@ -1480,29 +1484,31 @@ class OpenCVConan(ConanFile):
 
         if self.settings.os == "Android":
             tc.variables["BUILD_ANDROID_EXAMPLES"] = False
+        tc.cache_variables["CV_TRACE"] = False
 
         tc.generate()
 
         CMakeDeps(self).generate()
 
-        if self.options.get_safe("with_wayland"):
+        if self.options.get_safe("with_wayland") or self.options.get_safe("with_gtk"):
             deps = PkgConfigDeps(self)
-            if self._is_legacy_one_profile:
-                # Manually generate pkgconfig file of wayland-protocols since
-                # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
-                wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
-                wp_version = self.dependencies.build["wayland-protocols"].ref.version
-                wp_pkg_content = textwrap.dedent(f"""\
-                    prefix={wp_prefix}
-                    datarootdir=${{prefix}}/res
-                    pkgdatadir=${{datarootdir}}/wayland-protocols
-                    Name: Wayland Protocols
-                    Description: Wayland protocol files
-                    Version: {wp_version}
-                """)
-                save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
-            else:
-                deps.build_context_activated = ["wayland-protocols"]
+            if self.options.get_safe("with_wayland"):
+                if self._is_legacy_one_profile:
+                    # Manually generate pkgconfig file of wayland-protocols since
+                    # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
+                    wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
+                    wp_version = self.dependencies.build["wayland-protocols"].ref.version
+                    wp_pkg_content = textwrap.dedent(f"""\
+                        prefix={wp_prefix}
+                        datarootdir=${{prefix}}/res
+                        pkgdatadir=${{datarootdir}}/wayland-protocols
+                        Name: Wayland Protocols
+                        Description: Wayland protocol files
+                        Version: {wp_version}
+                    """)
+                    save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
+                else:
+                    deps.build_context_activated = ["wayland-protocols"]
             deps.generate()
 
     def build(self):
@@ -1551,19 +1557,6 @@ class OpenCVConan(ConanFile):
     @property
     def _module_target_rel_path(self):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
-
-    # returns true if GTK2 is selected. To do this, the version option
-    # of the gtk/system package is checked or the conan package version
-    # of an gtk conan package is checked.
-    @property
-    def _is_gtk_version2(self):
-        if not self.options.get_safe("with_gtk", False):
-            return False
-        gtk_version = self.dependencies["gtk"].ref.version
-        if gtk_version == "system":
-            return self.dependencies["gtk"].options.version == 2
-        else:
-            return Version(gtk_version) < "3.0.0"
 
     @staticmethod
     def _cmake_target(module):
@@ -1653,4 +1646,3 @@ class OpenCVConan(ConanFile):
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
 
         add_components(self._opencv_modules)
-

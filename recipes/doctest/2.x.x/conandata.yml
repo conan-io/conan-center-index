@@ -1,4 +1,7 @@
 sources:
+  "2.5.2":
+    url: "https://github.com/doctest/doctest/archive/v2.5.2.tar.gz"
+    sha256: "9189960c2bbbc4f3382ce0773b2bb5f13e3afd8fed47f55f193e11e85a4f9854"
   "2.4.12":
     url: "https://github.com/doctest/doctest/archive/v2.4.12.tar.gz"
     sha256: "73381c7aa4dee704bd935609668cf41880ea7f19fa0504a200e13b74999c2d70"

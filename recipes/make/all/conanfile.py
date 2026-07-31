@@ -5,11 +5,12 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class MakeConan(ConanFile):
     name = "make"
+    package_type = "application"
     description = (
         "GNU Make is a tool which controls the generation of executables and "
         "other non-source files of a program from the program's source files"
@@ -19,10 +20,6 @@ class MakeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "GPL-3.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -45,15 +42,16 @@ class MakeConan(ConanFile):
         if is_msvc(self):
             vcvars = VCVars(self)
             vcvars.generate()
-        if self._settings_build.os != "Windows":
+        if self.settings_build.os != "Windows":
             tc = AutotoolsToolchain(self)
+            tc.configure_args.extend(["--disable-dependency-tracking"])
             tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
         with chdir(self, self.source_folder):
             # README.W32
-            if self._settings_build.os == "Windows":
+            if self.settings_build.os == "Windows":
                 if is_msvc(self):
                     command = "build_w32.bat --without-guile"
                 else:
@@ -75,8 +73,3 @@ class MakeConan(ConanFile):
 
         make = os.path.join(self.package_folder, "bin", "gnumake.exe" if self.settings.os == "Windows" else "make")
         self.conf_info.define("tools.gnu:make_program", make)
-
-        # TODO: to remove in conan v2
-        self.user_info.make = make
-        self.env_info.CONAN_MAKE_PROGRAM = make
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

@@ -1,0 +1,63 @@
+Mujoco hardcodes some build configuration option resulting in a not
+flexible build for Conan.
+
+This patch allows using different C++ standard, manage fPIC via Conan,
+and avoid forcing LTO and -Werror.
+
+https://github.com/google-deepmind/mujoco/pull/2693
+https://github.com/google-deepmind/mujoco/pull/3223
+https://github.com/google-deepmind/mujoco/pull/3224
+
+diff --git a/cmake/MujocoOptions.cmake b/cmake/MujocoOptions.cmake
+index a606220..78606a6 100644
+--- a/cmake/MujocoOptions.cmake
++++ b/cmake/MujocoOptions.cmake
+@@ -13,12 +13,17 @@
+ # limitations under the License.
+ 
+ # Global compilation settings
+-set(CMAKE_C_STANDARD 11)
+-set(CMAKE_C_STANDARD_REQUIRED ON)
+-set(CMAKE_CXX_STANDARD 20)
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-set(CMAKE_CXX_EXTENSIONS OFF)
+-set(CMAKE_C_EXTENSIONS OFF)
++if(NOT CMAKE_C_STANDARD)
++  set(CMAKE_C_STANDARD 11)
++  set(CMAKE_C_STANDARD_REQUIRED ON)
++  set(CMAKE_C_EXTENSIONS OFF)
++endif()
++
++if(NOT CMAKE_CXX_STANDARD)
++  set(CMAKE_CXX_STANDARD 20)
++  set(CMAKE_CXX_STANDARD_REQUIRED ON)
++  set(CMAKE_CXX_EXTENSIONS OFF)
++endif()
+ set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # For LLVM tooling
+ 
+ if(NOT CMAKE_CONFIGURATION_TYPES)
+@@ -49,7 +54,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}"
+ 
+ set(OpenGL_GL_PREFERENCE GLVND)
+ 
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ set(CMAKE_C_VISIBILITY_PRESET hidden)
+ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+ set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+@@ -86,7 +90,6 @@ get_mujoco_extra_link_options(EXTRA_LINK_OPTIONS)
+ 
+ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND NOT MSVC))
+   set(EXTRA_COMPILE_OPTIONS
+-      -Werror
+       -Wall
+       -Wpedantic
+       -Wimplicit-fallthrough
+@@ -104,7 +107,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang
+   endif()
+ endif()
+ 
+-if(NOT CMAKE_INTERPROCEDURAL_OPTIMIZATION AND (CMAKE_BUILD_TYPE AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug"))
++if(NOT DEFINED CMAKE_INTERPROCEDURAL_OPTIMIZATION AND (CMAKE_BUILD_TYPE AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug"))
+   set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+ endif()
+ 

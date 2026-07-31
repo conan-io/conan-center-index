@@ -1,0 +1,14 @@
+Let Conan configure RPATH for the package, instead of using a custom CMake module.
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1ab7ea7..18ef599 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -67,7 +67,6 @@ if (NOT PDAL_PLUGIN_INSTALL_PATH)
+     endif()
+ endif()
+
+-include(${PDAL_CMAKE_DIR}/rpath.cmake)
+
+ # wipe lib/ drectory on clean. It will have plugins that could be out of date
+ # in the next build

@@ -101,6 +101,9 @@ class LibheifConan(ConanFile):
         tc.cache_variables["WITH_AOM"] = self.options.with_libaomav1
         tc.cache_variables["WITH_AOM_DECODER"] = self.options.with_libaomav1
         tc.cache_variables["WITH_AOM_ENCODER"] = self.options.with_libaomav1
+        if self.options.with_libaomav1:
+            tc.cache_variables["AOM_ENCODER_FOUND"] = "YES"
+            tc.cache_variables["AOM_DECODER_FOUND"] = "YES"
         tc.cache_variables["WITH_RAV1E"] = False
         tc.cache_variables["WITH_DAV1D"] = self.options.with_dav1d
         tc.cache_variables["WITH_EXAMPLES"] = False

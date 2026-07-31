@@ -8,6 +8,7 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
@@ -288,6 +289,9 @@ class LibvipsConan(ConanFile):
         tc.generate()
 
         deps = PkgConfigDeps(self)
+        if self.options.with_pdfium:
+            pdfium_api_version = Version(self.dependencies["pdfium"].ref.version).patch
+            deps.set_property("pdfium", "system_package_version", pdfium_api_version)
         deps.generate()
 
     def _patch_sources(self):

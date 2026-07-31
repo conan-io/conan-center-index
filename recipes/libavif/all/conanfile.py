@@ -55,14 +55,14 @@ class LibAVIFConan(ConanFile):
         return self.options.with_decoder == "dav1d"
 
     def requirements(self):
-        self.requires("libaom-av1/3.6.1")
+        self.requires("libaom-av1/[>=3.13.3 <4]")
         self.requires("libyuv/1892")
         self.requires("libwebp/[>=1.3.2 <2]")
         if self._has_dav1d:
             self.requires("dav1d/[>=1.4 <2]")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.19]")
+        self.tool_requires("cmake/[>=3.22]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -71,8 +71,8 @@ class LibAVIFConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["AVIF_ENABLE_WERROR"] = False
-        tc.cache_variables["AVIF_CODEC_AOM"] = True
-        tc.cache_variables["AVIF_CODEC_DAV1D"] = self.options.with_decoder == "dav1d"
+        tc.cache_variables["AVIF_CODEC_AOM"] = "SYSTEM"
+        tc.cache_variables["AVIF_CODEC_DAV1D"] = "SYSTEM" if self.options.with_decoder == "dav1d" else "OFF"
         tc.cache_variables["AVIF_CODEC_AOM_DECODE"] = self.options.with_decoder == "aom"
         tc.cache_variables["LIBYUV_VERSION"] = str(self.dependencies["libyuv"].ref.version)
         if "with_ycgco_r" in self.options:

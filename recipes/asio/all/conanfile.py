@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.50.0"
@@ -31,7 +32,10 @@ class Asio(ConanFile):
         pass
 
     def package(self):
-        root_dir = os.path.join(self.source_folder, "asio")
+        root_dir = self.source_folder
+        if Version(self.version) < "1.38.0":
+            root_dir = os.path.join(self.source_folder, "asio")
+
         include_dir = os.path.join(root_dir, "include")
         copy(self, "LICENSE_1_0.txt", src=root_dir, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*.hpp", src=include_dir, dst=os.path.join(self.package_folder, "include"))

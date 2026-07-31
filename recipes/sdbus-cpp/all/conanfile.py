@@ -4,12 +4,10 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=2.1"
 
 
 class SdbusCppConan(ConanFile):
@@ -36,36 +34,15 @@ class SdbusCppConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
-        return 17
-
-    @property
-    def _minimum_compilers_version(self):
-        # non-trivial designated initializers are not supported in gcc < 8
-        # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55606
-        return {
-            "gcc": "7" if Version(self.version) < "2.0.0" else "8",
-            "clang": "6",
-        }
-
-    @property
-    def _supported_os(self):
-        return (["Linux"] if Version(self.version) < "1.4.0"
-                else ["Linux", "FreeBSD"])
-
-    @property
     def _with_sdbus(self):
         return ("basu" if self.settings.os == "FreeBSD"
                 else self.options.get_safe("with_sdbus", "systemd"))
 
     def config_options(self):
-        if Version(self.version) < "1.4.0" or self.settings.os != "Linux":
+        if self.settings.os != "Linux":
             del self.options.with_sdbus
 
     def configure(self):
-        if Version(self.version) < "0.9.0":
-            self.license = "LGPL-2.1-or-later"
-
         if self.options.shared:
             del self.options.fPIC
 
@@ -83,16 +60,11 @@ class SdbusCppConan(ConanFile):
             self.requires("expat/[>=2.6.2 <3]", transitive_libs=False)
 
     def validate(self):
-        if self.settings.os not in self._supported_os:
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration(
                 f"{self.ref} does not support {self.settings.os}")
 
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if min_version and Version(self.settings.compiler.version) < min_version:
-            raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+        check_min_cppstd(self, 20)
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
@@ -100,16 +72,13 @@ class SdbusCppConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_CXX_STANDARD 20)",
+                        "")
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = CMakeToolchain(self)
-        if Version(self.version) >= "2.0.0":
-            tc.variables["SDBUSCPP_BUILD_CODEGEN"] = self.options.with_code_gen
-        else:
-            tc.variables["BUILD_CODE_GEN"] = self.options.with_code_gen
+        tc.variables["SDBUSCPP_BUILD_CODEGEN"] = self.options.with_code_gen
         tc.variables["BUILD_DOC"] = False
         tc.variables["BUILD_TESTS"] = False
         tc.variables["BUILD_LIBSYSTEMD"] = False
@@ -143,18 +112,9 @@ class SdbusCppConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "sdbus-c++")
         self.cpp_info.set_property("cmake_target_name", "SDBusCpp::sdbus-c++")
         self.cpp_info.set_property("pkg_config_name", "sdbus-c++")
-        # TODO: back to root cpp_info in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["sdbus-c++"].libs = ["sdbus-c++"]
         self.cpp_info.components["sdbus-c++"].system_libs = ["pthread", "m"]
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "SDBusCpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "SDBusCpp"
-        self.cpp_info.filenames["cmake_find_package"] = "sdbus-c++"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "sdbus-c++"
-        self.cpp_info.components["sdbus-c++"].names["cmake_find_package"] = "sdbus-c++"
-        self.cpp_info.components["sdbus-c++"].names["cmake_find_package_multi"] = "sdbus-c++"
-        self.cpp_info.components["sdbus-c++"].names["pkg_config"] = "sdbus-c++"
         self.cpp_info.components["sdbus-c++"].set_property(
             "cmake_target_name", "SDBusCpp::sdbus-c++")
         self.cpp_info.components["sdbus-c++"].set_property(
@@ -169,6 +129,3 @@ class SdbusCppConan(ConanFile):
             # Not a dependency of the lib, only of executable, but there is no way to modelize this
             # with conan
             self.cpp_info.components["sdbus-c++"].requires.append("expat::expat")
-        if self.options.with_code_gen:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.env_info.PATH.append(bin_path)

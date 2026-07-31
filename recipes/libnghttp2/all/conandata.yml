@@ -2,3 +2,6 @@ sources:
   "1.66.0":
     url: "https://github.com/nghttp2/nghttp2/releases/download/v1.66.0/nghttp2-1.66.0.tar.bz2"
     sha256: "1d484ad37354df9fcab970814e93a5dca91a53256e83f4f58dd73119c6321017"
+  "1.68.1":
+    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.68.1/nghttp2-1.68.1.tar.bz2"
+    sha256: "b761b53cb64916657ea84437973d508fd675e96bb2feb9593a1e43d1959abe95"

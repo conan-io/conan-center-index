@@ -1,11 +1,11 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
-from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class SVTAV1Conan(ConanFile):
@@ -44,14 +44,9 @@ class SVTAV1Conan(ConanFile):
         "with_neon_sve2": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
-        if Version(self.version) < "2.0.0":
-            del self.options.minimal_build
         if Version(self.version) >= "2.1.1":
             # https://gitlab.com/AOMediaCodec/SVT-AV1/-/blob/c949fe4f14fe288a9b2b47aa3e61335422a83645/CHANGELOG.md#211---2024-06-25
             del self.options.build_decoder
@@ -71,17 +66,10 @@ class SVTAV1Conan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cpuinfo/cci.20231129")
-
-    def validate(self):
-        # https://gitlab.com/AOMediaCodec/SVT-AV1/-/issues/2081
-        # https://gitlab.com/AOMediaCodec/SVT-AV1/-/commit/800a81b09db1cf8c9c289ecf6f70381d7888b98c
-        if Version(self.version) < "1.9.0" and self.settings.os == "Android":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support Android before version 1.9.0.")
+        self.requires("cpuinfo/[>=cci.20231129]")
 
     def build_requirements(self):
-        if Version(self.version) >= "1.3.0":
-            self.tool_requires("cmake/[>=3.16 <4]")
+        self.tool_requires("cmake/[>=3.16]")
         if self.settings.arch in ("x86", "x86_64"):
             self.tool_requires("nasm/2.16.01")
 
@@ -90,33 +78,32 @@ class SVTAV1Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_APPS"] = False
+        tc.cache_variables["BUILD_APPS"] = False
         if Version(self.version) < "2.1.1":
-            tc.variables["BUILD_DEC"] = self.options.build_decoder
-        tc.variables["BUILD_ENC"] = self.options.build_encoder
-        tc.variables["USE_EXTERNAL_CPUINFO"] = True
+            tc.cache_variables["BUILD_DEC"] = self.options.build_decoder
+        tc.cache_variables["BUILD_ENC"] = self.options.build_encoder
+        tc.cache_variables["USE_EXTERNAL_CPUINFO"] = True
         if self.settings.arch in ("x86", "x86_64"):
-            tc.variables["ENABLE_NASM"] = True
-        tc.variables["MINIMAL_BUILD"] = self.options.get_safe("minimal_build", False)
+            tc.cache_variables["ENABLE_NASM"] = True
+        tc.cache_variables["MINIMAL_BUILD"] = self.options.minimal_build
         if "with_neon" in self.options:
-            tc.variables["ENABLE_NEON"] = self.options.with_neon
+            tc.cache_variables["ENABLE_NEON"] = self.options.with_neon
         if "with_arm_crc32" in self.options:
-            tc.variables["ENABLE_ARM_CRC32"] = self.options.with_arm_crc32
+            tc.cache_variables["ENABLE_ARM_CRC32"] = self.options.with_arm_crc32
         if "with_neon_dotprod" in self.options:
-            tc.variables["ENABLE_NEON_DOTPROD"] = self.options.with_neon_dotprod
+            tc.cache_variables["ENABLE_NEON_DOTPROD"] = self.options.with_neon_dotprod
         if "with_neon_i8mm" in self.options:
-            tc.variables["ENABLE_NEON_i8MM"] = self.options.with_neon_i8mm
+            tc.cache_variables["ENABLE_NEON_i8MM"] = self.options.with_neon_i8mm
         if "with_sve" in self.options:
-            tc.variables["ENABLE_SVE"] = self.options.with_sve
+            tc.cache_variables["ENABLE_SVE"] = self.options.with_sve
         if "with_sve2" in self.options:
-            tc.variables["ENABLE_SVE2"] = self.options.with_sve2
-
+            tc.cache_variables["ENABLE_SVE2"] = self.options.with_sve2
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

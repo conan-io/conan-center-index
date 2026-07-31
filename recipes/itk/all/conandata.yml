@@ -1,9 +1,9 @@
 sources:
-  "5.3.0":
-    url: "https://github.com/InsightSoftwareConsortium/ITK/releases/download/v5.3.0/InsightToolkit-5.3.0.tar.gz"
-    sha256: "57a4471133dc8f76bde3d6eb45285c440bd40d113428884a1487472b7b71e383"
+  "5.4.6":
+    url: "https://github.com/InsightSoftwareConsortium/ITK/releases/download/v5.4.6/InsightToolkit-5.4.6.tar.gz"
+    sha256: "1177567965a2522c53f7c77ed222afd619262f508caaf026646b21e275971e95"
 patches:
-  "5.3.0":
-    - patch_file: "patches/0002-find-conan-packages.patch"
+  "5.4.6":
+    - patch_file: "patches/0002-5.4.6-find-conan-packages.patch"
       patch_description: "inject thirdparties from conan"
       patch_type: "conan"

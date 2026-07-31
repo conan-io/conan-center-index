@@ -1,4 +1,7 @@
 sources:
+  "12.0.0":
+    url: "https://github.com/machinezone/IXWebSocket/archive/refs/tags/v12.0.0.tar.gz"
+    sha256: "f193bc24e10c18ab8d31d6f31370fde8b31d3eaf1de32e1d8ab14d666659b8ad"
   "11.4.6":
     url: "https://github.com/machinezone/IXWebSocket/archive/refs/tags/v11.4.6.tar.gz"
     sha256: "c024334f8e45980836c67008979a884d6dcc5ef067dd2eb1fa7241f4c17ddc32"

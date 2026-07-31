@@ -53,6 +53,10 @@ class CycloneDDSConan(ConanFile):
             "apple-clang": "10",
         }
 
+    @property
+    def _pre_v11(self):
+        return Version(self.version) < "11"
+
     def _has_idlc(self, info=False):
         # don't build idlc when it makes little sense or not supported
         host_os = self.info.settings.os if info else self.settings.os
@@ -82,7 +86,7 @@ class CycloneDDSConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
-        if self.options.enable_security and not self.options.shared:
+        if self._pre_v11 and self.options.enable_security and not self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} currently do not support"\
                                             "static build and security on")
         if self.settings.compiler.get_safe("cppstd"):
@@ -92,6 +96,9 @@ class CycloneDDSConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        if Version(self.version) == "11.0.1" and not self.options.shared and self.settings.compiler == "msvc":
+            # FIXME: ddsc.lib(cdtors.c.obj) : error LNK2005: tls_callback_func already defined in string.c.obj
+            raise ConanInvalidConfiguration("Windows static build is not support due linker error. See https://github.com/eclipse-cyclonedds/cyclonedds/issues/2422")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
@@ -110,7 +117,12 @@ class CycloneDDSConan(ConanFile):
         tc.cache_variables["ENABLE_LTO"] = False
         # variables which effects build
         tc.variables["ENABLE_SSL"] = self.options.with_ssl
-        tc.variables["ENABLE_SHM"] = self.options.with_shm
+        if self._pre_v11:
+            # INFO: deprecated in 11.0.0:
+            # https://github.com/eclipse-cyclonedds/cyclonedds/commit/9f354f462d9e8b374da408efc89050f3161322f4
+            tc.cache_variables["ENABLE_SHM"] = self.options.with_shm
+        else:
+            tc.cache_variables["ENABLE_ICEORYX"] = self.options.with_shm
         tc.variables["ENABLE_SECURITY"] = self.options.enable_security
         tc.variables["ENABLE_TYPE_DISCOVERY"] = self.options.enable_discovery
         tc.variables["ENABLE_TOPIC_DISCOVERY"] = self.options.enable_discovery
@@ -147,7 +159,10 @@ class CycloneDDSConan(ConanFile):
         self.cpp_info.components["CycloneDDS"].libs = ["ddsc"]
         requires = []
         if self.options.with_shm:
-            requires.append("iceoryx::iceoryx_binding_c")
+            if self._pre_v11:
+                requires.append("iceoryx::iceoryx_binding_c")
+            else:
+                requires.extend(["iceoryx::iceoryx_hoofs", "iceoryx::iceoryx_posh"])
         if self.options.with_ssl:
             requires.append("openssl::openssl")
         self.cpp_info.components["CycloneDDS"].requires = requires
@@ -161,6 +176,7 @@ class CycloneDDSConan(ConanFile):
                 "iphlpapi"
             ]
 
+        # TODO: CMakeConfigDeps + cpp_info.exe can replace CycloneDDS_idlc.cmake
         build_modules = [
             os.path.join("lib", "cmake", "CycloneDDS", "CycloneDDS_idlc.cmake"),
             os.path.join("lib", "cmake", "CycloneDDS", "idlc", "Generate.cmake"),
@@ -189,3 +205,10 @@ class CycloneDDSConan(ConanFile):
             self.cpp_info.components["idl"].set_property("cmake_target_name", "CycloneDDS::idl")
             self.cpp_info.components["idl"].build_modules["cmake_find_package"] = build_modules
             self.cpp_info.components["idl"].build_modules["cmake_find_package_multi"] = build_modules
+            self.cpp_info.components["idl"].requires = ["CycloneDDS"]
+
+            if Version(self.version) >= "11.0.0":
+                # https://github.com/eclipse-cyclonedds/cyclonedds/pull/1752
+                self.cpp_info.components["libidlc"].set_property("cmake_target_name", "CycloneDDS::libidlc")
+                self.cpp_info.components["libidlc"].libs = ["cycloneddsidlc"]
+                self.cpp_info.components["libidlc"].requires = ["idl", "CycloneDDS"]
