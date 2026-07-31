@@ -1,9 +1,10 @@
+diff --git a/gif_lib.h b/gif_lib.h
 --- a/gif_lib.h
 +++ b/gif_lib.h
-@@ -12,6 +12,20 @@
- #ifdef __cplusplus
+@@ -13,6 +13,21 @@
  extern "C" {
  #endif /* __cplusplus */
+ 
 +
 +#ifdef _MSC_VER
 +  #ifdef USE_GIF_LIB
@@ -18,10 +19,11 @@
 +#else
 +  #define GIF_EXPORT
 +#endif /* _MSC_VER */
- 
++
  #define GIFLIB_MAJOR 6
  #define GIFLIB_MINOR 1
-@@ -125,13 +139,13 @@
+ #define GIFLIB_RELEASE 3
+@@ -125,13 +140,13 @@
  ******************************************************************************/
  
  /* Main entry points */
@@ -41,7 +43,7 @@
  
  #define E_GIF_SUCCEEDED 0
  #define E_GIF_ERR_OPEN_FAILED 201 /* And EGif possible errors. */
-@@ -146,39 +160,39 @@
+@@ -146,39 +161,39 @@
  #define E_GIF_ERR_NOT_WRITEABLE 210
  
  /* These are legacy.  You probably do not want to call them directly */
@@ -98,7 +100,7 @@
  
  #define D_GIF_SUCCEEDED 0
  #define D_GIF_ERR_OPEN_FAILED 101 /* And DGif possible errors. */
-@@ -196,25 +210,25 @@
+@@ -196,25 +211,25 @@
  #define D_GIF_ERR_EOF_TOO_SOON 113
  
  /* These are legacy.  You probably do not want to call them directly */
@@ -137,7 +139,7 @@
  
  /*****************************************************************************
   Everything below this point is new after version 1.2, supporting `slurp
-@@ -225,42 +239,42 @@
+@@ -225,42 +240,42 @@
   Color map handling from gif_alloc.c
  ******************************************************************************/
  
@@ -193,15 +195,14 @@
                              GifFileType *GifFile, int ImageIndex);
  
  /******************************************************************************
-@@ -269,18 +283,18 @@
+@@ -269,18 +284,18 @@
  
  #define GIF_FONT_WIDTH 8
  #define GIF_FONT_HEIGHT 8
 -extern const unsigned char GifAsciiTable8x8[][GIF_FONT_WIDTH];
--
--extern void GifDrawText8x8(SavedImage *Image, const int x, const int y,
 +GIF_EXPORT extern const unsigned char GifAsciiTable8x8[][GIF_FONT_WIDTH];
-+
+ 
+-extern void GifDrawText8x8(SavedImage *Image, const int x, const int y,
 +GIF_EXPORT extern void GifDrawText8x8(SavedImage *Image, const int x, const int y,
                             const char *legend, const int color);
  
@@ -218,3 +219,15 @@
                                  const char *legend, const int border,
                                  const int bg, const int fg);
  
+diff --git a/quantize.c b/quantize.c
+--- a/quantize.c
++++ b/quantize.c
+@@ -59,7 +59,7 @@
+    Also non of the parameter are allocated by this routine.
+    This function returns GIF_OK if successful, GIF_ERROR otherwise.
+ ******************************************************************************/
+-int GifQuantizeBuffer(unsigned int Width, unsigned int Height,
++GIF_EXPORT int GifQuantizeBuffer(unsigned int Width, unsigned int Height,
+                       int *ColorMapSize, const GifByteType *RedInput,
+                       const GifByteType *GreenInput,
+                       const GifByteType *BlueInput, GifByteType *OutputBuffer,
