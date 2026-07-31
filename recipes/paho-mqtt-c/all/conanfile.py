@@ -3,7 +3,6 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, replace_in_file
 from conan.tools.scm import Version
 import os
-import platform
 
 required_conan_version = ">=2.1"
 
@@ -127,10 +126,7 @@ class PahoMqttcConan(ConanFile):
                     self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(
                         ["wsock32", "uuid", "crypt32", "rpcrt4"])
         elif self.settings.os == "Linux":
-            libs = ["c", "dl", "pthread"]
-            if platform.libc_ver()[0] == "glibc":
-                libs.insert(0, "anl")
-            self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(libs)
+            self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["c", "dl", "pthread"])
         elif self.settings.os == "FreeBSD":
             self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["compat", "pthread"])
         elif self.settings.os == "Android":
