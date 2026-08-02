@@ -1,0 +1,62 @@
+diff --git CMakeLists.txt CMakeLists.txt
+index f81653e..3630f1c 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -144,7 +144,7 @@ if(UHDR_BUILD_BENCHMARK AND EMSCRIPTEN)
+ endif()
+ 
+ # side effects
+-if(CMAKE_CROSSCOMPILING AND UHDR_ENABLE_INSTALL)
++if(FALSE)
+   set(UHDR_ENABLE_INSTALL FALSE) # disable install and uninstall targets during cross compilation.
+   message(STATUS "Install and uninstall targets - Disabled")
+ endif()
+@@ -184,9 +184,9 @@ endif()
+ ###########################################################
+ # Compile flags
+ ###########################################################
+-set(CMAKE_CXX_STANDARD 17)
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-set(CMAKE_CXX_EXTENSIONS OFF)
++# set(CMAKE_CXX_STANDARD 17)
++# set(CMAKE_CXX_STANDARD_REQUIRED ON)
++# set(CMAKE_CXX_EXTENSIONS OFF)
+ if(BUILD_SHARED_LIBS)
+   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+   set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+@@ -208,9 +208,9 @@ else()
+     # Sanitizer libraries could be only DSO's, static linking an entire executable not possible
+     message(STATUS "Pure static executable may not possible, disabling '-static' option")
+     set(UHDR_ENABLE_STATIC_LINKING OFF)
+-  elseif(MSVC AND DEFINED BUILD_FOR_WINUI AND BUILD_FOR_WINUI)
+-    # WinUI builds use /MD (DLL CRT), keep the global setting from parent project
+-    set(UHDR_ENABLE_STATIC_LINKING OFF)
++  elseif(MSVC AND DEFINED BUILD_FOR_WINUI AND BUILD_FOR_WINUI)
++    # WinUI builds use /MD (DLL CRT), keep the global setting from parent project
++    set(UHDR_ENABLE_STATIC_LINKING OFF)
+   elseif(MSVC)
+     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+     set(UHDR_ENABLE_STATIC_LINKING ON)
+@@ -522,7 +522,7 @@ if(NOT JPEG_FOUND)
+         SOURCE_DIR ${JPEGTURBO_SOURCE_DIR}
+         BINARY_DIR ${JPEGTURBO_BINARY_DIR}
+         BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config $<CONFIG> --target jpeg-static
+-        CMAKE_ARGS ${UHDR_CMAKE_ARGS} -DENABLE_SHARED=0 -DWITH_CRT_DLL=ON
++        CMAKE_ARGS ${UHDR_CMAKE_ARGS} -DENABLE_SHARED=0 -DWITH_CRT_DLL=ON
+         BUILD_BYPRODUCTS ${JPEG_LIBRARIES}
+         INSTALL_COMMAND ""
+     )
+@@ -866,9 +866,10 @@ if(UHDR_BUILD_JAVA)
+ endif()
+ 
+ if(UHDR_ENABLE_INSTALL)
+-  # XCODE seems to have issues when the target has only object files as input
+-  # we use combine_static_libs to prepare install targets
+-  if(NOT XCODE)
++  # # XCODE seems to have issues when the target has only object files as input
++  # # we use combine_static_libs to prepare install targets
++  # if(NOT XCODE)
++  if(TRUE)
+     include(GNUInstallDirs)
+ 
+     # pkg-config: libuhdr.pc
