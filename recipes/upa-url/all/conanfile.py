@@ -48,10 +48,9 @@ class upa_urlRecipe(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        # Remove unused files
+
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        if Version(self.version) >= "2.5.0":
-            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "upa")
