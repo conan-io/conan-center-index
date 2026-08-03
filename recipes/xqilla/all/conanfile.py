@@ -14,6 +14,7 @@ required_conan_version = ">=1.53.0"
 
 class XqillaConan(ConanFile):
     name = "xqilla"
+    deprecated = "No longer maintained upstream, recipe is no longer maintained"
     description = (
         "XQilla is an XQuery and XPath 2 library and command line utility "
         "written in C++, implemented on top of the Xerces-C library"
