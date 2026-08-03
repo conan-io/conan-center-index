@@ -1,12 +1,11 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir, save
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.60.0 <2 || >=2.0.5"
+required_conan_version = ">=2.0.5"
 
 
 class XercesCConan(ConanFile):
@@ -177,7 +176,3 @@ class XercesCConan(ConanFile):
             self.cpp_info.frameworks = ["CoreFoundation", "CoreServices"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread"])
-
-        if Version(conan_version).major < 2:
-            self.cpp_info.names["cmake_find_package"] = "XercesC"
-            self.cpp_info.names["cmake_find_package_multi"] = "XercesC"

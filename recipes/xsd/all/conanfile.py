@@ -32,7 +32,7 @@ class ConanXqilla(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("xerces-c/3.2.3")
+        self.requires("xerces-c/[>=3.2.3 <3]")
 
     def package_id(self):
         del self.info.settings.compiler
