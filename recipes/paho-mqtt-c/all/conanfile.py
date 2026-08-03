@@ -71,8 +71,6 @@ class PahoMqttcConan(ConanFile):
             tc.cache_variables["OPENSSL_ROOT_DIR"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
         tc.variables["PAHO_HIGH_PERFORMANCE"] = self.options.high_performance
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        if Version(self.version) < "1.3.14": # pylint: disable=conan-condition-evals-to-constant
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -80,11 +78,7 @@ class PahoMqttcConan(ConanFile):
 
     def _patch_source(self):
         apply_conandata_patches(self)
-        if Version(self.version) < "1.3.14": # pylint: disable=conan-condition-evals-to-constant
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "SET(CMAKE_MODULE_PATH \"${CMAKE_SOURCE_DIR}/cmake/modules\")",
-                            "LIST(APPEND CMAKE_MODULE_PATH \"${CMAKE_SOURCE_DIR}/cmake/modules\")")
-        elif Version(self.version) < "1.3.17": # pylint: disable=conan-condition-evals-to-constant
+        if Version(self.version) < "1.3.17": # pylint: disable=conan-condition-evals-to-constant
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "set(CMAKE_MODULE_PATH \"${PROJECT_SOURCE_DIR}/cmake/modules\")",
                             "list(APPEND CMAKE_MODULE_PATH \"${PROJECT_SOURCE_DIR}/cmake/modules\")")
@@ -126,7 +120,7 @@ class PahoMqttcConan(ConanFile):
                     self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(
                         ["wsock32", "uuid", "crypt32", "rpcrt4"])
         elif self.settings.os == "Linux":
-            self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["anl", "c", "dl", "pthread"])
+            self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["c", "dl", "pthread"])
         elif self.settings.os == "FreeBSD":
             self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["compat", "pthread"])
         elif self.settings.os == "Android":
