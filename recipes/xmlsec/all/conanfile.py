@@ -164,7 +164,7 @@ class XmlSecConan(ConanFile):
             ]
 
             with chdir(self, os.path.join(self.source_folder, "win32")):
-                self.run(f"powershell -ExecutionPolicy Bypass -File configure.ps1 {' '.join(args)}")
+                self.run(f"powershell -ExecutionPolicy RemoteSigned -File configure.ps1 {' '.join(args)}")
 
             # Fix library names in generated Makefile.msvc
             def format_libs(package):
