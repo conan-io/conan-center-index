@@ -1,9 +1,0 @@
---- CMakeLists.txt
-+++ CMakeLists.txt
-@@ -1,5 +1,5 @@
- set(CPACK_RPM_COMPONENT_INSTALL ON)
--cmake_minimum_required(VERSION 3.1)
-+cmake_minimum_required(VERSION 3.15)
- 
- project(opentracing-cpp)
- 

@@ -5,4 +5,3 @@ sources:
 patches:
   "1.6.0":
     - patch_file: "patches/0001-Set-default-installation-folders.patch"
-    - patch_file: "patches/0002-Update-Min-CMake.patch"
