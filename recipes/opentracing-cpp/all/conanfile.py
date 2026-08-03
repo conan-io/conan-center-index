@@ -29,6 +29,7 @@ class OpenTracingConan(ConanFile):
         "enable_mocktracer": False,
         "enable_dynamic_load": False,
     }
+    deprecated = "upstream deprecated. See https://github.com/opentracing/specification/issues/163"
 
     def export_sources(self):
         export_conandata_patches(self)
