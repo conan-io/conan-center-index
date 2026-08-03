@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -66,6 +67,8 @@ class UserspaceRCUConan(ConanFile):
             dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
+
+        fix_apple_shared_install_name(self)
 
         rm(self, "*.la", self.package_folder, recursive=True)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
