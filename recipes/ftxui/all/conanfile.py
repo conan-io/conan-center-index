@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm
+from conan.tools.files import get, copy, replace_in_file, rmdir, rm
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -29,9 +29,6 @@ class FTXUIConan(ConanFile):
     implements = ["auto_shared_fpic"]
 
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -56,7 +53,10 @@ class FTXUIConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
+        if Version(self.version) >= "6.0.0":
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "ftxui_set_options.cmake"),
+                            "set_property(TARGET ${library} PROPERTY POSITION_INDEPENDENT_CODE ON)",
+                            "# set_property(TARGET ${library} PROPERTY POSITION_INDEPENDENT_CODE ON)")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
