@@ -67,3 +67,5 @@ class DoubleConversionConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "double-conversion::double-conversion")
         self.cpp_info.set_property("pkg_config_name", "double-conversion")
         self.cpp_info.libs = ["double-conversion"]
+        if Version(self.version) >= "3.4.0":
+            self.cpp_info.set_property("cmake_target_aliases", ["double-conversion"])
