@@ -17,10 +17,13 @@ class OneTBBConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/oneapi-src/oneTBB"
     description = (
-        "oneAPI Threading Building Blocks (oneTBB) lets you easily write parallel C++"
-        " programs that take full advantage of multicore performance, that are portable, composable"
-        " and have future-proof scalability.")
-    topics = ("tbb", "threading", "parallelism", "tbbmalloc")
+        "oneTBB is a flexible C++ library that simplifies the work of adding parallelism to complex applications, "
+        " even if you are not a threading expert."
+        " The library lets you easily write parallel programs that take full advantage of the multi-core performance."
+        " Such programs are portable, composable and have a future-proof scalability."
+        " oneTBB provides you with functions, interfaces, and classes to parallelize and scale the code."
+        " All you have to do is to use the templates.")
+    topics = ("parallelism", "tasks", "tbb", "tbbmalloc", "threading")
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -59,7 +62,7 @@ class OneTBBConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("tbbbind"):
-            self.requires("hwloc/2.12.2", options={'shared': True})
+            self.requires("hwloc/[>=2.12.2 <3]", options={'shared': True})
 
     def validate(self):
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "11.0":
