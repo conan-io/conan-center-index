@@ -35,18 +35,14 @@ class DoubleConversionConan(ConanFile):
         check_min_vs(self, "190")
 
     def build_requirements(self):
-        if Version(self.version) >= "3.4.0":
-            self.tool_requires("cmake/[>=3.29]")
+        self.tool_requires("cmake/[>=3.29]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.settings.os == "Windows" and Version(self.version) <= "3.1.5":
-            tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        if Version(self.version) <= "3.3.1": # pylint: disable=conan-condition-evals-to-constant
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support for 3.3.0
         tc.generate()
 
     def build(self):
@@ -66,5 +62,4 @@ class DoubleConversionConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "double-conversion")
         self.cpp_info.set_property("cmake_target_name", "double-conversion::double-conversion")
         self.cpp_info.libs = ["double-conversion"]
-        if Version(self.version) >= "3.4.0":
-            self.cpp_info.set_property("cmake_target_aliases", ["double-conversion"])
+        self.cpp_info.set_property("cmake_target_aliases", ["double-conversion"])
