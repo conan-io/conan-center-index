@@ -2,42 +2,15 @@ sources:
   "4.1.0":
     url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/4.1.0.tar.gz"
     sha256: "6a85b84ab75d9e6491606abd5cba4d303e7ecdb94968d5c9f8dd53eebb0fffd5"
-  "4.0.2":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/4.0.2.tar.gz"
-    sha256: "e04def7c032e0f3a3d89593e83462df1cc2a652230a2eb1a68ed2503ffab39ef"
   "3.7.0":
     url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/3.7.0.tar.gz"
     sha256: "bd3bb9f45bb0ac092e4ff9052d565d8d6eed8f8029a1a7de7424b4190b797345"
-  "3.6.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/3.6.0.tar.gz"
-    sha256: "23366522d8e0f0d4f8405bfda435be0d408782b3309a46be522b060b7393ef4f"
-  "3.5.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/3.5.0.tar.gz"
-    sha256: "36d7c935f720d5300ea93941599b4d53884198fb504ad60b9a1b55189199ee4d"
-  "3.4.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/3.4.0.tar.gz"
-    sha256: "84aafa6bd1bf2000232e380f12eea0de01b2d0da88930aa4416aee524a8736aa"
-  "3.3.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/3.3.0.tar.gz"
-    sha256: "57a722592a29ee8fca902983411c78e7f4179c402a8b0b905f96916c9694672a"
-  "3.2.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/3.2.0.tar.gz"
-    sha256: "44c513ef7956976738c2ca37384a220c5383e95fc363ad933541c6f3eef9d294"
-  "3.1.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/3.1.0.tar.gz"
-    sha256: "09280a81f17d87d171062210c904c1acd94b1cdcf4c040eaa16cc9d224d526d4"
-  "3.0.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/3.0.0.tar.gz"
-    sha256: "9266fb85c518a251a5440e490c81615601791f2de2fad8755aa09f13a0c541f9"
   "2.3.0":
     url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/v2.3.0.tar.gz"
     sha256: "d671a3d47c2ef250cadddbae545b1b7bee51f9411836b627b7860e187c868a72"
   "2.2.0":
     url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/2.2.0.tar.gz"
     sha256: "289e8f86c9d468ee62508167c202c34d662915922582af73b9d31691feb2b0af"
-  "2.1.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/2.1.0.tar.gz"
-    sha256: "7f131c608dccd14599e5765e1a919550f08f5c334764f0e20ec181e7e8cbddae"
   "2.0.0":
     url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/2.0.0.tar.gz"
     sha256: "df46ab60153f75ef0a1ab269e6b107ec34fdc467993c3984029d7deb5e0fab6c"
