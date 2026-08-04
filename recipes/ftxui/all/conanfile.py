@@ -56,6 +56,9 @@ class FTXUIConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "ftxui_set_options.cmake"),
                         "set_property(TARGET ${library} PROPERTY POSITION_INDEPENDENT_CODE ON)",
                         "# set_property(TARGET ${library} PROPERTY POSITION_INDEPENDENT_CODE ON)")
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "ftxui_install.cmake"),
+                        "get_property(_ftxui_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)",
+                        "set(_ftxui_isMultiConfig FALSE)")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
