@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 from conan import ConanFile
 from conan.tools.files import get, copy
@@ -55,17 +54,3 @@ class CpythonInterpreterConan(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.bindirs = ["."]
-
-        bindir = Path(self.package_folder) / (self.cpp_info.bindirs[0] if self.cpp_info.bindirs else ".")
-        python_exe = bindir / "python3"
-        if not python_exe.exists():
-            python_exe = bindir / "python"
-        if not python_exe.exists() and self.settings.os == "Windows":
-            python_exe = bindir / "python.exe"
-
-        if python_exe.exists():
-            python_root = python_exe.parent.parent if python_exe.parent.name == "bin" else python_exe.parent
-            python_root_str = str(python_root)
-            self.buildenv_info.define("Python3_ROOT_DIR", python_root_str)
-            # Otherwise an active venv/conda would outrank Python3_ROOT_DIR.
-            self.buildenv_info.define("Python3_FIND_VIRTUALENV", "STANDARD")
