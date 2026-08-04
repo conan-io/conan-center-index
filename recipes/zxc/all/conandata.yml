@@ -1,4 +1,4 @@
 sources:
-  "0.12.0":
-    url: "https://github.com/hellobertrand/zxc/archive/refs/tags/v0.12.0.tar.gz"
-    sha256: "2de4e21a4ecb33a71ba04b052b94d4e4f9882c85851d2142863f8629a9e06623"
+  "0.13.2":
+    url: "https://github.com/hellobertrand/zxc/archive/refs/tags/v0.13.2.tar.gz"
+    sha256: "957acf0e2c0f230b6acc0a4d48c3ee4734117b290a8c8ef1a9cf29686924a0ac"
