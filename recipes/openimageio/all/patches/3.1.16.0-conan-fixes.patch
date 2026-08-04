@@ -1,5 +1,5 @@
 diff --git CMakeLists.txt CMakeLists.txt
-index 81565b47a..8df414e47 100644
+index ec78441d2..de4513baf 100644
 --- CMakeLists.txt
 +++ CMakeLists.txt
 @@ -293,7 +293,7 @@ if (OIIO_BUILD_TOOLS AND NOT BUILD_OIIOUTIL_ONLY)
@@ -12,10 +12,10 @@ index 81565b47a..8df414e47 100644
  endif ()
  
 diff --git src/cmake/externalpackages.cmake src/cmake/externalpackages.cmake
-index f10cfc852..ec8989f81 100644
+index 425404cfd..31bc0ddff 100644
 --- src/cmake/externalpackages.cmake
 +++ src/cmake/externalpackages.cmake
-@@ -238,7 +238,7 @@ checked_find_package (fmt REQUIRED
+@@ -240,7 +240,7 @@ checked_find_package (fmt REQUIRED
                        VERSION_MIN 7.0
                        BUILD_LOCAL missing
                       )
