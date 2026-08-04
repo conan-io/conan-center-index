@@ -6,7 +6,6 @@ from conan.tools.files import copy, get, rm, rmdir, save
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
-import re
 
 required_conan_version = ">=2.0"
 
