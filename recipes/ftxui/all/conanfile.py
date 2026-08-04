@@ -53,10 +53,9 @@ class FTXUIConan(ConanFile):
         tc.generate()
 
     def build(self):
-        if Version(self.version) >= "6.0.0":
-            replace_in_file(self, os.path.join(self.source_folder, "cmake", "ftxui_set_options.cmake"),
-                            "set_property(TARGET ${library} PROPERTY POSITION_INDEPENDENT_CODE ON)",
-                            "# set_property(TARGET ${library} PROPERTY POSITION_INDEPENDENT_CODE ON)")
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "ftxui_set_options.cmake"),
+                        "set_property(TARGET ${library} PROPERTY POSITION_INDEPENDENT_CODE ON)",
+                        "# set_property(TARGET ${library} PROPERTY POSITION_INDEPENDENT_CODE ON)")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -72,8 +71,7 @@ class FTXUIConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ftxui")
         self.cpp_info.set_property("pkg_config_name", "ftxui")
-        if Version(self.version) >= "7.0.0":
-            self.cpp_info.set_property("cmake_target_name", "ftxui::ftxui")
+        self.cpp_info.set_property("cmake_target_name", "ftxui::ftxui")
 
         self.cpp_info.components["ftxui-dom"].set_property("cmake_target_name", "ftxui::dom")
         self.cpp_info.components["ftxui-dom"].libs = ["ftxui-dom"]
@@ -89,5 +87,3 @@ class FTXUIConan(ConanFile):
         self.cpp_info.components["ftxui-component"].set_property("cmake_target_name", "ftxui::component")
         self.cpp_info.components["ftxui-component"].libs = ["ftxui-component"]
         self.cpp_info.components["ftxui-component"].requires = ["ftxui-dom"]
-        if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) < "7.0.0":
-            self.cpp_info.components["ftxui-component"].system_libs.append("pthread")

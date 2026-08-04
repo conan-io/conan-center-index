@@ -2,12 +2,3 @@ sources:
   "7.0.2":
     url: "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v7.0.2.tar.gz"
     sha256: "28da2c3389440af869f8781679b537c4a3d5b4df42aeab54eb1564d1b61af864"
-  "6.1.9":
-    url: "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v6.1.9.tar.gz"
-    sha256: "45819c1e54914783d4a1ca5633885035d74146778a1f74e1213cdb7b76340e71"
-  "6.0.2":
-    url: "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v6.0.2.tar.gz"
-    sha256: "ace3477a8dd7cdb911dbc75e7b43cdcc9cf1d4a3cc3fb41168ecc31c06626cb9"
-  "5.0.0":
-    url: "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v5.0.0.tar.gz"
-    sha256: "a2991cb222c944aee14397965d9f6b050245da849d8c5da7c72d112de2786b5b"
