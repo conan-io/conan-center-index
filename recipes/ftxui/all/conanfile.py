@@ -37,6 +37,9 @@ class FTXUIConan(ConanFile):
         if is_msvc(self) and self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("shared with static runtime not supported")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.20]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -55,9 +58,6 @@ class FTXUIConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "ftxui_set_options.cmake"),
                         "set_property(TARGET ${library} PROPERTY POSITION_INDEPENDENT_CODE ON)",
                         "# set_property(TARGET ${library} PROPERTY POSITION_INDEPENDENT_CODE ON)")
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "ftxui_install.cmake"),
-                        "get_property(_ftxui_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)",
-                        "set(_ftxui_isMultiConfig FALSE)")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
