@@ -37,9 +37,6 @@ class FTXUIConan(ConanFile):
         if is_msvc(self) and self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("shared with static runtime not supported")
 
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.20]")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
