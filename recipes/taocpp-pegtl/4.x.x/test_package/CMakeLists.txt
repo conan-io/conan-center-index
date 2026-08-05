@@ -4,4 +4,4 @@ project(test_package LANGUAGES CXX)
 find_package(pegtl REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} taocpp::pegtl)
+target_link_libraries(${PROJECT_NAME} PRIVATE taocpp::pegtl)
