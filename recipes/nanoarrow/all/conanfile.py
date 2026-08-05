@@ -65,11 +65,11 @@ class NanoarrowConan(ConanFile):
             tc.variables["NANOARROW_IPC_WITH_ZSTD"] = self.options.with_zstd
             if Version(self.version) >= "0.9.0":
                 tc.variables["NANOARROW_IPC_WITH_LZ4"] = self.options.with_lz4
-        
+
         tc.variables["NANOARROW_BUILD_TESTS"] = False
         tc.variables["NANOARROW_BUILD_APPS"] = False
         tc.variables["NANOARROW_BUNDLE"] = False
-        tc.variables["NANOARROW_INSTALL_SHARED"] = self.options.shared 
+        tc.variables["NANOARROW_INSTALL_SHARED"] = self.options.shared
         tc.variables["NANOARROW_DEBUG_EXTRA_WARNINGS"] = False
         tc.generate()
 
@@ -85,7 +85,7 @@ class NanoarrowConan(ConanFile):
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        
+
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
@@ -95,7 +95,7 @@ class NanoarrowConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "nanoarrow")
-        
+
         suffix = "_shared" if self.options.shared else "_static"
 
         self.cpp_info.components["nanoarrow_core"].libs = [f"nanoarrow{suffix}"]
@@ -104,7 +104,7 @@ class NanoarrowConan(ConanFile):
             self.cpp_info.components["nanoarrow_core"].defines.append("NANOARROW_EXPORT_DLL")
         if self.settings.build_type == "Debug":
             self.cpp_info.components["nanoarrow_core"].defines.append("NANOARROW_DEBUG")
-        
+
         if self.options.with_ipc:
             self.cpp_info.components["nanoarrow_ipc"].libs = [f"nanoarrow_ipc{suffix}"]
             self.cpp_info.components["nanoarrow_ipc"].requires = ["nanoarrow_core"]
