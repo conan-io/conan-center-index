@@ -1,0 +1,25 @@
+diff --git a/src/server/ua_services_discovery.c b/src/server/ua_services_discovery.c
+index 73ed838..d32c439 100644
+--- a/src/server/ua_services_discovery.c
++++ b/src/server/ua_services_discovery.c
+@@ -269,18 +269,14 @@ Service_FindServersOnNetwork(UA_Server *server, UA_Session *session,
+         response->responseHeader.serviceResult = UA_STATUSCODE_BADINTERNALERROR;
+         return true;
+     }
+-    for(size_t i = 0; i < recordCount; i++) {
+-        if(filteredCount >= recordCount)
+-            break;
++    for(; current && filteredCount < recordCount;
++        current = UA_DiscoveryManager_getNextServerOnNetworkRecord(dm, current)) {
+         if(current->recordId < request->startingRecordId)
+             continue;
+         if(!entryMatchesCapabilityFilter(request->serverCapabilityFilterSize,
+                                request->serverCapabilityFilter, current))
+             continue;
+         filtered[filteredCount++] = current;
+-        current = UA_DiscoveryManager_getNextServerOnNetworkRecord(dm, current);
+-        if(!current)
+-            break;
+     }
+ 
+     if(filteredCount == 0)
