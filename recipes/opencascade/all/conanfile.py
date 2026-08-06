@@ -168,15 +168,6 @@ class OpenCascadeConan(ConanFile):
         # does not always link to CMake imported targets
         sorted_deps = [dep for dep in reversed(self.dependencies.host.topological_sort.values())]
         deps_defines = " ".join([f"-D{d}" for dep in sorted_deps for d in dep.cpp_info.aggregated_components().defines])
-        replace_in_file(
-            self,
-            cmakelists,
-            "PROJECT (OCCT)",
-            textwrap.dedent(f"""\
-                PROJECT (OCCT)
-                add_definitions({deps_defines})
-            """),
-        )
 
         # Avoid to add system include/libs directories and inject directories
         # from conan dependencies instead
