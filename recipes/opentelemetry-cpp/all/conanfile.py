@@ -70,7 +70,7 @@ class OpenTelemetryCppConan(ConanFile):
             # Opentelemetry-cpp on Windows only supports static libraries,
             # upstream does not support shared builds on Windows
             self.package_type = "static-library"
-            del self.options.shared
+            self.options.shared = False
 
     def configure(self):
         if self.options.get_safe("shared"):
@@ -126,6 +126,8 @@ class OpenTelemetryCppConan(ConanFile):
         if self.options.with_otlp_grpc:
             if not self.dependencies["grpc"].options.cpp_plugin:
                 raise ConanInvalidConfiguration(f"{self.ref} requires grpc with cpp_plugin=True")
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} does not support shared builds on Windows")
 
     def build_requirements(self):
         if self._needs_proto:
