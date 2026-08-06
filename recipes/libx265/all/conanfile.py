@@ -39,6 +39,10 @@ class Libx265Conan(ConanFile):
         "with_numa": False,
     }
 
+    @property
+    def _is_msvc_like(self):
+        return is_msvc(self) or (self.settings.os == "Windows" and self.settings.compiler == "clang")
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -52,7 +56,7 @@ class Libx265Conan(ConanFile):
         # FIXME: Disable assembly by default if host is Android for the moment. It fails to build
         if (self.settings.compiler == "apple-clang" and "arm" in self.settings.arch) or self.settings.os == "Android":
             self.options.assembly = False
-        if is_msvc(self) and self.settings.arch == "armv8":
+        if self._is_msvc_like and self.settings.arch == "armv8":
             # Build errors, possibly unsupported
             self.options.assembly = False
 
@@ -110,7 +114,7 @@ class Libx265Conan(ConanFile):
         tc.variables["MAIN12"] = self.options.bit_depth == 12
         tc.variables["ENABLE_HDR10_PLUS"] = self.options.HDR10
         tc.variables["ENABLE_SVT_HEVC"] = self.options.SVG_HEVC_encoder
-        if is_msvc(self):
+        if self._is_msvc_like:
             tc.variables["STATIC_LINK_CRT"] = is_msvc_static_runtime(self)
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
         if self.settings.os == "Linux":
@@ -148,13 +152,13 @@ class Libx265Conan(ConanFile):
         cmake.install()
 
         if self.options.shared:
-            if is_msvc(self):
+            if self._is_msvc_like:
                 static_lib = "x265-static.lib"
             else:
                 static_lib = "libx265.a"
             os.unlink(os.path.join(self.package_folder, "lib", static_lib))
 
-        if is_msvc(self):
+        if self._is_msvc_like:
             name = "libx265.lib" if self.options.shared else "x265-static.lib"
             rename(self, os.path.join(self.package_folder, "lib", name),
                          os.path.join(self.package_folder, "lib", "x265.lib"))
