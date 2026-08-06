@@ -1,0 +1,9 @@
+sources:
+  "1.4.0":
+    url: "https://github.com/memgraph/mgconsole/archive/refs/tags/v1.4.0.tar.gz"
+    sha256: "a38dddf8c110d70e73b26705ec26eeed8a960b097ec81b691104d8b6b6eaac99"
+patches:
+  "1.4.0":
+    - patch_file: "patches/1.4.0.patch"
+      patch_description: "Fixes for mgconsole, version 1.4.0"
+      patch_type: "conan"
