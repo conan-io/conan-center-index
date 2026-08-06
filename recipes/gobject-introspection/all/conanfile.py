@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -11,9 +11,10 @@ from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.env import Environment
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.scm import Version
+from conan.tools.system import PyEnv
 from conan import conan_version
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
+required_conan_version = ">=2.26"
 
 
 class GobjectIntrospectionConan(ConanFile):
@@ -56,7 +57,11 @@ class GobjectIntrospectionConan(ConanFile):
 
     def requirements(self):
         # https://gitlab.gnome.org/GNOME/gobject-introspection/-/blob/1.76.1/meson.build?ref_type=tags#L127-131
-        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
+        if self.version < Version("1.82.0"):
+            self.requires("glib/[>=2.78.3 <3]", transitive_headers=True, transitive_libs=True)
+        else:
+            #https://gitlab.gnome.org/GNOME/gobject-introspection/-/commit/fc4b438253bf869f56153f80dc32f58bcf9e3b81
+            self.requires("glib/[>=2.82 <3]", transitive_headers=True, transitive_libs=True)
         # ffi.h is exposed by public header gobject-introspection-1.0/girffi.h
         self.requires("libffi/3.4.4", transitive_headers=True)
 
@@ -95,15 +100,23 @@ class GobjectIntrospectionConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
+
+        pyenv = PyEnv(self)
+        if(self.version < Version("1.81.2")):
+            # https://gitlab.gnome.org/GNOME/gobject-introspection/-/commit/a2139dba59eac283a7f543ed737f038deebddc19
+            pyenv.install(["setuptools<74.0.0"])
+        else:
+            pyenv.install(["setuptools~=82.0.0"])
+        pyenv.generate()
+
         tc = MesonToolchain(self)
         if cross_building(self):
             tc.project_options["gi_cross_use_prebuilt_gi"] = "false"
         tc.project_options["build_introspection_data"] = self.options.build_introspection_data
         tc.project_options["datadir"] = "res"
+        tc.project_options["python"] = pyenv.env_exe
         tc.generate()
+
         deps = PkgConfigDeps(self)
         deps.generate()
         # INFO: g-ir-scanner uses PKG_CONFIG_PATH directly instead of pkg-config Meson module
