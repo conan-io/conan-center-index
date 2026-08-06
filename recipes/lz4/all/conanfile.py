@@ -20,10 +20,14 @@ class LZ4Conan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_cli": [True, False],
+        "with_legacy_lz4c": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_cli": True,
+        "with_legacy_lz4c": False
     }
 
     def export_sources(self):
@@ -39,6 +43,9 @@ class LZ4Conan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
+        if Version(self.version) >= "1.10.0":
+            self.options.rm_safe("with_legacy_lz4c")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -49,9 +56,8 @@ class LZ4Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["LZ4_BUILD_CLI"] = False
-        if Version(self.version) < "1.10.0":
-            tc.variables["LZ4_BUILD_LEGACY_LZ4C"] = False
+        tc.variables["LZ4_BUILD_CLI"] = self.options.with_cli
+        tc.variables["LZ4_BUILD_LEGACY_LZ4C"] = self.options.get_safe("with_legacy_lz4c", False)
         tc.variables["LZ4_BUNDLED_MODE"] = False
         tc.variables["LZ4_POSITION_INDEPENDENT_LIB"] = self.options.get_safe("fPIC", True)
         # Generate a relocatable shared lib on Macos
