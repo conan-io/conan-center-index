@@ -1,0 +1,12 @@
+sources:
+  "5.1.5":
+    url: "https://github.com/rdbo/libmem/archive/refs/tags/5.1.5.tar.gz"
+    sha256: "58a1db4f4b01e452c91c307d4486d5e4e39887ee3b3b2ad930b6718d8daeb509"
+patches:
+  "5.1.5":
+    - patch_file: "patches/5.1.5-001-fix-cmake.patch"
+      patch_description: "Debundle dependencies"
+      patch_type: "portability"
+    - patch_file: "patches/5.1.5-002-add-gettid.patch"
+      patch_description: "Add gettid() fallback implementation"
+      patch_type: "portability"
