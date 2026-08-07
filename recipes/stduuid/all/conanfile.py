@@ -21,6 +21,15 @@ class StduuidConan(ConanFile):
         # True: Use std::span
         # False: Use gsl::span
         "with_cxx20_span": [True, False],
+        "with_system_generator": [True, False],
+        "with_time_generator": [True, False],
+        "hash_string_based": [True, False]
+    }
+    default_options = {
+        "with_cxx20_span": True,
+        "with_system_generator": False,
+        "with_time_generator": False,
+        "hash_string_based": False,
     }
 
     @property
@@ -36,7 +45,7 @@ class StduuidConan(ConanFile):
             "msvc": "191",
             "Visual Studio": "15",
         }
-    
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -88,3 +97,9 @@ class StduuidConan(ConanFile):
         self.cpp_info.libdirs = []
         if self.options.get_safe("with_cxx20_span"):
             self.cpp_info.defines = ["LIBUUID_CPP20_OR_GREATER"]
+        if self.options.get_safe("with_system_generator"):
+            self.cpp_info.system_libs = ["UUID_SYSTEM_GENERATOR"]
+        if self.options.get_safe("with_time_generator"):
+            self.cpp_info.system_libs = ["UUID_TIME_GENERATOR"]
+        if self.options.get_safe("hash_string_based"):
+            self.cpp_info.defines = ["UUID_HASH_STRING_BASED"]
