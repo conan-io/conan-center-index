@@ -44,7 +44,7 @@ class AsioGrpcConan(ConanFile):
                 self.requires("boost/[>=1.74 <1.90]", transitive_headers=True)
 
             if self.options.backend == "asio":
-                self.requires("asio/[>=1.17 <1.38]", transitive_headers=True)
+                self.requires("asio/[>=1.17 <1.37]", transitive_headers=True)
 
         if self.options.backend == "unifex":
             self.requires("libunifex/0.4.0", transitive_headers=True, transitive_libs=True)
