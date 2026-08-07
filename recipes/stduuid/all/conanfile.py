@@ -95,11 +95,12 @@ class StduuidConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.defines = []
         if self.options.get_safe("with_cxx20_span"):
-            self.cpp_info.defines = ["LIBUUID_CPP20_OR_GREATER"]
+            self.cpp_info.defines.append("LIBUUID_CPP20_OR_GREATER")
         if self.options.get_safe("with_system_generator"):
-            self.cpp_info.system_libs = ["UUID_SYSTEM_GENERATOR"]
+            self.cpp_info.defines.append("UUID_SYSTEM_GENERATOR")
         if self.options.get_safe("with_time_generator"):
-            self.cpp_info.system_libs = ["UUID_TIME_GENERATOR"]
+            self.cpp_info.defines.append("UUID_TIME_GENERATOR")
         if self.options.get_safe("hash_string_based"):
-            self.cpp_info.defines = ["UUID_HASH_STRING_BASED"]
+            self.cpp_info.defines.append("UUID_HASH_STRING_BASED")
