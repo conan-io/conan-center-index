@@ -46,8 +46,6 @@ class kubernetesRecipe(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
-        tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
-        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.generate()
 
     def build(self):
