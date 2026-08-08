@@ -1,0 +1,4 @@
+sources:
+  "0.2.5":
+    url: "https://gitlab.freedesktop.org/libdecor/libdecor/-/archive/0.2.5/libdecor-0.2.5.tar.gz"
+    sha256: "39c109a9a7eae943ba34d18a282c447d5729f9c486c8bc05ea305e4acd341522"
