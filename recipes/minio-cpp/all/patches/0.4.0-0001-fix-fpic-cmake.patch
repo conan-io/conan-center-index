@@ -2,9 +2,9 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
 index c2610db..52bbffa 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -124,7 +124,6 @@ target_include_directories(miniocpp PUBLIC
- )
- target_link_libraries(miniocpp PUBLIC ${MINIO_CPP_LIBS})
+@@ -178,7 +178,6 @@
+   target_compile_definitions(miniocpp PUBLIC MINIO_CPP_RDMA)
+ endif()
  set_target_properties(miniocpp PROPERTIES VERSION "${MINIO_CPP_VERSION_STRING}")
 -set_target_properties(miniocpp PROPERTIES POSITION_INDEPENDENT_CODE ON)
  
