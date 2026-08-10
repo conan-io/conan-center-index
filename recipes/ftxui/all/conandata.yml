@@ -1,4 +1,7 @@
 sources:
+  "7.0.3":
+    url: "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v7.0.3.tar.gz"
+    sha256: "e7c62ffe19009759821b4f0f8df7f2a6fb83784c3a9f1477d81f56d3ee723c88"
   "7.0.2":
     url: "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v7.0.2.tar.gz"
     sha256: "28da2c3389440af869f8781679b537c4a3d5b4df42aeab54eb1564d1b61af864"
