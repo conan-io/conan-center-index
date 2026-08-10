@@ -312,10 +312,6 @@ class LibcurlConan(ConanFile):
         return "yes" if value else "no"
 
     def _generate_with_autotools(self):
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
-
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
             f"--with-libidn2={self._yes_no(self.options.with_libidn)}",
