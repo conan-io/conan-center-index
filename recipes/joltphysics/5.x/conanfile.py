@@ -61,6 +61,11 @@ class JoltPhysicsConan(ConanFile):
         tc.cache_variables["OVERRIDE_CXX_FLAGS"] = False
         tc.cache_variables["DEBUG_RENDERER_IN_DEBUG_AND_RELEASE"] = False
         tc.cache_variables["PROFILER_IN_DEBUG_AND_RELEASE"] = False
+        # Disable GPU compute backends introduced in 5.6.0 (require optional SDKs)
+        tc.cache_variables["JPH_USE_DX12"] = False
+        tc.cache_variables["JPH_USE_VK"] = False
+        tc.cache_variables["JPH_USE_MTL"] = False
+        tc.cache_variables["JPH_USE_CPU_COMPUTE"] = False
         if is_msvc(self):
             tc.cache_variables["USE_STATIC_MSVC_RUNTIME_LIBRARY"] = is_msvc_static_runtime(self)
         tc.generate()
