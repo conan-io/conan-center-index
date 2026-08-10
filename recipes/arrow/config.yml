@@ -1,4 +1,6 @@
 versions:
+  "25.0.1":
+    folder: all
   "25.0.0":
     folder: all
   # C++20
