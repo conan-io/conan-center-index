@@ -84,7 +84,7 @@ index 40b64ed..1cf09b2 100644
  	//TelnetOptions
 
 From 17f46eb17f3ca138874e262c2dccbda658e34e14 Mon Sep 17 00:00:00 2001
-From: Bruno de Lacheisserie <bruno.de.lacheisserie@gmail.com>
+From: Bruno de Lacheisserie
 Date: Tue, 10 Sep 2024 22:02:24 +0200
 Subject: [PATCH 2/2] remove deprecated `CURLOPT_CLOSEPOLICY`
 
