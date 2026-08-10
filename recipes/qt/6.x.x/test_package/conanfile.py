@@ -3,7 +3,6 @@ import os
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualRunEnv
 from conan.tools.files import copy, save
 
 
@@ -34,10 +33,6 @@ Prefix = {path}""")
             for tool in ["moc", "rcc", "uic"]:
                 tc.cache_variables[f"CMAKE_AUTO{tool.upper()}_EXECUTABLE"] = os.path.join(qt_tools_rootdir, f"{tool}.exe" if self.settings_build.os == "Windows" else tool)
         tc.generate()
-
-        VirtualRunEnv(self).generate()
-        if can_run(self):
-            VirtualRunEnv(self).generate(scope="build")
 
     def build(self):
         cmake = CMake(self)
