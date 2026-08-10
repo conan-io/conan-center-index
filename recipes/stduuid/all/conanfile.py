@@ -22,14 +22,12 @@ class StduuidConan(ConanFile):
         # False: Use gsl::span
         "with_cxx20_span": [True, False],
         "with_system_generator": [True, False],
-        "with_time_generator": [True, False],
-        "hash_string_based": [True, False]
+        "with_time_generator": [True, False]
     }
     default_options = {
         "with_cxx20_span": True,
         "with_system_generator": False,
-        "with_time_generator": False,
-        "hash_string_based": False,
+        "with_time_generator": False
     }
 
     @property
@@ -102,5 +100,4 @@ class StduuidConan(ConanFile):
             self.cpp_info.defines.append("UUID_SYSTEM_GENERATOR")
         if self.options.get_safe("with_time_generator"):
             self.cpp_info.defines.append("UUID_TIME_GENERATOR")
-        if self.options.get_safe("hash_string_based"):
-            self.cpp_info.defines.append("UUID_HASH_STRING_BASED")
+
