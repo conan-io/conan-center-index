@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.files import copy, get, rmdir
 import os
 
 required_conan_version = ">=2.0.9"
@@ -23,7 +23,6 @@ class MailioConan(ConanFile):
         "fPIC": True,
         "shared": False,
     }
-    short_paths = True
     implements = ["auto_shared_fpic"]
 
     def layout(self):
@@ -37,7 +36,7 @@ class MailioConan(ConanFile):
         check_min_cppstd(self, 17)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16.3]")
+        self.tool_requires("cmake/[>=3.30]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
