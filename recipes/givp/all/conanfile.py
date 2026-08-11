@@ -9,12 +9,12 @@ from typing import TYPE_CHECKING, Any, ClassVar
 
 if TYPE_CHECKING:
     # Conan modules are optional in generic Python type-check environments.
-    from conan import ConanFile as ConanFileBase  # type: ignore[import-not-found]
-    from conan.tools.cmake import CMake as CMakeHelper  # type: ignore[import-not-found]
-    from conan.tools.cmake import (  # type: ignore[import-not-found]
+    from conan import ConanFile as ConanFileBase  # type: ignore[import-untyped]
+    from conan.tools.cmake import CMake as CMakeHelper  # type: ignore[import-untyped]
+    from conan.tools.cmake import (  # type: ignore[import-untyped]
         cmake_layout as cmake_layout_helper,
     )
-    from conan.tools.files import copy as copy_helper  # type: ignore[import-not-found]
+    from conan.tools.files import copy as copy_helper  # type: ignore[import-untyped]
 else:
     import importlib
 
@@ -81,41 +81,41 @@ class GivpConan(ConanFileBase):
 
     def export_sources(self) -> None:
         """Export the C++ sources needed by the package from the parent cpp tree."""
-        cpp_root = os.path.abspath(os.path.join(self.recipe_folder, ".."))
+        cpp_root = os.path.abspath(os.path.join(str(self.recipe_folder), ".."))
         repo_root = os.path.abspath(os.path.join(cpp_root, ".."))
         copy_helper(
             self,
             "*.hpp",
             src=os.path.join(cpp_root, "include"),
-            dst=os.path.join(self.export_sources_folder, "include"),
+            dst=os.path.join(str(self.export_sources_folder), "include"),
             keep_path=True,
         )
         copy_helper(
             self,
             "*.h",
             src=os.path.join(cpp_root, "include"),
-            dst=os.path.join(self.export_sources_folder, "include"),
+            dst=os.path.join(str(self.export_sources_folder), "include"),
             keep_path=True,
         )
         copy_helper(
             self,
             "*.cmake.in",
             src=os.path.join(cpp_root, "cmake"),
-            dst=os.path.join(self.export_sources_folder, "cmake"),
+            dst=os.path.join(str(self.export_sources_folder), "cmake"),
             keep_path=True,
         )
         copy_helper(
             self,
             "CMakeLists.txt",
             src=cpp_root,
-            dst=self.export_sources_folder,
+            dst=str(self.export_sources_folder),
             keep_path=False,
         )
         copy_helper(
             self,
             "LICENSE",
             src=repo_root,
-            dst=self.export_sources_folder,
+            dst=str(self.export_sources_folder),
             keep_path=False,
         )
 

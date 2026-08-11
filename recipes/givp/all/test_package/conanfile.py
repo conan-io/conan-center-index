@@ -7,8 +7,8 @@
 
 import os
 
-from conan import ConanFile  # type: ignore[import-not-found]
-from conan.tools.cmake import CMake, cmake_layout  # type: ignore[import-not-found]
+from conan import ConanFile  # type: ignore[import-untyped]
+from conan.tools.cmake import CMake, cmake_layout  # type: ignore[import-untyped]
 
 
 class GivpTestConan(ConanFile):
@@ -23,7 +23,7 @@ class GivpTestConan(ConanFile):
 
     def requirements(self) -> None:
         """Require the library being tested."""
-        self.requires(self.tested_reference_str)
+        self.requires(self.tested_reference_str)  # type: ignore[reportOptionalCall]
 
     def build(self) -> None:
         """Build the test package."""
@@ -33,4 +33,4 @@ class GivpTestConan(ConanFile):
 
     def test(self) -> None:
         """Run the test package."""
-        self.run(os.path.join(self.cpp.build.bindir, "example"))
+        self.run(os.path.join(self.cpp.build.bindir, "example"))  # type: ignore[reportOptionalMemberAccess]
