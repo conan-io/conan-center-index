@@ -19,9 +19,9 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str, run=can_run(self))
 
     def build_requirements(self):
+        self.tool_requires("cmake/[>=3.27]") # needed for `CMAKE_AUTO{tool}_EXECUTABLE` variables
         if not can_run(self):
             self.tool_requires(self.tested_reference_str)
-            self.tool_requires("cmake/[>=3.27 <4]")
 
     def generate(self):
         path = self.dependencies["qt"].package_folder.replace("\\", "/")
