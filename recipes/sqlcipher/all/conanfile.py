@@ -122,7 +122,11 @@ class SqlcipherConan(ConanFile):
         if self.settings.build_type == "Debug":
             env.define("DEBUG", "2")
         env.define("FOR_WIN10", "1")
-        env.define("PLATFORM", {"x86": "x86", "x86_64": "x64"}[str(self.settings.arch)])
+        env.define("PLATFORM", {
+            "x86": "x86",
+            "x86_64": "x64",
+            "armv8": "arm64"
+            }[str(self.settings.arch)])
         tc.generate(env)
 
         tc = NMakeDeps(self)
