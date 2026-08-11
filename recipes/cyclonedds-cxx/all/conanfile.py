@@ -45,6 +45,8 @@ class CycloneDDSCXXConan(ConanFile):
 
     @property
     def _pre_v11(self):
+        # v11+ restructured CMake variables, moved shm handling into the cyclonedds dependency,
+        # and uses different get_target_property names in CMakeLists
         return Version(self.version) < "11"
 
     def _has_idlc(self, info=False):
@@ -78,7 +80,7 @@ class CycloneDDSCXXConan(ConanFile):
         #      <dds/topic/detail/Topic.hpp>:34
         self.requires("cyclonedds/{}".format(self.version), transitive_headers=True)
 
-        if self._pre_v11 and self.options.get_safe("with_shm"):
+        if self.options.get_safe("with_shm", False):
             self.requires("iceoryx/2.0.5")
 
     def validate(self):
@@ -90,7 +92,8 @@ class CycloneDDSCXXConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self._pre_v11 and self.options.get_safe("with_shm") != self.dependencies['cyclonedds'].options.with_shm:
+        # shm option is only relevant pre-v11; v11+ shm is handled by the cyclonedds dependency
+        if self._pre_v11 and self.options.get_safe("with_shm", False) != self.dependencies['cyclonedds'].options.with_shm:
             raise ConanInvalidConfiguration(
                 "cyclonedds-cxx and cyclonedds must be built with the same 'with_shm' option")
 
@@ -108,10 +111,10 @@ class CycloneDDSCXXConan(ConanFile):
         tc.variables["BUILD_EXAMPLES"] = False
         # variables which effects build
         tc.variables["ENABLE_LEGACY"] = False
+        tc.variables["ENABLE_COVERAGE"] = False
         if self._pre_v11:
             # variables not present in the 11.0.0 CMakeLists
             tc.variables["BUILD_DOCS"] = False
-            tc.variables["ENABLE_COVERAGE"] = False
             tc.variables["ENABLE_SHM"] = self.options.get_safe("with_shm")
             tc.variables["ENABLE_TYPE_DISCOVERY"] = self.dependencies["cyclonedds"].options.enable_discovery
         else:
@@ -121,12 +124,14 @@ class CycloneDDSCXXConan(ConanFile):
         tc.variables["ENABLE_TOPIC_DISCOVERY"] = self.dependencies["cyclonedds"].options.enable_discovery
         tc.generate()
         deps = CMakeDeps(self)
+        # iceoryx uses a different cmake target name pre-v11; v11+ shm is internal to cyclonedds
         if self._pre_v11:
             deps.set_property("iceoryx", "cmake_file_name", "iceoryx_binding_c")
         deps.generate()
 
     def _patch_sources(self):
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        # upstream CMakeLists uses different get_target_property property names pre-v11 vs v11+
         if self._pre_v11:
             replace_in_file(self, cmakelists,
                             "get_target_property(cyclonedds_has_shm CycloneDDS::ddsc SHM_SUPPORT_IS_AVAILABLE)",
@@ -142,6 +147,9 @@ class CycloneDDSCXXConan(ConanFile):
             replace_in_file(self, cmakelists,
                             "get_target_property(cyclonedds_has_qos_provider CycloneDDS::ddsc QOS_PROVIDER_IS_AVAILABLE)",
                             "set(cyclonedds_has_qos_provider ON)")
+            replace_in_file(self, cmakelists,
+                            "set(CMAKE_CXX_STANDARD 11)",
+                            "")
         replace_in_file(self, cmakelists,
                         "get_target_property(cyclonedds_has_topic_discovery CycloneDDS::ddsc TOPIC_DISCOVERY_IS_AVAILABLE)",
                         "set(cyclonedds_has_topic_discovery {})".format(self.dependencies["cyclonedds"].options.enable_discovery))
@@ -187,7 +195,7 @@ class CycloneDDSCXXConan(ConanFile):
         self.cpp_info.components["ddscxx"].set_property("cmake_target_name", "CycloneDDS-CXX::ddscxx")
         self.cpp_info.components["ddscxx"].set_property("pkg_config_name", "CycloneDDS-CXX")
         self.cpp_info.components["ddscxx"].requires = ["cyclonedds::CycloneDDS"]
-        if self._pre_v11 and self.options.get_safe("with_shm"):
+        if self.options.get_safe("with_shm", False):
             self.cpp_info.components["ddscxx"].requires.append("iceoryx::iceoryx")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["ddscxx"].system_libs = ["m"]
