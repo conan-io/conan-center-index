@@ -1,9 +1,10 @@
 import os
+import textwrap
 
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, save
+from conan.tools.files import chmod, copy, save
 
 
 class TestPackageConan(ConanFile):
@@ -32,6 +33,34 @@ Prefix = {path}""")
             qt_tools_rootdir = self.conf.get("user.qt:tools_directory", None)
             for tool in ["moc", "rcc", "uic"]:
                 tc.cache_variables[f"CMAKE_AUTO{tool.upper()}_EXECUTABLE"] = os.path.join(qt_tools_rootdir, f"{tool}.exe" if self.settings_build.os == "Windows" else tool)
+        else:
+            bindir = "bin" if self.settings.os == "Windows" else "libexec"
+            qt_tools_rootdir = os.path.join(self.dependencies["qt"].package_folder, bindir)
+            is_windows = self.settings.os == "Windows"
+            if is_windows:
+                exe_ext, wrapper_ext, conanrun_name = ".exe", ".bat", "conanrun.bat"
+                template = textwrap.dedent("""\
+                    @echo off
+                    call "{conanrun_script}"
+                    "{real_tool}" %*
+                    exit /b %ERRORLEVEL%
+                    """)
+            else:
+                exe_ext, wrapper_ext, conanrun_name = "", "", "conanrun.sh"
+                template = textwrap.dedent("""\
+                    #!/bin/bash
+                    source "{conanrun_script}"
+                    exec "{real_tool}" "$@"
+                    """)
+
+            for tool in ["moc", "rcc", "uic"]:
+                real_tool = os.path.join(qt_tools_rootdir, f"{tool}{exe_ext}")
+                wrapper_path = os.path.join(self.generators_folder, f"{tool}{wrapper_ext}")
+                conanrun_script = os.path.join(self.generators_folder, conanrun_name)
+                save(self, wrapper_path, template.format(conanrun_script=conanrun_script, real_tool=real_tool))
+                if not is_windows:
+                    chmod(self, wrapper_path, execute=True)
+                tc.cache_variables[f"CMAKE_AUTO{tool.upper()}_EXECUTABLE"] = wrapper_path
         tc.generate()
 
     def build(self):
