@@ -1,5 +1,5 @@
 sources:
-  "4.4.0":
+  "4.4.2":
     Linux:
       armv8:
         url: "https://cmake.org/files/v4.4/cmake-4.4.2-linux-aarch64.tar.gz"
