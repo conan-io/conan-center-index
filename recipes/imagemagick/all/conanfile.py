@@ -131,7 +131,7 @@ class ImageMagicConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(
-                "Windows builds of ImageMagick require MFC which cannot currently be sourced from CCI."
+                "Windows builds of ImageMagick do not currently support MSVC."
             )
 
     def source(self):
