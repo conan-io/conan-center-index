@@ -80,3 +80,6 @@ class TgbotConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "TgBot::TgBot")
         if self.options.shared:
             self.cpp_info.defines.append("TGBOT_DLL")
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("ws2_32")
+            self.cpp_info.defines.extend(["_WIN32_WINNT=0x0601", "WIN32_LEAN_AND_MEAN", "NOMINMAX"])
