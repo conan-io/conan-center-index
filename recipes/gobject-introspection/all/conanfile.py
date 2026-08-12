@@ -84,18 +84,16 @@ class GobjectIntrospectionConan(ConanFile):
         else:
             self.tool_requires("flex/2.6.4")
             self.tool_requires("bison/3.8.2")
-        self.tool_requires("glib/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
-        pyenv = PyEnv(self)
+        pyenv = PyEnv(self, py_version="3.12")
         pyenv.install(["setuptools~=82.0.0"])
         pyenv.generate()
+        env = VirtualBuildEnv(self)
+        env.generate()
 
         tc = MesonToolchain(self)
         if cross_building(self):
@@ -103,6 +101,8 @@ class GobjectIntrospectionConan(ConanFile):
         tc.project_options["build_introspection_data"] = self.options.build_introspection_data
         tc.project_options["datadir"] = "res"
         tc.project_options["python"] = pyenv.env_exe
+        if self.settings.os == "Linux":
+            tc.extra_ldflags.append("-Wl,--disable-new-dtags")
         tc.generate()
 
         deps = PkgConfigDeps(self)
@@ -110,6 +110,16 @@ class GobjectIntrospectionConan(ConanFile):
         # INFO: g-ir-scanner uses PKG_CONFIG_PATH directly instead of pkg-config Meson module
         env = Environment()
         env.define_path("PKG_CONFIG_PATH", self.generators_folder)
+        if self.settings.os == "Linux" and self.options.get_safe("build_introspection_data"):
+            launcher_path = os.path.join(self.generators_folder, "gi-cross-launcher.sh")
+            with open(launcher_path, "w") as f:
+                f.write(
+                    "#!/bin/sh\n"
+                    '. "$(dirname "$0")/conanrun.sh" >/dev/null\n'
+                    'exec "$@"\n'
+                )
+            os.chmod(launcher_path, 0o755)
+            env.define_path("GI_CROSS_LAUNCHER", launcher_path)
         envvars = env.vars(self)
         envvars.save_script("pkg_config_env")
 
