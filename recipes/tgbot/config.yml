@@ -1,3 +1,7 @@
 versions:
+  "1.10":
+    folder: pre_1.12
+  "1.11":
+    folder: pre_1.12
   "1.12.2":
     folder: all
