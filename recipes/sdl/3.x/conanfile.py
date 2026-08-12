@@ -130,6 +130,10 @@ class SDLConan(ConanFile):
         if self.settings.os != "Windows":
             del self.options.directx
 
+        if self.settings.os == "Emscripten":
+            self.options.opengl = False
+            del self.options.vulkan
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -204,7 +208,7 @@ class SDLConan(ConanFile):
     @property
     def _supports_opengles(self):
         return (self.options.get_safe("opengles")
-                and self.settings.os in ("Android", "iOS", "visionOS", "tvOS", "watchOS"))
+                and self.settings.os in ("Android", "Emscripten", "iOS", "visionOS", "tvOS", "watchOS"))
 
     @property
     def _supports_dbus(self):
