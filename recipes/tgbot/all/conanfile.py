@@ -6,7 +6,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 
-required_conan_version = ">=2"
+required_conan_version = ">=2.28"
 
 
 class TgbotConan(ConanFile):
@@ -37,9 +37,9 @@ class TgbotConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("boost/[>=1.83 <2]", options={"header_only": True}, transitive_headers=True)
+        self.requires("boost/1.91.0", options={"header_only": True}, transitive_headers=True)
         self.requires("libcurl/[>=7.78 <9]", transitive_headers=True, transitive_libs=True)
-        self.requires("nlohmann_json/[>=3.11 <4]", transitive_headers=True)
+        self.requires("nlohmann_json/3.12.0", transitive_headers=True)
 
     def validate(self):
         check_min_cppstd(self, 20)
@@ -76,7 +76,7 @@ class TgbotConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["TgBot"]
-        self.cpp_info.set_property("cmake_file_name", "tgbot")
-        self.cpp_info.set_property("cmake_target_name", "tgbot::tgbot")
+        self.cpp_info.set_property("cmake_file_name", "TgBot")
+        self.cpp_info.set_property("cmake_target_name", "TgBot::TgBot")
         if self.options.shared:
             self.cpp_info.defines.append("TGBOT_DLL")
