@@ -116,6 +116,7 @@ class SqlcipherConan(ConanFile):
             env.define("SQLITE_TEMP_STORE", self._temp_store_nmake_value)
         env.define("OPT_FEATURE_FLAGS", " ".join(opt_feature_flags))
         env.define("TCLSH_CMD", self.dependencies.build['tcl'].runenv_info.vars(self)['TCLSH'])
+        env.define("WITHOUT_JIMSH", "1")
 
         if not is_msvc_static_runtime(self):
             env.define("USE_CRT_DLL", "1")
