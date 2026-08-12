@@ -3,7 +3,6 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -33,19 +32,8 @@ class GobjectIntrospectionConan(ConanFile):
         "fPIC": True,
         "build_introspection_data": True,
     }
+    implements = ["auto_shared_fpic"]
     languages = "C"
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-        if self.settings.os in ["Windows", "Macos"] or cross_building(self):
-            # FIXME: tools/g-ir-scanner fails to load glib
-            self.options.build_introspection_data = False
-
-    def configure(self):
-        if self.options.get_safe("build_introspection_data"):
-            # INFO: g-ir-scanner looks for dynamic glib and gobject libraries when running
-            self.options["glib"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -61,18 +49,6 @@ class GobjectIntrospectionConan(ConanFile):
             # fatal error LNK1104: cannot open file 'python37_d.lib'
             raise ConanInvalidConfiguration(
                 f"{self.ref} debug build on Windows is disabled due to debug version of Python libs likely not being available. Contributions to fix this are welcome.")
-        if self.options.build_introspection_data and not self.dependencies["glib"].options.shared:
-            # FIXME: tools/g-ir-scanner fails to load glib
-            # tools/g-ir-scanner --output=gir/GLib-2.0.gir ...
-            # ERROR: can't resolve libraries to shared libraries: glib-2.0, gobject-2.0
-            raise ConanInvalidConfiguration(f"{self.ref} requires shared glib to be built as shared. Use -o 'glib/*:shared=True'.")
-        if self.options.build_introspection_data and self.settings.os in ["Windows", "Macos"]:
-            # FIXME: tools/g-ir-scanner', '--output=gir/GLib-2.0.gir' ... ERROR: can't resolve libraries to shared libraries: glib-2.0, gobject-2.0
-            # FIXME: g-ir-scanner fails to find libgnuintl
-            # giscanner/_giscanner.cpython-37m-darwin.so, 0x0002): Library not loaded: /lib/libgnuintl.8.dylib
-            raise ConanInvalidConfiguration(f"{self.ref} fails to run g-ir-scanner due glib loaded as shared. Use -o 'glib/*:shared=False'. Contributions to fix this are welcome.")
-        if self.options.build_introspection_data and cross_building(self):
-            raise ConanInvalidConfiguration(f"{self.ref} build_introspection_data is not supported when cross-building. Use '&:build_introspection_data=False'.")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
@@ -89,11 +65,6 @@ class GobjectIntrospectionConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
         tc = MesonToolchain(self)
         if cross_building(self):
             tc.project_options["gi_cross_use_prebuilt_gi"] = "false"
