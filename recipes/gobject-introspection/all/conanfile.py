@@ -33,7 +33,7 @@ class GobjectIntrospectionConan(ConanFile):
         "fPIC": True,
         "build_introspection_data": True,
     }
-    short_paths = True
+    languages = "C"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,8 +43,6 @@ class GobjectIntrospectionConan(ConanFile):
             self.options.build_introspection_data = False
 
     def configure(self):
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
         if self.options.get_safe("build_introspection_data"):
             # INFO: g-ir-scanner looks for dynamic glib and gobject libraries when running
             self.options["glib"].shared = True
