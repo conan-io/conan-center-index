@@ -90,7 +90,7 @@ class GobjectIntrospectionConan(ConanFile):
 
     def generate(self):
         pyenv = PyEnv(self, py_version="3.10")
-        pyenv.install(["setuptools~=82.0.0"])
+        pyenv.install(["setuptools<81.0.0"]) # https://gitlab.gnome.org/GNOME/gobject-introspection/-/work_items/575
         pyenv.generate()
         env = VirtualBuildEnv(self)
         env.generate()
