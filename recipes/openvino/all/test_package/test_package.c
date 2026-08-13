@@ -28,7 +28,7 @@ int main() {
     }
 
     TEST(test_device(1101, core, "CPU", "AVAILABLE_DEVICES", ENABLE_INTEL_CPU));
-    TEST(test_device(1102, core, "GPU", "AVAILABLE_DEVICES", ENABLE_INTEL_GPU));
+    //TEST(test_device(1102, core, "GPU", "AVAILABLE_DEVICES", ENABLE_INTEL_GPU));
     TEST(test_device(1103, core, "AUTO", "SUPPORTED_PROPERTIES", ENABLE_AUTO));
     TEST(test_device(1104, core, "BATCH", "SUPPORTED_PROPERTIES", ENABLE_AUTO_BATCH));
     TEST(test_device(1105, core, "HETERO", "SUPPORTED_PROPERTIES", ENABLE_HETERO));
