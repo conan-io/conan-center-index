@@ -89,6 +89,7 @@ class MongoCDriverConan(ConanFile):
             raise ConanInvalidConfiguration("with_sasl=sspi only allowed on Windows")
 
     def build_requirements(self):
+        self.tool_requires("cmake/[>=3.15 <4]")
         if self.options.with_ssl == "libressl" or self.options.with_zstd:
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
                 self.tool_requires("pkgconf/2.1.0")
