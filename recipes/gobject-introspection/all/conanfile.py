@@ -89,7 +89,7 @@ class GobjectIntrospectionConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        pyenv = PyEnv(self, py_version="3.12")
+        pyenv = PyEnv(self, py_version="3.10")
         pyenv.install(["setuptools~=82.0.0"])
         pyenv.generate()
         env = VirtualBuildEnv(self)
