@@ -373,6 +373,9 @@ class SDLConan(ConanFile):
 
         if self.options.get_safe("wayland"):
             self.cpp_info.components["sdl3"].requires.extend(["wayland::wayland", "xkbcommon::xkbcommon", "egl::egl"])
+            if not self.dependencies["wayland"].options.shared:
+                self.cpp_info.components["sdl3"].system_libs.extend(["decor-0"])
+
 
         if self.options.get_safe("x11"):
             self.cpp_info.components["sdl3"].requires.extend(["xorg::x11", "xorg::xext"])
