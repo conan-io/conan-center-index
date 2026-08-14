@@ -4,6 +4,7 @@ import re
 import textwrap
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -98,6 +99,10 @@ class OpenCascadeConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
+        if not self.options.shared and not self.options.with_rapidjson:
+            # INFO: fails to compile, because DRAWEXE references the GLTF toolkits unconditionally in static
+            # builds (OCCT_NO_PLUGINS), but OCCT excludes them from the build when RapidJSON is disabled
+            raise ConanInvalidConfiguration("Static builds require with_rapidjson=True. See https://github.com/Open-Cascade-SAS/OCCT/issues/1405")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
