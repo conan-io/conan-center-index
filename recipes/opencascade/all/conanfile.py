@@ -1,7 +1,6 @@
 import json
 import os
 import re
-import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -169,10 +168,7 @@ class OpenCascadeConan(ConanFile):
         occt_csf_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_csf.cmake")
         occt_defs_flags_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_defs_flags.cmake")
 
-        # Inject interface definitions of dependencies because opencascade
-        # does not always link to CMake imported targets
         sorted_deps = [dep for dep in reversed(self.dependencies.host.topological_sort.values())]
-        deps_defines = " ".join([f"-D{d}" for dep in sorted_deps for d in dep.cpp_info.aggregated_components().defines])
 
         # Avoid to add system include/libs directories and inject directories
         # from conan dependencies instead
@@ -364,6 +360,7 @@ class OpenCascadeConan(ConanFile):
             "CSF_XwLibs": {"externals": ["xorg::xorg"] if self._is_linux else []},
             # Optional dependencies
             "CSF_OpenGlLibs": {"externals": ["opengl::opengl"] if self.options.with_opengl else []},
+            "CSF_OpenGlesLibs": {"externals": ["opengl::opengl"] if self.options.with_opengl else []},
             "CSF_TclTkLibs": {"externals": ["tk::tk"] if self.options.with_tk else []},
             "CSF_FFmpeg": {"externals": ["ffmpeg::ffmpeg"] if self.options.with_ffmpeg else []},
             "CSF_FreeImagePlus": {"externals": ["freeimage::freeimage"] if self.options.with_freeimage else []},
