@@ -119,7 +119,6 @@ class OpenCascadeConan(ConanFile):
         if self.settings.build_type == "Debug":
             tc.cache_variables["BUILD_WITH_DEBUG"] = self.options.extended_debug_messages
         tc.cache_variables["BUILD_USE_PCH"] = False
-        tc.cache_variables["INSTALL_SAMPLES"] = False
 
         tc.cache_variables["INSTALL_DIR_LAYOUT"] = "Unix"
         tc.cache_variables["INSTALL_DIR_BIN"] = "bin"
@@ -127,13 +126,8 @@ class OpenCascadeConan(ConanFile):
         tc.cache_variables["INSTALL_DIR_INCLUDE"] = "include"
         tc.cache_variables["INSTALL_DIR_RESOURCE"] = "res/resource"
         tc.cache_variables["INSTALL_DIR_DATA"] = "res/data"
-        tc.cache_variables["INSTALL_DIR_SAMPLES"] = "res/samples"
         tc.cache_variables["INSTALL_DIR_DOC"] = "res/doc"
 
-        if is_msvc(self):
-            tc.cache_variables["BUILD_SAMPLES_MFC"] = False
-        tc.cache_variables["BUILD_SAMPLES_QT"] = False
-        tc.cache_variables["BUILD_Inspector"] = False
         if is_apple_os(self):
             tc.cache_variables["USE_GLX"] = False
         if self.settings.os == "Windows":
