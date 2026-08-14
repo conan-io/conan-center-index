@@ -11,7 +11,6 @@ from conan.tools.files import (
     collect_libs, copy, get,
     load, rename, replace_in_file, rmdir, save
 )
-from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=2.1"
 
