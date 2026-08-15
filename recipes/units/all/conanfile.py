@@ -13,10 +13,10 @@ class UnitsConan(ConanFile):
     name = "units"
     description = (
         "A compile-time, header-only, dimensional analysis and unit conversion "
-        "library built on c++14 with no dependencies"
+        "library with no dependencies"
     )
     license = "MIT"
-    topics = ("unit-conversion", "dimensional-analysis", "cpp14",
+    topics = ("unit-conversion", "dimensional-analysis",
               "template-metaprogramming", "compile-time", "header-only",
               "no-dependencies")
     homepage = "https://github.com/nholthaus/units"
@@ -27,10 +27,17 @@ class UnitsConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "14"
+        return "23" if Version(self.version) >= "3.4.0" else "14"
 
     @property
     def _minimum_compilers_version(self):
+        if Version(self.version) >= "3.4.0":
+            return {
+                "clang": "19",
+                "gcc": "13",
+                "msvc": "193",
+                "Visual Studio": "17",
+            }
         return {
             "clang": "3.4",
             "gcc": "4.9.3",
@@ -61,7 +68,7 @@ class UnitsConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "units.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, "*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "units")
