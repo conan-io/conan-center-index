@@ -9,3 +9,7 @@ patches:
       patch_type: "conan"
     - patch_file: "patches/1.3.15-0002-fix-find-libuv.patch"
     - patch_file: "patches/1.3.15-0003-fix-libuv-target.patch"
+    - patch_file: "patches/1.3.15-0004-fix-gcc16-maybe-uninitialized.patch"
+      patch_description: "Fix -Werror build failure with GCC 16 (-Wmaybe-uninitialized false positive, GCC PR 125203): make ParseError::_err_info / StopIterError::_to_msg static"
+      patch_type: "backport"
+      patch_source: "https://github.com/sewenew/redis-plus-plus/commit/4b4cd0dc2931e96842ef05e165673b8679e32f48"

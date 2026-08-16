@@ -1,0 +1,60 @@
+Backport of the upstream fix for a -Wmaybe-uninitialized diagnostic (GCC 16, false
+positive on constructor initializer lists, GCC PR 125203) that fails the library's own
+-Werror build: ParseError::_err_info / StopIterError::_to_msg become static.
+
+https://github.com/sewenew/redis-plus-plus/commit/4b4cd0dc2931e96842ef05e165673b8679e32f48
+
+diff --git a/src/sw/redis++/reply.cpp b/src/sw/redis++/reply.cpp
+index c2d1c4ef..83cc307d 100644
+--- a/src/sw/redis++/reply.cpp
++++ b/src/sw/redis++/reply.cpp
+@@ -23,7 +23,7 @@ namespace sw {
+ namespace redis {
+ 
+ std::string ParseError::_err_info(const std::string &expect_type,
+-        const redisReply &reply) const {
++        const redisReply &reply) {
+     return "expect " + expect_type + " reply, but got " +
+         reply::type_to_string(reply.type) + " reply";
+ }
+diff --git a/src/sw/redis++/reply.h b/src/sw/redis++/reply.h
+index 97d18c30..1b35db78 100644
+--- a/src/sw/redis++/reply.h
++++ b/src/sw/redis++/reply.h
+@@ -62,7 +62,8 @@ class ParseError : public ProtoError {
+     virtual ~ParseError() override = default;
+ 
+ private:
+-    std::string _err_info(const std::string &type, const redisReply &reply) const;
++    // Make it static to walk around GCC 16 bug. Check issues #678 for detail.
++    static std::string _err_info(const std::string &type, const redisReply &reply);
+ };
+ 
+ namespace reply {
+diff --git a/src/sw/redis++/sentinel.cpp b/src/sw/redis++/sentinel.cpp
+index 3de14ca3..69262651 100644
+--- a/src/sw/redis++/sentinel.cpp
++++ b/src/sw/redis++/sentinel.cpp
+@@ -408,7 +408,7 @@ Connection SimpleSentinel::create(const ConnectionOptions &opts) {
+     return _sentinel->slave(_master_name, opts);
+ }
+ 
+-std::string StopIterError::_to_msg(const std::vector<std::string> &errs) const {
++std::string StopIterError::_to_msg(const std::vector<std::string> &errs) {
+     std::string msg;
+     for (const auto &err : errs) {
+         if (!msg.empty()) {
+diff --git a/src/sw/redis++/sentinel.h b/src/sw/redis++/sentinel.h
+index 19e54a1a..29e3dae4 100644
+--- a/src/sw/redis++/sentinel.h
++++ b/src/sw/redis++/sentinel.h
+@@ -138,7 +138,8 @@ class StopIterError : public Error {
+     virtual ~StopIterError() override = default;
+ 
+ private:
+-    std::string _to_msg(const std::vector<std::string> &errs) const;
++    // Make it static to walk around GCC 16 bug. Check issues #678 for detail.
++    static std::string _to_msg(const std::vector<std::string> &errs);
+ };
+ 
+ }
