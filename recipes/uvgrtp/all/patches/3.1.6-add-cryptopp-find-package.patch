@@ -1,0 +1,73 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b079433..f27b4a2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -230,51 +230,27 @@ if (UNIX)
+         list(APPEND UVGRTP_CXX_FLAGS "-DUVGRTP_HAVE_SENDMMSG=1")
+         target_compile_definitions(${PROJECT_NAME} PRIVATE UVGRTP_HAVE_SENDMMSG=1)
+     endif()
+-
+-    # Try finding if pkg-config installed in the system
+-    find_package(PkgConfig)
+-    if(PkgConfig_FOUND)
+-        list(APPEND UVGRTP_LINKER_FLAGS "-luvgrtp")
+-        if(CMAKE_USE_PTHREADS_INIT AND NOT CMAKE_HAVE_LIBC_PTHREAD)
+-            list(APPEND UVGRTP_LINKER_FLAGS "-lpthread")
+-        endif()
+-        # Check PKG_CONFIG_PATH, if not defined, use lib/pkgconfig
+-        if(NOT DEFINED ENV{PKG_CONFIG_PATH})
+-            set(PKG_CONFIG_PATH "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+-            message("PKG_CONFIG_PATH is not set. Setting it to ${PKG_CONFIG_PATH}")
+-        endif(NOT DEFINED ENV{PKG_CONFIG_PATH})
+-
+-        # Find crypto++
+-        if(NOT UVGRTP_DISABLE_CRYPTO)
+-            pkg_search_module(CRYPTOPP libcrypto++ cryptopp)
+-            if(CRYPTOPP_FOUND)
+-              list(APPEND UVGRTP_CXX_FLAGS ${CRYPTOPP_CFLAGS_OTHER})
+-              list(APPEND UVGRTP_LINKER_FLAGS ${CRYPTOPP_LDFLAGS})
+-            endif()
+-        endif()
+-
+-        # Generate and install .pc file
+-        string(REPLACE ";" " " UVGRTP_CXX_FLAGS "${UVGRTP_CXX_FLAGS}")
+-        string(REPLACE ";" " " UVGRTP_LINKER_FLAGS "${UVGRTP_LINKER_FLAGS}")
+-        configure_file("cmake/uvgrtp.pc.in" "uvgrtp.pc" @ONLY)
+-        if (NOT UVGRTP_DISABLE_INSTALL)
+-            install(FILES ${CMAKE_CURRENT_BINARY_DIR}/uvgrtp.pc DESTINATION ${PKG_CONFIG_PATH}/)
+-        endif()
+-    else()
+-        message("pkg-config not found. Not generating pc file")
+-    endif(PkgConfig_FOUND)
+ endif (UNIX)
+ 
+-if (NOT CRYPTOPP_FOUND AND UVGRTP_DOWNLOAD_CRYPTO)
+-  include(cmake/CryptoHeaders.cmake)
+-  list(APPEND UVGRTP_CXX_FLAGS ${CRYPTOPP_CFLAGS_OTHER})
+-  list(APPEND UVGRTP_LINKER_FLAGS ${CRYPTOPP_LDFLAGS})
+-elseif(NOT CRYPTOPP_FOUND AND UNIX)
+-  # In Visual Studio, we want to leave user the option to add Crypto++ headers manually
+-  message("libcrypto++ not found. Encryption will be disabled")
+-  list(APPEND UVGRTP_CXX_FLAGS "-D__RTP_NO_CRYPTO__")
++if (NOT UVGRTP_DISABLE_CRYPTO)
++    find_package(CryptoPP QUIET)
++
++    if (CryptoPP_FOUND)
++        target_link_libraries(${PROJECT_NAME} PRIVATE cryptopp::cryptopp)
++    elseif (UVGRTP_DOWNLOAD_CRYPTO)
++        include(cmake/CryptoHeaders.cmake)
++        list(APPEND UVGRTP_CXX_FLAGS ${CRYPTOPP_CFLAGS_OTHER})
++        list(APPEND UVGRTP_LINKER_FLAGS ${CRYPTOPP_LDFLAGS})
++    else()
++        message(STATUS "Crypto++ not found; encryption will be disabled")
++        list(APPEND UVGRTP_CXX_FLAGS "-D__RTP_NO_CRYPTO__")
++        target_compile_definitions(${PROJECT_NAME} PRIVATE __RTP_NO_CRYPTO__)
++    endif()
+ endif()
+ 
++target_compile_options(${PROJECT_NAME} PRIVATE ${UVGRTP_CXX_FLAGS})
++target_link_options(${PROJECT_NAME}    PRIVATE ${UVGRTP_LINKER_FLAGS})
++
+ if(APPLE)
+     target_link_libraries(${PROJECT_NAME} PRIVATE "-framework Security")
+ endif()
