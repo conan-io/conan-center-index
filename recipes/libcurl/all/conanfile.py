@@ -3,9 +3,9 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, download, get, load, replace_in_file, rm, rmdir, save
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get, load, replace_in_file, rm, rmdir, save
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 
@@ -138,6 +138,7 @@ class LibcurlConan(ConanFile):
 
     def export_sources(self):
         copy(self, "lib_Makefile_add.am", self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -218,6 +219,7 @@ class LibcurlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
         cert_url = self.conf.get("user.libcurl.cert:url", check_type=str) or "https://curl.se/ca/cacert-2025-11-04.pem"
         cert_sha256 = self.conf.get("user.libcurl.cert:sha256", check_type=str) or "8ac40bdd3d3e151a6b4078d2b2029796e8f843e3f86fbf2adbc4dd9f05e79def"
         download(self, cert_url, "cacert.pem", verify=True, sha256=cert_sha256)
@@ -445,6 +447,13 @@ class LibcurlConan(ConanFile):
             elif self.settings.os == "Android":
                 pass # this just works, conan is great!
 
+        if self.settings.os == "Macos":
+            # Configure rpath for ./configure script runtime checks when not crossbuilding.
+            for dep in self.dependencies.host.values():
+                if dep.package_type == "shared-library":
+                    tc.extra_ldflags.extend(f"-Wl,-rpath,{libdir}" for libdir in
+                                             dep.cpp_info.aggregated_components().libdirs)
+
         env = tc.environment()
 
         # tweaks for mingw
@@ -465,8 +474,6 @@ class LibcurlConan(ConanFile):
 
         tc.generate(env)
         tc = PkgConfigDeps(self)
-        tc.generate()
-        tc = AutotoolsDeps(self)
         tc.generate()
 
     def _get_linux_arm_host(self):
