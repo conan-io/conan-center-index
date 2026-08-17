@@ -3,9 +3,9 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, download, get, load, replace_in_file, rm, rmdir, save
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 
@@ -283,6 +283,19 @@ class LibcurlConan(ConanFile):
         subdirs_to_build = "lib src" if self.options.build_executable else "lib"
         replace_in_file(self, top_makefile, "SUBDIRS = lib docs src scripts", f"SUBDIRS = {subdirs_to_build}")
 
+        # curl's configure constructs CURL_LIBRARY_PATH with paths to dependencies
+        # This is then used as LD_LIBRARY_PATH for test executables to test
+        # for runtime library availability.
+        # pkg-config can report multiple -L flags in SSL_LDFLAGS (e.g. when
+        # openssl.pc also requires zlib). curl only strips the first "-L",
+        # leaving the rest stuck to LIB_OPENSSL as a single malformed path.
+        # Without this patch, we either get "./conftest: error while loading shared libraries: ... "
+        # or  "checking runtime libs availability... failed" during configure.
+        replace_in_file(self,
+                            os.path.join(self.source_folder, "m4", "curl-openssl.m4"),
+                            "LIB_OPENSSL=`echo $SSL_LDFLAGS | sed -e 's/^-L//'`",
+                            "LIB_OPENSSL=`echo $SSL_LDFLAGS | sed -e 's/^-L//' -e 's/ -L/:/g'`")
+
         if self._is_mingw and self.options.shared:
             # patch for shared mingw build
             lib_makefile = os.path.join(self.source_folder, "lib", "Makefile.am")
@@ -465,8 +478,6 @@ class LibcurlConan(ConanFile):
 
         tc.generate(env)
         tc = PkgConfigDeps(self)
-        tc.generate()
-        tc = AutotoolsDeps(self)
         tc.generate()
 
     def _get_linux_arm_host(self):
