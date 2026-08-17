@@ -11,3 +11,10 @@ sources:
   "0.3.24":
     url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.24.tar.gz"
     sha256: "ceadc5065da97bd92404cac7254da66cc6eb192679cf1002098688978d4d5132"
+patches:
+  "0.3.30":
+    - patch_file: "patches/0.3.30/0001-disable-getarch.patch"
+      patch_type: "portability"
+      patch_description: >
+        Don't try to detect information about the build system to determine
+        architecture flags. This is essential for reproducible builds.
