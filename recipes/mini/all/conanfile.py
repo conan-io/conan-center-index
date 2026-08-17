@@ -21,11 +21,17 @@ class MiniConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 14
+        return 17 if self.version > Version("0.9.16") else 14
 
     @property
     def _compilers_minimum_version(self):
         return {
+            "Visual Studio": "15",
+            "msvc": "191",
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "10",
+        } if self._min_cppstd >= 17 else {
             "Visual Studio": "15",
             "msvc": "191",
             "gcc": "5",
