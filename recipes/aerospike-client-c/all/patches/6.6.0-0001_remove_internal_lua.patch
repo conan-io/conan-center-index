@@ -1,0 +1,17 @@
+diff --git a/Makefile b/Makefile
+index 49b21ef6..75a7af6e 100644
+--- a/Makefile
++++ b/Makefile
+@@ -255,10 +255,10 @@ $(TARGET_OBJ)/aerospike/%.o: $(SOURCE_MAIN)/aerospike/%.c
+ 	$(object)
+ 
+ $(TARGET_LIB)/libaerospike.$(DYNAMIC_SUFFIX): $(OBJECTS) $(EXP_DEPS) | modules
+-	$(library) $(DEPS) $(LUA_OBJECTS)
++	$(library) $(DEPS)
+ 
+ $(TARGET_LIB)/libaerospike.a: $(OBJECTS) $(EXP_DEPS) | modules
+-	$(archive) $(DEPS) $(LUA_OBJECTS)
++	$(archive) $(DEPS)
+ 
+ $(TARGET_INCL)/aerospike/%.h: $(SOURCE_INCL)/aerospike/%.h
+ 	@mkdir -p $(@D)
