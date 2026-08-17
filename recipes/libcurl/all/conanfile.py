@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, download, get, load, replace_in_file, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get, load, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -138,6 +138,7 @@ class LibcurlConan(ConanFile):
 
     def export_sources(self):
         copy(self, "lib_Makefile_add.am", self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -218,6 +219,7 @@ class LibcurlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
         cert_url = self.conf.get("user.libcurl.cert:url", check_type=str) or "https://curl.se/ca/cacert-2025-11-04.pem"
         cert_sha256 = self.conf.get("user.libcurl.cert:sha256", check_type=str) or "8ac40bdd3d3e151a6b4078d2b2029796e8f843e3f86fbf2adbc4dd9f05e79def"
         download(self, cert_url, "cacert.pem", verify=True, sha256=cert_sha256)
@@ -282,19 +284,6 @@ class LibcurlConan(ConanFile):
 
         subdirs_to_build = "lib src" if self.options.build_executable else "lib"
         replace_in_file(self, top_makefile, "SUBDIRS = lib docs src scripts", f"SUBDIRS = {subdirs_to_build}")
-
-        # curl's configure constructs CURL_LIBRARY_PATH with paths to dependencies
-        # This is then used as LD_LIBRARY_PATH for test executables to test
-        # for runtime library availability.
-        # pkg-config can report multiple -L flags in SSL_LDFLAGS (e.g. when
-        # openssl.pc also requires zlib). curl only strips the first "-L",
-        # leaving the rest stuck to LIB_OPENSSL as a single malformed path.
-        # Without this patch, we either get "./conftest: error while loading shared libraries: ... "
-        # or  "checking runtime libs availability... failed" during configure.
-        replace_in_file(self,
-                            os.path.join(self.source_folder, "m4", "curl-openssl.m4"),
-                            "LIB_OPENSSL=`echo $SSL_LDFLAGS | sed -e 's/^-L//'`",
-                            "LIB_OPENSSL=`echo $SSL_LDFLAGS | sed -e 's/^-L//' -e 's/ -L/:/g'`")
 
         if self._is_mingw and self.options.shared:
             # patch for shared mingw build
@@ -457,6 +446,13 @@ class LibcurlConan(ConanFile):
                     tc.extra_ldflags.extend(["-Wl,-framework,CoreFoundation", "-Wl,-framework,Security"])
             elif self.settings.os == "Android":
                 pass # this just works, conan is great!
+
+        if self.settings.os == "Macos":
+            # Configure rpath for ./configure script runtime checks when not crossbuilding.
+            for dep in self.dependencies.host.values():
+                if dep.package_type == "shared-library":
+                    tc.extra_ldflags.extend(f"-Wl,-rpath,{libdir}" for libdir in
+                                             dep.cpp_info.aggregated_components().libdirs)
 
         env = tc.environment()
 
