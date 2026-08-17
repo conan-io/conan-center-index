@@ -1,4 +1,4 @@
 sources:
   "1.12.1":
-    url: "https://dlcdn.apache.org/avro/avro-1.12.1/avro-src-1.12.1.tar.gz"
+    url: "https://archive.apache.org/dist/avro/avro-1.12.1/avro-src-1.12.1.tar.gz"
     sha256: "268e47c0850df04f952ea6fdfc3b12a8d0042124354bff6c0239be0b70016d2e"
