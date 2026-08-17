@@ -8,7 +8,7 @@ required_conan_version = ">=2.19.0"
 
 
 class SerializeConan(ConanFile):
-    name = "serialize"
+    name = "mas-bandwidth-serialize"
     description = "A simple bitpacking serializer for C++"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
