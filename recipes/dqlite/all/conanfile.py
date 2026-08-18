@@ -44,7 +44,7 @@ class DqliteConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("sqlite3/[>=3.34.0 <4]")
+        self.requires("sqlite3/[>=3.34.0 <4]", transitive_headers=True)
         self.requires("libuv/[>=1.34.0 <2]")
         if self.options.with_lz4:
             self.requires("lz4/[>=1.7.1 <2]")
