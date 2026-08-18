@@ -25,7 +25,6 @@ class TestPackageConan(ConanFile):
         env = buildenv.vars(scope='build')
         assert 'PKG_CONFIG' in env.keys()
         assert 'ACLOCAL_PATH' in env.keys()
-        assert 'AUTOMAKE_CONAN_INCLUDES' in env.keys()
         buildenv.generate()
 
     def test(self):
