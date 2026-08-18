@@ -15,7 +15,7 @@ class PkgConfConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("build", "configuration")
     homepage = "https://git.sr.ht/~kaniini/pkgconf"
-    license = "ISC"
+    license = ("pkgconf", "BSD-2-Clause")
     description = "package compiler and linker metadata toolkit"
     settings = "os", "arch", "compiler", "build_type"
     languages = "C"
