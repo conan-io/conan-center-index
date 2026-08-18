@@ -196,7 +196,7 @@ class OpenTelemetryCppConan(ConanFile):
     def _patch_sources(self):
         # let the otelcpp-proto library follow the default build type
         replace_in_file(self, os.path.join(self.source_folder, "cmake/opentelemetry-proto.cmake"),
-                        "set(OTELCPP_PROTO_LIB_TYPE", "#set(OTELCPP_PROTO_LIB_TYPE")
+                        "set(OTELCPP_PROTO_LIB_TYPE", "#set(OTELCPP_PROTO_LIB_TYPE", strict=False)
 
         if self._needs_proto:
             protos_path = self.dependencies.build["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root").replace("\\", "/")
