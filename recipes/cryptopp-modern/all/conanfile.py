@@ -29,6 +29,8 @@ class CryptoPPModernConan(ConanFile):
         "use_openmp": False,
     }
 
+    provides = "cryptopp"
+
     implements = ["auto_shared_fpic"]
 
     def layout(self):
@@ -42,22 +44,25 @@ class CryptoPPModernConan(ConanFile):
             self.requires("llvm-openmp/20.1.6")
 
     def validate(self):
-        # Crypto++ does not properly support shared/DLL builds; the bundled CMake
-        # errors out when CRYPTOPP_BUILD_SHARED is enabled.
-        if self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} does not support shared builds")
+        # Shared builds are supported on Unix-like platforms only; Windows DLL
+        # support has not shipped and the bundled CMake errors out on it.
+        if self.options.shared and self.settings.os == "Windows":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support shared builds on Windows")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.20]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        # Honor the fPIC option instead of the unconditional PIC the project forces.
+        # Honor the fPIC option instead of the PIC the project forces.
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "set(CMAKE_POSITION_INDEPENDENT_CODE 1)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
+        # The project derives BUILD_SHARED_LIBS from CRYPTOPP_BUILD_SHARED, so the
+        # BUILD_SHARED_LIBS the toolchain sets is not enough on its own.
+        tc.cache_variables["CRYPTOPP_BUILD_SHARED"] = bool(self.options.shared)
         tc.cache_variables["CRYPTOPP_BUILD_TESTING"] = False
         tc.cache_variables["CRYPTOPP_USE_INTERMEDIATE_OBJECTS_TARGET"] = False
         tc.cache_variables["CRYPTOPP_USE_OPENMP"] = self.options.use_openmp
@@ -80,6 +85,8 @@ class CryptoPPModernConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "cryptopp-modern")
