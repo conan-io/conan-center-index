@@ -78,11 +78,10 @@ class PkgConfConan(ConanFile):
         env.generate()
 
         tc = MesonToolchain(self)
-        if Version(self.version) < "3.0.0":
-            if Version(self.version) >= "1.9.4":
-                tc.project_options["tests"] = "disabled"
-            else:
-                tc.project_options["tests"] = False
+        if Version(self.version) >= "1.9.4":
+            tc.project_options["tests"] = "disabled"
+        else:
+            tc.project_options["tests"] = False
 
         if not self.options.enable_lib:
             tc.project_options["default_library"] = "static"
