@@ -131,7 +131,7 @@ class SDLConan(ConanFile):
             del self.options.directx
 
         if self.settings.os == "Emscripten":
-            self.options.opengl = False
+            del self.options.opengl
             del self.options.vulkan
 
     def configure(self):
