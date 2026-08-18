@@ -67,5 +67,3 @@ class PkgConfConan(ConanFile):
 
         pkgconf_aclocal = os.path.join(self.package_folder, "bin", "aclocal")
         self.buildenv_info.prepend_path("ACLOCAL_PATH", pkgconf_aclocal)
-        # TODO: evaluate if `ACLOCAL_PATH` is enough and we can stop using `AUTOMAKE_CONAN_INCLUDES`
-        self.buildenv_info.prepend_path("AUTOMAKE_CONAN_INCLUDES", pkgconf_aclocal)
