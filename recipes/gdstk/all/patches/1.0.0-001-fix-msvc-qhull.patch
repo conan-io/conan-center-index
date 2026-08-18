@@ -1,0 +1,58 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f0270ab..01f3b4d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -20,7 +20,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+ 
+     if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /nologo /W3 /MD /EHsc /wd4996")
++        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /nologo /W3 /MD /EHsc /wd4996 /utf-8")
+         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi")
+         set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Ox /GL -DNDEBUG")
+     else()
+@@ -30,7 +30,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+     endif()
+ 
+     include(CTest)
+-    add_subdirectory(docs/cpp)
++    # add_subdirectory(docs/cpp)
+ endif()
+ 
+ if(APPLE)
+@@ -39,7 +39,7 @@ if(APPLE)
+     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup -flat_namespace")
+ endif()
+ 
+-add_subdirectory(external)
++# add_subdirectory(external)
+ add_subdirectory(src)
+ 
+ if("${SKBUILD}" STREQUAL "2")
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index d2ad951..0f39b60 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ include(GNUInstallDirs)
+ 
+-find_package(ZLIB 1.2.7)
++find_package(ZLIB)
+ if(NOT ZLIB_FOUND)
+     # Check first for header files
+     if(DEFINED ENV{ZLIB_INCLUDE_DIRS})
+@@ -85,12 +85,11 @@ target_include_directories(gdstk PUBLIC
+     $<BUILD_INTERFACE:${gdstk_SOURCE_DIR}/include>
+     $<BUILD_INTERFACE:${gdstk_SOURCE_DIR}/external>
+     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+-    ${ZLIB_INCLUDE_DIRS}
+-    ${QHULL_INCLUDE_DIRS})
++    ${ZLIB_INCLUDE_DIRS})
+ 
+ target_link_libraries(gdstk
+     ${ZLIB_LIBRARIES}
+-    ${QHULL_LIBRARIES}
++    Qhull::qhullstatic_r
+     clipper)
+ 
+ if(UNIX)
