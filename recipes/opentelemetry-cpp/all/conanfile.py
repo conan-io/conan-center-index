@@ -127,6 +127,10 @@ class OpenTelemetryCppConan(ConanFile):
             if not self.dependencies["grpc"].options.cpp_plugin:
                 raise ConanInvalidConfiguration(f"{self.ref} requires grpc with cpp_plugin=True")
 
+        if self.dependencies["protobuf"].package_type == "static-library" and self.package_type != "static-library":
+            # https://github.com/open-telemetry/opentelemetry-cpp/blame/2d80af1b1d26e300d9c0f7f51fa360f22c773523/cmake/opentelemetry-proto.cmake#L189-L193
+            raise ConanInvalidConfiguration(f"opentelemetry-cpp should be built as a static library when using static protobuf")
+
     def build_requirements(self):
         if self._needs_proto:
             self.tool_requires("opentelemetry-proto/1.7.0")
@@ -160,6 +164,7 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["WITH_OTLP_GRPC"] = self.options.with_otlp_grpc
         tc.cache_variables["WITH_OTLP_HTTP"] = self.options.with_otlp_http
         tc.cache_variables["WITH_OTLP_HTTP_COMPRESSION"] = self.options.with_otlp_http_compression
+        tc.cache_variables["OTELCPP_PROTO_LIB_TYPE"] = "SHARED_LIBRARY" if self.options.get_safe("shared") else "STATIC_LIBRARY"
         if self.settings.os == "Linux":
             # So that the linker can pick up the correct openssl transitive dependency from libcurl
             # when building shared
@@ -189,6 +194,10 @@ class OpenTelemetryCppConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+        # let the otelcpp-proto library follow the default build type
+        replace_in_file(self, os.path.join(self.source_folder, "cmake/opentelemetry-proto.cmake"),
+                        "set(OTELCPP_PROTO_LIB_TYPE", "#set(OTELCPP_PROTO_LIB_TYPE")
+
         if self._needs_proto:
             protos_path = self.dependencies.build["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root").replace("\\", "/")
             protos_cmake_path = os.path.join(self.source_folder, "cmake", "opentelemetry-proto.cmake")
