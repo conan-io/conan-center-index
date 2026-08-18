@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
@@ -19,26 +18,6 @@ class MiniConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _min_cppstd(self):
-        return 17 if self.version > Version("0.9.16") else 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "15",
-            "msvc": "191",
-            "gcc": "8",
-            "clang": "7",
-            "apple-clang": "10",
-        } if self._min_cppstd >= 17 else {
-            "Visual Studio": "15",
-            "msvc": "191",
-            "gcc": "5",
-            "clang": "5",
-            "apple-clang": "5.1",
-        }
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -47,12 +26,7 @@ class MiniConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+            check_min_cppstd(self, 17 if Version(self.version) >= "0.9.18" else 14)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
