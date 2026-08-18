@@ -89,7 +89,6 @@ class MongoCDriverConan(ConanFile):
             raise ConanInvalidConfiguration("with_sasl=sspi only allowed on Windows")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.15 <4.4]")
         if self.options.with_ssl == "libressl" or self.options.with_zstd:
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
                 self.tool_requires("pkgconf/2.1.0")
@@ -189,6 +188,10 @@ class MongoCDriverConan(ConanFile):
         if Version(self.version) < "1.30.3":
             replace_in_file(self, os.path.join(self.source_folder, "src", "libbson", "CMakeLists.txt"),
                                   "cmake_policy (SET CMP0042 OLD)", "")
+        if Version(self.version) < "2.4.0":
+            replace_in_file(self, os.path.join(self.source_folder, "src", "libmongoc", "CMakeLists.txt"),
+                                  "\"-Werror -DCMAKE_CXX_LINK_EXECUTABLE='echo not linking now...'\"",
+                                  "\"-DCOMPILE_DEFINITIONS=-Werror\" \"-DCMAKE_CXX_LINK_EXECUTABLE='echo not linking now...'\"")
 
     def build(self):
         self._patch_sources()
