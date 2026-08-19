@@ -1,4 +1,4 @@
 sources:
-  "1.0.2":
-    url: "https://github.com/d-led/influxdb-cpp-rest/archive/refs/tags/v1.0.2.tar.gz"
-    sha256: "a9f369a382a7f132304021d996638061b62f319a5e849ad444a5daee27d06d0a"
+  "1.0.3":
+    url: "https://github.com/d-led/influxdb-cpp-rest/archive/refs/tags/v1.0.3.tar.gz"
+    sha256: "d131390bdb7f48192e34badc9435717e7d786221a610c7383252d0e213396712"
