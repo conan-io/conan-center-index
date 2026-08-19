@@ -207,18 +207,21 @@ class OpenSceneGraphConanFile(ConanFile):
         tc.variables["OSG_WITH_OPENEXR"] = self.options.get_safe("with_openexr", False)
         tc.variables["OSG_WITH_INVENTOR"] = False
         tc.variables["OSG_WITH_JASPER"] = self.options.with_jasper
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Jasper"] = not self.options.with_jasper
         tc.variables["OSG_WITH_OPENCASCADE"] = False
         tc.variables["OSG_WITH_FBX"] = False
         tc.variables["OSG_WITH_ZLIB"] = self.options.with_zlib
         tc.variables["OSG_WITH_GDAL"] = self.options.with_gdal
         tc.variables["OSG_WITH_GTA"] = self.options.with_gta
         tc.variables["OSG_WITH_CURL"] = self.options.with_curl
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = not self.options.with_curl
         tc.variables["OSG_WITH_LIBVNCSERVER"] = False
         tc.variables["OSG_WITH_DCMTK"] = self.options.get_safe("with_dcmtk", False)
         tc.variables["OSG_WITH_FFMPEG"] = False
         tc.variables["OSG_WITH_DIRECTSHOW"] = False
         tc.variables["OSG_WITH_SDL"] = False
         tc.variables["OSG_WITH_POPPLER"] = False
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Poppler-glib"] = True
         tc.variables["OSG_WITH_RSVG"] = False
         tc.variables["OSG_WITH_NVTT"] = False
         tc.variables["OSG_WITH_ASIO"] = self.options.get_safe("with_asio", False)
@@ -226,8 +229,14 @@ class OpenSceneGraphConanFile(ConanFile):
         tc.variables["OSG_WITH_LIBLAS"] = False
         tc.variables["OSG_WITH_GIFLIB"] = self.options.get_safe("with_gif", False)
         tc.variables["OSG_WITH_JPEG"] = self.options.get_safe("with_jpeg", False)
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_JPEG"] = not self.options.get_safe("with_jpeg", False)
         tc.variables["OSG_WITH_PNG"] = self.options.get_safe("with_png", False)
         tc.variables["OSG_WITH_TIFF"] = self.options.with_tiff
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_TIFF"] = not self.options.with_tiff
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_GLIB"] = True
+        tc.cache_variables["LIBXML2_FOUND"] = False
+        tc.cache_variables["LIBXML2_LIBRARY"] = "LIBXML2_LIBRARY-NOTFOUND"
+        tc.cache_variables["LIBXML2_INCLUDE_DIR"] = "LIBXML2_INCLUDE_DIR-NOTFOUND"
 
         if (self.options.get_safe("with_avfoundation")):
             tc.variables["OSG_WITH_AV_FOUNDATION"] = True
@@ -242,7 +251,7 @@ class OpenSceneGraphConanFile(ConanFile):
             tc.preprocessor_definitions["GL_SILENCE_DEPRECATION"] = "1"
 
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"  # macOS: use @rpath for shared libs
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support 
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -489,7 +498,7 @@ class OpenSceneGraphConanFile(ConanFile):
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
             setup_plugin("jpeg").requires.append("libjpeg-turbo::jpeg")
         elif self.options.get_safe("with_jpeg") == "mozjpeg":
-            setup_plugin("jpeg").requires.append("mozjpeg::libjpeg")       
+            setup_plugin("jpeg").requires.append("mozjpeg::libjpeg")
 
         if self.options.with_jasper:
             setup_plugin("jp2").requires.append("jasper::jasper")
