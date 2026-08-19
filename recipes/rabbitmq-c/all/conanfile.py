@@ -23,7 +23,7 @@ class RabbitmqcConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "ssl": True,
+        "ssl": False,
     }
 
     def config_options(self):
