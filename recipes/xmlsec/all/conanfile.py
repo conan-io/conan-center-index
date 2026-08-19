@@ -164,7 +164,7 @@ class XmlSecConan(ConanFile):
             ]
 
             with chdir(self, os.path.join(self.source_folder, "win32")):
-                self.run(f"cscript configure.js {' '.join(args)}")
+                self.run(f"powershell -ExecutionPolicy RemoteSigned -File configure.ps1 {' '.join(args)}")
 
             # Fix library names in generated Makefile.msvc
             def format_libs(package):
@@ -173,11 +173,12 @@ class XmlSecConan(ConanFile):
                 return " ".join(libs)
 
             makefile_msvc = os.path.join(self.source_folder, "win32", "Makefile.msvc")
-            replace_in_file(self, makefile_msvc, "libxml2.lib", format_libs("libxml2"))
-            replace_in_file(self, makefile_msvc, "libxml2s.lib", format_libs("libxml2"))
+            debug_suffix = "d" if self.settings.build_type == "Debug" else ""
+            replace_in_file(self, makefile_msvc, f"libxml2{debug_suffix}.lib", format_libs("libxml2"))
+            replace_in_file(self, makefile_msvc, f"libxml2{debug_suffix}s.lib", format_libs("libxml2"))
             if self.options.with_xslt:
-                replace_in_file(self, makefile_msvc, "libxslt.lib", format_libs("libxslt"))
-                replace_in_file(self, makefile_msvc, "libxslts.lib", format_libs("libxslt"))
+                replace_in_file(self, makefile_msvc, f"libxslt{debug_suffix}.lib", format_libs("libxslt"))
+                replace_in_file(self, makefile_msvc, f"libxslt{debug_suffix}s.lib", format_libs("libxslt"))
             if self.options.with_openssl:
                 replace_in_file(self, makefile_msvc, "libcrypto.lib", format_libs("openssl"))
 

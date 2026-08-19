@@ -1,7 +1,7 @@
 sources:
-  "0.23.0":
-    url: "https://archive.apache.org/dist/thrift/0.23.0/thrift-0.23.0.tar.gz"
-    sha256: "1859d932d2ae1f13d16c5a196931208c116310a5ff50f2bfd11d3db03be8f46f"
+  "0.24.0":
+    url: "https://archive.apache.org/dist/thrift/0.24.0/thrift-0.24.0.tar.gz"
+    sha256: "e0fa5839a4c5c1d631b0931cf2c554ebbfa4e2fee3a9fb3ffd4f82ce4396c6e4"
   "0.21.0":
     url: "http://archive.apache.org/dist/thrift/0.21.0/thrift-0.21.0.tar.gz"
     sha256: "9a24f3eba9a4ca493602226c16d8c228037db3b9291c6fc4019bfe3bd39fc67c"
@@ -9,10 +9,10 @@ sources:
     url: "https://archive.apache.org/dist/thrift/0.17.0/thrift-0.17.0.tar.gz"
     sha256: "b272c1788bb165d99521a2599b31b97fa69e5931d099015d91ae107a0b0cc58f"
 patches:
-  "0.23.0":
+  "0.24.0":
     - patch_file: "patches/cmake-0.21.0-001-install-dir.patch"
-    - patch_file: "patches/cmake-0.23.0-001-conan-libs.patch"
-    - patch_file: "patches/cmake-0.23.0-002-conan-libs.patch"
+    - patch_file: "patches/cmake-0.24.0-001-conan-libs.patch"
+    - patch_file: "patches/cmake-0.24.0-002-conan-libs.patch"
   "0.21.0":
     - patch_file: "patches/cmake-0.21.0-001-install-dir.patch"
     - patch_file: "patches/cmake-0.21.0-002-conan-libs.patch"

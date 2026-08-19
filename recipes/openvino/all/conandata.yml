@@ -1,23 +1,23 @@
 sources:
-  "2026.2.1":
+  "2026.3.0":
     "openvino":
-      url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2026.2.1.tar.gz"
-      sha256: "9255a1cd87ad330242ed5063c2bcb2d04cc6897ab50b9fc95da5ac4a4625ae4d"
+      url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2026.3.0.tar.gz"
+      sha256: "48d97d500916e8fd57972a9ed729584c6d73c286554486745fb786e4cf5cf5df"
     "arm_compute":
-      url: "https://github.com/ARM-software/ComputeLibrary/archive/refs/tags/v53.0.0.tar.gz"
-      sha256: "370c480385493c5be9c639dfcfabaa4bc8eac74fe21332905b1630a4c0cb3a87"
+      url: "https://github.com/ARM-software/ComputeLibrary/archive/refs/tags/v53.1.0.tar.gz"
+      sha256: "9aa17bfbda0ab68904cdb005fc724498d630b64fdaadb4a50e4d7eee67680a76"
     "arm_kleidiai":
-      url: "https://github.com/ARM-software/kleidiai/archive/refs/tags/v1.19.0.tar.gz"
-      sha256: "73170b676a9f4d67d2f3b76795804d7dbaca09f105bb08b0a4ae76a2db086156"
+      url: "https://github.com/ARM-software/kleidiai/archive/refs/tags/v1.26.0.tar.gz"
+      sha256: "c4ed713df2e5ebb412bab98fec9ec5ee001c52e8cfdcc6b091e5e1de9c750588"
     "onednn_cpu":
-      url: "https://github.com/openvinotoolkit/oneDNN/archive/87f65fdd1927b1d0cbdf0ea37728146abfbffb52.tar.gz"
-      sha256: "2843f9d4e92a83d16d37a92dcc29b87732415f9cd9fd87769651aa67da197521"
+      url: "https://github.com/openvinotoolkit/oneDNN/archive/f82d833de6f13fac4bb1926d521ca8fec4f4ae01.tar.gz"
+      sha256: "119c80210ceec0ea2b2b1908b862ed9c3b4366e65d4e0bdea82142f14b7f6712"
     "mlas":
       url: "https://github.com/openvinotoolkit/mlas/archive/d1bc25ec4660cddd87804fcf03b2411b5dfb2e94.tar.gz"
       sha256: "0a44fbfd4b13e8609d66ddac4b11a27c90c1074cde5244c91ad197901666004c"
     "onednn_gpu":
-      url: "https://github.com/oneapi-src/oneDNN/archive/refs/tags/v3.12.tar.gz"
-      sha256: "efa94db6e8395daaef8e307a48e9527bbaab58a64b44e5d59a3662b4b155099d"
+      url: "https://github.com/oneapi-src/oneDNN/archive/refs/tags/v3.13.tar.gz"
+      sha256: "f90a34cc3f1a5af511570d72f4437205efdf97e1d28c576418daa7ef1a34daaa"
   "2025.4.0":
     "openvino":
       url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2025.4.0.tar.gz"
@@ -38,9 +38,7 @@ sources:
       url: "https://github.com/oneapi-src/oneDNN/archive/29d64fe0ec0f1f20d7f80aa76630d58a6011a869.tar.gz"
       sha256: "90139a1193b9773f94ff3310cd6118d3b6ccf1adb24461c84aa87890caa5ee77"
 patches:
-  "2026.2.1":
-    - patch_file: "patches/2026.2.1-system-levelzero-fix.patch"
-    - patch_file: "patches/2026.2.1-system-deps.patch"
-    - patch_file: "patches/2026.2.1-onnx-proto-dedup.patch"
+  "2026.3.0":
+    - patch_file: "patches/2026.3.0-fix-deps.patch"
   "2025.4.0":
     - patch_file: "patches/2025.4.0-CPU-ARM-Define-HWCAP2_I8MM-constant-properly-33060.patch"

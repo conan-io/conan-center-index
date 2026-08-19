@@ -10,6 +10,3 @@ target_link_libraries(${PROJECT_NAME} userspace-rcu::urcu)
 
 add_executable(${PROJECT_NAME}-mb ${TEST_SRC})
 target_link_libraries(${PROJECT_NAME}-mb userspace-rcu::urcu-mb)
-
-add_executable(${PROJECT_NAME}-signal ${TEST_SRC})
-target_link_libraries(${PROJECT_NAME}-signal userspace-rcu::urcu-signal)

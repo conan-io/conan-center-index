@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
+from conan.tools.apple import is_apple_os
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
@@ -26,6 +27,7 @@ class CpphttplibConan(ConanFile):
         "with_brotli": [True, False],
         "use_macos_keychain_certs": [True, False],
         "with_zstd": [True, False],
+        "use_non_blocking_getaddrinfo": [True, False],
     }
     default_options = {
         "with_openssl": False,
@@ -35,6 +37,7 @@ class CpphttplibConan(ConanFile):
         "with_brotli": False,
         "use_macos_keychain_certs": True,
         "with_zstd": False,
+        "use_non_blocking_getaddrinfo": True,
     }
     no_copy_source = True
 
@@ -103,16 +106,22 @@ class CpphttplibConan(ConanFile):
         if self.options.get_safe("with_zstd"):
             self.cpp_info.defines.append("CPPHTTPLIB_ZSTD_SUPPORT")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread", "anl"]
+            self.cpp_info.system_libs = ["pthread"]
+            if self.options.use_non_blocking_getaddrinfo:
+                self.cpp_info.system_libs.append("anl")
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["crypt32", "cryptui", "ws2_32"]
-        elif self.settings.os == "Macos":
-            if self._tls_enabled and self.options.get_safe("use_macos_keychain_certs"):
-                self.cpp_info.frameworks.extend(["CFNetwork", "CoreFoundation", "Security"])
-                if Version(self.version) < "0.36.0":
-                    self.cpp_info.defines.append("CPPHTTPLIB_USE_CERTS_FROM_MACOSX_KEYCHAIN")
+        elif is_apple_os(self):
+            if self.settings.os == "Macos":
+                if self._tls_enabled and self.options.get_safe("use_macos_keychain_certs"):
+                    self.cpp_info.frameworks.extend(["CoreFoundation", "Security"])
+                    if Version(self.version) < "0.36.0":
+                        self.cpp_info.defines.append("CPPHTTPLIB_USE_CERTS_FROM_MACOSX_KEYCHAIN")
 
-            if not self.options.get_safe("use_macos_keychain_certs") and Version(self.version) >= "0.36.0":
-                self.cpp_info.defines.append("CPPHTTPLIB_DISABLE_MACOSX_AUTOMATIC_ROOT_CERTIFICATES")
+                if not self.options.get_safe("use_macos_keychain_certs") and Version(self.version) >= "0.36.0":
+                    self.cpp_info.defines.append("CPPHTTPLIB_DISABLE_MACOSX_AUTOMATIC_ROOT_CERTIFICATES")
+            if self.options.use_non_blocking_getaddrinfo:
+                self.cpp_info.frameworks.extend(["CoreFoundation", "CFNetwork"])
 
-        self.cpp_info.defines.append("CPPHTTPLIB_USE_NON_BLOCKING_GETADDRINFO")
+        if self.options.use_non_blocking_getaddrinfo:
+            self.cpp_info.defines.append("CPPHTTPLIB_USE_NON_BLOCKING_GETADDRINFO")

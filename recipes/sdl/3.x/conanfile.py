@@ -130,6 +130,10 @@ class SDLConan(ConanFile):
         if self.settings.os != "Windows":
             del self.options.directx
 
+        if self.settings.os == "Emscripten":
+            del self.options.opengl
+            del self.options.vulkan
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -204,7 +208,7 @@ class SDLConan(ConanFile):
     @property
     def _supports_opengles(self):
         return (self.options.get_safe("opengles")
-                and self.settings.os in ("Android", "iOS", "visionOS", "tvOS", "watchOS"))
+                and self.settings.os in ("Android", "Emscripten", "iOS", "visionOS", "tvOS", "watchOS"))
 
     @property
     def _supports_dbus(self):
@@ -263,7 +267,7 @@ class SDLConan(ConanFile):
         tc.cache_variables["SDL_OPENGLES"] = bool(self._supports_opengles)
 
         if self.options.hidapi:
-            tc.cache_variables["SDL_HIDAPI_LIBUSB"] = self.options.get_safe("libusb")
+            tc.cache_variables["SDL_HIDAPI_LIBUSB"] = self.options.get_safe("libusb", False)
             # Prevent loading shared libusb during runtime
             # This just means it will be linked traditionally, even when libusb is shared
             # See https://github.com/libsdl-org/SDL/blob/96292a5b464258a2b926e0a3d72f8b98c2a81aa6/cmake/sdlchecks.cmake#L1107-L1113
