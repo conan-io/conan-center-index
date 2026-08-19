@@ -10,7 +10,7 @@ required_conan_version = ">=2.28"
 
 class TgbotConan(ConanFile):
     name = "tgbot"
-    description = "C++ library for the Telegram Bot API"
+    description = "C++ library for Telegram bot API"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://reo7sp.github.io/tgbot-cpp"
@@ -36,7 +36,7 @@ class TgbotConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("boost/1.91.0", options={"header_only": True}, transitive_headers=True)
+        self.requires("boost/[>=1.83.0 <1.90.0]", options={"header_only": True}, transitive_headers=True)
         self.requires("libcurl/[>=7.78 <9]", transitive_headers=True, transitive_libs=True)
         self.requires("nlohmann_json/3.12.0", transitive_headers=True)
 
@@ -54,7 +54,6 @@ class TgbotConan(ConanFile):
         dependencies.generate()
 
         toolchain = CMakeToolchain(self)
-        toolchain.variables["ENABLE_TESTS"] = False
         toolchain.generate()
 
     def build(self):
@@ -65,18 +64,14 @@ class TgbotConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        copy(
-            self,
-            "LICENSE",
-            src=self.source_folder,
-            dst=os.path.join(self.package_folder, "licenses"),
-        )
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["TgBot"]
         self.cpp_info.set_property("cmake_file_name", "TgBot")
         self.cpp_info.set_property("cmake_target_name", "TgBot::TgBot")
+        self.cpp_info.set_property("cmake_target_aliases", ["tgbot::tgbot"])
         if self.options.shared:
             self.cpp_info.defines.append("TGBOT_DLL")
         if self.settings.os == "Windows":
