@@ -267,7 +267,7 @@ class SDLConan(ConanFile):
         tc.cache_variables["SDL_OPENGLES"] = bool(self._supports_opengles)
 
         if self.options.hidapi:
-            tc.cache_variables["SDL_HIDAPI_LIBUSB"] = self.options.get_safe("libusb")
+            tc.cache_variables["SDL_HIDAPI_LIBUSB"] = self.options.get_safe("libusb", False)
             # Prevent loading shared libusb during runtime
             # This just means it will be linked traditionally, even when libusb is shared
             # See https://github.com/libsdl-org/SDL/blob/96292a5b464258a2b926e0a3d72f8b98c2a81aa6/cmake/sdlchecks.cmake#L1107-L1113
