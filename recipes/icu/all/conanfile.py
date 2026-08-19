@@ -136,6 +136,10 @@ class ICUConan(ConanFile):
             tc.extra_defines.append("U_STATIC_IMPLEMENTATION")
         if is_apple_os(self):
             tc.extra_defines.append("_DARWIN_C_SOURCE")
+        if self.settings.os == "Linux":
+            # $ survives bash (sourcing conanautotoolstoolchain.sh) once, then Make's own
+            # $(LDFLAGS) expansion once more, so it needs escaping for both: \\ + \$ + \$
+            tc.extra_ldflags.append(r"-Wl,-rpath,\\\$\$ORIGIN")
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.extend([
             "--datarootdir=${prefix}/lib", # do not use share

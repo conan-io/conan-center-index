@@ -1,0 +1,16 @@
+When pkg-config returns multiple `-L` entries to link against OpenSSL, 
+the `curl-openssl.m4` macro only takes the first one and ignores the rest.
+This patch fixes that by replacing all `-L` entries with a colon-separated list of directories.
+
+--- a/m4/curl-openssl.m4
++++ b/m4/curl-openssl.m4
+@@ -126,7 +126,7 @@
+       AC_MSG_NOTICE([pkg-config: SSL_LIBS: "$SSL_LIBS"])
+       AC_MSG_NOTICE([pkg-config: SSL_LDFLAGS: "$SSL_LDFLAGS"])
+       AC_MSG_NOTICE([pkg-config: SSL_CPPFLAGS: "$SSL_CPPFLAGS"])
+
+-      LIB_OPENSSL=`echo $SSL_LDFLAGS | sed -e 's/^-L//'`
++      LIB_OPENSSL=`echo $SSL_LDFLAGS | sed -e 's/^-L//' -e 's/ -L/:/g'`
+
+       dnl use the values pkg-config reported.  This is here
+       dnl instead of below with CPPFLAGS and LDFLAGS because we only

@@ -54,6 +54,7 @@ class MujocoConan(ConanFile):
         self.requires("tinyobjloader/2.0.0-rc10")
         self.requires("libccd/2.1", options={"enable_double_precision": True})
         self.requires("marchingcubecpp/0.0.0.cci.20260224")
+        self.requires("miniz/3.1.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

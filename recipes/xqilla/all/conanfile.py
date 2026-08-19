@@ -14,6 +14,7 @@ required_conan_version = ">=1.53.0"
 
 class XqillaConan(ConanFile):
     name = "xqilla"
+    deprecated = "No longer maintained upstream, recipe is no longer maintained"
     description = (
         "XQilla is an XQuery and XPath 2 library and command line utility "
         "written in C++, implemented on top of the Xerces-C library"
@@ -56,7 +57,7 @@ class XqillaConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("xerces-c/3.2.3")
+        self.requires("xerces-c/[>=3.2.3 <4]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
