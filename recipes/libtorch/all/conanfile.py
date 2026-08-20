@@ -13,6 +13,7 @@ from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from pathlib import Path
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.system import PyEnv
+from conan.tools.scm import Version
 
 required_conan_version = ">=2.26"
 
@@ -121,7 +122,7 @@ class LibtorchRecipe(ConanFile):
         self.tool_requires("protobuf/<host_version>")
 
     def validate(self):
-        check_min_cppstd(self, 20)
+        check_min_cppstd(self, 20 if Version(self.version) >= "2.13.0" else 17)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
