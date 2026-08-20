@@ -28,7 +28,7 @@ class InfluxdbCppRestConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("cpprestsdk/2.10.19", transitive_headers=True)
+        self.requires("cpprestsdk/2.10.19")
         self.requires("rxcpp/4.1.1", transitive_headers=True)
         self.requires("openssl/[>=1.1 <4]")
 
