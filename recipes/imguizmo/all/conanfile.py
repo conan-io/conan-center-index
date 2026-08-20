@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -42,10 +43,21 @@ class ImGuizmoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("imgui/1.90.5", transitive_headers=True)
+        if self.version == "1.83":
+            self.requires("imgui/1.90.5", transitive_headers=True)
+        else:
+            postfix = "-docking" if str(self.version).endswith("-docking") else ""
+        
+            self.requires(f"imgui/1.92.8{postfix}", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # ImGuizmo 1.10 moved all source files into a src directory. We move them to the extracted root like the 1.83 layout
+        nested = os.path.join(self.source_folder, "src")
+        if os.path.isdir(nested):
+            for f in os.listdir(nested):
+                shutil.move(os.path.join(nested, f), self.source_folder)
+            os.rmdir(nested)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -58,16 +70,13 @@ class ImGuizmoConan(ConanFile):
         if self.version == "1.83" and Version(self.dependencies["imgui"].ref.version) >= "1.89.4":
             # Related to a breaking change: https://github.com/ocornut/imgui/blob/master/docs/CHANGELOG.txt#L912
             # Redirection: ImDrawList::AddBezierCurve() -> use ImDrawList::AddBezierCubic()
-            replace_in_file(self, os.path.join(self.source_folder, "GraphEditor.cpp"),
-                            "AddBezierCurve", "AddBezierCubic")
+            replace_in_file(self, os.path.join(self.source_folder, "GraphEditor.cpp"), "AddBezierCurve", "AddBezierCubic")
         cmake = CMake(self)
         cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE",
-             dst=os.path.join(self.package_folder, "licenses"),
-             src=self.source_folder)
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
 
