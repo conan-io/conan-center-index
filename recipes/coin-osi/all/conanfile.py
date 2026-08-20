@@ -2,14 +2,13 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, msvc_runtime_flag
 import os
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2"
 
 
 class CoinOsiConan(ConanFile):
@@ -30,39 +29,34 @@ class CoinOsiConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+            self.package_type = "static-library"
 
     def configure(self):
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("coin-utils/2.11.9")
+        self.requires("coin-utils/[>=2.11.9 <2.12]")
 
     def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("coin-osi does not support shared builds on Windows")
         # FIXME: This issue likely comes from very old autotools versions used to produce configure.
-        if hasattr(self, "settings_build") and cross_building(self) and self.options.shared:
+        if cross_building(self) and self.options.get_safe("shared"):
             raise ConanInvalidConfiguration("coin-osi shared not supported yet when cross-building")
 
     def build_requirements(self):
         self.tool_requires("gnu-config/cci.20210814")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.0.3")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -71,9 +65,6 @@ class CoinOsiConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
             "--without-blas",
@@ -91,7 +82,7 @@ class CoinOsiConan(ConanFile):
             env.define("CXX", "cl -nologo")
             env.define("LD", "link -nologo")
             env.define("AR", "lib -nologo")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             # TODO: Something to fix in conan client or pkgconf recipe?
             # This is a weird workaround when build machine is Windows. Here we have to inject regular
             # Windows path to pc files folder instead of unix path flavor injected by AutotoolsToolchain...
