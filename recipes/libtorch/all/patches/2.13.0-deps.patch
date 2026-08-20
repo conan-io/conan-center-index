@@ -1,17 +1,17 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index ce7890f..b4c80cf 100644
+index a8b655d..785f132 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -384,7 +384,7 @@ option(USE_MIMALLOC "Use mimalloc" OFF)
- # on Windows.
+@@ -418,7 +418,7 @@ option(USE_MIMALLOC "Use mimalloc" OFF)
+ # on Windows and AArch64.
  option(USE_MIMALLOC_ON_MKL "Use mimalloc on MKL" OFF)
- if(WIN32)
+ if(WIN32 OR (CPU_AARCH64 AND NOT APPLE))
 -  set(USE_MIMALLOC ON)
 +  # set(USE_MIMALLOC ON)
- 
-   # Not enable USE_MIMALLOC_ON_MKL due to it caused issue:
-   # https://github.com/pytorch/pytorch/issues/138994
-@@ -427,8 +427,7 @@ if(WIN32)
+   # Disable OPT flags for mimalloc on aarch64 as it breaks ARMv8.0
+   # See https://github.com/pytorch/pytorch/issues/174344
+   if(CPU_AARCH64)
+@@ -469,8 +469,7 @@ if(WIN32)
        libuv_tmp_LIBRARY
        NAMES uv libuv
        HINTS $ENV{CONDA_PREFIX}\\Library $ENV{PREFIX}\\Library
@@ -21,7 +21,7 @@ index ce7890f..b4c80cf 100644
      if(NOT libuv_tmp_LIBRARY)
        set(USE_DISTRIBUTED OFF)
        set(USE_GLOO OFF)
-@@ -796,9 +795,7 @@ if(NOT CMAKE_BUILD_TYPE)
+@@ -872,9 +871,7 @@ if(NOT CMAKE_BUILD_TYPE)
  endif()
  
  # The below means we are cross compiling for arm64 or x86_64 on MacOSX
@@ -32,7 +32,7 @@ index ce7890f..b4c80cf 100644
    set(CROSS_COMPILING_MACOSX TRUE)
    # We need to compile a universal protoc to not fail protobuf build We set
    # CMAKE_TRY_COMPILE_TARGET_TYPE to STATIC_LIBRARY (vs executable) to succeed
-@@ -828,7 +825,7 @@ if(NOT IOS
+@@ -904,7 +901,7 @@ if(NOT IOS
    set(CAFFE2_CUSTOM_PROTOC_EXECUTABLE
        "${PROJECT_SOURCE_DIR}/build_host_protoc/bin/protoc")
  endif()
@@ -41,7 +41,7 @@ index ce7890f..b4c80cf 100644
  # ---[ Misc checks to cope with various compiler modes
  include(cmake/MiscCheck.cmake)
  
-@@ -1259,8 +1256,7 @@ if(USE_MIMALLOC)
+@@ -1312,8 +1309,7 @@ if(USE_MIMALLOC)
    set(MI_BUILD_OBJECT OFF)
    set(MI_BUILD_TESTS OFF)
    add_definitions(-DUSE_MIMALLOC)
@@ -51,11 +51,36 @@ index ce7890f..b4c80cf 100644
  endif()
  
  if(USE_MIMALLOC AND USE_MIMALLOC_ON_MKL)
+@@ -1462,17 +1458,13 @@ if(BUILD_BUNDLE_PTXAS AND USE_CUDA)
+           DESTINATION "${CMAKE_INSTALL_BINDIR}")
+ endif()
+ 
+-# File mirroring: copy source files into torchgen/packaged/, vendored
+-# inductor templates, and symlink-replacement copies.  Previously handled
+-# by setup.py; now consolidated here for both scikit-build-core and
+-# setuptools builds.
+-include(cmake/FileMirroring.cmake)
+-
+-# Package data: install non-Python data files (type stubs, templates,
+-# headers, etc.) into the torch package.  Previously declared via
+-# setup.py package_data; now consolidated here for both scikit-build-core
+-# and setuptools builds.
+-include(cmake/PackageData.cmake)
++# File mirroring / package data are for Python wheel packaging and pull in
++# third_party headers (e.g. valgrind) that are removed when building libtorch
++# via Conan with BUILD_PYTHON=OFF.
++if(BUILD_PYTHON)
++  include(cmake/FileMirroring.cmake)
++  include(cmake/PackageData.cmake)
++endif()
+ 
+ include(cmake/PostBuildSteps.cmake)
+ 
 diff --git a/aten/src/ATen/CMakeLists.txt b/aten/src/ATen/CMakeLists.txt
-index 6c09568..0266a1f 100644
+index adf7b5e..a08b05b 100644
 --- a/aten/src/ATen/CMakeLists.txt
 +++ b/aten/src/ATen/CMakeLists.txt
-@@ -647,15 +647,10 @@ if(NOT EMSCRIPTEN AND NOT INTERN_BUILD_MOBILE)
+@@ -812,15 +812,10 @@ if(NOT EMSCRIPTEN AND NOT INTERN_BUILD_MOBILE)
      list(APPEND ATen_THIRD_PARTY_INCLUDE ${CMAKE_BINARY_DIR}/include)
      link_directories(${CMAKE_BINARY_DIR}/sleef/lib)
    else()
@@ -74,7 +99,7 @@ index 6c09568..0266a1f 100644
    if(NOT MSVC)
      set(CMAKE_C_FLAGS_DEBUG ${OLD_CMAKE_C_FLAGS_DEBUG})
 diff --git a/aten/src/ATen/native/quantized/cpu/qnnpack/CMakeLists.txt b/aten/src/ATen/native/quantized/cpu/qnnpack/CMakeLists.txt
-index 799ec5e..c1ed8d9 100644
+index 19b7851..67479e5 100644
 --- a/aten/src/ATen/native/quantized/cpu/qnnpack/CMakeLists.txt
 +++ b/aten/src/ATen/native/quantized/cpu/qnnpack/CMakeLists.txt
 @@ -385,12 +385,7 @@ if(NOT TARGET fxdiv AND NOT USE_SYSTEM_FXDIV)
@@ -120,18 +145,16 @@ index 799ec5e..c1ed8d9 100644
  target_link_libraries(pytorch_qnnpack PRIVATE fp16)
  
 diff --git a/caffe2/CMakeLists.txt b/caffe2/CMakeLists.txt
-index 6ab41b6..bb07522 100644
+index e4a0454..1342f94 100644
 --- a/caffe2/CMakeLists.txt
 +++ b/caffe2/CMakeLists.txt
-@@ -1322,11 +1322,10 @@ if(USE_KINETO)
+@@ -1338,11 +1338,7 @@ if(USE_KINETO)
      ${TORCH_ROOT}/third_party/kineto/libkineto/src)
  endif()
  
 -target_include_directories(torch_cpu PRIVATE
 -  ${TORCH_ROOT}/third_party/cpp-httplib)
-+find_package(httplib REQUIRED CONFIG)
-+find_package(nlohmann_json REQUIRED CONFIG)
- 
+-
 -target_include_directories(torch_cpu PRIVATE
 -  ${TORCH_ROOT}/third_party/nlohmann/include)
 +target_link_libraries(torch_cpu PRIVATE httplib nlohmann)
@@ -139,10 +162,10 @@ index 6ab41b6..bb07522 100644
  install(DIRECTORY
    "${TORCH_SRC_DIR}/csrc"
 diff --git a/cmake/Dependencies.cmake b/cmake/Dependencies.cmake
-index ef5c2fd..6a15d1e 100644
+index 2baa187..289b3a9 100644
 --- a/cmake/Dependencies.cmake
 +++ b/cmake/Dependencies.cmake
-@@ -299,12 +299,8 @@ endif()
+@@ -332,12 +332,8 @@ endif()
  # --- [ PocketFFT
  set(AT_POCKETFFT_ENABLED 0)
  if(NOT AT_MKL_ENABLED)
@@ -157,7 +180,7 @@ index ef5c2fd..6a15d1e 100644
  
    set(AT_POCKETFFT_ENABLED 1)
    message(STATUS "Using pocketfft in directory: ${POCKETFFT_INCLUDE_DIR}")
-@@ -403,12 +399,7 @@ if(INTERN_BUILD_MOBILE OR NOT DISABLE_NNPACK_AND_FAMILY)
+@@ -436,12 +432,7 @@ if(INTERN_BUILD_MOBILE OR NOT DISABLE_NNPACK_AND_FAMILY)
  
    if(NOT TARGET pthreadpool)
      if(USE_SYSTEM_PTHREADPOOL)
@@ -171,7 +194,7 @@ index ef5c2fd..6a15d1e 100644
        message("-- Found pthreadpool: ${PTHREADPOOL_LIBRARY}")
      else()
        if(NOT DEFINED PTHREADPOOL_SOURCE_DIR)
-@@ -433,6 +424,7 @@ else()
+@@ -466,6 +457,7 @@ else()
  endif()
  
  if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(s390x|ppc64le)$")
@@ -179,7 +202,7 @@ index ef5c2fd..6a15d1e 100644
    # ---[ Caffe2 uses cpuinfo library in the thread pool
    # ---[ But it doesn't support s390x/powerpc and thus not used on s390x/powerpc
    if(NOT TARGET cpuinfo AND USE_SYSTEM_CPUINFO)
-@@ -499,7 +491,7 @@ endif()
+@@ -532,7 +524,7 @@ endif()
  
  # ---[ NNPACK
  if(USE_NNPACK)
@@ -188,7 +211,7 @@ index ef5c2fd..6a15d1e 100644
    if(NNPACK_FOUND)
      if(TARGET nnpack)
        # ---[ NNPACK is being built together with Caffe2: explicitly specify dependency
-@@ -580,17 +572,8 @@ if(USE_XNNPACK AND NOT USE_SYSTEM_XNNPACK)
+@@ -610,17 +602,8 @@ if(USE_XNNPACK AND NOT USE_SYSTEM_XNNPACK)
    include_directories(SYSTEM ${XNNPACK_INCLUDE_DIR})
    list(APPEND Caffe2_DEPENDENCY_LIBS XNNPACK microkernels-prod)
  elseif(NOT TARGET XNNPACK AND USE_SYSTEM_XNNPACK)
@@ -208,7 +231,7 @@ index ef5c2fd..6a15d1e 100644
  endif()
  
  # ---[ Vulkan deps
-@@ -708,7 +691,7 @@ endif()
+@@ -738,7 +721,7 @@ endif()
  # ---[ NUMA
  if(USE_NUMA)
    if(LINUX)
@@ -217,7 +240,7 @@ index ef5c2fd..6a15d1e 100644
      if(NOT NUMA_FOUND)
        message(WARNING "Not compiling with NUMA. Suppress this warning with -DUSE_NUMA=OFF")
        caffe2_update_option(USE_NUMA OFF)
-@@ -757,9 +740,8 @@ if(NOT TARGET fp16 AND NOT USE_SYSTEM_FP16)
+@@ -787,9 +770,8 @@ if(NOT TARGET fp16 AND NOT USE_SYSTEM_FP16)
        "${FP16_SOURCE_DIR}"
        "${CONFU_DEPENDENCIES_BINARY_DIR}/FP16")
    endif()
@@ -229,7 +252,7 @@ index ef5c2fd..6a15d1e 100644
  endif()
  list(APPEND Caffe2_DEPENDENCY_LIBS fp16)
  
-@@ -781,7 +763,7 @@ endif()
+@@ -811,7 +793,7 @@ endif()
  # Due to license considerations, we will only use the MPL2 parts of Eigen.
  set(EIGEN_MPL2_ONLY 1)
  if(USE_SYSTEM_EIGEN_INSTALL)
@@ -238,7 +261,7 @@ index ef5c2fd..6a15d1e 100644
    if(EIGEN3_FOUND)
      message(STATUS "Found system Eigen at " ${EIGEN3_INCLUDE_DIR})
    else()
-@@ -1307,20 +1289,9 @@ if(CAFFE2_CMAKE_BUILDING_WITH_MAIN_REPO AND NOT INTERN_DISABLE_ONNX)
+@@ -1406,20 +1388,9 @@ if(CAFFE2_CMAKE_BUILDING_WITH_MAIN_REPO AND NOT INTERN_DISABLE_ONNX)
      endif()
      list(APPEND Caffe2_DEPENDENCY_WHOLE_LINK_LIBS onnx_library)
    else()
@@ -262,7 +285,7 @@ index ef5c2fd..6a15d1e 100644
    endif()
    # Recover the build shared libs option.
    set(BUILD_SHARED_LIBS ${TEMP_BUILD_SHARED_LIBS})
-@@ -1492,15 +1463,9 @@ if(NOT INTERN_BUILD_MOBILE)
+@@ -1571,15 +1542,9 @@ if(NOT INTERN_BUILD_MOBILE)
    endif()
  
    if(USE_KLEIDIAI)
@@ -280,7 +303,7 @@ index ef5c2fd..6a15d1e 100644
    endif()
  
    if(UNIX AND NOT APPLE)
-@@ -1514,6 +1479,7 @@ if(NOT INTERN_BUILD_MOBILE)
+@@ -1593,6 +1558,7 @@ if(NOT INTERN_BUILD_MOBILE)
    endif(UNIX AND NOT APPLE)
  
    if(UNIX)
@@ -288,38 +311,55 @@ index ef5c2fd..6a15d1e 100644
      set(CMAKE_EXTRA_INCLUDE_FILES "sys/mman.h")
      CHECK_FUNCTION_EXISTS(mmap HAVE_MMAP)
      if(HAVE_MMAP)
-@@ -1546,7 +1512,7 @@ endif()
- #
+@@ -1633,30 +1599,9 @@ endif()
+ # This was the default behavior before version 12.0.0.
+ # Since PyTorch C API depends on it, make it available for projects that
+ # depend on PyTorch.
+-set(FMT_INSTALL ON)
  set(TEMP_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
  set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libs" FORCE)
 -add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/fmt)
-+find_package(fmt REQUIRED)
- 
- # Disable compiler feature checks for `fmt`.
- #
-@@ -1555,7 +1521,6 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/fmt)
- # CMAKE_CXX_FLAGS in ways that break feature checks. Since we already know
- # `fmt` is compatible with a superset of the compilers that PyTorch is, it
- # shouldn't be too bad to just disable the checks.
+-
+-# Disable compiler feature checks for `fmt`.
+-#
+-# CMake compiles a little program to check compiler features. Some of our build
+-# configurations (notably the mobile build analyzer) will populate
+-# CMAKE_CXX_FLAGS in ways that break feature checks. Since we already know
+-# `fmt` is compatible with a superset of the compilers that PyTorch is, it
+-# shouldn't be too bad to just disable the checks.
 -set_target_properties(fmt-header-only PROPERTIES INTERFACE_COMPILE_FEATURES "")
+-
+-# Keep fmt's header-only type layout stable across mixed C++ modes by forcing
+-# one no_unique_address spelling for all translation units.
+-if(MSVC AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+-  set(_fmt_no_unique_address "[[msvc::no_unique_address]]")
+-else()
+-  set(_fmt_no_unique_address "[[no_unique_address]]")
+-endif()
+-target_compile_definitions(fmt PUBLIC "FMT_NO_UNIQUE_ADDRESS=${_fmt_no_unique_address}")
+-target_compile_definitions(fmt-header-only INTERFACE "FMT_NO_UNIQUE_ADDRESS=${_fmt_no_unique_address}")
+-unset(_fmt_no_unique_address)
++find_package(fmt REQUIRED)
  
  list(APPEND Caffe2_DEPENDENCY_LIBS fmt::fmt-header-only)
  set(BUILD_SHARED_LIBS ${TEMP_BUILD_SHARED_LIBS} CACHE BOOL "Build shared libs" FORCE)
-@@ -1709,16 +1674,10 @@ if(USE_KINETO)
+@@ -1729,16 +1674,15 @@ if(USE_KINETO)
  endif()
  
  # Include google/FlatBuffers
 -include(${CMAKE_CURRENT_LIST_DIR}/FlatBuffers.cmake)
--
--# Include cpp-httplib
--add_library(httplib INTERFACE IMPORTED)
--target_include_directories(httplib SYSTEM INTERFACE ${PROJECT_SOURCE_DIR}/third_party/cpp-httplib)
 +find_package(FlatBuffers REQUIRED CONFIG)
 +list(APPEND Caffe2_DEPENDENCY_LIBS flatbuffers::flatbuffers)
  
--# Include nlohmann-json
+ # Include cpp-httplib
+-add_library(httplib INTERFACE IMPORTED)
+-target_include_directories(httplib SYSTEM INTERFACE ${PROJECT_SOURCE_DIR}/third_party/cpp-httplib)
++find_package(httplib REQUIRED CONFIG GLOBAL)
+ 
+ # Include nlohmann-json
 -add_library(nlohmann INTERFACE IMPORTED)
 -include_directories(nlohmann SYSTEM INTERFACE ${PROJECT_SOURCE_DIR}/third_party/nlohmann/include)
++find_package(nlohmann_json REQUIRED CONFIG GLOBAL)
  
  # Include moodycamel
 -add_library(moodycamel INTERFACE IMPORTED)
@@ -339,67 +379,3 @@ index 77ec362..441a2b1 100644
  elseif(Protobuf_FOUND OR PROTOBUF_FOUND)
    # If the modern targets are not present, we will generate them for you for
    # backward compatibility. This is backported from CMake's new FindProtobuf.cmake
-diff --git a/tools/generate_torch_version.py b/tools/generate_torch_version.py
-index ce92638..f985fca 100644
---- a/tools/generate_torch_version.py
-+++ b/tools/generate_torch_version.py
-@@ -6,8 +6,6 @@ import re
- import subprocess
- from pathlib import Path
- 
--from setuptools import distutils  # type: ignore[import,attr-defined]
--
- 
- UNKNOWN = "Unknown"
- RELEASE_PATTERN = re.compile(r"/v[0-9]+(\.[0-9]+)*(-rc[0-9]+)?/")
-@@ -63,6 +61,29 @@ def get_torch_version(sha: str | None = None) -> str:
-         version += "+git" + sha[:7]
-     return version
- 
-+# TEMP
-+
-+_MAP = {
-+    'y': True,
-+    'yes': True,
-+    't': True,
-+    'true': True,
-+    'on': True,
-+    '1': True,
-+    'n': False,
-+    'no': False,
-+    'f': False,
-+    'false': False,
-+    'off': False,
-+    '0': False
-+}
-+
-+
-+def strtobool(value):
-+    try:
-+        return _MAP[str(value).lower()]
-+    except KeyError:
-+        raise ValueError('"{}" is not a valid bool value'.format(value))
- 
- if __name__ == "__main__":
-     parser = argparse.ArgumentParser(
-@@ -71,7 +92,7 @@ if __name__ == "__main__":
-     parser.add_argument(
-         "--is-debug",
-         "--is_debug",
--        type=distutils.util.strtobool,
-+        type=strtobool,
-         help="Whether this build is debug mode or not.",
-     )
-     parser.add_argument("--cuda-version", "--cuda_version", type=str)
-diff --git a/torch/nativert/executor/Placement.cpp b/torch/nativert/executor/Placement.cpp
-index 0432ecd..16cdc61 100644
---- a/torch/nativert/executor/Placement.cpp
-+++ b/torch/nativert/executor/Placement.cpp
-@@ -2,6 +2,7 @@
- 
- #include <fmt/ostream.h>
- #include <ostream>
-+#include <algorithm>
- 
- namespace torch::nativert {
- 
