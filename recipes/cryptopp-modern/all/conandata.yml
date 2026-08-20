@@ -1,0 +1,4 @@
+sources:
+  "2026.8.1":
+    url: "https://github.com/cryptopp-modern/cryptopp-modern/releases/download/2026.8.1/cryptopp-modern-2026.8.1.tar.gz"
+    sha256: "a520241300a97bc9a2408ca020dc0a114f3310bc0362551ef3840cf0f4f842d7"
