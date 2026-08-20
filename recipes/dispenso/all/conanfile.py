@@ -32,7 +32,7 @@ class DispensoPackage(ConanFile):
 
     def requirements(self):
         # Part of the public api in dispenso/thread_pool.h (and more), unvendorized
-        self.requires("concurrentqueue/1.0.4", transitive_headers=True)
+        self.requires("concurrentqueue/1.0.5", transitive_headers=True)
 
     def validate(self):
         check_min_cppstd(self, 14)
