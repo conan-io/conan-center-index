@@ -30,7 +30,7 @@ class MatxConan(ConanFile):
     def validate(self):
         if self.settings.os not in ("Linux", "Windows"):
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
-        # matx/1.0.0 needs cuda-toolkit >=13.x as it depends on CCCL > 3.3.0
+        # matx/1.0.0 and newer needs cuda-toolkit >=13.x as it depends on CCCL > 3.3.0
         # This recipe is not calling CPM
         min_cppstd = 17 if Version(self.version) < "1.0.0" else 20
         check_min_cppstd(self, min_cppstd)
