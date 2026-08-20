@@ -35,26 +35,28 @@ class TgbotConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         self.requires("boost/[>=1.83.0 <1.90.0]", options={"header_only": True}, transitive_headers=True)
         self.requires("libcurl/[>=7.78 <9]", transitive_headers=True, transitive_libs=True)
         self.requires("nlohmann_json/3.12.0", transitive_headers=True)
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16]")
+
     def validate(self):
         check_min_cppstd(self, 20)
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        dependencies = CMakeDeps(self)
-        dependencies.generate()
-
-        toolchain = CMakeToolchain(self)
-        toolchain.generate()
+        tc = CMakeToolchain(self)
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -64,12 +66,14 @@ class TgbotConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["TgBot"]
-        self.cpp_info.set_property("cmake_file_name", "TgBot")
+        self.cpp_info.set_property("cmake_file_name_variants", ["TgBot"])
         self.cpp_info.set_property("cmake_target_name", "TgBot::TgBot")
         self.cpp_info.set_property("cmake_target_aliases", ["tgbot::tgbot"])
         if self.options.shared:
@@ -78,3 +82,5 @@ class TgbotConan(ConanFile):
             self.cpp_info.defines.extend(["_WIN32_WINNT=0x0601", "WIN32_LEAN_AND_MEAN", "NOMINMAX"])
             if not self.options.shared:
                 self.cpp_info.system_libs.append("ws2_32")
+        elif self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
