@@ -2,9 +2,3 @@ sources:
   "11.0.1":
     url: "https://github.com/eclipse-cyclonedds/cyclonedds-cxx/archive/refs/tags/11.0.1.tar.gz"
     sha256: "f20d30610100329716b2bd810054741a6ce9be6a9eeefcf941def1e1b311ddb2"
-  "0.10.5":
-    url: "https://github.com/eclipse-cyclonedds/cyclonedds-cxx/archive/refs/tags/0.10.5.tar.gz"
-    sha256: "94a6287f617e689690fc17a068b60be1ae003099702d3e1a95162f74edb88442"
-  "0.10.4":
-    url: "https://github.com/eclipse-cyclonedds/cyclonedds-cxx/archive/refs/tags/0.10.4.tar.gz"
-    sha256: "ca09d738b150a7dc1fa63dcb5ad211a4ba516c92710ebff7b9fe817c7c5a257e"
