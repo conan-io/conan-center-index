@@ -80,3 +80,4 @@ class InfluxdbCppRestConan(ConanFile):
         self.cpp_info.components["c-rest"].set_property("cmake_target_name", "influxdb-cpp-rest::influx-c-rest")
         self.cpp_info.components["c-rest"].libs = ["influx-c-rest"]
         self.cpp_info.components["c-rest"].includedirs = ["include/influx-c-rest"]
+        self.cpp_info.components["c-rest"].requires = ["cpp-rest"]
