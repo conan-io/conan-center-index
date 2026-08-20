@@ -28,11 +28,12 @@ class InfluxdbCppRestConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("cpprestsdk/2.10.19")
-        self.requires("rxcpp/4.1.1")
+        self.requires("cpprestsdk/2.10.19", transitive_headers=True)
+        self.requires("rxcpp/4.1.1", transitive_headers=True)
+        self.requires("openssl/[>=1.1 <4]")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.20]")
+        self.tool_requires("cmake/[>=3.20 <4]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -66,8 +67,16 @@ class InfluxdbCppRestConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "influxdb-cpp-rest")
-        self.cpp_info.set_property("cmake_target_name", "influxdb-cpp-rest::influxdb-cpp-rest")
-        self.cpp_info.libs = ["influxdb-cpp-rest"]
-        self.cpp_info.includedirs = ["include/influxdb-cpp-rest"]
+
+        # C++ client library (static)
+        self.cpp_info.components["cpp-rest"].set_property("cmake_target_name", "influxdb-cpp-rest::influxdb-cpp-rest")
+        self.cpp_info.components["cpp-rest"].libs = ["influxdb-cpp-rest"]
+        self.cpp_info.components["cpp-rest"].includedirs = ["include/influxdb-cpp-rest"]
+        self.cpp_info.components["cpp-rest"].requires = ["cpprestsdk::cpprest", "rxcpp::rxcpp", "openssl::openssl"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.components["cpp-rest"].system_libs = ["pthread"]
+
+        # C wrapper (shared)
+        self.cpp_info.components["c-rest"].set_property("cmake_target_name", "influxdb-cpp-rest::influx-c-rest")
+        self.cpp_info.components["c-rest"].libs = ["influx-c-rest"]
+        self.cpp_info.components["c-rest"].includedirs = ["include/influx-c-rest"]
