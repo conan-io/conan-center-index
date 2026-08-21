@@ -43,6 +43,7 @@ class DispensoPackage(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["DISPENSO_USE_SYSTEM_CONCURRENTQUEUE"] = True
+        tc.cache_variables["DISPENSO_WERROR"] = False
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
