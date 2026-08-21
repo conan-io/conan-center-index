@@ -1,0 +1,4 @@
+sources:
+  "2.0.6":
+    url: "https://github.com/librats/librats/archive/refs/tags/2.0.6.tar.gz"
+    sha256: "3f3afd8f69b7f27774588e6df42004284830454b007e77f198f26dad4812a711"
