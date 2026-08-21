@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
@@ -27,10 +28,24 @@ class AsioGrpcConan(ConanFile):
 
     def requirements(self):
         self.requires("grpc/[>=1.67.1 <2]", transitive_headers=True, transitive_libs=True)
-        if self.options.backend == "boost":
-            self.requires(f"boost/1.88.0", transitive_headers=True)
-        if self.options.backend == "asio":
-            self.requires(f"asio/1.32.0", transitive_headers=True)
+
+        # asio::inline_executor replaced system_executor as the default associated
+        # executor in Boost 1.90 / standalone Asio 1.38.0. asio-grpc hardcoded the
+        # old default until 3.6.0, so 3.5.x needs an upper bound.
+
+        if Version(self.version) >= "3.6.0":
+            if self.options.backend == "boost":
+                self.requires("boost/[>=1.74 <2]", transitive_headers=True)
+
+            if self.options.backend == "asio":
+                self.requires("asio/[>=1.17 <2]", transitive_headers=True)
+        else:
+            if self.options.backend == "boost":
+                self.requires("boost/[>=1.74 <1.90]", transitive_headers=True)
+
+            if self.options.backend == "asio":
+                self.requires("asio/[>=1.17 <1.37]", transitive_headers=True)
+
         if self.options.backend == "unifex":
             self.requires("libunifex/0.4.0", transitive_headers=True, transitive_libs=True)
 
