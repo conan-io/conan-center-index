@@ -1,7 +1,35 @@
 versions:
+  "3.12.14":
+    folder: "all"
+  "3.12.13":
+    folder: "all"
+  "3.12.12":
+    folder: "all"
+  "3.12.11":
+    folder: "all"
+  "3.12.10":
+    folder: "all"
+  "3.12.9":
+    folder: "all"
+  "3.12.8":
+    folder: "all"
   "3.12.7":
     folder: "all"
   "3.12.2":
+    folder: "all"
+  "3.11.16":
+    folder: "all"
+  "3.11.15":
+    folder: "all"
+  "3.11.14":
+    folder: "all"
+  "3.11.13":
+    folder: "all"
+  "3.11.12":
+    folder: "all"
+  "3.11.11":
+    folder: "all"
+  "3.11.10":
     folder: "all"
   "3.11.9":
     folder: "all"
