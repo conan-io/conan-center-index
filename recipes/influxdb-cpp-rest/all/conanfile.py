@@ -81,3 +81,6 @@ class InfluxdbCppRestConan(ConanFile):
         self.cpp_info.components["c-rest"].libs = ["influx-c-rest"]
         self.cpp_info.components["c-rest"].includedirs = ["include/influx-c-rest"]
         self.cpp_info.components["c-rest"].requires = ["cpp-rest"]
+        self.cpp_info.components["c-rest"].type = "shared-library"
+        # Adding the "bin" folder to work around this https://github.com/conan-io/conan/issues/20222
+        self.runenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
