@@ -130,6 +130,9 @@ class SDLConan(ConanFile):
         if self.settings.os != "Windows":
             del self.options.directx
 
+        if self.settings.os in ("iOS", "tvOS", "visionOS", "watchOS"):
+            del self.options.opengl
+
         if self.settings.os == "Emscripten":
             del self.options.opengl
             del self.options.vulkan
@@ -201,11 +204,6 @@ class SDLConan(ConanFile):
         return self.settings.os in ("Linux", "FreeBSD")
 
     @property
-    def _supports_opengl(self):
-        return (self.options.get_safe("opengl")
-                and self.settings.os not in ("iOS", "visionOS", "tvOS", "watchOS"))
-
-    @property
     def _supports_opengles(self):
         return (self.options.get_safe("opengles")
                 and self.settings.os in ("Android", "Emscripten", "iOS", "visionOS", "tvOS", "watchOS"))
@@ -219,7 +217,7 @@ class SDLConan(ConanFile):
             self.requires("libiconv/1.17")
         if self.options.get_safe("libusb"):
             self.requires("libusb/1.0.26")
-        if self._supports_opengl:
+        if self.options.get_safe("opengl"):
             self.requires("opengl/system")
         if self.options.get_safe("libudev"):
             self.requires("libudev/system")
@@ -263,7 +261,7 @@ class SDLConan(ConanFile):
         for subsystem in _subsystems:
             tc.cache_variables[f"SDL_{subsystem[0].upper()}"] = self.options.get_safe(subsystem[0])
 
-        tc.cache_variables["SDL_OPENGL"] = bool(self._supports_opengl)
+        tc.cache_variables["SDL_OPENGL"] = self.options.get_safe("opengl", False)
         tc.cache_variables["SDL_OPENGLES"] = bool(self._supports_opengles)
 
         if self.options.hidapi:
