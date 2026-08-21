@@ -1,0 +1,4 @@
+sources:
+  "3.8.12":
+    url: "https://github.com/CppMicroServices/CppMicroServices/archive/refs/tags/v3.8.12.zip"
+    sha256: "97d62b7ff46031aeb4d220425aea197027291f399d2a651e4da68ce3aa0649d9"

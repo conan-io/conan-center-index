@@ -1,0 +1,4 @@
+{
+  "bundle.symbolic_name": "test_greeter_activator",
+  "bundle.activator": true
+}
