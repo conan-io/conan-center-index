@@ -4,7 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=2.9"
 
 
 class InfluxdbCppRestConan(ConanFile):
