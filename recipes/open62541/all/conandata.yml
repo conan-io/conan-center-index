@@ -1,17 +1,23 @@
 sources:
-  "1.5.0":
-    url: "https://github.com/open62541/open62541/archive/v1.5.0.tar.gz"
-    sha256: "b7d92fe4b767aac2935ffb7bff9c88d528ce8a05a3767d093748f14388622636"
+  "1.5.5":
+    url: "https://github.com/open62541/open62541/archive/v1.5.5.tar.gz"
+    sha256: "a5f3d15eab72afb2ed67838b71f0d2c4c09b880d003857f71fc17b7279f2d397"
   "1.4.14":
     url: "https://github.com/open62541/open62541/archive/v1.4.14.tar.gz"
     sha256: "0a0a8830e4e5f720e901579f826c788fdbc3d49f44a9515ab15a06e877b59416"
 patches:
-  "1.5.0":
+  "1.5.5":
     - patch_file: "patches/0004-include-iphlpapi-1.5.0.patch"
       patch_description: "Include iphlpapi.h for SecureZeroMemory"
       patch_type: "conan"
-    - patch_file: "patches/1.5.0-0001-use-external-mdnsd.patch"
-      patch_description: "Consume mdnsd as external dependency provided by Conan"
+    - patch_file: "patches/1002-add-inet-to-libmdnsd.patch"
+      patch_description: "Add inet.h/inet.c to the libmdnsd headers and sources"
+      patch_type: "conan"
+    - patch_file: "patches/1003-mdnsd-inet-addr-api.patch"
+      patch_description: "Adapt ua_discovery_mdns.c mdnsd_in/mdnsd_out calls to the inet_addr_t mdnsd API"
+      patch_type: "conan"
+    - patch_file: "patches/1004-findServersOnNetwork-dont-skip.patch"
+      patch_description: "Fix Service_FindServersOnNetwork to advance the iterator correctly"
       patch_type: "conan"
   "1.4.14":
     - patch_file: "patches/0004-include-iphlpapi.patch"
