@@ -240,7 +240,8 @@ class SDLConan(ConanFile):
             self.requires("xorg/system")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.24]")
+        if not self.conf.get("tools.cmake:cmake_program", check_type=str):
+            self.tool_requires("cmake/[>=3.24]")
         if self._is_unix_sys and not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         if self.options.get_safe("wayland"):
