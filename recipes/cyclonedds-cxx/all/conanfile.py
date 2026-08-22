@@ -83,6 +83,7 @@ class CycloneDDSCXXConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -93,9 +94,6 @@ class CycloneDDSCXXConan(ConanFile):
         # variables which effects build
         tc.variables["ENABLE_LEGACY"] = False
         tc.variables["ENABLE_COVERAGE"] = False
-        # type library and qos provider support are always enabled in the cyclonedds recipe
-        tc.variables["ENABLE_TYPELIB"] = True
-        tc.variables["ENABLE_QOS_PROVIDER"] = True
         tc.variables["ENABLE_TOPIC_DISCOVERY"] = self.dependencies["cyclonedds"].options.enable_discovery
         tc.generate()
         deps = CMakeDeps(self)
@@ -113,12 +111,13 @@ class CycloneDDSCXXConan(ConanFile):
         replace_in_file(self, cmakelists,
                         "set(CMAKE_CXX_STANDARD 11)",
                         "")
+        # ON is safe: ENABLE_TOPIC_DISCOVERY (set in generate()) is the real gate and this var
+        # is only read inside that block; hardcoding keeps it config-independent for source()
         replace_in_file(self, cmakelists,
                         "get_target_property(cyclonedds_has_topic_discovery CycloneDDS::ddsc TOPIC_DISCOVERY_IS_AVAILABLE)",
-                        "set(cyclonedds_has_topic_discovery {})".format(self.dependencies["cyclonedds"].options.enable_discovery))
+                        "set(cyclonedds_has_topic_discovery ON)")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
