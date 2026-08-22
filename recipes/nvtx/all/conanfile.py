@@ -1,0 +1,48 @@
+from conan import ConanFile
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+import os
+
+required_conan_version = ">=1.50.0"
+
+
+class NVTXConan(ConanFile):
+    name = "nvtx"
+    description = (
+        "The NVIDIA Tools Extension SDK (NVTX) is a C-based API for annotating "
+        "events, code ranges, and resources in your applications."
+    )
+    homepage = "https://github.com/NVIDIA/NVTX"
+    url = "https://github.com/conan-io/conan-center-index"
+    license = "Apache-2.0"
+    topics = ("profiler", "nvidia", "nsight")
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.clear()
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        pass
+
+    def package(self):
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.h", src=os.path.join(self.source_folder, "c", "include"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, "*.hpp", src=os.path.join(self.source_folder, "c", "include"), dst=os.path.join(self.package_folder, "include"))
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "nvtx")
+        # This name does not match upstream, but consumers might be relying on it
+        self.cpp_info.set_property("cmake_target_name", "nvtx::nvtx")
+        self.cpp_info.set_property("cmake_target_aliases", ["nvtx3::nvtx3-cpp", "nvtx3::nvtx3-c"])
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("dl")

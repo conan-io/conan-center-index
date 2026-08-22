@@ -1,0 +1,193 @@
+diff --git a/termcap.h b/termcap.h
+index b19fb0a..1116b3f 100644
+--- a/termcap.h
++++ b/termcap.h
+@@ -16,46 +16,71 @@
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+ 
+ #ifndef _TERMCAP_H
+-#define _TERMCAP_H 1
++#define _TERMCAP_H
++#if defined _MSC_VER
++#  define TERMCAP_SHARED_EXPORT_API __declspec(dllexport)
++#  define TERMCAP_SHARED_IMPORT_API __declspec(dllimport)
++#  define TERMCAP_STATIC_IMPORT_API
++#  define TERMCAP_STATIC_EXPORT_API
++#else
++#  define TERMCAP_SHARED_EXPORT_API __attribute__((visibility("default")))
++#  define TERMCAP_SHARED_IMPORT_API __attribute__((visibility("default")))
++#  define TERMCAP_STATIC_IMPORT_API
++#  define TERMCAP_STATIC_EXPORT_API
++#endif
++
++#if defined TERMCAP_BUILDING
++#  define TERMCAP_SHARED_API TERMCAP_SHARED_EXPORT_API
++#  define TERMCAP_STATIC_API TERMCAP_STATIC_EXPORT_API
++#else
++#  define TERMCAP_SHARED_API TERMCAP_SHARED_IMPORT_API
++#  define TERMCAP_STATIC_API TERMCAP_STATIC_IMPORT_API
++#endif
++
++#if defined TERMCAP_SHARED
++#  define TERMCAP_API TERMCAP_SHARED_API
++#else
++#  define TERMCAP_API TERMCAP_STATIC_API
++#endif
+ 
+ #if __STDC__
+ 
+-extern int tgetent (char *buffer, const char *termtype);
++TERMCAP_API int tgetent (char *buffer, const char *termtype);
+ 
+-extern int tgetnum (const char *name);
+-extern int tgetflag (const char *name);
+-extern char *tgetstr (const char *name, char **area);
++TERMCAP_API int tgetnum (const char *name);
++TERMCAP_API int tgetflag (const char *name);
++TERMCAP_API char *tgetstr (const char *name, char **area);
+ 
+-extern char PC;
+-extern short ospeed;
+-extern void tputs (const char *string, int nlines, int (*outfun) (int));
++TERMCAP_API extern char PC;
++TERMCAP_API extern short ospeed;
++TERMCAP_API void tputs (const char *string, int nlines, int (*outfun) (int));
+ 
+-extern char *tparam (const char *ctlstring, char *buffer, int size, ...);
++TERMCAP_API char *tparam (const char *ctlstring, char *buffer, int size, ...);
+ 
+-extern char *UP;
+-extern char *BC;
++TERMCAP_API extern char *UP;
++TERMCAP_API extern char *BC;
+ 
+-extern char *tgoto (const char *cstring, int hpos, int vpos);
++TERMCAP_API char *tgoto (const char *cstring, int hpos, int vpos);
+ 
+ #else /* not __STDC__ */
+ 
+-extern int tgetent ();
++TERMCAP_API int tgetent ();
+ 
+-extern int tgetnum ();
+-extern int tgetflag ();
+-extern char *tgetstr ();
++TERMCAP_API int tgetnum ();
++TERMCAP_API int tgetflag ();
++TERMCAP_API char *tgetstr ();
+ 
+-extern char PC;
+-extern short ospeed;
++TERMCAP_API extern char PC;
++TERMCAP_API extern short ospeed;
+ 
+-extern void tputs ();
++TERMCAP_API void tputs ();
+ 
+-extern char *tparam ();
++TERMCAP_API char *tparam ();
+ 
+-extern char *UP;
+-extern char *BC;
++TERMCAP_API extern char *UP;
++TERMCAP_API extern char *BC;
+ 
+-extern char *tgoto ();
++TERMCAP_API char *tgoto ();
+ 
+ #endif /* not __STDC__ */
+ 
+diff --git a/termcap_intern.h b/termcap_intern.h
+new file mode 100644
+index 0000000..4179163
+--- /dev/null
++++ b/termcap_intern.h
+@@ -0,0 +1,88 @@
++/* Declarations for termcap library.
++   Copyright (C) 1991, 1992, 1995 Free Software Foundation, Inc.
++
++   This program is free software; you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 2, or (at your option)
++   any later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program; if not, write to the Free Software
++   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
++
++#ifndef _TERMCAP_H
++#define _TERMCAP_H 1
++
++#if defined _MSC_VER
++#  define TERMCAP_SHARED_EXPORT_API __declspec(dllexport)
++#  define TERMCAP_SHARED_IMPORT_API __declspec(dllimport)
++#  define TERMCAP_STATIC_IMPORT_API
++#  define TERMCAP_STATIC_EXPORT_API
++#else
++#  define TERMCAP_SHARED_EXPORT_API __attribute__((visibility("default")))
++#  define TERMCAP_SHARED_IMPORT_API __attribute__((visibility("default")))
++#  define TERMCAP_STATIC_IMPORT_API
++#  define TERMCAP_STATIC_EXPORT_API
++#endif
++
++#if defined TERMCAP_BUILDING
++#  define TERMCAP_SHARED_API TERMCAP_SHARED_EXPORT_API
++#  define TERMCAP_STATIC_API TERMCAP_STATIC_EXPORT_API
++#else
++#  define TERMCAP_SHARED_API TERMCAP_SHARED_IMPORT_API
++#  define TERMCAP_STATIC_API TERMCAP_STATIC_IMPORT_API
++#endif
++
++#if defined TERMCAP_SHARED
++#  define TERMCAP_API TERMCAP_SHARED_API
++#else
++#  define TERMCAP_API TERMCAP_STATIC_API
++#endif
++
++#if __STDC__
++
++TERMCAP_API int tgetent (char *buffer,  char *termtype);
++
++TERMCAP_API int tgetnum ( char *name);
++TERMCAP_API int tgetflag ( char *name);
++TERMCAP_API char *tgetstr ( char *name, char **area);
++
++TERMCAP_API extern char PC;
++TERMCAP_API extern short ospeed;
++TERMCAP_API void tputs ( char *string, int nlines, int (*outfun) (int));
++
++TERMCAP_API char *tparam ();
++
++TERMCAP_API extern char *UP;
++TERMCAP_API extern char *BC;
++
++TERMCAP_API char *tgoto ( char *cstring, int hpos, int vpos);
++
++#else /* not __STDC__ */
++
++TERMCAP_API int tgetent ();
++
++TERMCAP_API int tgetnum ();
++TERMCAP_API int tgetflag ();
++TERMCAP_API char *tgetstr ();
++
++TERMCAP_API extern char PC;
++TERMCAP_API extern short ospeed;
++
++TERMCAP_API void tputs ();
++
++TERMCAP_API char *tparam ();
++
++TERMCAP_API extern char *UP;
++TERMCAP_API extern char *BC;
++
++TERMCAP_API char *tgoto ();
++
++#endif /* not __STDC__ */
++
++#endif /* not _TERMCAP_H */

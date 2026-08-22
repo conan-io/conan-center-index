@@ -1,0 +1,18 @@
+--- a/src/liboping.c	2022-01-04 12:15:14.312483115 -0700
++++ b/src/liboping.c	2022-01-04 12:16:40.031084749 -0700
+@@ -203,8 +203,15 @@
+ static void ping_set_error (pingobj_t *obj, const char *function,
+ 	       	const char *message)
+ {
++#if __GNUC__ >= 7
++#pragma GCC diagnostic push
++#pragma GCC diagnostic ignored "-Wformat-truncation"
++#endif
+ 	snprintf (obj->errmsg, sizeof (obj->errmsg),
+ 			"%s: %s", function, message);
++#if __GNUC__ >= 7
++#pragma GCC diagnostic pop
++#endif
+ 	obj->errmsg[sizeof (obj->errmsg) - 1] = 0;
+ }
+ 

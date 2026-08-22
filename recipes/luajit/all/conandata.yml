@@ -1,0 +1,13 @@
+# INFO: Upstream moved to rolling releases and removed all tarballs.
+#       The Github mirror (https://github.com/LuaJIT/LuaJIT) does not match the checksums and have missing header files.
+#       Conan will consume the backup sources from the Conan Center Artifactory instead, which are the original tarballs (same checksums).
+#       Read the issue https://github.com/conan-io/conan-center-index/issues/25032 for more information.
+sources:
+  "2.1.0-beta3":
+    url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/1ad2e34b111c802f9d0cdf019e986909123237a28c746b21295b63c9e785d9c3"
+    sha256: "1ad2e34b111c802f9d0cdf019e986909123237a28c746b21295b63c9e785d9c3"
+patches:
+  "2.1.0-beta3":
+    - patch_file: "patches/2.1.0-beta3-0001-remove-mac-deploy.patch"
+      patch_type: "conan"
+      patch_description: "Do not enforce default value for MACOSX_DEPLOYMENT_TARGET"

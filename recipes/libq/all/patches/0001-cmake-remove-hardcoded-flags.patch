@@ -1,0 +1,22 @@
+diff --git a/cmake/compilersetup.cmake b/cmake/compilersetup.cmake
+index e550442..8ee19f7 100644
+--- a/cmake/compilersetup.cmake
++++ b/cmake/compilersetup.cmake
+@@ -15,7 +15,6 @@ set( CMAKE_CXX_EXTENSIONS OFF )
+ if ( CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
+ 
+ 	if ( CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
+-		set( CMAKE_CXX_FLAGS "-std=c++11 -Wall -pipe -pthread" )
+ 	endif ( )
+ 
+ 	if ( NOT CMAKE_CXX_FLAGS )
+@@ -82,9 +81,6 @@ elseif ( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
+ 	set( CMAKE_DEBUG_POSTFIX "d" )
+ 	add_definitions( "/bigobj" )
+ 
+-	set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd" )
+-	set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT" )
+-
+ else ( )
+ 
+ 	q_warning( "untested compiler: ${CMAKE_CXX_COMPILER}" )

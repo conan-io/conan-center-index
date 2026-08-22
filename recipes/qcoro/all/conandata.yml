@@ -1,0 +1,4 @@
+sources:
+  "0.4.0":
+    url: "https://github.com/danvratil/qcoro/archive/refs/tags/v0.4.0.tar.gz"
+    sha256: "0e68b3f0ce7bf521ffbdd731464d2d60d8d7a39a749b551ed26855a1707d86d1"

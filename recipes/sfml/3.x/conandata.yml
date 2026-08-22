@@ -1,0 +1,7 @@
+sources:
+  "3.0.2":
+    url: "https://github.com/SFML/SFML/archive/refs/tags/3.0.2.tar.gz"
+    sha256: "0034e05f95509e5d3fb81b1625713e06da7b068f210288ce3fd67106f8f46995"
+patches:
+  "3.0.2":
+    - patch_file: "patches/3.0.2-001-unvendor-deps.patch"

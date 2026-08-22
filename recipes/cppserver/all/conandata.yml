@@ -1,0 +1,16 @@
+sources:
+  "1.0.2.0":
+    url: "https://github.com/chronoxor/CppServer/archive/1.0.2.0.tar.gz"
+    sha256: "512b2ada2ddebcedcfac814e3d0784ccef410506dab5dcf64c56302b40e042d4"
+patches:
+  "1.0.2.0":
+    - patch_file: "patches/0001-cmake-clean-up-1-0-2-0.patch"
+      patch_description: "use cci packages, disable test/example builds"
+      patch_type: "conan"
+    - patch_file: "patches/0002-define-win32-winnt-1-0-2-0.patch"
+      patch_description: "add win32/winnt defines"
+      patch_type: "portability"
+    - patch_file: "patches/0003-remove-asio-defines-1-0-0-0.patch"
+      patch_description: "remove asio defines"
+      patch_type: "portability"
+

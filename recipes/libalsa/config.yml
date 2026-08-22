@@ -1,0 +1,19 @@
+versions:
+  "1.2.13":
+    folder: all
+  "1.2.12":
+    folder: all
+  "1.2.10":
+    folder: all
+  "1.2.7.2":
+    folder: all
+  "1.2.7":
+    folder: all
+  "1.2.5.1":
+    folder: all
+  "1.2.4":
+    folder: all
+  "1.2.2":
+    folder: all
+  "1.1.9":
+    folder: all

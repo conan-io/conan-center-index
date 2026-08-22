@@ -1,0 +1,570 @@
+diff --git a/Clients/DNS-SD.VisualStudio/dns-sd.vcxproj b/Clients/DNS-SD.VisualStudio/dns-sd.vcxproj
+index 8ed154a..e21d9de 100755
+--- a/Clients/DNS-SD.VisualStudio/dns-sd.vcxproj
++++ b/Clients/DNS-SD.VisualStudio/dns-sd.vcxproj
+@@ -26,18 +26,22 @@
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+diff --git a/Clients/ExplorerPlugin/ExplorerPlugin.vcxproj b/Clients/ExplorerPlugin/ExplorerPlugin.vcxproj
+index 810c90e..87fe301 100755
+--- a/Clients/ExplorerPlugin/ExplorerPlugin.vcxproj
++++ b/Clients/ExplorerPlugin/ExplorerPlugin.vcxproj
+@@ -34,24 +34,32 @@
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Template|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Template|Win32'">
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+diff --git a/Clients/ExplorerPlugin/ExplorerPluginLocRes.vcxproj b/Clients/ExplorerPlugin/ExplorerPluginLocRes.vcxproj
+index fb96fd3..faef74e 100755
+--- a/Clients/ExplorerPlugin/ExplorerPluginLocRes.vcxproj
++++ b/Clients/ExplorerPlugin/ExplorerPluginLocRes.vcxproj
+@@ -35,24 +35,32 @@
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Template|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Template|Win32'">
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+diff --git a/Clients/ExplorerPlugin/ExplorerPluginRes.vcxproj b/Clients/ExplorerPlugin/ExplorerPluginRes.vcxproj
+index 4fb6490..9471cec 100755
+--- a/Clients/ExplorerPlugin/ExplorerPluginRes.vcxproj
++++ b/Clients/ExplorerPlugin/ExplorerPluginRes.vcxproj
+@@ -34,24 +34,32 @@
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Template|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Template|Win32'">
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+diff --git a/Clients/FirefoxExtension/FirefoxExtension.vcxproj b/Clients/FirefoxExtension/FirefoxExtension.vcxproj
+index 1d02a4e..3999920 100755
+--- a/Clients/FirefoxExtension/FirefoxExtension.vcxproj
++++ b/Clients/FirefoxExtension/FirefoxExtension.vcxproj
+@@ -18,11 +18,13 @@
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>false</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>false</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+diff --git a/Clients/PrinterSetupWizard/PrinterSetupWizard.vcxproj b/Clients/PrinterSetupWizard/PrinterSetupWizard.vcxproj
+index 563597e..558320e 100755
+--- a/Clients/PrinterSetupWizard/PrinterSetupWizard.vcxproj
++++ b/Clients/PrinterSetupWizard/PrinterSetupWizard.vcxproj
+@@ -35,24 +35,32 @@
+     <ConfigurationType>Application</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Template|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Template|Win32'">
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+diff --git a/Clients/PrinterSetupWizard/PrinterSetupWizardLocRes.vcxproj b/Clients/PrinterSetupWizard/PrinterSetupWizardLocRes.vcxproj
+index 86affb8..efbb143 100755
+--- a/Clients/PrinterSetupWizard/PrinterSetupWizardLocRes.vcxproj
++++ b/Clients/PrinterSetupWizard/PrinterSetupWizardLocRes.vcxproj
+@@ -35,24 +35,32 @@
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Template|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Template|Win32'">
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+diff --git a/Clients/PrinterSetupWizard/PrinterSetupWizardRes.vcxproj b/Clients/PrinterSetupWizard/PrinterSetupWizardRes.vcxproj
+index 16befa7..3cf521c 100755
+--- a/Clients/PrinterSetupWizard/PrinterSetupWizardRes.vcxproj
++++ b/Clients/PrinterSetupWizard/PrinterSetupWizardRes.vcxproj
+@@ -35,24 +35,32 @@
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Template|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Template|Win32'">
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+diff --git a/Clients/mDNSNetMonitor.VisualStudio/mDNSNetMonitor.vcxproj b/Clients/mDNSNetMonitor.VisualStudio/mDNSNetMonitor.vcxproj
+index 89a27a4..a26a972 100755
+--- a/Clients/mDNSNetMonitor.VisualStudio/mDNSNetMonitor.vcxproj
++++ b/Clients/mDNSNetMonitor.VisualStudio/mDNSNetMonitor.vcxproj
+@@ -28,19 +28,23 @@
+     <ConfigurationType>Application</ConfigurationType>
+     <CharacterSet>Unicode</CharacterSet>
+     <WholeProgramOptimization>true</WholeProgramOptimization>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <CharacterSet>Unicode</CharacterSet>
+     <WholeProgramOptimization>true</WholeProgramOptimization>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+diff --git a/mDNSWindows/ControlPanel/ControlPanel.vcxproj b/mDNSWindows/ControlPanel/ControlPanel.vcxproj
+index c341d42..0b82bea 100755
+--- a/mDNSWindows/ControlPanel/ControlPanel.vcxproj
++++ b/mDNSWindows/ControlPanel/ControlPanel.vcxproj
+@@ -28,19 +28,23 @@
+     <ConfigurationType>Application</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+diff --git a/mDNSWindows/ControlPanel/ControlPanelLocRes.vcxproj b/mDNSWindows/ControlPanel/ControlPanelLocRes.vcxproj
+index bc51708..4633fe4 100755
+--- a/mDNSWindows/ControlPanel/ControlPanelLocRes.vcxproj
++++ b/mDNSWindows/ControlPanel/ControlPanelLocRes.vcxproj
+@@ -36,24 +36,32 @@
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Template|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Template|Win32'">
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+diff --git a/mDNSWindows/ControlPanel/ControlPanelRes.vcxproj b/mDNSWindows/ControlPanel/ControlPanelRes.vcxproj
+index 321e5ee..37fd041 100755
+--- a/mDNSWindows/ControlPanel/ControlPanelRes.vcxproj
++++ b/mDNSWindows/ControlPanel/ControlPanelRes.vcxproj
+@@ -34,24 +34,32 @@
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Template|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>Static</UseOfMfc>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Template|Win32'">
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+diff --git a/mDNSWindows/DLL/dnssd.vcxproj b/mDNSWindows/DLL/dnssd.vcxproj
+index 7438a3a..0a6a50e 100755
+--- a/mDNSWindows/DLL/dnssd.vcxproj
++++ b/mDNSWindows/DLL/dnssd.vcxproj
+@@ -28,18 +28,22 @@
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+diff --git a/mDNSWindows/DLLStub/DLLStub.vcxproj b/mDNSWindows/DLLStub/DLLStub.vcxproj
+index 292d931..0f3fd11 100755
+--- a/mDNSWindows/DLLStub/DLLStub.vcxproj
++++ b/mDNSWindows/DLLStub/DLLStub.vcxproj
+@@ -29,24 +29,28 @@
+     <UseOfAtl>false</UseOfAtl>
+     <CharacterSet>Unicode</CharacterSet>
+     <WholeProgramOptimization>false</WholeProgramOptimization>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>StaticLibrary</ConfigurationType>
+     <UseOfAtl>false</UseOfAtl>
+     <CharacterSet>Unicode</CharacterSet>
+     <WholeProgramOptimization>false</WholeProgramOptimization>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>StaticLibrary</ConfigurationType>
+     <UseOfAtl>false</UseOfAtl>
+     <CharacterSet>Unicode</CharacterSet>
+     <WholeProgramOptimization>false</WholeProgramOptimization>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>StaticLibrary</ConfigurationType>
+     <UseOfAtl>false</UseOfAtl>
+     <CharacterSet>Unicode</CharacterSet>
+     <WholeProgramOptimization>false</WholeProgramOptimization>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+diff --git a/mDNSWindows/DLLX/DLLX.vcxproj b/mDNSWindows/DLLX/DLLX.vcxproj
+index a57e4ed..6c414b7 100755
+--- a/mDNSWindows/DLLX/DLLX.vcxproj
++++ b/mDNSWindows/DLLX/DLLX.vcxproj
+@@ -28,23 +28,27 @@
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfAtl>Static</UseOfAtl>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>false</UseOfMfc>
+     <UseOfAtl>Static</UseOfAtl>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfAtl>Static</UseOfAtl>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseOfMfc>false</UseOfMfc>
+     <UseOfAtl>Static</UseOfAtl>
+     <CharacterSet>Unicode</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+diff --git a/mDNSWindows/NSPTool/NSPTool.vcxproj b/mDNSWindows/NSPTool/NSPTool.vcxproj
+index 7c86852..f676f42 100755
+--- a/mDNSWindows/NSPTool/NSPTool.vcxproj
++++ b/mDNSWindows/NSPTool/NSPTool.vcxproj
+@@ -26,18 +26,22 @@
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+diff --git a/mDNSWindows/SystemService/Service.vcxproj b/mDNSWindows/SystemService/Service.vcxproj
+index c0eb7a0..4a9ee1c 100755
+--- a/mDNSWindows/SystemService/Service.vcxproj
++++ b/mDNSWindows/SystemService/Service.vcxproj
+@@ -28,18 +28,22 @@
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+diff --git a/mDNSWindows/mdnsNSP/mdnsNSP.vcxproj b/mDNSWindows/mdnsNSP/mdnsNSP.vcxproj
+index 71b2b98..e844f9a 100755
+--- a/mDNSWindows/mdnsNSP/mdnsNSP.vcxproj
++++ b/mDNSWindows/mdnsNSP/mdnsNSP.vcxproj
+@@ -26,18 +26,22 @@
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v142</PlatformToolset>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">

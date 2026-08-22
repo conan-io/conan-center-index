@@ -1,0 +1,8 @@
+sources:
+  "2.1.1":
+    url: "https://support.hdfgroup.org/ftp/lib-external/szip/2.1.1/src/szip-2.1.1.tar.gz"
+    sha256: "21ee958b4f2d4be2c9cabfa5e1a94877043609ce86fde5f286f105f7ff84d412"
+patches:
+  "2.1.1":
+    - patch_file: "patches/fix_unknown_size_t.patch"
+    - patch_file: "patches/build_either_static_or_shared.patch"

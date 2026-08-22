@@ -1,0 +1,18 @@
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -246,6 +246,7 @@ endif()
+ 
+ 
+ 
++if(0)
+ if (APPLE)
+   set_target_properties(
+     ${SIDX_LIB_NAME}
+@@ -257,6 +258,7 @@ if (APPLE)
+     PROPERTIES
+     INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib" BUILD_WITH_INSTALL_RPATH OFF)
+ endif()
++endif()
+ 
+ ###############################################################################
+ # Targets installation

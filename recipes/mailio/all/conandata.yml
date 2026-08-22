@@ -1,0 +1,4 @@
+sources:
+  "0.26.0":
+    url: "https://github.com/karastojko/mailio/archive/refs/tags/0.26.0.tar.gz"
+    sha256: "f3222adf2d5d8d8f89c5509a6da10dd6456637f32b3962c3c0c9af54178849dc"

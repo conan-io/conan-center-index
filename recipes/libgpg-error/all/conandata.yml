@@ -1,0 +1,4 @@
+sources:
+  "1.61":
+    url: "https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.61.tar.gz"
+    sha256: "7980d7d43178b06a74bfba3d4606c13955bf2370344e12938d56ae4a9da6d36f"

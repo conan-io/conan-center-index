@@ -1,0 +1,11 @@
+--- a/src/common/normNode.cpp
++++ b/src/common/normNode.cpp
+@@ -1621,7 +1621,7 @@ void NormSenderNode::HandleObjectMessage(const NormObjectMsg& msg)
+         {
+             // The hacky use of "sync_id" here keeps the debug message from
+             // printing too often while "waiting to sync" ...
+-            if (0 == sync_id)
++            if (0 == (UINT16)sync_id)
+             {
+                 PLOG(PL_ERROR, "NormSenderNode::HandleObjectMessage() waiting to sync ...\n");
+                 sync_id = 100;

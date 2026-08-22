@@ -1,0 +1,18 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e6630a0..fff5d68 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -40,7 +40,12 @@ if(SPNG_SHARED)
+     add_library(spng SHARED ${spng_SOURCES})
+     target_include_directories(spng PUBLIC ${PROJECT_SOURCE_DIR}/spng)
+     target_link_libraries(spng ${spng_LIBS})
+-    install(TARGETS spng DESTINATION lib)
++    install(
++        TARGETS spng
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    )
+ 
+     if(BUILD_EXAMPLES)
+         add_executable(example examples/example.c)

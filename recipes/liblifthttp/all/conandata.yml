@@ -1,0 +1,4 @@
+sources:
+  "4.4.2":
+    url: "https://github.com/jbaldwin/liblifthttp/archive/refs/tags/v4.4.2.tar.gz"
+    sha256: "093ad71d95853ea6006ccefba0e68de945493d8a320e23fd5dbf64eecb1aacc5"

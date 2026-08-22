@@ -1,0 +1,13 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/vsg-dev/VulkanSceneGraph/archive/refs/tags/VulkanSceneGraph-1.0.0.tar.gz"
+    sha256: "5611284f4256893ea97a33f9e99f5ecc8bdda110cc9fb7770b291fb45e8f9cf6"
+  "1.0.3":
+    url: "https://github.com/vsg-dev/VulkanSceneGraph/archive/refs/tags/VulkanSceneGraph-1.0.3.tar.gz"
+    sha256: "84aa1d445ecdd2702843f8f01e760d4db32c2ab3fe8c5d6122f8a83b67a50e36"
+  "1.0.5":
+    url: "https://github.com/vsg-dev/VulkanSceneGraph/archive/refs/tags/v1.0.5.tar.gz"
+    sha256: "ff58260fcb88d19d92c40a70bc40ff06abb1a8805568eb76862a036d13ada75b"
+  "1.0.9":
+    url: "https://github.com/vsg-dev/VulkanSceneGraph/archive/v1.0.9.tar.gz"
+    sha256: "9a62be7facc13c391c33dc8356b147a3b86f531ea72a28f6b2c364777e761412"

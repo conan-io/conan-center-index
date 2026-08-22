@@ -1,0 +1,10 @@
+--- PCbuild/pcbuild.sln
++++ PCbuild/pcbuild.sln
+@@ -9,7 +9,4 @@
+ 	EndProjectSection
+ EndProject
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "python", "python.vcxproj", "{B11D750F-CD1F-4A96-85CE-E69A5C5259F9}"
+-	ProjectSection(ProjectDependencies) = postProject
+-		{0E9791DB-593A-465F-98BC-681011311618} = {0E9791DB-593A-465F-98BC-681011311618}
+-	EndProjectSection
+ EndProject

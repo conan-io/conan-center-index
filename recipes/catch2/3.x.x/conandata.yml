@@ -1,0 +1,4 @@
+sources:
+  "3.15.3":
+    url: "https://github.com/catchorg/Catch2/archive/refs/tags/v3.15.3.tar.gz"
+    sha256: "b0299ae552918220a7a6e21e7de5b714777f4e8c883fb70c4bb23fe01df8c6e3"

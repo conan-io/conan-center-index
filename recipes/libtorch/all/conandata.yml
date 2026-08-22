@@ -1,0 +1,9 @@
+sources:
+  "2.9.1":
+    url: "https://github.com/pytorch/pytorch/releases/download/v2.9.1/pytorch-v2.9.1.tar.gz"
+    sha256: "e17504700ebc4c87f9b57059df1c4d790b769458c04db144c7a92aea90f2c92b"
+
+patches:
+  "2.9.1":
+    - patch_file: "patches/2.9.1-deps.patch"
+      patch_description: "Fix CMake dependencies and python imports"

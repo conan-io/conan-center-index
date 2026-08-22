@@ -1,0 +1,14 @@
+sources:
+  "0.16.2":
+    url: "https://github.com/lief-project/LIEF/archive/0.16.2.tar.gz"
+    sha256: "895ce0321b233a6d610ed89ccbe8dc4aa2cf0bb959919a1db0693ba264f3d29a"
+  "0.13.1":
+    url: "https://github.com/lief-project/LIEF/archive/0.13.1.tar.gz"
+    sha256: "a3a846e9b6ce2acf89ef4687e870f41ca703f18fee3e7f501ebb05ee1aeb1847"
+patches:
+  "0.16.2":
+    - patch_file: "patches/0.16.2-001_cmake_fixes.patch"
+  "0.13.1":
+    - patch_file: "patches/0.13.0-001_link_to_conan.patch"
+      patch_description: "find conan package and link these"
+      patch_type: "conan"

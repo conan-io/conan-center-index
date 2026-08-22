@@ -1,0 +1,40 @@
+sources:
+  "4.1.0":
+    url: "https://github.com/uber/h3/archive/refs/tags/v4.1.0.tar.gz"
+    sha256: "ec99f1f5974846bde64f4513cf8d2ea1b8d172d2218ab41803bf6a63532272bc"
+  "3.7.2":
+    url: "https://github.com/uber/h3/archive/refs/tags/v3.7.2.tar.gz"
+    sha256: "803a7fbbeb01f1f65cae9398bda9579a0529e7bafffc6e0e0a6d81a71b305629"
+  "3.7.1":
+    url: "https://github.com/uber/h3/archive/v3.7.1.tar.gz"
+    sha256: "cfa3b4e1d46251929bd30575f09c89edb2c209be7ad8b0af15ff3f9a04132688"
+  "3.7.0":
+    url: "https://github.com/uber/h3/archive/v3.7.0.tar.gz"
+    sha256: "7b59780781750d2ccc64c50b6364d706947a684b0cb996c1b104f448562d2d7c"
+  "3.6.4":
+    url: "https://github.com/uber/h3/archive/v3.6.4.tar.gz"
+    sha256: "b80c2eee2b3e645de77893e27ca149e63d3bb6bf95d33e3a384e3f390e2681bb"
+  "3.6.3":
+    url: "https://github.com/uber/h3/archive/v3.6.3.tar.gz"
+    sha256: "3ba219959ecb0ef6956f05113aa659d7b605e4eebbdca561b8243ce309e4684e"
+patches:
+  "3.7.2":
+    - patch_file: "patches/fix-cmake-3.7.x.patch"
+      patch_description: "move project definition to head, set c99 flag"
+      patch_type: "portability"
+  "3.7.1":
+    - patch_file: "patches/fix-cmake-3.7.x.patch"
+      patch_description: "move project definition to head, set c99 flag"
+      patch_type: "portability"
+  "3.7.0":
+    - patch_file: "patches/fix-cmake-3.7.x.patch"
+      patch_description: "move project definition to head, set c99 flag"
+      patch_type: "portability"
+  "3.6.4":
+    - patch_file: "patches/fix-cmake-3.6.4.patch"
+      patch_description: "move project definition to head, set c99 flag"
+      patch_type: "portability"
+  "3.6.3":
+    - patch_file: "patches/fix-cmake-3.6.3.patch"
+      patch_description: "move project definition to head, set c99 flag"
+      patch_type: "portability"

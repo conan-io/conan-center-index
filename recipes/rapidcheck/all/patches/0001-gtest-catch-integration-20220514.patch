@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9f583af..ea31145 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -106,8 +106,6 @@ if(NOT RC_ENABLE_RTTI)
+   target_compile_definitions(rapidcheck PUBLIC RC_DONT_USE_RTTI)
+ endif()
+ 
+-add_subdirectory(ext)
+-
+ if(RC_ENABLE_TESTS)
+   enable_testing()
+   add_subdirectory(test)

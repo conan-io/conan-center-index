@@ -1,0 +1,7 @@
+versions:
+  # cppstd 20
+  "2026.07.06.00":
+    folder: all
+  # cppstd 17
+  "2024.08.12.00":
+    folder: 2024.x

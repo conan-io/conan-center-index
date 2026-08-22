@@ -1,0 +1,7 @@
+sources:
+  "3.1.1":
+    url: "https://github.com/erincatto/box2d/archive/refs/tags/v3.1.1.tar.gz"
+    sha256: "fb6ef914b50f4312d7d921a600eabc12318bb3c55a0b8c0b90608fa4488ef2e4"
+  "2.4.2":
+    url: "https://github.com/erincatto/box2d/archive/refs/tags/v2.4.2.tar.gz"
+    sha256: "85b9b104d256c985e6e244b4227d447897fac429071cc114e5cc819dae848852"

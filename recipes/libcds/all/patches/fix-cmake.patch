@@ -1,0 +1,57 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -85,7 +85,6 @@ endif(WITH_TESTS_COVERAGE)
+ set(CDS_SHARED_LIBRARY ${PROJECT_NAME})
+ set(CDS_STATIC_LIBRARY ${PROJECT_NAME}-s)
+ 
+-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+ set(CMAKE_INCLUDE_CURRENT_DIR ON)
+ 
+ if(CDS_BIN_DIR)
+@@ -162,33 +161,35 @@ set(SOURCES src/init.cpp
+             src/topology_osx.cpp
+             src/dllmain.cpp)
+ 
++if(BUILD_SHARED_LIBS)
+ add_library(${CDS_SHARED_LIBRARY} SHARED ${SOURCES})
+ set_target_properties(${CDS_SHARED_LIBRARY} PROPERTIES VERSION ${PROJECT_VERSION}
+         DEBUG_POSTFIX "_d")
+-if(MINGW)
++if(WIN32)
+     set_target_properties(${CDS_SHARED_LIBRARY} PROPERTIES DEFINE_SYMBOL CDS_BUILD_LIB)
+ endif()
+ 
++target_link_libraries(${CDS_SHARED_LIBRARY} PRIVATE ${CMAKE_THREAD_LIBS_INIT})
++target_include_directories(${CDS_SHARED_LIBRARY} INTERFACE "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
++                                                            $<INSTALL_INTERFACE:include>)
++target_compile_options(${CDS_SHARED_LIBRARY} PUBLIC "${LIBCDS_PUBLIC_CXX_FLAGS}")
++target_compile_options(${CDS_SHARED_LIBRARY} PRIVATE "${LIBCDS_PRIVATE_CXX_FLAGS}")
++install(TARGETS ${CDS_SHARED_LIBRARY} EXPORT LibCDSConfig LIBRARY DESTINATION lib ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)
++else()
+ add_library(${CDS_STATIC_LIBRARY} STATIC ${SOURCES})
+ set_target_properties(${CDS_STATIC_LIBRARY} PROPERTIES DEBUG_POSTFIX "_d")
+-if(MINGW)
+-    target_compile_definitions(${CDS_STATIC_LIBRARY} PRIVATE CDS_BUILD_STATIC_LIB)
++if(WIN32)
++    target_compile_definitions(${CDS_STATIC_LIBRARY} PUBLIC CDS_BUILD_STATIC_LIB)
+ endif()
+ 
+-target_link_libraries(${CDS_SHARED_LIBRARY} PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+ target_link_libraries(${CDS_STATIC_LIBRARY} PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+-target_include_directories(${CDS_SHARED_LIBRARY} INTERFACE "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
+-                                                            $<INSTALL_INTERFACE:include>)
+ target_include_directories(${CDS_STATIC_LIBRARY} INTERFACE "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
+                                                             $<INSTALL_INTERFACE:include>)
+-target_compile_options(${CDS_SHARED_LIBRARY} PUBLIC "${LIBCDS_PUBLIC_CXX_FLAGS}")
+ target_compile_options(${CDS_STATIC_LIBRARY} PUBLIC "${LIBCDS_PUBLIC_CXX_FLAGS}")
+-target_compile_options(${CDS_SHARED_LIBRARY} PRIVATE "${LIBCDS_PRIVATE_CXX_FLAGS}")
+ target_compile_options(${CDS_STATIC_LIBRARY} PRIVATE "${LIBCDS_PRIVATE_CXX_FLAGS}")
++install(TARGETS ${CDS_STATIC_LIBRARY} EXPORT LibCDSConfig LIBRARY DESTINATION lib ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)
++endif()
+ 
+-install(TARGETS ${CDS_SHARED_LIBRARY} EXPORT LibCDSConfig LIBRARY DESTINATION lib${LIB_SUFFIX} COMPONENT ${LIBRARIES_COMPONENT} NAMELINK_SKIP RUNTIME DESTINATION lib${LIB_SUFFIX})
+-install(TARGETS ${CDS_SHARED_LIBRARY} EXPORT LibCDSConfig LIBRARY DESTINATION lib${LIB_SUFFIX} COMPONENT ${HEADERS_COMPONENT} NAMELINK_ONLY)
+-install(TARGETS ${CDS_STATIC_LIBRARY} EXPORT LibCDSConfig DESTINATION lib${LIB_SUFFIX} COMPONENT ${LIBRARIES_COMPONENT})
+ install(EXPORT LibCDSConfig FILE LibCDSConfig.cmake NAMESPACE LibCDS:: DESTINATION lib/cmake/LibCDS)
+ install(DIRECTORY ${PROJECT_SOURCE_DIR}/cds DESTINATION include COMPONENT ${HEADERS_COMPONENT})
+ 

@@ -1,0 +1,4 @@
+sources:
+  "0.1.0":
+    url: "https://github.com/yandex/ozo/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "bf4f07c8105f9d5ccf0eebf88d3e33ee440b5668493f63e62de2cd184e80b39a"

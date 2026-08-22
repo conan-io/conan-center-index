@@ -1,0 +1,35 @@
+versions:
+  "7.21":
+    folder: all
+  "7.20":
+    folder: all
+  "7.10":
+    folder: all
+  "7.08":
+    folder: all
+  "7.07.1":
+    folder: all
+  "7.07":
+    folder: all
+  "7.06":
+    folder: all
+  "7.05":
+    folder: all
+  "7.00":
+    folder: all
+  "6.73":
+    folder: all
+  "6.62":
+    folder: all
+  "6.61.2":
+    folder: all
+  "6.60.2":
+    folder: all
+  "6.60":
+    folder: all
+  "6.01":
+    folder: all
+  "6.00":
+    folder: all
+  "5.993":
+    folder: all

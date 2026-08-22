@@ -1,0 +1,22 @@
+sources:
+  "1.4.0":
+    url: "https://github.com/Tessil/robin-map/archive/v1.4.0.tar.gz"
+    sha256: "7930dbf9634acfc02686d87f615c0f4f33135948130b8922331c16d90a03250c"
+  "1.3.0":
+    url: "https://github.com/Tessil/robin-map/archive/v1.3.0.tar.gz"
+    sha256: "a8424ad3b0affd4c57ed26f0f3d8a29604f0e1f2ef2089f497f614b1c94c7236"
+  "1.2.2":
+    url: "https://github.com/Tessil/robin-map/archive/v1.2.2.tar.gz"
+    sha256: "c72767ecea2a90074c7efbe91620c8f955af666505e22782e82813c652710821"
+  "1.2.1":
+    url: "https://github.com/Tessil/robin-map/archive/v1.2.1.tar.gz"
+    sha256: "2b54d2c1de2f73bea5c51d5dcbd64813a08caf1bfddcfdeee40ab74e9599e8e3"
+  "1.0.1":
+    url: "https://github.com/Tessil/robin-map/archive/v1.0.1.tar.gz"
+    sha256: "b2ffdb623727cea852a66bddcb7fa6d938538a82b40e48294bb581fe086ef005"
+  "0.6.3":
+    url: "https://github.com/Tessil/robin-map/archive/v0.6.3.tar.gz"
+    sha256: "e6654c8c2598f63eb0b1d52ff8bdf39cfcc91d81dd5d05274a6dca91241cd72f"
+  "0.6.2":
+    url: "https://github.com/Tessil/robin-map/archive/v0.6.2.tar.gz"
+    sha256: "c08ec4b1bf1c85eb0d6432244a6a89862229da1cb834f3f90fba8dc35d8c8ef1"

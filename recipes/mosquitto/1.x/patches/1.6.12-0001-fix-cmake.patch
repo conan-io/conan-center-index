@@ -1,0 +1,68 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4,11 +4,11 @@
+ # To configure the build options either use the CMake gui, or run the command
+ # line utility including the "-i" option.
+ 
++cmake_minimum_required(VERSION 3.1)
+ set(CMAKE_LEGACY_CYGWIN_WIN32 0)
+ 
+ project(mosquitto)
+ 
+-cmake_minimum_required(VERSION 2.8)
+ # Only for version 3 and up. cmake_policy(SET CMP0042 NEW)
+ 
+ set (VERSION 1.6.12)
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -65,6 +65,9 @@ endif (UNIX AND NOT APPLE)
+ 
+ if (WIN32)
+ 	set (LIBRARIES ${LIBRARIES} ws2_32)
++    if(WITH_TLS)
++        list(APPEND LIBRARIES crypt32)
++    endif()
+ endif (WIN32)
+ 
+ if (WITH_SRV)
+@@ -91,7 +94,7 @@ set_target_properties(libmosquitto PROPERTIES
+ 	SOVERSION 1
+ )
+ 
+-install(TARGETS libmosquitto RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
++install(TARGETS libmosquitto RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+ if (WITH_STATIC_LIBRARIES)
+ 	add_library(libmosquitto_static STATIC ${C_SRC})
+--- a/lib/cpp/CMakeLists.txt
++++ b/lib/cpp/CMakeLists.txt
+@@ -13,7 +13,7 @@ set_target_properties(mosquittopp PROPERTIES
+ 	VERSION ${VERSION}
+ 	SOVERSION 1
+ )
+-install(TARGETS mosquittopp RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
++install(TARGETS mosquittopp RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+ if (WITH_STATIC_LIBRARIES)
+ 	add_library(mosquittopp_static STATIC
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -167,6 +167,9 @@ endif (UNIX)
+ 
+ if (WIN32)
+ 	set (MOSQ_LIBS ${MOSQ_LIBS} ws2_32)
++    if(WITH_TLS)
++        list(APPEND MOSQ_LIBS crypt32)
++    endif()
+ endif (WIN32)
+ 
+ if (WITH_WEBSOCKETS)
+@@ -198,5 +201,8 @@ install(FILES mosquitto_broker.h mosquitto_plugin.h DESTINATION "${CMAKE_INSTALL
+ if (WITH_TLS)
+ 	add_executable(mosquitto_passwd mosquitto_passwd.c ../lib/misc_mosq.c)
+ 	target_link_libraries(mosquitto_passwd ${OPENSSL_LIBRARIES})
++    if(WIN32)
++        target_link_libraries(mosquitto_passwd ws2_32 crypt32)
++    endif()
+ 	install(TARGETS mosquitto_passwd RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+ endif (WITH_TLS)

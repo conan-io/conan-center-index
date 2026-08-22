@@ -1,0 +1,16 @@
+gcc-11 triggers an error. std::aligned_alloc needs c++17.
+This patch ports openal 1.21.1 behavior back to 1.21.0.
+--- common/almalloc.cpp
++++ common/almalloc.cpp
+@@ -21,4 +21,4 @@
+-#if defined(HAVE_STD_ALIGNED_ALLOC)
+-    size = (size+(alignment-1))&~(alignment-1);
+-    return std::aligned_alloc(alignment, size);
++//#if defined(HAVE_STD_ALIGNED_ALLOC)
++//    size = (size+(alignment-1))&~(alignment-1);
++//    return std::aligned_alloc(alignment, size);
+-#elif defined(HAVE_POSIX_MEMALIGN)
++#if defined(HAVE_POSIX_MEMALIGN)
+@@ -56,1 +56,1 @@
+-#if defined(HAVE_STD_ALIGNED_ALLOC) || defined(HAVE_POSIX_MEMALIGN)
++#if defined(HAVE_POSIX_MEMALIGN)

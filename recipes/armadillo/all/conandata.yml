@@ -1,0 +1,12 @@
+sources:
+  "15.2.6":
+    url: "https://sourceforge.net/projects/arma/files/armadillo-15.2.6.tar.xz"
+    sha256: "97cb8ef708541f632e861d005a462dd0367240f81ff96f8e63ebbdd75c8ce55f"
+  "12.6.4":
+    url: "https://sourceforge.net/projects/arma/files/armadillo-12.6.4.tar.xz"
+    sha256: "eb7f243ffc32f18324bc7fa978d0358637e7357ca7836bec55b4eb56e9749380"
+patches:
+  "15.2.6":
+    - patch_file: "patches/0005-Guard-dependency-discovery-15.2.x.patch"
+  "12.6.4":
+    - patch_file: "patches/0004-Guard-dependency-discovery-12.6.x.patch"

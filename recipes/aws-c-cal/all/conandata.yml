@@ -1,0 +1,4 @@
+sources:
+  "0.9.8":
+    url: "https://github.com/awslabs/aws-c-cal/archive/v0.9.8.tar.gz"
+    sha256: "4a2a0918c763639f18d971367df6b528a1f3a0660f1c66d5791e435e8e671db9"

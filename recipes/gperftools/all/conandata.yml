@@ -1,0 +1,4 @@
+sources:
+  "2.17.2":
+    url: "https://github.com/gperftools/gperftools/releases/download/gperftools-2.17.2/gperftools-2.17.2.tar.gz"
+    sha256: "bb172a54312f623b53d8b94cab040248c559decdb87574ed873e80b516e6e8eb"

@@ -1,0 +1,194 @@
+diff --git a/MagickCore/Config.txt b/MagickCore/Config.txt
+index e573f40..dd9b862 100644
+--- a/MagickCore/Config.txt
++++ b/MagickCore/Config.txt
+@@ -24,12 +24,8 @@ vms.c
+ widget.c
+ 
+ [DEPENDENCIES]
+-bzlib
+ freetype
+-lcms
+-libxml
+ lqr
+-zlib
+ 
+ [WARNING_LEVEL]
+ 4
+diff --git a/coders/Config.dng.txt b/coders/Config.dng.txt
+index 2e9b9d1..172ffda 100644
+--- a/coders/Config.dng.txt
++++ b/coders/Config.dng.txt
+@@ -4,5 +4,4 @@
+ [DEFINES_LIB]
+ LIBRAW_NODLL
+ 
+-[DEPENDENCIES]
+-libraw
+\ No newline at end of file
++[DEPENDENCIES]
+\ No newline at end of file
+diff --git a/coders/Config.exr.txt b/coders/Config.exr.txt
+index 2624459..90f9cf0 100644
+--- a/coders/Config.exr.txt
++++ b/coders/Config.exr.txt
+@@ -2,5 +2,4 @@
+ ..\..\exr\openexr
+ ..\..\exr\openexr\IlmImf
+ 
+-[DEPENDENCIES]
+-exr
+\ No newline at end of file
++[DEPENDENCIES]
+\ No newline at end of file
+diff --git a/coders/Config.flif.txt b/coders/Config.flif.txt
+index aa7d5bb..13f8be3 100644
+--- a/coders/Config.flif.txt
++++ b/coders/Config.flif.txt
+@@ -2,7 +2,6 @@
+ ..\..\flif\src\library
+ 
+ [DEPENDENCIES]
+-flif
+ 
+ [VISUAL_STUDIO]
+ 2013
+diff --git a/coders/Config.heic.txt b/coders/Config.heic.txt
+index 9684b8d..08e8633 100644
+--- a/coders/Config.heic.txt
++++ b/coders/Config.heic.txt
+@@ -6,4 +6,3 @@
+ LIBHEIF_STATIC_BUILD
+ 
+ [DEPENDENCIES]
+-libheif
+diff --git a/coders/Config.jbig.txt b/coders/Config.jbig.txt
+index d763d54..5d26be6 100644
+--- a/coders/Config.jbig.txt
++++ b/coders/Config.jbig.txt
+@@ -2,4 +2,3 @@
+ ..\..\jbig\libjbig
+ 
+ [DEPENDENCIES]
+-jbig
+diff --git a/coders/Config.jp2.txt b/coders/Config.jp2.txt
+index a991a0b..08cb26e 100644
+--- a/coders/Config.jp2.txt
++++ b/coders/Config.jp2.txt
+@@ -2,4 +2,3 @@
+ ..\..\openjpeg\src\lib\openjp2
+ 
+ [DEPENDENCIES]
+-openjpeg
+diff --git a/coders/Config.jpeg.txt b/coders/Config.jpeg.txt
+index e473c26..c106aa0 100644
+--- a/coders/Config.jpeg.txt
++++ b/coders/Config.jpeg.txt
+@@ -2,4 +2,3 @@
+ ..\..\jpeg-turbo
+ 
+ [DEPENDENCIES]
+-jpeg-turbo
+diff --git a/coders/Config.mat.txt b/coders/Config.mat.txt
+index 8585d25..ed91809 100644
+--- a/coders/Config.mat.txt
++++ b/coders/Config.mat.txt
+@@ -2,4 +2,3 @@
+ ..\..\zlib
+ 
+ [DEPENDENCIES]
+-zlib
+diff --git a/coders/Config.miff.txt b/coders/Config.miff.txt
+index 92d3f74..0072180 100644
+--- a/coders/Config.miff.txt
++++ b/coders/Config.miff.txt
+@@ -6,7 +6,4 @@
+ [DEFINES_LIB]
+ LZMA_API_STATIC
+ 
+-[DEPENDENCIES]
+-bzlib
+-liblzma
+-zlib
+\ No newline at end of file
++[DEPENDENCIES]
+\ No newline at end of file
+diff --git a/coders/Config.msl.txt b/coders/Config.msl.txt
+index d521b8f..9ebd750 100644
+--- a/coders/Config.msl.txt
++++ b/coders/Config.msl.txt
+@@ -2,4 +2,3 @@
+ ..\..\libxml\include
+ 
+ [DEPENDENCIES]
+-libxml
+diff --git a/coders/Config.pango.txt b/coders/Config.pango.txt
+index dbb5b72..d799970 100644
+--- a/coders/Config.pango.txt
++++ b/coders/Config.pango.txt
+@@ -6,6 +6,3 @@
+ ..\..\pango
+ 
+ [DEPENDENCIES]
+-cairo
+-glib
+-pango
+diff --git a/coders/Config.png.txt b/coders/Config.png.txt
+index e88a895..48890df 100644
+--- a/coders/Config.png.txt
++++ b/coders/Config.png.txt
+@@ -3,5 +3,3 @@
+ ..\..\zlib
+ 
+ [DEPENDENCIES]
+-png
+-zlib
+diff --git a/coders/Config.psd.txt b/coders/Config.psd.txt
+index 8585d25..ed91809 100644
+--- a/coders/Config.psd.txt
++++ b/coders/Config.psd.txt
+@@ -2,4 +2,3 @@
+ ..\..\zlib
+ 
+ [DEPENDENCIES]
+-zlib
+diff --git a/coders/Config.svg.txt b/coders/Config.svg.txt
+index 44e96c7..1b32c1e 100644
+--- a/coders/Config.svg.txt
++++ b/coders/Config.svg.txt
+@@ -9,7 +9,3 @@
+ ..\..\librsvg\gdk-pixbuf
+ 
+ [DEPENDENCIES]
+-cairo
+-glib
+-libxml
+-librsvg
+diff --git a/coders/Config.tiff.txt b/coders/Config.tiff.txt
+index 7e71723..619af78 100644
+--- a/coders/Config.tiff.txt
++++ b/coders/Config.tiff.txt
+@@ -2,5 +2,4 @@
+ ..\..\tiff\libtiff
+ 
+ [DEPENDENCIES]
+-tiff
+ coders>psd
+diff --git a/coders/Config.url.txt b/coders/Config.url.txt
+index d521b8f..9ebd750 100644
+--- a/coders/Config.url.txt
++++ b/coders/Config.url.txt
+@@ -2,4 +2,3 @@
+ ..\..\libxml\include
+ 
+ [DEPENDENCIES]
+-libxml
+diff --git a/coders/Config.webp.txt b/coders/Config.webp.txt
+index 407656f..b187605 100644
+--- a/coders/Config.webp.txt
++++ b/coders/Config.webp.txt
+@@ -2,4 +2,3 @@
+ ..\..\webp\src
+ 
+ [DEPENDENCIES]
+-webp

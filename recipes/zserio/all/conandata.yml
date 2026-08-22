@@ -1,0 +1,101 @@
+sources:
+  "2.18.2":
+    runtime:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.18.2/zserio-2.18.2-runtime-libs.zip"
+      sha256: "972abab2e3eb25f3658373ccd7b80347ee5fc1283a618ab8aebf4fb4969d9fff"
+    compiler:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.18.2/zserio-2.18.2-bin.zip"
+      sha256: "87e10806bcd1ef3bfd1c1a42a439b2e943d662800642d2afd644ebb85acfc212"
+    license:
+      url: "https://raw.githubusercontent.com/ndsev/zserio/v2.18.2/LICENSE"
+      sha256: "d91fb189ae307416d1131b76a9c7e28c657f0a03641340c76ac994fc8119bc46"
+  "2.18.1":
+    runtime:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.18.1/zserio-2.18.1-runtime-libs.zip"
+      sha256: "abe269ce851fcef2f0284744bc895ddbd014c9158b3c703e634c67c76f650fb4"
+    compiler:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.18.1/zserio-2.18.1-bin.zip"
+      sha256: "9e92bbd8d8a5a1bfea14f9e52e7e4b36d46a80f7b81c24c3202ddeef28e0ec66"
+    license:
+      url: "https://raw.githubusercontent.com/ndsev/zserio/v2.18.1/LICENSE"
+      sha256: "d91fb189ae307416d1131b76a9c7e28c657f0a03641340c76ac994fc8119bc46"
+  "2.18.0":
+    runtime:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.18.0/zserio-2.18.0-runtime-libs.zip"
+      sha256: "08ed15ae3768cec262784a58dcfe2e2f68dfce53aedd3c5540aeb4f9c0d4226d"
+    compiler:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.18.0/zserio-2.18.0-bin.zip"
+      sha256: "2212e63b04f96569268cecfd56832de766654180d371641250fa5054ebf13a33"
+    license:
+      url: "https://raw.githubusercontent.com/ndsev/zserio/v2.18.0/LICENSE"
+      sha256: "d91fb189ae307416d1131b76a9c7e28c657f0a03641340c76ac994fc8119bc46"
+  "2.17.0":
+    runtime:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.17.0/zserio-2.17.0-runtime-libs.zip"
+      sha256: "66e5d6f9796ffb2a0781385abe707663c5eafbbeace0e449e4ed0c73b9460ecd"
+    compiler:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.17.0/zserio-2.17.0-bin.zip"
+      sha256: "976cee037a35544854f6019cc0f73c8742ff26c3fffb9341a84cee5d085374d7"
+    license:
+      url: "https://raw.githubusercontent.com/ndsev/zserio/v2.17.0/LICENSE"
+      sha256: "8fd7b040fc223bb07551dfed490df0d55d6af25e331e58bc7c7599163ed1bb5a"
+  "2.16.1":
+    runtime:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.16.1/zserio-2.16.1-runtime-libs.zip"
+      sha256: "36a162e97d5e1a6d6910dc5f7d034edee7f237ab7db8deff800f8dc858cc7caf"
+    compiler:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.16.1/zserio-2.16.1-bin.zip"
+      sha256: "72e94a503f563a7fa55be5db9baf100b46f3fc126be83f6bc7f58597fdd36661"
+    license:
+      url: "https://raw.githubusercontent.com/ndsev/zserio/v2.16.1/LICENSE"
+      sha256: "8fd7b040fc223bb07551dfed490df0d55d6af25e331e58bc7c7599163ed1bb5a"
+  "2.16.0":
+    runtime:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.16.0/zserio-2.16.0-runtime-libs.zip"
+      sha256: "e9e136247a70a198da20c145f9bf18b618b20b451cd64eb703e2f48b20c87b8c"
+    compiler:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.16.0/zserio-2.16.0-bin.zip"
+      sha256: "b686ccb9bb7f7d786076a83b3f02cdaceedd9d1a509f975bed96ac283c6b4894"
+    license:
+      url: "https://raw.githubusercontent.com/ndsev/zserio/v2.16.0/LICENSE"
+      sha256: "8fd7b040fc223bb07551dfed490df0d55d6af25e331e58bc7c7599163ed1bb5a"
+  "2.15.0":
+    runtime:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.15.0/zserio-2.15.0-runtime-libs.zip"
+      sha256: "6bfc82723715dccc4022f1aaf590513f4105f402cf33e3cf7bd15b04e203b218"
+    compiler:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.15.0/zserio-2.15.0-bin.zip"
+      sha256: "17398de9856cc48e05e37eab34783f5d421a758f65efad6a20672f2547fc60b8"
+    license:
+      url: "https://raw.githubusercontent.com/ndsev/zserio/v2.15.0/LICENSE"
+      sha256: "8fd7b040fc223bb07551dfed490df0d55d6af25e331e58bc7c7599163ed1bb5a"
+  "2.14.1":
+    runtime:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.14.1/zserio-2.14.1-runtime-libs.zip"
+      sha256: "ae3d7660ed3dd02fc77f535d7c7c721d9f03179c441efd0f4d09dc889da929fc"
+    compiler:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.14.1/zserio-2.14.1-bin.zip"
+      sha256: "3280d620b2c23e01cc2e73bae9b60c93f94b23859c68edb1f105ba499b377049"
+    license:
+      url: "https://raw.githubusercontent.com/ndsev/zserio/v2.14.1/LICENSE"
+      sha256: "8fd7b040fc223bb07551dfed490df0d55d6af25e331e58bc7c7599163ed1bb5a"
+  "2.14.0":
+    runtime:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.14.0/zserio-2.14.0-runtime-libs.zip"
+      sha256: "6002bfe179333435c84d3be2cfb612c008bd52837512aecea8a888e4a3139564"
+    compiler:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.14.0/zserio-2.14.0-bin.zip"
+      sha256: "c1d4668371ad3543cb24f86b218640da7f720f31afe3f8af2d427114d7c7ae5c"
+    license:
+      url: "https://raw.githubusercontent.com/ndsev/zserio/v2.14.0/LICENSE"
+      sha256: "8fd7b040fc223bb07551dfed490df0d55d6af25e331e58bc7c7599163ed1bb5a"
+  "2.13.0":
+    runtime:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.13.0/zserio-2.13.0-runtime-libs.zip"
+      sha256: "a720bd3208190f44b232296c11f1a3880154431f2f005e7db8f07ab01c9d235d"
+    compiler:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.13.0/zserio-2.13.0-bin.zip"
+      sha256: "be5cf2a08aa91adac034f12609ea0a697d9f3ef7a00c1c38e6b997f9455dacd4"
+    license:
+      url: "https://raw.githubusercontent.com/ndsev/zserio/v2.13.0/LICENSE"
+      sha256: "7049b75154737fd45754917ba3d1027ad0b00beac15cb8931edaee4de40978ac"

@@ -1,0 +1,19 @@
+sources:
+  "0.4.0":
+    url: "https://github.com/biojppm/c4core/releases/download/v0.4.0/c4core-0.4.0-src.tgz"
+    sha256: "6703768e6ae3f623296d3fb5cff0fc74c08bfe45dc800234e0e42ba508e230a0"
+  "0.2.0":
+    url: "https://github.com/biojppm/c4core/releases/download/v0.2.0/c4core-0.2.0-src.tgz"
+    sha256: "7843e6fb41c200fff69fc71105dbbf56bb410bdbab6b330e02cbe18430fe23bd"
+  "0.1.11":
+    url: "https://github.com/biojppm/c4core/releases/download/v0.1.11/c4core-0.1.11-src.tgz"
+    sha256: "67f4443f3742424f42453594e26e656f616dddfcf225a1d810e00473a741408c"
+
+patches:
+  "0.4.0":
+    - patch_file: "patches/0.4.0-0001-make-fast_float-external.patch"
+  "0.2.0":
+    - patch_file: "patches/0.2.0-0001-make-fast_float-external.patch"
+  "0.1.11":
+    - patch_file: "patches/0.1.11-0001-make-fast_float-external.patch"
+  

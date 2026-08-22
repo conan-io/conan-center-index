@@ -1,0 +1,114 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,6 +1,8 @@
+ cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+ project(edlib VERSION 1.2.5)
+ 
++option(EDLIB_BUILD_EXAMPLES "Build examples" ON)
++option(EDLIB_BUILD_UTILITIES "Build utilities" ON)
+ set(MACOSX (${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
+ 
+ if(CMAKE_BUILD_TYPE MATCHES Debug)
+@@ -50,16 +52,23 @@ file(GLOB SOURCES "edlib/src/*.cpp")
+ add_library(edlib ${SOURCES})
+ set_target_properties(edlib
+     PROPERTIES
++    CXX_VISIBILITY_PRESET hidden
++    VISIBILITY_INLINES_HIDDEN ON
+     VERSION ${PROJECT_VERSION}
+     SOVERSION ${PROJECT_VERSION})
++if(BUILD_SHARED_LIBS)
++  target_compile_definitions(edlib PUBLIC EDLIB_SHARED PRIVATE EDLIB_BUILD_SHARED)
++endif()
+ 
+ target_include_directories(edlib PUBLIC
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/edlib/include>
+     $<INSTALL_INTERFACE:include>)
+ 
+ # Build binaries.
++if(EDLIB_BUILD_EXAMPLES)
+ add_executable(helloWorld apps/hello-world/helloWorld.c)
+ target_link_libraries(helloWorld edlib)
++endif()
+ 
+ include(CTest)
+ if (BUILD_TESTING)
+@@ -69,14 +78,17 @@ if (BUILD_TESTING)
+   add_test(edlib_tests ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/runTests)
+ endif()
+ 
+-if (NOT WIN32) # If on windows, do not build binaries that do not support windows.
++if(EDLIB_BUILD_UTILITIES AND NOT WIN32)
+   add_executable(edlib-aligner apps/aligner/aligner.cpp)
+   target_link_libraries(edlib-aligner edlib)
+ endif()
+ 
+ 
+ # Create target 'install' for installing libraries.
+-install(TARGETS edlib DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(TARGETS edlib
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ install(FILES edlib/include/edlib.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ 
+ # configure and install pkg-config file
+--- a/edlib/include/edlib.h
++++ b/edlib/include/edlib.h
+@@ -11,6 +11,16 @@
+ extern "C" {
+ #endif
+ 
++#ifndef EDLIB_SHARED
++#define EDLIB_API
++#elif !defined(_WIN32)
++#define EDLIB_API __attribute__ ((visibility ("default")))
++#elif defined(EDLIB_BUILD_SHARED)
++#define EDLIB_API __declspec(dllexport)
++#else
++#define EDLIB_API __declspec(dllimport)
++#endif
++
+ // Status codes
+ #define EDLIB_STATUS_OK 0
+ #define EDLIB_STATUS_ERROR 1
+@@ -128,6 +138,7 @@ extern "C" {
+      * Helper method for easy construction of configuration object.
+      * @return Configuration object filled with given parameters.
+      */
++    EDLIB_API
+     EdlibAlignConfig edlibNewAlignConfig(int k, EdlibAlignMode mode, EdlibAlignTask task,
+                                          EdlibEqualityPair* additionalEqualities,
+                                          int additionalEqualitiesLength);
+@@ -136,6 +147,7 @@ extern "C" {
+      * @return Default configuration object, with following defaults:
+      *         k = -1, mode = EDLIB_MODE_NW, task = EDLIB_TASK_DISTANCE, no additional equalities.
+      */
++    EDLIB_API
+     EdlibAlignConfig edlibDefaultAlignConfig(void);
+ 
+ 
+@@ -204,6 +216,7 @@ extern "C" {
+      * Frees memory in EdlibAlignResult that was allocated by edlib.
+      * If you do not use it, make sure to free needed members manually using free().
+      */
++    EDLIB_API
+     void edlibFreeAlignResult(EdlibAlignResult result);
+ 
+ 
+@@ -222,6 +235,7 @@ extern "C" {
+      * @return  Result of alignment, which can contain edit distance, start and end locations and alignment path.
+      *          Make sure to clean up the object using edlibFreeAlignResult() or by manually freeing needed members.
+      */
++    EDLIB_API
+     EdlibAlignResult edlibAlign(const char* query, int queryLength,
+                                 const char* target, int targetLength,
+                                 const EdlibAlignConfig config);
+@@ -246,6 +260,7 @@ extern "C" {
+      *     Needed memory is allocated and given pointer is set to it.
+      *     Do not forget to free it later using free()!
+      */
++    EDLIB_API
+     char* edlibAlignmentToCigar(const unsigned char* alignment, int alignmentLength,
+                                 EdlibCigarFormat cigarFormat);
+ 

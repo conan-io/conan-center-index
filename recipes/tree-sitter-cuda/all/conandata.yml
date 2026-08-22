@@ -1,0 +1,28 @@
+sources:
+  "0.21.1":
+    url: "https://github.com/tree-sitter-grammars/tree-sitter-cuda/archive/refs/tags/v0.21.1.tar.gz"
+    sha256: "8cb5f44b706cbefcb5b5bdad7cc7f8fd3e49aa14c37693895fd9f198c56ba4d9"
+patches:
+  "0.21.1":
+    - patch_file: "patches/0.21.1-disable-gencode-fpic.patch"
+      patch_description: "disable gencode and fPIC"
+      patch_type: "portability"
+# Each version of tree-sitter-cuda is tied to a specific range of versions of tree-sitter;
+# if the version of tree-sitter is wrong, tree-sitter-cuda compiles
+# but fails with no message, typically by 'ts_parser_set_language()'.
+# Hence, we list dependencies here explicitly.
+# In more detail, according to the official docs
+#   https://docs.rs/tree-sitter/latest/tree_sitter/constant.LANGUAGE_VERSION.html
+#   "The Tree-sitter library is generally backwards-compatible with languages generated
+#   using older CLI versions, but is not forwards-compatible."
+# Since it is not clear when backward compatibility is broken, we set a reasonable
+# upper limit on the next tree-sitter version (e.g., "<0.26.0") to be on the safe side;
+# if the next version does NOT break backward compatibility and then constraint is then
+# undue, you can
+# - override the constraint with a "[replace_requires]" section in the profile:
+#   https://docs.conan.io/2/reference/config_files/profiles.html
+# - open an issue in the Conan Center Index to update the constraint
+# For more info you can see the PR
+#   https://github.com/conan-io/conan-center-index/pull/28510
+tree-sitter-version:
+  "0.21.1": "[>=0.25.0 <0.26.0]"

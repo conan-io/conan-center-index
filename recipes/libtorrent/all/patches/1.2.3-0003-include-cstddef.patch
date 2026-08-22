@@ -1,0 +1,22 @@
+--- a/include/libtorrent/config.hpp
++++ b/include/libtorrent/config.hpp
+@@ -33,6 +33,8 @@ POSSIBILITY OF SUCH DAMAGE.
+ #ifndef TORRENT_CONFIG_HPP_INCLUDED
+ #define TORRENT_CONFIG_HPP_INCLUDED
+ 
++#include <cstddef>
++
+ #include "libtorrent/aux_/disable_warnings_push.hpp"
+ 
+ #define _FILE_OFFSET_BITS 64
+--- a/include/libtorrent/ed25519.hpp
++++ b/include/libtorrent/ed25519.hpp
+@@ -2,7 +2,7 @@
+ #define ED25519_HPP
+ 
+ #include "libtorrent/aux_/export.hpp" // for TORRENT_EXPORT
+-#include <stddef.h> // for size_t
++#include <cstddef> // for ptrdiff_t, size_t
+ 
+ namespace libtorrent {
+ 

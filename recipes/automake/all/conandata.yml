@@ -1,0 +1,12 @@
+sources:
+  "1.16.5":
+    url:
+    - "https://ftpmirror.gnu.org/gnu/automake/automake-1.16.5.tar.gz"
+    - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/automake/automake-1.16.5.tar.gz"
+    - "https://ftp.gnu.org/gnu/automake/automake-1.16.5.tar.gz"
+    sha256: "07bd24ad08a64bc17250ce09ec56e921d6343903943e99ccf63bbf0705e34605"
+patches:
+  "1.16.5":
+    - patch_file: "patches/0001-help2man-no-discard-stderr-1.16.5.patch"
+    - patch_file: "patches/0002-no-perl-path-in-shebang-1.16.5.patch"
+    - patch_file: "patches/0003-relocatable-automake-1.16.5.patch"

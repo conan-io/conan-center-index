@@ -1,0 +1,4 @@
+sources:
+  "0.25.1":
+    url: https://github.com/foxglove/foxglove-sdk/archive/refs/tags/sdk/v0.25.1.tar.gz
+    sha256: d58a81c338211298b49de34c38f47cb7df107be3aea1f6980e628c272ca08f25

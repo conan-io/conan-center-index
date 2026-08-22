@@ -1,0 +1,4 @@
+sources:
+  "5.0.6":
+    url: "https://github.com/capstone-engine/capstone/archive/refs/tags/5.0.6.tar.gz"
+    sha256: "240ebc834c51aae41ca9215d3190cc372fd132b9c5c8aa2d5f19ca0c325e28f9"

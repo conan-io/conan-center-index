@@ -1,0 +1,31 @@
+sources:
+  "7.0.0":
+    url: "https://github.com/msgpack/msgpack-c/releases/download/cpp-7.0.0/msgpack-cxx-7.0.0.tar.gz"
+    sha256: "7504b7af7e7b9002ce529d4f941e1b7fb1fb435768780ce7da4abaac79bb156f"
+  "6.1.1":
+    url: "https://github.com/msgpack/msgpack-c/releases/download/cpp-6.1.1/msgpack-cxx-6.1.1.tar.gz"
+    sha256: "5fd555742e37bbd58d166199e669f01f743c7b3c6177191dd7b31fb0c37fa191"
+  "6.1.0":
+    url: "https://github.com/msgpack/msgpack-c/releases/download/cpp-6.1.0/msgpack-cxx-6.1.0.tar.gz"
+    sha256: "23ede7e93c8efee343ad8c6514c28f3708207e5106af3b3e4969b3a9ed7039e7"
+  "6.0.0":
+    url: "https://github.com/msgpack/msgpack-c/releases/download/cpp-6.0.0/msgpack-cxx-6.0.0.tar.gz"
+    sha256: "0948d2db98245fb97b9721cfbc3e44c1b832e3ce3b8cfd7485adc368dc084d14"
+  "5.0.0":
+    url: "https://github.com/msgpack/msgpack-c/releases/download/cpp-5.0.0/msgpack-cxx-5.0.0.tar.gz"
+    sha256: "80f997575acff12b1b64158ef9dbad4cff32595f985532e16c6ea67e317452d5"
+  "4.1.3":
+    url: "https://github.com/msgpack/msgpack-c/releases/download/cpp-4.1.3/msgpack-cxx-4.1.3.tar.gz"
+    sha256: "2539075ea2f35c15cab5c50ecba00d76fc4cbdcd485840257f15ebb04e8e3e1a"
+  "4.1.2":
+    url: "https://github.com/msgpack/msgpack-c/releases/download/cpp-4.1.2/msgpack-cxx-4.1.2.tar.gz"
+    sha256: "eeddd7faeacbc12e10052bd1e3ec78bd26c69bfbbea9f9264c7ffce9b1ede7b1"
+  "4.1.1":
+    url: "https://github.com/msgpack/msgpack-c/releases/download/cpp-4.1.1/msgpack-cxx-4.1.1.tar.gz"
+    sha256: "8115c5edcf20bc1408c798a6bdaec16c1e52b1c34859d4982a0fb03300438f0b"
+  "4.1.0":
+    url: "https://github.com/msgpack/msgpack-c/releases/download/cpp-4.1.0/msgpack-cxx-4.1.0.tar.gz"
+    sha256: "11e042ffdafda6fc4ebdc5f4f63b352229b89796c2f8aa3e813116ec1dd8377d"
+  "4.0.3":
+    url: "https://github.com/msgpack/msgpack-c/releases/download/cpp-4.0.3/msgpack-cxx-4.0.3.tar.gz"
+    sha256: "9b3c1803b9855b7b023d7f181f66ebb0d6941275ba41d692037e0aa27736443f"

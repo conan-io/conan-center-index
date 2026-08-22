@@ -1,0 +1,12 @@
+--- a/src/headers/spatialite/gaiaconfig-msvc.h
++++ b/src/headers/spatialite/gaiaconfig-msvc.h
+@@ -10,6 +10,9 @@
+ /* Should be defined in order to enable LIBXML2 support. */
+ #define ENABLE_LIBXML2 1
+ 
++/* Should be defined in order to enable MiniZIP support. */
++#define ENABLE_MINIZIP 1
++
+ /* Should be defined in order to enable RTTOPO support. */
+ #define ENABLE_RTTOPO 1
+ 

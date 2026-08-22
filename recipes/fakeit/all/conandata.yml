@@ -1,0 +1,4 @@
+sources:
+  "2.5.0":
+    url: "https://github.com/eranpeer/FakeIt/archive/2.5.0.tar.gz"
+    sha256: "57adedf802271513d88a1d9342d829cfb34988c3d835e07346f8129047200c53"

@@ -1,0 +1,74 @@
+---
+ src/compress.c       |  2 +-
+ test/easylzma_test.c | 20 ++++++++++++--------
+ test/simple.c        |  4 +++-
+ 3 files changed, 16 insertions(+), 10 deletions(-)
+
+diff --git a/src/compress.c b/src/compress.c
+index 78be112..577b014 100644
+--- a/src/compress.c
++++ b/src/compress.c
+@@ -66,7 +66,7 @@ elzma_compress_free(elzma_compress_handle * hand)
+                             (ISzAlloc *) &((*hand)->allocStruct),
+                             (ISzAlloc *) &((*hand)->allocStruct));
+         }
+-        
++        free(*hand);
+     }
+     *hand = NULL;
+ }
+diff --git a/test/easylzma_test.c b/test/easylzma_test.c
+index 80691d9..3dfa45d 100644
+--- a/test/easylzma_test.c
++++ b/test/easylzma_test.c
+@@ -153,16 +153,20 @@ static int roundTripTest(elzma_file_format format)
+ 
+     free(compressed);
+ 
+-    if (rc != ELZMA_E_OK) return rc;
+-    
+-    if (sz != strlen(sampleData) ||
+-        0 != memcmp(decompressed, sampleData, sz))
+-    {
++    if (rc != ELZMA_E_OK) {
++        if (sz != strlen(sampleData) ||
++            0 != memcmp(decompressed, sampleData, sz))
++        {
++            rc = 1;
++        } else {
++            rc = ELZMA_E_OK;
++        }
++    }
++
++    if (decompressed != NULL) {
+         free(decompressed);
+-        return 1;
+     }
+-    
+-    return ELZMA_E_OK;
++    return rc;
+ }
+ 
+ /* "correct" lzip generated from the lzip program */
+diff --git a/test/simple.c b/test/simple.c
+index 09df38e..5ae6800 100644
+--- a/test/simple.c
++++ b/test/simple.c
+@@ -99,6 +99,7 @@ simpleCompress(elzma_file_format format, const unsigned char * inData,
+             return rc;
+         }
+ 
++        elzma_compress_free(&hand);
+         *outData = ds.outData;
+         *outLen = ds.outLen;
+     }
+@@ -132,7 +133,8 @@ simpleDecompress(elzma_file_format format, const unsigned char * inData,
+             elzma_decompress_free(&hand);
+             return rc;
+         }
+-        
++
++        elzma_decompress_free(&hand);
+         *outData = ds.outData;
+         *outLen = ds.outLen;
+     }

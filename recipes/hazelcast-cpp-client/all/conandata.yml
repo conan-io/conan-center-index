@@ -1,0 +1,4 @@
+sources:
+  "5.7.0":
+    url: "https://github.com/hazelcast/hazelcast-cpp-client/archive/v5.7.0.tar.gz"
+    sha256: "021944210c00eaf7351ef23b4fa7049a7b1229171339d9d384d8d5a5ffa9f406"

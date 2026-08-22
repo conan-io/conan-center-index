@@ -1,0 +1,4 @@
+sources:
+  "1.2.9":
+    url: "https://github.com/stack-of-tasks/eiquadprog/releases/download/v1.2.9/eiquadprog-1.2.9.tar.gz"
+    sha256: "41f317803933d42a2228b041e7f94d75fb4239449a2e291f404ab18c82622cd4"

@@ -1,0 +1,10 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -481,7 +481,6 @@ set_target_properties(
+ 	ODE
+ 	PROPERTIES
+ 	OUTPUT_NAME ode
+-	POSITION_INDEPENDENT_CODE ON
+ 	VERSION ${VERSION}
+ )
+ 

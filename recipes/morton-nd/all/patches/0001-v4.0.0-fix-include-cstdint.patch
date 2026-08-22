@@ -1,0 +1,24 @@
+diff --git a/include/morton-nd/mortonND_BMI2.h b/include/morton-nd/mortonND_BMI2.h
+index b99d2c0..63d89f2 100644
+--- a/include/morton-nd/mortonND_BMI2.h
++++ b/include/morton-nd/mortonND_BMI2.h
+@@ -17,6 +17,7 @@
+ #include <tuple>
+ #include <type_traits>
+ #include <immintrin.h>
++#include <cstdint>
+ 
+ namespace mortonnd {
+ 
+diff --git a/include/morton-nd/mortonND_LUT.h b/include/morton-nd/mortonND_LUT.h
+index 110ad63..fb3777b 100644
+--- a/include/morton-nd/mortonND_LUT.h
++++ b/include/morton-nd/mortonND_LUT.h
+@@ -13,6 +13,7 @@
+ #include <tuple>
+ #include <type_traits>
+ #include <limits>
++#include <cstdint>
+ 
+ namespace mortonnd {
+ 

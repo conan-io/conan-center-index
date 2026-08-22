@@ -1,0 +1,25 @@
+diff --git a/ouster_mapping/CMakeLists.txt b/ouster_mapping/CMakeLists.txt
+index 83b5db6..c0cd4d1 100644
+--- a/ouster_mapping/CMakeLists.txt
++++ b/ouster_mapping/CMakeLists.txt
+@@ -5,6 +5,7 @@ option(USE_OPENMP "Enable the use of OpenMP" ON)
+ find_package(Ceres REQUIRED)
+ find_package(Eigen3 REQUIRED)
+ find_package(KissIcp REQUIRED)
++find_package(Sophus REQUIRED)
+ 
+ if(USE_OPENMP)
+ 
+@@ -64,9 +65,10 @@ endif()
+ 
+ target_link_libraries(ouster_mapping
+   PRIVATE
++    Sophus::Sophus
+     ${MAPPING_OS_LIBRARIES}
+-    $<BUILD_INTERFACE:kiss_icp_core>
+-    $<BUILD_INTERFACE:kiss_icp_pipeline>
++    kiss-icp::kiss_icp_core
++    kiss-icp::kiss_icp_pipeline
+     ${CERES_LIBRARIES_INTERNAL}
+     Eigen3::Eigen
+     OusterSDK::ouster_client

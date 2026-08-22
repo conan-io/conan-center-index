@@ -1,0 +1,33 @@
+diff --git a/homog2d.hpp b/homog2d.hpp
+index f30d150..d82d7e5 100644
+--- a/homog2d.hpp
++++ b/homog2d.hpp
+@@ -115,12 +115,18 @@ See https://github.com/skramm/homog2d
+ 	#define HOMOG2D_BIND_Y y
+ #endif
+ 
++#ifdef _MSC_VER
++	#define HOMOG2D_PRETTY_FUNCTION __FUNCSIG__
++#else
++	#define HOMOG2D_PRETTY_FUNCTION __PRETTY_FUNCTION__
++#endif
++
+ /// Error throw wrapper macro
+ #define HOMOG2D_THROW_ERROR_1( msg ) \
+ 	{ \
+ 		std::ostringstream oss; \
+ 		oss << "homog2d: line " <<  __LINE__  << ", function:" << __FUNCTION__ << "(): " \
+-			<< msg << "\n -full function name: " << __PRETTY_FUNCTION__ \
++			<< msg << "\n -full function name: " << HOMOG2D_PRETTY_FUNCTION \
+ 			<< "\n -Error count=" << ++errorCount(); \
+ 		throw std::runtime_error( oss.str() ); \
+ 	}
+@@ -130,7 +136,7 @@ See https://github.com/skramm/homog2d
+ 	{ \
+ 		std::ostringstream oss; \
+ 		oss << "homog2d: line " <<  __LINE__  << ", function:" << func << "(): " \
+-			<< msg << "\n -full function name: " << __PRETTY_FUNCTION__ \
++			<< msg << "\n -full function name: " << HOMOG2D_PRETTY_FUNCTION \
+ 			<< "\n -Error count=" << ++errorCount(); \
+ 		throw std::runtime_error( oss.str() ); \
+ 	}

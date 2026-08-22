@@ -1,0 +1,7 @@
+sources:
+  "8.16.0":
+    url: "https://github.com/libvips/libvips/releases/download/v8.16.0/vips-8.16.0.tar.xz"
+    sha256: "6eca46c6ba5fac86224fd69007741012b0ea1f9aa1fcb9256b0cbc2faf768563"
+patches:
+  "8.16.0":
+    - patch_file: "patches/0002-fix-8-16-0-msvc-build.patch"

@@ -1,0 +1,12 @@
+diff --git a/lemon/CMakeLists.txt b/lemon/CMakeLists.txt
+index 4e6567e..dec0513 100644
+--- a/lemon/CMakeLists.txt
++++ b/lemon/CMakeLists.txt
+@@ -68,6 +68,7 @@ INSTALL(
+   TARGETS lemon
+   ARCHIVE DESTINATION lib
+   LIBRARY DESTINATION lib
++  RUNTIME DESTINATION bin
+   COMPONENT library
+ )
+ 

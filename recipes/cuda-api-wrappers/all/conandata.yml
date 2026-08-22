@@ -1,0 +1,4 @@
+sources:
+  "0.8.2":
+    url: "https://github.com/eyalroz/cuda-api-wrappers/archive/refs/tags/v0.8.2.tar.gz"
+    sha256: "14e0558bb6851600bd674b18b7416ca678ae3dc45198875d552fc826fded4c7e"

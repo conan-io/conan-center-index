@@ -1,0 +1,4 @@
+sources:
+  "3.0.0":
+    url: "https://github.com/NIFTI-Imaging/nifti_clib/archive/refs/tags/v3.0.0.tar.gz"
+    sha256: "fe6cb1076974df01844f3f4dab1aa844953b3bc1d679126c652975158573d03d"

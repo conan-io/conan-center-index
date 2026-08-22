@@ -1,0 +1,5 @@
+versions:
+  "0.8.4-rc3":
+    folder: all
+  "0.8.2":
+    folder: all

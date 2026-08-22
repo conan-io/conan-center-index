@@ -1,0 +1,13 @@
+diff --git a/plf_list.h b/plf_list.h
+index a9e3711..8357582 100644
+--- a/plf_list.h
++++ b/plf_list.h
+@@ -168,7 +168,7 @@
+ 		#define PLF_CONSTEXPR constexpr
+ 	#endif
+ 
+-	#if __cplusplus > 201704L && ((defined(_LIBCPP_VERSION) && _LIBCPP_VERSION >= 13) || !defined(_LIBCPP_VERSION)) && ((defined(__clang__) && (__clang_major__ >= 13)) || (defined(__GNUC__) && __GNUC__ >= 10) || (!defined(__clang__) && !defined(__GNUC__)))
++	#if __cplusplus > 201704L && ((defined(_LIBCPP_VERSION) && _LIBCPP_VERSION >= 13) || !defined(_LIBCPP_VERSION)) && (!defined(__APPLE_CC__) && (defined(__clang__) && (__clang_major__ >= 13)) || (defined(__GNUC__) && __GNUC__ >= 10) || (!defined(__clang__) && !defined(__GNUC__)))
+ 		#define PLF_CPP20_SUPPORT
+ 		#undef PLF_CONSTFUNC
+ 		#define PLF_CONSTFUNC constexpr

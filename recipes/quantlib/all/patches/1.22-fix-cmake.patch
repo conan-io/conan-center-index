@@ -1,0 +1,48 @@
+* Don't build examples and tests
+* Allow shared on windows
+* enable at least C++11 standard
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required()
++cmake_minimum_required(VERSION 3.8)
+ 
+ project(QuantLib)
+ 
+@@ -45,8 +45,6 @@ if (Boost_FOUND)
+ endif (Boost_FOUND)
+ 
+ add_subdirectory(ql)
+-add_subdirectory(Examples)
+-add_subdirectory(test-suite)
+ 
+ #
+ # Copy across the ANSI config file into the build directory. Users
+--- a/ql/CMakeLists.txt
++++ b/ql/CMakeLists.txt
+@@ -2294,7 +2294,7 @@ set(QuantLib_HDR
+ get_quantlib_library_name(QL_OUTPUT_NAME)
+ 
+ if(WIN32)
+-    if (${BUILD_SHARED_LIBS})
++    if (0)
+         # Windows needs to link static library (nothing is declared to export in QuantLib)
+         message(FATAL_ERROR "You should build QuantLib in STATIC mode as nothing is exported from the library. Use BUILD_SHARED_LIBS=OFF")
+     endif()
+@@ -2303,6 +2303,7 @@ if(WIN32)
+ else()
+     add_library(${QL_OUTPUT_NAME} ${QuantLib_SRC} ${QuantLib_HDR})
+ endif()
++target_compile_features(${QL_OUTPUT_NAME} PUBLIC cxx_std_11)
+ set(QL_LINK_LIBRARY ${QL_OUTPUT_NAME} PARENT_SCOPE)
+ 
+ foreach(file ${QuantLib_HDR})
+@@ -2311,6 +2312,7 @@ foreach(file ${QuantLib_HDR})
+ endforeach()
+ 
+ install(TARGETS ${QL_OUTPUT_NAME}
++        RUNTIME DESTINATION bin
+         ARCHIVE DESTINATION lib
+         LIBRARY DESTINATION lib
+         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE

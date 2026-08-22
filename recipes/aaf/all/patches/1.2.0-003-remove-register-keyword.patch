@@ -1,0 +1,46 @@
+diff --git a/ref-impl/plugins/AAFPluginUtils.cpp b/ref-impl/plugins/AAFPluginUtils.cpp
+index daa02cadf..5c6767ba4 100755
+--- a/ref-impl/plugins/AAFPluginUtils.cpp
++++ b/ref-impl/plugins/AAFPluginUtils.cpp
+@@ -96,7 +96,7 @@ aafBool aafIsEqualGUID( const GUID& guid1, const GUID& guid2 )
+ void AAFByteSwap16(
+ 			aafInt16 * wp)	/* IN/OUT -- Byte swap this value */
+ {
+-	register unsigned char *cp = (unsigned char *) wp;
++	unsigned char *cp = (unsigned char *) wp;
+ 	int             t;
+ 
+ 	t = cp[1];
+@@ -122,7 +122,7 @@ void AAFByteSwap16(
+ void AAFByteSwap32(
+ 			aafInt32 *lp)	/* IN/OUT -- Byte swap this value */
+ {
+-	register unsigned char *cp = (unsigned char *) lp;
++	unsigned char *cp = (unsigned char *) lp;
+ 	int             t;
+ 
+ 	t = cp[3];
+@@ -151,7 +151,7 @@ void AAFByteSwap32(
+ void AAFByteSwap64(
+ 			aafInt64 *lp)	/* IN/OUT -- Byte swap this value */
+ {
+-	register unsigned char *cp = (unsigned char *) lp;
++	unsigned char *cp = (unsigned char *) lp;
+ 	int             t;
+ 
+ 	t = cp[7];
+diff --git a/ref-impl/src/impl/aafTable.cpp b/ref-impl/src/impl/aafTable.cpp
+index 8f18b8e6a..16f231403 100644
+--- a/ref-impl/src/impl/aafTable.cpp
++++ b/ref-impl/src/impl/aafTable.cpp
+@@ -1068,8 +1068,8 @@ static aafBool cmpSensitive( void *temp1, void *temp2)
+ 	
+ static aafBool cmpInsensitive( void *temp1, void *temp2)
+ {
+-	register char *a = (char *)temp1;
+-	register char *b = (char *)temp2;
++	char *a = (char *)temp1;
++	char *b = (char *)temp2;
+ 
+ 	for ( ; (*a != '\0') && (*b != '\0'); a++, b++)
+ 	{	

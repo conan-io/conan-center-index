@@ -1,0 +1,142 @@
+diff --git a/Graphics/ShaderTools/include/SPIRVShaderResources.hpp b/Graphics/ShaderTools/include/SPIRVShaderResources.hpp
+index 6f3bec87b..842b485b3 100644
+--- a/Graphics/ShaderTools/include/SPIRVShaderResources.hpp
++++ b/Graphics/ShaderTools/include/SPIRVShaderResources.hpp
+@@ -47,11 +47,17 @@
+ #include "RefCntAutoPtr.hpp"
+ #include "StringPool.hpp"
+ 
+-namespace diligent_spirv_cross
++#ifdef SPIRV_CROSS_NAMESPACE_OVERRIDE
++#define SPIRV_CROSS_NAMESPACE SPIRV_CROSS_NAMESPACE_OVERRIDE
++#else
++#define SPIRV_CROSS_NAMESPACE spirv_cross
++#endif
++
++namespace SPIRV_CROSS_NAMESPACE
+ {
+ class Compiler;
+ struct Resource;
+-} // namespace diligent_spirv_cross
++} // namespace SPIRV_CROSS_NAMESPACE
+ 
+ namespace Diligent
+ {
+@@ -98,8 +104,8 @@ struct SPIRVShaderResourceAttribs
+ 
+     // clang-format on
+ 
+-    SPIRVShaderResourceAttribs(const diligent_spirv_cross::Compiler& Compiler,
+-                               const diligent_spirv_cross::Resource& Res,
++    SPIRVShaderResourceAttribs(const SPIRV_CROSS_NAMESPACE::Compiler& Compiler,
++                               const SPIRV_CROSS_NAMESPACE::Resource& Res,
+                                const char*                           _Name,
+                                ResourceType                          _Type,
+                                Uint32                                _BufferStaticSize = 0,
+diff --git a/Graphics/ShaderTools/src/SPIRVShaderResources.cpp b/Graphics/ShaderTools/src/SPIRVShaderResources.cpp
+index c8badc818..c9f8f2171 100644
+--- a/Graphics/ShaderTools/src/SPIRVShaderResources.cpp
++++ b/Graphics/ShaderTools/src/SPIRVShaderResources.cpp
+@@ -38,8 +38,8 @@ namespace Diligent
+ {
+ 
+ template <typename Type>
+-Type GetResourceArraySize(const diligent_spirv_cross::Compiler& Compiler,
+-                          const diligent_spirv_cross::Resource& Res)
++Type GetResourceArraySize(const SPIRV_CROSS_NAMESPACE::Compiler& Compiler,
++                          const SPIRV_CROSS_NAMESPACE::Resource& Res)
+ {
+     const auto& type    = Compiler.get_type(Res.type_id);
+     uint32_t    arrSize = 1;
+@@ -53,12 +53,12 @@ Type GetResourceArraySize(const diligent_spirv_cross::Compiler& Compiler,
+     return static_cast<Type>(arrSize);
+ }
+ 
+-static RESOURCE_DIMENSION GetResourceDimension(const diligent_spirv_cross::Compiler& Compiler,
+-                                               const diligent_spirv_cross::Resource& Res)
++static RESOURCE_DIMENSION GetResourceDimension(const SPIRV_CROSS_NAMESPACE::Compiler& Compiler,
++                                               const SPIRV_CROSS_NAMESPACE::Resource& Res)
+ {
+     const auto& type = Compiler.get_type(Res.type_id);
+-    if (type.basetype == diligent_spirv_cross::SPIRType::BaseType::Image ||
+-        type.basetype == diligent_spirv_cross::SPIRType::BaseType::SampledImage)
++    if (type.basetype == SPIRV_CROSS_NAMESPACE::SPIRType::BaseType::Image ||
++        type.basetype == SPIRV_CROSS_NAMESPACE::SPIRType::BaseType::SampledImage)
+     {
+         switch (type.image.dim)
+         {
+@@ -78,12 +78,12 @@ static RESOURCE_DIMENSION GetResourceDimension(const diligent_spirv_cross::Compi
+     }
+ }
+ 
+-static bool IsMultisample(const diligent_spirv_cross::Compiler& Compiler,
+-                          const diligent_spirv_cross::Resource& Res)
++static bool IsMultisample(const SPIRV_CROSS_NAMESPACE::Compiler& Compiler,
++                          const SPIRV_CROSS_NAMESPACE::Resource& Res)
+ {
+     const auto& type = Compiler.get_type(Res.type_id);
+-    if (type.basetype == diligent_spirv_cross::SPIRType::BaseType::Image ||
+-        type.basetype == diligent_spirv_cross::SPIRType::BaseType::SampledImage)
++    if (type.basetype == SPIRV_CROSS_NAMESPACE::SPIRType::BaseType::Image ||
++        type.basetype == SPIRV_CROSS_NAMESPACE::SPIRType::BaseType::SampledImage)
+     {
+         return type.image.ms;
+     }
+@@ -93,8 +93,8 @@ static bool IsMultisample(const diligent_spirv_cross::Compiler& Compiler,
+     }
+ }
+ 
+-static uint32_t GetDecorationOffset(const diligent_spirv_cross::Compiler& Compiler,
+-                                    const diligent_spirv_cross::Resource& Res,
++static uint32_t GetDecorationOffset(const SPIRV_CROSS_NAMESPACE::Compiler& Compiler,
++                                    const SPIRV_CROSS_NAMESPACE::Resource& Res,
+                                     spv::Decoration                       Decoration)
+ {
+     VERIFY(Compiler.has_decoration(Res.id, Decoration), "Resource \'", Res.name, "\' has no requested decoration");
+@@ -105,8 +105,8 @@ static uint32_t GetDecorationOffset(const diligent_spirv_cross::Compiler& Compil
+     return offset;
+ }
+ 
+-SPIRVShaderResourceAttribs::SPIRVShaderResourceAttribs(const diligent_spirv_cross::Compiler& Compiler,
+-                                                       const diligent_spirv_cross::Resource& Res,
++SPIRVShaderResourceAttribs::SPIRVShaderResourceAttribs(const SPIRV_CROSS_NAMESPACE::Compiler& Compiler,
++                                                       const SPIRV_CROSS_NAMESPACE::Resource& Res,
+                                                        const char*                           _Name,
+                                                        ResourceType                          _Type,
+                                                        Uint32                                _BufferStaticSize,
+@@ -222,9 +222,9 @@ spv::ExecutionModel ShaderTypeToSpvExecutionModel(SHADER_TYPE ShaderType)
+     }
+ }
+ 
+-const std::string& GetUBName(diligent_spirv_cross::Compiler&               Compiler,
+-                             const diligent_spirv_cross::Resource&         UB,
+-                             const diligent_spirv_cross::ParsedIR::Source& IRSource)
++const std::string& GetUBName(SPIRV_CROSS_NAMESPACE::Compiler&               Compiler,
++                             const SPIRV_CROSS_NAMESPACE::Resource&         UB,
++                             const SPIRV_CROSS_NAMESPACE::ParsedIR::Source& IRSource)
+ {
+     // Consider the following HLSL constant buffer:
+     //
+@@ -269,11 +269,11 @@ SPIRVShaderResources::SPIRVShaderResources(IMemoryAllocator&     Allocator,
+     m_ShaderType{shaderDesc.ShaderType}
+ {
+     // https://github.com/KhronosGroup/SPIRV-Cross/wiki/Reflection-API-user-guide
+-    diligent_spirv_cross::Parser parser(move(spirv_binary));
++    SPIRV_CROSS_NAMESPACE::Parser parser(move(spirv_binary));
+     parser.parse();
+     const auto ParsedIRSource = parser.get_parsed_ir().source;
+     m_IsHLSLSource            = ParsedIRSource.hlsl;
+-    diligent_spirv_cross::Compiler Compiler(std::move(parser.get_parsed_ir()));
++    SPIRV_CROSS_NAMESPACE::Compiler Compiler(std::move(parser.get_parsed_ir()));
+ 
+     spv::ExecutionModel ExecutionModel = ShaderTypeToSpvExecutionModel(shaderDesc.ShaderType);
+     auto                EntryPoints    = Compiler.get_entry_points_and_stages();
+@@ -298,7 +298,7 @@ SPIRVShaderResources::SPIRVShaderResources(IMemoryAllocator&     Allocator,
+     Compiler.set_entry_point(EntryPoint, ExecutionModel);
+ 
+     // The SPIR-V is now parsed, and we can perform reflection on it.
+-    diligent_spirv_cross::ShaderResources resources = Compiler.get_shader_resources();
++    SPIRV_CROSS_NAMESPACE::ShaderResources resources = Compiler.get_shader_resources();
+ 
+     size_t ResourceNamesPoolSize = 0;
+     for (const auto& ub : resources.uniform_buffers)

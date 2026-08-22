@@ -1,0 +1,30 @@
+diff --git a/sole.hpp b/sole.hpp
+index 8673774..35f2524 100644
+--- a/sole.hpp
++++ b/sole.hpp
+@@ -201,6 +201,14 @@ namespace std {
+ #   define $msvc  $yes
+ #endif
+ 
++#ifdef _MSC_VER
++#   define $thread __declspec(thread)
++#elif defined __clang__
++#   define $thread thread_local
++#else
++#   define $thread __thread
++#endif
++
+ #if defined(__GNUC__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 < 50100)
+     namespace std
+     {
+@@ -665,8 +673,8 @@ namespace sole {
+     // UUID implementations
+ 
+     inline uuid uuid4() {
+-        static $msvc(__declspec(thread)) $melse(__thread) std::random_device rd;
+-        static $msvc(__declspec(thread)) $melse(__thread) std::uniform_int_distribution<uint64_t> dist(0, (uint64_t)(~0));
++        static $thread std::random_device rd;
++        static $thread std::uniform_int_distribution<uint64_t> dist(0, (uint64_t)(~0));
+ 
+         uuid my;
+ 

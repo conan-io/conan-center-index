@@ -1,0 +1,88 @@
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, get, export_conandata_patches, load, rmdir, save
+from conan.tools.microsoft import is_msvc
+import os
+
+required_conan_version = ">=2.1"
+
+
+class AngelScriptConan(ConanFile):
+    name = "angelscript"
+    description = (
+        "An extremely flexible cross-platform scripting library designed to "
+        "allow applications to extend their functionality through external scripts."
+    )
+    license = "Zlib"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "http://www.angelcode.com/angelscript"
+    topics = ("angelcode", "embedded", "scripting", "language", "compiler", "interpreter")
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [False, True],
+        "fPIC": [False, True],
+        "no_exceptions": [False, True],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "no_exceptions": False,
+    }
+
+    short_paths = True
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def validate(self):
+        check_min_cppstd(self, 11)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["AS_NO_EXCEPTIONS"] = self.options.no_exceptions
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.generate()
+
+    def build(self):
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, "angelscript", "projects", "cmake"))
+        cmake.build()
+
+    def _extract_license(self):
+        header = load(self, os.path.join(self.source_folder, "angelscript", "include", "angelscript.h"))
+        return header[header.find("/*", 1) + 3 : header.find("*/", 1)]
+
+    def package(self):
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "Angelscript")
+        self.cpp_info.set_property("cmake_target_name", "Angelscript::angelscript")
+        postfix = "d" if is_msvc(self) and self.settings.build_type == "Debug" else ""
+
+        # todo: revisit need for the component
+        self.cpp_info.components["_angelscript"].libs = [f"angelscript{postfix}"]
+        if self.settings.os in ("Linux", "FreeBSD", "SunOS"):
+            self.cpp_info.components["_angelscript"].system_libs.extend(["m", "pthread"])
+        self.cpp_info.components["_angelscript"].set_property("cmake_target_name", "Angelscript::angelscript")

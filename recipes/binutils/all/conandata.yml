@@ -1,0 +1,18 @@
+sources:
+  "2.46.1":
+    url:
+      - "https://ftpmirror.gnu.org/gnu/binutils/binutils-2.46.1.tar.xz"
+      - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/binutils/binutils-2.46.1.tar.xz"
+      - "https://ftp.gnu.org/gnu/binutils/binutils-2.46.1.tar.xz"
+    sha256: "e127a709cba24c76de8936cb7083dd768f28cd37eb010492e2f19b71eb1294e4"
+  "2.42":
+    url:
+      - "https://ftpmirror.gnu.org/gnu/binutils/binutils-2.42.tar.xz"
+      - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/binutils/binutils-2.42.tar.xz"
+      - "https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.xz"
+    sha256: "f6e4d41fd5fc778b06b7891457b3620da5ecea1006c6a4a41ae998109f85a800"
+patches:
+  "2.42":
+    - patch_file: "patches/2.42-0001-no-texinfo.patch"
+      patch_type: "conan"
+      patch_description: "disable texinfo"

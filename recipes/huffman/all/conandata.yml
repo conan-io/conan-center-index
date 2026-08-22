@@ -1,0 +1,5 @@
+sources:
+  "1.2.7":
+    # Don't use tar.gz because test data files in tar.gz has invalid paths on Windows.
+    url: "https://github.com/drichardson/huffman/archive/refs/tags/v1.2.7.zip"
+    sha256: "0d382f271daf47623676307710cb05d246839247370989b8ffa6fee82bea375a"

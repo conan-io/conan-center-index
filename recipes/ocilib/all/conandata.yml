@@ -1,0 +1,4 @@
+sources:
+  "4.7.6":
+    url: "https://github.com/vrogier/ocilib/releases/download/v4.7.6/ocilib-4.7.6-gnu.tar.gz"
+    sha256: "35657c00b3cfbcff09a398a6566b95b23067b0d15c1155a17615da7780715a85"

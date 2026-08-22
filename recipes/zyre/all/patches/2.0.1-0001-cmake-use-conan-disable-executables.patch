@@ -1,0 +1,47 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e285ba0..69f3c19 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -237,6 +237,7 @@ if (ZYRE_BUILD_SHARED)
+   set_target_properties (zyre PROPERTIES
+     PUBLIC_HEADER "${public_headers}"
+     DEFINE_SYMBOL "ZYRE_EXPORTS"
++    LINKER_LANGUAGE CXX
+     SOVERSION "2"
+     VERSION "${ZYRE_VERSION}"
+     COMPILE_DEFINITIONS "DLL_EXPORT"
+@@ -303,8 +294,9 @@ if (ZYRE_BUILD_STATIC)
+ 
+ endif()
+ 
+-
++if(BUILD_EXECUTABLES)
+ include(${CMAKE_CURRENT_SOURCE_DIR}/src/CMakeLists-local.txt) # Optional project-local hook
++endif()
+ 
+ ########################################################################
+ # pkgconfig
+@@ -360,6 +362,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/zyreConfig.cmake
+ ########################################################################
+ # executables
+ ########################################################################
++if(BUILD_EXECUTABLES)
+ add_executable(
+     perf_local
+     "${SOURCE_DIR}/src/perf_local.c"
+@@ -491,6 +494,7 @@ target_link_libraries(
+     ${OPTIONAL_LIBRARIES}
+ )
+ endif()
++
+ if (NOT TARGET zyre AND TARGET zyre-static)
+ target_link_libraries(
+     zyre_selftest
+@@ -501,6 +515,7 @@ target_link_libraries(
+     ${OPTIONAL_LIBRARIES_STATIC}
+ )
+ endif()
++endif()
+ 
+ ########################################################################
+ # tests

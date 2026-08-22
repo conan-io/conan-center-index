@@ -1,0 +1,51 @@
+From 751bb485c0437c176a8ba8f6f98b155a6d53906d Mon Sep 17 00:00:00 2001
+From: Jorrit Rouwe <jrouwe@gmail.com>
+Date: Wed, 29 Jan 2025 21:18:35 +0100
+Subject: [PATCH] Workaround for compile error in clang 13 on macOS
+
+Fixes #1482
+---
+ Jolt/Core/Color.h           | 2 +-
+ Jolt/Geometry/OrientedBox.h | 2 +-
+ Jolt/Physics/Body/Body.h    | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/Jolt/Core/Color.h b/Jolt/Core/Color.h
+index d07390de1..7706ca85b 100644
+--- a/Jolt/Core/Color.h
++++ b/Jolt/Core/Color.h
+@@ -12,7 +12,7 @@ class Color;
+ using ColorArg = Color;
+ 
+ /// Class that holds an RGBA color with 8-bits per component
+-class [[nodiscard]] JPH_EXPORT_GCC_BUG_WORKAROUND Color
++class JPH_EXPORT_GCC_BUG_WORKAROUND [[nodiscard]] Color
+ {
+ public:
+ 	/// Constructors
+diff --git a/Jolt/Geometry/OrientedBox.h b/Jolt/Geometry/OrientedBox.h
+index c5c2a0e16..e15126661 100644
+--- a/Jolt/Geometry/OrientedBox.h
++++ b/Jolt/Geometry/OrientedBox.h
+@@ -14,7 +14,7 @@ JPH_NAMESPACE_BEGIN
+ class AABox;
+ 
+ /// Oriented box
+-class [[nodiscard]] JPH_EXPORT_GCC_BUG_WORKAROUND OrientedBox
++class JPH_EXPORT_GCC_BUG_WORKAROUND [[nodiscard]] OrientedBox
+ {
+ public:
+ 	JPH_OVERRIDE_NEW_DELETE
+diff --git a/Jolt/Physics/Body/Body.h b/Jolt/Physics/Body/Body.h
+index 63034f909..e8831a309 100644
+--- a/Jolt/Physics/Body/Body.h
++++ b/Jolt/Physics/Body/Body.h
+@@ -31,7 +31,7 @@ class SoftBodyCreationSettings;
+ /// The functions that get/set the position of the body all indicate if they are relative to the center of mass or to the original position in which the shape was created.
+ ///
+ /// The linear velocity is also velocity of the center of mass, to correct for this: \f$VelocityCOM = Velocity - AngularVelocity \times ShapeCOM\f$.
+-class alignas(JPH_RVECTOR_ALIGNMENT) JPH_EXPORT_GCC_BUG_WORKAROUND Body : public NonCopyable
++class JPH_EXPORT_GCC_BUG_WORKAROUND alignas(JPH_RVECTOR_ALIGNMENT) Body : public NonCopyable
+ {
+ public:
+ 	JPH_OVERRIDE_NEW_DELETE

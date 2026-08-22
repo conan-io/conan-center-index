@@ -1,0 +1,9 @@
+sources:
+  "0.1.7":
+    url: "https://github.com/David-Haim/concurrencpp/archive/refs/tags/v.0.1.7.tar.gz"
+    sha256: "049f3e83ad1828e0b8b518652de1a3160d5849fdff03d521d0a5af0167338e89"
+patches:
+  "0.1.7":
+    - patch_file: "patches/cmake-min-version.patch"
+    - patch_file: "patches/directory-name.patch"
+    - patch_file: "patches/include-missing-headers.patch"

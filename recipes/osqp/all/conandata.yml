@@ -1,0 +1,7 @@
+sources:
+  "0.6.3":
+    url: "https://github.com/osqp/osqp/releases/download/v0.6.3/osqp-v0.6.3-src.tar.gz"
+    sha256: "285b2a60f68d113a1090767ec8a9c81a65b3af2d258f8c78a31cc3f98ba58456"
+  "0.6.2":
+    url: "https://github.com/osqp/osqp/releases/download/v0.6.2/complete_sources.tar.gz"
+    sha256: "0a7ade2fa19f13e13bc12f6ea0046ef764049023efb4997a4e72a76534f623ec"

@@ -1,0 +1,13 @@
+sources:
+  "10.0.2":
+    url: "https://github.com/scipopt/scip/releases/download/v10.0.2/scip-10.0.2.tgz"
+    sha256: "7544647007c9a63a770a71f5884a50ac81da37372bb6958d08588870bd58a50b"
+patches:
+  "10.0.2":
+    - patch_file: "patches/0002-bigobj-spx-msvc-debug.patch"
+    - patch_file: "patches/0003-format_msvc_stdext.patch"
+version_mappings:
+  "10.0.2":
+    soplex: "8.0.2"
+    default_sym: "snauty"
+    default_tpi: "tny"

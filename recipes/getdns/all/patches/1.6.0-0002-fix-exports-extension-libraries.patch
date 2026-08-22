@@ -1,0 +1,13 @@
+Based on https://github.com/getdnsapi/getdns/pull/489
+
+--- cmake/modules/TargetSharedLibraryExports.cmake
++++ cmake/modules/TargetSharedLibraryExports.cmake
+@@ -20,7 +20,7 @@
+       file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/${libname}.ver" "  ${symbol};\n")
+     endforeach ()
+     file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/${libname}.ver" "local:\n  *;\n};\n")
+-    target_link_libraries(${lib} PRIVATE "-Wl,--version-script=getdns.ver")
++    target_link_libraries(${lib} PRIVATE "-Wl,--version-script=${libname}.ver")
+   else ()
+     message(WARNING "Unknown platform, ${lib} exports not set.")
+   endif ()

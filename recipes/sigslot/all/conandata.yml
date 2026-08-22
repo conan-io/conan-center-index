@@ -1,0 +1,4 @@
+sources:
+  "1.2.3":
+    url: "https://github.com/palacaze/sigslot/archive/v1.2.3.tar.gz"
+    sha256: "36c30a88f05c8f8e6b4800d8f9c7c006cf61164695bf5fd91a8b80ed4e1d96af"

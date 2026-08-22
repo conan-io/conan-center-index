@@ -1,0 +1,20 @@
+From 1940cc0400de2e8161821558e73e3d8d0ddb13d3 Mon Sep 17 00:00:00 2001
+From: Steveice10 <1269164+Steveice10@users.noreply.github.com>
+Date: Thu, 25 Jan 2024 04:56:36 -0800
+Subject: [PATCH] build: fix compiling for ARM with MSVC but not Visual Studio
+ generator (#106)
+
+---
+diff --git a/cryptopp-cmake/cryptopp/CMakeLists.txt b/cryptopp-cmake/cryptopp/CMakeLists.txt
+index 7a78807..b64256f 100644
+--- a/cryptopp-cmake/cryptopp/CMakeLists.txt
++++ b/cryptopp-cmake/cryptopp/CMakeLists.txt
+@@ -1241,7 +1241,7 @@ set_source_files_properties(
+ # Compiler: MSVC
+ # ------------------------------------------------------------------------------
+ if(MSVC AND NOT CRYPTOPP_DISABLE_ASM)
+-    if(${CMAKE_GENERATOR_PLATFORM} MATCHES "ARM")
++    if(${CMAKE_GENERATOR_PLATFORM} MATCHES "ARM" OR CRYPTOPP_ARM32 OR CRYPTOPP_ARMV8)
+         message(
+             STATUS
+             "[cryptopp] Disabling ASM because ARM is specified as target platform."

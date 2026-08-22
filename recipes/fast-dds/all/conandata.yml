@@ -1,0 +1,29 @@
+sources:
+  "3.4.3":
+    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v3.4.3.tar.gz"
+    sha256: "107de2c0213ae1615eb7402af16fd9a90696944643a73f4e9b2a4c29687e420d"
+  "3.2.1":
+    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v3.2.1.tar.gz"
+    sha256: "8c088fb967d39785f1f83454d75308ae6c55fc74fc31de173713bc293635b2fd"
+  "2.14.3":
+    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.14.3.tar.gz"
+    sha256: "292e4170e4689d878eb5ddd38661134a704a1541402a4f564353190e4aadd23d"
+patches:
+  "3.4.3":
+    - patch_file: "patches/3.2.1-0002-fix-tool-paths.patch"
+      patch_type: "conan"
+      patch_description: "Fixup paths in tools to match conan package structure"
+    - patch_file: "patches/3.4.3-0003-remove-werror.patch"
+      patch_type: "conan"
+      patch_description: "Remove werror which fixes kIOMainPortDefault not defined in MacOS < 12"
+  "3.2.1":
+    - patch_file: "patches/3.2.1-0002-fix-tool-paths.patch"
+      patch_type: "conan"
+      patch_description: "Fixup paths in tools to match conan package structure"
+    - patch_file: "patches/3.2.1-0003-remove-werror.patch"
+      patch_type: "conan"
+      patch_description: "Remove werror which fixes kIOMainPortDefault not defined in MacOS < 12"
+  "2.14.3":
+    - patch_file: "patches/2.14.3-0002-fix-tool-paths.patch"
+      patch_type: "conan"
+      patch_description: "Fixup paths in tools to match conan package structure"

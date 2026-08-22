@@ -1,0 +1,10 @@
+--- similarity_search/CMakeLists.txt	2021-03-26 12:59:01 +0100
++++ similarity_search/CMakeLists.txt	2021-03-26 13:00:13 +0100
+@@ -108,7 +108,6 @@
+ endif()
+ 
+ add_subdirectory (src)
+-add_subdirectory (apps)
+ if (NOT WITHOUT_TESTS)
+     add_subdirectory (test)
+ endif()

@@ -1,0 +1,7 @@
+sources:
+  "4.1.8":
+    url: "https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.8.tar.bz2"
+    sha256: "466f68e3132a1dc02710cc2011fafced8336d98359fa2dae4dddcfd5719f12a9"
+patches:
+  "4.1.8":
+    - patch_file: "patches/allow-multiple-rpath-flags.patch"

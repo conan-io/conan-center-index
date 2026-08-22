@@ -1,0 +1,4 @@
+sources:
+  "0.17":
+    url: "https://github.com/epezent/implot/archive/v0.17.tar.gz"
+    sha256: "0aa3ff4fb97e553608e6758e77980eedf01745628fe6c025e647f941ae674127"

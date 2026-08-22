@@ -1,0 +1,7 @@
+sources:
+  "3.13.3":
+    url: "https://storage.googleapis.com/aom-releases/libaom-3.13.3.tar.gz"
+    sha256: "446a4ae9741cb8f3eeb98c949d25f91b48cb2b8569cae975c4b737392e9024fc"
+patches:
+  "3.13.3":
+    - patch_file: "patches/0001-3.13.3-fix-install.patch"

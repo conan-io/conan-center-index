@@ -1,0 +1,4 @@
+sources:
+  "0.5.0":
+    url: "https://github.com/aurora-opensource/au/releases/download/0.5.0/au-0.5.0.tar.gz"
+    sha256: "69d3510df7880dc5a109d751b8afc38b2adbf4af2e829b569b19cbdd970fee5e"

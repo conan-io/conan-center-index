@@ -1,0 +1,215 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
+import glob
+import os
+import textwrap
+
+required_conan_version = ">=2.1"
+
+
+class CapnprotoConan(ConanFile):
+    name = "capnproto"
+    description = "Cap'n Proto serialization/RPC system."
+    license = "MIT"
+    topics = ("serialization", "rpc")
+    homepage = "https://capnproto.org"
+    url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_openssl": [True, False],
+        "with_zlib": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_openssl": True,
+        "with_zlib": True,
+    }
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        if self.settings.os == "Windows":
+            cmake_layout(self, src_folder="src")
+        else:
+            basic_layout(self, src_folder="src")
+
+    def requirements(self):
+        if self.options.with_openssl:
+            self.requires("openssl/[>=1.1 <4]")
+        if self.options.get_safe("with_zlib"):
+            self.requires("zlib/[>=1.2.11 <2]")
+
+    def validate(self):
+        check_min_cppstd(self, 14)
+
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared libraries for Visual Studio")
+
+    def build_requirements(self):
+        if self.settings.os != "Windows":
+            self.tool_requires("libtool/2.4.7")
+            if self.settings_build.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        if self.settings.os == "Windows":
+            tc = CMakeToolchain(self)
+            tc.variables["BUILD_TESTING"] = False
+            tc.variables["EXTERNAL_CAPNP"] = False
+            tc.variables["CAPNP_LITE"] = False
+            tc.variables["WITH_OPENSSL"] = self.options.with_openssl
+            if Version(self.version) < "2": # pylint: disable=conan-condition-evals-to-constant
+                tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support (v2 branch does not need this)
+            tc.generate()
+            deps = CMakeDeps(self)
+            deps.generate()
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
+            if not cross_building(self):
+                env = VirtualRunEnv(self)
+                env.generate(scope="build")
+            tc = AutotoolsToolchain(self)
+            yes_no = lambda v: "yes" if v else "no"
+            tc.configure_args.extend([
+                f"--with-openssl={yes_no(self.options.with_openssl)}",
+                "--enable-reflection",
+                f"--with-zlib={yes_no(self.options.with_zlib)}"
+            ])
+            # Fix rpath on macOS
+            if self.settings.os == "Macos":
+                tc.extra_ldflags.append("-Wl,-rpath,@loader_path/../lib")
+            tc.generate()
+            deps = AutotoolsDeps(self)
+            deps.generate()
+
+    def build(self):
+        apply_conandata_patches(self)
+        if self.settings.os == "Windows":
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
+        else:
+            with chdir(self, os.path.join(self.source_folder, "c++")):
+                autotools = Autotools(self)
+                # TODO: replace by a call to autootols.autoreconf() in c++ folder once https://github.com/conan-io/conan/issues/12103 implemented
+                self.run("autoreconf --force --install")
+                autotools.configure(build_script_folder=os.path.join(self.source_folder, "c++"))
+                if (is_apple_os(self) and cross_building(self) and self.settings.arch in ("x86_64", "armv8") and
+                    self.settings.compiler == "apple-clang"):
+                    # when crossbuilding, the -arch flag is not correctly forwarded to the linker invocation
+                    libtool_sh = os.path.join(self.source_folder, "c++", "libtool")
+                    arch = "x86_64" if self.settings.arch == "x86_64" else "arm64"
+                    replace_in_file(self, libtool_sh, r'archive_cmds="\$CC -r ', r'archive_cmds="\$CC -r -arch {} '.format(arch))
+                autotools.make()
+
+    @property
+    def _cmake_folder(self):
+        return os.path.join("lib", "cmake", "CapnProto")
+
+    def package(self):
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if self.settings.os == "Windows":
+            cmake = CMake(self)
+            cmake.install()
+        else:
+            with chdir(self, os.path.join(self.source_folder, "c++")):
+                autotools = Autotools(self)
+                autotools.install()
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            fix_apple_shared_install_name(self)
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        for cmake_file in glob.glob(os.path.join(self.package_folder, self._cmake_folder, "*")):
+            if os.path.basename(cmake_file) != "CapnProtoMacros.cmake":
+                os.remove(cmake_file)
+        # inject mandatory variables so that CAPNP_GENERATE_CPP function can
+        # work in a robust way (build from source or from pre build package)
+        find_execs = textwrap.dedent("""\
+            if(CMAKE_CROSSCOMPILING)
+                find_program(CAPNP_EXECUTABLE capnp PATHS ENV PATH NO_DEFAULT_PATH)
+                find_program(CAPNPC_CXX_EXECUTABLE capnpc-c++ PATHS ENV PATH NO_DEFAULT_PATH)
+            endif()
+            if(NOT CAPNP_EXECUTABLE)
+                set(CAPNP_EXECUTABLE "${CMAKE_CURRENT_LIST_DIR}/../../../bin/capnp${CMAKE_EXECUTABLE_SUFFIX}")
+            endif()
+            if(NOT CAPNPC_CXX_EXECUTABLE)
+                set(CAPNPC_CXX_EXECUTABLE "${CMAKE_CURRENT_LIST_DIR}/../../../bin/capnpc-c++${CMAKE_EXECUTABLE_SUFFIX}")
+            endif()
+            set(CAPNP_INCLUDE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../../../include")
+            function(CAPNP_GENERATE_CPP SOURCES HEADERS)
+        """)
+        replace_in_file(self, os.path.join(self.package_folder, self._cmake_folder, "CapnProtoMacros.cmake"),
+                              "function(CAPNP_GENERATE_CPP SOURCES HEADERS)",
+                              find_execs)
+
+    @property
+    def _capnp_components(self):
+        def libm():
+            return ["m"] if self.settings.os in ["Linux", "FreeBSD"] else []
+
+        def pthread():
+            return ["pthread"] if self.settings.os in ["Linux", "FreeBSD"] else []
+
+        def ws2_32():
+            return ["ws2_32"] if self.settings.os == "Windows" else []
+
+        components = {
+            "capnp": {"requires": ["kj"]},
+            "capnp-json": {"requires": ["capnp", "kj"]},
+            "capnp-rpc": {"requires": ["capnp", "kj", "kj-async"]},
+            "capnpc": {"requires": ["capnp", "kj"], "system_libs": libm() + pthread()},
+            "kj": {"system_libs": libm() + pthread()},
+            "kj-async": {"requires": ["kj"], "system_libs": libm() + pthread() + ws2_32()},
+            "kj-http": {"requires": ["kj", "kj-async"]},
+            "kj-test": {"requires": ["kj"]},
+        }
+
+        if self.options.get_safe("with_zlib"):
+            components.update({"kj-gzip": {"requires": ["kj", "kj-async", "zlib::zlib"]}})
+            components["kj-http"].setdefault("requires", []).append("zlib::zlib")
+        if self.options.with_openssl:
+            components.update({"kj-tls": {"requires": ["kj", "kj-async", "openssl::openssl"]}})
+        
+        components.update({"capnp-websocket": {"requires": ["capnp", "capnp-rpc", "kj-http", "kj-async", "kj"]}})
+
+        return components
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "CapnProto")
+        capnprotomacros = os.path.join(self._cmake_folder, "CapnProtoMacros.cmake")
+        self.cpp_info.set_property("cmake_build_modules", [capnprotomacros])
+
+        for name, comp_info in self._capnp_components.items():
+            self.cpp_info.components[name].set_property("cmake_target_name", f"CapnProto::{name}")
+            self.cpp_info.components[name].builddirs.append(self._cmake_folder)
+            self.cpp_info.components[name].set_property("pkg_config_name", name)
+            self.cpp_info.components[name].libs = [name]
+            self.cpp_info.components[name].requires = comp_info.get("requires", [])
+            self.cpp_info.components[name].system_libs = comp_info.get("system_libs", [])

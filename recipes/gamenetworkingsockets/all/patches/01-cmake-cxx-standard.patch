@@ -1,0 +1,18 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 891beb4..ff1fd60 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -201,9 +201,10 @@ function(set_target_common_gns_properties TGT)
+ 		set_target_properties(${TGT} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+ 	endif()
+ 
+-	set_target_properties(${TGT} PROPERTIES
+-		CXX_STANDARD 11
+-	)
++	# Fallback to Conan-defined CMAKE_CXX_STANDARD
++	# set_target_properties(${TGT} PROPERTIES
++	# 	CXX_STANDARD 11
++	# )
+ endfunction()
+ 
+ if(BUILD_EXAMPLES)

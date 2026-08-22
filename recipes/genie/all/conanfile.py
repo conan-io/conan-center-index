@@ -1,0 +1,96 @@
+from conan import ConanFile
+from conan.tools.files import get, replace_in_file, copy
+from conan.tools.build import cross_building
+from conan.tools.layout import basic_layout
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.microsoft import VCVars, is_msvc
+from conan.tools.gnu import AutotoolsToolchain, Autotools
+from conan.tools.apple import is_apple_os
+import os
+
+required_conan_version = ">=2.0"
+
+class GenieConan(ConanFile):
+    name = "genie"
+    license = "BSD-3-clause"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/bkaradzic/GENie"
+    description = "Project generator tool"
+    topics = ("genie", "project", "generator", "build", "build-systems")
+    settings = "os", "arch", "compiler", "build_type"
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        del self.info.settings.compiler
+
+    def validate(self):
+        if cross_building(self):
+            raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
+
+    def build_requirements(self):
+        if self.settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+                self.tool_requires("msys2/cci.latest")
+        if is_msvc(self):
+            self.tool_requires("cccl/1.3")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+
+    @property
+    def _os(self):
+        if is_apple_os(self):
+            return "darwin"
+        return {
+            "Windows": "windows",
+            "Linux": "linux",
+            "FreeBSD": "bsd",
+        }[str(self.settings.os)]
+
+    def _patch_compiler(self, cc, cxx):
+        makefile = os.path.join(self.source_folder, "build", f"gmake.{self._os}", "genie.make")
+        
+        replace_in_file(self, makefile, "CC  = gcc", f"CC = {cc}" if cc else "")
+        replace_in_file(self, makefile, "CXX = g++", f"CXX = {cxx}" if cxx else "")
+
+    @property
+    def _genie_config(self):
+        return "debug" if self.settings.build_type == "Debug" else "release"
+
+    def generate(self):
+        vbe = VirtualBuildEnv(self)
+        vbe.generate()
+        if is_msvc(self):
+            ms = VCVars(self)
+            ms.generate()
+        else:
+            tc = AutotoolsToolchain(self)
+            tc.generate()
+
+    def build(self):
+        if is_msvc(self):
+            self._patch_compiler("cccl", "cccl")
+            self.run("make", cwd=self.source_folder)
+        else:
+            self._patch_compiler("", "")
+
+            autotools = Autotools(self)
+            autotools.make(args=[f"-C {self.source_folder}", f"OS={self._os}", f"config={self._genie_config}"])
+
+    def package(self):
+        copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        bin_ext = ".exe" if self.settings.os == "Windows" else ""
+        copy(self, pattern=f"genie{bin_ext}", src=os.path.join(self.source_folder, "bin", self._os), dst=os.path.join(self.package_folder, "bin"))
+        if self.settings.build_type == "Debug":
+            copy(self, pattern="*.lua", src=os.path.join(self.source_folder, "src"), dst=os.path.join(self.package_folder,"res"))
+
+    def package_info(self):
+        self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []
+        
+        if self.settings.build_type == "Debug":
+            self.buildenv_info.append_path("PREMAKE_PATH", os.path.join(self.package_folder, "res"))

@@ -1,0 +1,11 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -100,7 +100,7 @@
+     add_compile_options($<$<COMPILE_LANGUAGE:C>:/wd4267>)
+ 
+     # handle msvcrt setting being passed in CMAKE_C_FLAGS
+-    if(DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
++    if(FALSE)
+         # do not support other methods of setting this (it would be more conformant, tho)
+         message(FATAL_ERROR "please set msvcrt via CMAKE_C_FLAGS")
+     endif()

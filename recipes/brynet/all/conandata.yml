@@ -1,0 +1,13 @@
+sources:
+  "1.12.2":
+    url: "https://github.com/IronsDu/brynet/archive/v1.12.2.tar.gz"
+    sha256: "b8b740cae39804d1e7037866046321065856c0ea9f565d26f67aeccc7ccd3d51"
+  "1.12.1":
+    url: "https://github.com/IronsDu/brynet/archive/v1.12.1.tar.gz"
+    sha256: "bcd7ce9b1c3a8dd900f34e50e7ac23013226b3c78b1e22b079d781fbc698122d"
+  "1.11.1":
+    url: "https://github.com/IronsDu/brynet/archive/v1.11.1.tar.gz"
+    sha256: "780f7e1be5e16a202b75661178209a9dd572d07d548a7f30e9bcc7f4a768c61d"
+  "1.11.0":
+    url: "https://github.com/IronsDu/brynet/archive/refs/tags/v1.11.0.tar.gz"
+    sha256: "e446c5616a5353f6d29510d30eaa852c69bda9aecd1f74b8cc9c6ae8f1fd6485"

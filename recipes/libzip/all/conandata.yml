@@ -1,0 +1,17 @@
+sources:
+  "1.11.4":
+    url:
+    - "https://libzip.org/download/libzip-1.11.4.tar.gz"
+    - "https://github.com/nih-at/libzip/releases/download/v1.11.4/libzip-1.11.4.tar.gz"
+    sha256: "82e9f2f2421f9d7c2466bbc3173cd09595a88ea37db0d559a9d0a2dc60dc722e"
+  "1.10.1":
+    url:
+      - "https://libzip.org/download/libzip-1.10.1.tar.gz"
+      - "https://github.com/nih-at/libzip/releases/download/v1.10.1/libzip-1.10.1.tar.gz"
+    sha256: "9669ae5dfe3ac5b3897536dc8466a874c8cf2c0e3b1fdd08d75b273884299363"
+patches:
+  "1.11.4":
+    - patch_file: "patches/1.11.4-0002-remove-rpath.patch"
+  "1.10.1":
+    - patch_file: "patches/1.7.3-0001-cmake-install-bundle.patch"
+    - patch_file: "patches/1.10.1-0002-remove-rpath.patch"

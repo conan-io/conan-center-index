@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES CXX)
+
+find_package(cpp-peglib CONFIG)
+if (NOT TARGET cpp-peglib::cpp-peglib)
+    find_package(peglib REQUIRED CONFIG)
+endif()
+
+add_executable(${PROJECT_NAME} test_package.cpp)
+if (TARGET cpp-peglib::cpp-peglib)
+    target_link_libraries(${PROJECT_NAME} PRIVATE cpp-peglib::cpp-peglib)
+else()
+    target_link_libraries(${PROJECT_NAME} PRIVATE peglib)
+endif()
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)

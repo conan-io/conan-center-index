@@ -1,0 +1,55 @@
+sources:
+  "0.11.4":
+    url: "https://blend2d.com/download/blend2d-0.11.4.tar.gz"
+    sha256: "07f7d99d2ebb7b42a707a4f0035745b781faf9083933f944084f66e6246bb01c"
+  "0.11.3":
+    url: "https://blend2d.com/download/blend2d-0.11.3.tar.gz"
+    sha256: "6dfb2c0260073f2af6c3dfe6c30a31da637e6facf7802f6b2836cc3c4e74fdd8"
+  "0.11.1":
+    url: "https://blend2d.com/download/blend2d-0.11.1.tar.gz"
+    sha256: "f46d61b6aa477fea1a353a41f5906d4e861817ae059ed22fc6ecdd50ff859dd2"
+    # When upstream will have new release, tarball may be deleted.
+    # Use following url: https://github.com/blend2d/blend2d/archive/a7f947677e85441abe1769586d3bb935b4086a07.tar.gz
+  "0.10.6":
+    url: "https://github.com/blend2d/blend2d/archive/df124784fd3e9765251c74d412d88c625e3587e9.tar.gz"
+    sha256: "d8a91745c79beeab29d781357308b49ef51d009237b342ce50304ea618e977ad"
+  "0.10.5":
+    url: "https://github.com/blend2d/blend2d/archive/99fc3aa9a1d113e913df67166d40d2a81bef1dcb.tar.gz"
+    sha256: "cb7426a483156721c02b28cf65969bdeeb13ffed6cf9bc4a9493d7ec4d5de8c3"
+  "0.10.4":
+    url: "https://github.com/blend2d/blend2d/archive/d60f62b9d008be096daff329dfe9b8409c344651.tar.gz"
+    sha256: "ce197422ae8ec0d0310895bebed396091e0144ec09482439d24040196957e740"
+  "0.10":
+    url: "https://github.com/blend2d/blend2d/archive/000d55c75994fa88efcb7a31ae32be9ec8435f7d.tar.gz"
+    sha256: "7a986e14d08d687bfc7510bd762a29f01b1c2449b4e60f85268dd0072c65b698"
+  "0.9":
+    url: "https://github.com/blend2d/blend2d/archive/346555924752f085a2a06265858bc63c8987bf98.tar.gz"
+    sha256: "89639d60320e8d684c3708b849ede9ac660cbd2acc33de6baa846ee7fbed24b8"
+  "0.8":
+    url: "https://github.com/blend2d/blend2d/archive/2910c87c5e8ddedcf80bbf4871bb59d70e1170c1.tar.gz"
+    sha256: "34ff6f0f2dd10b39e1e6a3b07c5f76844b38f780c6849a65a34351e76e36cd3d"
+patches:
+  "0.10.6":
+    - patch_file: "patches/0.10.6-0001-disable-embed-asmjit.patch"
+      patch_description: "use asmjit cci package"
+      patch_type: "conan"
+  "0.10.5":
+    - patch_file: "patches/0.10-0001-disable-embed-asmjit.patch"
+      patch_description: "use asmjit cci package"
+      patch_type: "conan"
+  "0.10.4":
+    - patch_file: "patches/0.10-0001-disable-embed-asmjit.patch"
+      patch_description: "use asmjit cci package"
+      patch_type: "conan"
+  "0.10":
+    - patch_file: "patches/0.10-0001-disable-embed-asmjit.patch"
+      patch_description: "use asmjit cci package"
+      patch_type: "conan"
+  "0.9":
+    - patch_file: "patches/0.9-0001-disable-embed-asmjit.patch"
+      patch_description: "use asmjit cci package"
+      patch_type: "conan"
+  "0.8":
+    - patch_file: "patches/0.8-0001-disable-embed-asmjit.patch"
+      patch_description: "use asmjit cci package"
+      patch_type: "conan"

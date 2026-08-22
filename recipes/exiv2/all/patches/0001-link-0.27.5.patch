@@ -1,0 +1,13 @@
+diff --git a/xmpsdk/CMakeLists.txt b/xmpsdk/CMakeLists.txt
+index a22698fb..9ef87970 100644
+--- a/xmpsdk/CMakeLists.txt
++++ b/xmpsdk/CMakeLists.txt
+@@ -28,7 +28,7 @@ add_library(exiv2-xmp STATIC
+ 
+ target_link_libraries(exiv2-xmp
+     PRIVATE 
+-        $<BUILD_INTERFACE:${EXPAT_LIBRARY}>
++        EXPAT::EXPAT
+ )
+ 
+ target_include_directories(exiv2-xmp

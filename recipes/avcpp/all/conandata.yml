@@ -1,0 +1,4 @@
+sources:
+  "2.7.1":
+    url: "https://github.com/h4tr3d/avcpp/archive/refs/tags/v2.7.1.tar.gz"
+    sha256: "9721f34851b8d32f87ebe8f6f024e8d75902b946f7f62020e56aa9ed0d926a3e"

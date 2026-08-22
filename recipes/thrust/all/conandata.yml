@@ -1,0 +1,4 @@
+sources:
+  "1.17.2":
+    url: "https://github.com/thrust/thrust/archive/1.17.2.tar.gz"
+    sha256: "d021e37f5aac30fd1b9737865399feb57db8e601ae2fc0af3cd41784435e9523"

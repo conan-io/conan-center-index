@@ -1,0 +1,74 @@
+cmake_minimum_required(VERSION 3.8)
+project(imgui LANGUAGES CXX)
+
+set(MISC_DIR ${IMGUI_SRC_DIR}/misc)
+set(EXTRA_FONTS_DIR ${MISC_DIR}/fonts)
+set(IMGUI_EXPORT_HEADERS imgui_export_headers.h)
+
+file(GLOB SOURCE_FILES ${IMGUI_SRC_DIR}/*.cpp)
+file(GLOB HEADER_FILES ${IMGUI_SRC_DIR}/*.h)
+
+if(IMGUI_ENABLE_TEST_ENGINE)
+    message(STATUS "Building ImGui with test engine")
+    file(GLOB TEST_ENGINE_FILES ${IMGUI_TEST_ENGINE_DIR}/imgui_test_engine/*.cpp)
+    list(APPEND SOURCE_FILES ${TEST_ENGINE_FILES})
+    file(GLOB TEST_ENGINE_HEADER_FILES ${IMGUI_TEST_ENGINE_DIR}/imgui_test_engine/*.h)
+    list(APPEND HEADER_FILES ${TEST_ENGINE_HEADER_FILES})
+else()
+    message(STATUS "Building ImGui without test engine")
+endif()
+
+file(GLOB EXTRA_FONTS_FILES ${EXTRA_FONTS_DIR}/*.ttf)
+if (MSVC)
+    file(GLOB EXTRA_NATVIS_FILES ${MISC_DIR}/natvis/*.natvis)
+endif()
+
+set(BINARY_TO_COMPRESSED_BIN binary_to_compressed_c)
+
+add_executable(${BINARY_TO_COMPRESSED_BIN} ${EXTRA_FONTS_DIR}/binary_to_compressed_c.cpp)
+target_compile_features(${BINARY_TO_COMPRESSED_BIN} PRIVATE cxx_std_11)
+
+add_library(${PROJECT_NAME} ${SOURCE_FILES})
+
+if(IMGUI_WITH_SDL3_BINDING)
+    target_sources(${PROJECT_NAME} PRIVATE ${IMGUI_SRC_DIR}/backends/imgui_impl_sdl3.cpp)
+    list(APPEND HEADER_FILES ${IMGUI_SRC_DIR}/backends/imgui_impl_sdl3.h)
+    find_package(SDL3 REQUIRED CONFIG)
+    target_link_libraries(${PROJECT_NAME} PUBLIC SDL3::SDL3)
+endif()
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN ON
+)
+include(GenerateExportHeader)
+generate_export_header(${PROJECT_NAME}
+    EXPORT_MACRO_NAME IMGUI_API
+    EXPORT_FILE_NAME ${IMGUI_EXPORT_HEADERS}
+)
+target_include_directories(${PROJECT_NAME} PUBLIC
+    $<BUILD_INTERFACE:${IMGUI_SRC_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<INSTALL_INTERFACE:include>
+)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+
+include(GNUInstallDirs)
+
+install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS ${BINARY_TO_COMPRESSED_BIN}
+        DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES ${HEADER_FILES} ${CMAKE_CURRENT_BINARY_DIR}/${IMGUI_EXPORT_HEADERS}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
+install(FILES ${EXTRA_FONTS_FILES}
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/res/fonts
+        PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
+if (MSVC)
+    install(FILES ${EXTRA_NATVIS_FILES}
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/res/natvis
+            PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
+endif()

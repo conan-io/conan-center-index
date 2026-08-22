@@ -1,0 +1,53 @@
+sources:
+  "0.15.0":
+    url: "https://github.com/jbaldwin/libcoro/archive/v0.15.0.tar.gz"
+    sha256: "9538281c742ca59c028052ad150d0e7ff688b8a724532dea95e74966b90d70c2"
+  "0.14.1":
+    url: "https://github.com/jbaldwin/libcoro/archive/refs/tags/v0.14.1.tar.gz"
+    sha256: "0a18058fe17826237a868e3d266960e839db8c7aeeb2beba9b596c84124afe0e"
+  "0.12.1":
+    url: "https://github.com/jbaldwin/libcoro/archive/refs/tags/v0.12.1.tar.gz"
+    sha256: "2cb6f45fc73dad6008cc930d92939785684835e03b12df422b98fcab9e393add"
+  "0.12":
+    url: "https://github.com/jbaldwin/libcoro/archive/refs/tags/v0.12.tar.gz"
+    sha256: "9a89f329e12fda7d6425523fb2cbd1ebaf41e0e1d41e210d93ad4f3a196333a2"
+  "0.11.1":
+    url: "https://github.com/jbaldwin/libcoro/archive/refs/tags/v0.11.1.tar.gz"
+    sha256: "c7eb1bf133519ec0e0bc2e3e018ac4d1447a143e5e7385dab19204277d7c7671"
+  "0.10":
+    url: "https://github.com/jbaldwin/libcoro/archive/refs/tags/v0.10.tar.gz"
+    sha256: "0e952e72012925b75910f80772f3642dac631644578dbbc0db4fee047badc745"
+  "0.9":
+    url: "https://github.com/jbaldwin/libcoro/archive/refs/tags/v0.9.tar.gz"
+    sha256: "680479582023f019bfa58b17bbcd30aa2ef1a8ba2c09d4ea9b296dbc77e93f1f"
+  "0.8":
+    url: "https://github.com/jbaldwin/libcoro/archive/refs/tags/v0.8.tar.gz"
+    sha256: "09d8de39c9233d79c0dd1379c6826c636f63667f21001b66eb9b2080f6b270ad"
+  "0.7":
+    url: "https://github.com/jbaldwin/libcoro/archive/refs/tags/v0.7.tar.gz"
+    sha256: "ce1f3f1c4fa21b53d1cd195a29bd5a2313e53aa35637b402db04207d02316e51"
+patches:
+  "0.10":
+    - patch_file: "patches/0.10-0002-disable-git-config.patch"
+      patch_type: "official"
+      patch_description: "Comment out invocation of git config command"
+      patch_source: "https://github.com/jbaldwin/libcoro/pull/234"
+  "0.9":
+    - patch_file: "patches/0.9-0002-disable-git-config.patch"
+      patch_type: "conan"
+      patch_description: "Comment out invocation of git config command"
+    - patch_file: "patches/0.9-0003-include-exception.patch"
+      patch_type: "backport"
+      patch_source: "https://github.com/jbaldwin/libcoro/pull/169"
+      patch_description: "include std headers"
+  "0.8":
+    - patch_file: "patches/0.8-0002-disable-git-config.patch"
+      patch_type: "conan"
+      patch_description: "Comment out invocation of git config command"
+  "0.7":
+    - patch_file: "patches/0.7-0002-disable-git-config.patch"
+      patch_type: "conan"
+      patch_description: "Comment out invocation of git config command"
+    - patch_file: "patches/0.7-0003-fix-dependencies.patch"
+      patch_type: "conan"
+      patch_description: "Replace add_subdirectory dependencies with find_package"

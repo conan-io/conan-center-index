@@ -1,0 +1,71 @@
+Mujoco hardcodes some build configuration option resulting in a not
+flexible build for Conan.
+
+This patch allows using different C++ standard, manage fPIC via Conan,
+and MSVC encoding and -Werror.
+
+https://github.com/google-deepmind/mujoco/pull/2693
+https://github.com/google-deepmind/mujoco/pull/3224
+
+diff --git a/cmake/MujocoOptions.cmake b/cmake/MujocoOptions.cmake
+index 952163a1..88abcad1 100644
+--- a/cmake/MujocoOptions.cmake
++++ b/cmake/MujocoOptions.cmake
+@@ -12,17 +12,21 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+ # Global compilation settings
+-set(CMAKE_C_STANDARD 11)
+-set(CMAKE_C_STANDARD_REQUIRED ON)
+-set(CMAKE_CXX_STANDARD 20)
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-set(CMAKE_CXX_EXTENSIONS OFF)
+-if(EMSCRIPTEN)
+-  set(CMAKE_C_EXTENSIONS ON)
+-else()
+-  set(CMAKE_C_EXTENSIONS OFF)
++if(NOT CMAKE_C_STANDARD)
++  set(CMAKE_C_STANDARD 11)
++  set(CMAKE_C_STANDARD_REQUIRED ON)
++  if(EMSCRIPTEN)
++    set(CMAKE_C_EXTENSIONS ON)
++  else()
++    set(CMAKE_C_EXTENSIONS OFF)
++  endif()
++endif()
++if(NOT CMAKE_CXX_STANDARD)
++  set(CMAKE_CXX_STANDARD 20)
++  set(CMAKE_CXX_STANDARD_REQUIRED ON)
++  set(CMAKE_CXX_EXTENSIONS OFF)
+ endif()
+ set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # For LLVM tooling
+ 
+ if(NOT CMAKE_CONFIGURATION_TYPES)
+@@ -52,15 +56,14 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}"
+ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
+ 
+ set(OpenGL_GL_PREFERENCE GLVND)
+ 
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ set(CMAKE_C_VISIBILITY_PRESET hidden)
+ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+ set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+ 
+ if(MSVC)
+-  add_compile_options(/Gy /Gw /Oi)
++  add_compile_options(/utf-8 /Gy /Gw /Oi)
+ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+   add_compile_options(-fdata-sections -ffunction-sections)
+ endif()
+ 
+@@ -89,9 +92,8 @@ include(MujocoLinkOptions)
+ get_mujoco_extra_link_options(EXTRA_LINK_OPTIONS)
+ 
+ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND NOT MSVC))
+   set(EXTRA_COMPILE_OPTIONS
+-      -Werror
+       -Wall
+       -Wpedantic
+       -Wimplicit-fallthrough
+       -Wunused

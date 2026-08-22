@@ -1,0 +1,4 @@
+sources:
+  "5.0.0-beta7":
+    url: "https://github.com/premake/premake-core/releases/download/v5.0.0-beta7/premake-5.0.0-beta7-src.zip"
+    sha256: "d39874aed04e317a46bdd281b193fe58c70457cd07bbd50e1bdcb4729c3a4860"

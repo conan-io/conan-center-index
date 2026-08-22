@@ -1,0 +1,39 @@
+--- a/pem.h
++++ b/pem.h
+@@ -15,13 +15,13 @@
+ #ifndef CRYPTOPP_PEM_H
+ #define CRYPTOPP_PEM_H
+ 
+-#include "pubkey.h"
+-#include "eccrypto.h"
+-#include "gfpcrypt.h"
+-#include "integer.h"
+-#include "rsa.h"
+-#include "dsa.h"
+-#include "elgamal.h"
++#include <cryptopp/pubkey.h>
++#include <cryptopp/eccrypto.h>
++#include <cryptopp/gfpcrypt.h>
++#include <cryptopp/integer.h>
++#include <cryptopp/rsa.h>
++#include <cryptopp/dsa.h>
++#include <cryptopp/elgamal.h>
+ 
+ NAMESPACE_BEGIN(CryptoPP)
+ 
+--- a/pem_common.h
++++ b/pem_common.h
+@@ -10,9 +10,10 @@
+ #ifndef CRYPTOPP_PEM_COMMON_H
+ #define CRYPTOPP_PEM_COMMON_H
+ 
+-#include "cryptlib.h"
+-#include "secblock.h"
+-#include "osrng.h"
++#include <cryptopp/cryptlib.h>
++#include <cryptopp/secblock.h>
++#include <cryptopp/osrng.h>
++
+ #include "pem.h"
+ 
+ #include <string>

@@ -1,0 +1,245 @@
+From 1de6be1b19c8a349f81910d50e18a5c3d010daec Mon Sep 17 00:00:00 2001
+From: Walid Boussafa <walid.boussafa@dotmatics.com>
+Date: Sat, 14 Dec 2024 11:14:37 +0100
+Subject: [PATCH] CNI-2015 fix qt find_package
+
+---
+ find-modules/FindGradle.cmake                        | 2 +-
+ find-modules/FindQHelpGenerator.cmake                | 2 +-
+ kde-modules/KDEFrameworkCompilerSettings.cmake       | 2 +-
+ modules/ECMAddAndroidApk.cmake                       | 4 ++--
+ modules/ECMAddQch.cmake                              | 2 +-
+ modules/ECMAddQtDesignerPlugin.cmake                 | 8 ++++----
+ modules/ECMCreateQmFromPoFiles.cmake                 | 2 +-
+ modules/ECMPoQmTools.cmake                           | 2 +-
+ modules/ECMQueryQmake.cmake                          | 4 ++--
+ modules/ECMQueryQt.cmake                             | 4 ++--
+ tests/ECMAddTests/multi_tests/CMakeLists.txt         | 2 +-
+ tests/ECMAddTests/single_tests/CMakeLists.txt        | 2 +-
+ tests/ECMPoQmToolsTest/CMakeLists.txt                | 2 +-
+ tests/ECMQtDeclareLoggingCategoryTest/CMakeLists.txt | 2 +-
+ toolchain/ECMAndroidDeployQt5.cmake                  | 2 +-
+ 15 files changed, 21 insertions(+), 21 deletions(-)
+
+diff --git a/find-modules/FindGradle.cmake b/find-modules/FindGradle.cmake
+index f08ccc2..88ddcdc 100644
+--- a/find-modules/FindGradle.cmake
++++ b/find-modules/FindGradle.cmake
+@@ -30,7 +30,7 @@ Since 5.76.0.
+ include(${CMAKE_CURRENT_LIST_DIR}/../modules/QtVersionOption.cmake)
+ include(FindPackageHandleStandardArgs)
+ 
+-find_package(Qt${QT_MAJOR_VERSION}Core REQUIRED)
++find_package(Qt${QT_MAJOR_VERSION} COMPONENTS Core REQUIRED)
+ 
+ set (Gradle_PRECOMMAND "")
+ if (NOT WIN32)
+diff --git a/find-modules/FindQHelpGenerator.cmake b/find-modules/FindQHelpGenerator.cmake
+index b259010..65830d9 100644
+--- a/find-modules/FindQHelpGenerator.cmake
++++ b/find-modules/FindQHelpGenerator.cmake
+@@ -13,7 +13,7 @@ Finds the Qt5 QHelpGenerator
+ #]=======================================================================]
+ 
+ include(${CMAKE_CURRENT_LIST_DIR}/../modules/QtVersionOption.cmake)
+-find_package(Qt${QT_MAJOR_VERSION}Help QUIET)
++find_package(Qt${QT_MAJOR_VERSION} COMPONENTS Help QUIET)
+ if (TARGET Qt5::qhelpgenerator)
+     get_target_property(QHelpGenerator_EXECUTABLE Qt5::qhelpgenerator LOCATION)
+ else()
+diff --git a/kde-modules/KDEFrameworkCompilerSettings.cmake b/kde-modules/KDEFrameworkCompilerSettings.cmake
+index 67bc7f3..4413f6b 100644
+--- a/kde-modules/KDEFrameworkCompilerSettings.cmake
++++ b/kde-modules/KDEFrameworkCompilerSettings.cmake
+@@ -48,7 +48,7 @@ endif()
+ # otherwise we'll break function pointer based connects and method lookups
+ include(${CMAKE_CURRENT_LIST_DIR}/../modules/QtVersionOption.cmake)
+ if (QT_MAJOR_VERSION EQUAL "6")
+-    find_package(Qt6Core)
++    find_package(Qt6 COMPONENTS Core)
+     set(ENABLE_BSYMBOLICFUNCTIONS ${QT_FEATURE_reduce_relocations})
+     set(CMAKE_CXX_STANDARD 20)
+     set(CMAKE_CXX_EXTENSIONS OFF)
+diff --git a/modules/ECMAddAndroidApk.cmake b/modules/ECMAddAndroidApk.cmake
+index 897db4c..90c146b 100644
+--- a/modules/ECMAddAndroidApk.cmake
++++ b/modules/ECMAddAndroidApk.cmake
+@@ -52,8 +52,8 @@ if (QT_MAJOR_VERSION EQUAL 5)
+     return()
+ endif()
+ 
+-find_package(Qt6Core REQUIRED) # required for the following to work stand-alone
+-find_package(Qt6CoreTools REQUIRED)
++find_package(Qt6 COMPONENTS Core REQUIRED) # required for the following to work stand-alone
++find_package(Qt6 COMPONENTS CoreTools REQUIRED)
+ find_package(Python3 COMPONENTS Interpreter REQUIRED)
+ 
+ set(_ECM_TOOLCHAIN_DIR "${CMAKE_CURRENT_LIST_DIR}/../toolchain")
+diff --git a/modules/ECMAddQch.cmake b/modules/ECMAddQch.cmake
+index 4f5261a..891f8d8 100644
+--- a/modules/ECMAddQch.cmake
++++ b/modules/ECMAddQch.cmake
+@@ -279,7 +279,7 @@ function(_ecm_ensure_qt_qch_targets)
+     # Ideally one day Qt CMake Config files provide these
+     if(NOT TARGET Qt${QT_MAJOR_VERSION}Core_QCH)
+         # get Qt version, if any
+-        find_package(Qt${QT_MAJOR_VERSION}Core CONFIG QUIET)
++        find_package(Qt${QT_MAJOR_VERSION} COMPONENTS Core CONFIG QUIET)
+         # lookup tag files
+         ecm_query_qt(qt_docs_dir QT_INSTALL_DOCS TRY)
+         find_path(_qtcoreTagsPath qtcore/qtcore.tags
+diff --git a/modules/ECMAddQtDesignerPlugin.cmake b/modules/ECMAddQtDesignerPlugin.cmake
+index d847e66..83cee5a 100644
+--- a/modules/ECMAddQtDesignerPlugin.cmake
++++ b/modules/ECMAddQtDesignerPlugin.cmake
+@@ -441,16 +441,16 @@ macro(ecm_add_qtdesignerplugin target)
+     endif()
+ 
+     # Check deps
+-    if(NOT Qt${QT_MAJOR_VERSION}UiPlugin_FOUND)
+-        find_package(Qt${QT_MAJOR_VERSION}UiPlugin QUIET CONFIG)
+-        set_package_properties(Qt${QT_MAJOR_VERSION}UiPlugin PROPERTIES
++    if(NOT TARGET Qt${QT_MAJOR_VERSION}::UiPlugin)
++        find_package(Qt${QT_MAJOR_VERSION} COMPONENTS UiPlugin QUIET CONFIG)
++        set_package_properties(Qt${QT_MAJOR_VERSION}::UiPlugin PROPERTIES
+             PURPOSE "Required to build Qt Designer plugins"
+             TYPE REQUIRED
+         )
+     endif()
+ 
+     # setup plugin only if uiplugin lib was found, as we do not abort hard the cmake run otherwise
+-    if (Qt${QT_MAJOR_VERSION}UiPlugin_FOUND)
++    if (TARGET Qt${QT_MAJOR_VERSION}::UiPlugin)
+         set(_generation_dir "${CMAKE_CURRENT_BINARY_DIR}/${target}_ECMQtDesignerPlugin")
+         file(MAKE_DIRECTORY "${_generation_dir}")
+         set(_rc_icon_dir "/${ARGS_NAME}/designer")
+diff --git a/modules/ECMCreateQmFromPoFiles.cmake b/modules/ECMCreateQmFromPoFiles.cmake
+index 98e656d..60f0c00 100644
+--- a/modules/ECMCreateQmFromPoFiles.cmake
++++ b/modules/ECMCreateQmFromPoFiles.cmake
+@@ -165,7 +165,7 @@ endfunction()
+ function(ECM_CREATE_QM_FROM_PO_FILES)
+     # This gives us Qt5::lrelease and Qt5::lupdate but unfortunately no Qt5::lconvert
+     # See https://bugreports.qt-project.org/browse/QTBUG-37937
+-    find_package(Qt5LinguistTools CONFIG REQUIRED)
++    find_package(Qt5 COMPONENTS LinguistTools CONFIG REQUIRED)
+ 
+     foreach (arg ${ARGN})
+         if (arg STREQUAL "PO_DIR")
+diff --git a/modules/ECMPoQmTools.cmake b/modules/ECMPoQmTools.cmake
+index b05a57b..5120cc1 100644
+--- a/modules/ECMPoQmTools.cmake
++++ b/modules/ECMPoQmTools.cmake
+@@ -148,7 +148,7 @@ function(ecm_process_po_files_as_qm lang)
+ 
+     # Find lrelease and lconvert
+     if (QT_MAJOR_VERSION EQUAL "5")
+-        find_package(Qt5LinguistTools CONFIG REQUIRED)
++        find_package(Qt5 COMPONENTS LinguistTools CONFIG REQUIRED)
+     else()
+         find_package(Qt6 COMPONENTS LinguistTools CONFIG REQUIRED)
+     endif()
+diff --git a/modules/ECMQueryQmake.cmake b/modules/ECMQueryQmake.cmake
+index 4277eee..91f3c17 100644
+--- a/modules/ECMQueryQmake.cmake
++++ b/modules/ECMQueryQmake.cmake
+@@ -3,9 +3,9 @@ if (${ECM_GLOBAL_FIND_VERSION} VERSION_GREATER_EQUAL 5.93)
+ endif()
+ 
+ include(${CMAKE_CURRENT_LIST_DIR}/QtVersionOption.cmake)
+-find_package(Qt${QT_MAJOR_VERSION}Core QUIET)
++find_package(Qt${QT_MAJOR_VERSION} COMPONENTS Core QUIET)
+ 
+-if (Qt5Core_FOUND)
++if (TARGET Qt5::Core)
+     set(_qmake_executable_default "qmake-qt5")
+ endif ()
+ if (TARGET Qt5::qmake)
+diff --git a/modules/ECMQueryQt.cmake b/modules/ECMQueryQt.cmake
+index 639b2b5..fcc4412 100644
+--- a/modules/ECMQueryQt.cmake
++++ b/modules/ECMQueryQt.cmake
+@@ -46,7 +46,7 @@ endif()
+ 
+ if (QT_MAJOR_VERSION STREQUAL "5")
+     # QUIET to accommodate the TRY option
+-    find_package(Qt${QT_MAJOR_VERSION}Core QUIET)
++    find_package(Qt${QT_MAJOR_VERSION} COMPONENTS Core QUIET)
+     set(_exec_name_text "Qt5 qmake")
+     if(TARGET Qt5::qmake)
+         get_target_property(_qmake_executable_default Qt5::qmake LOCATION)
+@@ -56,7 +56,7 @@ if (QT_MAJOR_VERSION STREQUAL "5")
+     endif()
+ elseif(QT_MAJOR_VERSION STREQUAL "6")
+     # QUIET to accommodate the TRY option
+-    find_package(Qt6 COMPONENTS CoreTools QUIET CONFIG)
++    find_package(Qt6 COMPONENTS Core QUIET CONFIG)
+     set(_exec_name_text "Qt6 qtpaths")
+     if (TARGET Qt6::qtpaths)
+         get_target_property(_qtpaths_executable Qt6::qtpaths LOCATION)
+diff --git a/tests/ECMAddTests/multi_tests/CMakeLists.txt b/tests/ECMAddTests/multi_tests/CMakeLists.txt
+index ff15c99..e7b44fd 100644
+--- a/tests/ECMAddTests/multi_tests/CMakeLists.txt
++++ b/tests/ECMAddTests/multi_tests/CMakeLists.txt
+@@ -9,7 +9,7 @@ target_include_directories(testhelper PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/..")
+ 
+ # Link to QtCore for WinMain on Windows
+ include(QtVersionOption)
+-find_package(Qt${QT_MAJOR_VERSION}Core REQUIRED)
++find_package(Qt${QT_MAJOR_VERSION} COMPONENTS Core REQUIRED)
+ target_link_libraries(testhelper PUBLIC Qt${QT_MAJOR_VERSION}::Core)
+ 
+ enable_testing()
+diff --git a/tests/ECMAddTests/single_tests/CMakeLists.txt b/tests/ECMAddTests/single_tests/CMakeLists.txt
+index 3a619f7..67924b2 100644
+--- a/tests/ECMAddTests/single_tests/CMakeLists.txt
++++ b/tests/ECMAddTests/single_tests/CMakeLists.txt
+@@ -9,7 +9,7 @@ target_include_directories(testhelper PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/..")
+ 
+ # Link to QtCore for WinMain on Windows
+ include(QtVersionOption)
+-find_package(Qt${QT_MAJOR_VERSION}Core REQUIRED)
++find_package(Qt${QT_MAJOR_VERSION} COMPONENTS Core REQUIRED)
+ target_link_libraries(testhelper PUBLIC Qt${QT_MAJOR_VERSION}::Core)
+ 
+ enable_testing()
+diff --git a/tests/ECMPoQmToolsTest/CMakeLists.txt b/tests/ECMPoQmToolsTest/CMakeLists.txt
+index 1aee4f8..683cc09 100644
+--- a/tests/ECMPoQmToolsTest/CMakeLists.txt
++++ b/tests/ECMPoQmToolsTest/CMakeLists.txt
+@@ -66,7 +66,7 @@ unset(LOCALE_INSTALL_DIR)
+ #                      #
+ ########################
+ 
+-find_package(Qt${QT_MAJOR_VERSION}Core CONFIG REQUIRED)
++find_package(Qt${QT_MAJOR_VERSION} COMPONENTS Core CONFIG REQUIRED)
+ ecm_install_po_files_as_qm(tr_test-po)
+ 
+ 
+diff --git a/tests/ECMQtDeclareLoggingCategoryTest/CMakeLists.txt b/tests/ECMQtDeclareLoggingCategoryTest/CMakeLists.txt
+index c196ef2..e2b0ec7 100644
+--- a/tests/ECMQtDeclareLoggingCategoryTest/CMakeLists.txt
++++ b/tests/ECMQtDeclareLoggingCategoryTest/CMakeLists.txt
+@@ -44,7 +44,7 @@ ecm_qt_export_logging_category(
+     DESCRIPTION "log 4"
+ )
+ 
+-find_package(Qt${QT_MAJOR_VERSION}Core REQUIRED)
++find_package(Qt${QT_MAJOR_VERSION} COMPONENTS Core REQUIRED)
+ 
+ add_executable(testmain testmain.cpp ${sources})
+ target_include_directories(testmain
+diff --git a/toolchain/ECMAndroidDeployQt5.cmake b/toolchain/ECMAndroidDeployQt5.cmake
+index 30af69e..cc66980 100644
+--- a/toolchain/ECMAndroidDeployQt5.cmake
++++ b/toolchain/ECMAndroidDeployQt5.cmake
+@@ -1,5 +1,5 @@
+ cmake_minimum_required (VERSION 3.19 FATAL_ERROR)
+-find_package(Qt5Core REQUIRED)
++find_package(Qt5 COMPONENTS Core REQUIRED)
+ find_package(Python3 COMPONENTS Interpreter REQUIRED)
+ 
+ # Taken from https://stackoverflow.com/a/62311397
+-- 
+2.39.2
+

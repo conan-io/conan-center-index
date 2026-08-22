@@ -1,0 +1,13 @@
+--- a/mfhdf/libsrc/file.c
++++ b/mfhdf/libsrc/file.c
+@@ -26,6 +26,10 @@
+ #include    "alloc.h"
+ #include    "herr.h"
+ 
++#ifdef H4_HAVE_UNISTD_H
++#include <unistd.h>
++#endif
++
+ /* obtain the maximum number of open files allowed, at the same time,
+    on the current system */
+ #if defined _WIN32

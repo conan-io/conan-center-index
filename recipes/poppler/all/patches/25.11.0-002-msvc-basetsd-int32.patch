@@ -1,0 +1,20 @@
+diff --git a/poppler/ImageEmbeddingUtils.cc b/poppler/ImageEmbeddingUtils.cc
+index debca9d..f0c2c08 100644
+--- a/poppler/ImageEmbeddingUtils.cc
++++ b/poppler/ImageEmbeddingUtils.cc
+@@ -15,6 +15,7 @@
+ #include <config.h>
+ 
+ #include <memory>
++#include "Error.h"
+ #ifdef ENABLE_LIBJPEG
+ #    include <cstdio>
+ extern "C" {
+@@ -31,7 +32,6 @@ extern "C" {
+ #include "goo/GooCheckedOps.h"
+ #include "Object.h"
+ #include "Array.h"
+-#include "Error.h"
+ #include "PDFDoc.h"
+ 
+ namespace ImageEmbeddingUtils {

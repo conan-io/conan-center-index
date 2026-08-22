@@ -1,0 +1,93 @@
+diff --git a/ThirdParty/CMakeLists.txt b/ThirdParty/CMakeLists.txt
+index e329495f..d61520cd 100644
+--- a/ThirdParty/CMakeLists.txt
++++ b/ThirdParty/CMakeLists.txt
+@@ -23,9 +23,6 @@ if(VULKAN_SUPPORTED OR METAL_SUPPORTED)
+     # do not really need any target from the project.
+     #add_subdirectory(SPIRV-Headers)
+     #set_directory_root_folder("SPIRV-Headers" "ThirdParty/DiligentCore/SPIRV-Headers")
+-    install(FILES SPIRV-Headers/LICENSE DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME SPIRV-Headers-License.txt)
+-
+-    install(FILES Vulkan-Headers/LICENSE.txt DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME Vulkan-Headers-License.txt)
+ 
+     option(DILIGENT_NO_GLSLANG "Do NOT build glslang compiler" OFF)
+     option(DILIGENT_IMPROVE_SPIRV_TOOLS_DEBUG_PERF "Enable some optimizations for SPIRV-Tools, glslang, SPIRV-Cross and related projects in debug build to improve performance" ON)
+@@ -41,15 +38,9 @@ if(VULKAN_SUPPORTED OR METAL_SUPPORTED)
+             set(SPIRV_CHECK_CONTEXT OFF CACHE BOOL "Do not check if the IR context is in a valid state")
+         endif()
+         set(CMAKE_MACOSX_RPATH TRUE)
+-        add_subdirectory(SPIRV-Tools)
+-        set_directory_root_folder("SPIRV-Tools" "DiligentCore/ThirdParty/SPIRV-Tools")
+         # We only need SPIRV-Tools-opt for glslang that also depends on SPIRV-Tools-static.
+         # Exclude all other targets from the build to save build time
+-        set(SPIRV_TOOLS_EXCLUDE_TARGETS SPIRV-Tools-link SPIRV-Tools-reduce SPIRV-Tools-shared)
+-        set_target_properties(${SPIRV_TOOLS_EXCLUDE_TARGETS} PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
+ 
+-        set(THIRD_PARTY_LIBS SPIRV-Tools-static SPIRV-Tools-opt)
+-        install(FILES SPIRV-Tools/LICENSE DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME SPIRV-Tools-License.txt)
+     endif()
+ 
+     if(NOT ${DILIGENT_NO_GLSLANG})
+@@ -57,14 +48,9 @@ if(VULKAN_SUPPORTED OR METAL_SUPPORTED)
+         set(ENABLE_SPVREMAPPER OFF CACHE BOOL "Do not build SPIRV remapper")
+         set(SKIP_GLSLANG_INSTALL ON CACHE BOOL "Skip glslang installation")
+         set(ENABLE_CTEST OFF CACHE BOOL "Disable testing")
+-        add_subdirectory(glslang)
+-        set_directory_root_folder("glslang" "DiligentCore/ThirdParty/glslang")
+ 
+         # glslang "kindly" sets global CMAKE_DEBUG_POSTFIX to "d", which we have to unset now
+         unset(CMAKE_DEBUG_POSTFIX CACHE)
+-
+-        list(APPEND THIRD_PARTY_LIBS GenericCodeGen glslang OGLCompiler OSDependent SPIRV HLSL MachineIndependent)
+-        install(FILES glslang/LICENSE.txt DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME GLSLang-License.txt)
+     endif()
+ 
+     set(SPIRV_CROSS_CLI OFF CACHE BOOL "Build the CLI binary. Requires SPIRV_CROSS_STATIC.")
+@@ -80,37 +66,11 @@ if(VULKAN_SUPPORTED OR METAL_SUPPORTED)
+     set(SPIRV_CROSS_FORCE_PIC ON CACHE BOOL "Force position-independent code.")
+     set(SPIRV_CROSS_SKIP_INSTALL ON CACHE BOOL "Skip SPIRV-Cross installation.")
+     set(SPIRV_CROSS_NAMESPACE_OVERRIDE diligent_spirv_cross CACHE STRING "Override the namespace used in the C++ API.")
+-    add_subdirectory(SPIRV-Cross)
+-    set_directory_root_folder("SPIRV-Cross" "DiligentCore/ThirdParty/SPIRV-Cross")
+-
+-    list(APPEND THIRD_PARTY_LIBS spirv-cross-core)
+-    if(METAL_SUPPORTED)
+-        list(APPEND THIRD_PARTY_LIBS spirv-cross-msl spirv-cross-glsl)
+-    endif()
+-    install(FILES SPIRV-Cross/LICENSE DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME SPIRV-Cross-License.txt)
+-
+-    if(DILIGENT_INSTALL_CORE)
+-        install(TARGETS ${THIRD_PARTY_LIBS}
+-                ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}/${DILIGENT_CORE_DIR}/$<CONFIG>"
+-                LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/${DILIGENT_CORE_DIR}/$<CONFIG>"
+-                RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}/${DILIGENT_CORE_DIR}/$<CONFIG>"
+-        )
+-    endif()
+ 
+-    if(${DILIGENT_IMPROVE_SPIRV_TOOLS_DEBUG_PERF} AND MSVC)
+-        # Enable function inlining (/Ob1) in Debug build to improve shader compilation performance
+-        foreach(TARGET ${THIRD_PARTY_LIBS}) 
+-            target_compile_options(${TARGET} PRIVATE "$<$<CONFIG:DEBUG>:/Ob1>")
+-        endforeach()
+-    endif()
++    list(APPEND THIRD_PARTY_LIBS SPIRV-Tools-opt spirv-cross-msl spirv-cross-glsl glslang::SPIRV glslang::glslang glslang::MachineIndependent glslang::GenericCodeGen glslang::OSDependent glslang::OGLCompiler glslang::HLSL)
+ 
+     # Make sure that symbols do not leak out when third-party
+     # libs are linked into shared libraries
+-    set_target_properties(${THIRD_PARTY_LIBS} PROPERTIES
+-        CXX_VISIBILITY_PRESET hidden # -fvisibility=hidden
+-        C_VISIBILITY_PRESET hidden # -fvisibility=hidden
+-        VISIBILITY_INLINES_HIDDEN TRUE
+-     )
+ endif()
+ 
+ if(${DILIGENT_BUILD_GOOGLE_TEST})
+@@ -126,8 +86,3 @@ if(${DILIGENT_BUILD_GOOGLE_TEST})
+      )
+ endif()
+ 
+-install(FILES googletest/LICENSE DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME googletest-License.txt)
+-install(FILES stb/stb_image_write_license.txt DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}")
+-install(FILES volk/LICENSE.md DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME Volk-License.md)
+-install(FILES DirectXShaderCompiler/LICENSE.TXT DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME DXC-License.txt)
+-install(FILES DirectXShaderCompiler/ThirdPartyNotices.txt DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME DXC-ThirdPartyNotices.txt)

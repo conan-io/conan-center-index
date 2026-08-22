@@ -1,0 +1,7 @@
+sources:
+  "3.13.5":
+    url: "https://github.com/embree/embree/archive/refs/tags/v3.13.5.tar.gz"
+    sha256: "b8c22d275d9128741265537c559d0ea73074adbf2f2b66b0a766ca52c52d665b"
+patches:
+  "3.13.5":
+    - patch_file: "patches/3.13.x-0001-cmake-minimum-required.patch"

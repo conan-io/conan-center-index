@@ -1,0 +1,4 @@
+sources:
+  "0.59.0":
+    url: "https://github.com/abedra/libvault/archive/refs/tags/0.59.0.zip"
+    sha256: 668e71e1689f6142735387989042945e42fd6e0483f223ce3a08121887a335ce

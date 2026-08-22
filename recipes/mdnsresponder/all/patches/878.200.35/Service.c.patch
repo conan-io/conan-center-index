@@ -1,0 +1,42 @@
+--- mDNSWindows/SystemService/Service.c
++++ mDNSWindows/SystemService/Service.c
+@@ -1075,9 +1075,6 @@
+ 	BOOL			initialized;
+ 	BOOL			ok;
+ 	
+-	DEBUG_UNUSED( argc );
+-	DEBUG_UNUSED( argv );
+-	
+ 	initialized = FALSE;
+ 	
+ 	// <rdar://problem/5727548> Make the service as running before we call ServiceSpecificInitialize. We've
+@@ -1197,9 +1194,6 @@
+ {
+ 	OSStatus err;
+ 	
+-	DEBUG_UNUSED( argc );
+-	DEBUG_UNUSED( argv );
+-	
+ 	mDNSPlatformMemZero( &gMDNSRecord, sizeof gMDNSRecord);
+ 	mDNSPlatformMemZero( &gPlatformStorage, sizeof gPlatformStorage);
+ 
+@@ -2127,9 +2121,8 @@
+ }
+ 
+ 
+-mDNSexport void RecordUpdatedNiceLabel(mDNS *const m, mDNSs32 delay)
++mDNSexport void RecordUpdatedNiceLabel(mDNSs32 delay)
+ 	{
+-	(void)m;
+ 	(void)delay;
+ 	// No-op, for now
+ 	}
+@@ -2340,8 +2333,6 @@
+ {
+ 	OSStatus err = kNoErr;
+ 
+-	DEBUG_UNUSED( inMDNS );
+-
+ 	//
+ 	// <rdar://problem/4096464> Don't call SetLLRoute on loopback
+ 	// <rdar://problem/6885843> Default route on Windows 7 breaks network connectivity

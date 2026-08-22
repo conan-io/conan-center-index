@@ -1,0 +1,24 @@
+From e775c5c070093facb17a732c3b509bfe0ca8ade7 Mon Sep 17 00:00:00 2001
+From: Uilian Ries <uilianries@gmail.com>
+Date: Tue, 18 Jun 2024 11:39:22 +0200
+Subject: [PATCH] Link to legacy_stdio only when MSVC
+
+Signed-off-by: Uilian Ries <uilianries@gmail.com>
+---
+ src/rebound.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/rebound.c b/src/rebound.c
+index 18267206b..40afe76f4 100644
+--- a/src/rebound.c
++++ b/src/rebound.c
+@@ -23,7 +23,9 @@
+  *
+  */
+ #define _NO_CRT_STDIO_INLINE // WIN32 to use _vsprintf_s
++#if defined(_WIN32) && defined(_MSC_VER)
+ #pragma comment(lib, "legacy_stdio_definitions.lib")
++#endif
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <stddef.h> // for offsetof()

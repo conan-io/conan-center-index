@@ -1,0 +1,21 @@
+Behavior changed in Poco 1.15.0.
+See https://github.com/pocoproject/poco/commit/337f13414df298f7ece0ee123c622b1b20a7b004
+
+CMakeDeps always generates INTERFACE IMPORTED targets, so get_target_property()
+never returns SHARED_LIBRARY or STATIC_LIBRARY. Fixed by CMakeConfigDeps: the library type is shared/static/interface.
+
+The EMBEDDED_PCRE2_SOURCES are private source from pcre2, which should be compiled when linking against the shared library.
+The static library is expected to be linked against the system pcre2 library, so the embedded sources should not be compiled in that case.
+
+diff --git a/Foundation/CMakeLists.txt b/Foundation/CMakeLists.txt
+index bf141ba..3a54d7d 100644
+--- a/Foundation/CMakeLists.txt
++++ b/Foundation/CMakeLists.txt
+@@ -35,7 +35,6 @@ if(POCO_UNBUNDLED)
+ 
+ 	# pcre2 source files are linked with Foundation when shared library pcre2 is linked.
+ 	# When linking pcre2 as static library the symbols are accessible.
+-	get_target_property(_PCRE2TYPE Pcre2::Pcre2 TYPE)
+ 	if("${_PCRE2TYPE}" STREQUAL "SHARED_LIBRARY")
+ 		# HACK: Unicode.cpp requires functions from these files.
+ 		# They can't be used directly from the library

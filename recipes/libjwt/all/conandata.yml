@@ -1,0 +1,4 @@
+sources:
+  "1.18.3":
+    url: "https://github.com/benmcollins/libjwt/archive/refs/tags/v1.18.3.zip"
+    sha256: "c4f9e5a8f1b7b3c3e8f6b0b2d6a9d2f8e3a1c4d5e6f7a8b9c0d1e2f3a4b5c6d7"

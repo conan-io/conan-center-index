@@ -1,0 +1,19 @@
+versions:
+  "4.12.0":
+    folder: all
+  "4.10.6":
+    folder: all
+  "4.10.1":
+    folder: all
+  "4.06.1":
+    folder: all
+  "4.03.1":
+    folder: all
+  "4.02.1":
+    folder: all
+  "4.01.9":
+    folder: all
+  "4.01.7":
+    folder: all
+  "4.01.5":
+    folder: all

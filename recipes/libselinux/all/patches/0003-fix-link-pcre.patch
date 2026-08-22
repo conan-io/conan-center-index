@@ -1,0 +1,11 @@
+--- a/utils/Makefile
++++ b/utils/Makefile
+@@ -43,7 +43,7 @@ endif
+ 
+ override CFLAGS += -I../include -D_GNU_SOURCE $(DISABLE_FLAGS) $(PCRE_CFLAGS)
+ override LDFLAGS += -L../src
+-override LDLIBS += -lselinux $(FTS_LDLIBS)
++override LDLIBS += -lselinux $(FTS_LDLIBS) $(PCRE_LDLIBS)
+ PCRE_LDLIBS ?= -lpcre
+ 
+ ifeq ($(ANDROID_HOST),y)

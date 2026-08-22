@@ -1,0 +1,7 @@
+versions:
+  "24.04.00":
+    folder: all
+  "23.10.00":
+    folder: all
+  "23.06.00":
+    folder: all

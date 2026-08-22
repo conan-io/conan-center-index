@@ -1,0 +1,9 @@
+versions:
+  "0.22.2":
+    folder: all
+  "0.21.5b":
+    folder: all
+  "0.21.2":
+    folder: all
+  "0.20.2":
+    folder: all

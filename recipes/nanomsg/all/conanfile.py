@@ -1,0 +1,107 @@
+from conan import ConanFile
+from conan.errors import ConanException
+from conan.tools.files import get, copy, rm, rmdir
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.scm import Version
+import os
+
+
+required_conan_version = ">=2.1"
+
+class NanomsgConan(ConanFile):
+    name = "nanomsg"
+    description = "A socket library that provides several common communication patterns."
+    license = "MIT"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/nanomsg/nanomsg"
+    topics = ("socket", "protocols", "communication")
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "enable_coverage": [True, False],
+        "enable_getaddrinfo_a":[True, False],
+        "enable_tools": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "enable_coverage": False,
+        "enable_getaddrinfo_a":True,
+        "enable_tools": False,
+    }
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["NN_STATIC_LIB"] = not self.options.shared
+        tc.variables["NN_ENABLE_COVERAGE"] = self.options.enable_coverage
+        tc.variables["NN_ENABLE_GETADDRINFO_A"] = self.options.enable_getaddrinfo_a
+        tc.variables["NN_ENABLE_DOC"] = False
+        tc.variables["NN_TESTS"] = False
+        tc.variables["NN_TOOLS"] = self.options.enable_tools
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "1.2.1": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
+
+        # Prevent linking against unused found library
+        # https://github.com/nanomsg/nanomsg/blob/ccd7f20c1b756f7041598383baffcdc326246db7/CMakeLists.txt#L245C36-L245C51
+        tc.cache_variables["NN_HAVE_LIBNSL"] = "0"
+
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
+        tc = VirtualBuildEnv(self)
+        tc.generate(scope="build")
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
+        cmake.install()
+
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+
+    def package_info(self):
+        self.cpp_info.libs = ["nanomsg"]
+        self.cpp_info.set_property("cmake_file_name", "nanomsg")
+        self.cpp_info.set_property("cmake_target_name", "nanomsg::nanomsg")
+        self.cpp_info.set_property("pkg_config_name", "nanomsg")
+
+        if self.settings.os == "Windows" and not self.options.shared:
+            self.cpp_info.system_libs.extend(["mswsock", "ws2_32", "advapi32"])
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.append("anl")
+            self.cpp_info.system_libs.append("rt")
+
+        if not self.options.shared:
+            self.cpp_info.defines.append("NN_STATIC_LIB")
+        if self.options.enable_coverage:
+            self.cpp_info.defines.append("NN_ENABLE_COVERAGE")

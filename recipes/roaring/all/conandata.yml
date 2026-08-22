@@ -1,0 +1,34 @@
+sources:
+  "4.7.2":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v4.7.2.tar.gz"
+    sha256: "3695a0aac3e8b6f2fd3ec45151a5fb7c28b432538777b7b7473de3b83f088960"
+  "4.5.0":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v4.5.0.tar.gz"
+    sha256: "8f945ad82ce1be195c899c57e0734a5c0ea2685c3127bf9033d4391d054f94ab"
+  "4.2.1":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v4.2.1.tar.gz"
+    sha256: "3514728e9eb8c90dbc00a9e337302eb458c65be2f9501a3e882d051599c4a74c"
+  "4.2.0":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v4.2.0.tar.gz"
+    sha256: "b5f2d184b0872f57dce911cb520925539cfa851deda516d1239e8e06aff96439"
+  "4.1.7":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v4.1.7.tar.gz"
+    sha256: "ea235796c074c3a8a8c3e5c84bb5f09619723b8e4913cf99cc349f626c193569"
+  "4.1.2":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v4.1.2.tar.gz"
+    sha256: "dd9e9d9a28dcf9ba1622fb4a3a7b4d7f5e12732bb35e99a7cb028b7512731a7b"
+  "4.1.1":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v4.1.1.tar.gz"
+    sha256: "42804cc2bb5c9279ec4fcaa56d2d6b389da934634abcce8dbc4e4c1d60e1468d"
+  "4.1.0":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v4.1.0.tar.gz"
+    sha256: "0596c6e22bcccb56f38260142b435f1f72aef7721fa370fd9f2b88380245fc1d"
+  "4.0.0":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v4.0.0.tar.gz"
+    sha256: "a8b98db3800cd10979561a1388e4e970886a24015bd6cfabb08ba7917f541b0d"
+  "3.0.0":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v3.0.0.tar.gz"
+    sha256: "25183bc54ab650d964256d547869a34573a13d06f7e6a369b79e77f5c1feb8ba"
+  "2.1.2":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v2.1.2.tar.gz"
+    sha256: "a53d2f540f78ddae31e30c573b1b7fd41d7257d6a090507ba35d9c398712e5ad"

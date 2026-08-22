@@ -1,0 +1,12 @@
+diff --git a/google/cloud/functions/CMakeLists.txt b/google/cloud/functions/CMakeLists.txt
+index 2b9506b..609c238 100644
+--- a/google/cloud/functions/CMakeLists.txt
++++ b/google/cloud/functions/CMakeLists.txt
+@@ -137,7 +137,6 @@ install(
+     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+             COMPONENT runtime
+-            NAMELINK_SKIP
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+             COMPONENT development
+             NAMELINK_COMPONENT development

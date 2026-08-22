@@ -1,0 +1,4 @@
+sources:
+  "1.1":
+    sha256: 9e1fff51faa8754b5c61ab00f41339df0b9b1c09a13611e3357aab76c65f2ba0
+    url: https://github.com/Reputeless/Xoshiro-cpp/archive/refs/tags/v1.1.tar.gz

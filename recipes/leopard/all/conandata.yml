@@ -1,0 +1,7 @@
+sources:
+  "2.1.0":
+    url: "https://github.com/hosseinmoein/Leopard/archive/refs/tags/2.1.0.tar.gz"
+    sha256: "26b57fdea4cd94ddbc34a478e978632637cde2fc263bdf2d6bdfd3e9ddd0b1d5"
+  "2.0.0":
+    url: "https://github.com/hosseinmoein/Leopard/archive/refs/tags/2.0.0.tar.gz"
+    sha256: "c24ac5d2555c4496f26662925061a52ae1b2265ae9fc91b0cce19d1647d62699"

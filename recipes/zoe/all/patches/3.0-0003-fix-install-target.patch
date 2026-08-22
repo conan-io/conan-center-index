@@ -1,0 +1,13 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 34f38b4..85c3a14 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -116,7 +116,7 @@ endif()
+ 
+ install(DIRECTORY ../include/zoe 	DESTINATION include)
+ 
+-install(TARGETS ${ASHE_LIB_NAME}
++install(TARGETS ${ZOE_LIB_NAME}
+     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}

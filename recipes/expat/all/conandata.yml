@@ -1,0 +1,16 @@
+sources:
+  "2.8.3":
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_8_3/expat-2.8.3.tar.xz"
+    sha256: "f6256df90c906773d344da084402b7d3e4f22ed41b1a59c989098a83d3ea0c85"
+  "2.7.5":
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_7_5/expat-2.7.5.tar.xz"
+    sha256: "1032dfef4ff17f70464827daa28369b20f6584d108bc36f17ab1676e1edd2f91"
+  "2.6.4":
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_6_4/expat-2.6.4.tar.xz"
+    sha256: "a695629dae047055b37d50a0ff4776d1d45d0a4c842cf4ccee158441f55ff7ee"
+  "2.5.0":
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_5_0/expat-2.5.0.tar.xz"
+    sha256: "ef2420f0232c087801abf705e89ae65f6257df6b7931d37846a193ef2e8cdcbe"
+  "2.4.8":
+    sha256: "f79b8f904b749e3e0d20afeadecf8249c55b2e32d4ebb089ae378df479dcaf25"
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_4_8/expat-2.4.8.tar.xz"

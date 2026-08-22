@@ -1,0 +1,66 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5ef9cbb..fed641b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -80,39 +80,12 @@ add_library(
+     sources/internal/matrix_compressor.cc
+ )
+ 
+-include(FetchContent)
+-
+-fetchcontent_declare(
+-    streamvbyte
+-    URL https://github.com/lemire/streamvbyte/archive/refs/tags/v1.0.0.zip
+-    URL_HASH MD5=3d1a01cfb704947fa6498944082aeed1
+-)
+-
+-fetchcontent_declare(
+-    fpzip
+-    URL https://github.com/LLNL/fpzip/releases/download/1.3.0/fpzip-1.3.0.zip
+-    URL_HASH MD5=933ed7628de406a24fe2de61c8c3356c
+-)
+-
+-fetchcontent_makeavailable(streamvbyte)
+-
+-fetchcontent_getproperties(fpzip)
+-
+-if(NOT fpzip_POPULATED)
+-    fetchcontent_populate(fpzip)
+-    # Make subproject to use 'BUILD_SHARED_LIBS=ON' setting.
+-    set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "Build SHARED libraries")
+-    add_subdirectory(${fpzip_SOURCE_DIR} ${fpzip_BINARY_DIR})
+-endif()
++find_package(streamvbyte REQUIRED CONFIG)
++find_package(fpzip REQUIRED CONFIG)
+ 
+ # Add alias
+ add_library(${WB_TARGET_NAME}::${WB_TARGET_NAME} ALIAS ${WB_TARGET_NAME})
+ 
+-# Set fPIC
+-set_target_properties(${WB_TARGET_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+-set_target_properties(streamvbyte PROPERTIES POSITION_INDEPENDENT_CODE ON)
+-set_target_properties(fpzip PROPERTIES POSITION_INDEPENDENT_CODE ON)
+-
+ # Turn off parallelization in blaze
+ target_compile_definitions(
+     ${WB_TARGET_NAME}
+@@ -143,8 +116,8 @@ target_include_directories(
+ )
+ 
+ # Link dependencies
+-target_link_libraries(${WB_TARGET_NAME} PRIVATE streamvbyte)
+-target_link_libraries(${WB_TARGET_NAME} PRIVATE fpzip)
++target_link_libraries(${WB_TARGET_NAME} PRIVATE streamvbyte::streamvbyte)
++target_link_libraries(${WB_TARGET_NAME} PRIVATE fpzip::fpzip)
+ target_link_libraries(${WB_TARGET_NAME} PRIVATE JPEG::JPEG)
+ target_link_libraries(${WB_TARGET_NAME} PRIVATE cimg::cimg)
+ 
+@@ -178,7 +151,7 @@ endif()
+ include(GNUInstallDirs)
+ 
+ # Create package targets file
+-install(TARGETS ${WB_TARGET_NAME} streamvbyte EXPORT ${WB_TARGET_NAME}-target)
++install(TARGETS ${WB_TARGET_NAME} EXPORT ${WB_TARGET_NAME}-target)
+ install(
+     EXPORT ${WB_TARGET_NAME}-target
+     FILE ${WB_TARGET_NAME}-targets.cmake

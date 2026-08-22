@@ -1,0 +1,11 @@
+sources:
+  "2007f":
+    url: "https://github.com/uw-imap/imap/archive/cab109466534e206a3652ef1c68fe88101b68bda.zip"
+    sha256: "aaca88c228b7bab9f73b5972e996fd39f770d8e226561b3e107ec19ceaf21570"
+patches:
+  "2007f":
+    - patch_file: patches/0001-fix-yunchan-tempfile.patch
+    - patch_file: patches/0002-fix-makefile-w2k.patch
+    - patch_file: patches/0003-fix-env-nt.patch
+    - patch_file: patches/0004-fix-makefile.patch
+    - patch_file: patches/2014_openssl1.1.1_sni.patch

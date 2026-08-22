@@ -1,0 +1,19 @@
+sources:
+  "3.0.1":
+    url: https://github.com/accellera-official/systemc/archive/3.0.1.tar.gz
+    sha256: d07765d0d2ffd6c01767880d0c6aaf53cd9487975f898c593ffffd713258fcbb
+  "2.3.3":
+    url: https://github.com/accellera-official/systemc/archive/2.3.3.tar.gz
+    sha256: 5781b9a351e5afedabc37d145e5f7edec08f3fd5de00ffeb8fa1f3086b1f7b3f
+  "2.3.4":
+    url: https://github.com/accellera-official/systemc/archive/2.3.4.tar.gz
+    sha256: bfb309485a8ad35a08ee78827d1647a451ec5455767b25136e74522a6f41e0ea
+patches:
+  "2.3.3":
+    - patch_file: "patches/0001-cmake.patch"
+    - patch_file: "patches/0002-sc_string_view.patch"
+    - patch_file: "patches/0003-mingw.patch"
+  "2.3.4":
+    - patch_file: "patches/0002-sc_string_view.patch"
+    - patch_file: "patches/0003-mingw.patch"
+    - patch_file: "patches/0004-cmake.patch"

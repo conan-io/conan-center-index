@@ -1,0 +1,9 @@
+--- a/libjbig/jbig.h
++++ b/libjbig/jbig.h
+@@ -307,5 +309,6 @@
+                                         const unsigned char *src, unsigned char **dest,
+                                         int use_graycode);
+ extern JBIGEXPORT int jbg_newlen(unsigned char *bie, size_t len);
++extern JBIGEXPORT unsigned char *jbg_next_pscdms(unsigned char *p, size_t len);
+
+ #endif /* JBG_H */

@@ -1,0 +1,49 @@
+diff --git a/Makefile b/Makefile
+index 948e3fa..5b34574 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,15 +1,15 @@
+ # Variables:
+-prefix = /usr/local
++#prefix = /usr/local
+ exec_prefix = $(prefix)
+ bindir = $(exec_prefix)/bin
+ libdir = $(exec_prefix)/lib
+ includedir = $(prefix)/include
+ pkgconfigdir = $(libdir)/pkgconfig
+ 
+-CFLAGS = -Wall -Wextra
+-LDFLAGS_GCSECTIONS = -Wl,--gc-sections
++CFLAGS += -Wall -Wextra
++LDFLAGS_GCSECTIONS += -Wl,--gc-sections
+ LDFLAGS += $(if $(gc_sections-pass),$(LDFLAGS_GCSECTIONS))
+-LDLIBS = -lm
++LDLIBS += -lm
+ 
+ GIT_ARCHIVE = git archive --prefix="$(PACKAGE)/" -9
+ INSTALL = install
+@@ -33,8 +33,8 @@ TINYCBOR_FREESTANDING_SOURCES = \
+ #
+ CBORDUMP_SOURCES = tools/cbordump/cbordump.c
+ 
+-BUILD_SHARED = $(shell file -L /bin/sh 2>/dev/null | grep -q ELF && echo 1)
+-BUILD_STATIC = 1
++BUILD_SHARED ?= $(shell file -L /bin/sh 2>/dev/null | grep -q ELF && echo 1)
++BUILD_STATIC ?= 1
+ 
+ ifneq ($(BUILD_STATIC),1)
+ ifneq ($(BUILD_SHARED),1)
+@@ -151,11 +151,11 @@ lib/libtinycbor.so: $(TINYCBOR_SOURCES:.c=.pic.o)
+ 
+ bin/cbordump: $(CBORDUMP_SOURCES:.c=.o) $(BINLIBRARY)
+ 	@$(MKDIR) -p bin
+-	$(CC) -o $@ $(LDFLAGS) $^ $(LDLIBS)
++	$(CC) $(cflags) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+ 
+ bin/json2cbor: $(JSON2CBOR_SOURCES:.c=.o) $(BINLIBRARY)
+ 	@$(MKDIR) -p bin
+-	$(CC) -o $@ $(LDFLAGS) $^ $(LDFLAGS_CJSON) $(LDLIBS)
++	$(CC) $(cflags) -o $@ $(LDFLAGS) $^ $(LDFLAGS_CJSON) $(LDLIBS)
+ 
+ tinycbor.pc: tinycbor.pc.in
+ 	$(SED) > $@ < $< \

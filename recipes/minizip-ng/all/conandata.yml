@@ -1,0 +1,4 @@
+sources:
+  "4.2.1":
+    url: "https://github.com/zlib-ng/minizip-ng/archive/4.2.1.tar.gz"
+    sha256: "3cc35c2cb925dbe67cc801e3234b31b0f30197812a99377352fa1b551ab3d011"

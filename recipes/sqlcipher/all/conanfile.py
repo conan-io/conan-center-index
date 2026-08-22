@@ -1,0 +1,265 @@
+import os
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, mkdir
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import VCVars, is_msvc, is_msvc_static_runtime, NMakeToolchain, NMakeDeps
+from conan.tools.scm import Version
+
+required_conan_version = ">=2.4"
+
+
+class SqlcipherConan(ConanFile):
+    name = "sqlcipher"
+    description = "SQLite extension that provides 256 bit AES encryption of database files."
+    license = "BSD-3-Clause"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.zetetic.net/sqlcipher/"
+    topics = ("database", "encryption", "sqlite")
+    languages = "C"
+    implements = ["auto_shared_fpic"]
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "crypto_library": ["openssl", "libressl", "commoncrypto"],
+        "with_largefile": [True, False],
+        "temporary_store": ["always_file", "default_file", "default_memory", "always_memory"],
+        "enable_column_metadata": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "crypto_library": "openssl",
+        "with_largefile": True,
+        "temporary_store": "default_memory",
+        "enable_column_metadata": False,
+    }
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            self.options.rm_safe("with_largefile")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def requirements(self):
+        if self.options.crypto_library == "openssl":
+            self.requires("openssl/[>=3 <4]")
+        elif self.options.crypto_library == "libressl":
+            self.requires("libressl/3.5.3")
+
+    def validate(self):
+        if self.options.crypto_library == "commoncrypto" and not is_apple_os(self):
+            raise ConanInvalidConfiguration("commoncrypto is only supported on Macos")
+
+    def build_requirements(self):
+        self.tool_requires("tcl/8.6.13")
+        if not is_msvc(self):
+            self.tool_requires("gnu-config/cci.20210814")
+            if self.settings_build.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+
+    @property
+    def _temp_store_nmake_value(self):
+        return {
+            "always_file": "0",
+            "default_file": "1",
+            "default_memory": "2",
+            "always_memory": "3",
+        }.get(str(self.options.temporary_store))
+
+    @property
+    def _temp_store_autotools_value(self):
+        return {
+            "always_file": "never",
+            "default_file": "no",
+            "default_memory": "yes",
+            "always_memory": "always",
+        }.get(str(self.options.temporary_store))
+
+    def _generate_msvc(self):
+        tc = NMakeToolchain(self)
+        env = tc.environment()
+        crypto_dep = self.dependencies[str(self.options.crypto_library)].cpp_info
+        env.define("TLIBS", " ".join(lib + ".lib" for lib in crypto_dep.libs + crypto_dep.system_libs))
+        env.define("LTLIBPATHS", f"/LIBPATH:{crypto_dep.libdir}")
+        env.define("OPTS", f'-I{crypto_dep.includedir} -DSQLITE_HAS_CODEC')
+        env.define("NO_TCL", "1")
+        env.define("USE_AMALGAMATION", "1")
+        opt_feature_flags = ["-DSQLCIPHER_CRYPTO_OPENSSL"]
+        tc.extra_ldflags.append("-lcrypto")
+        if self.options.enable_column_metadata:
+            opt_feature_flags.append("-DSQLITE_ENABLE_COLUMN_METADATA")
+        if Version(self.version) > "4.6.1":
+            # INFO: These flags are mandatory: https://github.com/sqlcipher/sqlcipher/blob/v4.16.0/README.md#compiling
+            opt_feature_flags.append("-DHAVE_STDINT_H")
+            opt_feature_flags.append("-DSQLITE_EXTRA_INIT=sqlcipher_extra_init")
+            opt_feature_flags.append("-DSQLITE_EXTRA_SHUTDOWN=sqlcipher_extra_shutdown")
+            opt_feature_flags.append(f"-DSQLITE_TEMP_STORE={self._temp_store_nmake_value}")
+        else:
+            env.define("SQLITE_TEMP_STORE", self._temp_store_nmake_value)
+        env.define("OPT_FEATURE_FLAGS", " ".join(opt_feature_flags))
+        env.define("TCLSH_CMD", self.dependencies.build['tcl'].runenv_info.vars(self)['TCLSH'])
+        env.define("WITHOUT_JIMSH", "1")
+
+        if not is_msvc_static_runtime(self):
+            env.define("USE_CRT_DLL", "1")
+        if self.settings.build_type == "Debug":
+            env.define("DEBUG", "2")
+        env.define("FOR_WIN10", "1")
+        env.define("PLATFORM", {
+            "x86": "x86",
+            "x86_64": "x64",
+            "armv8": "arm64"
+            }[str(self.settings.arch)])
+        tc.generate(env)
+
+        tc = NMakeDeps(self)
+        tc.generate()
+
+        vcvars = VCVars(self)
+        vcvars.generate()
+
+    @property
+    def _use_commoncrypto(self):
+        return self.options.crypto_library == "commoncrypto" and is_apple_os(self)
+
+    def _generate_unix(self):
+        tc = AutotoolsToolchain(self)
+        tc.update_configure_args({
+            "--oldincludedir": None,  # remove this arg (SQLCipher/SQLite configure doesn't support it)
+        })
+        tc.configure_args += [
+            "--disable-tcl",
+        ]
+        prefix_tempstore = "with" if Version(self.version) > "4.6.1" else "enable"
+        tc.configure_args.append(f"--{prefix_tempstore}-tempstore={self._temp_store_autotools_value}")
+        if self.settings.os == "Windows":
+            tc.configure_args += [
+                "config_BUILD_EXEEXT='.exe'",
+                "config_TARGET_EXEEXT='.exe'",
+            ]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            tc.extra_ldflags.append("-ldl")
+            if not self.options.with_largefile:
+                tc.extra_defines.append("SQLITE_DISABLE_LFS=1")
+        tc.extra_defines.append("SQLITE_HAS_CODEC")
+        if Version(self.version) > "4.6.1":
+            # INFO: These flags are mandatory: https://github.com/sqlcipher/sqlcipher/blob/v4.16.0/README.md#compiling
+            tc.extra_defines.append("SQLITE_EXTRA_INIT=sqlcipher_extra_init")
+            tc.extra_defines.append("SQLITE_EXTRA_SHUTDOWN=sqlcipher_extra_shutdown")
+
+        if self._use_commoncrypto:
+            tc.extra_ldflags += [
+                "-framework", "Security",
+                "-framework", "CoreFoundation",
+            ]
+            if Version(self.version) > "4.6.1":
+                tc.extra_defines.append("SQLCIPHER_CRYPTO_COMMONCRYPTO")
+            else:
+                tc.configure_args.append("--with-crypto-lib=commoncrypto")
+        else:
+            tc.extra_ldflags.append("-lcrypto")
+            tc.extra_defines.append("SQLCIPHER_CRYPTO_OPENSSL")
+
+        if self.options.enable_column_metadata:
+            tc.extra_defines.append("SQLITE_ENABLE_COLUMN_METADATA=1")
+        if self.options.shared and is_apple_os(self):
+            # INFO: changing install names or rpaths can't be redone for bin/sqlite3 because larger updated load commands do not fit
+            tc.extra_ldflags.append("-headerpad_max_install_names")
+        if is_apple_os(self) and self.settings.compiler == "apple-clang" and Version(self.version) >= "4.7.0":
+            # Sqlcipher migrated to autosetup which diverges from autoconf when falling back to compiler when not finding the triplet
+            # https://github.com/sqlcipher/sqlcipher/releases/tag/v4.7.0
+            # Proposed fix for autoconf fallback behavior was rejected:
+            # - https://github.com/sqlcipher/sqlcipher/pull/594
+            # - https://github.com/msteveb/autosetup/issues/84
+            # As Apple Clang is not a cross-compiler, we can just remove the --host arg to use the defaut compiler
+            # https://msteveb.github.io/autosetup/user/crosscompiling/
+            tc.update_configure_args({"--host": None})
+        tc.generate()
+
+        deps = AutotoolsDeps(self)
+        deps.generate()
+
+    def generate(self):
+        if is_msvc(self):
+            self._generate_msvc()
+        else:
+            self._generate_unix()
+
+    def _patch_sources_unix(self):
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                copy(self, os.path.basename(gnu_config), os.path.dirname(gnu_config), os.path.join(self.source_folder, "build-aux"))
+
+    def build(self):
+        if is_msvc(self):
+            with chdir(self, self.source_folder):
+                main_target = "dll" if self.options.shared else "sqlcipher.lib"
+                self.run(f"nmake /f Makefile.msc {main_target}")
+        else:
+            self._patch_sources_unix()
+            with chdir(self, self.source_folder):
+                autotools = Autotools(self)
+                autotools.configure()
+                if self.settings.os == "Windows":
+                    # sqlcipher will create .exe for the build machine, which we defined to Linux...
+                    replace_in_file(self, "Makefile", "BEXE = .exe", "BEXE = ")
+                autotools.make()
+
+    def package(self):
+        copy(self, "LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        if is_msvc(self):
+            copy(self, "*.dll", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder, keep_path=False)
+            copy(self, "*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
+            copy(self, "sqlite3.h", dst=os.path.join(self.package_folder, "include", "sqlcipher"), src=self.source_folder)
+        else:
+            with chdir(self, self.source_folder):
+                autotools = Autotools(self)
+                autotools.install()
+            rm(self, "*.la", self.package_folder, recursive=True)
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            fix_apple_shared_install_name(self)
+
+            if Version(self.version) > "4.6.1":
+                # INFO: Relocate sqlite3 headers to sqlcipher to prevent file collisions
+                include_dir = os.path.join(self.package_folder, "include")
+                mkdir(self, os.path.join(include_dir, "sqlcipher"))
+                copy(self, "*.h", os.path.join(include_dir), os.path.join(include_dir, "sqlcipher"))
+                rm(self, "*.h", include_dir)
+
+    def package_info(self):
+        self.cpp_info.libs = ["sqlcipher"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread", "dl", "m"]
+        self.cpp_info.defines = [
+            "SQLITE_HAS_CODEC",
+            f"SQLITE_TEMP_STORE={self._temp_store_nmake_value}"
+        ]
+        if self._use_commoncrypto:
+            self.cpp_info.frameworks = ["Security", "CoreFoundation"]
+        else:
+            self.cpp_info.defines.append("SQLCIPHER_CRYPTO_OPENSSL")
+        # Allow using #include <sqlite3.h> even with sqlcipher (for libs like sqlpp11-connector-sqlite3)
+        self.cpp_info.includedirs.append(os.path.join("include", "sqlcipher"))

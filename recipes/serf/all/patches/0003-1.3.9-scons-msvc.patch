@@ -1,0 +1,67 @@
+--- SConstruct
++++ SConstruct
+@@ -140,8 +140,8 @@
+     EnumVariable('MSVC_VERSION',
+                  "Visual C++ to use for building (E.g. 11.0, 9.0)",
+                  None,
+-                 allowed_values=('14.0', '12.0',
++                 allowed_values=('14.3', '14.2', '14.1', '14.0', '12.0',
+                                  '11.0', '10.0', '9.0', '8.0', '6.0')
+                 ),
+ 
+     # We always documented that we handle an install layout, but in fact we
+@@ -208,7 +208,7 @@
+ thisdir = os.getcwd()
+ libdir = '$LIBDIR'
+ incdir = '$PREFIX/include/serf-$MAJOR'
+-
++if os.environ.get("TMP"): env["ENV"]["TMP"] = os.environ["TMP"]
+ # This version string is used in the dynamic library name, and for Mac OS X also
+ # for the current_version and compatibility_version options in the .dylib
+ #
+@@ -273,11 +273,11 @@
+   # Choose runtime and optimization
+   if debug:
+     # Disable optimizations for debugging, use debug DLL runtime
+-    env.Append(CCFLAGS=['/Od', '/MDd'])
++    env.Append(CCFLAGS=['/Od'])
+     env.Append(CPPDEFINES=['DEBUG', '_DEBUG'])
+   else:
+     # Optimize for speed, use DLL runtime
+-    env.Append(CCFLAGS=['/O2', '/MD'])
++    env.Append(CCFLAGS=['/O2'])
+     env.Append(CPPDEFINES=['NDEBUG'])
+     env.Append(LINKFLAGS=['/RELEASE'])
+ 
+@@ -309,7 +309,7 @@
+   if aprstatic:
+     apr_libs='apr-1.lib'
+     apu_libs='aprutil-1.lib'
+-    env.Append(LIBS=['shell32.lib', 'xml.lib'])
++    env.Append(LIBS=['shell32.lib'])
+   else:
+     apr_libs='libapr-1.lib'
+     apu_libs='libaprutil-1.lib'
+@@ -316,8 +316,8 @@
+ 
+   env.Append(LIBS=[apr_libs, apu_libs])
+   if not env.get('SOURCE_LAYOUT', None):
+-    env.Append(LIBPATH=['$APR/lib', '$APU/lib'],
+-               CPPPATH=['$APR/include/apr-1', '$APU/include/apr-1'])
++    env.Append(LIBPATH=['$APR/lib', '$APU/lib'],
++               CPPPATH=['$APR/include', '$APU/include'])
+   elif aprstatic:
+     env.Append(LIBPATH=['$APR/LibR','$APU/LibR'],
+                CPPPATH=['$APR/include', '$APU/include'])
+@@ -335,9 +335,9 @@
+                LIBPATH=['$ZLIB'])
+ 
+   # openssl
+-  env.Append(LIBS=['libeay32.lib', 'ssleay32.lib'])
++  env.Append(LIBS=os.environ["OPENSSL_LIBS"].split(";"))
+   if not env.get('SOURCE_LAYOUT', None):
+-    env.Append(CPPPATH=['$OPENSSL/include/openssl'],
++    env.Append(CPPPATH=['$OPENSSL/include', '$OPENSSL/include/openssl'],
+                LIBPATH=['$OPENSSL/lib'])
+   elif 0: # opensslstatic:
+     env.Append(CPPPATH=['$OPENSSL/inc32'],

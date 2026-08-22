@@ -1,0 +1,9 @@
+sources:
+  "cci.20190617":
+    url: "https://github.com/google/astc-codec/archive/9757befb64db6662aad45de09ca87cd6f599ac02.tar.gz"
+    sha256: "19034fed68401a612655b026e713c351df8caa768f55ce29a0f628378e988eac"
+patches:
+  "cci.20190617":
+    - patch_file: "patches/0001-fix-cmake.patch"
+      patch_description: "CMake: add install target, export symbols"
+      patch_type: "conan"

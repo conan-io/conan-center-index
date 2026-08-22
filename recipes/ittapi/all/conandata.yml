@@ -1,0 +1,4 @@
+sources:
+  "3.25.5":
+    url: "https://github.com/intel/ittapi/archive/v3.25.5.tar.gz"
+    sha256: "2d19243e7ac8a7de08bfd005429a308c1db52a18e5b7b66d29a6c19f066946e3"

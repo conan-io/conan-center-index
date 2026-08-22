@@ -1,0 +1,10 @@
+sources:
+  "0.2.10":
+    url: "https://github.com/awslabs/aws-lambda-cpp/archive/refs/tags/v0.2.10.tar.gz"
+    sha256: "fee8e465ac63efaa6252aa2a108183ef174cbc5ed3e56e4de4986846f89a76ee"
+  "0.2.9":
+    url: "https://github.com/awslabs/aws-lambda-cpp/archive/refs/tags/0.2.9.tar.gz"
+    sha256: "4fb98483248adf0a2b251cb1b06df8b19bbd40e7f015dccfc32b7eaae6a294e7"
+  "0.2.8":
+    url: "https://github.com/awslabs/aws-lambda-cpp/archive/refs/tags/v0.2.8.tar.gz"
+    sha256: "a236516331804a0a6e2ef2273042a583e55a135bb6478308829c51e7c425acdb"

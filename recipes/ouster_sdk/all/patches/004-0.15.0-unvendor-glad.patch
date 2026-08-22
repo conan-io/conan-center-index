@@ -1,0 +1,46 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index af91f77..5a0f22c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -82,7 +82,6 @@ endif()
+ 
+ if(BUILD_VIZ)
+   add_subdirectory(ouster_viz)
+-  add_subdirectory(thirdparty/glad)
+ endif()
+ 
+ if(BUILD_MAPPING)
+diff --git a/ouster_viz/CMakeLists.txt b/ouster_viz/CMakeLists.txt
+index 55bf26c..1d4d66f 100644
+--- a/ouster_viz/CMakeLists.txt
++++ b/ouster_viz/CMakeLists.txt
+@@ -6,6 +6,7 @@ include(Coverage)
+ find_package(glfw3 REQUIRED)
+ find_package(Eigen3 REQUIRED)
+ find_package(PNG REQUIRED)
++find_package(glad REQUIRED CONFIG)
+ 
+ # ==== Libraries ====
+ # use only MPL-licensed parts of eigen
+@@ -14,7 +15,7 @@ add_definitions(-DEIGEN_MPL2_ONLY)
+ add_library(ouster_viz STATIC src/point_viz.cpp src/cloud.cpp src/camera.cpp src/image.cpp
+   src/gltext.cpp src/misc.cpp src/glfw.cpp src/framebuffer.cpp src/screenshot_utils.cpp)
+ target_link_libraries(ouster_viz
+-  PRIVATE Eigen3::Eigen glfw ${GL_LOADER} OpenGL::GL ouster_client glad PNG::PNG)
++  PRIVATE Eigen3::Eigen glfw ${GL_LOADER} OpenGL::GL ouster_client glad::glad PNG::PNG)
+ set_property(TARGET ouster_viz PROPERTY POSITION_INDEPENDENT_CODE ON)
+ if(BUILD_SHARED_LIBRARY)
+   set_target_properties(ouster_viz PROPERTIES CXX_VISIBILITY_PRESET hidden)
+diff --git a/ouster_viz/src/glfw.h b/ouster_viz/src/glfw.h
+index 2d1bb79..04ac7dc 100644
+--- a/ouster_viz/src/glfw.h
++++ b/ouster_viz/src/glfw.h
+@@ -7,7 +7,7 @@
+ 
+ // clang-format off
+ // GLAD must be included before GLFW
+-#include "glad.h"
++#include <glad/gl.h>
+ #include <GLFW/glfw3.h>
+ // clang-format on
+ 

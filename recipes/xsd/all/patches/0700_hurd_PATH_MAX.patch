@@ -1,0 +1,21 @@
+Description: Add PATH_MAX for hurd
+Author: Jörg Frings-Fürst <debain@jff-webhosting.net>
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=784425
+Last-Update: 2016-01-17
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+Index: trunk/libcutl/cutl/fs/path.cxx
+===================================================================
+--- a/libcutl/cutl/fs/path.cxx
++++ b/libcutl/cutl/fs/path.cxx
+@@ -13,6 +13,10 @@
+ 
+ #include <cutl/fs/path.hxx>
+ 
++#ifndef PATH_MAX
++  #define PATH_MAX 4096
++#endif
++
+ namespace cutl
+ {
+   namespace fs

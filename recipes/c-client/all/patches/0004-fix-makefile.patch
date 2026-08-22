@@ -1,0 +1,55 @@
+--- Makefile
++++ Makefile
+@@ -422,10 +422,8 @@
+ 	EXTRACFLAGS="$(EXTRACFLAGS) -DMAC_OSX_KLUDGE=1" \
+ 	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/System/Library/OpenSSL/certs SSLKEYS=/System/Library/OpenSSL/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib PAMDLFLAGS=-lpam"
+ 
+-osx:	osxok an
+-	$(TOUCH) ip6
+-	$(BUILD) BUILDTYPE=$@ IP=$(IP6) EXTRAAUTHENTICATORS="$(EXTRAAUTHENTICATORS) gss" \
+-	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/System/Library/OpenSSL/certs SSLKEYS=/System/Library/OpenSSL/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib"
++osx:	an
++	$(BUILD) BUILDTYPE=$@ IP=$(IP6)
+ 
+ osxok:
+ 	@$(SH) -c '(test ! -f /usr/include/pam/pam_appl.h ) || make osxwarn'
+@@ -678,7 +676,7 @@
+ 	$(TOOLS)/$@ "$(LN)" src/tmail tmail
+ 	$(LN) $(TOOLS)/$@ .
+ 
+-build:	OSTYPE rebuild rebuildclean bundled
++build:	OSTYPE rebuild rebuildclean
+ 
+ OSTYPE:
+ 	@$(MAKE) ip$(IP)
+@@ -695,8 +693,8 @@
+ 	$(TOUCH) rebuild
+ 
+ rebuild:
+-	@$(SH) -c '(test $(BUILDTYPE) = rebuild -o $(BUILDTYPE) = `$(CAT) OSTYPE`) || (echo Already built for `$(CAT) OSTYPE` -- you must do \"make clean\" first && exit 1)'
+-	@echo Rebuilding c-client for `$(CAT) OSTYPE`...
++	@$(SH) -c '(test $(BUILDTYPE) = rebuild) || (echo Already built for $(BUILDTYPE) -- you must do \"make clean\" first && exit 1)'
++	@echo Rebuilding c-client for $(BUILDTYPE)...
+ 	@$(TOUCH) SPECIALS
+ 	$(CD) c-client;$(MAKE) all CC=`$(CAT) CCTYPE` \
+ 	 CFLAGS="`$(CAT) CFLAGS`" `$(CAT) SPECIALS`
+--- src/osdep/unix/Makefile
++++ src/osdep/unix/Makefile
+@@ -149,7 +149,7 @@
+ 
+ # Normally no need to change any of these
+ 
+-ARCHIVE=c-client.a
++ARCHIVE=libc-client.a
+ BINARIES=osdep.o mail.o misc.o newsrc.o smanager.o utf8.o utf8aux.o siglocal.o \
+  dummy.o pseudo.o netmsg.o flstring.o fdstring.o \
+  rfc822.o nntp.o smtp.o imap4r1.o pop3.o \
+@@ -935,7 +935,7 @@
+ 	@echo If you get No such file error messages for files x509.h, ssl.h,
+ 	@echo pem.h, buffer.h, bio.h, and crypto.h, that means that OpenSSL
+ 	@echo is not installed on your system.  Either install OpenSSL first
+-	@echo or build with command: make `$(CAT) OSTYPE` SSLTYPE=none
++	@echo or build with command: make $(OS) SSLTYPE=none
+ 	@echo ========================================================================
+ 
+ osdep.so:	$(OSDEPS)

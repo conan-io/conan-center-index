@@ -1,0 +1,9 @@
+sources:
+  "5.6":
+    url: "http://baical.net/files/libP7Client_v5.6.zip"
+    sha256: "7503bdf739b9c2aea297b49fa0aa0162b7090830aee1cbd4cf7be5d3c75600de"
+patches:
+  "5.6":
+    - patch_file: "patches/0001-fix-cmake.patch"
+      patch_description: "Fix CMakeLists"
+      patch_type: "conan"

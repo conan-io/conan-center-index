@@ -1,0 +1,10 @@
+sources:
+  "3.6.6":
+    url: "https://github.com/sass/libsass/archive/3.6.6.tar.gz"
+    sha256: "11f0bb3709a4f20285507419d7618f3877a425c0131ea8df40fe6196129df15d"
+  "3.6.5":
+    url: "https://github.com/sass/libsass/archive/3.6.5.tar.gz"
+    sha256: "89d8f2c46ae2b1b826b58ce7dde966a176bac41975b82e84ad46b01a55080582"
+  "3.6.4":
+    sha256: f9484d9a6df60576e791566eab2f757a97fd414fce01dd41fc0a693ea5db2889
+    url: https://github.com/sass/libsass/archive/3.6.4.tar.gz

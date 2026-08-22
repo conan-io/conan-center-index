@@ -1,0 +1,175 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import (
+    apply_conandata_patches, collect_libs, copy, export_conandata_patches, get,
+    rename, replace_in_file, rmdir
+)
+from conan.tools.scm import Version
+
+import os
+
+required_conan_version = ">=2"
+
+
+class CryptoPPConan(ConanFile):
+    name = "cryptopp"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://cryptopp.com"
+    license = "BSL-1.0"
+    description = "Crypto++ Library is a free C++ class library of cryptographic schemes."
+    topics = ("crypto", "cryptographic", "security")
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "use_openmp": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "use_openmp": False,
+    }
+
+    implements = ["auto_shared_fpic"]
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate_build(self):
+        if is_apple_os(self) and cross_building(self) and Version(self.version) <= "8.6.0":
+            # See https://github.com/abdes/cryptopp-cmake/pull/38
+            raise ConanInvalidConfiguration("cryptopp 8.6.0 and lower do not support cross-building on Apple platforms")
+
+    def validate(self):
+        if self.options.shared and Version(self.version) >= "8.7.0":
+            raise ConanInvalidConfiguration("cryptopp 8.7.0 and higher do not support shared builds")
+        if Version(self.version) < "8.9.0" and self.settings.os == "Windows" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("Older releases do not support Windows ARM")
+
+    def build_requirements(self):
+        if Version(self.version) >= "8.7.0":
+            self.tool_requires("cmake/[>=3.20 <4]")
+
+    def source(self):
+        # Get cryptopp sources
+        get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
+
+        if Version(self.version) < "8.7.0":
+            # Get CMakeLists
+            base_source_dir = os.path.join(self.source_folder, os.pardir)
+            get(self, **self.conan_data["sources"][self.version]["cmake"], destination=base_source_dir)
+            src_folder = os.path.join(
+                base_source_dir,
+                f"cryptopp-cmake-CRYPTOPP_{self.version.replace('.', '_')}",
+            )
+            for file in ("CMakeLists.txt", "cryptopp-config.cmake"):
+                rename(self, src=os.path.join(src_folder, file), dst=os.path.join(self.source_folder, file))
+            rmdir(self, src_folder)
+        else:
+            # Get cryptopp-cmake sources
+            get(self, **self.conan_data["sources"][self.version]["cmake"],
+                destination=os.path.join(self.source_folder, "cryptopp-cmake"), strip_root=True)
+        self._patch_sources()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        # Honor fPIC option
+        if Version(self.version) < "8.7.0":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                "SET(CMAKE_POSITION_INDEPENDENT_CODE 1)", "")
+        else:
+            replace_in_file(self, os.path.join(self.source_folder, "cryptopp-cmake", "cryptopp", "CMakeLists.txt"),
+                                "set(CMAKE_POSITION_INDEPENDENT_CODE 1)", "")
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if Version(self.version) < "8.7.0":
+            tc.variables["BUILD_STATIC"] = not self.options.shared
+            tc.variables["BUILD_SHARED"] = self.options.shared
+            tc.variables["BUILD_TESTING"] = False
+            tc.variables["BUILD_DOCUMENTATION"] = False
+            tc.variables["USE_INTERMEDIATE_OBJECTS_TARGET"] = False
+            if self.settings.os == "Android":
+                tc.variables["CRYPTOPP_NATIVE_ARCH"] = True
+            if self.settings.os == "Macos" and self.settings.arch == "armv8" and Version(self.version) <= "8.4.0":
+                tc.variables["CMAKE_CXX_FLAGS"] = "-march=armv8-a"
+            # For msvc shared
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+            # Relocatable shared libs on macOS
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        else:
+            tc.cache_variables["CRYPTOPP_SOURCES"] = self.source_folder.replace("\\", "/")
+            tc.cache_variables["CRYPTOPP_BUILD_TESTING"] = False
+            tc.cache_variables["CRYPTOPP_BUILD_DOCUMENTATION"] = False
+            tc.cache_variables["CRYPTOPP_USE_INTERMEDIATE_OBJECTS_TARGET"] = False
+            if self.settings.os == "Android":
+                tc.cache_variables["CRYPTOPP_NATIVE_ARCH"] = True
+            tc.cache_variables["CRYPTOPP_USE_OPENMP"] = self.options.use_openmp
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Git"] = True
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        tc.generate()
+
+    def _ensure_android_cpufeatures(self):
+        # Use cpu-features.h from Android NDK
+        if self.settings.os == "Android" and Version(self.version) < "8.4.0":
+            # Replicate logic from: https://github.com/weidai11/cryptopp/blob/CRYPTOPP_8_2_0/cpu.cpp#L46-L52
+            # In more recent versions this is already taken care of by cryptopp-cmake
+            android_ndk_home = self.conf.get("tools.android:ndk_path")
+            if android_ndk_home:
+                copy(
+                    self,
+                    "cpu-features.h",
+                    src=os.path.join(android_ndk_home, "sources", "android", "cpufeatures"),
+                    dst=self.source_folder,
+                )
+
+    def build(self):
+        self._ensure_android_cpufeatures()
+        cmake = CMake(self)
+        if Version(self.version) < "8.7.0":
+            cmake.configure()
+        else:
+            cmake.configure(build_script_folder="cryptopp-cmake")
+        cmake.build()
+
+    def package(self):
+        copy(self, "License.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+        if Version(self.version) < "8.7.0":
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        else:
+            rmdir(self, os.path.join(self.package_folder, "share"))
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "cryptopp")
+        self.cpp_info.set_property("cmake_target_name", "cryptopp::cryptopp")
+        legacy_cmake_target = "cryptopp-shared" if self.options.shared else "cryptopp-static"
+        self.cpp_info.set_property("cmake_target_aliases", [legacy_cmake_target])
+        self.cpp_info.set_property("pkg_config_name", "libcryptopp")
+
+        # TODO: back to global scope once cmake_find_package* generators removed
+        self.cpp_info.components["libcryptopp"].libs = collect_libs(self)
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["libcryptopp"].system_libs = ["pthread", "m"]
+        elif self.settings.os == "SunOS":
+            self.cpp_info.components["libcryptopp"].system_libs = ["nsl", "socket"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["libcryptopp"].system_libs = ["bcrypt", "ws2_32"]
+
+        if not self.options.shared and self.options.use_openmp:
+            if self.settings.compiler in ("gcc", "clang"):
+                openmp_flag = ["-fopenmp"]
+                self.cpp_info.components["libcryptopp"].sharedlinkflags = openmp_flag
+                self.cpp_info.components["libcryptopp"].exelinkflags = openmp_flag
+
+        self.cpp_info.components["libcryptopp"].set_property("cmake_target_name", "cryptopp::cryptopp")
+        self.cpp_info.components["libcryptopp"].set_property("pkg_config_name", "libcryptopp")

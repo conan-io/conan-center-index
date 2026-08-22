@@ -1,0 +1,13 @@
+sources:
+  "1.18.0":
+    url: "https://cairographics.org/releases/cairomm-1.18.0.tar.xz"
+    sha256: "b81255394e3ea8e8aa887276d22afa8985fc8daef60692eb2407d23049f03cfb"
+  "1.17.1":
+    url: "https://cairographics.org/releases/cairomm-1.17.1.tar.xz"
+    sha256: "343e8463ff7dd4d2c90991d6284a2203431e711026575207fd4c313cd323fdbe"
+  "1.16.2":
+    url: "https://cairographics.org/releases/cairomm-1.16.2.tar.xz"
+    sha256: "6a63bf98a97dda2b0f55e34d1b5f3fb909ef8b70f9b8d382cb1ff3978e7dc13f"
+  "1.14.5":
+    url: "https://cairographics.org/releases/cairomm-1.14.5.tar.xz"
+    sha256: "70136203540c884e89ce1c9edfb6369b9953937f6cd596d97c78c9758a5d48db"

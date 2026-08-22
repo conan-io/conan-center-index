@@ -1,0 +1,97 @@
+from conan import ConanFile
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import copy, get
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.microsoft import check_min_vs
+import os
+
+required_conan_version = ">=2.0.9"
+
+
+class CcacheConan(ConanFile):
+    name = "ccache"
+    package_type = "application"
+    description = (
+        "Ccache (or “ccache”) is a compiler cache. It speeds up recompilation "
+        "by caching previous compilations and detecting when the same "
+        "compilation is being done again."
+    )
+    license = "GPL-3.0-or-later"
+    topics = ("compiler-cache", "recompilation", "cache", "compiler")
+    homepage = "https://ccache.dev"
+    url = "https://github.com/conan-io/conan-center-index"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "redis_storage_backend": [True, False],
+    }
+    default_options = {
+        "redis_storage_backend": True,
+    }
+
+    @property
+    def _min_cppstd(self):
+        if Version(self.version) >= "4.13":
+            return "20"
+        return "17"
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("zstd/[>=1.5 <1.6]")
+        self.requires("fmt/[>=10.2.1 <=11.1.1]") # Explicitly tested with all versions in this range
+        self.requires("xxhash/[~0.8]")
+        if self.options.redis_storage_backend:
+            self.requires("hiredis/[>=1.3.0 <2]")
+
+    def validate(self):
+        check_min_cppstd(self, self._min_cppstd)
+        check_min_vs(self, 192)
+        if self.settings.compiler== "clang" and Version(self.settings.compiler.version).major == "11" and \
+            self.settings.compiler.libcxx == "libstdc++":
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++ filesystem library, that is not supported by Clang 11 + libstdc++.")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.18]")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder,
+            strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["REDIS_STORAGE_BACKEND"] = self.options.redis_storage_backend
+        tc.variables["HIREDIS_FROM_INTERNET"] = False
+        tc.variables["ZSTD_FROM_INTERNET"] = False
+        tc.variables["ENABLE_DOCUMENTATION"] = False
+        tc.variables["ENABLE_TESTING"] = False
+        tc.variables["STATIC_LINK"] = False  # Don't link static runtimes and let Conan handle it
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.set_property("fmt", "cmake_file_name", "Fmt")
+        deps.set_property("fmt", "cmake_find_mode", "module")
+        deps.set_property("fmt", "cmake_target_name", "dep_fmt")
+        deps.set_property("hiredis", "cmake_file_name", "Hiredis")
+        deps.set_property("hiredis", "cmake_target_name", "dep_hiredis")
+        deps.set_property("hiredis", "cmake_find_mode", "module")
+        deps.set_property("zstd", "cmake_file_name", "Zstd")
+        deps.set_property("zstd", "cmake_target_name", "dep_zstd")
+        deps.set_property("zstd", "cmake_find_mode", "module")
+        deps.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        copy(self, "*GPL-*.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+
+    def package_info(self):
+        self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []

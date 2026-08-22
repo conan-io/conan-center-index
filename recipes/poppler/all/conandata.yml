@@ -1,0 +1,8 @@
+sources:
+  "25.11.0":
+    url: "https://poppler.freedesktop.org/poppler-25.11.0.tar.xz"
+    sha256: "63f155142b77349e2bccaef148e754e7506ab1641e713b83af4f54a8f8b15369"
+patches:
+  "25.11.0":
+    - patch_file: "patches/25.11.0-001-fix-cmake-usage.patch"
+    - patch_file: "patches/25.11.0-002-msvc-basetsd-int32.patch"

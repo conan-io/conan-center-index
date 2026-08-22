@@ -1,0 +1,48 @@
+cmake_minimum_required(VERSION 3.15)
+project(wiringPi LANGUAGES C)
+
+file(GLOB SRC_FILES ${WIRINGPI_SRC_DIR}/wiringPi/*.c)
+
+message(STATUS "SRC_FILES: ${SRC_FILES}")
+if(NOT WIRINGPI_WITH_WPI_EXTENSIONS)
+  list(FILTER SRC_FILES EXCLUDE REGEX ".*wpiExtensions.c")
+  list(FILTER SRC_FILES EXCLUDE REGEX ".*drcNet.c")
+endif()
+
+# WiringpiV1 is not part of any object in the upstream Makefile
+list(FILTER SRC_FILES EXCLUDE REGEX "WiringpiV1.c")
+
+add_library(${PROJECT_NAME} ${SRC_FILES})
+target_include_directories(${PROJECT_NAME} PUBLIC ${WIRINGPI_SRC_DIR}/wiringPi)
+target_compile_definitions(${PROJECT_NAME} PRIVATE _GNU_SOURCE)
+
+if(WIRINGPI_WITH_DEV_LIB)
+    file(GLOB SRC_FILES ${WIRINGPI_SRC_DIR}/devLib/*.c)
+    list(FILTER SRC_FILES EXCLUDE REGEX ".*piFaceOld.c")
+    add_library(wiringPiDevLib ${SRC_FILES})
+    target_include_directories(wiringPiDevLib PUBLIC ${WIRINGPI_SRC_DIR}/devLib
+                                                     ${WIRINGPI_SRC_DIR}/wiringPi)
+endif()
+
+if(WIRINGPI_LINUX_HEADERS_DIR)
+    target_include_directories(${PROJECT_NAME} PUBLIC ${WIRINGPI_LINUX_HEADERS_DIR})
+endif()
+
+install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+
+install(DIRECTORY ${WIRINGPI_SRC_DIR}/wiringPi/ DESTINATION include
+        FILES_MATCHING PATTERN "*.h")
+
+if(WIRINGPI_WITH_DEV_LIB)
+
+    install(TARGETS wiringPiDevLib
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+
+    install(DIRECTORY ${WIRINGPI_SRC_DIR}/devLib/ DESTINATION include
+            FILES_MATCHING PATTERN "*.h")
+endif()

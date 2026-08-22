@@ -1,0 +1,11 @@
+--- src/Makefile.in
++++ src/Makefile.in
+@@ -239,7 +239,7 @@
+ # argtable-2.11 is 1:6:1 (minor tweaks to makefiles, src code is identical to argtable-2.8)
+ # argtable-2.12 is 1:7:1 (added support for parsing hex,octal,binary integer formats)
+ # argtable-2.13 is 1:8:1 (added CMake support and improved parsing of filenames)
+-libargtable2_la_LDFLAGS = -version-info 1:8:1
++libargtable2_la_LDFLAGS = -version-info 1:8:1 -no-undefined
+ include_HEADERS = argtable2.h
+ all: config.h
+ 	$(MAKE) $(AM_MAKEFLAGS) all-am

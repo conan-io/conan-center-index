@@ -1,0 +1,319 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
+from conan.tools.microsoft import check_min_vs, is_msvc, msvc_runtime_flag
+import os
+
+required_conan_version = ">=2"
+
+
+class GtsamConan(ConanFile):
+    name = "gtsam"
+    license = "BSD-3-Clause"
+    homepage = "https://github.com/borglab/gtsam"
+    url = "https://github.com/conan-io/conan-center-index"
+    description = ("GTSAM is a library of C++ classes that implement "
+                   "smoothing and mapping (SAM) in robotics and vision")
+    topics = ("mapping", "smoothing", "optimization", "factor-graphs",
+              "state-estimation", "computer-vision", "robotics")
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "allow_deprecated": [True, False],
+        "build_type_postfixes": [True, False],
+        "build_unstable": [True, False],
+        "build_with_march_native": [True, False],
+        "default_allocator": [None, "STL", "BoostPool", "TBB", "tcmalloc"],
+        "disable_new_timers": [True, False],
+        "enable_consistency_checks": [True, False],
+        "install_cppunitlite": [True, False],
+        "install_matlab_toolbox": [True, False],
+        "pose3_expmap": [True, False],
+        "rot3_expmap": [True, False],
+        "slow_but_correct_betweenfactor": [True, False],
+        "support_nested_dissection": [True, False],
+        "tangent_preintegration": [True, False],
+        "throw_cheirality_exception": [True, False],
+        "use_quaternions": [True, False],
+        "with_TBB": [True, False],
+        "with_eigen_MKL": [True, False],
+        "with_eigen_MKL_OPENMP": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "allow_deprecated": True,
+        "build_type_postfixes": True,
+        "build_unstable": True,
+        "build_with_march_native": False,
+        "default_allocator": None,
+        "disable_new_timers": False,
+        "enable_consistency_checks": False,
+        "install_cppunitlite": True,
+        "install_matlab_toolbox": False,
+        "pose3_expmap": True,
+        "rot3_expmap": True,
+        "slow_but_correct_betweenfactor": False,
+        "support_nested_dissection": True,
+        "tangent_preintegration": True,
+        "throw_cheirality_exception": True,
+        "use_quaternions": False,
+        "with_TBB": True,
+        "with_eigen_MKL": False,
+        "with_eigen_MKL_OPENMP": False,
+    }
+    options_description = {
+        "allow_deprecated": "Allow use of deprecated methods/functions",
+        "build_type_postfixes": "Append the build type to the name of compiled libraries",
+        "build_unstable": "Enable building of gtsam_unstable",
+        "build_with_march_native": "Build with all instructions supported by native architecture (binary may not be portable!)",
+        "default_allocator": "Set preferred memory allocator. If unset, defaults to STL or to TBB, if with_TBB is enabled",
+        "disable_new_timers": "Disables using Boost.chrono for timing",
+        "enable_consistency_checks": "Enable expensive consistency checks",
+        "install_cppunitlite": "Install CppUnitLite library as a component",
+        "install_matlab_toolbox": "Install MATLAB toolbox",
+        "pose3_expmap": "Use Pose3::EXPMAP as the default mode. If disabled, Pose3::FIRST_ORDER will be used.",
+        "rot3_expmap": ("Ignore if GTSAM_USE_QUATERNIONS is OFF (Rot3::EXPMAP by default). "
+                        "Otherwise, enable Rot3::EXPMAP, or if disabled, use Rot3::CAYLEY."),
+        "slow_but_correct_betweenfactor": "Use the slower but correct version of BetweenFactor",
+        "support_nested_dissection": "Support METIS-based nested dissection",
+        "tangent_preintegration": "Use the new ImuFactor with integration on tangent space",
+        "throw_cheirality_exception": "Throw exception when a triangulated point is behind a camera",
+        "use_quaternions": ("Enable an internal Quaternion representation for rotations instead of rotation matrices. "
+                            "If enabled, Rot3::EXPMAP is enforced by default."),
+        "with_TBB": "Use Intel Threaded Building Blocks (TBB)",
+        "with_eigen_MKL": "Eigen will use Intel MKL if available",
+        "with_eigen_MKL_OPENMP": "Eigen, when using Intel MKL, will also use OpenMP for multithreading if available",
+    }
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        if self.options.with_TBB:
+            self.options["onetbb"].tbbmalloc = True
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("boost/1.84.0", transitive_headers=True)
+        self.requires("eigen/3.4.0", transitive_headers=True)
+        if self.options.with_TBB:
+            self.requires("onetbb/[>=2021.10.0 <2024]", transitive_headers=True, transitive_libs=True)
+        if self.options.default_allocator == "tcmalloc":
+            self.requires("gperftools/[>=2.15 <3]")
+        if self.options.support_nested_dissection:
+            # Used in a public header here:
+            # https://github.com/borglab/gtsam/blob/4.2.0/gtsam_unstable/partition/FindSeparator-inl.h#L23-L27
+            self.requires("metis/5.2.1", transitive_headers=True, transitive_libs=True)
+
+    @property
+    def _required_boost_components(self):
+        # Based on https://github.com/borglab/gtsam/blob/4.2.1/cmake/HandleBoost.cmake#L26
+        return [
+            "chrono",
+            "filesystem",
+            "program_options",
+            "serialization",
+            "timer",
+        ]
+
+    def validate(self):
+        miss_boost_required_comp = any(
+            self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
+            for boost_comp in self._required_boost_components
+        )
+        if self.dependencies["boost"].options.header_only or miss_boost_required_comp:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires non header-only boost with these components: "
+                f"{', '.join(self._required_boost_components)}"
+            )
+
+        if self.options.with_TBB:
+            if self.options.default_allocator in [None, "TBB"]:
+                if not self.dependencies["onetbb"].options.tbbmalloc:
+                    raise ConanInvalidConfiguration("GTSAM with TBB requires onetbb/*:tbbmalloc=True")
+            elif self.options.default_allocator != "tcmalloc":
+                raise ConanInvalidConfiguration(f"with_TBB option cannot be used with default_allocator={self.options.default_allocator}")
+        elif self.options.default_allocator == "TBB":
+            raise ConanInvalidConfiguration("default_allocator=TBB requires with_TBB=True")
+
+        check_min_vs(self, "191")
+
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration("Can't build as shared with msvc due to duplicate symbols with mscv")
+
+        if self.options.support_nested_dissection and self.dependencies["metis"].options.with_64bit_types:
+            raise ConanInvalidConfiguration("GTSAM does not support METIS with 64-bit types")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/HandleGeneralOptions.cmake
+        tc.variables["GTSAM_BUILD_UNSTABLE"] = self.options.build_unstable
+        tc.variables["GTSAM_UNSTABLE_BUILD_PYTHON"] = False
+        tc.variables["GTSAM_UNSTABLE_INSTALL_MATLAB_TOOLBOX"] = self.options.install_matlab_toolbox
+        tc.variables["GTSAM_USE_QUATERNIONS"] = self.options.use_quaternions
+        tc.variables["GTSAM_POSE3_EXPMAP"] = self.options.pose3_expmap
+        tc.variables["GTSAM_ROT3_EXPMAP"] = self.options.rot3_expmap
+        tc.variables["GTSAM_ENABLE_CONSISTENCY_CHECKS"] = self.options.enable_consistency_checks
+        tc.variables["GTSAM_WITH_TBB"] = self.options.with_TBB
+        tc.variables["GTSAM_WITH_EIGEN_MKL"] = self.options.with_eigen_MKL
+        tc.variables["GTSAM_WITH_EIGEN_MKL_OPENMP"] = self.options.with_eigen_MKL_OPENMP
+        tc.variables["GTSAM_THROW_CHEIRALITY_EXCEPTION"] = self.options.throw_cheirality_exception
+        tc.variables["GTSAM_BUILD_PYTHON"] = False
+        tc.variables["GTSAM_INSTALL_MATLAB_TOOLBOX"] = self.options.install_matlab_toolbox
+        tc.variables["GTSAM_ALLOW_DEPRECATED_SINCE_V4"] = self.options.allow_deprecated
+        tc.variables["GTSAM_ALLOW_DEPRECATED_SINCE_V41"] = self.options.allow_deprecated
+        tc.variables["GTSAM_ALLOW_DEPRECATED_SINCE_V42"] = self.options.allow_deprecated
+        tc.variables["GTSAM_SUPPORT_NESTED_DISSECTION"] = self.options.support_nested_dissection
+        tc.variables["GTSAM_TANGENT_PREINTEGRATION"] = self.options.tangent_preintegration
+        tc.variables["GTSAM_SLOW_BUT_CORRECT_BETWEENFACTOR"] = self.options.slow_but_correct_betweenfactor
+        tc.variables["GTSAM_BUILD_WITH_CCACHE"] = False
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/HandleAllocators.cmake
+        if self.options.default_allocator is not None:
+            tc.variables["GTSAM_DEFAULT_ALLOCATOR"] = self.options.default_allocator
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/GtsamBuildTypes.cmake#L59
+        tc.variables["GTSAM_BUILD_TYPE_POSTFIXES"] = self.options.build_type_postfixes
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/GtsamBuildTypes.cmake#L193
+        tc.variables["GTSAM_BUILD_WITH_MARCH_NATIVE"] = self.options.build_with_march_native
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/HandleBoost.cmake#L36
+        tc.variables["GTSAM_DISABLE_NEW_TIMERS"] = self.options.disable_new_timers
+        # https://github.com/borglab/gtsam/blob/4.2.0/CppUnitLite/CMakeLists.txt#L13
+        tc.variables["GTSAM_INSTALL_CPPUNITLITE"] = self.options.install_cppunitlite
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/HandleEigen.cmake#L3
+        tc.variables["GTSAM_USE_SYSTEM_EIGEN"] = True
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/HandleMetis.cmake#L11
+        tc.variables["GTSAM_USE_SYSTEM_METIS"] = False
+        # https://github.com/borglab/gtsam/blob/4.2.0/gtsam/3rdparty/CMakeLists.txt#L76
+        tc.variables["GTSAM_INSTALL_GEOGRAPHICLIB"] = False
+        # https://github.com/borglab/gtsam/blob/4.2.0/matlab/CMakeLists.txt#L14-L15
+        tc.variables["GTSAM_MEX_BUILD_STATIC_MODULE"] = False
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/GtsamTesting.cmake#L89-L91
+        tc.variables["GTSAM_BUILD_TESTS"] = False
+        tc.variables["GTSAM_BUILD_EXAMPLES_ALWAYS"] = False
+        tc.variables["GTSAM_BUILD_TIMING_ALWAYS"] = False
+        # https://github.com/borglab/gtsam/blob/4.2.0/doc/CMakeLists.txt
+        tc.variables["GTSAM_BUILD_DOCS"] = False
+        tc.variables["GTSAM_BUILD_DOC_HTML"] = False
+        tc.variables["GTSAM_BUILD_DOC_LATEX"] = False
+        tc.variables["Boost_USE_STATIC_LIBS"] = not self.dependencies["boost"].options.shared
+        tc.variables["Boost_NO_SYSTEM_PATHS"] = True
+        tc.cache_variables["Boost_SERIALIZATION_LIBRARY"] = True
+        tc.cache_variables["Boost_FILESYSTEM_LIBRARY"] = True
+        tc.cache_variables["Boost_TIMER_LIBRARY"] = True
+
+        tc.generate()
+
+        deps = CMakeDeps(self)
+
+        if self.options.support_nested_dissection:
+            deps.set_property("metis", "cmake_target_name", "metis-gtsam-if")
+
+        if self.options.with_TBB:
+            deps.set_property("onetbb::libtbb", "cmake_target_name", "tbb")
+            deps.set_property("onetbb::tbbmalloc", "cmake_target_name", "tbbmalloc")
+
+        deps.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
+        # Honor vc runtime
+        if is_msvc(self):
+            gtsam_build_types_cmake = os.path.join(self.source_folder, "cmake", "GtsamBuildTypes.cmake")
+            replace_in_file(self, gtsam_build_types_cmake, "/MD ", f"/{msvc_runtime_flag(self)} ")
+            replace_in_file(self, gtsam_build_types_cmake, "/MDd ", f"/{msvc_runtime_flag(self)} ")
+
+        # Ensure a newer CMake standard is used for non-cache_variables support and other policies
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "cmake_minimum_required(VERSION 3.0)",
+                        "cmake_minimum_required(VERSION 3.15)")
+
+        # Fix tcmalloc / gperftools handling
+        if self.options.default_allocator == "tcmalloc":
+            handle_allocators_path = os.path.join(self.source_folder, "cmake", "HandleAllocators.cmake")
+            replace_in_file(self, handle_allocators_path,
+                            "if(GOOGLE",
+                            ("find_package(gperftools REQUIRED)\n"
+                             "set(GOOGLE_PERFTOOLS_FOUND TRUE)\n"
+                             "if(GOOGLE"))
+            replace_in_file(self, handle_allocators_path,
+                            'GTSAM_ADDITIONAL_LIBRARIES "tcmalloc"',
+                            'GTSAM_ADDITIONAL_LIBRARIES "gperftools::gperftools"')
+
+        if self.options.support_nested_dissection:
+            # Fix HandleMetis.cmake incompatibility with METIS from Conan
+            save(self, os.path.join(self.source_folder, "cmake", "HandleMetis.cmake"),
+                 "find_package(metis REQUIRED CONFIG)\n")
+
+
+        # Fix TBB handling
+        handle_tbb_path = os.path.join(self.source_folder, "cmake", "HandleTBB.cmake")
+        replace_in_file(self, handle_tbb_path, "find_package(TBB 4.4 ", "find_package(TBB ")
+
+    def build(self):
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.BSD", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "CMake"))
+
+    def package_info(self):
+        # GTSAM uses targets without a namespace prefix:
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/example_cmake_find_gtsam/CMakeLists.txt
+        self.cpp_info.set_property("cmake_file_name", "GTSAM")
+
+        gtsam = self.cpp_info.components["libgtsam"]
+        gtsam.set_property("cmake_target_name", "gtsam")
+        gtsam.libs = ["gtsam"]
+        gtsam.requires = [f"boost::{component}" for component in self._required_boost_components]
+        gtsam.requires.append("eigen::eigen")
+        if self.options.with_TBB:
+            gtsam.requires.extend(["onetbb::libtbb", "onetbb::tbbmalloc"])
+        if self.options.default_allocator == "tcmalloc":
+            gtsam.requires.append("gperftools::gperftools")
+        if self.settings.os == "Windows":
+            gtsam.system_libs = ["dbghelp"]
+
+        if self.options.build_unstable:
+            gtsam_unstable = self.cpp_info.components["libgtsam_unstable"]
+            gtsam_unstable.set_property("cmake_target_name", "gtsam_unstable")
+            gtsam_unstable.libs = ["gtsam_unstable"]
+            gtsam_unstable.requires = ["libgtsam"]
+
+        if self.options.support_nested_dissection:
+            gtsam.requires.append("metis::metis")
+
+        if self.options.install_cppunitlite:
+            cppunitlite = self.cpp_info.components["gtsam_CppUnitLite"]
+            cppunitlite.set_property("cmake_target_name", "CppUnitLite")
+            cppunitlite.libs = ["CppUnitLite"]
+            cppunitlite.requires = ["boost::boost"]
+
+        if is_msvc(self) and not self.options.shared:
+            for component in self.cpp_info.components.values():
+                component.libs = [f"lib{lib}" for lib in component.libs if lib.startswith("gtsam")]
+        if self.options.build_type_postfixes and self.settings.build_type != "Release":
+            for component in self.cpp_info.components.values():
+                component.libs = [f"{lib}{self.settings.build_type}" for lib in component.libs]

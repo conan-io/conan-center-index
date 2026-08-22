@@ -1,0 +1,8 @@
+sources:
+  "0.8.8":
+    url: "https://github.com/uNetworking/uSockets/archive/v0.8.8.tar.gz"
+    sha256: "d14d2efe1df767dbebfb8d6f5b52aa952faf66b30c822fbe464debaa0c5c0b17"
+patches:
+  "0.8.8":
+    - patch_file: "patches/0.8.8-remove-lto-flag.patch"
+ 

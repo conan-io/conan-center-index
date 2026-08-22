@@ -1,0 +1,9 @@
+sources:
+  "2.8.139":
+    url:
+      - "https://sourceforge.net/projects/gsoap2/files/gsoap_2.8.139.zip/download"
+    sha256: "74d1d7854c8ff500729a3003fd07536e417f3e900aee2eeb2d9300d70e4c047b"
+  "2.8.134":
+    url:
+      - "https://sourceforge.net/projects/gsoap2/files/gsoap_2.8.134.zip/download"
+    sha256: "63478e555c0ccde0164f055ff605b02805db0abc6712a04bcb14cb617b047218"

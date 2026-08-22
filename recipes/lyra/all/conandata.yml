@@ -1,0 +1,22 @@
+sources:
+  "1.8.0":
+    sha256: 7f70c230f0bbcdf77a653f982343c87028cf8a0d4196f6ac79ad376697ed1c1a
+    url: https://github.com/bfgroup/Lyra/releases/download/1.8.0/lyra-1.8.0.tar.bz2
+  "1.7.0":
+    sha256: 2a4cbf23e4a4b9c33dd25df11e5017e0647575b45b8b4a42349ab754f670b853
+    url: https://github.com/bfgroup/Lyra/releases/download/1.7.0/lyra-1.7.0.tar.bz2
+  "1.6.1":
+    sha256: a93f247ed89eba11ca36eb24c4f8ba7be636bf24e74aaaa8e1066e0954bec7e3
+    url: https://github.com/bfgroup/Lyra/archive/1.6.1.tar.gz
+  "1.6.0":
+    sha256: 919e92a9c02fea3f365a3a7bdccd8b306311a28a7f2044dac8e7651106d7b644
+    url: https://github.com/bfgroup/Lyra/archive/1.6.tar.gz
+  "1.5.1":
+    sha256: 11ccdfc6f776b9a2ebe987d9b4e492981f88f3642546fd1c2e1115741863cae0
+    url: https://github.com/bfgroup/Lyra/archive/1.5.1.tar.gz
+  "1.4.0":
+    sha256: 86cc0c4978312582393e196d534011a1f186db9e3e09ba34fd250c2a59ebf814
+    url: https://github.com/bfgroup/Lyra/archive/1.4.tar.gz
+  "1.3.0":
+    sha256: 1e9757b850d1afc14413ceb9eb47af5693f6f03a0f1231617fac39df8534db2b
+    url: https://github.com/bfgroup/Lyra/archive/1.3.tar.gz

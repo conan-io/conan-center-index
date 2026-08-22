@@ -1,0 +1,5 @@
+sources:
+  "v2.5":
+    url: "https://github.com/leducp/KickCAT/archive/refs/tags/v2.5.zip"
+    sha256: "838fa44cd86feddfdfb836d3f70eeaff377001caf20696efc942b729cb1f6bc6"
+

@@ -1,0 +1,19 @@
+sources:
+  "3.7":
+    url: "https://github.com/redorav/hlslpp/archive/refs/tags/3.7.tar.gz"
+    sha256: "819a3d20e5dcea27ee16903b6c96c309d1432c950f282791c06c8f27c2cb12f0"
+  "3.3.1":
+    url: "https://github.com/redorav/hlslpp/archive/3.3.1.tar.gz"
+    sha256: "0756161beb8dd9eae377dc11e933d045618fea7ac93674f60eb8cffc04080499"
+  "3.2.3":
+    url: "https://github.com/redorav/hlslpp/archive/refs/tags/3.2.3.tar.gz"
+    sha256: "132149d25306cdc56a87c1d6a4a93d3200de4864b5d27d758d235ce4ace64498"
+  "3.1":
+    url: "https://github.com/redorav/hlslpp/archive/refs/tags/3.1.tar.gz"
+    sha256: "6f933e43bf8150a41d76a188377e59007897dc87e96be30608e7f2007605d5c4"
+  "3.0":
+    url: "https://github.com/redorav/hlslpp/archive/3.0.tar.gz"
+    sha256: "2ba6d8d3cdfbd0f87d4ede0281a293e872eff8d6390d96d2aab063562072a830"
+  "2.0":
+    url: "https://github.com/redorav/hlslpp/archive/2.0.tar.gz"
+    sha256: "63ca1fb18e129d9daf045160a96867b934c9a4595a094298597ff18192fc476b"

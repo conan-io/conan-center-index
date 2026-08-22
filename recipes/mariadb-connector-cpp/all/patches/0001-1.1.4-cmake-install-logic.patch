@@ -1,0 +1,44 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -692,7 +692,7 @@ ADD_DEPENDENCIES(${LIBRARY_NAME} DEPENDENCIES_FOR_PACKAGE)
+ ########## Packaging ##########
+ 
+ # MSI
+-IF(WIN32)
++IF(0)
+   IF(WITH_MSI)
+     ADD_CUSTOM_COMMAND(TARGET ${LIBRARY_NAME} POST_BUILD
+       COMMAND ${CMAKE_COMMAND} ARGS -DDRIVER_LIB_DIR=$<TARGET_FILE_DIR:${LIBRARY_NAME}>
+@@ -710,8 +710,12 @@ ELSE()
+     #ADD_SUBDIRECTORY(osxinstall)
+   ENDIF()
+   INSTALL(TARGETS ${LIBRARY_NAME}
+-          LIBRARY DESTINATION ${INSTALL_LIBDIR}
+-          COMPONENT SharedLibraries)
++          LIBRARY DESTINATION lib
++            COMPONENT SharedLibraries
++          RUNTIME DESTINATION bin
++            COMPONENT SharedLibraries
++          ARCHIVE DESTINATION lib
++            COMPONENT SharedLibraries)
+   INSTALL(TARGETS
+           ${STATIC_LIBRARY_NAME}
+           ARCHIVE DESTINATION ${INSTALL_LIBDIR}
+
+--- a/include/CMakeLists.txt
++++ b/include/CMakeLists.txt
+@@ -38,11 +38,11 @@ ENDIF()
+ 
+ INSTALL(FILES ${MARIADBCPP_PUBLIC_API}
+         DESTINATION ${INSTALL_INCLUDEDIR}
+-        COMPONENT Development)
++        COMPONENT Headers)
+ INSTALL(FILES ${MARIADBCPP_PUBLIC_CLASSES}
+         DESTINATION ${INSTALL_INCLUDEDIR}/conncpp
+-        COMPONENT Development)
++        COMPONENT Headers)
+ INSTALL(FILES ${MARIADBCPP_COMPAT_STUBS}
+         DESTINATION ${INSTALL_INCLUDEDIR}/conncpp/compat
+-        COMPONENT Development)
++        COMPONENT Headers)
+ 

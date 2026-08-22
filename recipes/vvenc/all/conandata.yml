@@ -1,0 +1,13 @@
+sources:
+  "1.12.0":
+    url: "https://github.com/fraunhoferhhi/vvenc/archive/refs/tags/v1.12.0.tar.gz"
+    sha256: "e7311ffcc87d8fcc4b839807061cca1b89be017ae7c449a69436dc2dd07615c2"
+  "1.11.1":
+    url: "https://github.com/fraunhoferhhi/vvenc/archive/refs/tags/v1.11.1.tar.gz"
+    sha256: "4f0c8ac3f03eb970bee7a0cacc57a886ac511d58f081bb08ba4bce6f547d92fa"
+  "1.10.0":
+    url: "https://github.com/fraunhoferhhi/vvenc/archive/refs/tags/v1.10.0.tar.gz"
+    sha256: "579e4b19de3b356a96ec436dbfeb3b9583cb0a854e55f81226990924a5cfd38c"
+  "1.8.0":
+    url: "https://github.com/fraunhoferhhi/vvenc/archive/refs/tags/v1.8.0.tar.gz"
+    sha256: "119970f1e00667045eb12775db10611fc04f9158348144913c9e233f98664714"

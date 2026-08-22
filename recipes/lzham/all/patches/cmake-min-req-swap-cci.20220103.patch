@@ -1,0 +1,55 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 428cdfc..b8980e5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,5 +1,5 @@
+-# PROJECT(lzham)
+ cmake_minimum_required(VERSION 2.8)
++PROJECT(lzham)
+ option(BUILD_X64 "build 64-bit" ON)
+ option(BUILD_SHARED_LIBS "build shared/static libs" ON)
+ 
+diff --git a/lzhamcomp/CMakeLists.txt b/lzhamcomp/CMakeLists.txt
+index c80cc66..a3f77e7 100644
+--- a/lzhamcomp/CMakeLists.txt
++++ b/lzhamcomp/CMakeLists.txt
+@@ -1,5 +1,5 @@
+-PROJECT(lzhamcomp)
+ cmake_minimum_required(VERSION 2.8)
++PROJECT(lzhamcomp)
+ option(BUILD_X64 "build 64-bit" TRUE)
+ 
+ message("Initial BUILD_X64=${BUILD_X64}")
+diff --git a/lzhamdecomp/CMakeLists.txt b/lzhamdecomp/CMakeLists.txt
+index bf87a02..723379e 100644
+--- a/lzhamdecomp/CMakeLists.txt
++++ b/lzhamdecomp/CMakeLists.txt
+@@ -1,5 +1,5 @@
+-PROJECT(lzhamdecomp)
+ cmake_minimum_required(VERSION 2.8)
++PROJECT(lzhamdecomp)
+ option(BUILD_X64 "build 64-bit" TRUE)
+ 
+ message("Initial BUILD_X64=${BUILD_X64}")
+diff --git a/lzhamdll/CMakeLists.txt b/lzhamdll/CMakeLists.txt
+index f77f3fe..5a162b6 100644
+--- a/lzhamdll/CMakeLists.txt
++++ b/lzhamdll/CMakeLists.txt
+@@ -1,5 +1,5 @@
+-PROJECT(lzhamdll)
+ cmake_minimum_required(VERSION 2.8)
++PROJECT(lzhamdll)
+ option(BUILD_X64 "build 64-bit" TRUE)
+ 
+ message("Initial BUILD_X64=${BUILD_X64}")
+diff --git a/lzhamtest/CMakeLists.txt b/lzhamtest/CMakeLists.txt
+index 3349911..b8833b9 100644
+--- a/lzhamtest/CMakeLists.txt
++++ b/lzhamtest/CMakeLists.txt
+@@ -1,5 +1,5 @@
+-PROJECT(lzhamtest)
+ cmake_minimum_required(VERSION 2.8)
++PROJECT(lzhamtest)
+ option(BUILD_X64 "build 64-bit" TRUE)
+ 
+ message("Initial BUILD_X64=${BUILD_X64}")

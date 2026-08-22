@@ -1,0 +1,7 @@
+sources:
+  "8.45":
+    url: "https://sourceforge.net/projects/pcre/files/pcre/8.45/pcre-8.45.tar.bz2"
+    sha256: "4dae6fdcd2bb0bb6c37b5f97c33c2be954da743985369cddac3546e3218bffb8"
+patches:
+  "8.45":
+    - patch_file: "patches/0001-fix-cmake-8.45.patch"

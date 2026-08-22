@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d70de08..df997b1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -9,7 +9,7 @@ else()
+     set(BUILD_THIS_PROJECT False)
+ endif()
+ 
+-if(BUILD_THIS_PROJECT)
++if(0)
+     include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+ 
+     include(CTest)

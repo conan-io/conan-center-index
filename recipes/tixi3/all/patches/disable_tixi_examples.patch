@@ -1,0 +1,24 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3ab74e9..39878ca 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -109,10 +109,15 @@ if(TIXI_BUILD_TESTS)
+ endif(TIXI_BUILD_TESTS)
+ 
+ #demos
+-add_subdirectory(examples/Demo)
+-if (TIXI_ENABLE_FORTRAN)
+-  add_subdirectory(examples/fortran77)
+-endif(TIXI_ENABLE_FORTRAN)
++option (TIXI_BUILD_EXAMPLES "Build tixi examples" ON)
++
++if (TIXI_BUILD_EXAMPLES)
++  add_subdirectory(examples/Demo)
++
++  if (TIXI_ENABLE_FORTRAN)
++    add_subdirectory(examples/fortran77)
++  endif(TIXI_ENABLE_FORTRAN)
++endif(TIXI_BUILD_EXAMPLES)
+ 
+ # create the doc
+ include(createDoc)

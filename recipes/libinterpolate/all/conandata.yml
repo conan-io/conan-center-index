@@ -1,0 +1,17 @@
+sources:
+  "2.7":
+    url:
+      - "https://github.com/CD3/libInterpolate/archive/refs/tags/2.7.tar.gz"
+    sha256: "a502a00d6aee13e9b8ae9af6fafbcb783d5380835e353a0fc85a586ca7e31e43"
+  "2.6.4":
+    url:
+      - "https://github.com/CD3/libInterpolate/archive/refs/tags/2.6.4.tar.gz"
+    sha256: "231a39fcc87ffc3e03936f7a21abc78ef309c2f1de79bd3ae72c24d78352d666"
+  "2.6.3":
+    url:
+      - "https://github.com/CD3/libInterpolate/archive/refs/tags/2.6.3.tar.gz"
+    sha256: "bb2f253c27594b4e56ed9349630086665f529100eac2cd3cba63d198c3a84ff9"
+  "2.6.2":
+    url:
+      - "https://github.com/CD3/libInterpolate/archive/refs/tags/2.6.2.tar.gz"
+    sha256: "42f40c9b77fda6e0c52ed39b522458456e89fb4981d63f812aa158c6f4be8ab0"

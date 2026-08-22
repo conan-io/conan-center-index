@@ -1,0 +1,6 @@
+sources:
+  # Newer versions at the top
+  "0.2.2":
+    url:
+      - "https://github.com/CD3/BoostUnitDefinitions/archive/refs/tags/0.2.2.tar.gz"
+    sha256: "84b374ce94bd4792994205a40e3a92b4d70694203f596c18f00de2520ba55db3"

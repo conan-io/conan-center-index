@@ -1,0 +1,11 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -27,7 +27,7 @@
+ # Detect if Check is being used in another build as a subproject
+ # probably with command FetchContent*().
+ set(THIS_IS_SUBPROJECT FALSE)
+-if(DEFINED PROJECT_NAME)
++if(0)
+   set(THIS_IS_SUBPROJECT TRUE)
+   message(STATUS "Turned off installing because Check is a subproject.")
+   message(STATUS "Turned off building tests because Check is a subproject.")

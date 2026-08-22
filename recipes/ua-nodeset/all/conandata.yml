@@ -1,0 +1,5 @@
+sources:
+  "padim-1.02-2021-07-21":
+    # This is just the latest tag on the 1.04 release branch as of 23Sep2021
+    url: https://github.com/OPCFoundation/UA-Nodeset/archive/refs/tags/PADIM-1.02-2021-07-21.tar.gz
+    sha256: 05c83369ea82cd275d47ccc46a6d919c81392e2d0b7444a3e538ee3ba482dbee

@@ -1,0 +1,27 @@
+From 6c5767ba13a12710eab8b5ab7a3db331a1ed7161 Mon Sep 17 00:00:00 2001
+From: Charles Karney <karney@users.sourceforge.net>
+Date: Sun, 24 Jan 2021 09:28:41 -0500
+Subject: [PATCH] Clean up some lists with default methods in Rhumb.  Document
+ issues with AlbersEqualArea.  doc: Update gdal_translate example to include
+ offset + scale.
+
+--- include/GeographicLib/Rhumb.hpp
++++ include/GeographicLib/Rhumb.hpp
+@@ -468,11 +468,15 @@ namespace GeographicLib {
+     const Rhumb& _rh;
+     bool _exact;
+     real _lat1, _lon1, _azi12, _salp, _calp, _mu1, _psi1, _r1;
+-    RhumbLine& operator=(const RhumbLine&); // copy assignment not allowed
++    // copy assignment not allowed
++    RhumbLine& operator=(const RhumbLine&) = delete;
+     RhumbLine(const Rhumb& rh, real lat1, real lon1, real azi12,
+               bool exact);
+   public:
+-
++    /**
++     * Construction is via default copy constructor.
++     **********************************************************************/
++    RhumbLine(const RhumbLine&) = default;
+     /**
+      * This is a duplication of Rhumb::mask.
+      **********************************************************************/

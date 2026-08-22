@@ -1,0 +1,28 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -518,6 +518,10 @@ target_compile_definitions(
+ 
+ if(APPLE)
+ 	target_compile_definitions(ODE PRIVATE -DMAC_OS_X_VERSION=${MAC_OS_X_VERSION})
++	if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
++		find_library(CORESERVICES_FW NAMES CoreServices)
++		target_link_libraries(ODE PRIVATE ${CORESERVICES_FW})
++	endif()
+ endif()
+ 
+ if(WIN32)
+--- a/ode/src/timer.cpp
++++ b/ode/src/timer.cpp
+@@ -176,7 +176,11 @@ double dTimerTicksPerSecond()
+ 
+ #if !defined(PENTIUM) && !defined(WIN32)
+ 
+-#ifndef macintosh
++#ifdef macintosh
++#include <TargetConditionals.h>
++#endif
++
++#if !defined(macintosh) || !TARGET_OS_OSX
+ 
+ #include <sys/time.h>
+ #include <unistd.h>

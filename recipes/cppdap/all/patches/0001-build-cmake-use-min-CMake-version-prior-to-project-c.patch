@@ -1,0 +1,33 @@
+From ab76a207761b02e169f3ace39e3beb126b39fe9e Mon Sep 17 00:00:00 2001
+From: Gregor Jasny <gjasny@googlemail.com>
+Date: Mon, 5 Jun 2023 08:01:43 +0200
+Subject: [PATCH] build(cmake): use min CMake version prior to project call
+
+The [CMake documentation](https://cmake.org/cmake/help/latest/command/cmake_minimum_required.html)
+mandates that `cmake_minimum_required` should be called early
+in the `CMakeLists.txt` prior to any `project()` command.
+---
+ CMakeLists.txt | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f111f1a..717f02e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,11 +12,10 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+-cmake_policy(SET CMP0048 NEW)
+-project(cppdap VERSION 1.59.0 LANGUAGES CXX C)
+-
+ cmake_minimum_required(VERSION 3.13)
+ 
++project(cppdap VERSION 1.59.0 LANGUAGES CXX C)
++
+ set (CMAKE_CXX_STANDARD 11)
+ 
+ include(GNUInstallDirs)
+-- 
+2.40.1
+

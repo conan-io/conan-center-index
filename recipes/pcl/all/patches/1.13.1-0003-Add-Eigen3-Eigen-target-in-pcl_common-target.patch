@@ -1,0 +1,25 @@
+From a975f68d2e399a1563fe0d66b2c048978f0282d1 Mon Sep 17 00:00:00 2001
+From: Esteban DUGUEPEROUX <esteban.dugueperoux@gmail.com>
+Date: Mon, 7 Aug 2023 23:50:12 +0200
+Subject: [PATCH] Add Eigen3::Eigen target in pcl_common target
+
+---
+ common/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/common/CMakeLists.txt b/common/CMakeLists.txt
+index 48e1a202e..e0ced5241 100644
+--- a/common/CMakeLists.txt
++++ b/common/CMakeLists.txt
+@@ -179,7 +179,7 @@ target_include_directories(${LIB_NAME} PUBLIC
+   $<INSTALL_INTERFACE:include> 
+ )
+ 
+-target_link_libraries(${LIB_NAME} Boost::boost)
++target_link_libraries(${LIB_NAME} Boost::boost Eigen3::Eigen)
+ 
+ if(MSVC AND NOT (MSVC_VERSION LESS 1915))
+   # MSVC resolved a byte alignment issue in compiler version 15.9
+-- 
+2.41.0
+

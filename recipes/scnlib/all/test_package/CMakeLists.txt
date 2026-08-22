@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES CXX)
+
+find_package(scn REQUIRED CONFIG)
+
+add_executable(${PROJECT_NAME} test_package.cpp)
+if(TARGET scn::scn-header-only)
+    target_link_libraries(${PROJECT_NAME} PRIVATE scn::scn-header-only)
+else()
+    target_link_libraries(${PROJECT_NAME} PRIVATE scn::scn)
+endif()
+if (scn_VERSION VERSION_LESS "2.0.0")
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+else()
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC SCNLIB_V2)
+endif()

@@ -1,0 +1,9 @@
+sources:
+  "6.8.0":
+    url: "https://download.kde.org/stable/frameworks/6.8/extra-cmake-modules-6.8.0.tar.xz"
+    sha256: "ff8a0bf72285bec1768e3acd8f7c665a26d55a1527e96d73e35789dc9f0e3472"
+patches:
+  "6.8.0":
+    - patch_file: "patches/0001-fix-find_package-qt.patch"
+      patch_description: "fix find_package qt"
+      patch_type: "portability"

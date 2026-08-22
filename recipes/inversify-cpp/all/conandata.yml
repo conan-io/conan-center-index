@@ -1,0 +1,4 @@
+sources:
+  "2.1.0":
+    url: "https://github.com/mosure/inversify-cpp/archive/refs/tags/2.1.0.tar.gz"
+    sha256: "6829b45a558c7eb4e15fdc08cb0dfe3c76f708c00bbdcc06d1fcdbd0a3ef55d1"

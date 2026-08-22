@@ -1,0 +1,122 @@
+diff --git a/TextureLoader/interface/BCTools.h b/TextureLoader/interface/BCTools.h
+index cb46211..95bee9f 100644
+--- a/TextureLoader/interface/BCTools.h
++++ b/TextureLoader/interface/BCTools.h
+@@ -26,7 +26,7 @@
+ 
+ #pragma once
+ 
+-#include "../../../DiligentCore/Primitives/interface/BasicTypes.h"
++#include "DiligentCore/Primitives/interface/BasicTypes.h"
+ 
+ DILIGENT_BEGIN_NAMESPACE(Diligent)
+ 
+diff --git a/TextureLoader/interface/Image.h b/TextureLoader/interface/Image.h
+index 78629a0..4d5f5f7 100644
+--- a/TextureLoader/interface/Image.h
++++ b/TextureLoader/interface/Image.h
+@@ -27,15 +27,15 @@
+ 
+ #pragma once
+ 
+-#include "../../../DiligentCore/Graphics/GraphicsEngine/interface/GraphicsTypes.h"
+-#include "../../../DiligentCore/Primitives/interface/FileStream.h"
+-#include "../../../DiligentCore/Primitives/interface/DataBlob.h"
++#include "DiligentCore/Graphics/GraphicsEngine/interface/GraphicsTypes.h"
++#include "DiligentCore/Primitives/interface/FileStream.h"
++#include "DiligentCore/Primitives/interface/DataBlob.h"
+ 
+ #if DILIGENT_CPP_INTERFACE
+ #    include <vector>
+ 
+-#    include "../../../DiligentCore/Common/interface/RefCntAutoPtr.hpp"
+-#    include "../../../DiligentCore/Common/interface/ObjectBase.hpp"
++#    include "DiligentCore/Common/interface/RefCntAutoPtr.hpp"
++#    include "DiligentCore/Common/interface/ObjectBase.hpp"
+ #endif
+ 
+ DILIGENT_BEGIN_NAMESPACE(Diligent)
+diff --git a/TextureLoader/interface/TextureLoader.h b/TextureLoader/interface/TextureLoader.h
+index 15710a6..9ccf234 100644
+--- a/TextureLoader/interface/TextureLoader.h
++++ b/TextureLoader/interface/TextureLoader.h
+@@ -27,9 +27,9 @@
+ 
+ #pragma once
+ 
+-#include "../../../DiligentCore/Primitives/interface/FileStream.h"
+-#include "../../../DiligentCore/Graphics/GraphicsEngine/interface/RenderDevice.h"
+-#include "../../../DiligentCore/Graphics/GraphicsEngine/interface/Texture.h"
++#include "DiligentCore/Primitives/interface/FileStream.h"
++#include "DiligentCore/Graphics/GraphicsEngine/interface/RenderDevice.h"
++#include "DiligentCore/Graphics/GraphicsEngine/interface/Texture.h"
+ #include "Image.h"
+ 
+ DILIGENT_BEGIN_NAMESPACE(Diligent)
+@@ -96,7 +96,7 @@ static const struct INTERFACE_ID IID_TextureLoader =
+     {0xe04fe6d5, 0x8665, 0x4183, {0xa8, 0x72, 0x85, 0x2e, 0xf, 0x7c, 0xe2, 0x42}};
+ 
+ #define DILIGENT_INTERFACE_NAME ITextureLoader
+-#include "../../../DiligentCore/Primitives/interface/DefineInterfaceHelperMacros.h"
++#include "DiligentCore/Primitives/interface/DefineInterfaceHelperMacros.h"
+ 
+ #define ITextureLoaderInclusiveMethods \
+     IObjectInclusiveMethods;           \
+@@ -123,7 +123,7 @@ DILIGENT_BEGIN_INTERFACE(ITextureLoader, IObject)
+ DILIGENT_END_INTERFACE
+ // clang-format on
+ 
+-#include "../../../DiligentCore/Primitives/interface/UndefInterfaceHelperMacros.h"
++#include "DiligentCore/Primitives/interface/UndefInterfaceHelperMacros.h"
+ 
+ #if DILIGENT_C_INTERFACE
+ 
+@@ -135,7 +135,7 @@ DILIGENT_END_INTERFACE
+ 
+ #endif
+ 
+-#include "../../../DiligentCore/Primitives/interface/DefineGlobalFuncHelperMacros.h"
++#include "DiligentCore/Primitives/interface/DefineGlobalFuncHelperMacros.h"
+ 
+ /// Creates a texture loader from image.
+ 
+@@ -177,6 +177,6 @@ void DILIGENT_GLOBAL_FUNCTION(CreateTextureLoaderFromMemory)(const void*
+                                                              const TextureLoadInfo REF TexLoadInfo,
+                                                              ITextureLoader**          ppLoader);
+ 
+-#include "../../../DiligentCore/Primitives/interface/UndefGlobalFuncHelperMacros.h"
++#include "DiligentCore/Primitives/interface/UndefGlobalFuncHelperMacros.h"
+ 
+ DILIGENT_END_NAMESPACE // namespace Diligent
+diff --git a/TextureLoader/interface/TextureUtilities.h b/TextureLoader/interface/TextureUtilities.h
+index 93d563a..2b53b02 100644
+--- a/TextureLoader/interface/TextureUtilities.h
++++ b/TextureLoader/interface/TextureUtilities.h
+@@ -30,15 +30,15 @@
+ /// \file
+ /// Defines texture utilities
+ 
+-#include "../../../DiligentCore/Graphics/GraphicsEngine/interface/GraphicsTypes.h"
+-#include "../../../DiligentCore/Graphics/GraphicsEngine/interface/Texture.h"
+-#include "../../../DiligentCore/Graphics/GraphicsEngine/interface/RenderDevice.h"
++#include "DiligentCore/Graphics/GraphicsEngine/interface/GraphicsTypes.h"
++#include "DiligentCore/Graphics/GraphicsEngine/interface/Texture.h"
++#include "DiligentCore/Graphics/GraphicsEngine/interface/RenderDevice.h"
+ #include "TextureLoader.h"
+ 
+ DILIGENT_BEGIN_NAMESPACE(Diligent)
+ 
+ 
+-#include "../../../DiligentCore/Primitives/interface/DefineGlobalFuncHelperMacros.h"
++#include "DiligentCore/Primitives/interface/DefineGlobalFuncHelperMacros.h"
+ 
+ /// Creates a texture from file.
+ 
+@@ -51,6 +51,6 @@ void DILIGENT_GLOBAL_FUNCTION(CreateTextureFromFile)(const Char*               F
+                                                      IRenderDevice*            pDevice,
+                                                      ITexture**                ppTexture);
+ 
+-#include "../../../DiligentCore/Primitives/interface/UndefGlobalFuncHelperMacros.h"
++#include "DiligentCore/Primitives/interface/UndefGlobalFuncHelperMacros.h"
+ 
+ DILIGENT_END_NAMESPACE // namespace Diligent

@@ -1,0 +1,28 @@
+sources:
+  "v15":
+    url: "https://github.com/rollbear/strong_type/archive/refs/tags/v15.tar.gz"
+    sha256: "d445398d4c4d6795060ac2b60be146b3cd7e6039985244b2d56f9bc333f20bae"
+  "v14":
+    url: "https://github.com/rollbear/strong_type/archive/refs/tags/v14.tar.gz"
+    sha256: "6cc5a6f8de5b52e6c9e4c8b246b6052b5943d6de9b314660009e092af522d2fc"
+  "v13":
+    url: "https://github.com/rollbear/strong_type/archive/refs/tags/v13.tar.gz"
+    sha256: "96a799dff6ed8d83040703c6f79162fc5ddf13d1aea4e56ce456736a30e07c5a"
+  "v12":
+    url: "https://github.com/rollbear/strong_type/archive/refs/tags/v12.tar.gz"
+    sha256: "8af0400c7ae76c7ec8646e929bacb37fc7fcae33e54eeaa61fa9f9df508a9248"
+  "v11":
+    url: "https://github.com/rollbear/strong_type/archive/refs/tags/v11.tar.gz"
+    sha256: "b9879c8835501c05147603ac86097b263437f72a35299b5f96c90be789932418"
+  "v10":
+    url: "https://github.com/rollbear/strong_type/archive/refs/tags/v10.tar.gz"
+    sha256: "154e4ceda6cf8fe734deb7eafdf58df5052822d04425dc7c22711ef54cdaeefa"
+  "v9":
+    url: "https://github.com/rollbear/strong_type/archive/refs/tags/v9.tar.gz"
+    sha256: "9d71ee02256b99c7f0189295514dd683cc1be8886444d5c04623fd491cf5aa40"
+  "v8":
+    url: "https://github.com/rollbear/strong_type/archive/refs/tags/v8.tar.gz"
+    sha256: "31ee68e097fec2ce65dbf2ed683911c5ee6a7a37808b28d84479ef7e17990fad"
+  "v7":
+    url: "https://github.com/rollbear/strong_type/archive/refs/tags/v7.tar.gz"
+    sha256: "854365b28dfaaee5c2047dd4d2e746c809b76035191b22a4ce24f4cac49d0891"

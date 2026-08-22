@@ -1,0 +1,4 @@
+sources:
+  "1.18.0":
+    url: "https://gitlab.arm.com/kleidi/kleidiai/-/archive/v1.18.0/kleidiai-v1.18.0.tar.gz"
+    sha256: "54aef3a659827f1be3fd29ae82c9e96500061ccb8125370820299ec323701462"

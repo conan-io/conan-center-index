@@ -1,0 +1,12 @@
+diff --git a/xapian-core/common/errno_to_string.cc b/xapian-core/common/errno_to_string.cc
+index 00c214b..0064304 100644
+--- common/errno_to_string.cc
++++ common/errno_to_string.cc
+@@ -28,6 +28,7 @@
+ 
+ // <cstring> doesn't give us strerror_r() with Sun C++ 5.9.
+ #include <string.h>
++#include <cerrno>
+ #if defined HAVE__SYS_ERRLIST_AND__SYS_NERR || \
+     defined HAVE_SYS_ERRLIST_AND_SYS_NERR
+ # include <stdio.h>

@@ -1,0 +1,4 @@
+sources:
+  "0.8.0":
+    url: "https://github.com/arturbac/simple_enum/archive/refs/tags/v0.8.0.tar.gz"
+    sha256: "b32e723ddb29b6cb2ab93f2376157ee6fd7a4f3c170edddb6a3fb7186068e6ee"

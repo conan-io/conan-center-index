@@ -1,0 +1,19 @@
+sources:
+  "8.0.0":
+    url: "https://github.com/stephenberry/glaze/archive/refs/tags/v8.0.0.tar.gz"
+    sha256: "569152f5ec43c510b2ec339476e2d0b78066068855e1a91594dbdfafcd7d248d"
+  "7.8.4":
+    url: "https://github.com/stephenberry/glaze/archive/refs/tags/v7.8.4.tar.gz"
+    sha256: "65331a8f8ffa56a3c5990eb31119db8afc1cec0b48de57b4ebbc9c1286ea74a3"
+  "7.7.1":
+    url: "https://github.com/stephenberry/glaze/archive/refs/tags/v7.7.1.tar.gz"
+    sha256: "c51217ca374f2a7d556c501a849d3a43dfffff47ba7711b6f0c22020e71ff63d"
+  "7.4.0":
+    url: "https://github.com/stephenberry/glaze/archive/refs/tags/v7.4.0.tar.gz"
+    sha256: "e7592590187dd56f16558a08b36e90bf349e885330f3a3961048df302cc9dfa1"
+  "7.2.0":
+    url: "https://github.com/stephenberry/glaze/archive/refs/tags/v7.2.0.tar.gz"
+    sha256: "17DBA19AE63AE48F94994F00D49D5CB3C8F1306DB1046C534C4828662490B7D4"
+  "6.4.0":
+    url: "https://github.com/stephenberry/glaze/archive/refs/tags/v6.4.0.tar.gz"
+    sha256: "20BDFCC6A97F632BA9F962565710A5DD37E9833F5629B898B3FC1AD301EDCE60"

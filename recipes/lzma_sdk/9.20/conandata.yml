@@ -1,0 +1,4 @@
+sources:
+  "9.20":
+    url: https://www.7-zip.org/a/lzma920.tar.bz2
+    sha256: 8ac221acdca8b6f6dd110120763af42b3707363752fc04e63c7bbff76774a445

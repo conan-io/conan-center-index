@@ -1,0 +1,38 @@
+--- configure.ac
++++ configure.ac
+@@ -20,7 +20,7 @@ AC_SEARCH_LIBS([socket], [socket],
+ AC_SUBST([SOCKET_LIBS])
+ 
+ # Checks for header files.
+-AC_CHECK_HEADERS([fcntl.h inttypes.h limits.h netinet/in.h stdlib.h string.h sys/file.h sys/ioctl.h sys/socket.h sys/time.h unistd.h])
++AC_CHECK_HEADERS([fcntl.h inttypes.h limits.h netinet/in.h stdlib.h string.h sys/file.h sys/ioctl.h sys/socket.h sys/syscall.h sys/time.h unistd.h])
+ AC_CHECK_DECLS([_SC_HOST_NAME_MAX])
+ 
+ # Checks for typedefs, structures, and compiler characteristics.
+--- randutils.c
++++ randutils.c
+@@ -6,14 +6,24 @@
+  * This file may be redistributed under the terms of the
+  * GNU Lesser General Public License.
+  */
++
++#if defined(HAVE_CONFIG_H)
++#include "config.h"
++#endif
++
+ #include <stdio.h>
+ #include <unistd.h>
+ #include <fcntl.h>
+ #include <stdlib.h>
+ #include <string.h>
++
++#if defined(HAVE_SYS_TIME_H)
+ #include <sys/time.h>
++#endif
+ 
++#if defined(HAVE_SYS_SYSCALL_H)
+ #include <sys/syscall.h>
++#endif
+ 
+ #include "randutils.h"
+ 

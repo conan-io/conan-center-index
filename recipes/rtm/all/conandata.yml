@@ -1,0 +1,25 @@
+sources:
+  "2.3.0":
+    url: "https://github.com/nfrechette/rtm/archive/v2.3.0.tar.gz"
+    sha256: "2b5f2c3761bb52ae89802a574e9dc9949aec3b183f7e100b9b66a65adcc6f5ab"
+  "2.2.1":
+    url: "https://github.com/nfrechette/rtm/archive/v2.2.1.tar.gz"
+    sha256: "678989368bc9859138db00719ad9e2f82b51acb0d8da6905426e4134223cee2a"
+  "2.2.0":
+    url: "https://github.com/nfrechette/rtm/archive/v2.2.0.tar.gz"
+    sha256: "e627c46de1895b78eee63612ce4e5ade3af28e040edab6ec6f6521366b4e8b9b"
+  "2.1.5":
+    url: "https://github.com/nfrechette/rtm/archive/v2.1.5.tar.gz"
+    sha256: "afb05cb00b59498756ca197028de291a1960e58d5f6fcad161d8240682481eae"
+  "2.1.4":
+    url: "https://github.com/nfrechette/rtm/archive/v2.1.4.tar.gz"
+    sha256: "7b2746d6e5ea007358ad8963ca1a83636caae893e67106ee1446efefa8e848d2"
+  "2.1.3":
+    url: "https://github.com/nfrechette/rtm/archive/v2.1.3.tar.gz"
+    sha256: "489f39566f64138e9fa54c7a74a8a2a65690eb58bc719177d27e5b2e04017e06"
+  "2.1.2":
+    url: "https://github.com/nfrechette/rtm/archive/v2.1.2.tar.gz"
+    sha256: "4fa45bae0e9c74beae49a5a855ab16308f11e84efbad07b523a661febeafcbb0"
+  "2.0.0":
+    url: "https://github.com/nfrechette/rtm/archive/v2.0.0.tar.gz"
+    sha256: "29155da085dde32d14528927d05aa231d966a0e37ff0b402e7333f7159c08bd0"

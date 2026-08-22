@@ -1,0 +1,4 @@
+sources:
+  "3.13.0":
+    url: "https://github.com/nats-io/nats.c/archive/refs/tags/v3.13.0.tar.gz"
+    sha256: "f6ec9ee2ab367594b56dd3265e3561074ade7c3d7410a6f45a77704c5e537024"

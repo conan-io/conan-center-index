@@ -1,0 +1,8 @@
+versions:
+  "3.25":
+    folder: all
+  "3.24":
+    folder: all
+  "3.22a":
+    folder: all
+

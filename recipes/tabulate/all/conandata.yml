@@ -1,0 +1,13 @@
+sources:
+  "1.5":
+    url: "https://github.com/p-ranav/tabulate/archive/v1.5.tar.gz"
+    sha256: "16b289f46306283544bb593f4601e80d6ea51248fde52e910cc569ef08eba3fb"
+  "1.4":
+    url: "https://github.com/p-ranav/tabulate/archive/v1.4.tar.gz"
+    sha256: "c20cdc3175526a069e932136a7cbdf6f27b137bdb4fc5f574eb5a497228c8e11"
+  "1.3":
+    url: "https://github.com/p-ranav/tabulate/archive/v1.3.tar.gz"
+    sha256: "d1739e82f9f5acab084a5166a78714fde5198ce6b9448ec8ae8e403085048f7e"
+  "1.0":
+    url: "https://github.com/p-ranav/tabulate/archive/v1.0.tar.gz"
+    sha256: "34eda3605e2ce0c7ca339fa2af6a0c77a5e49321b2f549ff5313f955273c8ac8"

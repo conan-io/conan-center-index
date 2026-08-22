@@ -1,0 +1,4 @@
+sources:
+  "0.23.92":
+    url: "https://github.com/mchehab/zbar/archive/refs/tags/0.23.92.tar.gz"
+    sha256: "dffc16695cb6e42fa318a4946fd42866c0f5ab735f7eaf450b108d1c3a19b4ba"

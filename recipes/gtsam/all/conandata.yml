@@ -1,0 +1,12 @@
+sources:
+  "4.2.1":
+    url: "https://github.com/borglab/gtsam/archive/refs/tags/4.2.1.tar.gz"
+    sha256: "96ea77d620fc8c2e9ed79af1b4abfdc3e73d96ee7a581a2bc326963c43dd92c2"
+patches:
+  "4.2.1":
+    - patch_file: "patches/4.2.0-0001-macos-rpath.patch"
+      patch_description: "Relocatable shared libs on Apple OS"
+      patch_type: "conan"
+    - patch_file: "patches/4.2.0-0002-eigen3-version.patch"
+      patch_description: "Get Eigen3 version info from Conan"
+      patch_type: "conan"

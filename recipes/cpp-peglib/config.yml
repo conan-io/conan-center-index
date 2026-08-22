@@ -1,0 +1,31 @@
+versions:
+  "1.9.1":
+    folder: "1.x.x"
+  "1.9.0":
+    folder: "1.x.x"
+  "1.8.8":
+    folder: "1.x.x"
+  "1.8.7":
+    folder: "1.x.x"
+  "1.8.6":
+    folder: "1.x.x"
+  "1.8.5":
+    folder: "1.x.x"
+  "1.8.4":
+    folder: "1.x.x"
+  "1.8.3":
+    folder: "1.x.x"
+  "1.8.2":
+    folder: "1.x.x"
+  "1.8.1":
+    folder: "1.x.x"
+  "1.8.0":
+    folder: "1.x.x"
+  "1.6.1":
+    folder: "1.x.x"
+  "1.6.0":
+    folder: "1.x.x"
+  "1.5.0":
+    folder: "1.x.x"
+  "0.1.13":
+    folder: "0.x.x"

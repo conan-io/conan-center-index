@@ -1,0 +1,74 @@
+--- a/project/msvc/faac.vcxproj
++++ b/project/msvc/faac.vcxproj
+@@ -66,7 +66,7 @@
+       <Culture>0x0413</Culture>
+     </ResourceCompile>
+     <Link>
+-      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+       <GenerateDebugInformation>true</GenerateDebugInformation>
+       <SubSystem>Console</SubSystem>
+@@ -89,7 +89,7 @@
+       <Culture>0x0413</Culture>
+     </ResourceCompile>
+     <Link>
+-      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+       <SubSystem>Console</SubSystem>
+     </Link>
+--- a/project/msvc/libfaac_dll.vcxproj
++++ b/project/msvc/libfaac_dll.vcxproj
+@@ -61,10 +61,9 @@
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+     </ClCompile>
+     <Link>
+-      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+       <ModuleDefinitionFile>.\libfaac.def</ModuleDefinitionFile>
+-      <TargetMachine>MachineX86</TargetMachine>
+     </Link>
+     <PreBuildEvent>
+       <Message>Retrieving package version...</Message>
+@@ -84,11 +83,10 @@
+       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+     </ClCompile>
+     <Link>
+-      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+       <ModuleDefinitionFile>.\libfaac.def</ModuleDefinitionFile>
+       <GenerateDebugInformation>true</GenerateDebugInformation>
+-      <TargetMachine>MachineX86</TargetMachine>
+     </Link>
+     <PreBuildEvent>
+       <Message>Retrieving package version...</Message>
+--- a/project/msvc/libfaac_dll_drm.vcxproj
++++ b/project/msvc/libfaac_dll_drm.vcxproj
+@@ -61,10 +61,9 @@
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+     </ClCompile>
+     <Link>
+-      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+       <ModuleDefinitionFile>.\libfaac.def</ModuleDefinitionFile>
+-      <TargetMachine>MachineX86</TargetMachine>
+       <ImportLibrary>$(OutDir)libfaacdrm.lib</ImportLibrary>
+     </Link>
+     <PreBuildEvent>
+@@ -85,11 +84,10 @@
+       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+     </ClCompile>
+     <Link>
+-      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+       <ModuleDefinitionFile>.\libfaac.def</ModuleDefinitionFile>
+       <GenerateDebugInformation>true</GenerateDebugInformation>
+-      <TargetMachine>MachineX86</TargetMachine>
+       <ImportLibrary>$(OutDir)libfaacdrm.lib</ImportLibrary>
+     </Link>
+     <PreBuildEvent>

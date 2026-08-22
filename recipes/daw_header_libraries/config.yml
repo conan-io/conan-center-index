@@ -1,0 +1,23 @@
+versions:
+  "2.118.0":
+    folder: all
+  "2.114.0":
+    folder: all
+  "2.110.0":
+    folder: all
+  "2.107.0":
+    folder: all
+  "2.106.2":
+    folder: all
+  "2.106.1":
+    folder: all
+  "2.106.0":
+    folder: all
+  "2.101.0":
+    folder: all
+  "2.98.5":
+    folder: all
+  "2.97.0":
+    folder: all
+  "2.96.1":
+    folder: all

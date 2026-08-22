@@ -1,0 +1,32 @@
+diff --git a/tools/lto/lto.exports b/tools/lto/lto.exports
+index 1f0a6b23d3fd..2871abd34e40 100644
+--- a/tools/lto/lto.exports
++++ b/tools/lto/lto.exports
+@@ -43,12 +43,6 @@ lto_codegen_optimize
+ lto_codegen_compile_optimized
+ lto_codegen_set_should_internalize
+ lto_codegen_set_should_embed_uselists
+-LLVMCreateDisasm
+-LLVMCreateDisasmCPU
+-LLVMDisasmDispose
+-LLVMDisasmInstruction
+-LLVMSetDisasmOptions
+-LLVMCreateDisasmCPUFeatures
+ thinlto_create_codegen
+ thinlto_codegen_dispose
+ thinlto_codegen_add_module
+diff --git a/tools/remarks-shlib/CMakeLists.txt b/tools/remarks-shlib/CMakeLists.txt
+index 865436247270..aa11669d9a75 100644
+--- a/tools/remarks-shlib/CMakeLists.txt
++++ b/tools/remarks-shlib/CMakeLists.txt
+@@ -9,7 +9,9 @@ if(LLVM_ENABLE_PIC)
+     libremarks.cpp
+     )
+ 
+-  set(LLVM_EXPORTED_SYMBOL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Remarks.exports)
++  if (NOT (BUILD_SHARED_LIBS OR LLVM_LINK_LLVM_DYLIB))
++    set(LLVM_EXPORTED_SYMBOL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Remarks.exports)
++  endif()
+ 
+   add_llvm_library(Remarks SHARED INSTALL_WITH_TOOLCHAIN ${SOURCES})
+ 

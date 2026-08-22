@@ -1,0 +1,8 @@
+sources:
+  "4.3.5":
+    url: "https://github.com/zeromq/libzmq/releases/download/v4.3.5/zeromq-4.3.5.tar.gz"
+    sha256: "6653ef5910f17954861fe72332e68b03ca6e4d9c7160eb3a8de5a5a913bfab43"
+patches:
+  "4.3.5":
+    - patch_file: "patches/0003-rpath-macos-4.3.5.patch"
+    - patch_file: "patches/0004-cmake-minimum-required-first.patch"

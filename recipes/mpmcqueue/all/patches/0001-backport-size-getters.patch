@@ -1,0 +1,26 @@
+diff --git include/rigtorp/MPMCQueue.h include/rigtorp/MPMCQueue.h
+index 01ca713..b804f89 100644
+--- include/rigtorp/MPMCQueue.h
++++ include/rigtorp/MPMCQueue.h
+@@ -163,6 +163,21 @@ public:
+   Queue(const Queue &) = delete;
+   Queue &operator=(const Queue &) = delete;
+ 
++  /// Returns the number of elements in the queue.
++  /// The size can be negative when the queue is empty and there is at least one
++  /// reader waiting. Since this is a concurrent queue the size is only a best
++  /// effort guess until all reader and writer threads have been joined.
++  ptrdiff_t size() const noexcept {
++    // TODO: How can we deal with wrapped queue on 32bit?
++    return static_cast<ptrdiff_t>(head_.load(std::memory_order_relaxed) -
++                                  tail_.load(std::memory_order_relaxed));
++  }
++
++  /// Returns true if the queue is empty.
++  /// Since this is a concurrent queue this is only a best effort guess
++  /// until all reader and writer threads have been joined.
++  bool empty() const noexcept { return size() <= 0; }
++
+   template <typename... Args> void emplace(Args &&... args) noexcept {
+     static_assert(std::is_nothrow_constructible<T, Args &&...>::value,
+                   "T must be nothrow constructible with Args&&...");

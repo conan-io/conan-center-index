@@ -1,0 +1,22 @@
+sources:
+  "cci.20231024":
+    url: "https://github.com/google/brunsli/archive/0b7bd7b47d1f8fd8682d4818180e0ab42f26d4c3.tar.gz"
+    sha256: "b4ca17e1bbb3a6cae6b840d78422490b75733b4165e5ba066302154d971ec32e"
+  "0.1":
+    url: "https://github.com/google/brunsli/archive/refs/tags/v0.1.tar.gz"
+    sha256: "62762dc740f9fcc9706449c078f12c2a366416486d2882be50a9f201f99ac0bc"
+patches:
+  "cci.20231024":
+    - patch_file: "patches/cci.20230730/001-cmake-use-conan-deps.patch"
+      patch_description: "Use Conan dependencies in CMake"
+      patch_type: "conan"
+    - patch_file: "patches/cci.20230730/002-fix-shared-windows-build.patch"
+      patch_description: "Fix shared Windows build, do not build executables"
+      patch_type: "conan"
+  "0.1":
+    - patch_file: "patches/0.1/001-cmake-use-conan-deps.patch"
+      patch_description: "Use Conan dependencies in CMake"
+      patch_type: "conan"
+    - patch_file: "patches/0.1/002-fix-shared-windows-build.patch"
+      patch_description: "Fix shared Windows build, do not build executables"
+      patch_type: "conan"

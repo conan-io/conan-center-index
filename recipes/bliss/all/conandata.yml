@@ -1,0 +1,8 @@
+sources:
+  "0.77":
+    url: "https://users.aalto.fi/~tjunttil/bliss/downloads/bliss-0.77.zip"
+    sha256: "acc8b98034f30fad24c897f365abd866c13d9f1bb207e398d0caf136875972a4"
+patches:
+  "0.77":
+    - patch_file: "patches/0001-fix-cmake.patch"
+    - patch_file: "patches/0002-no-assert-non-existent-member-variable.patch"

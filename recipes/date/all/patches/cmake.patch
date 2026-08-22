@@ -1,0 +1,19 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f025a3a..7bc93df 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -57,8 +57,12 @@ else( )
+ 	target_compile_definitions( tz PRIVATE -DHAS_REMOTE_API=1 )
+ 	target_compile_definitions( tz PUBLIC -DUSE_OS_TZDB=0 )
+ 	find_package( CURL REQUIRED )
+-	include_directories( SYSTEM ${CURL_INCLUDE_DIRS} )
+-	set( OPTIONAL_LIBRARIES ${CURL_LIBRARIES} )
++    set( OPTIONAL_LIBRARIES CURL::libcurl )
++endif()
++
++if( BUILD_SHARED_LIBS )
++    target_compile_definitions( tz PRIVATE -DDATE_BUILD_DLL=1 )
++    target_compile_definitions( tz PUBLIC -DDATE_USE_DLL=1 )
+ endif( )
+ 
+ if( USE_TZ_DB_IN_DOT )

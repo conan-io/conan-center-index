@@ -1,0 +1,7 @@
+import os
+SConsignFile(os.path.join(GetLaunchDir(), "db"))
+
+SConscript('SConscript',
+           build_dir='build',
+           src='.',
+           duplicate=False)

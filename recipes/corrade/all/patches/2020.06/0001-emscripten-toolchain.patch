@@ -1,0 +1,49 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e0cc288..81e919e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -223,9 +223,6 @@ if(TESTSUITE_TARGET_XCTEST)
+ endif()
+ 
+ include(UseCorrade)
+-if(CORRADE_TARGET_EMSCRIPTEN)
+-    include(UseEmscripten)
+-endif()
+ 
+ # Installation paths
+ include(CorradeLibSuffix)
+diff --git a/modules/UseCorrade.cmake b/modules/UseCorrade.cmake
+index 8276c71..d0800a0 100644
+--- a/modules/UseCorrade.cmake
++++ b/modules/UseCorrade.cmake
+@@ -319,11 +319,6 @@ if(CORRADE_TESTSUITE_TARGET_XCTEST)
+     endif()
+ endif()
+ 
+-if(CORRADE_TARGET_EMSCRIPTEN)
+-    # For bundling files to the tests
+-    include(UseEmscripten)
+-endif()
+-
+ if(CORRADE_TARGET_IOS AND NOT CORRADE_TESTSUITE_TARGET_XCTEST)
+     set(CORRADE_TESTSUITE_BUNDLE_IDENTIFIER_PREFIX ${PROJECT_NAME} CACHE STRING
+         "Bundle identifier prefix for tests ran on iOS device")
+@@ -434,7 +429,17 @@ function(corrade_add_test test_name)
+                 string(REGEX REPLACE ${_corrade_file_pair_match} "${_corrade_file_pair_replace}" file_pair ${file})
+                 list(GET file_pair 0 input_filename)
+                 list(GET file_pair 1 output_filename)
+-                emscripten_embed_file(${test_name} ${input_filename} "/${output_filename}")
++
++                # This is a verbatim copy of emscripten_embed_file() from
++                # UseEmscripten inside the toolchains submodule. It's not
++                # included in order to avoid a dependency on the toolchains and
++                # thus allow 3rd party toolchains to be used instead.
++                get_filename_component(absolute_file ${input_filename} ABSOLUTE)
++                get_target_property(${test_name}_LINK_FLAGS ${test_name} LINK_FLAGS)
++                if(NOT ${test_name}_LINK_FLAGS)
++                    set(${test_name}_LINK_FLAGS )
++                endif()
++                set_target_properties(${test_name} PROPERTIES LINK_FLAGS "${${test_name}_LINK_FLAGS} --embed-file ${absolute_file}@/${output_filename}")
+             endforeach()
+ 
+             # Generate the runner file, first replacing ${test_name} with

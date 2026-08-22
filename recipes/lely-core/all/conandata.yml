@@ -1,0 +1,10 @@
+sources:
+  "2.3.4":
+    url: "https://gitlab.com/lely_industries/lely-core/-/archive/v2.3.4/lely-core-v2.3.4.tar.gz"
+    sha256: "6f31b4fd7ea6aafb1a62b9d956a12a900386564859099e97af1c6bd1d10bdaf2"
+  "2.3.3":
+    url: "https://gitlab.com/lely_industries/lely-core/-/archive/v2.3.3/lely-core-v2.3.3.tar.gz"
+    sha256: "6d0810f9e835543f0aeb5f86dcdc7a24578041f5d0a714bf5a14db2cb24ce373"
+  "2.3.2":
+    url: "https://gitlab.com/lely_industries/lely-core/-/archive/v2.3.2/lely-core-v2.3.2.tar.gz"
+    sha256: "c37eb6f004ad1a1ec1f891e31a09b72f588da361fa92888e8edfcf215a1d707a"

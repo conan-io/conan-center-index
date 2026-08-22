@@ -1,0 +1,61 @@
+osgEarth explects to find lerc as a submodule which is not copied in the package
+Adapt to use Lerc 4.x as required by GDAL too in the same graph
+
+diff --git a/src/osgEarthDrivers/lerc/CMakeLists.txt b/src/osgEarthDrivers/lerc/CMakeLists.txt
+index e8d0f8c..b285bbe 100644
+--- a/src/osgEarthDrivers/lerc/CMakeLists.txt
++++ b/src/osgEarthDrivers/lerc/CMakeLists.txt
+@@ -1,15 +1,10 @@
+ include_directories(BEFORE ../../third_party/lerc/include )
+
++find_package(lerc REQUIRED CONFIG)
++
+ add_osgearth_plugin(
+     TARGET osgdb_lerc
+     SOURCES
+-        ReaderWriterLERC.cpp
+-        ../../third_party/lerc/src/LercLib/BitMask.cpp
+-        ../../third_party/lerc/src/LercLib/BitStuffer2.cpp
+-        ../../third_party/lerc/src/LercLib/Huffman.cpp
+-        ../../third_party/lerc/src/LercLib/Lerc.cpp
+-        ../../third_party/lerc/src/LercLib/Lerc_c_api_impl.cpp
+-        ../../third_party/lerc/src/LercLib/Lerc2.cpp
+-        ../../third_party/lerc/src/LercLib/RLE.cpp
+-        ../../third_party/lerc/src/LercLib/Lerc1Decode/BitStuffer.cpp
+-        ../../third_party/lerc/src/LercLib/Lerc1Decode/CntZImage.cpp )
+\ No newline at end of file
++        ReaderWriterLERC.cpp)
++
++target_link_libraries(osgdb_lerc PRIVATE lerc::lerc)
+\ No newline at end of file
+diff --git a/src/osgEarthDrivers/lerc/ReaderWriterLERC.cpp b/src/osgEarthDrivers/lerc/ReaderWriterLERC.cpp
+index cf23a12..c977f94 100644
+--- a/src/osgEarthDrivers/lerc/ReaderWriterLERC.cpp
++++ b/src/osgEarthDrivers/lerc/ReaderWriterLERC.cpp
+@@ -159,7 +159,7 @@ public:
+
+         // Decode the image
+         unsigned int bandOffset = 0;
+-        hr = lerc_decode((const unsigned char*)(data.get()), length, 0, numDims, width, height, numBands, dataType, (void*)output);
++        hr = lerc_decode((const unsigned char*)(data.get()), length, 0, 0, numDims, width, height, numBands, dataType, (void*)output);
+         if (hr)
+         {
+             delete[]output;
+@@ -333,7 +333,7 @@ public:
+
+         hr = lerc_computeCompressedSize((void*)imageData,    // raw image data, row by row, band by band
+             dataType, numDims, width, height, numBands,
+-            0,
++            0, 0,
+             maxZError,           // max coding error per pixel, or precision
+             &numBytesNeeded);    // size of outgoing Lerc blob
+         if (hr)
+@@ -347,7 +347,7 @@ public:
+
+         hr = lerc_encode((void*)imageData,    // raw image data, row by row, band by band
+             dataType, numDims, width, height, numBands,
+-            0,         // can give nullptr if all pixels are valid
++            0, 0,         // can give nullptr if all pixels are valid
+             maxZError,           // max coding error per pixel, or precision
+             pLercBlob,           // buffer to write to, function will fail if buffer too small
+             numBytesBlob,        // buffer size

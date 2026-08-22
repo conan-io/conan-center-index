@@ -1,0 +1,56 @@
+diff --git a/Imgui/CMakeLists.txt b/Imgui/CMakeLists.txt
+index 7a8e62f..041f324 100644
+--- a/Imgui/CMakeLists.txt
++++ b/Imgui/CMakeLists.txt
+@@ -11,24 +11,12 @@ endif()
+ set(IMGUIZMO_QUAT_PATH ../ThirdParty/imGuIZMO.quat)
+ 
+ set(DEAR_IMGUI_INCLUDE
+-    ${DEAR_IMGUI_PATH}/imconfig.h
+-    ${DEAR_IMGUI_PATH}/imgui_internal.h
+-    ${DEAR_IMGUI_PATH}/imstb_rectpack.h
+-    ${DEAR_IMGUI_PATH}/imstb_textedit.h
+-    ${DEAR_IMGUI_PATH}/imstb_truetype.h
+-    ${DEAR_IMGUI_PATH}/misc/cpp/imgui_stdlib.h
+ )
+ 
+ set(DEAR_IMGUI_INTERFACE
+-    ${DEAR_IMGUI_PATH}/imgui.h
+ )
+ 
+ set(DEAR_IMGUI_SOURCE
+-    ${DEAR_IMGUI_PATH}/imgui.cpp
+-    ${DEAR_IMGUI_PATH}/imgui_draw.cpp
+-    ${DEAR_IMGUI_PATH}/imgui_tables.cpp
+-    ${DEAR_IMGUI_PATH}/imgui_widgets.cpp
+-    ${DEAR_IMGUI_PATH}/misc/cpp/imgui_stdlib.cpp
+ )
+ 
+ set(SOURCE
+@@ -48,8 +36,6 @@ set(INTERFACE
+ )
+ 
+ if(PLATFORM_WIN32)
+-    list(APPEND DEAR_IMGUI_SOURCE ${DEAR_IMGUI_PATH}/backends/imgui_impl_win32.cpp)
+-    list(APPEND DEAR_IMGUI_INCLUDE ${DEAR_IMGUI_PATH}/backends/imgui_impl_win32.h)
+ 
+     list(APPEND SOURCE src/ImGuiImplWin32.cpp)
+     list(APPEND INTERFACE interface/ImGuiImplWin32.hpp)
+@@ -62,9 +48,6 @@ elseif(PLATFORM_LINUX)
+ elseif(PLATFORM_ANDROID)
+     list(APPEND SOURCE src/ImGuiImplAndroid.cpp)
+     list(APPEND INTERFACE interface/ImGuiImplAndroid.hpp)
+-elseif(PLATFORM_MACOS)
+-    list(APPEND DEAR_IMGUI_SOURCE ${DEAR_IMGUI_PATH}/backends/imgui_impl_osx.mm)
+-    list(APPEND DEAR_IMGUI_INCLUDE ${DEAR_IMGUI_PATH}/backends/imgui_impl_osx.h)
+ 
+     list(APPEND SOURCE src/ImGuiImplMacOS.mm)
+     list(APPEND INTERFACE interface/ImGuiImplMacOS.hpp)
+@@ -129,6 +112,7 @@ PRIVATE
+     Diligent-GraphicsEngineInterface
+     Diligent-GraphicsAccessories
+     Diligent-GraphicsTools
++    imgui::imgui
+ )
+ 
+ set_target_properties(Diligent-Imgui PROPERTIES

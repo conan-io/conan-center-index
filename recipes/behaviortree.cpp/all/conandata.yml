@@ -1,0 +1,4 @@
+sources:
+  "4.9.0":
+    url: "https://github.com/BehaviorTree/BehaviorTree.CPP/archive/refs/tags/4.9.0.tar.gz"
+    sha256: "74a22cf46d7cd423d7065616528cfd68bcd925b3fc2b819a99413cdd3334c02a"

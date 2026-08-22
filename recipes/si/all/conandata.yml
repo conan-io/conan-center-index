@@ -1,0 +1,19 @@
+sources:
+  2.5.3:
+    url: "https://github.com/bernedom/SI/archive/2.5.3.tar.gz"
+    sha256: "5c06f9f471474b97ed16e0f63f301d41702d27f6b9f340f0420eb0cfb928d0c6"
+  2.5.1:
+    url: "https://github.com/bernedom/SI/archive/2.5.1.tar.gz"
+    sha256: "b7b977c04c220a47a2bd3b8e2b6acfd640d286dfe1ae609f20e184cfec998798"
+  2.5.0:
+    url: "https://github.com/bernedom/SI/archive/2.5.0.tar.gz"
+    sha256: "dc00eb8cfaa32e19c83595b238726188d2b857f8999dae08fe3001d0107ba276"
+  2.4.1:
+    url: "https://github.com/bernedom/SI/archive/2.4.1.tar.gz"
+    sha256: "6bfdbebb549da1b2db93b55c1c7f8228a0cdc6144a815319918237ca8601ad3a"
+  2.3.0:
+    url: "https://github.com/bernedom/SI/archive/2.3.0.tar.gz"
+    sha256: "b714162a933ddf1be66c8f2f2d31b52626189d6e4b292770bbb899106e8f6ac1"
+  1.7.6:
+    url: "https://github.com/bernedom/SI/archive/1.7.6.tar.gz"
+    sha256: "88041156890c34f7ca92f3ae385b19189583aa5c59ac470bfe2db6df5d5c954b"

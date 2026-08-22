@@ -1,0 +1,12 @@
+diff --git a/include/jwt-cpp/jwt.h b/include/jwt-cpp/jwt.h
+--- a/include/jwt-cpp/jwt.h
++++ b/include/jwt-cpp/jwt.h
+@@ -8,1 +8,1 @@
+-#include "picojson/picojson.h"
++#include "picojson.h"
+diff --git a/include/jwt-cpp/traits/kazuho-picojson/traits.h b/include/jwt-cpp/traits/kazuho-picojson/traits.h
+--- a/include/jwt-cpp/traits/kazuho-picojson/traits.h
++++ b/include/jwt-cpp/traits/kazuho-picojson/traits.h
+@@ -7,1 +7,1 @@
+-#include "picojson/picojson.h"
++#include "picojson.h"

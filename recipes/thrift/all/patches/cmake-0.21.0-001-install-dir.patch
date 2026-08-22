@@ -1,0 +1,18 @@
+diff --git a/build/cmake/DefineInstallationPaths.cmake b/build/cmake/DefineInstallationPaths.cmake
+--- a/build/cmake/DefineInstallationPaths.cmake
++++ b/build/cmake/DefineInstallationPaths.cmake
+@@ -20,13 +20,7 @@
+
+ # Define the default install paths
+ set(BIN_INSTALL_DIR "bin" CACHE PATH "The binary install dir (default: bin)")
+-# For MSVC builds, install shared libs to bin/, while keeping the install
+-# dir for static libs as lib/.
+-if(MSVC AND BUILD_SHARED_LIBS)
+-    set(LIB_INSTALL_DIR "bin${LIB_SUFFIX}" CACHE PATH "The library install dir (default: bin${LIB_SUFFIX})")
+-else()
+-    set(LIB_INSTALL_DIR "lib${LIB_SUFFIX}" CACHE PATH "The library install dir (default: lib${LIB_SUFFIX})")
+-endif()
++set(LIB_INSTALL_DIR "lib${LIB_SUFFIX}" CACHE PATH "The library install dir (default: lib${LIB_SUFFIX})")
+ set(INCLUDE_INSTALL_DIR "include" CACHE PATH "The library install dir (default: include)")
+ set(CMAKE_INSTALL_DIR "lib/cmake" CACHE PATH "The subdirectory to install cmake config files (default: cmake)")
+ set(PKGCONFIG_INSTALL_DIR "lib/pkgconfig" CACHE PATH "The subdirectory to install pkgconfig config files (default: lib/pkgconfig)")

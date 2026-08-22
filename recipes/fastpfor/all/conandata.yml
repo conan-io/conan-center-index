@@ -1,0 +1,9 @@
+sources:
+  "0.2.0":
+    url: "https://github.com/lemire/FastPFor/archive/refs/tags/v0.2.0.tar.gz"
+    sha256: "fe8aca450a5bb35d11b9353660134efd427a8add47afe262df8991c29ab1139c"
+patches:
+  "0.2.0":
+    - patch_file: "patches/0.2.0-0001-fix-cmake.patch"
+      patch_description: "find cmake deps, disable unittest/utility"
+      patch_type: "conan"

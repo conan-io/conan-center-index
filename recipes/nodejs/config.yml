@@ -1,0 +1,17 @@
+versions:
+  "24.18.0":
+    folder: all
+  "22.20.0":
+    folder: all
+  "20.16.0":
+    folder: all
+  "18.15.0":
+    folder: all
+  "16.20.2":
+    folder: all
+  "16.3.0":
+    folder: all
+  "13.6.0":
+    folder: all
+  "12.14.1":
+    folder: all

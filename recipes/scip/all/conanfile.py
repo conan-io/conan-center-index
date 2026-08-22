@@ -1,0 +1,138 @@
+from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import (apply_conandata_patches, export_conandata_patches,
+                               replace_in_file, copy, get)
+from conan.tools.microsoft import check_min_vs, is_msvc
+import os
+
+required_conan_version = ">=2"
+
+
+class SCIPConan(ConanFile):
+    name = "scip"
+    description = "SCIP mixed integer (nonlinear) programming solver"
+    license = "Apache-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://scipopt.org/"
+    topics = ("mip", "solver", "linear", "programming")
+    settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_gmp": [True, False],
+        "with_tpi": [False, "omp", "tny"],
+        "with_sym": [False, "bliss", "dejavu" ,"snauty"],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_gmp": True
+    }
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def validate(self):
+        check_min_cppstd(self, 14)
+        check_min_vs(self, 191)
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
+        if self.options.shared and self.options.with_sym == "bliss":
+            raise ConanInvalidConfiguration("Bliss is not supported in shared mode.")
+        comp = self.settings.compiler
+        if self.options.with_sym == "bliss" and comp == 'clang' and comp.libcxx and comp.libcxx == 'libc++':
+            raise ConanInvalidConfiguration("Bliss does not support libc++.")
+        if self.dependencies["soplex"].options.with_gmp and not self.options.with_gmp:
+            raise ConanInvalidConfiguration("The options 'with_gmp' should be aligned with 'soplex:with_gmp' too.")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD", "##")
+
+    def requirements(self):
+        if self.options.with_gmp:
+            self.requires("gmp/6.3.0")
+        if self.options.with_sym == "bliss":
+            self.requires("bliss/0.77")
+        required_version = self.conan_data["version_mappings"][self.version]["soplex"]
+        self.requires(f"soplex/{required_version}")
+        self.requires("zlib/[>=1.2.11 <2]")
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        if self.options.with_sym == None:
+            self.options.with_sym = self.conan_data["version_mappings"][self.version]["default_sym"]
+        if self.options.with_tpi == None:
+            self.options.with_tpi = self.conan_data["version_mappings"][self.version]["default_tpi"]
+
+    def configure(self):
+        self.options["soplex"].with_gmp = self.options.with_gmp
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    @staticmethod
+    def _to_cmake(*arrays):
+        return ";".join(item.replace("\\", "/") for sublist in arrays for item in sublist)
+
+    def generate(self):
+        apply_conandata_patches(self)
+        tc = CMakeToolchain(self)
+        tc.variables["SHARED"] = self.options.shared
+        tc.variables["READLINE"] = False  # required for interactive stuff
+        tc.variables["GMP"] = self.options.with_gmp
+        tc.variables["TPI"] = self.options.with_tpi or "none"
+        tc.variables["LPS"] = "spx"
+        tc.variables["SYM"] = self.options.with_sym or "none"
+        tc.variables["EXACTSOLVE"] = False
+        tc.variables["MPFR"] = False
+        tc.variables["SOPLEX_INCLUDE_DIRS"] = self._to_cmake(self.dependencies["soplex"].cpp_info.includedirs)
+        if self.options.shared:
+            # CMakeLists accesses different variables for SoPlex depending on the SHARED option
+            tc.variables["SOPLEX_PIC_LIBRARIES"] = "soplex"
+        if self.dependencies["soplex"].options.with_boost:
+            # INFO: docu states BOOST_ROOT, yet that does not exist in CMakeLists
+            tc.variables["SOPLEX_INCLUDE_DIRS"] = self._to_cmake(
+                self.dependencies["soplex"].cpp_info.includedirs,
+                self.dependencies["boost"].cpp_info.includedirs
+            )
+        tc.variables["PAPILO"] = False  # LGPL
+        tc.variables["ZIMPL"] = False  # LPGL
+        tc.variables["IPOPT"] = False  # no such coin package on conan center yet
+        tc.variables["BUILD_TESTING"] = False  # do not build documentation and examples
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("sopex", "cmake_file_name", "SOPEX")
+        deps.set_property("gmp", "cmake_file_name", "GMP")
+        deps.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build(target="libscip")
+
+    def package(self):
+        copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        # cmake install is not used as this requires the command line tools to be built, which we do not do
+        copy(self, pattern="*.h", src=os.path.join(self.source_folder, "src"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, pattern="*.h", src=os.path.join(self.build_folder, "scip"), dst=os.path.join(self.package_folder, "include", "scip"))
+        if self.options.shared:
+            copy(self, pattern="*.so*", src=os.path.join(self.build_folder, "lib"), dst=os.path.join(self.package_folder, "lib"))
+            copy(self, pattern="*.dylib*", src=os.path.join(self.build_folder, "lib"), dst=os.path.join(self.package_folder, "lib"))
+        else:
+            copy(self, pattern="*.a", src=os.path.join(self.build_folder, "lib"), dst=os.path.join(self.package_folder, "lib"))
+            copy(self, pattern="*.lib", src=os.path.join(self.build_folder, "lib"), dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+            copy(self, pattern="*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        fix_apple_shared_install_name(self)
+
+    def package_info(self):
+        self.cpp_info.libs = ["libscip" if is_msvc(self) else "scip"]
+        if self.options.with_tpi == "omp":
+            self.cpp_info.system_libs.append("-fopenmp")

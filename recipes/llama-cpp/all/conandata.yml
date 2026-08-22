@@ -1,0 +1,4 @@
+sources:
+  "b6565":
+    url: "https://github.com/ggerganov/llama.cpp/archive/refs/tags/b6565.tar.gz"
+    sha256: "d00ea100bdd2dbba35663b55124acbcf26c5a7b442fced3e2c742f245d87a6e5"

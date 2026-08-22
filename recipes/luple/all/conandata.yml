@@ -1,0 +1,4 @@
+sources:
+  "1.2":
+    - url: "https://github.com/alexpolt/luple/archive/1.2.tar.gz"
+      sha256: "810e622b656fa4f1cae5b299db94f550262eb49c81d373cfe770edcea3e8a68b"

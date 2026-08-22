@@ -1,0 +1,21 @@
+sources:
+  "3.13.0":
+    url: "https://github.com/randombit/botan/archive/3.13.0.tar.gz"
+    sha256: "9fbff1cd4fe7caff9bc146304dabf551e05a8beefdf03062b63d02cbb61f2e22"
+  "3.12.0":
+    url: "https://github.com/randombit/botan/archive/3.12.0.tar.gz"
+    sha256: "cf152f47723876a7b8544925fc37183089933b95b9b30f41e79ab2f263ab7995"
+  "3.7.1+rscs1":
+    # This is functionally equivalent to the vanilla Botan 3.7.1 release with two
+    # backported patches to comply with the technical guidelines published by the
+    # German Federal Office for Information Security (BSI).
+    # See this pull request: https://github.com/randombit/botan/pull/4794
+    #
+    # BSI recommends the usage of Botan 3.7.1-RSCS1 in security products that aim
+    # for an official BSI approval for classified communication (VS-NfD) in Germany.
+    # See: https://www.bsi.bund.de/EN/Themen/Unternehmen-und-Organisationen/Informationen-und-Empfehlungen/Kryptografie/Kryptobibliothek-Botan/kryptobibliothek-botan_node.html
+    url: "https://github.com/Rohde-Schwarz/botan/archive/refs/tags/3.7.1-RSCS1.tar.gz"
+    sha256: "ee7263493bf5fbbda1061415fac824e5d797370df649d458e2b83b304d338792"
+  "2.19.5":
+    url: "https://github.com/randombit/botan/archive/2.19.5.tar.gz"
+    sha256: "8d4a3826787f9febbdc225172ad2d39d7d3960346c5721fe46cb27d480d7e1de"

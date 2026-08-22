@@ -1,0 +1,14 @@
+--- _msvc/zimg.sln
++++ _msvc/zimg.sln
+@@ -1,8 +1,8 @@
+-﻿
++
+ Microsoft Visual Studio Solution File, Format Version 12.00
+ # Visual Studio Version 16
+-VisualStudioVersion = 16.0.28922.388
+-MinimumVisualStudioVersion = 10.0.40219.1
++# VisualStudioVersion = 16.0.28922.388
++# MinimumVisualStudioVersion = 10.0.40219.1
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testapp", "testapp\testapp.vcxproj", "{B85E6CC0-ED80-487D-805A-DA3597A15CE6}"
+ 	ProjectSection(ProjectDependencies) = postProject
+ 		{C8629E57-4D6F-40FA-82FC-B39824195932} = {C8629E57-4D6F-40FA-82FC-B39824195932}

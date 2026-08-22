@@ -1,0 +1,30 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -79,13 +79,13 @@ target_include_directories(oboe
+ #     Enable -Ofast
+ target_compile_options(oboe
+         PRIVATE
+-        -std=c++17
+         -Wall
+         -Wextra-semi
+         -Wshadow
+         -Wshadow-field
+         -Ofast
+-        "$<$<CONFIG:DEBUG>:-Werror>")
++)
++
+ 
+ # Enable logging of D,V for debug builds
+ target_compile_definitions(oboe PUBLIC $<$<CONFIG:DEBUG>:OBOE_ENABLE_LOGGING=1>)
+@@ -94,8 +94,8 @@ target_link_libraries(oboe PRIVATE log OpenSLES)
+ 
+ # When installing oboe put the libraries in the lib/<ABI> folder e.g. lib/arm64-v8a
+ install(TARGETS oboe
+-        LIBRARY DESTINATION lib/${ANDROID_ABI}
+-        ARCHIVE DESTINATION lib/${ANDROID_ABI})
++        LIBRARY DESTINATION lib
++        ARCHIVE DESTINATION lib)
+ 
+ # Also install the headers
+ install(DIRECTORY include/oboe DESTINATION include)
+\ No newline at end of file

@@ -1,0 +1,10 @@
+sources:
+  "0.12":
+    url: "https://github.com/xiph/opusfile/archive/v0.12.tar.gz"
+    sha256: "a20a1dff1cdf0719d1e995112915e9966debf1470ee26bb31b2f510ccf00ef40"
+patches:
+  "0.12":
+    - patch_file: "patches/001-disable-cert-store-integration.patch"
+      patch_description: "Allow to build with OpenSSL 1.1"
+      patch_type: "portability"
+      patch_source: "https://github.com/xiph/opusfile/issues/13#issuecomment-425349836"

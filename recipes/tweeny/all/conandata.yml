@@ -1,0 +1,4 @@
+sources:
+  "3.2.0":
+    url: "https://github.com/mobius3/tweeny/archive/refs/tags/v3.2.0.tar.gz"
+    sha256: "2be7db9e0354da31f020b77474e2d547dbbaa8999a6a4bea4b388e6d31e4ef07"

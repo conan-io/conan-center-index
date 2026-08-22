@@ -1,0 +1,4 @@
+sources:
+  "1.1.5":
+    url: "https://github.com/catchorg/clara/archive/v1.1.5.tar.gz"
+    sha256: "767dc1718e53678cbea00977adcd0a8a195802a505aec3c537664cf25a173142"

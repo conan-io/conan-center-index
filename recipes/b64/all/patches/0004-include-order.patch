@@ -1,0 +1,22 @@
+diff --git a/base64/base64.cc b/base64/base64.cc
+index f952dc6..e22abd0 100644
+--- a/base64/base64.cc
++++ b/base64/base64.cc
+@@ -5,14 +5,14 @@ This is part of the libb64 project, and has been placed in the public domain.
+ For details, see http://sourceforge.net/projects/libb64
+ */
+ 
+-#include <b64/encode.h>
+-#include <b64/decode.h>
++#include <cstdlib>
+ 
+ #include <iostream>
+ #include <fstream>
+ #include <string>
+ 
+-#include <cstdlib>
++#include <b64/encode.h>
++#include <b64/decode.h>
+ 
+ // Function which prints the usage of this executable
+ void usage()

@@ -1,0 +1,4 @@
+sources:
+  "0.2":
+    url: "https://github.com/eyalroz/cuda-kat/archive/refs/tags/v0.2.tar.gz"
+    sha256: "1d5fc1172663f1db0e98d000ea0b1ab4c033a974090024559199954fd1c6b63f"

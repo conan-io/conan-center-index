@@ -1,0 +1,13 @@
+sources:
+  "1.4.0":
+    url: "https://github.com/google/highway/archive/1.4.0.tar.gz"
+    sha256: "e72241ac9524bb653ae52ced768b508045d4438726a303f10181a38f764a453c"
+  "1.3.0":
+    url: "https://github.com/google/highway/archive/1.3.0.tar.gz"
+    sha256: "07b3c1ba2c1096878a85a31a5b9b3757427af963b1141ca904db2f9f4afe0bc2"
+  "1.1.0":
+    url: "https://github.com/google/highway/archive/1.1.0.tar.gz"
+    sha256: "354a8b4539b588e70b98ec70844273e3f2741302c4c377bcc4e81b3d1866f7c9"
+  "1.0.7":
+    url: "https://github.com/google/highway/archive/1.0.7.tar.gz"
+    sha256: "5434488108186c170a5e2fca5e3c9b6ef59a1caa4d520b008a9b8be6b8abe6c5"

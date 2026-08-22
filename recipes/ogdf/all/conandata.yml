@@ -1,0 +1,4 @@
+sources:
+  "2025.10":
+    url: "https://github.com/ogdf/ogdf/archive/refs/tags/foxglove-202510.tar.gz"
+    sha256: "e0496c2ac53f5bef3639ebac0f6110323bdd938b7d29ea5da79aced4a28f99b5"

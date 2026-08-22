@@ -1,0 +1,11 @@
+--- a/src/szlib.h
++++ b/src/szlib.h
+@@ -42,6 +42,8 @@ Post Falls, ID 83854.  (208) 262-2008.
+ #include "ricehdf.h"
+ #include "szip_adpt.h"
+ 
++#include <stddef.h>
++
+ #define SZLIB_VERSION "2.1.1"
+ 
+ /*

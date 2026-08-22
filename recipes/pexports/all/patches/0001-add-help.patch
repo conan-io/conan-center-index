@@ -1,0 +1,32 @@
+--- pexports.c
++++ pexports.c
+@@ -68,7 +68,7 @@
+   IMAGE_SECTION_HEADER *section;
+   uint32_t exp_rva, exp_size;
+   int i;
+-
++  int help = 0;
+ # if defined(_WIN32) && !defined(_WIN64)
+   /*
+    * If running on 64-bit Windows and built as a 32-bit process, try
+@@ -106,7 +106,7 @@
+       if (argv[i][0] == '-')
+         {
+           switch (argv[i][1])
+-            {
++            { case 'H': help = 1; break;
+             case 'v':
+               verbose = 1;
+               break;
+@@ -153,9 +153,9 @@
+ 	"  -o\tprint ordinals\n"
+ 	"  -p\tset preprocessor program\n"
+-	"  -v\tverbose mode\n"
++	"  -v\tverbose mode\n" "  -H\tthis help\n"
+ 	"\nReport bugs as directed at %s\n",
+ 	PACKAGE_VERSION_STRING, program_name, PACKAGE_BUG_REPORT);
+-      return 1;
++      return help?0:1;
+     }
+ 
+   /* parse headers and build symbol tree */

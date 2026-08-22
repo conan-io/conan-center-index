@@ -1,0 +1,4 @@
+sources:
+  "1.12.2":
+    url: "https://gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.12.2.tar.gz"
+    sha256: "d7ee3b90330ab71c39ffea4274a356089d375f716f9893ef5ecabc73d3e1551d"

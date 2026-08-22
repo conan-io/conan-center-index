@@ -1,0 +1,7 @@
+sources:
+  "30.2.0":
+    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release/30.2.0.tar.gz"
+    sha256: "17294b30dfbdef7bc4fc3785e2b6e43e7166c61a22df22874ff28e2876de50ec"
+patches:
+  "30.2.0":
+    - patch_file: "patches/0001-fix-export-single-config-win.patch"

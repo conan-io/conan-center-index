@@ -1,0 +1,9 @@
+versions:
+  "14.2.0":
+    folder: all
+  "14.1.0":
+    folder: all
+  "13.2.0":
+    folder: all
+  "13.0.0":
+    folder: all

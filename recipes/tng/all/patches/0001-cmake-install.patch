@@ -1,0 +1,14 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bc6f8fd..602630e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -47,7 +47,8 @@ configure_file(              src/lib/tng_io-configVersion.cmake.in
+ install(TARGETS tng_io
+         EXPORT tng_io
+         LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+-        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
++        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+
+ install(EXPORT tng_io FILE tng_io.cmake
+         NAMESPACE tng_io::

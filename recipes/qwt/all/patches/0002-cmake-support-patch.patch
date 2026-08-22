@@ -1,0 +1,32 @@
+From fb0e2add3354cdf39dee7b58e6f6c88aba5d6793 Mon Sep 17 00:00:00 2001
+From: Esteban Dugueperoux
+ <43169544+EstebanDugueperoux2@users.noreply.github.com>
+Date: Thu, 8 Sep 2022 11:10:47 +0000
+Subject: [PATCH] conan: Remove qwt include prefix
+
+  - Remove qwt include prefix to be
+  compatible with current consumption
+  of 6.2.0 release through conan center.
+---
+ src/CMakeLists.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index a6a4bf2..760f84c 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -419,10 +419,10 @@ install(FILES
+ )
+ 
+ install(FILES ${HEADERS}
+-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/qwt${QWT_NAME_SUFFIX}
++  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${QWT_NAME_SUFFIX}
+ )
+ install(DIRECTORY ${CMAKE_SOURCE_DIR}/classincludes/
+-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/qwt${QWT_NAME_SUFFIX}
++  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${QWT_NAME_SUFFIX}
+   PATTERN "classincludes.pro" EXCLUDE
+ )
+ 
+-- 
+2.37.2

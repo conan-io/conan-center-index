@@ -1,0 +1,20 @@
+sources:
+  "1.139.1000":
+    source:
+      url: "https://github.com/openhome/ohPipeline/archive/refs/tags/ohMediaPlayer_1.139.1000.tar.gz"
+      sha256: "070eac6d974bbe520d0b292df1ca4a72160a2b607a60dabdaa0971c3ef96e5e4"
+    cmake:
+      url: "https://raw.githubusercontent.com/merakiacoustic/ohPipeline/ohMediaPlayer_1.139.1000_meraki3/CMakeLists.txt"
+      sha256: "4ebe83cf0419802f42d9d9c7ff36c666bd1094415eb29c77927273753019a202"
+  "1.155.1133":
+    source:
+      url: "https://github.com/openhome/ohPipeline/archive/refs/tags/ohMediaPlayer_1.155.1133.tar.gz"
+      sha256: "507bdf70fc6b9bf8e4605546a5c7ae99abbe537cce4b74b3e091764323939fae"
+    cmake:
+      url: "https://raw.githubusercontent.com/merakiacoustic/ohPipeline/ohMediaPlayer_1.155.1133_meraki2/CMakeLists.txt"
+      sha256: "0f8701552c2b3331edeedde4c3a1b8120dc419d493f6a2e05b21c9045729d6ff"
+patches:
+  "1.139.1000":
+    - patch_file: "patches/0001-missing-include.patch"
+      patch_type: "portability"
+      patch_description: "Add a missing stdlib include"

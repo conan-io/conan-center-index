@@ -1,0 +1,13 @@
+# Versions to keep:
+#  - The last patch version of the supported releases, as per https://openssl-library.org/source/
+#  - The last patch version of the current LTS release
+#  - The most recent FIPS validated version
+#  Note: please do not maintain multiple patch versions of the same minor,
+#        unless required by the above.
+sources:
+  "4.0.1":
+    url: "https://github.com/openssl/openssl/releases/download/openssl-4.0.1/openssl-4.0.1.tar.gz"
+    sha256: 2db3f3a0d6ea4b59e1f094ace2c8cd536dffb87cdc39084c5afa1e6f7f37dd09
+patches:
+  "4.0.1":
+    - patch_file: "patches/01-msvc-use-z7-to-enable-parallel-builds.patch"

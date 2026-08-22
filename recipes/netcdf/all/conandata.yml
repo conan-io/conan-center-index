@@ -1,0 +1,12 @@
+sources:
+  "4.8.1":
+    url: "https://github.com/Unidata/netcdf-c/archive/v4.8.1.tar.gz"
+    sha256: "bc018cc30d5da402622bf76462480664c6668b55eb16ba205a0dfb8647161dd0"
+patches:
+  "4.8.1":
+    - patch_file: "patches/4.8.1-0001-fix-cmake.patch"
+      patch_description: "fixes for cmake target_link_libraries and using deps"
+      patch_type: "conan"
+    - patch_file: "patches/4.8.1-0002-fix-cross-compile.patch"
+      patch_description: "fixes 'Unable to find the math library' when cross compiling"
+      patch_type: "conan"

@@ -1,0 +1,13 @@
+sources:
+  "1.13.1":
+    url: "https://github.com/xkbcommon/libxkbcommon/archive/xkbcommon-1.13.1.tar.gz"
+    sha256: "aeb951964c2f7ecc08174cb5517962d157595e9e3f38fc4a130b91dc2f9fec18"
+  "1.6.0":
+    url: "https://xkbcommon.org/download/libxkbcommon-1.6.0.tar.xz"
+    sha256: "0edc14eccdd391514458bc5f5a4b99863ed2d651e4dd761a90abf4f46ef99c2b"
+  "1.5.0":
+    url: "https://xkbcommon.org/download/libxkbcommon-1.5.0.tar.xz"
+    sha256: "560f11c4bbbca10f495f3ef7d3a6aa4ca62b4f8fb0b52e7d459d18a26e46e017"
+  "1.4.1":
+    url: "https://xkbcommon.org/download/libxkbcommon-1.4.1.tar.xz"
+    sha256: "943c07a1e2198026d8102b17270a1f406e4d3d6bbc4ae105b9e1b82d7d136b39"

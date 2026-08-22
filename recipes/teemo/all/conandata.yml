@@ -1,0 +1,13 @@
+sources:
+  "2.7":
+    url: "https://github.com/winsoft666/teemo/archive/refs/tags/v2.7.tar.gz"
+    sha256: "0cf4f90d22b1c19845db08ff1addc5872327b33f020e8d5409f3819391afaf79"
+
+patches:
+  "2.7":
+    - patch_file: "patches/0001-follow-cxx-standards.patch"
+      patch_description: "include threads header"
+      patch_type: "portability"
+    - patch_file: "patches/0002-support-macosx.patch"
+      patch_description: "support macosx"
+      patch_type: "portability"

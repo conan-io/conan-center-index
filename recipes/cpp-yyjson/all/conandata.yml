@@ -1,0 +1,7 @@
+sources:
+  "0.6.0":
+    url: "https://github.com/yosh-matsuda/cpp-yyjson/archive/refs/tags/v0.6.0.tar.gz"
+    sha256: "e146e5e2de023a83ffafba52320506bd25512e6ae9d13ee7836110f659253914"
+  "0.5.0":
+    url: "https://github.com/yosh-matsuda/cpp-yyjson/archive/refs/tags/v0.5.0.tar.gz"
+    sha256: "c1d44460c9ca3c21d5cfaea882ffaca83565c24984c5d17322e0b74a84ececfc"

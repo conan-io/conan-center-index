@@ -1,0 +1,11 @@
+--- a/win32/configure.js
++++ b/win32/configure.js
+@@ -394,7 +394,7 @@ if (error != 0) {
+ // with /MT and friends, then we need to enable static linking for xsltproc
+ if (cruntime == "/MT" || cruntime == "/MTd" ||
+ 		cruntime == "/ML" || cruntime == "/MLd") {
+-	buildStatic = 1;
++	// buildStatic = 1;
+ }
+ 
+ if (buildStatic == 1 && withModules == 1) {

@@ -1,0 +1,4 @@
+sources:
+  "1.39.4":
+    url: "https://github.com/AcademySoftwareFoundation/MaterialX/archive/refs/tags/v1.39.4.tar.gz"
+    sha256: "ce9c1a3b84a060d6280d355a72bf42b53837ee7bcc5a566cab1e927c64078fd9"

@@ -1,0 +1,29 @@
+From c8d12a5c7c5b6f1c4593f0a6c1eeceacc4d7c941 Mon Sep 17 00:00:00 2001
+From: Christopher Degawa <ccom@randomderp.com>
+Date: Sun, 29 Dec 2019 21:10:15 +0000
+Subject: [PATCH] frontend: fix out-of-root build
+
+from https://github.com/m-ab-s/media-autobuild_suite/commit/11d58abd8fde7c70378993029bad7bbaeb5f7e3e
+---
+ frontend/Makefile.am | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/frontend/Makefile.am b/frontend/Makefile.am
+index dbe88c4..745a2f1 100644
+--- a/frontend/Makefile.am
++++ b/frontend/Makefile.am
+@@ -14,10 +14,10 @@ bin_PROGRAMS += faacgui
+ faacgui_SOURCES = maingui.c input.c input.h resource.h
+ faac_LDADD += -lws2_32 icon.o
+ faacgui_LDADD = $(faac_LDADD) faacguires.o -lcomdlg32
+-faacguires.o:
+-	$(WINDRES) faacgui.rc faacguires.o
+-icon.o:
+-	$(WINDRES) icon.rc icon.o
++faacguires.o: faacgui.rc
++	$(WINDRES) $(top_srcdir)/frontend/faacgui.rc faacguires.o
++icon.o: icon.rc
++	$(WINDRES) $(top_srcdir)/frontend/icon.rc icon.o
+ endif
+ 
+ endif # !USE_DRM

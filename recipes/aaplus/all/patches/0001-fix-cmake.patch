@@ -1,0 +1,117 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,9 +1,7 @@
++cmake_minimum_required(VERSION 3.8)
+ PROJECT (AstronomicalAlgorithms)
+ 
+-cmake_minimum_required(VERSION 3.8)
+ 
+-SET(CMAKE_CXX_STANDARD 17)
+-SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+ 
+ #-----------------------------------------------------------------------------
+ # Output directories.
+@@ -133,12 +131,11 @@ SET ( SRCS_LIB
+   AAVSOP87_SAT.cpp
+   AAVSOP87_URA.cpp
+   AAVSOP87_VEN.cpp
+-  stdafx.cpp
+ )
+ 
+ #-----------------------------------------------------------------------------
+ SET ( INCS
+-#  AA+.h
++  AA+.h
+   AA2DCoordinate.h
+   AA3DCoordinate.h
+   AAAberration.h
+@@ -149,6 +146,8 @@ SET ( INCS
+   AADefines.h
+   AADiameters.h
+   AADynamicalTime.h
++  AAELP2000.h
++  AAELPMPP02.h
+   AAEarth.h
+   AAEaster.h
+   AAEclipses.h
+@@ -157,6 +156,7 @@ SET ( INCS
+   AAElliptical.h
+   AAEquationOfTime.h
+   AAEquinoxesAndSolstices.h
++  AAEquinoxesAndSolstices2.h
+   AAFK5.h
+   AAGalileanMoons.h
+   AAGlobe.h
+@@ -170,10 +170,15 @@ SET ( INCS
+   AAMoon.h
+   AAMoonIlluminatedFraction.h
+   AAMoonMaxDeclinations.h
++  AAMoonMaxDeclinations2.h
+   AAMoonNodes.h
++  AAMoonNodes2.h
+   AAMoonPerigeeApogee.h
++  AAMoonPerigeeApogee2.h
+   AAMoonPhases.h
++  AAMoonPhases2.h
+   AAMoslemCalendar.h
++  AANearParabolic.h
+   AANeptune.h
+   AANodes.h
+   AANutation.h
+@@ -192,6 +197,7 @@ SET ( INCS
+   AAPrecession.h
+   AARefraction.h
+   AARiseTransitSet.h
++  AARiseTransitSet2.h
+   AASaturn.h
+   AASaturnMoons.h
+   AASaturnRings.h
+@@ -252,7 +258,6 @@ SET ( INCS
+   AAVSOP87_SAT.h
+   AAVSOP87_URA.h
+   AAVSOP87_VEN.h
+-  stdafx.h
+ )
+ 
+ SET ( SRCS
+@@ -262,18 +267,32 @@ SET ( SRCS
+ #-----------------------------------------------------------------------------
+ # Executables.
+ #-----------------------------------------------------------------------------
+-ADD_EXECUTABLE(AATest ${SRCS} )
+ 
+ #-----------------------------------------------------------------------------
+ # Libraries.
+-ADD_LIBRARY(aaplus-static STATIC ${SRCS_LIB} ${INCS})
+-SET_TARGET_PROPERTIES(aaplus-static PROPERTIES OUTPUT_NAME "aaplus")
++add_library(aaplus ${SRCS_LIB})
++target_compile_features(aaplus PUBLIC cxx_std_17)
++target_link_libraries(aaplus PRIVATE
++    $<$<PLATFORM_ID:Windows>:ws2_32>
++    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:stdc++fs>
++)
++if(BUILD_SHARED_LIBS)
++    set_target_properties(aaplus PROPERTIES
++        CXX_VISIBILITY_PRESET hidden
++        VISIBILITY_INLINES_HIDDEN TRUE
++    )
++    if(WIN32)
++        target_compile_definitions(aaplus PRIVATE "AAPLUS_EXT_CLASS=__declspec(dllexport)")
++    else()
++        target_compile_definitions(aaplus PRIVATE "AAPLUS_EXT_CLASS=__attribute__((visibility(\"default\")))")
++    endif()
++endif()
+ 
+-ADD_LIBRARY(aaplus-shared SHARED ${SRCS_LIB} ${INCS})
+-SET_TARGET_PROPERTIES(aaplus-shared PROPERTIES OUTPUT_NAME "aaplus")
+ 
+-install(TARGETS aaplus-shared aaplus-static 
+-		DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
++install(TARGETS aaplus
++        RUNTIME DESTINATION bin
++        ARCHIVE DESTINATION lib
++        LIBRARY DESTINATION lib)
++install(FILES ${INCS} DESTINATION include)
+ 
+-TARGET_LINK_LIBRARIES(AATest aaplus-static)
+ 

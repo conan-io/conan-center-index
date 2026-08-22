@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES C)
+
+find_package(libspng CONFIG)
+if (NOT libspng_FOUND)
+    find_package(SPNG REQUIRED CONFIG)
+endif()
+
+add_executable(${PROJECT_NAME} test_package.c)
+if (TARGET libspng::libspng)
+    target_link_libraries(${PROJECT_NAME} PRIVATE libspng::libspng)
+elseif(TARGET spng::spng)
+    target_link_libraries(${PROJECT_NAME} PRIVATE spng::spng)
+else()
+    target_link_libraries(${PROJECT_NAME} PRIVATE spng::spng_static)
+endif()

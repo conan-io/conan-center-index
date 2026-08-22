@@ -1,0 +1,16 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -32,7 +32,12 @@ endif()
+ if(SPNG_SHARED)
+     add_library(spng SHARED ${spng_SOURCES})
+     target_link_libraries(spng ${spng_LIBS})
+-    install(TARGETS spng DESTINATION lib)
++    install(
++        TARGETS spng
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    )
+ 
+     if(BUILD_EXAMPLES)
+         add_executable(example examples/example.c)

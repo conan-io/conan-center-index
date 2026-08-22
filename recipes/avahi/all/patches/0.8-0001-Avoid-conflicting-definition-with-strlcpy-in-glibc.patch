@@ -1,0 +1,79 @@
+From 495f8868f4cdad235608c7ac732ade17d3d49b17 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Wed, 6 Mar 2024 09:44:33 -0600
+Subject: [PATCH] Avoid conflicting definition with strlcpy in glibc
+
+---
+ avahi-common/domain.c    | 8 ++------
+ avahi-compat-howl/text.c | 8 ++------
+ 2 files changed, 4 insertions(+), 12 deletions(-)
+
+diff --git a/avahi-common/domain.c b/avahi-common/domain.c
+index 3b1ab68..555aeb3 100644
+--- a/avahi-common/domain.c
++++ b/avahi-common/domain.c
+@@ -477,9 +477,7 @@ int avahi_service_name_join(char *p, size_t size, const char *name, const char *
+     return AVAHI_OK;
+ }
+ 
+-#ifndef HAVE_STRLCPY
+-
+-static size_t strlcpy(char *dest, const char *src, size_t n) {
++static size_t avahi_strlcpy(char *dest, const char *src, size_t n) {
+     assert(dest);
+     assert(src);
+ 
+@@ -491,8 +489,6 @@ static size_t strlcpy(char *dest, const char *src, size_t n) {
+     return strlen(src);
+ }
+ 
+-#endif
+-
+ int avahi_service_name_split(const char *p, char *name, size_t name_size, char *type, size_t type_size, char *domain, size_t domain_size) {
+     enum {
+         NAME,
+@@ -524,7 +520,7 @@ int avahi_service_name_split(const char *p, char *name, size_t name_size, char *
+ 
+         switch (state) {
+             case NAME:
+-                strlcpy(name, buf, name_size);
++                avahi_strlcpy(name, buf, name_size);
+                 state = TYPE;
+                 break;
+ 
+diff --git a/avahi-compat-howl/text.c b/avahi-compat-howl/text.c
+index 7ef4df3..45f43ae 100644
+--- a/avahi-compat-howl/text.c
++++ b/avahi-compat-howl/text.c
+@@ -37,9 +37,7 @@ struct _sw_text_record {
+     int buffer_valid;
+ };
+ 
+-#ifndef HAVE_STRLCPY
+-
+-static size_t strlcpy(char *dest, const char *src, size_t n) {
++static size_t avahi_strlcpy(char *dest, const char *src, size_t n) {
+     assert(dest);
+     assert(src);
+ 
+@@ -51,8 +49,6 @@ static size_t strlcpy(char *dest, const char *src, size_t n) {
+     return strlen(src);
+ }
+ 
+-#endif
+-
+ sw_result sw_text_record_init(sw_text_record *self) {
+     assert(self);
+ 
+@@ -244,7 +240,7 @@ sw_result sw_text_record_iterator_next(
+     if (avahi_string_list_get_pair(self->index, &mkey, &mvalue, &msize) < 0)
+         return SW_E_UNKNOWN;
+ 
+-    strlcpy(key, mkey, SW_TEXT_RECORD_MAX_LEN);
++    avahi_strlcpy(key, mkey, SW_TEXT_RECORD_MAX_LEN);
+     memset(val, 0, SW_TEXT_RECORD_MAX_LEN);
+     memcpy(val, mvalue, msize);
+     *val_len = msize;
+-- 
+2.44.0
+

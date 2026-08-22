@@ -1,0 +1,4 @@
+sources:
+  "0.4.0":
+    url: "https://github.com/facebookexperimental/libunifex/archive/refs/tags/v0.4.0.tar.gz"
+    sha256: "d5ce3b616e166da31e6b4284764a1feeba52aade868bcbffa94cfd86b402716e"

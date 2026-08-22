@@ -1,0 +1,14 @@
+--- nextprime.c
++++ nextprime.c
+@@ -54,9 +54,9 @@
+ 
+ #include "gmp.h"
+ #include "gmp-impl.h"
++#ifndef _MSC_VER
+ #include <string.h>		/* for memset */
++#endif
+-
+-
+ unsigned long int
+ gmp_nextprime (gmp_primesieve_t *ps)
+ {

@@ -1,0 +1,7 @@
+sources:
+  "4.1.1":
+    url: "https://github.com/ReactiveX/RxCpp/archive/v4.1.1.tar.gz"
+    sha256: "054a9be63e66904ecaa552ce56d6458b4545d6da5ea32f5103c7fc379cebb374"
+  "4.1.0":
+    url: "https://github.com/ReactiveX/RxCpp/archive/4.1.0.tar.gz"
+    sha256: "d3bb49c7ac6b5c43235df710510fce87d827bb88a1b78242017f190d2acbbdea"

@@ -1,0 +1,38 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -31,7 +31,7 @@ endif()
+ 
+ configure_file(
+ 	cmake/config/config.hpp.in
+-	generated/include/kangaru/detail/config.hpp
++	${CMAKE_CURRENT_BINARY_DIR}/generated/include/kangaru/detail/config.hpp
+ 	@ONLY
+ )
+ 
+@@ -48,7 +48,7 @@ target_compile_features(kangaru INTERFACE cxx_std_11)
+ target_include_directories(kangaru INTERFACE
+ 	$<INSTALL_INTERFACE:${KANGARU_INSTALL_INCLUDE_DIR}>
+ 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+-	$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/generated/include>
++	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated/include>
+ )
+ 
+ if(KANGARU_BUILD_EXAMPLES)
+@@ -82,7 +82,7 @@ if(KANGARU_INSTALL)
+ 	# build tree package config
+ 	configure_file(
+ 		cmake/config/kangaruBuildConfig.cmake.in
+-		kangaruConfig.cmake
++		${CMAKE_CURRENT_BINARY_DIR}/kangaruConfig.cmake
+ 		@ONLY
+ 	)
+ 	
+@@ -95,7 +95,7 @@ if(KANGARU_INSTALL)
+ 	)
+ 	
+ 	install(
+-		DIRECTORY include/kangaru ${CMAKE_BINARY_DIR}/generated/include/kangaru
++		DIRECTORY include/kangaru ${CMAKE_CURRENT_BINARY_DIR}/generated/include/kangaru
+ 		DESTINATION ${KANGARU_INSTALL_INCLUDE_DIR} FILES_MATCHING PATTERN "*.hpp"
+ 	)
+ 	

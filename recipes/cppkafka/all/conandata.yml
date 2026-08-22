@@ -1,0 +1,7 @@
+sources:
+  "0.4.1":
+    url: "https://github.com/mfontanini/cppkafka/archive/refs/tags/v0.4.1.tar.gz"
+    sha256: "45770ae0404cb9ba73d659618c51cd55b574c66ed3c7b148360222fb524b0ff7"
+patches:
+  "0.4.1":
+    - patch_file: "patches/0.4.1-0003-clean-rpath.patch"

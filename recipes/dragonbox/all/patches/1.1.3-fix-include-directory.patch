@@ -1,0 +1,13 @@
+diff --git a/a/CMakeLists.txt b/b/CMakeLists.txt
+index a9d80b9..e0417d7 100644
+--- a/a/CMakeLists.txt
++++ b/b/CMakeLists.txt
+@@ -58,7 +58,7 @@ option(DRAGONBOX_INSTALL_TO_CHARS
+         On)
+
+ set(dragonbox_directory "dragonbox-${PROJECT_VERSION}")
+-set(dragonbox_include_directory "${CMAKE_INSTALL_INCLUDEDIR}/${dragonbox_directory}")
++set(dragonbox_include_directory "${CMAKE_INSTALL_INCLUDEDIR}")
+ set(dragonbox_install_targets "dragonbox")
+
+ if (DRAGONBOX_INSTALL_TO_CHARS)

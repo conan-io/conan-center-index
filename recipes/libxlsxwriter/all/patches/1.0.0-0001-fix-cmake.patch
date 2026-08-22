@@ -1,0 +1,38 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -153,9 +153,8 @@ endif()
+ 
+ if(NOT BUILD_SHARED_LIBS)
+     if(UNIX)
+-        set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+     elseif(MINGW OR MSYS)
+-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static -static-libgcc -Wno-char-subscripts -Wno-long-long")
++        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-char-subscripts -Wno-long-long")
+         list(APPEND LXW_PRIVATE_COMPILE_DEFINITIONS USE_FILE32API)
+     elseif(MSVC)
+         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Fd\"${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pdb\"")
+@@ -183,13 +182,13 @@ enable_language(CXX)
+ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+ 
+ # ZLIB
+-find_package(ZLIB REQUIRED "1.0")
++find_package(ZLIB REQUIRED)
+ list(APPEND LXW_PRIVATE_INCLUDE_DIRS ${ZLIB_INCLUDE_DIRS})
+ message("zlib version: " ${ZLIB_VERSION})
+ 
+ # MINIZIP
+ if (USE_SYSTEM_MINIZIP)
+-    find_package(MINIZIP REQUIRED "1.0")
++    find_package(minizip REQUIRED CONFIG)
+     list(APPEND LXW_PRIVATE_INCLUDE_DIRS ${MINIZIP_INCLUDE_DIRS})
+ endif()
+ 
+@@ -237,7 +236,7 @@ target_sources(${PROJECT_NAME}
+     PRIVATE ${LXW_SOURCES}
+     PUBLIC ${LXW_HEADERS}
+ )
+-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${ZLIB_LIBRARIES} ${MINIZIP_LIBRARIES})
++target_link_libraries(${PROJECT_NAME} PRIVATE ZLIB::ZLIB minizip::minizip)
+ target_compile_definitions(${PROJECT_NAME} PRIVATE ${LXW_PRIVATE_COMPILE_DEFINITIONS})
+ 
+ # /utf-8 needs VS2015 Update 2 or above.

@@ -1,0 +1,7 @@
+versions:
+  "20251105":
+    folder: all
+  "20250722": # last version to support c++14
+    folder: all
+  "20230301": # keep while referenced by other recipes
+    folder: all

@@ -1,0 +1,11 @@
+--- a/src/julian_day.c
++++ b/src/julian_day.c
+@@ -16,7 +16,7 @@
+  *  Copyright (C) 2000 - 2005 Liam Girdwood <lgirdwood@gmail.com>
+  */
+ 
+-#if defined(__MINGW__) || defined(__MINGW32__) || defined(__MINGW64__)
++#if defined(__MINGW32__) && !defined(__MINGW64__)
+ #define _USE_32BIT_TIME_T
+ #endif	//__MINGW__
+ 

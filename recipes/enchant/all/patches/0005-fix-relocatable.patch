@@ -1,0 +1,10 @@
+--- lib/relocatable.c
++++ lib/relocatable.c
+@@ -25,6 +25,7 @@
+ 
+ #define _GL_USE_STDLIB_ALLOC 1
+ #include <config.h>
++#include <configmake.h>
+ 
+ /* Specification.  */
+ #include "relocatable.h"

@@ -1,0 +1,16 @@
+diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
+index 987b735..efe20cc 100644
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -19,8 +19,9 @@ endif()
+ add_library(nfs ${SOURCES})
+ target_link_libraries(nfs PRIVATE ${CORE_LIBRARIES} PUBLIC ${SYSTEM_LIBRARIES})
+ set_target_properties(nfs PROPERTIES
+-                          VERSION ${PROJECT_VERSION}
+-                          SOVERSION ${SOVERSION})
++  OUTPUT_NAME "libnfs"  # Ensures consistent output name (e.g., libnfs.dll on Windows, libnfs.so on Unix)
++  PREFIX ""             # Removes the "lib" prefix on Unix-like systems to avoid "liblibnfs.so"
++)
+ 
+ install(TARGETS nfs EXPORT libnfs
+                     RUNTIME DESTINATION bin

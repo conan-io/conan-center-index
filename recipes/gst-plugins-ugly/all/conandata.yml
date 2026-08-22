@@ -1,0 +1,4 @@
+sources:
+  "1.19.1":
+    url: "https://gitlab.freedesktop.org/gstreamer/gst-plugins-ugly/-/archive/1.19.1/gst-plugins-ugly-1.19.1.tar.bz2"
+    sha256 : "b9ae94a04eaf9d93bc36500b3d7eda864f82142d2ce950c1e92a4288924227e6"

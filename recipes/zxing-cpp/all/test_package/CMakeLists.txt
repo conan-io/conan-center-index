@@ -1,0 +1,20 @@
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
+
+find_package(ZXing REQUIRED CONFIG)
+find_package(stb REQUIRED CONFIG)
+
+if (ZXing_VERSION VERSION_LESS "1.1.0")
+    add_executable(${PROJECT_NAME} test_package.cpp)
+elseif (ZXing_VERSION VERSION_LESS "2.0.0")
+    add_executable(${PROJECT_NAME} test_package_1.1.cpp)
+else()
+    add_executable(${PROJECT_NAME} test_package_2.0.cpp)
+endif()
+target_link_libraries(${PROJECT_NAME} PRIVATE ZXing::ZXing stb::stb)
+
+if (ZXing_VERSION VERSION_LESS "2.0.0")
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
+else()
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+endif()

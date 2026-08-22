@@ -1,0 +1,7 @@
+versions:
+  "2.15.3":
+    folder: cmake
+  "2.14.5":
+    folder: cmake
+  "2.13.8":
+    folder: all

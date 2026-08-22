@@ -1,0 +1,21 @@
+sources:
+  "9.7.0":
+    url: "https://github.com/OSGeo/PROJ/releases/download/9.7.0/proj-9.7.0.tar.gz"
+    sha256: "65705ecd987b50bf63e15820ce6bd17c042feaabda981249831bd230f6689709"
+  "9.6.0":
+    url: "https://github.com/OSGeo/PROJ/releases/download/9.6.0/proj-9.6.0.tar.gz"
+    sha256: "d8cae521c311c39513193657e75767f7cfbf2f91bd202fcd4a200028d3b57e14"
+  "9.5.0":
+    url: "https://github.com/OSGeo/PROJ/releases/download/9.5.0/proj-9.5.0.tar.gz"
+    sha256: "659af0d558f7c5618c322fde2d3392910806faee8684687959339021fa207d99"
+  "9.4.1":
+    url: "https://github.com/OSGeo/PROJ/releases/download/9.4.1/proj-9.4.1.tar.gz"
+    sha256: "ffe20170ee2b952207adf8a195e2141eab12cda181e49fdeb54425d98c7171d7"
+  "9.3.1":
+    url: "https://github.com/OSGeo/PROJ/releases/download/9.3.1/proj-9.3.1.tar.gz"
+    sha256: "b0f919cb9e1f42f803a3e616c2b63a78e4d81ecfaed80978d570d3a5e29d10bc"
+patches:
+  "9.3.1":
+    - patch_file: "patches/0001-use-cmake-targets-9.2.1.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"

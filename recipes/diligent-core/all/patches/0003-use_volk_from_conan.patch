@@ -1,0 +1,40 @@
+diff --git a/Graphics/GraphicsEngineVulkan/CMakeLists.txt b/Graphics/GraphicsEngineVulkan/CMakeLists.txt
+index e760513d..a0d2de9c 100644
+--- a/Graphics/GraphicsEngineVulkan/CMakeLists.txt
++++ b/Graphics/GraphicsEngineVulkan/CMakeLists.txt
+@@ -156,7 +156,8 @@ target_include_directories(Diligent-GraphicsEngineVk-static
+ PRIVATE
+     include
+     ../../ThirdParty
+-    ../../ThirdParty/Vulkan-Headers/include
++${VulkanHeaders_INCLUDE_DIR}
++${volk_INCLUDE_DIR}/
+ )
+ 
+ set(PRIVATE_DEPENDENCIES
+diff --git a/Graphics/GraphicsEngineVulkan/include/VulkanUtilities/VulkanHeaders.h b/Graphics/GraphicsEngineVulkan/include/VulkanUtilities/VulkanHeaders.h
+index ad00815a..65b3753c 100644
+--- a/Graphics/GraphicsEngineVulkan/include/VulkanUtilities/VulkanHeaders.h
++++ b/Graphics/GraphicsEngineVulkan/include/VulkanUtilities/VulkanHeaders.h
+@@ -37,7 +37,7 @@
+ #define VK_FORMAT_RANGE_SIZE (VK_FORMAT_ASTC_12x12_SRGB_BLOCK - VK_FORMAT_UNDEFINED + 1)
+ 
+ #if DILIGENT_USE_VOLK
+-#    include "volk/volk.h"
++#    include "volk.h"
+ #endif
+ 
+ #ifdef _WINBASE_
+diff --git a/Graphics/GraphicsEngineVulkan/src/VulkanUtilities/VulkanInstance.cpp b/Graphics/GraphicsEngineVulkan/src/VulkanUtilities/VulkanInstance.cpp
+index 6e0a8e42..5fbf4b20 100644
+--- a/Graphics/GraphicsEngineVulkan/src/VulkanUtilities/VulkanInstance.cpp
++++ b/Graphics/GraphicsEngineVulkan/src/VulkanUtilities/VulkanInstance.cpp
+@@ -34,7 +34,7 @@
+ 
+ #if DILIGENT_USE_VOLK
+ #    define VOLK_IMPLEMENTATION
+-#    include "volk/volk.h"
++#    include "volk.h"
+ #endif
+ 
+ #include "VulkanErrors.hpp"

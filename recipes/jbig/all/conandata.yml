@@ -1,0 +1,8 @@
+sources:
+  "20160605":
+    sha256: "2669b49ee000150af7709b21c7656f1f6cbea09fd33116c40b41310adeb2b73e"
+    url: "https://github.com/ImageMagick/jbig/archive/5d8f5f6fa71766ced5e828bf7bfff642ddb8a6ad.zip"
+patches:
+  "20160605":
+    - patch_file: patches/0001-add-missing-export.patch
+    - patch_file: patches/0002-fix-msvc-export.patch

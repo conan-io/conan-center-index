@@ -1,0 +1,41 @@
+https://github.com/wxWidgets/wxWidgets/issues/26269
+https://github.com/wxWidgets/wxWidgets/commit/583d7d6c339578d34f704d69f3f6de61a47055f9
+
+From 583d7d6c339578d34f704d69f3f6de61a47055f9 Mon Sep 17 00:00:00 2001
+From: Vadim Zeitlin
+Date: Fri, 6 Mar 2026 14:31:15 +0100
+Subject: [PATCH] Fix wxGTK build with GTK versions without Wayland support
+
+Add missing GDK_WINDOWING_WAYLAND compile-time check to fix the problem
+introduced in 8ed1469743 (Fix crash on wxGLCanvasEGL destruction,
+2026-02-26), see #26248.
+
+Note that we probably don't need a run-time check here because
+g_signal_handlers_disconnect_by_func() would just do nothing if the
+handler is not connected.
+
+Closes #26269.
+---
+ src/unix/glegl.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/unix/glegl.cpp b/src/unix/glegl.cpp
+index 01ec76dced56..fc53bfcc2a59 100644
+--- a/src/unix/glegl.cpp
++++ b/src/unix/glegl.cpp
+@@ -685,6 +685,7 @@ void wxGLCanvasEGL::OnRealized()
+
+ wxGLCanvasEGL::~wxGLCanvasEGL()
+ {
++#ifdef GDK_WINDOWING_WAYLAND
+     // Our "unmap" signal handler would be called from wxWindow dtor, so
+     // disconnect it to avoid accessing this object when it's already destroyed
+     // by wxGLCanvas dtor (and it is useless anyhow now as all it does is to
+@@ -697,6 +698,7 @@ wxGLCanvasEGL::~wxGLCanvasEGL()
+             this
+         );
+     }
++#endif // GDK_WINDOWING_WAYLAND
+
+     if ( m_surface )
+         eglDestroySurface(m_display, m_surface);

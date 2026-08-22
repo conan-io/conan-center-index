@@ -1,0 +1,10 @@
+--- a/src/lib_json/CMakeLists.txt
++++ b/src/lib_json/CMakeLists.txt
+@@ -79,7 +79,6 @@ set_target_properties( jsoncpp_lib PROPERTIES
+     OUTPUT_NAME jsoncpp
+     VERSION ${JSONCPP_VERSION}
+     SOVERSION ${JSONCPP_SOVERSION}
+-    POSITION_INDEPENDENT_CODE ON
+ )
+ 
+ # Set library's runtime search path on OSX

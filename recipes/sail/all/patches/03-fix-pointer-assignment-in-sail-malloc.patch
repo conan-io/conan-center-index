@@ -1,0 +1,16 @@
+diff --git a/src/sail-common/utils.c b/src/sail-common/utils.c
+index 4d2aa758..15be3ce5 100644
+--- a/src/sail-common/utils.c
++++ b/src/sail-common/utils.c
+@@ -1254,8 +1254,9 @@ sail_status_t sail_multibyte_to_wchar(const char* str, wchar_t** wstr)
+         SAIL_LOG_AND_RETURN(SAIL_ERROR_INVALID_ARGUMENT);
+     }
+ 
+-    wchar_t* wstr_local;
+-    SAIL_TRY(sail_malloc(chars_needed * sizeof(wchar_t), &wstr_local));
++    void* ptr;
++    SAIL_TRY(sail_malloc(chars_needed * sizeof(wchar_t), &ptr));
++    wchar_t* wstr_local = ptr;
+ 
+     /* Actually convert. */
+     int result = MultiByteToWideChar(CP_UTF8, 0, str, -1, wstr_local, chars_needed);

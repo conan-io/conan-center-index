@@ -1,0 +1,4 @@
+sources:
+  "3.5.0":
+    url: "https://github.com/pantor/inja/archive/v3.5.0.tar.gz"
+    sha256: "a5f0266673c59028eab6ceeddd8b862c70abfeb32fb7a5387c16bf46f3269ab2"

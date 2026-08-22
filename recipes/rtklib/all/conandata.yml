@@ -1,0 +1,9 @@
+sources:
+  "2.4.3-b34":
+    url: "https://github.com/tomojitakasu/RTKLIB/archive/refs/tags/v2.4.3-b34.tar.gz"
+    sha256: "a9ce13293ef71b028036cb98a114b9bba96bdd439a0aeebca8e9c73156e461cf"
+patches:
+  "2.4.3-b34":
+    - patch_file: "patches/fix-dll-export-of-global-vars.patch"
+      patch_description: "Fix missing EXPORT attributes on global variables required for shared Windows builds"
+      patch_type: "portability"

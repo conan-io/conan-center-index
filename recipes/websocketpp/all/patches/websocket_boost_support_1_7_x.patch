@@ -1,0 +1,157 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2d13117..b803c21 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -123,7 +123,11 @@ if (BUILD_TESTS OR BUILD_EXAMPLES)
+ 
+     # g++
+     if (CMAKE_COMPILER_IS_GNUCXX)
+-        set (WEBSOCKETPP_PLATFORM_LIBS pthread rt)
++        if (NOT APPLE)
++            set (WEBSOCKETPP_PLATFORM_LIBS pthread rt)
++        else()
++            set (WEBSOCKETPP_PLATFORM_LIBS pthread)
++        endif()
+         set (WEBSOCKETPP_PLATFORM_TLS_LIBS ssl crypto)
+         set (WEBSOCKETPP_BOOST_LIBS system thread)
+         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+@@ -202,7 +206,7 @@ if (BUILD_TESTS OR BUILD_EXAMPLES)
+ 	endif ()
+ 
+     if (NOT Boost_USE_STATIC_LIBS)
+-        add_definitions (/DBOOST_TEST_DYN_LINK)
++        add_definitions (-DBOOST_TEST_DYN_LINK)
+     endif ()
+ 
+     set (Boost_FIND_REQUIRED TRUE)
+diff --git a/changelog.md b/changelog.md
+index 6771d6e..743d014 100644
+--- a/changelog.md
++++ b/changelog.md
+@@ -1,4 +1,9 @@
+ HEAD
++- CMake: Update cmake installer to better handle dependencies when using
++  g++ on MacOS. Thank you Luca Palano for reporting and a patch. #831
++- CMake: Update cmake installer to use a variable for the include directory
++  improving the ability of the install to be customized. THank you Schrijvers
++  Luc and Gianfranco Costamanga for reporting and a patch. #842
+ 
+ 0.8.1 - 2018-07-16
+ Note: This release does not change library behavior. It only corrects issues
+diff --git a/cmake/CMakeHelpers.cmake b/cmake/CMakeHelpers.cmake
+index 1478f4b..f603632 100644
+--- a/cmake/CMakeHelpers.cmake
++++ b/cmake/CMakeHelpers.cmake
+@@ -80,7 +80,7 @@ macro (final_target)
+     endif ()
+ 
+     install (DIRECTORY ${CMAKE_SOURCE_DIR}/${TARGET_NAME}
+-             DESTINATION include/
++             DESTINATION ${INSTALL_INCLUDE_DIR}/
+              FILES_MATCHING PATTERN "*.hpp*")
+ endmacro ()
+ 
+diff --git a/docs/faq.dox b/docs/faq.dox
+index 24059f7..9f417ec 100644
+--- a/docs/faq.dox
++++ b/docs/faq.dox
+@@ -55,7 +55,7 @@ If you handle errors from methods like send, ping, close, etc correctly then you
+ 
+ Normally, for security purposes, operating systems prevent programs from listening on sockets created by other programs. When your program crashes and restarts, the new instance is a different program from the perspective of the operating system. As such it can’t listen on the socket address/port that the previous program was using until after a timeout occurs to make sure the old program was done with it.
+ 
+-The the first step for handling this is to make sure that you provide a method (signal handler, admin websocket message, etc) to perform a clean server shutdown. There is a question elsewhere in this FAQ that describes the steps necessary for this.
++The first step for handling this is to make sure that you provide a method (signal handler, admin websocket message, etc) to perform a clean server shutdown. There is a question elsewhere in this FAQ that describes the steps necessary for this.
+ 
+ The clean close strategy won't help in the case of crashes or other abnormal closures. An option to consider for these cases is the use of the SO_REUSEADDR socket option. This instructs the OS to not request an exclusive lock on the socket. This means that after your program crashes the replacement you start can immediately listen on that address/port combo again.
+ 
+diff --git a/websocketpp/transport/asio/connection.hpp b/websocketpp/transport/asio/connection.hpp
+index 60f88a7..57dda74 100644
+--- a/websocketpp/transport/asio/connection.hpp
++++ b/websocketpp/transport/asio/connection.hpp
+@@ -311,9 +311,10 @@ public:
+      * needed.
+      */
+     timer_ptr set_timer(long duration, timer_handler callback) {
+-        timer_ptr new_timer = lib::make_shared<lib::asio::steady_timer>(
+-            lib::ref(*m_io_service),
+-            lib::asio::milliseconds(duration)
++        timer_ptr new_timer(
++            new lib::asio::steady_timer(
++                *m_io_service,
++                lib::asio::milliseconds(duration))
+         );
+ 
+         if (config::enable_multithreading) {
+@@ -461,8 +462,7 @@ protected:
+         m_io_service = io_service;
+ 
+         if (config::enable_multithreading) {
+-            m_strand = lib::make_shared<lib::asio::io_service::strand>(
+-                lib::ref(*io_service));
++            m_strand.reset(new lib::asio::io_service::strand(*io_service));
+         }
+ 
+         lib::error_code ec = socket_con_type::init_asio(io_service, m_strand,
+diff --git a/websocketpp/transport/asio/endpoint.hpp b/websocketpp/transport/asio/endpoint.hpp
+index ddab2c7..94509ad 100644
+--- a/websocketpp/transport/asio/endpoint.hpp
++++ b/websocketpp/transport/asio/endpoint.hpp
+@@ -195,8 +195,7 @@ public:
+ 
+         m_io_service = ptr;
+         m_external_io_service = true;
+-        m_acceptor = lib::make_shared<lib::asio::ip::tcp::acceptor>(
+-            lib::ref(*m_io_service));
++        m_acceptor.reset(new lib::asio::ip::tcp::acceptor(*m_io_service));
+ 
+         m_state = READY;
+         ec = lib::error_code();
+@@ -688,9 +687,7 @@ public:
+      * @since 0.3.0
+      */
+     void start_perpetual() {
+-        m_work = lib::make_shared<lib::asio::io_service::work>(
+-            lib::ref(*m_io_service)
+-        );
++        m_work.reset(new lib::asio::io_service::work(*m_io_service));
+     }
+ 
+     /// Clears the endpoint's perpetual flag, allowing it to exit when empty
+@@ -854,8 +851,7 @@ protected:
+ 
+         // Create a resolver
+         if (!m_resolver) {
+-            m_resolver = lib::make_shared<lib::asio::ip::tcp::resolver>(
+-                lib::ref(*m_io_service));
++            m_resolver.reset(new lib::asio::ip::tcp::resolver(*m_io_service));
+         }
+ 
+         tcon->set_uri(u);
+diff --git a/websocketpp/transport/asio/security/none.hpp b/websocketpp/transport/asio/security/none.hpp
+index 5c8293d..6c7d352 100644
+--- a/websocketpp/transport/asio/security/none.hpp
++++ b/websocketpp/transport/asio/security/none.hpp
+@@ -168,8 +168,7 @@ protected:
+             return socket::make_error_code(socket::error::invalid_state);
+         }
+ 
+-        m_socket = lib::make_shared<lib::asio::ip::tcp::socket>(
+-            lib::ref(*service));
++        m_socket.reset(new lib::asio::ip::tcp::socket(*service));
+ 
+         if (m_socket_init_handler) {
+             m_socket_init_handler(m_hdl, *m_socket);
+diff --git a/websocketpp/transport/asio/security/tls.hpp b/websocketpp/transport/asio/security/tls.hpp
+index c76fd9a..04ac379 100644
+--- a/websocketpp/transport/asio/security/tls.hpp
++++ b/websocketpp/transport/asio/security/tls.hpp
+@@ -193,8 +193,7 @@ protected:
+         if (!m_context) {
+             return socket::make_error_code(socket::error::invalid_tls_context);
+         }
+-        m_socket = lib::make_shared<socket_type>(
+-            _WEBSOCKETPP_REF(*service),lib::ref(*m_context));
++        m_socket.reset(new socket_type(*service, *m_context));
+ 
+         if (m_socket_init_handler) {
+             m_socket_init_handler(m_hdl, get_socket());

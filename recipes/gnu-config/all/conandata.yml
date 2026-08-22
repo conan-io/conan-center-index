@@ -1,0 +1,12 @@
+sources:
+  "cci.20210814":
+    url: "https://https.git.savannah.gnu.org/git/config.git"
+    commit: "191bcb948f7191c36eefe634336f5fc5c0c4c2be"
+  "cci.20201022":
+    url: "https://https.git.savannah.gnu.org/git/config.git"
+    commit: "1c4398015583eb77bc043234f5734be055e64bea"
+patches:
+  "cci.20210814":
+    - patch_file: "patches/cci.20210814-0001-tvos-support.patch"
+      patch_description: "add support to tvOS"
+      patch_type: "portability"

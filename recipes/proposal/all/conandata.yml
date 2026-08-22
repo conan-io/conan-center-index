@@ -1,0 +1,10 @@
+sources:
+  "7.6.2":
+    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.6.2.tar.gz"
+    sha256: "52e91807009b8e610deee485ea57523482cf5626a28f3e42b747dc58d9f505d8"
+  "7.5.1":
+    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.5.1.tar.gz"
+    sha256: "2a283bfc335c4b6b01d2acc1eea1a5e4c456bd3dd11e41ef24ca3d955c9655a3"
+  "7.4.2":
+    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.4.2.tar.gz"
+    sha256: "f0db44c96a80a6ce3dda02c598574f5f0209376bd2c6c176797710da8eb3e108"

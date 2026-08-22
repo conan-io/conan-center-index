@@ -1,0 +1,15 @@
+sources:
+  "2.11.12":
+    url: "https://github.com/coin-or/CoinUtils/archive/releases/2.11.12.tar.gz"
+    sha256: "eef1785d78639b228ae2de26b334129fe6a7d399c4ac6f8fc5bb9054ba00de64"
+  "2.11.9":
+    url: "https://github.com/coin-or/CoinUtils/archive/releases/2.11.9.tar.gz"
+    sha256: "15d572ace4cd3b7c8ce117081b65a2bd5b5a4ebaba54fadc99c7a244160f88b8"
+patches:
+  "2.11.12":
+    - patch_file: "patches/0001-no-check-pkgconfig.patch"
+  "2.11.9":
+    - patch_file: "patches/0001-no-check-pkgconfig.patch"
+    - patch_file: "patches/0003-cpp17-compat.patch"
+      patch_description: "C++17 compatibility"
+      patch_type: "portability"

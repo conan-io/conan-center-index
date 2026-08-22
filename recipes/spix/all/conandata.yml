@@ -1,0 +1,4 @@
+sources:
+  "0.14":
+    url: "https://github.com/faaxm/spix/archive/refs/tags/v0.14.tar.gz"
+    sha256: "2693ebc33c3b711a3fde526b46f84def72d10f4ade282e52f53db8952e848ece"

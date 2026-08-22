@@ -1,0 +1,22 @@
+sources:
+  "0.16.4":
+    url: "https://bitbucket.org/odedevs/ode/downloads/ode-0.16.4.tar.gz"
+    sha256: "71037b8281c6c86b0a55729f90d5db697abe4cbec1d8118157e00d48ec253467"
+  "0.16.2":
+    url: "https://bitbucket.org/odedevs/ode/downloads/ode-0.16.2.tar.gz"
+    sha256: "b26aebdcb015e2d89720ef48e0cb2e8a3ca77915f89d853893e7cc861f810f22"
+patches:
+  "0.16.4":
+    - patch_file: "patches/0002-dont-force-pic.patch"
+      patch_description: "Allow to build static library without PIC"
+      patch_type: "conan"
+  "0.16.2":
+    - patch_file: "patches/0001-fix-apple.patch"
+      patch_description: "Fix cross-build to macOS, iOS, watchOS & tvOS"
+      patch_type: "portability"
+    - patch_file: "patches/0002-dont-force-pic.patch"
+      patch_description: "Allow to build static library without PIC"
+      patch_type: "conan"
+    - patch_file: "patches/0004-fix-include-ode-timer.patch"
+      patch_description: "Fix casing issue in include of ode/timer.h"
+      patch_type: "conan"

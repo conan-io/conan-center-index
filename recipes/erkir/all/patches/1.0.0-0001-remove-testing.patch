@@ -1,0 +1,24 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 673e4b8..851f78a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -21,19 +21,8 @@ add_library(erkir
+ )
+ add_library(erkir::erkir ALIAS erkir)
+ 
+-add_executable(erkir_test
+-    test/test.cpp
+-)
+-
+-target_link_libraries(erkir_test PRIVATE erkir)
+-
+ # Includes
+ target_include_directories(erkir      PUBLIC  include)
+-target_include_directories(erkir_test PRIVATE include)
+-target_include_directories(erkir_test PRIVATE src)
+-
+-enable_testing()
+-add_test(NAME Test COMMAND erkir_test)
+ 
+ # Coverage support.
+ option(CODE_COVERAGE "Enable coverage reporting" ON)

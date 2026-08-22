@@ -1,0 +1,7 @@
+sources:
+  "0.8.4-rc3":
+    url: "https://github.com/simd-everywhere/simde/archive/refs/tags/v0.8.4-rc3.tar.gz"
+    sha256: "a5407985439fef1435ac1f091a4d2e6c71981faed213e1be156aca575ce7052c"
+  "0.8.2":
+    url: "https://github.com/simd-everywhere/simde/archive/refs/tags/v0.8.2.tar.gz"
+    sha256: "ed2a3268658f2f2a9b5367628a85ccd4cf9516460ed8604eed369653d49b25fb"

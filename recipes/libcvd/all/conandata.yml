@@ -1,0 +1,4 @@
+sources:
+  "2.5.1":
+    url: "https://github.com/edrosten/libcvd/archive/refs/tags/RELEASE_2_5_1.tar.gz"
+    sha256: "c077e426e1bd6e6c7af3b9330ec1496a59789f2d0c529dc18049fc653947dd6e"

@@ -1,0 +1,96 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -157,7 +157,7 @@
+ )
+ 
+ SET(LIBRARIES
+-  ${LibUSB_LIBRARIES}
++  libusb::libusb
+   ${LIBFREENECT2_THREADING_LIBRARIES}
+ )
+ 
+@@ -276,8 +272,8 @@
+ 
+     LIST(APPEND LIBFREENECT2_DLLS ${GLFW3_DLL})
+     LIST(APPEND LIBRARIES
+-      ${GLFW3_LIBRARIES}
+-      ${OPENGL_gl_LIBRARY}
++      ${GLFW3_LIBRARIES} glfw
++      ${OPENGL_gl_LIBRARY} opengl::opengl
+     )
+     LIST(APPEND SOURCES
+       src/flextGL.cpp
+@@ -297,10 +293,10 @@
+ 
+ SET(HAVE_OpenCL disabled)
+ IF(ENABLE_OPENCL)
+-  FIND_PACKAGE(OpenCL)
++  find_package(OpenCLICDLoader REQUIRED)
++  find_package(OpenCLHeaders REQUIRED)
+ 
+   SET(HAVE_OpenCL no)
+-  IF(OpenCL_FOUND)
+     SET(LIBFREENECT2_WITH_OPENCL_SUPPORT 1)
+     SET(HAVE_OpenCL yes)
+ 
+@@ -312,7 +308,7 @@
+         MESSAGE(WARNING "Your libOpenCL.so is incompatible with CL/cl.h. Install ocl-icd-opencl-dev to update libOpenCL.so?")
+       ENDIF()
+     ENDIF()
+-    INCLUDE_DIRECTORIES(${OpenCL_INCLUDE_DIRS})
++    INCLUDE_DIRECTORIES(${OpenCLHeaders_INCLUDE_DIRS})
+ 
+     LIST(APPEND SOURCES
+       src/opencl_depth_packet_processor.cpp
+@@ -320,7 +316,7 @@
+     )
+ 
+     LIST(APPEND LIBRARIES
+-      ${OpenCL_LIBRARIES}
++      OpenCL::Headers OpenCL::OpenCL
+     )
+ 
+     LIST(APPEND RESOURCES
+@@ -334,12 +330,11 @@
+     IF(UNIX AND NOT APPLE)
+       SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions")
+     ENDIF()
+-  ENDIF(OpenCL_FOUND)
+ ENDIF(ENABLE_OPENCL)
+ 
+ SET(HAVE_CUDA disabled)
+ IF(ENABLE_CUDA)
+-  FIND_PACKAGE(CUDA)
++  FIND_PACKAGE(CUDA REQUIRED)
+   SET(HAVE_CUDA no)
+   IF(CUDA_FOUND AND MSVC14 AND CUDA_VERSION VERSION_LESS 8.0)
+     SET(HAVE_CUDA "no (VS2015 not supported)")
+@@ -347,12 +342,15 @@
+     SET(LIBFREENECT2_WITH_CUDA_SUPPORT 1)
+     SET(HAVE_CUDA yes)
+ 
+-    STRING(REPLACE "\\" "/" NVCUDASAMPLES_ROOT "$ENV{NVCUDASAMPLES_ROOT}")
++    IF(NOT DEFINED NVCUDASAMPLES_ROOT)
++      STRING(REPLACE "\\" "/" NVCUDASAMPLES_ROOT "$ENV{NVCUDASAMPLES_ROOT}")
++    ENDIF()
+     STRING(REPLACE "\\" "/" NVCUDASAMPLES8_0_ROOT "$ENV{NVCUDASAMPLES8_0_ROOT}")
+     CUDA_INCLUDE_DIRECTORIES(
+       "${MY_DIR}/include/"
+       "${CUDA_TOOLKIT_ROOT_DIR}/samples/common/inc"
+       "${NVCUDASAMPLES_ROOT}/common/inc"
++      "${NVCUDASAMPLES_ROOT}/Common"
+       "${NVCUDASAMPLES8_0_ROOT}/common/inc"
+     )
+     SET(CUDA_FLAGS -use_fast_math)
+@@ -403,11 +401,6 @@
+ # Both command line -DCMAKE_INSTALL_RPATH=... and CMake GUI settings are accepted.
+ #
+ # Anyway if wrong versions of libusb is used, errors will be reported explicitly.
+-IF(NOT DEFINED CMAKE_INSTALL_RPATH AND NOT ${LibUSB_LIBDIR} MATCHES "^/usr/lib")
+-  SET(CMAKE_INSTALL_RPATH ${LibUSB_LIBDIR} CACHE STRING "Set RPATH for a private libusb")
+-ELSEIF(DEFINED CMAKE_INSTALL_RPATH)
+-  SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH} CACHE STRING "Set RPATH for a private libusb")
+-ENDIF()
+ IF(DEFINED CMAKE_INSTALL_RPATH)
+   MESSAGE(STATUS "RPATH set to ${CMAKE_INSTALL_RPATH}")
+ ENDIF()

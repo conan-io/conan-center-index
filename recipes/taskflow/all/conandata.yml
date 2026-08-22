@@ -1,0 +1,15 @@
+sources:
+  "4.0.0":
+    url: "https://github.com/taskflow/taskflow/archive/v4.0.0.tar.gz"
+    sha256: "a9d27ad29caffc95e394976c6a362debb94194f9b3fbb7f25e34aaf54272f497"
+  "3.10.0":
+    url: "https://github.com/taskflow/taskflow/archive/v3.10.0.tar.gz"
+    sha256: "fe86765da417f6ceaa2d232ffac70c9afaeb3dc0816337d39a7c93e39c2dee0b"
+  "3.3.0":
+    url: "https://github.com/taskflow/taskflow/archive/v3.3.0.tar.gz"
+    sha256: "66b891f706ba99a5ca5ed239d520ad6943ebe94728d1c89e07a939615a6488ef"
+patches:
+  "3.3.0":
+    - patch_file: "patches/3.3.0-immintrin-guard.patch"
+      patch_description: "add condition to check IA architecture"
+      patch_type: "portability"

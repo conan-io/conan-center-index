@@ -1,0 +1,8 @@
+versions:
+  "3.3.2":
+    folder: all
+  "2.2.4":
+    folder: all
+  # mold requires 2.1.2
+  "2.1.2":
+    folder: all

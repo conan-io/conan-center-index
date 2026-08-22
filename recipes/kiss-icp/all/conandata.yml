@@ -1,0 +1,5 @@
+sources:
+  "1.2.3":
+    url:
+      - "https://github.com/PRBonn/kiss-icp/archive/refs/tags/v1.2.3.tar.gz"
+    sha256: "087a9745c5b2cc304e72bf87929371ecb102c8b75c026162c58d643d6af8849c"

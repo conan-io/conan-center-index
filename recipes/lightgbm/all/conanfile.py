@@ -1,0 +1,119 @@
+import os
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
+
+required_conan_version = ">=2.1"
+
+
+class LightGBMConan(ConanFile):
+    name = "lightgbm"
+    description = (
+        "A fast, distributed, high performance gradient boosting "
+        "(GBT, GBDT, GBRT, GBM or MART) framework based on decision tree algorithms, "
+        "used for ranking, classification and many other machine learning tasks."
+    )
+    license = "MIT"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/microsoft/LightGBM"
+    topics = ("machine-learning", "boosting")
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_openmp": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+        # apple-clang does not support OpenMP out of the box
+        # and externally provided headers and libraries are not guaranteed to work with future versions
+        self.options.with_openmp = self.settings.compiler != "apple-clang"
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("eigen/3.4.0")
+        self.requires("fast_double_parser/[>=0.7.0 <1]", transitive_headers=True, transitive_libs=True)
+        self.requires("fmt/[>=10.1.1]", transitive_headers=True, transitive_libs=True)
+
+    def validate(self):
+        # Note: Next release looks like the min cppstd will be 17
+        check_min_cppstd(self, 11)
+
+        if self.options.with_openmp and self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration("OpenMP support is required, which is not "
+                                            "available in Apple Clang")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.18]")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_STATIC_LIB"] = not self.options.shared
+        tc.cache_variables["USE_DEBUG"] = self.settings.build_type in ["Debug", "RelWithDebInfo"]
+        tc.cache_variables["USE_OPENMP"] = self.options.get_safe("with_openmp", False)
+        tc.cache_variables["BUILD_CLI"] = False
+        tc.variables["_MAJOR_VERSION"] = Version(self.version).major
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
+        cmake.install()
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "LightGBM")
+        self.cpp_info.set_property("cmake_target_name", "LightGBM::LightGBM")
+
+        self.cpp_info.libs = ["lib_lightgbm"] if is_msvc(self) else ["_lightgbm"]
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi"])
+        elif self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
+
+        # OpenMP preprocessor directives are used in a number of public headers, such as:
+        # https://github.com/microsoft/LightGBM/blob/master/include/LightGBM/tree.h#L188
+        if self.options.get_safe("with_openmp"):
+            openmp_flags = []
+            if is_msvc(self):
+                openmp_flags = ["-openmp"]
+            elif self.settings.compiler == "gcc":
+                openmp_flags = ["-fopenmp"]
+            elif self.settings.compiler in ["clang", "apple-clang"]:
+                openmp_flags = ["-Xpreprocessor", "-fopenmp"]
+            self.cpp_info.cxxflags.extend(openmp_flags)
+            self.cpp_info.exelinkflags.extend(openmp_flags)
+            self.cpp_info.sharedlinkflags.extend(openmp_flags)

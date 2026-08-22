@@ -1,0 +1,88 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -119,3 +119,14 @@ INSTALL(
+     RUNTIME DESTINATION bin
+     PUBLIC_HEADER DESTINATION include
+     )
++target_include_directories(squish PUBLIC
++  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
++  $<INSTALL_INTERFACE:include>
++)
++set_target_properties(squish PROPERTIES
++    CXX_VISIBILITY_PRESET hidden
++    VISIBILITY_INLINES_HIDDEN TRUE
++)
++include(GenerateExportHeader)
++generate_export_header(squish)
++install(FILES ${CMAKE_CURRENT_BINARY_DIR}/squish_export.h DESTINATION include)
+--- a/squish.h
++++ b/squish.h
+@@ -26,6 +26,8 @@
+ #ifndef SQUISH_H
+ #define SQUISH_H
+ 
++#include "squish_export.h"
++
+ //! All squish API functions live in this namespace.
+ namespace squish {
+ 
+@@ -113,7 +115,7 @@ enum
+     { 0.2126f, 0.7152f, 0.0722f }. If non-NULL, the metric should point to a
+     contiguous array of 3 floats.
+ */
+-void CompressMasked( u8 const* rgba, int mask, void* block, int flags, float* metric = 0 );
++SQUISH_EXPORT void CompressMasked( u8 const* rgba, int mask, void* block, int flags, float* metric = 0 );
+ 
+ // -----------------------------------------------------------------------------
+ 
+@@ -176,7 +178,7 @@ inline void Compress( u8 const* rgba, void* block, int flags, float* metric = 0
+     however, DXT1 will be used by default if none is specified. All other flags
+     are ignored.
+ */
+-void Decompress( u8* rgba, void const* block, int flags );
++SQUISH_EXPORT void Decompress( u8* rgba, void const* block, int flags );
+ 
+ // -----------------------------------------------------------------------------
+ 
+@@ -194,7 +196,7 @@ void Decompress( u8* rgba, void const* block, int flags );
+     function supports arbitrary size images by allowing the outer blocks to
+     be only partially used.
+ */
+-int GetStorageRequirements( int width, int height, int flags );
++SQUISH_EXPORT int GetStorageRequirements( int width, int height, int flags );
+ 
+ // -----------------------------------------------------------------------------
+ 
+@@ -249,8 +251,8 @@ int GetStorageRequirements( int width, int height, int flags );
+     Windows platform but for other platforms like MacOS X a different
+     gamma value may be more suitable.
+ */
+-void CompressImage( u8 const* rgba, int width, int height, int pitch, void* blocks, int flags, float* metric = 0 );
+-void CompressImage( u8 const* rgba, int width, int height, void* blocks, int flags, float* metric = 0 );
++SQUISH_EXPORT void CompressImage( u8 const* rgba, int width, int height, int pitch, void* blocks, int flags, float* metric = 0 );
++SQUISH_EXPORT void CompressImage( u8 const* rgba, int width, int height, void* blocks, int flags, float* metric = 0 );
+ 
+ // -----------------------------------------------------------------------------
+ 
+@@ -274,8 +276,8 @@ void CompressImage( u8 const* rgba, int width, int height, void* blocks, int fla
+ 
+     Internally this function calls squish::Decompress for each block.
+ */
+-void DecompressImage( u8* rgba, int width, int height, int pitch, void const* blocks, int flags );
+-void DecompressImage( u8* rgba, int width, int height, void const* blocks, int flags );
++SQUISH_EXPORT void DecompressImage( u8* rgba, int width, int height, int pitch, void const* blocks, int flags );
++SQUISH_EXPORT void DecompressImage( u8* rgba, int width, int height, void const* blocks, int flags );
+ 
+ // -----------------------------------------------------------------------------
+ 
+@@ -299,8 +301,8 @@ void DecompressImage( u8* rgba, int width, int height, void const* blocks, int f
+ 
+     Internally this function calls squish::Decompress for each block.
+ */
+-void ComputeMSE(u8 const *rgba, int width, int height, int pitch, u8 const *dxt, int flags, double &colourMSE, double &alphaMSE);
+-void ComputeMSE(u8 const *rgba, int width, int height, u8 const *dxt, int flags, double &colourMSE, double &alphaMSE);
++SQUISH_EXPORT void ComputeMSE(u8 const *rgba, int width, int height, int pitch, u8 const *dxt, int flags, double &colourMSE, double &alphaMSE);
++SQUISH_EXPORT void ComputeMSE(u8 const *rgba, int width, int height, u8 const *dxt, int flags, double &colourMSE, double &alphaMSE);
+ 
+ // -----------------------------------------------------------------------------
+ 

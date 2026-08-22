@@ -1,0 +1,4 @@
+sources:
+  "5.0.0":
+    url: "https://github.com/banditcpp/snowhouse/archive/v5.0.0.tar.gz"
+    sha256: "a1997eb1c170292bad5545ca5e65cb7c900bc49c0f9143672116777d24189b69"

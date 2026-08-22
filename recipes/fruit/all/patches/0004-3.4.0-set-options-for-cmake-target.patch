@@ -1,0 +1,16 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 9c75ec6..0d7100d 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -27,9 +27,8 @@ target_compile_options(fruit
+         ${FRUIT_ADDITIONAL_COMPILE_FLAGS})
+ 
+ if(FRUIT_USES_BOOST)
+-    target_include_directories(fruit
+-        PRIVATE
+-            ${CONAN_INCLUDE_DIRS_BOOST})
++    find_package(Boost REQUIRED CONFIG)
++    target_link_libraries(fruit PUBLIC Boost::boost)
+ endif()
+ 
+ install(TARGETS fruit

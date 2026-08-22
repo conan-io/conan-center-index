@@ -1,0 +1,6 @@
+# Only keep the most recent version
+# Harbuzz is backwards compatible, see https://github.com/conan-io/conan-center-index/pull/28188#issue-3331432127
+sources:
+  "12.3.0":
+    url: "https://github.com/harfbuzz/harfbuzz/releases/download/12.3.0/harfbuzz-12.3.0.tar.xz"
+    sha256: "8660ebd3c27d9407fc8433b5d172bafba5f0317cb0bb4339f28e5370c93d42b7"

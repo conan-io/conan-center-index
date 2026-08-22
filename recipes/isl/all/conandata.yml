@@ -1,0 +1,15 @@
+sources:
+  "0.26":
+    url: "https://libisl.sourceforge.io/isl-0.26.tar.xz"
+    sha256: "a0b5cb06d24f9fa9e77b55fabbe9a3c94a336190345c2555f9915bb38e976504"
+  "0.25":
+    url: "https://libisl.sourceforge.io/isl-0.25.tar.xz"
+    sha256: "be7b210647ccadf90a2f0b000fca11a4d40546374a850db67adb32fad4b230d9"
+  "0.24":
+    url: "https://libisl.sourceforge.io/isl-0.24.tar.xz"
+    sha256: "043105cc544f416b48736fff8caf077fb0663a717d06b1113f16e391ac99ebad"
+patches:
+  "0.24":
+    - patch_file: "patches/0.24-0001-fix-ac_test_cflags.patch"
+      patch_description: "Fix ac_test_CFLAGS logic error"
+      patch_type: "portability"

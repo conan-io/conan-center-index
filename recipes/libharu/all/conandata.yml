@@ -1,0 +1,4 @@
+sources:
+  "2.4.6":
+    url: "https://github.com/libharu/libharu/archive/v2.4.6.tar.gz"
+    sha256: "ec8f327520d1d354ce58b5d2af75b64f380cddc522437c169463b39760921348"

@@ -1,0 +1,12 @@
+diff --git a/cmake/helpers/GdalGenerateConfig.cmake b/cmake/helpers/GdalGenerateConfig.cmake
+index debddd7..688b870 100644
+--- a/cmake/helpers/GdalGenerateConfig.cmake
++++ b/cmake/helpers/GdalGenerateConfig.cmake
+@@ -38,6 +38,7 @@ function(gdal_flatten_link_libraries _result _is_debug_build)
+             # new target
+             get_target_property(_link_libraries ${_lib} INTERFACE_LINK_LIBRARIES)
+             get_target_property(_type ${_lib} TYPE)
++            list(REMOVE_ITEM _link_libraries ${_lib})
+             if(_link_libraries AND NOT TYPE STREQUAL "SHARED_LIBRARY")
+                 gdal_flatten_link_libraries(_libs "${_is_debug_build}" ${_link_libraries})
+             endif()

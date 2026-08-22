@@ -1,0 +1,13 @@
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -48,7 +48,9 @@ function(hdr_histogram_add_library NAME LIBRARY_TYPE DO_INSTALL)
+         install(
+             TARGETS ${NAME}
+             EXPORT ${PROJECT_NAME}-targets
+-            DESTINATION ${CMAKE_INSTALL_LIBDIR})
++            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+     endif()
+ endfunction()
+ 

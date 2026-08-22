@@ -1,0 +1,12 @@
+diff --git a/tensorflow/lite/tools/cmake/modules/OverridableFetchContent.cmake b/tensorflow/lite/tools/cmake/modules/OverridableFetchContent.cmake
+index 9ed9510..4a6a45d 100644
+--- a/tensorflow/lite/tools/cmake/modules/OverridableFetchContent.cmake
++++ b/tensorflow/lite/tools/cmake/modules/OverridableFetchContent.cmake
+@@ -251,6 +251,7 @@ function(OverridableFetchContent_Declare CONTENT_NAME)
+     URL_HASH
+     URL_MD5
+   )
++  message(FATAL_ERROR "OverridableFetchContent_Declare called by ${CONTENT_NAME}! Failing build.")
+   set(ALL_VALUE_ARGS LICENSE_FILE LICENSE_URL ${OVERRIDABLE_ARGS})
+   cmake_parse_arguments(ARGS
+     ""

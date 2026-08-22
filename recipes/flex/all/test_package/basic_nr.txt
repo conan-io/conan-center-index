@@ -1,0 +1,6 @@
+/* this is a multi line comment
+still in the comment
+and done */
+foo = "bar"
+num = 43
+setting = false

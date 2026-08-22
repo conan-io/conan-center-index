@@ -1,0 +1,13 @@
+diff --git a/src/skiplist.h b/src/skiplist.h
+index 15f5fb7..5c24461 100644
+--- a/src/skiplist.h
++++ b/src/skiplist.h
+@@ -29,7 +29,7 @@ limitations under the License.
+ struct _skiplist_node;
+ 
+ //#define _STL_ATOMIC (1)
+-#ifdef __APPLE__
++#if __has_include(<atomic>)
+     #define _STL_ATOMIC (1)
+ #endif
+ #if defined(_STL_ATOMIC) && defined(__cplusplus)

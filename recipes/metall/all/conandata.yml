@@ -1,0 +1,7 @@
+sources:
+  "0.34":
+    url: "https://github.com/LLNL/metall/archive/refs/tags/v0.34.tar.gz"
+    sha256: "977d08798fbaad405c3793f402b89507c49d9f6e12669719504bbd8dcc145c13"
+  "0.32":
+    url: "https://github.com/LLNL/metall/archive/refs/tags/v0.32.tar.gz"
+    sha256: "2d373689c56fb41c5e995d786a76845f396099cc5f8bcba0c45a0179a621e235"

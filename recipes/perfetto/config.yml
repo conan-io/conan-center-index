@@ -1,0 +1,21 @@
+versions:
+  "52.0":
+    folder: all
+  "50.1":
+    folder: all
+  "48.1":
+    folder: all
+  "47.0":
+    folder: all
+  "45.0":
+    folder: all
+  "44.0":
+    folder: all
+  "43.1":
+    folder: all
+  "42.0":
+    folder: all
+  "41.0":
+    folder: all
+  "40.0":
+    folder: all

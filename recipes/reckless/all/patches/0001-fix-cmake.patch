@@ -1,0 +1,48 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,8 +1,5 @@
+-if(NOT MSVC)
+-    set(CMAKE_CXX_COMPILER_NAMES g++ clang++ icpc c++ cxx)
+-endif()
++cmake_minimum_required(VERSION 3.8)
+ project(reckless LANGUAGES CXX)
+-CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
+ 
+ ################################################################################
+ # Options
+@@ -13,12 +10,6 @@ option(RECKLESS_BUILD_EXAMPLES "Build the examples" OFF)
+ ################################################################################
+ # Add Flags
+ ################################################################################
+-set(CMAKE_CXX_STANDARD 11)
+-if(MSVC)
+-    add_compile_options(/W4 /O3)
+-else()
+-    add_compile_options(-Wall -Wextra -O3 -g)
+-endif()
+ 
+ ################################################################################
+ # Build Libraries
+@@ -52,7 +43,21 @@ else()
+    )
+ endif()
+ 
+-add_library(reckless STATIC ${SRC_LIST})
++find_package(Threads REQUIRED)
++add_library(reckless ${SRC_LIST})
++target_link_libraries(reckless PUBLIC Threads::Threads)
++if(WIN32)
++    target_link_libraries(reckless PRIVATE synchronization)
++endif()
++target_compile_features(reckless PUBLIC cxx_std_11)
++
++include(GNUInstallDirs)
++install(TARGETS reckless
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
++install(DIRECTORY reckless/include/reckless DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ 
+ ################################################################################
+ # Build Examples

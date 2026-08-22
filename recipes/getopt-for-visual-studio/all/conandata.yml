@@ -1,0 +1,7 @@
+sources:
+  "20200201":
+    url: "https://github.com/skandhurkat/Getopt-for-Visual-Studio/archive/6708172892a4d89042b743315e8a52e2d9d5defc.zip"
+    sha256: "9b50026b3f10c3f6a7340e0074a898d6d1105eef068bf98d90af99770375a465"
+patches:
+  "20200201":
+    - patch_file: "patches/0001-allow-usage-in-multiple-compilation-units.patch"

@@ -1,0 +1,13 @@
+diff --git a/pointmatcher/PointCloudGenerator.cpp b/pointmatcher/PointCloudGenerator.cpp
+index d084dd2..739995b 100644
+--- a/pointmatcher/PointCloudGenerator.cpp
++++ b/pointmatcher/PointCloudGenerator.cpp
+@@ -170,7 +170,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::PointCloudGenerator::gener
+     {
+         // Sample random values of theta and phi.
+         const ScalarType phi{ 2.0f * pi * uniformDistribution(randomNumberGenerator) };
+-        const ScalarType radiusSample{ radius * sqrt(uniformDistribution(randomNumberGenerator)) };
++		const ScalarType radiusSample{ static_cast<ScalarType>(radius * sqrt(uniformDistribution(randomNumberGenerator))) };
+ 
+         // Pre-compute values, such as sine and cosine of phi and theta.
+         const ScalarType sinPhi{ std::sin(phi) };

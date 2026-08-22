@@ -1,0 +1,13 @@
+diff --git a/cmake/modules/AddLLVM.cmake b/cmake/modules/AddLLVM.cmake
+index b74adc11ade9..8c70fe15d2a0 100644
+--- a/cmake/modules/AddLLVM.cmake
++++ b/cmake/modules/AddLLVM.cmake
+@@ -2081,7 +2081,7 @@ function(llvm_setup_rpath name)
+   endif()
+ 
+   set_target_properties(${name} PROPERTIES
+-                        BUILD_WITH_INSTALL_RPATH On
++	                BUILD_WITH_INSTALL_RPATH OFF 
+                         INSTALL_RPATH "${_install_rpath}"
+                         ${_install_name_dir})
+ endfunction()

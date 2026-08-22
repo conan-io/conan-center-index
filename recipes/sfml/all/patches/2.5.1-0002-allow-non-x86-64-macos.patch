@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -253,7 +253,7 @@ if(SFML_OS_MACOSX)
+     endif()
+ 
+     # only the default architecture (i.e. 64-bit) is supported
+-    if(NOT CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
++    if(0)
+         message(FATAL_ERROR "Only 64-bit architecture is supported")
+     endif()
+ 

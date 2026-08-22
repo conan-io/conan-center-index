@@ -1,0 +1,4 @@
+sources:
+  "3.0.1":
+    url: "https://github.com/martin-olivier/dylib/archive/refs/tags/v3.0.1.tar.gz"
+    sha256: "dfef3f0aeccf4ad847a5cd02f0b0bff086b4fac6e764e33abd82d3c85cfb578c"

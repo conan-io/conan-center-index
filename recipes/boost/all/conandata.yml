@@ -1,0 +1,209 @@
+sources:
+  "1.91.0":
+    url:
+      - "https://archives.boost.io/release/1.91.0/source/boost_1_91_0.tar.bz2"
+    sha256: "de5e6b0e4913395c6bdfa90537febd9028ea4c0735d2cdb0cd9b45d5f51264f5"
+  "1.90.0":
+    url:
+      - "https://archives.boost.io/release/1.90.0/source/boost_1_90_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.90.0/boost_1_90_0.tar.bz2"
+    sha256: "49551aff3b22cbc5c5a9ed3dbc92f0e23ea50a0f7325b0d198b705e8ee3fc305"
+  "1.89.0":
+    url:
+      - "https://archives.boost.io/release/1.89.0/source/boost_1_89_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.89.0/boost_1_89_0.tar.bz2"
+    sha256: "85a33fa22621b4f314f8e85e1a5e2a9363d22e4f4992925d4bb3bc631b5a0c7a"
+  "1.88.0":
+    url:
+      - "https://archives.boost.io/release/1.88.0/source/boost_1_88_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.88.0/boost_1_88_0.tar.bz2"
+    sha256: "46d9d2c06637b219270877c9e16155cbd015b6dc84349af064c088e9b5b12f7b"
+  "1.87.0":
+    url:
+      - "https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.87.0/boost_1_87_0.tar.bz2"
+    sha256: "af57be25cb4c4f4b413ed692fe378affb4352ea50fbe294a11ef548f4d527d89"
+  "1.86.0":
+    url:
+      - "https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.86.0/boost_1_86_0.tar.bz2"
+    sha256: "1bed88e40401b2cb7a1f76d4bab499e352fa4d0c5f31c0dbae64e24d34d7513b"
+  "1.85.0":
+    url:
+      - "https://archives.boost.io/release/1.85.0/source/boost_1_85_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.85.0/boost_1_85_0.tar.bz2"
+    sha256: "7009fe1faa1697476bdc7027703a2badb84e849b7b0baad5086b087b971f8617"
+  "1.84.0":
+    url:
+      - "https://archives.boost.io/release/1.84.0/source/boost_1_84_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.84.0/boost_1_84_0.tar.bz2"
+    sha256: "cc4b893acf645c9d4b698e9a0f08ca8846aa5d6c68275c14c3e7949c24109454"
+  "1.83.0":
+    url:
+      - "https://archives.boost.io/release/1.83.0/source/boost_1_83_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.83.0/boost_1_83_0.tar.bz2"
+    sha256: "6478edfe2f3305127cffe8caf73ea0176c53769f4bf1585be237eb30798c3b8e"
+  "1.82.0":
+    url:
+      - "https://archives.boost.io/release/1.82.0/source/boost_1_82_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.82.0/boost_1_82_0.tar.bz2"
+    sha256: "a6e1ab9b0860e6a2881dd7b21fe9f737a095e5f33a3a874afc6a345228597ee6"
+  "1.81.0":
+    url:
+      - "https://archives.boost.io/release/1.81.0/source/boost_1_81_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.81.0/boost_1_81_0.tar.bz2"
+    sha256: "71feeed900fbccca04a3b4f2f84a7c217186f28a940ed8b7ed4725986baf99fa"
+  "1.80.0":
+    url:
+      - "https://archives.boost.io/release/1.80.0/source/boost_1_80_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.80.0/boost_1_80_0.tar.bz2"
+    sha256: "1e19565d82e43bc59209a168f5ac899d3ba471d55c7610c677d4ccf2c9c500c0"
+  "1.79.0":
+    url:
+      - "https://archives.boost.io/release/1.79.0/source/boost_1_79_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.79.0/boost_1_79_0.tar.bz2"
+    sha256: "475d589d51a7f8b3ba2ba4eda022b170e562ca3b760ee922c146b6c65856ef39"
+  "1.78.0":
+    url:
+      - "https://archives.boost.io/release/1.78.0/source/boost_1_78_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.78.0/boost_1_78_0.tar.bz2"
+    sha256: "8681f175d4bdb26c52222665793eef08490d7758529330f98d3b29dd0735bccc"
+patches:
+  "1.91.0":
+    - patch_file: "patches/1.88.0-locale-iconv-library-option.patch"
+      patch_description: "Optional flag to specify iconv from either libc of libiconv"
+      patch_type: "conan"
+  "1.90.0":
+    - patch_file: "patches/1.88.0-locale-iconv-library-option.patch"
+      patch_description: "Optional flag to specify iconv from either libc of libiconv"
+      patch_type: "conan"
+  "1.89.0":
+    - patch_file: "patches/1.88.0-locale-iconv-library-option.patch"
+      patch_description: "Optional flag to specify iconv from either libc of libiconv"
+      patch_type: "conan"
+  "1.88.0":
+    - patch_file: "patches/1.88.0-locale-iconv-library-option.patch"
+      patch_description: "Optional flag to specify iconv from either libc of libiconv"
+      patch_type: "conan"
+  "1.87.0":
+    - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
+      patch_description: "Optional flag to specify iconv from either libc of libiconv"
+      patch_type: "conan"
+    - patch_file: "patches/1.87.0-boost-fiber-fix-property-numa.patch"
+      patch_description: "Fix b2 numa=on property for Boost.Fiber"
+      patch_type: "official"
+      patch_source: https://github.com/boostorg/fiber/commit/238487b543e8863c647d31a82ccfc3fa11a960d9"
+  "1.86.0":
+    - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
+      patch_description: "Optional flag to specify iconv from either libc of libiconv"
+      patch_type: "conan"
+  "1.85.0":
+    - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
+      patch_description: "Optional flag to specify iconv from either libc of libiconv"
+      patch_type: "conan"
+    - patch_file: "patches/1.85.0-container-aliasing-violation-fix.patch"
+      patch_description: "Fix aliasing violation in boost::container"
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/container/commit/20ad12f20e661978e90dc7f36d8ab8ac05e5a5a9"
+  "1.84.0":
+    - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
+      patch_description: "Optional flag to specify iconv from either libc of libiconv"
+      patch_type: "conan"
+    - patch_file: "patches/1.84.0-reimplement-string_set-as-any-string.patch"
+      patch_description: "Fix compilation with cppstd=20 on libcxx platforms (e.g. MacOS)"
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/locale/commit/c5e8f02c903696a213fc4b710f6740ccd1f07f4e"
+  "1.83.0":
+    - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
+      patch_description: "Optional flag to specify iconv from either libc of libiconv"
+      patch_type: "conan"
+    - patch_file: "patches/1.83.0-locale-msvc.patch"
+      patch_description: "Fix compilation on windows when NOMINMAX is not defined"
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/locale/pull/189"
+  "1.82.0":
+    - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
+      patch_description: "Optional flag to specify iconv from either libc of libiconv"
+      patch_type: "conan"
+  "1.81.0":
+    - patch_file: "patches/boost_1_77_mpi_check.patch"
+      patch_description: "Fails the build when mpi is not configured"
+      patch_type: "conan"
+    - patch_file: "patches/1.81.0-locale-fail-on-missing-backend.patch"
+      patch_description: "Fails the build when there is no iconv backend"
+      patch_type: "conan"
+  "1.80.0":
+    - patch_file: "patches/1.80.0-locale-fail-on-missing-backend.patch"
+      patch_description: "Fails the build when there is no iconv backend"
+      patch_type: "conan"
+    - patch_file: "patches/boost_1_77_mpi_check.patch"
+      patch_description: "Fails the build when mpi is not configured"
+      patch_type: "conan"
+    - patch_file: "patches/1.80.0-0001-filesystem-win-fix-dir-it-net-share.patch"
+      patch_description: "Directory iterators may fail to construct for a network share on Windows prior to 10"
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/filesystem/issues/245"
+    - patch_file: "patches/1.80.0-0002-filesystem-fix-weakly-canonical-long-path.patch"
+      patch_description: 'On Windows, weakly_canonical fails to process paths that start with the "\\?\" prefix'
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/filesystem/issues/247"
+    - patch_file: "patches/1.80.0-0003-unordered-valid-after-move.patch"
+      patch_description: "Containers are not in a valid state after moving"
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/unordered/issues/139"
+    - patch_file: "patches/1.80.0-0004-filesystem-posix-fix-no-at-apis-missing-include.patch"
+      patch_description: "On POSIX systems that don't support *at APIs, compilation fails due to a missing include"
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/filesystem/issues/250"
+    - patch_file: "patches/1.80.0-0005-config-libcpp15.patch"
+      patch_description: "Support for libcpp15 which removes std::unary_function and std::binary_function."
+      patch_type: "portability"
+      patch_source: "https://www.boost.org/patches/1_80_0/0005-config-libcpp15.patch"
+    - patch_file: "patches/1.80.0-0006-unordered-msvc-rtcc.patch"
+      patch_description: "Fix MSVC /RTCc build runtime failures."
+      patch_type: "official"
+      patch_source: "https://www.boost.org/patches/1_80_0/0006-unordered-msvc-rtcc.patch"
+  "1.79.0":
+    - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
+      patch_description: "Fails the build when there is no iconv backend"
+      patch_type: "conan"
+    - patch_file: "patches/boost_1_77_mpi_check.patch"
+      patch_description: "Fails the build when mpi is not configured"
+      patch_type: "conan"
+    - patch_file: "patches/1.69.0-locale-no-system.patch"
+      patch_description: "This library links to boost_system, even though that library is header-only"
+      patch_type: "conan"
+    - patch_file: "patches/1.77.0-fiber-mingw.patch"
+      patch_description: "fix layout=versioned for clang@Macos + mingw@Windows"
+      patch_type: "conan"
+    - patch_file: "patches/1.79.0-0001-json-array-erase-relocate.patch"
+      patch_description: "json::array::erase(it) seg fault on linux"
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/json/issues/692"
+    - patch_file: "patches/1.79.0-smart_ptr_cw_ppc_msync.patch"
+      patch_description: "Use msync for PowerPC architectures"
+      patch_type: "portability"
+    - patch_file: "patches/1.79.0-geometry_no_rtti.patch"
+      patch_description: "Fix access specifier preventing use of experimental iterators. Allow more granular control over enabled experimental features."
+      patch_type: "portability"
+      patch_source: "https://github.com/boostorg/geometry/discussions/1041"
+  "1.78.0":
+    - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
+      patch_description: "Fails the build when there is no iconv backend"
+      patch_type: "conan"
+    - patch_file: "patches/boost_1_77_mpi_check.patch"
+      patch_description: "Fails the build when mpi is not configured"
+      patch_type: "conan"
+    - patch_file: "patches/1.69.0-locale-no-system.patch"
+      patch_description: "This library links to boost_system, even though that library is header-only"
+      patch_type: "conan"
+    - patch_file: "patches/1.77.0-type_erasure-no-system.patch"
+      patch_description: "This library links to boost_system, even though that library is header-only"
+      patch_type: "conan"
+    - patch_file: "patches/1.77.0-fiber-mingw.patch"
+      patch_description: "fix layout=versioned for clang@Macos + mingw@Windows"
+      patch_type: "conan"
+    - patch_file: "patches/1.78.0-b2-fix-install.patch"
+      patch_description: "Don't skip install targets if there's <build>no in ureqs"
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/build/pull/113"

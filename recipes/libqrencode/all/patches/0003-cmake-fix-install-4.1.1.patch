@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 773e037..9ffd002 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -133,7 +133,7 @@ configure_file(libqrencode.pc.in libqrencode.pc @ONLY)
+ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/qrencode.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libqrencode.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+ install(FILES qrencode.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+-install(TARGETS qrencode DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(TARGETS qrencode ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+ ## Build utility tools
+ if(WITH_TOOLS)

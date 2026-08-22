@@ -1,0 +1,64 @@
+# this package's recipe relies on version suffixes to handle imgui's docking branch.
+# Suffix: -docking for docking branch sources
+sources:
+  "1.92.9b":
+    core:
+      url: "https://github.com/ocornut/imgui/archive/v1.92.9b.tar.gz"
+      sha256: "21d8a0a565e85dce943e375db00812c2f3f0ab21f3f0f7964e364a63422d7f99"
+    testengine:
+      url: "https://github.com/ocornut/imgui_test_engine/archive/v1.92.9.tar.gz"
+      sha256: "6f48d2eeedc60c7857c4cc7ee7129ade50a6a932bfeb66b5e116bd2f6733af2b"
+  "1.92.9b-docking":
+    core:
+      url: "https://github.com/ocornut/imgui/archive/v1.92.9b-docking.tar.gz"
+      sha256: "90ded916bd57db2e0e171b6b098940a47c6f5042725dcdc67fb19940ca8bfdcc"
+    testengine:
+      url: "https://github.com/ocornut/imgui_test_engine/archive/v1.92.9.tar.gz"
+      sha256: "6f48d2eeedc60c7857c4cc7ee7129ade50a6a932bfeb66b5e116bd2f6733af2b"
+  "1.91.8":
+    core:
+      url: "https://github.com/ocornut/imgui/archive/v1.91.8.tar.gz"
+      sha256: "db3a2e02bfd6c269adf0968950573053d002f40bdfb9ef2e4a90bce804b0f286"
+    testengine:
+      url: "https://github.com/ocornut/imgui_test_engine/archive/v1.91.8.tar.gz"
+      sha256: "bdfc31cb819bd6e4df2d5da0316edf92b1011d1c4046293aafd9ae14106570e2"
+  "1.91.8-docking":
+    core:
+      url: "https://github.com/ocornut/imgui/archive/v1.91.8-docking.tar.gz"
+      sha256: "55f5e65abea635f2a8bfa9a92cd966448a363a262cf6dead7cc662fb0ab37612"
+    testengine:
+      url: "https://github.com/ocornut/imgui_test_engine/archive/v1.91.8.tar.gz"
+      sha256: "bdfc31cb819bd6e4df2d5da0316edf92b1011d1c4046293aafd9ae14106570e2"
+  "1.90.5":
+    core:
+      url: "https://github.com/ocornut/imgui/archive/v1.90.5.tar.gz"
+      sha256: "e94b48dba7311c85ba8e3e6fe7c734d76a0eed21b2b42c5180fd5706d1562241"
+    testengine:
+      url: "https://github.com/ocornut/imgui_test_engine/archive/v1.90.5.tar.gz"
+      sha256: "79339246d8c919c5926df0a7bee99be585ebaf67cdaba89a0ac314b1f7846f92"
+  "1.90.5-docking":
+    core:
+      url: "https://github.com/ocornut/imgui/archive/v1.90.5-docking.tar.gz"
+      sha256: "8a5e1e594d6c8552e46e4c1ba8dd9deb51262067f04937904babc04384533ccc"
+    testengine:
+      url: "https://github.com/ocornut/imgui_test_engine/archive/v1.90.5.tar.gz"
+      sha256: "79339246d8c919c5926df0a7bee99be585ebaf67cdaba89a0ac314b1f7846f92"
+  "1.87":
+    core:
+      url: "https://github.com/ocornut/imgui/archive/v1.87.tar.gz"
+      sha256: "b54ceb35bda38766e36b87c25edf7a1cd8fd2cb8c485b245aedca6fb85645a20"
+  "1.85":
+    core:
+      url: "https://github.com/ocornut/imgui/archive/v1.85.tar.gz"
+      sha256: "7ed49d1f4573004fa725a70642aaddd3e06bb57fcfe1c1a49ac6574a3e895a77"
+patches:
+  "1.92.4":
+    - patch_file: "patches/1.92.4-0001-static-linking-bugfix-backport.patch"
+      patch_description: "Add missing export for a function needed by the backends"
+      patch_source: "https://github.com/ocornut/imgui/pull/9016"
+      patch_type: "backport"
+  "1.92.4-docking":
+    - patch_file: "patches/1.92.4-docking-0001-static-linking-bugfix-backport.patch"
+      patch_description: "Add missing export for a function needed by the backends"
+      patch_source: "https://github.com/ocornut/imgui/pull/9016"
+      patch_type: "backport"

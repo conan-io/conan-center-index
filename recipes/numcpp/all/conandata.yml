@@ -1,0 +1,37 @@
+sources:
+  "2.14.0":
+    url: "https://github.com/dpilger26/NumCpp/archive/Version_2.14.0.tar.gz"
+    sha256: "f7d3a11d12f3209c95c098d0566e6aee072cfc493f1e9376796c91520958686f"
+  "2.12.1":
+    url: "https://github.com/dpilger26/NumCpp/archive/Version_2.12.1.tar.gz"
+    sha256: "f462ecd27126e6057b31fa38f1f72cef2c4223c9d848515412970714a5bb6d16"
+  "2.12.0":
+    url: "https://github.com/dpilger26/NumCpp/archive/Version_2.12.0.tar.gz"
+    sha256: "4c7266d405c8058f87467732129362b5a5c810d36df91e8655defa4d93fc141b"
+  "2.11.0":
+    url: "https://github.com/dpilger26/NumCpp/archive/Version_2.11.0.tar.gz"
+    sha256: "ea675775c3535589f268224efa31ae6003a68e95a465e92c99496a0c9366bdc2"
+  "2.10.1":
+    url: "https://github.com/dpilger26/NumCpp/archive/Version_2.10.1.tar.gz"
+    sha256: "847382a780bea2a9b804c1835dcc5f9addabd0d1e3eb9c8339cde9422a5008d6"
+  "2.9.0":
+    url: "https://github.com/dpilger26/NumCpp/archive/Version_2.9.0.tar.gz"
+    sha256: "1c15e23beb4f3d4933d7a6e8d5eb0259e825685973c8f0219485d3f606e5378a"
+  "2.8.0":
+    url: "https://github.com/dpilger26/NumCpp/archive/Version_2.8.0.tar.gz"
+    sha256: "3868cf24b0981d5b5bfeaea65719f541f82d331ef7b79ba0d73cedb4dc7ddd47"
+  "2.7.0":
+    url: "https://github.com/dpilger26/NumCpp/archive/Version_2.7.0.tar.gz"
+    sha256: "3805ef996ba73502a6525c9ddc529ebd0fa6967385e508db71843c08c50105b0"
+  "2.6.2":
+    url: "https://github.com/dpilger26/NumCpp/archive/Version_2.6.2.tar.gz"
+    sha256: "6c32dd72cc2ccaf7efbba394305c7a3e2ccf1b763d3688de7e253f9ca9b3cf4a"
+  "2.5.1":
+    url: "https://github.com/dpilger26/NumCpp/archive/Version_2.5.1.tar.gz"
+    sha256: "0677907a90e96a468a9ea4e702940833570c2419d9a822724ee708dddd3c422e"
+  "2.4.2":
+    url: "https://github.com/dpilger26/NumCpp/archive/Version_2.4.2.tar.gz"
+    sha256: "8da0494552796b76e5e9ef691176fa7cb27bc52fec4019da20bfd8fb7ba00b91"
+  "2.4.1":
+    url: "https://github.com/dpilger26/NumCpp/archive/Version_2.4.1.zip"
+    sha256: 5a98a7871ea7f56afec4b975a7b1ad019d729c7ea08c29ac0d5b0471c798c5f0

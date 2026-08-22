@@ -1,0 +1,4 @@
+sources:
+  "1.4.350.0":
+    url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/refs/tags/vulkan-sdk-1.4.350.0.tar.gz"
+    sha256: "4905ae2d2424cccdd88554b78f6f53e3469da17433c3923d049a167ea674f50e"

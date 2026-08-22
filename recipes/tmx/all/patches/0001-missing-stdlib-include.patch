@@ -1,0 +1,22 @@
+From 2d20ed631618f5e9ca89d90147aab8157989f5da Mon Sep 17 00:00:00 2001
+From: Connor Rigby <connorr@hey.com>
+Date: Thu, 18 Jan 2024 18:40:53 -0700
+Subject: [PATCH] tmx_mem: add stdlib.h for free and realloc
+
+Signed-off-by: Connor Rigby <connorr@hey.com>
+---
+ src/tmx_mem.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/tmx_mem.c b/src/tmx_mem.c
+index 5ff31c9..b421af6 100644
+--- a/src/tmx_mem.c
++++ b/src/tmx_mem.c
+@@ -2,6 +2,7 @@
+ 	Node allocation
+ */
+ 
++#include <stdlib.h>
+ #include <string.h>
+ 
+ #include <libxml/xmlmemory.h>

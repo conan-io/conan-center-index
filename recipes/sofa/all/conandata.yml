@@ -1,0 +1,5 @@
+sources:
+  "20231011":
+    url: "http://www.iausofa.org/s/sofa_c-20231011tar.gz"
+    sha256: "d9c10833cae8b4d9361a0ffda31ec361fd1262362025bec4d4e51a880150ace2"
+    filename: sofa_c-20231011.tar.gz

@@ -1,0 +1,12 @@
+sources:
+  "cci.20230909":
+    url: "https://github.com/crayzeewulf/libserial/archive/ee1992dc3c5dc41a0e18e2d1dad18c103eb405ec.tar.gz"
+    sha256: "2b83141630c76e119b19d85958c8685efab6eff3e2af3435933b8f2ac147f62a"
+  "cci.20200930":
+    url: "https://github.com/crayzeewulf/libserial/archive/1d1e47a2faae0470f93eb291263b0ce7ea119a81.tar.gz"
+    sha256: "a433b04bd42e8b4504e5e1fbe7ec22b648f2872d3d125e58c17b9c6c1b171bba"
+patches:
+  "cci.20200930":
+    - patch_file: "patches/0001-add-cstdint.patch"
+      patch_description: "add cstdint for uint8_t"
+      patch_type: "portability"

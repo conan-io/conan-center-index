@@ -1,0 +1,21 @@
+sources:
+  "1.24.3":
+    url:
+      - "https://github.com/kcat/openal-soft/releases/download/1.24.3/openal-soft-1.24.3.tar.bz2"
+      - "https://openal-soft.org/openal-releases/openal-soft-1.24.3.tar.bz2"
+    sha256: "cb5e6197a1c0da0edcf2a81024953cc8fa8545c3b9474e48c852af709d587892"
+  "1.23.1":
+    url:
+      - "https://github.com/kcat/openal-soft/releases/download/1.23.1/openal-soft-1.23.1.tar.bz2"
+      - "https://openal-soft.org/openal-releases/openal-soft-1.23.1.tar.bz2"
+    sha256: "796f4b89134c4e57270b7f0d755f0fa3435b90da437b745160a49bd41c845b21"
+  "1.22.2":
+    url:
+      - "https://github.com/kcat/openal-soft/releases/download/1.22.2/openal-soft-1.22.2.tar.bz2"
+      - "https://openal-soft.org/openal-releases/openal-soft-1.22.2.tar.bz2"
+    sha256: "ae94cc95cda76b7cc6e92e38c2531af82148e76d3d88ce996e2928a1ea7c3d20"
+patches:
+  "1.22.2":
+    - patch_file: "patches/1.22.2-0001-fix-al-optional-in-if-compile-error.patch"
+      patch_source: "https://github.com/kcat/openal-soft/commit/650a6d49e9a511d005171940761f6dd6b440ee66"
+    - patch_file: "patches/1.22.2-0002-fix-pulseaudio-find-package-vars.patch"

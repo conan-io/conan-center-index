@@ -1,0 +1,13 @@
+--- src/enchant.h
++++ src/enchant.h
+@@ -34,6 +34,10 @@
+ #include <stdint.h> /* for uint32_t */
+ #include <sys/types.h> /* for size_t, ssize_t */
+ 
++#ifdef _WIN32
++# include <BaseTsd.h>
++# define ssize_t SSIZE_T
++#endif
+ 
+ #ifdef __cplusplus
+ extern "C" {

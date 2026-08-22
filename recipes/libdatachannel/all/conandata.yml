@@ -1,0 +1,4 @@
+sources:
+  "0.24.0":
+    url: "https://github.com/paullouisageneau/libdatachannel/archive/refs/tags/v0.24.0.tar.gz"
+    sha256: "62a4d1fb43df73549bbed9d82161d2bf8b1396bee2a50759b9d8a8d03e62ab12"

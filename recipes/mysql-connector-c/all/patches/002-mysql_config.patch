@@ -1,0 +1,55 @@
+--- scripts/CMakeLists.txt
++++ scripts/CMakeLists.txt
+@@ -50,6 +50,8 @@ IF(POLICY CMP0007)
+   CMAKE_POLICY(SET CMP0007 OLD)
+ ENDIF()
+ 
++set(REQUIRE_STDCPP "" CACHE STRING "c++ library")
++
+ # Extract dependencies using CMake's internal ${target}_LIB_DEPENDS variable
+ # returned string in ${var} is can be passed to linker's command line
+ MACRO(EXTRACT_LINK_LIBRARIES target var)
+@@ -72,6 +74,9 @@ MACRO(EXTRACT_LINK_LIBRARIES target var) 
+         ENDIF()
+       ENDIF()
+     ENDFOREACH()
++    IF(REQUIRE_STDCPP)
++        SET(${var} "${${var}}-l${REQUIRE_STDCPP}")
++    ENDIF()
+   ENDIF()
+   IF(MSVC)
+     STRING(REPLACE "-l" "" ${var} "${${var}}")
+@@ -79,6 +84,7 @@ MACRO(EXTRACT_LINK_LIBRARIES target var)
+ ENDMACRO()
+ 
+ EXTRACT_LINK_LIBRARIES(mysqlclient CLIENT_LIBS)
++GET_PROPERTY(LIBMYSQL_OS_OUTPUT_NAME TARGET mysqlclient PROPERTY OUTPUT_NAME)
+ 
+ SET(LIBMYSQLD_LIBS_USAGE "
+         --libmysqld-libs [$embedded_libs]")
+diff --git a/source/source_subfolder/scripts/mysql_config.pl.in b/source/source_subfolder/scripts/mysql_config.pl.in
+index 54e3f76..b3c10c9 100644
+--- scripts/mysql_config.pl.in
++++ scripts/mysql_config.pl.in
+@@ -184,7 +184,7 @@ else
+ 
+ 
+ my $flags;
+-$flags->{libs} = [@lib_opts, qw(@CONFIG_CLIENT_LIBS@)];
++$flags->{libs} = [@lib_opts, qw(@CLIENT_LIBS@)];
+ $flags->{embedded_libs} = [@lib_e_opts, qw(@CONFIG_EMBEDD_LIBS@)];
+ 
+ $flags->{include} = ["-I$pkgincludedir"];
+diff --git a/source/source_subfolder/scripts/mysql_config.sh b/source/source_subfolder/scripts/mysql_config.sh
+index a900cc6..b8118c1 100644
+--- scripts/mysql_config.sh
++++ scripts/mysql_config.sh
+@@ -111,7 +111,7 @@ fi
+ 
+ # Create options 
+ libs="-L$pkglibdir@RPATH_OPTION@"
+-libs="$libs -l@LIBMYSQL_OS_OUTPUT_NAME@ @CONFIG_CLIENT_LIBS@"
++libs="$libs -l@LIBMYSQL_OS_OUTPUT_NAME@ @CLIENT_LIBS@"
+ embedded_libs="-L$pkglibdir@RPATH_OPTION@"
+ embedded_libs="$embedded_libs -l@LIBEMBED_OS_OUTPUT_NAME@ @CONFIG_EMBEDD_LIBS@"
+ 

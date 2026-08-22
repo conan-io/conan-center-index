@@ -1,0 +1,12 @@
+diff --git a/libgphoto2_port/libusb1/libusb1.c b/libgphoto2_port/libusb1/libusb1.c
+index d3da30f..1342855 100644
+--- a/libgphoto2_port/libusb1/libusb1.c
++++ b/libgphoto2_port/libusb1/libusb1.c
+@@ -20,6 +20,7 @@
+  * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+  * Boston, MA  02110-1301  USA
+  */
++#define _DARWIN_C_SOURCE
+ #include "config.h"
+ #include <gphoto2/gphoto2-port-library.h>
+ 

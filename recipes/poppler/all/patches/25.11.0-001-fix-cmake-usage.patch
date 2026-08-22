@@ -1,0 +1,42 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f10f9b0..461ee6a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -47,7 +47,6 @@ string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VER
+ set(POPPLER_MICRO_VERSION "0")
+ set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION_STRING}.${POPPLER_MICRO_VERSION}")
+ 
+-set(CMAKE_CXX_STANDARD 20)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+ set(CMAKE_C_STANDARD 17)
+@@ -94,7 +93,6 @@ else()
+ endif()
+ option(EXTRA_WARN "Enable extra compile warnings" OFF)
+ 
+-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+ 
+ set(TESTDATADIR "${CMAKE_SOURCE_DIR}/../test" CACHE STRING "Specify test data dir.")
+ if(NOT (EXISTS ${TESTDATADIR} AND EXISTS ${TESTDATADIR}/test-poppler.c))
+@@ -165,7 +163,7 @@ endif()
+ 
+ macro(find_soft_mandatory_package _enable_option _package_name _package_version)
+   if(${_enable_option})
+-    find_package(${_package_name} ${_package_version})
++    find_package(${_package_name} CONFIG ${_package_version} REQUIRED)
+     if(NOT ${_package_name}_FOUND)
+       MESSAGE(FATAL_ERROR "Could not find the ${_package_version} version of ${_package_name}. If you're not interested in the features it provides set the cmake ${_enable_option} option to OFF")
+     endif()
+diff --git a/glib/CMakeLists.txt b/glib/CMakeLists.txt
+index 9499381..3ca3df3 100644
+--- a/glib/CMakeLists.txt
++++ b/glib/CMakeLists.txt
+@@ -95,7 +95,7 @@ if(MINGW AND BUILD_SHARED_LIBS)
+     get_target_property(POPPLER_GLIB_SOVERSION poppler-glib SOVERSION)
+     set_target_properties(poppler-glib PROPERTIES SUFFIX "-${POPPLER_GLIB_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+ endif()
+-target_link_libraries(poppler-glib poppler PkgConfig::GLIB2 ${CAIRO_LIBRARIES} Freetype::Freetype)
++target_link_libraries(poppler-glib poppler glib::glib-2.0 glib::gobject-2.0 glib::gio-2.0 cairo::cairo Freetype::Freetype)
+ target_include_directories(poppler-glib SYSTEM PRIVATE ${CAIRO_INCLUDE_DIRS})
+ install(TARGETS poppler-glib RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 

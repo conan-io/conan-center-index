@@ -1,0 +1,14 @@
+sources:
+  "3.9.6":
+    url:
+      - "https://dlcdn.apache.org/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz"
+      - "https://archive.apache.org/dist/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz"
+    sha256: "6eedd2cae3626d6ad3a5c9ee324bd265853d64297f07f033430755bd0e0c3a4b"
+  "3.9.4":
+    url:
+      - "https://dlcdn.apache.org/maven/maven-3/3.9.4/binaries/apache-maven-3.9.4-bin.tar.gz"
+      - "https://archive.apache.org/dist/maven/maven-3/3.9.4/binaries/apache-maven-3.9.4-bin.tar.gz"
+    sha256: "ff66b70c830a38d331d44f6c25a37b582471def9a161c93902bac7bea3098319"
+  "3.9.2":
+    url: "https://archive.apache.org/dist/maven/maven-3/3.9.2/binaries/apache-maven-3.9.2-bin.tar.gz"
+    sha256: "809ef3220c6d179195c06c324cb9a6d34d8ecba566c5cfd8eb83167bc034117d"

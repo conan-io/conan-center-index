@@ -1,0 +1,76 @@
+commit 0b5d67c0f738aa2b0f3e658d26c638434ee518f8
+Author: Stephen Sinclair <radarsat1@gmail.com>
+Date:   Mon Jan 13 18:47:16 2020 +0100
+
+    Add a separate LICENSE file.
+
+diff --git a/LICENSE b/LICENSE
+new file mode 100644
+index 0000000..97d50ab
+--- /dev/null
++++ b/LICENSE
+@@ -0,0 +1,27 @@
++
++RtMidi: realtime MIDI i/o C++ classes
++Copyright (c) 2003-2019 Gary P. Scavone
++
++Permission is hereby granted, free of charge, to any person
++obtaining a copy of this software and associated documentation files
++(the "Software"), to deal in the Software without restriction,
++including without limitation the rights to use, copy, modify, merge,
++publish, distribute, sublicense, and/or sell copies of the Software,
++and to permit persons to whom the Software is furnished to do so,
++subject to the following conditions:
++
++The above copyright notice and this permission notice shall be
++included in all copies or substantial portions of the Software.
++
++Any person wishing to distribute modifications to the Software is
++asked to send the modifications to the original developer so that
++they can be incorporated into the canonical version.  This is,
++however, not a binding provision of this license.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
++EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
++MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
++IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
++ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
++CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
++WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+diff --git a/README.md b/README.md
+index c43158d..9f9304c 100644
+--- a/README.md
++++ b/README.md
+@@ -36,31 +36,4 @@ For complete documentation on RtMidi, see the `doc` directory of the distributio
+ 
+ ## Legal and ethical
+ 
+-The RtMidi license is similar to the MIT License, with the added *feature* that modifications be sent to the developer.
+-
+-    RtMidi: realtime MIDI i/o C++ classes
+-    Copyright (c) 2003-2019 Gary P. Scavone
+-
+-    Permission is hereby granted, free of charge, to any person
+-    obtaining a copy of this software and associated documentation files
+-    (the "Software"), to deal in the Software without restriction,
+-    including without limitation the rights to use, copy, modify, merge,
+-    publish, distribute, sublicense, and/or sell copies of the Software,
+-    and to permit persons to whom the Software is furnished to do so,
+-    subject to the following conditions:
+-
+-    The above copyright notice and this permission notice shall be
+-    included in all copies or substantial portions of the Software.
+-
+-    Any person wishing to distribute modifications to the Software is
+-    asked to send the modifications to the original developer so that
+-    they can be incorporated into the canonical version.  This is,
+-    however, not a binding provision of this license.
+-
+-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+-    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+-    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+-    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+-    ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+-    CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+-    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
++The RtMidi license is similar to the MIT License, with the added *feature* that modifications be sent to the developer.  Please see [LICENSE](LICENSE).

@@ -1,0 +1,56 @@
+diff --git a/src/types.c b/src/types.c
+index c1c27f3..d5d52bb 100644
+--- a/src/types.c
++++ b/src/types.c
+@@ -31,6 +31,8 @@
+ #include <ffi.h>
+ #include <ffi_common.h>
+ 
++#include <complex.h>
++
+ /* Type definitions */
+ 
+ #define FFI_TYPEDEF(name, type, id, maybe_const)\
+@@ -45,17 +47,17 @@ maybe_const ffi_type ffi_type_##name = {	\
+   id, NULL					\
+ }
+ 
+-#define FFI_COMPLEX_TYPEDEF(name, type, maybe_const)	\
++#define FFI_COMPLEX_TYPEDEF(name, complex_type, maybe_const)	\
+ static ffi_type *ffi_elements_complex_##name [2] = {	\
+ 	(ffi_type *)(&ffi_type_##name), NULL		\
+ };							\
+ struct struct_align_complex_##name {			\
+   char c;						\
+-  _Complex type x;					\
++  complex_type x;					\
+ };							\
+ FFI_EXTERN						\
+ maybe_const ffi_type ffi_type_complex_##name = {	\
+-  sizeof(_Complex type),				\
++  sizeof(complex_type),				\
+   offsetof(struct struct_align_complex_##name, x),	\
+   FFI_TYPE_COMPLEX,					\
+   (ffi_type **)ffi_elements_complex_##name		\
+@@ -99,8 +101,18 @@ const ffi_type ffi_type_longdouble = { 16, 16, 4, NULL };
+ FFI_TYPEDEF(longdouble, long double, FFI_TYPE_LONGDOUBLE, FFI_LDBL_CONST);
+ #endif
+ 
++#ifdef _MSC_VER
++#  define FLOAT_COMPLEX _C_float_complex
++#  define DOUBLE_COMPLEX _C_double_complex
++#  define LDOUBLE_COMPLEX _C_ldouble_complex
++#else
++#  define FLOAT_COMPLEX float _Complex
++#  define DOUBLE_COMPLEX double _Complex
++#  define LDOUBLE_COMPLEX long double _Complex
++#endif
++
+ #ifdef FFI_TARGET_HAS_COMPLEX_TYPE
+-FFI_COMPLEX_TYPEDEF(float, float, const);
+-FFI_COMPLEX_TYPEDEF(double, double, const);
+-FFI_COMPLEX_TYPEDEF(longdouble, long double, FFI_LDBL_CONST);
++FFI_COMPLEX_TYPEDEF(float, FLOAT_COMPLEX, const);
++FFI_COMPLEX_TYPEDEF(double, DOUBLE_COMPLEX, const);
++FFI_COMPLEX_TYPEDEF(longdouble, LDOUBLE_COMPLEX, FFI_LDBL_CONST);
+ #endif

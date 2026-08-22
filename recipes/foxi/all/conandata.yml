@@ -1,0 +1,7 @@
+sources:
+  "cci.20210217":
+    url: "https://github.com/houseroad/foxi/archive/bd6feb6d0d3fc903df42b4feb82a602a5fcb1fd5.zip"
+    sha256: "1485f400ba468664884287b6b94e0164844e28a100d3795ada4361d2c34832e1"
+patches:
+  "cci.20210217":
+    - patch_file: "patches/fix-conflicting-types.patch"

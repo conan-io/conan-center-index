@@ -1,0 +1,40 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -25,7 +25,7 @@
+ #
+ # Minimum required version of cmake 
+ #
+-CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
++CMAKE_MINIMUM_REQUIRED( VERSION 3.15 )
+ 
+ #
+ # Project name and programming languages used
+@@ -179,7 +179,6 @@
+ 	${PROJECT_SOURCE_DIR}
+ 	${PROJECT_SOURCE_DIR}/acado
+ 	${PROJECT_SOURCE_DIR}/external_packages
+-	${PROJECT_SOURCE_DIR}/external_packages/qpOASES-3.2.0/include
+ 	${PROJECT_BINARY_DIR}
+ )
+ 
+@@ -198,11 +197,6 @@
+ ################################################################################
+ 
+ IF (NOT ACADO_BUILD_CGT_ONLY)
+-	#
+-	# Build qpOASES library
+-	#
+-	ADD_SUBDIRECTORY( ./external_packages/qpOASES-3.2.0 )
+-	
+ 	#
+ 	# Build csparse library
+ 	#
+@@ -378,7 +344,6 @@
+ 	${PROJECT_SOURCE_DIR}
+ 	${PROJECT_SOURCE_DIR}/acado
+ 	${PROJECT_SOURCE_DIR}/external_packages
+-	${PROJECT_SOURCE_DIR}/external_packages/qpOASES-3.2.0/include
+ 	${PROJECT_BINARY_DIR}
+ )
+ 
+ CONFIGURE_FILE(

@@ -1,0 +1,21 @@
+--- src/loslib.c	2020-02-14 12:04:26.000000000 +0100
++++ loslib_mobile.c	2020-02-14 12:03:59.000000000 +0100
+@@ -140,6 +140,7 @@
+ 
+ static int os_execute (lua_State *L) {
+   const char *cmd = luaL_optstring(L, 1, NULL);
++#if !defined(__IPHONE_8_1)  && !defined (__ANDROID__)
+   int stat = system(cmd);
+   if (cmd != NULL)
+     return luaL_execresult(L, stat);
+@@ -147,6 +148,10 @@
+     lua_pushboolean(L, stat);  /* true if there is a shell */
+     return 1;
+   }
++#else 
++    lua_pushboolean(L, -1);  /* a problem */
++    return 1;  
++#endif
+ }
+ 
+ 

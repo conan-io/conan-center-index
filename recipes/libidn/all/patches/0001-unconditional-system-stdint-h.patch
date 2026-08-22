@@ -1,0 +1,19 @@
+--- lib/Makefile.in
++++ lib/Makefile.in
+@@ -2000,11 +2000,11 @@
+ 
+ 
+ idn-int.h:
+-	if test -n "$(STDINT_H)"; then \
+-		sed -e s/include_next/include/ gl/stdint.h > idn-int.h; \
+-	else \
+-		echo '#include <stdint.h>' > idn-int.h; \
+-	fi
++	# if test -n "$(STDINT_H)"; then \
++	# sed -e s/include_next/include/ gl/stdint.h > idn-int.h; \
++	# else
++	echo '#include <stdint.h>' > idn-int.h;
++	# fi
+ @HAVE_LD_OUTPUT_DEF_TRUE@libidn-$(DLL_VERSION).def: libidn.la
+ 
+ #nfkc.c: gunibreak.h gunicomp.h gunidecomp.h

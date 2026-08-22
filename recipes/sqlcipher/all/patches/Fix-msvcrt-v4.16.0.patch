@@ -1,0 +1,19 @@
+Drop /NODEFAULTLIB:msvcrt from LDFLAGS.
+Reported https://sqlite.org/bugs/forumpost/f387fd9b03
+Patch not backported yet
+
+--- a/Makefile.msc
++++ b/Makefile.msc
+@@ -1241,9 +1241,9 @@
+
+ # If either debugging or symbols are enabled, enable PDBs.
+ #
+ !IF $(DEBUG)>1 || $(SYMBOLS)!=0
+-LDFLAGS = /NODEFAULTLIB:msvcrt /DEBUG $(LDOPTS)
++LDFLAGS = /DEBUG $(LDOPTS)
+ !ELSE
+-LDFLAGS = /NODEFAULTLIB:msvcrt $(LDOPTS)
++LDFLAGS = $(LDOPTS)
+ !ENDIF
+
+ # <<mark>>

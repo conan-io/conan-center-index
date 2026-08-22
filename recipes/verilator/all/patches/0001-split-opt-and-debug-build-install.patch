@@ -1,0 +1,33 @@
+--- Makefile.in
++++ Makefile.in
+@@ -218,7 +218,7 @@
+ verilator_exe verilator_bin verilator_bin_dbg verilator_coverage_bin_dbg:
+ 	@echo ------------------------------------------------------------
+ 	@echo "making verilator in src"
+-	$(MAKE) -C src $(OBJCACHE_JOBS)
++	$(MAKE) -C src $(SRC_TARGET) $(OBJCACHE_JOBS)
+ 
+ .PHONY:msg_test
+ msg_test: all_nomsg
+@@ -295,16 +295,19 @@
+ VL_INST_DATA_SRCDIR_FILES = \
+ 	examples/*/*.[chv]*  examples/*/Makefile* \
+ 	examples/*/CMakeLists.txt
+-
++DEBUG=0
+ installbin:
+ 	$(MKINSTALLDIRS) $(DESTDIR)$(bindir)
+ 	( cd ${srcdir}/bin ; $(INSTALL_PROGRAM) verilator $(DESTDIR)$(bindir)/verilator )
+-	( cd ${srcdir}/bin ; $(INSTALL_PROGRAM) verilator_coverage $(DESTDIR)$(bindir)/verilator_coverage )
+ 	( cd ${srcdir}/bin ; $(INSTALL_PROGRAM) verilator_gantt $(DESTDIR)$(bindir)/verilator_gantt )
+ 	( cd ${srcdir}/bin ; $(INSTALL_PROGRAM) verilator_profcfunc $(DESTDIR)$(bindir)/verilator_profcfunc )
++ifeq ($(DEBUG),0)
++	( cd ${srcdir}/bin ; $(INSTALL_PROGRAM) verilator_coverage $(DESTDIR)$(bindir)/verilator_coverage )
+ 	( cd bin ; $(INSTALL_PROGRAM) verilator_bin $(DESTDIR)$(bindir)/verilator_bin )
++else
+ 	( cd bin ; $(INSTALL_PROGRAM) verilator_bin_dbg $(DESTDIR)$(bindir)/verilator_bin_dbg )
+ 	( cd bin ; $(INSTALL_PROGRAM) verilator_coverage_bin_dbg $(DESTDIR)$(bindir)/verilator_coverage_bin_dbg )
++endif
+ 	$(MKINSTALLDIRS) $(DESTDIR)$(pkgdatadir)/bin
+ 	( cd ${srcdir}/bin ; $(INSTALL_PROGRAM) verilator_includer $(DESTDIR)$(pkgdatadir)/bin/verilator_includer )
+ 

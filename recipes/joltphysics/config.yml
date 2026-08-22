@@ -1,0 +1,7 @@
+versions:
+  "5.2.0":
+    folder: 5.x
+  "3.0.1":
+    folder: 3.x
+  "2.0.1":
+    folder: 3.x

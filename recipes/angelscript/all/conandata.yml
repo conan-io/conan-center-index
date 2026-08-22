@@ -1,0 +1,4 @@
+sources:
+  "2.38.0":
+    url: "https://www.angelcode.com/angelscript/sdk/files/angelscript_2.38.0.zip"
+    sha256: "b33b5dbcda10317ef67d628353d83246984ce6fcac102d4dc2aed121eba52e6f"

@@ -1,0 +1,100 @@
+commit dfff3ca2bd52df35be52ec104d1f31f1e4aeef0e
+Author: dvirtz <dvirtz@gmail.com>
+Date:   Tue Aug 3 16:48:41 2021 +0300
+
+    build with external sdk
+
+diff --git a/Makefile b/Makefile
+index 6929dee..74194b5 100644
+--- a/Makefile
++++ b/Makefile
+@@ -98,9 +98,6 @@ endif
+ # makefile.[name].vars.mk.
+ -include makefile.*.vars.mk
+ 
+-ifeq ($(top.libfabric),)
+-    $(error libfabric source tree not found)
+-endif
+ # Build artifacts for libfabric go into a debug or release directory under top.libfabric
+ build_dir.libfabric := $(top.libfabric)/build/$(config_libfabric)
+ 
+@@ -127,7 +124,7 @@ srcs.cdi := $(foreach ext,c cpp,$(wildcard $(src_dir.cdi)/*.$(ext)))
+ srcs.cdi += queue.c fifo.c list.c logger.c os_linux.c pool.c
+ objs.cdi := $(addprefix $(build_dir.obj)/,$(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(notdir $(srcs.cdi)))))
+ headers.cdi := $(foreach dir,$(include_dirs.cdi),$(wildcard $(dir)/*.h))
+-include_opts.cdi := $(foreach proj,cdi libfabric,$(addprefix -I,$(include_dirs.$(proj))))
++include_opts.cdi := $(foreach proj,cdi,$(addprefix -I,$(include_dirs.$(proj))))
+ depends.cdi := $(patsubst %.o,%.d,$(objs.cdi))
+ 
+ # the end goal of building the SDK library
+@@ -186,24 +183,24 @@ headers.all := $(foreach dir,cdi test test_common test_min_tx test_min_rx test_u
+ # augment compiler flags
+ COMMON_COMPILER_FLAG_ADDITIONS := \
+ 	$(include_opts.cdi) $(include_opts.test) \
+-	$(EXTRA_COMPILER_FLAG_ADDITIONS) \
+-	-Wall -Wextra -Werror -pthread -fPIC \
++	-Wall -Wextra -pthread -fPIC \
+ 	-D_LINUX -D_POSIX_C_SOURCE=200112L \
+-	$(sanitize_opts)
++	$(sanitize_opts) \
++	$(EXTRA_COMPILER_FLAG_ADDITIONS)
+ ifeq ($(config), debug)
+     COMMON_COMPILER_FLAG_ADDITIONS += -O0 -g -DDEBUG
+ else
+     COMMON_COMPILER_FLAG_ADDITIONS += -O3 -DNDEBUG
+ endif
+ 
+-CFLAGS += $(COMMON_COMPILER_FLAG_ADDITIONS) --std=c99
+-CXXFLAGS += $(COMMON_COMPILER_FLAG_ADDITIONS) --std=c++11
++CFLAGS += $(CPPFLAGS) $(COMMON_COMPILER_FLAG_ADDITIONS) --std=c99
++CXXFLAGS += $(CPPFLAGS) $(COMMON_COMPILER_FLAG_ADDITIONS) --std=c++11
+ 
+ # additional flags to pass to the linker to create cdi_test* programs
+ # The only libraries needed here are those that present new dependencies beyond what libcdisdk.so already requires.
+ # An rpath is specified so cdi_test can find libcdisdk.so.2 in the same directory as cdi_test or in a sibling directory
+ # named lib.
+-CDI_LDFLAGS = $(LDFLAGS) -L$(build_dir.lib) -lcdisdk -lfabric $(EXTRA_LD_LIBS) -lncurses -lm $(aws_sdk_library_flags) \
++CDI_LDFLAGS = $(LDFLAGS) -L$(build_dir.lib) -lcdisdk -lfabric $(EXTRA_LD_LIBS) -lncurses -lm \
+ 	   -Wl,-rpath,\$$ORIGIN:\$$ORIGIN/../lib64:\$$ORIGIN/../lib
+ 
+ # docs go into the build directory but are not specific to release/debug
+@@ -284,7 +281,7 @@ vpath %.c $(foreach proj,cdi common test test_common test_minimal test_unit,$(sr
+ vpath %.cpp $(src_dir.cdi)
+ 
+ # rule to create the various build output directories
+-$(foreach d,obj lib bin doc packages libfabric results image libaws,$(build_dir.$(d))) :
++$(foreach d,obj lib bin doc packages results image libaws,$(build_dir.$(d))) :
+ 	$(Q)mkdir -p $@
+ 
+ # Setup flags for libfabric depending on debug/release build target.
+@@ -321,12 +318,10 @@ $(libfabric) : $(libfabric_config_h) | $(build_dir.lib)
+ # rule to create the SDK library file
+ .PHONY : libsdk
+ libsdk : $(libsdk)
+-$(libsdk) : $(libfabric_config_h) $(objs.cdi) $(libfabric) $(libaws) | $(build_dir.lib)
++$(libsdk) : $(objs.cdi) | $(build_dir.lib)
+ 	@echo "GCC version is" $(GCCVERSION)
+ 	$(Q)$(CC) -shared -o $@ -Wl,-z,defs,-soname=$(basename $(notdir $@)),--version-script,libcdisdk.vers \
+-		$(objs.cdi) -L$(build_dir.lib) $(aws_sdk_library_flags) \
+-		-lfabric -ldl -lrt $(EXTRA_CC_LIBS) -lnl-3 -lm $(EXTRA_LD_LIBS) -lpthread -lc \
+-		$(ASAN_LIBS) -Wl,-rpath,\$$ORIGIN:\$$ORIGIN/../lib
++		$(objs.cdi) $(LDFLAGS) $(LIBS)
+ 	$(Q)ln -fs $@ $(basename $@)
+ 	$(Q)ln -fs $@ $(basename $(basename $@))
+ 
+@@ -432,13 +427,12 @@ clean ::
+ 	$(Q)$(RM) -r $(top.build)
+ 
+ cleanall :: clean
+-	$(Q)$(RM) -r $(top.libfabric)/build $(libfabric_config_h)
+ 
+-$(depends.cdi) : $(libfabric_config_h) $(aws_h)
++$(depends.cdi) : $(aws_h)
+ 
+ # include dependency rules from generated files; this is conditional so .d files are only created if needed.
+ ifneq ($(real_build_goals),)
+--include $(foreach proj,cdi test test_min_tx test_min_rx test_unit,$(depends.$(proj)))
++-include $(foreach proj,$(real_build_goals),$(depends.$(proj)))
+ endif
+ 
+ # Users can add their own rules to this makefile by creating a makefile in this directory called

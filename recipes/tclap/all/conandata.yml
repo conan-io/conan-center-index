@@ -1,0 +1,11 @@
+# INFO: Moved from a fork to the original repository
+sources:
+  "1.2.5":
+    url: "https://github.com/mirror/tclap/archive/refs/tags/v1.2.5.tar.gz"
+    sha256: "7e87d13734076fa4f626f6144ce9a02717198b3f054341a6886e2107b048b235"
+  "1.2.4":
+    url: "https://sourceforge.net/projects/tclap/files/tclap-1.2.4.tar.gz"
+    sha256: "634c5b59dbb1ccbc9d6a5f6de494a257e29a3f59dcb6fc30445ff39b45188574"
+  "1.2.3":
+    url: "https://sourceforge.net/projects/tclap/files/tclap-1.2.3.tar.gz"
+    sha256: "19e7db5281540f154348770bc3a7484575f4f549aef8e00aabcc94b395f773c9"

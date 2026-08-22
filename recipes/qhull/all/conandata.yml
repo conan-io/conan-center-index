@@ -1,0 +1,9 @@
+sources:
+  "8.0.2":
+    url: "https://github.com/qhull/qhull/archive/v8.0.2.tar.gz"
+    sha256: "8774e9a12c70b0180b95d6b0b563c5aa4bea8d5960c15e18ae3b6d2521d64f8b"
+patches:
+  "8.0.2":
+    - patch_file: "patches/0001-fix-cmake.patch"
+      patch_description: "Fix cmake_minimum_required() to provide CMake 4 support and avoid hardcoding rpath"
+    - patch_file: "patches/0002-cpp20-fixes.patch"

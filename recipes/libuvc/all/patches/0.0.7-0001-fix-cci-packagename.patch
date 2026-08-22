@@ -1,0 +1,13 @@
+diff --git a/a/CMakeLists.txt b/b/CMakeLists.txt
+index fbaffc9..e14daf4 100644
+--- a/a/CMakeLists.txt
++++ b/b/CMakeLists.txt
+@@ -116,7 +116,7 @@ foreach(target_name IN LISTS UVC_TARGETS)
+   )
+   target_link_libraries(${target_name}
+     # libusb-1.0 used internally so we link to it privately.
+-    PRIVATE LibUSB::LibUSB ${threads}
++    PRIVATE libusb::libusb ${threads}
+   )
+   if(JPEG_FOUND)
+     target_link_libraries(${target_name}

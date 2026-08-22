@@ -1,0 +1,23 @@
+sources:
+  "4.2.4":
+    url: "https://github.com/jasper-software/jasper/releases/download/version-4.2.4/jasper-4.2.4.tar.gz"
+    sha256: "6a597613d8d84c500b5b83bf0eec06cd3707c23d19957f70354ac2394c9914e7"
+  "4.2.0":
+    url: "https://github.com/jasper-software/jasper/releases/download/version-4.2.0/jasper-4.2.0.tar.gz"
+    sha256: "69f0b08a0cc281a06eaf7feed510736854bbff9af89ab1d01b77382ad57ec957"
+  "4.0.0":
+    url: "https://github.com/jasper-software/jasper/releases/download/version-4.0.0/jasper-4.0.0.tar.gz"
+    sha256: "39514e1b53a5333fcff817e19565371f016ea536c36fd2d13a9c4d8da8f0be0c"
+patches:
+  "4.2.4":
+    - patch_file: "patches/4.2.0-0003-deterministic-libname.patch"
+      patch_description: "No generator dependent libname"
+      patch_type: "conan"
+  "4.2.0":
+    - patch_file: "patches/4.2.0-0003-deterministic-libname.patch"
+      patch_description: "No generator dependent libname"
+      patch_type: "conan"
+  "4.0.0":
+    - patch_file: "patches/4.0.0-0001-do-not-hardcode-install-rpath.patch"
+    - patch_file: "patches/4.0.0-0002-deterministic-libname.patch"
+    - patch_file: "patches/4.0.0-0003-msvc-c11-atomics-detection.patch"

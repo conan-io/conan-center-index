@@ -1,0 +1,27 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 77c74eb..80d7bb0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -395,7 +395,7 @@ endif()
+ 
+ # Find asmjit dependency if building with JIT support.
+ if (NOT BLEND2D_NO_JIT)
+-  if (NOT DEFINED ASMJIT_DIR)
++  if (0)
+     foreach(dir "${BLEND2D_DIR}/3rdparty/asmjit"
+                 "${CMAKE_CURRENT_LIST_DIR}/../asmjit")
+       if (EXISTS ${dir}/CMakeLists.txt)
+@@ -413,10 +413,9 @@ if (NOT BLEND2D_NO_JIT)
+   endif()
+ 
+   set(ASMJIT_NO_FOREIGN TRUE)
+-  include("${ASMJIT_DIR}/CMakeLists.txt")
+-  list(APPEND BLEND2D_DEPS ${ASMJIT_LIBS})
+-  list(APPEND BLEND2D_PRIVATE_CFLAGS ${ASMJIT_CFLAGS})
+-  list(APPEND BLEND2D_PRIVATE_CFLAGS -DASMJIT_NO_STDCXX)
++  find_package(asmjit CONFIG REQUIRED)
++  list(APPEND BLEND2D_DEPS asmjit::asmjit)
++  list(APPEND BLEND2D_PRIVATE_CFLAGS ${asmjit_DEFINITIONS_DEBUG}${asmjit_DEFINITIONS_RELEASE})
+ 
+   # A possibility to reduce the resulting binary size by disabling asmjit logging.
+   if (BLEND2D_NO_JIT_LOGGING)

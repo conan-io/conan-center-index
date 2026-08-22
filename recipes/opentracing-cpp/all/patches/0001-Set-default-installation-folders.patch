@@ -1,0 +1,54 @@
+---
+ CMakeLists.txt            | 9 ++-------
+ mocktracer/CMakeLists.txt | 7 ++-----
+ 2 files changed, 4 insertions(+), 12 deletions(-)
+
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -164,11 +164,7 @@ if (BUILD_SHARED_LIBS)
+                                              SOVERSION ${OPENTRACING_VERSION_MAJOR})
+   target_compile_definitions(opentracing PRIVATE OPENTRACING_EXPORTS)
+   install(TARGETS opentracing EXPORT OpenTracingTargets
+-          COMPONENT DIST
+-          RUNTIME DESTINATION ${LIB_INSTALL_DIR}
+-          LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+-          ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+-          )
++          COMPONENT DIST)
+   if (CLANG_TIDY_EXE)
+     set_target_properties(opentracing PROPERTIES
+                                     CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
+@@ -184,8 +180,7 @@ if (BUILD_STATIC_LIBS)
+   endif()
+   target_compile_definitions(opentracing-static PUBLIC OPENTRACING_STATIC)
+   target_include_directories(opentracing-static INTERFACE "$<INSTALL_INTERFACE:include/>")
+-  install(TARGETS opentracing-static EXPORT OpenTracingTargets
+-      ARCHIVE DESTINATION ${LIB_INSTALL_DIR})
++  install(TARGETS opentracing-static EXPORT OpenTracingTargets)
+ endif()
+ 
+ 
+--- mocktracer/CMakeLists.txt
++++ mocktracer/CMakeLists.txt
+@@ -20,9 +20,7 @@ if (BUILD_SHARED_LIBS)
+   target_compile_definitions(opentracing_mocktracer PRIVATE OPENTRACING_MOCK_TRACER_EXPORTS)
+   install(TARGETS opentracing_mocktracer
+           COMPONENT DIST
+-          EXPORT OpenTracingTargets
+-          LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+-          ARCHIVE DESTINATION ${LIB_INSTALL_DIR})
++          EXPORT OpenTracingTargets)
+ 
+   
+ endif()
+@@ -36,8 +34,7 @@ if (BUILD_STATIC_LIBS)
+   target_compile_definitions(opentracing_mocktracer-static PUBLIC OPENTRACING_MOCK_TRACER_STATIC)
+   target_include_directories(opentracing_mocktracer-static INTERFACE "$<INSTALL_INTERFACE:include/>")
+   target_link_libraries(opentracing_mocktracer-static opentracing-static)
+-  install(TARGETS opentracing_mocktracer-static EXPORT OpenTracingTargets
+-	  ARCHIVE DESTINATION ${LIB_INSTALL_DIR})
++  install(TARGETS opentracing_mocktracer-static EXPORT OpenTracingTargets)
+ endif()
+ 
+ install(DIRECTORY include/opentracing DESTINATION include
+

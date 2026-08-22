@@ -1,0 +1,51 @@
+--- bfd/Makefile.in
++++ bfd/Makefile.in
+@@ -259,7 +259,7 @@
+ am__v_texidevnull_0 = > /dev/null
+ am__v_texidevnull_1 = 
+ am__dirstamp = $(am__leading_dot)dirstamp
+-INFO_DEPS = doc/bfd.info
++INFO_DEPS = 
+ am__TEXINFO_TEX_DIR = $(srcdir)
+ DVIS = doc/bfd.dvi
+ PDFS = doc/bfd.pdf
+@@ -2050,7 +2050,7 @@
+ check-am: all-am
+ check: $(BUILT_SOURCES)
+ 	$(MAKE) $(AM_MAKEFLAGS) check-recursive
+-all-am: Makefile $(INFO_DEPS) $(LTLIBRARIES) $(HEADERS) config.h
++all-am: Makefile $(LTLIBRARIES) $(HEADERS) config.h
+ installdirs: installdirs-recursive
+ installdirs-am:
+ 	for dir in "$(DESTDIR)$(bfdlibdir)" "$(DESTDIR)$(infodir)" "$(DESTDIR)$(bfdincludedir)"; do \
+@@ -2117,8 +2117,7 @@
+ 
+ info-am: $(INFO_DEPS)
+ 
+-install-data-am: install-bfdincludeHEADERS install-bfdlibLTLIBRARIES \
+-	install-info-am
++install-data-am: install-bfdincludeHEADERS install-bfdlibLTLIBRARIES
+ 
+ install-dvi: install-dvi-recursive
+ 
+
+--- gas/Makefile.in
++++ gas/Makefile.in
+@@ -1825,7 +1825,7 @@
+ check-am: all-am
+ 	$(MAKE) $(AM_MAKEFLAGS) check-DEJAGNU
+ check: check-recursive
+-all-am: Makefile $(INFO_DEPS) $(PROGRAMS) $(SCRIPTS) $(MANS) config.h
++all-am: Makefile $(PROGRAMS) $(SCRIPTS) $(MANS) config.h
+ installdirs: installdirs-recursive
+ installdirs-am:
+ 	for dir in "$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)"; do \
+@@ -1901,7 +1901,7 @@
+ 
+ info-am: $(INFO_DEPS) info-local
+ 
+-install-data-am: install-info-am install-man
++install-data-am: install-man
+ 
+ install-dvi: install-dvi-recursive
+ 

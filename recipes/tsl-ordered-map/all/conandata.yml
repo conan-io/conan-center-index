@@ -1,0 +1,7 @@
+sources:
+  "1.1.0":
+    url: "https://github.com/Tessil/ordered-map/archive/v1.1.0.tar.gz"
+    sha256: "d6070502351646d68f2bbe6078c0da361bc1db733ee8a392e33cfb8b31183e28"
+  "1.0.0":
+    url: "https://github.com/Tessil/ordered-map/archive/v1.0.0.tar.gz"
+    sha256: "49cd436b8bdacb01d5f4afd7aab0c0d6fa57433dfc29d65f08a5f1ed1e2af26b"

@@ -1,0 +1,58 @@
+--- src/sysc/utils/sc_string_view.h
++++ src/sysc/utils/sc_string_view.h
+@@ -37,17 +37,47 @@
+ 
+ #include <sysc/kernel/sc_cmnhdr.h>
+ 
+-#if SC_CPLUSPLUS >= 201402L && defined(__has_include)
+-#  if SC_CPLUSPLUS > 201402L && __has_include(<string_view>) /* since C++17 */
+-#    define SC_STRING_VIEW_NS_ std
+-#    include <string_view>
+-   /*  available in Library Fundamentals, ISO/IEC TS 19568:2015 */
+-#  elif __has_include(<experimental/string_view>)
++#if defined(__clang__)
++#  if (__cplusplus >= 201103)
++#    if __has_include(<__config>)
++#      include <__config>
++#      if defined(_LIBCPP_VERSION)
++#        define HAS_CLANG_LIBCXX 1
++#      endif
++#    endif
++#  endif
++#endif
++
++#if defined(__clang__)
++#  if defined(HAS_CLANG_LIBCXX)
++#    if (__cplusplus >= 201402)
++#      if __has_include(<string_view>)
++#        define HAS_STD_STRING_VIEW 1
++#      endif
++#    endif
++#  else
++#    if (__cplusplus >= 201703)
++#      if __has_include(<string_view>)
++#        define HAS_STD_STRING_VIEW 1
++#      endif
++#    endif
++#  endif
++#elif defined(__GNUC__)
++#  if (__GNUC__ >= 7)
++#    if (__cplusplus >= 201703)
++#      define HAS_STD_STRING_VIEW 1
++#    endif
++#  endif
++#endif
++
++#if HAS_STD_STRING_VIEW
++#  define SC_STRING_VIEW_NS_ std
++#  include <string_view>
++#elif SC_CPLUSPLUS >= 201402L && defined(__has_include)
++#  if __has_include(<experimental/string_view>)
+ #    define SC_STRING_VIEW_NS_ std::experimental
+ #    include <experimental/string_view>
+ #  endif
+-#else
+-// TODO: other ways to detect availability of std::(experimental::)string_view?
+ #endif
+ 
+ #ifndef SC_STRING_VIEW_NS_

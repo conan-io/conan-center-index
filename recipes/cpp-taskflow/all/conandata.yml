@@ -1,0 +1,7 @@
+sources:
+  2.2.0:
+    url: "https://github.com/taskflow/taskflow/archive/v2.2.0.tar.gz"
+    sha256: "A8AD8C94CEEAC0BC18D8429F877E10A2AF2CD44CD9DC420D9751E69F48FF85D1"
+  2.4.0:
+    url: "https://github.com/taskflow/taskflow/archive/v2.4.0.tar.gz"
+    sha256: "1F6CC854DD579396CA22AE86014CBF13DD90205E7C9438E2B6B2FDDACA99668C"

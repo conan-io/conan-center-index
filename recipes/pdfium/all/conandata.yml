@@ -1,0 +1,21 @@
+sources:
+  "95.0.4629":
+    pdfium-cmake:
+      # FIXME: create release
+      url: "https://github.com/madebr/pdfium-cmake/archive/e02962c2ebf6d1a2edc7b05bb4fc8cb73cac5b18.zip"
+      sha256: "e8454d098af887bc989fbbc955b32566b109b4f03350fb6c08cc7f2e359a909f"
+    pdfium:
+      url: "https://pdfium.googlesource.com/pdfium/+archive/refs/heads/chromium/4629.tar.gz"
+      # sha256 is volatile on googlesource, no up-to-date github fork
+    trace_event:
+      url: "https://chromium.googlesource.com/chromium/src/base/trace_event/common/+archive/ad56859ef8c85cc09a3d8e95dcedadb5109a0af8.tar.gz"
+      # sha256 is volatile on googlesource, no up-to-date github fork
+    chromium_build:
+      url: "https://chromium.googlesource.com/chromium/src/build/+archive/95667421554b672f9330df8efb8148b6c2d00594.tar.gz"
+      # sha256 is volatile on googlesource, no up-to-date github fork
+patches:
+  "95.0.4629":
+    - patch_file: "patches/95.0.4629-0001-include-stdint.patch"
+      patch_description: "Add missing standard include which affects newer versions of gcc"
+      patch_source: "https://pdfium.googlesource.com/pdfium/+/6dd81921398c1a44abf4eac7ce04446efee74169"
+      patch_type: "official"

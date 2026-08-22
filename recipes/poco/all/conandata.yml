@@ -1,0 +1,13 @@
+sources:
+  "1.15.2":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.15.2-release.tar.gz"
+    sha256: "aed7f94b3ea6a0d22f3bebaa368c76def029a5a45c9b3ea105e19e84e3530b3f"
+patches:
+  "1.15.2":
+    - patch_file: "patches/0001-fix-cmake-imported-global.patch"
+    - patch_file: "patches/0002-adjust-mysql-headers.patch"
+    - patch_file: "patches/0003-fix-pcre2-interface-library-type.patch"
+    - patch_file: "patches/0004-fix-win-pragma-warning.patch"
+    - patch_file: "patches/0005-cmake-cppstd.patch"
+    - patch_file: "patches/0006-fix-cppstd17-atomic.patch"
+    - patch_file: "patches/0007-osx-target-version.patch"
