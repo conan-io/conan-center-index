@@ -1,4 +1,4 @@
 sources:
-  "1.8.2":
-    url: "https://github.com/mas-bandwidth/yojimbo/archive/refs/tags/v1.8.2.tar.gz"
-    sha256: "3d626a32d260e3600ce7fafca694edb04f39170df17e1e21ffe0d842daa82991"
+  "1.10.0":
+    url: "https://github.com/mas-bandwidth/yojimbo/archive/refs/tags/v1.10.0.tar.gz"
+    sha256: "4717ae7deeecd2d595faa9b48d932c1f6fe8171b0301de631518e019e7f1eddd"
