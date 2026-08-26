@@ -1,0 +1,4 @@
+sources:
+  "1.0.5":
+    url: "https://github.com/igor-krechetov/hsmcpp/archive/refs/tags/1.0.5.tar.gz"
+    sha256: "3c2cc49cf0ed260c02a142eb1c59e70539ea9ec5843abb2c53fc6ed389227754"
