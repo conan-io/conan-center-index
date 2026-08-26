@@ -1,4 +1,7 @@
 sources:
+  "1.1.2":
+    url: "https://github.com/podofo/podofo/archive/refs/tags/1.1.2.tar.gz"
+    sha256: "d6ffe6fc173ac6d6e5b00f5cb9db01990cab1bdf7cc03bdeffce3013bc9ec63a"
   "1.0.3":
     url: "https://github.com/podofo/podofo/archive/refs/tags/1.0.3.tar.gz"
     sha256: "02815b21a51632c2849d41b067597e9356bbc54bad0efcd84c902b555c203ce7"
@@ -6,6 +9,10 @@ sources:
     url: "https://github.com/podofo/podofo/archive/refs/tags/0.10.5.tar.gz"
     sha256: "49b159e88ba177ad2561b5cf6cbd68ecbe83272f5488bc527e44f97dbf695273"
 patches:
+  "1.1.2":
+    - patch_file: "patches/0001-fix-utf8cpp-target-name-1.1.2.patch"
+      patch_description: "Change the target utf8cpp::utf8cpp to utf8cpp to match what the conan recipe provides"
+      patch_type: "conan"
   "1.0.3":
     - patch_file: "patches/0001-unvendor-libs-1.0.3.patch"
       patch_description: "Unvendor date, fmt, utf8cpp, utf8proc, tcb-span and fast-float. Remove C++ hardcoded standard"

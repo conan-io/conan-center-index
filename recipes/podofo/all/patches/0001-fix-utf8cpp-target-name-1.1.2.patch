@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c678167..8203f1a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -334,7 +334,7 @@ if (PODOFO_DEVENDOR_FMT)
+     endif()
+ endif()
+ if (PODOFO_DEVENDOR_UTF8CPP)
+-    list(APPEND PODOFO_LIB_DEPENDS PRIVATE $<COMPILE_ONLY:utf8cpp::utf8cpp>)
++    list(APPEND PODOFO_LIB_DEPENDS PRIVATE $<COMPILE_ONLY:utf8cpp>)
+ endif()
+ if (PODOFO_DEVENDOR_UTF8PROC)
+     list(APPEND PODOFO_LIB_DEPENDS PRIVATE utf8proc::utf8proc)
