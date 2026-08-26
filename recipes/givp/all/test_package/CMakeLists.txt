@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Arnaldo Mendes Pires Junior
+# SPDX-License-Identifier: MIT
+
 cmake_minimum_required(VERSION 3.21)
 project(givp_conan_test LANGUAGES CXX)
 
