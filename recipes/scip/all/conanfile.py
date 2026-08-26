@@ -85,6 +85,8 @@ class SCIPConan(ConanFile):
     def generate(self):
         apply_conandata_patches(self)
         tc = CMakeToolchain(self)
+        if self.settings.os == "Windows":
+            tc.preprocessor_definitions["NOMINMAX"] = None
         tc.variables["SHARED"] = self.options.shared
         tc.variables["READLINE"] = False  # required for interactive stuff
         tc.variables["GMP"] = self.options.with_gmp
