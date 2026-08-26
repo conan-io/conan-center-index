@@ -32,18 +32,10 @@ class AsioGrpcConan(ConanFile):
         # executor in Boost 1.90 / standalone Asio 1.38.0. asio-grpc hardcoded the
         # old default until 3.6.0, so 3.5.x needs an upper bound.
 
-        if Version(self.version) >= "3.6.0":
-            if self.options.backend == "boost":
-                self.requires("boost/[>=1.74 <2]", transitive_headers=True)
-
-            if self.options.backend == "asio":
-                self.requires("asio/[>=1.17 <2]", transitive_headers=True)
-        else:
-            if self.options.backend == "boost":
-                self.requires("boost/[>=1.74 <1.90]", transitive_headers=True)
-
-            if self.options.backend == "asio":
-                self.requires("asio/[>=1.17 <1.37]", transitive_headers=True)
+        if self.options.backend == "boost":
+            self.requires("boost/[>=1.74 <2]", transitive_headers=True)
+        if self.options.backend == "asio":
+            self.requires("asio/[>=1.17 <2]", transitive_headers=True)
 
         if self.options.backend == "unifex":
             self.requires("libunifex/0.4.0", transitive_headers=True, transitive_libs=True)
