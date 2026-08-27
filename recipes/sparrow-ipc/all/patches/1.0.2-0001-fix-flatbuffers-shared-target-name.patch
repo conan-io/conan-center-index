@@ -1,6 +1,6 @@
 --- a/cmake/external_dependencies.cmake
 +++ b/cmake/external_dependencies.cmake
-@@ -104,8 +104,8 @@ find_package_or_fetch(
+@@ -101,7 +101,7 @@ find_package_or_fetch(
      TAG v25.2.10
  )
  
