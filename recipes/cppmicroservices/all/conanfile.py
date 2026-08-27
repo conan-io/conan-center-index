@@ -2,8 +2,9 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualRunEnv
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration, ConanException
 
@@ -37,6 +38,11 @@ class CppMicroServicesConan(ConanFile):
         # Upstream only adds the full compendium when threading + shared libs are both on.
         return bool(self.options.shared and self.options.with_threading)
 
+    def export_sources(self):
+        # Ship the patch files listed in conandata.yml alongside the recipe so
+        # apply_conandata_patches() can find them at build time.
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -51,25 +57,45 @@ class CppMicroServicesConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.17]")
 
+    @property
+    def _required_boost_components(self):
+        if self.settings.os == "Windows":
+            # CppMicroServices runtime libraries (the core framework, declarative services,
+            # configuration admin, etc.) don't require any compiled boost, but the usResourceCompiler build-time
+            # tool does on Windows (compiled version of nowide is required for utf8 stream support on Windows)
+            return ["nowide"]
+        else:
+            return []
+
     def requirements(self):
-        # boost and cli11 link only into build-time tools (resource compiler, code-gen);
-        # visible=False keeps them out of consumers' Conan graphs.
-        #
-        # miniz/spdlog/rapidjson are baked into the installed shared libraries. rapidjson is
-        # header-only. miniz/spdlog are not but their symbols are not exported/visible.
-        self.requires("boost/[>=1.86.0 <2]",     visible=False)
+        boost_components = self._required_boost_components
+        if boost_components:
+            boost_options = {"header_only": False}
+            boost_options.update({f"without_{comp}": False for comp in boost_components})
+        else:
+            boost_options = {"header_only": True}
+
+        # Using transitive_libs=False (even if this library is static) because compiled Boost is only 
+        # used in the usResourceCompiler build-time tool
+        self.requires("boost/[>=1.86.0 <2]", options=boost_options, transitive_libs=False)
+            
         self.requires("miniz/3.1.1")
         self.requires("spdlog/1.14.1")
         self.requires("rapidjson/cci.20220822")
-        self.requires("cli11/2.4.1",             visible=False)
+        self.requires("cli11/2.4.1")
 
     def validate(self):
         check_min_cppstd(self, 17)
 
-        if self.settings.os == "Windows":
-            if self.dependencies["boost"].options.get_safe("without_nowide"):
+        if self._required_boost_components:
+            miss_boost_required_comp = any(
+                self.dependencies["boost"].options.get_safe(f"without_{comp}", True)
+                for comp in self._required_boost_components
+            )
+            if self.dependencies["boost"].options.header_only or miss_boost_required_comp:
                 raise ConanInvalidConfiguration(
-                    f"{self.ref} requires boost with nowide on Windows"
+                    f"{self.name} requires non-header-only boost with these components: "
+                    f"{', '.join(self._required_boost_components)}"
                 )
 
         # Mirror the minimum compiler versions enforced by upstream CMake.
@@ -89,6 +115,15 @@ class CppMicroServicesConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # No upstream release carries our shared-dep build fixes (miniz/spdlog
+        # symbol-hiding gates + the macOS DYLD_LIBRARY_PATH re-supply for
+        # usResourceCompiler), so patch the downloaded tarball here. Applied in
+        # source() (not build()) because
+        # no_copy_source=True means the source tree is shared/immutable across
+        # builds -- patching in build() would re-apply and fail on rebuild.
+        #
+        # Remove this once the upstream CppMicroServices changes are in a GitHub release.
+        apply_conandata_patches(self)
 
     # generate is where we set CMake variables and generate both the CMakeToolchain and CMakeDeps files.
     def generate(self):
@@ -102,8 +137,19 @@ class CppMicroServicesConan(ConanFile):
         # Always use Conan-provided packages instead of the bundled third_party/ copies.
         tc.variables["US_USE_SYSTEM_BOOST"] = True
         tc.variables["Boost_NO_BOOST_CMAKE"] = False
+        
         tc.variables["US_USE_SYSTEM_MINIZ"] = True
+        minizDep = self.dependencies.get("miniz")
+        minizShared = minizDep.options.get_safe("shared")
+        if minizShared is not None:
+            tc.variables["US_MINIZ_SHARED"] = str(minizShared) == "True"
+            
         tc.variables["US_USE_SYSTEM_SPDLOG"] = True
+        spdlogDep = self.dependencies.get("spdlog")
+        spdlogShared = spdlogDep.options.get_safe("shared") if spdlogDep else None
+        if spdlogShared is not None:
+            tc.variables["US_SPDLOG_SHARED"] = str(spdlogShared) == "True"
+            
         tc.variables["US_USE_SYSTEM_RAPIDJSON"] = True
         tc.variables["US_USE_SYSTEM_CLI11"] = True
         # Never pull in test or example build-time deps in a package recipe.
@@ -124,6 +170,18 @@ class CppMicroServicesConan(ConanFile):
         deps.set_property("rapidjson", "cmake_file_name",   "rapidjson")
         deps.set_property("rapidjson", "cmake_target_name", "rapidjson::rapidjson")
         deps.generate()
+
+        # During our own build, cmake.build() runs the freshly-built usResourceCompiler to
+        # compile the framework's resources. When a runtime dep like miniz is shared, the tool
+        # needs its shared lib at execution time. The tool runs from the *build tree*, so on
+        # macOS/Linux CMake's build-tree rpath (absolute dep dirs) resolves it automatically;
+        # Windows has no rpath, so put the deps' bindirs on PATH for the build step.
+        # (scope="build" writes into the conanbuild env that CMake.build() applies.)
+        #
+        # Note: installed binaries carry no absolute install rpath (we don't set
+        # CMAKE_INSTALL_RPATH_USE_LINK_PATH) -- consumers resolve shared deps at runtime via
+        # their own VirtualRunEnv, which keeps the installed package relocatable.
+        VirtualRunEnv(self).generate(scope="build")
 
     # build / package are where we call CMake to build and install the library.  The upstream
     # CMakeLists.txt is already set up to install everything correctly, so we don't need to do any
@@ -192,8 +250,7 @@ class CppMicroServicesConan(ConanFile):
             fw.system_libs.append("pthread")
 
 
-        fw.requires = ["miniz::miniz", "spdlog::spdlog",
-                       "rapidjson::rapidjson"]
+        fw.requires = ["cli11::cli11", "miniz::miniz", "spdlog::spdlog", "rapidjson::rapidjson", "boost::boost"]
 
         # LogService (INTERFACE / header-only upstream, no compiled library)
         ls = self.cpp_info.components["logservice"]
@@ -221,3 +278,4 @@ class CppMicroServicesConan(ConanFile):
                 comp.set_property("cmake_target_name", cmake_tgt)
                 comp.libs = [lib_name]
                 comp.requires = ["framework"]
+
