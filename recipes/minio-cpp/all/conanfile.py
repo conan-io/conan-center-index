@@ -35,11 +35,11 @@ class MinioCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("curlpp/0.8.1.cci.20240530", transitive_headers=True)
+        self.requires("cpp-httplib/0.53.1")
         self.requires("inih/58")
         self.requires("nlohmann_json/3.11.3", transitive_headers=True)
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("pugixml/1.14")
+        self.requires("pugixml/1.16", transitive_headers=True)
         self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
@@ -52,8 +52,6 @@ class MinioCppConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.generate()
         deps = CMakeDeps(self)
-        deps.set_property("curlpp", "cmake_file_name", "unofficial-curlpp")
-        deps.set_property("curlpp", "cmake_target_name", "unofficial::curlpp::curlpp")
         deps.set_property("inih", "cmake_file_name", "unofficial-inih")
         deps.set_property("inih", "cmake_target_name", "unofficial::inih::inireader")
         deps.set_property("pugixml", "cmake_target_name", "pugixml")
