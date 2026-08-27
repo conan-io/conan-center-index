@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
 import os
 
@@ -44,6 +44,7 @@ class PodofoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.with_fontconfig
 
         if is_msvc(self):
             # libunistring recipe raises for Visual Studio
@@ -72,7 +73,7 @@ class PodofoConan(ConanFile):
         self.requires("utf8proc/2.9.0")
 
         # Optional dependencies
-        if self.settings.os != "Windows" and self.options.with_fontconfig:
+        if self.options.get_safe("with_fontconfig"):
             self.requires("fontconfig/2.15.0")
         if self.options.with_libidn:
             self.requires("libidn/1.36")
@@ -110,7 +111,8 @@ class PodofoConan(ConanFile):
         tc.cache_variables["PODOFO_DEVENDOR_FMT"] = True
         tc.cache_variables["PODOFO_DEVENDOR_UTF8CPP"] = True
         tc.cache_variables["PODOFO_DEVENDOR_UTF8PROC"] = True
-        tc.cache_variables["PODOFO_WITH_FONTMANAGER"] = self.options.with_fontconfig
+        tc.cache_variables["PODOFO_WITH_WIN32GDI_FONT_SEARCH"] = self.settings.os == "Windows"
+        tc.cache_variables["PODOFO_WITH_FONTMANAGER"] = True if self.settings.os == "Windows" else self.options.with_fontconfig
 
         tc.cache_variables["PODOFO_BUILD_TEST"] = False
         tc.cache_variables["PODOFO_BUILD_EXAMPLES"] = False
