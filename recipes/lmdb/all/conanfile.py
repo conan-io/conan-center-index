@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.46.0"
@@ -61,7 +62,11 @@ class lmdbConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["LMDB_SRC_DIR"] = os.path.join(self.source_folder, "libraries", "liblmdb").replace("\\", "/")
-        tc.variables["LMDB_ENABLE_ROBUST_MUTEX"] = self.options.enable_robust_mutex
+        # MDB_USE_ROBUST is only consulted where LMDB uses POSIX mutexes. Leave it
+        # undefined elsewhere: since 1.0 the mere presence of the macro suppresses
+        # the POSIX semaphore default on Apple/BSD and falls back to SysV semaphores.
+        if self.settings.os in ("Linux", "FreeBSD"):
+            tc.variables["LMDB_ENABLE_ROBUST_MUTEX"] = self.options.enable_robust_mutex
         tc.generate()
 
     def build(self):
@@ -80,6 +85,9 @@ class lmdbConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
+            # Since 1.0 the crypto module loader (module.c) requires dlopen()
+            if Version(self.version) >= "1.0.0":
+                self.cpp_info.system_libs.append("dl")
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bin_path}")
