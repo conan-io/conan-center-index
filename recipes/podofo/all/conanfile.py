@@ -56,7 +56,7 @@ class PodofoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("freetype/2.13.2")
+        self.requires("freetype/[>=2.13.2 <3]")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("libxml2/[>=2.12.5 <3]")
         self.requires("openssl/[>=1.1 <4]")
