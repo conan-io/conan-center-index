@@ -43,7 +43,10 @@ class MoldConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("xxhash/0.8.2")
         if self.options.with_mimalloc:
-            self.requires("mimalloc/2.1.2")
+            if Version(self.version) >= "2.42.0":
+                self.requires("mimalloc/3.3.2")
+            else:
+                self.requires("mimalloc/2.1.2")
         if Version(self.version) < "2.2.0":
             # Newer versions use vendored-in BLAKE3
             self.requires("openssl/[>=1.1 <4]")
@@ -91,6 +94,9 @@ class MoldConan(ConanFile):
         tc.generate()
 
         cd = CMakeDeps(self)
+        if self.options.with_mimalloc:
+            # static built mimalloc recipe exports mimalloc-static but mold expects mimalloc
+            cd.set_property("mimalloc", "cmake_target_name", "mimalloc")
         cd.generate()
 
         vbe = VirtualBuildEnv(self)
