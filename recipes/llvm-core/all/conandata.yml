@@ -1,4 +1,11 @@
 sources:
+  "20.1.6":
+    "llvm":
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.6/llvm-20.1.6.src.tar.xz
+      sha256: f09e304ca98bb809f492ec34f94f587361b4b0d06ed783fb3a41e7fb218e47a1
+    "cmake":
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.6/cmake-20.1.6.src.tar.xz
+      sha256: b4b3efa5d5b01b3f211f1ba326bb6f0c318331f828202d332c95b7f30fca5f8c
   "19.1.7":
     "llvm":
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/llvm-19.1.7.src.tar.xz
@@ -17,6 +24,11 @@ sources:
     sha256: ce8508e318a01a63d4e8b3090ab2ded3c598a50258cc49e2625b9120d4c03ea5
 
 patches:
+  "20.1.6":
+    - patch_file: patches/20x/0000-cmake-dependencies.patch
+      patch_description: fix references to third party libs to match conan variables and targets
+      patch_type: conan
+      base_path: llvm-main
   "19.1.7":
     - patch_file: patches/19x/0000-cmake-dependencies.patch
       patch_description: fix references to third party libs to match conan variables and targets
