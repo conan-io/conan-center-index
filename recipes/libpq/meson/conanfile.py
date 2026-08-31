@@ -1,9 +1,11 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.microsoft import is_msvc
 
 import os
 
@@ -82,6 +84,9 @@ class LibpqConan(ConanFile):
         if self.options.get_safe("with_readline"):
             self.requires("readline/8.2")
 
+        if is_msvc(self) and cross_building(self):
+            self.tool_requires(f"libpq/{self.version}")
+
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
@@ -119,6 +124,9 @@ class LibpqConan(ConanFile):
         tc.project_options["tap_tests"] = "disabled"
         tc.project_options["plpython"] = "disabled"
         tc.project_options["docs"] = "disabled"
+
+        if is_msvc(self) and cross_building(self):
+            tc.project_options['ZIC'] = os.path.join(self.dependencies.build['libpq'].package_folder, "bin", "_zic", "zic.exe")
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
@@ -132,6 +140,11 @@ class LibpqConan(ConanFile):
         copy(self, "COPYRIGHT", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
+
+        if is_msvc(self):
+            # copy zic.exe so that we can use it when cross-building on windows
+            copy(self, "zic.exe", os.path.join(self.build_folder, "src", "timezone"),
+                                  os.path.join(self.package_folder, "bin", "_zic"))
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))

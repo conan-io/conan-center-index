@@ -1,11 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import (
-    apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file,
-    rm, rmdir
-)
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 import os
 
 required_conan_version = ">=2.1"
@@ -58,6 +54,7 @@ class LibmediainfoConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -67,22 +64,7 @@ class LibmediainfoConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
-        # TODO: move this to a patch (see how https://github.com/MediaArea/MediaInfoLib/issues/1408 is addressed by upstream)
-        postfix = ""
-        if self.settings.build_type == "Debug":
-            if self.settings.os == "Windows":
-                postfix += "d"
-            elif is_apple_os(self):
-                postfix += "_debug"
-        mediainfodll_h = os.path.join(self.source_folder, "Source", "MediaInfoDLL", "MediaInfoDLL.h")
-        replace_in_file(self, mediainfodll_h, "MediaInfo.dll", f"MediaInfo{postfix}.dll")
-        replace_in_file(self, mediainfodll_h, "libmediainfo.0.dylib", f"libmediainfo{postfix}.0.dylib")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "Project", "CMake"))
         cmake.build()
@@ -101,12 +83,6 @@ class LibmediainfoConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "MediaInfoLib")
         self.cpp_info.set_property("cmake_target_name", "mediainfo")
         self.cpp_info.set_property("pkg_config_name", "libmediainfo")
-        postfix = ""
-        if self.settings.build_type == "Debug":
-            if self.settings.os == "Windows":
-                postfix += "d"
-            elif is_apple_os(self):
-                postfix += "_debug"
-        self.cpp_info.libs = [f"mediainfo{postfix}"]
+        self.cpp_info.libs = ["mediainfo"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])

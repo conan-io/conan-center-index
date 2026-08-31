@@ -1,12 +1,9 @@
 sources:
-  "4.2":
-    url: "https://github.com/borglab/gtsam/archive/refs/tags/4.2.tar.gz"
-    sha256: "9ff8846d0a83a245c284cb5760ec2d74535ef9b5885183ccfefd7ff122eba60e"
+  "4.2.1":
+    url: "https://github.com/borglab/gtsam/archive/refs/tags/4.2.1.tar.gz"
+    sha256: "96ea77d620fc8c2e9ed79af1b4abfdc3e73d96ee7a581a2bc326963c43dd92c2"
 patches:
-  "4.2":
-    - patch_file: "patches/4.1.1-0001-cmake-boost.patch"
-      patch_description: "Use boost targets"
-      patch_type: "conan"
+  "4.2.1":
     - patch_file: "patches/4.2.0-0001-macos-rpath.patch"
       patch_description: "Relocatable shared libs on Apple OS"
       patch_type: "conan"

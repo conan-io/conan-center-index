@@ -56,16 +56,11 @@ class Opene57Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.options.with_tools:
-            self.options["boost"].multithreading = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_tools:
-            self.requires("boost/1.90.0")
-
         if self.options.with_docs:
             self.requires("doxygen/[>=1.8 <2]")
 

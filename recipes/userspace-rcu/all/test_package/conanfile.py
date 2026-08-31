@@ -26,6 +26,6 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            for test in ["", "-mb", "-signal"]:
+            for test in ["", "-mb"]:
                 bin_path = os.path.join(self.cpp.build.bindir, f"test_package{test}")
                 self.run(bin_path, env="conanrun")

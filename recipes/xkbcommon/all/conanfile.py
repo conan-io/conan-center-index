@@ -132,4 +132,4 @@ class XkbcommonConan(ConanFile):
             self.cpp_info.components["xkbcli-interactive-wayland"].includedirs = []
             self.cpp_info.components["xkbcli-interactive-wayland"].requires = ["wayland::wayland-client"]
 
-        self.cpp_info.set_property("pkg_config_name", "none")
+        self.cpp_info.set_property("pkg_config_name", "xkbcommon_all_do_not_use")

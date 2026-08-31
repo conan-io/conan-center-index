@@ -1037,13 +1037,13 @@ class OpenCVConan(ConanFile):
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.parallel == "tbb":
-            self.requires("onetbb/2021.10.0")
+            self.requires("onetbb/[>=2021.10.0 <2024]")
         if self.options.with_ipp == "intel-ipp":
             self.requires("intel-ipp/2020")
         # dnn module dependencies
         if self.options.get_safe("with_protobuf"):
             # Symbols are exposed https://github.com/conan-io/conan-center-index/pull/16678#issuecomment-1507811867
-            self.requires("protobuf/3.21.12", transitive_libs=True)
+            self.requires("protobuf/[>=3.21.12 <8]", transitive_libs=True)
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-headers/1.3.268.0")
         if self.options.get_safe("with_openvino"):
@@ -1141,8 +1141,14 @@ class OpenCVConan(ConanFile):
 
     def validate(self):
         self._check_mandatory_options(self._opencv_modules)
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        # INFO: Newer versions of protobuf require higher versions of C++ than OpenCV itself
+        # See https://opensource.google/documentation/policies/cplusplus-support
+        min_cppstd = 11
+        if self.options.get_safe("with_protobuf"):
+            protobuf_version = Version(self.dependencies["protobuf"].ref.version)
+            protobuf_release = Version(f"{protobuf_version.minor}.{protobuf_version.patch}")
+            min_cppstd = 17 if protobuf_release >= Version("30.1") else 14
+        check_min_cppstd(self, min_cppstd)
         if self.options.shared and self._is_cl_like and self._is_cl_like_static_runtime:
             raise ConanInvalidConfiguration("MSVC or clang-cl with static runtime are not supported for shared library.")
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "4":

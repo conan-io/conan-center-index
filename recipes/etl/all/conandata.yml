@@ -1,4 +1,4 @@
 sources:
-  "20.47.1":
-    url: "https://github.com/ETLCPP/etl/archive/refs/tags/20.47.1.tar.gz"
-    sha256: "ea4cff73a18106c2fbae35b9200f8099d1a08ed70ffcca392c4264c3825eedb3"
+  "20.48.1":
+    url: "https://github.com/ETLCPP/etl/archive/refs/tags/20.48.1.tar.gz"
+    sha256: "0a6c5ec3c89b2de614b435301931566e4118a7bd7b7909615a11132f39a89ee9"

@@ -110,16 +110,6 @@ class LibjpegConan(ConanFile):
                 # Don't force LTO
                 replace_in_file(self, jpeg_vcxproj, "<WholeProgramOptimization>true</WholeProgramOptimization>", "")
 
-                # Inject conan-generated .props file
-                # Note: importing it right before Microsoft.Cpp.props also ensures we correctly
-                #       handle the toolset setting
-                conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
-                replace_in_file(
-                    self, jpeg_vcxproj,
-                    """<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.props" />""",
-                    f"""<Import Project="{conantoolchain_props}" /><Import Project="$(VCTargetsPath)\\Microsoft.Cpp.props" />""",
-                )
-
                 # Patch settings for a different build type
                 if self.settings.build_type is not "Release":
                     replacements = {
@@ -134,6 +124,16 @@ class LibjpegConan(ConanFile):
                         replace_in_file(self, jpeg_vcxproj, key, value)
 
                     replace_in_file(self, os.path.join(self.source_folder, "jpeg.sln"), "Release", str(self.settings.build_type))
+
+                # Inject conan-generated .props file
+                # Note: importing it right before Microsoft.Cpp.props also ensures we correctly
+                #       handle the toolset setting
+                conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
+                replace_in_file(
+                    self, jpeg_vcxproj,
+                    """<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.props" />""",
+                    f"""<Import Project="{conantoolchain_props}" /><Import Project="$(VCTargetsPath)\\Microsoft.Cpp.props" />""",
+                )
 
                 msbuild = MSBuild(self)
                 if self.settings.arch == "x86":

@@ -1,12 +1,10 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get, rm, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 class C4CoreConan(ConanFile):
     name = "c4core"
@@ -14,7 +12,7 @@ class C4CoreConan(ConanFile):
         "c4core is a library of low-level C++ utilities, written with "
         "low-latency projects in mind."
     )
-    license = "MIT",
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/biojppm/c4core"
     topics = ("utilities", "low-latency", )
@@ -47,17 +45,10 @@ class C4CoreConan(ConanFile):
 
     def requirements(self):
         if self.options.with_fast_float:
-            self.requires("fast_float/6.1.0", transitive_headers=True)
+            self.requires("fast_float/8.2.10", transitive_headers=True)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "11")
-
-        ## clang with libc++ is not supported. It is already fixed since 0.1.9.
-        if Version(self.version) <= "0.1.8":
-            if self.settings.compiler in ["clang", "apple-clang"] and \
-                self.settings.compiler.get_safe("libcxx") == "libc++":
-                raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang with libc++")
+        check_min_cppstd(self, "11")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

@@ -1,4 +1,14 @@
 sources:
+  "2.18.2":
+    runtime:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.18.2/zserio-2.18.2-runtime-libs.zip"
+      sha256: "972abab2e3eb25f3658373ccd7b80347ee5fc1283a618ab8aebf4fb4969d9fff"
+    compiler:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.18.2/zserio-2.18.2-bin.zip"
+      sha256: "87e10806bcd1ef3bfd1c1a42a439b2e943d662800642d2afd644ebb85acfc212"
+    license:
+      url: "https://raw.githubusercontent.com/ndsev/zserio/v2.18.2/LICENSE"
+      sha256: "d91fb189ae307416d1131b76a9c7e28c657f0a03641340c76ac994fc8119bc46"
   "2.18.1":
     runtime:
       url: "https://github.com/ndsev/zserio/releases/download/v2.18.1/zserio-2.18.1-runtime-libs.zip"

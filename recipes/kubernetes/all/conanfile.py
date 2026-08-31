@@ -21,9 +21,9 @@ class kubernetesRecipe(ConanFile):
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": True, "fPIC": True}
+    default_options = {"shared": False, "fPIC": True}
 
-    implements = ["auto_shared_fpic", "auto_language"]
+    implements = ["auto_shared_fpic"]
     languages = "C"
 
     def source(self):

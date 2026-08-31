@@ -8,7 +8,7 @@ from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class Pagmo2Conan(ConanFile):
@@ -58,8 +58,8 @@ class Pagmo2Conan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.85.0", transitive_headers=True)
-        self.requires("onetbb/2021.12.0")
+        self.requires("boost/[>=1.85.0 <1.91.0]", transitive_headers=True)
+        self.requires("onetbb/[>=2021.10.0 <2024]")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.with_nlopt:
@@ -102,6 +102,10 @@ class Pagmo2Conan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        yacma_cmake = os.path.join(self.source_folder, "cmake_modules", "yacma", "YACMACompilerLinkerSettings.cmake")
+        replace_in_file(self, yacma_cmake, 'list(APPEND _YACMA_CXX_FLAGS_DEBUG "-Werror")', "")
+        replace_in_file(self, yacma_cmake, "_YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/W4)", "")
+        replace_in_file(self, yacma_cmake, "_YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/WX)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -117,19 +121,7 @@ class Pagmo2Conan(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
 
-    def _patch_sources(self):
-        # do not force MT runtime for static lib
-        if Version(self.version) < "2.18":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "if(YACMA_COMPILER_IS_MSVC AND PAGMO_BUILD_STATIC_LIBRARY)", "if(0)")
-        # No warnings as errors
-        yacma_cmake = os.path.join(self.source_folder, "cmake_modules", "yacma", "YACMACompilerLinkerSettings.cmake")
-        replace_in_file(self, yacma_cmake, 'list(APPEND _YACMA_CXX_FLAGS_DEBUG "-Werror")', "")
-        replace_in_file(self, yacma_cmake, "_YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/W4)", "")
-        replace_in_file(self, yacma_cmake, "_YACMA_CHECK_ENABLE_DEBUG_CXX_FLAG(/WX)", "")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -152,14 +144,8 @@ class Pagmo2Conan(ConanFile):
             self.cpp_info.components["_pagmo"].system_libs.append("pthread")
 
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["_pagmo"].requires = ["boost::boost", "onetbb::onetbb"]
+        self.cpp_info.components["_pagmo"].requires = ["boost::boost", "onetbb::libtbb"]
         if self.options.with_eigen:
             self.cpp_info.components["_pagmo"].requires.append("eigen::eigen")
         if self.options.with_nlopt:
             self.cpp_info.components["_pagmo"].requires.append("nlopt::nlopt")
-        self.cpp_info.filenames["cmake_find_package"] = "pagmo"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "pagmo"
-        self.cpp_info.names["cmake_find_package"] = "Pagmo"
-        self.cpp_info.names["cmake_find_package_multi"] = "Pagmo"
-        self.cpp_info.components["_pagmo"].names["cmake_find_package"] = "pagmo"
-        self.cpp_info.components["_pagmo"].names["cmake_find_package_multi"] = "pagmo"

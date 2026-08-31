@@ -5,7 +5,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.scm import Version
 
@@ -34,7 +33,7 @@ class SentryNativeConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "backend": ["none", "inproc", "crashpad", "breakpad", "native"],
-        "transport": ["none", "curl", "winhttp"],
+        "transport": ["none", "curl", "winhttp", "custom"],
         "qt": [True, False],
         "with_crashpad": ["google", "sentry"],
         "crashpad_with_tls": ["openssl", False],
@@ -147,14 +146,13 @@ class SentryNativeConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os == "Windows":
-            self.tool_requires("cmake/[>=3.16.4 <4]")
+            self.tool_requires("cmake/[>=3.16.4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
         apply_conandata_patches(self)
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
         tc = CMakeToolchain(self)
         tc.variables["SENTRY_BACKEND"] = self.options.backend
         if self.options.backend == "breakpad":
@@ -168,7 +166,10 @@ class SentryNativeConan(ConanFile):
         if self.options.get_safe("wer", False):
             tc.variables["CRASHPAD_WER_ENABLED"] = True
         tc.generate()
-        CMakeDeps(self).generate()
+        deps = CMakeDeps(self)
+        if self.settings.os == "Linux":
+            deps.set_property("libunwind", "cmake_target_name", "unwind")
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -303,3 +304,9 @@ class SentryNativeConan(ConanFile):
             # tools
             self.cpp_info.components["crashpad_tools"].set_property("cmake_target_name", "crashpad::tools")
             self.cpp_info.components["crashpad_tools"].libs = [] if self.options.shared else ["crashpad_tools"]
+
+            if self.options.backend == "native":
+                if self.settings.os == "Windows":
+                    self.cpp_info.components["sentry_wer"].libs = ["sentry-wer"]
+                    self.cpp_info.components["sentry_wer"].type = "shared-library"
+                    self.cpp_info.components["sentry"].requires.append("sentry_wer")

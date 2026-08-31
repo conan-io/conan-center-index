@@ -8,3 +8,6 @@ sources:
   "9.0.21":
     url: "https://github.com/google/libphonenumber/archive/refs/tags/v9.0.21.tar.gz"
     sha256: "4261a7c38744b3b4859a424a193714ef55b53cd9f3d3d463f9ac589a2c778102"
+  "9.0.32":
+    url: "https://github.com/google/libphonenumber/archive/refs/tags/v9.0.32.tar.gz"
+    sha256: "fef1a587ff4793d02cf10dc87d083e7a230e0caf56e8dfdf0da6a15f78420ed8"

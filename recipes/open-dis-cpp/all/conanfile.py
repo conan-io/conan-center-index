@@ -1,7 +1,6 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanException
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.build import check_min_cppstd
@@ -32,9 +31,8 @@ class OpenDisConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_EXAMPLES"] = "FALSE"
         tc.cache_variables["BUILD_TESTS"] = "FALSE"
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
-        if Version(self.version) > "1.1.0": # pylint: disable=conan-unreachable-upper-version
-            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
+        if Version(self.version) < "1.2.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
     def layout(self):
