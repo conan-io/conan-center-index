@@ -35,7 +35,7 @@ class MinioCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cpp-httplib/0.53.1")
+        self.requires("cpp-httplib/0.53.1", options={"with_openssl": True})
         self.requires("inih/58")
         self.requires("nlohmann_json/3.11.3", transitive_headers=True)
         self.requires("openssl/[>=1.1 <4]")
