@@ -68,8 +68,8 @@ class Log4cplusConan(ConanFile):
             if Version(self.version) < 2 and valid_min_cppstd(self, 17):
                 raise ConanInvalidConfiguration(f"${self.ref} does not support C++17")
         if Version(self.version) >= "2.1.2" and \
-           is_msvc(self) and Version(self.settings.compiler.version) < 192:
-            raise ConanInvalidConfiguration(f"${self.ref} requires Visual Studio 2019 or newer")
+           is_msvc(self) and Version(self.settings.compiler.version) < 191:
+            raise ConanInvalidConfiguration(f"${self.ref} requires Visual Studio 2017 or newer")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
