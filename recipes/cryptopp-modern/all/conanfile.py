@@ -92,6 +92,7 @@ class CryptoPPModernConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "cryptopp-modern")
         self.cpp_info.set_property("cmake_target_name", "cryptopp::cryptopp")
         self.cpp_info.set_property("pkg_config_name", "cryptopp-modern")
+        self.cpp_info.set_property("pkg_config_aliases", ["libcryptopp"])
 
         self.cpp_info.libs = ["cryptopp"]
         if self.settings.os in ["Linux", "FreeBSD"]:
