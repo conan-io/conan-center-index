@@ -160,6 +160,10 @@ class OpenSceneGraphConanFile(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
 
+    def build_requirements(self):
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/[>=2.1.0 <3]")
+
     def validate(self):
         if self.options.get_safe("with_asio"):
             raise ConanInvalidConfiguration(
@@ -202,39 +206,53 @@ class OpenSceneGraphConanFile(ConanFile):
 
         tc.variables["OPENGL_PROFILE"] = str(self.options.opengl_profile).upper()
 
+        def disable_dependency(variable, cmake_file_name):
+            tc.cache_variables[f"OSG_WITH_{variable}"] = False
+            # Even with false options, if osg finds the dependency on the system, it will enable the feature.
+            tc.cache_variables[f"CMAKE_DISABLE_FIND_PACKAGE_{cmake_file_name}"] = True
+
+        def toggle_dependency(option_name, variable, cmake_file_name, disable=True):
+            if self.options.get_safe(option_name, False):
+                tc.cache_variables[f"OSG_WITH_{variable}"] = True
+                self.output.info(f"Enabling OSG_WITH_{variable}")
+            elif disable:
+                disable_dependency(variable, cmake_file_name)
+
         # Disable option dependencies unless we have a package for them
-        tc.variables["OSG_WITH_FREETYPE"] = self.options.with_freetype
-        tc.variables["OSG_WITH_OPENEXR"] = self.options.get_safe("with_openexr", False)
-        tc.variables["OSG_WITH_INVENTOR"] = False
-        tc.variables["OSG_WITH_JASPER"] = self.options.with_jasper
-        tc.variables["OSG_WITH_OPENCASCADE"] = False
-        tc.variables["OSG_WITH_FBX"] = False
-        tc.variables["OSG_WITH_ZLIB"] = self.options.with_zlib
-        tc.variables["OSG_WITH_GDAL"] = self.options.with_gdal
-        tc.variables["OSG_WITH_GTA"] = self.options.with_gta
-        tc.variables["OSG_WITH_CURL"] = self.options.with_curl
-        tc.variables["OSG_WITH_LIBVNCSERVER"] = False
-        tc.variables["OSG_WITH_DCMTK"] = self.options.get_safe("with_dcmtk", False)
-        tc.variables["OSG_WITH_FFMPEG"] = False
-        tc.variables["OSG_WITH_DIRECTSHOW"] = False
-        tc.variables["OSG_WITH_SDL"] = False
-        tc.variables["OSG_WITH_POPPLER"] = False
-        tc.variables["OSG_WITH_RSVG"] = False
-        tc.variables["OSG_WITH_NVTT"] = False
-        tc.variables["OSG_WITH_ASIO"] = self.options.get_safe("with_asio", False)
-        tc.variables["OSG_WITH_ZEROCONF"] = False
-        tc.variables["OSG_WITH_LIBLAS"] = False
-        tc.variables["OSG_WITH_GIFLIB"] = self.options.get_safe("with_gif", False)
-        tc.variables["OSG_WITH_JPEG"] = self.options.get_safe("with_jpeg", False)
-        tc.variables["OSG_WITH_PNG"] = self.options.get_safe("with_png", False)
-        tc.variables["OSG_WITH_TIFF"] = self.options.with_tiff
+        toggle_dependency("with_freetype", "FREETYPE", "Freetype")
+        toggle_dependency("with_openexr", "OPENEXR", "OpenEXR")
+        disable_dependency("INVENTOR", "Inventor")
+        toggle_dependency("with_jasper", "JASPER", "Jasper")
+        disable_dependency("OPENCASCADE", "OpenCascade")
+        disable_dependency("FBX", "FBX")
+        toggle_dependency("with_zlib", "ZLIB", "ZLIB")
+        toggle_dependency("with_gdal", "GDAL", "GDAL")
+        toggle_dependency("with_gta", "GTA", "GTA")
+        toggle_dependency("with_curl", "CURL", "CURL")
+        disable_dependency("LIBVNCSERVER", "LibVNCServer")
+        toggle_dependency("with_dcmtk", "DCMTK", "DCMTK")
+        # TODO: Maybe ffmpeg can be supported in the future
+        disable_dependency("FFMPEG", "FFmpeg")
+        disable_dependency("GSTREAMER", "GStreamer")
+        disable_dependency("DIRECTSHOW", "DirectShow")
+        # TODO: Maybe SDL can be supported in the future
+        disable_dependency("SDL", "SDL2")
+        disable_dependency("SDL", "SDL")
+        disable_dependency("POPPLER", "Poppler-glib")
+        disable_dependency("RSVG", "RSVG")
+        disable_dependency("NVTT", "NVTT")
+        toggle_dependency("with_asio", "ASIO", "Asio")
+        disable_dependency("ZEROCONF", "ZeroConf")
+        disable_dependency("LIBLAS", "LIBLAS")
+        toggle_dependency("with_gif", "GIFLIB", "GIFLIB")
+        toggle_dependency("with_jpeg", "JPEG", "JPEG")
+        toggle_dependency("with_png", "PNG", "PNG", disable=False)
+        toggle_dependency("with_tiff", "TIFF", "TIFF")
 
-        if (self.options.get_safe("with_avfoundation")):
-            tc.variables["OSG_WITH_AV_FOUNDATION"] = True
-
+        toggle_dependency("with_avfoundation", "AV_FOUNDATION", "AVFoundation")
         if self.settings.os == "Windows":
             # osg has optional quicktime support on Windows
-            tc.variables["CMAKE_DISABLE_FIND_PACKAGE_QuickTime"] = True
+            disable_dependency("QUICKTIME", "QuickTime")
 
         tc.variables["OSG_MSVC_VERSIONED_DLL"] = False
 
@@ -242,7 +260,7 @@ class OpenSceneGraphConanFile(ConanFile):
             tc.preprocessor_definitions["GL_SILENCE_DEPRECATION"] = "1"
 
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"  # macOS: use @rpath for shared libs
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support 
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -297,7 +315,7 @@ class OpenSceneGraphConanFile(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self.source_path.parent)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.path.pardir))
         cmake.build()
 
     def package(self):
@@ -489,7 +507,7 @@ class OpenSceneGraphConanFile(ConanFile):
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
             setup_plugin("jpeg").requires.append("libjpeg-turbo::jpeg")
         elif self.options.get_safe("with_jpeg") == "mozjpeg":
-            setup_plugin("jpeg").requires.append("mozjpeg::libjpeg")       
+            setup_plugin("jpeg").requires.append("mozjpeg::libjpeg")
 
         if self.options.with_jasper:
             setup_plugin("jp2").requires.append("jasper::jasper")
