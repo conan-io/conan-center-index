@@ -1,9 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.scm import Version
 import os
@@ -112,9 +111,10 @@ class OpenblasConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-
-        # When cross-compiling, OpenBLAS requires explicitly setting TARGET
-        if cross_building(self, skip_x64_x86=True) and not self.options.target:
+        # Always explicitly set TARGET, either from user or inferred from settings.arch.
+        # We cannot have the OpenBLAS build system try to detect the CPU at build time,
+        # which results in non-reproducible builds.
+        if not self.options.target:
             # Try inferring the target from settings.arch
             target = conan_arch_to_openblas_target.get(str(self.settings.arch))
             if target:
@@ -134,13 +134,15 @@ class OpenblasConan(ConanFile):
                 raise ConanInvalidConfiguration(f'"{self.name}/*:build_relapack=True" option is only supported for GCC and Clang')
 
     def validate_build(self):
-        # If we're cross-compiling, and the user didn't provide the target, and
-        # we couldn't infer the target from settings.arch, fail
-        if cross_building(self, skip_x64_x86=True) and not self.options.target:
+        if not self.options.target:
             raise ConanInvalidConfiguration(f'Could not determine OpenBLAS TARGET. Please set the "{self.name}/*:target=XXX" option.')
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -171,8 +173,7 @@ class OpenblasConan(ConanFile):
         # which is required to successfully compile on older gcc versions.
         tc.variables["ANDROID"] = self.settings.os in ["Linux", "Android"]
 
-        if self.options.target:
-            tc.cache_variables["TARGET"] = self.options.target
+        tc.cache_variables["TARGET"] = self.options.target
 
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         if Version(self.version) < "0.3.29": # pylint: disable=conan-condition-evals-to-constant
