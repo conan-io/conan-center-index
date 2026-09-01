@@ -1,0 +1,4 @@
+sources:
+  "2.16.0":
+    url: "https://github.com/intel/libvpl/archive/v2.16.0.tar.gz"
+    sha256: "D60931937426130DDAD9F1975C010543F0DA99E67EDB1C6070656B7947F633B6"
