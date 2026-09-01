@@ -793,6 +793,11 @@ class QtConan(ConanFile):
             args += ["-no-framework"]
             if cross_building(self):
                 args.append(f"QMAKE_APPLE_DEVICE_ARCHS={to_apple_arch(self)}")
+        elif is_apple_os(self):
+            sdk = str(self.settings.os.sdk)
+            args += [f"-sdk {sdk}"]
+            if sdk.endswith("simulator"):
+                args += [f"QMAKE_APPLE_SIMULATOR_ARCHS={to_apple_arch(self)}"]
         elif self.settings.os == "Android":
             args += [f"-android-ndk-platform android-{self.settings.os.api_level}"]
             args += [f"-android-abis {android_abi(self)}"]
