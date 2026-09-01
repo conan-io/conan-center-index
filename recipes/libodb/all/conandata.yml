@@ -1,0 +1,8 @@
+sources:
+  "2.5.0":
+    libodb:
+      url: "https://www.codesynthesis.com/download/odb/2.5.0/libodb-2.5.0.tar.gz"
+      sha256: "700038a73c6cbead011129b15030b7cdd3f73510b687f2c4504808df4230441b"
+    build2_toolchain:
+      url: "https://download.build2.org/0.18.1/build2-toolchain-0.18.1.tar.gz"
+      sha256: "23b1719f1d8d1ef1957c2b28bc12177aa70d23d73de79889c2f5041d293692bc"
