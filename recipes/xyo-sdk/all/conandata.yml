@@ -1,7 +1,7 @@
 sources:
   "2.1.0":
     url: "https://github.com/xyo-financial/sdk-cpp/archive/refs/tags/v2.1.0.tar.gz"
-    sha256: "5b1762515f455ed19953e6a13cb21902cf619eb558549c8e4e2df2dec84c4923"
+    sha256: "cfdbb40dff9cabcc90e96e1650410f56fd6603c1b9bc0b9f24368aa15b9fb0f9"
   "2.0.0":
     url: "https://github.com/xyo-financial/sdk-cpp/archive/refs/tags/v2.0.0.tar.gz"
     sha256: "b53e8bbcf699b22dffa664d844bb3a898ee55d92c6907b397f3427a2c524c8ae"
