@@ -1,4 +1,4 @@
 sources:
-  "0.1.3":
-    url: "https://github.com/depz-ai/depz-sensor-sdk/archive/refs/tags/v0.1.3.tar.gz"
-    sha256: "a9a87574c762981893a7651c84e516106e07c1319b91db0df3ea66931cde6576"
+  "0.1.4":
+    url: "https://github.com/depz-ai/depz-sensor-sdk/archive/refs/tags/v0.1.4.tar.gz"
+    sha256: "ff66d1d513c1434b2168b926c3896eae24d70e20b93a1458a83432f389ab654d"
