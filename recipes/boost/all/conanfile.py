@@ -1637,6 +1637,10 @@ class BoostConan(ConanFile):
 
     @property
     def _toolset_version(self):
+        # Return empty string for non-MSVC builds
+        if not is_msvc(self):
+            return ""
+
         toolset = MSBuildToolchain(self).toolset
         if toolset:
             match = re.match(r"v(\d+)(\d)$", toolset)
