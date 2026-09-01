@@ -31,6 +31,9 @@ class GlazeConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.31]")
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["glaze_DEVELOPER_MODE"] = False
