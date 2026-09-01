@@ -45,6 +45,7 @@ class MakeConan(ConanFile):
         if self.settings_build.os != "Windows":
             tc = AutotoolsToolchain(self)
             tc.configure_args.extend(["--disable-dependency-tracking"])
+            tc.configure_args.append("CXX=")
             tc.generate()
 
     def build(self):
