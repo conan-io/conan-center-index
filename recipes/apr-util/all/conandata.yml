@@ -4,7 +4,17 @@ sources:
       - "https://archive.apache.org/dist/apr/apr-util-1.6.1.tar.gz"
       - "https://downloads.apache.org/apr/apr-util-1.6.1.tar.gz"
     sha256: "b65e40713da57d004123b6319828be7f1273fbc6490e145874ee1177e112c459"
+  "1.6.5":
+    url:
+      - "https://archive.apache.org/dist/apr/apr-util-1.6.5.tar.gz"
+      - "https://downloads.apache.org/apr/apr-util-1.6.5.tar.gz"
+    sha256: "f43a1c8c79eef497a022ec6c99dddbdf57e42001da6ccbfae259631ed5aa2805"
+
 patches:
   "1.6.1":
-    - patch_file: "patches/0001-fix-cmake.patch"
-    - patch_file: "patches/0002-apu-config-prefix-env.patch"
+    - patch_file: "patches/1.6.1/0001-fix-cmake.patch"
+    - patch_file: "patches/1.6.1/0002-apu-config-prefix-env.patch"
+
+  "1.6.5":
+    - patch_file: "patches/1.6.5/0001-fix-cmake.patch"
+    - patch_file: "patches/1.6.5/0002-apu-config-prefix-env.patch"
