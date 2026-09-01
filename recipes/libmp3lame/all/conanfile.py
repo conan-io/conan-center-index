@@ -92,7 +92,9 @@ class LibMP3LameConan(ConanFile):
                 buildenv_vars = VirtualBuildEnv(self).vars()
                 cl = compilers_from_conf.get("c", buildenv_vars.get("CC", "clang-cl"))
                 link = buildenv_vars.get("LD", "lld-link")
-                replace_in_file(self, "Makefile.MSVC", "CC = cl", f"CC = {cl}")
+                # Quote the CC path: nmake's .c.obj inference rule cannot resolve
+                # subdirectory targets when $(CC) expands to a path with spaces.
+                replace_in_file(self, "Makefile.MSVC", "CC = cl", f'CC = "{cl}"')
                 replace_in_file(self, "Makefile.MSVC", "LN = link", f"LN = {link}")
                 # what is /GAy? MSDN doesn't know it
                 # clang-cl: error: no such file or directory: '/GAy'
