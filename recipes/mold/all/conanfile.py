@@ -5,7 +5,6 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import copy, get, rmdir
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
-from conan.tools.env import VirtualBuildEnv
 
 required_conan_version = ">2.0"
 
@@ -73,8 +72,6 @@ class MoldConan(ConanFile):
             cd.set_property("mimalloc", "cmake_target_name", "mimalloc")
         cd.generate()
 
-        vbe = VirtualBuildEnv(self)
-        vbe.generate()
 
     def build(self):
         cmake = CMake(self)
