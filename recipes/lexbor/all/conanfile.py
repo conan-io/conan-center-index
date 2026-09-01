@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
 from conan.tools.files import get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
@@ -47,12 +46,8 @@ class LexborConan(ConanFile):
         tc.cache_variables["LEXBOR_BUILD_SHARED"] = self.options.shared
         tc.cache_variables["LEXBOR_BUILD_STATIC"] = not self.options.shared
         tc.variables["LEXBOR_TESTS_CPP"] = False
-        tc.variables["LEXBOR_BUILD_SEPARATELY"] = self.options.build_separately
+        tc.variables["LEXBOR_BUILD_SEPARATELY"] = False
         tc.variables["LEXBOR_INSTALL_HEADERS"] = True
-        if Version(self.version) < "2.3.0":
-            # To install relocatable shared lib on Macos by default
-            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):
