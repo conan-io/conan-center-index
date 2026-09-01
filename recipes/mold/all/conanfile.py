@@ -52,11 +52,7 @@ class MoldConan(ConanFile):
         del self.info.settings.compiler
 
     def validate_build(self):
-        # perform these checks in validate_build() - since the compiler is removed from the package_id,
-        # this lets the compatibility plugin consider the executable built with other compilers
-        if Version(self.version) >= "2.34.0":
-            # mold has required C+20 since 1.4.1. However, C++20 features are used for the first time in 2.34.0.
-            check_min_cppstd(self, 20)
+        check_min_cppstd(self, 20)
         if self.settings.compiler in ["gcc", "clang", "intel-cc"] and self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration('Mold can only be built with libstdc++11; specify mold:compiler.libcxx=libstdc++11 in your build profile')
         if self.settings.compiler == "msvc":
@@ -65,12 +61,10 @@ class MoldConan(ConanFile):
             raise ConanInvalidConfiguration("GCC version 10 or higher required")
         if self.settings.compiler in ('clang', 'apple-clang') and Version(self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("Clang version 12 or higher required")
-        if Version(self.version) >= "2.34.0" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14":
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14":
             raise ConanInvalidConfiguration("Apple-Clang version 14 or higher required due to C++20 features")
         if self.settings.compiler == "apple-clang" and "armv8" == self.settings.arch :
             raise ConanInvalidConfiguration(f'{self.name} is still not supported by Mac M1.')
-        if Version(self.version) == "2.33.0" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14":
-            raise ConanInvalidConfiguration(f'{self.ref} doesn\'t support Apple-Clang < 14.')
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.18.0 <4]")
@@ -88,7 +82,6 @@ class MoldConan(ConanFile):
 
         cd = CMakeDeps(self)
         if self.options.with_mimalloc:
-            # static built mimalloc recipe exports mimalloc-static but mold expects mimalloc
             cd.set_property("mimalloc", "cmake_target_name", "mimalloc")
         cd.generate()
 
