@@ -16,7 +16,7 @@ class MoldConan(ConanFile):
         "mold is a faster drop-in replacement for existing Unix linkers. "
         "It is several times faster than the LLVM lld linker."
     )
-    license = ("AGPL-3.0", "MIT")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/rui314/mold/"
     topics = ("ld", "linkage", "compilation", "pre-built")
@@ -29,12 +29,6 @@ class MoldConan(ConanFile):
     default_options = {
         "with_mimalloc": False,
     }
-
-    def configure(self):
-        if Version(self.version) < "2.0.0":
-            self.license = "AGPL-3.0"
-        else:
-            self.license = "MIT"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -65,9 +59,6 @@ class MoldConan(ConanFile):
             raise ConanInvalidConfiguration("Apple-Clang version 14 or higher required due to C++20 features")
         if self.settings.compiler == "apple-clang" and "armv8" == self.settings.arch :
             raise ConanInvalidConfiguration(f'{self.name} is still not supported by Mac M1.')
-
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.18.0 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
