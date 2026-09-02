@@ -1,0 +1,6 @@
+sources:
+  "2.4.1":
+    url: "https://github.com/eProsima/Fast-DDS-python/archive/refs/tags/v2.4.1.tar.gz"
+    sha256: "e708b1b3517fe40c2e0564a00b0ca413288d84ac3433d08b7bc2f9c01088cce7"
+fastdds_versions:
+  "2.4.1": "3.4.3"
