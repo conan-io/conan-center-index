@@ -601,6 +601,18 @@ class QtConan(ConanFile):
         if self.options.lib_infix:
             tc.variables["QT_LIBINFIX"] = str(self.options.lib_infix)
 
+        # Equivalent of configure's -separate-debug-info. The feature is AUTODETECT OFF, so it
+        # has to be asked for; its own condition additionally requires a shared build with
+        # debug info, which is why this mirrors that check instead of forcing it blindly.
+        # On ELF this makes Qt run `objcopy --only-keep-debug` into <basename>.debug, strip the
+        # binary and add a .gnu_debuglink; package() then moves those .debug files into the
+        # package metadata, exactly as it does with .pdb files on MSVC.
+        # Apple platforms are excluded on purpose: there the feature produces .dSYM bundles
+        # (directories), which the "*.debug" glob in package() would not pick up.
+        if self.settings.os in ("Linux", "FreeBSD") and self.options.shared \
+                and self.settings.get_safe("build_type") in ("Debug", "RelWithDebInfo"):
+            tc.variables["FEATURE_separate_debug_info"] = "ON"
+
 
         if self.settings.os == "Macos":
             tc.variables["FEATURE_framework"] = "OFF"
@@ -862,8 +874,13 @@ class QtConan(ConanFile):
         rm(self, "*.la*", os.path.join(self.package_folder, "lib"), recursive=True)
         # Debug symbols are kept out of the package itself, but preserved as package metadata:
         # uploaded with the package, not downloaded unless explicitly asked for.
+        # MSVC: .pdb files sit next to the binaries. ELF: FEATURE_separate_debug_info (see
+        # generate()) has split the debug info into <basename>.debug files, leaving the .so
+        # files stripped and carrying a .gnu_debuglink to them.
         copy(self, "*.pdb", self.package_folder, os.path.join(self.package_metadata_folder, "pdb"))
         rm(self, "*.pdb*", self.package_folder, recursive=True)
+        copy(self, "*.debug", self.package_folder, os.path.join(self.package_metadata_folder, "debug"))
+        rm(self, "*.debug", self.package_folder, recursive=True)
         rm(self, "ensure_pro_file.cmake", self.package_folder, recursive=True)
         os.remove(os.path.join(self.package_folder, "libexec" if self.settings.os != "Windows" else "bin", "qt-cmake-private-install.cmake"))
 
