@@ -1,0 +1,4 @@
+sources:
+  "1.1.0":
+    url: "https://github.com/jmuehlig/perf-cpp/archive/refs/tags/v1.1.0.tar.gz"
+    sha256: "85745bdc4cfd4cfbbe01f3572d559e7d6c3f28ec5abf3a1d0e80a318d8cd9671"
