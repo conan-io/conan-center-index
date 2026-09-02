@@ -159,6 +159,8 @@ class MongoCDriverConan(ConanFile):
         tc.variables["HAVE_ASN1_STRING_GET0_DATA"] = True  # Requires OpenSSL 1.1.0+
         # https://github.com/mongodb/mongo-c-driver/blob/1.25.3/src/libmongoc/CMakeLists.txt#L366-L375
         tc.variables["SASL2_HAVE_SASL_CLIENT_DONE"] = True # Requires Cyrus-SASL 2.1.23+
+        if Version(self.version) < "1.25":
+            tc.variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -183,6 +185,13 @@ class MongoCDriverConan(ConanFile):
         # cleanup rpath
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                               "set (CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)", "")
+        if Version(self.version) < "1.30.3":
+            replace_in_file(self, os.path.join(self.source_folder, "src", "libbson", "CMakeLists.txt"),
+                                  "cmake_policy (SET CMP0042 OLD)", "")
+        if Version(self.version) < "2.4.0":
+            replace_in_file(self, os.path.join(self.source_folder, "src", "libmongoc", "CMakeLists.txt"),
+                                  "\"-Werror -DCMAKE_CXX_LINK_EXECUTABLE='echo not linking now...'\"",
+                                  "\"-DCOMPILE_DEFINITIONS=-Werror\" \"-DCMAKE_CXX_LINK_EXECUTABLE='echo not linking now...'\"")
 
     def build(self):
         self._patch_sources()
