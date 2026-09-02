@@ -1,4 +1,4 @@
 sources:
-  "1.10.0":
-    url: "https://github.com/mas-bandwidth/yojimbo/archive/refs/tags/v1.10.0.tar.gz"
-    sha256: "4717ae7deeecd2d595faa9b48d932c1f6fe8171b0301de631518e019e7f1eddd"
+  "1.11.0":
+    url: "https://github.com/mas-bandwidth/yojimbo/archive/refs/tags/v1.11.0.tar.gz"
+    sha256: "eab9946fbd4aa288dbd4e72252a3066f9ba41adee749bfa081504debd41e17be"
