@@ -80,4 +80,7 @@ patches:
   "6.10.3":
     - "patch_file": "patches/6.10.3-fix-macos-26.4.diff"
       "base_path": "qtbase"
+    - "patch_file": "patches/6.10.3-feflow.patch"
+      "patch_description": "FEFLOW: enable SQLite extension loading at runtime in the QSQLITE driver, and connect QToolButton's default action with Qt::UniqueConnection"
+      "patch_type": "conan"
 

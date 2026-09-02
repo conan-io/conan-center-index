@@ -76,6 +76,8 @@ class QtConan(ConanFile):
         "sysroot": [None, "ANY"],
         "multiconfiguration": [True, False],
         "disabled_features": [None, "ANY"],
+        "namespace": [None, "ANY"],
+        "lib_infix": [None, "ANY"],
     }
     options.update({module: [True, False] for module in _submodules})
     options.update({f"{status}_modules": [True, False] for status in _module_statuses})
@@ -118,6 +120,8 @@ class QtConan(ConanFile):
         "sysroot": None,
         "multiconfiguration": False,
         "disabled_features": "",
+        "namespace": None,
+        "lib_infix": None,
     }
     # essential_modules, addon_modules, deprecated_modules, preview_modules:
     #    these are only provided for convenience, set to False by default
@@ -591,6 +595,12 @@ class QtConan(ConanFile):
         for feature in str(self.options.disabled_features).split():
             tc.variables[f"FEATURE_{feature}"] = "OFF"
 
+        # equivalent of configure's -qtnamespace and -qtlibinfix
+        if self.options.namespace:
+            tc.variables["QT_NAMESPACE"] = str(self.options.namespace)
+        if self.options.lib_infix:
+            tc.variables["QT_LIBINFIX"] = str(self.options.lib_infix)
+
 
         if self.settings.os == "Macos":
             tc.variables["FEATURE_framework"] = "OFF"
@@ -850,6 +860,9 @@ class QtConan(ConanFile):
         for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
             rm(self, mask, self.package_folder, recursive=True, excludes="Qt6HostInfoConfig.cmake")
         rm(self, "*.la*", os.path.join(self.package_folder, "lib"), recursive=True)
+        # Debug symbols are kept out of the package itself, but preserved as package metadata:
+        # uploaded with the package, not downloaded unless explicitly asked for.
+        copy(self, "*.pdb", self.package_folder, os.path.join(self.package_metadata_folder, "pdb"))
         rm(self, "*.pdb*", self.package_folder, recursive=True)
         rm(self, "ensure_pro_file.cmake", self.package_folder, recursive=True)
         os.remove(os.path.join(self.package_folder, "libexec" if self.settings.os != "Windows" else "bin", "qt-cmake-private-install.cmake"))
@@ -1045,6 +1058,10 @@ class QtConan(ConanFile):
                 build_modules[component] = []
             build_modules[component].append(module)
 
+        # set by QT_LIBINFIX, sits between the module name and the debug suffix:
+        # Qt6Core -> Qt6CoreFE, Qt6Cored -> Qt6CoreFEd
+        libinfix = str(self.options.lib_infix or "")
+
         libsuffix = ""
         if self.settings.get_safe("build_type") == "Debug":
             if is_msvc(self):
@@ -1073,7 +1090,7 @@ class QtConan(ConanFile):
                 libname = module[:-7]
             else:
                 libname = module
-            self.cpp_info.components[componentname].libs = [f"Qt6{libname}{libsuffix}"]
+            self.cpp_info.components[componentname].libs = [f"Qt6{libname}{libinfix}{libsuffix}"]
             if has_include_dir:
                 self.cpp_info.components[componentname].includedirs = ["include", os.path.join("include", f"Qt{module}")]
             self.cpp_info.components[componentname].defines = [f"QT_{module.upper()}_LIB"]
@@ -1087,7 +1104,7 @@ class QtConan(ConanFile):
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt6::{pluginname}")
             self.cpp_info.components[componentname].set_property("cmake_target_aliases", [f"Qt::{pluginname}"])
             if not self.options.shared:
-                self.cpp_info.components[componentname].libs = [libname + libsuffix]
+                self.cpp_info.components[componentname].libs = [libname + libinfix + libsuffix]
             self.cpp_info.components[componentname].libdirs = [os.path.join("plugins", plugintype)]
             self.cpp_info.components[componentname].includedirs = []
             if "Core" not in requires:
@@ -1521,7 +1538,7 @@ class QtConan(ConanFile):
             if self.settings.os == "Windows":
                 self.cpp_info.components["qtEntryPointImplementation"].set_property("cmake_target_name", "Qt6::EntryPointImplementation")
                 self.cpp_info.components["qtEntryPointImplementation"].set_property("cmake_target_aliases", ["Qt::EntryPointImplementation"])
-                self.cpp_info.components["qtEntryPointImplementation"].libs = [f"Qt6EntryPoint{libsuffix}"]
+                self.cpp_info.components["qtEntryPointImplementation"].libs = [f"Qt6EntryPoint{libinfix}{libsuffix}"]
                 self.cpp_info.components["qtEntryPointImplementation"].system_libs = ["shell32"]
 
                 if self.settings.compiler == "gcc":

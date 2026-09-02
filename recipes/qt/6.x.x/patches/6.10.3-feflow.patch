@@ -1,0 +1,47 @@
+diff --git a/qtbase/src/plugins/sqldrivers/sqlite/CMakeLists.txt b/qtbase/src/plugins/sqldrivers/sqlite/CMakeLists.txt
+index 827cae9..5a48c74 100644
+--- a/qtbase/src/plugins/sqldrivers/sqlite/CMakeLists.txt
++++ b/qtbase/src/plugins/sqldrivers/sqlite/CMakeLists.txt
+@@ -110,7 +110,7 @@ qt_internal_extend_target(QSQLiteDriverPlugin CONDITION QT_FEATURE_dlopen AND NO
+ 
+ qt_internal_extend_target(QSQLiteDriverPlugin CONDITION NOT QT_FEATURE_dlopen AND NOT QT_FEATURE_system_sqlite
+     DEFINES
+-        SQLITE_OMIT_LOAD_EXTENSION
++        SQLITE_ENABLE_LOAD_EXTENSION
+ )
+ 
+ qt_internal_extend_target(QSQLiteDriverPlugin CONDITION NOT QT_FEATURE_thread AND NOT QT_FEATURE_system_sqlite
+diff --git a/qtbase/src/plugins/sqldrivers/sqlite/qsql_sqlite.cpp b/qtbase/src/plugins/sqldrivers/sqlite/qsql_sqlite.cpp
+index 7b1a657..2f1be5f 100644
+--- a/qtbase/src/plugins/sqldrivers/sqlite/qsql_sqlite.cpp
++++ b/qtbase/src/plugins/sqldrivers/sqlite/qsql_sqlite.cpp
+@@ -359,6 +359,7 @@ QSQLiteResult::QSQLiteResult(const QSQLiteDriver* db)
+ {
+     Q_D(QSQLiteResult);
+     const_cast<QSQLiteDriverPrivate*>(d->drv_d_func())->results.append(this);
++    sqlite3_enable_load_extension(d->drv_d_func()->access, true);       // @FEFLOW@: Enable map extension
+ }
+ 
+ QSQLiteResult::~QSQLiteResult()
+@@ -699,6 +700,7 @@ QSQLiteDriver::QSQLiteDriver(sqlite3 *connection, QObject *parent)
+ {
+     Q_D(QSQLiteDriver);
+     d->access = connection;
++    sqlite3_enable_load_extension(d->access, true);     // @FEFLOW@: Enable map extension
+     setOpen(true);
+     setOpenError(false);
+ }
+diff --git a/qtbase/src/widgets/widgets/qtoolbutton.cpp b/qtbase/src/widgets/widgets/qtoolbutton.cpp
+index 01150cd..ed26a06 100644
+--- a/qtbase/src/widgets/widgets/qtoolbutton.cpp
++++ b/qtbase/src/widgets/widgets/qtoolbutton.cpp
+@@ -962,7 +962,8 @@ void QToolButton::setDefaultAction(QAction *action)
+             setPopupMode(QToolButton::MenuButtonPopup);
+         } else {
+             QObjectPrivate::connect(d->defaultAction, &QAction::changed, d,
+-                                    &QToolButtonPrivate::onDefaultActionChanged);
++                                    &QToolButtonPrivate::onDefaultActionChanged,
++                                    Qt::UniqueConnection);
+         }
+     }
+ #endif
