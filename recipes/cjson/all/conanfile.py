@@ -58,8 +58,11 @@ class CjsonConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_SANITIZERS"] = False
         tc.variables["ENABLE_SAFE_STACK"] = False
-        tc.variables["ENABLE_PUBLIC_SYMBOLS"] = True
-        tc.variables["ENABLE_HIDDEN_SYMBOLS"] = False
+        tc.variables["ENABLE_PUBLIC_SYMBOLS"] = self.options.shared
+        tc.variables["ENABLE_HIDDEN_SYMBOLS"] = not self.options.shared
+        if not self.options.shared:
+            tc.variables["CMAKE_C_VISIBILITY_PRESET"] = "hidden"
+            tc.variables["CMAKE_VISIBILITY_INLINES_HIDDEN"] = True
         tc.variables["ENABLE_TARGET_EXPORT"] = False
         tc.variables["BUILD_SHARED_AND_STATIC_LIBS"] = False
         tc.variables["CJSON_OVERRIDE_BUILD_SHARED_LIBS"] = False
@@ -94,6 +97,10 @@ class CjsonConan(ConanFile):
         self.cpp_info.components["_cjson"].set_property("cmake_target_name", "cjson")
         self.cpp_info.components["_cjson"].set_property("pkg_config_name", "libcjson")
         self.cpp_info.components["_cjson"].libs = ["cjson"]
+        if self.settings.os == "Windows" and not self.options.shared:
+            # cJSON.h defaults to __declspec(dllexport) when no symbol macro is defined,
+            # which would make consumers' DLLs re-export the cJSON API.
+            self.cpp_info.components["_cjson"].defines = ["CJSON_HIDE_SYMBOLS"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_cjson"].system_libs = ["m"]
 
