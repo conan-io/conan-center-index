@@ -68,7 +68,7 @@ class Open62541Conan(ConanFile):
         # With Multicast: Deprecated. Use 'multicast' instead
         # multicast: UA_ENABLE_DISCOVERY_MULTICAST=On (<1.5.0) / UA_ENABLE_DISCOVERY_MULTICAST=MDNSD (>=1.5.0)
         # semaphore: UA_ENABLE_DISCOVERY_SEMAPHORE=On
-        # multicast,semaphore: UA_ENABLE_DISCOVERY_MULTICAST=On/MDNSD and UA_ENABLE_DISCOVERY_SEMAPHORE=On        "discovery": [True, False, "With Multicast", "multicast", "semaphore", "multicast,semaphore"],
+        # multicast,semaphore: UA_ENABLE_DISCOVERY_MULTICAST=On/MDNSD and UA_ENABLE_DISCOVERY_SEMAPHORE=On
         "discovery": [True, False, "With Multicast", "multicast", "semaphore", "multicast,semaphore"],
         # Deprecated. Use discovery=semaphore instead
         "discovery_semaphore": [True, False],
@@ -189,7 +189,8 @@ class Open62541Conan(ConanFile):
         if self.options.web_socket:
             self.requires("libwebsockets/4.3.2")
         if self.options.discovery == "With Multicast" or "multicast" in str(self.options.discovery):
-            if Version(self.version) < "1.5.5":
+            # >=1.5.0 vendors mdnsd as a submodule instead of consuming an external one
+            if Version(self.version) < "1.5.0":
                 self.requires("pro-mdnsd/0.8.4")
         if self.options.get_safe("nodeset_loader"):
             if Version(self.version) >= "1.5.0":

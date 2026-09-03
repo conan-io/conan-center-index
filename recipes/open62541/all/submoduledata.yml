@@ -1,5 +1,5 @@
 submodules:
-  "1.5.5":
+  "1.5.7":
     deps/ua-nodeset:
       url: "https://github.com/OPCFoundation/UA-Nodeset/archive/257db9ad98ee7ba4b67d3500b54bfc9d744a36af.tar.gz"
       sha256: "b8ab371bb616dcc09d4f001a7e3a9ac925e347a9061c39cf971912263d21a395"
@@ -9,8 +9,8 @@ submodules:
       sha256: "fadb558143cf4ff258cd3e78bf90eafac34986e223d7e1869847ec2173797339"
       archive_pattern: "nodesetLoader-{sha256}"
     deps/mdnsd:
-      url: "https://github.com/troglobit/mdnsd/archive/e190ef757323596a0af196c1b83297dba054f3d1.tar.gz"
-      sha256: "b6369b67910e7fa24c0a91858976b5a8401367044c2f9f53ea1bce4d1b4ce836"
+      url: "https://github.com/troglobit/mdnsd/archive/c1be962b37e4b952625d9b0a873e5ca619b1a35a.tar.gz"
+      sha256: "0ca46e750370ccbd2d627954ed6191e2ec971e8cfe25e7f29670467676787ce3"
       archive_pattern: "mdnsd-{sha256}"
   "1.4.14":
     deps/ua-nodeset:
