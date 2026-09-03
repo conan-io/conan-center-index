@@ -1,8 +1,8 @@
 sources:
-  "3.10.0":
-    url: "https://github.com/google-deepmind/mujoco/archive/refs/tags/3.10.0.tar.gz"
-    sha256: "a47bfb76c1c0f1e0e444412bd3b9ed248fa7a267e0142ab2c65858486f183dbe"
+  "3.12.0":
+    url: "https://github.com/google-deepmind/mujoco/archive/refs/tags/3.12.0.tar.gz"
+    sha256: "9faa979982c3e924e8aaff3b16983bba3a1ab19c81f4f73178ae9c2ea25e467d"
 patches:
-  "3.10.0":
+  "3.12.0":
     - patch_file: "patches/0001-external-dependencies.patch"
     - patch_file: "patches/0002-build-options.patch"
