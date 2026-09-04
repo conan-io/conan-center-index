@@ -1,0 +1,4 @@
+sources:
+  "7.0":
+    url: "https://github.com/jfalcou/copacabana/archive/v7.tar.gz"
+    sha256: "c24436ebcdda92b87d02b28d4c6f9d5c20a58ac254725280d142e8d72e8c6412"
