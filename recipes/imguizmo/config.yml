@@ -1,4 +1,8 @@
 versions:
+  "1.10":
+    folder: "all"
+  "1.10-docking":
+    folder: "all"
   "cci.20231114":
     folder: "all"
   "1.83":
