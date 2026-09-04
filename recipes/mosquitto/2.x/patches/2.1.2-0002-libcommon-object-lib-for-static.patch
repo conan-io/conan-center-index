@@ -1,0 +1,22 @@
+--- a/libcommon/CMakeLists.txt
++++ b/libcommon/CMakeLists.txt
+@@ -25,14 +25,18 @@
+ 	"${mosquitto_SOURCE_DIR}/include/mosquitto/libcommon_utf8.h"
+ )
+ 
+-if(WIN32)
++if(WIN32 AND NOT WITH_STATIC_LIBRARIES)
+ 	add_library(libmosquitto_common SHARED
+ 		${C_SRC}
+ 	)
+ else()
+ 	add_library(libmosquitto_common OBJECT
+ 		${C_SRC}
+ 	)
+ endif()
++
++if(WITH_STATIC_LIBRARIES)
++	target_compile_definitions(libmosquitto_common PUBLIC "LIBMOSQUITTO_STATIC")
++endif()
+ 
+ target_include_directories(libmosquitto_common
