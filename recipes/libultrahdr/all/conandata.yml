@@ -1,10 +1,17 @@
 
 sources:
-  "1.4.0":
-    url: "https://github.com/google/libultrahdr/archive/refs/tags/v1.4.0.tar.gz"
-    sha256: "e7e1252e2c44d8ed6b99ee0f67a3caf2d8a61c43834b13b1c3cd485574c03ab9"
+  "2.0.1":
+    url: "https://github.com/google/libultrahdr/archive/refs/tags/v2.0.1.tar.gz"
+    sha256: "588232d2c9adcd01541d48dc2e76f8448c52fea7fc2543e700a281b995ab50d2"
+  "1.5.1":
+    url: "https://github.com/google/libultrahdr/archive/refs/tags/v1.5.1.tar.gz"
+    sha256: "54d3f36c1d2b56ef9b8e63fd3f5fcac56c2c4540f8a56e0cc952f5010d790191"
 patches:
-  "1.4.0":
-    - patch_file: "patches/1.4.0_cmake-portability.patch"
+  "2.0.1":
+    - patch_file: "patches/2.0.1_cmake-portability.patch"
+      patch_description: "Ensure project builds correctly with Conan (Ensure correct finding & linkin of dependencies and prevent some forced overriden settings provided by the Conan CMake toolchain)"
+      patch_type: "conan"
+  "1.5.1":
+    - patch_file: "patches/1.5.1_cmake-portability.patch"
       patch_description: "Ensure project builds correctly with Conan (Ensure correct finding & linkin of dependencies and prevent some forced overriden settings provided by the Conan CMake toolchain)"
       patch_type: "conan"
