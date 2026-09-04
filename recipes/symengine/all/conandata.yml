@@ -23,6 +23,9 @@ sources:
   "0.14.0":
     url: "https://github.com/symengine/symengine/archive/refs/tags/v0.14.0.tar.gz"
     sha256: "11c5f64e9eec998152437f288b8429ec001168277d55f3f5f1df78e3cf129707"
+  "0.15.0":
+    url: "https://github.com/symengine/symengine/archive/refs/tags/v0.15.0.tar.gz"
+    sha256: "9f75f0367221abd88b9b60ef7b104b4aa1e34e99d3152c3df2bb2467bad2f04f"
 
 patches:
   "0.14.0":
