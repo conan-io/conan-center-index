@@ -66,6 +66,13 @@ class SymengineConan(ConanFile):
     def _needs_fast_float(self):
         return Version(self.version) >= "0.13.0"
 
+    @property
+    def _hardcodes_cxx_flags(self):
+        # Until 0.15.0 upstream forced -std=c++11 and -fPIC into CMAKE_CXX_FLAGS.
+        # Newer versions use target_compile_features(symengine PUBLIC cxx_std_11)
+        # and leave the PIC setting to the consumer.
+        return Version(self.version) < "0.15.0"
+
     def requirements(self):
         if self.options.integer_class == "boostmp":
             # symengine/mp_class.h:12
@@ -105,14 +112,15 @@ class SymengineConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        # Disable hardcoded C++11
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        'set(CMAKE_CXX_FLAGS "${CXX11_OPTIONS} ${CMAKE_CXX_FLAGS}")',
-                        '')
-        # Let Conan choose fPIC
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        'set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${common}")',
-                        '')
+        if self._hardcodes_cxx_flags:
+            # Disable hardcoded C++11
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            'set(CMAKE_CXX_FLAGS "${CXX11_OPTIONS} ${CMAKE_CXX_FLAGS}")',
+                            '')
+            # Let Conan choose fPIC
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            'set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${common}")',
+                            '')
         # cmake_target_name not working?
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "set(LIBS ${LIBS} ${GMP_TARGETS})",
