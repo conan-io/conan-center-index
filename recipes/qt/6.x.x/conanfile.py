@@ -998,6 +998,7 @@ class QtConan(ConanFile):
             save(self, os.path.join(self.package_folder, self._cmake_qt6_private_file(module)), contents)
 
         _create_private_module("Core", ["Core"])
+        _create_private_module("Test", ["CorePrivate", "Test"])
 
         if self.options.gui:
             _create_private_module("Gui", ["CorePrivate", "Gui"])
@@ -1318,6 +1319,7 @@ class QtConan(ConanFile):
         _create_module("Network", networkReqs)
         _create_module("Sql", [])
         _create_module("Test", [])
+        _add_build_module("qtTest", self._cmake_qt6_private_file("Test"))
         if self.options.widgets:
             _create_module("Widgets", ["Gui"])
             _add_build_module("qtWidgets", self._cmake_qt6_private_file("Widgets"))
