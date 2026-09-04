@@ -1,13 +1,17 @@
 submodules:
-  "1.5.0":
+  "1.5.7":
     deps/ua-nodeset:
-      url: "https://github.com/OPCFoundation/UA-Nodeset/archive/Woodworking-1.01.0-2023-01-31.zip"
-      sha256: "e9603dae4cc20f660dff81f7f0f325e5592e1154f7918d8978b226bb46201b3e"
-      archive_pattern: "UA-Nodeset-{version}"
+      url: "https://github.com/OPCFoundation/UA-Nodeset/archive/257db9ad98ee7ba4b67d3500b54bfc9d744a36af.tar.gz"
+      sha256: "b8ab371bb616dcc09d4f001a7e3a9ac925e347a9061c39cf971912263d21a395"
+      archive_pattern: "UA-Nodeset-{sha256}"
     deps/nodesetLoader:
-      url: "https://github.com/open62541/open62541-nodeset-loader/archive/453322ad20a6b5504864a7ea69076ca144f971f4.tar.gz"
-      sha256: "893279d17bdc730fc55f9d2bbd931db7bdbd79fcb7e76e9655cb2a6daeeab4b5"
-      archive_pattern: "open62541-nodeset-loader-{sha256}"
+      url: "https://github.com/open62541/nodesetLoader/archive/bcfe420dc88f31be671dd2ec0cd1296531f192ab.tar.gz"
+      sha256: "fadb558143cf4ff258cd3e78bf90eafac34986e223d7e1869847ec2173797339"
+      archive_pattern: "nodesetLoader-{sha256}"
+    deps/mdnsd:
+      url: "https://github.com/troglobit/mdnsd/archive/c1be962b37e4b952625d9b0a873e5ca619b1a35a.tar.gz"
+      sha256: "0ca46e750370ccbd2d627954ed6191e2ec971e8cfe25e7f29670467676787ce3"
+      archive_pattern: "mdnsd-{sha256}"
   "1.4.14":
     deps/ua-nodeset:
       url: "https://github.com/OPCFoundation/UA-Nodeset/archive/Machinery-1.03.0-2023-08-01.zip"
