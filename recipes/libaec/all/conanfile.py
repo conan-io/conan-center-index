@@ -13,7 +13,7 @@ class LibaecConan(ConanFile):
     name = "libaec"
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://gitlab.dkrz.de/k202009/libaec"
+    homepage = "https://gitlab.dkrz.de/dkrz-sw/libaec"
     description = "Adaptive Entropy Coding library"
     topics = "dsp", "encoding", "decoding"
 
@@ -100,7 +100,7 @@ class LibaecConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "libaec")
 
         # CMake targets are based on
-        # https://gitlab.dkrz.de/k202009/libaec/-/blob/master/cmake/libaec-config.cmake.in
+        # https://gitlab.dkrz.de/dkrz-sw/libaec/-/blob/master/cmake/libaec-config.cmake.in
         self.cpp_info.components["aec"].set_property("cmake_target_name", "libaec::aec")
         aec_name = "aec"
         if self.settings.os == "Windows" and not self.options.shared:
