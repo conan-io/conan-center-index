@@ -1,0 +1,168 @@
+From c1ec24faaad362fd3b36cc51aab33c6178bb1746 Mon Sep 17 00:00:00 2001
+From: Esteban DUGUEPEROUX <esteban.dugueperoux@gmail.com>
+Date: Wed, 4 Feb 2026 21:39:58 +0100
+Subject: [PATCH] cmake: Make little changes to ease conan integration
+
+---
+ .gitignore                                      | 1 +
+ cmake/CMakeLists.txt                            | 4 +++-
+ src/ifcgeom/CMakeLists.txt                      | 2 +-
+ src/ifcgeom/Serialization/schema/CMakeLists.txt | 8 ++++++--
+ src/ifcgeom/kernels/CMakeLists.txt              | 4 +---
+ src/ifcparse/CMakeLists.txt                     | 4 +++-
+ src/serializers/CMakeLists.txt                  | 1 +
+ src/serializers/schema_dependent/CMakeLists.txt | 6 ++++--
+ src/svgfill/CMakeLists.txt                      | 2 +-
+ 9 files changed, 21 insertions(+), 11 deletions(-)
+
+diff --git a/.gitignore b/.gitignore
+index bee04658c..11b27ede6 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -14,6 +14,7 @@
+ /src/qtviewer/out/
+ 
+ /win/BuildDepsCache*.txt
++CMakeUserPresets.json
+ 
+ # General Python residue
+ __pycache__
+diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
+index 9e88026ac..80b28fc37 100644
+--- a/cmake/CMakeLists.txt
++++ b/cmake/CMakeLists.txt
+@@ -335,7 +335,9 @@ endif()
+ # Otherwise it will find components needed for CGAL and we might some libraries.
+ if(WITH_CGAL)
+     find_package(CGAL REQUIRED)
+-    set(CGAL_LIBRARIES IFCOPENSHELL_CGAL)
++    set(CGAL_LIBRARIES CGAL::CGAL)
++    add_definitions(-DIFOPSH_WITH_CGAL)
++    set(SWIG_DEFINES ${SWIG_DEFINES} -DIFOPSH_WITH_CGAL)
+     list(APPEND GEOMETRY_KERNELS cgal)
+ endif()
+ 
+diff --git a/src/ifcgeom/CMakeLists.txt b/src/ifcgeom/CMakeLists.txt
+index 31bb2e7bc..2ecfa2520 100644
+--- a/src/ifcgeom/CMakeLists.txt
++++ b/src/ifcgeom/CMakeLists.txt
+@@ -1,7 +1,7 @@
+ add_subdirectory(kernels)
+ set(kernel_libraries ${kernel_libraries} PARENT_SCOPE)
+ 
+-if((BUILD_CONVERT OR BUILD_IFCPYTHON) AND WITH_OPENCASCADE)
++if((BUILD_CONVERT OR BUILD_IFCPYTHON OR BUILD_IFCGEOM) AND WITH_OPENCASCADE)
+     add_subdirectory(Serialization)
+     set(IFCOPENSHELL_LIBRARIES ${IFCOPENSHELL_LIBRARIES} PARENT_SCOPE)
+ endif()
+diff --git a/src/ifcgeom/Serialization/schema/CMakeLists.txt b/src/ifcgeom/Serialization/schema/CMakeLists.txt
+index 583c17763..fdfa618af 100644
+--- a/src/ifcgeom/Serialization/schema/CMakeLists.txt
++++ b/src/ifcgeom/Serialization/schema/CMakeLists.txt
+@@ -1,10 +1,14 @@
+ foreach(schema ${SCHEMA_VERSIONS})
+-    add_library(geometry_serializer_ifc${schema} OBJECT Serialization.cpp)
+-    target_link_libraries(geometry_serializer_ifc${schema} ${OpenCASCADE_LIBRARIES})
++    add_library(geometry_serializer_ifc${schema} Serialization.cpp)
++    target_link_libraries(geometry_serializer_ifc${schema} ${OpenCASCADE_LIBRARIES} IfcParse)
+     set_target_properties(
+         geometry_serializer_ifc${schema}
+         PROPERTIES COMPILE_FLAGS "-DIFC_GEOMSERIALIZATION_EXPORTS -DIfcSchema=Ifc${schema}"
+     )
++    install(
++        TARGETS geometry_serializer_ifc${schema}
++        EXPORT ${IFCOPENSHELL_EXPORT_TAGETS}
++    )
+     list(APPEND geometry_serializer_libraries geometry_serializer_ifc${schema})
+ endforeach()
+ set(geometry_serializer_libraries ${geometry_serializer_libraries} PARENT_SCOPE)
+diff --git a/src/ifcgeom/kernels/CMakeLists.txt b/src/ifcgeom/kernels/CMakeLists.txt
+index 6775a8f37..e89ff7857 100644
+--- a/src/ifcgeom/kernels/CMakeLists.txt
++++ b/src/ifcgeom/kernels/CMakeLists.txt
+@@ -23,7 +23,6 @@ foreach(kernel ${GEOMETRY_KERNELS})
+ 
+     if(${kernel} STREQUAL "cgal")
+         find_package(CGAL REQUIRED)
+-        target_link_libraries(${KERNEL_TARGET} IFCOPENSHELL_CGAL)
+         set_property(TARGET ${KERNEL_TARGET} APPEND_STRING PROPERTY COMPILE_FLAGS " -DCGAL_HAS_THREADS")
+ 
+         set(KERNEL_TARGET_SIMPLE "${KERNEL_TARGET}_simple")
+@@ -33,8 +32,7 @@ foreach(kernel ${GEOMETRY_KERNELS})
+             PROPERTIES COMPILE_FLAGS "-DIFC_GEOM_EXPORTS -DIFOPSH_SIMPLE_KERNEL -DCGAL_HAS_THREADS"
+         )
+         list(APPEND kernel_libraries ${KERNEL_TARGET_SIMPLE})
+-        target_link_libraries(${KERNEL_TARGET_SIMPLE} ${${KERNEL_UPPER}_LIBRARIES} Eigen3::Eigen)
+-        target_link_libraries(${KERNEL_TARGET_SIMPLE} IFCOPENSHELL_CGAL)
++        target_link_libraries(${KERNEL_TARGET_SIMPLE} ${${KERNEL_UPPER}_LIBRARIES} IfcGeom Eigen3::Eigen)
+         install(TARGETS ${KERNEL_TARGET_SIMPLE} EXPORT ${IFCOPENSHELL_EXPORT_TARGETS})
+     elseif(${kernel} STREQUAL "opencascade")
+         target_link_libraries(${KERNEL_TARGET} ${OpenCASCADE_LIBRARIES})
+diff --git a/src/ifcparse/CMakeLists.txt b/src/ifcparse/CMakeLists.txt
+index 55e63d68c..e8ca7bd19 100644
+--- a/src/ifcparse/CMakeLists.txt
++++ b/src/ifcparse/CMakeLists.txt
+@@ -49,7 +49,9 @@ else()
+     target_link_libraries(IfcParse ${Boost_LIBRARIES} ${BCRYPT_LIBRARIES})
+ endif()
+ 
+-target_link_libraries(IfcParse ${ROCKSDB_LIBRARIES})
++if(WITH_ROCKSDB)
++    target_link_libraries(IfcParse ${ROCKSDB_LIBRARIES})
++endif()
+ 
+ install(
+     TARGETS IfcParse
+diff --git a/src/serializers/CMakeLists.txt b/src/serializers/CMakeLists.txt
+index 94b30a0e3..fe9877a46 100644
+--- a/src/serializers/CMakeLists.txt
++++ b/src/serializers/CMakeLists.txt
+@@ -32,6 +32,7 @@ target_link_libraries(
+         ${GLTF_LIBRARIES}
+         IfcGeom
+         ${OpenCASCADE_LIBRARIES}
++        ${ROCKSDB_LIBRARIES}
+         ${kernel_libraries}
+         IfcParse
+ )
+diff --git a/src/serializers/schema_dependent/CMakeLists.txt b/src/serializers/schema_dependent/CMakeLists.txt
+index ef877342e..eed6947a5 100644
+--- a/src/serializers/schema_dependent/CMakeLists.txt
++++ b/src/serializers/schema_dependent/CMakeLists.txt
+@@ -3,16 +3,18 @@ file(GLOB SERIALIZERS_S_CPP_FILES *.cpp)
+ set(SERIALIZERS_S_FILES ${SERIALIZERS_S_H_FILES} ${SERIALIZERS_S_CPP_FILES})
+ 
+ foreach(schema ${SCHEMA_VERSIONS})
+-    add_library(Serializers_ifc${schema} OBJECT ${SERIALIZERS_S_FILES})
++    add_library(Serializers_ifc${schema} ${SERIALIZERS_S_FILES})
+     set(SERIALIZER_SCHEMA_LIBRARIES ${SERIALIZER_SCHEMA_LIBRARIES} Serializers_ifc${schema})
+     set_target_properties(
+         Serializers_ifc${schema}
+         PROPERTIES COMPILE_FLAGS "-DIFC_GEOM_EXPORTS -DIfcSchema=Ifc${schema}"
+     )
+-    target_link_libraries(Serializers_ifc${schema} ${HDF5_LIBRARIES} ${GLTF_LIBRARIES})
++    target_link_libraries(Serializers_ifc${schema} ${HDF5_LIBRARIES} ${GLTF_LIBRARIES} ${ROCKSDB_LIBRARIES})
+     if(NOT WASM_BUILD)
+         target_link_libraries(Serializers_ifc${schema} IfcGeom ${OpenCASCADE_LIBRARIES})
+     endif()
++
++    install(TARGETS Serializers_ifc${schema})
+ endforeach()
+ 
+ set(SERIALIZER_SCHEMA_LIBRARIES ${SERIALIZER_SCHEMA_LIBRARIES} PARENT_SCOPE)
+diff --git a/src/svgfill/CMakeLists.txt b/src/svgfill/CMakeLists.txt
+index f2f8c1a06..e3bf0fea4 100644
+--- a/src/svgfill/CMakeLists.txt
++++ b/src/svgfill/CMakeLists.txt
+@@ -42,7 +42,7 @@ file(GLOB LIB_H_FILES src/*.h)
+ file(GLOB LIB_CPP_FILES src/svgfill.cpp src/arrange_polygons.cpp)
+ set(LIB_SRC_FILES ${LIB_H_FILES} ${LIB_CPP_FILES})
+ add_library(svgfill ${LIB_SRC_FILES})
+-target_link_libraries(svgfill ${Boost_LIBRARIES} ${BCRYPT_LIBRARIES} LibXml2::LibXml2 IFCOPENSHELL_CGAL)
++target_link_libraries(svgfill ${Boost_LIBRARIES} ${BCRYPT_LIBRARIES} LibXml2::LibXml2 ${CGAL_LIBRARIES})
+ set_target_properties(svgfill PROPERTIES PUBLIC_HEADER "${LIB_H_FILES}")
+ 
+ add_executable(svgfill_exe src/main.cpp)
+-- 
+2.43.0
+
