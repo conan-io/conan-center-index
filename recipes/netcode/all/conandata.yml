@@ -1,4 +1,7 @@
 sources:
+  "1.4.5":
+    url: "https://github.com/mas-bandwidth/netcode/archive/refs/tags/v1.4.5.tar.gz"
+    sha256: "ac967ae1dcf97ca7e38a873a0c1ee28412d476e3040900ff1244749f7385c2b5"
   "1.4.3":
     url: "https://github.com/mas-bandwidth/netcode/archive/refs/tags/v1.4.3.tar.gz"
     sha256: "3618a3acef21831b9d5e59278c4f6c0cfdc8235984db8d9a30683f853bec3fe4"
