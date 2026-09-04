@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 
-required_conan_version = ">=2.19.0"
+required_conan_version = ">=2.0"
 
 
 class ReliableConan(ConanFile):
