@@ -165,6 +165,8 @@ class SentryNativeConan(ConanFile):
         tc.variables["SENTRY_INTEGRATION_QT"] = self.options.qt
         if self.options.get_safe("wer", False):
             tc.variables["CRASHPAD_WER_ENABLED"] = True
+        if self.settings.os == "Windows" and not self.conf.get("tools.cmake.cmaketoolchain:system_version"):
+            tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0"
         tc.generate()
         deps = CMakeDeps(self)
         if self.settings.os == "Linux":
