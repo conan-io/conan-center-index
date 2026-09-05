@@ -1,0 +1,4 @@
+sources:
+  "0.3.0":
+    url: "https://github.com/jfayot/sioxx/archive/refs/tags/v0.3.0.tar.gz"
+    sha256: "f41e084fd16c4d59ea8669173c5276f99d2d20be9a78c097e5568fac15352fdf"
