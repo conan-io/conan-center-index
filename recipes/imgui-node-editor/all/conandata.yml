@@ -1,0 +1,16 @@
+sources:
+  "0.9.2":
+    url: "https://github.com/thedmd/imgui-node-editor/archive/refs/tags/v0.9.2.tar.gz"
+    sha256: "1a9720acc754e44442ce1d93fa916f8df6cedb8b5c58472ab21d6d69aff58016"
+  "0.9.2-docking":
+    url: "https://github.com/thedmd/imgui-node-editor/archive/refs/tags/v0.9.2.tar.gz"
+    sha256: "1a9720acc754e44442ce1d93fa916f8df6cedb8b5c58472ab21d6d69aff58016"
+patches:
+  "0.9.2":
+    - patch_file: "patches/0.9.2-0001-fix-imgui-1.92-compat.patch"
+      patch_description: "Adapt to Dear ImGui API changes (ImGui::GetKeyIndex removal, ImRect::Floor() removal, built-in ImVec2 math operators) so the library builds against imgui 1.92.x"
+      patch_type: "portability"
+  "0.9.2-docking":
+    - patch_file: "patches/0.9.2-0001-fix-imgui-1.92-compat.patch"
+      patch_description: "Adapt to Dear ImGui API changes (ImGui::GetKeyIndex removal, ImRect::Floor() removal, built-in ImVec2 math operators) so the library builds against imgui 1.92.x"
+      patch_type: "portability"
