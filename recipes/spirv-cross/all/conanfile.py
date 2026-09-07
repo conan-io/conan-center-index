@@ -174,6 +174,9 @@ class SpirvCrossConan(ConanFile):
                 components.update({"spirv-cross-util": ["spirv-cross-core"]})
         return components
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.5 <5]")
+
     def package_info(self):
         # FIXME: we should provide one CMake config file per target (waiting for an implementation of https://github.com/conan-io/conan/issues/9000)
         def _register_component(target_lib, requires):
