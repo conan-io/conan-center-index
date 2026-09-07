@@ -4,4 +4,4 @@ project(test_package CXX)
 find_package(SymEngine REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE SymEngine)
+target_link_libraries(${PROJECT_NAME} PRIVATE symengine)
