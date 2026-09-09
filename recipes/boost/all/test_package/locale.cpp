@@ -2,6 +2,6 @@
 
 int main()
 {
-    boost::locale::generator gen; gen("");
+    BOOST_NAMESPACE::locale::generator gen; gen("");
     return 0;
 }
