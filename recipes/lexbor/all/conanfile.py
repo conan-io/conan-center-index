@@ -1,6 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc
 from conan.tools.files import get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
