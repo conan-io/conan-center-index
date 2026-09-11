@@ -69,6 +69,8 @@ class SymengineConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                 "set(LIBS ${LIBS} ${GMP_TARGETS})",
                                 "set(LIBS ${LIBS} gmp::gmp)")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                        "set_target_properties (symengine PROPERTIES POSITION_INDEPENDENT_CODE ON)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
