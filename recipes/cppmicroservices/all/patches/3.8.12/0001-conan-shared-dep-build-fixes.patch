@@ -1,0 +1,148 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 19dafdf2..aeed0087 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -404,6 +404,12 @@ else()
+         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/spdlog/include)
+ endif()
+ 
++# Set by the Conan recipe to reflect spdlog's linkage; undefined in the legacy
++# vendored build (which is always a static, non-system spdlog).
++if(NOT DEFINED US_SPDLOG_SHARED)
++    set(US_SPDLOG_SHARED OFF)
++endif()
++
+ if(US_USE_SYSTEM_RAPIDJSON)
+     find_package(rapidjson REQUIRED)
+     if(NOT TARGET rapidjson::rapidjson)
+@@ -433,6 +439,10 @@ else()
+         ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
+ endif()
+ 
++if(NOT DEFINED US_MINIZ_SHARED)
++    set(US_MINIZ_SHARED OFF)
++endif()
++
+ #-----------------------------------------------------------------------------
+ # Testing configuration
+ #-----------------------------------------------------------------------------
+diff --git a/cmake/usFunctionAddResources.cmake b/cmake/usFunctionAddResources.cmake
+index 56829ebf..914391cf 100755
+--- a/cmake/usFunctionAddResources.cmake
++++ b/cmake/usFunctionAddResources.cmake
+@@ -110,6 +110,42 @@ function(usFunctionAddResources)
+       message(FATAL_ERROR "The CppMicroServices resource compiler was not found. Check the US_RCC_EXECUTABLE CMake variable.")
+     endif()
+     set(resource_compiler_dep ${resource_compiler})
++
++    # When usResourceCompiler is installed with shared third-party deps in
++    # separate locations (e.g. a package-managed build), it loads them from the
++    # dynamic loader's search path at consumer build time. When the tool is
++    # consumed from the build context, the ambient loader path does not carry the
++    # tool's transitive deps (the host and build package instances differ), so
++    # the load fails ("libminiz.so.3: cannot open shared object file" on Linux,
++    # "Library not loaded: @rpath/..." on macOS). On macOS this is compounded by
++    # SIP, which strips DYLD_* from the environment whenever CMake runs a custom
++    # command through /bin/sh. Re-supply the loader path via `cmake -E env`, which
++    # sets the child environment directly (and, on macOS, bypasses the /bin/sh
++    # SIP stripping).
++    #
++    # The dep dirs come from CMAKE_LIBRARY_PATH (populated by the package manager's
++    # toolchain with the link dirs of all deps, including the compiler's own
++    # build-context copies) -- the correct source, since the ambient loader path
++    # lacks them. Empty when unset (e.g. the vendored build that links the deps in
++    # statically), so this is a no-op there.
++    if(UNIX AND CMAKE_LIBRARY_PATH)
++      # CMake substitutes a bare executable target name for its built path only
++      # when it is the first COMMAND token. Prepending `cmake -E env` demotes the
++      # compiler to an argument, so reference it by file path explicitly
++      # ($<TARGET_FILE:> resolves both our built target and the consumer's
++      # IMPORTED usResourceCompiler). Build order is preserved via
++      # resource_compiler_dep (set to the target above) in DEPENDS below.
++      if(TARGET ${resource_compiler})
++        set(resource_compiler $<TARGET_FILE:${resource_compiler}>)
++      endif()
++      # CMAKE_LIBRARY_PATH is a CMake ;-list; the loader path env wants :-separated.
++      string(REPLACE ";" ":" _rc_loader_path "${CMAKE_LIBRARY_PATH}")
++      if(APPLE)
++        set(_rc_env_cmd ${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=${_rc_loader_path}")
++      else()
++        set(_rc_env_cmd ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${_rc_loader_path}")
++      endif()
++    endif()
+   endif()
+ 
+   set(_cmd_deps )
+diff --git a/cmake/usFunctionEmbedResources.cmake b/cmake/usFunctionEmbedResources.cmake
+index 0f9e0c22..fcbe3e4a 100755
+--- a/cmake/usFunctionEmbedResources.cmake
++++ b/cmake/usFunctionEmbedResources.cmake
+@@ -142,6 +142,42 @@ function(usFunctionEmbedResources)
+       message(FATAL_ERROR "The CppMicroServices resource compiler was not found. Check the US_RCC_EXECUTABLE CMake variable.")
+     endif()
+     set(resource_compiler_dep ${resource_compiler})
++
++    # When usResourceCompiler is installed with shared third-party deps in
++    # separate locations (e.g. a package-managed build), it loads them from the
++    # dynamic loader's search path at consumer build time. When the tool is
++    # consumed from the build context, the ambient loader path does not carry the
++    # tool's transitive deps (the host and build package instances differ), so
++    # the load fails ("libminiz.so.3: cannot open shared object file" on Linux,
++    # "Library not loaded: @rpath/..." on macOS). On macOS this is compounded by
++    # SIP, which strips DYLD_* from the environment whenever CMake runs a custom
++    # command through /bin/sh. Re-supply the loader path via `cmake -E env`, which
++    # sets the child environment directly (and, on macOS, bypasses the /bin/sh
++    # SIP stripping).
++    #
++    # The dep dirs come from CMAKE_LIBRARY_PATH (populated by the package manager's
++    # toolchain with the link dirs of all deps, including the compiler's own
++    # build-context copies) -- the correct source, since the ambient loader path
++    # lacks them. Empty when unset (e.g. the vendored build that links the deps in
++    # statically), so this is a no-op there.
++    if(UNIX AND CMAKE_LIBRARY_PATH)
++      # CMake substitutes a bare executable target name for its built path only
++      # when it is the first COMMAND token. Prepending `cmake -E env` demotes the
++      # compiler to an argument, so reference it by file path explicitly
++      # ($<TARGET_FILE:> resolves both our built target and the consumer's
++      # IMPORTED usResourceCompiler). Build order is preserved via
++      # resource_compiler_dep (set to the target above) in DEPENDS below.
++      if(TARGET ${resource_compiler})
++        set(resource_compiler $<TARGET_FILE:${resource_compiler}>)
++      endif()
++      # CMAKE_LIBRARY_PATH is a CMake ;-list; the loader path env wants :-separated.
++      string(REPLACE ";" ":" _rc_loader_path "${CMAKE_LIBRARY_PATH}")
++      if(APPLE)
++        set(_rc_env_cmd ${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=${_rc_loader_path}")
++      else()
++        set(_rc_env_cmd ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${_rc_loader_path}")
++      endif()
++    endif()
+   endif()
+ 
+   set(_zip_archive )
+diff --git a/compendium/LogServiceImpl/CMakeLists.txt b/compendium/LogServiceImpl/CMakeLists.txt
+index 8cd2a8b8..feb5a8f4 100644
+--- a/compendium/LogServiceImpl/CMakeLists.txt
++++ b/compendium/LogServiceImpl/CMakeLists.txt
+@@ -67,7 +67,7 @@ target_include_directories(LogService PRIVATE
+   )
+ 
+ target_link_libraries(LogService PRIVATE spdlog::spdlog)
+-if(BUILD_SHARED_LIBS AND US_USE_SYSTEM_SPDLOG)
++if(BUILD_SHARED_LIBS AND US_USE_SYSTEM_SPDLOG AND NOT US_SPDLOG_SHARED)
+   if(APPLE)
+     target_link_options(LogService PRIVATE "-Wl,-hidden-lspdlog")
+   elseif(UNIX)
+diff --git a/framework/CMakeLists.txt b/framework/CMakeLists.txt
+index f3e10476..18470a93 100644
+--- a/framework/CMakeLists.txt
++++ b/framework/CMakeLists.txt
+@@ -45,7 +45,7 @@ usMacroCreateBundle(Framework
+ 
+ # Private implementation deps — not propagated to framework consumers.
+ target_link_libraries(${PROJECT_TARGET} PRIVATE miniz::miniz rapidjson::rapidjson)
+-if(BUILD_SHARED_LIBS AND US_USE_SYSTEM_MINIZ)
++if(BUILD_SHARED_LIBS AND US_USE_SYSTEM_MINIZ AND NOT US_MINIZ_SHARED)
+   if(APPLE)
+     target_link_options(${PROJECT_TARGET} PRIVATE "-Wl,-hidden-lminiz")
+   elseif(UNIX)
