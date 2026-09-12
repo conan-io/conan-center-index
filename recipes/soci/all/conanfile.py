@@ -53,6 +53,8 @@ class SociConan(ConanFile):
             self.tool_requires("cmake/[>=3.23 <4]")
 
     def requirements(self):
+        if Version(self.version) >= "4.1.3":
+            self.requires("fmt/[>=9 <13]")
         # New versions will not need transitive_headers=True
         if self.options.with_sqlite3:
             self.requires("sqlite3/[>=3.44 <4]", transitive_headers=True)
@@ -93,6 +95,8 @@ class SociConan(ConanFile):
         tc.cache_variables["{}_MYSQL".format(backend_prefix)] = self.options.with_mysql
         tc.cache_variables["{}_POSTGRESQL".format(backend_prefix)] = self.options.with_postgresql
         tc.cache_variables["WITH_BOOST"] = self.options.with_boost
+        if Version(self.version) >= "4.1.3":
+            tc.cache_variables["SOCI_FMT_BUILTIN"] = "OFF"
         if Version(self.version) < "4.1.0": # pylint: disable=conan-condition-evals-to-constant
             tc.cache_variables["SOCI_CXX11"] = True
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
@@ -135,6 +139,8 @@ class SociConan(ConanFile):
         self.cpp_info.components["soci_core"].libs = ["{}soci_core{}".format(lib_prefix, lib_suffix)]
         if self.options.with_boost:
             self.cpp_info.components["soci_core"].requires.append("boost::headers")
+        if version >= "4.1.3":
+            self.cpp_info.components["soci_core"].requires.append("fmt::fmt")
 
         # soci_empty
         if self.options.empty:
