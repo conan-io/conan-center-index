@@ -1075,7 +1075,12 @@ Prefix = ..""")
             assert componentname not in self.cpp_info.components, f"Plugin {pluginname} already present in self.cpp_info.components"
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt5::{pluginname}")
             self.cpp_info.components[componentname].set_property("cmake_target_aliases", [f"Qt::{pluginname}"])
-            if not self.options.shared:
+            if not (self.settings.os == "Windows" and bool(self.options.shared)):
+                # Can't populate this property for Shared builds on Windows as
+                # CMake `find_library` expects to find an import lib which doesn't exist for plugins.
+                # See eg:
+                # * https://discourse.cmake.org/t/find-library-wont-find-dlls/4050/4
+                # * https://github.com/conan-io/conan/issues/12654
                 self.cpp_info.components[componentname].libs = [libname + libsuffix]
             self.cpp_info.components[componentname].libdirs = [os.path.join("plugins", plugintype)]
             self.cpp_info.components[componentname].includedirs = []
