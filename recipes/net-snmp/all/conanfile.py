@@ -1,11 +1,11 @@
 import os
 import stat
+import textwrap
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, chdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir, chdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, NMakeToolchain
@@ -39,9 +39,6 @@ class NetSnmpConan(ConanFile):
         "with_ipv6": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -59,12 +56,6 @@ class NetSnmpConan(ConanFile):
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
         self.requires("pcre/8.45")
         self.requires("zlib/[>=1.2.11 <2]")
-
-    def validate(self):
-        if is_msvc(self) and self.options.shared:
-            # FIXME: Linker errors against third-party dependencies:
-            # snmp_openssl.obj : error LNK2019: unresolved external symbol CRYPTO_free referenced in function _extract_oname
-            raise ConanInvalidConfiguration(f"{self.ref} fails when building as shared library, use -o '&:shared=False'. Contributions are welcome!")
 
     def build_requirements(self):
         if is_msvc(self):
@@ -126,29 +117,48 @@ class NetSnmpConan(ConanFile):
             deps = PkgConfigDeps(self)
             deps.generate()
 
-    def _patch_msvc(self):
-        ssl_info = self.dependencies["openssl"]
-        openssl_root = ssl_info.package_folder.replace("\\", "/")
-        search_replace = [
-            (r'$default_openssldir . "\\include"', f"'{openssl_root}/include'"),
-            (r'$default_openssldir . "\\lib\\VC"', f"'{openssl_root}/lib'"),
-            ("$openssl = false", "$openssl = true"),
+    def _configure_msvc(self):
+        ssl = self.dependencies["openssl"].package_folder.replace("\\", "/")
+        prefix = self.package_folder.replace("\\", "/")
+        args = [
+            "perl", "Configure",
+            f"--config={'debug' if self._is_debug else 'release'}",
+            f"--linktype={'dynamic' if self.options.shared else 'static'}",
+            "--with-ssl",
+            f'--with-sslincdir="{ssl}/include"',
+            f'--with-ssllibdir="{ssl}/lib"',
+            f'--prefix="{prefix}"',
         ]
-        if self._is_debug:
-            search_replace.append(("$debug = false", "$debug = true"))
-        if self.options.shared:
-            search_replace.append(("$link_dynamic = false", "$link_dynamic = true"))
         if self.options.with_ipv6:
-            search_replace.append(("$b_ipv6 = false", "$b_ipv6 = true"))
-        for search, replace in search_replace:
-            replace_in_file(self, "build.pl", search, replace)
-        replace_in_file(self, "Configure", '"/runtime', f'"/{msvc_runtime_flag(self)}')
-        link_lines = "\n".join(
-            f'#    pragma comment(lib, "{lib}.lib")'
-            for lib in ssl_info.cpp_info.libs + ssl_info.cpp_info.system_libs
-        )
-        config = r"net-snmp\net-snmp-config.h.in"
-        replace_in_file(self, config, "/* Conan: system_libs */", link_lines)
+            args.append("--with-ipv6")
+        self.run(" ".join(args))
+
+    def _patch_msvc(self):
+        # net-snmp version-independent patching, instead of using patch files
+        if "MT" in msvc_runtime_flag(self):
+            replace_in_file(self, "Configure", "/MD", "/MT", strict=False)
+        ssl_info = self.dependencies["openssl"].cpp_info
+        zlib_info = self.dependencies["zlib"].cpp_info
+        extra_libs = zlib_info.libs + \
+            ssl_info.components["ssl"].libs + ssl_info.components["ssl"].system_libs + \
+            ssl_info.components["crypto"].libs + ssl_info.components["crypto"].system_libs
+        replace_in_file(self,
+                        os.path.join("net-snmp", "net-snmp-config.h.in"),
+                        textwrap.dedent("""\
+                            #    ifdef _DLL
+                            #      pragma comment(lib, "libcrypto.lib")
+                            #      pragma comment(lib, "libssl.lib")
+                            #    else
+                            #      pragma comment(lib, "libcrypto_static.lib")
+                            #      pragma comment(lib, "libssl_static.lib")
+                            #    endif"""
+                        ),
+                        "\n".join(f'#    pragma comment(lib, "{lib}.lib")' for lib in extra_libs))
+        if self.options.shared:
+            replace_in_file(self,
+                            os.path.join("libsnmp_dll", "Makefile.in"),
+                            "$(LDFLAGS)",
+                            '$(LDFLAGS) /libpath:"{}"'.format(zlib_info.libdirs[0].replace("\\", "/")))
 
     def _patch_unix(self):
         for gnu_config in [
@@ -161,27 +171,16 @@ class NetSnmpConan(ConanFile):
         replace_in_file(self, configure_path,
                         "-install_name \\$rpath/",
                         "-install_name @rpath/")
-        crypto_libs = self.dependencies["openssl"].cpp_info.system_libs
-        if len(crypto_libs) != 0:
-            crypto_link_flags = " -l".join(crypto_libs)
-            replace_in_file(self, configure_path,
-                'LIBCRYPTO="-l${CRYPTO}"',
-                'LIBCRYPTO="-l${CRYPTO} -l%s"' % (crypto_link_flags,))
-            replace_in_file(self, configure_path,
-                            'LIBS="-lcrypto  $LIBS"',
-                            f'LIBS="-lcrypto -l{crypto_link_flags} $LIBS"')
+        os.chmod(configure_path, os.stat(configure_path).st_mode | stat.S_IEXEC)
 
     def build(self):
-        apply_conandata_patches(self)
         if is_msvc(self):
             with chdir(self, os.path.join(self.source_folder, "win32")):
                 self._patch_msvc()
-                self.run("perl build.pl")
+                self._configure_msvc()
                 self.run("nmake /nologo libsnmp")
         else:
             self._patch_unix()
-            configure_path = os.path.join(self.source_folder, "configure")
-            os.chmod(configure_path, os.stat(configure_path).st_mode | stat.S_IEXEC)
             autotools = Autotools(self)
             autotools.autoreconf()
             autotools.configure()
@@ -196,6 +195,10 @@ class NetSnmpConan(ConanFile):
             copy(self, "netsnmp.lib",
                  dst=os.path.join(self.package_folder, "lib"),
                  src=os.path.join(self.source_folder, rf"win32\lib\{cfg}"))
+            if self.options.shared:
+                copy(self, "netsnmp.dll",
+                     dst=os.path.join(self.package_folder, "bin"),
+                     src=os.path.join(self.source_folder, rf"win32\bin\{cfg}"))
             copy(self, "include/net-snmp/*.h",
                  dst=self.package_folder,
                  src=self.source_folder)
@@ -205,11 +208,11 @@ class NetSnmpConan(ConanFile):
                      src=os.path.join(self.source_folder, "win32"))
         else:
             autotools = Autotools(self)
-            #only install with -j1 as parallel install will break dependencies. Probably a bug in the dependencies
-            #install specific targets instead of just everything as it will try to do perl stuff on you host machine
-            autotools.install(args=["-j1"], target="installsubdirs installlibs installprogs installheaders")
+            autotools.install(target="installheaders")
+            with chdir(self, os.path.join(self.build_folder, "snmplib")):
+                autotools.install()
+
             rm(self, "README", self.package_folder, recursive=True)
-            rmdir(self, os.path.join(self.package_folder, "bin"))
             rm(self, "*.la", self.package_folder, recursive=True)
             fix_apple_shared_install_name(self)
 
