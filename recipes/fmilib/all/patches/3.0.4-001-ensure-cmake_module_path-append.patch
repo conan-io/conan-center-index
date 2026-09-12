@@ -1,0 +1,25 @@
+From fd06ad82dc6a131aac6231dce7d0c9203c4ef989 Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Fri, 31 Oct 2025 10:46:33 +0100
+Subject: [PATCH 1/5] Ensure CMAKE_MODULE_PATH is appended only
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e4c92fb..56c9282 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -33,7 +33,7 @@ set_property(GLOBAL PROPERTY PROPERTYPREDEFINED_TARGETS_FOLDER  Global)
+ set(CMAKE_SOURCE_DIR ${FMILibrary_SOURCE_DIR})
+ set(CMAKE_BINARY_DIR ${FMILibrary_BINARY_DIR})
+ 
+-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/Config.cmake)
++list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/Config.cmake)
+ 
+ # User configuration options and parameters
+ set(FMILIB_THIRDPARTYLIBS  ${CMAKE_SOURCE_DIR}/ThirdParty CACHE PATH "Path to the ThirdParty library dir" )
+-- 
+2.39.5
+
