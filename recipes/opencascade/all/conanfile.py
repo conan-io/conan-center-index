@@ -1,8 +1,9 @@
 import json
 import os
-import textwrap
+import re
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -10,7 +11,6 @@ from conan.tools.files import (
     collect_libs, copy, get,
     load, rename, replace_in_file, rmdir, save
 )
-from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=2.1"
 
@@ -96,7 +96,11 @@ class OpenCascadeConan(ConanFile):
             self.requires("onetbb/[>=2021.10.0 <2024]")
 
     def validate(self):
-        check_min_cppstd(self, 11)
+        check_min_cppstd(self, 17)
+        if not self.options.shared and not self.options.with_rapidjson:
+            # INFO: fails to compile, because DRAWEXE references the GLTF toolkits unconditionally in static
+            # builds (OCCT_NO_PLUGINS), but OCCT excludes them from the build when RapidJSON is disabled
+            raise ConanInvalidConfiguration("Static builds require with_rapidjson=True. See https://github.com/Open-Cascade-SAS/OCCT/issues/1405")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -114,7 +118,6 @@ class OpenCascadeConan(ConanFile):
         if self.settings.build_type == "Debug":
             tc.cache_variables["BUILD_WITH_DEBUG"] = self.options.extended_debug_messages
         tc.cache_variables["BUILD_USE_PCH"] = False
-        tc.cache_variables["INSTALL_SAMPLES"] = False
 
         tc.cache_variables["INSTALL_DIR_LAYOUT"] = "Unix"
         tc.cache_variables["INSTALL_DIR_BIN"] = "bin"
@@ -122,13 +125,8 @@ class OpenCascadeConan(ConanFile):
         tc.cache_variables["INSTALL_DIR_INCLUDE"] = "include"
         tc.cache_variables["INSTALL_DIR_RESOURCE"] = "res/resource"
         tc.cache_variables["INSTALL_DIR_DATA"] = "res/data"
-        tc.cache_variables["INSTALL_DIR_SAMPLES"] = "res/samples"
         tc.cache_variables["INSTALL_DIR_DOC"] = "res/doc"
 
-        if is_msvc(self):
-            tc.cache_variables["BUILD_SAMPLES_MFC"] = False
-        tc.cache_variables["BUILD_SAMPLES_QT"] = False
-        tc.cache_variables["BUILD_Inspector"] = False
         if is_apple_os(self):
             tc.cache_variables["USE_GLX"] = False
         if self.settings.os == "Windows":
@@ -159,28 +157,15 @@ class OpenCascadeConan(ConanFile):
             replace_in_file(self, cmakelists, pattern, f"find_package({package_name} REQUIRED)")
 
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        cmakelists_tools = os.path.join(self.source_folder, "tools", "CMakeLists.txt")
         occt_toolkit_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_toolkit.cmake")
         occt_csf_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_csf.cmake")
         occt_defs_flags_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_defs_flags.cmake")
 
-        # Inject interface definitions of dependencies because opencascade
-        # does not always link to CMake imported targets
         sorted_deps = [dep for dep in reversed(self.dependencies.host.topological_sort.values())]
-        deps_defines = " ".join([f"-D{d}" for dep in sorted_deps for d in dep.cpp_info.aggregated_components().defines])
-        replace_in_file(
-            self,
-            cmakelists,
-            "project (OCCT)",
-            textwrap.dedent(f"""\
-                project (OCCT)
-                add_definitions({deps_defines})
-            """),
-        )
 
         # Avoid to add system include/libs directories and inject directories
         # from conan dependencies instead
-        for cmake_file in [cmakelists, cmakelists_tools]:
+        for cmake_file in [cmakelists]:
             deps_includedirs = ";".join([p.replace("\\", "/") for dep in sorted_deps for p in dep.cpp_info.aggregated_components().includedirs])
             replace_in_file(
                 self,
@@ -240,7 +225,7 @@ class OpenCascadeConan(ConanFile):
             replace_in_file(
                 self,
                 occt_csf_cmake,
-                "set (CSF_fontconfig \"fontconfig\")",
+                "set (CSF_fontconfig \"fontconfig expat\")",
                 f"find_package(Fontconfig REQUIRED)\nset (CSF_fontconfig \"{fontconfig_libs}\")",
             )
 
@@ -368,6 +353,7 @@ class OpenCascadeConan(ConanFile):
             "CSF_XwLibs": {"externals": ["xorg::xorg"] if self._is_linux else []},
             # Optional dependencies
             "CSF_OpenGlLibs": {"externals": ["opengl::opengl"] if self.options.with_opengl else []},
+            "CSF_OpenGlesLibs": {"externals": ["opengl::opengl"] if self.options.with_opengl else []},
             "CSF_TclTkLibs": {"externals": ["tk::tk"] if self.options.with_tk else []},
             "CSF_FFmpeg": {"externals": ["ffmpeg::ffmpeg"] if self.options.with_ffmpeg else []},
             "CSF_FreeImagePlus": {"externals": ["freeimage::freeimage"] if self.options.with_freeimage else []},
@@ -400,20 +386,35 @@ class OpenCascadeConan(ConanFile):
             "CSF_objc": {},
         }
 
-        modules = {}
+        def _load_cmake_list(path):
+            content = load(self, path)
+            return re.findall(r"^\s+(\w+)$", content, re.MULTILINE)
 
-        # MODULES: lists all modules and all possible components per module
-        modules_content = load(self, os.path.join(self.source_folder, "adm", "MODULES"))
+        # OCCT 8 lists modules in src/MODULES.cmake and their toolkits in
+        # src/<module>/TOOLKITS.cmake.
+        module_names = _load_cmake_list(os.path.join(self.source_folder, "src", "MODULES.cmake"))
+        modules = {}
         packaged_libs_list = collect_libs(self, "lib")
-        for module_line in modules_content.splitlines():
+        for module_name in module_names:
             components = {}
-            module_components = module_line.split()
-            components_list = [component for component in module_components[1:] if component in packaged_libs_list]
+            module_components = _load_cmake_list(
+                os.path.join(self.source_folder, "src", module_name, "TOOLKITS.cmake")
+            )
+            components_list = [component for component in module_components if component in packaged_libs_list]
             for component_name in components_list:
                 component_deps = {}
-                # EXTERNLIB: stores dependencies of each component. External dependencies are prefixed with CSF_
-                externlib_content = load(self, os.path.join(self.source_folder, "src", component_name, "EXTERNLIB"))
-                for dependency in externlib_content.splitlines():
+                # OCCT 8 stores each toolkit below its module and expresses
+                # dependencies in EXTERNLIB.cmake.
+                dependencies = _load_cmake_list(
+                    os.path.join(
+                        self.source_folder,
+                        "src",
+                        module_name,
+                        component_name,
+                        "EXTERNLIB.cmake",
+                    ),
+                )
+                for dependency in dependencies:
                     if dependency.startswith("TK") and dependency in packaged_libs_list:
                         component_deps.setdefault("internals", []).append(dependency)
                     elif dependency.startswith("CSF_"):
@@ -422,7 +423,7 @@ class OpenCascadeConan(ConanFile):
                             if deps:
                                 component_deps.setdefault(dep_type, []).extend(deps)
                 components.update({component_name: component_deps})
-            modules.update({module_components[0]:components})
+            modules.update({module_name: components})
 
         return modules
 
