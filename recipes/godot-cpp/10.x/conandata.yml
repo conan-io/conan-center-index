@@ -1,0 +1,7 @@
+sources:
+  "10.0.0-rc2":
+    url: "https://github.com/godotengine/godot-cpp/archive/refs/tags/10.0.0-rc2.tar.gz"
+    sha256: "de4cdd5482570047d229081d3f4598a3de60058ca4b82b06bd855923689180f9"
+  "10.0.0-rc1":
+    url: "https://github.com/godotengine/godot-cpp/archive/refs/tags/10.0.0-rc1.tar.gz"
+    sha256: "6a34530e81eed5bca407d68c6598be521d89d604a795bd9ed2bee9e4a7b0fee7"
