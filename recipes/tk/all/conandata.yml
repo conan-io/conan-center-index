@@ -17,3 +17,6 @@ patches:
     - patch_file: "patches/0004-Fix-msvc-shared-build.patch"
       patch_description: "Output an inline file directly to its final destination to avoid a failure in C3I"
       patch_type: "conan"
+    - patch_file: "patches/0005-Owner-writable-libs.patch"
+      patch_description: "Make installed libs writable for owner."
+      patch_type: "portability"
