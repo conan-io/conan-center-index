@@ -1,0 +1,15 @@
+# https://github.com/Chlumsky/msdf-atlas-gen/commit/94390ed367106a0940f4ae51ef65f71274b104f7
+# Refactor saveImage to support msdfgen 1.13
+diff --git a/msdf-atlas-gen/image-save.hpp b/msdf-atlas-gen/image-save.hpp
+index 490e2d8..52ce43f 100644
+--- a/msdf-atlas-gen/image-save.hpp
++++ b/msdf-atlas-gen/image-save.hpp
+@@ -61,7 +61,7 @@ bool saveImage(const msdfgen::BitmapConstRef<float, N> &bitmap, ImageFormat form
+         case ImageFormat::RGBA:
+             return msdfgen::saveRgba(bitmap, filename);
+         case ImageFormat::FL32:
+-            return msdfgen::saveFl32(bitmap, filename);
++            return msdfgen::saveFl32(msdfgen::BitmapConstSection<float, N>(bitmap), filename);
+         case ImageFormat::TEXT:
+             return false;
+         case ImageFormat::TEXT_FLOAT:
