@@ -2,10 +2,10 @@ Backport
 https://github.com/postgres/postgres/commit/a516b3f00d7469cbd1885a2c5903fbd62430a2ac
 
 diff --git a/meson.build b/meson.build
-index e19b737..1cdf332 100644
+index c87f98e..fd64ec1 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -2322,7 +2322,11 @@ int main(void)
+@@ -2351,7 +2351,11 @@ int main(void)
  }
  '''
  
