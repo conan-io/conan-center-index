@@ -43,10 +43,10 @@ class LibtoolConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("automake/1.16.5")
+        self.requires("automake/1.19")
 
     def build_requirements(self):
-        self.tool_requires("automake/1.16.5")
+        self.tool_requires("automake/1.19")
         self.tool_requires("m4/1.4.19")               # Needed by configure
         self.tool_requires("gnu-config/cci.20210814")
         if self.settings_build.os == "Windows":
@@ -187,9 +187,16 @@ class LibtoolConan(ConanFile):
         replace_in_file(self, libtool_m4,
                               "lt_cv_deplibs_check_method='file_magic ^x86 archive import|^x86 DLL'",
                               method_pass_all)
-        replace_in_file(self, libtool_m4,
-                              "lt_cv_deplibs_check_method='file_magic file format (pei*-i386(.*architecture: i386)?|pe-arm-wince|pe-x86-64)'",
+
+        if self.version == "2.4.7":
+            replace_in_file(self, libtool_m4,
+                                "lt_cv_deplibs_check_method='file_magic file format (pei*-i386(.*architecture: i386)?|pe-arm-wince|pe-x86-64)'",
+                                method_pass_all)
+        else:
+            replace_in_file(self, libtool_m4,
+                              "lt_cv_deplibs_check_method='file_magic file format (pei*-i386(.*architecture: i386)?|pe-arm-wince|pe-x86-64|pe-aarch64)'",
                               method_pass_all)
+
 
     def package_info(self):
         self.cpp_info.libs = ["ltdl"]
