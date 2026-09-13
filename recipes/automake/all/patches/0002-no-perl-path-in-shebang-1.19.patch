@@ -1,0 +1,38 @@
+--- Makefile.in
++++ Makefile.in
+@@ -555,7 +555,7 @@
+ PACKAGE_URL = @PACKAGE_URL@
+ PACKAGE_VERSION = @PACKAGE_VERSION@
+ PATH_SEPARATOR = @PATH_SEPARATOR@
+-PERL = @PERL@
++PERL = /usr/bin/env perl
+ RELEASE_YEAR = @RELEASE_YEAR@
+ SET_MAKE = @SET_MAKE@
+ SHELL = @SHELL@
+--- bin/aclocal.in
++++ bin/aclocal.in
+@@ -1,4 +1,4 @@
+-#!@PERL@
++#!/usr/bin/env perl
+ # aclocal - create aclocal.m4 by scanning configure.ac      -*- perl -*-
+ # @configure_input@
+ # Copyright (C) 1996-2026 Free Software Foundation, Inc.
+--- bin/automake.in
++++ bin/automake.in
+@@ -1,4 +1,4 @@
+-#!@PERL@
++#!/usr/bin/env perl
+ # automake - create Makefile.in from Makefile.am            -*- perl -*-
+ # @configure_input@
+ # Copyright (C) 1994-2026 Free Software Foundation, Inc.
+--- t/ax/test-defs.in
++++ t/ax/test-defs.in
+@@ -100,7 +100,7 @@
+ # User can override various tools used.  Prefer overriding specific for
+ # that automake testsuite, if they are available.
+ AWK=${AM_TESTSUITE_AWK-${AWK-'@AWK@'}}
+-PERL=${AM_TESTSUITE_PERL-${PERL-'@PERL@'}}
++PERL=${AM_TESTSUITE_PERL-${PERL-'/usr/bin/env perl'}}
+ MAKE=${AM_TESTSUITE_MAKE-${MAKE-'make'}}
+ YACC=${AM_TESTSUITE_YACC-${YACC-'@YACC@'}}
+ LEX=${AM_TESTSUITE_LEX-${LEX-'@LEX@'}}
