@@ -60,9 +60,6 @@ class CryptoPPModernConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # The project derives BUILD_SHARED_LIBS from CRYPTOPP_BUILD_SHARED, so the
-        # BUILD_SHARED_LIBS the toolchain sets is not enough on its own.
-        tc.cache_variables["CRYPTOPP_BUILD_SHARED"] = bool(self.options.shared)
         tc.cache_variables["CRYPTOPP_BUILD_TESTING"] = False
         tc.cache_variables["CRYPTOPP_USE_INTERMEDIATE_OBJECTS_TARGET"] = False
         tc.cache_variables["CRYPTOPP_USE_OPENMP"] = self.options.use_openmp
