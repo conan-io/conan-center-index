@@ -136,6 +136,8 @@ class LibrealsenseConan(ConanFile):
             self.cpp_info.components["realsense-file"].libs = [f"realsense-file{postfix}"]
             self.cpp_info.components["realsense-file"].requires = ["lz4::lz4"]
             self.cpp_info.components["realsense2"].requires.append("realsense-file")
+        else:
+            self.cpp_info.components["realsense2"].requires.append("lz4::lz4")
 
         if self.settings.os == "Linux":
             self.cpp_info.components["realsense2"].system_libs.extend(["m", "pthread", "udev"])
