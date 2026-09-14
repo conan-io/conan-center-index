@@ -7,7 +7,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, copy, rmdir, rm, save, replace_in_file, export_conandata_patches, apply_conandata_patches
 
-required_conan_version = ">=2.0.6"
+required_conan_version = ">=2.1"
 
 
 class OusterSdkConan(ConanFile):
