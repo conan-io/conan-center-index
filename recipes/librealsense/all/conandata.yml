@@ -8,3 +8,5 @@ patches:
       patch_description: "Use Conan libusb/nlohmann_json, skip network firmware check and ldconfig, fix Windows driver GLOB"
     - patch_file: "patches/0002-fix-avx-check.patch"
       patch_description: "Avoid AVX/cpuid path on non-x86 (Linux ARM and similar)"
+    - patch_file: "patches/0003-fix-missing-includes.patch"
+      patch_description: "Add missing <stdexcept> for GCC 13 (std::runtime_error)"

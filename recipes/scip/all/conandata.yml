@@ -8,6 +8,7 @@ sources:
 patches:
   "10.0.3":
     - patch_file: "patches/0003-format_msvc_stdext.patch"
+    - patch_file: "patches/0004-undef-min-windows.patch"
   "10.0.2":
     - patch_file: "patches/0002-bigobj-spx-msvc-debug.patch"
     - patch_file: "patches/0003-format_msvc_stdext.patch"
