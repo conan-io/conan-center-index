@@ -1,0 +1,33 @@
+diff --git a/ouster_osf/CMakeLists.txt b/ouster_osf/CMakeLists.txt
+index bc768d6..b1bfb70 100644
+--- a/ouster_osf/CMakeLists.txt
++++ b/ouster_osf/CMakeLists.txt
+@@ -8,6 +8,7 @@ option(OUSTER_OSF_NO_THREADING "Don't use threads, useful for WASM targets" OFF)
+ 
+ # ==== Requirements ====
+ find_package(ZLIB REQUIRED)
++find_package(zstd REQUIRED)
+ find_package(PNG REQUIRED)
+ find_package(Eigen3 REQUIRED)
+ find_package(CURL REQUIRED)
+@@ -152,6 +153,7 @@ target_link_libraries(ouster_osf
+     PNG::PNG
+     ZLIB::ZLIB
+     zpng
++    zstd::libzstd
+     $<BUILD_INTERFACE:CURL::libcurl>
+ )
+ target_include_directories(ouster_osf
+diff --git a/thirdparty/zpng/CMakeLists.txt b/thirdparty/zpng/CMakeLists.txt
+index c8ee1fa..da62d9e 100644
+--- a/thirdparty/zpng/CMakeLists.txt
++++ b/thirdparty/zpng/CMakeLists.txt
+@@ -6,7 +6,7 @@ target_include_directories(zpng PUBLIC
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+ target_link_libraries(zpng
+   PRIVATE
+-    zstd
++    zstd::libzstd
+ )
+ install(TARGETS zpng
+     EXPORT ouster-sdk-targets
