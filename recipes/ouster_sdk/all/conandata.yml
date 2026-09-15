@@ -1,24 +1,13 @@
 sources:
-  "0.15.0":
-    url: "https://github.com/ouster-lidar/ouster-sdk/archive/refs/tags/v0.15.0.tar.gz"
-    sha256: "852ab984781d49163faa2e1f333f4c6cb20637199b2fe6de1f9e76b77856c276"
-  "0.14.0":
-    url: "https://github.com/ouster-lidar/ouster-sdk/archive/refs/tags/release-0.14.0.tar.gz"
-    sha256: "dc5d24ba78f13facc0392dc159700474ffd0df34ad019b53632a497de9b56d51"
+  "1.0.1":
+    url: "https://github.com/ouster-lidar/ouster-sdk/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: "b40b5a54f551d80d2027e7b3c5662cf2e3ec9e5668e2d5a31c7510aae13b97b3"
 patches:
-  "0.14.0":
-    - patch_file: "patches/001-0.14.0-link-optional-components.patch"
-      patch_type: "bugfix"
-      patch_description: "Link optional components only when enabled"
-      patch_source: "https://github.com/ouster-lidar/ouster-sdk/pull/656"
-  "0.15.0":
-    - patch_file: "patches/002-0.15.0-add-stdexcept-include.patch"
-      patch_description: "Add missing <stdexcept> include"
-      patch_source: "https://github.com/ouster-lidar/ouster-sdk/pull/677"
-    - patch_file: "patches/003-0.15.0-use-conan-sophus.patch"
-      patch_description: "Use Conan Sophus instead of vendored version"
-    - patch_file: "patches/004-0.15.0-unvendor-glad.patch"
-      patch_description: "Unvendor glad"
-    - patch_file: "patches/005-0.15.0-include-mapping-in-shared-library.patch"
-      patch_description: "Include ouster_mapping object files and link dependencies in shared_library"
-      patch_source: "https://github.com/ouster-lidar/ouster-sdk/pull/676"
+  "1.0.1":
+    - patch_file: "patches/001-1.0.1-unvendor-robin-map.patch"
+    - patch_file: "patches/002-1.0.1-use-conan-openssl.patch"
+    - patch_file: "patches/003-1.0.1-unvendor-glad.patch"
+    - patch_file: "patches/004-1.0.1-unvendor-sophus.patch"
+    - patch_file: "patches/005-1.0.1-use-conan-zstd.patch"
+    - patch_file: "patches/006-1.0.1-shared-library-optional-sensor.patch"
+    - patch_file: "patches/007-1.0.1-add-stdexcept-include.patch"

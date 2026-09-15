@@ -1,0 +1,27 @@
+diff --git a/ouster_core/CMakeLists.txt b/ouster_core/CMakeLists.txt
+index 87710b9..3864e7c 100644
+--- a/ouster_core/CMakeLists.txt
++++ b/ouster_core/CMakeLists.txt
+@@ -4,7 +4,7 @@ find_package(Threads REQUIRED)
+ find_package(nmea REQUIRED)
+ find_package(libzip REQUIRED)
+ find_package(OpenSSL REQUIRED)
+-find_package(RobinMap REQUIRED MODULE)
++find_package(tsl-robin-map REQUIRED)
+ 
+ include(Coverage)
+ 
+@@ -104,13 +104,6 @@ install(DIRECTORY include/ouster include/optional-lite
+   DESTINATION include
+ )
+ 
+-# voxel_hash_map.h is a public header and includes <tsl/robin_map.h>.
+-# Install the vendored robin-map headers so consumers of the installed SDK
+-# (e.g. Python CLI prebuilt build) can find them without needing the source tree.
+-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/robin-map/include/tsl
+-  DESTINATION include
+-)
+-
+ add_executable(zone_render_mini src/zone_render_mini.cpp)
+ target_link_libraries(zone_render_mini PRIVATE ouster_core)
+ target_include_directories(zone_render_mini SYSTEM
