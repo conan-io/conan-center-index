@@ -80,7 +80,7 @@ class LlamaCppConan(ConanFile):
 
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/[>=1.3 <1.5]")
-            self.requires("spirv-headers/1.2.198.0")
+            self.requires("spirv-headers/1.4.350.0")
 
     def build_requirements(self):
         if self.options.get_safe("with_vulkan"):
