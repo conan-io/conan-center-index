@@ -1,4 +1,7 @@
 sources:
+  "1.4.357.0":
+    url: "https://github.com/KhronosGroup/SPIRV-Reflect/archive/refs/tags/vulkan-sdk-1.4.357.0.tar.gz"
+    sha256: "c865bd55459c5b8020a6ac962e462fc33eb4bf2dae8bf7c474357c58ce22a95d"
   "1.4.350.0":
     url: "https://github.com/KhronosGroup/SPIRV-Reflect/archive/refs/tags/vulkan-sdk-1.4.350.0.tar.gz"
     sha256: "c81ea49449d77189574ce0ff1374350533c283f41a9dd1b59f351c26961302b9"

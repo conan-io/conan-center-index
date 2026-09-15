@@ -1,5 +1,8 @@
 # Add only the SDK release versions from https://github.com/KhronosGroup/glslang/tags for consistency
 sources:
+  "1.4.357.0":
+    url: "https://github.com/KhronosGroup/glslang/archive/refs/tags/vulkan-sdk-1.4.357.0.tar.gz"
+    sha256: "81038794e20494556edbcc0fc70fa984d71d1b440f9c49adf2cbaaa60a519757"
   "1.4.350.0":
     url: "https://github.com/KhronosGroup/glslang/archive/refs/tags/vulkan-sdk-1.4.350.0.tar.gz"
     sha256: "a6885b1631fd77c89cd689b939cf2b3032c5ec13ee99250270d34bcad1efc10c"
