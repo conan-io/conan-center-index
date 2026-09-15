@@ -1,0 +1,40 @@
+--- a/cmake/recipes/cereal.cmake
++++ b/cmake/recipes/cereal.cmake
+@@ -1,5 +1,7 @@
+ # cereal (https://github.com/USCiLab/cereal)
+ # License: BSD-3-Clause
++find_package(cereal REQUIRED CONFIG)
++
+ if(TARGET cereal::cereal)
+     return()
+ endif()
+--- a/cmake/recipes/SPIRV-Cross.cmake
++++ b/cmake/recipes/SPIRV-Cross.cmake
+@@ -1,5 +1,7 @@
+ # SPIRV-Cross (https://github.com/KhronosGroup/SPIRV-Cross)
+ # License: Apache-2.0
++find_package(spirv-cross REQUIRED CONFIG)
++
+ if(TARGET SPRIV-Cross::SPRIV-Cross)
+     return()
+ endif()
+--- a/cmake/recipes/SPIRV-Tools.cmake
++++ b/cmake/recipes/SPIRV-Tools.cmake
+@@ -1,5 +1,7 @@
+ # SPIRV-Tools (https://github.com/KhronosGroup/SPIRV-Tools)
+ # License: Apache-2.0
++find_package(SPIRV-Tools REQUIRED CONFIG)
++
+ if(TARGET SPIRV-Tools::SPIRV-Tools)
+     return()
+ endif()
+--- a/cmake/recipes/Vulkan-Headers.cmake
++++ b/cmake/recipes/Vulkan-Headers.cmake
+@@ -1,5 +1,7 @@
+ # Vulkan-Headers (https://github.com/KhronosGroup/Vulkan-Headers)
+ # License: Apache-2.0
++find_package(VulkanHeaders REQUIRED CONFIG)
++
+ if(TARGET Vulkan::Headers)
+     return()
+ endif()
