@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
 import os
 
 required_conan_version = ">=2"
@@ -34,7 +34,7 @@ class MoltenVKConan(ConanFile):
     }
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def configure(self):
         if self.options.shared:
@@ -46,10 +46,10 @@ class MoltenVKConan(ConanFile):
     def requirements(self):
         self.requires("cereal/1.3.2")
         version = "1.4.350.0"
-        self.requires("glslang", version)
-        self.requires("spirv-cross", version)
-        self.requires("vulkan-headers", version, transitive_headers=True)
-        self.requires("spirv-tools", version)
+        self.requires(f"glslang/{version}")
+        self.requires(f"spirv-cross/{version}")
+        self.requires(f"vulkan-headers/{version}", transitive_headers=True)
+        self.requires(f"spirv-tools/{version}")
 
     def validate(self):
         check_min_cppstd(self, 17)
@@ -61,12 +61,30 @@ class MoltenVKConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        # Let CMakeToolchain control the C++ standard instead of hardcoding it upstream
+        replace_in_file(
+            self, os.path.join(self.source_folder, "CMakeLists.txt"),
+            "\tset(CMAKE_CXX_STANDARD 17)\n"
+            "\tset(CMAKE_CXX_STANDARD_REQUIRED ON)\n"
+            "\tset(CMAKE_CXX_EXTENSIONS OFF)\n",
+            "",
+        )
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["MVK_BUILD_SHADER_CONVERTER_TOOL"] = self.options.tools
         tc.generate()
         deps = CMakeDeps(self)
+        # MoltenVK's cmake/recipes/*.cmake scripts guard their CPM fallback behind
+        # if(TARGET <name>) checks using the upstream project names, not Conan's
+        # default lowercase package names. Align the global targets so find_package()
+        # satisfies those guards instead of falling through to CPMAddPackage().
+        deps.set_property("spirv-cross", "cmake_target_name", "SPRIV-Cross::SPRIV-Cross")
+        deps.set_property("spirv-tools", "cmake_target_name", "SPIRV-Tools::SPIRV-Tools")
         deps.generate()
 
     def build(self):

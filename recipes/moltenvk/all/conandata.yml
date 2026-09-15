@@ -1,4 +1,9 @@
 sources:
   "1.4.2":
-    url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.3.0.tar.gz"
-    sha256: "9476033d49ef02776ebab288fffae3e28fd627a3e29b7ae5975a1e1c785bf912"
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.4.2.tar.gz"
+    sha256: "6864db532f1dbbdb621a8d0ec13f24edae318fd9269dd3dd0cdff791334bb1cb"
+patches:
+  "1.4.2":
+    - patch_file: "patches/0001-find-conan-deps.patch"
+      patch_description: "Locate Conan-provided dependencies via find_package() before the existing if(TARGET ...) guards, so the CPMAddPackage() fallback is never reached"
+      patch_type: "conan"
