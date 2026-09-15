@@ -37,19 +37,4 @@ class VariantLiteConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "variant-lite")
         self.cpp_info.set_property("cmake_target_name", "nonstd::variant-lite")
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "variant-lite"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "variant-lite"
-        self.cpp_info.names["cmake_find_package"] = "nonstd"
-        self.cpp_info.names["cmake_find_package_multi"] = "nonstd"
-        self.cpp_info.components["variantlite"].names["cmake_find_package"] = "variant-lite"
-        self.cpp_info.components["variantlite"].names["cmake_find_package_multi"] = "variant-lite"
-        self.cpp_info.components["variantlite"].set_property("cmake_target_name", "nonstd::variant-lite")
-        self.cpp_info.components["variantlite"].bindirs = []
-        self.cpp_info.components["variantlite"].frameworkdirs = []
-        self.cpp_info.components["variantlite"].libdirs = []
-        self.cpp_info.components["variantlite"].resdirs = []
