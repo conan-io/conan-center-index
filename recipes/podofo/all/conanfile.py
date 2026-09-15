@@ -1,9 +1,8 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm
+from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
@@ -26,6 +25,7 @@ class PodofoConan(ConanFile):
         "with_tiff": [True, False],
         "with_png": [True, False],
         "with_unistring": [True, False],
+        "with_fontconfig": [True, False],
     }
     default_options = {
         "shared": False,
@@ -35,6 +35,7 @@ class PodofoConan(ConanFile):
         "with_tiff": True,
         "with_png": True,
         "with_unistring": True,
+        "with_fontconfig": True,
     }
 
     def export_sources(self):
@@ -43,6 +44,7 @@ class PodofoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.with_fontconfig
 
         if is_msvc(self):
             # libunistring recipe raises for Visual Studio
@@ -57,7 +59,7 @@ class PodofoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("freetype/2.13.2")
+        self.requires("freetype/[>=2.13.2 <3]")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("libxml2/[>=2.12.5 <3]")
         self.requires("openssl/[>=1.1 <4]")
@@ -67,14 +69,11 @@ class PodofoConan(ConanFile):
         self.requires("date/[^3.0.4]")
         self.requires("fast_float/6.1.0")
         self.requires("tcb-span/cci.20220616", transitive_headers=True)
-        if Version(self.version) < "1.0.3":
-            self.requires("utfcpp/[<4]")
-        else:
-            self.requires("utfcpp/[>=4.0.6]")
-            self.requires("utf8proc/2.9.0")
+        self.requires("utfcpp/[>=4.0.6]")
+        self.requires("utf8proc/2.9.0")
 
         # Optional dependencies
-        if self.settings.os != "Windows":
+        if self.options.get_safe("with_fontconfig"):
             self.requires("fontconfig/2.15.0")
         if self.options.with_libidn:
             self.requires("libidn/1.36")
@@ -103,24 +102,23 @@ class PodofoConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
         apply_conandata_patches(self)
-        # Unvendor 3rd party libraries
-        libraries_to_unvendor = ["fmt", "date", "utf8cpp", "tclap"]
-        if Version(self.version) >= "1.0.3":
-            libraries_to_unvendor.append("utf8proc")
-            rm(self, "span.hpp", os.path.join(self.source_folder, "src", "podofo", "3rdparty"))
-        else:
-            rm(self, "span.hpp", os.path.join(self.source_folder, "src", "podofo", "auxiliary"))
-        for vendor_library in libraries_to_unvendor:
-            rmdir(self, os.path.join(self.source_folder, "3rdparty", vendor_library))
-        # Remove single header fast_float to use the conan package
-        rm(self, "fast_float.h", os.path.join(self.source_folder, "3rdparty"))
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["PODOFO_DEVENDOR_TCBSPAN"] = True
+        tc.cache_variables["PODOFO_DEVENDOR_DATE"] = True
+        tc.cache_variables["PODOFO_DEVENDOR_FASTFLOAT"] = True
+        tc.cache_variables["PODOFO_DEVENDOR_FMT"] = True
+        tc.cache_variables["PODOFO_DEVENDOR_UTF8CPP"] = True
+        tc.cache_variables["PODOFO_DEVENDOR_UTF8PROC"] = True
+        tc.cache_variables["PODOFO_WITH_WIN32GDI_FONT_SEARCH"] = self.settings.os == "Windows"
+        tc.cache_variables["PODOFO_WITH_FONTMANAGER"] = True if self.settings.os == "Windows" else self.options.with_fontconfig
+
         tc.cache_variables["PODOFO_BUILD_TEST"] = False
         tc.cache_variables["PODOFO_BUILD_EXAMPLES"] = False
         tc.cache_variables["PODOFO_BUILD_STATIC"] = not self.options.shared
         tc.variables["PODOFO_HAVE_OPENSSL_NO_RC4"] = self.dependencies["openssl"].options.get_safe("no_rc4", False)
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -134,7 +132,7 @@ class PodofoConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -146,15 +144,13 @@ class PodofoConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.libs = ["podofo", "podofo_private"]
             self.cpp_info.defines.append("PODOFO_STATIC")
-            if Version(self.version) >= "1.0.3":
-                # This is a private library which podofo links against itself.
-                # This library is always built statically. When podofo is built as shared,
-                # it is embedded inside the podofo shared library.
-                self.cpp_info.libs.append("podofo_3rdparty")
+            # This is a private library which podofo links against itself.
+            # This library is always built statically. When podofo is built as shared,
+            # it is embedded inside the podofo shared library.
+            self.cpp_info.libs.append("podofo_3rdparty")
         else:
             self.cpp_info.libs = ["podofo"]
             self.cpp_info.defines.append("PODOFO_SHARED")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
-
