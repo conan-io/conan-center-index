@@ -1,0 +1,4 @@
+sources:
+  "0.2.0":
+    url: "https://github.com/tree-sitter-grammars/tree-sitter-glsl/archive/refs/tags/v0.2.0.tar.gz"
+    sha256: "65d098362f9ffd47e9bf5916133ed24ccf934b01027debdaeeb46ff3ec41caf0"
