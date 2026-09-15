@@ -1,0 +1,17 @@
+Fix missing cmake taget for spirv-headers
+
+https://github.com/ggml-org/llama.cpp/pull/28951
+
+diff --git a/ggml/src/ggml-vulkan/CMakeLists.txt b/ggml/src/ggml-vulkan/CMakeLists.txt
+index e733ad5cc984..e52a24477458 100644
+--- a/ggml/src/ggml-vulkan/CMakeLists.txt
++++ b/ggml/src/ggml-vulkan/CMakeLists.txt
+@@ -109,7 +109,7 @@ if (Vulkan_FOUND)
+         "GGML_VULKAN_FLOAT_E4M3_GLSLC_SUPPORT"
+     )
+ 
+-    target_link_libraries(ggml-vulkan PRIVATE Vulkan::Vulkan)
++    target_link_libraries(ggml-vulkan PRIVATE Vulkan::Vulkan SPIRV-Headers::SPIRV-Headers)
+     target_include_directories(ggml-vulkan PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+ 
+     # Workaround to the "can't dereference invalidated vector iterator" bug in clang-cl debug build

@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import save, copy, get, rmdir
+from conan.tools.files import save, copy, get, rmdir, export_conandata_patches, apply_conandata_patches
 
 required_conan_version = ">=2.0.9"
 
@@ -60,6 +60,9 @@ class LlamaCppConan(ConanFile):
                 target_link_libraries({cuda_target} INTERFACE CUDA::cudart_static CUDA::cublas_static CUDA::cublasLt_static CUDA::cuda_driver)
             endif()
         """)
+    
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def validate(self):
         check_min_cppstd(self, 17)
@@ -85,6 +88,7 @@ class LlamaCppConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -174,7 +178,7 @@ class LlamaCppConan(ConanFile):
 
         self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
         self.cpp_info.components["common"].libs = ["llama-common"]
-        self.cpp_info.components["common"].requires = ["llama", "llama-common-base"]
+        self.cpp_info.components["common"].requires = ["llama", "llama-common-base", "openssl::openssl"]
 
         if self.settings.os not in ("iOS", "tvOS", "watchOS", "Android", "Emscripten"):
             self.cpp_info.components["common"].defines.append("LLAMA_SUBPROCESS")
@@ -208,7 +212,7 @@ class LlamaCppConan(ConanFile):
                 self.cpp_info.components["ggml-cuda"].set_property("cmake_extra_interface_libs",
                             ["CUDA::cudart", "CUDA::cublas", "CUDA::cublasLt", "CUDA::cuda_driver"])
             elif backend == "vulkan":
-                self.cpp_info.components["ggml-vulkan"].requires.append("vulkan-loader::vulkan-loader")
+                self.cpp_info.components["ggml-vulkan"].requires = ["vulkan-loader::vulkan-loader", "spirv-headers::spirv-headers"]
 
         if is_apple_os(self):
             if "blas" in backends:
