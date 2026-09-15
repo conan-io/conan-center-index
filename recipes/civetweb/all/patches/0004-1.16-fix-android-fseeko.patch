@@ -1,0 +1,16 @@
+diff --git a/src/civetweb.c b/src/civetweb.c
+index 9e321edf..accd3b6b 100644
+--- a/src/civetweb.c
++++ b/src/civetweb.c
+@@ -894,6 +894,11 @@ typedef unsigned short int in_port_t;
+ #endif
+ #endif
+
++#if defined(__ANDROID_API__) && __ANDROID_API__ < 24 && !defined(__LP64__)
++    // https://android.googlesource.com/platform/bionic/+/master/docs/32-bit-abi.md#32_bit-and
++    #define fseeko fseek
++#endif
++
+ #define vsnprintf_impl vsnprintf
+
+ #if !defined(NO_SSL_DL) && !defined(NO_SSL)
