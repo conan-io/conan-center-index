@@ -5,7 +5,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
-from conan.tools.files import copy, get, rename
+from conan.tools.files import copy, get, rename, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -62,6 +62,9 @@ class GetTextConan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def requirements(self):
         self.requires("libiconv/1.17")
@@ -198,6 +201,8 @@ class GetTextConan(ConanFile):
             deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
+
         autotools = Autotools(self)
         autotools.configure("gettext-runtime")
         autotools.make()
