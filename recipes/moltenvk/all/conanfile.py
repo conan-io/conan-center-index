@@ -79,10 +79,6 @@ class MoltenVKConan(ConanFile):
         tc.variables["MVK_BUILD_SHADER_CONVERTER_TOOL"] = self.options.tools
         tc.generate()
         deps = CMakeDeps(self)
-        # MoltenVK's cmake/recipes/*.cmake scripts guard their CPM fallback behind
-        # if(TARGET <name>) checks using the upstream project names, not Conan's
-        # default lowercase package names. Align the global targets so find_package()
-        # satisfies those guards instead of falling through to CPMAddPackage().
         deps.set_property("spirv-cross", "cmake_target_name", "SPRIV-Cross::SPRIV-Cross")
         deps.set_property("spirv-tools", "cmake_target_name", "SPIRV-Tools::SPIRV-Tools")
         deps.generate()
