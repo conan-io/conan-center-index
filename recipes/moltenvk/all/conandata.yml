@@ -5,5 +5,3 @@ sources:
 patches:
   "1.4.2":
     - patch_file: "patches/0001-find-conan-deps.patch"
-      patch_description: "Locate Conan-provided dependencies via find_package() before the existing if(TARGET ...) guards, so the CPMAddPackage() fallback is never reached"
-      patch_type: "conan"
