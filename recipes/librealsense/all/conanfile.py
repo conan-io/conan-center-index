@@ -90,8 +90,6 @@ class LibrealsenseConan(ConanFile):
         tc.variables["ENABLE_CCACHE"] = False
         if self.settings.os == "Windows":
             tc.variables["FORCE_RSUSB_BACKEND"] = self.options.rsusb_backend
-        if self.settings.arch == "armv8":
-            tc.preprocessor_definitions["USE_SOFT_INTRINSICS"] = "1"
         tc.generate()
 
         deps = CMakeDeps(self)
