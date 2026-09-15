@@ -128,11 +128,23 @@ class LlamaCppConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         copy(self, "*", os.path.join(self.source_folder, "models"), os.path.join(self.package_folder, "res", "models"))
         copy(self, "*.h*", os.path.join(self.source_folder, "common"), os.path.join(self.package_folder, "include", "common"))
+        # subproc.h does `#include <sheredom/subprocess.h>` whenever LLAMA_SUBPROCESS is
+        # defined (see package_info): that header needs to be reachable from the same
+        # include root as common's own headers. (vendor/nlohmann is NOT needed here: json.h
+        # hides nlohmann behind a pimpl wrapper and never exposes it in a public header.)
+        copy(self, "*.h*", os.path.join(self.source_folder, "vendor", "sheredom"), os.path.join(self.package_folder, "include", "common", "sheredom"))
+        # "*common*" also matches llama-common-base (formerly the header-only "build_info"
+        # OBJECT library, now a standalone STATIC library linked PUBLIC by llama-common).
         copy(self, "*common*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*common*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         copy(self, "*common*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*common*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*common*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        # cpp-httplib is a vendored, always-STATIC HTTP client that llama-common privately
+        # links for downloads/chat completion endpoints. It is never bundled into
+        # llama-common's own archive, so it must be packaged as its own file.
+        copy(self, "*cpp-httplib*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*cpp-httplib*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         if self.options.with_cuda and not self.options.shared:
             save(self, os.path.join(self.package_folder, "lib", "cmake", "llama-cpp-cuda-static.cmake"), self._cuda_build_module)
 
@@ -170,13 +182,36 @@ class LlamaCppConan(ConanFile):
         self.cpp_info.components["llama"].resdirs = ["res"]
         self.cpp_info.components["llama"].requires = ["ggml", "ggml-base"]
 
+        # llama-common-base used to be an OBJECT library ("build_info") whose object code
+        # was baked directly into common's own archive. It is now a standalone STATIC
+        # library that llama-common links PUBLIC, so it needs its own component.
+        self.cpp_info.components["llama-common-base"].libs = ["llama-common-base"]
+
+        # cpp-httplib is a vendored, always-STATIC HTTP client that llama-common links
+        # PRIVATE for downloads/chat completion endpoints. It ships its own binary and
+        # carries platform-specific link requirements when TLS support is enabled.
+        self.cpp_info.components["cpp-httplib"].libs = ["cpp-httplib"]
+        if self.settings.os == "Windows" and self.settings.compiler != "msvc":
+            self.cpp_info.components["cpp-httplib"].system_libs.append("ws2_32")
+            if self.options.with_openssl:
+                self.cpp_info.components["cpp-httplib"].system_libs.append("crypt32")
+        if is_apple_os(self) and self.options.with_openssl:
+            self.cpp_info.components["cpp-httplib"].frameworks.extend(["CoreFoundation", "Security"])
+
         self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
         self.cpp_info.components["common"].libs = ["llama-common"]
-        self.cpp_info.components["common"].requires = ["llama"]
+        self.cpp_info.components["common"].requires = ["llama", "llama-common-base", "cpp-httplib"]
 
         if self.options.with_openssl:
             self.cpp_info.components["common"].requires.append("openssl::openssl")
             self.cpp_info.components["common"].defines.append("LLAMA_USE_OPENSSL")
+
+        # Mirrors LLAMA_SUBPROCESS_DEFAULT in the top-level CMakeLists.txt: ON everywhere
+        # except iOS/Android/Emscripten. LLAMA_SUBPROCESS is a PUBLIC compile definition on
+        # llama-common (it changes the layout of common_subproc in subproc.h), so consumers
+        # must see the same value the library was actually built with.
+        if self.settings.os not in ("iOS", "tvOS", "watchOS", "Android", "Emscripten"):
+            self.cpp_info.components["common"].defines.append("LLAMA_SUBPROCESS")
 
         if is_apple_os(self):
             self.cpp_info.components["common"].frameworks.extend(["Foundation", "Accelerate", "Metal"])
