@@ -29,7 +29,7 @@ class LibrealsenseConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "tools": True,
-        "rsusb_backend": True,  # TODO: change to False when CI gets MSVC ATL support
+        "rsusb_backend": False,
     }
     implements = ["auto_shared_fpic"]
 
@@ -37,8 +37,10 @@ class LibrealsenseConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if self.settings.os != "Windows":
-            del self.options.rsusb_backend
+        if self.settings.os == "Windows":
+            self.options.rm_safe("fPIC")
+        else:
+            self.options.rm_safe("rsusb_backend")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -113,7 +115,8 @@ class LibrealsenseConan(ConanFile):
         cmake.install()
         if self.options.shared:
             postfix = "d" if is_msvc(self) and self.settings.build_type == "Debug" else ""
-            rm(self, f"librealsense-file{postfix}.*", os.path.join(self.package_folder, "lib"))
+            rm(self, f"*realsense-file{postfix}.*", os.path.join(self.package_folder, "lib"))
+            rm(self, f"*rsutils{postfix}.*", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
@@ -122,22 +125,21 @@ class LibrealsenseConan(ConanFile):
 
         postfix = "d" if is_msvc(self) and self.settings.build_type == "Debug" else ""
 
-        self.cpp_info.components["rsutils"].set_property("cmake_target_name", "realsense2::rsutils")
-        self.cpp_info.components["rsutils"].libs = [f"rsutils{postfix}"]
-        self.cpp_info.components["rsutils"].requires = ["nlohmann_json::nlohmann_json"]
-
         self.cpp_info.components["realsense2"].set_property("cmake_target_name", "realsense2::realsense2")
         self.cpp_info.components["realsense2"].set_property("pkg_config_name", "realsense2")
         self.cpp_info.components["realsense2"].libs = [f"realsense2{postfix}"]
-        self.cpp_info.components["realsense2"].requires = ["libusb::libusb", "rsutils"]
+        self.cpp_info.components["realsense2"].requires = ["libusb::libusb"]
 
         if not self.options.shared:
+            self.cpp_info.components["rsutils"].set_property("cmake_target_name", "realsense2::rsutils")
+            self.cpp_info.components["rsutils"].libs = [f"rsutils{postfix}"]
+            self.cpp_info.components["rsutils"].requires = ["nlohmann_json::nlohmann_json"]
             self.cpp_info.components["realsense-file"].set_property("cmake_target_name", "realsense2::realsense-file")
             self.cpp_info.components["realsense-file"].libs = [f"realsense-file{postfix}"]
             self.cpp_info.components["realsense-file"].requires = ["lz4::lz4"]
-            self.cpp_info.components["realsense2"].requires.append("realsense-file")
+            self.cpp_info.components["realsense2"].requires.extend(["rsutils", "realsense-file"])
         else:
-            self.cpp_info.components["realsense2"].requires.append("lz4::lz4")
+            self.cpp_info.components["realsense2"].requires.extend(["nlohmann_json::nlohmann_json", "lz4::lz4"])
 
         if self.settings.os == "Linux":
             self.cpp_info.components["realsense2"].system_libs.extend(["m", "pthread", "udev"])
