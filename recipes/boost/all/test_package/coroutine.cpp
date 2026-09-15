@@ -3,8 +3,8 @@
 
 int main()
 {
-  boost::coroutines::coroutine<void>::pull_type sink(
-    [](boost::coroutines::coroutine<void>::push_type& source) {
+  BOOST_NAMESPACE::coroutines::coroutine<void>::pull_type sink(
+    [](BOOST_NAMESPACE::coroutines::coroutine<void>::push_type& source) {
       source();
       std::cout << "Testing Boost::Coroutine" << std::endl;
     });
