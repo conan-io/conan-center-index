@@ -1,0 +1,7 @@
+sources:
+  "0.1.1":
+    url: "https://github.com/mpernia/mock-services/archive/refs/tags/v0.1.1.tar.gz"
+    sha256: bddec5e088d5ff1d833d36dce5b795ff7dd66eceb582404965f7bd28366fb6c2
+  "0.1.0":
+    url: "https://github.com/mpernia/mock-services/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: 11263bf24bc79afa617be3f24e350d8a170755bb0d0d64d1188644969c2ae63d
