@@ -90,7 +90,7 @@ class LlamaCppConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-        tc = CMakeToolchain(self)      
+        tc = CMakeToolchain(self)
         tc.variables["LLAMA_STANDALONE"] = False
         tc.variables["LLAMA_BUILD_TESTS"] = False
         tc.cache_variables["LLAMA_BUILD_TOOLS"] = False
@@ -133,7 +133,7 @@ class LlamaCppConan(ConanFile):
         copy(self, "*common*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         copy(self, "*common*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*common*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*common*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)                
+        copy(self, "*common*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         if self.options.with_cuda and not self.options.shared:
             save(self, os.path.join(self.package_folder, "lib", "cmake", "llama-cpp-cuda-static.cmake"), self._cuda_build_module)
 
@@ -174,7 +174,7 @@ class LlamaCppConan(ConanFile):
 
         self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
         self.cpp_info.components["common"].libs = ["llama-common"]
-        self.cpp_info.components["common"].requires = ["llama", "llama-common-base", "cpp-httplib"]
+        self.cpp_info.components["common"].requires = ["llama", "llama-common-base"]
 
         if self.settings.os not in ("iOS", "tvOS", "watchOS", "Android", "Emscripten"):
             self.cpp_info.components["common"].defines.append("LLAMA_SUBPROCESS")
