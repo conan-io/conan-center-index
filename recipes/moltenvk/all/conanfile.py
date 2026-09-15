@@ -45,7 +45,7 @@ class MoltenVKConan(ConanFile):
 
     def requirements(self):
         self.requires("cereal/1.3.2")
-        version = "1.4.350.0"
+        version = "1.4.357.0"
         self.requires(f"glslang/{version}")
         self.requires(f"spirv-cross/{version}")
         self.requires(f"vulkan-headers/{version}", transitive_headers=True)
