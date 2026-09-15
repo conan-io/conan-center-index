@@ -7,6 +7,6 @@ patches:
     - patch_file: "patches/0001-fix-cmake.patch"
       patch_description: "Use Conan libusb/nlohmann_json, skip network firmware check and ldconfig, fix Windows driver GLOB"
     - patch_file: "patches/0002-fix-avx-check.patch"
-      patch_description: "Avoid AVX/cpuid path on non-x86 (Linux ARM and similar)"
+      patch_description: "Use cpuid/AVX detection only on x86/x86_64; stub has_avx() elsewhere (ARM, etc.)"
     - patch_file: "patches/0003-fix-missing-includes.patch"
       patch_description: "Add missing standard headers required by GCC 13"
