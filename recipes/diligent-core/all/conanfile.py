@@ -113,22 +113,23 @@ class DiligentCoreConan(ConanFile):
 
     def requirements(self):
         self.requires("opengl/system")
-        if self.settings.os == "Linux":
-            self.requires("wayland/1.22.0")
 
-        self.requires("spirv-cross/1.3.224.0")
-        self.requires("spirv-tools/1.3.224.0")
+        spirv_version = "1.4.350.0"
+        self.requires(f"spirv-cross/{spirv_version}")
+        self.requires(f"spirv-tools/{spirv_version}")
         if self.options.with_glslang:
-            self.requires("glslang/1.3.224.0")
-        self.requires("vulkan-headers/1.3.224.0")
-        self.requires("vulkan-validationlayers/1.3.224.1")
-        self.requires("volk/1.3.224.0")
-        self.requires("xxhash/0.8.1")
+            self.requires(f"glslang/{spirv_version}")
+        self.requires(f"vulkan-headers/{spirv_version}")
+        self.requires(f"vulkan-validationlayers/{spirv_version}")
+        self.requires(f"volk/{spirv_version}")
+        self.requires("xxhash/0.8.3")
+        if self.settings.os == "Linux":
+            self.requires("wayland/[>=1.22.0 <2]")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.4.1")
+                self.requires("xkbcommon/1.13.1")
 
     def _diligent_platform(self):
         if self.settings.os == "Windows":
