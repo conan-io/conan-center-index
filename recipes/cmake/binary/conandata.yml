@@ -33,27 +33,27 @@ sources:
       armv8:
         url:
           - "https://cmake.org/files/v3.31/cmake-3.31.12-linux-aarch64.tar.gz"
-          - "https://github.com/Kitware/CMake/releases/download/v4.4.3/cmake-3.31.12-linux-aarch64.tar.gz"
+          - "https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-linux-aarch64.tar.gz"
         sha256: "83f8fd91d2038a56556e1400390fcfe42f79602940c494f6c6f1cdae7f9e7f40"
       x86_64:
         url:
           - "https://cmake.org/files/v3.31/cmake-3.31.12-linux-x86_64.tar.gz"
-          - "https://github.com/Kitware/CMake/releases/download/v4.4.3/cmake-3.31.12-linux-x86_64.tar.gz"
+          - "https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-linux-x86_64.tar.gz"
         sha256: "0dc2e9a6860f06bf10bd8fadc03e35d9eeb4df46e33763a7e480e987758f385c"
     Macos:
       universal:
         url:
           - "https://cmake.org/files/v3.31/cmake-3.31.12-macos10.10-universal.tar.gz"
-          - "https://github.com/Kitware/CMake/releases/download/v4.4.3/cmake-3.31.12-macos10.10-universal.tar.gz"
+          - "https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-macos10.10-universal.tar.gz"
         sha256: "cf096d869d45b79f5ce82f3d6abffa44f983fc146fee13cfe59024911e6975af"
     Windows:
       armv8:
         url:
           - "https://cmake.org/files/v3.31/cmake-3.31.12-windows-arm64.zip"
-          - "https://github.com/Kitware/CMake/releases/download/v4.4.3/cmake-3.31.12-windows-arm64.zip"
+          - "https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-windows-arm64.zip"
         sha256: "e4160c1842dea858ad376ff2ec17587104515b51714eca5963b8bdd798105553"
       x86_64:
         url:
           - "https://cmake.org/files/v3.31/cmake-3.31.12-windows-x86_64.zip"
-          - "https://github.com/Kitware/CMake/releases/download/v4.4.3/cmake-3.31.12-windows-x86_64.zip"
+          - "https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-windows-x86_64.zip"
         sha256: "0c4baa40f28b3f8225eb3fdf6946c987b4fe901403b4eaf2fbbd9378100aaa0c"
