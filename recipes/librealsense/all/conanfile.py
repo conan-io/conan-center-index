@@ -47,8 +47,8 @@ class LibrealsenseConan(ConanFile):
 
     def requirements(self):
         self.requires("libusb/1.0.26")
-        self.requires("nlohmann_json/3.12.0")
-        self.requires("lz4/1.9.4")
+        self.requires("nlohmann_json/[>=3.12.0 <3.13]")
+        self.requires("lz4/[>=1.9.4 <2]")
 
     def validate(self):
         check_min_cppstd(self, 14)
