@@ -1,8 +1,8 @@
 sources:
-  "2026.3.0":
+  "2026.3.1":
     "openvino":
-      url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2026.3.0.tar.gz"
-      sha256: "48d97d500916e8fd57972a9ed729584c6d73c286554486745fb786e4cf5cf5df"
+      url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2026.3.1.tar.gz"
+      sha256: "06128c315f2d81a6d9d390e4e505748eb32f58bc8e717e32143d228546668505"
     "arm_compute":
       url: "https://github.com/ARM-software/ComputeLibrary/archive/refs/tags/v53.1.0.tar.gz"
       sha256: "9aa17bfbda0ab68904cdb005fc724498d630b64fdaadb4a50e4d7eee67680a76"
@@ -38,7 +38,7 @@ sources:
       url: "https://github.com/oneapi-src/oneDNN/archive/29d64fe0ec0f1f20d7f80aa76630d58a6011a869.tar.gz"
       sha256: "90139a1193b9773f94ff3310cd6118d3b6ccf1adb24461c84aa87890caa5ee77"
 patches:
-  "2026.3.0":
-    - patch_file: "patches/2026.3.0-fix-deps.patch"
+  "2026.3.1":
+    - patch_file: "patches/2026.3.1-fix-deps.patch"
   "2025.4.0":
     - patch_file: "patches/2025.4.0-CPU-ARM-Define-HWCAP2_I8MM-constant-properly-33060.patch"

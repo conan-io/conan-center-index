@@ -1,10 +1,12 @@
 sources:
   "5.8.3":
     url:
-      - "https://tukaani.org/xz/xz-5.8.3.tar.xz"
+      - "https://github.com/tukaani-project/xz/releases/download/v5.8.3/xz-5.8.3.tar.xz"
+      - "https://codeberg.org/tukaani/xz/releases/download/v5.8.3/xz-5.8.3.tar.xz"
+      - "https://sourceforge.net/projects/lzmautils/files/xz-5.8.3.tar.xz"
     sha256: "fff1ffcf2b0da84d308a14de513a1aa23d4e9aa3464d17e64b9714bfdd0bbfb6"
   "5.4.5":
     url:
-      - "https://tukaani.org/xz/xz-5.4.5.tar.xz"
-      - "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/da9dec6c12cf2ecf269c31ab65b5de18e8e52b96f35d5bcd08c12b43e6878803"
+      - "https://github.com/tukaani-project/xz/releases/download/v5.4.5/xz-5.4.5.tar.xz"
+      - "https://sourceforge.net/projects/lzmautils/files/xz-5.4.5.tar.xz"
     sha256: "da9dec6c12cf2ecf269c31ab65b5de18e8e52b96f35d5bcd08c12b43e6878803"
