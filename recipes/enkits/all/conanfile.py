@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import copy, get, rmdir
 
 required_conan_version = ">=2.1"
 
@@ -26,9 +26,6 @@ class EnkiTSConan(ConanFile):
         "fPIC": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -42,26 +39,15 @@ class EnkiTSConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["ENKITS_INSTALL"] = True
         tc.cache_variables["ENKITS_BUILD_EXAMPLES"] = False
         tc.cache_variables["ENKITS_BUILD_SHARED"] = self.options.shared
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
-    def _patch_sources(self):
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            'install(TARGETS enkiTS DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/enkiTS")',
-            "install(TARGETS enkiTS ARCHIVE LIBRARY RUNTIME)",
-        )
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -70,9 +56,16 @@ class EnkiTSConan(ConanFile):
         copy(self, "License.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        # INFO: DLL missed in install step: https://github.com/dougbinks/enkiTS/pull/148
+        copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["enkiTS"]
+        self.cpp_info.set_property("cmake_file_name", "enkiTS")
+        self.cpp_info.set_property("cmake_target_name", "enkiTS::enkiTS")
+        # INFO: Custom target to avoid breaking existing consumers
+        self.cpp_info.set_property("cmake_target_aliases", ["enkits::enkits"])
 
         if self.options.shared:
             self.cpp_info.defines.append("ENKITS_DLL=1")

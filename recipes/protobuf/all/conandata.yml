@@ -8,6 +8,9 @@ sources:
   "5.29.6":
     url: "https://github.com/protocolbuffers/protobuf/releases/download/v29.6/protobuf-29.6.tar.gz"
     sha256: "877bf9f880631aa31daf2c09896276985696728137fcd43cc534a28c5566d9ba"
+patches:
+  "6.33.5":
+    - patch_file: "patches/6.33.5-nvcc.patch"
 absl_deps:
   # reference: https://github.com/protocolbuffers/protobuf/blob/main/cmake/abseil-cpp.cmake
   "7.35.0":

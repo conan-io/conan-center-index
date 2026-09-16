@@ -164,7 +164,7 @@ class ArrowConan(ConanFile):
         if self.options.with_mimalloc:
             self.requires("mimalloc/[>=1.7.6 <3]")
         if self.options.with_boost:
-            self.requires("boost/[>=1.85.0 <=1.90.0]")
+            self.requires("boost/[>=1.85.0 <=1.91.0]")
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
         if self.options.with_glog:
@@ -193,7 +193,7 @@ class ArrowConan(ConanFile):
             self.requires("lz4/1.9.4")
         if self.options.with_snappy:
             self.requires("snappy/1.1.9")
-        if self.options.simd_level != "disabled" or self.options.runtime_simd_level != "disabled":
+        if Version(self.version) >= "25.0.0" or (self.options.simd_level != "disabled" or self.options.runtime_simd_level != "disabled"):
             self.requires("xsimd/14.2.0")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
@@ -553,7 +553,7 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("lz4::lz4")
         if self.options.with_snappy:
             self.cpp_info.components["libarrow"].requires.append("snappy::snappy")
-        if self.options.simd_level != "disabled" or self.options.runtime_simd_level != "disabled":
+        if Version(self.version) >= "25.0.0" or (self.options.simd_level != "disabled" or self.options.runtime_simd_level != "disabled"):
             self.cpp_info.components["libarrow"].requires.append("xsimd::xsimd")
         if self.options.with_zlib:
             self.cpp_info.components["libarrow"].requires.append("zlib::zlib")

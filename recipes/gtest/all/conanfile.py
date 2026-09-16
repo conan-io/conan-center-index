@@ -55,8 +55,12 @@ class GTestConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-        internal_utils = os.path.join(self.source_folder, "googletest", "cmake", "internal_utils.cmake")
-        replace_in_file(self, internal_utils, "-WX", "")
+        if Version(self.version) < "1.18.0":
+            # Removed in 1.18.0
+            # https://github.com/google/googletest/commit/4cb0ab12a15aa95649cb59c4063c206e3f2ee9ba
+            internal_utils = os.path.join(
+                self.source_folder, "googletest", "cmake", "internal_utils.cmake")
+            replace_in_file(self, internal_utils, "-WX", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
