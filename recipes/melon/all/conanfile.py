@@ -30,7 +30,7 @@ class MelonConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 23)
         compilers = {"gcc": "14", "clang": "16", "apple-clang": "21", "msvc": "194"}
-        if self.settings.compiler in compilers and Version(self.settings.compiler.version) < compilers[str(self.settings.compiler)]:
+        if str(self.settings.compiler) in compilers and Version(self.settings.compiler.version) < compilers[str(self.settings.compiler)]:
             raise ConanInvalidConfiguration(f"{self.settings.compiler} version must be at least {compilers[str(self.settings.compiler)]}. See https://github.com/fhamonic/melon#installation")
 
     def build_requirements(self):
