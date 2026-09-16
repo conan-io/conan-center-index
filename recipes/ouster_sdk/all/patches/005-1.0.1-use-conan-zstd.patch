@@ -14,20 +14,7 @@ index bc768d6..b1bfb70 100644
      PNG::PNG
      ZLIB::ZLIB
      zpng
-+    zstd::libzstd
++    zstd
      $<BUILD_INTERFACE:CURL::libcurl>
  )
  target_include_directories(ouster_osf
-diff --git a/thirdparty/zpng/CMakeLists.txt b/thirdparty/zpng/CMakeLists.txt
-index c8ee1fa..da62d9e 100644
---- a/thirdparty/zpng/CMakeLists.txt
-+++ b/thirdparty/zpng/CMakeLists.txt
-@@ -6,7 +6,7 @@ target_include_directories(zpng PUBLIC
-     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
- target_link_libraries(zpng
-   PRIVATE
--    zstd
-+    zstd::libzstd
- )
- install(TARGETS zpng
-     EXPORT ouster-sdk-targets

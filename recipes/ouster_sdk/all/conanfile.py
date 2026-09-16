@@ -140,6 +140,9 @@ class OusterSdkConan(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
+        # zstd's own target name is namespaced (zstd::libzstd*); upstream's zpng links the
+        # unnamespaced "zstd" name instead, expecting its own cmake/Findzstd.cmake to alias it
+        deps.set_property("zstd", "cmake_target_name", "zstd")
         deps.generate()
 
     def _patch_sources(self):
