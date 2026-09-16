@@ -1,4 +1,7 @@
 sources:
+  "5.0.1":
+    url: "https://github.com/martinus/unordered_dense/archive/v5.0.1.tar.gz"
+    sha256: "b79f46db45fd73310211429e5d33da4a579543ac544ae7dc12f8d9a31ad0aea4"
   "4.11.0":
     url: "https://github.com/martinus/unordered_dense/archive/v4.11.0.tar.gz"
     sha256: "a232f7433b45872d43e4dc74a25cbd58effc0be76e3d704b34e5de3c637eed77"
