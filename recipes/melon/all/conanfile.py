@@ -4,6 +4,8 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get, rmdir
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMake
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=2.1"
 
@@ -27,6 +29,8 @@ class MelonConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 23)
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "14":
+            raise ConanInvalidConfiguration("GCC version must be at least 14. See https://github.com/fhamonic/melon#installation")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24]")
