@@ -31,7 +31,6 @@ class LibrealsenseConan(ConanFile):
         "tools": True,
         "rsusb_backend": False,
     }
-    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -41,6 +40,10 @@ class LibrealsenseConan(ConanFile):
             self.options.rm_safe("fPIC")
         else:
             self.options.rm_safe("rsusb_backend")
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
