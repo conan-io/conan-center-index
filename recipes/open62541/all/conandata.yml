@@ -1,12 +1,12 @@
 sources:
-  "1.5.7":
-    url: "https://github.com/open62541/open62541/archive/v1.5.7.tar.gz"
-    sha256: "a4018b052c93fedb55f00558a85869b86f3bb2293184d322e33f2666c497eaeb"
-  "1.4.14":
-    url: "https://github.com/open62541/open62541/archive/v1.4.14.tar.gz"
-    sha256: "0a0a8830e4e5f720e901579f826c788fdbc3d49f44a9515ab15a06e877b59416"
+  "1.5.8":
+    url: "https://github.com/open62541/open62541/archive/v1.5.8.tar.gz"
+    sha256: "cf7951baf253c0537b3397e4ce3ff13930542abcb6ffc3b9cb082af88f95c300"
+  "1.4.20":
+    url: "https://github.com/open62541/open62541/archive/v1.4.20.tar.gz"
+    sha256: "1464937bfbb9310f1465477e62df676d2dd2b0c25315a60f333d6350c600a2cb"
 patches:
-  "1.4.14":
+  "1.4.20":
     - patch_file: "patches/0004-include-iphlpapi.patch"
       patch_description: "Include iphlpapi.h for SecureZeroMemory"
       patch_type: "conan"
