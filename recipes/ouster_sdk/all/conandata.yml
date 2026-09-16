@@ -11,3 +11,4 @@ patches:
     - patch_file: "patches/005-1.0.1-use-conan-zstd.patch"
     - patch_file: "patches/006-1.0.1-shared-library-optional-sensor.patch"
     - patch_file: "patches/007-1.0.1-add-stdexcept-include.patch"
+    - patch_file: "patches/008-1.0.1-ouster-algorithm-no-forced-cxx-standard.patch"
