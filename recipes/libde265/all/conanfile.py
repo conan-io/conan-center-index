@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2"
@@ -20,12 +19,16 @@ class Libde265Conan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "sse": [True, False],
+        "simd": [True, False],
+        "avx2": [True, False],
+        "avx512": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "sse": True,
+        "simd": True,
+        "avx2": True,
+        "avx512": True,
     }
 
     def export_sources(self):
@@ -34,18 +37,25 @@ class Libde265Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.arch not in ["x86", "x86_64"]:
-            del self.options.sse
+        if self.settings.arch != "x86_64":
+            del self.options.avx2
+            del self.options.avx512
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if not self.options.simd:
+            self.options.rm_safe("avx2")
+            self.options.rm_safe("avx512")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
         check_min_cppstd(self, 11)
+
+    def validate_build(self):
+        check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -55,9 +65,12 @@ class Libde265Conan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         tc.variables["ENABLE_SDL"] = False
-        tc.variables["DISABLE_SSE"] = not self.options.get_safe("sse", False)
-        if Version(self.version) < "1.0.16":
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
+        tc.variables["ENABLE_DECODER"] = False
+        tc.variables["ENABLE_ENCODER"] = False
+        tc.variables["ENABLE_SHERLOCK265"] = False
+        tc.variables["ENABLE_SIMD"] = bool(self.options.simd)
+        tc.variables["ENABLE_AVX2"] = bool(self.options.get_safe("avx2", False))
+        tc.variables["ENABLE_AVX512"] = bool(self.options.get_safe("avx512", False))
         tc.generate()
 
     def _patch_sources(self):
@@ -80,7 +93,7 @@ class Libde265Conan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libde265")
         self.cpp_info.set_property("cmake_target_name", "de265")
-        self.cpp_info.set_property("cmake_target_aliases", ["libde265"])  # official imported target before 1.0.10
+        self.cpp_info.set_property("cmake_target_aliases", ["libde265"])
         self.cpp_info.set_property("pkg_config_name", "libde265")
         prefix = "lib" if self.settings.os == "Windows" and not self.options.shared else ""
         self.cpp_info.libs = [f"{prefix}de265"]
