@@ -134,7 +134,6 @@ class NetSnmpConan(ConanFile):
         self.run(" ".join(args))
 
     def _patch_msvc(self):
-        # net-snmp version-independent patching, instead of using patch files
         if "MT" in msvc_runtime_flag(self):
             replace_in_file(self, "Configure", "/MD", "/MT", strict=False)
         ssl_info = self.dependencies["openssl"].cpp_info
@@ -171,6 +170,15 @@ class NetSnmpConan(ConanFile):
         replace_in_file(self, configure_path,
                         "-install_name \\$rpath/",
                         "-install_name @rpath/")
+        crypto_libs = self.dependencies["openssl"].cpp_info.system_libs
+        if len(crypto_libs) != 0:
+            crypto_link_flags = " -l".join(crypto_libs)
+            replace_in_file(self, configure_path,
+                'LIBCRYPTO="-l${CRYPTO}"',
+                'LIBCRYPTO="-l${CRYPTO} -l%s"' % (crypto_link_flags,))
+            replace_in_file(self, configure_path,
+                            'LIBS="-lcrypto  $LIBS"',
+                            f'LIBS="-lcrypto -l{crypto_link_flags} $LIBS"')
         os.chmod(configure_path, os.stat(configure_path).st_mode | stat.S_IEXEC)
 
     def build(self):
