@@ -112,7 +112,7 @@ class PodofoConan(ConanFile):
         tc.cache_variables["PODOFO_DEVENDOR_UTF8CPP"] = True
         tc.cache_variables["PODOFO_DEVENDOR_UTF8PROC"] = True
         tc.cache_variables["PODOFO_WITH_WIN32GDI_FONT_SEARCH"] = self.settings.os == "Windows"
-        tc.cache_variables["PODOFO_WITH_FONTMANAGER"] = True if self.settings.os == "Windows" else self.options.with_fontconfig
+        tc.cache_variables["PODOFO_WITH_FONTMANAGER"] = self.options.get_safe("with_fontconfig", True)
 
         tc.cache_variables["PODOFO_BUILD_TEST"] = False
         tc.cache_variables["PODOFO_BUILD_EXAMPLES"] = False
