@@ -3,7 +3,7 @@ project(bzip2 LANGUAGES C)
 
 include(GNUInstallDirs)
 
-option(BZ2_BUILD_EXE "Build bzip2 command-line utility" ON)
+option(BZ2_BUILD_EXE "Build bzip2 command-line utilities" ON)
 
 add_library(
     bz2
@@ -35,7 +35,42 @@ install(
 )
 
 if(BZ2_BUILD_EXE)
+    # Main bzip2 executable
     add_executable(bzip2 ${BZ2_SRC_DIR}/bzip2.c)
     target_link_libraries(bzip2 PRIVATE bz2)
     install(TARGETS bzip2 DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+    # bzip2recover utility
+    add_executable(bzip2recover ${BZ2_SRC_DIR}/bzip2recover.c)
+    target_link_libraries(bzip2recover PRIVATE bz2)
+    install(TARGETS bzip2recover DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+    # Install utility scripts
+    install(PROGRAMS ${BZ2_SRC_DIR}/bzgrep DESTINATION ${CMAKE_INSTALL_BINDIR})
+    install(PROGRAMS ${BZ2_SRC_DIR}/bzmore DESTINATION ${CMAKE_INSTALL_BINDIR})
+    install(PROGRAMS ${BZ2_SRC_DIR}/bzdiff DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+    # Install extra tools which are either copies or symlinks of other tools
+    # This is a 1:1 mapping of what the original makefile does.
+    # bunzip2 and bzcat are copies of bzip2 (not symlinks)
+    install(CODE "
+        execute_process(COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/bzip2${CMAKE_EXECUTABLE_SUFFIX}
+            ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/bunzip2${CMAKE_EXECUTABLE_SUFFIX})
+        execute_process(COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/bzip2${CMAKE_EXECUTABLE_SUFFIX}
+            ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/bzcat${CMAKE_EXECUTABLE_SUFFIX})
+    ")
+
+    # Create symlinks
+    install(CODE "
+        file(CREATE_LINK bzgrep${CMAKE_EXECUTABLE_SUFFIX}
+             ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/bzegrep${CMAKE_EXECUTABLE_SUFFIX} SYMBOLIC)
+        file(CREATE_LINK bzgrep${CMAKE_EXECUTABLE_SUFFIX}
+             ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/bzfgrep${CMAKE_EXECUTABLE_SUFFIX} SYMBOLIC)
+        file(CREATE_LINK bzmore${CMAKE_EXECUTABLE_SUFFIX}
+            ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/bzless${CMAKE_EXECUTABLE_SUFFIX} SYMBOLIC)
+        file(CREATE_LINK bzdiff${CMAKE_EXECUTABLE_SUFFIX}
+             ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/bzcmp${CMAKE_EXECUTABLE_SUFFIX} SYMBOLIC)
+    ")
 endif()
