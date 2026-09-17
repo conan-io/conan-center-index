@@ -1,0 +1,9 @@
+diff --git a/cpp/types.h b/cpp/types.h
+index 76c4311..05120eb 100644
+--- a/cpp/types.h
++++ b/cpp/types.h
+@@ -6,3 +6,4 @@
+ #include <Windows.h>
+ #include <dxgi.h>
+ #endif
++#include <cstdint>
