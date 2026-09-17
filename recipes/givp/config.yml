@@ -1,0 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Arnaldo Mendes Pires Junior
+# SPDX-License-Identifier: MIT
+
+versions:
+  "1.0.1":
+    folder: all
