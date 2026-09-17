@@ -13,6 +13,3 @@ patches:
     - patch_file: "patches/0008-fix-posix-qnx.patch"
       patch_description: "Ensure posix is default architecture"
       patch_type: "portability"
-    - patch_file: "patches/1.4.14-0001-use-external-mdnsd.patch"
-      patch_description: "Consume mdnsd as external dependency provided by Conan"
-      patch_type: "conan"
