@@ -1,10 +1,9 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class LibCborStackConan(ConanFile):
@@ -15,17 +14,16 @@ class LibCborStackConan(ConanFile):
     description = "CBOR protocol implementation for C"
     topics = ("cbor", "serialization", "messaging")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "custom_alloc": [True, False],
         "pretty_printer": [True, False],
         "buffer_growth_factor": ["ANY"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "custom_alloc": False,
         "pretty_printer": True,
         "buffer_growth_factor": 2,
     }
@@ -57,13 +55,10 @@ class LibCborStackConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["WITH_EXAMPLES"] = False
         tc.variables["SANITIZE"] = False
-        tc.variables["CBOR_CUSTOM_ALLOC"] = self.options.custom_alloc
         tc.variables["CBOR_PRETTY_PRINTER"] = self.options.pretty_printer
         tc.variables["CBOR_BUFFER_GROWTH"] = self.options.buffer_growth_factor
         # Relocatable shared libs on macOS
         tc.variables["CMAKE_MACOSX_RPATH"] = True
-        if Version(self.version) < "0.13.0":
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
 
     def build(self):
