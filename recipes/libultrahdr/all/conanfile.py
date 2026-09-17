@@ -40,15 +40,14 @@ class LibultrahdrConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        if Version(self) < "2.0":
+        if Version(self.version) < "2.0":
             del self.options.with_libheif
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-
-        if Version(self) < "2.0":
-            self.options.rm_safe("with_libheif")
+        if Version(self.version) >= "2.0":
+            self.license = "MIT", "Apache-2.0"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -86,7 +85,7 @@ class LibultrahdrConan(ConanFile):
         if is_msvc(self) and not self.options.shared:
             tc.cache_variables["BUILD_FOR_WINUI"] = True
 
-        if Version(self) >= "2.0":
+        if Version(self.version) >= "2.0":
             # Always force activate/deactivate
             tc.cache_variables["UHDR_ENABLE_HEIF"] = self.options.get_safe("with_libheif", False)
             tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_libheif"] = True
@@ -112,7 +111,7 @@ class LibultrahdrConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        suffix = "-static" if is_msvc(self) and not self.options.shared else ""
+        suffix = "-static" if Version(self.version) >= "2.0" and is_msvc(self) and not self.options.shared else ""
         self.cpp_info.libs = [f"uhdr{suffix}"]
 
         if self.options.with_jpeg == "libjpeg":
