@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.apple import is_apple_os
 import os
@@ -36,6 +36,9 @@ class RsyncConan(ConanFile):
     }
     languages = "C"
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
@@ -45,6 +48,7 @@ class RsyncConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def package_id(self):
         del self.info.settings.compiler
