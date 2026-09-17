@@ -1,20 +1,20 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class ZintConan(ConanFile):
     name = "zint"
     description = "Zint Barcode Generator"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://sourceforge.net/p/zint/code"
-    license = "GPL-3.0"
-    topics = ("barcode", "qt")
+    homepage = "https://www.zint.org.uk"
+    license = ("BSD-3-Clause", "GPL-3.0")
+    topics = ("barcode", "barcode-generator", "qr-code", "2d-barcodes", "gs1")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -52,55 +52,56 @@ class ZintConan(ConanFile):
             self.requires("libpng/[>=1.6 <2]")
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_qt:
-            self.requires("qt/5.15.10")
+            self.requires("qt/[>=5.15 <7]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.options.with_qt and not self.dependencies["qt"].options.gui:
             raise ConanInvalidConfiguration(f"{self.ref} needs qt:gui=True")
+        if self.settings.os == "Windows" and self.options.shared and self.options.with_qt:
+            # Upstream does not export DLL symbols on libqzint. The following clases are not exported:
+            # - https://github.com/zint/zint/blob/2.16.0/backend_qt/qzint.h#L48
+            # - https://github.com/zint/zint/blob/2.16.0/backend_qt/qzint.h#L423
+            raise ConanInvalidConfiguration(f"{self.ref} does not support shared build on Windows with_qt enabled")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["DATA_INSTALL_DIR"] = os.path.join(self.package_folder, "lib").replace("\\", "/")
-        tc.variables["ZINT_USE_QT"] = self.options.with_qt
+        tc.cache_variables["ZINT_USE_QT"] = self.options.with_qt
         if self.options.with_qt:
-            tc.variables["QT_VERSION_MAJOR"] = Version(self.dependencies["qt"].ref.version).major
-        tc.variables["ZINT_USE_PNG"] = self.options.with_libpng
+            qt_version = Version(self.dependencies["qt"].ref.version)
+            tc.variables["QT_VERSION_MAJOR"] = str(qt_version.major)
+            tc.variables["ZINT_QT6"] = qt_version.major == "6"
+        tc.cache_variables["ZINT_USE_PNG"] = self.options.with_libpng
+        tc.cache_variables["ZINT_SHARED"] = self.options.shared
+        tc.cache_variables["ZINT_STATIC"] = not self.options.shared
+        tc.cache_variables["ZINT_FRONTEND"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_source(self):
-        apply_conandata_patches(self)
-        # Don't override CMAKE_OSX_SYSROOT, it can easily break consumers.
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            "set(CMAKE_OSX_SYSROOT \"/\")",
-            "",
-        )
-
     def build(self):
-        self._patch_source()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Zint")
-
         self.cpp_info.components["libzint"].set_property("cmake_target_name", "Zint::Zint")
-        self.cpp_info.components["libzint"].libs = ["zint" if self.options.shared else "zint-static"]
+        use_static_suffix = not self.options.shared and self.settings.os == "Windows"
+        self.cpp_info.components["libzint"].libs = ["zint-static" if use_static_suffix else "zint"]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.components["libzint"].defines = ["ZINT_DLL"]
+        if self.settings.os != "Windows":
+            self.cpp_info.components["libzint"].system_libs = ["m"]
         if self.options.with_libpng:
             self.cpp_info.components["libzint"].requires.extend(["libpng::libpng", "zlib::zlib"])
 
@@ -111,17 +112,11 @@ class ZintConan(ConanFile):
                 "libzint",
                 "qt::qtGui",
             ])
-            if self.settings.os == "Windows" and self.options.shared:
-                self.cpp_info.components["libqzint"].defines = ["QZINT_DLL"]
+            # qzint is a static library. Previous recipe revisions patched this but that required maintaining
+            # multiple patches in order to support Windows + Shared. We will keep it simple in
+            # this version and mimic upstream behavior
+            self.cpp_info.components["libqzint"].type = "static-library"
 
         # Trick to only define Zint::QZint and Zint::Zint in CMakeDeps generator
         self.cpp_info.set_property("cmake_target_name", "Zint::QZint" if self.options.with_qt else "Zint::Zint")
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Zint"
-        self.cpp_info.names["cmake_find_package_multi"] = "Zint"
-        self.cpp_info.components["libzint"].names["cmake_find_package"] = "Zint"
-        self.cpp_info.components["libzint"].names["cmake_find_package_multi"] = "Zint"
-        if self.options.with_qt:
-            self.cpp_info.components["libqzint"].names["cmake_find_package"] = "QZint"
-            self.cpp_info.components["libqzint"].names["cmake_find_package_multi"] = "QZint"
