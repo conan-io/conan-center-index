@@ -535,8 +535,6 @@ class LibcurlConan(ConanFile):
         tc.variables["CURL_DISABLE_RTSP"] = not self.options.with_rtsp
         tc.variables["CURL_DISABLE_CRYPTO_AUTH"] = not self.options.with_crypto_auth
         tc.variables["CURL_DISABLE_VERBOSE_STRINGS"] = not self.options.with_verbose_strings
-        if self.options.with_ssl == "libressl":
-            tc.variables["CURL_DISABLE_SRP"] = True
         if "with_form_api" in self.options:
             tc.variables["CURL_DISABLE_FORM_API"] = not self.options.with_form_api
         if "with_websockets" in self.options:
@@ -560,7 +558,6 @@ class LibcurlConan(ConanFile):
         # TODO: refactor this and consider `CMAKE_TRY_COMPILE_CONFIGURATION` for all platforms
         #       see https://github.com/conan-io/conan/issues/12180
         tc.variables["HAVE_SSL_SET0_WBIO"] = False
-        tc.variables["HAVE_OPENSSL_SRP"] = True
         tc.variables["HAVE_SSL_CTX_SET_QUIC_METHOD"] = True
 
         if is_msvc(self):
