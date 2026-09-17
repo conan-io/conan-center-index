@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import save, copy, get, rmdir
+from conan.tools.files import save, copy, get, rmdir, export_conandata_patches, apply_conandata_patches
 
 required_conan_version = ">=2.0.9"
 
@@ -16,7 +16,7 @@ class LlamaCppConan(ConanFile):
     description = "Inference of LLaMA model in pure C/C++"
     topics = ("llama", "llm", "ai")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/ggerganov/llama.cpp"
+    homepage = "https://llama.app/"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     package_type = "library"
@@ -26,7 +26,7 @@ class LlamaCppConan(ConanFile):
         "fPIC": [True, False],
         "with_examples": [True, False],
         "with_cuda": [True, False],
-        "with_curl": [True, False],
+        "with_openssl": [True, False],
         "with_vulkan": [True, False],
     }
     default_options = {
@@ -34,7 +34,7 @@ class LlamaCppConan(ConanFile):
         "fPIC": True,
         "with_examples": False,
         "with_cuda": False,
-        "with_curl": False,
+        "with_openssl": True,
         "with_vulkan": False,
     }
 
@@ -60,6 +60,9 @@ class LlamaCppConan(ConanFile):
                 target_link_libraries({cuda_target} INTERFACE CUDA::cudart_static CUDA::cublas_static CUDA::cublasLt_static CUDA::cuda_driver)
             endif()
         """)
+    
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def validate(self):
         check_min_cppstd(self, 17)
@@ -72,11 +75,12 @@ class LlamaCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_curl:
-            self.requires("libcurl/[>=7.78 <9]")
+        if self.options.with_openssl:
+            self.requires("openssl/[>=1.1 <4]")
 
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/[>=1.3 <1.5]")
+            self.requires("spirv-headers/1.4.350.0")
 
     def build_requirements(self):
         if self.options.get_safe("with_vulkan"):
@@ -84,32 +88,35 @@ class LlamaCppConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         deps = CMakeDeps(self)
         deps.generate()
 
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
         tc.variables["LLAMA_STANDALONE"] = False
         tc.variables["LLAMA_BUILD_TESTS"] = False
+        tc.cache_variables["LLAMA_BUILD_TOOLS"] = False
+        tc.cache_variables["LLAMA_BUILD_SERVER"] = False
+        tc.cache_variables["LLAMA_BUILD_APP"] = False
         tc.variables["LLAMA_BUILD_EXAMPLES"] = self.options.get_safe("with_examples")
-        tc.variables["LLAMA_CURL"] = self.options.get_safe("with_curl")
+        tc.cache_variables["LLAMA_OPENSSL"] = self.options.get_safe("with_openssl")
         if cross_building(self):
             tc.variables["LLAMA_NATIVE"] = False
             tc.variables["GGML_NATIVE_DEFAULT"] = False
 
         tc.variables["GGML_BUILD_TESTS"] = False
-        # Follow with_examples when newer versions can compile examples,
-        # right now it tries to add_subdirectory to a non-existent folder
         tc.variables["GGML_BUILD_EXAMPLES"] = False
         tc.variables["GGML_CUDA"] = self.options.get_safe("with_cuda")
+        tc.cache_variables["LLAMA_BUILD_UI"] = False
+        tc.cache_variables["LLAMA_USE_PREBUILT_UI"] = False
 
         if self.options.get_safe("with_vulkan"):
             tc.variables["GGML_VULKAN"] = True
             shaderc_bin_path = os.path.join(self.dependencies.build["shaderc"].cpp_info.bindir, "glslc").replace("\\", "/")
             tc.variables["Vulkan_GLSLC_EXECUTABLE"] = shaderc_bin_path
-
+        tc.cache_variables["LLAMA_BUILD_IS_DEV"] = False
         tc.generate()
 
     def build(self):
@@ -119,6 +126,7 @@ class LlamaCppConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*", src=os.path.join(self.source_folder, "licenses"), dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
@@ -145,23 +153,35 @@ class LlamaCppConan(ConanFile):
         return results
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "llama")
+        self.cpp_info.set_property("cmake_file_name", "llama")
+
         self.cpp_info.components["ggml"].libs = ["ggml"]
         self.cpp_info.components["ggml"].resdirs = ["res"]
         self.cpp_info.components["ggml"].set_property("cmake_target_name", "ggml::all")
+        self.cpp_info.components["ggml"].set_property("cmake_file_name", "ggml")
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["ggml"].system_libs.append("dl")
+        self.cpp_info.components["ggml"].requires = ["ggml-base"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["ggml-base"].system_libs.extend(["dl", "m", "pthread"])
+
+        self.cpp_info.components["ggml-base"].libs = ["ggml-base"]
+        self.cpp_info.components["ggml-base"].resdirs = ["res"]
+        self.cpp_info.components["ggml-base"].set_property("cmake_target_name", "ggml-base")
 
         self.cpp_info.components["llama"].libs = ["llama"]
         self.cpp_info.components["llama"].resdirs = ["res"]
-        self.cpp_info.components["llama"].requires.append("ggml")
+        self.cpp_info.components["llama"].requires = ["ggml", "ggml-base"]
+
+        self.cpp_info.components["llama-common-base"].libs = ["llama-common-base"]
 
         self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
-        self.cpp_info.components["common"].libs = ["common"]
-        self.cpp_info.components["common"].requires = ["llama"]
+        self.cpp_info.components["common"].libs = ["llama-common"]
+        self.cpp_info.components["common"].requires = ["llama", "llama-common-base", "openssl::openssl"]
 
-        if self.options.with_curl:
-            self.cpp_info.components["common"].requires.append("libcurl::libcurl")
-            self.cpp_info.components["common"].defines.append("LLAMA_USE_CURL")
+        if self.settings.os not in ("iOS", "tvOS", "watchOS", "Android", "Emscripten"):
+            self.cpp_info.components["common"].defines.append("LLAMA_SUBPROCESS")
 
         if is_apple_os(self):
             self.cpp_info.components["common"].frameworks.extend(["Foundation", "Accelerate", "Metal"])
@@ -172,15 +192,6 @@ class LlamaCppConan(ConanFile):
             self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
             module_path = os.path.join("lib", "cmake", "llama-cpp-cuda-static.cmake")
             self.cpp_info.set_property("cmake_build_modules", [module_path])
-
-        self.cpp_info.components["ggml-base"].libs = ["ggml-base"]
-        self.cpp_info.components["ggml-base"].resdirs = ["res"]
-        self.cpp_info.components["ggml-base"].set_property("cmake_target_name", "ggml-base")
-
-        self.cpp_info.components["ggml"].requires = ["ggml-base"]
-        if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.components["ggml-base"].system_libs.extend(["dl", "m", "pthread"])
-
 
         if self.options.shared:
             self.cpp_info.components["llama"].defines.append("LLAMA_SHARED")
@@ -197,8 +208,11 @@ class LlamaCppConan(ConanFile):
             self.cpp_info.components["ggml"].defines.append(f"GGML_USE_{backend.upper()}")
             self.cpp_info.components["ggml"].requires.append(f"ggml-{backend}")
 
-            if backend == "vulkan":
-                self.cpp_info.components["ggml-vulkan"].requires.append("vulkan-loader::vulkan-loader")
+            if backend == "cuda":
+                self.cpp_info.components["ggml-cuda"].set_property("cmake_extra_interface_libs",
+                            ["CUDA::cudart", "CUDA::cublas", "CUDA::cublasLt", "CUDA::cuda_driver"])
+            elif backend == "vulkan":
+                self.cpp_info.components["ggml-vulkan"].requires = ["vulkan-loader::vulkan-loader", "spirv-headers::spirv-headers"]
 
         if is_apple_os(self):
             if "blas" in backends:
