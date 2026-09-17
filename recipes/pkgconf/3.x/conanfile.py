@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.files import copy, get, rename, rm, rmdir
+from conan.tools.files import copy, get, rename, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 
@@ -20,6 +20,9 @@ class PkgConfConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     languages = "C"
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -31,6 +34,7 @@ class PkgConfConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = MesonToolchain(self)
