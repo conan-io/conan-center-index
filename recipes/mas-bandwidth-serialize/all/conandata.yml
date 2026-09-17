@@ -1,4 +1,4 @@
 sources:
-  "1.15.0":
-    url: "https://github.com/mas-bandwidth/serialize/archive/refs/tags/v1.15.0.tar.gz"
-    sha256: "81b992fe80fe66d9d6e06a3e0840d6b8b1d28a6b7be79b37b41cc74748b88082"
+  "1.17.0":
+    url: "https://github.com/mas-bandwidth/serialize/archive/refs/tags/v1.17.0.tar.gz"
+    sha256: "8bde39558934f51cdc3d1cedbfbb4061cfda2b78103eb75a12e09428249436b9"
