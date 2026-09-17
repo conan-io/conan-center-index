@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <alsa/global.h>
+#include <alsa/asoundlib.h>
 
 int main()
 {
