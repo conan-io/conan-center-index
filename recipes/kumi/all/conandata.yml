@@ -1,0 +1,11 @@
+sources:
+  "5.0":
+    url: "https://github.com/jfalcou/kumi/archive/v5.0.tar.gz"
+    sha256: "175569a39837988b6349f2bc7b7bab757c09d29e9503e20e188c9afa1c88e474"
+  "4.0":
+    url: "https://github.com/jfalcou/kumi/archive/v4.0.tar.gz"
+    sha256: "f788ee60b814a07d2b2148dd86b5153261b582ac5a248905cbf3e19423a0f7cd"
+  "cpm":
+    url: "https://github.com/cpm-cmake/CPM.cmake/releases/download/v0.40.8/CPM.cmake"
+    sha256: "78ba32abdf798bc616bab7c73aac32a17bbd7b06ad9e26a6add69de8f3ae4791"
+    filename: "CPM_0.40.8.cmake"
