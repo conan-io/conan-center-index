@@ -1,8 +1,8 @@
 #include <boost/python/numpy.hpp>
 #include <iostream>
 
-namespace p = boost::python;
-namespace np = boost::python::numpy;
+namespace p = BOOST_NAMESPACE::python;
+namespace np = BOOST_NAMESPACE::python::numpy;
 
 int main(int argc, char **argv)
 {
