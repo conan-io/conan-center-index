@@ -1,4 +1,16 @@
 sources:
-  "2.0.22":
-    url: "https://github.com/eclipse-mosquitto/mosquitto/archive/refs/tags/v2.0.22.tar.gz"
-    sha256: "a2850bd168cd9f1baa954c30994167f9f8c54ee4966ef34738620a48f63657d5"
+  "2.1.2":
+    url: "https://github.com/eclipse-mosquitto/mosquitto/archive/refs/tags/v2.1.2.tar.gz"
+    sha256: "20e998aae86d1629e787a924c044bb912d21ac8f5d1c1b707f2af06eb4c6016d"
+patches:
+  "2.1.2":
+    - patch_file: "patches/2.1.2-0001-fix-mosquittopp-static.patch"
+      patch_description: "mosquittopp_static is configured before lib/CMakeLists.txt defines C_SRC and LIBRARIES, so it got no sources and no cJSON include dir"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/eclipse-mosquitto/mosquitto/issues/3733"
+    - patch_file: "patches/2.1.2-0002-libcommon-object-lib-for-static.patch"
+      patch_description: "Build libmosquitto_common as an object library on Windows too when only static libraries are requested, otherwise the static package depends on a mosquitto_common DLL"
+      patch_type: "conan"
+    - patch_file: "patches/2.1.2-0003-libcommon-static-export-macro.patch"
+      patch_description: "libcommon.h always declares its API __declspec(dllimport) on Windows, so a static build gets unresolved __imp_ symbols; honour LIBMOSQUITTO_STATIC like libmosquitto.h does"
+      patch_type: "conan"
