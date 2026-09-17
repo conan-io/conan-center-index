@@ -1,12 +1,12 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -17,11 +17,11 @@
+@@ -17,11 +17,10 @@
  
++CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
  PROJECT(APR-Util C)
  
 -CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-+CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
- 
+-
  FIND_PACKAGE(OpenSSL)
  
 -FIND_PACKAGE(EXPAT)
@@ -14,7 +14,7 @@
  
  OPTION(APU_HAVE_CRYPTO      "Crypto support"                            OFF)
  OPTION(APU_HAVE_ODBC        "Build ODBC DBD driver"                     ON)
-@@ -29,17 +29,14 @@
+@@ -29,17 +28,14 @@
  OPTION(INSTALL_PDB          "Install .pdb files (if generated)"         ON)
  OPTION(APR_BUILD_TESTAPR    "Build the test suite"                      OFF)
  OPTION(TEST_STATIC_LIBS     "Test programs use APR static libraries instead of shared libraries?" OFF)
@@ -39,7 +39,7 @@
  
  IF(APU_HAVE_CRYPTO)
  IF(NOT OPENSSL_FOUND)
-@@ -228,23 +225,26 @@
+@@ -228,23 +224,26 @@
  
  # Note: The WINNT definition on some targets is used only by libaprutil.rc.
  
@@ -67,7 +67,7 @@
    SET(install_targets ${install_targets} apr_crypto_openssl-1)
    SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/apr_crypto_openssl-1.pdb)
    SET_TARGET_PROPERTIES(apr_crypto_openssl-1 PROPERTIES INCLUDE_DIRECTORIES "${APR_INCLUDE_DIRECTORIES};${OPENSSL_INCLUDE_DIR}")
-@@ -254,7 +254,7 @@
+@@ -254,7 +253,7 @@
  ENDIF()
  
  IF(APU_HAVE_ODBC)
