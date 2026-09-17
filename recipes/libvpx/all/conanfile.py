@@ -188,6 +188,8 @@ class LibVPXConan(ConanFile):
             env.define("CC", "")
         else:
             env = tc.environment()
+            if is_apple_os(self) and self.settings.arch in ['x86', 'x86_64']:
+                env.unset("ASFLAGS")
         tc.generate(env)
 
     def _patch_sources(self):
