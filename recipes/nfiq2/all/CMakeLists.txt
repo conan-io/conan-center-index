@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.15)
+project(nfiq2_conan_root LANGUAGES CXX)
+set(SUPERBUILD_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
+set(FRFXLL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/fingerjetfxose/FingerJetFXOSE/libFRFXLL")
+add_subdirectory(fingerjetfxose/FingerJetFXOSE/libFRFXLL/src)
+add_subdirectory(NFIQ2/NFIQ2Algorithm)
