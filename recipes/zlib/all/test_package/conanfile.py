@@ -18,7 +18,7 @@ class TestPackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["ZLIB_WITH_ZLIBWAPI"] = bool(
-            self.dependencies["zlib"].options.get_safe("zlibwapi"))
+            self.dependencies["zlib"].options.get_safe("enable_zlibwapi"))
         tc.generate()
 
     def build(self):
@@ -30,6 +30,6 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
-            if self.dependencies["zlib"].options.get_safe("zlibwapi"):
+            if self.dependencies["zlib"].options.get_safe("enable_zlibwapi"):
                 wapi_path = os.path.join(self.cpp.build.bindirs[0], "test_package_wapi")
                 self.run(wapi_path, env="conanrun")
