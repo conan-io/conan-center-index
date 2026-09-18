@@ -127,7 +127,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_libheif:
             self.requires("libheif/[>=1.16.2 <2]")
         if self.options.with_raw:
-            self.requires("libraw/0.21.2")
+            self.requires("libraw/[>=0.20]")
         if self.options.with_openjpeg:
             self.requires("openjpeg/[>=2.5.2 <3]")
         if self.options.get_safe("with_openjph", False):
