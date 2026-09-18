@@ -1,0 +1,9 @@
+sources:
+  "0.1.1":
+    url: "https://github.com/jbltx/TextMateLib/archive/refs/tags/v0.1.1.tar.gz"
+    sha256: "53aff65c88420ccfc8daa4a51031d94ece42d8f35dd60f7ae7343a82bfbe85f7"
+patches:
+  "0.1.1":
+    - patch_file: "patches/0001-use-conan-deps.patch"
+      patch_description: "Replace bundled dependencies with find_package and remove test targets"
+      patch_type: "conan"
