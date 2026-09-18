@@ -382,7 +382,15 @@ class BoostConan(ConanFile):
 
     @property
     def _is_clang_cl(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "clang"
+        if self.settings.os != "Windows":
+            return False
+
+        if self.settings.compiler != "clang":
+            return False
+
+        cxx = str(self._cxx).lower()
+
+        return "clang-cl" in cxx
 
     @property
     def _python_executable(self):
@@ -1248,7 +1256,6 @@ class BoostConan(ConanFile):
             return "o32"
         if str(self.settings.arch).startswith("riscv"):
             return "sysv"
-
         return None
 
     @property
@@ -1507,8 +1514,11 @@ class BoostConan(ConanFile):
         ar = VirtualBuildEnv(self).vars().get("AR")
         if ar:
             return ar
+        if self.settings.compiler == "clang" and not self._is_clang_cl:
+            return shutil.which("llvm-ar") or shutil.which("ar")
         if is_apple_os(self) and self.settings.compiler == "apple-clang":
             return XCRun(self).ar
+
         return None
 
     @property
@@ -1516,6 +1526,8 @@ class BoostConan(ConanFile):
         ranlib = VirtualBuildEnv(self).vars().get("RANLIB")
         if ranlib:
             return ranlib
+        if self.settings.compiler == "clang" and not self._is_clang_cl:
+            return shutil.which("llvm-ranlib") or shutil.which("ranlib")
         if is_apple_os(self) and self.settings.compiler == "apple-clang":
             return XCRun(self).ranlib
         return None
@@ -1649,7 +1661,9 @@ class BoostConan(ConanFile):
         if is_msvc(self):
             return "clang-win" if self.settings.compiler.get_safe("toolset") == "ClangCL" else "msvc"
         if self.settings.os == "Windows" and self.settings.compiler == "clang":
-            return "clang-win"
+            if self._is_clang_cl:
+                return "clang-win"
+            return "clang"
         if self.settings.os == "Emscripten" and self.settings.compiler in ("clang", "emcc"):
             return "emscripten"
         if self.settings.compiler == "gcc" and is_apple_os(self):
@@ -1943,13 +1957,27 @@ class BoostConan(ConanFile):
             def add_libprefix(n):
                 """ On MSVC, static libraries are built with a 'lib' prefix. Some libraries do not support shared, so are always built as a static library. """
                 libprefix = ""
+
                 if is_msvc(self) and (not self._shared or n in self._dependencies["static_only"]):
                     libprefix = "lib"
-                elif self._toolset == "clang-win":
+
+                # only clang-cl uses MSVC naming
+                elif self._toolset == "clang-win" and self._is_clang_cl:
                     libprefix = "lib"
+
                 return libprefix + n
 
-            all_detected_libraries = set(l[:-4] if l.endswith(".dll") else l for l in collect_libs(self))
+            raw_detected_libraries = set(l[:-4] if l.endswith(".dll") else l for l in collect_libs(self))
+            all_detected_libraries = set(raw_detected_libraries)
+            if self.settings.os == "Windows" and self.settings.compiler == "clang" and not self._is_clang_cl:
+                # MSYS2 clang can produce .lib files prefixed with "lib" (e.g. libboost_atomic.lib).
+                # collect_libs() keeps that prefix for .lib files, while expected Boost component names
+                # are prefix-less. Normalize names only for validation checks.
+                namespace_prefix = f"lib{self.options.namespace}_"
+                all_detected_libraries = {
+                    library_name[3:] if library_name.startswith(namespace_prefix) else library_name
+                    for library_name in raw_detected_libraries
+                }
             all_expected_libraries = set()
             incomplete_components = []
 
