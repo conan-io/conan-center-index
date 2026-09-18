@@ -1,43 +1,69 @@
-Add a zlibwapi.dll target to the contrib/zlib1-dll sub-project:
-- Up to 1.3.1, the pre-generated Visual Studio solution (contrib/vstudio/zlibvc.sln)
-  produced zlibwapi.dll: zlib plus contrib/minizip, built with ZLIB_WINAPI so that
-  the exported functions use the WINAPI (stdcall) calling convention. That solution
-  was removed in 1.3.2 and the CMake build has no replacement for it
-- Some consumers link against, or LoadLibrary(), that specific filename and ABI
-- 1.3.2 already ships contrib/zlib1-dll and the ZLIB_BUILD_ZLIB1_DLL option, but
-  the sub-project only builds zlib1.dll
+Add a zlibwapi.dll target to the contrib/zlib1-dll sub-project, and fix that
+sub-project so it can be built from within zlib at all.
+
+Why zlibwapi.dll:
+- Up to 1.3.1 the pre-generated Visual Studio solution (contrib/vstudio/zlibvc.sln)
+  produced zlibwapi.dll: zlib plus contrib/minizip, compiled with ZLIB_WINAPI so
+  that the exported functions use the WINAPI (stdcall) calling convention. That
+  solution was removed in 1.3.2 and the CMake build has no replacement for it
+- Some consumers link against, or LoadLibrary(), that exact filename and ABI
+- 1.3.2 already ships contrib/zlib1-dll and its ZLIB_BUILD_ZLIB1_DLL option, but
+  that sub-project only builds zlib1.dll
 
 Upstream added the same DLL to the same sub-project after the 1.3.2 release
-(madler/zlib@337803ad, plus @160de9bf for the version resource), so this patch is
-expected to be dropped at the next zlib release. It is deliberately not a literal
-backport of those two commits: they sit on top of eight further changes to the
-sub-project - target-name prefixes, a CMake package export, cmake_path() and a
-3.20 minimum, a debug postfix, standalone-vs-chainbuild path handling - none of
-which have anything to do with zlibwapi. Only what creates the DLL is carried here.
+(madler/zlib@337803ad, plus @160de9bf for its version resource), so this patch is
+expected to be dropped at the next zlib release.
 
-Three changes to contrib/zlib1-dll/CMakeLists.txt:
-- win32/zlib1.rc moves out of the shared source list onto the zlib1 target. A
+Backported verbatim, because contrib/zlib1-dll cannot be built from within zlib
+without them. These are prerequisites, not zlibwapi changes:
+- madler/zlib@5c0dfd26 "CMake: Fix zlib1-dll when building from within zlib".
+  ZLIB_CONF_WRITTEN is a cache variable that zlib's top-level CMakeLists.txt sets
+  first, so this sub-project skips writing its own zconf.h.cmakein and then
+  configure_file()s it anyway:
+      CMake Error: File .../contrib/zlib1-dll/zconf.h.cmakein does not exist
+      CMake Error at contrib/zlib1-dll/CMakeLists.txt:104 (configure_file):
+        configure_file Problem configuring file
+  ZCONF_IN_ZLIB1 records which directory owns the template, and ZCONF_H points at
+  whichever zconf.h is the real one. The same commit guards include(CPack) with
+  CPACK_INCLUDED, which zlib's top-level already sets for precisely that purpose;
+  without it a chained configure also warns "CPack.cmake has already been
+  included!!"
+- madler/zlib@74c677ca "CMake: Add proper reconfiguration for standalone
+  zlib1.dll", which makes ZCONF_IN_ZLIB1 a CACHE INTERNAL variable so that its
+  value survives a re-configure, when the ZLIB_CONF_WRITTEN block no longer runs
+
+Adapted rather than copied, so that only what creates the DLL is carried:
+- the zlibwapi target, a copy of the zlib1 target with ZLIB_WINAPI added to its
+  PUBLIC compile definitions. It has to be PUBLIC: consumers must be compiled
+  with it too, or the prototypes in zlib.h and in the minizip headers use a
+  different calling convention than the library (see win32/DLL_FAQ.txt, section
+  7). The $<$<BOOL:NOT:${VAR}>:...> generator expressions are copied from zlib1
+  as they are. They are always true - that is not valid negation syntax - but
+  reproducing zlib1's flags exactly matters more here than fixing that
+- win32/zlib1.rc moves off the shared source list onto the zlib1 target only. A
   version resource hardcodes InternalName/OriginalFilename, so each DLL needs its
   own, otherwise zlibwapi.dll reports itself as zlib1.dll. Upstream hit the same
   problem in 160de9bf
-- the zlibwapi target, a copy of the zlib1 target with ZLIB_WINAPI added to its
-  PUBLIC compile definitions. It has to be PUBLIC: consumers must be compiled with
-  it too, or the prototypes in zlib.h and in the minizip headers use a different
-  calling convention than the library (see win32/DLL_FAQ.txt, section 7)
+- contrib/zlib1-dll/zlibwapi.rc is win32/zlib1.rc with the include path adjusted
+  for its new location and both filename fields changed to zlibwapi.dll
 - the install() calls become conditional on a new ZLIB1_DLL_INSTALL option, which
   is the name upstream later chose for it. Building this sub-project from within
-  zlib otherwise installs a second zlib1.dll over the one the main build produced,
-  and copies the minizip headers into the include root
+  zlib otherwise installs a second zlib1.dll over the one the main build
+  produced, and copies the minizip headers into the include root
 
-contrib/zlib1-dll/zlibwapi.rc is win32/zlib1.rc with the include path adjusted for
-its new location and both filename fields changed to zlibwapi.dll.
+Deliberately not backported, none of it being needed to produce the DLL:
+target-name prefixes (90d5bd8a), the CMake package export half of 337803ad,
+tests (2d2b1870), a debug postfix (8849c7c9), option renames (021a1303), and
+@d287163d, which replaces this sub-project's include_directories() with
+cmake_path()-computed target_include_directories() and raises the CMake minimum
+to 3.20.
 
-Upstream does not compile contrib/minizip/iowin32.c into the DLL, so the
-fill_win32_filefunc* entry points of the historic www.winimage.com/zLibDll build
-are absent here as well. Everything else that one exported is present.
+Upstream compiles contrib/minizip into both DLLs but not contrib/minizip/iowin32.c,
+so the fill_win32_filefunc* entry points of the historic www.winimage.com/zLibDll
+build are absent here as well. Everything else that one exported is present.
 
 diff --git a/contrib/zlib1-dll/CMakeLists.txt b/contrib/zlib1-dll/CMakeLists.txt
-index 8662512..59af502 100644
+index 8662512..fb2f908 100644
 --- a/contrib/zlib1-dll/CMakeLists.txt
 +++ b/contrib/zlib1-dll/CMakeLists.txt
 @@ -16,6 +16,7 @@ if(NOT WIN32)
@@ -48,7 +74,53 @@ index 8662512..59af502 100644
  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
  
  include(CheckCSourceCompiles)
-@@ -142,7 +143,6 @@ set(ZLIB1-DLL_SRCS
+@@ -23,9 +24,12 @@ include(CheckFunctionExists)
+ include(CheckIncludeFile)
+ include(CMakePackageConfigHelpers)
+ include(CheckTypeSize)
+-include(CPack)
+ include(GNUInstallDirs)
+ 
++if(NOT CPACK_INCLUDED)
++    include(CPack)
++endif(NOT CPACK_INCLUDED)
++
+ if(NOT ZLIB_CONF_WRITTEN)
+     set(CONF_OUT_FILE ${zlib1-dll_BINARY_DIR}/zconf.h.cmakein)
+     file(READ ../../zconf.h ZCONF_CONTENT LIMIT 245)
+@@ -50,6 +54,8 @@ if(NOT ZLIB_CONF_WRITTEN)
+         TRUE
+         CACHE BOOL "zconf.h.cmakein was created")
+     mark_as_advanced(ZLIB_CONF_WRITTEN)
++
++    set(ZCONF_IN_ZLIB1 True CACHE INTERNAL "find zconf.h in zlib1-dll")
+ endif(NOT ZLIB_CONF_WRITTEN)
+ 
+ if(ENABLE_BZIP2)
+@@ -101,13 +107,20 @@ check_c_source_compiles(
+     HAVE___ATTR__VIS_HIDDEN)
+ 
+ unset(CMAKE_COMPILE_FLAGS)
+-configure_file(${zlib1-dll_BINARY_DIR}/zconf.h.cmakein ${zlib1-dll_BINARY_DIR}/zconf.h)
++
++if(ZCONF_IN_ZLIB1)
++    configure_file(${zlib1-dll_BINARY_DIR}/zconf.h.cmakein
++                   ${zlib1-dll_BINARY_DIR}/zconf.h)
++    set(ZCONF_H "${zlib1-dll_BINARY_DIR}/zconf.h")
++else(ZCONF_IN_ZLIB1)
++    set(ZCONF_H "${zlib1-dll_BINARY_DIR}/../../zconf.h")
++endif(ZCONF_IN_ZLIB1)
+ 
+ # ============================================================================
+ # zlib1-dll
+ # ============================================================================
+ set(ZLIB1-DLL_PUBLIC_HDRS
+-    ${zlib1-dll_BINARY_DIR}/zconf.h
++    ${ZCONF_H}
+     ../../zlib.h
+     ../minizip/crypt.h
+     ../minizip/ints.h
+@@ -142,7 +155,6 @@ set(ZLIB1-DLL_SRCS
      ../../inffast.c
      ../../trees.c
      ../../uncompr.c
@@ -56,7 +128,7 @@ index 8662512..59af502 100644
      ../../zutil.c
      ../minizip/ioapi.c
      ../minizip/mztools.c
-@@ -151,7 +151,8 @@ set(ZLIB1-DLL_SRCS
+@@ -151,7 +163,8 @@ set(ZLIB1-DLL_SRCS
  
  add_library(zlib1 SHARED ${ZLIB1-DLL_SRCS}
                           ${ZLIB1-DLL_PUBLIC_HDRS}
@@ -66,7 +138,7 @@ index 8662512..59af502 100644
  
  #taget_include_directories doesn't like relative paths
  include_directories(../../
-@@ -181,16 +182,53 @@ endif(NOT CYGWIN)
+@@ -181,16 +194,53 @@ endif(NOT CYGWIN)
  set_target_properties(zlib1 PROPERTIES
      DEFINE_SYMBOL ZLIB_DLL)
  
@@ -100,16 +172,16 @@ index 8662512..59af502 100644
 +
 +target_link_libraries(zlibwapi
 +    PUBLIC $<$<BOOL:${BZIP2_FOUND}>:BZip2::BZip2>)
- 
--install(
--    FILES ${ZLIB1-DLL_PUBLIC_HDRS}
--    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
++
 +if(NOT CYGWIN)
 +    set_target_properties(zlibwapi PROPERTIES
 +        SOVERSION ${zlib1-dll_VERSION_MAJOR}
 +        VERSION ${zlib1-dll_VERSION})
 +endif(NOT CYGWIN)
-+
+ 
+-install(
+-    FILES ${ZLIB1-DLL_PUBLIC_HDRS}
+-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 +set_target_properties(zlibwapi PROPERTIES
 +    DEFINE_SYMBOL ZLIB_DLL)
  
