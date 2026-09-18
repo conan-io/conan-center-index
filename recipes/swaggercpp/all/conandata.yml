@@ -1,0 +1,4 @@
+sources:
+  "0.2.1":
+    url: "https://github.com/stescobedo92/swagger-cpp/archive/refs/tags/v0.2.1.tar.gz"
+    sha256: "2b5f40fbc686673a69fe4b39570fc18a2f37cbee2dbd7a9c5980d67f38ccdaa1"
