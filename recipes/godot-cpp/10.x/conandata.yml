@@ -1,0 +1,4 @@
+sources:
+  "10.0.0":
+    url: "https://github.com/godotengine/godot-cpp/archive/refs/tags/10.0.0-stable.tar.gz"
+    sha256: "ebbf64f0f8f8b8b66bc4bc4d3797db97f95b19cf0dfb5b3f8cf56683d9df7db4"
