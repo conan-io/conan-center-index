@@ -101,6 +101,10 @@ class FltkConan(ConanFile):
         tc.cache_variables["FLTK_BUILD_FLUID"] = False
         if self.settings.compiler.get_safe("runtime") is not None:
             tc.cache_variables["FLTK_MSVC_RUNTIME_DLL"] = "MT" not in msvc_runtime_flag(self)
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            tc.cache_variables["FLTK_BACKEND_X11"] = True
+            # INFO: Disable Wayland backend to avoid using from system
+            tc.cache_variables["FLTK_BACKEND_WAYLAND"] = False
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
