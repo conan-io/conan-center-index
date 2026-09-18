@@ -4,7 +4,7 @@
  #ifndef CORE_FXCODEC_FX_CODEC_H_
  #define CORE_FXCODEC_FX_CODEC_H_
 
-+#include <cstdint>
++#include <stdint.h>
  #include <map>
 
  #include "third_party/base/optional.h"
@@ -15,7 +15,7 @@
  #define DEFINE_PS_TABLES
  #include "third_party/freetype/include/pstables.h"
 +
-+#include <cstdint>
++#include <stdint.h>
 
  namespace {
 
@@ -27,7 +27,7 @@
  #include <list>
  #include <memory>
  #include <utility>
-+#include <cstdint>
++#include <stdint.h>
 
  class CJBig2_SymbolDict;
 
@@ -39,7 +39,7 @@
  #include <iterator>
  #include <type_traits>
  #include <utility>
-+#include <cstdint>
++#include <stdint.h>
 
  #include "core/fxcrt/unowned_ptr.h"
  #include "third_party/base/check.h"
@@ -51,7 +51,7 @@
  #define FPDFSDK_FORMFILLER_CFFL_PRIVATEDATA_H_
 
  #include <memory>
-+#include <cstdint>
++#include <stdint.h>
 
  #include "core/fxcrt/observed_ptr.h"
 
@@ -63,6 +63,6 @@
  #include <sstream>
  #include <utility>
  #include <vector>
-+#include <cstdint>
++#include <stdint.h>
 
  #include "constants/annotation_common.h"
