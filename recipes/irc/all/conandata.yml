@@ -1,0 +1,4 @@
+sources:
+  "1.0.0-pre":
+    url: "https://github.com/ichesnokov-irc/irc/archive/refs/tags/1.0.0-pre.tar.gz"
+    sha256: "bd90104ba83ab0871c16e6075e76130ba9dcb0ff005ab1c3ea174ebfd945e491"
