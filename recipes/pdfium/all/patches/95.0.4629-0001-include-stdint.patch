@@ -4,7 +4,65 @@
  #ifndef CORE_FXCODEC_FX_CODEC_H_
  #define CORE_FXCODEC_FX_CODEC_H_
 
-+#include <stdint.h>
++#include <cstdint>
  #include <map>
 
  #include "third_party/base/optional.h"
+
+--- a/core/fxge/freetype/fx_freetype.cpp
++++ b/core/fxge/freetype/fx_freetype.cpp
+@@ -9,6 +9,8 @@
+ #define DEFINE_PS_TABLES
+ #include "third_party/freetype/include/pstables.h"
++
++#include <cstdint>
+
+ namespace {
+
+ constexpr uint32_t kVariantBit = 0x80000000;
+
+--- a/core/fxcodec/jbig2/JBig2_DocumentContext.h
++++ b/core/fxcodec/jbig2/JBig2_DocumentContext.h
+@@ -10,6 +10,7 @@
+ #include <list>
+ #include <memory>
+ #include <utility>
++#include <cstdint>
+
+ class CJBig2_SymbolDict;
+
+ using CJBig2_CacheKey = std::pair<uint32_t, uint32_t>;
+
+--- a/third_party/base/span.h
++++ b/third_party/base/span.h
+@@ -12,6 +12,7 @@
+ #include <iterator>
+ #include <type_traits>
+ #include <utility>
++#include <cstdint>
+
+ #include "core/fxcrt/unowned_ptr.h"
+ #include "third_party/base/check.h"
+
+--- a/fpdfsdk/formfiller/cffl_privatedata.h
++++ b/fpdfsdk/formfiller/cffl_privatedata.h
+@@ -7,6 +7,7 @@
+ #ifndef FPDFSDK_FORMFILLER_CFFL_PRIVATEDATA_H_
+ #define FPDFSDK_FORMFILLER_CFFL_PRIVATEDATA_H_
+
+ #include <memory>
++#include <cstdint>
+
+ #include "core/fxcrt/observed_ptr.h"
+
+--- a/fpdfsdk/fpdf_flatten.cpp
++++ b/fpdfsdk/fpdf_flatten.cpp
+@@ -11,6 +11,7 @@
+ #include <algorithm>
+ #include <memory>
+ #include <sstream>
+ #include <utility>
+ #include <vector>
++#include <cstdint>
+
+ #include "constants/annotation_common.h"
