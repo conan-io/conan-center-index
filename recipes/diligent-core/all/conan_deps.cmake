@@ -16,7 +16,6 @@ if (NOT DILIGENT_NO_GLSLANG)
     target_include_directories(glslang INTERFACE
         ${glslang_INCLUDE_DIR}/glslang
     )
-    target_link_libraries(volk INTERFACE volk::volk)
 
     add_library(SPIRV ALIAS glslang::SPIRV)
 endif()
