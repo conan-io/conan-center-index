@@ -128,6 +128,12 @@ class DiligentCoreConan(ConanFile):
         tc.variables["DILIGENT_USE_VOLK"] = True
         if self.settings.os == "Windows":
             tc.preprocessor_definitions["VK_USE_PLATFORM_WIN32_KHR"] = True
+        #we need to mannualy add the volk source as it does not pick up windows platoform.
+        volk_package = Path(self.dependencies["volk"].package_folder)
+        volk_c = (volk_package / "include" / "volk.c").as_posix()
+        tc.variables["CONAN_VOLK_C_FILE"] = volk_c
+
+        print(f"VOLK source directory: {volk_c}")
         tc.variables[self._diligent_platform()] = True
         tc.generate()
 
@@ -156,7 +162,25 @@ class DiligentCoreConan(ConanFile):
             "if (NOT ${DILIGENT_NO_GLSLANG} AND (NOT TARGET glslang AND NOT TARGET glslang::glslang))"
         )
 
-        # 2. Disable USE_SPIRV_TOOLS in ShaderTools (prevents missing source/opt/pass.h)
+        vulkan_cmake = os.path.join(
+            self.source_folder, "Graphics", "GraphicsEngineVulkan", "CMakeLists.txt"
+        )
+
+        # Add volk.c directly to Diligent's source list so it compiles with Diligent's flags
+        replace_in_file(
+            self,
+            vulkan_cmake,
+            "add_library(Diligent-GraphicsEngineVk-static STATIC",
+            "add_library(Diligent-GraphicsEngineVk-static STATIC ${CONAN_VOLK_C_FILE}"
+        )
+
+        # Ensure Win32 platform macro is set for Vulkan engine sources
+        replace_in_file(
+            self,
+            vulkan_cmake,
+            "set(PRIVATE_COMPILE_DEFINITIONS NOMINMAX DILIGENT_USE_VOLK=1)",
+            "set(PRIVATE_COMPILE_DEFINITIONS NOMINMAX DILIGENT_USE_VOLK=1 VK_USE_PLATFORM_WIN32_KHR=1)"
+        )
 
 
     def build_requirements(self):
@@ -167,7 +191,7 @@ class DiligentCoreConan(ConanFile):
         if self.settings.os == "Linux":
             self.requires("wayland/1.24.0")
 
-        self.requires("spirv-headers/1.4.350.0")
+        self.requires("spirv-headers/1.4.350.0", )
         self.requires("spirv-cross/1.4.350.0")
         self.requires("spirv-tools/1.4.350.0")
         if self.options.with_glslang:
@@ -256,7 +280,6 @@ class DiligentCoreConan(ConanFile):
         archiver_path = os.path.join("include", "Graphics", "Archiver", "interface")
         if os.path.isdir(archiver_path):
             self.cpp_info.includedirs.append(archiver_path)
-        self.cpp_info.includedirs.append(os.path.join("src"))
         self.cpp_info.includedirs.append(os.path.join("include", "Primitives", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "Platforms", "Basic", "interface"))
         if self.settings.os == "Android":

@@ -15,7 +15,7 @@ if (NOT DILIGENT_NO_GLSLANG)
 
     target_include_directories(glslang INTERFACE
         ${glslang_INCLUDE_DIR}/glslang
-    )
+    )   
 
     add_library(SPIRV ALIAS glslang::SPIRV)
 endif()
