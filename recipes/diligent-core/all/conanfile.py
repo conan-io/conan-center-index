@@ -7,7 +7,7 @@ from conan.tools.files import rm, get, rmdir, rename, collect_libs, export_conan
 from conan.tools.microsoft import visual
 from conan.tools.apple import is_apple_os
 import os
-
+from pathlib import Path
 required_conan_version = ">=1.52.0"
 
 
@@ -62,7 +62,7 @@ class DiligentCoreConan(ConanFile):
     def export_sources(self):
         copy(self, "conan_deps.cmake", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"), keep_path=False)
         export_conandata_patches(self)
-        
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -80,11 +80,54 @@ class DiligentCoreConan(ConanFile):
         tc.variables["DILIGENT_BUILD_TESTS"] = False
         tc.variables["DILIGENT_NO_DXC"] = True
         tc.variables["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
-        tc.variables["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.dependencies["spirv-cross"].options.namespace
+        #tc.variables["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.dependencies["spirv-cross"].options.namespace
         tc.variables["DILIGENT_CLANG_COMPILE_OPTIONS"] = ""
         tc.variables["DILIGENT_MSVC_COMPILE_OPTIONS"] = ""
         tc.variables["ENABLE_RTTI"] = True
         tc.variables["ENABLE_EXCEPTIONS"] = True
+        tc.variables["DILIGENT_BUILD_CORE_THIRD_PARTY"] = False
+        spirv_tools_package = Path(self.dependencies["spirv-tools"].package_folder)
+
+        # ...\spirv-tools\<hash>\p
+        # -> ...\spirv-tools\<hash>\b\src
+        spirv_tools_src = (
+            spirv_tools_package.parent / "b" / "src"
+        ).as_posix()
+
+        spirv_tools_include = (
+            Path(spirv_tools_src) / "include"
+        ).as_posix()
+
+        spirv_tools_build = (
+            spirv_tools_package.parent / "b" / "build"
+        ).as_posix()
+
+        print(f"SPIRV-Tools source directory: {spirv_tools_src}")
+        print(f"SPIRV-Tools include directory: {spirv_tools_include}")
+        print(f"SPIRV-Tools build directory: {spirv_tools_build}")
+
+        tc.variables["CONAN_SPIRV_TOOLS_SOURCE_DIR"] = spirv_tools_src
+        tc.variables["CONAN_SPIRV_TOOLS_INCLUDE_DIR"] = spirv_tools_include
+        tc.variables["CONAN_SPIRV_TOOLS_BUILD_DIR"] = spirv_tools_build
+
+        spirv_headers_package = Path(
+            self.dependencies["spirv-headers"].package_folder
+        )
+
+        spirv_headers_include = (
+            spirv_headers_package / "include"
+        ).as_posix()
+        spirv_headers_unified_include = (
+                    spirv_headers_package / "include" / "spirv" / "unified1"
+                ).as_posix()
+        print(f"SPIRV-Headers include directory: {spirv_headers_include}")
+        print(f"SPIRV-Headers unified include directory: {spirv_headers_unified_include}")
+
+        tc.variables["CONAN_SPIRV_HEADERS_INCLUDE_DIR"] = spirv_headers_include
+        tc.variables["CONAN_SPIRV_HEADERS_UNIFIED_INCLUDE_DIR"] = spirv_headers_unified_include
+        tc.variables["DILIGENT_USE_VOLK"] = True
+        if self.settings.os == "Windows":
+            tc.preprocessor_definitions["VK_USE_PLATFORM_WIN32_KHR"] = True
         tc.variables[self._diligent_platform()] = True
         tc.generate()
 
@@ -97,7 +140,6 @@ class DiligentCoreConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
@@ -107,28 +149,37 @@ class DiligentCoreConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "project(DiligentCore)",
                         "project(DiligentCore)\n\ninclude(conan_deps.cmake)")
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "ThirdParty", "CMakeLists.txt"),
+            "if (NOT ${DILIGENT_NO_GLSLANG} AND (NOT TARGET glslang))",
+            "if (NOT ${DILIGENT_NO_GLSLANG} AND (NOT TARGET glslang AND NOT TARGET glslang::glslang))"
+        )
+
+        # 2. Disable USE_SPIRV_TOOLS in ShaderTools (prevents missing source/opt/pass.h)
+
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.24 <4]")
+        self.tool_requires("cmake/[>=3.24]")
 
     def requirements(self):
         self.requires("opengl/system")
         if self.settings.os == "Linux":
-            self.requires("wayland/1.22.0")
+            self.requires("wayland/1.24.0")
 
-        self.requires("spirv-cross/1.3.224.0")
-        self.requires("spirv-tools/1.3.224.0")
+        self.requires("spirv-headers/1.4.350.0")
+        self.requires("spirv-cross/1.4.350.0")
+        self.requires("spirv-tools/1.4.350.0")
         if self.options.with_glslang:
-            self.requires("glslang/1.3.224.0")
-        self.requires("vulkan-headers/1.3.224.0")
-        self.requires("vulkan-validationlayers/1.3.224.1")
-        self.requires("volk/1.3.224.0")
-        self.requires("xxhash/0.8.1")
-
+            self.requires("glslang/1.4.350.0")
+        self.requires("vulkan-headers/1.4.350.0")
+        self.requires("vulkan-validationlayers/1.4.350.0")
+        self.requires("volk/1.4.350.0")
+        self.requires("xxhash/0.8.3")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.4.1")
+                self.requires("xkbcommon/1.13.1")
 
     def _diligent_platform(self):
         if self.settings.os == "Windows":
@@ -205,7 +256,7 @@ class DiligentCoreConan(ConanFile):
         archiver_path = os.path.join("include", "Graphics", "Archiver", "interface")
         if os.path.isdir(archiver_path):
             self.cpp_info.includedirs.append(archiver_path)
-
+        self.cpp_info.includedirs.append(os.path.join("src"))
         self.cpp_info.includedirs.append(os.path.join("include", "Primitives", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "Platforms", "Basic", "interface"))
         if self.settings.os == "Android":
@@ -221,7 +272,7 @@ class DiligentCoreConan(ConanFile):
             self.cpp_info.includedirs.append(os.path.join("include", "Graphics", "GraphicsEngineD3D11", "interface"))
             self.cpp_info.includedirs.append(os.path.join("include", "Graphics", "GraphicsEngineD3D12", "interface"))
 
-        self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.dependencies["spirv-cross"].options.namespace))
+        #self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.dependencies["spirv-cross"].options.namespace))
         self.cpp_info.defines.append("{}=1".format(self._diligent_platform()))
 
         if self.settings.os in ["Macos", "Linux"]:
@@ -230,3 +281,4 @@ class DiligentCoreConan(ConanFile):
             self.cpp_info.frameworks = ["CoreFoundation", 'Cocoa', 'AppKit']
         if self.settings.os == 'Windows':
             self.cpp_info.system_libs = ["dxgi", "shlwapi"]
+
