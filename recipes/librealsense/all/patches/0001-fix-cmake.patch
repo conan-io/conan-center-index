@@ -1,6 +1,6 @@
 --- a/CMake/install_config.cmake
 +++ b/CMake/install_config.cmake
-@@ -48,4 +48,4 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/config/realsense2.pc"
+@@ -48,4 +48,4 @@
          DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
  )
  
@@ -28,7 +28,7 @@
  endif()
 --- a/CMake/windows_config.cmake
 +++ b/CMake/windows_config.cmake
-@@ -94,8 +94,9 @@ macro(os_target_config)
+@@ -95,8 +95,9 @@
          if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
              message("Preparing Windows 7 drivers" )
              make_directory(${CMAKE_CURRENT_BINARY_DIR}/drivers/)
@@ -42,7 +42,7 @@
              endforeach()
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -9,7 +9,7 @@ set(REPO_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+@@ -8,7 +8,7 @@
  include_directories(${REPO_ROOT})
  
  include(CMake/lrs_options.cmake)
@@ -51,33 +51,34 @@
  #Deprecation message, should be removed in future releases
  if(${FORCE_LIBUVC} OR ${FORCE_WINUSB_UVC} OR ${ANDROID_USB_HOST_UVC})
      MESSAGE(DEPRECATION "FORCE_LIBUVC, FORCE_WINUSB_UVC and ANDROID_USB_HOST_UVC are deprecated, use FORCE_RSUSB_BACKEND instead")
---- a/common/fw/CMakeLists.txt
-+++ b/common/fw/CMakeLists.txt
-@@ -39,16 +39,17 @@ set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER Resources)
+--- a/third-party/CMakeLists.txt
++++ b/third-party/CMakeLists.txt
+@@ -5,7 +5,7 @@
  
- function(target_binary url version sha1 symbol ext)
-   set(binary "${CMAKE_CURRENT_BINARY_DIR}/${symbol}-${version}${ext}")
--  message(STATUS "... ${url}/${symbol}-${version}${ext}")
--  file(DOWNLOAD "${url}/${symbol}-${version}${ext}" "${binary}"
--       EXPECTED_HASH SHA1=${sha1}
--       STATUS status)
--  list(GET status 0 error_code)
--  if (NOT ${error_code} EQUAL 0)
--      message(FATAL_ERROR "FAILED with status ${status}")
--  else()
--      #message(STATUS "Download firmware ${status} for ${symbol}-${version}${ext}")
--  endif()
-+  file(COPY "${CMAKE_SOURCE_DIR}/${symbol}-${version}${ext}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
-+#  message(STATUS "... ${url}/${symbol}-${version}${ext}")
-+#  file(DOWNLOAD "${url}/${symbol}-${version}${ext}" "${binary}"
-+#       EXPECTED_HASH SHA1=${sha1}
-+#       STATUS status)
-+#  list(GET status 0 error_code)
-+#  if (NOT ${error_code} EQUAL 0)
-+#      message(FATAL_ERROR "FAILED with status ${status}")
-+#  else()
-+#      #message(STATUS "Download firmware ${status} for ${symbol}-${version}${ext}")
-+#  endif()
-   string(TOUPPER ${symbol} SYMBOL)
-   string(REPLACE "." "," version_commas ${version})
-   string(REPLACE "\\" "\\\\" binary_escaped "${binary}")
+ pop_security_flags() # remove security flags for third party, as we cannot guarantee their security enforcment
+ 
+-include(CMake/external_json.cmake)
++# include(CMake/external_json.cmake)
+ add_subdirectory( ${_rel_path}/realsense-file )
+ 
+ if(BUILD_EASYLOGGINGPP)
+--- a/third-party/rsutils/CMakeLists.txt
++++ b/third-party/rsutils/CMakeLists.txt
+@@ -4,15 +4,14 @@
+ project( rsutils )
+ 
+ add_library( ${PROJECT_NAME} STATIC "" )
+-# We cannot directly interface with nlohmann_json (doesn't work on bionic)
+-#target_link_libraries( ${PROJECT_NAME} PUBLIC nlohmann_json )
++find_package(nlohmann_json CONFIG REQUIRED)
++target_link_libraries( ${PROJECT_NAME} PUBLIC nlohmann_json::nlohmann_json)
+ target_compile_features( ${PROJECT_NAME} PUBLIC cxx_std_14 )
+ set_target_properties( ${PROJECT_NAME} PROPERTIES FOLDER Library )
+ 
+ target_include_directories( ${PROJECT_NAME}
+     PUBLIC
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+-        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/third-party/json/include>
+ )
+ 
+ # Headers -----------------------------------------------------------------------------------
