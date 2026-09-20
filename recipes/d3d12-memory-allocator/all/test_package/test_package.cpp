@@ -5,6 +5,6 @@ int main() {
   D3D12MA::ALLOCATOR_DESC allocatorDesc = {};
   D3D12MA::Allocator* allocator;
   HRESULT hr = D3D12MA::CreateAllocator(&allocatorDesc, &allocator);
-  std::cout << "Alloactor result: " << hr << std::endl;
+  std::cout << "SDK Version: " << D3D12_SDK_VERSION << " Allocator result: " << hr << std::endl;
   return 0;
 }
