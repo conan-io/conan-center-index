@@ -115,15 +115,13 @@ class OusterSdkConan(ConanFile):
         if self.options.build_osf:
             self.tool_requires("flatbuffers/<host_version>")
         # ouster_algorithm and ouster_mapping require CMake 3.16.3+
-        self.tool_requires("cmake/[>=3.16.3 <5]")
+        self.tool_requires("cmake/[>=3.16.3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         self._patch_sources()
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_SENSOR"] = self.options.build_sensor
         tc.cache_variables["BUILD_PCAP"] = self.options.build_pcap
@@ -227,17 +225,6 @@ class OusterSdkConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["ouster_sensor"].system_libs = ["pthread"]
 
-        if self.options.build_pcap:
-            self.cpp_info.components["ouster_pcap"].set_property("cmake_target_name", "OusterSDK::ouster_pcap")
-            self.cpp_info.components["ouster_pcap"].libs = ["ouster_pcap"] if produce_library else []
-            self.cpp_info.components["ouster_pcap"].requires = [
-                "ouster_core",
-                "libtins::libtins",
-                "libpcap::libpcap",
-            ]
-            if self.settings.os == "Windows":
-                self.cpp_info.components["ouster_pcap"].system_libs = ["ws2_32"]
-
         if self.options.build_osf:
             # Bundled zstd-based image encoder used by ouster_osf
             self.cpp_info.components["zpng"].set_property("cmake_target_name", "OusterSDK::zpng")
@@ -255,6 +242,17 @@ class OusterSdkConan(ConanFile):
                 "zlib::zlib",
                 "zstd::zstd",
             ]
+
+        if self.options.build_pcap:
+            self.cpp_info.components["ouster_pcap"].set_property("cmake_target_name", "OusterSDK::ouster_pcap")
+            self.cpp_info.components["ouster_pcap"].libs = ["ouster_pcap"] if produce_library else []
+            self.cpp_info.components["ouster_pcap"].requires = [
+                "ouster_core",
+                "libtins::libtins",
+                "libpcap::libpcap",
+            ]
+            if self.settings.os == "Windows":
+                self.cpp_info.components["ouster_pcap"].system_libs = ["ws2_32"]
 
         if self.options.build_viz:
             self.cpp_info.components["ouster_viz"].set_property("cmake_target_name", "OusterSDK::ouster_viz")
