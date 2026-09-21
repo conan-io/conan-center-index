@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rename
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=2.0.0"
@@ -29,6 +29,9 @@ class GodotCppConan(ConanFile):
         "target": "template_debug",
     }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -50,6 +53,7 @@ class GodotCppConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -64,13 +68,6 @@ class GodotCppConan(ConanFile):
         lib_folder = os.path.join(self.package_folder, "lib")
         copy(self, "*.a", os.path.join(self.build_folder, "bin"), lib_folder, keep_path=False)
         copy(self, "*.lib", os.path.join(self.build_folder, "bin"), lib_folder, keep_path=False)
-
-        # The built library carries a platform/target/arch suffix, drop it for a stable name
-        for built_lib in os.listdir(lib_folder):
-            ext = os.path.splitext(built_lib)[1]
-            prefix = "" if ext == ".lib" else "lib"
-            rename(self, os.path.join(lib_folder, built_lib),
-                   os.path.join(lib_folder, f"{prefix}godot-cpp{ext}"))
 
     def package_info(self):
         self.cpp_info.libs = ["godot-cpp"]
