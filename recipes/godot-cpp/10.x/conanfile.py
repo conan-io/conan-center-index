@@ -37,8 +37,6 @@ class GodotCppConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support {self.settings.os}")
         if self.settings.os == "Emscripten" and self.settings.arch != "wasm":
             raise ConanInvalidConfiguration(f"{self.ref} on Emscripten requires arch=wasm")
-        if self.settings.os == "Android" and Version(str(self.settings.os.api_level)) < "24":
-            raise ConanInvalidConfiguration(f"{self.ref} on Android requires os.api_level >= 24 (upstream minimum)")
 
         check_min_cppstd(self, 17)
 
