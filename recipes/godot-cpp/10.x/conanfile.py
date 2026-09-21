@@ -13,7 +13,7 @@ required_conan_version = ">=2.0.0"
 
 class GodotCppConan(ConanFile):
     name = "godot-cpp"
-    description = "C++ bindings for the Godot Engine's GDExtensions API"
+    description = "C++ bindings for the Godot Engine's GDExtension API"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/godotengine/godot-cpp"
