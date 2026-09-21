@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/fhamonic/mippp/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "c588063b34b33fd5cc53bf83e82e4579846750e4c4728477a8898bc4f2bb8061"
