@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
+from conan.tools.files import copy, download, get
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 
@@ -52,13 +52,25 @@ class VincentlaucsbCsvParserConan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        if Version(self.version) >= Version("2.5.2"):
+            for source in self.conan_data["sources"][self.version]:
+                urls = source["url"]
+                url = urls[0] if isinstance(urls, (list, tuple)) else urls
+                filename = url[url.rfind("/") + 1:]
+                download(self, urls, filename, sha256=source["sha256"])
+        else:
+            get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, pattern="*",
-             dst=os.path.join(self.package_folder, "include"),
-             src=os.path.join(self.source_folder, "single_include"))
+        if Version(self.version) >= Version("2.5.2"):
+            copy(self, "csv.hpp",
+                 dst=os.path.join(self.package_folder, "include"),
+                 src=self.source_folder)
+        else:
+            copy(self, pattern="*",
+                 dst=os.path.join(self.package_folder, "include"),
+                 src=os.path.join(self.source_folder, "single_include"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
