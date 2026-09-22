@@ -5,3 +5,4 @@ sources:
 patches:
   "1.4.2":
     - patch_file: "patches/0001-find-conan-deps.patch"
+    - patch_file: "patches/0002-let-cmaketoolchain-control-cxx-standard.patch"

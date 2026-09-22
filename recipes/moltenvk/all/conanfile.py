@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 import os
 
 required_conan_version = ">=2"
@@ -59,20 +59,17 @@ class MoltenVKConan(ConanFile):
         if spirv_cross.options.shared or not (spirv_cross.options.msl and spirv_cross.options.reflect):
             raise ConanInvalidConfiguration("Requires spirv-cross static with msl & reflect enabled")
 
+    def build_requirements(self):
+        # cmake/MoltenVK/MoltenVK_CPM_Cache.cmake uses file(REAL_PATH ... EXPAND_TILDE),
+        # which requires CMake >= 3.24, even though upstream only checks for >= 3.18
+        self.tool_requires("cmake/[>=3.24]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         self._patch_sources()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # Let CMakeToolchain control the C++ standard instead of hardcoding it upstream
-        replace_in_file(
-            self, os.path.join(self.source_folder, "CMakeLists.txt"),
-            "\tset(CMAKE_CXX_STANDARD 17)\n"
-            "\tset(CMAKE_CXX_STANDARD_REQUIRED ON)\n"
-            "\tset(CMAKE_CXX_EXTENSIONS OFF)\n",
-            "",
-        )
 
     def generate(self):
         tc = CMakeToolchain(self)
