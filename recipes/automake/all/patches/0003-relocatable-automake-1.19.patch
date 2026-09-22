@@ -1,5 +1,7 @@
---- bin/aclocal.in
-+++ bin/aclocal.in
+diff --git a/bin/aclocal.in b/bin/aclocal.in
+index fcad2ac..390d3fb 100644
+--- a/bin/aclocal.in
++++ b/bin/aclocal.in
 @@ -20,10 +20,13 @@
  # Alexandre Duret-Lutz <adl@gnu.org>.
  
@@ -15,7 +17,7 @@
      unless $ENV{AUTOMAKE_UNINSTALLED};
  }
  
-@@ -62,9 +65,15 @@
+@@ -62,9 +65,15 @@ $perl_threads = 0;
  # @system_includes can be augmented with the 'dirlist' file or the
  # --aclocal-path option/ACLOCAL_PATH environment variable, and reset
  # with the '--system-acdir' option.
@@ -33,7 +35,7 @@
  my $aclocal_path = '';
  
  # Whether we should copy M4 file in $user_includes[0].
-@@ -447,6 +456,7 @@
+@@ -447,6 +456,7 @@ sub scan_m4_files ()
      }
    scan_m4_dirs (FT_AUTOMAKE, SCAN_M4_DIRS_ERROR, @automake_includes);
    scan_m4_dirs (FT_SYSTEM, SCAN_M4_DIRS_ERROR, @system_includes);
@@ -41,7 +43,7 @@
  
    # Construct a new function that does the searching.  We use a
    # function (instead of just evaluating $search in the loop) so that
-@@ -767,7 +777,7 @@
+@@ -767,7 +777,7 @@ sub trace_used_macros ()
    # aclocal.m4 is not yet available.
    local $ENV{WARNINGS} = 'none';
  
@@ -50,8 +52,10 @@
    $traces .= " --language Autoconf-without-aclocal-m4 ";
  
    # Support AC_CONFIG_MACRO_DIRS also with older autoconf.
---- bin/automake.in
-+++ bin/automake.in
+diff --git a/bin/automake.in b/bin/automake.in
+index ebc0655..69ecdbd 100644
+--- a/bin/automake.in
++++ b/bin/automake.in
 @@ -23,10 +23,13 @@
  package Automake;
  
@@ -67,7 +71,7 @@
      unless $ENV{AUTOMAKE_UNINSTALLED};
  
    # Override SHELL.  This is required on DJGPP so that system() uses
-@@ -5372,7 +5375,8 @@
+@@ -5372,7 +5375,8 @@ sub scan_autoconf_traces
    # and will see its warnings then.
    local $ENV{WARNINGS} = 'none';
  
@@ -77,8 +81,10 @@
  
    # Use a separator unlikely to be used, not ':', the default, which
    # has a precise meaning for AC_CONFIG_FILES and so on.
---- lib/Automake/Config.in
-+++ lib/Automake/Config.in
+diff --git a/lib/Automake/Config.in b/lib/Automake/Config.in
+index e0c90e3..1698b2a 100644
+--- a/lib/Automake/Config.in
++++ b/lib/Automake/Config.in
 @@ -18,6 +18,8 @@
  package Automake::Config;
  
@@ -88,7 +94,7 @@
  
  use Exporter;
  
-@@ -32,7 +34,8 @@
+@@ -32,7 +34,8 @@ our $PACKAGE = '@PACKAGE@';
  our $PACKAGE_BUGREPORT = '@PACKAGE_BUGREPORT@';
  our $VERSION = '@VERSION@';
  our $RELEASE_YEAR = '@RELEASE_YEAR@';
