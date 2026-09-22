@@ -94,6 +94,7 @@ class MoltenVKConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.includedirs = []
         self.cpp_info.libs = ["MoltenVK"]
         self.cpp_info.frameworks = ["Metal", "Foundation", "CoreFoundation", "QuartzCore", "IOSurface", "CoreGraphics"]
         if self.settings.os == "Macos":
