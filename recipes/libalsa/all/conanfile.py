@@ -50,9 +50,9 @@ class LibalsaConan(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
-        yes_no = lambda v: "yes" if v else "no"
+        enable_python = "yes" if not self.options.disable_python else "no"
         tc.configure_args.extend([
-            f"--enable-python={yes_no(not self.options.disable_python)}",
+            f"--enable-python={enable_python}",
             "--datarootdir=${prefix}/res",
             "--datadir=${prefix}/res",
         ])
