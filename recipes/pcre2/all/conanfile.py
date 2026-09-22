@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -93,6 +93,11 @@ class PCRE2Conan(ConanFile):
         tc.variables["PCRE2_BUILD_PCRE2GREP"] = self.options.build_pcre2grep
         tc.variables["PCRE2_SUPPORT_LIBZ"] = self.options.get_safe("with_zlib", False)
         tc.variables["PCRE2_SUPPORT_LIBBZ2"] = self.options.get_safe("with_bzip2", False)
+        # libedit and libreadline are used only for testing (pcre2test executable)
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Editline"] = True
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Readline"] = True
+        tc.variables["PCRE2_SUPPORT_LIBEDIT"] = False
+        tc.variables["PCRE2_SUPPORT_LIBREADLINE"] = False
         tc.variables["PCRE2_BUILD_TESTS"] = False
         if is_msvc(self):
             tc.variables["PCRE2_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
@@ -118,6 +123,8 @@ class PCRE2Conan(ConanFile):
             # Do not add ${PROJECT_SOURCE_DIR}/cmake because versions older than 10.47 contain
             #  a custom FindPackageHandleStandardArgs.cmake which can break conan generators
             replace_in_file(self, cmakelists, "LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
+        rm(self, "FindEditline.cmake", os.path.join(self.source_folder, "cmake"))
+        rm(self, "FindReadline.cmake", os.path.join(self.source_folder, "cmake"))
 
         # pcre2-config does not correctly include '-static' in static library names
         if is_msvc(self):
