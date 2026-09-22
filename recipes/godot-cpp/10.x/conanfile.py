@@ -5,9 +5,9 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 
-required_conan_version = ">=2.0.0"
+required_conan_version = ">=2.0.9"
 
 
 class GodotCppConan(ConanFile):
@@ -21,13 +21,16 @@ class GodotCppConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     options = {
+        "fPIC": [True, False],
         "api_version": ["4.3", "4.4", "4.5", "4.6", "4.7"],
         "target": ["template_debug", "template_release", "editor"],
     }
     default_options = {
+        "fPIC": True,
         "api_version": "4.7",
         "target": "template_debug",
     }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -50,6 +53,8 @@ class GodotCppConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["GODOTCPP_API_VERSION"] = str(self.options.api_version)
         tc.cache_variables["GODOTCPP_TARGET"] = str(self.options.target)
+        if is_msvc(self):
+            tc.cache_variables["GODOTCPP_USE_STATIC_CPP"] = is_msvc_static_runtime(self)
         tc.generate()
 
     def build(self):
@@ -97,8 +102,9 @@ class GodotCppConan(ConanFile):
         self.cpp_info.defines = defines
 
         if self.settings.os == "Emscripten":
-            # Recreates the PUBLIC compile / link flags of upstream cmake/web.cmake
-            # so consumer GDExtensions link as wasm side modules.
+            # Recreates the flags of upstream cmake/web.cmake so consumer GDExtensions link
+            # as wasm side modules. -shared is left out of exelinkflags, it would turn an
+            # executable linking godot-cpp into a side module that cannot be run.
             self.cpp_info.cxxflags = ["-sSIDE_MODULE=1", "-sSUPPORT_LONGJMP=wasm", "-sUSE_PTHREADS=1"]
             web_linkflags = ["-sWASM_BIGINT", "-sSUPPORT_LONGJMP=wasm", "-sUSE_PTHREADS=1",
                              "-fvisibility=hidden"]
