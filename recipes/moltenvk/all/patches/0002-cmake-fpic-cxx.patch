@@ -12,3 +12,14 @@
 
  ### Configuration
  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/MoltenVK/")
+
+@@ -83,9 +83,6 @@
+ set(CPM_USE_NAMED_CACHE_DIRECTORIES 1)
+ include(MoltenVK_CPM_Cache)
+
+-# Generate position-independent code by default
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+-
+ if(NOT DEFINED MOLTEN_VK_EXTERNAL_REVISIONS_DIR)
+ 	set(MOLTEN_VK_EXTERNAL_REVISIONS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ExternalRevisions")
+ endif()

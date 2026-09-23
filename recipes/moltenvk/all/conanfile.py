@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
@@ -19,7 +20,6 @@ class MoltenVKConan(ConanFile):
     topics = ("moltenvk", "khronos", "vulkan", "metal")
     homepage = "https://github.com/KhronosGroup/MoltenVK"
     url = "https://github.com/conan-io/conan-center-index"
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -53,7 +53,7 @@ class MoltenVKConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
-        if self.settings.os not in ["Macos", "iOS", "tvOS"]:
+        if not is_apple_os(self):
             raise ConanInvalidConfiguration("Only supported on MacOS, iOS and tvOS")
         spirv_cross = self.dependencies["spirv-cross"]
         if spirv_cross.options.shared or not (spirv_cross.options.msl and spirv_cross.options.reflect):
@@ -61,8 +61,8 @@ class MoltenVKConan(ConanFile):
 
     def build_requirements(self):
         # cmake/MoltenVK/MoltenVK_CPM_Cache.cmake uses file(REAL_PATH ... EXPAND_TILDE),
-        # which requires CMake >= 3.24, even though upstream only checks for >= 3.18
-        self.tool_requires("cmake/[>=3.24]")
+        # which requires CMake >= 3.21, even though upstream only checks for >= 3.18
+        self.tool_requires("cmake/[>=3.21]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
