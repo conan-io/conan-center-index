@@ -1,4 +1,7 @@
 sources:
+  "10.1.0":
+    url: "https://github.com/scipopt/scip/releases/download/v10.1.0/scip-10.1.0.tgz"
+    sha256: "fe8cfd15a03970ef45156ed56c6a4382485bd095e0e99cf7d7db87cdf8d47304"
   "10.0.3":
     url: "https://github.com/scipopt/scip/releases/download/v10.0.3/scip-10.0.3.tgz"
     sha256: "7fe90d216e1481b430eaed2bfc25c0349ffd73bfad6201bd96fa082dc54c1438"
@@ -12,6 +15,10 @@ patches:
     - patch_file: "patches/0002-bigobj-spx-msvc-debug.patch"
     - patch_file: "patches/0003-format_msvc_stdext.patch"
 version_mappings:
+  "10.1.0":
+    soplex: "8.1.0"
+    default_sym: "snauty"
+    default_tpi: "tny"
   "10.0.3":
     soplex: "8.0.3"
     default_sym: "snauty"
