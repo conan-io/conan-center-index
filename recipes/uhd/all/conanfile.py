@@ -11,6 +11,7 @@ from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=2.26"
 
+
 class UhdConan(ConanFile):
     name = "uhd"
     description = (
@@ -36,12 +37,14 @@ class UhdConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
     def requirements(self):
         self.requires("boost/[>=1.83.0 <2]")
+        self.requires("libusb/1.0.29")
 
     def validate(self):
         check_min_cppstd(self, 17)
@@ -55,6 +58,7 @@ class UhdConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         replace_in_file(self, os.path.join(self.source_folder, "host", "CMakeLists.txt"), "add_subdirectory(docs)", "#add_subdirectory(docs)")
+        replace_in_file(self, os.path.join(self.source_folder, "host", "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 20)", "")
 
     def generate(self):
         pyenv = PyEnv(self)
@@ -64,8 +68,13 @@ class UhdConan(ConanFile):
         deps = CMakeDeps(self)
         if Version(self.dependencies["boost"].ref.version) >= "1.89.0":
             deps.set_property("boost::headers", "cmake_target_aliases", ["Boost::system"])
+        deps.set_property("libusb", "cmake_file_name", "LIBUSB")
+        deps.set_property("libusb", "cmake_target_name", "LIBUSB::LIBUSB")
         deps.generate()
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.cache_variables["UHD_VERSION"] = str(self.version)
+        tc.cache_variables["UHD_GIT_BRANCH_OVERRIDE"] = f"UHD-{self.version}"
         if is_apple_os(self):
             tc.cache_variables["CMAKE_INSTALL_NAME_DIR"] = "@rpath"
             tc.cache_variables["CMAKE_INSTALL_RPATH"] = ""
@@ -73,14 +82,15 @@ class UhdConan(ConanFile):
         tc.cache_variables["ENABLE_PYTHON_API"] = False
         tc.cache_variables["ENABLE_EXAMPLES"] = False
         tc.cache_variables["ENABLE_TESTS"] = False
-        tc.cache_variables["ENABLE_B100"] = False
-        tc.cache_variables["ENABLE_USRP1"] = False
-        tc.cache_variables["ENABLE_X300"] = False
-        tc.cache_variables["ENABLE_MPMD"] = False
-        tc.cache_variables["ENABLE_OCTOCLOCK"] = False
+        tc.cache_variables["ENABLE_B100"] = True
+        tc.cache_variables["ENABLE_B200"] = True
+        tc.cache_variables["ENABLE_USRP1"] = True
+        tc.cache_variables["ENABLE_USRP2"] = True
+        tc.cache_variables["ENABLE_X300"] = True
+        tc.cache_variables["ENABLE_MPMD"] = True
+        tc.cache_variables["ENABLE_OCTOCLOCK"] = True
         tc.cache_variables["ENABLE_STATIC_LIBS"] = not self.options.shared
         tc.generate()
-
 
     def build(self):
         cmake = CMake(self)

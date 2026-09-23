@@ -1,4 +1,4 @@
 sources:
-  "1.5.1":
-    url: "https://github.com/facebookincubator/dispenso/archive/refs/tags/v1.5.1.tar.gz"
-    sha256: "e75b2a1bd428b2e9558ea99c03d266d2bf8881ba41689016e8c98052e1a0c17d"
+  "1.6.2":
+    url: "https://github.com/facebookincubator/dispenso/archive/refs/tags/v1.6.2.tar.gz"
+    sha256: "9641511a6b14a77f68817f1a6e72fa9e55bc3ef2628a10011dcab07c6ba10539"

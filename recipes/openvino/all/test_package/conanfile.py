@@ -23,19 +23,22 @@ class TestPackageConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_VERBOSE_MAKEFILE"] = True
         # HW plugins
-        tc.variables["ENABLE_INTEL_CPU"] = self.dependencies[self.tested_reference_str].options.enable_cpu
-        tc.variables["ENABLE_INTEL_GPU"] = self.dependencies[self.tested_reference_str].options.get_safe("enable_gpu", False)
-        # SW plugins
-        tc.variables["ENABLE_AUTO"] = self.dependencies[self.tested_reference_str].options.enable_auto
-        tc.variables["ENABLE_HETERO"] = self.dependencies[self.tested_reference_str].options.enable_hetero
-        tc.variables["ENABLE_AUTO_BATCH"] = self.dependencies[self.tested_reference_str].options.enable_auto_batch
-        # Frontends
-        tc.variables["ENABLE_IR_FRONTEND"] = self.dependencies[self.tested_reference_str].options.enable_ir_frontend
-        tc.variables["ENABLE_ONNX_FRONTEND"] = self.dependencies[self.tested_reference_str].options.enable_onnx_frontend
-        tc.variables["ENABLE_TF_FRONTEND"] = self.dependencies[self.tested_reference_str].options.enable_tf_frontend
-        tc.variables["ENABLE_TF_LITE_FRONTEND"] = self.dependencies[self.tested_reference_str].options.enable_tf_lite_frontend
-        tc.variables["ENABLE_PADDLE_FRONTEND"] = self.dependencies[self.tested_reference_str].options.enable_paddle_frontend
-        tc.variables["ENABLE_PYTORCH_FRONTEND"] = self.dependencies[self.tested_reference_str].options.enable_pytorch_frontend
+        tc.variables.update({
+            cmake_key: self.dependencies[self.tested_reference_str].options.get_safe(opt_key, False)
+            for (opt_key, cmake_key) in [
+                ("enable_cpu", "ENABLE_INTEL_CPU"),
+                ("enable_gpu", "ENABLE_INTEL_GPU"),
+                ("enable_auto", "ENABLE_AUTO"),
+                ("enable_hetero", "ENABLE_HETERO"),
+                ("enable_auto_batch", "ENABLE_AUTO_BATCH"),
+                ("enable_ir_frontend", "ENABLE_IR_FRONTEND"),
+                ("enable_onnx_frontend", "ENABLE_ONNX_FRONTEND"),
+                ("enable_tf_frontend", "ENABLE_TF_FRONTEND"),
+                ("enable_tf_lite_frontend", "ENABLE_TF_LITE_FRONTEND"),
+                ("enable_paddle_frontend", "ENABLE_PADDLE_FRONTEND"),
+                ("enable_pytorch_frontend", "ENABLE_PYTORCH_FRONTEND"),
+            ]
+        })
         tc.generate()
 
     def build(self):
@@ -45,8 +48,8 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            bin_path_c = os.path.join(self.cpp.build.bindirs[0], "test_package_c")
-            self.run(bin_path_c, env="conanrun")
-
             bin_path_cpp = os.path.join(self.cpp.build.bindirs[0], "test_package_cpp")
             self.run(bin_path_cpp, env="conanrun")
+
+            bin_path_c = os.path.join(self.cpp.build.bindirs[0], "test_package_c")
+            self.run(bin_path_c, env="conanrun")

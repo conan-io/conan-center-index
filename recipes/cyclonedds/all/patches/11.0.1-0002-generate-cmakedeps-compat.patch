@@ -1,0 +1,38 @@
+Fix IDLC_GENERATE failing on Windows when using external CycloneDDS
+
+The missing libidlc component definitions prevents the CycloneDDS::libidlc target from being created,
+which causes the IDLC_GENERATE fall in the else branch, which then fails to find the .dll file on Windows.
+
+Related to https://github.com/eclipse-cyclonedds/cyclonedds/issue/2389
+
+diff --git a/cmake/Modules/Generate.cmake b/cmake/Modules/Generate.cmake
+index 3bc3a15..07675aa 100644
+--- a/cmake/Modules/Generate.cmake
++++ b/cmake/Modules/Generate.cmake
+@@ -17,7 +17,7 @@ function(IDLC_GENERATE)
+   cmake_parse_arguments(
+     IDLC "${options}" "${one_value_keywords}" "${multi_value_keywords}" "" ${ARGN})
+
+-  if (TARGET CycloneDDS::libidlc)
++  if (0)
+     set(_idlc_backend "$<TARGET_FILE:CycloneDDS::libidlc>")
+     if (NOT DEFINED _idlc_generate_skipreport)
+       message(STATUS "Building internal IDLC backend")
+@@ -25,13 +25,17 @@ function(IDLC_GENERATE)
+     endif()
+     set(_idlc_depends CycloneDDS::libidlc)
+   else()
++    set(_cmake_find_library_suffixes_original ${CMAKE_FIND_LIBRARY_SUFFIXES})
+     if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux" AND NOT ".so" IN_LIST CMAKE_FIND_LIBRARY_SUFFIXES)
+       # When cross-compiling, find_library looks for libraries using naming conventions of the target,
+       # But here we're trying to find the idlc backend library to run on the host.
+       # For now, building for a Windows target on a Linux host with w64-mingw is supported by this workaround.
+       list(APPEND CMAKE_FIND_LIBRARY_SUFFIXES ".so")
++    elseif (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
++      set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll")
+     endif()
+     find_library(_idlc_backend "cycloneddsidlc" NO_CMAKE_FIND_ROOT_PATH)
++    set(CMAKE_FIND_LIBRARY_SUFFIXES ${_cmake_find_library_suffixes_original})
+     if (_idlc_backend)
+       if (NOT DEFINED _idlc_generate_skipreport)
+         message(STATUS "Using external IDLC backend: ${_idlc_backend}")

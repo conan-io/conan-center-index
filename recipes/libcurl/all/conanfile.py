@@ -3,9 +3,9 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, download, get, load, replace_in_file, rm, rmdir, save
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get, load, replace_in_file, rm, rmdir, save
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 
@@ -138,6 +138,7 @@ class LibcurlConan(ConanFile):
 
     def export_sources(self):
         copy(self, "lib_Makefile_add.am", self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -173,7 +174,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_nghttp2:
             self.requires("libnghttp2/[>=1.59.0 <2]")
         if self.options.with_libssh2:
-            self.requires("libssh2/1.11.0")
+            self.requires("libssh2/[>=1.11.0 <2]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_brotli:
@@ -218,6 +219,7 @@ class LibcurlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
         cert_url = self.conf.get("user.libcurl.cert:url", check_type=str) or "https://curl.se/ca/cacert-2025-11-04.pem"
         cert_sha256 = self.conf.get("user.libcurl.cert:sha256", check_type=str) or "8ac40bdd3d3e151a6b4078d2b2029796e8f843e3f86fbf2adbc4dd9f05e79def"
         download(self, cert_url, "cacert.pem", verify=True, sha256=cert_sha256)
@@ -312,10 +314,6 @@ class LibcurlConan(ConanFile):
         return "yes" if value else "no"
 
     def _generate_with_autotools(self):
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
-
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
             f"--with-libidn2={self._yes_no(self.options.with_libidn)}",
@@ -356,12 +354,8 @@ class LibcurlConan(ConanFile):
         if not self.options.with_ssl:
             tc.configure_args.append("--without-ssl")
 
-        if self.options.with_ssl == "openssl":
-            path = unix_path(self, self.dependencies["openssl"].package_folder)
-            tc.configure_args.append(f"--with-openssl={path}")
-        elif self.options.with_ssl == "libressl":
-            path = unix_path(self, self.dependencies["libressl"].package_folder)
-            tc.configure_args.append(f"--with-openssl={path}")
+        if self.options.with_ssl in ("openssl", "libressl"):
+            tc.configure_args.append("--with-openssl")
         else:
             tc.configure_args.append("--without-openssl")
 
@@ -453,6 +447,13 @@ class LibcurlConan(ConanFile):
             elif self.settings.os == "Android":
                 pass # this just works, conan is great!
 
+        if self.settings.os == "Macos":
+            # Configure rpath for ./configure script runtime checks when not crossbuilding.
+            for dep in self.dependencies.host.values():
+                if dep.package_type == "shared-library":
+                    tc.extra_ldflags.extend(f"-Wl,-rpath,{libdir}" for libdir in
+                                             dep.cpp_info.aggregated_components().libdirs)
+
         env = tc.environment()
 
         # tweaks for mingw
@@ -473,8 +474,6 @@ class LibcurlConan(ConanFile):
 
         tc.generate(env)
         tc = PkgConfigDeps(self)
-        tc.generate()
-        tc = AutotoolsDeps(self)
         tc.generate()
 
     def _get_linux_arm_host(self):
@@ -536,8 +535,6 @@ class LibcurlConan(ConanFile):
         tc.variables["CURL_DISABLE_RTSP"] = not self.options.with_rtsp
         tc.variables["CURL_DISABLE_CRYPTO_AUTH"] = not self.options.with_crypto_auth
         tc.variables["CURL_DISABLE_VERBOSE_STRINGS"] = not self.options.with_verbose_strings
-        if self.options.with_ssl == "libressl":
-            tc.variables["CURL_DISABLE_SRP"] = True
         if "with_form_api" in self.options:
             tc.variables["CURL_DISABLE_FORM_API"] = not self.options.with_form_api
         if "with_websockets" in self.options:
@@ -561,7 +558,6 @@ class LibcurlConan(ConanFile):
         # TODO: refactor this and consider `CMAKE_TRY_COMPILE_CONFIGURATION` for all platforms
         #       see https://github.com/conan-io/conan/issues/12180
         tc.variables["HAVE_SSL_SET0_WBIO"] = False
-        tc.variables["HAVE_OPENSSL_SRP"] = True
         tc.variables["HAVE_SSL_CTX_SET_QUIC_METHOD"] = True
 
         if is_msvc(self):

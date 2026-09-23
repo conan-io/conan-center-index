@@ -1,4 +1,7 @@
 sources:
-  "2024.08.12.00":
-    url: "https://github.com/facebook/folly/releases/download/v2024.08.12.00/folly-v2024.08.12.00.tar.gz"
-    sha256: "18d7be721721db547cb9c5dd5cc50df05cd88b0a8e683e3126ec6f9ce2c41c4d"
+  "2026.07.06.00":
+    url: "https://github.com/facebook/folly/releases/download/v2026.07.06.00/folly-v2026.07.06.00.tar.gz"
+    sha256: "183bf1007ac1550ebcede07cc38d084cfdc280289b21521d833195e5955dfba1"
+patches:
+  "2026.07.06.00":
+    - patch_file: "patches/0001-cmake-deps.patch"

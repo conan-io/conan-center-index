@@ -8,6 +8,9 @@
 #ifdef TEST_POSTGRES_ENABLED
 #include <sqlgen/postgres.hpp>
 #endif
+#ifdef TEST_DUCKDB_ENABLED
+#include <sqlgen/duckdb.hpp>
+#endif
 
 #include <iostream>
 struct Person {
@@ -34,6 +37,9 @@ int main() {
     #endif
     #ifdef TEST_POSTGRES_ENABLED
     std::cout << "postgress: " << sqlgen::postgres::to_sql(query) << std::endl;
+    #endif
+    #ifdef TEST_DUCKDB_ENABLED
+    std::cout << "duckdb: " << sqlgen::duckdb::to_sql(query) << std::endl;
     #endif
 
     return 0;

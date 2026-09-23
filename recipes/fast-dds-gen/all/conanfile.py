@@ -14,7 +14,6 @@ class FastDdsGenConan(ConanFile):
     homepage = "https://github.com/eProsima/Fast-DDS-Gen"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("idl", "code-generation", "fastdds")
-
     package_type = "application"
     settings = "os", "arch"
 
@@ -26,6 +25,9 @@ class FastDdsGenConan(ConanFile):
 
     def requirements(self):
         self.requires("openjdk/19.0.2")
+
+    def package_id(self):
+        self.info.clear()
 
     def build_requirements(self):
         self.tool_requires("openjdk/<host_version>")
@@ -77,6 +79,3 @@ class FastDdsGenConan(ConanFile):
         self.cpp_info.includedirs = []
         self.cpp_info.set_property("cmake_file_name", "fastddsgen")
         self.cpp_info.set_property("cmake_target_name", "fastddsgen::fastddsgen")
-
-        fastdds_version = self.conan_data.get("fastdds_versions", {}).get(str(self.version), "3.4.0")
-        self.conf_info.define("user.fast-dds-gen:fastdds_version", fastdds_version)

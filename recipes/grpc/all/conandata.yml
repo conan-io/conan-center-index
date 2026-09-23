@@ -1,13 +1,19 @@
 sources:
-  "1.81.0":
-    url: "https://github.com/grpc/grpc/archive/refs/tags/v1.81.0.tar.gz"
-    sha256: "41b695614b26652ff9e97ce50cfd4a6c7a3d45a9fe598d1454407746499bbf2c"
+  "1.84.0":
+    source:
+      url: "https://github.com/grpc/grpc/archive/refs/tags/v1.84.0.tar.gz"
+      sha256: "17a4d25717f4871eb71cfdf191f7491f66a59c8ebc782ab53d52fcbfc478959f"
+    grpc-proto:
+      url: "https://github.com/grpc/grpc-proto/archive/ec30f589e2519d595688b9a42f88a91bdd6b733f.tar.gz"
+      sha256: "5e9b520b22afbd53a662cc29017064be253c1dfa6df8958738594e7fec6ade33"
   "1.69.0": # this is the last version that supports C++14
-    url: "https://github.com/grpc/grpc/archive/v1.69.0.tar.gz"
-    sha256: "cd256d91781911d46a57506978b3979bfee45d5086a1b6668a3ae19c5e77f8dc"
+    source:
+      url: "https://github.com/grpc/grpc/archive/v1.69.0.tar.gz"
+      sha256: "cd256d91781911d46a57506978b3979bfee45d5086a1b6668a3ae19c5e77f8dc"
   "1.54.3": # this is still referenced explicitly by other recipes
-    url: "https://github.com/grpc/grpc/archive/v1.54.3.tar.gz"
-    sha256: "17e4e1b100657b88027721220cbfb694d86c4b807e9257eaf2fb2d273b41b1b1"
+    source:
+      url: "https://github.com/grpc/grpc/archive/v1.54.3.tar.gz"
+      sha256: "17e4e1b100657b88027721220cbfb694d86c4b807e9257eaf2fb2d273b41b1b1"
 patches:
   "1.54.3":
     - patch_file: "patches/v1.50.x/002-CMake-Add-gRPC_USE_SYSTEMD-option-34384.patch"

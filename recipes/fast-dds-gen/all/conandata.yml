@@ -10,5 +10,3 @@ patches:
     - patch_file: "patches/4.2.0-0001-skip-git-submodule-update.patch"
       patch_type: "conan"
       patch_description: "Skip git submodule update as sources are fetched via conandata.yml"
-fastdds_versions:
-  "4.2.0": "3.4.0"

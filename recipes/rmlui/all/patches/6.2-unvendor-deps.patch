@@ -1,0 +1,56 @@
+diff --git a/CMake/Dependencies.cmake b/CMake/Dependencies.cmake
+index 23724bc..d847405 100644
+--- a/CMake/Dependencies.cmake
++++ b/CMake/Dependencies.cmake
+@@ -30,8 +30,8 @@ endif()
+ 
+ # The Lua and LuaJIT modules don't provide targets, so make our own, or let users define the target already.
+ if(RMLUI_LUA_BINDINGS AND (RMLUI_LUA_BINDINGS_LIBRARY STREQUAL "lua" OR RMLUI_LUA_BINDINGS_LIBRARY STREQUAL "lua_as_cxx"))
++	find_package("Lua" REQUIRED)
+ 	if(NOT TARGET Lua::Lua)
+-		find_package("Lua" REQUIRED)
+ 		add_library(Lua::Lua INTERFACE IMPORTED)
+ 		set_target_properties(Lua::Lua PROPERTIES
+ 			INTERFACE_LINK_LIBRARIES "${LUA_LIBRARIES}"
+diff --git a/Include/RmlUi/Config/Config.h b/Include/RmlUi/Config/Config.h
+index 5c4f3c9..bf79b10 100644
+--- a/Include/RmlUi/Config/Config.h
++++ b/Include/RmlUi/Config/Config.h
+@@ -27,9 +27,9 @@
+ 		#include <set>
+ 		#include <unordered_set>
+ 	#else
+-		#include "../Core/Containers/itlib/flat_map.hpp"
+-		#include "../Core/Containers/itlib/flat_set.hpp"
+-		#include "../Core/Containers/robin_hood.h"
++		#include <itlib/flat_map.hpp>
++		#include <itlib/flat_set.hpp>
++		#include <robin_hood.h>
+ 	#endif // RMLUI_NO_THIRDPARTY_CONTAINERS
+ 
+ namespace Rml {
+diff --git a/Source/Core/CMakeLists.txt b/Source/Core/CMakeLists.txt
+index 3ac5fac..32a071a 100644
+--- a/Source/Core/CMakeLists.txt
++++ b/Source/Core/CMakeLists.txt
+@@ -242,9 +242,6 @@ target_sources(rmlui_core PRIVATE
+ 	"${PROJECT_SOURCE_DIR}/Include/RmlUi/Core/Colour.inl"
+ 	"${PROJECT_SOURCE_DIR}/Include/RmlUi/Core/CompiledFilterShader.h"
+ 	"${PROJECT_SOURCE_DIR}/Include/RmlUi/Core/ComputedValues.h"
+-	"${PROJECT_SOURCE_DIR}/Include/RmlUi/Core/Containers/itlib/flat_map.hpp"
+-	"${PROJECT_SOURCE_DIR}/Include/RmlUi/Core/Containers/itlib/flat_set.hpp"
+-	"${PROJECT_SOURCE_DIR}/Include/RmlUi/Core/Containers/robin_hood.h"
+ 	"${PROJECT_SOURCE_DIR}/Include/RmlUi/Core/Context.h"
+ 	"${PROJECT_SOURCE_DIR}/Include/RmlUi/Core/ContextInstancer.h"
+ 	"${PROJECT_SOURCE_DIR}/Include/RmlUi/Core/ConvolutionFilter.h"
+@@ -435,6 +432,10 @@ endif()
+ if(NOT RMLUI_THIRDPARTY_CONTAINERS)
+ 	target_compile_definitions(rmlui_core PUBLIC "RMLUI_NO_THIRDPARTY_CONTAINERS")
+ 	message(STATUS "Disabling third-party containers for RmlUi.")
++else()
++	find_package(robin_hood CONFIG REQUIRED)
++	find_package(itlib CONFIG REQUIRED)
++	target_link_libraries(rmlui_core PUBLIC robin_hood::robin_hood itlib::itlib)
+ endif()
+ 
+ if(RMLUI_CUSTOM_RTTI)

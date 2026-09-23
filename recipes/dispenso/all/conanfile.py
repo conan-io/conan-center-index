@@ -32,7 +32,7 @@ class DispensoPackage(ConanFile):
 
     def requirements(self):
         # Part of the public api in dispenso/thread_pool.h (and more), unvendorized
-        self.requires("concurrentqueue/1.0.4", transitive_headers=True)
+        self.requires("concurrentqueue/1.0.5", transitive_headers=True)
 
     def validate(self):
         check_min_cppstd(self, 14)
@@ -43,6 +43,7 @@ class DispensoPackage(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["DISPENSO_USE_SYSTEM_CONCURRENTQUEUE"] = True
+        tc.cache_variables["DISPENSO_WERROR"] = False
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()

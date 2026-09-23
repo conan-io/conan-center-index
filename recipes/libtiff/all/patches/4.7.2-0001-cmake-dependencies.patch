@@ -1,0 +1,68 @@
+diff --git a/cmake/JBIGCodec.cmake b/cmake/JBIGCodec.cmake
+index a4350028..4cb01552 100644
+--- a/cmake/JBIGCodec.cmake
++++ b/cmake/JBIGCodec.cmake
+@@ -34,7 +34,7 @@ if(JBIG_FOUND)
+     set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${JBIG_INCLUDE_DIRS})
+     set(CMAKE_REQUIRED_LIBRARIES_SAVE ${CMAKE_REQUIRED_LIBRARIES})
+     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${JBIG_LIBRARIES})
+-    check_symbol_exists(jbg_newlen "jbig.h" HAVE_JBG_NEWLEN)
++    set(HAVE_JBG_NEWLEN TRUE)
+     set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_SAVE})
+     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_SAVE})
+ endif()
+diff --git a/cmake/JPEGCodec.cmake b/cmake/JPEGCodec.cmake
+index 8455a3ec..09fe975a 100644
+--- a/cmake/JPEGCodec.cmake
++++ b/cmake/JPEGCodec.cmake
+@@ -94,34 +94,4 @@ endif()
+ if (JPEG_SUPPORT)
+     # Check for jpeg12_read_scanlines() which has been added in libjpeg-turbo 3.0
+     # for dual 8/12 bit mode.
+-    include(CheckSymbolExists)
+-    include(CMakePushCheckState)
+-    cmake_push_check_state(RESET)
+-
+-    # Set up includes and libraries for the check
+-    # For targets, we need to explicitly get the include directories
+-    if(TARGET ${JPEG_LIBRARIES})
+-        # It's an imported target - extract properties
+-        get_target_property(_jpeg_includes ${JPEG_LIBRARIES} INTERFACE_INCLUDE_DIRECTORIES)
+-        if(_jpeg_includes)
+-            set(CMAKE_REQUIRED_INCLUDES "${_jpeg_includes}")
+-        endif()
+-        unset(_jpeg_includes)
+-    elseif(JPEG_INCLUDE_DIRS)
+-        # It's a plain library - use the provided includes
+-        set(CMAKE_REQUIRED_INCLUDES "${JPEG_INCLUDE_DIRS}")
+-    endif()
+-
+-    set(CMAKE_REQUIRED_LIBRARIES "${JPEG_LIBRARIES}")
+-
+-    # Check if the jpeg12_read_scanlines symbol exists in jpeglib.h
+-    # This is more reliable than trying to compile code that calls it
+-    check_symbol_exists(jpeg_read_scanlines "stdio.h;jpeglib.h" HAVE_JPEGTURBO_DUAL_MODE_8)
+-    check_symbol_exists(jpeg12_read_scanlines "stdio.h;jpeglib.h" HAVE_JPEGTURBO_DUAL_MODE_12)
+-    set(HAVE_JPEGTURBO_DUAL_MODE_8_12 OFF)
+-    if (HAVE_JPEGTURBO_DUAL_MODE_8 AND HAVE_JPEGTURBO_DUAL_MODE_12)
+-        set(HAVE_JPEGTURBO_DUAL_MODE_8_12 ON)
+-    endif()
+-
+-    cmake_pop_check_state()
+ endif()
+
+ if (NOT HAVE_JPEGTURBO_DUAL_MODE_8_12)
+diff --git a/cmake/LZMACodec.cmake b/cmake/LZMACodec.cmake
+index c51afe82..53ef874e 100644
+--- a/cmake/LZMACodec.cmake
++++ b/cmake/LZMACodec.cmake
+@@ -28,7 +28,7 @@
+ set(LZMA_SUPPORT FALSE)
+ find_package(liblzma)
+
+-option(lzma "use liblzma (required for LZMA2 compression)" ${LIBLZMA_FOUND})
+-if (lzma AND LIBLZMA_FOUND)
++option(lzma "use liblzma (required for LZMA2 compression)" ${liblzma_FOUND})
++if (lzma AND liblzma_FOUND)
+     set(LZMA_SUPPORT TRUE)
+ endif()

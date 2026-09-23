@@ -1,0 +1,32 @@
+Backport Fix for issue https://github.com/protocolbuffers/protobuf/issues/21542
+Also experienced when using nvcc (e.g. onnxruntime with CUDA)
+This is a conservative backport of:
+      https://github.com/protocolbuffers/protobuf/commit/211f52431b9ec30d4d4a1c76aafd64bd78d93c43
+Guarded by `__CUDACC__` so as to not alter behaviour for other compilers
+
+
+diff --git a/src/google/protobuf/message_lite.h b/src/google/protobuf/message_lite.h
+index 25264ef..6e0ba91 100644
+--- a/src/google/protobuf/message_lite.h
++++ b/src/google/protobuf/message_lite.h
+@@ -292,11 +292,18 @@ struct MessageTraitsImpl {
+ template <typename T>
+ using MessageTraits = decltype(MessageTraitsImpl::value<T>);
+ 
++#ifdef __CUDACC__
+ struct EnumTraitsImpl {
+-  struct Undefined;
+   template <typename T>
+-  static Undefined value;
++  static std::enable_if_t<sizeof(T) != 0> value;
+ };
++#else
++ struct EnumTraitsImpl {
++   struct Undefined;
++   template <typename T>
++   static Undefined value;
++ };
++#endif
+ template <typename T>
+ using EnumTraits = decltype(EnumTraitsImpl::value<T>);
+ 

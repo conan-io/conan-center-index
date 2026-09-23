@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(quickjs C)
 
-option(USE_BIGNUM "Use bignum" ON)
 option(DUMP_LEAKS "dump leaks" OFF)
 
 file(STRINGS ${QUICKJS_SRC_DIR}/VERSION version)
@@ -9,12 +8,12 @@ set(cdef CONFIG_VERSION="${version}" _GNU_SOURCE)
 
 set(QUICKJS_SRC
     ${QUICKJS_SRC_DIR}/quickjs.c
-    ${QUICKJS_SRC_DIR}/libbf.c
     ${QUICKJS_SRC_DIR}/libregexp.c
     ${QUICKJS_SRC_DIR}/libunicode.c
     ${QUICKJS_SRC_DIR}/cutils.c
-    ${QUICKJS_SRC_DIR}/quickjs-libc.c
-)
+    ${QUICKJS_SRC_DIR}/quickjs-libc.c  
+    ${QUICKJS_SRC_DIR}/dtoa.c  
+)  
 
 set(QUICKJS_INC
     ${QUICKJS_SRC_DIR}/cutils.h
@@ -30,21 +29,12 @@ set(QUICKJS_INC
     ${QUICKJS_SRC_DIR}/unicode_gen_def.h
 )
 
-if(USE_BIGNUM)
-    list(APPEND QUICKJS_SRC ${QUICKJS_SRC_DIR}/libbf.c)
-    list(APPEND QUICKJS_INC ${QUICKJS_SRC_DIR}/libbf.h)
-endif()
-
 add_library(quickjs ${QUICKJS_SRC})
 target_include_directories(quickjs PRIVATE ${QUICKJS_SRC_DIR})
 set_target_properties(quickjs PROPERTIES
     PUBLIC_HEADER "${QUICKJS_INC}"
     WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
-
-if(USE_BIGNUM)
-    target_compile_definitions(quickjs PRIVATE CONFIG_BIGNUM)
-endif()
 
 find_library(LIBM m)
 target_link_libraries(quickjs PRIVATE $<$<BOOL:${LIBM}>:${LIBM}>)

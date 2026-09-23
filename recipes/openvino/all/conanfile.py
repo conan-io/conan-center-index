@@ -148,7 +148,7 @@ class OpenvinoConan(ConanFile):
         self.tool_requires("cmake/[>=3.18 <4]")
 
     def requirements(self):
-        self.requires("onetbb/2021.10.0")
+        self.requires("onetbb/[>=2021.10.0 <2024]")
         self.requires("pugixml/1.14")
         if Version(self.version) >= "2025.1.0":
                 self.requires("nlohmann_json/3.11.3")

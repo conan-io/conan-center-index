@@ -87,11 +87,11 @@ class KtxConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["KTX_FEATURE_TOOLS"] = self.options.tools
-        tc.variables["KTX_FEATURE_DOC"] = False
-        tc.variables["KTX_FEATURE_LOADTEST_APPS"] = False
-        tc.variables["KTX_FEATURE_TESTS"] = False
-        tc.variables["BASISU_SUPPORT_SSE"] = self.options.get_safe("sse", False)
+        tc.cache_variables["KTX_FEATURE_TOOLS"] = self.options.tools
+        tc.cache_variables["KTX_FEATURE_DOC"] = False
+        tc.cache_variables["KTX_FEATURE_LOADTEST_APPS"] = False
+        tc.cache_variables["KTX_FEATURE_TESTS"] = False
+        tc.cache_variables["BASISU_SUPPORT_SSE"] = self.options.get_safe("sse", False)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

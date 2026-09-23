@@ -77,9 +77,10 @@ class LibPslConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options["runtime"] = self._idna_option
         if Version(self.version) >= "0.21.5":
-            tc.project_options["builtin"] = "true" if self.options.with_idna else "false"
             tc.project_options["tests"] = "false"  # disable tests and fuzzes
         else:
+            # INFO: Version 0.21.2 replaced idna with builtin option
+            # https://github.com/rockdaboot/libpsl/commit/aa4909766c24c17bd1d9000ca419f6dc6b32c238
             tc.project_options["builtin"] = self._idna_option
         if not self.options.shared:
             tc.preprocessor_definitions["PSL_STATIC"] = "1"

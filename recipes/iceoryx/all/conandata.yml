@@ -1,12 +1,12 @@
 sources:
-  "2.0.6":
-    url: "https://github.com/eclipse-iceoryx/iceoryx/archive/v2.0.6.tar.gz"
-    sha256: "a2add8ffee0c3357ef985cc46c7de79ccb754ea2bed02c61f2ff805ab2c869f1"
+  "2.0.8":
+    url: "https://github.com/eclipse-iceoryx/iceoryx/archive/v2.0.8.tar.gz"
+    sha256: "375b8e635185cd39821b676847bfe4c67f2ef70af9b598c00bd9e8d8e8659bd9"
   "2.0.5":
     url: "https://github.com/eclipse-iceoryx/iceoryx/archive/v2.0.5.tar.gz"
     sha256: "bf6de70e3edee71223f993a29bff5e61af95ce4871104929d8bd1729f544bafb"
 patches:
-  "2.0.6":
+  "2.0.8":
     - patch_file: "patches/2.0.5-001-missing-chrono-include.patch"
   "2.0.5":
     - patch_file: "patches/2.0.5-001-missing-chrono-include.patch"

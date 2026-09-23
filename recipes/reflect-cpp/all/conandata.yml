@@ -20,3 +20,6 @@ sources:
   "0.23.0":
     url: "https://github.com/getml/reflect-cpp/archive/refs/tags/v0.23.0.tar.gz"
     sha256: "9c5650d7ef0ab2b0ff617095280c641e6d770d9efc62dc04d86bb6ea56b55130"
+  "0.25.0":
+    url: "https://github.com/getml/reflect-cpp/archive/refs/tags/v0.25.0.tar.gz"
+    sha256: "de74d3793fd3dde9105ebe0f40bffb28df7009d59e0714389e4d29fcb46a1a3f"
