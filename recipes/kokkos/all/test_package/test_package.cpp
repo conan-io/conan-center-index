@@ -2,6 +2,7 @@
 #include <iostream>
 
 int main(void) {
-    std::cout << "Hello World on Kokkos execution space " << Kokkos::DefaultExecutionSpace::name();
+    const auto initialized = Kokkos::is_initialized();
+    std::cout << "Kokkos test package: " << initialized << std::endl;
     return 0;
 }
