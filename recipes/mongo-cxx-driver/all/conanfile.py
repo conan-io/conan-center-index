@@ -118,14 +118,6 @@ class MongoCxxConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        if Version(self.version) >= "4.6":
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "CMakeLists.txt"),
-                r"set\((BSON_REQUIRED_VERSION|MONGOC_REQUIRED_VERSION|MONGOC_DOWNLOAD_VERSION) [0-9.]+\)",
-                r"set(\1 )",
-                regex=True,
-            )
 
     def generate(self):
         tc = CMakeToolchain(self)
