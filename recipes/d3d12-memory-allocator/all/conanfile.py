@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import get, copy, rmdir, replace_in_file
+from conan.tools.files import get, copy, rmdir, apply_conandata_patches, export_conandata_patches
 import os
 
 required_conan_version = ">=2"
@@ -26,6 +26,9 @@ class D3D12MemoryAllocatorConan(ConanFile):
         "with_dxheaders": False,
     }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def validate(self):
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only available in Windows")
@@ -36,6 +39,7 @@ class D3D12MemoryAllocatorConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
+        apply_conandata_patches(self)
 
     def requirements(self):
         if self.options.with_dxheaders:
@@ -48,9 +52,7 @@ class D3D12MemoryAllocatorConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_DOCUMENTATION"] = False
         tc.variables["D3D12MA_BUILD_SAMPLE"] = False
-
-        if self.options.with_dxheaders:
-            tc.preprocessor_definitions["D3D12MA_USING_DIRECTX_HEADERS"] = "1"
+        tc.cache_variables["D3D12MA_USING_DIRECTX_HEADERS"] = self.options.with_dxheaders
 
         tc.generate()
 
@@ -58,17 +60,6 @@ class D3D12MemoryAllocatorConan(ConanFile):
         deps.generate()
 
     def build(self):
-        if self.options.with_dxheaders:
-            cmakelists_path = os.path.join(self.source_folder, "src/CMakeLists.txt")
-
-            replace_in_file(self, cmakelists_path,
-                            "add_library(D3D12MemoryAllocator",
-                            "find_package(DirectX-Headers REQUIRED)\nadd_library(D3D12MemoryAllocator")
-            replace_in_file(self, cmakelists_path,
-                            "target_link_libraries(D3D12MemoryAllocator",
-                            "target_link_libraries(D3D12MemoryAllocator PUBLIC Microsoft::DirectX-Headers)\ntarget_link_libraries(D3D12MemoryAllocator")
-
-
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -82,7 +73,6 @@ class D3D12MemoryAllocatorConan(ConanFile):
     def package_info(self):
         if self.options.with_dxheaders:
             self.cpp_info.defines.append("D3D12MA_USING_DIRECTX_HEADERS")
-            self.cpp_info.requires = ["directx-headers::directx-headers"]
 
         self.cpp_info.set_property("cmake_file_name", "D3D12MemoryAllocator")
         self.cpp_info.set_property("cmake_target_name", "GPUOpen::D3D12MemoryAllocator")
