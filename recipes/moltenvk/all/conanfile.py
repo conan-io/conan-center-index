@@ -3,7 +3,7 @@ from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
 required_conan_version = ">=2"
@@ -20,25 +20,17 @@ class MoltenVKConan(ConanFile):
     topics = ("moltenvk", "khronos", "vulkan", "metal")
     homepage = "https://github.com/KhronosGroup/MoltenVK"
     url = "https://github.com/conan-io/conan-center-index"
-    package_type = "library"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
         "tools": [True, False],
     }
     default_options = {
-        "shared": True,
-        "fPIC": True,
         "tools": True,
     }
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -89,6 +81,7 @@ class MoltenVKConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.includedirs = []
