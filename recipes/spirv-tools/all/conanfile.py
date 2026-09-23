@@ -145,6 +145,12 @@ class SpirvtoolsConan(ConanFile):
             rm(self, "*SPIRV-Tools-shared.dll", os.path.join(self.package_folder, "bin"))
             rm(self, "*SPIRV-Tools-shared*", os.path.join(self.package_folder, "lib"))
 
+        # TODO: Remove it once Diligent-Core no longer needs SPIRV-Tools private headers
+        # Those same private headers also require headers that the build generates on the fly
+        copy(self, "*.h", src=os.path.join(self.source_folder, "source"), dst=os.path.join(self.package_folder, "include", "source"))
+        copy(self, "*.h", src=self.build_folder, dst=os.path.join(self.package_folder, "include"))
+        copy(self, "*.inc", src=self.build_folder, dst=os.path.join(self.package_folder, "include"))
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SPIRV-Tools")
         self.cpp_info.set_property("pkg_config_name", "SPIRV-Tools-shared" if self.options.shared else "SPIRV-Tools")
