@@ -62,7 +62,7 @@ class DiligentCoreConan(ConanFile):
     def export_sources(self):
         copy(self, "conan_deps.cmake", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"), keep_path=False)
         export_conandata_patches(self)
-        
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -109,12 +109,12 @@ class DiligentCoreConan(ConanFile):
                         "project(DiligentCore)\n\ninclude(conan_deps.cmake)")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.24 <4]")
+        self.tool_requires("cmake/[>=3.24]")
 
     def requirements(self):
         self.requires("opengl/system")
 
-        spirv_version = "1.4.350.0"
+        spirv_version = "1.4.357.0"
         self.requires(f"spirv-cross/{spirv_version}")
         self.requires(f"spirv-tools/{spirv_version}")
         if self.options.with_glslang:
