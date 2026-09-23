@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=2.31.0"
+required_conan_version = ">=2.10.0"
 
 
 class MongoCxxConan(ConanFile):
