@@ -1,7 +1,8 @@
 diff --git a/utils/update_build_version.py b/utils/update_build_version.py
+index 7adcefc..cb738fa 100755
 --- a/utils/update_build_version.py
 +++ b/utils/update_build_version.py
-@@ -128,18 +128,18 @@
+@@ -130,18 +130,18 @@ def get_version_string(project, directory):
  
  
  def main():

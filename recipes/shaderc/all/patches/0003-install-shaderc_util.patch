@@ -1,7 +1,8 @@
 diff --git a/libshaderc_util/CMakeLists.txt b/libshaderc_util/CMakeLists.txt
+index 8430ece..5ae030c 100644
 --- a/libshaderc_util/CMakeLists.txt
 +++ b/libshaderc_util/CMakeLists.txt
-@@ -87,3 +87,10 @@
+@@ -89,3 +89,11 @@ if(${SHADERC_ENABLE_TESTS})
    add_dependencies(shaderc_util_file_finder_test testdata)
    add_dependencies(shaderc_util_io_shaderc_test testdata)
  endif()
@@ -12,3 +13,4 @@ diff --git a/libshaderc_util/CMakeLists.txt b/libshaderc_util/CMakeLists.txt
 +    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 +    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 +endif()
++
