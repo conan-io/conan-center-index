@@ -40,9 +40,9 @@ class GodotCppConan(ConanFile):
 
     def validate(self):
         if self.settings.os not in ("Windows", "Linux", "Macos", "iOS", "Android", "Emscripten"):
-            raise ConanInvalidConfiguration(f"{self.ref} does not support {self.settings.os}")
+            raise ConanInvalidConfiguration("Does not support {self.settings.os}")
         if self.settings.os == "Emscripten" and self.settings.arch != "wasm":
-            raise ConanInvalidConfiguration(f"{self.ref} on Emscripten requires arch=wasm")
+            raise ConanInvalidConfiguration("On Emscripten requires arch=wasm")
 
         check_min_cppstd(self, 17)
 
