@@ -52,8 +52,8 @@ class GodotCppConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["GODOTCPP_API_VERSION"] = str(self.options.api_version)
-        tc.cache_variables["GODOTCPP_TARGET"] = str(self.options.target)
+        tc.cache_variables["GODOTCPP_API_VERSION"] = self.options.api_version
+        tc.cache_variables["GODOTCPP_TARGET"] = self.options.target
         if is_msvc(self):
             tc.cache_variables["GODOTCPP_USE_STATIC_CPP"] = is_msvc_static_runtime(self)
         tc.generate()
