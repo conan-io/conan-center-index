@@ -66,6 +66,7 @@ class DiligentCoreConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        rmdir(self, os.path.join(self.source_folder, "ThirdParty", "glew"))
 
     def package_id(self):
         if visual.is_msvc(self.info):
@@ -87,9 +88,11 @@ class DiligentCoreConan(ConanFile):
         tc.variables["ENABLE_RTTI"] = True
         tc.variables["ENABLE_EXCEPTIONS"] = True
         tc.variables[self._diligent_platform()] = True
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("glew", "cmake_target_name", "GLEW::glew")
         deps.generate()
 
     def layout(self):
@@ -124,6 +127,7 @@ class DiligentCoreConan(ConanFile):
         self.requires(f"vulkan-validationlayers/{spirv_version}")
         self.requires(f"volk/{spirv_version}")
         self.requires("xxhash/0.8.3")
+        self.requires("glew/2.2.0")
         if self.settings.os == "Linux":
             self.requires("wayland/[>=1.22.0 <2]")
 
