@@ -1,8 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import cross_building
-from conan.tools.env import VirtualRunEnv
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -33,7 +31,7 @@ class PsqlodbcConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libpq/14.22")
+        self.requires("libpq/[>=14.22 <18]")
         self.requires("odbc/2.3.11")
 
     def validate(self):
@@ -53,24 +51,19 @@ class PsqlodbcConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        # configure runs test executables linked against shared dependencies
-        if not cross_building(self):
-            VirtualRunEnv(self).generate(scope="build")
-
         tc = AutotoolsToolchain(self)
         # configure's AC_CHECK_LIB(ltdl, ...) and unixODBC linkage add several
         # libraries (libltdl, libodbc, libodbccr) to the link line that the
         # driver never references. --as-needed drops these unused DT_NEEDED
-        # entries, leaving only libpq and libodbcinst.
-        tc.extra_ldflags.append("-Wl,--as-needed")
-        libpq_root = self.dependencies["libpq"].package_folder
-        odbc_root = self.dependencies["odbc"].package_folder
+        # entries, leaving only libpq and libodbcinst. Apple's linker doesn't
+        # support this GNU ld flag.
+        if not is_apple_os(self):
+            tc.extra_ldflags.append("-Wl,--as-needed")
         tc.configure_args.extend([
-            f"--with-libpq={libpq_root}",
-            f"--with-unixodbc={odbc_root}",
+            f"--with-libpq={self.dependencies["libpq"].package_folder}",
+            f"--with-unixodbc={self.dependencies["odbc"].package_folder}",
         ])
         tc.generate()
-
         deps = AutotoolsDeps(self)
         deps.generate()
 
@@ -97,7 +90,6 @@ class PsqlodbcConan(ConanFile):
         # ship no public headers, so no link interface is exposed.
         self.cpp_info.includedirs = []
         self.cpp_info.libs = []
-        self.cpp_info.libdirs = ["lib"]
         # The driver modules link libpq (PQ*) and unixODBC's libodbcinst
         # (SQLGetPrivateProfileString). Declare these so the runtime
         # dependencies are propagated to consumers/generators.
