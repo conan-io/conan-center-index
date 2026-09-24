@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -59,6 +58,7 @@ class VolkConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     @property
     def _platform_defines(self):
@@ -89,28 +89,14 @@ class VolkConan(ConanFile):
 
     def _patch_sources(self):
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        if Version(self.version) < "1.3.296":
-            replace_in_file(self, cmakelists, "find_package(Vulkan QUIET)", "find_package(VulkanHeaders REQUIRED)")
-
-        if Version(self.version) < "1.3.261":
-            replace_in_file(self, cmakelists, "Vulkan::Vulkan", "Vulkan::Headers")
-        elif Version(self.version) < "1.3.296":
-            replace_in_file(
-                self,
-                cmakelists,
-                "if(VULKAN_HEADERS_INSTALL_DIR)",
-                "if(1)\nset(VOLK_INCLUDES ${VulkanHeaders_INCLUDE_DIRS})\nelseif(VULKAN_HEADERS_INSTALL_DIR)",
-            )
-        else:
-            replace_in_file(
-                self,
-                cmakelists,
-                "if(VULKAN_HEADERS_INSTALL_DIR)",
-                "if(1)\nfind_package(VulkanHeaders REQUIRED)\nset(VOLK_INCLUDES ${VulkanHeaders_INCLUDE_DIRS})\nelseif(VULKAN_HEADERS_INSTALL_DIR)",
-            )
+        replace_in_file(
+            self,
+            cmakelists,
+            "if(VULKAN_HEADERS_INSTALL_DIR)",
+            "if(1)\nfind_package(VulkanHeaders REQUIRED)\nset(VOLK_INCLUDES ${VulkanHeaders_INCLUDE_DIRS})\nelseif(VULKAN_HEADERS_INSTALL_DIR)",
+        )
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
