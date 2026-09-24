@@ -4,7 +4,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class VolkConan(ConanFile):
@@ -127,7 +127,3 @@ class VolkConan(ConanFile):
             self.cpp_info.components["volk_headers"].system_libs = ["dl"]
             if self.options.with_x11:
                 self.cpp_info.components["volk_headers"].requires.append("xorg::xcb")
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["libvolk"].names["cmake_find_package"] = "volk"
-        self.cpp_info.components["libvolk"].names["cmake_find_package_multi"] = "volk"
