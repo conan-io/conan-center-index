@@ -44,7 +44,7 @@ class OpenCascadeConan(ConanFile):
         "with_ffmpeg": False,
         "with_freeimage": False,
         "with_openvr": False,
-        "with_rapidjson": False,
+        "with_rapidjson": True,
         "with_draco": False,
         "with_tk": True,
         "with_tbb": False,
