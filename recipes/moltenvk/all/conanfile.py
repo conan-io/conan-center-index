@@ -38,7 +38,6 @@ class MoltenVKConan(ConanFile):
     def requirements(self):
         self.requires("cereal/1.3.2")
         version = "1.4.357.0"
-        self.requires(f"glslang/{version}")
         self.requires(f"spirv-cross/{version}")
         self.requires(f"vulkan-headers/{version}", transitive_headers=True)
         self.requires(f"spirv-tools/{version}")
@@ -84,6 +83,7 @@ class MoltenVKConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "MoltenVK")
         self.cpp_info.includedirs = []
         self.cpp_info.libs = ["MoltenVK"]
         self.cpp_info.frameworks = ["Metal", "Foundation", "CoreFoundation", "QuartzCore", "IOSurface", "CoreGraphics"]
@@ -93,11 +93,11 @@ class MoltenVKConan(ConanFile):
             self.cpp_info.frameworks.append("UIKit")
 
         self.cpp_info.requires = [
-            "cereal::cereal", "glslang::glslang-core", "glslang::spirv", "spirv-cross::spirv-cross-core",
+            "cereal::cereal", "spirv-cross::spirv-cross-core",
             "spirv-cross::spirv-cross-msl", "spirv-cross::spirv-cross-reflect", "vulkan-headers::vulkan-headers",
         ]
         self.cpp_info.requires.append("spirv-tools::spirv-tools-core")
 
-        moltenvk_icd_path = os.path.join(self.package_folder, "lib", "MoltenVK_icd.json")
+        moltenvk_icd_path = os.path.join(self.package_folder, "etc", "vulkan", "icd.d", "MoltenVK_icd.json")
         self.runenv_info.prepend_path("VK_DRIVER_FILES", moltenvk_icd_path)
         self.runenv_info.prepend_path("VK_ICD_FILENAMES", moltenvk_icd_path)

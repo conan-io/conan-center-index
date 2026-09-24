@@ -1,14 +1,19 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 91f50f1..515e625 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -82,6 +82,11 @@
+@@ -82,9 +82,11 @@ endif()
  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/MoltenVK/")
  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/recipes/")
-
+ 
+-# General CMake utils
+-set(CPM_USE_NAMED_CACHE_DIRECTORIES 1)
+-include(MoltenVK_CPM_Cache)
 +find_package(cereal REQUIRED CONFIG)
 +find_package(spirv-cross REQUIRED CONFIG)
 +find_package(SPIRV-Tools REQUIRED CONFIG)
 +find_package(VulkanHeaders REQUIRED CONFIG)
 +
- # General CMake utils
- set(CPM_USE_NAMED_CACHE_DIRECTORIES 1)
- include(MoltenVK_CPM_Cache)
+ 
+ # Generate position-independent code by default
+ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
