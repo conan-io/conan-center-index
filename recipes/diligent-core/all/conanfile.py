@@ -66,7 +66,6 @@ class DiligentCoreConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        rmdir(self, os.path.join(self.source_folder, "ThirdParty", "glew"))
 
     def package_id(self):
         if visual.is_msvc(self.info):
