@@ -56,7 +56,8 @@ class lmdbConan(ConanFile):
         # MDB_USE_ROBUST is only consulted where LMDB uses POSIX mutexes. Leave it
         # undefined elsewhere: since 1.0 the mere presence of the macro suppresses
         # the POSIX semaphore default on Apple/BSD and falls back to SysV semaphores.
-        if self.settings.os in ("Linux", "FreeBSD"):
+        # Emscripten also uses POSIX mutexes, but does not provide robust mutexes.
+        if self.settings.os in ("Linux", "FreeBSD", "Emscripten"):
             tc.variables["LMDB_ENABLE_ROBUST_MUTEX"] = self.options.enable_robust_mutex
         tc.generate()
 
