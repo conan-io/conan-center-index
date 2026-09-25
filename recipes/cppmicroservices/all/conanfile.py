@@ -68,7 +68,12 @@ class CppMicroServicesConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["US_USE_SYSTEM_BOOST"] = True
         tc.cache_variables["US_USE_SYSTEM_MINIZ"] = True
+        # Upstream hides the symbols of static miniz/spdlog when linking them into the shared bundles.
+        tc.cache_variables["US_MINIZ_SHARED"] =self.dependencies["miniz"].options.shared
         tc.cache_variables["US_USE_SYSTEM_SPDLOG"] = self.options.shared
+        if self.options.shared:
+            spdlog_options = self.dependencies["spdlog"].options
+            tc.cache_variables["US_SPDLOG_SHARED"] = bool(spdlog_options.get_safe("shared") or spdlog_options.get_safe("header_only"))
         tc.cache_variables["US_USE_SYSTEM_RAPIDJSON"] = True
         tc.cache_variables["US_USE_SYSTEM_CLI11"] = True
         tc.cache_variables["US_BUILD_TESTING"] = False
@@ -109,13 +114,13 @@ class CppMicroServicesConan(ConanFile):
         self.cpp_info.components["usresourcecompiler3"].exe = "usResourceCompiler3"
         self.cpp_info.components["usresourcecompiler3"].location = os.path.join(self.package_folder, "bin", "usResourceCompiler3")
         # Only the Boost.Nowide headers are used
-        self.cpp_info.components["usresourcecompiler3"].requires = ["boost::headers", "miniz::miniz"]
+        self.cpp_info.components["usresourcecompiler3"].requires = ["boost::headers", "miniz::miniz", "cli11::cli11"]
         self.cpp_info.components["usresourcecompiler3"].libdirs = []
         self.cpp_info.components["usresourcecompiler3"].includedirs = []
 
         self.cpp_info.components["jsonschemavalidator"].exe = "jsonschemavalidator"
         self.cpp_info.components["jsonschemavalidator"].location = os.path.join(self.package_folder, "bin", "jsonschemavalidator")
-        self.cpp_info.components["jsonschemavalidator"].requires = ["cli11::cli11"]
+        self.cpp_info.components["jsonschemavalidator"].requires = ["cli11::cli11", "rapidjson::rapidjson"]
         self.cpp_info.components["jsonschemavalidator"].libdirs = []
         self.cpp_info.components["jsonschemavalidator"].includedirs = []
 
@@ -127,6 +132,7 @@ class CppMicroServicesConan(ConanFile):
 
         self.cpp_info.components["scrcodegen3"].exe = "SCRCodeGen3"
         self.cpp_info.components["scrcodegen3"].location = os.path.join(self.package_folder, "bin", "SCRCodeGen3")
+        self.cpp_info.components["scrcodegen3"].requires = ["rapidjson::rapidjson"]
         self.cpp_info.components["scrcodegen3"].libdirs = []
         self.cpp_info.components["scrcodegen3"].includedirs = []
 
