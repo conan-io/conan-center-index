@@ -1,0 +1,28 @@
+Fix wrong architecture for resource objects when cross-compiling on macOS
+https://github.com/CppMicroServices/CppMicroServices/pull/1289
+
+diff --git a/cmake/usFunctionEmbedResources.cmake b/cmake/usFunctionEmbedResources.cmake
+index f1ce8332..9bef0bc5 100755
+--- a/cmake/usFunctionEmbedResources.cmake
++++ b/cmake/usFunctionEmbedResources.cmake
+@@ -223,11 +223,18 @@ function(usFunctionEmbedResources)
+         set(_us_resource_deploy_target_flag -mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET})
+       endif()
+
++      set(_us_resource_arch_flags)
++      if(CMAKE_OSX_ARCHITECTURES)
++        foreach(_us_arch ${CMAKE_OSX_ARCHITECTURES})
++          list(APPEND _us_resource_arch_flags -arch ${_us_arch})
++        endforeach()
++      endif()
++
+       # section name is "us_resources" because max length for section names in Mach-O format is 16 characters.
+       add_custom_command(
+         OUTPUT ${_source_output}
+-        COMMAND ${CMAKE_CXX_COMPILER} --std=c++17 ${_us_resource_cxx_flags} ${_us_resource_deploy_target_flag} -c ${US_CMAKE_RESOURCE_DEPENDENCIES_CPP} -o stub.o
+-        COMMAND ${CMAKE_LINKER} -r -sectcreate __TEXT us_resources ${_zip_archive_name} stub.o -o ${_source_output}
++        COMMAND ${CMAKE_CXX_COMPILER} --std=c++17 ${_us_resource_cxx_flags} ${_us_resource_arch_flags} ${_us_resource_deploy_target_flag} -c ${US_CMAKE_RESOURCE_DEPENDENCIES_CPP} -o stub.o
++        COMMAND ${CMAKE_LINKER} -r ${_us_resource_arch_flags} -sectcreate __TEXT us_resources ${_zip_archive_name} stub.o -o ${_source_output}
+         DEPENDS ${_zip_archive}
+         WORKING_DIRECTORY ${_zip_archive_path}
+         COMMENT "Linking resources zip file ${_zip_archive} for ${US_RESOURCE_TARGET}"
