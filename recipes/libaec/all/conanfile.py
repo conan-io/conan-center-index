@@ -13,7 +13,7 @@ class LibaecConan(ConanFile):
     name = "libaec"
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://gitlab.dkrz.de/k202009/libaec"
+    homepage = "https://github.com/Deutsches-Klimarechenzentrum/libaec"
     description = "Adaptive Entropy Coding library"
     topics = "dsp", "encoding", "decoding"
 
@@ -100,17 +100,19 @@ class LibaecConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "libaec")
 
         # CMake targets are based on
-        # https://gitlab.dkrz.de/k202009/libaec/-/blob/master/cmake/libaec-config.cmake.in
+        # https://github.com/Deutsches-Klimarechenzentrum/libaec/blob/v1.1.2/cmake/libaec-config.cmake.in
         self.cpp_info.components["aec"].set_property("cmake_target_name", "libaec::aec")
+        # The 1.0.6 release tarball uses underscores; tag archives use hyphens.
+        static_suffix = "_static" if Version(self.version) == "1.0.6" else "-static"
         aec_name = "aec"
         if self.settings.os == "Windows" and not self.options.shared:
-            aec_name = "aec-static"
+            aec_name = f"aec{static_suffix}"
         self.cpp_info.components["aec"].libs = [aec_name]
 
         self.cpp_info.components["sz"].set_property("cmake_target_name", "libaec::sz")
         szip_name = "sz"
         if self.settings.os == "Windows":
-            szip_name = "szip" if self.options.shared else "szip-static"
+            szip_name = "szip" if self.options.shared else f"szip{static_suffix}"
         self.cpp_info.components["sz"].libs = [szip_name]
 
         # TODO: Legacy, to be removed on Conan 2.0
