@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.4"
@@ -37,7 +38,8 @@ class TreeSitterCUDAConan(ConanFile):
         self.requires(dep, transitive_headers=True, transitive_libs=True)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        stripRoot = Version(self.version) < "0.21.2"
+        get(self, **self.conan_data["sources"][self.version], strip_root=stripRoot)
         apply_conandata_patches(self)
 
     def generate(self):
