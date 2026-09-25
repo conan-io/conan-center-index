@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rm, replace_in_file, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import copy, get, rm, replace_in_file
 from conan.tools.env import VirtualBuildEnv
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -22,9 +22,6 @@ class CppMicroServicesConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     implements = ["auto_shared_fpic"]
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -56,7 +53,6 @@ class CppMicroServicesConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
         # error: virtual method '~ConfigurationManager' is inside a 'final' class and can never be overridden
         # Fixed by https://github.com/CppMicroServices/CppMicroServices/pull/1275
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "-Werror", "")
