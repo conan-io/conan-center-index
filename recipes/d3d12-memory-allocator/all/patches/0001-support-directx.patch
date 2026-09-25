@@ -1,0 +1,37 @@
+https://github.com/GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator/pull/97
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5cf7273..dae37bd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -7,6 +7,11 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+ find_package(Doxygen)
+ option(BUILD_DOCUMENTATION "Create and install the HTML-based API documentation (requires Doxygen)" OFF)
+ option(BUILD_SHARED_LIBS "Build D3D12 Memory Allocator shared library" OFF)
++option(D3D12MA_USING_DIRECTX_HEADERS "Build D3D12 Memory Allocator with the open sourced DirectX headers" OFF)
++
++if(D3D12MA_USING_DIRECTX_HEADERS)
++    find_package(directx-headers REQUIRED)
++endif()
+ 
+ if(BUILD_DOCUMENTATION)
+     if(DOXYGEN_FOUND)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 34ec3f8..21312b8 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -46,6 +46,15 @@ if(BUILD_SHARED_LIBS)
+     )
+ endif()
+ 
++if(D3D12MA_USING_DIRECTX_HEADERS)
++    target_link_libraries(D3D12MemoryAllocator PUBLIC
++        Microsoft::DirectX-Headers
++    )
++    target_compile_definitions(D3D12MemoryAllocator PUBLIC
++        D3D12MA_USING_DIRECTX_HEADERS
++    )
++endif()
++
+ set(D3D12MA_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
+ set(D3D12MA_VERSION_CONFIG "${D3D12MA_GENERATED_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
+ set(D3D12MA_PROJECT_CONFIG "${D3D12MA_GENERATED_DIR}/${PROJECT_NAME}Config.cmake")
