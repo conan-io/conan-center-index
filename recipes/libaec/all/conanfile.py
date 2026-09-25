@@ -102,15 +102,17 @@ class LibaecConan(ConanFile):
         # CMake targets are based on
         # https://github.com/Deutsches-Klimarechenzentrum/libaec/blob/v1.1.2/cmake/libaec-config.cmake.in
         self.cpp_info.components["aec"].set_property("cmake_target_name", "libaec::aec")
+        # The 1.0.6 release tarball uses underscores; tag archives use hyphens.
+        static_suffix = "_static" if Version(self.version) == "1.0.6" else "-static"
         aec_name = "aec"
         if self.settings.os == "Windows" and not self.options.shared:
-            aec_name = "aec-static"
+            aec_name = f"aec{static_suffix}"
         self.cpp_info.components["aec"].libs = [aec_name]
 
         self.cpp_info.components["sz"].set_property("cmake_target_name", "libaec::sz")
         szip_name = "sz"
         if self.settings.os == "Windows":
-            szip_name = "szip" if self.options.shared else "szip-static"
+            szip_name = "szip" if self.options.shared else f"szip{static_suffix}"
         self.cpp_info.components["sz"].libs = [szip_name]
 
         # TODO: Legacy, to be removed on Conan 2.0
