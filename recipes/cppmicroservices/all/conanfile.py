@@ -58,6 +58,8 @@ class CppMicroServicesConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "-Werror", "")
         # Link Boost::nowide from Conan instead of virtual imported target nowide::nowide
         replace_in_file(self, os.path.join(self.source_folder, "tools", "rc", "CMakeLists.txt"), "nowide::nowide", "Boost::nowide")
+        # Let Conan manage cppstd
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 17)", "")
 
     def generate(self):
         env = VirtualBuildEnv(self)
