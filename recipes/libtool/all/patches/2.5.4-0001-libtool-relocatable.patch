@@ -1,0 +1,41 @@
+diff --git a/Makefile.in b/Makefile.in
+index 1234567..abcdefg 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -2427,10 +2427,10 @@
+ # files created in the build tree, so instead we regenerate the
+ # manual pages if the sources for the build-tree files we want to
+ # run have changed.
+-$(libtool_1): $(ltmain_sh)
+-	$(AM_V_GEN)$(update_mans) -n 'Provide generalized library-building support services' --help-option=--help-all libtool
+-$(libtoolize_1): $(libtoolize_in)
+-	$(AM_V_GEN)$(update_mans) -n 'Prepare a package to use libtool' libtoolize
++#$(libtool_1): $(ltmain_sh)
++#	$(AM_V_GEN)$(update_mans) -n 'Provide generalized library-building support services' --help-option=--help-all libtool
++#$(libtoolize_1): $(libtoolize_in)
++#	$(AM_V_GEN)$(update_mans) -n 'Prepare a package to use libtool' libtoolize
+ 
+ install-data-local: $(lt_Makefile_in) install-scripts-local
+ 	@$(NORMAL_INSTALL)
+diff --git a/libtoolize.in b/libtoolize.in
+index 1234567..abcdefg 100644
+--- a/libtoolize.in
++++ b/libtoolize.in
+@@ -1934,11 +1934,12 @@
+   pkgmacro_files="@pkgmacro_files@"
+ 
+   # Locations for important files:
+-  prefix="@prefix@"
+-  datadir="@datadir@"
+-  pkgauxdir="@pkgauxdir@"
+-  pkgltdldir="@pkgdatadir@"
+-  aclocaldir="@aclocaldir@"
++  scriptdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
++  prefix="$scriptdir/.."
++  datadir="$scriptdir/../res"
++  pkgauxdir="$scriptdir/../res/libtool/build-aux"
++  pkgltdldir="$scriptdir/../res/libtool"
++  aclocaldir="$scriptdir/../res/aclocal"
+ 
+   # Allow the user to override the master libtoolize repository:
+   if test -n "$_lt_pkgdatadir"; then
