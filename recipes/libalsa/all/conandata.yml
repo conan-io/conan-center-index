@@ -1,4 +1,7 @@
 sources:
+  "1.2.16.1":
+    url: "https://github.com/alsa-project/alsa-lib/archive/v1.2.16.1.tar.gz"
+    sha256: "8df8253c6349cf309903c1dd7752efe783c1f456913c9d722bdb5731271c0988"
   "1.2.13":
     url: "https://github.com/alsa-project/alsa-lib/archive/v1.2.13.tar.gz"
     sha256: "e296a2e8fa165855e2c8f263ff6bc0b0ea21a3bece4404135f3a181d1a03e63a"
