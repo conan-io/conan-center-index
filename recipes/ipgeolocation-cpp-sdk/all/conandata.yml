@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/IPGeolocation/ip-geolocation-api-cpp-sdk/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "c45a9f537962d43714bb7b778ce6417f012abeff26a361d42464b1795d6df3f3"
