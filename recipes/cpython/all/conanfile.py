@@ -382,10 +382,13 @@ class CPythonConan(ConanFile):
                             "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"$(Configuration) == 'Debug' or $(Configuration) == 'Release'\"",
                             "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"False\"")
 
-        # Remove vendored openssl file
-        replace_in_file(self, self._msvc_project_path("_ssl"),
-                        r'<ClCompile Include="$(opensslIncludeDir)\applink.c">',
-                        r'<ClCompile Include="$(opensslIncludeDir)\applink.c" Condition="False">')
+        # Remove vendored openssl file.
+        # Upstream dropped this reference in 3.12.10, and did not backport the change to 3.11,
+        # so every 3.11.x is below the 3.12.10 boundary and still needs the patch.
+        if Version(self.version) < "3.12.10":
+            replace_in_file(self, self._msvc_project_path("_ssl"),
+                            r'<ClCompile Include="$(opensslIncludeDir)\applink.c">',
+                            r'<ClCompile Include="$(opensslIncludeDir)\applink.c" Condition="False">')
 
         self._inject_conan_props_file("_bz2", "bzip2", self.options.get_safe("with_bz2"))
         self._inject_conan_props_file("_elementtree", "expat", self._supports_modules)
