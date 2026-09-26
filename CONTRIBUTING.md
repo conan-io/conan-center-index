@@ -107,5 +107,5 @@ For any suggestion, feature request or question open an issue indicating the fol
 - Try to explain the motivation, what are you trying to do, what is the pain it tries to solve.
 - What do you expect from CCI.
 
-We use the following tags to control the status of the issues and pull requests, you can learn more in [Labels](docs/labels.md) document
+We use the following tags to control the status of the issues and pull requests, you can learn more in [Labels](https://github.com/conan-io/conan-center-index/labels) document
 which details the important one and their roles.
