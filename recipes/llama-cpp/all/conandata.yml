@@ -1,4 +1,7 @@
 sources:
-  "b6565":
-    url: "https://github.com/ggerganov/llama.cpp/archive/refs/tags/b6565.tar.gz"
-    sha256: "d00ea100bdd2dbba35663b55124acbcf26c5a7b442fced3e2c742f245d87a6e5"
+  "0.4.1":
+    url: "https://github.com/ggml-org/llama.cpp/archive/refs/tags/v0.4.1.tar.gz"
+    sha256: "ef3d5b1907a391500ae11b5e61a8e2022e0deaac9790899cad9c4e02f03bfb9a"
+patches:
+  "0.4.1":
+    - patch_file: "patches/0001-link-spirv-headers.patch"
