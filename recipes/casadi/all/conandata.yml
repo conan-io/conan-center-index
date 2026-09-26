@@ -1,0 +1,4 @@
+sources:
+  "3.8.1":
+    url: "https://github.com/casadi/casadi/archive/refs/tags/3.8.1.tar.gz"
+    sha256: "99c14f3c50dbc8393f449844cb600c5151acff5f74ed53c97d444fcaaf6b5a13"
