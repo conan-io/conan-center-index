@@ -1,0 +1,4 @@
+sources:
+  "4.5.0":
+    url: "https://github.com/kristianivarsson/polylite/archive/refs/tags/4.5.0.tar.gz"
+    sha256: "78e9bbc2429b30bc58e6c84a3f00aea6fe23d3d3d7101e495a769d8722b41438"
