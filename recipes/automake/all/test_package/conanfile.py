@@ -39,7 +39,7 @@ class TestPackageConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        self.build_requires(self.tested_reference_str)
+        self.tool_requires(self.tested_reference_str)
         if self._settings_build.os == "Windows" and not self.conf.get(
             "tools.microsoft.bash:path", check_type=str
         ):
