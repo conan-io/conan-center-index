@@ -1,13 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class LibalsaConan(ConanFile):
@@ -47,20 +45,14 @@ class LibalsaConan(ConanFile):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
 
-    def build_requirements(self):
-        self.tool_requires("libtool/2.4.7")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        virtual_build_env = VirtualBuildEnv(self)
-        virtual_build_env.generate()
-
         tc = AutotoolsToolchain(self)
-        yes_no = lambda v: "yes" if v else "no"
+        enable_python = "yes" if not self.options.disable_python else "no"
         tc.configure_args.extend([
-            f"--enable-python={yes_no(not self.options.disable_python)}",
+            f"--enable-python={enable_python}",
             "--datarootdir=${prefix}/res",
             "--datadir=${prefix}/res",
         ])
@@ -69,25 +61,13 @@ class LibalsaConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         autotools = Autotools(self)
-        if Version(self.version) > "1.2.4":
-            autotools.autoreconf()
-            autotools.configure()
-            autotools.make()
-        else:
-            with chdir(self, self.source_folder):
-                autotools.autoreconf()
-                autotools.configure()
-                autotools.make()
+        autotools.configure()
+        autotools.make()
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        if Version(self.version) > "1.2.4":
-            autotools = Autotools(self)
-            autotools.install()
-        else:
-            with chdir(self, self.source_folder):
-                autotools = Autotools(self)
-                autotools.install()
+        autotools = Autotools(self)
+        autotools.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
@@ -101,9 +81,3 @@ class LibalsaConan(ConanFile):
         self.cpp_info.system_libs = ["dl", "m", "rt", "pthread"]
         alsa_config_dir = os.path.join(self.package_folder, "res", "alsa")
         self.runenv_info.define_path("ALSA_CONFIG_DIR", alsa_config_dir)
-
-        # TODO: to remove in conan v2?
-        self.cpp_info.names["cmake_find_package"] = "ALSA"
-        self.cpp_info.names["cmake_find_package_multi"] = "ALSA"
-        self.cpp_info.names["pkg_config"] = "alsa"
-        self.env_info.ALSA_CONFIG_DIR = alsa_config_dir
