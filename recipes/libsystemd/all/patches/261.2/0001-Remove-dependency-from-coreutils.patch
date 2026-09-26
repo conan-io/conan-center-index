@@ -1,0 +1,16 @@
+diff --git a/meson.build b/meson.build
+index 438ce4f..b6e23aa 100644
+--- a/meson.build
++++ b/meson.build
+@@ -44,10 +44,7 @@ if meson.version().version_compare('>=1.3.0')
+         relative_source_path = fs.relative_to(meson.project_source_root(),
+                                               meson.project_build_root())
+ else
+-        relative_source_path = run_command('realpath',
+-                                           '--relative-to=@0@'.format(meson.project_build_root()),
+-                                           meson.project_source_root(),
+-                                           check : true).stdout().strip()
++        relative_source_path = @CONAN_SRC_REL_PATH@
+ endif
+ conf.set_quoted('RELATIVE_SOURCE_PATH', relative_source_path)
+ 
