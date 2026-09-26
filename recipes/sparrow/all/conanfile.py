@@ -15,7 +15,7 @@ class SparrowRecipe(ConanFile):
     description = "C++20 idiomatic APIs for the Apache Arrow Columnar Format"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/man-group/sparrow"
+    homepage = "https://github.com/sparrow-org/sparrow"
     topics = ("arrow", "apache arrow", "columnar format", "dataframe")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
