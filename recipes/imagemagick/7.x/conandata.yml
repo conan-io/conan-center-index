@@ -1,0 +1,31 @@
+sources:
+  "7.1.2-18":
+    url: "https://github.com/ImageMagick/ImageMagick/archive/refs/tags/7.1.2-18.tar.gz"
+    sha256: "2db8a1f9bac19831c76574e4fd514ecb80a71a49911ee5dc8c1f3fb6d9d550df"
+patches:
+  "7.1.2-18":
+    - patch_file: "patches/0001-fix-zstd-pkgconfig-prefix.patch"
+      patch_description: >
+        Fix PKG_CHECK_MODULES prefix mismatch in configure.ac: LIBZSTD creates
+        LIBZSTD_CFLAGS but code uses ZSTD_CFLAGS. Upstream bug.
+      patch_type: "bugfix"
+    - patch_file: "patches/0002-fix-fallthrough-msvc-c-mode.patch"
+      patch_description: >
+        Guard [[fallthrough]] with __cplusplus check on MSVC. The C++17
+        attribute is not valid in MSVC's C frontend; make it a no-op for C.
+      patch_type: "portability"
+    - patch_file: "patches/0003-fix-cppflags-crt-conflict.patch"
+      patch_description: >
+        Remove -D_DLL, -D_LIB, -D_MT from CPPFLAGS in configure.ac
+        (keep them in MAGICK_CPPFLAGS / MAGICK_PCFLAGS). Adding these
+        to CPPFLAGS pollutes AC_CHECK_SIZEOF: -D_DLL makes CRT headers
+        declare stdio as dllimport, incompatible with -MT static CRT,
+        causing LNK2019 for fopen/ferror. Defines are injected into the
+        Makefile post-configure by conanfile.py instead.
+      patch_type: "portability"
+    - patch_file: "patches/0004-fix-uhdr-cpp-compat.patch"
+      patch_description: >
+        Fix coders/uhdr.c for C++ compilation (-TP on Windows): replace
+        {0} struct initializers with {} (enum first field), and add
+        explicit casts from void* to typed pointers (uint16_t*, etc.).
+      patch_type: "portability"
