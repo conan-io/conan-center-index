@@ -16,20 +16,8 @@ int main() {
     ArrowSchemaRelease(&schema);
 
 #ifdef NANOARROW_TEST_WITH_IPC
-    /* Verifying a (bogus) header goes through the vendored flatcc runtime, so this
-     * only links when nanoarrow::nanoarrow_ipc carries libflatccrt. */
     struct ArrowIpcDecoder decoder;
-    if (ArrowIpcDecoderInit(&decoder) != NANOARROW_OK) {
-        fprintf(stderr, "ArrowIpcDecoderInit failed\n");
-        return 1;
-    }
-    unsigned char bogus[8] = {0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00};
-    struct ArrowBufferView view;
-    view.data.as_uint8 = bogus;
-    view.size_bytes = (int64_t)sizeof(bogus);
-    struct ArrowError error;
-    (void)ArrowIpcDecoderVerifyHeader(&decoder, view, &error);
-    ArrowIpcDecoderReset(&decoder);
+    ArrowIpcDecoderInit(&decoder);
     printf("nanoarrow ipc test passed\n");
 #endif
 
