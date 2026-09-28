@@ -26,6 +26,19 @@ class CppMicroServicesConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def validate(self):
+            check_min_cppstd(self, 17)
+            if self.dependencies["boost"].options.without_nowide:
+                raise ConanInvalidConfiguration(f"Boost nowide is required for {self.name}. Build with -o 'boost/*:without_nowide=False'")
+            if cross_building(self):
+                # FIXME: usResourceCompiler is a build tool in CppMicroServices required by cppmicroservices
+                # We need to run it as for native arch and solve its dynamic linking issues
+                raise ConanInvalidConfiguration(f"Cross-building is not supported yet. Contributions are welcome!")
+            # FIXME: usResourceCompiler3 tools have issues locating shared DLLs on Windows
+            # We can patch its cmake to inject library paths
+            if self.settings.os == "Windows" and self.options.shared:
+                raise ConanInvalidConfiguration(f"usResourceCompiler3 tools can not find shared DLLs. Contributions are welcome!")
+
     def requirements(self):
         self.requires("boost/1.91.0", options={"without_nowide": False})
         self.requires("miniz/3.1.1")
@@ -34,19 +47,6 @@ class CppMicroServicesConan(ConanFile):
         if self.options.shared:
             # LogService, DeclarativeServices and ConfigurationAdmin bundles are only built as shared libraries
             self.requires("spdlog/[>=1.15 <2]")
-
-    def validate(self):
-        check_min_cppstd(self, 17)
-        if self.dependencies["boost"].options.without_nowide:
-            raise ConanInvalidConfiguration(f"Boost nowide is required for {self.name}. Build with -o 'boost/*:without_nowide=False'")
-        if cross_building(self):
-            # FIXME: usResourceCompiler is a build tool in CppMicroServices required by cppmicroservices
-            # We need to run it as for native arch and solve its dynamic linking issues
-            raise ConanInvalidConfiguration(f"Cross-building is not supported yet. Contributions are welcome!")
-        # FIXME: usResourceCompiler3 tools have issues locating shared DLLs on Windows
-        # We can patch its cmake to inject library paths
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration(f"usResourceCompiler3 tools can not find shared DLLs. Contributions are welcome!")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.17]")
@@ -114,7 +114,7 @@ class CppMicroServicesConan(ConanFile):
         self.cpp_info.components["usresourcecompiler3"].exe = "usResourceCompiler3"
         self.cpp_info.components["usresourcecompiler3"].location = os.path.join(self.package_folder, "bin", "usResourceCompiler3")
         # Only the Boost.Nowide headers are used
-        self.cpp_info.components["usresourcecompiler3"].requires = ["boost::headers", "miniz::miniz", "cli11::cli11"]
+        self.cpp_info.components["usresourcecompiler3"].requires = ["boost::headers", "miniz::miniz", "cli11::cli11", "boost::nowide"]
         self.cpp_info.components["usresourcecompiler3"].libdirs = []
         self.cpp_info.components["usresourcecompiler3"].includedirs = []
 
