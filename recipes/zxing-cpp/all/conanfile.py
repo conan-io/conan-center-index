@@ -31,11 +31,11 @@ class ZXingCppConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def build_requirements(self):
-        self.build_requires("cmake/[>=3.16]")
-
     def validate(self):
         check_min_cppstd(self, 20)
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
