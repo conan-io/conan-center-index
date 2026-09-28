@@ -1,0 +1,5 @@
+versions:
+  "1.2.5":
+    url: "https://github.com/fcf-framework/fcfTest/archive/refs/tags/v1.2.5.zip"
+    sha256: "be133d09c6801ec38359d3e17fac3d8ff2747795624af1e07b6451f140511a07"
+
