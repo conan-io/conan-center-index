@@ -1,9 +1,7 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy, rmdir, rm
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
@@ -39,11 +37,6 @@ class ZXingCppConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 20)
 
-        # FIXME: This is a workaround for "The system cannot execute the specified program."
-        # TODO: Validate on Windows for 3.1.1
-        if Version(self.version) >= "1.3.0" and is_msvc_static_runtime(self) and self.settings.build_type == "Debug":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support MT + Debug.")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -65,6 +58,7 @@ class ZXingCppConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ZXing")
