@@ -1,0 +1,16 @@
+Escape quotes when generating H5build_settings.c so CMAKE_INSTALL_RPATH
+values with $ORIGIN / ${ORIGIN} are valid C string literals.
+
+Backport of https://github.com/HDFGroup/hdf5/pull/6673
+
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1168,7 +1168,7 @@ endif ()
+ #-----------------------------------------------------------------------------
+ # Generate the H5build_settings.c file
+ #-----------------------------------------------------------------------------
+-configure_file (${HDF5_SOURCE_DIR}/src/H5build_settings.cmake.c.in ${HDF5_SRC_BINARY_DIR}/H5build_settings.c @ONLY)
++configure_file (${HDF5_SOURCE_DIR}/src/H5build_settings.cmake.c.in ${HDF5_SRC_BINARY_DIR}/H5build_settings.c ESCAPE_QUOTES @ONLY)
+ 
+ if (BUILD_SHARED_LIBS)
+  file (MAKE_DIRECTORY "${HDF5_SRC_BINARY_DIR}/shared")

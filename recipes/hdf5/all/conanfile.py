@@ -121,8 +121,8 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_EXTERNAL_LIB_PREFIX"] = ""
         tc.variables["HDF5_USE_FOLDERS"] = False
         tc.variables["HDF5_NO_PACKAGES"] = True
-        tc.variables["ALLOW_UNSUPPORTED"] = False
-        tc.variables["ONLY_SHARED_LIBS"] = self.options.shared
+        tc.variables["ALLOW_UNSUPPORTED" if Version(self.version) < "2.0.0" else "HDF5_ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
+        tc.variables["ONLY_SHARED_LIBS" if Version(self.version) < "2.0.0" else "HDF5_ONLY_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["BUILD_STATIC_EXECS"] = False
         tc.variables["HDF5_ENABLE_COVERAGE"] = False
@@ -152,7 +152,6 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_BUILD_FORTRAN"] = False
         tc.variables["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
         tc.variables["HDF5_BUILD_JAVA"] = False
-        tc.variables["ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
         tc.generate()
 
     def build(self):
