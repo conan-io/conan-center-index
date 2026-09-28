@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import stdcpp_library
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -10,7 +9,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Git
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.10.0"
 
 
 class LibVmafConan(ConanFile):
@@ -82,8 +81,6 @@ class LibVmafConan(ConanFile):
         git.fetch_commit(**self.conan_data["sources"][self.version])
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
 
