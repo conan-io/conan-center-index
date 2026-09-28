@@ -27,17 +27,17 @@ class CppMicroServicesConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-            check_min_cppstd(self, 17)
-            if self.dependencies["boost"].options.without_nowide:
-                raise ConanInvalidConfiguration(f"Boost nowide is required for {self.name}. Build with -o 'boost/*:without_nowide=False'")
-            if cross_building(self):
-                # FIXME: usResourceCompiler is a build tool in CppMicroServices required by cppmicroservices
-                # We need to run it as for native arch and solve its dynamic linking issues
-                raise ConanInvalidConfiguration(f"Cross-building is not supported yet. Contributions are welcome!")
-            # FIXME: usResourceCompiler3 tools have issues locating shared DLLs on Windows
-            # We can patch its cmake to inject library paths
-            if self.settings.os == "Windows" and self.options.shared:
-                raise ConanInvalidConfiguration(f"usResourceCompiler3 tools can not find shared DLLs. Contributions are welcome!")
+        check_min_cppstd(self, 17)
+        if self.dependencies["boost"].options.without_nowide:
+            raise ConanInvalidConfiguration(f"Boost nowide is required for {self.name}. Build with -o 'boost/*:without_nowide=False'")
+        if cross_building(self):
+            # FIXME: usResourceCompiler is a build tool in CppMicroServices required by cppmicroservices
+            # We need to run it as for native arch and solve its dynamic linking issues
+            raise ConanInvalidConfiguration(f"Cross-building is not supported yet. Contributions are welcome!")
+        # FIXME: usResourceCompiler3 tools have issues locating shared DLLs on Windows
+        # We can patch its cmake to inject library paths
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration(f"usResourceCompiler3 tools can not find shared DLLs. Contributions are welcome!")
 
     def requirements(self):
         self.requires("boost/1.91.0", options={"without_nowide": False})
