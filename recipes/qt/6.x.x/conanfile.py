@@ -1352,7 +1352,9 @@ class QtConan(ConanFile):
             self.cpp_info.components["qtUiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
             self.cpp_info.components["qtUiPlugin"].libdirs = []
             _create_module("UiTools", ["UiPlugin", "Gui", "Widgets"])
-            if "designer" not in disabled_features:
+            # qttools only builds QtDesigner with QT_FEATURE_process
+            has_process = not self._apple_embedded and "process" not in disabled_features
+            if "designer" not in disabled_features and has_process:
                 _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
             if "assistant" not in disabled_features:
                 _create_module("Help", ["Gui", "Sql", "Widgets"])
