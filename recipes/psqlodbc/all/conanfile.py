@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.build import cross_building
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -58,20 +59,28 @@ class PsqlodbcConan(ConanFile):
         # support this GNU ld flag.
         if not is_apple_os(self):
             tc.extra_ldflags.append("-Wl,--as-needed")
-        # Not passing --with-libpq/--with-unixodbc as directories: each one
-        # makes configure.ac separately re-detect pg_config/odbc_config and
-        # re-derive CPPFLAGS/LDFLAGS from them, on top of (and potentially
-        # breaking) the correct flags AutotoolsDeps already provides for
-        # these deps. The defaults (with_libpq=yes, with_unixodbc=yes) still
-        # enable both and just skip that redundant, fragile re-detection.
-        # For unixODBC, with_unixodbc=yes still requires finding odbc_config,
-        # so tell configure.ac to skip it (its own escape hatch for "the
-        # flags are already set") and rely on AutotoolsDeps instead.
-        tc.configure_args.append("--with-unixodbc=__without_odbc_config")
-        # pqexpbuffer.h etc. are libpq-internal headers, not part of its
-        # public API/cpp_info, so AutotoolsDeps doesn't expose this dir.
-        libpq_root = self.dependencies["libpq"].package_folder
-        tc.extra_cflags.append(f"-I{libpq_root}/include/postgresql/internal")
+        libpq_folder = self.dependencies["libpq"].package_folder
+        odbc_folder = self.dependencies["odbc"].package_folder
+        if cross_building(self):
+            # Not passing --with-libpq/--with-unixodbc as directories: each one
+            # makes configure.ac separately re-detect pg_config/odbc_config and
+            # re-derive CPPFLAGS/LDFLAGS from them, on top of (and potentially
+            # breaking) the correct flags AutotoolsDeps already provides for
+            # these deps. The defaults (with_libpq=yes, with_unixodbc=yes) still
+            # enable both and just skip that redundant, fragile re-detection.
+            # For unixODBC, with_unixodbc=yes still requires finding odbc_config,
+            # so tell configure.ac to skip it (its own escape hatch for "the
+            # flags are already set") and rely on AutotoolsDeps instead.
+            tc.configure_args.append("--with-unixodbc=__without_odbc_config")
+            # pqexpbuffer.h etc. are libpq-internal headers, not part of its
+            # public API/cpp_info, so AutotoolsDeps doesn't expose this dir.
+            libpq_root = self.dependencies["libpq"].package_folder
+            tc.extra_cflags.append(f"-I{libpq_root}/include/postgresql/internal")
+        else:
+            tc.configure_args.extend([
+                f"--with-libpq={libpq_folder}",
+                f"--with-unixodbc={odbc_folder}",
+            ])
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
