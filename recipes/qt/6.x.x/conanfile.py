@@ -128,6 +128,11 @@ class QtConan(ConanFile):
     _submodules_tree = None
 
     @property
+    def _apple_embedded(self):
+        # UIKit platforms: no host tools, no QProcess
+        return self.settings.os in ["iOS", "tvOS", "watchOS", "visionOS"]
+
+    @property
     def _get_module_tree(self):
         if self._submodules_tree:
             return self._submodules_tree
@@ -617,11 +622,12 @@ class QtConan(ConanFile):
             tc.variables["QT_QMAKE_DEVICE_OPTIONS"] = f"CROSS_COMPILE={self.options.cross_compile}"
         if cross_building(self):
             # Mainly to locate Qt6HostInfoConfig.cmake
-            tc.cache_variables["QT_HOST_PATH"] = self.dependencies.direct_build["qt"].package_folder
+            qt_build_package_folder = self.dependencies.direct_build["qt"].package_folder
+            tc.cache_variables["QT_HOST_PATH"] = qt_build_package_folder
             # Stand-in for Qt6CoreTools - which is loaded for the executable targets
-            tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = os.path.join(self.dependencies.direct_build["qt"].package_folder, self._cmake_executables_file)
-            # Ensure tools for host are always built
-            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = True
+            tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = os.path.join(qt_build_package_folder, self._cmake_executables_file)
+            # The iOS SDK cannot build the tools (no ApplicationServices), they come from QT_HOST_PATH
+            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = not self._apple_embedded
 
         tc.variables["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.get_safe("build_type") == "Debug" and not self.options.shared:
@@ -659,7 +665,7 @@ class QtConan(ConanFile):
             # moc.exe, uic.exe, etc are built first and used subsequently during the build
             # and have DLL dependencies through QtCore library - copy the DLLs so that they
             # are found at runtime to avoid exposing the "host" runenv to the build environment
-            dest_folder = os.path.join(self.build_folder, "qtbase", "bin") 
+            dest_folder = os.path.join(self.build_folder, "qtbase", "bin")
             for dep in self.dependencies.host.values():
                 for bindir in dep.cpp_info.bindirs:
                     copy(self, pattern="*.dll", src=bindir, dst=dest_folder, keep_path=False)
@@ -930,7 +936,8 @@ class QtConan(ConanFile):
                     exe_path = path_
                     break
             else:
-                assert False, f"Could not find executable {target}{extension} in {self.package_folder}"
+                # Not built for Apple embedded targets, see QT_FORCE_BUILD_TOOLS
+                assert self._apple_embedded, f"Could not find executable {target}{extension} in {self.package_folder}"
             if not exe_path:
                 self.output.warning(f"Could not find path to {target}{extension}")
             filecontents += textwrap.dedent(f"""\
