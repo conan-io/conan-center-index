@@ -1,11 +1,9 @@
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import stdcpp_library
 from conan.tools.files import copy, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Git
 import os
 
@@ -105,10 +103,6 @@ class LibVmafConan(ConanFile):
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        fix_apple_shared_install_name(self)
-        if is_msvc(self) and not self.options.shared:
-            os.rename(os.path.join(self.package_folder, "lib", "libvmaf.a"),
-                      os.path.join(self.package_folder, "lib", "vmaf.lib"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libvmaf")
