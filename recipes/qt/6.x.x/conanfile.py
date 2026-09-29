@@ -877,8 +877,8 @@ class QtConan(ConanFile):
         filecontents += f"set(QT_VERSION_MAJOR {ver.major})\n"
         filecontents += f"set(QT_VERSION_MINOR {ver.minor})\n"
         filecontents += f"set(QT_VERSION_PATCH {ver.patch})\n"
-        if self.settings.os == "Macos":
-            filecontents += 'set(__qt_internal_cmake_apple_support_files_path "${CMAKE_CURRENT_LIST_DIR}/../../../lib/cmake/Qt6/macos")\n'
+        if is_apple_os(self):
+            filecontents += f'set(__qt_internal_cmake_apple_support_files_path "${{CMAKE_CURRENT_LIST_DIR}}/../../../lib/cmake/Qt6/{str(self.settings.os).lower()}")\n'
         if self.settings.os == "Windows":
             filecontents += 'set(__qt_internal_cmake_windows_support_files_path "${CMAKE_CURRENT_LIST_DIR}/../../../lib/cmake/Qt6/windows")\n'
         targets = ["moc", "qlalr", "rcc", "tracegen", "cmake_automoc_parser", "qmake", "qtpaths", "syncqt", "tracepointgen"]
