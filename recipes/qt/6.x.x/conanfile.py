@@ -592,7 +592,8 @@ class QtConan(ConanFile):
             tc.variables[f"FEATURE_{feature}"] = "OFF"
 
 
-        if self.settings.os == "Macos":
+        if is_apple_os(self):
+            # On by default on all Apple platforms, package_info() expects lib/libQt6*.a
             tc.variables["FEATURE_framework"] = "OFF"
         elif self.settings.os == "Android":
             tc.variables["CMAKE_ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
