@@ -633,6 +633,15 @@ class QtConan(ConanFile):
             tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = os.path.join(qt_build_package_folder, self._cmake_executables_file)
             # The iOS SDK cannot build the tools (no ApplicationServices), they come from QT_HOST_PATH
             tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = not self._apple_embedded
+            if self._apple_embedded and self.options.qttranslations and self.options.qttools:
+                # qttranslations needs LinguistTools, only built in the build context Qt
+                tc.cache_variables["CMAKE_PREFIX_PATH"] = qt_build_package_folder
+                tc.cache_variables["Qt6_DIR"] = os.path.join(qt_build_package_folder, "lib", "cmake", "Qt6")
+                linguist_tools_dir = os.path.join(qt_build_package_folder, "lib", "cmake", "Qt6LinguistTools")
+                tc.cache_variables["Qt6LinguistTools_DIR"] = linguist_tools_dir
+                linguist_tools_macros = os.path.join(linguist_tools_dir, "Qt6LinguistToolsMacros.cmake")
+                if os.path.exists(linguist_tools_macros):
+                    tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] += f";{linguist_tools_macros}"
 
         tc.variables["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.get_safe("build_type") == "Debug" and not self.options.shared:
