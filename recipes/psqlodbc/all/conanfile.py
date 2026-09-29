@@ -38,9 +38,8 @@ class PsqlodbcConan(ConanFile):
         # Upstream supports Windows through a separate MSVC/nmake build system.
         # This recipe only covers the autotools (Unix) build against unixODBC.
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(
-                f"{self.ref} is not supported on Windows. Use the upstream MSVC build instead."
-            )
+            raise ConanInvalidConfiguration("Windows is not supported. "
+                                            "Use the upstream MSVC build instead.")
 
     def build_requirements(self):
         self.tool_requires("autoconf/2.71")
@@ -59,9 +58,11 @@ class PsqlodbcConan(ConanFile):
         # support this GNU ld flag.
         if not is_apple_os(self):
             tc.extra_ldflags.append("-Wl,--as-needed")
+        libpq_folder = self.dependencies["libpq"].package_folder
+        odbc_folder = self.dependencies["odbc"].package_folder
         tc.configure_args.extend([
-            f"--with-libpq={self.dependencies["libpq"].package_folder}",
-            f"--with-unixodbc={self.dependencies["odbc"].package_folder}",
+            f"--with-libpq={libpq_folder}",
+            f"--with-unixodbc={odbc_folder}",
         ])
         tc.generate()
         deps = AutotoolsDeps(self)
