@@ -1564,6 +1564,9 @@ class QtConan(ConanFile):
                     self.cpp_info.components["qtEntryPointPrivate"].requires.append("qtEntryPointImplementation")
             if self.settings.os == "iOS":
                 self.cpp_info.components["qtEntryPointPrivate"].exelinkflags.append("-Wl,-e,_qt_main_wrapper")
+                # Defines _qt_main_wrapper, otherwise only linked by qt_add_executable()
+                if "qtQIOSIntegrationPlugin" in self.cpp_info.components:
+                    self.cpp_info.components["qtEntryPointPrivate"].requires.append("qtQIOSIntegrationPlugin")
 
         if self.settings.os != "Windows":
             self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
