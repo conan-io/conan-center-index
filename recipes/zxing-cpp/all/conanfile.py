@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.files import get, copy, rmdir, rm
+from conan.tools.files import get, copy, rmdir, rm, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
@@ -39,6 +39,9 @@ class ZXingCppConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # INFO: Keep C API support, but avoid building ZXingCTest - not packaged anyway
+        # Avoid fetching/needing STB as a requirement
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory (wrappers/c)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
