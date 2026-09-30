@@ -60,6 +60,8 @@ class KokkosConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Kokkos")
+        self.cpp_info.set_property("cmake_target_name", "Kokkos::kokkos")
+        self.cpp_info.set_property("cmake_target_aliases", ["Kokkos::all_libs"])
 
         self.cpp_info.components["kokkoscore"].set_property("cmake_target_name", "Kokkos::kokkoscore")
         self.cpp_info.components["kokkoscore"].libs = ["kokkoscore"]
@@ -78,9 +80,3 @@ class KokkosConan(ConanFile):
         self.cpp_info.components["kokkossimd"].set_property("cmake_target_name", "Kokkos::kokkossimd")
         self.cpp_info.components["kokkossimd"].libs = ["kokkossimd"]
         self.cpp_info.components["kokkossimd"].requires = ["kokkoscore"]
-
-        self.cpp_info.components["kokkos"].includedirs = []
-        self.cpp_info.components["kokkos"].libdirs = []
-        self.cpp_info.components["kokkos"].set_property("cmake_target_name", "Kokkos::kokkos")
-        self.cpp_info.components["kokkos"].set_property("cmake_target_aliases", ["Kokkos::all_libs"])
-        self.cpp_info.components["kokkos"].requires = ["kokkoscore", "kokkoscontainers", "kokkosalgorithms", "kokkossimd"]
