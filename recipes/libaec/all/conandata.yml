@@ -5,6 +5,7 @@ sources:
   "1.1.2":
     url: "https://github.com/Deutsches-Klimarechenzentrum/libaec/releases/download/v1.1.2/libaec-1.1.2.tar.gz"
     sha256: "a5d03a242468014b92b1b196de397f1e9a7927782db1a0423ea01db78421e373"
+  # Using the tag URL as it points to a later commit that fixes the lib names
   "1.0.6":
-    url: "https://github.com/Deutsches-Klimarechenzentrum/libaec/releases/download/v1.0.6/libaec-1.0.6.tar.gz"
-    sha256: "032961877231113bb094ef224085e6d66fd670f85a3e17f53d0f131abf24f2fd"
+    url: "https://github.com/Deutsches-Klimarechenzentrum/libaec/archive/refs/tags/v1.0.6.tar.gz"
+    sha256: "80b713112798f5c961f13145fb5a5fcb917f50b6bafc7dba489fa939ee0aecd3"
