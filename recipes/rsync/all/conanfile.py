@@ -64,10 +64,10 @@ class RsyncConan(ConanFile):
             self.requires("zstd/[>=1.5.5 <1.6]")
 
         if self.options.with_lz4:
-            self.requires("lz4/1.9.2")
+            self.requires("lz4/[>=1.9.2 <2]")
 
         if self.options.with_xxhash:
-            self.requires("xxhash/0.8.1")
+            self.requires("xxhash/[>=0.8.1 <0.9]")
 
     def validate(self):
         if self.settings.os == "Windows":
