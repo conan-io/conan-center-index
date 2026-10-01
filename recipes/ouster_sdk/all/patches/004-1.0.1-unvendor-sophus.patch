@@ -1,0 +1,21 @@
+diff --git a/ouster_mapping/CMakeLists.txt b/ouster_mapping/CMakeLists.txt
+index 285e54e..14d8d12 100644
+--- a/ouster_mapping/CMakeLists.txt
++++ b/ouster_mapping/CMakeLists.txt
+@@ -52,7 +52,6 @@ target_include_directories(ouster_mapping
+      ouster_transform
+      ${CERES_INCLUDE_DIRS}
+      ${EIGEN3_INCLUDE_DIRS}
+-     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/sophus>
+    PUBLIC
+       $<INSTALL_INTERFACE:include>
+       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+@@ -91,7 +90,7 @@ target_link_libraries(ouster_mapping
+     OusterSDK::ouster_algorithm
+   PRIVATE
+     ${MAPPING_OS_LIBRARIES}
+-    $<BUILD_INTERFACE:Sophus::Sophus>
++    Sophus::Sophus
+     TBB::tbb
+     ${CERES_LIBRARIES_INTERNAL}
+     Eigen3::Eigen

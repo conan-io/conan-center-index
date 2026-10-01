@@ -1,0 +1,13 @@
+diff --git a/Makefile.in b/Makefile.in
+index 3ec84b8..4a633bc 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -750,7 +750,7 @@ man1_MANS = \
+ update_mans = \
+     $(MKDIR_P) doc \
+     && AUTOMAKE_HELP2MAN=true ./pre-inst-env \
+-       $(PERL) $(srcdir)/doc/help2man --output=$@ --info-page=automake \
++       $(PERL) $(srcdir)/doc/help2man --no-discard-stderr --output=$@ --info-page=automake \
+                --name="$${HELP2MAN_NAME}"
+ 
+ checklinkx = $(top_srcdir)/contrib/checklinkx

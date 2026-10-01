@@ -1,4 +1,7 @@
 sources:
+  "5.6.0":
+    url: "https://github.com/orange-cpp/omath/archive/refs/tags/v5.6.0.tar.gz"
+    sha256: "9ddd9ae712b0d2edd46bb161043825a850211a85dcc5a8c284718a6e02f59f66"
   "5.0.0":
     url: "https://github.com/orange-cpp/omath/archive/refs/tags/v5.0.0.tar.gz"
     sha256: "1ec20f2216f46ca67fc24b9b3fef39e9397470e486ca40c5a3c3dd1574cfcdc3"
