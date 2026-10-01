@@ -154,7 +154,6 @@ dependencies:
   wave:
   - filesystem
   - serialization
-  - thread
   wserialization:
   - serialization
 libs:
