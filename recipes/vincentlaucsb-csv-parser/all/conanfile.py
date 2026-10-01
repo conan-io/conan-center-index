@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, download, get
+from conan.tools.files import copy, download, get, load, save
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 
@@ -53,21 +53,25 @@ class VincentlaucsbCsvParserConan(ConanFile):
 
     def source(self):
         if Version(self.version) >= Version("2.5.2"):
-            for source in self.conan_data["sources"][self.version]:
-                urls = source["url"]
-                url = urls[0] if isinstance(urls, (list, tuple)) else urls
-                filename = url[url.rfind("/") + 1:]
-                download(self, urls, filename, sha256=source["sha256"])
+            download(self, **self.conan_data["sources"][self.version], filename="csv.hpp")
         else:
             get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def _extract_license(self):
+        # The MIT license text is embedded in the header's leading comment
+        header = load(self, os.path.join(self.source_folder, "csv.hpp"))
+        start = header.index("MIT License")
+        end = header.index("*/", start)
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), header[start:end].strip() + "\n")
+
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         if Version(self.version) >= Version("2.5.2"):
+            self._extract_license()
             copy(self, "csv.hpp",
                  dst=os.path.join(self.package_folder, "include"),
                  src=self.source_folder)
         else:
+            copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
             copy(self, pattern="*",
                  dst=os.path.join(self.package_folder, "include"),
                  src=os.path.join(self.source_folder, "single_include"))
