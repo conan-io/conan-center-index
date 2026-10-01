@@ -1,7 +1,3 @@
-# Conan 2 recipe of the native C library (c/native) and the header-only C++17 wrapper, built with c/CMakeLists.txt from
-# the release tarball `make -C c/native dist`. Laid out as conan-center-index's recipes/uniscript, which is also a
-# local-recipes-index remote: conan remote add uniscript <checkout>/packaging/conan --type local-recipes-index
-# At a release: url and sha256 in conandata.yml, the version in config.yml (notes/c-packaging.md).
 import os
 
 from conan import ConanFile
