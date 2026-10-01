@@ -52,8 +52,6 @@ class OpenCascadeConan(ConanFile):
         "extended_debug_messages": False,
     }
 
-    short_paths = True
-
     @property
     def _is_linux(self):
         return self.settings.os in ["Linux", "FreeBSD"]
