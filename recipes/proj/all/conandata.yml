@@ -19,3 +19,6 @@ patches:
     - patch_file: "patches/0001-use-cmake-targets-9.2.1.patch"
       patch_type: "conan"
       patch_description: "Use cmake targets"
+    - patch_file: "patches/0002-quote-intel-llvm-flags-9.3.1.patch"
+      patch_type: "conan"
+      patch_description: "Quote IntelLLVM math flag appends"
