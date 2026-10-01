@@ -2,7 +2,7 @@
 #ifdef DOCKING
     #include <imgui_internal.h>
 #endif
-#ifdef ENABLE_TEST_ENGINE
+#ifdef IMGUI_ENABLE_TEST_ENGINE
 #include <imgui_te_engine.h>
 #endif
 
@@ -16,7 +16,7 @@ int main(int, char**)
     printf("  with docking\n");
 #endif
 
-#ifdef ENABLE_TEST_ENGINE
+#ifdef IMGUI_ENABLE_TEST_ENGINE
     printf("  with test engine\n");
     ImGuiTestEngine *engine = ImGuiTestEngine_CreateContext();
     if (engine == NULL) {
@@ -27,6 +27,14 @@ int main(int, char**)
     ImGuiTestEngine_DestroyContext(engine);
 #else
     ImGui::DestroyContext();
+#endif
+
+#ifdef IMGUI_DISABLE_OBSOLETE_FUNCTIONS
+    printf("  with obsolete functions disabled\n");
+#endif
+
+#ifdef IMGUI_USE_WCHAR32
+    printf("  with wchar32 support\n");
 #endif
 
     return 0;
