@@ -1,14 +1,16 @@
 from conan import ConanFile
-from conan.tools.files import copy, chdir, get, rmdir, rm
-from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, NMakeToolchain, NMakeDeps, msvc_runtime_flag
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
-from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import chdir, copy, get, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import NMakeDeps, NMakeToolchain, is_msvc
 import os
 
-conan_minimum_required = ">=2.4.0"
+required_conan_version = ">=2.19"  # Autotools.make()/install() accept "makefile" since 2.19
+
 
 class LibtomcryptConan(ConanFile):
     name = "libtomcrypt"
@@ -25,6 +27,7 @@ class LibtomcryptConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
+            # INFO: makefile.msvc only builds a static library
             del self.options.fPIC
             del self.options.shared
 
@@ -37,137 +40,83 @@ class LibtomcryptConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def requirements(self):
+        self.requires("libtommath/1.3.0")
+
+    def build_requirements(self):
+        if self.options.get_safe("shared"):
+            # INFO: makefile.shared drives the build through GNU libtool. On Macos it looks for "glibtool",
+            # which is not installed by default (and Apple's own /usr/bin/libtool is a different tool).
+            self.tool_requires("libtool/2.4.7")
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            if not is_msvc(self):
+                raise ConanInvalidConfiguration(f"{self.ref} only supports MSVC on Windows (makefile.msvc)")
+            if self.settings.arch == "armv8":
+                # INFO: tomcrypt_cfg.h (a public header) does not know _M_ARM64 and stops with "Cannot detect endianness"
+                raise ConanInvalidConfiguration(f"{self.ref} does not support Windows on ARM64")
+
+    def validate_build(self):
+        if cross_building(self) and self.options.get_safe("shared") and self.settings.os != "Macos":
+            # INFO: libtool runs the compiler it was configured with (the build machine's) to link the library
+            raise ConanInvalidConfiguration("Cross-building a shared library is only supported on Macos")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def build_requirements(self):
-        if not is_msvc(self) and self.options.shared:
-            self.tool_requires("libtool/2.4.7")
-
-    def requirements(self):
-        self.requires("libtommath/1.3.0")
+    @property
+    def _defines(self):
+        # INFO: USE_LTM/LTM_DESC select LibTomMath as math backend, LTM_DESC declares "ltm_desc" in the public headers
+        return ["USE_LTM", "LTM_DESC"]
 
     def generate(self):
         if is_msvc(self):
             tc = NMakeToolchain(self)
+            tc.extra_defines.extend(self._defines)
             tc.generate()
-            tc = NMakeDeps(self)
-            tc.generate()
+            NMakeDeps(self).generate()
         else:
-            tc = AutotoolsDeps(self)
-            tc.generate()
             tc = AutotoolsToolchain(self)
-            tc.make_args = self._make_args()
+            tc.extra_defines.extend(self._defines)
+            env = tc.vars()
+            deps_env = AutotoolsDeps(self).vars()
+            # INFO: The makefiles assign CC, CFLAGS, LDFLAGS... unconditionally, so exported variables are ignored.
+            #       Forward what AutotoolsToolchain/AutotoolsDeps computed as make arguments instead of rebuilding it.
+            cflags = [env.get("CFLAGS"), env.get("CPPFLAGS"), deps_env.get("CPPFLAGS")]  # makefile.unix has no CPPFLAGS
+            ldflags = [env.get("LDFLAGS"), deps_env.get("LDFLAGS")]
+            tc.make_args += [
+                "PREFIX=",
+                f"CFLAGS={' '.join(filter(None, cflags))}",
+                f"LDFLAGS={' '.join(filter(None, ldflags))}",
+                f"EXTRALIBS={deps_env.get('LIBS', '')}",
+            ]
+            build_env = VirtualBuildEnv(self).vars()
+            for var in ("CC", "AR", "RANLIB"):
+                value = env.get(var) or build_env.get(var)
+                if value:
+                    tc.make_args.append(f"{var}={value}")
+            if self.options.get_safe("shared"):
+                libtool = os.path.join(self.dependencies.build["libtool"].cpp_info.bindirs[0], "libtool")
+                tc.make_args.append(f"LIBTOOL={libtool}")
             tc.generate()
-
-    def validate(self):
-        if cross_building(self):
-            # FIXME: On Mac it produces native libraries only, and fails when linking the test package.
-            raise ConanInvalidConfiguration("Cross-building is not supported. Contributions are welcome.")
 
     @property
     def _makefile(self):
-        """
-        Helper method to determine the appropriate makefile based on the build options and settings.
-        """
-        makefile = "makefile.shared" if self.options.get_safe("shared") else "makefile.unix"
         if is_msvc(self):
-            makefile = "makefile.msvc"
-        elif self.settings.os == "Windows":
-            makefile = "makefile.mingw"
-        return makefile
+            return "makefile.msvc"
+        return "makefile.shared" if self.options.get_safe("shared") else "makefile.unix"
 
-    def _make_args(self):
-        """ Helper method to construct the arguments for the make command based on the build options and settings.
-            Environment variables have no effect because those variables are listed in the makefiles as arguments, so we need to pass them explicitly.
-        """
-        args = ["PREFIX=", f"DESTDIR={self.package_folder}"]
-        if not is_msvc(self) and self.options.shared:
-            libtoolpath = self.dependencies.build["libtool"].cpp_info.bindirs[0]
-            args.append(f"LIBTOOL={os.path.join(libtoolpath, 'libtool')}")
-
-        compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
-        autotools_vars = AutotoolsToolchain(self).vars()
-        autotoolsdeps_vars = AutotoolsDeps(self).vars()
-
-        cc = compilers_from_conf.get("c", autotools_vars.get("CC", "cc"))
-        if cc:
-            args.append(f"CC={cc}")
-
-        defs = self.conf.get("tools.build:defines", default=[], check_type=list)
-        defs.extend(["USE_LTM", "LTM_DESC"])
-
-        cflags = self.conf.get("tools.build:cflags", default=[], check_type=list)
-        cppflags = self.conf.get("tools.build:cxxflags", default=[], check_type=list)
-
-        # Combine cflags and cppflags, prioritizing autotools_vars and autotoolsdeps_vars if conf is empty
-        cflags_str = " ".join(cflags) if cflags else autotools_vars.get("CFLAGS", "")
-        cppflags_str = " ".join(cppflags) if cppflags else autotoolsdeps_vars.get("CPPFLAGS", "")
-
-        if defs:
-            cppflags_str = f"{cppflags_str} {' '.join(f'-D{d}' for d in defs)}".strip()
-
-        if cppflags_str:
-            cflags_str = f"{cflags_str} {cppflags_str}".strip()
-
-        if cflags_str:
-            args.append(f"CFLAGS={cflags_str}")
-
-        ldflags = self.conf.get("tools.build:sharedlinkflags", default=[], check_type=list)
-        ldflags_str = " ".join(ldflags) if ldflags else autotoolsdeps_vars.get("LDFLAGS", "")
-        if ldflags_str:
-            args.append(f"LDFLAGS={ldflags_str}")
-
-        args.append(f"EXTRALIBS={autotoolsdeps_vars.get('LIBS', '')}")
-
-        ar = autotools_vars.get("AR")
-        if ar:
-            args.append(f"AR={ar}")
-
-        ld = autotools_vars.get("LD")
-        if ld:
-            args.append(f"LD={ld}")
-
-        return args
-
+    @property
     def _nmake_args(self):
-        prefix = self.package_folder.replace("\\", "/")
-        args = [f"PREFIX={prefix}"]
-
-        compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
-        cc = compilers_from_conf.get("c", "cl")
-        if cc:
-            args.append(f"CC={cc}")
-
-        tommath_include = os.path.join(self.dependencies["libtommath"].cpp_info.includedirs[0]).replace("\\", "/")
-        tommath_libdir = os.path.join(self.dependencies["libtommath"].cpp_info.libdirs[0]).replace("\\", "/")
-        tommath_lib = self.dependencies["libtommath"].cpp_info.libs[0]
-
-        defs = self.conf.get("tools.build:defines", default=[], check_type=list)
-        defs.extend(["USE_LTM", "LTM_DESC"])
-
-        cflags = self.conf.get("tools.build:cflags", default=[], check_type=list)
-        cflags.append(f"/I'{tommath_include}'")
-        if self.settings.build_type == "Release":
-            cflags.append("/Ox /DNDEBUG")
-        cflags.append(f"/{msvc_runtime_flag(self)}")
-        cflags.extend(f"/D{d}" for d in defs)
-        args.append(f"CFLAGS=\"{' '.join(cflags)}\"")
-
-        extralibs = f"EXTRALIBS=\"/link /LIBPATH:'{tommath_libdir}' {tommath_lib}.lib\""
-        args.append(extralibs)
-
-        ldflags = self.conf.get("tools.build:sharedlinkflags", default=[], check_type=list)
-        if ldflags:
-            args.append(f"LDFLAGS=\"{' '.join(ldflags)}\"")
-
-        return args
+        # INFO: CL, _LINK_ and LIB come from NMakeToolchain/NMakeDeps. An empty CFLAGS drops the makefile's
+        #       default "/Ox /I../libtommath".
+        return ["CFLAGS=", f'PREFIX="{self.package_folder}"'.replace("\\", "/")]
 
     def build(self):
         with chdir(self, self.source_folder):
             if is_msvc(self):
-                make_args = self._nmake_args()
-                self.run(f"nmake -f {self._makefile} {' '.join(make_args)}")
+                self.run(f"nmake -f {self._makefile} {' '.join(self._nmake_args)}")
             else:
                 autotools = Autotools(self)
                 autotools.make(makefile=self._makefile)
@@ -176,20 +125,20 @@ class LibtomcryptConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         with chdir(self, self.source_folder):
             if is_msvc(self):
-                make_args = self._nmake_args()
-                self.run(f"nmake -f {self._makefile} install {' '.join(make_args)}")
+                self.run(f"nmake -f {self._makefile} install {' '.join(self._nmake_args)}")
             else:
                 autotools = Autotools(self)
                 autotools.install(makefile=self._makefile)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # INFO: bin dir is empty by created during the install step
-        rmdir(self, os.path.join(self.package_folder, "bin"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         if self.options.get_safe("shared"):
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "libtomcrypt")
         self.cpp_info.libs = ["tomcrypt"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread"]
+        # INFO: the public headers must see the same defines the library was built with
+        self.cpp_info.defines = self._defines
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["advapi32"]  # rng_get_bytes() uses CryptGenRandom
