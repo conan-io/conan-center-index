@@ -1,0 +1,4 @@
+sources:
+  "0.2.0":
+    url: "https://github.com/fsbondtec/curvepress/archive/refs/tags/0.2.0.tar.gz"
+    sha256: "84af07f45addc7ae256be6ee18848f7e58e3876dd4e1fe522e6c0f3f829e694c"
