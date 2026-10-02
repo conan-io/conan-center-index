@@ -1,11 +1,15 @@
 import os
-import sys
 from pathlib import Path
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.system import PipEnv
+
+
+required_conan_version = ">=2.21.0"
+
 
 class GladConan(ConanFile):
     name = "glad"
@@ -88,17 +92,18 @@ class GladConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = CMakeToolchain(self)
-        if os.getenv("CONAN_CENTER_BUILD_SERVICE"):
-            # We need the Jinja2 package for Glad's code generation,
-            # but the Python found by CMake's FindPython may not have it installed.
-            # For CCI runners, we know that the Python running Conan will definitely have it.
-            tc.cache_variables["Python_EXECUTABLE"] = sys.executable
+        pipenv = PipEnv(self)
+        # Should be pipenv.install(["Jinja2>=2.7,<4.0"])
+        # but version constraint omitted due to https://github.com/conan-io/conan/issues/19477
+        pipenv.install(["Jinja2"])
+        pipenv.generate()
 
+        tc = CMakeToolchain(self)
         tc.cache_variables.update({
-                "GLAD_SOURCES_DIR": self.source_folder,
-                "GLAD_CONAN_LIB_TYPE": "SHARED" if self.options.shared else "STATIC",
-                "GLAD_CONAN_API": self._get_api(),
+            "Python_ROOT_DIR": (Path(self.build_folder) / "conan_pipenv").as_posix(),
+            "GLAD_SOURCES_DIR": self.source_folder,
+            "GLAD_CONAN_LIB_TYPE": "SHARED" if self.options.shared else "STATIC",
+            "GLAD_CONAN_API": self._get_api(),
         })
         if self.options.extensions:
             tc.cache_variables["GLAD_CONAN_EXTENSIONS"] = ";".join(str(self.options.extensions).split(","))
