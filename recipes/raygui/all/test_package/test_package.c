@@ -1,7 +1,8 @@
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
+#include <iostream>
 
 int main(void) {
-    GuiEnable();
+    std::cout << "Rayguy version: " << RAYGUI_VERSION << std::endl;
     return 0;
 }

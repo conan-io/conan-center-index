@@ -3,7 +3,7 @@ from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class RayguiConan(ConanFile):
@@ -24,7 +24,7 @@ class RayguiConan(ConanFile):
         self.info.clear()
 
     def requirements(self):
-        self.requires("raylib/[>=5 <7]")
+        self.requires("raylib/[>=6 <7]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
