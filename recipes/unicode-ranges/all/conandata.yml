@@ -1,0 +1,7 @@
+sources:
+  "0.2.0":
+    url: "https://github.com/cristi1990an/unicode_ranges/archive/refs/tags/v0.2.0.tar.gz"
+    sha256: "4270cf91798fdf0ca12f34d439920250de98145143baeeb079614645e93a7aef"
+  "0.1.0":
+    url: "https://github.com/cristi1990an/unicode_ranges/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "0d18fbf45080644d4418f152ac02eda879aaa768f2c33a1787a1f337a68abcbe"
