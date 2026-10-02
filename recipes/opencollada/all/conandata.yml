@@ -1,0 +1,9 @@
+sources:
+  "1.6.68":
+    url: https://github.com/KhronosGroup/OpenCOLLADA/archive/refs/tags/v1.6.68.tar.gz
+    sha256: 
+patches:
+  "1.6.68":
+    - patch_file: "patches/0001-cmake-Adapt-for-conan.patch"
+      patch_description: "Adapt for conan"
+      patch_type: "conan"
