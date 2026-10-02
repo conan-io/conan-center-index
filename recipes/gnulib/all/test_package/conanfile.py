@@ -46,6 +46,12 @@ class TestPackageConan(ConanFile):
             env.vars(self).save_script("conanbuild_msvc")
 
     def build(self):
+        gnulib_pkg = self.dependencies.build[self.tested_reference_str].package_folder
+        bindir = os.path.join(gnulib_pkg, "bin")
+        assert os.path.isfile(os.path.join(bindir, "gnulib-tool"))
+        assert os.path.isfile(os.path.join(gnulib_pkg, "licenses", "COPYING"))
+        assert not os.path.exists(os.path.join(bindir, ".git"))
+
         for src in ["configure.ac", "Makefile.am", "test_package.c"]:
             copy(self, src, src=self.source_folder, dst=self.build_folder)
         for fn in ("COPYING", "NEWS", "INSTALL", "README", "AUTHORS", "ChangeLog"):
