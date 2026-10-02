@@ -1,6 +1,13 @@
 #include <cstdlib>
+#include <iterator>
+#include <string>
 #include <vector>
+
+#ifdef FMT_TEST_USE_MODULE
+import fmt;
+#else
 #include "fmt/ranges.h"
+#endif
 
 int main() {
     std::vector<char> numbers;
