@@ -59,15 +59,16 @@ class QtConan(ConanFile):
         "with_zstd": [True, False],
         "with_brotli": [True, False],
         "with_dbus": [True, False],
-        "with_libalsa": [True, False],
-        "with_openal": [True, False],
+        "with_ffmpeg": [True, False],
         "with_gstreamer": [True, False],
+        "with_pipewire": [True, False],
         "with_pulseaudio": [True, False],
         "with_gssapi": [True, False],
         "with_md4c": [True, False],
         "with_x11": [True, False],
         "with_egl": [True, False],
 
+        "quick": [True, False],
         "gui": [True, False],
         "widgets": [True, False],
 
@@ -101,9 +102,9 @@ class QtConan(ConanFile):
         "with_zstd": False,
         "with_brotli": True,
         "with_dbus": False,
-        "with_libalsa": False,
-        "with_openal": True,
+        "with_ffmpeg": True,
         "with_gstreamer": False,
+        "with_pipewire": True,
         "with_pulseaudio": False,
         "with_gssapi": False,
         "with_md4c": True,
@@ -112,6 +113,7 @@ class QtConan(ConanFile):
 
         "gui": True,
         "widgets": True,
+        "quick": False,
 
         "device": None,
         "cross_compile": None,
@@ -166,7 +168,6 @@ class QtConan(ConanFile):
             del self.options.with_icu
             del self.options.with_fontconfig
             self.options.with_glib = False
-            del self.options.with_libalsa
             del self.options.with_x11
             del self.options.with_egl
 
@@ -242,10 +243,11 @@ class QtConan(ConanFile):
                 setattr(self.options, module, False)
 
         if not self.options.get_safe("qtmultimedia"):
-            self.options.rm_safe("with_libalsa")
-            del self.options.with_openal
             del self.options.with_gstreamer
             del self.options.with_pulseaudio
+            del self.options.with_pipewire
+        elif self.settings.os != "Linux" or Version(self.version) < Version("6.10.0"):
+            del self.options.with_pipewire
 
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.get_safe("qtwebengine"):
@@ -319,8 +321,6 @@ class QtConan(ConanFile):
         if "MT" in self.settings.get_safe("compiler.runtime", default="") and self.options.shared:
             raise ConanInvalidConfiguration("Qt cannot be built as shared library with static runtime")
 
-        if self.options.get_safe("with_pulseaudio", False) or self.options.get_safe("with_libalsa", False):
-            raise ConanInvalidConfiguration("alsa and pulseaudio are not supported (QTBUG-95116), please disable them.")
         if not self.options.with_pcre2:
             raise ConanInvalidConfiguration("pcre2 is actually required by qt (QTBUG-92454). please use option qt:with_pcre2=True")
 
@@ -332,11 +332,14 @@ class QtConan(ConanFile):
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
 
-        if self.options.get_safe("qtspeech") and not self.options.qtdeclarative:
-            raise ConanInvalidConfiguration("qtspeech requires qtdeclarative, cf QTBUG-108381")
-
         if self.options.get_safe("qtwayland") and not self.options.get_safe("with_egl"):
             raise ConanInvalidConfiguration("qtwayland requires with_egl=True")
+
+        if self.options.get_safe("quick"):
+            if not self.options.qtdeclarative:
+                raise ConanInvalidConfiguration(f"option qt:quick requires also qt:qtdeclarative")
+            if not self.options.qtshadertools:
+                raise ConanInvalidConfiguration(f"option qt:quick requires also qt:qtshadertools")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -384,10 +387,6 @@ class QtConan(ConanFile):
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.11")
-        if self.options.get_safe("with_openal", False):
-            self.requires("openal-soft/1.22.2")
-        if self.options.get_safe("with_libalsa", False):
-            self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_x11") or self.options.qtwayland:
             self.requires("xkbcommon/1.5.0")
         if self.options.get_safe("with_x11", False):
@@ -409,11 +408,15 @@ class QtConan(ConanFile):
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.93")
             self.requires("libdrm/2.4.119")
+        if self.options.get_safe("with_ffmpeg", False):
+            self.requires("ffmpeg/[>=6.1 <8.1]"
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gstreamer/1.19.2")
             self.requires("gst-plugins-base/1.19.2")
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
+        if self.options.get_safe("with_pipewire", False)
+            self.requires("pipewire/1.2.7")
         if self.options.with_dbus:
             self.requires("dbus/1.15.8")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
@@ -1426,12 +1429,12 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("qtmultimedia"):
             multimedia_reqs = ["Network", "Gui"]
-            if self.options.get_safe("with_libalsa", False):
-                multimedia_reqs.append("libalsa::libalsa")
-            if self.options.with_openal:
-                multimedia_reqs.append("openal-soft::openal-soft")
             if self.options.get_safe("with_pulseaudio", False):
                 multimedia_reqs.append("pulseaudio::pulse")
+            if self.options.get_safe("with_pipewire", False):
+                multimedia_reqs.append("pipewire::pipewire")
+            if self.options.get_safe("with_ffmpeg", False):
+                multimedia_reqs.append("ffmpeg::ffmpeg")
             _create_module("Multimedia", multimedia_reqs)
             _create_module("MultimediaWidgets", ["Multimedia", "Widgets", "Gui"])
             if self.options.qtdeclarative and qt_quick_enabled:
