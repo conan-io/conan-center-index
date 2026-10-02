@@ -1,0 +1,13 @@
+--- a/configure
++++ b/configure
+@@ -607,8 +607,8 @@
+         if cc_check '' -Qdiag-error:10006,10157 ; then
+             CHECK_CFLAGS="$CHECK_CFLAGS -Qdiag-error:10006,10157"
+         fi
+-    elif [[ "$cc_base" = cl || "$cc_base" = cl[\ .]* ]]; then
+-        # Standard Microsoft Visual Studio
++    elif [[ "$cc_base" = cl || "$cc_base" = cl[\ .]* || "$cc_base" = clang-cl || "$cc_base" = clang-cl[\ .]* ]]; then
++        # Standard Microsoft Visual Studio or clang-cl (MSVC-compatible)
+         compiler=CL
+         compiler_style=MS
+         CFLAGS="$CFLAGS -nologo -GS- -DHAVE_STRING_H -I\$(SRCPATH)/extras"
