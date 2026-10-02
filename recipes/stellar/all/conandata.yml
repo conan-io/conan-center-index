@@ -1,0 +1,4 @@
+sources:
+  "0.1.0":
+    url: "https://github.com/stescobedo92/stellar/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "34e445d0dc81703e8e40180b3a33cfadc5828d044903c1577e1b5bfba9dcaae7"
