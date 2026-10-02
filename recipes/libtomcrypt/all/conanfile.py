@@ -71,6 +71,8 @@ class LibtomcryptConan(ConanFile):
         return ["USE_LTM", "LTM_DESC"]
 
     def generate(self):
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
         if is_msvc(self):
             tc = NMakeToolchain(self)
             tc.extra_defines.extend(self._defines)
@@ -91,7 +93,7 @@ class LibtomcryptConan(ConanFile):
                 f"LDFLAGS={' '.join(filter(None, ldflags))}",
                 f"EXTRALIBS={deps_env.get('LIBS', '')}",
             ]
-            build_env = VirtualBuildEnv(self).vars()
+            build_env = buildenv.vars()
             for var in ("CC", "AR", "RANLIB"):
                 value = env.get(var) or build_env.get(var)
                 if value:
@@ -130,6 +132,8 @@ class LibtomcryptConan(ConanFile):
                 autotools = Autotools(self)
                 autotools.install(makefile=self._makefile)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        # INFO: the bin folder is created (empty) by makefile.msvc install
+        rmdir(self, os.path.join(self.package_folder, "bin"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         if self.options.get_safe("shared"):
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
