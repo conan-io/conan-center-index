@@ -61,7 +61,10 @@ class XxHashConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, "cmake_unofficial"))
+        if Version(self.version) < "0.8.4":
+            cmake.configure(build_script_folder=os.path.join(self.source_folder, "cmake_unofficial"))
+        else:
+            cmake.configure(build_script_folder=os.path.join(self.source_folder, "build", "cmake"))
         cmake.build()
 
     def package(self):
