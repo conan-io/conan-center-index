@@ -1,0 +1,4 @@
+sources:
+  "5.0":
+    url: "https://github.com/raysan5/raygui/archive/refs/tags/5.0.tar.gz"
+    sha256: "0f194c4a5e837c0930aca0b6315db45d00f76fa0052d841eea94598d390c39d6"
