@@ -337,6 +337,12 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("qtwayland") and not self.options.get_safe("with_egl"):
             raise ConanInvalidConfiguration("qtwayland requires with_egl=True")
+        elif self.options.get_safe("qtwayland") and self.options.get_safe("with_egl"):
+            # INFO: The system EGL can be built using a different Wayland version, expecting different features not available
+            # in the version used to build the Conan package for Wayland, causing runtime errors.
+            # Usually consuming the latest Wayland package from Conan Center Index should work.
+            # See conan-io/conan-center-index#29476
+            self.output.warning("The system EGL may not work properly with Conan package for Wayland due ABI incompatibilities between the version used to build EGL.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -399,7 +405,7 @@ class QtConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/[>=1.5 <1.6]")
         if self.options.qtwayland:
-            self.requires("wayland/1.22.0")
+            self.requires("wayland/[>=1.22.0 <2]")
         if self.options.with_brotli:
             self.requires("brotli/1.1.0")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
@@ -438,7 +444,7 @@ class QtConan(ConanFile):
                 self.tool_requires("flex/2.6.4")
 
         if self.options.qtwayland:
-            self.tool_requires("wayland/1.22.0")
+            self.tool_requires("wayland/<host_version>")
         if cross_building(self):
             self.tool_requires(f"qt/{self.version}")
 
