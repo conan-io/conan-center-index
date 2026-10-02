@@ -1,15 +1,20 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
+from os.path import join
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
+from conan.tools.files import get, rm, copy
+from conan.tools.build import check_min_cppstd
+from conan.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=2.0"
 
 
 class QCoroConan(ConanFile):
     name = "qcoro"
     license = "MIT"
-    homepage = "https://github.com/danvratil/qcoro"
-    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://qcoro.dev/"
+    url = "https://github.com/qcoro/qcoro"
     description = "C++ Coroutines for Qt."
     topics = ("coroutines", "qt")
     settings = "os", "compiler", "build_type", "arch"
@@ -23,17 +28,6 @@ class QCoroConan(ConanFile):
         "fPIC": True,
         "asan": False,
     }
-    generators = "cmake", "cmake_find_package_multi"
-    exports_sources = ["CMakeLists.txt"]
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _compilers_minimum_version(self):
@@ -55,14 +49,14 @@ class QCoroConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        self.build_requires("cmake/3.23.2")
+        self.tool_requires("cmake/[>=3.21.1 <4]")
 
     def requirements(self):
-        self.requires("qt/6.3.1")
+        self.requires("qt/[>=6.3.1]", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 20)
+            check_min_cppstd(self, 20)
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -85,62 +79,67 @@ class QCoroConan(ConanFile):
             print("Your compiler is {} {} and is compatible.".format(str(self.settings.compiler), compiler_version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self.source_folder)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
+    def layout(self):
+        cmake_layout(self)
 
-        self._cmake = CMake(self)
+    def generate(self):
+        tc = CMakeToolchain(self)
 
-        self._cmake.definitions["QCORO_BUILD_EXAMPLES"] = False
-        self._cmake.definitions["QCORO_ENABLE_ASAN"] = self.options.asan
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["QCORO_WITH_QTDBUS"] = self.options["qt"].with_dbus
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        tc.cache_variables["USE_QT_VERSION"] = "6"
+        tc.cache_variables["QCORO_BUILD_EXAMPLES"] = False
+        tc.cache_variables["QCORO_ENABLE_ASAN"] = self.options.asan
+        tc.cache_variables["BUILD_TESTING"] = False
+
+        # control features
+        tc.cache_variables["QCORO_WITH_QTDBUS"] = self.dependencies["qt"].options.with_dbus
+        tc.cache_variables["QCORO_WITH_QTWEBSOCKETS"] = self.dependencies["qt"].options.qtwebsockets
+        tc.cache_variables["QCORO_WITH_QML"] = bool(self.dependencies["qt"].options.qtdeclarative)
+        tc.cache_variables["QCORO_WITH_QTQUICK"] = bool(self.dependencies["qt"].options.qtdeclarative)
+
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("*", dst="licenses", src=os.path.join(self._source_subfolder, "LICENSES"))
-        cmake = self._configure_cmake()
+        copy(self, "*", join(self.source_folder, "LICENSES"), join(self.package_folder, "licenses"))
+
+        cmake = CMake(self)
         cmake.install()
 
         for mask in ["Find*.cmake", "*Config*.cmake", "*-config.cmake", "*Targets*.cmake"]:
-            tools.remove_files_by_mask(self.package_folder, mask)
+            rm(self, mask, self.package_folder)
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "QCoro6"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "QCoro6"
         self.cpp_info.set_property("cmake_file_name", "QCoro6")
-        self.cpp_info.names["cmake_find_package"] = "QCoro"
-        self.cpp_info.names["cmake_find_package_multi"] = "QCoro"
+        self.cpp_info.set_property("pkg_config_name", "qcoro")
+        self.cpp_info.set_property('cmake_build_modules', [join("lib", "cmake", "QCoro6Coro", "QCoroMacros.cmake")])
 
-        self.cpp_info.components["qcoro-core"].set_property("cmake_target_name", "QCoro::Core")
-        self.cpp_info.components["qcoro-core"].names["cmake_find_package"] = "Core"
-        self.cpp_info.components["qcoro-core"].names["cmake_find_package_multi"] = "Core"
-        self.cpp_info.components["qcoro-core"].libs = ["QCoro6Core"]
-        self.cpp_info.components["qcoro-core"].includedirs.append(os.path.join("include", "qcoro6", "qcoro"))
-        self.cpp_info.components["qcoro-core"].requires = ["qt::qtCore"]
-        self.cpp_info.components["qcoro-core"].build_modules["cmake_find_package"].append(os.path.join("lib", "cmake", "QCoro6Coro", "QCoroMacros.cmake"))
-        self.cpp_info.components["qcoro-core"].build_modules["cmake_find_package_multi"].append(os.path.join("lib", "cmake", "QCoro6Coro", "QCoroMacros.cmake"))
-        self.cpp_info.components["qcoro-core"].builddirs.append(os.path.join("lib", "cmake", "QCoro6Coro"))
+        self.cpp_info.components["core"].set_property("cmake_target_name", "QCoro6::Core")
+        self.cpp_info.components["core"].set_property("cmake_target_aliases", ["QCoro::Core"])
+        self.cpp_info.components["core"].set_property("pkg_config_name", "qcoro-core")
+        self.cpp_info.components["core"].libs = ["QCoro6Core"]
+        self.cpp_info.components["core"].includedirs.append(join("include", "qcoro6"))
+        self.cpp_info.components["core"].requires = ["qt::qtCore"]
+        self.cpp_info.components["core"].builddirs.append(join("lib", "cmake", "QCoro6Coro"))
 
-        self.cpp_info.components["qcoro-network"].set_property("cmake_target_name", "QCoro::Network")
-        self.cpp_info.components["qcoro-network"].names["cmake_find_package"] = "Network"
-        self.cpp_info.components["qcoro-network"].names["cmake_find_package_multi"] = "Network"
-        self.cpp_info.components["qcoro-network"].libs = ["QCoro6Network"]
-        self.cpp_info.components["qcoro-network"].requires = ["qt::qtNetwork"]
+        self.cpp_info.components["network"].set_property("cmake_target_name", "QCoro6::Network")
+        self.cpp_info.components["network"].set_property("cmake_target_aliases", ["QCoro::Network"])
+        self.cpp_info.components["network"].set_property("pkg_config_name", "qcoro-network")
+        self.cpp_info.components["network"].libs = ["QCoro6Network"]
+        self.cpp_info.components["network"].requires = ["qt::qtNetwork"]
 
-        if self.options["qt"].with_dbus:
-            self.cpp_info.components["qcoro-dbus"].set_property("cmake_target_name", "QCoro::DBus")
-            self.cpp_info.components["qcoro-dbus"].names["cmake_find_package"] = "DBus"
-            self.cpp_info.components["qcoro-dbus"].names["cmake_find_package_multi"] = "DBus"
-            self.cpp_info.components["qcoro-dbus"].libs = ["QCoroDBus"]
-            self.cpp_info.components["qcoro-core"].requires = ["qt::qtDBus"]
+        if self.dependencies["qt"].options.with_dbus:
+            self.cpp_info.components["dbus"].set_property("cmake_target_name", "QCoro6::DBus")
+            self.cpp_info.components["dbus"].set_property("cmake_target_aliases", ["QCoro::DBus"])
+            self.cpp_info.components["dbus"].set_property("pkg_config_name", "qcoro-dbus")
+            self.cpp_info.components["dbus"].libs = ["QCoroDBus"]
+            self.cpp_info.components["core"].requires = ["qt::qtDBus"]
