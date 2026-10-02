@@ -1,8 +1,8 @@
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
-#include <iostream>
+#include <stdio.h>
 
 int main(void) {
-    std::cout << "Rayguy version: " << RAYGUI_VERSION << std::endl;
+    printf("Raygui version: %s\n", RAYGUI_VERSION);
     return 0;
 }
