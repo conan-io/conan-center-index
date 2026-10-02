@@ -83,7 +83,8 @@ class LibsystemdConan(ConanFile):
         download(self, **self.conan_data["sources"][self.version], filename="sources.tar.gz")
         with tarfile.open("sources.tar.gz", "r:gz") as tar:
             tar.extractall()
-        move_folder_contents(self, os.path.join(self.source_folder, f"systemd-stable-{self.version}"), self.source_folder)
+        folder_name = f"systemd-stable-{self.version}" if Version(self.version) < "261" else f"systemd-{self.version}"
+        move_folder_contents(self, os.path.join(self.source_folder, folder_name), self.source_folder)
 
     @property
     def _so_version(self):
@@ -138,8 +139,9 @@ class LibsystemdConan(ConanFile):
             "libiptc", "elfutils", "repart", "homed", "importd", "acl",
             "dns-over-tls", "log-trace"]
 
-        unrelated.append("oomd")
-        unrelated.extend(["sysext", "nscd"])
+        unrelated.extend(["oomd", "sysext"])
+        if Version(self.version) < "261":
+            unrelated.append("nscd")
         unrelated.append("link-boot-shared")
         unrelated.append("link-journalctl-shared")
         if Version(self.version) < "254.7":
@@ -149,6 +151,9 @@ class LibsystemdConan(ConanFile):
 
         for opt in unrelated:
             tc.project_options[opt] = "false"
+        if Version(self.version) >= "261":
+            tc.project_options["libidn"] = "disabled"
+            tc.project_options["libiptc"] = "disabled"
 
         if Version(self.version) < "255":
             # 'rootprefix' is unused during libsystemd packaging but systemd > v247
@@ -181,7 +186,8 @@ class LibsystemdConan(ConanFile):
         meson.configure()
         target = ("systemd:shared_library" if self.options.shared
                   else "systemd:static_library")
-        meson.build(target=f"version.h {target}")
+        version = "version.h" if Version(self.version) < "261" else "version"
+        meson.build(target=f"{version} {target}")
 
     def package(self):
         copy(self, "LICENSE.LGPL2.1", self.source_folder,
