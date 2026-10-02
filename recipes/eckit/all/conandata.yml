@@ -1,0 +1,4 @@
+sources:
+  "2.1.0":
+    url: "https://github.com/ecmwf/eckit/archive/refs/tags/2.1.0.tar.gz"
+    sha256: "bb7e888498b39925d724019f02c14b981761e7c94de899b5322cffe025d1e3d6"
