@@ -1,0 +1,31 @@
+diff --git a/ouster_library/CMakeLists.txt b/ouster_library/CMakeLists.txt
+index c3e3238..0f24280 100644
+--- a/ouster_library/CMakeLists.txt
++++ b/ouster_library/CMakeLists.txt
+@@ -86,16 +86,23 @@ function(ouster_library_common _TARGET)
+     PUBLIC
+     $<INSTALL_INTERFACE:include/optional-lite>)
+   get_target_property(CLIENT_INCLUDE_DIRS ouster_core INTERFACE_INCLUDE_DIRECTORIES)
+-  get_target_property(SENSOR_INCLUDE_DIRS ouster_sensor INTERFACE_INCLUDE_DIRECTORIES)
+   target_include_directories(${_TARGET}
+     PUBLIC
+     $<BUILD_INTERFACE:${CLIENT_INCLUDE_DIRS}>
+-    $<BUILD_INTERFACE:${SENSOR_INCLUDE_DIRS}>
+     $<INSTALL_INTERFACE:include>)
++  if(TARGET ouster_sensor)
++    get_target_property(SENSOR_INCLUDE_DIRS ouster_sensor INTERFACE_INCLUDE_DIRECTORIES)
++    target_include_directories(${_TARGET}
++      PUBLIC
++      $<BUILD_INTERFACE:${SENSOR_INCLUDE_DIRS}>)
++  endif()
+ 
+   set_property(TARGET ${_TARGET} PROPERTY POSITION_INDEPENDENT_CODE ON)
+   set_target_properties(${_TARGET} PROPERTIES CXX_VISIBILITY_PRESET hidden)
+-  target_link_libraries(${_TARGET} PRIVATE ouster_core ouster_sensor)
++  target_link_libraries(${_TARGET} PRIVATE ouster_core)
++  if(TARGET ouster_sensor)
++    target_link_libraries(${_TARGET} PRIVATE ouster_sensor)
++  endif()
+   # ouster_core is also absorbed via $<TARGET_OBJECTS:ouster_core> into
+   # shared_library; so transitive libs like ouster_build (SDK_VERSION, BUILD_HASH,
+   # etc.) are never pulled unless linked explicitly.

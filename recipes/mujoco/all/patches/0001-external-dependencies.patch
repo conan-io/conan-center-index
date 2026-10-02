@@ -16,7 +16,7 @@ Fix include header path for qhull:
 src/user/user_mesh.cc:71:10: fatal error: qhull_ra.h: No such file or directory
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 317301fa..e306a4e5 100644
+index a4cf1fed..d3cd03f9 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -108,9 +108,15 @@ if(APPLE AND (MUJOCO_BUILD_EXAMPLES OR MUJOCO_BUILD_SIMULATE OR MUJOCO_USE_FILAM
@@ -36,7 +36,7 @@ index 317301fa..e306a4e5 100644
  set(MUJOCO_HEADERS
      include/mujoco/mjassert.h
      include/mujoco/mjdata.h
-@@ -180,9 +186,9 @@ if(EMSCRIPTEN)
+@@ -184,9 +190,9 @@ if(EMSCRIPTEN)
    add_subdirectory(wasm)
  endif()
  
@@ -47,7 +47,7 @@ index 317301fa..e306a4e5 100644
    target_compile_definitions(mujoco PUBLIC mjUSEPLATFORMSIMD)
  endif()
  
-@@ -202,12 +208,14 @@ target_link_options(
+@@ -206,12 +212,14 @@ target_link_options(
  
  target_link_libraries(
    mujoco
@@ -67,10 +67,10 @@ index 317301fa..e306a4e5 100644
  if(NOT EMSCRIPTEN)
    target_link_libraries(mujoco PRIVATE Threads::Threads)
 diff --git a/src/user/user_mesh.cc b/src/user/user_mesh.cc
-index d71677cf..740cbb6f 100644
+index 872a3dc1..5a854046 100644
 --- a/src/user/user_mesh.cc
 +++ b/src/user/user_mesh.cc
-@@ -67,9 +67,9 @@
+@@ -68,9 +68,9 @@
  #include "user/user_resource.h"
  #include "user/user_util.h"
  
@@ -80,4 +80,4 @@ index d71677cf..740cbb6f 100644
  }
  
  namespace {
-   using mujoco::user::FilePath;
+ using mujoco::user::FilePath;

@@ -1,76 +1,62 @@
-from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
-from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 import os
 
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get, rmdir
+from conan.tools.cmake import cmake_layout, CMakeToolchain, CMake
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.1"
 
-class PackageConan(ConanFile):
+
+class MelonConan(ConanFile):
     name = "melon"
-    description = "A modern and efficient graph library using C++20 ranges and concepts."
+    description = "Modern and Efficient Library for Optimization in Networks."
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/fhamonic/melon"
-    topics = ("graph", "algorithm", "ranges", "c++20", "header-only")
+    topics = ("graph", "header-only", "cpp23", "algorithms")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _min_cppstd(self):
-        return 20
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "14",
-            "clang": "17",
-            "gcc": "12",
-            "msvc": "192",
-            "Visual Studio": "17",
-        }
-
     def layout(self):
-        basic_layout(self, src_folder="src")
-
-    def requirements(self):
-        self.requires("range-v3/0.12.0")
-        self.requires("fmt/10.2.1")
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 23)
+        compilers = {"gcc": "14", "clang": "18", "apple-clang": "21", "msvc": "194"}
+        if str(self.settings.compiler) in compilers and Version(self.settings.compiler.version) < compilers[str(self.settings.compiler)]:
+            raise ConanInvalidConfiguration(f"{self.settings.compiler} version must be at least {compilers[str(self.settings.compiler)]}. See https://github.com/fhamonic/melon#installation")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.24]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["MELON_BUILD_TESTS"] = False
+        tc.generate()
 
     def build(self):
         pass
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        copy(
-            self,
-            "*.hpp",
-            os.path.join(self.source_folder, "include"),
-            os.path.join(self.package_folder, "include"),
-        )
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread"])
+            self.cpp_info.system_libs = ["pthread"]
