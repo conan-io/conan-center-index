@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.50.0"
@@ -10,8 +11,8 @@ required_conan_version = ">=1.50.0"
 
 class SpyConan(ConanFile):
     name = "spy"
-    description = "C++ 17 for constexpr-proof detection and classification of informations about OS, compiler, etc..."
-    license = "MIT"
+    description = "Constexpr-proof detection and classification of compilers, operating systems, architectures and SIMD extensions"
+    license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://jfalcou.github.io/spy/"
     topics = ("config", "metaprogramming", "header-only")
@@ -21,17 +22,26 @@ class SpyConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17"
+        return "17" if Version(self.version) < "2.0.0" else "20"
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "7.4",
-            "Visual Studio": "15.7",
-            "msvc": "191",
-            "clang": "6",
-            "apple-clang": "10",
-        }
+            "17": {
+                "gcc": "7.4",
+                "Visual Studio": "15.7",
+                "msvc": "191",
+                "clang": "6",
+                "apple-clang": "10",
+            },
+            "20": {
+                "gcc": "11",
+                "Visual Studio": "16.11",
+                "msvc": "1929",
+                "clang": "13",
+                "apple-clang": "14",
+            },
+        }[self._min_cppstd]
 
     def package_id(self):
         self.info.clear()
