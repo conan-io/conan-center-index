@@ -1,0 +1,22 @@
+sources:
+  "1.6.68":
+    url: "https://github.com/KhronosGroup/OpenCOLLADA/archive/refs/tags/v1.6.68.tar.gz"
+    sha256: "d9db0c0a518aa6ac0359626f222707c6ca1b63a83cbf229d97a5999c9cde347b"
+patches:
+  "1.6.68":
+    - patch_file: "patches/pr622_and_disable_subdirs.patch"
+      patch_description: "Disable COLLADAValidator and DAEValidator subdirectories, add cmath include"
+      patch_type: "portability"
+      patch_source: "https://github.com/IfcOpenShell/IfcOpenShell"
+    - patch_file: "patches/config_select_libs_by_use_shared.patch"
+      patch_description: "Fix OpenCOLLADAConfig.cmake to select libraries based on USE_SHARED"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/IfcOpenShell/IfcOpenShell"
+    - patch_file: "patches/remove_tr1.patch"
+      patch_description: "Remove tr1 namespace usage, use std directly"
+      patch_type: "portability"
+      patch_source: "https://github.com/IfcOpenShell/IfcOpenShell"
+    - patch_file: "patches/use_internal_pcre_on_linux.patch"
+      patch_description: "Build the bundled PCRE when no native PCRE is available"
+      patch_type: "portability"
+      patch_source: "https://github.com/IfcOpenShell/IfcOpenShell"
