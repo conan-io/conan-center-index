@@ -862,7 +862,7 @@ class BoostConan(ConanFile):
                 del self.info.options.system_use_utf8
 
     def build_requirements(self):
-        if not self.options.header_only:
+        if not self.options.header_only or self._use_bcp:
             self.tool_requires("b2/[>=5.2 <6]")
 
     def source(self):
@@ -1084,7 +1084,9 @@ class BoostConan(ConanFile):
         with chdir(self, folder):
             njobs = build_jobs(self)
             njobs = f"-j{njobs}" if njobs else ""  # boost.build doesn't take -j0 as valid
+            user_config = os.path.join(self._boost_build_dir, 'user-config.jam')
             command = f"{self._b2_exe} {njobs} --abbreviate-paths toolset={self._toolset}"
+            command += f" --user-config={user_config}"
             command += f" -d{self.options.debug_level}"
             self.output.warning(command)
             self.run(command)
@@ -1151,17 +1153,17 @@ class BoostConan(ConanFile):
                             "! [ $(property-set).get <target-os> ] in windows cygwin darwin aix android &&",
                             strict=False)
 
-        if self.options.header_only:
-            self.output.warning("Header only package, skipping build")
-            return
-
         self._clean()
+
+        self._create_user_config_jam(self._boost_build_dir)
 
         if self._use_bcp:
             self._build_bcp()
             self._run_bcp()
 
-        self._create_user_config_jam(self._boost_build_dir)
+        if self.options.header_only:
+            self.output.warning("Header only package, skipping build")
+            return
 
         # JOIN ALL FLAGS
         b2_flags = " ".join(self._build_flags)
@@ -1707,7 +1709,8 @@ class BoostConan(ConanFile):
         copy(self, "LICENSE_1_0.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         if self.options.header_only:
-            copy(self, "*", src=os.path.join(self.source_folder, "boost"),
+            src_base = os.path.join(self.source_folder, self._bcp_dir) if self._use_bcp else self.source_folder
+            copy(self, "*", src=os.path.join(src_base, "boost"),
                             dst=os.path.join(self.package_folder, "include", "boost"))
 
         if self.settings.os == "Emscripten" and not self.options.header_only:

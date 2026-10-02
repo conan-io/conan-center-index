@@ -18,9 +18,9 @@
 
 int main() {
 #if BOOST_PROCESS_V2_DEFAULT
-    boost::process::shell().empty();
+    BOOST_NAMESPACE::process::shell().empty();
 #else
-    boost::process::v2::shell().empty();
+    BOOST_NAMESPACE::process::v2::shell().empty();
 #endif
     return 0;
 }
