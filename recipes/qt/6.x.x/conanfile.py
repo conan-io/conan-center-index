@@ -13,9 +13,10 @@ from conan.tools.files import copy, get, replace_in_file, apply_conandata_patche
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
+from conan.tools.system import PyEnv
 from conan.errors import ConanException, ConanInvalidConfiguration
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.26"
 
 class QtConan(ConanFile):
     _submodules = ["qtsvg", "qtdeclarative", "qttools", "qttranslations", "qtdoc",
@@ -389,7 +390,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_x11") or self.options.qtwayland:
-            self.requires("xkbcommon/1.5.0")
+            self.requires("xkbcommon/1.6.0")
         if self.options.get_safe("with_x11", False):
             self.requires("xorg/system")
         if self.options.get_safe("with_egl"):
@@ -443,8 +444,16 @@ class QtConan(ConanFile):
             self.tool_requires(f"qt/{self.version}")
 
     def generate(self):
-        ms = VirtualBuildEnv(self)
-        ms.generate()
+        # Explicitly .generate() the VirtualBuildEnv before PipEnv/PyEnv below
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
+
+        if self.options.qtwebengine:
+            # https://github.com/qt/qtwebengine/blob/1a75761f912328b7b3b7f0302cec62ae5c111d1a/configure.cmake#L361-L366
+            # QtWebEngine cannot build without html5lib visible to the python interpreter
+            pyenv = PyEnv(self)
+            pyenv.install(["html5lib~=1.0"])
+            pyenv.generate()
 
         tc = CMakeDeps(self)
         tc.set_property("libdrm", "cmake_file_name", "Libdrm")
@@ -652,6 +661,10 @@ class QtConan(ConanFile):
         with_egl = self.options.get_safe("with_egl", False)
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_EGL"] = not with_egl
 
+        if self.options.qtwebengine:
+            # Get CMake to find PipEnv's Python first to ensure html5lib is found
+            tc.cache_variables['Python3_ROOT_DIR'] = pyenv.env_dir
+            tc.cache_variables['Python3_EXECUTABLE'] = pyenv.env_exe
         tc.generate()
 
         if self.settings_build.os == "Windows" and not cross_building(self):
