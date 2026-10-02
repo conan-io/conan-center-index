@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
 find_package(QCoro6 REQUIRED COMPONENTS Core)
 qcoro_enable_coroutines()
 
