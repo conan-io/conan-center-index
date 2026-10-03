@@ -1,4 +1,7 @@
 sources:
+  "1.7.4":
+    sha256: "57bd9927cd1ee691cb96b244b7532dd941edeab126482e23b970a6335e95f287"
+    url: https://github.com/hunspell/hunspell/archive/refs/tags/v1.7.4.tar.gz
   "1.7.2":
     sha256: "69fa312d3586c988789266eaf7ffc9861d9f6396c31fc930a014d551b59bbd6e"
     url: https://github.com/hunspell/hunspell/archive/refs/tags/v1.7.2.tar.gz
