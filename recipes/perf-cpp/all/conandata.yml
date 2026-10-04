@@ -1,4 +1,4 @@
 sources:
-  "1.1.0":
-    url: "https://github.com/jmuehlig/perf-cpp/archive/refs/tags/v1.1.0.tar.gz"
-    sha256: "85745bdc4cfd4cfbbe01f3572d559e7d6c3f28ec5abf3a1d0e80a318d8cd9671"
+  "1.1.1":
+    url: "https://github.com/jmuehlig/perf-cpp/archive/refs/tags/v1.1.1.tar.gz"
+    sha256: "a7b4e1effeb45d5dd2fe4b3fef95fdbcdc1e30146b7faf987761ae990b2e2f7b"
