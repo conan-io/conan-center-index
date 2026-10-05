@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import save, copy, get, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import save, copy, get, rmdir, export_conandata_patches, apply_conandata_patches, replace_in_file
 
 required_conan_version = ">=2.0.9"
 
@@ -26,7 +26,6 @@ class LlamaCppConan(ConanFile):
         "fPIC": [True, False],
         "with_examples": [True, False],
         "with_cuda": [True, False],
-        "with_openssl": [True, False],
         "with_vulkan": [True, False],
     }
     default_options = {
@@ -34,7 +33,6 @@ class LlamaCppConan(ConanFile):
         "fPIC": True,
         "with_examples": False,
         "with_cuda": False,
-        "with_openssl": True,
         "with_vulkan": False,
     }
 
@@ -63,6 +61,7 @@ class LlamaCppConan(ConanFile):
     
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "conan_deps.cmake", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"))
 
     def validate(self):
         check_min_cppstd(self, 17)
@@ -75,8 +74,7 @@ class LlamaCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_openssl:
-            self.requires("openssl/[>=1.1 <4]")
+        self.requires("cpp-httplib/[~0.56]")
 
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/[>=1.3 <1.5]")
@@ -89,19 +87,21 @@ class LlamaCppConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "vendor", "CMakeLists.txt"), "add_subdirectory(cpp-httplib)", "")
 
     def generate(self):
         deps = CMakeDeps(self)
+        deps.set_property("cpp-httplib", "cmake_target_name", "cpp-httplib")
         deps.generate()
 
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_PROJECT_llama.cpp_INCLUDE"] = os.path.join(self.source_folder, "conan_deps.cmake")
         tc.variables["LLAMA_STANDALONE"] = False
         tc.variables["LLAMA_BUILD_TESTS"] = False
         tc.cache_variables["LLAMA_BUILD_TOOLS"] = False
         tc.cache_variables["LLAMA_BUILD_SERVER"] = False
         tc.cache_variables["LLAMA_BUILD_APP"] = False
         tc.variables["LLAMA_BUILD_EXAMPLES"] = self.options.get_safe("with_examples")
-        tc.cache_variables["LLAMA_OPENSSL"] = self.options.get_safe("with_openssl")
         if cross_building(self):
             tc.variables["LLAMA_NATIVE"] = False
             tc.variables["GGML_NATIVE_DEFAULT"] = False
@@ -178,7 +178,7 @@ class LlamaCppConan(ConanFile):
 
         self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
         self.cpp_info.components["common"].libs = ["llama-common"]
-        self.cpp_info.components["common"].requires = ["llama", "llama-common-base", "openssl::openssl"]
+        self.cpp_info.components["common"].requires = ["llama", "llama-common-base", "cpp-httplib::cpp-httplib"]
 
         if self.settings.os not in ("iOS", "tvOS", "watchOS", "Android", "Emscripten"):
             self.cpp_info.components["common"].defines.append("LLAMA_SUBPROCESS")
