@@ -17,7 +17,7 @@ imconfig_options = {
         "default": False,
     },
     "enable_test_engine_coroutine_stdthread_impl": {
-        "macro": "#define IMGUI_TEST_ENGINE_ENABLE_COROUTINE_STDTHREAD_IMPL",
+        "macro": "#define IMGUI_TEST_ENGINE_ENABLE_COROUTINE_STDTHREAD_IMPL 1",
         "default": True,
     },
     "use_wchar32": {
@@ -70,10 +70,6 @@ class IMGUIConan(ConanFile):
                 "No test engine found for this version, removing test engine option"
             )
             del self.options.enable_test_engine
-        # Remove the test engine coroutine option if the test engine is not enabled
-        if not self.options.get_safe("enable_test_engine", False):
-            self.output.info("Test engine is not enabled, removing coroutine option")
-            del self.options.enable_test_engine_coroutine_stdthread_impl
 
         # sdl3 bindings were introduced with 1.89.3
         # 1.91.8 is the oldest version that supports the latest sdl headers
@@ -81,6 +77,11 @@ class IMGUIConan(ConanFile):
             del self.options.with_sdl3_binding
 
     def configure(self):
+        # Remove the test engine coroutine option if the test engine is not enabled
+        if not self.options.get_safe("enable_test_engine", False):
+            self.output.info("Test engine is not enabled, removing coroutine option")
+            del self.options.enable_test_engine_coroutine_stdthread_impl
+
         if self.options.shared:
             self.options.rm_safe("fPIC")
 

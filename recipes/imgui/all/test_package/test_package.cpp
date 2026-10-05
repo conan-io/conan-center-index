@@ -23,6 +23,8 @@ int main(int, char**)
       printf("  Failed to create test engine context\n");
       return -1;
     }
+    ImGuiTestEngine_Start(engine, ImGui::GetCurrentContext());
+    ImGuiTestEngine_Stop(engine);
     ImGui::DestroyContext();
     ImGuiTestEngine_DestroyContext(engine);
 #else
