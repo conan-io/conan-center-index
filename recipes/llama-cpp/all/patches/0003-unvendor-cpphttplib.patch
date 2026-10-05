@@ -1,0 +1,12 @@
+Custom patch: Consume Conan package for cpp-httplib
+
+diff --git a/vendor/CMakeLists.txt b/vendor/CMakeLists.txt
+index 4479daf..6750bf8 100644
+--- a/vendor/CMakeLists.txt
++++ b/vendor/CMakeLists.txt
+@@ -7,5 +7,4 @@ add_subdirectory(stb)
+ 
+ # only used by common
+ if (LLAMA_BUILD_COMMON)
+-    add_subdirectory(cpp-httplib)
+ endif()
