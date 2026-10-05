@@ -1,0 +1,22 @@
+--- a/core/fxcodec/jbig2/JBig2_DocumentContext.h
++++ b/core/fxcodec/jbig2/JBig2_DocumentContext.h
+@@ -10,6 +10,7 @@
+ #include <list>
+ #include <memory>
+ #include <utility>
++#include <stdint.h>
+
+ class CJBig2_SymbolDict;
+
+ using CJBig2_CacheKey = std::pair<uint32_t, uint32_t>;
+
+--- a/third_party/base/span.h
++++ b/third_party/base/span.h
+@@ -12,6 +12,7 @@
+ #include <iterator>
+ #include <type_traits>
+ #include <utility>
++#include <stdint.h>
+
+ #include "core/fxcrt/unowned_ptr.h"
+ #include "third_party/base/check.h"
