@@ -23,26 +23,17 @@ class SzConan(ConanFile):
     options = {
         "with_hdf5": [True, False],
         "shared": [True, False],
-        "fPIC": [True, False],
     }
     default_options = {
         "with_hdf5": False,
         "shared": False,
-        "fPIC": True,
     }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def configure(self):
         if self.options.with_hdf5:
             self.package_type = "library"
-            if self.options.shared:
-                self.options.rm_safe("fPIC")
         else:
             self.options.rm_safe("shared")
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         if self.options.with_hdf5:
