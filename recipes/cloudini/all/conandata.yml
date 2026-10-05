@@ -1,4 +1,4 @@
 sources:
-  "1.2.3":
-    url: "https://github.com/facontidavide/cloudini/archive/refs/tags/1.2.3.tar.gz"
-    sha256: "414e55a63eae2ffa169da16e24c69723c96d4d9d13cc020c175763f14c029209"
+  "1.4.1":
+    url: "https://github.com/facontidavide/cloudini/archive/refs/tags/1.4.1.tar.gz"
+    sha256: "0fb83aa71c665fc73fdaaf3eefb2f16282f554f3d326c626437467acb203f59b"
