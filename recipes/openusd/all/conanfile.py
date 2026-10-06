@@ -46,14 +46,14 @@ class OpenUSDConan(ConanFile):
     def requirements(self):
         self.requires("onetbb/2023.1.0", transitive_headers=True)
         if self.options.with_imaging:
-            self.requires("opensubdiv/3.7.0")
+            self.requires("opensubdiv/3.7.0", transitive_headers=True)
             self.requires("opengl/system")
             if self.settings.os == "Linux":
                 self.requires("xorg/system")
         if self.options.get_safe("with_openimageio"):
             self.requires("openimageio/2.5.19.1")
         if self.options.with_materialx:
-            self.requires("materialx/1.39.4")
+            self.requires("materialx/1.39.4", transitive_headers=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.27]")
