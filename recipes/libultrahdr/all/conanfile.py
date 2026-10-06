@@ -73,6 +73,7 @@ class LibultrahdrConan(ConanFile):
         tc.cache_variables["UHDR_BUILD_DEPS"] = False
         tc.cache_variables['UHDR_BUILD_EXAMPLES'] = False
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_JPEG"] = True
+        tc.cache_variables["UHDR_ENABLE_HEIF"] = False
         if is_msvc(self) and not self.options.shared:
             tc.cache_variables["BUILD_FOR_WINUI"] = True
 
