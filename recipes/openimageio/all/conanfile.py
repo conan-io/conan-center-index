@@ -206,7 +206,8 @@ class OpenImageIOConan(ConanFile):
         tc.variables["USE_QT"] = False
         tc.variables["USE_LIBPNG"] = self.options.with_libpng
         tc.variables["USE_FREETYPE"] = self.options.with_freetype
-        tc.variables["USE_LIBWEBP"] = self.options.with_libwebp
+        tc.variables["USE_WEBP"] = self.options.with_libwebp
+        tc.variables["USE_LIBUHDR"] =  self.options.get_safe("with_libultrahdr", False)
         tc.variables["USE_OPENJPEG"] = self.options.with_openjpeg
         tc.cache_variables["USE_OPENJPH"] = self.options.get_safe("with_openjph", False)
 
