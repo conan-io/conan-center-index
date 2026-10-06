@@ -5,5 +5,4 @@ sources:
 patches:
   "26.08":
     - patch_file: "patches/26.08-0001-fix-cxx20-operator-rewriting-in-tfweakptrfacade.patch"
-      patch_description: "Fix infinite recursion in TfWeakPtrFacade operator== with C++20"
       patch_source: "https://github.com/PixarAnimationStudios/OpenUSD/pull/4102"
