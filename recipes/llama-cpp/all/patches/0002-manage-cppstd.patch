@@ -1,10 +1,10 @@
 Custom patch: Let Conan manage C++ standard via settings.compiler.cppstd
 
 diff --git a/ggml/CMakeLists.txt b/ggml/CMakeLists.txt
-index 1df78fd..4876ad0 100644
+index 3eacd4c..b23d456 100644
 --- a/ggml/CMakeLists.txt
 +++ b/ggml/CMakeLists.txt
-@@ -288,8 +288,6 @@ option(GGML_BUILD_EXAMPLES "ggml: build examples" ${GGML_STANDALONE})
+@@ -289,8 +289,6 @@ option(GGML_BUILD_EXAMPLES "ggml: build examples" ${GGML_STANDALONE})
  set(CMAKE_C_STANDARD 11)
  set(CMAKE_C_STANDARD_REQUIRED true)
  

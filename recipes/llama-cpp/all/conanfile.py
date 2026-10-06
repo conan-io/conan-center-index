@@ -58,10 +58,9 @@ class LlamaCppConan(ConanFile):
                 target_link_libraries({cuda_target} INTERFACE CUDA::cudart_static CUDA::cublas_static CUDA::cublasLt_static CUDA::cuda_driver)
             endif()
         """)
-    
+
     def export_sources(self):
         export_conandata_patches(self)
-        copy(self, "conan_deps.cmake", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"))
 
     def validate(self):
         check_min_cppstd(self, 17)
@@ -94,7 +93,6 @@ class LlamaCppConan(ConanFile):
         deps.generate()
 
         tc = CMakeToolchain(self)
-        tc.cache_variables["CMAKE_PROJECT_llama.cpp_INCLUDE"] = os.path.join(self.source_folder, "conan_deps.cmake")
         tc.variables["LLAMA_STANDALONE"] = False
         tc.variables["LLAMA_BUILD_TESTS"] = False
         tc.cache_variables["LLAMA_BUILD_TOOLS"] = False

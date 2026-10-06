@@ -1,4 +1,4 @@
-Fix missing cmake taget for spirv-headers
+Fix missing linking CMake target for spirv-headers
 
 https://github.com/ggml-org/llama.cpp/pull/28951
 
