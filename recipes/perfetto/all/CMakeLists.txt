@@ -4,7 +4,6 @@ project(perfetto LANGUAGES CXX)
 set(PUBLIC_HEADERS ${PERFETTO_SRC_DIR}/perfetto.h)
 
 add_library(perfetto ${PERFETTO_SRC_DIR}/perfetto.cc)
-target_compile_features(perfetto PRIVATE ${PERFETTO_CXX_STANDARD})
 set_target_properties(perfetto PROPERTIES
     PUBLIC_HEADER "${PUBLIC_HEADERS}"
     WINDOWS_EXPORT_ALL_SYMBOLS TRUE
