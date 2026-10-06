@@ -108,8 +108,5 @@ class LibultrahdrConan(ConanFile):
         elif self.options.with_jpeg == "mozjpeg":
             self.cpp_info.requires = ["mozjpeg::libjpeg"]
 
-        if self.options.get_safe("with_libheif", False):
-            self.cpp_info.requires.append("libheif::libheif")
-
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
