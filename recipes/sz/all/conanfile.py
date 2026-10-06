@@ -14,7 +14,7 @@ required_conan_version = ">=2.1"
 class SzConan(ConanFile):
     name = "sz"
     description = "SZ3: a modular error-bounded lossy compressor for scientific floating-point data"
-    license = ("DocumentRef-copyright-and-BSD-license.txt:LicenseRef-SZ3-BSD", "LGPL-2.1-or-later")
+    license = "DocumentRef-copyright-and-BSD-license.txt:LicenseRef-SZ3-BSD"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/szcompressor/SZ3"
     topics = ("compression", "lossy-compression", "scientific-data", "hdf5-filter", "header-only")
