@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc_static_runtime
 import os
 
@@ -26,6 +26,9 @@ class MsQuicConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         for submodule_name, submodule_data in self.conan_data["submodules"][self.version].items():
             get(self, **submodule_data, strip_root=True, destination=os.path.join(self.source_folder, "submodules", submodule_name))
+        replace_in_file(self, os.path.join(self.source_folder, "src", "inc", "CMakeLists.txt"),
+                        "target_compile_options(warnings INTERFACE ${QUIC_WARNING_FLAGS})",
+                        "")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
