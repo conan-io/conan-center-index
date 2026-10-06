@@ -173,6 +173,11 @@ class OpenUSDConan(ConanFile):
                 component.libs = [f"usd_{comp_name}"]
                 if self.settings.os == "Windows":
                     component.bindirs = ["lib"]
+                    # Conan's DLL location deduction matches any .dll containing the component
+                    # name, so "usd" would pick another library (e.g. usd_ar.dll)
+                    component.type = "shared-library"
+                    component.location = os.path.join(self.package_folder, "lib", f"usd_{comp_name}.dll")
+                    component.link_location = os.path.join(self.package_folder, "lib", f"usd_{comp_name}.lib")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["arch"].system_libs = ["m", "pthread", "dl"]
