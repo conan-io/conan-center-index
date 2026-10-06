@@ -3,10 +3,9 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, load, rmdir, save
+from conan.tools.files import copy, get, rmdir
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=2.1"
 
@@ -36,10 +35,7 @@ class SzConan(ConanFile):
             self.options.rm_safe("shared")
 
     def layout(self):
-        if self.options.with_hdf5:
-            cmake_layout(self, src_folder="src")
-        else:
-            basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         # Lossless_zstd.hpp declares the Zstd functions it calls, so no Zstd header is needed downstream
@@ -56,25 +52,20 @@ class SzConan(ConanFile):
         check_min_cppstd(self, 17)
 
     def build_requirements(self):
-        if self.options.with_hdf5:
-            self.tool_requires("cmake/[>=3.19 <4]")
-            self.tool_requires("pkgconf/[>=2.2 <3]")
+        self.tool_requires("cmake/[>=3.19 <4]")
+        self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         rmdir(self, os.path.join(self.source_folder, "tools", "zstd"))
 
     def generate(self):
-        if not self.options.with_hdf5:
-            return
         tc = CMakeToolchain(self)
-        tc.cache_variables["BUILD_H5Z_FILTER"] = True
+        tc.cache_variables["BUILD_H5Z_FILTER"] = bool(self.options.with_hdf5)
         tc.cache_variables["BUILD_SZ3_BINARY"] = False
-        tc.cache_variables["BUILD_MDZ"] = False
-        tc.cache_variables["BUILD_PARAVIEW_PLUGIN"] = False
-        tc.cache_variables["BUILD_TESTING"] = False
-        tc.cache_variables["SZ3_USE_BUNDLED_ZSTD"] = False
-        tc.cache_variables["SZ3_DEBUG_TIMINGS"] = False
+        if is_msvc(self):
+            # upstream prefers the bundled Zstd under MSVC
+            tc.cache_variables["SZ3_USE_BUNDLED_ZSTD"] = False
         tc.cache_variables["H5Z_SZ3_PLUGIN_INSTALL_DIR"] = ""
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_OpenMP"] = True
         tc.cache_variables["CMAKE_SKIP_INSTALL_RPATH"] = True
@@ -83,34 +74,14 @@ class SzConan(ConanFile):
         PkgConfigDeps(self).generate()
 
     def build(self):
-        if self.options.with_hdf5:
-            cmake = CMake(self)
-            cmake.configure()
-            cmake.build()
-
-    def _write_version_header(self):
-        version = Version(self.version)
-        content = load(self, os.path.join(self.source_folder, "include", "SZ3", "version.hpp.in"))
-        for key, value in (
-            ("PROJECT_NAME", "SZ3"),
-            ("PROJECT_VERSION", str(self.version)),
-            ("PROJECT_VERSION_MAJOR", str(version.major)),
-            ("PROJECT_VERSION_MINOR", str(version.minor)),
-            ("PROJECT_VERSION_PATCH", str(version.patch)),
-            ("PROJECT_VERSION_TWEAK", ""),
-            ("SZ3_DATA_VERSION", str(self.version)),
-        ):
-            content = content.replace(f"@{key}@", value)
-        save(self, os.path.join(self.package_folder, "include", "SZ3", "version.hpp"), content)
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
         copy(self, "copyright-and-BSD-license.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        if self.options.with_hdf5:
-            CMake(self).install()
-            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        else:
-            copy(self, "*.hpp", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
-            self._write_version_header()
+        CMake(self).install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SZ3")
