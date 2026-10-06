@@ -2,9 +2,3 @@ sources:
   "5.7.0":
     url: "https://git.libomath.org/orange/omath/archive/v5.7.0.tar.gz"
     sha256: "f5ddca871dee3aab70c9ac324a671dc366d901ed57dd0df3cada5df2aaca2b42"
-  "5.6.0":
-    url: "https://git.libomath.org/orange/omath/archive/v5.6.0.tar.gz"
-    sha256: "48cdf091451e7b999c0c49c7e979fdf61238bcadccd84a8be13135b8548f18c3"
-  "5.0.0":
-    url: "https://git.libomath.org/orange/omath/archive/v5.0.0.tar.gz"
-    sha256: "2289728630cf032fe4e180ac1dcf614f2eeff05a7d83e386a49d4e158c53bf19"
