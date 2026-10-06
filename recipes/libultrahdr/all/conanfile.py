@@ -23,14 +23,11 @@ class LibultrahdrConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"],
-        # libheif support added in 2.0
-        "with_libheif": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_jpeg": "libjpeg",
-        "with_libheif": False,
     }
 
     def export_sources(self):
@@ -39,9 +36,6 @@ class LibultrahdrConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-        if Version(self.version) < "2.0":
-            del self.options.with_libheif
 
     def configure(self):
         if self.options.shared:
@@ -59,9 +53,6 @@ class LibultrahdrConan(ConanFile):
             self.requires("libjpeg-turbo/[>=3.0.0 <4]")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/[>=4.1.3 <5]")
-
-        if self.options.get_safe("with_libheif", False):
-            self.requires("libheif/[>=1.16 <2]")
 
     def build_requirements(self):
         # The project requires cmake 3.15 but the use of CMAKE_REQUIRE_FIND_PACKAGE_JPEG below
@@ -85,13 +76,7 @@ class LibultrahdrConan(ConanFile):
         if is_msvc(self) and not self.options.shared:
             tc.cache_variables["BUILD_FOR_WINUI"] = True
 
-        if Version(self.version) >= "2.0":
-            # Always force activate/deactivate
-            tc.cache_variables["UHDR_ENABLE_HEIF"] = self.options.get_safe("with_libheif", False)
-            tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_libheif"] = True
-
         tc.generate()
-
         deps = CMakeDeps(self)
         if self.options.with_jpeg:
             deps.set_property(self.options.with_jpeg, "cmake_file_name", "JPEG")
