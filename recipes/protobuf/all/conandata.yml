@@ -1,4 +1,7 @@
 sources:
+  "7.35.1":
+    url: "https://github.com/protocolbuffers/protobuf/releases/download/v35.1/protobuf-35.1.tar.gz"
+    sha256: "f0b6838e7522a8da96126d487068c959bc624926368f3024ac8fd03abd0a1ac4"
   "7.35.0":
     url: "https://github.com/protocolbuffers/protobuf/releases/download/v35.0/protobuf-35.0.tar.gz"
     sha256: "8f907baca4b34a3b4854103ba5811e418fb6e2ff11fe0d8df9e8280b11d79926"
@@ -13,6 +16,42 @@ patches:
     - patch_file: "patches/6.33.5-nvcc.patch"
 absl_deps:
   # reference: https://github.com/protocolbuffers/protobuf/blob/main/cmake/abseil-cpp.cmake
+  "7.35.1":
+    - absl_absl_check
+    - absl_absl_log
+    - absl_algorithm
+    - absl_base
+    - absl_bind_front
+    - absl_bits
+    - absl_btree
+    - absl_cleanup
+    - absl_cord
+    - absl_core_headers
+    - absl_debugging
+    - absl_die_if_null
+    - absl_dynamic_annotations
+    - absl_flags
+    - absl_flat_hash_map
+    - absl_flat_hash_set
+    - absl_function_ref
+    - absl_hash
+    - absl_layout
+    - absl_log_initialize
+    - absl_log_globals
+    - absl_log_severity
+    - absl_memory
+    - absl_node_hash_map
+    - absl_node_hash_set
+    - absl_optional
+    - absl_random_distributions
+    - absl_random_random
+    - absl_span
+    - absl_status
+    - absl_statusor
+    - absl_strings
+    - absl_synchronization
+    - absl_time
+    - absl_utility
   "7.35.0":
     - absl_absl_check
     - absl_absl_log
