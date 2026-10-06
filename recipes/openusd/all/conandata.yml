@@ -2,3 +2,8 @@ sources:
   "26.08":
     url: "https://github.com/PixarAnimationStudios/OpenUSD/archive/refs/tags/v26.08.tar.gz"
     sha256: "4bccbb95cddda1dbeef2f74a08b9456352f2aa91bfd4578c0c613009c7950149"
+patches:
+  "26.08":
+    - patch_file: "patches/26.08-0001-fix-cxx20-operator-rewriting-in-tfweakptrfacade.patch"
+      patch_description: "Fix infinite recursion in TfWeakPtrFacade operator== with C++20"
+      patch_source: "https://github.com/PixarAnimationStudios/OpenUSD/pull/4102"

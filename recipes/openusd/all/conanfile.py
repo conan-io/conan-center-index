@@ -4,9 +4,9 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_max_cppstd, check_min_cppstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, load, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, replace_in_file, rm, rmdir
 
 required_conan_version = ">=2.1"
 
@@ -30,6 +30,9 @@ class OpenUSDConan(ConanFile):
         "with_materialx": False,
     }
     exports = "components/*.json"
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
         if not self.options.with_imaging:
@@ -62,11 +65,9 @@ class OpenUSDConan(ConanFile):
         if self.options.with_materialx and not self.dependencies["materialx"].options.shared:
             raise ConanInvalidConfiguration('openusd requires -o "materialx/*:shared=True"')
 
-    def validate_build(self):
-        check_max_cppstd(self, 17)
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "defaults", "CXXDefaults.cmake"),
                         "set(CMAKE_CXX_STANDARD 17)\nset(CMAKE_CXX_STANDARD_REQUIRED ON)\nset(CMAKE_CXX_EXTENSIONS OFF)\n", "")
 
