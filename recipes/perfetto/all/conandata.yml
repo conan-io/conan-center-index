@@ -2,3 +2,7 @@ sources:
   "58.2":
     url: "https://github.com/google/perfetto/releases/download/v58.2/perfetto-cpp-sdk-src.zip"
     sha256: "e56126ff81f0f914d35fe03c72419d147acf2890f36fbda7d4558fd5b84c4b09"
+licenses:
+  "58.2":
+    url: "https://raw.githubusercontent.com/google/perfetto/refs/tags/v58.2/LICENSE"
+    sha256: "9a682a56cffc9524dfa9b0b1c0dca9cb81a19e96d5bd0793aaf02c08a95ee7ca"

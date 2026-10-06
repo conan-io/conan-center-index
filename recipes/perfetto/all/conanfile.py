@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, download
 from conan.tools.microsoft import is_msvc
 import os
 
@@ -40,6 +40,7 @@ class PerfettoConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
+        download(self, filename="LICENSE", **self.conan_data["licenses"][self.version])
 
     def generate(self):
         tc = CMakeToolchain(self)
