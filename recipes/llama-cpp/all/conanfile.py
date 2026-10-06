@@ -156,7 +156,6 @@ class LlamaCppConan(ConanFile):
         self.cpp_info.components["ggml"].libs = ["ggml"]
         self.cpp_info.components["ggml"].resdirs = ["res"]
         self.cpp_info.components["ggml"].set_property("cmake_target_name", "ggml::all")
-        self.cpp_info.components["ggml"].set_property("cmake_file_name", "ggml")
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["ggml"].system_libs.append("dl")
         self.cpp_info.components["ggml"].requires = ["ggml-base"]
