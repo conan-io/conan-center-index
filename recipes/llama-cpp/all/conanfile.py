@@ -38,6 +38,10 @@ class LlamaCppConan(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
+    @property
+    def _with_subprocess(self):
+        return self.settings.os not in ("iOS", "tvOS", "watchOS", "Android", "Emscripten")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -98,6 +102,7 @@ class LlamaCppConan(ConanFile):
         tc.cache_variables["LLAMA_BUILD_TOOLS"] = False
         tc.cache_variables["LLAMA_BUILD_SERVER"] = False
         tc.cache_variables["LLAMA_BUILD_APP"] = False
+        tc.cache_variables["LLAMA_SUBPROCESS"] = self._with_subprocess
         tc.variables["LLAMA_BUILD_EXAMPLES"] = self.options.get_safe("with_examples")
         if cross_building(self):
             tc.variables["LLAMA_NATIVE"] = False
@@ -114,6 +119,7 @@ class LlamaCppConan(ConanFile):
             shaderc_bin_path = os.path.join(self.dependencies.build["shaderc"].cpp_info.bindir, "glslc").replace("\\", "/")
             tc.variables["Vulkan_GLSLC_EXECUTABLE"] = shaderc_bin_path
         tc.cache_variables["LLAMA_BUILD_IS_DEV"] = False
+
         tc.generate()
 
     def build(self):
@@ -176,7 +182,7 @@ class LlamaCppConan(ConanFile):
         self.cpp_info.components["common"].libs = ["llama-common"]
         self.cpp_info.components["common"].requires = ["llama", "llama-common-base", "cpp-httplib::cpp-httplib"]
 
-        if self.settings.os not in ("iOS", "tvOS", "watchOS", "Android", "Emscripten"):
+        if self._with_subprocess:
             self.cpp_info.components["common"].defines.append("LLAMA_SUBPROCESS")
 
         if is_apple_os(self):
