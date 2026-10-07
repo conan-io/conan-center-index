@@ -32,7 +32,11 @@ add_library(
     ${ADDITIONAL_SRCS}
 )
 
-target_compile_features(hunspell PRIVATE cxx_std_11)
+if ("${CONAN_hunspell_VERSION}" VERSION_GREATER_EQUAL "1.7.4")
+    target_compile_features(hunspell PRIVATE cxx_std_14)
+else()
+    target_compile_features(hunspell PRIVATE cxx_std_11)
+endif()
 
 if(MSVC)
   target_compile_options(hunspell PRIVATE /wd4267 /wd4996)
