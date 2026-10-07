@@ -1,7 +1,7 @@
 sources:
-  "7.35.1":
-    url: "https://github.com/protocolbuffers/protobuf/releases/download/v35.1/protobuf-35.1.tar.gz"
-    sha256: "f0b6838e7522a8da96126d487068c959bc624926368f3024ac8fd03abd0a1ac4"
+  "7.36.2":
+    url: "https://github.com/protocolbuffers/protobuf/releases/download/v36.2/protobuf-36.2.tar.gz"
+    sha256: "3d9642a662d10e68ebae5e53f14dcce5105684212d5078f8e0d47d1ab3ae6b64"
   "6.33.5":
     url: "https://github.com/protocolbuffers/protobuf/releases/download/v33.5/protobuf-33.5.tar.gz"
     sha256: "c6c7c27fadc19d40ab2eaa23ff35debfe01f6494a8345559b9bb285ce4144dd1"
@@ -13,7 +13,7 @@ patches:
     - patch_file: "patches/6.33.5-nvcc.patch"
 absl_deps:
   # reference: https://github.com/protocolbuffers/protobuf/blob/main/cmake/abseil-cpp.cmake
-  "7.35.1":
+  "7.36.2":
     - absl_absl_check
     - absl_absl_log
     - absl_algorithm
