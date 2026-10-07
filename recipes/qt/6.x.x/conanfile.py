@@ -422,7 +422,10 @@ class QtConan(ConanFile):
             self.requires("md4c/[>=0.4.8 <1]") # stable API since 0.3x as per md4c wiki
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.21.1 <4]")
+        if Version(self.version) >= "6.12.0":
+            self.tool_requires("cmake/[>=3.25 <4]")
+        else:
+            self.tool_requires("cmake/[>=3.21.1 <4]")
         self.tool_requires("ninja/[>=1.12 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
