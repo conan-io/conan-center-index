@@ -688,11 +688,13 @@ class QtConan(ConanFile):
 
         # patching in source method because of no_copy_source attribute
         apply_conandata_patches(self)
-        for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
-            replace_in_file(self, os.path.join(self.source_folder, "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
-                                  "  if (enable_precompiled_headers) {\n    if (is_win) {",
-                                  "  if (enable_precompiled_headers) {\n    if (false) {"
-                                  )
+        if Version(self.version) < "6.12.0":
+            # qtwebengine is no longer part of qt-everywhere-src since 6.12
+            for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
+                replace_in_file(self, os.path.join(self.source_folder, "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
+                                      "  if (enable_precompiled_headers) {\n    if (is_win) {",
+                                      "  if (enable_precompiled_headers) {\n    if (false) {"
+                                      )
 
         for f in ["FindPostgreSQL.cmake"]:
             file = os.path.join(self.source_folder, "qtbase", "cmake", f)
