@@ -40,8 +40,8 @@ class CrashCatchConan(ConanFile):
              dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "crashcatch")
-        self.cpp_info.set_property("cmake_target_name", "crashcatch::crashcatch")
+        self.cpp_info.set_property("cmake_file_name", "CrashCatch")
+        self.cpp_info.set_property("cmake_target_name", "CrashCatch::CrashCatch")
 
         # No compiled lib — only headers
         self.cpp_info.bindirs = []
