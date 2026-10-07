@@ -6,13 +6,6 @@ sources:
       - "https://invisible-mirror.net/archives/ncurses/ncurses-6.6.tar.gz"
       - "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.6.tar.gz"
     sha256: "355b4cbbed880b0381a04c46617b7656e362585d52e9cf84a67e2009b749ff11"
-  "6.5":
-    url:
-      - "https://ftpmirror.gnu.org/gnu/ncurses/ncurses-6.5.tar.gz"
-      - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/ncurses/ncurses-6.5.tar.gz"
-      - "https://invisible-mirror.net/archives/ncurses/ncurses-6.5.tar.gz"
-      - "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.5.tar.gz"
-    sha256: "136d91bc269a9a5785e5f9e980bc76ab57428f604ce3e5a5a90cebc767971cc6"
   "6.4":
     url:
       - "https://ftpmirror.gnu.org/gnu/ncurses/ncurses-6.4.tar.gz"
@@ -27,3 +20,8 @@ sources:
       - "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.3.tar.gz"
       - "https://invisible-mirror.net/archives/ncurses/ncurses-6.3.tar.gz"
     sha256: "97fc51ac2b085d4cde31ef4d2c3122c21abc217e9090a43a30fc5ec21684e059"
+patches:
+  "6.6":
+    - patch_file: "patches/0001-win32-remove-duplicate-nc_gettimeofday.patch"
+      patch_description: "MSVC: _nc_gettimeofday() is defined twice (win32con/gettimeofday.c and tinfo/lib_win32util.c), which breaks linking the DLL (LNK2005)"
+      patch_type: "portability"
