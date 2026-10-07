@@ -210,10 +210,7 @@ class LlamaCppConan(ConanFile):
             self.cpp_info.components["ggml"].defines.append(f"GGML_USE_{backend.upper()}")
             self.cpp_info.components["ggml"].requires.append(f"ggml-{backend}")
 
-            if backend == "cuda":
-                self.cpp_info.components["ggml-cuda"].set_property("cmake_extra_interface_libs",
-                            ["CUDA::cudart", "CUDA::cublas", "CUDA::cublasLt", "CUDA::cuda_driver"])
-            elif backend == "vulkan":
+            if backend == "vulkan":
                 self.cpp_info.components["ggml-vulkan"].requires = ["vulkan-loader::vulkan-loader", "spirv-headers::spirv-headers"]
 
         if is_apple_os(self):
