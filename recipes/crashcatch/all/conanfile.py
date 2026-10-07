@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.files import copy, get
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class CrashCatchConan(ConanFile):
