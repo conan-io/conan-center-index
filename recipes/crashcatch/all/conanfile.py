@@ -49,9 +49,8 @@ class CrashCatchConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
-        os_name = self.settings.get_safe("os")
-        if os_name == "Windows":
+        if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["DbgHelp", "User32"]
-        elif os_name == "Linux":
-            # backtrace() and dladdr() live in libdl on some distros
-            self.cpp_info.system_libs = ["dl"]
+            self.cpp_info.defines = ["_CRT_SECURE_NO_WARNINGS"]
+        elif self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread"]
