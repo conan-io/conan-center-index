@@ -1,0 +1,119 @@
+Removed PdfEncryptSession from the public API
+It was never meant to be public and it was used only privately in PdfMemDocument.
+
+https://github.com/podofo/podofo/issues/364
+https://github.com/podofo/podofo/commit/d1d9632f382a456655edef89eef7d0313d89f66c
+
+diff --git a/src/podofo/main/PdfMemDocument.cpp b/src/podofo/main/PdfMemDocument.cpp
+index bc218c7..7dd0a10 100644
+--- a/src/podofo/main/PdfMemDocument.cpp
++++ b/src/podofo/main/PdfMemDocument.cpp
+@@ -8,6 +8,7 @@
+ #include <podofo/auxiliary/StreamDevice.h>
+ #include <podofo/private/PdfWriter.h>
+ #include <podofo/private/PdfParser.h>
++#include <podofo/private/PdfEncryptSession.h>
+ 
+ #include "PdfCommon.h"
+ 
+@@ -60,6 +61,8 @@ PdfMemDocument::PdfMemDocument(const PdfMemDocument& rhs) :
+         m_Encrypt.reset(new PdfEncryptSession(rhs.m_Encrypt->GetEncrypt(), rhs.m_Encrypt->GetContext()));
+ }
+ 
++PdfMemDocument::~PdfMemDocument() {}
++
+ void PdfMemDocument::clear()
+ {
+     // NOTE: Here we clear only variables that have memory
+diff --git a/src/podofo/main/PdfMemDocument.h b/src/podofo/main/PdfMemDocument.h
+index e6c3722..1060223 100644
+--- a/src/podofo/main/PdfMemDocument.h
++++ b/src/podofo/main/PdfMemDocument.h
+@@ -9,7 +9,7 @@
+ #include <podofo/auxiliary/OutputDevice.h>
+ 
+ #include "PdfDocument.h"
+-#include "PdfEncryptSession.h"
++#include "PdfEncrypt.h"
+ 
+ namespace PoDoFo {
+ 
+@@ -46,6 +46,8 @@ public:
+     /// Construct a copy of the given document
+     PdfMemDocument(const PdfMemDocument& rhs);
+ 
++    ~PdfMemDocument();
++
+     /// Load a PdfMemDocument from a file
+     ///
+     /// @param filename filename of the file which is going to be parsed/opened
+diff --git a/src/podofo/main/PdfEncryptSession.cpp b/src/podofo/private/PdfEncryptSession.cpp
+similarity index 91%
+rename from src/podofo/main/PdfEncryptSession.cpp
+rename to src/podofo/private/PdfEncryptSession.cpp
+index 3eb64d0..a2e5c85 100644
+--- a/src/podofo/main/PdfEncryptSession.cpp
++++ b/src/podofo/private/PdfEncryptSession.cpp
+@@ -1,7 +1,7 @@
+ // SPDX-FileCopyrightText: 2022 Francesco Pretto <ceztko@gmail.com>
+ // SPDX-License-Identifier: LGPL-2.0-or-later OR MPL-2.0
+ 
+-#include <podofo/private/PdfDeclarationsPrivate.h>
++#include "PdfDeclarationsPrivate.h"
+ #include "PdfEncryptSession.h"
+ 
+ using namespace std;
+diff --git a/src/podofo/main/PdfEncryptSession.h b/src/podofo/private/PdfEncryptSession.h
+similarity index 85%
+rename from src/podofo/main/PdfEncryptSession.h
+rename to src/podofo/private/PdfEncryptSession.h
+index 90e6fa8..433043a 100644
+--- a/src/podofo/main/PdfEncryptSession.h
++++ b/src/podofo/private/PdfEncryptSession.h
+@@ -4,16 +4,16 @@
+ #ifndef PDF_ENCRYPT_SESSION
+ #define PDF_ENCRYPT_SESSION
+ 
+-#include "PdfEncrypt.h"
++#include <podofo/main/PdfEncrypt.h>
+ 
+ namespace PoDoFo {
+ 
+ /// A bundle of the encrypt object together a context
+-class PODOFO_API PdfEncryptSession final
++class PdfEncryptSession final
+ {
+     friend class PdfMemDocument;
+-    PODOFO_PRIVATE_FRIEND(class PdfParser);
+-    PODOFO_PRIVATE_FRIEND(class PdfImmediateWriter);
++    friend class PdfParser;
++    friend class PdfImmediateWriter;
+ 
+ private:
+     /// A copy constructor that does deep copy of PdfEncrypt as well
+diff --git a/src/podofo/private/PdfParserObject.h b/src/podofo/private/PdfParserObject.h
+index 1bf08b0..6dcf084 100644
+--- a/src/podofo/private/PdfParserObject.h
++++ b/src/podofo/private/PdfParserObject.h
+@@ -7,7 +7,7 @@
+ 
+ #include <podofo/main/PdfObject.h>
+ #include <podofo/main/PdfTokenizer.h>
+-#include <podofo/main/PdfEncryptSession.h>
++#include "PdfEncryptSession.h"
+ 
+ namespace PoDoFo {
+ 
+diff --git a/src/podofo/private/PdfWriter.h b/src/podofo/private/PdfWriter.h
+index 0c8af65..2af5c75 100644
+--- a/src/podofo/private/PdfWriter.h
++++ b/src/podofo/private/PdfWriter.h
+@@ -8,7 +8,7 @@
+ #include <podofo/auxiliary/InputDevice.h>
+ #include <podofo/auxiliary/OutputDevice.h>
+ #include <podofo/main/PdfIndirectObjectList.h>
+-#include <podofo/main/PdfEncryptSession.h>
++#include "PdfEncryptSession.h"
+ 
+ namespace PoDoFo {
+ 
