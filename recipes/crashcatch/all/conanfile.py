@@ -28,6 +28,9 @@ class CrashCatchConan(ConanFile):
         # Header-only: binary is the same regardless of compiler/settings
         self.info.clear()
 
+    def validate(self):
+        check_min_cppstd(self, 17)
+
     def package(self):
         copy(self, "LICENSE",
              src=self.source_folder,
