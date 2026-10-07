@@ -73,7 +73,7 @@ class LlamaCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cpp-httplib/[~0.56]")
+        self.requires("cpp-httplib/[~0.59]")
 
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/[>=1.3 <1.5]")
