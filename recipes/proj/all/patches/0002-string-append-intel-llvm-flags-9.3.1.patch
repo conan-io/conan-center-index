@@ -3,5 +3,5 @@
 @@ -95,2 +95,2 @@
 -  set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -fno-fast-math)
 -  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fno-fast-math)
-+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-fast-math")
-+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-fast-math")
++  string(APPEND CMAKE_C_FLAGS " -fno-fast-math")
++  string(APPEND CMAKE_CXX_FLAGS " -fno-fast-math")
