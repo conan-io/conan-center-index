@@ -13,7 +13,7 @@ configure_file("${src}/hunvisapi.h.in" hunvisapi.h @ONLY)
 # ---- Library target ----
 
 # Hunspell >= 1.7.4
-if (IS_READABLE "${src}/hunspelltrace.cxx")
+if (EXISTS "${src}/hunspelltrace.cxx")
     set(ADDITIONAL_SRCS "${src}/hunspelltrace.cxx")
 endif()
 
@@ -79,6 +79,6 @@ install(
 )
 
 # Hunspell >= 1.7.4
-if (IS_READABLE "${src}/hunversion.h")
+if (EXISTS "${src}/hunversion.h")
     install(FILES "${src}/hunversion.h" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/hunspell")
 endif()
