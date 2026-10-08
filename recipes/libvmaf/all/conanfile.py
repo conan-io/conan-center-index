@@ -24,25 +24,10 @@ class LibVmafConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_asm": [True, False],
-        "with_tools": [True, False],
-        "built_in_models": [True, False],
-        "enable_float": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_asm": True,
-        "built_in_models": True,
-        "enable_float": False,
-        "with_tools": False,
-    }
-
-    options_description = {
-        "with_asm": "Enable assembly optimizations, if available",
-        "with_tools": "Build command-line tools",
-        "built_in_models": "Include built-in VMAF models",
-        "enable_float": "Enable floating point calculations",
     }
 
     @property
