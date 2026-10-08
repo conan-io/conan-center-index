@@ -31,11 +31,7 @@ class YojimboConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # Link the libsodium supplied by Conan rather than yojimbo's bundled subset.
         tc.cache_variables["YOJIMBO_SYSTEM_SODIUM"] = True
-        # netcode and reliable have no Conan Center packages, so they are built from
-        # yojimbo's own vendored sources. YOJIMBO_SYSTEM_DEPS would look for external
-        # ones and fail.
         tc.cache_variables["YOJIMBO_SYSTEM_DEPS"] = False
         tc.cache_variables["YOJIMBO_BUILD_TESTS"] = False
         tc.cache_variables["YOJIMBO_INSTALL"] = True
@@ -46,14 +42,7 @@ class YojimboConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure()
-        # netcode and reliable are separate archives that libyojimbo links against, and
-        # upstream's install() rule covers only the yojimbo target, so build them
-        # explicitly and copy them in package(). tlsf is NOT built or packaged: since
-        # 1.8.0 upstream compiles tlsf.c directly into libyojimbo, and the standalone
-        # tlsf target exists only for development builds from the source tree.
-        cmake.build(target="netcode")
-        cmake.build(target="reliable")
-        cmake.build(target="yojimbo")
+        cmake.build()
 
     def package(self):
         copy(self, "LICENCE", self.source_folder,
