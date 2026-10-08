@@ -3,7 +3,6 @@ import os
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualRunEnv
 
 
 class TestPackageConan(ConanFile):
@@ -20,7 +19,6 @@ class TestPackageConan(ConanFile):
         tc.variables["CASADI_STATIC_PLUGINS"] = not self.dependencies["casadi"].options.shared
         tc.generate()
         CMakeDeps(self).generate()
-        VirtualRunEnv(self).generate()
 
     def build(self):
         cmake = CMake(self)
