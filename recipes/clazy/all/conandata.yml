@@ -1,0 +1,4 @@
+sources:
+  "1.12":
+    url: "https://github.com/KDE/clazy/archive/refs/tags/v1.12.tar.gz"
+    sha256: "945935bf47ea0298e4dfd0dfafe8ca7890185fe96cbf61290e007b9454fb2d10"
