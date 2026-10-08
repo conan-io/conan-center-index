@@ -1,0 +1,22 @@
+sources:
+  "3.0.4":
+    url:
+      - "https://github.com/modelon-community/fmi-library/archive/refs/tags/3.0.4.tar.gz"
+    sha256: "99bb1381f67fbc521faf8229ddeb9ae47aaa9d764989dcbc9af296ec565cd34f"
+patches:
+  "3.0.4":
+    - patch_file: "patches/3.0.4-001-ensure-cmake_module_path-append.patch"
+      patch_description: "ensure CMAKE_MODULE_PATH is list appended not set"
+      patch_type: "conan"
+    - patch_file: "patches/3.0.4-002-simply-use-conan-find-package-for-minizip.patch"
+      patch_description: "Do not let fmilib define minizip target variables"
+      patch_type: "conan"
+    - patch_file: "patches/3.0.4-003-use-conan-catch2-and-tweak-include-directory.patch"
+      patch_description: "Use catch2 from conan"
+      patch_type: "conan"
+    - patch_file: "patches/3.0.4-004-simply-use-conan-find-package-for-zlib.patch"
+      patch_description: "Find package zlib from conan"
+      patch_type: "conan"
+    - patch_file: "patches/3.0.4-005-add-missing-fmi-includes-and-libs-in-runtime-tests.patch"
+      patch_description: "Fix missing includes and library linking in runtime tests"
+      patch_type: "bugfix"
