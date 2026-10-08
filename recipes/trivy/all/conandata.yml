@@ -1,0 +1,13 @@
+sources:
+  "0.58.0":
+    Linux:
+      armv8:
+        url: "https://github.com/aquasecurity/trivy/releases/download/v0.58.0/trivy_0.58.0_Linux-ARM.tar.gz"
+        sha256: "979e51af330de80bee61bcd1b3be9af7fdf2c59af56d3bc4c34ee13b09956cd3"
+      x86_64:
+        url: "https://github.com/aquasecurity/trivy/releases/download/v0.58.0/trivy_0.58.0_Linux-64bit.tar.gz"
+        sha256: "eb79a4da633be9c22ce8e9c73a78c0f57ffb077fb92cb1968aaf9c686a20c549"
+    Windows:
+      x86_64:
+        url: "https://github.com/aquasecurity/trivy/releases/download/v0.58.0/trivy_0.58.0_windows-64bit.zip"
+        sha256: "42555d9f9fca7315ee622e8ad737a9c3bcbfcab398e5ec7e03e9a0c3191475ba"
