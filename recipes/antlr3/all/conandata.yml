@@ -1,0 +1,18 @@
+sources:
+  "3.5.3":
+    source:
+      url: "https://github.com/antlr/antlr3/archive/3.5.3/antlr3-3.5.3.tar.gz"
+      sha256: "a0892bcf164573d539b930e57a87ea45333141863a0dd3a49e5d8c919c8a58ab"
+    jar:
+      url: "https://repo1.maven.org/maven2/org/antlr/antlr-complete/3.5.3/antlr-complete-3.5.3.jar"
+      sha256: "e781de9b3e2cc1297dfdaf656da946a1fd22f449bd9e0ce1e12d488976887f83"
+patches:
+  "3.5.3":
+    - patch_file: "patches/0006-antlr3memory.hpp-fix-for-C-20-mode.patch"
+      patch_description: "Use const key type in map allocators, required in C++20 mode"
+      patch_type: "portability"
+      patch_source: "https://src.fedoraproject.org/rpms/antlr3"
+    - patch_file: "patches/0008-unconst-cyclicdfa-gcc-14.patch"
+      patch_description: "Drop const from CyclicDFA members so it stays copy-assignable with gcc >= 14"
+      patch_type: "portability"
+      patch_source: "https://src.fedoraproject.org/rpms/antlr3"
