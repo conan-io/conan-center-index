@@ -97,12 +97,18 @@ class CasadiConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "casadi")
         self.cpp_info.set_property("cmake_target_name", "casadi::casadi")
         self.cpp_info.set_property("pkg_config_name", "casadi")
-        self.cpp_info.defines = ["CASADI_SNPRINTF=snprintf"]
-        if self.options.shared:
-            self.cpp_info.libs = ["casadi"]
-        else:
-            # Static plugins must precede the core they depend on; consumers register them
-            # explicitly via casadi_load_<type>_<name>() since nothing can be dlopen'ed
-            self.cpp_info.libs = [f"casadi_{p}" for p in self._first_party_plugins] + ["casadi"]
+
+        core = self.cpp_info.components["core"]
+        core.libs = ["casadi"]
+        core.defines = ["CASADI_SNPRINTF=snprintf"]
+        core.requires = ["fmi2::fmi2", "fmi3::fmi3"]
         if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.system_libs = ["dl"]
+            core.system_libs = ["dl"]
+
+        if not self.options.shared:
+            # Static plugins can't be dlopen'ed, consumers register them explicitly
+            # via casadi_load_<type>_<name>()
+            for plugin in self._first_party_plugins:
+                component = self.cpp_info.components[plugin]
+                component.libs = [f"casadi_{plugin}"]
+                component.requires = ["core"]
