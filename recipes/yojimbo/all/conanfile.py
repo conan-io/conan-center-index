@@ -45,23 +45,9 @@ class YojimboConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENCE", self.source_folder,
-             os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENCE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        # Upstream installs only include/*.h. Consumers of yojimbo's public headers also
-        # need the vendored C headers those pull in (netcode.h for netcode_address_t,
-        # serialize.h for the serialisation macros), so copy them alongside.
-        for folder in ("netcode", "reliable", "serialize"):
-            copy(self, "*.h", os.path.join(self.source_folder, folder),
-                 os.path.join(self.package_folder, "include"))
-        # Copy the three archives by name rather than globbing *.a: upstream also
-        # defines a standalone `tlsf` target for source-tree development, and a blanket
-        # glob picks up libtlsf.a and ships a stray archive that no component declares.
-        for stem in ("netcode", "reliable", "yojimbo"):
-            for pattern in (f"lib{stem}.a", f"{stem}.lib"):
-                copy(self, pattern, self.build_folder,
-                     os.path.join(self.package_folder, "lib"), keep_path=False)
 
     def package_info(self):
         # netcode component -- the UDP protocol layer; needs libsodium for its AEAD.
