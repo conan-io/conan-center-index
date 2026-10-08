@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, rmdir
 
 required_conan_version = ">=2.19.0"
 
@@ -48,23 +48,13 @@ class YojimboConan(ConanFile):
         copy(self, "LICENCE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        # netcode component -- the UDP protocol layer; needs libsodium for its AEAD.
-        self.cpp_info.components["netcode"].libs = ["netcode"]
-        self.cpp_info.components["netcode"].requires = ["libsodium::libsodium"]
-        if self.settings.os == "Windows":
-            self.cpp_info.components["netcode"].system_libs = ["Ws2_32", "Iphlpapi"]
-
-        # reliable component -- packet acknowledgement.
-        self.cpp_info.components["reliable"].libs = ["reliable"]
-
-        # yojimbo itself. No separate tlsf component since 1.8.0: tlsf.c is compiled into
-        # libyojimbo, so a consumer linking yojimbo already has it.
-        self.cpp_info.components["yojimbo"].libs = ["yojimbo"]
-        self.cpp_info.components["yojimbo"].requires = [
-            "netcode", "reliable", "libsodium::libsodium",
-        ]
-        if self.settings.os != "Windows":
-            # ceil/floor in the reliable-ordered channel.
-            self.cpp_info.components["yojimbo"].system_libs = ["m"]
+        self.cpp_info.set_property("cmake_file_name", "yojimbo")
+        self.cpp_info.set_property("cmake_target_name", "Yojimbo::yojimbo")
+        self.cpp_info.libs = ["yojimbo"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["m"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["ws2_32", "iphlpapi"]
