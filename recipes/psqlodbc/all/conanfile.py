@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
@@ -41,9 +41,9 @@ class PsqlodbcConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows is not supported. "
                                             "Use the upstream MSVC build instead.")
-        if cross_building(self):
+        if not is_apple_os(self) and cross_building(self):
             # See commit https://github.com/conan-io/conan-center-index/pull/30495/changes/a2fe17cc30c8cbdd167269fdb80bad6c8de5e9b6
-            raise ConanInvalidConfiguration("Cross-compilation is not supported for now.")
+            raise ConanInvalidConfiguration("Linux cross-compilation is not supported for now.")
 
     def build_requirements(self):
         self.tool_requires("autoconf/2.71")
@@ -82,7 +82,6 @@ class PsqlodbcConan(ConanFile):
 
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        fix_apple_shared_install_name(self)
 
     def package_info(self):
         # psqlodbcw.so / psqlodbca.so are ODBC driver modules loaded
@@ -90,6 +89,7 @@ class PsqlodbcConan(ConanFile):
         # ship no public headers, so no link interface is exposed.
         self.cpp_info.includedirs = []
         self.cpp_info.libs = []
+        self.cpp_info.bindirs = []
         # The driver modules link libpq (PQ*) and unixODBC's libodbcinst
         # (SQLGetPrivateProfileString). Declare these so the runtime
         # dependencies are propagated to consumers/generators.
