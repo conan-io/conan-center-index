@@ -1,10 +1,10 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import stdcpp_library
-from conan.tools.files import copy, rmdir
-from conan.tools.gnu import PkgConfigDeps
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.scm import Git
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=2.10.0"
