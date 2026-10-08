@@ -445,7 +445,12 @@ class QtConan(ConanFile):
         if self.options.qtwayland:
             self.tool_requires("wayland/1.22.0")
         if cross_building(self):
-            self.tool_requires(f"qt/{self.version}")
+            tool_options = {}
+            if self._apple_embedded:
+                # Tools are not built for the target (see QT_FORCE_BUILD_TOOLS), the build context Qt must provide them
+                tool_modules = ["qttools", "qtshadertools", "qtdeclarative", "qtremoteobjects", "qtscxml"]
+                tool_options = {m: True for m in tool_modules if self.options.get_safe(m)}
+            self.tool_requires(f"qt/{self.version}", options=tool_options)
 
     def generate(self):
         ms = VirtualBuildEnv(self)
