@@ -81,6 +81,8 @@ class LibVmafConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libvmaf")
         self.cpp_info.libs = ["vmaf"]
+        # Consumers such as FFmpeg include <libvmaf.h> directly
+        self.cpp_info.includedirs = ["include", os.path.join("include", "libvmaf")]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
         if not self.options.shared:
