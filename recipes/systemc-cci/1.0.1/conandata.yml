@@ -1,0 +1,8 @@
+sources:
+  "1.0.1":
+    url: https://github.com/accellera-official/cci/releases/download/v1.0.1/cci_v1.0.1.zip
+    sha256: f71c12959270cdac9f7ccf73e8894406fd92cacb4d9baf9d0d92a4e798a28fe3
+patches:
+  "1.0.1":
+    - patch_file: "patches/cci_param_untyped_handle.patch"
+
