@@ -1,4 +1,4 @@
 sources:
   "3.2.1":
-    url: "https://github.com/Netflix/vmaf.git"
-    commit: "f85a853692a8c730d0270cd733c8bb30b5b93b7c"
+    url: "https://github.com/Netflix/vmaf/archive/refs/tags/v3.2.1.tar.gz"
+    sha256: "5df7386911bc15fd1ca783132528748d219768ae4fc5f8e0b61184f041648092"
