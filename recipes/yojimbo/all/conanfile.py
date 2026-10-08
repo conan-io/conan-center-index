@@ -24,11 +24,7 @@ class YojimboConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # yojimbo bundles a pruned libsodium, but YOJIMBO_SYSTEM_SODIUM=ON links an
-        # external one instead so the bundled copy is never compiled. Keeping libsodium
-        # unvendored is deliberate: a vendored crypto copy inside this package would not
-        # receive libsodium security updates through Conan.
-        self.requires("libsodium/1.0.20", transitive_headers=True, transitive_libs=True)
+        self.requires("libsodium/[~1.0.20]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
