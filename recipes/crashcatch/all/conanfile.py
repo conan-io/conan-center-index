@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
-from conan.tools.layout import basic_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
 import os
 
 required_conan_version = ">=2.1"
@@ -19,7 +19,7 @@ class CrashCatchConan(ConanFile):
     no_copy_source = True
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self,
@@ -33,13 +33,21 @@ class CrashCatchConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 17)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+
     def package(self):
         copy(self, "LICENSE",
              src=self.source_folder,
              dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "*.hpp",
-             src=os.path.join(self.source_folder, "include"),
-             dst=os.path.join(self.package_folder, "include"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CrashCatch")
