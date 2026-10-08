@@ -1103,9 +1103,19 @@ class QtConan(ConanFile):
                 requires.append("Core")
             self.cpp_info.components[componentname].requires = _get_corrected_reqs(requires)
 
+        def _plugin_library_exists(libname, plugintype):
+            if not self.package_folder:
+                return True
+            libdir = os.path.join(self.package_folder, "plugins", plugintype)
+            return any(os.path.isfile(os.path.join(libdir, name)) for name in (f"{libname}.lib", f"lib{libname}.a"))
+
         def _create_plugin(pluginname, libname, plugintype, requires):
             componentname = f"qt{pluginname}"
             assert componentname not in self.cpp_info.components, f"Plugin {pluginname} already present in self.cpp_info.components"
+            # Some plugins depend on what the build finds (mng needs libmng, jp2 needs jasper)
+            if not self.options.shared and not _plugin_library_exists(libname + libsuffix, plugintype):
+                self.output.warning(f"Plugin {pluginname} not declared: plugins/{plugintype}/{libname}{libsuffix} is not in the package")
+                return
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt6::{pluginname}")
             self.cpp_info.components[componentname].set_property("cmake_target_aliases", [f"Qt::{pluginname}"])
             if not self.options.shared:
