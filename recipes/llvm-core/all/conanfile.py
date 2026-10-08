@@ -46,6 +46,7 @@ LLVM_TARGETS = {
     "PowerPC",
     "RISCV",
     "Sparc",
+    "SPIRV",
     "SystemZ",
     "VE",
     "WebAssembly",
@@ -325,7 +326,11 @@ class LLVMCoreConan(ConanFile):
 
     @property
     def _all_targets(self):
-        targets = LLVM_TARGETS if Version(self.version) >= 14 else LLVM_TARGETS - {"LoongArch", "VE"}
+        targets = LLVM_TARGETS
+        if Version(self.version) < 20:
+            targets -= {"SPIRV"}
+        if Version(self.version) < 14:
+            targets -= {"LoongArch", "VE"}
         return ";".join(targets)
 
     def generate(self):
