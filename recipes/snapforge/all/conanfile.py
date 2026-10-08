@@ -30,7 +30,7 @@ class SnapForgeConan(ConanFile):
 
     def requirements(self):
         self.requires("libcurl/8.10.1")
-        self.requires("nlohmann_json/3.11.3")
+        self.requires("nlohmann_json/3.11.3", transitive_headers=True)
 
     def source(self):
         # Use the published, pinned six-file SDK release, never the private monorepo.
@@ -55,4 +55,5 @@ class SnapForgeConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SnapForge")
         self.cpp_info.set_property("cmake_target_name", "SnapForge::snapforge")
+        self.cpp_info.requires = ["libcurl::curl", "nlohmann_json::nlohmann_json"]
         self.cpp_info.libs = ["snapforge"]
