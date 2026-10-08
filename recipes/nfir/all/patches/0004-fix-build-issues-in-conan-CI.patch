@@ -1,0 +1,25 @@
+From 26faac7eae45254c780d6d1a43c6d5ae6482c05d Mon Sep 17 00:00:00 2001
+From: Tomas Krupa <tomas.krupa@innovatrics.com>
+Date: Wed, 26 Feb 2025 17:30:18 +0100
+Subject: [PATCH] fix build issues in conan CI
+
+---
+ src/bin/nfir.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/bin/nfir.cpp b/src/bin/nfir.cpp
+index 9000cb6..d1cf266 100644
+--- a/src/bin/nfir.cpp
++++ b/src/bin/nfir.cpp
+@@ -350,7 +350,7 @@ int main(int argc, char** argv)
+           NFIR::resample( srcImageAry, tgtImageAry,
+                         srcSampleRate, tgtSampleRate, "inch",
+                         interpolationMethod, filterType,
+-                        &imageWidth, &imageHeight, &lenSrcFileBlock,
++                        &imageWidth, &imageHeight, reinterpret_cast<size_t*>(&lenSrcFileBlock),
+                         srcImageFormat, tgtImageFormat, vecPngTextChunk,
+                         logRuntime );
+           // Note: lenSrcFileBlock contains length of the generated, target
+-- 
+2.34.1
+
