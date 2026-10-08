@@ -59,16 +59,10 @@ class LibVmafConan(ConanFile):
             destination=self._repo_folder)
 
     def generate(self):
-        deps = PkgConfigDeps(self)
-        deps.generate()
-
         tc = MesonToolchain(self)
         tc.project_options["enable_tests"] = False
         tc.project_options["enable_docs"] = False
-        tc.project_options["enable_tools"] = self.options.with_tools
-        tc.project_options["enable_asm"] = self.options.with_asm
-        tc.project_options["built_in_models"] = self.options.built_in_models
-        tc.project_options["enable_float"] = self.options.enable_float
+        tc.project_options["enable_tools"] = False
         tc.generate()
 
     def build(self):
