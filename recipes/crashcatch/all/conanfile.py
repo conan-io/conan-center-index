@@ -51,6 +51,5 @@ class CrashCatchConan(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["DbgHelp", "User32"]
-            self.cpp_info.defines = ["_CRT_SECURE_NO_WARNINGS"]
         elif self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
