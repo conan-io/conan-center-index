@@ -50,7 +50,7 @@ class Libx265Conan(ConanFile):
         # FIXME: Disable assembly by default if host is arm and compiler apple-clang for the moment.
         # Indeed, apple-clang is not able to understand some asm instructions of libx265
         # FIXME: Disable assembly by default if host is Android for the moment. It fails to build
-        if (self.settings.compiler == "apple-clang" and "arm" in self.settings.arch) or self.settings.os == "Android":
+        if ("arm" in self.settings.arch and self.settings.os == "Macos") or self.settings.os == "Android":
             self.options.assembly = False
         if is_msvc(self) and self.settings.arch == "armv8":
             # Build errors, possibly unsupported
