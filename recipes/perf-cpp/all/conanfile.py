@@ -65,12 +65,8 @@ class PerfCppConan(ConanFile):
         tc = CMakeToolchain(self)
         # Upstream uses a custom option name rather than BUILD_SHARED_LIBS
         tc.cache_variables["BUILD_LIB_SHARED"] = bool(self.options.shared)
-        tc.cache_variables["BUILD_EXAMPLES"] = False
-        tc.cache_variables["BUILD_TESTS"] = False
         # Defaults to ON for a standalone build, which this is; packaged builds should not lint
         tc.cache_variables["ENABLE_CLANG_TIDY"] = False
-        # Would shell out to python3 to generate a processor-specific event table at build time
-        tc.cache_variables["GEN_PROCESSOR_EVENTS"] = False
         tc.generate()
 
     def build(self):
@@ -86,7 +82,5 @@ class PerfCppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["perf-cpp"]
-        self.cpp_info.set_property("cmake_file_name", "perf-cpp")
-        self.cpp_info.set_property("cmake_target_name", "perf-cpp::perf-cpp")
         # The sampler's overflow worker runs on a std::thread
         self.cpp_info.system_libs.append("pthread")
