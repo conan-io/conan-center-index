@@ -55,11 +55,8 @@ class LibVmafConan(ConanFile):
             self.tool_requires("nasm/[>=2.13.02 <3]")
 
     def source(self):
-        # The Meson project lives in the "libvmaf" subfolder, but the default
-        # models compiled into the library are stored in the repository's
-        # top-level "model" folder, so the whole repository is cloned.
-        git = Git(self, folder=self._repo_folder)
-        git.fetch_commit(**self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version], strip_root=True,
+            destination=self._repo_folder)
 
     def generate(self):
         deps = PkgConfigDeps(self)
