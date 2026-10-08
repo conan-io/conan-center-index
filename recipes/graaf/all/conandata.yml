@@ -1,4 +1,7 @@
 sources:
+  "1.2.0":
+    url: "https://github.com/bobluppes/graaf/archive/v1.2.0.tar.gz"
+    sha256: "1131d2a99e070d7604adfc48cf7c7316a1bbf221af3106953c9b39afe87dbdc8"
   "1.1.1":
     url: "https://github.com/bobluppes/graaf/archive/v1.1.1.tar.gz"
     sha256: "2829e160c44463763faed593bb5b62e9bdfa26554c1fe949f564f2ca622381ff"

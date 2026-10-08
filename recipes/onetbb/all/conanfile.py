@@ -6,7 +6,6 @@ from conan.tools.files import copy, get, rm, rmdir, save
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
-import re
 
 required_conan_version = ">=2.0"
 
@@ -59,7 +58,7 @@ class OneTBBConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("tbbbind"):
-            self.requires("hwloc/2.12.2", options={'shared': True})
+            self.requires("hwloc/[>=2.12.2 <3]", options={'shared': True})
 
     def validate(self):
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "11.0":

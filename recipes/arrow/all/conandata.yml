@@ -1,7 +1,7 @@
 sources:
-  "25.0.0":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-25.0.0/apache-arrow-25.0.0.tar.gz?action=download"
-    sha256: "12afc2dc8137bdd4a68876cec939f664c9d55cfc7b75f55b45163ebb4e344d81"
+  "25.0.1":
+    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-25.0.1/apache-arrow-25.0.1.tar.gz?action=download"
+    sha256: "43d5de0a581f43cf63a2c06b4dcf13b9ff6fcd800f023324596e5781093bc500"
   "24.0.0":
     url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-24.0.0/apache-arrow-24.0.0.tar.gz?action=download"
     sha256: "9a8094d24fa33b90c672ab77fdda253f29300c8b0dd3f0b8e55a29dbd98b82c9"
@@ -12,8 +12,8 @@ sources:
     url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-19.0.1/apache-arrow-19.0.1.tar.gz?action=download"
     sha256: "acb76266e8b0c2fbb7eb15d542fbb462a73b3fd1e32b80fad6c2fafd95a51160"
 patches:
-  "25.0.0":
-    - patch_file: "patches/25.0.0-0001-fix-downloaded-mimalloc.patch"
+  "25.0.1":
+    - patch_file: "patches/25.0.1-0001-fix-downloaded-mimalloc.patch"
   "24.0.0":
     - patch_file: "patches/24.0.0-0001-fix-downloaded-mimalloc.patch"
   "22.0.0":

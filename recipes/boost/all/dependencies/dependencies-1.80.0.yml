@@ -146,9 +146,7 @@ dependencies:
   type_erasure:
   - thread
   unit_test_framework:
-  - prg_exec_monitor
   - test
-  - test_exec_monitor
   wave:
   - filesystem
   - serialization

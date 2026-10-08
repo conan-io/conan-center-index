@@ -1,0 +1,13 @@
+diff --git a/ouster_core/CMakeLists.txt b/ouster_core/CMakeLists.txt
+index 87710b9..01fbd84 100644
+--- a/ouster_core/CMakeLists.txt
++++ b/ouster_core/CMakeLists.txt
+@@ -55,7 +55,7 @@ target_link_libraries(ouster_core
+     nmea
+     ouster_build
+     libzip::zip
+-    ${OPENSSL_LIBRARIES}
++    OpenSSL::Crypto
+     )
+ target_compile_definitions(ouster_core PRIVATE EIGEN_MPL2_ONLY)
+ if(BUILD_SHARED_LIBRARY)
