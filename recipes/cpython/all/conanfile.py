@@ -588,6 +588,7 @@ class CPythonConan(ConanFile):
             "--include-pip",
             "--include-venv",
             "--include-dev",
+            "--include-stable"
         ]
         if self.options.with_tkinter:
             layout_args.append("--include-tcltk")
