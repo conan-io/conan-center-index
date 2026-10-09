@@ -1,4 +1,7 @@
 sources:
+  "cci.20260102":
+    url: "https://github.com/lvandeve/lodepng/archive/865adac2b8149774401626101ec618e3de45e1d8.tar.gz"
+    sha256: "480265dbc4c46a4258a776abbb9a66addc8adeaea085bb9f540b7d5292b1f534"
   "cci.20230410":
     url: "https://github.com/lvandeve/lodepng/archive/c18b949b71f45e78b1f9a28c5d458bce0da505d6.tar.gz"
     sha256: "915d1bf834e67632b87bd18c932e6041ed0ca46a7e3493f5e3290980092cf2d9"
