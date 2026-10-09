@@ -3,8 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
-from conan.tools.gnu import PkgConfigDeps
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=2.1"
@@ -53,11 +52,14 @@ class SzConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.19 <4]")
-        self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         rmdir(self, os.path.join(self.source_folder, "tools", "zstd"))
+        # use the Conan zstd target instead of find_library(NAMES zstd), which misses zstd_static.lib on MSVC
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "find_library(SZ3_ZSTD_LIBRARY NAMES zstd)",
+                        "find_package(zstd REQUIRED CONFIG)\n    set(SZ3_ZSTD_LIBRARY zstd::libzstd)")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -71,7 +73,6 @@ class SzConan(ConanFile):
         tc.cache_variables["CMAKE_SKIP_INSTALL_RPATH"] = True
         tc.generate()
         CMakeDeps(self).generate()
-        PkgConfigDeps(self).generate()
 
     def build(self):
         cmake = CMake(self)
@@ -113,5 +114,3 @@ class SzConan(ConanFile):
                 self.runenv_info.prepend_path("HDF5_PLUGIN_PATH", plugin_dir)
             else:
                 h5.defines = ["HDF5SZ3_STATIC"]
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                h5.system_libs = ["m"]
