@@ -41,7 +41,7 @@ class PsqlodbcConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows is not supported. "
                                             "Use the upstream MSVC build instead.")
-        if not is_apple_os(self) and cross_building(self):
+        if cross_building(self):
             # See commit https://github.com/conan-io/conan-center-index/pull/30495/changes/a2fe17cc30c8cbdd167269fdb80bad6c8de5e9b6
             raise ConanInvalidConfiguration("Linux cross-compilation is not supported for now.")
 
