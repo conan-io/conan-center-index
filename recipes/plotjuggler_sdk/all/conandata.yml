@@ -1,0 +1,4 @@
+sources:
+  "0.20.0":
+    url: "https://github.com/PlotJuggler/plotjuggler_sdk/archive/refs/tags/v0.20.0.tar.gz"
+    sha256: "2baddcbc9ed2bc61612a91ff684da6b9a5a5a52c73c4f8af8fa8cd4df1ba2907"
