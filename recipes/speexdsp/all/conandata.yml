@@ -1,0 +1,4 @@
+sources:
+  "1.2.1.cci.20260427":
+    url: "https://gitlab.xiph.org/xiph/speexdsp/-/archive/2e9c212d4dba4c79282800e68da893dd8be0eff6/speexdsp-2e9c212d4dba4c79282800e68da893dd8be0eff6.tar.gz"
+    sha256: "e429f7d807dc2713a7cfc91695bde8ff3feb3a0ba3e2ad608b50ae4d129d92a8"
