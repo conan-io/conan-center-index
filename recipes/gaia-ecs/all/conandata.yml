@@ -1,4 +1,7 @@
 sources:
+  "1.0.0":
+    url: "https://github.com/richardbiely/gaia-ecs/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "0e6c4d8dbea7c9a6e01b84244aefa0a041c913ba289bbcaaa0770ece9a02c25d"
   "0.9.2":
     url: "https://github.com/richardbiely/gaia-ecs/archive/refs/tags/v0.9.2.tar.gz"
     sha256: "2fbed6c70fb80ae20812adfe073a0d2b396c447b56167be2c917979fdc95cc8d"
