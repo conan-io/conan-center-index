@@ -1,0 +1,41 @@
+--- Makefile.in
++++ Makefile.in
+@@ -2460,12 +2460,12 @@
+ # files created in the build tree, so instead we regenerate the
+ # manual pages if the sources for the build-tree files we want to
+ # run have changed.
+-$(libtool_1): $(ltmain_sh)
+-	$(AM_V_GEN)$(update_mans) -n 'Provide generalized library-building support services' --help-option=--help-all libtool
+-$(libtoolize_1): $(libtoolize_in)
+-	$(AM_V_GEN)$(update_mans) -n 'Prepare a package to use libtool' libtoolize
+-$(libtoolnextv_1): $(libtoolnextv_in)
+-	$(AM_V_GEN)$(update_mans) -n 'Determines next version to use for a libtool library' libtool-next-version
++#$(libtool_1): $(ltmain_sh)
++#	$(AM_V_GEN)$(update_mans) -n 'Provide generalized library-building support services' --help-option=--help-all libtool
++#$(libtoolize_1): $(libtoolize_in)
++#	$(AM_V_GEN)$(update_mans) -n 'Prepare a package to use libtool' libtoolize
++#$(libtoolnextv_1): $(libtoolnextv_in)
++#	$(AM_V_GEN)$(update_mans) -n 'Determines next version to use for a libtool library' libtool-next-version
+ 
+ install-data-local: $(lt_Makefile_in) install-scripts-local
+ 	@$(NORMAL_INSTALL)
+--- libtoolize.in
++++ libtoolize.in
+@@ -1961,11 +1961,12 @@
+   pkgmacro_files="@pkgmacro_files@"
+ 
+   # Locations for important files:
+-  prefix="@prefix@"
+-  datadir="@datadir@"
+-  pkgauxdir="@pkgauxdir@"
+-  pkgltdldir="@pkgdatadir@"
+-  aclocaldir="@aclocaldir@"
++  scriptdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
++  prefix="$scriptdir/.."
++  datadir="$scriptdir/../res"
++  pkgauxdir="$scriptdir/../res/libtool/build-aux"
++  pkgltdldir="$scriptdir/../res/libtool"
++  aclocaldir="$scriptdir/../res/aclocal"
+ 
+   # Allow the user to override the master libtoolize repository:
+   if test -n "$_lt_pkgdatadir"; then
