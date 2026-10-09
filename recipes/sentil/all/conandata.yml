@@ -1,0 +1,14 @@
+sources:
+  "0.3.0":
+    linux-x86_64:
+      url: "https://github.com/sedislab/SENTIL/releases/download/v0.3.0/sentil-0.3.0-linux-x86_64.tar.gz"
+      sha256: "920e98a46f82074f176bfab07fe04a44236300d8262ca6905a4a4644d600eb23"
+    macos-x86_64:
+      url: "https://github.com/sedislab/SENTIL/releases/download/v0.3.0/sentil-0.3.0-macos-x86_64.tar.gz"
+      sha256: "c7f3fbc36edd5b1cb6e5117751c8acac3ea9a0f9650813af9e70b52645797a37"
+    macos-arm64:
+      url: "https://github.com/sedislab/SENTIL/releases/download/v0.3.0/sentil-0.3.0-macos-arm64.tar.gz"
+      sha256: "3ce341d1133f6c054a5fdbf0751f94fbf5f6532a41a788292caa44c0a6dda4f3"
+    windows-x86_64:
+      url: "https://github.com/sedislab/SENTIL/releases/download/v0.3.0/sentil-0.3.0-windows-x86_64.tar.gz"
+      sha256: "3649cdbd640708e037da641a1471522786b434d5bde55de8a89a3f03d4fc2a3f"
