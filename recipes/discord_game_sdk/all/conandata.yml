@@ -1,0 +1,8 @@
+sources:
+  "3.2.1":
+    url: "https://dl-game-sdk.discordapp.net/3.2.1/discord_game_sdk.zip"
+    sha256: "6757bb4a1f5b42aa7b6707cbf2158420278760ac5d80d40ca708bb01d20ae6b4"
+patches:
+  "3.2.1":
+    - patch_file: "patches/3.2.1-0001-include-cstdint.patch"
+      patch_description: "Include <cstdint> so the C++ wrapper compiles on newer GCC/Clang"
