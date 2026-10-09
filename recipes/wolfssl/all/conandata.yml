@@ -1,37 +1,4 @@
 sources:
-  "5.7.2":
-    url: "https://github.com/wolfSSL/wolfssl/archive/v5.7.2-stable.tar.gz"
-    sha256: "0f2ed82e345b833242705bbc4b08a2a2037a33f7bf9c610efae6464f6b10e305"
-  "5.7.0":
-    url: "https://github.com/wolfSSL/wolfssl/archive/v5.7.0-stable.tar.gz"
-    sha256: "2de93e8af588ee856fe67a6d7fce23fc1b226b74d710b0e3946bc8061f6aa18f"
-  "5.6.6":
-    url: "https://github.com/wolfSSL/wolfssl/archive/v5.6.6-stable.tar.gz"
-    sha256: "3d2ca672d41c2c2fa667885a80d6fa03c3e91f0f4f72f87aef2bc947e8c87237"
-  "5.6.4":
-    url: "https://github.com/wolfSSL/wolfssl/archive/v5.6.4-stable.tar.gz"
-    sha256: "031691906794ff45e1e792561cf31759f5d29ac74936bc8dffb8b14f16d820b4"
-  "5.6.3":
-    url: "https://github.com/wolfSSL/wolfssl/archive/v5.6.3-stable.tar.gz"
-    sha256: "2e74a397fa797c2902d7467d500de904907666afb4ff80f6464f6efd5afb114a"
-  "5.5.1":
-    url: "https://github.com/wolfSSL/wolfssl/archive/v5.5.1-stable.tar.gz"
-    sha256: "97339e6956c90e7c881ba5c748dd04f7c30e5dbe0c06da765418c51375a6dee3"
-  "5.4.0":
-    url: "https://github.com/wolfSSL/wolfssl/archive/v5.4.0-stable.tar.gz"
-    sha256: "dc36cc19dad197253e5c2ecaa490c7eef579ad448706e55d73d79396e814098b"
-  "5.3.0":
-    url: "https://github.com/wolfSSL/wolfssl/archive/v5.3.0-stable.tar.gz"
-    sha256: "1a3bb310dc01d3e73d9ad91b6ea8249d081016f8eef4ae8f21d3421f91ef1de9"
-  "5.2.0":
-    url: "https://github.com/wolfSSL/wolfssl/archive/v5.2.0-stable.tar.gz"
-    sha256: "409b4646c5f54f642de0e9f3544c3b83de7238134f5b1ff93fb44527bf119d05"
-  "5.1.1":
-    url: "https://github.com/wolfSSL/wolfssl/archive/v5.1.1-stable.tar.gz"
-    sha256: "d3e0544dbe7e9587c0f6538cdc671b6492663bb7a4281819538abe6c99cdbd92"
-  "4.8.1":
-    url: "https://github.com/wolfSSL/wolfssl/archive/v4.8.1-stable.tar.gz"
-    sha256: "50db45f348f47e00c93dd244c24108220120cb3cc9d01434789229c32937c444"
-  "4.7.1":
-    url: "https://github.com/wolfSSL/wolfssl/archive/v4.7.1r.tar.gz"
-    sha256: "bd13875b0b21e51b558ed797065937dc8530a5b09c219d966c3fc47a182d46a1"
+  "5.9.1":
+    url: "https://github.com/wolfSSL/wolfssl/archive/refs/tags/v5.9.1-stable.tar.gz"
+    sha256: "d5ca7af48cd2d9a91d539e9baedeba55a0605a28d7ac8b01dc3d5254a13ca341"

@@ -1,4 +1,5 @@
-#include "wolfssl/ssl.h"
+#include <wolfssl/options.h>
+#include <wolfssl/ssl.h>
 
 int main()
 {

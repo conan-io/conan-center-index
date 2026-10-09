@@ -1,0 +1,4 @@
+sources:
+  "3.25":
+    url: "https://github.com/KaHIP/KaHIP/archive/v3.25.tar.gz"
+    sha256: "3abad20158887b585b4d4792c35fa9023b7fd634b2bc4494334a3951b69f4842"

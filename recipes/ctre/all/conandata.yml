@@ -1,4 +1,7 @@
 sources:
+  "3.11.0":
+    url: "https://github.com/hanickadot/compile-time-regular-expressions/archive/v3.11.0.tar.gz"
+    sha256: "7d4b30d0bdd8864a47cceb2ab8e7c4d1846f0ec62383f8c45122435d32f19530"
   "3.10.0":
     url: "https://github.com/hanickadot/compile-time-regular-expressions/archive/v3.10.0.tar.gz"
     sha256: "b17e6c9a6cc0cea65132f62a6c699cefed952721063569d6339eb3ca471045e6"

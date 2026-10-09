@@ -1,9 +1,10 @@
-from conan import ConanFile
-from conan.tools.files import copy, get
-from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.50.0"
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
+
+required_conan_version = ">=2"
 
 
 class VulkanHeadersConan(ConanFile):
@@ -19,7 +20,7 @@ class VulkanHeadersConan(ConanFile):
     no_copy_source = True
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -27,30 +28,31 @@ class VulkanHeadersConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["VULKAN_HEADERS_ENABLE_MODULE"] = False
+        tc.cache_variables["VULKAN_HEADERS_ENABLE_TESTS"] = False
+        tc.generate()
+
     def build(self):
-        pass
+        cmake = CMake(self)
+        cmake.configure()
 
     def package(self):
         copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
-        copy(self, "*", src=os.path.join(self.source_folder, "registry"), dst=os.path.join(self.package_folder, "res", "vulkan", "registry"))
+        cmake = CMake(self)
+        cmake.install()
+        copy(self, "*", src=os.path.join(self.package_folder, "share", "vulkan", "registry"), dst=os.path.join(self.package_folder, "res", "vulkan", "registry"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "VulkanHeaders")
         self.cpp_info.components["vulkanheaders"].set_property("cmake_target_name", "Vulkan::Headers")
         self.cpp_info.components["vulkanheaders"].bindirs = []
         self.cpp_info.components["vulkanheaders"].libdirs = []
+
         self.cpp_info.components["vulkanregistry"].set_property("cmake_target_name", "Vulkan::Registry")
         self.cpp_info.components["vulkanregistry"].includedirs = [os.path.join("res", "vulkan", "registry")]
         self.cpp_info.components["vulkanregistry"].bindirs = []
         self.cpp_info.components["vulkanregistry"].libdirs = []
         self.cpp_info.components["vulkanregistry"].resdirs = ["res"]
-
-        self.cpp_info.filenames["cmake_find_package"] = "VulkanHeaders"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "VulkanHeaders"
-        self.cpp_info.names["cmake_find_package"] = "Vulkan"
-        self.cpp_info.names["cmake_find_package_multi"] = "Vulkan"
-        self.cpp_info.components["vulkanheaders"].names["cmake_find_package"] = "Headers"
-        self.cpp_info.components["vulkanheaders"].names["cmake_find_package_multi"] = "Headers"
-        self.cpp_info.components["vulkanregistry"].names["cmake_find_package"] = "Registry"
-        self.cpp_info.components["vulkanregistry"].names["cmake_find_package_multi"] = "Registry"

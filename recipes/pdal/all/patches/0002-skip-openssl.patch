@@ -1,0 +1,15 @@
+Avoid finding OpenSSL from CURL. PDAL will use transitive OpenSSL but is not listed as dependecny.
+
+diff --git a/vendor/arbiter/CMakeLists.txt b/vendor/arbiter/CMakeLists.txt
+index fc73b75..20ea607 100644
+--- a/vendor/arbiter/CMakeLists.txt
++++ b/vendor/arbiter/CMakeLists.txt
+@@ -48,7 +48,7 @@ if (ZLIB_FOUND)
+         PRIVATE
+             ARBITER_ZLIB)
+ endif()
+-if (OPENSSL_FOUND)
++if (FALSE)
+     target_include_directories(${PDAL_ARBITER_LIB_NAME}
+         PRIVATE
+             ${OPENSSL_INCLUDE_DIR})

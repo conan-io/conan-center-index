@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-find_package(QuaZip-Qt5 REQUIRED CONFIG)
+if(NOT DEFINED QUAZIP_QT_MAJOR_VERSION)
+    set(QUAZIP_QT_MAJOR_VERSION 5)
+endif()
+
+find_package(QuaZip-Qt${QUAZIP_QT_MAJOR_VERSION} REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE QuaZip::QuaZip)

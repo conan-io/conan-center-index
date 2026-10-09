@@ -1,0 +1,10 @@
+--- cmake/godotcpp.cmake
++++ cmake/godotcpp.cmake
+@@ -408,7 +408,6 @@
+             CXX_VISIBILITY_PRESET ${GODOTCPP_SYMBOL_VISIBILITY}
+ 
+             COMPILE_WARNING_AS_ERROR ${GODOTCPP_WARNING_AS_ERROR}
+-            POSITION_INDEPENDENT_CODE ON
+             BUILD_RPATH_USE_ORIGIN ON
+ 
+             PREFIX      "lib"

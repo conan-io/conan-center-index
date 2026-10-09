@@ -78,7 +78,7 @@ class TensorflowLiteConan(ConanFile):
         return Version(self.version) >= "2.12.0"
 
     def requirements(self):
-        self.requires("abseil/[>=20230125.3 <=20250127.0]")
+        self.requires("abseil/[>=20230125.3 <=20260526.0]")
         self.requires("eigen/3.4.0")
         self.requires("farmhash/cci.20190513")
         self.requires("fft/cci.20061228")
@@ -88,7 +88,7 @@ class TensorflowLiteConan(ConanFile):
             self.requires("flatbuffers/23.5.26", transitive_headers=True)
         self.requires("gemmlowp/cci.20210928")
         self.requires("ruy/cci.20231129")
-        self.requires("cpuinfo/cci.20231129")
+        self.requires("cpuinfo/[>=cci.20231129]")
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
         if self.options.with_xnnpack:

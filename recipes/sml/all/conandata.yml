@@ -1,33 +1,4 @@
 sources:
-  "1.1.13":
-    url: "https://github.com/boost-ext/sml/archive/refs/tags/v1.1.13.tar.gz"
-    sha256: "383b1d6868a29319694e5e2ed5934062de21c6e4920ad2ccb8e552f2892b922c"
-  "1.1.12":
-    url: "https://github.com/boost-ext/sml/archive/refs/tags/v1.1.12.tar.gz"
-    sha256: "65b53b3b839881512a5bf5bd443afd7dd64a406c706aab469f2e7cfd1d0a6012"
-  "1.1.11":
-    url: "https://github.com/boost-ext/sml/archive/refs/tags/v1.1.11.tar.gz"
-    sha256: "8773efd639ce9649dc449135c8c53232e1cb5f4037d44be02c1b9ccc343f246d"
-  "1.1.9":
-    url: "https://github.com/boost-ext/sml/archive/refs/tags/v1.1.9.tar.gz"
-    sha256: "c5ebffcf791ca0b89fd49a410b720432de748a31b7e0c9e5bd5c567d11c8c477"
-  "1.1.8":
-    url: "https://github.com/boost-ext/sml/archive/refs/tags/v1.1.8.tar.gz"
-    sha256: "d2626b2fd249fa0788ca364a2f8dcb4762dd72195f86d43370e4cad4c02262c5"
-  "1.1.6":
-    url: "https://github.com/boost-ext/sml/archive/refs/tags/v1.1.6.tar.gz"
-    sha256: "08a6d80eb9aa6ee4e462c1b802b9d7db8a39758746565f13cc4d2459ed49a29e"
-  "1.1.5":
-    url: "https://github.com/boost-ext/sml/archive/v1.1.5.tar.gz"
-    sha256: "b8106a28a275a9be7aa6ae49eb58396cc1b4e3c20afb472be8801af556e59cba"
-  "1.1.4":
-    url: "https://github.com/boost-ext/sml/archive/v1.1.4.tar.gz"
-    sha256: "897c78077f5a4d22b0de253b8689a8ea6d8adfba8d7b4877d6f5c76277e00976"
-patches:
-  "1.1.8":
-    - patch_file: "patches/0001-arrow_up-1.1.8.patch"
-      patch_type: backport
-      patch_source: https://github.com/boost-ext/sml/commit/9d7cc3d43f1a619a84049d6786054f31d6d1ab86
-      patch_description: Backport C++ compatibility fixes and release version bump.
-  "1.1.4":
-    - patch_file: "patches/0001-fix-clang12-error.patch"
+  "1.2.0":
+    url: "https://github.com/boost-ext/sml/archive/refs/tags/v1.2.0.tar.gz"
+    sha256: "d584375bc8b4b391f0d94d57bc126a7cbb0f8c2bf810f5602400206b62eaf280"

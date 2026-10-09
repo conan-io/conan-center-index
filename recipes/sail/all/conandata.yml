@@ -6,3 +6,4 @@ patches:
   "0.9.10":
     - patch_file: "patches/01-let-conan-handle-msvc-runtime.patch"
     - patch_file: "patches/02-libjxl-use-find-package.patch"
+    - patch_file: "patches/03-fix-pointer-assignment-in-sail-malloc.patch"

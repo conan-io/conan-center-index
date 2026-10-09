@@ -1,6 +1,6 @@
 # Maintain a single version unless there are older versions referenced by other recipes
 # Older versions are always available in the Conan Center remote
 sources:
-  "0.40":
-    url: "https://github.com/basiliscos/cpp-rotor/archive/refs/tags/v0.40.tar.gz"
-    sha256: "34347821df30ef60a1449af25a412188c6c47ca8af3700dff3fb82af6e3ba56a"
+  "0.41":
+    url: "https://github.com/basiliscos/cpp-rotor/archive/refs/tags/v0.41.tar.gz"
+    sha256: "a60794cf5329658a977f541587a99204b5e37e941e16c50398fbbdf957d57903"

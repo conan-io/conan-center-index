@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.layout import basic_layout
@@ -10,7 +9,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class InihConan(ConanFile):
@@ -34,10 +33,6 @@ class InihConan(ConanFile):
         "with_inireader": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 11
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -55,27 +50,23 @@ class InihConan(ConanFile):
 
     def validate(self):
         # since 57, INIReader requires C++11
-        if Version(self.version) >= "57" and self.options.with_inireader and \
-            self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        if self.options.with_inireader:
+            check_min_cppstd(self, 11)
         if self.options.shared and is_msvc(self):
             raise ConanInvalidConfiguration("Shared inih is not supported with msvc")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.1")
+        self.tool_requires("meson/[>=1.2.1 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
         tc = MesonToolchain(self)
         tc.project_options["distro_install"] = True
         tc.project_options["with_INIReader"] = self.options.with_inireader
-        # since 57, INIReader requires C++11
-        if Version(self.version) >= "57" and not is_msvc(self):
-            tc.cpp_args.append("-std=c++11")
+        if Version(self.version) >= "62":
+            tc.project_options["tests"] = False
         tc.generate()
 
     def build(self):

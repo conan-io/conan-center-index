@@ -37,7 +37,7 @@ class CurlppConan(ConanFile):
 
     def requirements(self):
         # As it's a wrapper, it includes curl symbols in its public headers
-        self.requires("libcurl/8.9.1", transitive_headers=True, transitive_libs=True)
+        self.requires("libcurl/[>=8.9.1 <9]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         check_min_cppstd(self, 11)

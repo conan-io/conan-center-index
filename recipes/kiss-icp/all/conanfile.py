@@ -31,7 +31,7 @@ class KissIcpConan(ConanFile):
         self.requires("eigen/3.4.0", transitive_headers=True)   
         self.requires("sophus/1.22.10", transitive_headers=True)
         self.requires("tsl-robin-map/1.3.0", transitive_headers=True)
-        self.requires("onetbb/2022.3.0")
+        self.requires("onetbb/[>=2022.3.0 <2024]")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16]")
@@ -82,7 +82,7 @@ class KissIcpConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["core"].libs = ["kiss_icp_core"]
         self.cpp_info.components["core"].set_property("cmake_target_name", "kiss-icp::kiss_icp_core")
-        self.cpp_info.components["core"].requires = ["eigen::eigen", "sophus::sophus", "onetbb::onetbb", "tsl-robin-map::tsl-robin-map"]
+        self.cpp_info.components["core"].requires = ["eigen::eigen", "sophus::sophus", "onetbb::libtbb", "tsl-robin-map::tsl-robin-map"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["core"].system_libs = ["m"]
         

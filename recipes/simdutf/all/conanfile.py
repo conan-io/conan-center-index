@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 
 import os
@@ -39,12 +39,15 @@ class SimdutfConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        check_min_cppstd(self, 11)
+        check_min_cppstd(self, 17 if Version(self.version) >= "9.0" else 11)
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.0":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 9.")
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and \
             Version(self.settings.compiler.version) < "10.0":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 10 with debug build")
+    
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.18]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -57,8 +60,6 @@ class SimdutfConan(ConanFile):
             tc.variables["CMAKE_CXX_FLAGS"] = " -mavx512f"
         tc.variables["SIMDUTF_TOOLS"] = False
         tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
 
     def build(self):
         cmake = CMake(self)

@@ -27,10 +27,16 @@ class AsioGrpcConan(ConanFile):
 
     def requirements(self):
         self.requires("grpc/[>=1.67.1 <2]", transitive_headers=True, transitive_libs=True)
+
+        # asio::inline_executor replaced system_executor as the default associated
+        # executor in Boost 1.90 / standalone Asio 1.38.0. asio-grpc hardcoded the
+        # old default until 3.6.0, so 3.5.x needs an upper bound.
+
         if self.options.backend == "boost":
-            self.requires(f"boost/1.88.0", transitive_headers=True)
+            self.requires("boost/[>=1.74 <2]", transitive_headers=True)
         if self.options.backend == "asio":
-            self.requires(f"asio/1.32.0", transitive_headers=True)
+            self.requires("asio/[>=1.17 <2]", transitive_headers=True)
+
         if self.options.backend == "unifex":
             self.requires("libunifex/0.4.0", transitive_headers=True, transitive_libs=True)
 

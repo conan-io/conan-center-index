@@ -26,7 +26,7 @@ class DCMTKConan(ConanFile):
         "fPIC": [True, False],
         "with_applications": [True, False],
         "with_multithreading": [True, False],
-        "charset_conversion": [None, "libiconv", "icu"],
+        "charset_conversion": [None, "oficonv", "libiconv", "icu"],
         "with_libxml2": [True, False],
         "with_zlib": [True, False],
         "with_openssl": [True, False],
@@ -125,6 +125,10 @@ class DCMTKConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 11)
+        if Version(self.version) >= "3.6.9" and self.options.charset_conversion == "icu":
+            raise ConanInvalidConfiguration("Support for ICU was removed in DCMTK 3.6.9. Please choose another character set conversion library.")
+        if Version(self.version) < "3.6.8" and self.options.charset_conversion == "oficonv":
+            raise ConanInvalidConfiguration("The oficonv module is not available in DCMTK versions lower than 3.6.8. Please choose another character set conversion library.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -142,7 +146,8 @@ class DCMTKConan(ConanFile):
         tc.variables["DCMTK_WITH_OPENSSL"] = self.options.with_openssl
         tc.variables["DCMTK_WITH_SNDFILE"] = False # not used at all, do not try to add an option for this one
         tc.variables["DCMTK_WITH_ICONV"] = self.options.charset_conversion == "libiconv"
-        tc.variables["DCMTK_WITH_ICU"] = self.options.charset_conversion == "icu"
+        if Version(self.version) < "3.6.9":
+            tc.variables["DCMTK_WITH_ICU"] = self.options.charset_conversion == "icu"
         if self.settings.os != "Windows":
             tc.variables["DCMTK_WITH_WRAP"] = self.options.with_tcpwrappers
         tc.variables["DCMTK_WITH_OPENJPEG"] = False # not used at all, do not try to add an option for this one
@@ -158,7 +163,7 @@ class DCMTKConan(ConanFile):
         tc.variables["DCMTK_ENABLE_MANPAGE"] = False
         tc.cache_variables["DCMTK_DEFAULT_DICT"] = self.options.default_dict
         if self.options.charset_conversion and Version(self.version) >= "3.6.8":
-            charset_conversion = { "libiconv": "libiconv", "icu": "ICU" }
+            charset_conversion = { "libiconv": "libiconv", "icu": "ICU", "oficonv": "oficonv" }
             tc.cache_variables["DCMTK_ENABLE_CHARSET_CONVERSION"] = charset_conversion[str(self.options.charset_conversion)]
         tc.variables["DCMTK_USE_DCMDICTPATH"] = self.options.use_dcmdictpath
         if self.settings.os == "Windows":
@@ -303,7 +308,12 @@ class DCMTKConan(ConanFile):
     def _dcmtk_components(self):
         def charset_conversion():
             if bool(self.options.charset_conversion):
-                return ["libiconv::libiconv"] if self.options.charset_conversion == "libiconv" else ["icu::icu"]
+                if self.options.charset_conversion == "oficonv":
+                    return ["oficonv"]
+                elif self.options.charset_conversion == "libiconv":
+                    return ["libiconv::libiconv"]
+                elif self.options.charset_conversion == "icu":
+                    return ["icu::icu"]
             return []
 
         def zlib():

@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import get, copy, rmdir
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -51,7 +52,11 @@ class TreeSitterConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, "lib"))
+        # CMakeLists.txt moved from lib/ to root in 0.26.x
+        if Version(self.version) < "0.26":
+            cmake.configure(build_script_folder=os.path.join(self.source_folder, "lib"))
+        else:
+            cmake.configure()
         cmake.build()
 
     def package(self):

@@ -5,11 +5,10 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.1"
 
 
 class DirectXHeadersConan(ConanFile):
@@ -22,36 +21,16 @@ class DirectXHeadersConan(ConanFile):
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
 
-    @property
-    def _min_cppstd(self):
-        return 11
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "5",
-            "gcc": "6",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if not self.settings.os in ["Linux", "Windows"]:
+        if self.settings.os not in ("Linux", "Windows"):
             raise ConanInvalidConfiguration(f"{self.name} is not supported on {self.settings.os}")
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 11)
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/[>=1.2.2 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

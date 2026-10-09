@@ -1,4 +1,4 @@
 sources:
-  "3.14.0":
-    url: "https://github.com/catchorg/Catch2/archive/refs/tags/v3.14.0.tar.gz"
-    sha256: "ba2a939efead3c833c499cf487e185762f419a71d30158cd1b43c6079c586490"
+  "3.16.0":
+    url: "https://github.com/catchorg/Catch2/archive/refs/tags/v3.16.0.tar.gz"
+    sha256: "0957cae5821b17ce07f0833aaa52b5137643a8382203221f363a8303c109af34"

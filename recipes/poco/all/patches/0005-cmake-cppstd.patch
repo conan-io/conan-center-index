@@ -1,0 +1,36 @@
+Let Conan configure the C++ standard based on settings.compiler.cppstd
+
+The current Poco's approach overrides Conan's configuration
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 56ca6e5..1de357f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -47,27 +47,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+ # Setup C/C++ compiler options
+ #################################################################################
+ 
+-# Detect if compiler supports C++20 standard (preferred)
+-include(CXX2x)
+-check_for_cxx20_compiler(CXX20_COMPILER)
+-
+-if (EMSCRIPTEN)
+-	set(CXX20_COMPILER OFF)
+-endif()
+-
+-if(CXX20_COMPILER)
+-	set(CMAKE_CXX_STANDARD 20)
+-	message(STATUS "Building Poco with C++20 standard")
+-else()
+-	# Fall back to C++17
+-	include(CXX1x)
+-	check_for_cxx17_compiler(CXX17_COMPILER)
+-	if(NOT CXX17_COMPILER)
+-		message(FATAL_ERROR "Compiler does not support C++17 or later.")
+-	endif()
+-	set(CMAKE_CXX_STANDARD 17)
+-	message(STATUS "Building Poco with C++17 standard (C++20 not available)")
+-endif()
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ 
+ 

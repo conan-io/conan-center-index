@@ -85,6 +85,7 @@ class DoxygenConan(ConanFile):
 
         deps = CMakeDeps(self)
         deps.set_property("libiconv", "cmake_additional_variables_prefixes", ["ICONV"])
+        deps.set_property("xapian-core", "cmake_file_name_variants", ["XAPIAN"])
         deps.generate()
 
     def build(self):

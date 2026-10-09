@@ -230,7 +230,7 @@ class LibwebsocketsConan(ConanFile):
         elif self.options.with_ssl == "mbedtls":
             self.requires("mbedtls/3.5.0")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/5.6.3")
+            self.requires("wolfssl/[>=5.6.6 <6]")
 
     def validate(self):
         if self.options.shared and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
@@ -422,7 +422,8 @@ class LibwebsocketsConan(ConanFile):
         tc.variables["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"
         tc.variables["DISABLE_WERROR"] = True
 
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) < "4.5.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -431,8 +432,8 @@ class LibwebsocketsConan(ConanFile):
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         replace_in_file(self,
             cmakelists,
-            "SET(CMAKE_INSTALL_NAME_DIR \"${CMAKE_INSTALL_PREFIX}/${LWS_INSTALL_LIB_DIR}${LIB_SUFFIX}\")",
-            "",
+            'SET(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${LWS_INSTALL_LIB_DIR}',
+            '# SET(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${LWS_INSTALL_LIB_DIR}',
         )
 
         # Early call to find_package(OpenSSL) because its referenced in different places

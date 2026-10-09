@@ -1,4 +1,4 @@
 sources:
-  "3.10":
-    url: "https://github.com/WiringPi/WiringPi/archive/refs/tags/3.10.tar.gz"
-    sha256: "d0a7b182154e763b4baff1a57a5e0fca093fcf081f663cb2fb17f5ada564e016"
+  "3.18":
+    url: "https://github.com/WiringPi/WiringPi/archive/refs/tags/3.18.tar.gz"
+    sha256: "c7a06c462372df1650219a10cdd4e8e1da763a41399539ecd1ee1dd4e14e09a8"

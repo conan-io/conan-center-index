@@ -1,4 +1,7 @@
 sources:
+  "6.3.2":
+    url: "https://github.com/swiftlang/swift-corelibs-libdispatch/archive/refs/tags/swift-6.3.2-RELEASE.tar.gz"
+    sha256: "a8ea68644b16d78d814ad33c03219b6471b21df292a0c0e261a2139ff630c87e"
   "5.3.2":
     sha256: d18ad8f24e3461108d8e2e0c838c8fca671f808ab8d06a2c32a7065f321995a1
     url: https://github.com/apple/swift-corelibs-libdispatch/archive/swift-5.3.2-RELEASE.tar.gz

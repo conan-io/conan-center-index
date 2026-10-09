@@ -1,4 +1,7 @@
 sources:
+  "5.4.9":
+    url: "https://github.com/CESNET/libyang/archive/refs/tags/v5.4.9.tar.gz"
+    sha256: "f36372e1b1b8835e8aec86f44c766b65158cc6aefb5f9352ddbc0fe2c558000a"
   "4.2.2":
     url: "https://github.com/CESNET/libyang/archive/refs/tags/v4.2.2.tar.gz"
     sha256: "6d1c7b68d96d7e304ac900ea3ccce3d1a7f182c3fed7e934132fbeb306d34397"

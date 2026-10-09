@@ -8,3 +8,10 @@ sources:
   "1.22.0":
     url: "https://gitlab.freedesktop.org/wayland/wayland/-/releases/1.22.0/downloads/wayland-1.22.0.tar.xz"
     sha256: "1540af1ea698a471c2d8e9d288332c7e0fd360c8f1d12936ebb7e7cbc2425842"
+patches:
+  "1.24.0":
+    - patch_file: "patches/1.24.0-01-wayland-scanner-when-crossbuilding.patch"
+  "1.23.92":
+    - patch_file: "patches/1.23.92-01-wayland-scanner-when-crossbuilding.patch"
+  "1.22.0":
+    - patch_file: "patches/1.22.0-01-wayland-scanner-when-crossbuilding.patch"

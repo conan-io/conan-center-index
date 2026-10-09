@@ -6,7 +6,7 @@ from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.61.0"
+required_conan_version = ">=2.9"
 
 class CycloneDDSCXXConan(ConanFile):
     name = "cyclonedds-cxx"
@@ -21,12 +21,10 @@ class CycloneDDSCXXConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_shm": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_shm": False,
     }
 
     @property
@@ -71,9 +69,6 @@ class CycloneDDSCXXConan(ConanFile):
         #      <dds/topic/detail/Topic.hpp>:34
         self.requires("cyclonedds/{}".format(self.version), transitive_headers=True)
 
-        if self.options.with_shm:
-            self.requires("iceoryx/2.0.5")
-
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
@@ -83,48 +78,46 @@ class CycloneDDSCXXConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self.options.with_shm != self.dependencies['cyclonedds'].options.with_shm:
-            raise ConanInvalidConfiguration(
-                "cyclonedds-cxx and cyclonedds must be built with the same 'with_shm' option")
-
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_DDSLIB"] = True
         tc.variables["BUILD_IDLLIB"] = self._has_idlc()
-        tc.variables["BUILD_DOCS"] = False
         tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_EXAMPLES"] = False
         # variables which effects build
         tc.variables["ENABLE_LEGACY"] = False
-        tc.variables["ENABLE_SHM"] = self.options.with_shm
-        tc.variables["ENABLE_TYPE_DISCOVERY"] = self.dependencies["cyclonedds"].options.enable_discovery
-        tc.variables["ENABLE_TOPIC_DISCOVERY"] = self.dependencies["cyclonedds"].options.enable_discovery
         tc.variables["ENABLE_COVERAGE"] = False
+        tc.variables["ENABLE_TOPIC_DISCOVERY"] = self.dependencies["cyclonedds"].options.enable_discovery
         tc.generate()
         deps = CMakeDeps(self)
-        deps.set_property("iceoryx", "cmake_file_name", "iceoryx_binding_c")
         deps.generate()
 
     def _patch_sources(self):
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        # type library and qos provider support are always enabled in the cyclonedds recipe
         replace_in_file(self, cmakelists,
-                        "get_target_property(cyclonedds_has_shm CycloneDDS::ddsc SHM_SUPPORT_IS_AVAILABLE)",
-                        "set(cyclonedds_has_shm {})".format(self.dependencies["cyclonedds"].options.with_shm))
+                        "get_target_property(cyclonedds_has_typelib CycloneDDS::ddsc TYPELIB_IS_AVAILABLE)",
+                        "set(cyclonedds_has_typelib ON)")
         replace_in_file(self, cmakelists,
-                        "get_target_property(cyclonedds_has_type_discovery CycloneDDS::ddsc TYPE_DISCOVERY_IS_AVAILABLE)",
-                        "set(cyclonedds_has_type_discovery {})".format(self.dependencies["cyclonedds"].options.enable_discovery))
+                        "get_target_property(cyclonedds_has_qos_provider CycloneDDS::ddsc QOS_PROVIDER_IS_AVAILABLE)",
+                        "set(cyclonedds_has_qos_provider ON)")
+        replace_in_file(self, cmakelists,
+                        "set(CMAKE_CXX_STANDARD 11)",
+                        "")
+        # ON is safe: ENABLE_TOPIC_DISCOVERY (set in generate()) is the real gate and this var
+        # is only read inside that block; hardcoding keeps it config-independent for source()
         replace_in_file(self, cmakelists,
                         "get_target_property(cyclonedds_has_topic_discovery CycloneDDS::ddsc TOPIC_DISCOVERY_IS_AVAILABLE)",
-                        "set(cyclonedds_has_topic_discovery {})".format(self.dependencies["cyclonedds"].options.enable_discovery))
+                        "set(cyclonedds_has_topic_discovery ON)")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -164,13 +157,11 @@ class CycloneDDSCXXConan(ConanFile):
         self.cpp_info.components["ddscxx"].set_property("cmake_target_name", "CycloneDDS-CXX::ddscxx")
         self.cpp_info.components["ddscxx"].set_property("pkg_config_name", "CycloneDDS-CXX")
         self.cpp_info.components["ddscxx"].requires = ["cyclonedds::CycloneDDS"]
-        if self.options.with_shm:
-            self.cpp_info.components["ddscxx"].requires.append("iceoryx::iceoryx")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["ddscxx"].system_libs = ["m"]
         self.cpp_info.components["idlcxx"].libs = ["cycloneddsidlcxx"]
+        self.cpp_info.components["idlcxx"].type = 'shared-library'
         self.cpp_info.components["idlcxx"].set_property("cmake_target_name", "CycloneDDS-CXX::idlcxx")
         self.cpp_info.components["idlcxx"].requires = ["cyclonedds::idl"]
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
         self.buildenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
         self.runenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))

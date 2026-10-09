@@ -3,12 +3,12 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get
+from conan.tools.files import (apply_conandata_patches, export_conandata_patches,
+                               replace_in_file, copy, get)
 from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.scm import Version
-from os.path import join
+import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class SCIPConan(ConanFile):
@@ -33,31 +33,12 @@ class SCIPConan(ConanFile):
         "with_gmp": True
     }
 
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "5",
-            "clang": "4",
-            "apple-clang": "7",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 14)
         check_min_vs(self, 191)
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
         if self.options.shared and self.options.with_sym == "bliss":
@@ -67,25 +48,18 @@ class SCIPConan(ConanFile):
             raise ConanInvalidConfiguration("Bliss does not support libc++.")
         if self.dependencies["soplex"].options.with_gmp and not self.options.with_gmp:
             raise ConanInvalidConfiguration("The options 'with_gmp' should be aligned with 'soplex:with_gmp' too.")
-        if Version(self.version) >= "9.0.1" and is_msvc(self) and self.settings.build_type == "Debug":
-            # lpi_spx2.cpp : error C1128: number of sections exceeded object file format limit: compile with /bigobj
-            raise ConanInvalidConfiguration(f"{self.ref} can not be build in Debug with MSVC.")
-        if Version(self.version) < "10.0.0" and self.options.with_sym == "dejavu":
-            raise ConanInvalidConfiguration(f"Value 'dejavu' for option 'with_sym' is supported only for version >= 10.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD", "##")
 
     def requirements(self):
-        def _mapping_requires(dep, **kwargs):
-            required_version = self.conan_data["version_mappings"][self.version][dep]
-            self.requires(f"{dep}/{required_version}", **kwargs)
-
         if self.options.with_gmp:
             self.requires("gmp/6.3.0")
         if self.options.with_sym == "bliss":
             self.requires("bliss/0.77")
-        _mapping_requires("soplex")
+        required_version = self.conan_data["version_mappings"][self.version]["soplex"]
+        self.requires(f"soplex/{required_version}")
         self.requires("zlib/[>=1.2.11 <2]")
 
     def config_options(self):
@@ -117,9 +91,8 @@ class SCIPConan(ConanFile):
         tc.variables["TPI"] = self.options.with_tpi or "none"
         tc.variables["LPS"] = "spx"
         tc.variables["SYM"] = self.options.with_sym or "none"
-        if Version(self.version) >= "10.0.0":
-            tc.variables["EXACTSOLVE"] = False
-            tc.variables["MPFR"] = False
+        tc.variables["EXACTSOLVE"] = False
+        tc.variables["MPFR"] = False
         tc.variables["SOPLEX_INCLUDE_DIRS"] = self._to_cmake(self.dependencies["soplex"].cpp_info.includedirs)
         if self.options.shared:
             # CMakeLists accesses different variables for SoPlex depending on the SHARED option
@@ -146,17 +119,17 @@ class SCIPConan(ConanFile):
         cmake.build(target="libscip")
 
     def package(self):
-        copy(self, pattern="LICENSE", src=self.source_folder, dst=join(self.package_folder, "licenses"))
+        copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         # cmake install is not used as this requires the command line tools to be built, which we do not do
-        copy(self, pattern="*.h", src=join(self.source_folder, "src"), dst=join(self.package_folder, "include"))
-        copy(self, pattern="*.h", src=join(self.build_folder, "scip"), dst=join(self.package_folder, "include", "scip"))
+        copy(self, pattern="*.h", src=os.path.join(self.source_folder, "src"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, pattern="*.h", src=os.path.join(self.build_folder, "scip"), dst=os.path.join(self.package_folder, "include", "scip"))
         if self.options.shared:
-            copy(self, pattern="*.so*", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"))
-            copy(self, pattern="*.dylib*", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"))
+            copy(self, pattern="*.so*", src=os.path.join(self.build_folder, "lib"), dst=os.path.join(self.package_folder, "lib"))
+            copy(self, pattern="*.dylib*", src=os.path.join(self.build_folder, "lib"), dst=os.path.join(self.package_folder, "lib"))
         else:
-            copy(self, pattern="*.a", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"))
-            copy(self, pattern="*.lib", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"), keep_path=False)
-            copy(self, pattern="*.lib", src=self.build_folder, dst=join(self.package_folder, "lib"), keep_path=False)
+            copy(self, pattern="*.a", src=os.path.join(self.build_folder, "lib"), dst=os.path.join(self.package_folder, "lib"))
+            copy(self, pattern="*.lib", src=os.path.join(self.build_folder, "lib"), dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+            copy(self, pattern="*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         fix_apple_shared_install_name(self)
 
     def package_info(self):

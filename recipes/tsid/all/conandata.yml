@@ -1,0 +1,4 @@
+sources:
+  "1.10.0":
+    url: "https://github.com/stack-of-tasks/tsid/archive/refs/tags/v1.10.0.tar.gz"
+    sha256: "c31f3c61a1a40c9d6e2411ef224da3db51c8a1fdb185425fc6ce84e06fe33862"
