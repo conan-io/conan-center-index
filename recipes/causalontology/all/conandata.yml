@@ -1,0 +1,4 @@
+sources:
+  "2.0.1":
+    url: "https://github.com/ai-university-aiu/causalontology/archive/refs/tags/v2.0.1.tar.gz"
+    sha256: "9ce51b79a5b547c4d6573fd93134baafe59b05d1f8bf517d5f7c6e2ddb08efd7"
