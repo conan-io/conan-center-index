@@ -98,6 +98,18 @@ if(NOT HEADER_ONLY)
         target_link_libraries(test_boost_url PRIVATE Boost::url)
     endif()
 
+    if (WITH_WAVE)
+        find_package(Boost COMPONENTS wave REQUIRED)
+        add_executable(test_boost_wave wave.cpp)
+        target_link_libraries(test_boost_wave PRIVATE Boost::wave)
+    endif()
+
+    if (WITH_MATH)
+        find_package(Boost COMPONENTS math_c99l REQUIRED)
+        add_executable(test_boost_math math.cpp)
+        target_link_libraries(test_boost_math PRIVATE Boost::math_c99l)
+    endif()
+
 endif()
 
 # Test header-only target
