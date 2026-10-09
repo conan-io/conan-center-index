@@ -7,9 +7,7 @@ from conan.tools.build import can_run
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
-    test_type = "explicit"
-
+    generators = "CMakeDeps", "CMakeToolchain"
     def layout(self):
         cmake_layout(self)
 
