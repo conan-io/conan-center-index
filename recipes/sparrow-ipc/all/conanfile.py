@@ -2,15 +2,14 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build.cppstd import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.microsoft import is_msvc
+from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.4"
 
 
-class SparrowRecipe(ConanFile):
+class SparrowIpcRecipe(ConanFile):
     name = "sparrow-ipc"
     description = "C++20 idiomatic APIs for the Apache Arrow Serialization and Interprocess Communication (IPC)"
     license = "BSD-3-Clause"
@@ -32,13 +31,11 @@ class SparrowRecipe(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def requirements(self):
-        self.requires("sparrow/2.3.1", transitive_headers=True)
-        self.requires("flatbuffers/24.12.23")
+        # sparrow is part of the public interface of sparrow-ipc (sparrow::sparrow is PUBLIC in
+        # upstream CMakeLists.txt), so consumers need both its headers and its libraries
+        self.requires("sparrow/2.4.0", transitive_headers=True, transitive_libs=True)
+        self.requires("flatbuffers/25.12.19")
         self.requires("lz4/1.9.4")
         self.requires("zstd/[>=1.5 <1.6]")
 
@@ -65,18 +62,18 @@ class SparrowRecipe(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.28]")
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["SPARROW_IPC_BUILD_SHARED"] = self.options.shared
         tc.generate()
         deps = CMakeDeps(self)
+        # Upstream CMakeLists.txt always links against `flatbuffers::flatbuffers`, but the
+        # flatbuffers recipe names its target `flatbuffers::flatbuffers_shared` when it is
+        # built as shared
+        deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
         deps.generate()
 
     def build(self):
@@ -96,14 +93,9 @@ class SparrowRecipe(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share", "cmake"))
 
     def package_info(self):
-        postfix = "d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.set_property("cmake_file_name", "sparrow-ipc")
-
-        # Main sparrow-ipc component
-        self.cpp_info.components["sparrow-ipc"].set_property("cmake_target_name", "sparrow-ipc::sparrow-ipc")
-        self.cpp_info.components["sparrow-ipc"].libs = [f"sparrow-ipc{postfix}"]
-        self.cpp_info.components["sparrow-ipc"].requires = ["sparrow::sparrow", "flatbuffers::libflatbuffers", "lz4::lz4", "zstd::zstdlib"]
+        self.cpp_info.set_property("cmake_target_name", "sparrow-ipc::sparrow-ipc")
+        self.cpp_info.libs = ["sparrow-ipc"]
 
         if not self.options.shared:
-            self.cpp_info.components["sparrow-ipc"].defines.append("SPARROW_IPC_STATIC_LIB")
-
+            self.cpp_info.defines.append("SPARROW_IPC_STATIC_LIB")
