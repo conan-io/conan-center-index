@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.files import rm, get, rmdir, rename, collect_libs, export_conandata_patches, copy, apply_conandata_patches, replace_in_file
+from conan.tools.files import rm, get, rmdir, collect_libs, export_conandata_patches, copy, apply_conandata_patches, replace_in_file
 from conan.tools.microsoft import visual
 from conan.tools.apple import is_apple_os
 import os
@@ -17,7 +17,8 @@ class DiligentCoreConan(ConanFile):
     homepage = "https://github.com/DiligentGraphics/DiligentCore"
     description = "Diligent Core is a modern cross-platfrom low-level graphics API."
     license = "Apache-2.0"
-    topics = ("graphics")
+    topics = ("graphics", "opengl", "vulkan", "directx", "shaders", "openxr", "raytracing")
+    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -62,7 +63,7 @@ class DiligentCoreConan(ConanFile):
     def export_sources(self):
         copy(self, "conan_deps.cmake", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"), keep_path=False)
         export_conandata_patches(self)
-        
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -86,9 +87,11 @@ class DiligentCoreConan(ConanFile):
         tc.variables["ENABLE_RTTI"] = True
         tc.variables["ENABLE_EXCEPTIONS"] = True
         tc.variables[self._diligent_platform()] = True
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("glew", "cmake_target_name", "GLEW::glew")
         deps.generate()
 
     def layout(self):
@@ -109,26 +112,28 @@ class DiligentCoreConan(ConanFile):
                         "project(DiligentCore)\n\ninclude(conan_deps.cmake)")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.24 <4]")
+        self.tool_requires("cmake/[>=3.24]")
 
     def requirements(self):
         self.requires("opengl/system")
-        if self.settings.os == "Linux":
-            self.requires("wayland/1.22.0")
 
-        self.requires("spirv-cross/1.3.224.0")
-        self.requires("spirv-tools/1.3.224.0")
+        spirv_version = "1.4.357.0"
+        self.requires(f"spirv-cross/{spirv_version}")
+        self.requires(f"spirv-tools/{spirv_version}")
         if self.options.with_glslang:
-            self.requires("glslang/1.3.224.0")
-        self.requires("vulkan-headers/1.3.224.0")
-        self.requires("vulkan-validationlayers/1.3.224.1")
-        self.requires("volk/1.3.224.0")
-        self.requires("xxhash/0.8.1")
+            self.requires(f"glslang/{spirv_version}")
+        self.requires(f"vulkan-headers/{spirv_version}")
+        self.requires(f"vulkan-validationlayers/{spirv_version}")
+        self.requires(f"volk/{spirv_version}")
+        self.requires("xxhash/0.8.3")
+        self.requires("glew/2.2.0")
+        if self.settings.os == "Linux":
+            self.requires("wayland/[>=1.22.0 <2]")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.4.1")
+                self.requires("xkbcommon/1.13.1")
 
     def _diligent_platform(self):
         if self.settings.os == "Windows":
