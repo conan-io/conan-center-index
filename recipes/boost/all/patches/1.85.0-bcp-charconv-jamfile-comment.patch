@@ -1,0 +1,11 @@
+--- a/tools/bcp/add_path.cpp
++++ b/tools/bcp/add_path.cpp
+@@ -114,7 +114,7 @@
+       // so scan for names of libraries:
+       //
+       static const boost::regex e(
+-         "\\<lib\\s+(boost\\w+)\\s+[:;]"
++         "\\<lib\\s+(boost\\w+)(?:\\s|#[^\\n]*\\n)+[:;]"
+          );
+ 
+       fileview view(m_boost_path / p);

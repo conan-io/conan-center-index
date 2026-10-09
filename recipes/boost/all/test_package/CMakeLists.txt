@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
+add_compile_definitions(BOOST_NAMESPACE=${BOOST_NAMESPACE})
+
 if(NOT HEADER_ONLY)
     if(WITH_RANDOM)
         find_package(Boost COMPONENTS random REQUIRED)

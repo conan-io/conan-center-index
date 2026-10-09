@@ -1,0 +1,35 @@
+--- a/tools/bcp/copy_path.cpp
++++ b/tools/bcp/copy_path.cpp
+@@ -119,6 +119,32 @@
+       os.write(&*v1.begin(), v1.size());
+       os.close();
+    }
++   else if(is_jam_file(p) && m_namespace_name.size())
++   {
++      static std::vector<char> v1, v2;
++      v1.clear();
++      v2.clear();
++      boost::filesystem::ifstream is((m_boost_path / p));
++      std::copy(std::istreambuf_iterator<char>(is), std::istreambuf_iterator<char>(), std::back_inserter(v1));
++
++      static boost::regex libname_matcher;
++      if(libname_matcher.empty())
++      {
++         libname_matcher.assign("boost_");
++      }
++
++      regex_replace(std::back_inserter(v2), v1.begin(), v1.end(), libname_matcher, m_namespace_name + "_");
++      std::swap(v1, v2);
++      v2.clear();
++
++      boost::filesystem::ofstream os;
++      if(m_unix_lines)
++         os.open((m_dest_path / p), std::ios_base::binary | std::ios_base::out);
++      else
++         os.open((m_dest_path / p), std::ios_base::out);
++      os.write(&*v1.begin(), v1.size());
++      os.close();
++   }
+    else if(m_namespace_name.size() && is_source_file(p))
+    {
+       //
