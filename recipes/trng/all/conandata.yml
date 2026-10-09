@@ -1,0 +1,16 @@
+sources:
+  "4.28":
+    url: "https://github.com/rabauke/trng4/archive/refs/tags/v4.28.tar.gz"
+    sha256: "50432094f8a4b079bcf1c4a9075691c34f4ed5be54835d7ea1a38ccb00ebc89e"
+  "4.27":
+    url: "https://github.com/rabauke/trng4/archive/refs/tags/v4.27.tar.gz"
+    sha256: "5d04cc66b7163c869c061c1155e47fe6d54d9a7f1c1fcc0fddecb9269b66a3de"
+  "4.26":
+    url: "https://github.com/rabauke/trng4/archive/refs/tags/v4.26.tar.gz"
+    sha256: "b6646d911862edb5a35e1a633b2ebbe8b5e66a4147d1c075f35d18f49467a864"
+  "4.25":
+    url: "https://github.com/rabauke/trng4/archive/refs/tags/v4.25.tar.gz"
+    sha256: "2727ce04e726a0b214e7bc8066793489b1ddce2fdf932d63313f4fd2823c9beb"
+  "4.24":
+    url: "https://github.com/rabauke/trng4/archive/refs/tags/v4.24.tar.gz"
+    sha256: "92dd7ab4de95666f453b4fef04827fa8599d93a3e533cdc604782c15edd0c13c"
