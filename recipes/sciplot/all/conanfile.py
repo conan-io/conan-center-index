@@ -2,26 +2,27 @@ import os
 
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
-from conan.tools.cmake import  cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.0"
+
 
 class SciplotConan(ConanFile):
     name = "sciplot"
     description = "A modern C++ scientific plotting library powered by gnuplot."
-    version = "0.3.1"
     license = "MIT"
-    url = "https://github.com/sciplot/sciplot"
-    homepage = "https://sciplot.github.io/"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/sciplot/sciplot"
     topics = ("plotting", "gnuplot", "scientific", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-
-    def export_sources(self):
-        export_conandata_patches(self)
+    no_copy_source = True
+    # Upstream is unmaintained: last release in 2022, last commit in 2023
+    deprecated = True
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -30,16 +31,25 @@ class SciplotConan(ConanFile):
         check_min_cppstd(self, 17)
 
     def source(self):
-        get(self, url=f"https://github.com/sciplot/sciplot/archive/refs/tags/v{self.version}.tar.gz", strip_root=True)
-        # get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-        # apply_conandata_patches(self)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["SCIPLOT_BUILD_EXAMPLES"] = False
+        tc.cache_variables["SCIPLOT_BUILD_TESTS"] = False
+        tc.cache_variables["SCIPLOT_BUILD_DOCS"] = False
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
 
     def package(self):
-        copy(self, "*.hpp", src=os.path.join(self.source_folder, "sciplot"), dst=os.path.join(self.package_folder, "include", "sciplot"))
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.set_property("cmake_target_name", "sciplot::sciplot")
