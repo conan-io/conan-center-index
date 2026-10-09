@@ -22,12 +22,10 @@ class SpeexDSPConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "fixed_point": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "fixed_point": False,
     }
     implements = ["auto_shared_fpic"]
     languages = "C"
@@ -51,9 +49,7 @@ class SpeexDSPConan(ConanFile):
         env.generate()
 
         tc = AutotoolsToolchain(self)
-        yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.extend([
-            f"--enable-fixed-point={yes_no(self.options.fixed_point)}",
             "--disable-examples",
         ])
         if is_msvc(self):
