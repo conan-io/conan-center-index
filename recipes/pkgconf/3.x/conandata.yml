@@ -1,0 +1,7 @@
+sources:
+  "3.0.7":
+    url: "https://distfiles.ariadne.space/pkgconf/pkgconf-3.0.7.tar.xz"
+    sha256: "c926ff491cbd9a331a589160811bd97ab1749b4d5198a519338f2cdfabe6940a"
+patches:
+    "3.0.7":
+      - patch_file: "patches/3.0.7-allow-colon+simicolon-sep.patch"
