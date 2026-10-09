@@ -21,17 +21,26 @@ class SzConan(ConanFile):
     options = {
         "with_hdf5": [True, False],
         "shared": [True, False],
+        "fPIC": [True, False],
     }
     default_options = {
         "with_hdf5": False,
         "shared": False,
+        "fPIC": True,
     }
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         if self.options.with_hdf5:
             self.package_type = "library"
+            if self.options.shared:
+                self.options.rm_safe("fPIC")
         else:
             self.options.rm_safe("shared")
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -60,6 +69,9 @@ class SzConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "find_library(SZ3_ZSTD_LIBRARY NAMES zstd)",
                         "find_package(zstd REQUIRED CONFIG)\n    set(SZ3_ZSTD_LIBRARY zstd::libzstd)")
+        # let the fPIC option decide instead of forcing PIC on hdf5sz3
+        replace_in_file(self, os.path.join(self.source_folder, "tools", "H5Z-SZ3", "CMakeLists.txt"),
+                        " VISIBILITY_INLINES_HIDDEN ON POSITION_INDEPENDENT_CODE ON)", " VISIBILITY_INLINES_HIDDEN ON)")
 
     def generate(self):
         tc = CMakeToolchain(self)
