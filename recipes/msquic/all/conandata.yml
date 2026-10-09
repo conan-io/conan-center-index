@@ -1,0 +1,12 @@
+sources:
+  "2.6.2":
+    url: "https://github.com/microsoft/msquic/archive/refs/tags/v2.6.2.tar.gz"
+    sha256: "206e4604eb7ffbc496eb4df804afaaba4814c2bbfdb18fdb142172301b74c8c0"
+submodules:
+  "2.6.2":
+    quictls:
+      url: "https://github.com/quictls/openssl/archive/ff36838bb69801cad56823159a036977bcbe5c75.tar.gz"
+      sha256: "0419330d8f30ca9437474cf7ae239661698d7796f9522ab2912c9e4ed01e0150"
+    xdp-for-windows:
+      url: "https://github.com/microsoft/xdp-for-windows/archive/d372b52577a724e04fa4c06acb90bbfa4719fc25.tar.gz"
+      sha256: "9a52e1b5fc31ae3825fa67bd8aabd2c7b969a79ad6ec6bb5b884aad9e6688d3c"
