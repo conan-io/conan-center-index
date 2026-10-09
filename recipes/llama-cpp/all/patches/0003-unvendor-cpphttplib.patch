@@ -1,0 +1,50 @@
+Custom patch: Consume Conan package for cpp-httplib
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3086e81..0f35ecd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -233,7 +233,7 @@ add_subdirectory(src)
+ #
+ # utils, programs, examples and tests
+ #
+-
++find_package(httplib CONFIG REQUIRED)
+ add_subdirectory(vendor)
+ 
+ if (LLAMA_BUILD_COMMON)
+diff --git a/common/http.h b/common/http.h
+index 878ad1c..e85ed39 100644
+--- a/common/http.h
++++ b/common/http.h
+@@ -1,6 +1,6 @@
+ #pragma once
+ 
+-#include <cpp-httplib/httplib.h>
++#include <httplib/httplib.h>
+ 
+ #ifdef _WIN32
+ #include <winsock2.h>
+diff --git a/tools/server/server-http.cpp b/tools/server/server-http.cpp
+index 33cbb15..d70d2a7 100644
+--- a/tools/server/server-http.cpp
++++ b/tools/server/server-http.cpp
+@@ -4,7 +4,7 @@
+ #include "server-common.h"
+ #include "ui.h"
+ 
+-#include <cpp-httplib/httplib.h>
++#include <httplib/httplib.h>
+ 
+ #include <functional>
+ #include <future>
+diff --git a/vendor/CMakeLists.txt b/vendor/CMakeLists.txt
+index 4479daf..6750bf8 100644
+--- a/vendor/CMakeLists.txt
++++ b/vendor/CMakeLists.txt
+@@ -7,5 +7,4 @@ add_subdirectory(stb)
+ 
+ # only used by common
+ if (LLAMA_BUILD_COMMON)
+-    add_subdirectory(cpp-httplib)
+ endif()
