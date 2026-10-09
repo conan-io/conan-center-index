@@ -1,0 +1,17 @@
+# Allow building internal PCRE on Unix when system PCRE is not found.
+# OpenCOLLADA's CMakeLists.txt only builds internal PCRE for WIN32 and APPLE.
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 95abbe21..b809ae1d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -257,7 +257,7 @@ add_subdirectory(${EXTERNAL_LIBRARIES}/MathMLSolver)
+ find_package(PCRE)
+ if (PCRE_FOUND)
+ 	message(STATUS "SUCCESSFUL: PCRE found")
+ else ()  # if pcre not found building its local copy from ./Externals
+-	if (WIN32 OR APPLE)
++	if (WIN32 OR APPLE OR UNIX)
+ 		message("WARNING: Native PCRE not found, taking PCRE from ./Externals")
+ 		add_definitions(-DPCRE_STATIC)
+ 		add_subdirectory(${EXTERNAL_LIBRARIES}/pcre)
