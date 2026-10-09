@@ -12,6 +12,11 @@ configure_file("${src}/hunvisapi.h.in" hunvisapi.h @ONLY)
 
 # ---- Library target ----
 
+# Hunspell >= 1.7.4
+if (EXISTS "${src}/hunspelltrace.cxx")
+    set(ADDITIONAL_SRCS "${src}/hunspelltrace.cxx")
+endif()
+
 add_library(
     hunspell
     "${src}/affentry.cxx"
@@ -24,9 +29,14 @@ add_library(
     "${src}/phonet.cxx"
     "${src}/replist.cxx"
     "${src}/suggestmgr.cxx"
+    ${ADDITIONAL_SRCS}
 )
 
-target_compile_features(hunspell PRIVATE cxx_std_11)
+if ("${CONAN_hunspell_VERSION}" VERSION_GREATER_EQUAL "1.7.4")
+    target_compile_features(hunspell PRIVATE cxx_std_14)
+else()
+    target_compile_features(hunspell PRIVATE cxx_std_11)
+endif()
 
 if(MSVC)
   target_compile_options(hunspell PRIVATE /wd4267 /wd4996)
@@ -67,3 +77,8 @@ install(
     "${PROJECT_BINARY_DIR}/hunvisapi.h"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/hunspell"
 )
+
+# Hunspell >= 1.7.4
+if (EXISTS "${src}/hunversion.h")
+    install(FILES "${src}/hunversion.h" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/hunspell")
+endif()
