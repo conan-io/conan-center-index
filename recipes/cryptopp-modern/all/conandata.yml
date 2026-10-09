@@ -1,0 +1,4 @@
+sources:
+  "2026.9.1":
+    url: "https://github.com/cryptopp-modern/cryptopp-modern/releases/download/2026.9.1/cryptopp-modern-2026.9.1.tar.gz"
+    sha256: "d2ebc036c334b06334bb0d36d17cb694a23e2d0c08d2c5cf1301e0ae9bef46e0"
