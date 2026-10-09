@@ -1,0 +1,4 @@
+sources:
+  "3.4.0":
+    url: "https://github.com/szcompressor/SZ3/archive/refs/tags/v3.4.0.tar.gz"
+    sha256: "4e1559d291cd0b892350bd74ddb749ad4aa4d6fbba170e588eb54f325a529e0d"
