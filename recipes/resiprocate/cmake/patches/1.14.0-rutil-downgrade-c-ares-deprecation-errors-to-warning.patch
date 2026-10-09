@@ -1,0 +1,31 @@
+From 80b9a654cac1f35c13fc818b1568c3f705d8686a Mon Sep 17 00:00:00 2001
+From: Gregor Jasny <gjasny@googlemail.com>
+Date: Fri, 3 Jul 2026 13:44:13 +0200
+Subject: [PATCH] rutil: downgrade c-ares deprecation errors to warnings
+
+---
+ rutil/dns/AresDns.cxx | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/rutil/dns/AresDns.cxx b/rutil/dns/AresDns.cxx
+index 563770c28..bdbb5128b 100644
+--- a/rutil/dns/AresDns.cxx
++++ b/rutil/dns/AresDns.cxx
+@@ -27,6 +27,14 @@
+ #endif
+ #endif
+ 
++#ifndef WIN32
++#pragma GCC diagnostic push
++#pragma GCC diagnostic warning "-Wdeprecated-declarations"
++#else
++#pragma warning(push)
++#pragma warning(3 : 4996)
++#endif
++
+ using namespace resip;
+ 
+ #define RESIPROCATE_SUBSYSTEM resip::Subsystem::DNS
+-- 
+2.54.0
+
