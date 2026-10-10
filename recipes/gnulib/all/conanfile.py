@@ -1,8 +1,9 @@
 import os
 
 from conan import ConanFile
-from conan.tools.files import copy, get
+from conan.tools.files import copy, rmdir
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Git
 
 required_conan_version = ">=1.52.0"
 
@@ -26,7 +27,16 @@ class GnuLibConanFile(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, filename="gnulib.tar.gz")
+        git = Git(self)
+        sources = self.conan_data["sources"][self.version]
+        # fetch_commit() landed in Conan 1.59. Older clients allowed by
+        # required_conan_version still check out this exact commit.
+        if hasattr(git, "fetch_commit"):
+            git.fetch_commit(url=sources["url"], commit=sources["commit"])
+        else:
+            git.clone(url=sources["url"], target=".")
+            git.checkout(commit=sources["commit"])
+        rmdir(self, os.path.join(self.source_folder, ".git"))
 
     def package(self):
         copy(self, "COPYING",
