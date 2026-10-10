@@ -1,0 +1,4 @@
+sources:
+  "2.18.0":
+    url: "https://github.com/ilyabrin/ci18n/archive/v2.18.0.tar.gz"
+    sha256: "a6c283cd31279b48b5218b02652434f4c01c8568eddd711deb3c887e97fad485"
