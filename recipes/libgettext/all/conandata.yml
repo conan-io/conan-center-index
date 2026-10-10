@@ -17,3 +17,9 @@ sources:
     - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gettext/gettext-0.22.tar.gz"
     - "https://ftp.gnu.org/gnu/gettext/gettext-0.22.tar.gz"
     sha256: "49f089be11b490170bbf09ed2f51e5f5177f55be4cc66504a5861820e0fb06ab"
+patches:
+  "0.26":
+    - patch_file: "patches/0.26-fix-c23-qualifier-generic-functions.patch"
+      patch_description: "Fix build with C23 qualifier-generic functions"
+      patch_type: "backport"
+      patch_source: "https://github.com/coreutils/gnulib/commit/df17f4f37ed3ca373d23ad42eae51122bdb96626"
