@@ -1,4 +1,7 @@
 sources:
+  "5.0.3":
+    url: "https://github.com/simdjson/simdjson/archive/v5.0.3.tar.gz"
+    sha256: "295e96d96d6d55face58e99b47ddc1f6c7c1a302f2ce5edf2c1ba7518972f0ed"
   "4.6.4":
     url: "https://github.com/simdjson/simdjson/archive/v4.6.4.tar.gz"
     sha256: "b091107844fe928158c5c2265c20360fff312889ddf7ebc4528a0f0f8f2ff9cd"
