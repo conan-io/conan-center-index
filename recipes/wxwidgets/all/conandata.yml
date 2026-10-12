@@ -1,10 +1,16 @@
 sources:
+  "3.3.4":
+    url: "https://github.com/wxWidgets/wxWidgets/releases/download/v3.3.4/wxWidgets-3.3.4.tar.bz2"
+    sha256: "815c16cafa4fcbfcf25c5c0a3418309c62257b8a3b6f91d85a1367a134f98c98"
   "3.3.3":
     url: "https://github.com/wxWidgets/wxWidgets/releases/download/v3.3.3/wxWidgets-3.3.3.tar.bz2"
     sha256: "81b09d6dd9f1ed9301f8c55a968a488d0491f264dc2bab19a7e407ac67009482"
   "3.3.2":
     url: "https://github.com/wxWidgets/wxWidgets/releases/download/v3.3.2/wxWidgets-3.3.2.tar.bz2"
     sha256: "50a28cb668de47b0e006cd6ebed8cf4f76c1cac6116fb3c978c44478219103f2"
+  "3.2.12":
+    url: "https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.12/wxWidgets-3.2.12.tar.bz2"
+    sha256: "a62719bb5e1dcc41c1a6fc1eecd499c7ee8521f70402c7b1bb3342a1e16344e0"
   "3.2.11":
     url: "https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.11/wxWidgets-3.2.11.tar.bz2"
     sha256: "6a129015bce2e914e4bf61ec4411854ad962801d47e92f2eb8340adb6a90af08"
@@ -14,3 +20,7 @@ sources:
 patches:
   "3.3.2":
     - patch_file: "patches/0001-fix-wxgtk-without-wayland.patch"
+  "3.3.4":
+    - patch_file: "patches/0001-fix-nanosvg-include-dirs-with-generator-expressions.patch"
+      patch_description: "CMake: don't compute NanoSVG include dirs parent for generator expressions"
+      patch_type: "conan"
