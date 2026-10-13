@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=2.4"
@@ -72,7 +73,10 @@ class ZxcConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "zxc")
         self.cpp_info.set_property("cmake_target_name", "zxc::zxc_lib")
         self.cpp_info.set_property("pkg_config_name", "libzxc")
-        self.cpp_info.libs = ["zxc"]
+        if is_msvc(self) and not self.options.shared:
+            self.cpp_info.libs = ["libzxc"]
+        else:
+            self.cpp_info.libs = ["zxc"]
         if not self.options.shared:
             self.cpp_info.defines.append("ZXC_STATIC_DEFINE")
         if self.settings.os in ["Linux", "FreeBSD"]:
