@@ -1,13 +1,11 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get, save
-from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.0.9"
 
 
 class LibfnConan(ConanFile):
@@ -18,105 +16,85 @@ class LibfnConan(ConanFile):
     homepage = "https://libfn.org"
     topics = ("functional-programming", "monadic", "expected", "optional", "header-only")
     package_type = "header-library"
-    # Settings are needed to read the consumer's compiler in package_info();
-    # package_id() clears them, so the package stays identical for everyone.
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "cxx26": [True, False],
+    }
+    default_options = {
+        "cxx26": False,
+    }
     no_copy_source = True
 
-    @property
-    def _min_cppstd(self):
-        return 20
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "12",
-            "clang": "16",
-            "apple-clang": "16",
-            "msvc": "193",
-        }
-
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.25]")
 
     def package_id(self):
-        # Intentional: header-only library, so the package is identical for every consumer.
         self.info.clear()
 
     def validate(self):
-        check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++20, which {self.settings.compiler} {self.settings.compiler.version} does not fully support."
-            )
+        check_min_cppstd(self, 26 if self.options.cxx26 else 20)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["LIBFN_TESTS"] = False
+        tc.cache_variables["DISABLE_CCACHE_DETECTION"] = True
+        # Upstream would symlink compile_commands.json into the shared source folder
+        tc.cache_variables["CMAKE_EXPORT_COMPILE_COMMANDS"] = False
+        tc.generate()
+
     def build(self):
-        pass
+        cmake = CMake(self)
+        cmake.configure()
 
     def package(self):
-        copy(
-            self,
-            pattern="*.hpp",
-            src=os.path.join(self.source_folder, "include"),
-            dst=os.path.join(self.package_folder, "include"),
-        )
         copy(
             self,
             pattern="LICENSE.md",
             src=self.source_folder,
             dst=os.path.join(self.package_folder, "licenses"),
         )
-        # CMakeDeps synthesizes its own targets and drops the compile features the CMake
-        # export carries; this build module restores fn_cxx26's language requirement.
-        save(
-            self,
-            os.path.join(self.package_folder, "cmake", "libfn-cxx26.cmake"),
-            "if(TARGET libfn::fn_cxx26)\n"
-            "  target_compile_features(libfn::fn_cxx26 INTERFACE cxx_std_26)\n"
-            "endif()\n",
-        )
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        # find_package(libfn) -> libfn::libfn aggregate target,
-        # plus libfn::fn, libfn::fn_cxx26 and libfn::pfn component targets.
         self.cpp_info.set_property("cmake_file_name", "libfn")
         self.cpp_info.set_property("cmake_target_name", "libfn::libfn")
-        self.cpp_info.set_property("cmake_build_modules", [os.path.join("cmake", "libfn-cxx26.cmake")])
 
-        # fn: the main component (headers under include/fn/); built on the pfn polyfills.
-        fn = self.cpp_info.components["fn"]
-        fn.set_property("cmake_target_name", "libfn::fn")
-        fn.bindirs = []
-        fn.libdirs = []
-        fn.includedirs = ["include"]
-        fn.requires = ["pfn"]
+        version = self.cpp_info.components["version"]
+        version.set_property("cmake_target_name", "libfn::version")
+        version.bindirs = []
+        version.libdirs = []
+        version.includedirs = ["include"]
 
-        # pfn: the C++20 component (headers under include/pfn/).
         pfn = self.cpp_info.components["pfn"]
         pfn.set_property("cmake_target_name", "libfn::pfn")
         pfn.bindirs = []
         pfn.libdirs = []
         pfn.includedirs = ["include"]
+        pfn.requires = ["version"]
 
-        # fn_cxx26: fn with the C++26 mode selected; owns no headers.
-        # A consumer links exactly one of libfn::fn / libfn::fn_cxx26.
-        fn_cxx26 = self.cpp_info.components["fn_cxx26"]
-        fn_cxx26.set_property("cmake_target_name", "libfn::fn_cxx26")
-        fn_cxx26.bindirs = []
-        fn_cxx26.libdirs = []
-        fn_cxx26.includedirs = []
-        fn_cxx26.requires = ["fn"]
-        fn_cxx26.defines = ["LIBFN_CXX26"]
+        fn = self.cpp_info.components["fn"]
+        fn.set_property("cmake_target_name", "libfn::fn")
+        fn.bindirs = []
+        fn.libdirs = []
+        fn.includedirs = ["include"]
+        fn.requires = ["pfn", "version"]
+        # An option rather than a component, so the libfn::libfn aggregate cannot pull it in
+        if self.options.cxx26:
+            fn.defines.append("LIBFN_CXX26")
+            fn.set_property("cmake_target_aliases", ["libfn::fn_cxx26"])
 
-        # CMakeDeps synthesizes its own targets, so the INTERFACE compile options
-        # exported by the CMake package do not reach conan consumers; mirror
-        # upstream cmake/CompilationOptions.cmake (append_compilation_options INTERFACE) here.
+        # Mirror the INTERFACE options of upstream's cmake/CompilationOptions.cmake
         compiler = self.settings.get_safe("compiler")
-        for component in (fn, pfn):
+        for component in (version, pfn, fn):
             if compiler == "msvc":
                 component.cxxflags.append("/permissive-")
                 component.defines.append("_HAS_CXX23")
