@@ -1,0 +1,14 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -72,11 +72,8 @@
+ option(MVK_BUILD_SHADER_CONVERTER_TOOL "If enabled, the MoltenVKShaderConverter executable will be built." OFF)
+
+ # Set default minimum C++ standard
+ if(MOLTEN_VK_TOPLEVEL_PROJECT)
+-	set(CMAKE_CXX_STANDARD 17)
+-	set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-	set(CMAKE_CXX_EXTENSIONS OFF)
+ endif()
+
+ ### Configuration
+ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/MoltenVK/")

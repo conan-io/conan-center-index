@@ -8,13 +8,13 @@ The EMBEDDED_PCRE2_SOURCES are private source from pcre2, which should be compil
 The static library is expected to be linked against the system pcre2 library, so the embedded sources should not be compiled in that case.
 
 diff --git a/Foundation/CMakeLists.txt b/Foundation/CMakeLists.txt
-index bf141ba..3a54d7d 100644
+index adf0b06..b427124 100644
 --- a/Foundation/CMakeLists.txt
 +++ b/Foundation/CMakeLists.txt
-@@ -35,7 +35,6 @@ if(POCO_UNBUNDLED)
- 
- 	# pcre2 source files are linked with Foundation when shared library pcre2 is linked.
- 	# When linking pcre2 as static library the symbols are accessible.
+@@ -38,7 +38,6 @@ if(POCO_UNBUNDLED)
+ 	# CONFIG-mode packages (e.g. Conan, vcpkg) may expose Pcre2::Pcre2 as an
+ 	# INTERFACE_LIBRARY aggregator; the PCRE2_STATIC compile definition is the
+ 	# canonical marker that the underlying build is static.
 -	get_target_property(_PCRE2TYPE Pcre2::Pcre2 TYPE)
  	if("${_PCRE2TYPE}" STREQUAL "SHARED_LIBRARY")
  		# HACK: Unicode.cpp requires functions from these files.

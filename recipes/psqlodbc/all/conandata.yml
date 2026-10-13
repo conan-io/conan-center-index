@@ -1,0 +1,7 @@
+sources:
+  "18.00.0004":
+    url: "https://github.com/postgresql-interfaces/psqlodbc/archive/refs/tags/REL-18_00_0004.tar.gz"
+    sha256: "af12354a5960846f5578e168b456cde3c21a11c4788277663bf9266b1de3adda"
+  "16.00.0005":
+    url: "https://github.com/postgresql-interfaces/psqlodbc/archive/refs/tags/REL-16_00_0005.tar.gz"
+    sha256: "1aa1bd5f9cb26ac1a4729ed2ab48974b29c335bebff6830d66aaac8bcd081ab0"

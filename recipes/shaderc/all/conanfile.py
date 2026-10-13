@@ -43,7 +43,7 @@ class ShadercConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        spirv_version = "1.4.313.0"
+        spirv_version = "1.4.357.0"
         self.requires(f"glslang/{spirv_version}")
         self.requires(f"spirv-tools/{spirv_version}")
         self.requires(f"spirv-headers/{spirv_version}")
@@ -65,6 +65,8 @@ class ShadercConan(ConanFile):
         tc.cache_variables["SHADERC_SKIP_TESTS"] = True
         tc.cache_variables["ENABLE_CODE_COVERAGE"] = False
         tc.cache_variables["SHADERC_ENABLE_WERROR_COMPILE"] = False
+        # Check if glslang version still supports HLSL; otherwise, set it to False
+        tc.cache_variables["SHADERC_ENABLE_HLSL"] = True
         if is_msvc(self):
             tc.cache_variables["SHADERC_ENABLE_SHARED_CRT"] = not is_msvc_static_runtime(self)
         tc.generate()
