@@ -30,10 +30,6 @@ class PlutoVGConan(ConanFile):
     implements = ["auto_shared_fpic"]
     languages = "C"
 
-    @property
-    def _is_mingw(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -79,6 +75,6 @@ class PlutoVGConan(ConanFile):
         self.cpp_info.includedirs = ["include", os.path.join("include", "plutovg")]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["m"]
-        if (is_msvc(self) or self._is_mingw) and not self.options.shared:
+        if not self.options.shared:
             self.cpp_info.defines.append("PLUTOVG_BUILD_STATIC")
 
