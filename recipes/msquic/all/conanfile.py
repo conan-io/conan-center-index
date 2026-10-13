@@ -33,6 +33,11 @@ class MsQuicConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        if self.settings.os != "Windows":
+            # Windows uses Schannel by default
+            self.requires("openssl/[>=3.5 <4]")
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.20]")
 
@@ -42,6 +47,13 @@ class MsQuicConan(ConanFile):
         tc.cache_variables["QUIC_BUILD_TEST"] = False
         tc.cache_variables["QUIC_BUILD_PERF"] = False
         tc.cache_variables["QUIC_BUILD_SHARED"] = False
+        if self.settings.os != "Windows":
+            # Upstream defaults to a bundled quictls fork, which rejects external OpenSSL
+            tc.cache_variables["QUIC_TLS_LIB"] = "openssl"
+            tc.cache_variables["QUIC_USE_EXTERNAL_OPENSSL"] = True
+            openssl = self.dependencies["openssl"].cpp_info
+            tc.cache_variables["QUIC_OPENSSL_INCLUDE_DIR"] = openssl.includedir.replace("\\", "/")
+            tc.cache_variables["QUIC_OPENSSL_LIB_DIR"] = openssl.libdir.replace("\\", "/")
         # Upstream defaults both to ON and then overwrites CMAKE_MSVC_RUNTIME_LIBRARY
         # after project(), which forces /MT even when compiler.runtime is dynamic.
         # PARTIAL implies STATIC, so it must stay off for /MD to take effect.
@@ -57,10 +69,9 @@ class MsQuicConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"),
              excludes="submodules/*")
-        copy(self, "LICENSE.txt", src=os.path.join(self.source_folder, "submodules", "quictls"),
-             dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "LICENSE", src=os.path.join(self.source_folder, "submodules", "xdp-for-windows"),
-             dst=os.path.join(self.package_folder, "licenses", "xdp-for-windows"))
+        if self.settings.os == "Windows":
+            copy(self, "LICENSE", src=os.path.join(self.source_folder, "submodules", "xdp-for-windows"),
+                 dst=os.path.join(self.package_folder, "licenses", "xdp-for-windows"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
