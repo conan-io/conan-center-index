@@ -20,6 +20,7 @@ class AixlogConan(ConanFile):
     topics = ("android-log", "eventlog", "header-only", "logcat", "logging", "macos-log", "outputdebugstring", "syslog")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    deprecated = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
