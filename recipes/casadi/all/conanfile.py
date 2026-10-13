@@ -94,10 +94,6 @@ class CasadiConan(ConanFile):
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "casadi")
-        self.cpp_info.set_property("cmake_target_name", "casadi::casadi")
-        self.cpp_info.set_property("pkg_config_name", "casadi")
-
         core = self.cpp_info.components["core"]
         core.libs = ["casadi"]
         core.defines = ["CASADI_SNPRINTF=snprintf"]
