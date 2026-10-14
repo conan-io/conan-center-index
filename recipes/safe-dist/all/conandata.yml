@@ -1,4 +1,4 @@
 sources:
-  "0.2.0":
-    url: "https://github.com/emorilebo/safe-dist/archive/refs/tags/v0.2.0.tar.gz"
-    sha256: "c2109120cbadc101cc8f4664296001065c5b92335ab2ee603a4736573d6e9559"
+  "0.2.1":
+    url: "https://github.com/emorilebo/safe-dist/archive/refs/tags/v0.2.1.tar.gz"
+    sha256: "5645e38f61b0ae8e683953fdc8d7de6c1bb80467b3ce6af3636eb7c44f42656a"
