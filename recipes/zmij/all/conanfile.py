@@ -12,7 +12,7 @@ required_conan_version = ">=2.28"
 class ZmijConan(ConanFile):
     name = "zmij"
     description = "A fast floating-point-to-string conversion library for C and C++"
-    license = ("MIT", "BSL-1.0")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/vitaut/zmij"
     topics = ("dtoa", "float", "double", "floating-point", "ieee754", "performance")
