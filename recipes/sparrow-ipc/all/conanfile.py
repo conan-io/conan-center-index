@@ -31,7 +31,6 @@ class SparrowIpcRecipe(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
-    flatbuffer_requirement = "flatbuffers/[~25]"
 
     def requirements(self):
         # sparrow is part of the public interface of sparrow-ipc (sparrow::sparrow is PUBLIC in
