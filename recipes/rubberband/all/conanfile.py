@@ -32,6 +32,7 @@ class RubberbandConan(ConanFile):
         "fPIC": True,
     }
     implements = ["auto_shared_fpic"]
+    deprecated = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
