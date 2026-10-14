@@ -1,9 +1,9 @@
 sources:
-  "8.22.0":
+  "8.23.0":
     url:
-      - "https://curl.se/download/curl-8.22.0.tar.xz"
-      - "https://github.com/curl/curl/releases/download/curl-8_22_0/curl-8.22.0.tar.xz"
-    sha256: "f7ef3ae8a22e521f289803fe93543eb64c329b58aa73a9e224dfd915a2a5f4f7"
+      - "https://github.com/curl/curl/releases/download/curl-8_23_0/curl-8.23.0.tar.xz"
+      - "https://curl.se/download/curl-8.23.0.tar.xz"
+    sha256: "8dadd7d2536a314f982ad05a651b713f426bf7d02cc2c76cffb9796f2218e6c5"
 patches:
-  "8.22.0":
-    - patch_file: "patches/0002-fix-openssl-ldflags-multiple-l.patch"
+  "8.23.0":
+    - patch_file: patches/0002-fix-openssl-ldflags-multiple-l.patch
