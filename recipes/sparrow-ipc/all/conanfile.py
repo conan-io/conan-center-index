@@ -31,13 +31,15 @@ class SparrowIpcRecipe(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
+    flatbuffer_requirement = "flatbuffers/[~25]"
+
     def requirements(self):
         # sparrow is part of the public interface of sparrow-ipc (sparrow::sparrow is PUBLIC in
         # upstream CMakeLists.txt), so consumers need both its headers and its libraries
-        self.requires("sparrow/2.4.0", transitive_headers=True, transitive_libs=True)
-        self.requires("flatbuffers/25.12.19")
-        self.requires("lz4/1.9.4")
-        self.requires("zstd/[>=1.5 <1.6]")
+        self.requires("sparrow/[^2.4]", transitive_headers=True, transitive_libs=True)
+        self.requires(self.flatbuffer_requirement)
+        self.requires("lz4/[^1.9]")
+        self.requires("zstd/[^1.5]")
 
     @property
     def _compilers_minimum_version(self):
@@ -61,6 +63,7 @@ class SparrowIpcRecipe(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.28]")
+        self.tool_requires(self.flatbuffer_requirement)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
