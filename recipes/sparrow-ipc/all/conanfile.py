@@ -63,7 +63,7 @@ class SparrowIpcRecipe(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.28]")
-        self.tool_requires(self.flatbuffer_requirement)
+        self.tool_requires("flatbuffers/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
