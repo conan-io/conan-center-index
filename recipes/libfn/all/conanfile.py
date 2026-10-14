@@ -27,15 +27,6 @@ class LibfnConan(ConanFile):
     }
     no_copy_source = True
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "12",
-            "clang": "16",
-            "apple-clang": "16",
-            "msvc": "193",
-        }
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -47,7 +38,8 @@ class LibfnConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 26 if self.options.cxx26 else 20)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
+        compilers_minimum_version = {"gcc": "12", "clang": "16", "apple-clang": "16", "msvc": "193"}
+        minimum_version = compilers_minimum_version.get(str(self.settings.compiler))
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++20, which {self.settings.compiler} {self.settings.compiler.version} does not fully support."
@@ -88,20 +80,17 @@ class LibfnConan(ConanFile):
         version.set_property("cmake_target_name", "libfn::version")
         version.bindirs = []
         version.libdirs = []
-        version.includedirs = ["include"]
 
         pfn = self.cpp_info.components["pfn"]
         pfn.set_property("cmake_target_name", "libfn::pfn")
         pfn.bindirs = []
         pfn.libdirs = []
-        pfn.includedirs = ["include"]
         pfn.requires = ["version"]
 
         fn = self.cpp_info.components["fn"]
         fn.set_property("cmake_target_name", "libfn::fn")
         fn.bindirs = []
         fn.libdirs = []
-        fn.includedirs = ["include"]
         fn.requires = ["pfn", "version"]
         # An option rather than a component, so the libfn::libfn aggregate cannot pull it in
         if self.options.cxx26:
