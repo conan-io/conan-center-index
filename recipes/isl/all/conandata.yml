@@ -1,4 +1,11 @@
 sources:
   "0.28":
-    url: "https://libisl.sourceforge.io/isl-0.28.tar.xz"
+    url:
+      - "https://libisl.sourceforge.io/isl-0.28.tar.xz"
+      - "https://downloads.sourceforge.net/project/libisl/isl-0.28.tar.xz"
     sha256: "3dc31b8e1b18329e42d5dfbf84dd55e15c59b61569a2ab246f61497d9592f727"
+  "0.26":
+    url:
+      - "https://libisl.sourceforge.io/isl-0.26.tar.xz"
+      - "https://downloads.sourceforge.net/project/libisl/isl-0.26.tar.xz"
+    sha256: "a0b5cb06d24f9fa9e77b55fabbe9a3c94a336190345c2555f9915bb38e976504"
