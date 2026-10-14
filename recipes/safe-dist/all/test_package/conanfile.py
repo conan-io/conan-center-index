@@ -6,9 +6,9 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     test_type = "explicit"
 
-    def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def test(self):
         if can_run(self):
-            self.run("safe-dist --help", env="conanbuild")
+            self.run("safe-dist --version", env="conanrun")
