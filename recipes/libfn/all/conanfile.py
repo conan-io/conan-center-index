@@ -1,9 +1,11 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 
 required_conan_version = ">=2.0.9"
 
@@ -25,6 +27,15 @@ class LibfnConan(ConanFile):
     }
     no_copy_source = True
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "12",
+            "clang": "16",
+            "apple-clang": "16",
+            "msvc": "193",
+        }
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -36,6 +47,11 @@ class LibfnConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 26 if self.options.cxx26 else 20)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++20, which {self.settings.compiler} {self.settings.compiler.version} does not fully support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
