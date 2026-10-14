@@ -43,6 +43,8 @@ class TestPackageConan(ConanFile):
         tc.cache_variables["WITH_PROCESS"] = not self._boost_option("without_process", True)
         tc.cache_variables["WITH_STACKTRACE"] = not self.dependencies["boost"].options.without_stacktrace
         tc.cache_variables["WITH_URL"] = not self._boost_option("without_url", True)
+        tc.cache_variables["WITH_WAVE"] = not self._boost_option("without_wave", True)
+        tc.cache_variables["WITH_MATH"] = not self._boost_option("without_math", True)
         tc.generate()
 
     def build(self):
