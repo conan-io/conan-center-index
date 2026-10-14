@@ -37,8 +37,6 @@ class OpenUSDConan(ConanFile):
     def configure(self):
         if not self.options.with_imaging:
             self.options.rm_safe("with_openimageio")
-        if self.options.with_materialx:
-            self.options["materialx"].shared = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -46,14 +44,14 @@ class OpenUSDConan(ConanFile):
     def requirements(self):
         self.requires("onetbb/2023.1.0", transitive_headers=True)
         if self.options.with_imaging:
-            self.requires("opensubdiv/3.7.0", transitive_headers=True)
+            self.requires("opensubdiv/3.7.0", transitive_headers=True, options={"with_opengl": True})
             self.requires("opengl/system")
             if self.settings.os == "Linux":
                 self.requires("xorg/system")
         if self.options.get_safe("with_openimageio"):
             self.requires("openimageio/2.5.19.1")
         if self.options.with_materialx:
-            self.requires("materialx/1.39.4", transitive_headers=True)
+            self.requires("materialx/1.39.4", transitive_headers=True, options={"shared": True})
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.27]")
@@ -84,7 +82,7 @@ class OpenUSDConan(ConanFile):
         tc.cache_variables["PXR_BUILD_USD_TOOLS"] = False
         tc.cache_variables["PXR_BUILD_IMAGING"] = self.options.with_imaging
         tc.cache_variables["PXR_BUILD_USD_IMAGING"] = self.options.with_imaging
-        tc.cache_variables["PXR_BUILD_OPENIMAGEIO_PLUGIN"] = bool(self.options.get_safe("with_openimageio"))
+        tc.cache_variables["PXR_BUILD_OPENIMAGEIO_PLUGIN"] = self.options.get_safe("with_openimageio", False)
         tc.cache_variables["PXR_ENABLE_MATERIALX_SUPPORT"] = self.options.with_materialx
         if self.options.get_safe("with_openimageio"):
             tc.cache_variables["OIIO_LIBRARIES"] = "OpenImageIO::OpenImageIO"
@@ -126,21 +124,12 @@ class OpenUSDConan(ConanFile):
         rm(self, "pxrConfig.cmake", self.package_folder)
         rmdir(self, os.path.join(self.package_folder, "cmake"))
 
-    @property
-    def _components_file(self):
-        return os.path.join(self.recipe_folder, "components", f"{self.version}.json")
-
-    @property
-    def _components_info(self):
-        # extracted from upstream's own CMakeLists.txt files
-        return json.loads(load(self, self._components_file))
-
     def _condition_is_true(self, condition):
         symbols = {
             "is_apple": is_apple_os(self),
-            "with_imaging": bool(self.options.with_imaging),
-            "with_openimageio": bool(self.options.get_safe("with_openimageio")),
-            "with_materialx": bool(self.options.with_materialx),
+            "with_imaging": self.options.with_imaging,
+            "with_openimageio": self.options.get_safe("with_openimageio"),
+            "with_materialx": self.options.with_materialx,
         }
         return all(symbols[name] for name in condition)
 
@@ -149,7 +138,11 @@ class OpenUSDConan(ConanFile):
         kit_framework = "AppKit" if self.settings.os == "Macos" else "UIKit"
         plugin_dir = os.path.join("plugin", "usd")
 
-        for comp_name, comp_info in self._components_info.items():
+        # extracted from upstream's own CMakeLists.txt files
+        components_file = os.path.join(self.recipe_folder, "components", f"{self.version}.json")
+        components_info = json.loads(load(self, components_file))
+
+        for comp_name, comp_info in components_info.items():
             if not self._condition_is_true(comp_info.get("condition", [])):
                 continue
 
