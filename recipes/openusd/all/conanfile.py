@@ -8,7 +8,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, replace_in_file, rm, rmdir
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=2.9"
 
 class OpenUSDConan(ConanFile):
     name = "openusd"
@@ -60,6 +60,9 @@ class OpenUSDConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
+        if self.settings.arch in ["x86", "armv6", "armv7", "armv7hf", "armv7s", "armv7k", "armv8_32"]:
+            # upstream's top-level CMakeLists.txt rejects non 64-bit builds
+            raise ConanInvalidConfiguration(f"{self.ref} requires a 64-bit target architecture")
         if self.options.with_imaging and not self.dependencies["opensubdiv"].options.with_opengl:
             raise ConanInvalidConfiguration('openusd requires -o "opensubdiv/*:with_opengl=True"')
         if self.options.with_materialx and not self.dependencies["materialx"].options.shared:
@@ -178,6 +181,10 @@ class OpenUSDConan(ConanFile):
                     component.type = "shared-library"
                     component.location = os.path.join(self.package_folder, "lib", f"usd_{comp_name}.dll")
                     component.link_location = os.path.join(self.package_folder, "lib", f"usd_{comp_name}.lib")
+
+        if self.options.with_imaging and self.options.with_materialx:
+            # Public hdSt headers change layout under this define, and upstream does not export it
+            self.cpp_info.components["hdSt"].defines.append("PXR_MATERIALX_SUPPORT_ENABLED")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["arch"].system_libs = ["m", "pthread", "dl"]
