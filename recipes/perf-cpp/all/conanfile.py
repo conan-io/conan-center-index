@@ -31,18 +31,6 @@ class PerfCppConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        # Upstream requires complete std::from_chars support and enforces this in CMakeLists.txt
-        return {
-            "gcc": "11",
-            "clang": "14",
-        }
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -51,8 +39,10 @@ class PerfCppConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} is only supported on Linux: it is built on the perf_event_open syscall."
             )
-        check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
+        check_min_cppstd(self, 17)
+        # Upstream requires complete std::from_chars support
+        compilers_minimum_version = {"gcc": "11", "clang": "14"}
+        minimum_version = compilers_minimum_version.get(str(self.settings.compiler))
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires {self.settings.compiler} >= {minimum_version}."
@@ -63,9 +53,7 @@ class PerfCppConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # Upstream uses a custom option name rather than BUILD_SHARED_LIBS
-        tc.cache_variables["BUILD_LIB_SHARED"] = bool(self.options.shared)
-        # Defaults to ON for a standalone build, which this is; packaged builds should not lint
+        tc.cache_variables["BUILD_LIB_SHARED"] = self.options.shared
         tc.cache_variables["ENABLE_CLANG_TIDY"] = False
         tc.generate()
 
