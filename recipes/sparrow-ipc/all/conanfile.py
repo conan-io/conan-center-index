@@ -36,7 +36,7 @@ class SparrowIpcRecipe(ConanFile):
         # sparrow is part of the public interface of sparrow-ipc (sparrow::sparrow is PUBLIC in
         # upstream CMakeLists.txt), so consumers need both its headers and its libraries
         self.requires("sparrow/[^2.4]", transitive_headers=True, transitive_libs=True)
-        self.requires(self.flatbuffer_requirement)
+        self.requires("flatbuffers/[>25 <26]")
         self.requires("lz4/[^1.9]")
         self.requires("zstd/[^1.5]")
 
