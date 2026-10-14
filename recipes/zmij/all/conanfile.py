@@ -36,7 +36,7 @@ class ZmijConan(ConanFile):
         check_min_cppstd(self, 14)
 
     def validate_build(self):
-        if self.settings.compiler == "apple-clang" and Version(self.version) < "21":
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "21":
             raise ConanInvalidConfiguration("Needs apple-clang >=21")
 
     def build_requirements(self):
