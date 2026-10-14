@@ -36,7 +36,3 @@ class RayguiConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.requires = ["raylib::raylib"]
-        self.cpp_info.set_property("cmake_file_name", "raygui")
-        self.cpp_info.set_property("cmake_target_name", "raygui::raygui")
-        self.cpp_info.set_property("pkg_config_name", "raygui")
