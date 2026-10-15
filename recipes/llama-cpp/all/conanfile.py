@@ -4,7 +4,7 @@ import textwrap
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import save, copy, get, rmdir, export_conandata_patches, apply_conandata_patches
 
@@ -107,10 +107,9 @@ class LlamaCppConan(ConanFile):
         tc.cache_variables["LLAMA_BUILD_APP"] = False
         tc.cache_variables["LLAMA_SUBPROCESS"] = self._with_subprocess
         tc.variables["LLAMA_BUILD_EXAMPLES"] = self.options.get_safe("with_examples")
-        if cross_building(self):
-            tc.variables["LLAMA_NATIVE"] = False
-            tc.variables["GGML_NATIVE_DEFAULT"] = False
 
+        # Avoid -march=native so binaries do not depend on the build machine CPU
+        tc.cache_variables["GGML_NATIVE"] = False
         tc.variables["GGML_BUILD_TESTS"] = False
         tc.variables["GGML_BUILD_EXAMPLES"] = False
         tc.variables["GGML_CUDA"] = self.options.get_safe("with_cuda")
