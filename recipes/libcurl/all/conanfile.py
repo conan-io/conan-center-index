@@ -24,7 +24,7 @@ class LibcurlConan(ConanFile):
     homepage = "https://curl.se"
     topics = ("curl", "data-transfer",
             "ftp", "gopher", "http", "imap", "ldap", "mqtt", "pop3", "rtmp", "rtsp",
-            "scp", "sftp", "smb", "smtp", "telnet", "tftp")
+            "scp", "sftp", "smtp", "telnet", "tftp")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -42,7 +42,6 @@ class LibcurlConan(ConanFile):
         "with_tftp": [True, False],
         "with_pop3": [True, False],
         "with_imap": [True, False],
-        "with_smb": [True, False],
         "with_smtp": [True, False],
         "with_gopher": [True, False],
         "with_mqtt": [True, False],
@@ -90,7 +89,6 @@ class LibcurlConan(ConanFile):
         "with_mqtt": True,
         "with_pop3": True,
         "with_rtsp": True,
-        "with_smb": False,
         "with_smtp": True,
         "with_telnet": True,
         "with_tftp": True,
@@ -333,7 +331,6 @@ class LibcurlConan(ConanFile):
             f"--enable-mqtt={self._yes_no(self.options.with_mqtt)}",
             f"--enable-pop3={self._yes_no(self.options.with_pop3)}",
             f"--enable-rtsp={self._yes_no(self.options.with_rtsp)}",
-            f"--enable-smb={self._yes_no(self.options.with_smb)}",
             f"--enable-smtp={self._yes_no(self.options.with_smtp)}",
             f"--enable-telnet={self._yes_no(self.options.with_telnet)}",
             f"--enable-tftp={self._yes_no(self.options.with_tftp)}",
@@ -522,7 +519,6 @@ class LibcurlConan(ConanFile):
         tc.variables["CURL_USE_LIBPSL"] = self.options.with_libpsl
         tc.variables["CURL_USE_LIBSSH2"] = self.options.with_libssh2
         tc.variables["ENABLE_ARES"] = self.options.with_c_ares
-        tc.variables["CURL_ENABLE_SMB"] = self.options.with_smb
         if not self.options.with_c_ares:
             tc.variables["ENABLE_THREADED_RESOLVER"] = self.options.with_threaded_resolver
         tc.variables["CURL_DISABLE_PROXY"] = not self.options.with_proxy
