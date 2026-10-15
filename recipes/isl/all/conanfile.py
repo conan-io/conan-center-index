@@ -72,6 +72,10 @@ class IslConan(ConanFile):
         if self.options.with_int == "gmp":
             tc.configure_args.append("--with-gmp=system")
             tc.configure_args.append(f'--with-gmp-prefix={unix_path(self, self.dependencies["gmp"].package_folder)}')
+            if self.options.shared and self.settings.os in ["Linux", "FreeBSD"]:
+                # libisl.so needs libgmp.so, so the linker must find it when linking the isl executables
+                gmp_libdir = self.dependencies["gmp"].cpp_info.aggregated_components().libdirs[0]
+                tc.extra_ldflags.append(f"-Wl,-rpath-link,{gmp_libdir}")
         if is_msvc(self):
             if check_min_vs(self, 191, raise_invalid=False):
                 tc.extra_cflags = ["-Zf"]
