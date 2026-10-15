@@ -25,19 +25,6 @@ index 878ad1c..e85ed39 100644
  
  #ifdef _WIN32
  #include <winsock2.h>
-diff --git a/tools/server/server-http.cpp b/tools/server/server-http.cpp
-index 33cbb15..d70d2a7 100644
---- a/tools/server/server-http.cpp
-+++ b/tools/server/server-http.cpp
-@@ -4,7 +4,7 @@
- #include "server-common.h"
- #include "ui.h"
- 
--#include <cpp-httplib/httplib.h>
-+#include <httplib/httplib.h>
- 
- #include <functional>
- #include <future>
 diff --git a/vendor/CMakeLists.txt b/vendor/CMakeLists.txt
 index 4479daf..6750bf8 100644
 --- a/vendor/CMakeLists.txt

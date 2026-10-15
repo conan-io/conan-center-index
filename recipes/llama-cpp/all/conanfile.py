@@ -27,6 +27,7 @@ class LlamaCppConan(ConanFile):
         "with_examples": [True, False],
         "with_cuda": [True, False],
         "with_vulkan": [True, False],
+        "with_openssl": [True, False],
     }
     default_options = {
         "shared": False,
@@ -34,6 +35,7 @@ class LlamaCppConan(ConanFile):
         "with_examples": False,
         "with_cuda": False,
         "with_vulkan": False,
+        "with_openssl": True,
     }
 
     implements = ["auto_shared_fpic"]
@@ -52,7 +54,7 @@ class LlamaCppConan(ConanFile):
     def _cuda_build_module(self):
         # Adding this to the package info is necessary if we want consumers of llama to link correctly when
         # they activate the CUDA option. In the future, when we have a CUDA recipe this could be removed.
-        cuda_target = "ggml-cuda"
+        cuda_target = "ggml::ggml-cuda"
         return textwrap.dedent(f"""\
             find_dependency(CUDAToolkit REQUIRED)
             if (WIN32)
@@ -68,6 +70,8 @@ class LlamaCppConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
+        if self.options.with_openssl and not self.dependencies["cpp-httplib"].options.with_openssl:
+            raise ConanInvalidConfiguration(f"{self.ref} with_openssl=True requires -o 'cpp-httplib/*:with_openssl=True'")
 
     def validate_build(self):
         if self.settings.compiler == "msvc" and "arm" in self.settings.arch:
@@ -77,7 +81,8 @@ class LlamaCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cpp-httplib/[~0.59]")
+        httplib_options = {"with_openssl": True} if self.options.with_openssl else None
+        self.requires("cpp-httplib/[~0.59]", options=httplib_options)
 
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/[>=1.3 <1.5]")
@@ -111,8 +116,7 @@ class LlamaCppConan(ConanFile):
         tc.variables["GGML_BUILD_TESTS"] = False
         tc.variables["GGML_BUILD_EXAMPLES"] = False
         tc.variables["GGML_CUDA"] = self.options.get_safe("with_cuda")
-        tc.cache_variables["LLAMA_BUILD_UI"] = False
-        tc.cache_variables["LLAMA_USE_PREBUILT_UI"] = False
+        tc.cache_variables["GGML_CUDA_NCCL"] = False
 
         if self.options.get_safe("with_vulkan"):
             tc.variables["GGML_VULKAN"] = True
@@ -136,11 +140,9 @@ class LlamaCppConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         copy(self, "*", os.path.join(self.source_folder, "models"), os.path.join(self.package_folder, "res", "models"))
         copy(self, "*.h*", os.path.join(self.source_folder, "common"), os.path.join(self.package_folder, "include", "common"), excludes=["subproc.h"])
-        copy(self, "*common*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*common*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
-        copy(self, "*common*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*common*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*common*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        # llama-common-base is always static and upstream does not install it
+        copy(self, "*llama-common-base.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*llama-common-base.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         if self.options.with_cuda and not self.options.shared:
             save(self, os.path.join(self.package_folder, "lib", "cmake", "llama-cpp-cuda-static.cmake"), self._cuda_build_module)
 
@@ -161,7 +163,7 @@ class LlamaCppConan(ConanFile):
 
         self.cpp_info.components["ggml"].libs = ["ggml"]
         self.cpp_info.components["ggml"].resdirs = ["res"]
-        self.cpp_info.components["ggml"].set_property("cmake_target_name", "ggml::all")
+        self.cpp_info.components["ggml"].set_property("cmake_target_name", "ggml::ggml")
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["ggml"].system_libs.append("dl")
         self.cpp_info.components["ggml"].requires = ["ggml-base"]
@@ -170,17 +172,25 @@ class LlamaCppConan(ConanFile):
 
         self.cpp_info.components["ggml-base"].libs = ["ggml-base"]
         self.cpp_info.components["ggml-base"].resdirs = ["res"]
-        self.cpp_info.components["ggml-base"].set_property("cmake_target_name", "ggml-base")
+        self.cpp_info.components["ggml-base"].set_property("cmake_target_name", "ggml::ggml-base")
 
+        # ggml::all only aggregates the backends, ggml::ggml already links them
+        self.cpp_info.components["ggml-all"].set_property("cmake_target_name", "ggml::all")
+
+        self.cpp_info.components["llama"].set_property("cmake_target_name", "llama")
+        self.cpp_info.components["llama"].set_property("pkg_config_name", "llama")
         self.cpp_info.components["llama"].libs = ["llama"]
         self.cpp_info.components["llama"].resdirs = ["res"]
         self.cpp_info.components["llama"].requires = ["ggml", "ggml-base"]
 
-        self.cpp_info.components["llama-common-base"].libs = ["llama-common-base"]
+        # upstream does not export common, these are its build tree target names
+        self.cpp_info.components["common-base"].set_property("cmake_target_name", "llama-common-base")
+        self.cpp_info.components["common-base"].libs = ["llama-common-base"]
 
+        self.cpp_info.components["common"].set_property("cmake_target_name", "llama-common")
         self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
         self.cpp_info.components["common"].libs = ["llama-common"]
-        self.cpp_info.components["common"].requires = ["llama", "llama-common-base", "cpp-httplib::cpp-httplib"]
+        self.cpp_info.components["common"].requires = ["llama", "common-base", "cpp-httplib::cpp-httplib"]
 
         if self._with_subprocess:
             self.cpp_info.components["common"].defines.append("LLAMA_SUBPROCESS")
@@ -204,11 +214,12 @@ class LlamaCppConan(ConanFile):
         for backend in backends:
             self.cpp_info.components[f"ggml-{backend}"].libs = [f"ggml-{backend}"]
             self.cpp_info.components[f"ggml-{backend}"].resdirs = ["res"]
-            self.cpp_info.components[f"ggml-{backend}"].set_property("cmake_target_name", f"ggml-{backend}")
+            self.cpp_info.components[f"ggml-{backend}"].set_property("cmake_target_name", f"ggml::ggml-{backend}")
             if self.options.shared:
                 self.cpp_info.components[f"ggml-{backend}"].defines.append("GGML_BACKEND_SHARED")
             self.cpp_info.components["ggml"].defines.append(f"GGML_USE_{backend.upper()}")
             self.cpp_info.components["ggml"].requires.append(f"ggml-{backend}")
+            self.cpp_info.components["ggml-all"].requires.append(f"ggml-{backend}")
 
             if backend == "vulkan":
                 self.cpp_info.components["ggml-vulkan"].requires = ["vulkan-loader::vulkan-loader", "spirv-headers::spirv-headers"]
