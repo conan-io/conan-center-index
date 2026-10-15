@@ -102,7 +102,6 @@ class LlamaCppConan(ConanFile):
         deps.generate()
 
         tc = CMakeToolchain(self)
-        tc.variables["LLAMA_STANDALONE"] = False
         tc.variables["LLAMA_BUILD_TESTS"] = False
         tc.cache_variables["LLAMA_BUILD_TOOLS"] = False
         tc.cache_variables["LLAMA_BUILD_SERVER"] = False
@@ -198,7 +197,7 @@ class LlamaCppConan(ConanFile):
         if is_apple_os(self):
             self.cpp_info.components["common"].frameworks.extend(["Foundation", "Accelerate", "Metal"])
         elif self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.components["common"].system_libs.extend(["dl", "m", "pthread", "gomp"])
+            self.cpp_info.components["common"].system_libs.extend(["dl", "m", "pthread"])
 
         if self.options.with_cuda and not self.options.shared:
             self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
@@ -223,6 +222,9 @@ class LlamaCppConan(ConanFile):
 
             if backend == "vulkan":
                 self.cpp_info.components["ggml-vulkan"].requires = ["vulkan-loader::vulkan-loader", "spirv-headers::spirv-headers"]
+
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["ggml-cpu"].system_libs.append("gomp")
 
         if is_apple_os(self):
             if "blas" in backends:
