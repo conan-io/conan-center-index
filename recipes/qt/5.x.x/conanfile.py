@@ -967,6 +967,8 @@ Prefix = ..""")
                     unset(_isPolicyNEW)
                 endif()
                 """)
+        elif self.settings.os == "Android":
+            filecontents += 'include("${CMAKE_CURRENT_LIST_DIR}/Qt5AndroidSupport.cmake")\n'
 
         filecontents += textwrap.dedent(f"""\
             if(NOT DEFINED QT_DEFAULT_MAJOR_VERSION)
