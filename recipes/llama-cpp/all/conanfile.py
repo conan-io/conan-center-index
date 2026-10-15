@@ -104,7 +104,6 @@ class LlamaCppConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["LLAMA_BUILD_TESTS"] = False
         tc.cache_variables["LLAMA_BUILD_TOOLS"] = False
-        tc.cache_variables["LLAMA_BUILD_SERVER"] = False
         tc.cache_variables["LLAMA_BUILD_APP"] = False
         tc.cache_variables["LLAMA_SUBPROCESS"] = self._with_subprocess
         tc.variables["LLAMA_BUILD_EXAMPLES"] = self.options.get_safe("with_examples")
@@ -138,7 +137,7 @@ class LlamaCppConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         copy(self, "*", os.path.join(self.source_folder, "models"), os.path.join(self.package_folder, "res", "models"))
-        copy(self, "*.h*", os.path.join(self.source_folder, "common"), os.path.join(self.package_folder, "include", "common"), excludes=["subproc.h"])
+        copy(self, "*.h*", os.path.join(self.source_folder, "common"), os.path.join(self.package_folder, "include", "common"), excludes=["subproc.h", "http.h"])
         # llama-common-base is always static and upstream does not install it
         copy(self, "*llama-common-base.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*llama-common-base.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
@@ -167,7 +166,7 @@ class LlamaCppConan(ConanFile):
             self.cpp_info.components["ggml"].system_libs.append("dl")
         self.cpp_info.components["ggml"].requires = ["ggml-base"]
         if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.components["ggml-base"].system_libs.extend(["dl", "m", "pthread"])
+            self.cpp_info.components["ggml-base"].system_libs.extend(["dl", "m", "pthread", "gomp"])
 
         self.cpp_info.components["ggml-base"].libs = ["ggml-base"]
         self.cpp_info.components["ggml-base"].resdirs = ["res"]
