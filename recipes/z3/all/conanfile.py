@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=2"
@@ -34,6 +34,9 @@ class Z3Conan(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -56,6 +59,7 @@ class Z3Conan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self._build_script_folder, "CMakeLists.txt"),
                         "set(CMAKE_CXX_STANDARD ", "# set(CMAKE_CXX_STANDARD ")
 

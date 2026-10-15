@@ -11,3 +11,8 @@ sources:
   "4.13.0":
     url: "https://github.com/Z3Prover/z3/archive/z3-4.13.0.tar.gz"
     sha256: "01bcc61c8362e37bb89fd2430f7e3385e86df7915019bd2ce45de9d9bd934502"
+
+patches:
+  "4.13.0":
+    - patch_file: "patches/4.13.0-0001-column_info-fix-m_low_bound.patch"
+    - patch_file: "patches/4.13.0-0002-static_matrix-gcc15-two-phase-lookup.patch"
