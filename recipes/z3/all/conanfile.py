@@ -50,9 +50,13 @@ class Z3Conan(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
 
+    @property
+    def _build_script_folder(self):
+        return os.path.join(self.source_folder, "core") if Version(self.version) >= "4.15.4" else self.source_folder
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+        replace_in_file(self, os.path.join(self._build_script_folder, "CMakeLists.txt"),
                         "set(CMAKE_CXX_STANDARD ", "# set(CMAKE_CXX_STANDARD ")
 
     def generate(self):
@@ -78,8 +82,7 @@ class Z3Conan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        build_script_folder = os.path.join(self.source_folder, "core") if Version(self.version) >= "4.15.4" else self.source_folder
-        cmake.configure(build_script_folder=build_script_folder)
+        cmake.configure(build_script_folder=self._build_script_folder)
         cmake.build()
 
     def package(self):
