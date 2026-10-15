@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 import os
 
 required_conan_version = ">=2.0.9"
@@ -39,12 +39,14 @@ class TrngConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmakelists, "set(CMAKE_CXX_STANDARD 11)", "")
+        replace_in_file(self, cmakelists, "set(CMAKE_CXX_EXTENSIONS OFF)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["TRNG_ENABLE_TESTS"] = False
         tc.cache_variables["TRNG_ENABLE_EXAMPLES"] = False
-        tc.cache_variables["BUILD_TESTING"] = False
         tc.generate()
 
     def build(self):
@@ -57,8 +59,10 @@ class TrngConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
+        # Upstream installs the Windows DLL into lib/
+        copy(self, "*.dll", src=os.path.join(self.package_folder, "lib"), dst=os.path.join(self.package_folder, "bin"))
+        rm(self, "*.dll", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["trng4"]
@@ -67,4 +71,4 @@ class TrngConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "trng4")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["m", "pthread"])
+            self.cpp_info.system_libs.append("m")
