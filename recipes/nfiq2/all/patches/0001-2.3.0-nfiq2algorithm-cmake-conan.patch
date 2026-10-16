@@ -1,0 +1,96 @@
+--- a/NFIQ2/NFIQ2Algorithm/CMakeLists.txt
++++ b/NFIQ2/NFIQ2Algorithm/CMakeLists.txt
+@@ -2,6 +2,8 @@
+ 
+ project( nfiq2 )
+ 
++option(BUILD_NFIQ2_CLI "Build the NFIQ2 command-line tool (Conan: needs NFIR/libbiomeval, off)" OFF)
++
+ set (CMAKE_CXX_STANDARD 11)
+ 
+ # FIXME: Prefer static libs on macOS and Windows, since it's "easy" on Linux to
+@@ -36,24 +38,28 @@
+ include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
+ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+ 
+-# add libbiomeval include directories
+-include_directories("${SUPERBUILD_ROOT_PATH}/libbiomeval/src/include")
+-
+ include_directories("${SUPERBUILD_ROOT_PATH}/fingerjetfxose/FingerJetFXOSE/libFRFXLL/include")
+ 
+ include_directories("${SUPERBUILD_ROOT_PATH}/digestpp")
+ 
+-option(EMBED_RANDOM_FOREST_PARAMETERS "Embed random forest parameters in library" OFF)
++option(EMBED_RANDOM_FOREST_PARAMETERS "Embed random forest parameters in library" ON)
+ set(EMBEDDED_RANDOM_FOREST_PARAMETER_FCT "0" CACHE STRING
+     "ANSI/NIST-ITL 1-2011: Update 2015 friction ridge capture technology (FRCT) code for parameters to embed")
+ 
+-set( OpenCV_DIR ${CMAKE_BINARY_DIR}/../../../OpenCV-prefix/src/OpenCV-build)
+-find_package(OpenCV REQUIRED NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH HINTS ${OpenCV_DIR})
++# Conan: OpenCV from opencv/ recipe (CMakeDeps) instead of superbuild ExternalProject
++find_package(OpenCV REQUIRED CONFIG)
++if(TARGET opencv::opencv)
++	set(_NFIQ2_OPENCV_LIB opencv::opencv)
++else()
++	set(_NFIQ2_OPENCV_LIB ${OpenCV_LIBS})
++	if(OpenCV_INCLUDE_DIRS)
++		include_directories(${OpenCV_INCLUDE_DIRS})
++	elseif(OpenCV_INCLUDE_DIR)
++		include_directories(${OpenCV_INCLUDE_DIR})
++	endif()
++endif()
+ set(OpenCV_SHARED ON)
+-include_directories(${OpenCV_INCLUDE_DIRS})
+ 
+-include_directories("${SUPERBUILD_ROOT_PATH}/NFIR/include")
+-
+ set(SOURCE_FILES
+     "src/nfiq2/nfiq2_cbeff.cpp"
+     "src/nfiq2/nfiq2_data.cpp"
+@@ -113,15 +119,22 @@
+ 	target_compile_definitions(${NFIQ2_STATIC_LIBRARY_TARGET} PUBLIC "NFIQ2_EMBEDDED_RANDOM_FOREST_PARAMETERS_FCT=${EMBEDDED_RANDOM_FOREST_PARAMETER_FCT}")
+ endif()
+ 
+-# FIXME: Change to "${CMAKE_INSTALL_PREFIX}/lib" once FJFX builds
+-# FIXME: are updated.
+-link_directories("${CMAKE_BINARY_DIR}/../../../fingerjetfxose/FingerJetFXOSE/libFRFXLL/src")
+-link_directories("${CMAKE_BINARY_DIR}/../../../fingerjetfxose/FingerJetFXOSE/libFRFXLL/src/$<$<BOOL:${IS_MULTI_CONFIG}>:$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>>")
++# FRFXLL is built in the parent (Conan) project; use the imported target, not hardcoded
++# superbuild link_directories to ../../../fingerjetfxose/...
+ target_link_libraries(${NFIQ2_STATIC_LIBRARY_TARGET} PUBLIC
+ 	FRFXLL_static
+-	${OpenCV_LIBS}
++	${_NFIQ2_OPENCV_LIB}
+ )
+ 
++# Conan: platform libs (upstream only linked these to the CLI; static lib used from apps)
++if(WIN32)
++	target_compile_definitions(${NFIQ2_STATIC_LIBRARY_TARGET} PRIVATE NOMINMAX)
++	target_link_libraries(${NFIQ2_STATIC_LIBRARY_TARGET} PUBLIC ws2_32)
++else()
++	find_package(Threads REQUIRED)
++	target_link_libraries(${NFIQ2_STATIC_LIBRARY_TARGET} PUBLIC Threads::Threads ${CMAKE_DL_LIBS})
++endif()
++
+ if(USE_SANITIZER)
+ 	target_link_libraries(${NFIQ2_STATIC_LIBRARY_TARGET} "asan")
+ endif()
+@@ -240,15 +253,8 @@
+ 	endif()
+ endif(BUILD_NFIQ2_CLI)
+ 
+-install(TARGETS ${NFIQ2_STATIC_LIBRARY_TARGET}
++# Conan: install without COMPONENT (default) so `cmake --install` picks up the library
++install(TARGETS ${NFIQ2_STATIC_LIBRARY_TARGET} FRFXLL_static
+     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+-    PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+-    COMPONENT install_staging)
+-
+-# FIXME: FingerJet doesn't have an install target
+-install(FILES
+-	${CMAKE_BINARY_DIR}/../../../fingerjetfxose/FingerJetFXOSE/libFRFXLL/src/$<$<BOOL:${IS_MULTI_CONFIG}>:$<$<CONFIG:Debug>:Debug/>$<$<CONFIG:Release>:Release/>>${CMAKE_STATIC_LIBRARY_PREFIX}FRFXLL_static${CMAKE_STATIC_LIBRARY_SUFFIX}
+-	${CMAKE_BINARY_DIR}/../../../fingerjetfxose/FingerJetFXOSE/libFRFXLL/src/$<$<BOOL:${IS_MULTI_CONFIG}>:$<$<CONFIG:Debug>:Debug/>$<$<CONFIG:Release>:Release/>>${CMAKE_SHARED_LIBRARY_PREFIX}FRFXLL${CMAKE_SHARED_LIBRARY_SUFFIX}
+-	DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+-	COMPONENT install_staging)
++    PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
