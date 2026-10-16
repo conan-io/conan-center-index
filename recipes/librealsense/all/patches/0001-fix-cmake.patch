@@ -1,0 +1,84 @@
+--- a/CMake/install_config.cmake
++++ b/CMake/install_config.cmake
+@@ -48,4 +48,4 @@
+         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+ )
+ 
+-install(CODE "execute_process(COMMAND ldconfig)")
++#install(CODE "execute_process(COMMAND ldconfig)")
+--- a/CMake/libusb_config.cmake
++++ b/CMake/libusb_config.cmake
+@@ -1,14 +1,5 @@
+ if (NOT TARGET usb)
+-    find_library(LIBUSB_LIB usb-1.0)
+-    find_path(LIBUSB_INC libusb.h HINTS PATH_SUFFIXES libusb-1.0)
+-    include(FindPackageHandleStandardArgs)
+-    find_package_handle_standard_args(usb "libusb not found; using internal version" LIBUSB_LIB LIBUSB_INC)
+-    if (USB_FOUND AND NOT USE_EXTERNAL_USB)
+-        add_library(usb INTERFACE)
+-        target_include_directories(usb INTERFACE ${LIBUSB_INC})
+-        target_link_libraries(usb INTERFACE ${LIBUSB_LIB})
+-    else()
+-        include(CMake/external_libusb.cmake)
+-    endif()
+-    install(TARGETS usb EXPORT realsense2Targets)
++    find_package(libusb REQUIRED CONFIG)
++    add_library(usb INTERFACE IMPORTED)
++    set_property(TARGET usb PROPERTY INTERFACE_LINK_LIBRARIES libusb::libusb)
+ endif()
+--- a/CMake/windows_config.cmake
++++ b/CMake/windows_config.cmake
+@@ -95,8 +95,9 @@
+         if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
+             message("Preparing Windows 7 drivers" )
+             make_directory(${CMAKE_CURRENT_BINARY_DIR}/drivers/)
+-            file(GLOB DRIVERS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/" "${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/*")
+-            foreach(item IN LISTS DRIVERS)
++            file(GLOB DRIVERS "${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/" "${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/*")
++            foreach(_driver_path IN LISTS DRIVERS)
++                get_filename_component(item ${_driver_path} NAME)
+                 message("Copying ${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/${item} to ${CMAKE_CURRENT_BINARY_DIR}/drivers/" )
+                 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/${item}" "${CMAKE_CURRENT_BINARY_DIR}/drivers/${item}" COPYONLY)
+             endforeach()
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -8,7 +8,7 @@
+ include_directories(${REPO_ROOT})
+ 
+ include(CMake/lrs_options.cmake)
+-include(CMake/connectivity_check.cmake)
++set(INTERNET_CONNECTION ON)
+ #Deprecation message, should be removed in future releases
+ if(${FORCE_LIBUVC} OR ${FORCE_WINUSB_UVC} OR ${ANDROID_USB_HOST_UVC})
+     MESSAGE(DEPRECATION "FORCE_LIBUVC, FORCE_WINUSB_UVC and ANDROID_USB_HOST_UVC are deprecated, use FORCE_RSUSB_BACKEND instead")
+--- a/third-party/CMakeLists.txt
++++ b/third-party/CMakeLists.txt
+@@ -5,7 +5,7 @@
+ 
+ pop_security_flags() # remove security flags for third party, as we cannot guarantee their security enforcment
+ 
+-include(CMake/external_json.cmake)
++# include(CMake/external_json.cmake)
+ add_subdirectory( ${_rel_path}/realsense-file )
+ 
+ if(BUILD_EASYLOGGINGPP)
+--- a/third-party/rsutils/CMakeLists.txt
++++ b/third-party/rsutils/CMakeLists.txt
+@@ -4,15 +4,14 @@
+ project( rsutils )
+ 
+ add_library( ${PROJECT_NAME} STATIC "" )
+-# We cannot directly interface with nlohmann_json (doesn't work on bionic)
+-#target_link_libraries( ${PROJECT_NAME} PUBLIC nlohmann_json )
++find_package(nlohmann_json CONFIG REQUIRED)
++target_link_libraries( ${PROJECT_NAME} PUBLIC nlohmann_json::nlohmann_json)
+ target_compile_features( ${PROJECT_NAME} PUBLIC cxx_std_14 )
+ set_target_properties( ${PROJECT_NAME} PROPERTIES FOLDER Library )
+ 
+ target_include_directories( ${PROJECT_NAME}
+     PUBLIC
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+-        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/third-party/json/include>
+ )
+ 
+ # Headers -----------------------------------------------------------------------------------

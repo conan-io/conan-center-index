@@ -1,7 +1,5 @@
 "versions":
+  "1.0.2":
+    "folder": "all"
   "0.9.32":
-    "folder": "all"
-  "0.9.31":
-    "folder": "all"
-  "0.9.29":
     "folder": "all"
