@@ -3,9 +3,10 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
@@ -25,9 +26,6 @@ class SentryNativeConan(ConanFile):
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     options = {
         "shared": [True, False],
@@ -59,8 +57,6 @@ class SentryNativeConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         if self.options.get_safe("with_crashpad") == "sentry":
-            # Sentry-native 0.7.8 requires C++20: Concepts and bit_cast
-            # https://github.com/chromium/mini_chromium/blob/e49947ad445c4ed4bc1bb4ed60bbe0fe17efe6ec/base/numerics/byte_conversions.h#L88
             return {
                 "Visual Studio": "16",
                 "msvc": "192",
@@ -147,10 +143,11 @@ class SentryNativeConan(ConanFile):
     def build_requirements(self):
         if self.settings.os == "Windows":
             self.tool_requires("cmake/[>=3.16.4]")
+        if self.settings.os == "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -165,11 +162,19 @@ class SentryNativeConan(ConanFile):
         tc.variables["SENTRY_INTEGRATION_QT"] = self.options.qt
         if self.options.get_safe("wer", False):
             tc.variables["CRASHPAD_WER_ENABLED"] = True
+        if self.settings.os == "Linux":
+            tc.variables["SENTRY_LIBUNWIND_SYSTEM"] = True
+        if self.settings.os == "Windows" and not self.conf.get("tools.cmake.cmaketoolchain:system_version"):
+            if cross_building(self, skip_x64_x86=True):
+                # Conan leaves CMAKE_SYSTEM_VERSION empty when cross-building (e.g. Windows ARM64 from x86_64), and
+                # sentry only links Synchronization.lib (WaitOnAddress) if it is 10.x or 6.2/6.3
+                tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0"
         tc.generate()
         deps = CMakeDeps(self)
-        if self.settings.os == "Linux":
-            deps.set_property("libunwind", "cmake_target_name", "unwind")
         deps.generate()
+        if self.settings.os == "Linux":
+            pc = PkgConfigDeps(self)
+            pc.generate()
 
     def build(self):
         cmake = CMake(self)
