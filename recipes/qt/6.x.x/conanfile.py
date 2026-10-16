@@ -292,6 +292,10 @@ class QtConan(ConanFile):
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "15":
             raise ConanInvalidConfiguration("apple-clang >= 14 is required by qt >= 6.8.3")
 
+        if Version(self.version) >= "6.12.0" and self.settings.compiler == "apple-clang" \
+                and Version(self.settings.compiler.version) < "16":
+            raise ConanInvalidConfiguration("apple-clang >= 16 (Xcode 16) is required by qt >= 6.12.0")
+
         if self.options.get_safe("qtwebengine"):
             if not self.options.shared:
                 raise ConanInvalidConfiguration("Static builds of Qt WebEngine are not supported")
