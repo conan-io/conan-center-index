@@ -68,7 +68,7 @@ class TracyConan(ConanFile):
             self.requires("libunwind/1.8.1", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        check_min_cppstd(self, 11)
+        check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
