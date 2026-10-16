@@ -1,0 +1,115 @@
+From 067fe453da0845e2179f408ebc6b8d288e03951d Mon Sep 17 00:00:00 2001
+From: Gregor Jasny <gjasny@googlemail.com>
+Date: Mon, 29 Jun 2026 17:30:51 +0200
+Subject: [PATCH] Properly set close on exec for BSDs
+
+---
+ CMakeLists.txt                    |  3 +++
+ config.h.cmake                    |  1 +
+ resip/stack/InternalTransport.cxx | 34 +++++++++++++++++++++++++------
+ 3 files changed, 32 insertions(+), 6 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cddf7ff4a..43f993cf9 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -899,6 +899,9 @@ endif()
+ include(CheckIncludeFiles)
+ check_include_files(sys/epoll.h HAVE_EPOLL)
+ 
++include(CheckSymbolExists)
++check_symbol_exists(SOCK_CLOEXEC "sys/socket.h" HAVE_SOCK_CLOEXEC)
++
+ # HAVE_LIBDL from autotools obsolete,
+ # now we use CMAKE_DL_LIBS to include the library
+ # when necessary
+diff --git a/config.h.cmake b/config.h.cmake
+index 701010190..431703597 100644
+--- a/config.h.cmake
++++ b/config.h.cmake
+@@ -9,6 +9,7 @@
+ #cmakedefine USE_POSTGRESQL
+ #cmakedefine USE_MAXMIND_GEOIP
+ #cmakedefine01 HAVE_CLOCK_GETTIME_MONOTONIC
++#cmakedefine HAVE_SOCK_CLOEXEC
+ #define DEFAULT_BRIDGE_MAX_IN_OUTPUTS @DEFAULT_BRIDGE_MAX_IN_OUTPUTS@
+ #cmakedefine SIPX_NO_RECORD
+ 
+diff --git a/resip/stack/InternalTransport.cxx b/resip/stack/InternalTransport.cxx
+index 5a19deff0..932839110 100644
+--- a/resip/stack/InternalTransport.cxx
++++ b/resip/stack/InternalTransport.cxx
+@@ -4,12 +4,14 @@
+ 
+ #include <iostream>
+ 
++#include <fcntl.h>
++
+ #if defined(HAVE_SYS_SOCKIO_H)
+ #include <sys/sockio.h>
+ #endif
+ 
+-#if defined(WIN32)
+-#define SOCK_CLOEXEC 0
++#if defined(HAVE_SOCK_CLOEXEC)
++#include <sys/socket.h>
+ #endif
+ 
+ #include "resip/stack/Helper.hxx"
+@@ -75,22 +77,28 @@ InternalTransport::isFinished() const
+ Socket
+ InternalTransport::socket(TransportType type, IpVersion ipVer)
+ {
++#if defined(HAVE_SOCK_CLOEXEC)
++   const int sockCloexec = SOCK_CLOEXEC;
++#else
++   const int sockCloexec = 0;
++#endif
++
+    Socket fd;
+    switch (type)
+    {
+       case UDP:
+ #ifdef USE_IPV6
+-         fd = ::socket(ipVer == V4 ? PF_INET : PF_INET6, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
++         fd = ::socket(ipVer == V4 ? PF_INET : PF_INET6, SOCK_DGRAM | sockCloexec, IPPROTO_UDP);
+ #else
+-         fd = ::socket(PF_INET, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
++         fd = ::socket(PF_INET, SOCK_DGRAM | sockCloexec, IPPROTO_UDP);
+ #endif
+          break;
+       case TCP:
+       case TLS:
+ #ifdef USE_IPV6
+-         fd = ::socket(ipVer == V4 ? PF_INET : PF_INET6, SOCK_STREAM | SOCK_CLOEXEC, 0);
++         fd = ::socket(ipVer == V4 ? PF_INET : PF_INET6, SOCK_STREAM | sockCloexec, 0);
+ #else
+-         fd = ::socket(PF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0);
++         fd = ::socket(PF_INET, SOCK_STREAM | sockCloexec, 0);
+ #endif
+          break;
+       default:
+@@ -112,6 +120,20 @@ InternalTransport::socket(TransportType type, IpVersion ipVer)
+       ErrLog(<< "Failed to set handle information: " << strError(e));
+       throw Transport::Exception("Failed SetHandleInformation", __FILE__, __LINE__);
+    }
++#elif !defined(HAVE_SOCK_CLOEXEC)
++   int flags = fcntl(fd, F_GETFD);
++   if (flags == -1)
++   {
++      int e = getErrno();
++      ErrLog (<< "Failed to get socket flags: " << strError(e));
++      throw Transport::Exception("Can't get socket flags", __FILE__,__LINE__);
++   }
++   if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) == -1)
++   {
++      int e = getErrno();
++      ErrLog (<< "Failed to set socket flags: " << strError(e));
++      throw Transport::Exception("Can't set socket flags", __FILE__,__LINE__);
++   }
+ #endif
+ 
+ #ifdef USE_IPV6
+-- 
+2.54.0
+
