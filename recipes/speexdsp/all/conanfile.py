@@ -15,7 +15,7 @@ class SpeexDSPConan(ConanFile):
     description = "SpeexDSP is a patent-free, Open Source/Free Software DSP library providing resampler, echo cancellation, noise suppression, and other audio processing functions."
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/xiph/speexdsp"
+    homepage = "https://gitlab.xiph.org/xiph/speexdsp"
     topics = ("audio", "dsp", "resampler", "echo-cancellation", "noise-suppression")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
