@@ -19,8 +19,13 @@ class TestPackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.generate()
-        handler_exe = "crashpad_handler.exe" if self.settings.os == "Windows" else "crashpad_handler"
-        handler_bin_path = os.path.join(self.dependencies[self.tested_reference_str].package_folder, "bin", handler_exe)
+        sentry = self.dependencies[self.tested_reference_str]
+        handler_bin_path = ""
+        if sentry.options.backend in ("crashpad", "native"):
+            handler_exe = "crashpad_handler" if sentry.options.backend == "crashpad" else "sentry-crash"
+            if self.settings.os == "Windows":
+                handler_exe += ".exe"
+            handler_bin_path = os.path.join(sentry.package_folder, "bin", handler_exe)
         save(self, os.path.join(self.build_folder, "handler_bin_path"), handler_bin_path)
 
     def build(self):
