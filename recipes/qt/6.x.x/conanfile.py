@@ -422,7 +422,10 @@ class QtConan(ConanFile):
             self.requires("md4c/[>=0.4.8 <1]") # stable API since 0.3x as per md4c wiki
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.21.1 <4]")
+        if Version(self.version) >= "6.12.0":
+            self.tool_requires("cmake/[>=3.25 <4]")
+        else:
+            self.tool_requires("cmake/[>=3.21.1 <4]")
         self.tool_requires("ninja/[>=1.12 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
@@ -685,11 +688,13 @@ class QtConan(ConanFile):
 
         # patching in source method because of no_copy_source attribute
         apply_conandata_patches(self)
-        for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
-            replace_in_file(self, os.path.join(self.source_folder, "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
-                                  "  if (enable_precompiled_headers) {\n    if (is_win) {",
-                                  "  if (enable_precompiled_headers) {\n    if (false) {"
-                                  )
+        if Version(self.version) < "6.12.0":
+            # qtwebengine is no longer part of qt-everywhere-src since 6.12
+            for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
+                replace_in_file(self, os.path.join(self.source_folder, "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
+                                      "  if (enable_precompiled_headers) {\n    if (is_win) {",
+                                      "  if (enable_precompiled_headers) {\n    if (false) {"
+                                      )
 
         for f in ["FindPostgreSQL.cmake"]:
             file = os.path.join(self.source_folder, "qtbase", "cmake", f)
