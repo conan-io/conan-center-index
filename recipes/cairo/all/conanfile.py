@@ -4,7 +4,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
@@ -29,6 +29,7 @@ class CairoConan(ConanFile):
         "fPIC": [True, False],
         "with_freetype": [True, False],
         "with_fontconfig": [True, False],
+        "with_dwrite": [True, False],
         "with_xlib": [True, False],
         "with_xlib_xrender": [True, False],
         "with_xcb": [True, False],
@@ -45,6 +46,7 @@ class CairoConan(ConanFile):
         "fPIC": True,
         "with_freetype": True,
         "with_fontconfig": True,
+        "with_dwrite": True,
         "with_xlib": True,
         "with_xlib_xrender": True,
         "with_xcb": True,
@@ -62,6 +64,12 @@ class CairoConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    @property
+    def _with_dwrite(self):
+        # DirectWrite exists since 1.17.6, which auto-detects it without a toggle.
+        return (self.settings.os == "Windows" and Version(self.version) >= "1.17.6"
+                and bool(self.options.get_safe("with_dwrite", True)))
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -75,12 +83,16 @@ class CairoConan(ConanFile):
             del self.options.with_symbol_lookup
         if Version(self.version) >= "1.17.8" or self.settings.os == "Windows" or is_apple_os(self):
             del self.options.with_opengl
+        # Meson's dwrite toggle was added in 1.17.8; earlier versions cannot expose it.
+        if self.settings.os != "Windows" or Version(self.version) < "1.17.8":
+            del self.options.with_dwrite
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
+        if not self._with_dwrite:
+            self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -151,6 +163,8 @@ class CairoConan(ConanFile):
         options["png"] = is_enabled(self.options.with_png)
         options["freetype"] = is_enabled(self.options.with_freetype)
         options["fontconfig"] = is_enabled(self.options.with_fontconfig)
+        if Version(self.version) >= "1.17.8":
+            options["dwrite"] = is_enabled(self._with_dwrite)
         if self.settings.os in ["Linux", "FreeBSD"]:
             options["xcb"] = is_enabled(self.options.with_xcb)
             options["xlib"] = is_enabled(self.options.with_xlib)
@@ -308,6 +322,11 @@ class CairoConan(ConanFile):
 
             if not self.options.shared:
                 self.cpp_info.components["cairo_"].defines.append("CAIRO_WIN32_STATIC_BUILD=1")
+                if self._with_dwrite:
+                    self.cpp_info.components["cairo_"].system_libs.extend(["ole32", "uuid"])
+                    libcxx = stdcpp_library(self)
+                    if libcxx:
+                        self.cpp_info.components["cairo_"].system_libs.append(libcxx)
 
         if self.options.get_safe("with_opengl"):
             if self.options.with_opengl == "desktop":
