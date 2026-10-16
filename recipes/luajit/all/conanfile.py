@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.scm import Version
+from conan.tools.scm import Git, Version
 from conan.tools.files import get, chdir, replace_in_file, copy, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc, MSBuildToolchain, VCVars, unix_path
 from conan.tools.layout import basic_layout
@@ -48,8 +48,14 @@ class LuajitConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} is not supported by Mac M1. Please, try any version >=2.1")
 
     def source(self):
-        filename = f"LuaJIT-{self.version}.tar.gz"
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, filename=filename, strip_root=True)
+        source = self.conan_data["sources"][self.version]
+        if "commit" in source:
+            git = Git(self)
+            git.clone(url=source["url"], target=".")
+            git.checkout(source["commit"])
+        else:
+            filename = f"LuaJIT-{self.version}.tar.gz"
+            get(self, **source, destination=self.source_folder, filename=filename, strip_root=True)
 
     def generate(self):
         if is_msvc(self):
