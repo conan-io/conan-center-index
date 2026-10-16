@@ -65,6 +65,8 @@ class FoonathanMemoryConan(ConanFile):
         tc.variables["FOONATHAN_MEMORY_BUILD_TESTS"] = False
         tc.variables["FOONATHAN_MEMORY_BUILD_TOOLS"] = self.options.with_tools
         tc.variables["FOONATHAN_MEMORY_CHECK_ALLOCATION_SIZE"] = self.options.with_sizecheck
+        # cmake/configuration.cmake derives the debug options from CMAKE_BUILD_TYPE, which multi-config generators leave empty
+        tc.cache_variables["CMAKE_BUILD_TYPE"] = str(self.settings.build_type)
         tc.generate()
 
     def _patch_sources(self):
