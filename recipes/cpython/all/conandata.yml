@@ -1,13 +1,22 @@
 sources:
+  "3.12.10":
+    url: "https://www.python.org/ftp/python/3.12.10/Python-3.12.10.tgz"
+    sha256: "15d9c623abfd2165fe816ea1fb385d6ed8cf3c664661ab357f1782e3036a6dac"
   "3.12.7":
     url: "https://www.python.org/ftp/python/3.12.7/Python-3.12.7.tgz"
     sha256: "73ac8fe780227bf371add8373c3079f42a0dc62deff8d612cd15a618082ab623"
   "3.12.2":
     url: "https://www.python.org/ftp/python/3.12.2/Python-3.12.2.tgz"
     sha256: "a7c4f6a9dc423d8c328003254ab0c9338b83037bd787d680826a5bf84308116e"
+  "3.11.12":
+    url: "https://www.python.org/ftp/python/3.11.12/Python-3.11.12.tgz"
+    sha256: "379c9929a989a9d65a1f5d854e011f4872b142259f4fc0a8c4062d2815ed7fba"
   "3.11.9":
     url: "https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz"
     sha256: "e7de3240a8bc2b1e1ba5c81bf943f06861ff494b69fda990ce2722a504c6153d"
+  "3.10.17":
+    url: "https://www.python.org/ftp/python/3.10.17/Python-3.10.17.tgz"
+    sha256: "8fcda0fbdc131859a4a4223abb925fd522a77e3fb3b52c46cea5f3bc2ae0cd9f"
   "3.10.14":
     url: "https://www.python.org/ftp/python/3.10.14/Python-3.10.14.tgz"
     sha256: "cefea32d3be89c02436711c95a45c7f8e880105514b78680c14fe76f5709a0f6"
@@ -18,6 +27,19 @@ sources:
     url: "https://www.python.org/ftp/python/3.8.19/Python-3.8.19.tgz"
     sha256: "c7fa55a36e5c7a19ec37d8f90f60a2197548908c9ac8b31e7c0dbffdd470eeac"
 patches:
+  "3.12.10":
+    - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
+      patch_description: "Fix ARM/ARM64 mismatch in project file"
+      patch_type: "bugfix"
+    - patch_file: "patches/3.12/3.12.1-0001-_ctypes-ffi.patch"
+      patch_description: "Support shared libffi"
+      patch_type: "portability"
+    - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
+      patch_description: "Allow package to be relocatable"
+      patch_type: "conan"
+    - patch_file: "patches/3.12/3.12.1-0002-remove-module-deps.patch"
+      patch_description: "Remove section of solution file forcing projects to be built that might not be used for this recipe"
+      patch_type: "conan"
   "3.12.7":
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
       patch_description: "Fix ARM/ARM64 mismatch in project file"
@@ -44,12 +66,38 @@ patches:
     - patch_file: "patches/3.12/3.12.1-0002-remove-module-deps.patch"
       patch_description: "Remove section of solution file forcing projects to be built that might not be used for this recipe"
       patch_type: "conan"
+  "3.11.12":
+    - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
+      patch_description: "Fix ARM/ARM64 mismatch in project file"
+      patch_type: "bugfix"
+    - patch_file: "patches/3.11/3.11.7-0001-_ctypes-ffi.patch"
+      patch_description: "Support shared libffi"
+      patch_type: "portability"
+    - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
+      patch_description: "Allow package to be relocatable"
+      patch_type: "conan"
+    - patch_file: "patches/3.x-0002-remove-module-deps.patch"
+      patch_description: "Remove section of solution file forcing projects to be built that might not be used for this recipe"
+      patch_type: "conan"
   "3.11.9":
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
       patch_description: "Fix ARM/ARM64 mismatch in project file"
       patch_type: "bugfix"
     - patch_file: "patches/3.11/3.11.7-0001-_ctypes-ffi.patch"
       patch_description: "Support shared libffi"
+      patch_type: "portability"
+    - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
+      patch_description: "Allow package to be relocatable"
+      patch_type: "conan"
+    - patch_file: "patches/3.x-0002-remove-module-deps.patch"
+      patch_description: "Remove section of solution file forcing projects to be built that might not be used for this recipe"
+      patch_type: "conan"
+  "3.10.17":
+    - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
+      patch_description: "Fix ARM/ARM64 mismatch in project file"
+      patch_type: "bugfix"
+    - patch_file: "patches/3.10/3.10.0-0003-_ctypes-ffi.patch"
+      patch_description: "Remove duplicate libffi symbols and support shared libffi"
       patch_type: "portability"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
       patch_description: "Allow package to be relocatable"
