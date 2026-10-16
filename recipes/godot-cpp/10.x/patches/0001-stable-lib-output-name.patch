@@ -1,0 +1,11 @@
+--- cmake/godotcpp.cmake	2026-09-21 17:16:50
++++ cmake/godotcpp.cmake	2026-09-21 17:16:50
+@@ -412,7 +412,7 @@
+             BUILD_RPATH_USE_ORIGIN ON
+ 
+             PREFIX      "lib"
+-            OUTPUT_NAME "${PROJECT_NAME}${GODOTCPP_SUFFIX}"
++            OUTPUT_NAME "${PROJECT_NAME}"
+ 
+             ARCHIVE_OUTPUT_DIRECTORY "$<1:${CMAKE_BINARY_DIR}/bin>"
+ 

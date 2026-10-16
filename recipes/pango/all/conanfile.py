@@ -70,7 +70,7 @@ class PangoConan(ConanFile):
 
     def requirements(self):
         if self.options.with_fontconfig:
-            self.requires("fontconfig/[>=2.15.0 <3]")
+            self.requires("fontconfig/[>=2.17.0 <3]")
         if self.options.with_freetype:
             self.requires("freetype/[>=2.13.2 <3]")
         if self.options.get_safe("with_xft"):
@@ -82,7 +82,7 @@ class PangoConan(ConanFile):
         self.requires("glib/[>=2.82 <3]", transitive_headers=True, transitive_libs=True)
         self.requires("fribidi/1.0.13")
         # "pango/pango-coverage.h" includes "hb.h"
-        self.requires("harfbuzz/[>=8.3.0]", transitive_headers=True)
+        self.requires("harfbuzz/[>=8.4.0]", transitive_headers=True)
 
     def validate(self):
         if (

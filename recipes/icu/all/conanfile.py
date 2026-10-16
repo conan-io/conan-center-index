@@ -167,7 +167,7 @@ class ICUConan(ConanFile):
                 tc.update_configure_args({"--host": host_triplet,
                                           "--build": build_triplet})
         else:
-            arch64 = ["x86_64", "sparcv9", "ppc64", "ppc64le", "armv8", "armv8.3", "mips64"]
+            arch64 = ["x86_64", "sparcv9", "ppc64", "ppc64le", "armv8", "armv8.3", "mips64", "riscv64"]
             bits = "64" if self.settings.arch in arch64 else "32"
             tc.configure_args.append(f"--with-library-bits={bits}")
         if self.settings.os != "Windows":

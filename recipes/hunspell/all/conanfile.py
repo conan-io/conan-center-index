@@ -2,10 +2,11 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches
+from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class HunspellConan(ConanFile):
@@ -28,7 +29,7 @@ class HunspellConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-        # TODO: Remove once PR is merged: https://github.com/hunspell/hunspell/pull/704/
+        # TODO: Remove once PR is merged: https://github.com/hunspell/hunspell/pull/1153/
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
@@ -50,8 +51,8 @@ class HunspellConan(ConanFile):
         os.remove(h)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        min_cppstd = 14 if Version(self.version) >= "1.7.4" else 11
+        check_min_cppstd(self, min_cppstd)
 
     def generate(self):
         tc = CMakeToolchain(self)

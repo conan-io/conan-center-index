@@ -870,7 +870,11 @@ class FFMpegConan(ConanFile):
                 avdevice.system_libs = ["ole32", "psapi", "strmiids", "uuid", "oleaut32", "shlwapi", "gdi32", "vfw32"]
             avutil.system_libs = ["user32", "bcrypt"]
             if self.options.avformat:
-                avformat.system_libs = ["secur32"]
+                avformat.system_libs = ["ws2_32"]
+                if not self.options.with_ssl:
+                    avformat.system_libs.append("secur32")
+                    if Version(self.version) >= "8.0":
+                        avformat.system_libs.extend(["crypt32", "ncrypt"])
         elif is_apple_os(self):
             if self.options.avdevice:
                 avdevice.frameworks = ["CoreFoundation", "Foundation", "CoreGraphics"]

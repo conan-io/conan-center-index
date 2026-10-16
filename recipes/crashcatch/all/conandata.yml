@@ -1,0 +1,4 @@
+sources:
+  "1.6.0":
+    url: "https://github.com/keithpotz/CrashCatch/archive/refs/tags/v1.6.0.tar.gz"
+    sha256: "601802cb2d99e3d302773520a50f97259c3bd5cff771263a658a12d01bf8d013"

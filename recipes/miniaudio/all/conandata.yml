@@ -1,4 +1,7 @@
 sources:
+  "0.11.25":
+    url: "https://github.com/mackron/miniaudio/archive/0.11.25.tar.gz"
+    sha256: "b900edcffe979816e2560a0580b9b1216d674b4f17fbadeca8f777a7f8ab0274"
   "0.11.22":
     url: "https://github.com/mackron/miniaudio/archive/0.11.22.tar.gz"
     sha256: "bcb07bfb27e6fa94d34da73ba2d5642d4940b208ec2a660dbf4e52e6b7cd492f"

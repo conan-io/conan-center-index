@@ -1,4 +1,7 @@
 sources:
+  "0.13.80":
+    url: "https://github.com/gdraheim/zziplib/archive/refs/tags/v0.13.80.tar.gz"
+    sha256: "21f40d111c0f7a398cfee3b0a30b20c5d92124b08ea4290055fbfe7bdd53a22c"
   "0.13.78":
     url: "https://github.com/gdraheim/zziplib/archive/refs/tags/v0.13.78.tar.gz"
     sha256: "feaeee7c34f18aa27bd3da643cc6a47d04d2c41753a59369d09102d79b9b0a31"

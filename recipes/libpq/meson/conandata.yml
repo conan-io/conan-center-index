@@ -1,8 +1,8 @@
 sources:
-  "17.7":
-    url: "https://ftp.postgresql.org/pub/source/v17.7/postgresql-17.7.tar.bz2"
-    sha256: "ef9e343302eccd33112f1b2f0247be493cb5768313adeb558b02de8797a2e9b5"
+  "17.11":
+    url: "https://ftp.postgresql.org/pub/source/v17.11/postgresql-17.11.tar.bz2"
+    sha256: "dd27f2b3c59e73ed14aa3324901242bf69a032a6347805f274e6260322d42979"
 patches:
-  "17.7":
+  "17.11":
     - patch_file: "patches/17.5-pgflex-preserve-environment-variables.patch"
-    - patch_file: "patches/17.7-backport-arm64-windows-support.patch"
+    - patch_file: "patches/17.11-backport-arm64-windows-support.patch"
