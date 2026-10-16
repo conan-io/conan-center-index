@@ -1,0 +1,5 @@
+--- cmake/helpers/CheckDependentLibraries.cmake
++++ cmake/helpers/CheckDependentLibraries.cmake
+@@ -528,1 +528,1 @@
+-if (SQLite3_FOUND)
++if (SQLite3_FOUND AND GDAL_USE_SQLITE3)
