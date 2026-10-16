@@ -182,6 +182,16 @@ class GccConan(ConanFile):
         self.output.info("Creating RANLIB env var with: " + ranlib)
         self.buildenv_info.define("RANLIB", ranlib)
 
+        # Add GCC runtime library paths (libstdc++, libgcc_s) to run and build environments.
+        # On non-x86_64 platforms (e.g. aarch64) GCC installs shared runtime libs into lib64/
+        # rather than the lib/ that Conan auto-detects, so we must register it explicitly.
+        for libdir_name in ("lib64", "lib"):
+            libdir = os.path.join(self.package_folder, libdir_name)
+            if os.path.exists(os.path.join(libdir, "libstdc++.so")):
+                self.runenv_info.prepend_path("LD_LIBRARY_PATH", libdir)
+                self.buildenv_info.prepend_path("LD_LIBRARY_PATH", libdir)
+                break
+
         # TODO: Remove after conan 2.0 is released
         self.env_info.CC = cc
         self.env_info.CXX = cxx
