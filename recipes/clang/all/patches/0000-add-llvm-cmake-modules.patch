@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1bb73599970c..04ad67b42e0a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -38,7 +38,7 @@ if(CLANG_BUILT_STANDALONE)
+   endif()
+ 
+   find_package(LLVM REQUIRED HINTS "${LLVM_CMAKE_DIR}")
+-  list(APPEND CMAKE_MODULE_PATH "${LLVM_DIR}")
++  list(APPEND CMAKE_MODULE_PATH "${LLVM_DIR};${LLVM_CMAKE_DIR}")
+ 
+   # Turn into CACHE PATHs for overwritting
+   set(LLVM_INCLUDE_DIRS ${LLVM_INCLUDE_DIRS} CACHE PATH "Path to llvm/include and any other header dirs needed")

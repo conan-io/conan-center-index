@@ -1,0 +1,14 @@
+sources:
+  "21.1.8":
+    "clang":
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/clang-21.1.8.src.tar.xz
+      sha256: 6090e3f23720d003cdd84483a47d0eec6d01adbb5e0c714ac0c8b58de546aa62
+    "cmake":
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/cmake-21.1.8.src.tar.xz
+      sha256: 85735f20fd8c81ecb0a09abb0c267018475420e93b65050cc5b7634eab744de9
+patches:
+  "21.1.8":
+    - patch_file: patches/0000-add-llvm-cmake-modules.patch
+      patch_description: Adds the LLVM CMake modules which are necessary for configuration
+      patch_type: conan
+      base_path: clang
