@@ -868,6 +868,10 @@ class QtConan(ConanFile):
             if m != "Qt6HostInfo":
                 rmdir(self, os.path.join(self.package_folder, "lib", "cmake", m))
 
+        # Copy `config.summary` for debugging purposes.
+        # Qt might fail to configure something that we expect and continue regardless.
+        copy(self, "config.summary", os.path.join(self.source_folder, "build_folder/"), self.package_folder)
+
         extension = ""
         if self.settings.os == "Windows":
             extension = ".exe"
