@@ -1,0 +1,127 @@
+diff --git a/cmake/prebuild.cmake b/cmake/prebuild.cmake
+index 4c100a770..17b3b3355 100644
+--- a/cmake/prebuild.cmake
++++ b/cmake/prebuild.cmake
+@@ -94,8 +94,8 @@ else ()
+  set(BU "_")
+ endif ()
+ 
+-# Cannot run getarch on target if we are cross-compiling
+-if (DEFINED CORE AND CMAKE_CROSSCOMPILING AND NOT (${HOST_OS} STREQUAL "WINDOWSSTORE"))
++# Never run getarch, use value of CORE instead
++if (DEFINED CORE)
+   # Write to config as getarch would
+   if (DEFINED TARGET_CORE)
+   set(TCORE ${TARGET_CORE})
+@@ -1442,109 +1442,6 @@ endif ()
+   file(MAKE_DIRECTORY ${TARGET_CONF_DIR})
+   file(RENAME ${TARGET_CONF_TEMP} "${TARGET_CONF_DIR}/${TARGET_CONF}")
+ 
+-else(NOT CMAKE_CROSSCOMPILING)
+-  # compile getarch
+-  set(GETARCH_SRC
+-    ${PROJECT_SOURCE_DIR}/getarch.c
+-    ${CPUIDEMU}
+-  )
+-
+-  if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+-    #Use generic for MSVC now
+-    message(STATUS "MSVC")
+-    set(GETARCH_FLAGS ${GETARCH_FLAGS} -DFORCE_GENERIC)
+-  else()
+-    if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+-      list(APPEND GETARCH_SRC ${PROJECT_SOURCE_DIR}/cpuid.S)
+-    endif()
+-    if (DEFINED TARGET_CORE)
+-    set(GETARCH_FLAGS ${GETARCH_FLAGS} -DFORCE_${TARGET_CORE})
+-  endif ()
+-  endif ()
+-
+-  if ("${CMAKE_SYSTEM_NAME}" STREQUAL "WindowsStore")
+-    # disable WindowsStore strict CRT checks
+-    set(GETARCH_FLAGS ${GETARCH_FLAGS} -D_CRT_SECURE_NO_WARNINGS)
+-  endif ()
+-
+-  set(GETARCH_DIR "${PROJECT_BINARY_DIR}/getarch_build")
+-  set(GETARCH_BIN "getarch${CMAKE_EXECUTABLE_SUFFIX}")
+-  file(MAKE_DIRECTORY "${GETARCH_DIR}")
+-  configure_file("${TARGET_CONF_TEMP}" "${GETARCH_DIR}/${TARGET_CONF}" COPYONLY)
+-  if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "WindowsStore")
+-    if (CMAKE_ASM_COMPILER_ID STREQUAL "")
+-      try_compile(GETARCH_RESULT "${GETARCH_DIR}"
+-        SOURCES ${GETARCH_SRC}
+-        CMAKE_FLAGS "-DCMAKE_ASM_COMPILER=${CMAKE_C_COMPILER}"
+-        COMPILE_DEFINITIONS ${EXFLAGS} ${GETARCH_FLAGS} -I"${GETARCH_DIR}" -I"${PROJECT_SOURCE_DIR}" -I"${PROJECT_BINARY_DIR}"
+-        OUTPUT_VARIABLE GETARCH_LOG
+-        COPY_FILE "${PROJECT_BINARY_DIR}/${GETARCH_BIN}"
+-      )
+-    else()
+-      try_compile(GETARCH_RESULT "${GETARCH_DIR}"
+-        SOURCES ${GETARCH_SRC}
+-        COMPILE_DEFINITIONS ${EXFLAGS} ${GETARCH_FLAGS} -I"${GETARCH_DIR}" -I"${PROJECT_SOURCE_DIR}" -I"${PROJECT_BINARY_DIR}"
+-        OUTPUT_VARIABLE GETARCH_LOG
+-        COPY_FILE "${PROJECT_BINARY_DIR}/${GETARCH_BIN}"
+-      )
+-    endif()
+-    if (NOT ${GETARCH_RESULT})
+-      MESSAGE(FATAL_ERROR "Compiling getarch failed ${GETARCH_LOG}")
+-    endif ()
+-  endif ()
+-  unset (HAVE_AVX2)
+-  unset (HAVE_AVX)
+-  unset (HAVE_FMA3)
+-  unset (HAVE_MMX)
+-  unset (HAVE_SSE)
+-  unset (HAVE_SSE2)
+-  unset (HAVE_SSE3)
+-  unset (HAVE_SSSE3)
+-  unset (HAVE_SSE4A)
+-  unset (HAVE_SSE4_1)
+-  unset (HAVE_SSE4_2)
+-  unset (HAVE_NEON)
+-  unset (HAVE_VFP)
+-  unset (HAVE_VFPV3)
+-  unset (HAVE_VFPV4)
+-  message(STATUS "Running getarch")
+-
+-  # use the cmake binary w/ the -E param to run a shell command in a cross-platform way
+-execute_process(COMMAND "${PROJECT_BINARY_DIR}/${GETARCH_BIN}" 0 OUTPUT_VARIABLE GETARCH_MAKE_OUT)
+-execute_process(COMMAND "${PROJECT_BINARY_DIR}/${GETARCH_BIN}" 1 OUTPUT_VARIABLE GETARCH_CONF_OUT)
+-
+-  message(STATUS "GETARCH results:\n${GETARCH_MAKE_OUT}")
+-
+-  # append config data from getarch to the TARGET file and read in CMake vars
+-  file(APPEND "${TARGET_CONF_TEMP}" ${GETARCH_CONF_OUT})
+-  ParseGetArchVars(${GETARCH_MAKE_OUT})
+-
+-  set(GETARCH2_DIR "${PROJECT_BINARY_DIR}/getarch2_build")
+-  set(GETARCH2_BIN "getarch_2nd${CMAKE_EXECUTABLE_SUFFIX}")
+-  file(MAKE_DIRECTORY "${GETARCH2_DIR}")
+-  configure_file("${TARGET_CONF_TEMP}" "${GETARCH2_DIR}/${TARGET_CONF}" COPYONLY)
+-  if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "WindowsStore")
+-    try_compile(GETARCH2_RESULT "${GETARCH2_DIR}"
+-      SOURCES "${PROJECT_SOURCE_DIR}/getarch_2nd.c"
+-    COMPILE_DEFINITIONS ${EXFLAGS} ${GETARCH_FLAGS} ${GETARCH2_FLAGS} -I"${GETARCH2_DIR}" -I"${PROJECT_SOURCE_DIR}" -I"${PROJECT_BINARY_DIR}"
+-      OUTPUT_VARIABLE GETARCH2_LOG
+-      COPY_FILE "${PROJECT_BINARY_DIR}/${GETARCH2_BIN}"
+-    )
+-
+-    if (NOT ${GETARCH2_RESULT})
+-      MESSAGE(FATAL_ERROR "Compiling getarch_2nd failed ${GETARCH2_LOG}")
+-    endif ()
+-  endif ()
+-
+-  # use the cmake binary w/ the -E param to run a shell command in a cross-platform way
+-execute_process(COMMAND "${PROJECT_BINARY_DIR}/${GETARCH2_BIN}" 0 OUTPUT_VARIABLE GETARCH2_MAKE_OUT)
+-execute_process(COMMAND "${PROJECT_BINARY_DIR}/${GETARCH2_BIN}" 1 OUTPUT_VARIABLE GETARCH2_CONF_OUT)
+-
+-  # append config data from getarch_2nd to the TARGET file and read in CMake vars
+-  file(APPEND "${TARGET_CONF_TEMP}" ${GETARCH2_CONF_OUT})
+-
+-  configure_file("${TARGET_CONF_TEMP}" "${TARGET_CONF_DIR}/${TARGET_CONF}" COPYONLY)
+-
+-  ParseGetArchVars(${GETARCH2_MAKE_OUT})
+-
++else()
++  message(FATAL_ERROR "OpenBLAS getarch is disabled for reproducible builds")
+ endif()
