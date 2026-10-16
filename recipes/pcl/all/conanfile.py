@@ -145,7 +145,7 @@ class PclConan(ConanFile):
         "with_cuda": False,
         "with_flann": True,
         "with_libusb": True,
-        "with_opencv": True,
+        "with_opencv": False,
         "with_opengl": True,
         "with_openmp": False,
         "with_pcap": True,
@@ -193,16 +193,23 @@ class PclConan(ConanFile):
     def _external_optional_deps(self):
         return {
             "2d": ["vtk"],
-            "io": ["davidsdk", "dssdk", "ensenso", "fzapi", "libusb", "openni", "openni2", "pcap", "png", "rssdk", "rssdk2", "vtk"],
+            "io": ["davidsdk", "dssdk", "ensenso", "fzapi", "libusb", "openni", "openni2", "pcap", "png", "rssdk", "rssdk2", "vtk", "opencv"],
             "kdtree": ["flann"],
             "people": ["openni"],
-            "recognition": ["metslib"],
+            "recognition": ["metslib", "opencv"],
             "search": ["flann"],
             "simulation": ["opengl"],
-            "surface": ["qhull", "vtk"],
+            "surface": ["qhull", "vtk", "openmp"],
+            "stereo": ["opencv"],
             "visualization": ["davidsdk", "dssdk", "ensenso", "opengl", "openni", "openni2", "qvtk", "rssdk"],
-            "apps": ["cuda", "libusb", "opengl", "openni", "png", "qhull", "qt", "qvtk", "vtk"],
+            "apps": ["cuda", "libusb", "opengl", "openni", "png", "qhull", "qt", "qvtk", "vtk", "openmp"],
             "tools": ["cuda", "davidsdk", "dssdk", "ensenso", "opencv", "opengl", "openni", "openni2", "qhull", "rssdk", "vtk"],
+            "filters": ["openmp"],
+            "features": ["openmp"],
+            "registration": ["openmp"],
+            "tracking": ["openmp", "opencv"],
+            "keypoints": ["openmp"],
+            "segmentation": ["openmp"],
         }
 
     def _ext_dep_to_conan_target(self, dep):
@@ -221,6 +228,7 @@ class PclConan(ConanFile):
             "metslib": [],
             "opencv": ["opencv::opencv"],
             "opengl": ["opengl::opengl", "freeglut::freeglut", "glew::glew", "glu::glu" if is_apple_os(self) or self.settings.os == "Windows" else "mesa-glu::mesa-glu"],
+            "openmp": [],
             "openni": [],
             "openni2": [],
             "pcap": ["libpcap::libpcap"],
@@ -373,7 +381,6 @@ class PclConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.83.0", transitive_headers=True)
-        self.requires("eigen/[>=3.4.0 <4]", transitive_headers=True)
         if self._is_enabled("flann"):
             self.requires("flann/1.9.2", transitive_headers=True)
         if self._is_enabled("png"):
@@ -397,6 +404,9 @@ class PclConan(ConanFile):
                 self.requires("mesa-glu/9.0.3", transitive_headers=True)
         if self._is_enabled("opencv"):
             self.requires("opencv/[>=4.8.1 <5]", transitive_headers=True)
+            self.requires("eigen/3.4.0", transitive_headers=True)
+        else:
+            self.requires("eigen/[>=3.4.0 <4]", transitive_headers=True)
         if self._is_enabled("zlib"):
             self.requires("zlib/[>=1.2.11 <2]")
         # TODO:
