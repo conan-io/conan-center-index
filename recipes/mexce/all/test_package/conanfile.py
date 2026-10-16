@@ -29,3 +29,6 @@ class MexceTestPackageConan(ConanFile):
         if can_run(self):
             cmd = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(cmd, env="conanrun")
+            if self.dependencies["mexce"].options.get_safe("with_protected"):
+                cmd = os.path.join(self.cpp.build.bindirs[0], "test_protected")
+                self.run(cmd, env="conanrun")

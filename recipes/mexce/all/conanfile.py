@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 
@@ -11,21 +12,38 @@ class MexceConan(ConanFile):
     license = "BSD-2-Clause"
     homepage = "https://github.com/imakris/mexce"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Single-header, dependency-free JIT compiler for scalar mathematical expressions."
+    description = "Header-only JIT compiler for scalar mathematical expressions."
     topics = ("jit", "math", "expression-parser", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    options = {"with_protected": [True, False]}
+    default_options = {"with_protected": False}
+
+    def config_options(self):
+        if Version(self.version) < "1.2.0":
+            self.options.rm_safe("with_protected")
+
+    def requirements(self):
+        if self.options.get_safe("with_protected"):
+            self.requires("libsodium/1.0.22")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def validate(self):
         check_min_cppstd(self, 11)
-        if str(self.settings.arch) not in ("x86", "x86_64"):
-            raise ConanInvalidConfiguration("mexce only supports x86 and x86_64 architectures")
+        supported_archs = {"x86", "x86_64"}
+        if self.settings.os == "Macos" and Version(self.version) >= "1.2.0":
+            supported_archs.add("armv8")
+        if str(self.settings.arch) not in supported_archs:
+            raise ConanInvalidConfiguration(
+                "mexce supports x86 and x86_64; macOS armv8 requires mexce >= 1.2.0")
+        if self.options.get_safe("with_protected") and self.settings.arch == "x86":
+            raise ConanInvalidConfiguration(
+                "mexce protected expressions require a 64-bit architecture")
 
     def package_id(self):
-        self.info.clear()
+        self.info.settings.clear()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -35,9 +53,26 @@ class MexceConan(ConanFile):
              os.path.join(self.package_folder, "include"))
         copy(self, "LICENSE*", self.source_folder,
              os.path.join(self.package_folder, "licenses"))
+        if self.options.get_safe("with_protected"):
+            copy(self, "mexce_protected*.h", self.source_folder,
+                 os.path.join(self.package_folder, "include"))
+            copy(self, "THIRD_PARTY_NOTICES.md", self.source_folder,
+                 os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.set_property("cmake_file_name", "mexce")
         self.cpp_info.set_property("cmake_target_name", "mexce::mexce")
+        if self.options.get_safe("with_protected"):
+            self.cpp_info.set_property("cmake_target_name", "mexce::all")
+            self.cpp_info.set_property("pkg_config_name", "mexce-all")
+            self.cpp_info.components["mexce"].bindirs = []
+            self.cpp_info.components["mexce"].libdirs = []
+            self.cpp_info.components["mexce"].set_property("cmake_target_name", "mexce::mexce")
+            self.cpp_info.components["mexce"].set_property("pkg_config_name", "mexce")
+            self.cpp_info.components["protected"].bindirs = []
+            self.cpp_info.components["protected"].libdirs = []
+            self.cpp_info.components["protected"].set_property("cmake_target_name", "mexce::protected")
+            self.cpp_info.components["protected"].set_property("pkg_config_name", "mexce-protected")
+            self.cpp_info.components["protected"].requires = ["mexce", "libsodium::libsodium"]
