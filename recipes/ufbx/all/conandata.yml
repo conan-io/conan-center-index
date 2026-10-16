@@ -1,0 +1,4 @@
+sources:
+  0.18.2:
+    url: "https://github.com/ufbx/ufbx/archive/refs/tags/v0.18.2.tar.gz"
+    sha256: "9161239e9aade9fc3e432420450687fa538893566002ffc016aa0cba4d1c36a6"
