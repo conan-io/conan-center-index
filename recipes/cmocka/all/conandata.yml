@@ -1,4 +1,7 @@
 sources:
+  "2.0.2":
+    url: "https://cmocka.org/files/2.0/cmocka-2.0.2.tar.xz"
+    sha256: "39f92f366bdf3f1a02af4da75b4a5c52df6c9f7e736c7d65de13283f9f0ef416"
   "1.1.8":
     url: "https://cmocka.org/files/1.1/cmocka-1.1.8.tar.xz"
     sha256: "58435b558766d7f4c729ba163bdf3aec38bed3bc766dab684e3526ed0aa7c780"
