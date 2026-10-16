@@ -63,7 +63,16 @@ class Pagmo2Conan(ConanFile):
         if self.options.with_eigen:
             self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.with_nlopt:
-            self.requires("nlopt/2.7.1", transitive_headers=True, transitive_libs=True)
+            nlopt_version = (
+                "2.11.0"
+                if self.version == "2.20.0"
+                else "2.7.1"
+            )
+            self.requires(
+                f"nlopt/{nlopt_version}",
+                transitive_headers=True,
+                transitive_libs=True,
+            )
 
     @property
     def _required_boost_components(self):
