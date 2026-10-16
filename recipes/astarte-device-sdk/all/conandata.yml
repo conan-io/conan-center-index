@@ -1,0 +1,5 @@
+sources:
+  "0.8.1":
+    url:
+    - "https://github.com/astarte-platform/astarte-device-sdk-cpp/archive/v0.8.1.tar.gz"
+    sha256: "21f4cb1686e9b0e78ca2805f3615e4033f04130fd80326688f3bca225e1eabb0"
