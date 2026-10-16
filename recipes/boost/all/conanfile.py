@@ -1958,6 +1958,8 @@ class BoostConan(ConanFile):
                 for name in names:
                     if name in ("boost_stacktrace_windbg", "boost_stacktrace_windbg_cached") and self.settings.os != "Windows":
                         continue
+                    if name == "boost_stacktrace_dump" and Version(self.version) < "1.92.0":
+                        continue
                     if name in ("boost_math_c99l", "boost_math_tr1l") and (str(self.settings.arch).startswith("ppc") or (Version(self.version) >= "1.87.0" and self.settings.os == "Emscripten")):
                         continue
                     if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic") and self.settings.os == "Windows":
@@ -2010,6 +2012,16 @@ class BoostConan(ConanFile):
                 self.cpp_info.components[module].libs = module_libraries
 
                 self.cpp_info.components[module].requires = self._dependencies["dependencies"][module] + ["_libboost"]
+                if Version(self.version) >= "1.92.0" and module in (
+                    "stacktrace_addr2line",
+                    "stacktrace_backtrace",
+                    "stacktrace_basic",
+                    "stacktrace_from_exception",
+                    "stacktrace_noop",
+                    "stacktrace_windbg",
+                    "stacktrace_windbg_cached",
+                ):
+                    self.cpp_info.components[module].requires.append("stacktrace_dump")
                 self.cpp_info.components[module].set_property("cmake_target_name", "Boost::" + module)
                 self.cpp_info.components[module].names["cmake_find_package"] = module
                 self.cpp_info.components[module].names["cmake_find_package_multi"] = module
