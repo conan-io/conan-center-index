@@ -1,0 +1,14 @@
+diff --git a/Graphics/ShaderTools/src/SPIRVShaderResources.cpp b/Graphics/ShaderTools/src/SPIRVShaderResources.cpp
+--- a/Graphics/ShaderTools/src/SPIRVShaderResources.cpp
++++ b/Graphics/ShaderTools/src/SPIRVShaderResources.cpp
+@@ -481,7 +481,9 @@ SPIRVShaderResources::SPIRVShaderResources(IMemoryAllocator&     Allocator,
+     // https://github.com/KhronosGroup/SPIRV-Cross/wiki/Reflection-API-user-guide
+     diligent_spirv_cross::Parser parser{std::move(spirv_binary)};
+     parser.parse();
+-    const diligent_spirv_cross::ParsedIR::Source ParsedIRSource = parser.get_parsed_ir().source;
++    if (parser.get_parsed_ir().sources.empty())
++        LOG_ERROR_AND_THROW("No sources found in SPIRV binary for shader '", CI.Name, "'");
++    const diligent_spirv_cross::ParsedIR::Source& ParsedIRSource = parser.get_parsed_ir().sources.front();
+ 
+     m_IsHLSLSource = ParsedIRSource.hlsl;
+     diligent_spirv_cross::Compiler Compiler{std::move(parser.get_parsed_ir())};
