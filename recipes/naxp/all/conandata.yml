@@ -1,4 +1,4 @@
 sources:
-  "0.13.0":
-    url: "https://github.com/naxp-org/naxp/archive/refs/tags/v0.13.0.tar.gz"
-    sha256: "0a04063b31ef89b88f2f2d4fbaff1d80142231bd477d20a34bb96efba426ae83"
+  "0.14.0":
+    url: "https://github.com/naxp-org/naxp/archive/refs/tags/v0.14.0.tar.gz"
+    sha256: "b6947b76eed163147b5b74096ee0e0d6324b2e156fa2fb05c875776343446113"
