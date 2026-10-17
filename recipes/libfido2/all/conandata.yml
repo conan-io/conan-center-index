@@ -1,0 +1,5 @@
+sources:
+  "1.17.0":
+    url:
+    - "https://developers.yubico.com/libfido2/Releases/libfido2-1.17.0.tar.gz"
+    sha256: "c1012c8871d71b65872fd5ff1a9d6b0838a55683a03e85ba97479ce57129c736"
