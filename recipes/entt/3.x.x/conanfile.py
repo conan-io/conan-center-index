@@ -32,6 +32,9 @@ class EnttConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.28]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
