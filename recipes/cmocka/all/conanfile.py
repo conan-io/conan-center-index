@@ -5,7 +5,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class CmockaConan(ConanFile):
@@ -95,7 +95,3 @@ class CmockaConan(ConanFile):
         self.cpp_info.libs = ["cmocka"]
         if Version(self.version) >= "2.0.0" and not self.options.shared:
             self.cpp_info.defines = ["CMOCKA_STATIC"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
