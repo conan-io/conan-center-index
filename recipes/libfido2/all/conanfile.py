@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.microsoft import is_msvc
 import os
@@ -22,24 +22,16 @@ class Libfido2Conan(ConanFile):
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     languages = "C"
+    # no fPIC option: upstream forces CMAKE_POSITION_INDEPENDENT_CODE to ON (CMakeLists.txt)
     options = {
         "shared": [True, False],
-        "nfc_linux": [True, False],
-        "use_winhello": [True, False],
     }
-
     default_options = {
         "shared": False,
-        "nfc_linux": True,
-        "use_winhello": True,
     }
 
-    def config_options(self):
-        if self.settings.os != "Linux":
-            self.options.rm_safe("nfc_linux")
-
-        if self.settings.os != "Windows":
-            self.options.rm_safe("use_winhello")
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -63,6 +55,7 @@ class Libfido2Conan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -73,12 +66,6 @@ class Libfido2Conan(ConanFile):
         tc.cache_variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
         tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.cache_variables["BUILD_TOOLS"] = False
-
-        if self.settings.os == "Linux":
-            tc.cache_variables["NFC_LINUX"] = bool(self.options.nfc_linux)
-
-        if self.settings.os == "Windows":
-            tc.cache_variables["USE_WINHELLO"] = bool(self.options.use_winhello)
 
         if is_msvc(self):
             cbor = self.dependencies["libcbor"].cpp_info
@@ -117,7 +104,6 @@ class Libfido2Conan(ConanFile):
             fix_apple_shared_install_name(self)
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.libs = ["fido2"]
