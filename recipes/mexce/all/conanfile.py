@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 import os
 
 
@@ -12,7 +11,7 @@ class MexceConan(ConanFile):
     license = "BSD-2-Clause"
     homepage = "https://github.com/imakris/mexce"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Header-only JIT compiler for scalar mathematical expressions."
+    description = "Single-header, dependency-free JIT compiler for scalar mathematical expressions."
     topics = ("jit", "math", "expression-parser", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
