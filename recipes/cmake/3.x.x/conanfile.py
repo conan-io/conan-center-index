@@ -93,7 +93,7 @@ class CMakeConan(ConanFile):
             tc.generate()
             bootstrap_cmake_options = ["--"]
             bootstrap_cmake_options.append(f'-DCMAKE_CXX_STANDARD={"11" if not self.settings.compiler.cppstd else self.settings.compiler.cppstd}')
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 if self.options.with_openssl:
                     openssl = self.dependencies["openssl"]
                     bootstrap_cmake_options.append("-DCMAKE_USE_OPENSSL=ON")
@@ -109,7 +109,7 @@ class CMakeConan(ConanFile):
             if not self.settings.compiler.cppstd:
                 tc.variables["CMAKE_CXX_STANDARD"] = 11
             tc.variables["CMAKE_BOOTSTRAP"] = False
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 tc.variables["CMAKE_USE_OPENSSL"] = self.options.with_openssl
                 if self.options.with_openssl:
                     openssl = self.dependencies["openssl"]

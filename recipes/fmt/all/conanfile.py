@@ -150,7 +150,7 @@ class FmtConan(ConanFile):
             postfix = "d" if self.settings.build_type == "Debug" else ""
             libname = "fmt" + postfix
             self.cpp_info.components["_fmt"].libs = [libname]
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["_fmt"].system_libs.extend(["m"])
             if self.options.shared:
                 self.cpp_info.components["_fmt"].defines.append("FMT_SHARED")
