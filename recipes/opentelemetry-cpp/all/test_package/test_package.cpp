@@ -2,6 +2,7 @@
 #include <opentelemetry/sdk/trace/simple_processor.h>
 #include <opentelemetry/sdk/trace/tracer_provider.h>
 #include <opentelemetry/trace/provider.h>
+#include <opentelemetry/exporters/otlp/otlp_recordable.h>
 
 int main(int argc, char** argv) {
   auto exporter = std::unique_ptr<opentelemetry::sdk::trace::SpanExporter>(
