@@ -45,7 +45,6 @@ class CmockaConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["WITH_STATIC_LIB"] = not self.options.shared
         tc.variables["WITH_EXAMPLES"] = False
         tc.generate()
 
