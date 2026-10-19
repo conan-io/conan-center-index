@@ -52,8 +52,9 @@ class MexceConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib"))
         copy(self, "LICENSE*", self.source_folder,
              os.path.join(self.package_folder, "licenses"))
-        copy(self, "THIRD_PARTY_NOTICES.md", self.source_folder,
-             os.path.join(self.package_folder, "licenses"))
+        if self.options.with_protected:
+            copy(self, "THIRD_PARTY_NOTICES.md", self.source_folder,
+                 os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "mexce")
