@@ -27,7 +27,6 @@ class LlamaCppConan(ConanFile):
         "with_examples": [True, False],
         "with_cuda": [True, False],
         "with_vulkan": [True, False],
-        "with_openssl": [True, False],
     }
     default_options = {
         "shared": False,
@@ -35,7 +34,6 @@ class LlamaCppConan(ConanFile):
         "with_examples": False,
         "with_cuda": False,
         "with_vulkan": False,
-        "with_openssl": True,
     }
 
     implements = ["auto_shared_fpic"]
@@ -70,8 +68,6 @@ class LlamaCppConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
-        if self.options.with_openssl and not self.dependencies["cpp-httplib"].options.with_openssl:
-            raise ConanInvalidConfiguration(f"{self.ref} with_openssl=True requires -o 'cpp-httplib/*:with_openssl=True'")
 
     def validate_build(self):
         if self.settings.compiler == "msvc" and "arm" in self.settings.arch:
@@ -81,8 +77,7 @@ class LlamaCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        httplib_options = {"with_openssl": True} if self.options.with_openssl else None
-        self.requires("cpp-httplib/[~0.59]", options=httplib_options)
+        self.requires("cpp-httplib/[~0.59]", options={"with_openssl": True})
 
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/[>=1.3 <1.5]")
