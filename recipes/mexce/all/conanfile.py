@@ -27,7 +27,8 @@ class MexceConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 11)
-        if str(self.settings.arch) not in ["x86", "x86_64", "armv8"]:
+        supported_archs = ["x86_64", "armv8"] if self.settings.os == "Macos" else ["x86", "x86_64"]
+        if str(self.settings.arch) not in supported_archs:
             raise ConanInvalidConfiguration("Not supported architecture. See https://github.com/imakris/mexce#requirements")
         if self.options.with_protected and self.settings.arch == "x86":
             raise ConanInvalidConfiguration("with_protected requires x86_64 or armv8. See https://github.com/imakris/mexce/blob/master/docs/protected_expressions.md")
@@ -38,6 +39,7 @@ class MexceConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["MEXCE_ENABLE_PROTECTED_EXPRESSIONS"] = self.options.with_protected
+        tc.cache_variables["BUILD_TESTING"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -50,6 +52,7 @@ class MexceConan(ConanFile):
         cmake.configure()
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         copy(self, "LICENSE*", self.source_folder,
              os.path.join(self.package_folder, "licenses"))
         if self.options.with_protected:
@@ -57,7 +60,6 @@ class MexceConan(ConanFile):
                  os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "mexce")
         self.cpp_info.set_property("pkg_config_name", "none")
         self.cpp_info.set_property("cmake_target_name", "none")
         self.cpp_info.bindirs = []
