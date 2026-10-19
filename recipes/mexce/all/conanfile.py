@@ -32,15 +32,10 @@ class MexceConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 11)
-        supported_archs = {"x86", "x86_64"}
-        if self.settings.os == "Macos" and Version(self.version) >= "1.2.0":
-            supported_archs.add("armv8")
-        if str(self.settings.arch) not in supported_archs:
-            raise ConanInvalidConfiguration(
-                "mexce supports x86 and x86_64; macOS armv8 requires mexce >= 1.2.0")
+        if str(self.settings.arch) not in ["x86", "x86_64", "armv8"]:
+            raise ConanInvalidConfiguration("Not supported architecture. See https://github.com/imakris/mexce#requirements")
         if self.options.get_safe("with_protected") and self.settings.arch == "x86":
-            raise ConanInvalidConfiguration(
-                "mexce protected expressions require a 64-bit architecture")
+            raise ConanInvalidConfiguration("with_protected requires x86_64 or armv8. See https://github.com/imakris/mexce/blob/master/docs/protected_expressions.md")
 
     def package_id(self):
         self.info.settings.clear()
