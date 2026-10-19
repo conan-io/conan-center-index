@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.files import copy, get, rm, rmdir
@@ -7,18 +8,20 @@ from conan.tools.microsoft import is_msvc
 import os
 
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=2.4"
 
 
 class Libfido2Conan(ConanFile):
     name = "libfido2"
     description = "Library for communication with FIDO2 devices over USB or NFC"
-    license = "BSD-2-Clause"
+    # BSD-2-Clause for libfido2 itself, ISC for the bundled openbsd-compat sources
+    license = ("BSD-2-Clause", "ISC")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://developers.yubico.com/libfido2/"
     topics = ("fido2", "webauthn", "yubikey")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+    languages = "C"
     options = {
         "shared": [True, False],
         "nfc_linux": [True, False],
@@ -38,10 +41,6 @@ class Libfido2Conan(ConanFile):
         if self.settings.os != "Windows":
             self.options.rm_safe("use_winhello")
 
-    def configure(self):
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -52,6 +51,11 @@ class Libfido2Conan(ConanFile):
 
         if self.settings.os == "Linux":
             self.requires("libudev/system")
+
+    def validate(self):
+        # upstream only provides HID backends for these platforms
+        if self.settings.os not in ["Linux", "Windows", "Macos", "FreeBSD"]:
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}")
 
     def build_requirements(self):
         if not is_msvc(self) and not self.conf.get("tools.gnu:pkg_config", check_type=str):
@@ -88,9 +92,10 @@ class Libfido2Conan(ConanFile):
             ]
 
             for prefix, dep in deps:
-                tc.cache_variables[f"{prefix}_INCLUDE_DIRS"] = dep.includedirs
-                tc.cache_variables[f"{prefix}_LIBRARY_DIRS"] = dep.libdirs
-                tc.cache_variables[f"{prefix}_LIBRARIES"] = dep.libs + dep.system_libs
+                # cache_variables are rendered with str(), so lists must be joined into a CMake list
+                tc.cache_variables[f"{prefix}_INCLUDE_DIRS"] = ";".join(dep.includedirs)
+                tc.cache_variables[f"{prefix}_LIBRARY_DIRS"] = ";".join(dep.libdirs)
+                tc.cache_variables[f"{prefix}_LIBRARIES"] = ";".join(dep.libs + dep.system_libs)
 
         tc.generate()
 
