@@ -10,14 +10,15 @@ required_conan_version = ">=2.0"
 class DepzSensorSdkCConan(ConanFile):
     name = "depz-sensor-sdk-c"
     description = (
-        "Contract-first C11 decode/codec SDK for the DEPZ USB sensor line "
-        "(SR04, VL53L8CX/CH, BNO086): CRCs, packet framing, USB identity, "
-        "firmware container parsing, and the per-sensor decode layer."
+        "C11 SDK for the DEPZ USB sensor line (HC-SR04 ultrasonic, VL53Lx / "
+        "VL53L4 / VL53L5 / VL53L7 / VL53L8 ToF, BNO055 / BNO08x IMU): packet "
+        "framing and codecs, per-sensor decoding, serial-port I/O, device "
+        "discovery and recording / replay."
     )
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/depz-ai/depz-sensor-sdk"
-    topics = ("sensors", "usb", "codec", "vl53l8", "bno086", "sr04", "embedded")
+    topics = ("sensors", "usb", "serial", "tof", "imu", "vl53l8", "bno086", "sr04")
     package_type = "static-library"
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -67,8 +68,13 @@ class DepzSensorSdkCConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["depz_sensor_sdk"]
+        self.cpp_info.libs = ["depz_sensor_sdk_c"]
         self.cpp_info.set_property("cmake_file_name", "depz-sensor-sdk-c")
         self.cpp_info.set_property("cmake_target_name", "depz::sensor_sdk_c")
+        # The serial-port layer: threads, plus the OS's port enumeration API.
         if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.system_libs = ["m"]
+            self.cpp_info.system_libs = ["m", "pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["setupapi", "cfgmgr32"]
+        elif self.settings.os == "Macos":
+            self.cpp_info.frameworks = ["IOKit", "CoreFoundation"]
