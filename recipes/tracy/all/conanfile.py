@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.gnu import PkgConfigDeps
@@ -32,20 +33,22 @@ class TracyConan(ConanFile):
         "no_context_switch": ([True, False], False),
         "no_exit": ([True, False], False),
         "no_sampling": ([True, False], False),
+        "no_wait_stacks": ([True, False], False),
         "no_verify": ([True, False], False),
         "no_vsync_capture": ([True, False], False),
         "no_frame_image": ([True, False], False),
         "no_system_tracing": ([True, False], False),
         "patchable_nopsleds": ([True, False], False),
-        "delayed_init": ([True, False], False),
         "manual_lifetime": ([True, False], False),
         "fibers": ([True, False], False),
         "no_crash_handler": ([True, False], False),
         "timer_fallback": ([True, False], False),
+        "disable_hw_timer": ([True, False], False),
         "libunwind_backtrace": ([True, False], False),
         "symbol_offline_resolve": ([True, False], False),
         "libbacktrace_elf_dynload_support": ([True, False], False),
         "ignore_memory_faults": ([True, False], False),
+        "opengl_auto_calibration": ([True, False], False),
         "verbose": ([True, False], False),
     }
     options = {
@@ -69,6 +72,8 @@ class TracyConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 11)
+        if self.options.disable_hw_timer and not self.options.timer_fallback:
+            raise ConanInvalidConfiguration("disable_hw_timer requires timer_fallback to be enabled")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -117,7 +122,8 @@ class TracyConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.components["tracyclient"].system_libs.extend([
                 "dbghelp",
-                "ws2_32"
+                "ws2_32",
+                "secur32"
             ])
         if self.options.libunwind_backtrace:
             self.cpp_info.components["tracyclient"].requires.append("libunwind::libunwind")
