@@ -23,6 +23,8 @@ class IslConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        # Integer backend, passed to configure as --with-int. `imath` and `imath-32` use isl's
+        # bundled imath sources. `gmp` needs an external dependency.
         "with_int": ["gmp", "imath", "imath-32"],
     }
     default_options = {
