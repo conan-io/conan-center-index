@@ -23,7 +23,6 @@ class TracyConan(ConanFile):
     _tracy_options = {
         "enable": ([True, False], True),
         "on_demand": ([True, False], False),
-        "callstack": ([True, False], False),
         "no_callstack": ([True, False], False),
         "no_callstack_inlines": ([True, False], False),
         "only_localhost": ([True, False], False),
@@ -43,7 +42,7 @@ class TracyConan(ConanFile):
         "fibers": ([True, False], False),
         "no_crash_handler": ([True, False], False),
         "timer_fallback": ([True, False], False),
-        "disable_hw_timer": ([True, False], False),
+        "disallow_hw_timer": ([True, False], False),
         "libunwind_backtrace": ([True, False], False),
         "symbol_offline_resolve": ([True, False], False),
         "libbacktrace_elf_dynload_support": ([True, False], False),
@@ -54,14 +53,25 @@ class TracyConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        # Callstack capture depth for the zone macros without the S postfix (0 disables, 1-62)
+        "callstack": ["ANY"],
         **{k: v[0] for k, v in _tracy_options.items()},
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "callstack": "0",
         **{k: v[1] for k, v in _tracy_options.items()},
     }
     implements = ["auto_shared_fpic"]
+
+    @property
+    def _callstack_depth(self):
+        try:
+            return int(str(self.options.callstack))
+        except ValueError:
+            # The option was a boolean switch before 0.14, where upstream turned it into a depth
+            raise ConanInvalidConfiguration(f"callstack must be an integer depth, got '{self.options.callstack}'")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -72,8 +82,10 @@ class TracyConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 11)
-        if self.options.disable_hw_timer and not self.options.timer_fallback:
-            raise ConanInvalidConfiguration("disable_hw_timer requires timer_fallback to be enabled")
+        if not 0 <= self._callstack_depth <= 62:
+            raise ConanInvalidConfiguration("callstack must be a capture depth between 0 (disabled) and 62")
+        if self.options.disallow_hw_timer and not self.options.timer_fallback:
+            raise ConanInvalidConfiguration("disallow_hw_timer requires timer_fallback to be enabled")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -86,6 +98,8 @@ class TracyConan(ConanFile):
             switch = getattr(self.options, opt)
             opt = f"TRACY_{opt.upper()}"
             tc.variables[opt] = switch
+        # TRACY_CALLSTACK is a callstack depth, not a boolean switch
+        tc.variables["TRACY_CALLSTACK"] = str(self._callstack_depth)
         tc.generate()
         if self.options.libunwind_backtrace:
             deps = PkgConfigDeps(self)
@@ -139,7 +153,9 @@ class TracyConan(ConanFile):
             self.cpp_info.components["tracyclient"].bindirs = ['bin/' + str(self.settings.build_type)]
             self.cpp_info.components["tracyclient"].libdirs = ['lib/' + str(self.settings.build_type)]
 
-        # Tracy CMake adds options set to ON as public
+        # Tracy CMake adds options set to ON as public, and the callstack depth with its value
+        if self._callstack_depth:
+            self.cpp_info.components["tracyclient"].defines.append(f"TRACY_CALLSTACK={self._callstack_depth}")
         for opt in self._tracy_options.keys():
             switch = getattr(self.options, opt)
             opt = f"TRACY_{opt.upper()}"
