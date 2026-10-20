@@ -17,7 +17,7 @@ class PdfiumConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://opensource.google/projects/pdfium"
     topics = ("generate", "generation", "rendering", "pdf", "document", "print")
-
+    deprecated = "No longer maintained: the build is too complex to keep up to date in Conan Center"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
