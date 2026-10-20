@@ -103,7 +103,6 @@ class ArmadilloConan(ConanFile):
             self.options.rm_safe("fPIC")
             self.options.rm_safe("shared")
             self.options.rm_safe("use_wrapper")
-            self.package_type = "header-library"
         elif self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
