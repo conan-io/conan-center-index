@@ -4,6 +4,7 @@ from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.build import cross_building
+from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
@@ -93,13 +94,15 @@ class ArmadilloConan(ConanFile):
             self.options.use_lapack = "framework_accelerate"
         if Version(self.version) < "14":
             del self.options.header_only
+        if is_msvc(self) and Version(self.version) >= "14.0.0":
+            del self.options.shared
 
     def configure(self):
         if self.options.get_safe("header_only"):
             self.options.rm_safe("fPIC")
             self.options.rm_safe("shared")
             self.options.rm_safe("use_wrapper")
-        elif self.options.shared:
+        elif self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
         if self.options.use_blas == "openblas":
@@ -165,7 +168,7 @@ class ArmadilloConan(ConanFile):
             )
 
         if not self.options.get_safe("header_only"):
-            if not self.options.shared and self.options.use_wrapper:
+            if not self.options.get_safe("shared", False) and self.options.use_wrapper:
                 raise ConanInvalidConfiguration("Building the armadillo run-time wrapper library requires armadillo/*:shared=True")
 
     def requirements(self):
@@ -229,7 +232,7 @@ class ArmadilloConan(ConanFile):
         if Version(self.version) >= "14":
             tc.cache_variables["STATIC_LIB"] = not self.options.get_safe("shared")
         else:
-            tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+            tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.get_safe("shared", False)
         tc.variables["BUILD_SMOKE_TEST"] = False
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if Version(self.version) < "14.0.0": # pylint: disable=conan-condition-evals-to-constant
