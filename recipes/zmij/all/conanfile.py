@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_max_cppstd, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.scm import Version
@@ -44,6 +44,9 @@ class ZmijConan(ConanFile):
     def validate_build(self):
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "21":
             raise ConanInvalidConfiguration("Needs apple-clang >=21")
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "21":
+            # https://github.com/vitaut/zmij/issues/169
+            check_max_cppstd(self, 14)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16]")
