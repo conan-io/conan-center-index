@@ -6,7 +6,7 @@ from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=2.28"
+required_conan_version = ">=2.4"
 
 
 class ZmijConan(ConanFile):
