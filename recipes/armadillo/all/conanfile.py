@@ -108,7 +108,7 @@ class ArmadilloConan(ConanFile):
                 self.options.use_lapack == "openblas"
             )
         if is_msvc(self) and Version(self.version) >= "14.0.0":
-            del self.options.shared
+            self.options.rm_safe("shared")
             if self.options.get_safe("header_only"):
                 self.package_type = "header-library"
             else:
