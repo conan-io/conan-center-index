@@ -4,7 +4,6 @@ from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc_static_runtime
 import os
 
-
 required_conan_version = ">=2.4.0"
 
 
@@ -23,9 +22,9 @@ class MsQuicConan(ConanFile):
     languages = "C", "C++"
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        for submodule_name, submodule_data in self.conan_data["submodules"][self.version].items():
-            get(self, **submodule_data, strip_root=True, destination=os.path.join(self.source_folder, "submodules", submodule_name))
+        get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version]["xdp-for-windows"], strip_root=True,
+            destination=os.path.join(self.source_folder, "submodules", "xdp-for-windows"))
         # Static builds merge every linked static lib into libmsquic.a and can't handle Conan's generator
         # expressions, so OpenSSL is only linked here for shared builds
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
