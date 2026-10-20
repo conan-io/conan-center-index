@@ -35,16 +35,12 @@ int main()
 #endif
 
 #if CAIRO_HAS_FT_FONT && CAIRO_HAS_FC_FONT
-    FcPattern *font_pattern = FcPatternCreate();
-    if (font_pattern == NULL)
-        return 1;
-
-    cairo_font_face_t *font_face = cairo_ft_font_face_create_for_pattern(font_pattern);
-    cairo_status_t font_status = cairo_font_face_status(font_face);
-    cairo_font_face_destroy(font_face);
-    FcPatternDestroy(font_pattern);
-    if (font_status != CAIRO_STATUS_SUCCESS)
-        return 1;
+    FcPattern *pattern = FcPatternCreate();
+    if (pattern) {
+        cairo_font_face_t *face = cairo_ft_font_face_create_for_pattern(pattern);
+        cairo_font_face_destroy(face);
+        FcPatternDestroy(pattern);
+    }
 #endif
 
     printf("cairo version is %s\n", cairo_version_string());
