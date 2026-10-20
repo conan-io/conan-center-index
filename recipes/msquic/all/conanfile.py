@@ -11,7 +11,7 @@ required_conan_version = ">=2.4.0"
 class MsQuicConan(ConanFile):
     name = "msquic"
     package_type = "library"
-    license = ("MIT", "Apache-2.0")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Cross-platform, C implementation of the IETF QUIC protocol"
     homepage = "https://github.com/microsoft/msquic"
