@@ -29,6 +29,12 @@ class ZmijConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            self.options.rm_safe("fPIC")
+            self.options.rm_safe("shared")
+            self.package_type = "static-library"
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -49,8 +55,6 @@ class ZmijConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["ZMIJ_TEST"] = False
         tc.cache_variables["ZMIJ_EXAMPLE"] = False
-        # zmij.h/zmij.cc have no __declspec(dllexport) annotations
-        tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
 
     def build(self):
