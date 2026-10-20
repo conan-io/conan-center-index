@@ -66,9 +66,8 @@ class CairoConan(ConanFile):
 
     @property
     def _with_dwrite(self):
-        # DirectWrite exists since 1.17.6, which auto-detects it without a toggle.
-        return (self.settings.os == "Windows" and Version(self.version) >= "1.17.6"
-                and bool(self.options.get_safe("with_dwrite", True)))
+        # Initial support: https://gitlab.freedesktop.org/cairo/cairo/-/merge_requests/244
+        return self.settings.os == "Windows" and Version(self.version) >= "1.17.6" and self.options.get_safe("with_dwrite", True)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -83,7 +82,6 @@ class CairoConan(ConanFile):
             del self.options.with_symbol_lookup
         if Version(self.version) >= "1.17.8" or self.settings.os == "Windows" or is_apple_os(self):
             del self.options.with_opengl
-        # Meson's dwrite toggle was added in 1.17.8; earlier versions cannot expose it.
         if self.settings.os != "Windows" or Version(self.version) < "1.17.8":
             del self.options.with_dwrite
 
@@ -91,7 +89,7 @@ class CairoConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
-        if not self._with_dwrite:
+        if self.options.shared or not self._with_dwrite:
             self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
