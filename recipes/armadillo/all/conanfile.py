@@ -94,9 +94,6 @@ class ArmadilloConan(ConanFile):
             self.options.use_lapack = "framework_accelerate"
         if Version(self.version) < "14":
             del self.options.header_only
-        if is_msvc(self) and Version(self.version) >= "14.0.0":
-            del self.options.shared
-            self.package_type = "static-library"
 
     def configure(self):
         if self.options.get_safe("header_only"):
@@ -110,6 +107,12 @@ class ArmadilloConan(ConanFile):
             self.options["openblas"].build_lapack = (
                 self.options.use_lapack == "openblas"
             )
+        if is_msvc(self) and Version(self.version) >= "14.0.0":
+            del self.options.shared
+            if self.options.get_safe("header_only"):
+                self.package_type = "header-library"
+            else:
+                self.package_type = "static-library"
 
     def validate_build(self):
         if self.options.use_hdf5 and cross_building(self):
