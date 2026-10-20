@@ -146,7 +146,12 @@ class JsonSchemaValidatorConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "nlohmann_json_schema_validator")
-        self.cpp_info.set_property("cmake_target_name", "nlohmann_json_schema_validator")
+        if Version(self.version) < "2.3.0":
+            self.cpp_info.set_property("cmake_target_name", "nlohmann_json_schema_validator")
+        else:
+            self.cpp_info.set_property("cmake_target_name", "nlohmann_json_schema_validator::validator")
+            # Upstream changed the target name in a minor release, keep an alias for compatibility on the conan side
+            self.cpp_info.set_property("cmake_target_aliases", ["nlohmann_json_schema_validator"])
         self.cpp_info.libs = ["json-schema-validator" if Version(self.version) < "2.1.0" else "nlohmann_json_schema_validator"]
         if self.options.json_diagnostics:
             self.cpp_info.defines = ["JSON_DIAGNOSTICS=1"]
