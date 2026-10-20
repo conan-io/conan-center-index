@@ -167,7 +167,7 @@ class ArmadilloConan(ConanFile):
             )
 
         if not self.options.get_safe("header_only"):
-            if not self.options.get_safe.shared and self.options.use_wrapper:
+            if not self.options.shared and self.options.use_wrapper:
                 raise ConanInvalidConfiguration("Building the armadillo run-time wrapper library requires armadillo/*:shared=True")
 
         if is_msvc(self) and Version(self.version) >= "14.0.0" and self.options.get_safe("shared"):
