@@ -92,8 +92,6 @@ class ArmadilloConan(ConanFile):
             # Macos will default to Accelerate framework
             self.options.use_blas = "framework_accelerate"
             self.options.use_lapack = "framework_accelerate"
-        if Version(self.version) < "14":
-            del self.options.header_only
 
     def configure(self):
         if self.options.get_safe("header_only"):
@@ -115,6 +113,9 @@ class ArmadilloConan(ConanFile):
             )
 
     def validate(self):
+        if Version(self.version) < "14" and self.options.header_only:
+            raise ConanInvalidConfiguration("header_only is only supported by armadillo 14 and newer")
+
         check_min_cppstd(self, 14 if Version(self.version) >= "15" else 11)
 
         if self.settings.os != "Macos" and (
@@ -166,7 +167,7 @@ class ArmadilloConan(ConanFile):
             )
 
         if not self.options.get_safe("header_only"):
-            if not self.options.get_safe("shared", False) and self.options.use_wrapper:
+            if not self.options.get_safe.shared and self.options.use_wrapper:
                 raise ConanInvalidConfiguration("Building the armadillo run-time wrapper library requires armadillo/*:shared=True")
 
         if is_msvc(self) and Version(self.version) >= "14.0.0" and self.options.get_safe("shared"):
@@ -234,7 +235,7 @@ class ArmadilloConan(ConanFile):
         if Version(self.version) >= "14":
             tc.cache_variables["STATIC_LIB"] = not self.options.get_safe("shared")
         else:
-            tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.get_safe("shared", False)
+            tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_SMOKE_TEST"] = False
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if Version(self.version) < "14.0.0": # pylint: disable=conan-condition-evals-to-constant
