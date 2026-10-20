@@ -96,12 +96,14 @@ class ArmadilloConan(ConanFile):
             del self.options.header_only
         if is_msvc(self) and Version(self.version) >= "14.0.0":
             del self.options.shared
+            self.package_type = "static-library"
 
     def configure(self):
         if self.options.get_safe("header_only"):
             self.options.rm_safe("fPIC")
             self.options.rm_safe("shared")
             self.options.rm_safe("use_wrapper")
+            self.package_type = "header-library"
         elif self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
