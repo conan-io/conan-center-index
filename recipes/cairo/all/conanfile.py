@@ -22,6 +22,7 @@ class CairoConan(ConanFile):
     topics = ("cairo", "graphics")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://cairographics.org/"
+    package_type = "library"
     license = ("LGPL-2.1-only", "MPL-1.1")
     settings = "os", "arch", "compiler", "build_type"
     options = {
