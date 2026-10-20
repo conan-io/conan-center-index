@@ -100,19 +100,13 @@ class ArmadilloConan(ConanFile):
             self.options.rm_safe("fPIC")
             self.options.rm_safe("shared")
             self.options.rm_safe("use_wrapper")
-        elif self.options.get_safe("shared"):
+        elif self.options.shared:
             self.options.rm_safe("fPIC")
 
         if self.options.use_blas == "openblas":
             self.options["openblas"].build_lapack = (
                 self.options.use_lapack == "openblas"
             )
-        if is_msvc(self) and Version(self.version) >= "14.0.0":
-            self.options.rm_safe("shared")
-            if self.options.get_safe("header_only"):
-                self.package_type = "header-library"
-            else:
-                self.package_type = "static-library"
 
     def validate_build(self):
         if self.options.use_hdf5 and cross_building(self):
@@ -174,6 +168,10 @@ class ArmadilloConan(ConanFile):
         if not self.options.get_safe("header_only"):
             if not self.options.get_safe("shared", False) and self.options.use_wrapper:
                 raise ConanInvalidConfiguration("Building the armadillo run-time wrapper library requires armadillo/*:shared=True")
+
+        if is_msvc(self) and Version(self.version) >= "14.0.0" and self.options.get_safe("shared"):
+            # https://gitlab.com/armadillo-lib/armadillo-code/-/blob/15.6.2/CMakeLists.txt?ref_type=tags#L236
+            raise ConanInvalidConfiguration("It does not support shared builds for MSVC. Build with -o &:shared=False")
 
     def requirements(self):
         # Optional requirements
