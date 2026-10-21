@@ -93,9 +93,6 @@ class SpeexDSPConan(ConanFile):
                          os.path.join(self.package_folder, "lib", "speexdsp.lib"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "SpeexDSP")
-        self.cpp_info.set_property("cmake_target_name", "SpeexDSP::speexdsp")
-        self.cpp_info.set_property("pkg_config_name", "speexdsp")
         self.cpp_info.libs = ["speexdsp"]
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             self.cpp_info.system_libs.append("m")
