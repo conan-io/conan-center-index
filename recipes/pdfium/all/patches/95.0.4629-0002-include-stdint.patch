@@ -1,0 +1,11 @@
+--- a/core/fxge/freetype/fx_freetype.cpp
++++ b/core/fxge/freetype/fx_freetype.cpp
+@@ -9,6 +9,8 @@
+ #define DEFINE_PS_TABLES
+ #include "third_party/freetype/include/pstables.h"
++
++#include <stdint.h>
+
+ namespace {
+
+ constexpr uint32_t kVariantBit = 0x80000000;
