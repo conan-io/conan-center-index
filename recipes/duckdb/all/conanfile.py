@@ -62,7 +62,7 @@ class DuckdbConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return 11 if Version(self.version) < "2.0.0" else 17
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -147,6 +147,11 @@ class DuckdbConan(ConanFile):
         dpes.generate()
 
     def build(self):
+        if Version(self.version) >= "2.0.0":
+            # Upstream forces the static MSVC runtime; let the profile's compiler.runtime decide
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            'set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")',
+                            "")
         if is_msvc(self) and not self.options.shared:
             replace_in_file(self, os.path.join(self.source_folder, "src", "include", "duckdb.h"),
                             f"#define DUCKDB_C_API __declspec(dllimport)",
@@ -180,9 +185,30 @@ class DuckdbConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
 
+    def _static_libs_2_0(self):
+        # Extensions and capability libraries first: they depend on duckdb_static
+        libs = []
+        if self.options.with_autocomplete:
+            libs.append("autocomplete_extension")
+        if self.options.with_tpch:
+            libs.append("tpch_extension")
+        if self.options.with_tpcds:
+            libs.append("tpcds_extension")
+        # Statically linked by default since 2.0.0 (extension/extension_config.cmake)
+        libs += ["core_functions_extension", "parquet_extension", "json_extension", "icu_extension"]
+        libs += ["duckdb_httplib", "duckdb_loadable_extensions", "duckdb_static"]
+        libs += ["duckdb_fmt", "duckdb_re2", "duckdb_miniz", "duckdb_utf8proc", "duckdb_hyperloglog",
+                 "duckdb_fastpforlib", "duckdb_mbedtls", "duckdb_fsst", "duckdb_zstd",
+                 "duckdb_skiplistlib", "duckdb_yyjson"]
+        if self.settings.os == "Linux" and self.settings.arch in ["x86_64", "armv8"]:
+            libs.append("duckdb_jemalloc")
+        return libs
+
     def package_info(self):
         if self.options.shared:
             self.cpp_info.libs = ["duckdb"]
+        elif Version(self.version) >= "2.0.0":
+            self.cpp_info.libs = self._static_libs_2_0()
         else:
             self.cpp_info.libs = [
                 "duckdb_static",
