@@ -1,0 +1,27 @@
+Fix configuring wxWidgets against a system NanoSVG package whose imported
+target uses generator expressions in INTERFACE_INCLUDE_DIRECTORIES, as the
+ones created by Conan CMakeDeps do: computing the parent directory of such
+an expression mangles it and CMake fails with "Found relative path while
+evaluating include directories of wxcore". The parent directory is part of
+the property in this case, so skipping the computation loses nothing.
+
+--- a/build/cmake/lib/nanosvg.cmake
++++ b/build/cmake/lib/nanosvg.cmake
+@@ -37,9 +37,14 @@ elseif(wxUSE_NANOSVG)
+             # The headers are included as <nanosvg/nanosvg.h>, matching their
+             # installed location, so the parent directory has to be on the
+             # search path as well (it usually, but not always, already is).
+-            get_filename_component(svg_incl_parent "${svg_incl_dir}" DIRECTORY)
+-            if(svg_incl_parent)
+-                list(APPEND NANOSVG_INCLUDE_DIRS ${svg_incl_parent})
++            # Skip this if the property contains generator expressions, e.g.
++            # in the imported targets created by Conan CMakeDeps: their
++            # parent directory cannot be computed.
++            if(NOT svg_incl_dir MATCHES "\\$<")
++                get_filename_component(svg_incl_parent "${svg_incl_dir}" DIRECTORY)
++                if(svg_incl_parent)
++                    list(APPEND NANOSVG_INCLUDE_DIRS ${svg_incl_parent})
++                endif()
+             endif()
+         endif()
+ 
