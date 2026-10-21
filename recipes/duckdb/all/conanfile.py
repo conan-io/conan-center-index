@@ -153,6 +153,12 @@ class DuckdbConan(ConanFile):
         tc.variables["ENABLE_UBSAN"] = False
         if is_msvc(self) and not self.options.shared:
             tc.preprocessor_definitions["DUCKDB_API"] = ""
+        if is_msvc(self) and self.settings.build_type == "Debug" and Version(self.version) >= "2.0.0":
+            # Upstream adds -DDEBUG to Debug builds for GCC/Clang only. Without it, MSVC Debug compiles D_ASSERT as
+            # assert() while the helpers some asserts call only exist when DEBUG defines D_ASSERT_IS_ENABLED; and
+            # DEBUG itself does not compile with MSVC (src/common/symbols.cpp). Disable assert() as in release builds;
+            # the debug runtime and iterator debugging depend on _DEBUG, not NDEBUG
+            tc.preprocessor_definitions["NDEBUG"] = "1"
         if cross_building(self):
             tc.variables["DUCKDB_EXPLICIT_PLATFORM"] = f"{self.settings.os}_{self.settings.arch}"
         # INFO: third_party/re2/CMakeLists.txt:32 (CMake version 3.4)
