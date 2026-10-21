@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rm
 import os
 
 
@@ -48,10 +48,13 @@ class ZycoreConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        # Consumers such as zydis call zyan_set_common_flags() & co. from this file
+        rm(self, "*", folder=os.path.join(self.package_folder, "lib", "cmake", "zycore"),
+           excludes=["zyan-functions.cmake"])
 
     def package_info(self):
         self.cpp_info.libs = ["Zycore"]
+        self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "zycore", "zyan-functions.cmake")])
         self.cpp_info.set_property("cmake_target_name", "Zycore::Zycore")
         self.cpp_info.set_property("cmake_target_aliases", ["Zycore"])
 
