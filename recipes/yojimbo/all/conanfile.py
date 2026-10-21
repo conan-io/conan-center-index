@@ -24,7 +24,7 @@ class YojimboConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16]")
+        self.tool_requires("cmake/[>=3.19]")
 
     def requirements(self):
         self.requires("libsodium/[~1.0.20]")
