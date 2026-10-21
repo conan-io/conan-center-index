@@ -95,6 +95,9 @@ class FreetypeConan(ConanFile):
         # Harfbuzz support introduces a circular dependency between Harfbuzz and Freetype.
         # They both have options to require each other.
         tc.project_options["harfbuzz"] = "disabled"
+        # hvf is experimental and available only on macOS
+        if Version(self.version) >= "2.15.0":
+            tc.project_options["hvf"] = "disabled"
         tc.project_options["png"] = feature(self.options.with_png)
         tc.project_options["tests"] = "disabled"
         tc.project_options["zlib"] = "system" if self.options.with_zlib else "disabled"
