@@ -1,11 +1,12 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, replace_in_file, rmdir, copy
+from conan.tools.files import get, rmdir, copy
+from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=2.4"
 
 class ensmallenRecipe(ConanFile):
     name = "ensmallen"
@@ -24,6 +25,9 @@ class ensmallenRecipe(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def validate(self):
+        check_min_cppstd(self, 11 if Version(self.version) < "3" else 14)
+
     def requirements(self):
         self.requires("armadillo/12.6.4")
 
@@ -38,22 +42,11 @@ class ensmallenRecipe(ConanFile):
         deps.generate()
         tc = CMakeToolchain(self)
         tc.variables["USE_OPENMP"] = False
+        tc.cache_variables["USE_BANDICOOT"] = False
         tc.generate()
 
 
     def build(self):
-        # TODO: Remove when conan 1.x support is dropped. This is largely resolved by the above
-        # specification of AnyNewerVersion for the compatibility policy, but this feature isn't
-        # available below version 2.0.12.
-        if conan_version < Version("2.0.12"):
-            # Remove hard requirement on armadillo 9.800.0
-            # This is a minimum requirement, use latest
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "CMakeLists.txt"),
-                "find_package(Armadillo 9.800.0 REQUIRED)",
-                "find_package(Armadillo REQUIRED)",
-            )
         cmake = CMake(self)
         cmake.configure()
 

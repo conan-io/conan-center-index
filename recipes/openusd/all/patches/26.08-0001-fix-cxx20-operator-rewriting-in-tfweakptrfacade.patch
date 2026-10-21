@@ -1,0 +1,26 @@
+From 8ae52e5d13902f8e89f39ff334563afb00140c3a Mon Sep 17 00:00:00 2001
+From: Delio Vicini
+Subject: [PATCH] Fix C++20 operator rewriting infinite recursion in TfWeakPtrFacade
+
+Explicitly call the member operator== using member function syntax to
+bypass operator lookup and potential rewriting in C++ 20. Without this
+change, this comparison operator produces an infinite recursion due to
+C++ 20's operator rewriting.
+
+Fixes #4017
+Closes #4102
+
+---
+diff --git a/pxr/base/tf/weakPtrFacade.h b/pxr/base/tf/weakPtrFacade.h
+index 1706d42809..de336a458b 100644
+--- a/pxr/base/tf/weakPtrFacade.h
++++ b/pxr/base/tf/weakPtrFacade.h
+@@ -107,7 +107,7 @@ class TfWeakPtrFacade : public TfWeakPtrFacadeBase {
+
+     template <class T>
+     friend bool operator == (const TfRefPtr<T>& p1, Derived const &p2) {
+-        return p2 == p1;
++        return p2.operator==(p1);
+     }
+
+     template <class T>

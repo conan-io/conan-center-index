@@ -1,7 +1,7 @@
 sources:
   "cci.20210511":
     url: "https://bitbucket.org/jpommier/pffft/get/ed78751d751e.zip"
-    sha256: "af4ac1f9e148348b492686491f2235b5b4dd210148fac29ceca6fb629e563b53"
+    sha256: "ac18062bb1f79f08eac695ce1c81a54e0d106652732eafd3779c12365a5dde69"
   "cci.20201015":
     url: "https://bitbucket.org/jpommier/pffft/get/2b2bd45bbf9b.zip"
-    sha256: "f21913b96eb0f87839dcb363992cd619e7a9c4333685ad9627bc3da205e36a89"
+    sha256: "514ab7a9b265b84f39feb21967d3a582f48b8c04b4247658aee518f6f5da4de7"
