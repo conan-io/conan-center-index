@@ -1,0 +1,8 @@
+sources:
+  "2.6.3":
+    source:
+      url: "https://github.com/microsoft/msquic/archive/refs/tags/v2.6.3.tar.gz"
+      sha256: "8584e3918f2e3c43c97b3c5ee036a14783581906d1b18d103982b1ccf54266cf"
+    xdp-for-windows:
+      url: "https://github.com/microsoft/xdp-for-windows/archive/d372b52577a724e04fa4c06acb90bbfa4719fc25.tar.gz"
+      sha256: "9a52e1b5fc31ae3825fa67bd8aabd2c7b969a79ad6ec6bb5b884aad9e6688d3c"
