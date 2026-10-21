@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.apple import fix_apple_shared_install_name
@@ -67,26 +67,12 @@ class Libfido2Conan(ConanFile):
         tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.cache_variables["BUILD_TOOLS"] = False
 
-        if is_msvc(self):
-            cbor = self.dependencies["libcbor"].cpp_info
-            crypto = self.dependencies["openssl"].cpp_info.components["crypto"]
-            zlib = self.dependencies["zlib"].cpp_info
-
-            deps = [
-                ("CBOR", cbor),
-                ("CRYPTO", crypto),
-                ("ZLIB", zlib),
-            ]
-
-            for prefix, dep in deps:
-                # cache_variables are rendered with str(), so lists must be joined into a CMake list
-                tc.cache_variables[f"{prefix}_INCLUDE_DIRS"] = ";".join(dep.includedirs)
-                tc.cache_variables[f"{prefix}_LIBRARY_DIRS"] = ";".join(dep.libdirs)
-                tc.cache_variables[f"{prefix}_LIBRARIES"] = ";".join(dep.libs + dep.system_libs)
-
         tc.generate()
 
-        if not is_msvc(self):
+        if is_msvc(self):
+            deps = CMakeDeps(self)
+            deps.generate()
+        else:
             pkg_config = PkgConfigDeps(self)
             pkg_config.generate()
 

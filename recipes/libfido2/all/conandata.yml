@@ -7,3 +7,6 @@ patches:
     - patch_file: "patches/1.17.0-0001-msvc-disabled-warnings-after-sdl.patch"
       patch_description: "MSVC: re-append the disabled warnings (-wd4996, ...) after /sdl, which otherwise turns C4996 into an error with Ninja"
       patch_type: "portability"
+    - patch_file: "patches/1.17.0-0002-msvc-cmake-dependencies.patch"
+      patch_description: "MSVC: use CMake imported targets"
+      patch_type: "conan"
