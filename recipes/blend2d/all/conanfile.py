@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import copy, get, rmdir
 import os
 
 required_conan_version = ">=2"
@@ -50,12 +50,10 @@ class Blend2dConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BLEND2D_TEST"] = False
-        tc.variables["BLEND2D_EMBED"] = False
         tc.variables["BLEND2D_STATIC"] = not self.options.shared
         tc.variables["BLEND2D_NO_STDCXX"] = False
         tc.variables["BLEND2D_EXTERNAL_ASMJIT"] = True
@@ -80,6 +78,6 @@ class Blend2dConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "blend2d::blend2d")
         self.cpp_info.libs = ["blend2d"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread", "rt",])
+            self.cpp_info.system_libs.extend(["pthread", "m"])
         if not self.options.shared:
             self.cpp_info.defines.append("BL_STATIC")
