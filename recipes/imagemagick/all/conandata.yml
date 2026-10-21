@@ -1,4 +1,4 @@
 sources:
-  "7.1.2-25":
-    url: "https://github.com/ImageMagick/ImageMagick/archive/7.1.2-25.tar.gz"
-    sha256: "ff33d227d2e1744327280e956ec9f7abaebbd8f48277d16cdad906e05e4794b6"
+  "7.1.2-34":
+    url: "https://github.com/ImageMagick/ImageMagick/archive/7.1.2-34.tar.gz"
+    sha256: "f5163a573a1c1bff16358d0a592b2fb168ad0fd3b9dc5ff57dc7820eebc5cf79"
