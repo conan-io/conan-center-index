@@ -55,10 +55,11 @@ class CasadiConan(ConanFile):
         check_min_cppstd(self, 11)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16.3 <5]")
+        self.tool_requires("cmake/[>=3.16.3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -76,7 +77,6 @@ class CasadiConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
