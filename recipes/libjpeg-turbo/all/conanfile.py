@@ -111,6 +111,7 @@ class LibjpegTurboConan(ConanFile):
 
         tc = CMakeToolchain(self)
         tc.blocks.remove("output_dirs")
+        tc.cache_variables["CMAKE_INSTALL_DEFAULT_LIBDIR"] = "lib"
         tc.variables["ENABLE_STATIC"] = not self.options.shared
         tc.variables["ENABLE_SHARED"] = self.options.shared
         tc.variables["WITH_SIMD"] = self.options.get_safe("SIMD", False)
