@@ -74,6 +74,7 @@ class NotCursesConan(ConanFile):
             rm(self, "*.dylib", os.path.join(self.package_folder, "lib"), recursive=True)
             rm(self, "*.so", os.path.join(self.package_folder, "lib"), recursive=True)
             rm(self, "*.dll", os.path.join(self.package_folder, "bin"), recursive=True)
+            rm(self, "*.dll.a", os.path.join(self.package_folder, "lib"), recursive=True)
 
     def package_info(self):
         self.cpp_info.components["core"].libs = ["notcurses-core"]
@@ -82,6 +83,8 @@ class NotCursesConan(ConanFile):
         self.cpp_info.components["core"].requires = ["ncurses::ncurses", "libunistring::libunistring", "zlib::zlib", "ffmpeg::avcodec", "ffmpeg::avdevice", "ffmpeg::avformat", "ffmpeg::avutil", "ffmpeg::swscale"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["core"].system_libs = ["pthread", "m"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["core"].system_libs = ["secur32"]
 
         self.cpp_info.components["libnotcurses"].libs = ["notcurses"]
         self.cpp_info.components["libnotcurses"].set_property("pkg_config_name", "notcurses")
