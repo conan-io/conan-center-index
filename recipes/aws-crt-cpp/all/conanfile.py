@@ -32,9 +32,9 @@ class AwsCrtCpp(ConanFile):
 
     def requirements(self):
         # Bump these in accordance with aws-sdk-cpp
-        self.requires("aws-c-common/0.14.5")
+        self.requires("aws-c-common/0.14.5", transitive_headers=True, transitive_libs=True)
         self.requires("aws-c-sdkutils/0.2.9")
-        self.requires("aws-c-io/0.27.6", transitive_headers=True)
+        self.requires("aws-c-io/0.27.6", transitive_headers=True, transitive_libs=True)
         self.requires("aws-c-cal/0.9.15")
         self.requires("aws-c-compression/0.3.2")
         self.requires("aws-c-http/0.11.0", transitive_headers=True)
