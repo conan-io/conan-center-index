@@ -555,7 +555,9 @@ class AwsSdkCppConan(ConanFile):
         self.requires("aws-c-mqtt/0.16.1")
         if self.options.get_safe("s3-crt"):
             self.requires("aws-c-s3/0.13.5")
-        self.requires("aws-c-sdkutils/0.2.9")  # No mention of this in the code
+        # Not used by the SDK sources directly (only through aws-crt-cpp's endpoints rule engine),
+        # but upstream's CMake calls aws_use_package() on it
+        self.requires("aws-c-sdkutils/0.2.9")
         self.requires("aws-checksums/0.2.10")
         if self.settings.os != "Windows":
             # Used transitively in core/utils/crypto/openssl/CryptoImpl.h public header
