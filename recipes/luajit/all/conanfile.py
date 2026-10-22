@@ -4,7 +4,7 @@ from conan.tools.files import get, chdir, replace_in_file, copy, rmdir, export_c
 from conan.tools.microsoft import is_msvc, MSBuildToolchain, VCVars, unix_path
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -132,6 +132,7 @@ class LuajitConan(ConanFile):
             with chdir(self, self.source_folder):
                 autotools = Autotools(self)
                 autotools.install(args=self._make_arguments + ["DESTDIR="])
+                fix_apple_shared_install_name(self)
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "share"))
 
