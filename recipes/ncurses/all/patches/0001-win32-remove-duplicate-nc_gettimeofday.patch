@@ -1,0 +1,11 @@
+--- a/ncurses/win32con/gettimeofday.c
++++ b/ncurses/win32con/gettimeofday.c
+@@ -33,7 +33,7 @@
+ 
+ MODULE_ID("$Id: gettimeofday.c,v 1.8 2025/08/30 17:59:42 tom Exp $")
+ 
+-#if HAVE_GETTIMEOFDAY == 2
++#if 0 /* HAVE_GETTIMEOFDAY == 2: _nc_gettimeofday() is already defined in tinfo/lib_win32util.c */
+ #define JAN1970 116444736000000000LL	/* the value for 01/01/1970 00:00 */
+ 
+ NCURSES_EXPORT(int)
