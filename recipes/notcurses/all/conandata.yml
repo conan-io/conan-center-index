@@ -2,3 +2,6 @@ sources:
   "3.0.17":
     url: "https://github.com/dankamongmen/notcurses/releases/download/v3.0.17/notcurses_3.0.17+dfsg.orig.tar.xz"
     sha256: "c056420ac634c8c71870ece6d7ab3986f406d1495c009fce5e14559acebc754f"
+patches:
+  "3.0.17":
+    - patch_file: "patches/manage-shared-option.patch"
