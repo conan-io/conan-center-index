@@ -1,3 +1,5 @@
+Custom CCI patch: Let Conan configure MACOSX_DEPLOYMENT_TARGET
+
 diff --git a/src/Makefile b/src/Makefile
 index 0b8c04f..e41c735 100644
 --- a/src/Makefile
