@@ -7,4 +7,4 @@ sources:
     sha256: "284b59730849d399dfd6137c3d492e3d21ee6e32ee0f00d2dce7898ab54b270e"
 patches:
   "2.1.1792527110":
-    - patch_file: "patches/2.1.0-beta3-0001-remove-mac-deploy.patch"
+    - patch_file: "patches/0001-remove-mac-deploy.patch"

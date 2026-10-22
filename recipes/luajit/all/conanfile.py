@@ -135,7 +135,8 @@ class LuajitConan(ConanFile):
             with chdir(self, self.source_folder):
                 autotools = Autotools(self)
                 autotools.install(args=self._make_arguments + ["DESTDIR="])
-                fix_apple_shared_install_name(self)
+                if self.options.shared:
+                    fix_apple_shared_install_name(self)
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "share"))
 
