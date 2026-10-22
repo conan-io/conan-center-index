@@ -48,7 +48,7 @@ class CasadiConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fmi2/2.0.4")
+        self.requires("fmi2/2.0.5")
         self.requires("fmi3/3.0.2")
 
     def validate(self):
