@@ -1,0 +1,98 @@
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+import os
+
+
+required_conan_version = ">=2.4"
+
+
+class NotCursesConan(ConanFile):
+    name = "notcurses"
+    description = "blingful character graphics/TUI library. definitely not curses"
+    license = "Apache-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://notcurses.com/"
+    topics = ("tui", "ncurses", "terminal")
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
+    implements = ["auto_shared_fpic"]
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("ncurses/6.5")
+        self.requires("libunistring/1.1")
+        self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("ffmpeg/[>=6.0 <8]")
+
+    def validate(self):
+        check_min_cppstd(self, 17)
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.21]")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            # INFO: tinfo and ffmpeg are detected via pkg-config
+            self.tool_requires("pkgconf/[>=2.1.0 <3]")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["USE_PANDOC"] = False
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_EXECUTABLES"] = False
+        tc.cache_variables["USE_POC"] = False
+        tc.cache_variables["USE_STATIC"] = not self.options.shared
+        tc.cache_variables["USE_MULTIMEDIA"] = "ffmpeg"
+        tc.cache_variables["USE_DEFLATE"] = False
+        tc.cache_variables["BUILD_FFI_LIBRARY"] = False
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+        deps = PkgConfigDeps(self)
+        deps.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        copy(self, "COPYRIGHT", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+
+    def package_info(self):
+        self.cpp_info.components["core"].libs = ["notcurses-core"]
+        self.cpp_info.components["core"].set_property("pkg_config_name", "notcurses-core")
+        self.cpp_info.components["core"].set_property("cmake_file_name", "NotcursesCore")
+        self.cpp_info.components["core"].requires = ["ncurses::ncurses", "libunistring::libunistring", "zlib::zlib", "ffmpeg::avcodec", "ffmpeg::avdevice", "ffmpeg::avformat", "ffmpeg::avutil", "ffmpeg::swscale"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["core"].system_libs = ["pthread", "m", "rt"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["core"].system_libs = ["secur32", "wsock32", "ws2_32"]
+
+        self.cpp_info.components["libnotcurses"].libs = ["notcurses"]
+        self.cpp_info.components["libnotcurses"].set_property("pkg_config_name", "notcurses")
+        self.cpp_info.components["libnotcurses"].set_property("cmake_file_name", "Notcurses")
+        self.cpp_info.components["libnotcurses"].requires = ["core"]
+
+        self.cpp_info.components["notcursespp"].libs = ["notcurses++"]
+        self.cpp_info.components["notcursespp"].set_property("pkg_config_name", "notcurses++")
+        self.cpp_info.components["notcursespp"].set_property("cmake_file_name", "Notcurses++")
+        self.cpp_info.components["notcursespp"].requires = ["libnotcurses"]
