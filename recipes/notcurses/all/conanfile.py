@@ -83,9 +83,9 @@ class NotCursesConan(ConanFile):
         self.cpp_info.components["core"].set_property("cmake_file_name", "NotcursesCore")
         self.cpp_info.components["core"].requires = ["ncurses::ncurses", "libunistring::libunistring", "zlib::zlib", "ffmpeg::avcodec", "ffmpeg::avdevice", "ffmpeg::avformat", "ffmpeg::avutil", "ffmpeg::swscale"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["core"].system_libs = ["pthread", "m"]
+            self.cpp_info.components["core"].system_libs = ["pthread", "m", "rt"]
         elif self.settings.os == "Windows":
-            self.cpp_info.components["core"].system_libs = ["secur32"]
+            self.cpp_info.components["core"].system_libs = ["secur32", "wsock32", "ws2_32"]
 
         self.cpp_info.components["libnotcurses"].libs = ["notcurses"]
         self.cpp_info.components["libnotcurses"].set_property("pkg_config_name", "notcurses")
