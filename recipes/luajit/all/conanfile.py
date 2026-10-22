@@ -59,6 +59,9 @@ class LuajitConan(ConanFile):
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
+            if self.options.shared and is_apple_os(self):
+                # INFO: changing install names or rpaths can't be redone because larger updated load commands do not fit
+                tc.extra_ldflags.append("-headerpad_max_install_names")
             tc.generate()
 
     def _patch_sources(self):
