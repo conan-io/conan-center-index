@@ -44,8 +44,8 @@ class LuajitConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os == "Macos" and self.settings.arch == "armv8" and cross_building(self):
-            raise ConanInvalidConfiguration("Cross-building LuaJIT to Mac armv8 is not supported. See https://github.com/LuaJIT/LuaJIT/issues/947")
+        if self.settings.os == "Macos" and cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building LuaJIT on Mac is not supported. See https://github.com/LuaJIT/LuaJIT/issues/947")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
