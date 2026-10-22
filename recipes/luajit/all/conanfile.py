@@ -10,7 +10,7 @@ from conan.errors import ConanInvalidConfiguration
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 
 class LuajitConan(ConanFile):
@@ -21,6 +21,8 @@ class LuajitConan(ConanFile):
     description = "LuaJIT is a Just-In-Time Compiler (JIT) for the Lua programming language."
     topics = ("lua", "jit")
     provides = "lua"
+    package_type = "library"
+    languages = "C"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -43,13 +45,11 @@ class LuajitConan(ConanFile):
 
     def validate(self):
         if self.settings.os == "Macos" and self.settings.arch == "armv8" and cross_building(self):
-            raise ConanInvalidConfiguration(f"{self.ref} can not be cross-built to Mac M1. Please, try any version >=2.1")
-        elif Version(self.version) <= "2.1.0-beta1" and self.settings.os == "Macos" and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration(f"{self.ref} is not supported by Mac M1. Please, try any version >=2.1")
+            raise ConanInvalidConfiguration("Cross-building LuaJIT to Mac armv8 is not supported. See https://github.com/LuaJIT/LuaJIT/issues/947")
 
     def source(self):
-        filename = f"LuaJIT-{self.version}.tar.gz"
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, filename=filename, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         if is_msvc(self):
@@ -105,7 +105,6 @@ class LuajitConan(ConanFile):
         return "luajit-2.1"
 
     def build(self):
-        apply_conandata_patches(self)
         self._patch_sources()
         if is_msvc(self):
             with chdir(self, os.path.join(self.source_folder, "src")):
