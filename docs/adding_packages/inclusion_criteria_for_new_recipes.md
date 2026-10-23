@@ -32,4 +32,4 @@ Several of these factors appearing together suggest that a library needs more ti
 
 ---
 
-If a proposal does not fit these guidelines, please open an issue instead.
+If a proposal does not fit these guidelines, please open an issue instead. Exceptions will be considered on a case by case basis.
