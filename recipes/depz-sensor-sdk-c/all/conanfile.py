@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, rmdir
 
 required_conan_version = ">=2.0"
 
@@ -66,6 +66,13 @@ class DepzSensorSdkCConan(ConanFile):
              dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        # The embedded ams TMF8829 sensor firmware is MIT: its licence goes with
+        # ours; the CMake config files are Conan's to generate.
+        copy(self, "LICENSES-MIT.TXT",
+             src=os.path.join(self.source_folder, self._subfolder, "licenses", "tmf8829"),
+             dst=os.path.join(self.package_folder, "licenses", "tmf8829"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["depz_sensor_sdk_c"]
