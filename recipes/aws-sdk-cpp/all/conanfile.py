@@ -544,12 +544,12 @@ class AwsSdkCppConan(ConanFile):
         # don't bump them independently, check the file
         # Create the new versions for the dependencies in the order shown
         # in that script, they are mostly topo sorted
-        self.requires("aws-crt-cpp/0.43.9", transitive_headers=True)
+        self.requires("aws-crt-cpp/0.43.9", transitive_headers=True, transitive_libs=True)
         self.requires("aws-c-auth/0.10.4")
         self.requires("aws-c-cal/0.9.15")
-        self.requires("aws-c-common/0.14.5")
+        self.requires("aws-c-common/0.14.5", transitive_headers=True, transitive_libs=True)
         self.requires("aws-c-compression/0.3.2")
-        self.requires("aws-c-event-stream/0.7.1")
+        self.requires("aws-c-event-stream/0.7.1", transitive_headers=True, transitive_libs=True)
         self.requires("aws-c-http/0.11.0")
         self.requires("aws-c-io/0.27.6")
         self.requires("aws-c-mqtt/0.16.1")
