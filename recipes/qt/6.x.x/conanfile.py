@@ -1648,10 +1648,16 @@ class QtConan(ConanFile):
                 if os.path.isfile(module):
                     _add_build_module(component_name, module)
 
-                for helper_modules in glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake")):
-                    _add_build_module(component_name, helper_modules)
-                for helper_modules in glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "Qt6QmlPublic*Helpers.cmake")):
-                    _add_build_module(component_name, helper_modules)
+                # QtPublicCMakeIncludeGuardHelpers.cmake defines __qt_internal_cmake_include_guard, 
+                # used by the other helpers since Qt 6.11.2, so it must be included first
+                include_guard_module = os.path.join(self.package_folder, "lib", "cmake", m, "QtPublicCMakeIncludeGuardHelpers.cmake")
+                if os.path.isfile(include_guard_module):
+                    _add_build_module(component_name, include_guard_module)
+                helper_modules = [h for h in glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake")) if h != include_guard_module]
+                for helper_module in helper_modules:
+                    _add_build_module(component_name, helper_module)
+                for helper_module in glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "Qt6QmlPublic*Helpers.cmake")):
+                    _add_build_module(component_name, helper_module)
                 self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
 
             elif component_name.endswith("Tools") and component_name[:-5] in self.cpp_info.components:
