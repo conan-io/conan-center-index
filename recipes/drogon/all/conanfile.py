@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
-from conan.tools.files import copy, get, rm
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 
@@ -33,6 +33,7 @@ class DrogonConan(ConanFile):
         "with_mysql": [True, False],
         "with_sqlite": [True, False],
         "with_redis": [True, False],
+        "with_spdlog": [True, False],
     }
     default_options = {
         "shared": False,
@@ -48,16 +49,24 @@ class DrogonConan(ConanFile):
         "with_mysql": False,
         "with_sqlite": False,
         "with_redis": False,
+        "with_spdlog": False,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "1.9.14":
+            del self.options.with_spdlog
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
             self.options["trantor"].shared = True
+        if self.options.get_safe("with_spdlog"):
+            self.options["trantor"].with_spdlog = True
         if not self.options.with_orm:
             del self.options.with_postgres
             del self.options.with_postgres_batch
@@ -94,6 +103,8 @@ class DrogonConan(ConanFile):
             self.requires("hiredis/1.2.0")
         if self.options.get_safe("with_yaml_cpp", False):
             self.requires("yaml-cpp/0.8.0")
+        if self.options.get_safe("with_spdlog"):
+            self.requires("spdlog/[>=1.13 <2]", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -121,6 +132,8 @@ class DrogonConan(ConanFile):
         if is_msvc(self):
             tc.cache_variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus /EHsc"
         tc.cache_variables["USE_SUBMODULE"] = False
+        if self.options.get_safe("with_spdlog"):
+            tc.cache_variables["USE_SPDLOG"] = True
         tc.generate()
         deps = CMakeDeps(self)
         if self.options.get_safe("with_mysql"):
@@ -141,6 +154,7 @@ class DrogonConan(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
