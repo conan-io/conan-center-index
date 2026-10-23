@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMake, CMakeDeps
 import os
 
@@ -46,6 +46,8 @@ class MexceConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # INFO: Let Conan handle the C++ standard version
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 11)", "")
 
     def package(self):
         cmake = CMake(self)
