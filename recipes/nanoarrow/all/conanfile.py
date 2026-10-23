@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.4.0"
@@ -20,6 +21,7 @@ class NanoarrowConan(ConanFile):
         "with_ipc": [True, False],
         "with_device": [True, False],
         "with_zstd": [True, False],
+        "with_lz4": [True, False],
     }
     default_options = {
         "shared": False,
@@ -27,6 +29,7 @@ class NanoarrowConan(ConanFile):
         "with_ipc": False,
         "with_device": False,
         "with_zstd": False,
+        "with_lz4": False,
     }
     implements = ["auto_shared_fpic"]
     languages = "C"
@@ -36,6 +39,9 @@ class NanoarrowConan(ConanFile):
             self.options.rm_safe("fPIC")
         if not self.options.with_ipc:
             self.options.rm_safe("with_zstd")
+            self.options.rm_safe("with_lz4")
+        if Version(self.version) < "0.9.0":
+            self.options.rm_safe("with_lz4")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -45,6 +51,8 @@ class NanoarrowConan(ConanFile):
             # flatcc is bundled because nanoarrow requires a version newer than 0.6.1
             if self.options.get_safe("with_zstd"):
                 self.requires("zstd/[>=1.5 <1.6]")
+            if self.options.get_safe("with_lz4"):
+                self.requires("lz4/[>=1.9 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -55,11 +63,13 @@ class NanoarrowConan(ConanFile):
         tc.variables["NANOARROW_DEVICE"] = self.options.with_device
         if self.options.with_ipc:
             tc.variables["NANOARROW_IPC_WITH_ZSTD"] = self.options.with_zstd
-        
+            if Version(self.version) >= "0.9.0":
+                tc.variables["NANOARROW_IPC_WITH_LZ4"] = self.options.with_lz4
+
         tc.variables["NANOARROW_BUILD_TESTS"] = False
         tc.variables["NANOARROW_BUILD_APPS"] = False
         tc.variables["NANOARROW_BUNDLE"] = False
-        tc.variables["NANOARROW_INSTALL_SHARED"] = self.options.shared 
+        tc.variables["NANOARROW_INSTALL_SHARED"] = self.options.shared
         tc.variables["NANOARROW_DEBUG_EXTRA_WARNINGS"] = False
         tc.generate()
 
@@ -75,7 +85,7 @@ class NanoarrowConan(ConanFile):
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        
+
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
@@ -85,7 +95,7 @@ class NanoarrowConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "nanoarrow")
-        
+
         suffix = "_shared" if self.options.shared else "_static"
 
         self.cpp_info.components["nanoarrow_core"].libs = [f"nanoarrow{suffix}"]
@@ -94,13 +104,15 @@ class NanoarrowConan(ConanFile):
             self.cpp_info.components["nanoarrow_core"].defines.append("NANOARROW_EXPORT_DLL")
         if self.settings.build_type == "Debug":
             self.cpp_info.components["nanoarrow_core"].defines.append("NANOARROW_DEBUG")
-        
+
         if self.options.with_ipc:
             self.cpp_info.components["nanoarrow_ipc"].libs = [f"nanoarrow_ipc{suffix}"]
             self.cpp_info.components["nanoarrow_ipc"].requires = ["nanoarrow_core"]
             self.cpp_info.components["nanoarrow_ipc"].set_property("cmake_target_name", "nanoarrow::nanoarrow_ipc")
             if self.options.get_safe("with_zstd"):
                 self.cpp_info.components["nanoarrow_ipc"].requires.append("zstd::zstd")
+            if self.options.get_safe("with_lz4"):
+                self.cpp_info.components["nanoarrow_ipc"].requires.append("lz4::lz4")
 
         if self.options.with_device:
             self.cpp_info.components["nanoarrow_device"].libs = [f"nanoarrow_device{suffix}"]
