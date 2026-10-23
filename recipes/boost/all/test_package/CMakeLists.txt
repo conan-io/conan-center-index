@@ -26,6 +26,13 @@ if(NOT HEADER_ONLY)
         target_link_libraries(test_boost_coroutine PRIVATE Boost::coroutine)
     endif()
 
+    if(WITH_COBALT)
+        find_package(Boost COMPONENTS coroutine REQUIRED)
+        add_executable(test_boost_cobalt cobalt.cpp)
+        target_link_libraries(test_boost_cobalt PRIVATE Boost::cobalt)
+        add_test(NAME cobalt_test COMMAND test_boost_cobalt)
+    endif()
+
     if(WITH_CHRONO)
         find_package(Boost COMPONENTS chrono REQUIRED)
         add_executable(test_boost_chrono chrono.cpp)
