@@ -1,0 +1,16 @@
+{
+  "bundle.symbolic_name": "test_greeter_ds",
+  "bundle.activator": false,
+  "scr": {
+    "version": 1,
+    "components": [
+      {
+        "immediate": true,
+        "implementation-class": "GreeterDSImpl",
+        "service": {
+          "interfaces": ["IGreeter"]
+        }
+      }
+    ]
+  }
+}
