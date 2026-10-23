@@ -81,7 +81,7 @@ class GLibConan(ConanFile):
             # for Linux, gettext is provided by libc
             self.requires("libgettext/0.22", transitive_headers=True, transitive_libs=True)
 
-        if is_apple_os(self):
+        if is_apple_os(self) or self.settings.os == "Android":
             self.requires("libiconv/1.17")
 
     def build_requirements(self):
@@ -98,6 +98,32 @@ class GLibConan(ConanFile):
         tc = PkgConfigDeps(self)
         tc.generate()
         tc = MesonToolchain(self)
+
+        if self.settings.os == "Android" and int(str(self.settings.os.api_level)) < 28 and "libiconv" in self.dependencies:
+            # Android's Bionic libc does not provide iconv before API level 28.
+            # Meson's built-in iconv module only tries "builtin" (compile against
+            # libc) and "system" (cc.find_library) detection methods; it does NOT
+            # support method: 'pkg-config'.  Therefore the only reliable way to
+            # make the iconv dependency discoverable is to inject the libiconv
+            # include and link flags directly into the toolchain so that Meson's
+            # internal compile/link tests succeed.
+
+            iconv = self.dependencies["libiconv"]
+            cpp_info = iconv.cpp_info.aggregated_components()
+
+            # Header search paths so the Meson compile test finds iconv.h
+            for inc in cpp_info.includedirs:
+                tc.c_args.append(f"-I{inc}")
+                tc.cpp_args.append(f"-I{inc}")
+
+            # Library search paths and libraries so the link test resolves libiconv.a
+            for libdir in cpp_info.libdirs:
+                tc.c_link_args.append(f"-L{libdir}")
+                tc.cpp_link_args.append(f"-L{libdir}")
+
+            for lib in cpp_info.libs:
+                tc.c_link_args.append(f"-l{lib}")
+                tc.cpp_link_args.append(f"-l{lib}")
 
         tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
         tc.project_options["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
@@ -232,8 +258,8 @@ class GLibConan(ConanFile):
             self.cpp_info.components["glib-2.0"].frameworks += ["Foundation", "CoreServices", "CoreFoundation"]
             self.cpp_info.components["gio-2.0"].frameworks.append("AppKit")
 
-            if is_apple_os(self):
-                self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
+        if is_apple_os(self) or self.settings.os == "Android":
+            self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
 
         self.cpp_info.components["glib-2.0"].requires.append("pcre2::pcre2")
 
