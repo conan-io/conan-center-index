@@ -61,6 +61,9 @@ class NanodbcConan(ConanFile):
             "apple-clang": "9.1",  # FIXME: this is a guess
         }
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.21]")
+
     def requirements(self):
         if self.options.with_boost:
             self.requires("boost/1.83.0")
