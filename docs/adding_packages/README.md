@@ -1,7 +1,7 @@
 # Adding Packages to ConanCenter
 
-ConanCenterIndex aims to provide the best quality packages of any open source project.
-Any C/C++ project can be made available by contributing a "recipe".
+ConanCenterIndex aims to provide high quality packages of mature, actively used and maintained open source C and C++ projects.
+Projects that meet our [inclusion criteria](inclusion_criteria_for_new_recipes.md) can be made available by contributing a "recipe".
 
 Getting started is easy. Try building an existing package with our [developing recipes](../developing_recipes_locally.md)
 tutorial. To deepen you understanding, start with the [How to write a good recipe](#how-to-provide-a-good-recipe) section.
