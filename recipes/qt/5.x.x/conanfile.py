@@ -455,6 +455,8 @@ class QtConan(ConanFile):
             self.requires("dbus/1.15.8")
         if self.options.qtwayland:
             self.requires("wayland/1.22.0")
+            if self.options.get_safe("opengl", "no") != "no":
+                self.requires("egl/system")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.21.2")
         if self.options.get_safe("with_atspi"):
@@ -1132,6 +1134,8 @@ Prefix = ..""")
                 if self.options.get_safe("with_x11", False):
                     gui_reqs.append("xorg::xorg")
             if self.options.get_safe("opengl", "no") != "no":
+                if self.options.get_safe("qtwayland", False):
+                    gui_reqs.append("egl::egl")
                 gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
                 gui_reqs.append("vulkan-loader::vulkan-loader")
