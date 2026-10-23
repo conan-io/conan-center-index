@@ -61,6 +61,9 @@ class NanodbcConan(ConanFile):
             "apple-clang": "9.1",  # FIXME: this is a guess
         }
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.21]")
+
     def requirements(self):
         if self.options.with_boost:
             self.requires("boost/1.83.0")
@@ -91,11 +94,10 @@ class NanodbcConan(ConanFile):
         tc.cache_variables["NANODBC_DISABLE_ASYNC"] = not self.options.get_safe("async")
         tc.cache_variables["NANODBC_ENABLE_UNICODE"] = self.options.unicode
         tc.cache_variables["NANODBC_ENABLE_BOOST"] = self.options.with_boost
-        tc.cache_variables["NANODBC_DISABLE_LIBCXX"] = self.settings.get_safe("compiler.libcxx") != "libc++"
-        tc.cache_variables["NANODBC_DISABLE_INSTALL"] = False
-        tc.cache_variables["NANODBC_DISABLE_EXAMPLES"] = True
-        tc.cache_variables["NANODBC_DISABLE_TESTS"] = True
-        tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.cache_variables["NANODBC_GENERATE_INSTALL"] = True
+        tc.cache_variables["NANODBC_BUILD_EXAMPLES"] = False
+        tc.cache_variables["NANODBC_BUILD_TESTS"] = False
+
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -103,8 +105,6 @@ class NanodbcConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # No warnings as errors
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "-Werror", "")
 
     def build(self):
         self._patch_sources()
