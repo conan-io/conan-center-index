@@ -50,8 +50,9 @@ class MdnsResponderConan(ConanFile):
         if self.settings.os not in ["Linux", "Windows"]:
             raise ConanInvalidConfiguration("Only Linux and Windows are supported for this package.")
         if Version(self.version) >= "1096.0.2":
-            # recent tarballs (since 1096.0.2) are missing mDNSWindows, so for now, Linux only
-            if self.settings.os == "Windows":
+            # Versions starting from 1096.0.2 up to 1310.140.1 have missed support for mDNSWindows.
+            # Afterwards, it was added again so the next release, "1556.60.9" was again providing Windows support.
+            if Version(self.version) < "1556.60.9" and self.settings.os == "Windows":
                 raise ConanInvalidConfiguration("Windows is not supported for version {}.".format(self.version))
             # TCP_NOTSENT_LOWAT is causing build failures for packages built with gcc 4.9
             # the best check would probably be for Linux kernel v3.12, but for now...
@@ -131,6 +132,8 @@ class MdnsResponderConan(ConanFile):
 
     def _build_msvc(self):
         sln = os.path.join(self.source_folder, "mDNSResponder.sln")
+        if Version(self.version) >= "1790.80.10":
+            sln = os.path.join(self.source_folder, "mDNSWindows", "mDNSResponder.sln")
         if "MD" in self.settings.compiler.runtime:
             # could use glob and replace_in_file(strict=False, ...)
             dll_vcxproj = os.path.join(self.source_folder, "mDNSWindows", "DLL", "dnssd.vcxproj")
