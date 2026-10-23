@@ -1,0 +1,4 @@
+sources:
+  "1.14.1":
+    url: "https://github.com/DaosPath/handoffkit/releases/download/v1.14.1/handoffkit-cpp-1.14.1.tar.gz"
+    sha256: "d5b2872c05b3538a576122524da6e2a452d357d0299c903586280882adce9269"
