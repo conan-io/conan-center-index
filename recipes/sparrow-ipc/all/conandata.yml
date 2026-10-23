@@ -1,0 +1,4 @@
+sources:
+  "2.0.0":
+    url: "https://github.com/sparrow-org/sparrow-ipc/archive/refs/tags/2.0.0.tar.gz"
+    sha256: "9f9eedf83578c894486e4d1ad2ac029df2d6883a090f236c86834e8d32102fa7"
