@@ -553,7 +553,7 @@ class QtConan(ConanFile):
             elif self.settings.compiler == "clang":
                 if self.settings.arch == "x86":
                     return "linux-clang-libc++-32" if self.settings.compiler.libcxx == "libc++" else "linux-clang-32"
-                elif self.settings.arch == "x86_64":
+                else:
                     return "linux-clang-libc++" if self.settings.compiler.libcxx == "libc++" else "linux-clang"
 
         elif self.settings.os == "Macos":
@@ -817,7 +817,7 @@ class QtConan(ConanFile):
                 else:
                     args += [f"-xplatform {xplatform_val}"]
             else:
-                self.output.warn("host not supported: %s %s %s %s" %
+                raise ConanInvalidConfiguration("host not supported: %s %s %s %s" %
                                  (self.settings.os, self.settings.compiler,
                                   self.settings.compiler.version, self.settings.arch))
         if self.options.cross_compile:
