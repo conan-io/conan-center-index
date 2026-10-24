@@ -3,6 +3,6 @@ project(test_package CXX)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gui Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets)
-find_package(qt${QT_VERSION_MAJOR}advanceddocking REQUIRED CONFIG)
+find_package(${ADS_CMAKE_FILE_NAME} REQUIRED CONFIG)
 add_executable(example example.cpp)
-target_link_libraries(example ads::qt${QT_VERSION_MAJOR}advanceddocking Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(example ${ADS_CMAKE_TARGET_NAME} Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Widgets)
