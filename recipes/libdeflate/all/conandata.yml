@@ -1,4 +1,7 @@
 sources:
+  "1.26":
+    url: "https://github.com/ebiggers/libdeflate/releases/download/v1.26/libdeflate-1.26.tar.gz"
+    sha256: "125856d4656e0feab660f94842f835923410c9281fedbcee64598c918da42b5a"
   "1.25":
     url: "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.25.tar.gz"
     sha256: "d11473c1ad4c57d874695e8026865e38b47116bbcb872bfc622ec8f37a86017d"
