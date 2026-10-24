@@ -1,7 +1,12 @@
 sources:
+  "6.3":
+    url: "https://github.com/mikke89/RmlUi/archive/refs/tags/6.3.tar.gz"
+    sha256: "d977298bb6147610e5984d5db85ddf284020d655a8713913f6982074f1dbdede"
   "6.2":
     url: "https://github.com/mikke89/RmlUi/archive/refs/tags/6.2.tar.gz"
     sha256: "814c3ff7b9666280338d8f0dda85979f5daf028d01c85fc8975431d1e2fd8e8b"
 patches:
+  "6.3":
+    - patch_file: "patches/6.3-unvendor-deps.patch"
   "6.2":
     - patch_file: "patches/6.2-unvendor-deps.patch"
