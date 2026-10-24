@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches, rmdir
+from conan.tools.scm import Version
 import os
 
 
@@ -68,7 +69,9 @@ class RmluiConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["RMLUI_LUA_BINDINGS"] = self.options.with_lua_bindings
         tc.cache_variables["RMLUI_SAMPLES"] = False
-        tc.cache_variables["RMLUI_CUSTOM_RTTI"] = False
+        # RMLUI_CUSTOM_RTTI was dropped in 6.3
+        if Version(self.version) < "6.3":
+            tc.cache_variables["RMLUI_CUSTOM_RTTI"] = False
         tc.cache_variables["RMLUI_PRECOMPILED_HEADERS"] = True
         tc.cache_variables["RMLUI_TRACY_PROFILING"] = False
         tc.cache_variables["RMLUI_THIRDPARTY_CONTAINERS"] = True
