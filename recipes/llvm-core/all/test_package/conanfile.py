@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import cmake_layout, CMakeDeps, CMakeToolchain, CMake
+from conan.tools.cmake import cmake_layout, CMakeConfigDeps, CMakeToolchain, CMake
 from conan.tools.env import VirtualRunEnv
 from conan.tools.build import can_run
 
@@ -20,8 +20,7 @@ class TestPackageConan(ConanFile):
         self.tool_requires("cmake/[>=3.20 <4]")
 
     def generate(self):
-        deps = CMakeDeps(self)
-        deps.check_components_exist = True
+        deps = CMakeConfigDeps(self)
         deps.generate()
 
         tc = CMakeToolchain(self)
