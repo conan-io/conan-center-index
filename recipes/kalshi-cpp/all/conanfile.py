@@ -31,19 +31,24 @@ class KalshiCppConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/[>=3 <4]")
-        self.requires("libcurl/[>=7.78.0 <9]")
+        self.requires("libcurl/[>=7.85 <9]")
         self.requires("libwebsockets/4.5.8")
         # Header-only and used only inside the library; installed headers never include it.
         self.requires("glaze/8.4.0", visible=False)
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.31 <5]")
+
     @property
     def _min_compiler_versions(self):
         # The oldest releases that ship std::expected and the rest of the C++23 it uses.
-        return {"gcc": "13", "clang": "17", "apple-clang": "15", "msvc": "194"}
+        return {"gcc": "13", "clang": "18", "apple-clang": "15", "msvc": "194"}
 
     def validate(self):
         check_min_cppstd(self, 23)
         minimum = self._min_compiler_versions.get(str(self.settings.compiler))
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libc++":
+            minimum = "19"
         if minimum and Version(self.settings.compiler.version) < minimum:
             raise ConanInvalidConfiguration(
                 f"{self.ref} needs {self.settings.compiler} {minimum} or newer for C++23")
