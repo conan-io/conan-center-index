@@ -1,4 +1,7 @@
 sources:
+  "9.3.2":
+    url: "https://github.com/simdutf/simdutf/archive/v9.3.2.tar.gz"
+    sha256: "d92a0a4ce216dcebf18af20fed7ea7279fa535683f790fdaeed39827a234f567"
   "9.0.0":
     url: "https://github.com/simdutf/simdutf/archive/v9.0.0.tar.gz"
     sha256: "fd2ce975f29809a975a8da8843cfb3a7265af3f71be548f199d23cf65e101764"
