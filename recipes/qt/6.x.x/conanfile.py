@@ -1219,6 +1219,9 @@ class QtConan(ConanFile):
                 ]
                 # https://github.com/qt/qtbase/blob/6.8.3/src/plugins/platforms/windows/CMakeLists.txt#L204
                 self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs.append("uiautomationcore")
+                if Version(self.version) >= "6.12.0":
+                    # https://github.com/qt/qtbase/blob/v6.12.0/src/plugins/platforms/windows/CMakeLists.txt#L72
+                    self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs.append("mscms")
             elif self.settings.os == "Android":
                 _create_plugin("QAndroidIntegrationPlugin", "qtforandroid", "platforms", ["Core", "Gui"])
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/android/CMakeLists.txt#L68-L70
@@ -1239,6 +1242,9 @@ class QtConan(ConanFile):
                     self.cpp_info.components["qtQCocoaIntegrationPlugin"].frameworks = [
                         "AppKit", "Carbon", "CoreServices", "CoreVideo", "IOKit", "IOSurface", "Metal", "QuartzCore"
                     ]
+                    if Version(self.version) >= "6.12.0":
+                        # https://github.com/qt/qtbase/blob/v6.12.0/src/plugins/platforms/cocoa/CMakeLists.txt#L71
+                        self.cpp_info.components["qtQCocoaIntegrationPlugin"].frameworks.append("ScreenCaptureKit")
                 if self.settings.os in ["Macos", "iOS"]:
                     # https://github.com/qt/qtbase/blob/v6.5.3/src/gui/CMakeLists.txt#L963
                     self.cpp_info.components["qtGui"].frameworks.append("Metal")
