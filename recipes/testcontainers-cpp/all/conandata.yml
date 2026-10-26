@@ -1,0 +1,4 @@
+sources:
+  "0.1.0":
+    url: "https://github.com/cppudge/testcontainers-cpp/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "25c986cb766a8979aef25e0423f278d20d52f00460e191524dcfd251842ac12d"
