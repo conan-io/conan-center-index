@@ -81,7 +81,7 @@ class Exiv2Conan(ConanFile):
         if self.options.with_curl:
             self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.get_safe("with_brotli"):
-            self.requires("brotli/1.1.0")
+            self.requires("brotli/[>=1.1.1 <2]")
         if self.options.get_safe("with_inih"):
             self.requires("inih/58")
 
