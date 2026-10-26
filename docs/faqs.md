@@ -32,7 +32,7 @@ This section gathers the most common questions from the community related to pac
   * [Can I install packages from the system package manager?](#can-i-install-packages-from-the-system-package-manager)
   * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)
   * [Why not add an option to build unit tests](#why-not-add-an-option-to-build-unit-tests)
-  * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)=
+  * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)
   * [How to protect my project from breaking changes in recipes?](#how-to-protect-my-project-from-breaking-changes-in-recipes)
   * [What's the policy on version ranges?](#whats-the-policy-on-version-ranges)
   * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)
