@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm
@@ -58,14 +59,12 @@ class DrogonConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "1.9.14":
-            del self.options.with_spdlog
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
             self.options["trantor"].shared = True
-        if self.options.get_safe("with_spdlog"):
+        if self.options.with_spdlog:
             self.options["trantor"].with_spdlog = True
         if not self.options.with_orm:
             del self.options.with_postgres
@@ -79,6 +78,8 @@ class DrogonConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
+        if self.options.with_spdlog and not self.dependencies["trantor"].options.with_spdlog:
+            raise ConanInvalidConfiguration(f"{self.ref} with_spdlog=True requires trantor/*:with_spdlog=True")
 
     def requirements(self):
         self.requires("trantor/[>=1.5.25 <2]", transitive_headers=True, transitive_libs=True)
@@ -103,8 +104,8 @@ class DrogonConan(ConanFile):
             self.requires("hiredis/1.2.0")
         if self.options.get_safe("with_yaml_cpp", False):
             self.requires("yaml-cpp/0.8.0")
-        if self.options.get_safe("with_spdlog"):
-            self.requires("spdlog/[>=1.13 <2]", transitive_headers=True)
+        if self.options.with_spdlog:
+            self.requires("spdlog/[>=1.13 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -132,7 +133,7 @@ class DrogonConan(ConanFile):
         if is_msvc(self):
             tc.cache_variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus /EHsc"
         tc.cache_variables["USE_SUBMODULE"] = False
-        if self.options.get_safe("with_spdlog"):
+        if self.options.with_spdlog:
             tc.cache_variables["USE_SPDLOG"] = True
         tc.generate()
         deps = CMakeDeps(self)
