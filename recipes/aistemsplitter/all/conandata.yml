@@ -1,0 +1,4 @@
+sources:
+  "0.1.0":
+    url: "https://github.com/aistemsplitter/aistemsplitter-cpp/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "ae68b07faf6473b3539b7406f9f87ee502162f9356c1a21b8e77b3fa56217515"
