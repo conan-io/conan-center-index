@@ -58,11 +58,11 @@ class JsonSchemaValidatorConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["JSON_VALIDATOR_BUILD_TESTS"] = False
-        tc.variables["JSON_VALIDATOR_BUILD_EXAMPLES"] = False
-        tc.variables["JSON_VALIDATOR_INSTALL"] = True
-        tc.variables["JSON_VALIDATOR_SHARED_LIBS"] = self.options.shared
-        tc.variables["CMAKE_INSTALL_RUNTIMEDIR"] = "bin"
+        tc.cache_variables["JSON_VALIDATOR_BUILD_TESTS"] = False
+        tc.cache_variables["JSON_VALIDATOR_BUILD_EXAMPLES"] = False
+        tc.cache_variables["JSON_VALIDATOR_INSTALL"] = True
+        tc.cache_variables["JSON_VALIDATOR_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["CMAKE_INSTALL_RUNTIMEDIR"] = "bin"
         if self.options.json_diagnostics:
             tc.preprocessor_definitions["JSON_DIAGNOSTICS"] = '1'
         tc.generate()
