@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import replace_in_file, apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir, save
+from conan.tools.files import replace_in_file, copy, get, rm, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
@@ -25,9 +25,6 @@ class XadConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -36,7 +33,6 @@ class XadConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
         # The VERSION file in the release archive still carries the "-dev" suffix
         save(self, os.path.join(self.source_folder, "VERSION"), f"{self.version}\n")
         # Version.hpp.in refers to XAD_VERSION_* while the project defines xad_VERSION_*, which leaves the numeric macros empty
@@ -77,8 +73,15 @@ class XadConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "XAD")
         self.cpp_info.set_property("cmake_target_name", "XAD::xad")
-        # On Windows the library name carries the toolset, runtime and build type
-        self.cpp_info.libs = collect_libs(self)
+        if is_msvc(self):
+            # Upstream names the library xad<bits>_vc14<x>_<md|mt>[d]
+            bits = "64" if self.settings.arch in ("x86_64", "armv8") else "32"
+            toolset = f"vc14{str(self.settings.compiler.version)[2]}"
+            runtime = "mt" if is_msvc_static_runtime(self) else "md"
+            debug = "d" if self.settings.build_type == "Debug" else ""
+            self.cpp_info.libs = [f"xad{bits}_{toolset}_{runtime}{debug}"]
+        else:
+            self.cpp_info.libs = ["xad_d" if self.settings.build_type == "Debug" else "xad"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "pthread"]
         if is_msvc(self) and self.settings.build_type == "Debug":
