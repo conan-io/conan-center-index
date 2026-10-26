@@ -1,0 +1,17 @@
+diff --git a/rapidhash.h b/rapidhash.h
+index cc18a20..c5ca0f3 100755
+--- a/rapidhash.h
++++ b/rapidhash.h
+@@ -63,7 +63,11 @@
+  # ifndef RAPIDHASH_INLINE
+  #   define RAPIDHASH_INLINE RAPIDHASH_ALWAYS_INLINE
+  # endif
+- # define RAPIDHASH_INLINE_CONSTEXPR RAPIDHASH_ALWAYS_INLINE constexpr
++ # if __cplusplus >= 201402L && !defined(_MSC_VER)
++ #   define RAPIDHASH_INLINE_CONSTEXPR RAPIDHASH_ALWAYS_INLINE constexpr
++ # else
++ #   define RAPIDHASH_INLINE_CONSTEXPR RAPIDHASH_ALWAYS_INLINE
++ # endif
+  #else
+  # define RAPIDHASH_NOEXCEPT
+  # define RAPIDHASH_CONSTEXPR static const
