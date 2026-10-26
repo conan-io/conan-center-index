@@ -71,7 +71,7 @@ class LibZipConan(ConanFile):
 
         if self.options.crypto == "openssl":
             self.requires("openssl/[>=1.1 <4]")
-        elif self.options.crypto == "mbedtls":
+        elif Version(self.version) < "1.12" and self.options.crypto == "mbedtls":
             self.requires("mbedtls/3.5.0")
         elif self.options.crypto == "gnutls":
             self.requires("gnutls/3.8.2")
@@ -85,6 +85,11 @@ class LibZipConan(ConanFile):
 
         if self.options.crypto == "CommonCrypto" and not is_apple_os(self):
             raise ConanInvalidConfiguration("CommonCrypto is only available on Apple platforms")
+
+        if Version(self.version) >= "1.12" and self.options.crypto == "mbedtls":
+            raise ConanInvalidConfiguration(
+                "libzip >= 1.12 no longer supports the mbedtls crypto backend"
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -108,7 +113,8 @@ class LibZipConan(ConanFile):
         tc.variables["ENABLE_ZSTD"] = self.options.with_zstd
         tc.variables["ENABLE_COMMONCRYPTO"] = self.options.crypto == "CommonCrypto"
         tc.variables["ENABLE_GNUTLS"] = self.options.crypto == "gnutls"
-        tc.variables["ENABLE_MBEDTLS"] = self.options.crypto == "mbedtls"
+        if Version(self.version) < "1.12":
+            tc.variables["ENABLE_MBEDTLS"] = self.options.crypto == "mbedtls"
         tc.variables["ENABLE_OPENSSL"] = self.options.crypto == "openssl"
         tc.variables["ENABLE_WINDOWS_CRYPTO"] = self.options.crypto == "win32"
         tc.generate()
@@ -151,7 +157,7 @@ class LibZipConan(ConanFile):
             self.cpp_info.components["_libzip"].requires.append("zstd::zstd")
         if self.options.crypto == "openssl":
             self.cpp_info.components["_libzip"].requires.append("openssl::crypto")
-        elif self.options.crypto == "mbedtls":
+        elif Version(self.version) < "1.12" and self.options.crypto == "mbedtls":
             self.cpp_info.components["_libzip"].requires.append("mbedtls::mbedtls")
         elif self.options.crypto == "gnutls":
             self.cpp_info.components["_libzip"].requires.append("gnutls::gnutls")
