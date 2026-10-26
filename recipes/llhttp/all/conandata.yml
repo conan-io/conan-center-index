@@ -1,4 +1,7 @@
 sources:
+  "9.4.3":
+    url: "https://github.com/nodejs/llhttp/archive/refs/tags/release/v9.4.3.tar.gz"
+    sha256: "1eb813c7437b31a87496a1cd3ed79f00746720f5e7e29c79b42c02cb69f36c39"
   "9.3.0":
     url: https://github.com/nodejs/llhttp/archive/refs/tags/release/v9.3.0.tar.gz
     sha256: "1a2b45cb8dda7082b307d336607023aa65549d6f060da1d246b1313da22b685a"
