@@ -12,7 +12,6 @@ Both methods often use build helpers to build binaries and install them into the
     * [Header Only](#header-only)
     * [CMake](#cmake)
     * [Autotools](#autotools)
-    * [No Upstream Build Scripts](#no-upstream-build-scripts)
     * [System Packages](#system-packages)<!-- endToc -->
 
 ## Build Method
@@ -45,13 +44,6 @@ For C/C++ projects which use CMake for building, you can take a look on [cmake p
 ### Autotools
 
 There is an [autotools package template](../package_templates/autotools_package/) amiable to start from.
-
-### No Upstream Build Scripts
-
-For cases where a project only offers source files but does not provide a build script, you can add CMake support.
-However, it is essential to first contact the upstream maintainers and open a pull request (PR) offering building support.
-If your PR is rejected because the author does not want any kind of build script, or if the project is abandoned, Conan Center Index (CCI) will consider accepting your build script based on the effort required to maintain it, as we aim to avoid adding scripts that may require significant ongoing maintenance.
-Take a look at [Bzip2](https://github.com/conan-io/conan-center-index/blob/master/recipes/bzip2/all/CMakeLists.txt) as example.
 
 ### System Packages
 
