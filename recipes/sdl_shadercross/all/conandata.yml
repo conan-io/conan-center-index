@@ -1,0 +1,4 @@
+sources:
+  "cci.20260903":
+    url: "https://github.com/libsdl-org/SDL_shadercross/archive/1ff05bec573988a98ef9e0260b4da44f512b8367.tar.gz"
+    sha256: "60aae35ff71bd1d5f85b363e9d077a86bb27dd36333c42685e56c2fd541174d2"
