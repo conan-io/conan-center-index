@@ -292,6 +292,10 @@ class QtConan(ConanFile):
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "15":
             raise ConanInvalidConfiguration("apple-clang >= 14 is required by qt >= 6.8.3")
 
+        if Version(self.version) >= "6.12.0" and self.settings.compiler == "apple-clang" \
+                and Version(self.settings.compiler.version) < "16":
+            raise ConanInvalidConfiguration("apple-clang >= 16 (Xcode 16) is required by qt >= 6.12.0")
+
         if self.options.get_safe("qtwebengine"):
             if not self.options.shared:
                 raise ConanInvalidConfiguration("Static builds of Qt WebEngine are not supported")
@@ -422,7 +426,7 @@ class QtConan(ConanFile):
             self.requires("md4c/[>=0.4.8 <1]") # stable API since 0.3x as per md4c wiki
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.21.1 <4]")
+        self.tool_requires("cmake/[>=3.25]")
         self.tool_requires("ninja/[>=1.12 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
@@ -685,11 +689,13 @@ class QtConan(ConanFile):
 
         # patching in source method because of no_copy_source attribute
         apply_conandata_patches(self)
-        for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
-            replace_in_file(self, os.path.join(self.source_folder, "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
-                                  "  if (enable_precompiled_headers) {\n    if (is_win) {",
-                                  "  if (enable_precompiled_headers) {\n    if (false) {"
-                                  )
+        if Version(self.version) < "6.12.0":
+            # qtwebengine is no longer part of qt-everywhere-src since 6.12
+            for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
+                replace_in_file(self, os.path.join(self.source_folder, "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
+                                      "  if (enable_precompiled_headers) {\n    if (is_win) {",
+                                      "  if (enable_precompiled_headers) {\n    if (false) {"
+                                      )
 
         for f in ["FindPostgreSQL.cmake"]:
             file = os.path.join(self.source_folder, "qtbase", "cmake", f)
@@ -1210,6 +1216,9 @@ class QtConan(ConanFile):
                 ]
                 # https://github.com/qt/qtbase/blob/6.8.3/src/plugins/platforms/windows/CMakeLists.txt#L204
                 self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs.append("uiautomationcore")
+                if Version(self.version) >= "6.12.0":
+                    # https://github.com/qt/qtbase/blob/v6.12.0/src/plugins/platforms/windows/CMakeLists.txt#L72
+                    self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs.append("mscms")
             elif self.settings.os == "Android":
                 _create_plugin("QAndroidIntegrationPlugin", "qtforandroid", "platforms", ["Core", "Gui"])
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/android/CMakeLists.txt#L68-L70
@@ -1227,21 +1236,24 @@ class QtConan(ConanFile):
                     self.cpp_info.components["qtGui"].frameworks += ["AppKit", "Carbon"]
                     _create_plugin("QCocoaIntegrationPlugin", "qcocoa", "platforms", ["Core", "Gui"])
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/cocoa/CMakeLists.txt#L51-L58
-                    self.cpp_info.components["QCocoaIntegrationPlugin"].frameworks = [
+                    self.cpp_info.components["qtQCocoaIntegrationPlugin"].frameworks = [
                         "AppKit", "Carbon", "CoreServices", "CoreVideo", "IOKit", "IOSurface", "Metal", "QuartzCore"
                     ]
+                    if Version(self.version) >= "6.12.0":
+                        # https://github.com/qt/qtbase/blob/v6.12.0/src/plugins/platforms/cocoa/CMakeLists.txt#L71
+                        self.cpp_info.components["qtQCocoaIntegrationPlugin"].frameworks.append("ScreenCaptureKit")
                 if self.settings.os in ["Macos", "iOS"]:
                     # https://github.com/qt/qtbase/blob/v6.5.3/src/gui/CMakeLists.txt#L963
                     self.cpp_info.components["qtGui"].frameworks.append("Metal")
                 if self.settings.os in ["iOS", "tvOS"]:
                     _create_plugin("QIOSIntegrationPlugin", "qios", "platforms", [])
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/ios/CMakeLists.txt#L32-L37
-                    self.cpp_info.components["QIOSIntegrationPlugin"].frameworks = [
+                    self.cpp_info.components["qtQIOSIntegrationPlugin"].frameworks = [
                         "AudioToolbox", "Foundation", "Metal", "QuartzCore", "UIKit", "CoreGraphics"
                     ]
                     if self.settings.os != "tvOS":
                         # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/ios/CMakeLists.txt#L66-L68
-                        self.cpp_info.components["QIOSIntegrationPlugin"].frameworks += [
+                        self.cpp_info.components["qtQIOSIntegrationPlugin"].frameworks += [
                             "AssetsLibrary", "UniformTypeIdentifiers", "Photos",
                         ]
                 elif self.settings.os == "watchOS":
@@ -1663,6 +1675,8 @@ class QtConan(ConanFile):
                     _add_build_module(component_name, helper_module)
                 for helper_module in glob.glob(os.path.join(cmake_dir, "Qt6QmlPublic*Helpers.cmake")):
                     _add_build_module(component_name, helper_module)
+
+                self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
 
             elif component_name.endswith("Tools") and component_name[:-5] in self.cpp_info.components:
                 module = os.path.join("lib", "cmake", f"{m}", f"{m[:-5]}Macros.cmake")
