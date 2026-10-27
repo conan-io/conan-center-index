@@ -63,8 +63,9 @@ class LibSerialPortConan(ConanFile):
         if not is_msvc(self):
             self.tool_requires("libtool/2.4.7")
             if self.settings_build.os == "Windows":
-                # MinGW builds with autotools need a bash shell, provided via tools.microsoft.bash:path
                 self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
