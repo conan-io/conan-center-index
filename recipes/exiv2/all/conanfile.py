@@ -1,13 +1,12 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd, check_max_cppstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import get, copy, rmdir, save, export_conandata_patches, apply_conandata_patches, replace_in_file
+from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, check_min_vs
 from conan.tools.scm import Version
 import os
-import sys
-import textwrap
+
 
 required_conan_version = ">=1.53.0"
 
@@ -44,13 +43,9 @@ class Exiv2Conan(ConanFile):
         "win_unicode": False,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) >= "0.28.0":
             del self.options.win_unicode
         else:
             del self.options.with_brotli
@@ -86,25 +81,21 @@ class Exiv2Conan(ConanFile):
             self.requires("inih/58")
 
     def validate(self):
-        if Version(self.version) >= "0.28.0":
-            min_cppstd = 17
+        min_cppstd = 17
 
-            check_min_cppstd(self, min_cppstd)
-            check_min_vs(self, 191)
+        check_min_cppstd(self, min_cppstd)
+        check_min_vs(self, 191)
 
-            compilers_minimum_version = {
-                "gcc": "8",
-                "clang": "5",
-                "apple-clang": "10",
-            }
-            minimum_version = compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{min_cppstd}, which your compiler does not fully support."
-                )
-        else:
-            # https://github.com/Exiv2/exiv2/tree/v0.27.7#217-building-with-c11-and-other-compilers
-            check_max_cppstd(self, 14)
+        compilers_minimum_version = {
+            "gcc": "8",
+            "clang": "5",
+            "apple-clang": "10",
+        }
+        minimum_version = compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{min_cppstd}, which your compiler does not fully support."
+            )
 
         if self.options.with_xmp == "external":
             raise ConanInvalidConfiguration("adobe-xmp-toolkit is not available on cci (yet)")
@@ -124,12 +115,9 @@ class Exiv2Conan(ConanFile):
         tc.variables["EXIV2_ENABLE_WEBREADY"] = self.options.with_curl
         tc.variables["EXIV2_ENABLE_CURL"] = self.options.with_curl
         tc.variables["EXIV2_ENABLE_SSH"] = False
-        if Version(self.version) >= "0.28.0":
-            tc.variables["EXIV2_ENABLE_BMFF"] = self.options.with_brotli
-            tc.variables["EXIV2_ENABLE_BROTLI"] = self.options.with_brotli
-            tc.variables["EXIV2_ENABLE_INIH"] = self.options.with_inih
-        else:
-            tc.variables["EXIV2_ENABLE_WIN_UNICODE"] = self.options.win_unicode
+        tc.variables["EXIV2_ENABLE_BMFF"] = self.options.with_brotli
+        tc.variables["EXIV2_ENABLE_BROTLI"] = self.options.with_brotli
+        tc.variables["EXIV2_ENABLE_INIH"] = self.options.with_inih
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
         if is_msvc(self):
@@ -142,7 +130,6 @@ class Exiv2Conan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
                         "POSITION_INDEPENDENT_CODE ON", "")
         # Enforce usage of FindEXPAT.cmake
@@ -189,10 +176,4 @@ class Exiv2Conan(ConanFile):
 
         # component exiv2-xmp
         if self.options.with_xmp == "bundled":
-            if Version(self.version) < "0.28.0":
-                self.cpp_info.components["exiv2-xmp"].set_property("cmake_target_name", "exiv2-xmp")
-                self.cpp_info.components["exiv2-xmp"].libs = ["exiv2-xmp"]
-                self.cpp_info.components["exiv2-xmp"].requires = [ "expat::expat" ]
-                self.cpp_info.components["exiv2lib"].requires.append("exiv2-xmp")
-            else:
-                self.cpp_info.components["exiv2lib"].requires.append("expat::expat")
+            self.cpp_info.components["exiv2lib"].requires.append("expat::expat")
