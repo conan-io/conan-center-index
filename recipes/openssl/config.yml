@@ -6,6 +6,8 @@
 #        unless required by the above.
 
 versions:
+  "4.1.0":
+    folder: "4.x.x"
   "4.0.3":
     folder: "4.x.x"
   "3.6.5":
