@@ -109,6 +109,13 @@ class LuajitConan(ConanFile):
             args.append(f"MACOSX_DEPLOYMENT_TARGET={self._macosx_deployment_target}")
         if cross_building(self) and self._target_sys:
             args.append(f"TARGET_SYS={self._target_sys}")
+        if self.settings.os == "Android":
+            # INFO: The NDK compiler only comes through the CC environment variable, which the Makefile's CC overrides,
+            #       and CC must stay the host compiler for the host tools anyway
+            ndk = AutotoolsToolchain(self).android_cross_flags
+            if ndk:
+                args += [f"STATIC_CC={ndk['CC']}", f"DYNAMIC_CC=\"{ndk['CC']} -fPIC\"", f"TARGET_LD={ndk['CC']}",
+                         f"TARGET_AR=\"{ndk['AR']} rcus\"", f"TARGET_STRIP={ndk['STRIP']}"]
         return args
 
     @property
