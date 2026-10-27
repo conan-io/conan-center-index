@@ -62,7 +62,16 @@ class LuajitConan(ConanFile):
             if self.options.shared and is_apple_os(self):
                 # INFO: changing install names or rpaths can't be redone because larger updated load commands do not fit
                 tc.extra_ldflags.append("-headerpad_max_install_names")
-            tc.generate()
+            env = tc.environment()
+            if cross_building(self):
+                # INFO: LuaJIT's Makefile also adds CFLAGS/LDFLAGS to the host tools (minilua, buildvm), which are run
+                #       during the build, so pass the toolchain flags through the target-only variables instead
+                env.unset("CFLAGS")
+                env.unset("LDFLAGS")
+                env.define("TARGET_CFLAGS", tc.cflags)
+                env.define("TARGET_LDFLAGS", tc.ldflags)
+                env.define("TARGET_SHLDFLAGS", tc.ldflags)
+            tc.generate(env)
 
     def _patch_sources(self):
         if not is_msvc(self):
@@ -96,9 +105,18 @@ class LuajitConan(ConanFile):
     @property
     def _make_arguments(self):
         args = [f"PREFIX={unix_path(self, self.package_folder)}"]
-        if is_apple_os(self) and self._macosx_deployment_target:
+        if self.settings.os == "Macos" and self._macosx_deployment_target:
             args.append(f"MACOSX_DEPLOYMENT_TARGET={self._macosx_deployment_target}")
+        if cross_building(self) and self._target_sys:
+            args.append(f"TARGET_SYS={self._target_sys}")
         return args
+
+    @property
+    def _target_sys(self):
+        # INFO: Only needed when cross compiling: LuaJIT derives it from the host otherwise
+        if is_apple_os(self) and self.settings.os != "Macos":
+            return "iOS"
+        return {"Macos": "Darwin", "Linux": "Linux", "Android": "Linux", "Windows": "Windows"}.get(str(self.settings.os))
 
     @property
     def _luajit_include_folder(self):
