@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
 required_conan_version = ">=2.1"
@@ -26,6 +26,9 @@ class ToomanycooksConan(ConanFile):
         "with_hwloc": True,
         "with_asio": None,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def requirements(self):
         if self.options.with_hwloc:
@@ -56,6 +59,7 @@ class ToomanycooksConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
