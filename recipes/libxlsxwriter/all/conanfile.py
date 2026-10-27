@@ -66,7 +66,10 @@ class LibxlsxwriterConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "1.2.1":
-            self.tool_requires("cmake/[>=3.16 <4]")
+            if is_msvc(self) and Version(str(self.settings.compiler.version)) >= "195":
+                self.tool_requires("cmake/[>=4.2 <5]")
+            else:
+                self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
