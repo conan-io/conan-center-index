@@ -2,3 +2,6 @@ sources:
   "2.20.0":
     url: "https://github.com/nanodbc/nanodbc/archive/v2.20.0.tar.gz"
     sha256: "9ff08bf1b7386e15e73f8c9146c91960c7dbce518feed353682799dbe55bd6f3"
+  "3.0.8":
+    url: "https://github.com/nanodbc/nanodbc/archive/v3.0.8.tar.gz"
+    sha256: "bbb8ec400f0f84a7f6d61d4a4360e4c90eece6add3735e6b0b451ab90ca76f3e"
