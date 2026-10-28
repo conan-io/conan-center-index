@@ -1,0 +1,12 @@
+sources:
+  "3.8.13":
+    url: "https://github.com/CppMicroServices/CppMicroServices/archive/refs/tags/v3.8.13.zip"
+    sha256: "5cc98e45688dc21f6a10548a7708f8844e25ff30e2c788d2b44976a132be48be"
+  "3.8.12":
+    url: "https://github.com/CppMicroServices/CppMicroServices/archive/refs/tags/v3.8.12.zip"
+    sha256: "97d62b7ff46031aeb4d220425aea197027291f399d2a651e4da68ce3aa0649d9"
+patches:
+  "3.8.12":
+    - patch_file: "patches/3.8.12/0001-conan-shared-dep-build-fixes.patch"
+      patch_description: "Support shared third-party deps: gate miniz/spdlog symbol-hiding on static linkage (US_MINIZ_SHARED / US_SPDLOG_SHARED), and re-supply DYLD_LIBRARY_PATH to usResourceCompiler on macOS (SIP strips it via /bin/sh)"
+      patch_type: "conan"
