@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir
 import os
@@ -34,10 +35,10 @@ class AwsCIO(ConanFile):
     def requirements(self):
         # These versions come from aws-sdl-cpp prefetch_crt_dependency.sh file,
         # dont bump them independently, check the file and update all the dependencies at once
-        self.requires("aws-c-common/0.12.5", transitive_headers=True, transitive_libs=True)
-        self.requires("aws-c-cal/0.9.8")
+        self.requires("aws-c-common/0.14.5", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-cal/0.9.15")
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
-            self.requires("s2n/1.5.27")
+            self.requires("s2n/1.7.7")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -46,6 +47,11 @@ class AwsCIO(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.cache_variables['AWS_STATIC_MSVC_RUNTIME_LIBRARY'] = self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime") == "static"
+        if is_apple_os(self):
+            # Since 0.27 upstream compiles s2n-tls in by default on macOS, but Apple Secure Transport remains the default
+            # TLS backend at runtime (s2n is only used if AWS_CRT_USE_NON_FIPS_TLS_13 is set, to get TLS 1.3).
+            # Disable it to avoid pulling s2n and openssl into the Apple dependency graph
+            tc.cache_variables["USE_S2N"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
