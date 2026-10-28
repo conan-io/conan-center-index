@@ -1,7 +1,13 @@
 sources:
   "1.0.2":
-    url: "https://git.openldap.org/openldap/openldap/-/archive/LMDB_1.0.2/openldap-LMDB_1.0.2.tar.gz"
+    url:
+      - "https://git.openldap.org/openldap/openldap/-/archive/LMDB_1.0.2/openldap-LMDB_1.0.2.tar.gz"
+      - "https://github.com/openldap/openldap/archive/refs/tags/LMDB_1.0.2.tar.gz"
+      - "https://gitlab.com/openldap/openldap/-/archive/LMDB_1.0.2/openldap-LMDB_1.0.2.tar.gz"
     sha256: "38a029bb3e29820380e18a2dfdbe906bbc5b322132c63274c5e4ed7833821752"
   "0.9.32":
-    url: "https://git.openldap.org/openldap/openldap/-/archive/LMDB_0.9.32/openldap-LMDB_0.9.32.tar.gz"
+    url:
+      - "https://git.openldap.org/openldap/openldap/-/archive/LMDB_0.9.32/openldap-LMDB_0.9.32.tar.gz"
+      - "https://github.com/openldap/openldap/archive/refs/tags/LMDB_0.9.32.tar.gz"
+      - "https://gitlab.com/openldap/openldap/-/archive/LMDB_0.9.32/openldap-LMDB_0.9.32.tar.gz"
     sha256: "c0937223bba3c37c896809883a3c9b43049354578b239d6ed2476236a87f40c9"
