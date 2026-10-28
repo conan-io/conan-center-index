@@ -1,5 +1,7 @@
+Backport of https://github.com/drogonframework/drogon/pull/2634
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index a03b8d7..c4277a5 100644
+index a03b8d7e02..c4277a5b26 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -30,7 +30,7 @@ CMAKE_DEPENDENT_OPTION(LIBPQ_BATCH_MODE "Use batch mode for libpq" ON "BUILD_POS
@@ -8,6 +10,6 @@ index a03b8d7..c4277a5 100644
  CMAKE_DEPENDENT_OPTION(BUILD_REDIS "Build with redis support" ON "BUILD_ORM" OFF)
 -CMAKE_DEPENDENT_OPTION(USE_SPDLOG "Allow using the spdlog logging library" OFF "USE_SUBMODULE" OFF)
 +option(USE_SPDLOG "Allow using the spdlog logging library" OFF)
- 
+
  set(DROGON_MAJOR_VERSION 1)
  set(DROGON_MINOR_VERSION 9)

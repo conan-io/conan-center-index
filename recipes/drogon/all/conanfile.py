@@ -109,6 +109,7 @@ class DrogonConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -133,8 +134,7 @@ class DrogonConan(ConanFile):
         if is_msvc(self):
             tc.cache_variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus /EHsc"
         tc.cache_variables["USE_SUBMODULE"] = False
-        if self.options.with_spdlog:
-            tc.cache_variables["USE_SPDLOG"] = True
+        tc.cache_variables["USE_SPDLOG"] = self.options.with_spdlog
         tc.generate()
         deps = CMakeDeps(self)
         if self.options.get_safe("with_mysql"):
@@ -150,12 +150,9 @@ class DrogonConan(ConanFile):
             deps.set_property("hiredis", "cmake_target_name", "Hiredis_lib")
         if self.options.get_safe("with_yaml_cpp"):
             deps.set_property("yaml-cpp", "cmake_additional_variables_prefixes", ["YAML_CPP"])
-        deps.set_property("jsoncpp", "cmake_file_name", "JsonCpp")
-        deps.set_property("jsoncpp", "cmake_target_name", "Jsoncpp_lib")
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
