@@ -1,12 +1,10 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.1"
 
 
 class GeoUtilsCppConan(ConanFile):
@@ -20,20 +18,6 @@ class GeoUtilsCppConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "clang": "5",
-            "apple-clang": "10",
-            "Visual Studio": "15",
-            "msvc": "191",
-        }
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -41,13 +25,7 @@ class GeoUtilsCppConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
-            )
+        check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -57,6 +35,7 @@ class GeoUtilsCppConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "NOTICE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         copy(self, "*.hpp",
              os.path.join(self.source_folder, "include"),
              os.path.join(self.package_folder, "include"))
