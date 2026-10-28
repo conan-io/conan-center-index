@@ -130,13 +130,6 @@ class CppMicroServicesConan(ConanFile):
         self.cpp_info.components["change_namespace"].libdirs = []
         self.cpp_info.components["change_namespace"].includedirs = []
 
-
-        self.cpp_info.components["scrcodegen3"].exe = "SCRCodeGen3.exe" if self.settings.os == "Windows" else "SCRCodeGen3"
-        self.cpp_info.components["scrcodegen3"].location = os.path.join(self.package_folder, "bin", self.cpp_info.components["scrcodegen3"].exe)
-        self.cpp_info.components["scrcodegen3"].requires = ["rapidjson::rapidjson"]
-        self.cpp_info.components["scrcodegen3"].libdirs = []
-        self.cpp_info.components["scrcodegen3"].includedirs = []
-
         self.cpp_info.components["usframework"].set_property("cmake_file_name", "usFramework")
         self.cpp_info.components["usframework"].set_property("cmake_target_name", "CppMicroServices")
         self.cpp_info.components["usframework"].libs = [f"CppMicroServices{libversion}{libsuffix}"]
@@ -156,6 +149,12 @@ class CppMicroServicesConan(ConanFile):
         self.cpp_info.components["cppmicroservices"].includedirs = []
 
         if self.options.shared:
+            self.cpp_info.components["scrcodegen3"].exe = "SCRCodeGen3.exe" if self.settings.os == "Windows" else "SCRCodeGen3"
+            self.cpp_info.components["scrcodegen3"].location = os.path.join(self.package_folder, "bin", self.cpp_info.components["scrcodegen3"].exe)
+            self.cpp_info.components["scrcodegen3"].requires = ["rapidjson::rapidjson"]
+            self.cpp_info.components["scrcodegen3"].libdirs = []
+            self.cpp_info.components["scrcodegen3"].includedirs = []
+
             self.cpp_info.components["uslogservice"].set_property("cmake_file_name", "usLogServiceImpl")
             self.cpp_info.components["uslogservice"].set_property("cmake_target_name", "LogService")
             self.cpp_info.components["uslogservice"].libs = [f"LogService{complibversion}{libsuffix}"]
