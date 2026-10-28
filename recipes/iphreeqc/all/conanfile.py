@@ -65,6 +65,7 @@ class IphreeqcConan(ConanFile):
         tc.variables["IPHREEQC_ENABLE_MODULE"] = False
         tc.variables["IPHREEQC_FORTRAN_TESTING"] = False
         tc.variables["BUILD_CLR_LIBS"] = False
+        tc.variables["BUILD_TESTING"] = False
         tc.generate()
 
     def build(self):
