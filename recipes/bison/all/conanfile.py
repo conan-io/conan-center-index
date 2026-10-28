@@ -69,6 +69,7 @@ class BisonConan(ConanFile):
         ])
         if self.settings.compiler == "apple-clang":
             tc.configure_args.append("gl_cv_compiler_check_decl_option=")
+            tc.extra_cflags.append("-Wno-error=incompatible-function-pointer-types")
         if is_msvc(self):
             # Avoid a `Assertion Failed Dialog Box` during configure with build_type=Debug
             # Visual Studio does not support the %n format flag:
