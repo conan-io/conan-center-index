@@ -62,8 +62,7 @@ class JoltPhysicsConan(ConanFile):
         tc.cache_variables["OVERRIDE_CXX_FLAGS"] = False
         tc.cache_variables["DEBUG_RENDERER_IN_DEBUG_AND_RELEASE"] = False
         tc.cache_variables["PROFILER_IN_DEBUG_AND_RELEASE"] = False
-        # INFO: GPU compute backends added in 5.6.0 compile their HLSL shaders with dxc, which CCI does not provide
-        # https://github.com/jrouwe/JoltPhysics/blob/v5.6.0/Build/CMakeLists.txt#L121-L128
+        # INFO: GPU compute backends added in 5.6.0 depend on dxc and SDKs installed on the build machine
         tc.cache_variables["JPH_USE_DX12"] = False
         tc.cache_variables["JPH_USE_VK"] = False
         tc.cache_variables["JPH_USE_MTL"] = False
@@ -91,7 +90,6 @@ class JoltPhysicsConan(ConanFile):
         # https://github.com/jrouwe/JoltPhysics/blob/v5.2.0/Build/CMakeLists.txt#L95C8-L95C28
         self.cpp_info.defines = ["JPH_OBJECT_STREAM"]
         if Version(self.version) >= "5.6.0":
-            # https://github.com/jrouwe/JoltPhysics/blob/v5.6.0/Jolt/Jolt.cmake#L909-L910
             self.cpp_info.defines.append("JPH_USE_CPU_COMPUTE")
         # INFO: Public defines exposed in include/Jolt/Jolt.cmake
         # https://github.com/jrouwe/JoltPhysics/blob/v5.2.0/Build/CMakeLists.txt#L51
@@ -101,11 +99,10 @@ class JoltPhysicsConan(ConanFile):
                                           "JPH_USE_F16C", "JPH_USE_FMADD"])
             if not is_msvc(self):
                 # INFO: GCC and Clang reject Jolt's always_inline intrinsics in consumers without these flags
-                # https://github.com/jrouwe/JoltPhysics/blob/v5.6.0/Jolt/Jolt.cmake#L1004-L1028
                 self.cpp_info.cxxflags.extend(["-mavx2", "-mbmi", "-mpopcnt", "-mlzcnt", "-mf16c", "-mfma",
                                                "-mfpmath=sse"])
         if is_msvc(self) and self.settings.build_type in ("Debug", "Release"):
-            # INFO: Floating point exceptions are enabled by default, but only defined for Debug and Release
+            # INFO: Floating point exceptions are enabled by default
             # https://github.com/jrouwe/JoltPhysics/blob/v5.2.0/Build/CMakeLists.txt#L37
             # https://github.com/jrouwe/JoltPhysics/blob/v5.2.0/Jolt/Jolt.cmake#L529
             self.cpp_info.defines.append("JPH_FLOATING_POINT_EXCEPTIONS_ENABLED")
