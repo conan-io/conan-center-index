@@ -111,27 +111,28 @@ class CppMicroServicesConan(ConanFile):
         self.cpp_info.set_property("cmake_build_modules", [os.path.join("share", "cppmicroservices3", "cmake", "CppMicroServicesHelpers.cmake")])
 
         # The executable is named usResourceCompiler3 on every platform
-        self.cpp_info.components["usresourcecompiler3"].exe = "usResourceCompiler3"
-        self.cpp_info.components["usresourcecompiler3"].location = os.path.join(self.package_folder, "bin", "usResourceCompiler3")
+        self.cpp_info.components["usresourcecompiler3"].exe = "usResourceCompiler3.exe" if self.settings.os == "Windows" else "usResourceCompiler3"
+        self.cpp_info.components["usresourcecompiler3"].location = os.path.join(self.package_folder, "bin", self.cpp_info.components["usresourcecompiler3"].exe)
         # Only the Boost.Nowide headers are used
         self.cpp_info.components["usresourcecompiler3"].requires = ["boost::headers", "miniz::miniz", "cli11::cli11", "boost::nowide"]
         self.cpp_info.components["usresourcecompiler3"].libdirs = []
         self.cpp_info.components["usresourcecompiler3"].includedirs = []
 
-        self.cpp_info.components["jsonschemavalidator"].exe = "jsonschemavalidator"
-        self.cpp_info.components["jsonschemavalidator"].location = os.path.join(self.package_folder, "bin", "jsonschemavalidator")
+        self.cpp_info.components["jsonschemavalidator"].exe = "jsonschemavalidator.exe" if self.settings.os == "Windows" else "jsonschemavalidator"
+        self.cpp_info.components["jsonschemavalidator"].location = os.path.join(self.package_folder, "bin", self.cpp_info.components["jsonschemavalidator"].exe)
         self.cpp_info.components["jsonschemavalidator"].requires = ["cli11::cli11", "rapidjson::rapidjson"]
         self.cpp_info.components["jsonschemavalidator"].libdirs = []
         self.cpp_info.components["jsonschemavalidator"].includedirs = []
 
-        self.cpp_info.components["change_namespace"].exe = "change_namespace"
-        self.cpp_info.components["change_namespace"].location = os.path.join(self.package_folder, "bin", "change_namespace")
+        self.cpp_info.components["change_namespace"].exe = "change_namespace.exe" if self.settings.os == "Windows" else "change_namespace"
+        self.cpp_info.components["change_namespace"].location = os.path.join(self.package_folder, "bin", self.cpp_info.components["change_namespace"].exe)
         self.cpp_info.components["change_namespace"].requires = ["cli11::cli11"]
         self.cpp_info.components["change_namespace"].libdirs = []
         self.cpp_info.components["change_namespace"].includedirs = []
 
-        self.cpp_info.components["scrcodegen3"].exe = "SCRCodeGen3"
-        self.cpp_info.components["scrcodegen3"].location = os.path.join(self.package_folder, "bin", "SCRCodeGen3")
+
+        self.cpp_info.components["scrcodegen3"].exe = "SCRCodeGen3.exe" if self.settings.os == "Windows" else "SCRCodeGen3"
+        self.cpp_info.components["scrcodegen3"].location = os.path.join(self.package_folder, "bin", self.cpp_info.components["scrcodegen3"].exe)
         self.cpp_info.components["scrcodegen3"].requires = ["rapidjson::rapidjson"]
         self.cpp_info.components["scrcodegen3"].libdirs = []
         self.cpp_info.components["scrcodegen3"].includedirs = []
