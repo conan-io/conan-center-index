@@ -189,7 +189,8 @@ class LibVPXConan(ConanFile):
         else:
             env = tc.environment()
             if is_apple_os(self) and self.settings.arch in ['x86', 'x86_64']:
-                env.unset("ASFLAGS")
+                for flag in getattr(tc, "asflags", []):  # asflags exists since 2.30
+                    env.remove("ASFLAGS", flag)
         tc.generate(env)
 
     def _patch_sources(self):
