@@ -1,0 +1,11 @@
+--- libs/stacktrace/build/Jamfile.v2
++++ libs/stacktrace/build/Jamfile.v2
+@@ -157,6 +157,8 @@ lib boost_stacktrace_from_exception
+   : # requirements
+     <warnings>all
+     <target-os>linux:<library>dl
++    # from_exception.cpp uses POSIX/ELF APIs not available with MinGW (GCC targeting Windows)
++    <toolset>gcc,<target-os>windows:<build>no
+
+     # Enable build when explicitly requested, or by default, when on x86
+     <conditional>@build-stacktrace-from-exception
