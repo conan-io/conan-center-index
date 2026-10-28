@@ -43,7 +43,7 @@ class CppMicroServicesConan(ConanFile):
         self.requires("boost/1.91.0", options={"without_nowide": False})
         self.requires("miniz/3.1.1")
         self.requires("rapidjson/cci.20250205")
-        self.requires("cli11/2.6.2")
+        self.requires("cli11/2.7.2")
         if self.options.shared:
             # LogService, DeclarativeServices and ConfigurationAdmin bundles are only built as shared libraries
             self.requires("spdlog/[>=1.15 <2]")
