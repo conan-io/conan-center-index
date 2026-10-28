@@ -2,6 +2,3 @@ sources:
   "1.21.2":
     url: "https://github.com/reductstore/reduct-cpp/archive/refs/tags/v1.21.2.tar.gz"
     sha256: "f7b6bccf2d2f32cd9c9a9577defa002e589f230cf059f61791e28aa4a7599a41"
-  "1.21.1":
-    url: "https://github.com/reductstore/reduct-cpp/archive/refs/tags/v1.21.1.tar.gz"
-    sha256: "b9f3c0ab49a055399c443d86ae5d648c1f52ad041c5a55026fb013d2ba51d897"
