@@ -46,13 +46,8 @@ class Exiv2Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.win_unicode
-        else:
-            del self.options.with_brotli
-            del self.options.with_inih
-
-            if self.settings.os == "Windows":
-                self.options.win_unicode = True
+        # INFO: Removed for >=0.28.0
+        del self.options.win_unicode
 
     def configure(self):
         if self.options.shared:
