@@ -64,7 +64,7 @@ class NanodbcConan(ConanFile):
             raise ConanInvalidConfiguration("with_boost option requires unicode option to be enabled. See https://github.com/nanodbc/nanodbc#build-options")
         if self.options.unicode and self.options.get_safe("utf8"):
             # https://github.com/nanodbc/nanodbc/blob/v3.0.8/CMakeLists.txt#L164
-            raise ConanInvalidConfiguration('unicode and utf8 options are alternatives; enable only one")
+            raise ConanInvalidConfiguration("unicode and utf8 options are alternatives; enable only one")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
