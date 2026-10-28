@@ -24,8 +24,8 @@
 +  check_symbol_exists("SSL_CTX_set1_sigalgs" "openssl/ssl.h" HAVE_OPENSSL_PROTOTYPE_SSL_CTX_SET1_SIGALGS)
 +  check_symbol_exists("TLS1_TXT_ECDHE_ECDSA_WITH_AES_256_CCM_8" "openssl/ssl.h" HAVE_OPENSSL_PROTOTYPE_TLS1_TXT_ECDHE_ECDSA_WITH_AES_256_CCM_8)
 +  check_symbol_exists("TLS1_TXT_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384" "openssl/ssl.h" HAVE_OPENSSL_PROTOTYPE_TLS1_TXT_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384)
-+  check_symbol_exists("TS_VERIFY_CTX_set0_store(0,0)" "openssl/ts.h" HAVE_OPENSSL_PROTOTYPE_TS_VERIFY_CTX_SET0_STORE)
-+  check_symbol_exists("X509_check_certificate_times(0,0,0)" "openssl/x509.h" HAVE_OPENSSL_PROTOTYPE_X509_CHECK_CERTIFICATE_TIMES)
++  check_symbol_exists("TS_VERIFY_CTX_set0_store" "openssl/ts.h" HAVE_OPENSSL_PROTOTYPE_TS_VERIFY_CTX_SET0_STORE)
++  check_symbol_exists("X509_check_certificate_times" "openssl/x509.h" HAVE_OPENSSL_PROTOTYPE_X509_CHECK_CERTIFICATE_TIMES)
  
    # test presence of functions, constants and macros needed for the dcmsign module
 -  CHECK_FUNCTIONWITHHEADER_EXISTS("EVP_PKEY_get_group_name" "openssl/evp.h" HAVE_OPENSSL_PROTOTYPE_EVP_PKEY_GET_GROUP_NAME)
