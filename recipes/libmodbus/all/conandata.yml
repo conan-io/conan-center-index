@@ -1,8 +1,14 @@
 sources:
+  "3.2.0":
+    url: "https://github.com/stephane/libmodbus/releases/download/v3.2.0/libmodbus-3.2.0.tar.gz"
+    sha256: "72239f319b9b8483e3d393c5a60865d734fcff18a8abbb2486e389834a2f6ef1"
   "3.1.12":
     url: "https://github.com/stephane/libmodbus/releases/download/v3.1.12/libmodbus-3.1.12.tar.gz"
     sha256: "2f4d4191cd196c1fba131daec03b621db75129d8255c832fc66b259d9fc46e7b"
 patches:
+  "3.2.0":
+    - patch_file: "patches/3.2.0-0001-no-msvc-warnings.patch"
+    - patch_file: "patches/0003-fix-typedef-int.patch"
   "3.1.12":
     - patch_file: "patches/0001-respect-cflags.patch"
     - patch_file: "patches/0002-no-msvc-warnings.patch"

@@ -1,0 +1,24 @@
+Use warning flags only with GCC and Clang
+
+https://github.com/stephane/libmodbus/issues/846
+
+diff --git a/configure.ac b/configure.ac
+--- a/configure.ac
++++ b/configure.ac
+@@ -153,12 +153,15 @@
+ # Check for termios2 support
+ AC_CHECK_TYPES([struct termios2], [], [], [[#include <asm/termbits.h>]])
+ 
+-WARNING_CFLAGS="-Wall \
++WARNING_CFLAGS=""
++if test "x$GCC" = "xyes"; then
++    WARNING_CFLAGS="-Wall \
+ -Wmissing-declarations -Wmissing-prototypes \
+ -Wnested-externs -Wpointer-arith \
+ -Wsign-compare -Wchar-subscripts \
+ -Wstrict-prototypes -Wshadow \
+ -Wformat-security"
++fi
+ AC_SUBST([WARNING_CFLAGS])
+ 
+ # Build options
