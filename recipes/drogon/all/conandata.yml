@@ -5,5 +5,4 @@ sources:
 patches:
   "1.9.14":
     - patch_file: "patches/1.9.14-0001-spdlog-without-submodule.patch"
-      patch_description: "Allow USE_SPDLOG when trantor is not a submodule"
-      patch_type: "portability"
+      patch_description: "Backport of https://github.com/drogonframework/drogon/pull/2634"
