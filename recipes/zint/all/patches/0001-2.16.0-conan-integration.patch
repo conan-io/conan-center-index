@@ -10,7 +10,7 @@ index f9a1227..7c35579 100644
 -    find_package(Qt6Gui)
 -    find_package(Qt6UiTools)
 -    find_package(Qt6Svg)
-+    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets Gui UiTools Svg REQUIRED)
++    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets Gui REQUIRED)
  
 -    if(Qt6Widgets_FOUND AND Qt6Gui_FOUND AND Qt6UiTools_FOUND AND Qt6Svg_FOUND)
 +    if(1)
@@ -26,7 +26,7 @@ index f9a1227..7c35579 100644
 -    find_package(Qt5Gui)
 -    find_package(Qt5UiTools)
 -    find_package(Qt5Svg)
-+    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets Gui UiTools Svg REQUIRED)
++    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets Gui REQUIRED)
  
 -    if(Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5UiTools_FOUND AND Qt5Svg_FOUND)
 +    if(1)

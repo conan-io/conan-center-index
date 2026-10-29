@@ -55,13 +55,16 @@ class ZintConan(ConanFile):
             self.requires("qt/[>=5.15 <7]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if self.options.with_qt and not self.dependencies["qt"].options.gui:
-            raise ConanInvalidConfiguration(f"{self.ref} needs qt:gui=True")
+        if self.options.with_qt:
+            if not self.dependencies["qt"].options.gui:
+                raise ConanInvalidConfiguration("Needs qt:gui=True")
+            if not self.dependencies["qt"].options.widgets:
+                raise ConanInvalidConfiguration("Needs qt:widgets=True")
         if self.settings.os == "Windows" and self.options.shared and self.options.with_qt:
-            # Upstream does not export DLL symbols on libqzint. The following clases are not exported:
+            # Upstream does not export DLL symbols on libqzint. The following classes are not exported:
             # - https://github.com/zint/zint/blob/2.16.0/backend_qt/qzint.h#L48
             # - https://github.com/zint/zint/blob/2.16.0/backend_qt/qzint.h#L423
-            raise ConanInvalidConfiguration(f"{self.ref} does not support shared build on Windows with_qt enabled")
+            raise ConanInvalidConfiguration("Does not support shared build on Windows with_qt enabled")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -78,6 +81,7 @@ class ZintConan(ConanFile):
         tc.cache_variables["ZINT_SHARED"] = self.options.shared
         tc.cache_variables["ZINT_STATIC"] = not self.options.shared
         tc.cache_variables["ZINT_FRONTEND"] = False
+        tc.cache_variables["ZINT_USE_GS1SE"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -111,6 +115,7 @@ class ZintConan(ConanFile):
             self.cpp_info.components["libqzint"].requires.extend([
                 "libzint",
                 "qt::qtGui",
+                "qt::qtWidgets",
             ])
             # qzint is a static library. Previous recipe revisions patched this but that required maintaining
             # multiple patches in order to support Windows + Shared. We will keep it simple in
