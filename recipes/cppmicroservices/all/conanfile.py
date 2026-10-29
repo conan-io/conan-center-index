@@ -83,6 +83,7 @@ class CppMicroServicesConan(ConanFile):
 
         deps = CMakeDeps(self)
         deps.set_property("boost", "cmake_target_name", "boost::boost")
+        deps.set_property("spdlog", "cmake_target_name", "spdlog::spdlog")
         deps.set_property("rapidjson", "cmake_file_name", "rapidjson")
         deps.set_property("rapidjson", "cmake_target_name", "rapidjson::rapidjson")
         deps.generate()
