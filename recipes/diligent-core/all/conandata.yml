@@ -17,6 +17,8 @@ sources:
 patches:
   "api.252009":
     - patch_file: "patches/0025-252009-glslang-spirv-cross-compat.patch"
+  "api.252005":
+    - patch_file: "patches/0025-252009-glslang-spirv-cross-compat.patch"
   "api.256019":
     - patch_file: "patches/0024-spirv-1.4.350-compat.patch"
   "2.5.2":
