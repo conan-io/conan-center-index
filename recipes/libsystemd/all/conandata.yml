@@ -1,4 +1,7 @@
 sources:
+  "261.4":
+    url: "https://github.com/systemd/systemd/archive/refs/tags/v261.4.tar.gz"
+    sha256: "2f78c37c6592dd34b95cca86793f1b8c5b073db35681ef80ea16a73c0c297a9e"
   "255.10":
     url: "https://github.com/systemd/systemd-stable/archive/v255.10.tar.gz"
     sha256: "1747b848e68223597abb90ca2758b25230ac4c19e252e9ec77c8518750f621ed"
@@ -15,6 +18,8 @@ sources:
     url: "https://github.com/systemd/systemd-stable/archive/v253.6.tar.gz"
     sha256: "a0aebcfaa2e001a4d846691631d1722c4cfa1a175e4ea62db6edca0ea3cf1e3e"
 patches:
+  "261.4":
+    - patch_file: "patches/261.4/0001-Remove-dependency-from-coreutils.patch"
   "255.10":
     - patch_file: "patches/251.18/0001-Remove-dependency-from-coreutils.patch"
   "255.2":
