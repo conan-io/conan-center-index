@@ -79,6 +79,9 @@ class JoltPhysicsConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        # Upstream does not install the shader headers used by HairSettings.h
+        copy(self, "*.h", src=os.path.join(self.source_folder, "Jolt", "Shaders"),
+             dst=os.path.join(self.package_folder, "include", "Jolt", "Shaders"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rm(self, "*.cmake", os.path.join(self.package_folder, "include", "Jolt"))
 
