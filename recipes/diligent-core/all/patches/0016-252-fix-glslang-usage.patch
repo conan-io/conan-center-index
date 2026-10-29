@@ -9,7 +9,7 @@ index c2dd85f3..cc83e707 100644
 -            SPIRV
 -            glslang
 +            SPIRV-Tools-opt
-+            glslang::SPIRV glslang::glslang glslang::MachineIndependent glslang::GenericCodeGen glslang::OSDependent glslang::OGLCompiler glslang::HLSL
++            glslang::SPIRV glslang::glslang
          )
      endif()
  endif()
