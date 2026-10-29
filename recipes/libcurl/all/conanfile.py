@@ -218,8 +218,9 @@ class LibcurlConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
-        cert_url = self.conf.get("user.libcurl.cert:url", check_type=str) or "https://curl.se/ca/cacert-2025-11-04.pem"
-        cert_sha256 = self.conf.get("user.libcurl.cert:sha256", check_type=str) or "8ac40bdd3d3e151a6b4078d2b2029796e8f843e3f86fbf2adbc4dd9f05e79def"
+        cert_url = self.conf.get("user.libcurl.cert:url", check_type=str) or self.conan_data["cacert"][self.version]["url"]
+        cert_sha256 = self.conf.get("user.libcurl.cert:sha256", check_type=str) or self.conan_data["cacert"][self.version]["sha256"]
+        self.output.info(f"Using CA certificate store: {cert_url} (sha256: {cert_sha256})")
         download(self, cert_url, "cacert.pem", verify=True, sha256=cert_sha256)
         replace_in_file(self, "CMakeLists.txt", "find_package(NGHTTP2 MODULE)", "find_package(NGHTTP2 CONFIG REQUIRED)")
         replace_in_file(self, "CMakeLists.txt", "find_package(Cares MODULE REQUIRED)", "find_package(Cares CONFIG REQUIRED)")
