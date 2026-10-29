@@ -2,6 +2,7 @@ Backport: Make SPIRV-Cross 1.4.350 compatible with DiligentCore
 
 https://github.com/DiligentGraphics/DiligentCore/commit/dc001594e84d481bf5a55fe3e92594113cfe7f02
 https://github.com/DiligentGraphics/DiligentCore/commit/602ab7c2044f9e823a06bbaccaba49ed0fba53ff
+https://github.com/DiligentGraphics/DiligentCore/commit/5d9cbe2d4454ba4a2a30c896d67400db8fd52229
 
 --- a/Graphics/ShaderTools/src/GLSLangUtils.cpp
 +++ b/Graphics/ShaderTools/src/GLSLangUtils.cpp
