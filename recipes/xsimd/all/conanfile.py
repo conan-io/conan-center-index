@@ -34,7 +34,8 @@ class XsimdConan(ConanFile):
 
     def requirements(self):
         if self.options.xtl_complex:
-            self.requires("xtl/0.7.5")
+            xtl_version = "0.7.5" if Version(self.version) < "13.2.0" else "0.8.0"
+            self.requires(f"xtl/{xtl_version}")
 
     def package_id(self):
         self.info.clear()
