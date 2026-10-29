@@ -15,6 +15,8 @@ sources:
     url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/v2.5.1.tar.gz"
     sha256: "56a577d5273539f88cc27fb74ab61e42f407da77ef4d0876f83a9f8e763c0f64"
 patches:
+  "api.252009":
+    - patch_file: "patches/0025-252009-glslang-spirv-cross-compat.patch"
   "api.256019":
     - patch_file: "patches/0024-spirv-1.4.350-compat.patch"
   "2.5.2":
