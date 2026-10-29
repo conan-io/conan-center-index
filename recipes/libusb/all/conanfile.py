@@ -91,7 +91,7 @@ class LibUSBConan(ConanFile):
                 "WholeProgramOptimization": "false",
             }
             if Version(self.version) >= "1.0.30":
-                tc.properties["EnableWindowsHotplug"] = ("true" if self.options.enable_windows_hotplug else "false")
+                tc.properties["EnableWindowsHotplug"] = ("true" if self.options.get_safe("enable_windows_hotplug") else "false")
             tc.generate()
         else:
             VirtualBuildEnv(self).generate()
@@ -99,14 +99,14 @@ class LibUSBConan(ConanFile):
             if self.settings.os in ["Linux", "Android"]:
                 tc.configure_args.append("--enable-udev" if self.options.enable_udev else "--disable-udev")
             if self.settings.os == "Windows" and Version(self.version) >= "1.0.30":
-                tc.configure_args.append("--enable-windows-hotplug" if self.options.enable_windows_hotplug else "--disable-windows-hotplug")
+                tc.configure_args.append("--enable-windows-hotplug" if self.options.get_safe("enable_windows_hotplug") else "--disable-windows-hotplug")
             tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
         if is_msvc(self):
             if Version(self.version) < "1.0.27":
-                solution_msvc_year = "2017" if Version(self.version) < "1.0.24" else "2019"
+                solution_msvc_year = "2019"
                 solution = f"libusb_{'dll' if self.options.shared else 'static'}_{solution_msvc_year}.vcxproj"
                 vcxproj_path = os.path.join(self.source_folder, "msvc", solution)
 
@@ -115,7 +115,7 @@ class LibUSBConan(ConanFile):
                     "<WholeProgramOptimization Condition=\"'$(Configuration)'=='Release'\">true</WholeProgramOptimization>",
                     "",
                 )
-                old_toolset = "v141" if Version(self.version) < "1.0.24" else "v142"
+                old_toolset = "v142"
                 new_toolset = MSBuildToolchain(self).toolset
                 replace_in_file(
                     self, vcxproj_path,
