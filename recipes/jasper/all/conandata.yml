@@ -1,4 +1,7 @@
 sources:
+  "4.2.9":
+    url: "https://github.com/jasper-software/jasper/releases/download/version-4.2.9/jasper-4.2.9.tar.gz"
+    sha256: "f71cf643937a5fcaedcfeb30a22ba406912948ad4413148214df280afc425454"
   "4.2.4":
     url: "https://github.com/jasper-software/jasper/releases/download/version-4.2.4/jasper-4.2.4.tar.gz"
     sha256: "6a597613d8d84c500b5b83bf0eec06cd3707c23d19957f70354ac2394c9914e7"
@@ -9,6 +12,10 @@ sources:
     url: "https://github.com/jasper-software/jasper/releases/download/version-4.0.0/jasper-4.0.0.tar.gz"
     sha256: "39514e1b53a5333fcff817e19565371f016ea536c36fd2d13a9c4d8da8f0be0c"
 patches:
+  "4.2.9":
+    - patch_file: "patches/4.2.9-0001-deterministic-libname.patch"
+      patch_description: "No generator dependent libname"
+      patch_type: "conan"
   "4.2.4":
     - patch_file: "patches/4.2.0-0003-deterministic-libname.patch"
       patch_description: "No generator dependent libname"

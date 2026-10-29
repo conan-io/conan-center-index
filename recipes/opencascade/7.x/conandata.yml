@@ -1,0 +1,4 @@
+sources:
+  "7.9.1":
+    url: "https://github.com/Open-Cascade-SAS/OCCT/archive/refs/tags/V7_9_1.tar.gz"
+    sha256: "de442298cd8860f5580b01007f67f0ecd0b8900cfa4da467fa3c823c2d1a45df"

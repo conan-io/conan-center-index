@@ -1,4 +1,7 @@
 sources:
+  "5.6.1":
+    url: "https://github.com/bfgroup/b2/releases/download/5.6.1/b2-5.6.1.tar.bz2"
+    sha256: "2020bd49c65b474d8bda141a3d13b7aacd442fe390d66eb7b8f6b0042dae3dc1"
   "4.8.2":
     url: "https://github.com/bfgroup/b2/archive/4.8.2.tar.gz"
     sha256: "220edfbd5022394c5dc264dfdd8bf6d3ec53b784db87461026bb23ea9d9ec4bd"

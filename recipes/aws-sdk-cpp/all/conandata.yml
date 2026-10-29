@@ -1,9 +1,9 @@
 sources:
-  "1.11.692":
-    url: "https://github.com/aws/aws-sdk-cpp/archive/refs/tags/1.11.692.tar.gz"
-    sha256: "48af03fe2b19b439344f422015c6f37296920f1972422d94f404001bd9781949"
+  "1.11.915":
+    url: "https://github.com/aws/aws-sdk-cpp/archive/refs/tags/1.11.915.tar.gz"
+    sha256: "14aae4edf6c1b389c2e43ed077889e767dd768495846a3f506c240a1e478f460"
 patches:
-  "1.11.692":
+  "1.11.915":
     - patch_file: patches/1.11.352-0001-pulseaudio.patch
       patch_description: Use pulseaudio from conan
       patch_type: conan

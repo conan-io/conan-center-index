@@ -1,4 +1,7 @@
 sources:
+  "13.1.0":
+    url: "https://github.com/odygrd/quill/releases/download/v13.1.0/quill-13.1.0.zip"
+    sha256: "f4dbdc05f4cb65964a46cfd0b0a3f6508cadd9f1022dd50f026bf207d3f5e183"
   "13.0.0":
     url: "https://github.com/odygrd/quill/releases/download/v13.0.0/quill-13.0.0.zip"
     sha256: "efb6ac9eea48633b05ebffae1dfee00fb065199bdc7686ea3353f77de09bbfa9"
