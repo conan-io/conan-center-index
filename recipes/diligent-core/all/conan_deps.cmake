@@ -12,7 +12,5 @@ if (NOT ${DILIGENT_NO_GLSLANG})
     add_library(SPIRV ALIAS glslang::SPIRV)
 endif()
 
-if(TARGET SPIRV-Headers::SPIRV-Headers AND NOT TARGET SPIRV-Headers)
-    add_library(SPIRV-Headers ALIAS SPIRV-Headers::SPIRV-Headers)
-endif()
+add_library(SPIRV-Headers ALIAS SPIRV-Headers::SPIRV-Headers)
 add_library(spirv-tools-core   ALIAS spirv-tools::spirv-tools)
