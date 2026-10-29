@@ -66,6 +66,10 @@ class DiligentCoreConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "project(DiligentCore)",
+                        "project(DiligentCore)\n\ninclude(conan_deps.cmake)")
 
     def package_id(self):
         if visual.is_msvc(self.info):
@@ -104,12 +108,6 @@ class DiligentCoreConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "project(DiligentCore)",
-                        "project(DiligentCore)\n\ninclude(conan_deps.cmake)")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24]")
@@ -152,7 +150,6 @@ class DiligentCoreConan(ConanFile):
             return "PLATFORM_TVOS"
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         # By default, Diligent builds static and shared versions of every main library. We select the one we
         # want based on options.shared in package(). To avoid building every intermediate library as SHARED,
