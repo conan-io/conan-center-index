@@ -80,7 +80,7 @@ class VolkConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["VOLK_PULL_IN_VULKAN"] = True
-        tc.variables["VOLK_INSTALL"] = True        
+        tc.variables["VOLK_INSTALL"] = True
         if self._platform_defines:
             tc.cache_variables["VOLK_STATIC_DEFINES"] = ";".join(self._platform_defines)
         tc.generate()
@@ -121,9 +121,6 @@ class VolkConan(ConanFile):
 
         self.cpp_info.components["volk_headers"].set_property("cmake_target_name", "volk::volk_headers")
         self.cpp_info.components["volk_headers"].libs = []
-        self.cpp_info.components["volk_headers"].defines = self._platform_defines
         self.cpp_info.components["volk_headers"].requires = ["vulkan-headers::vulkan-headers"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["volk_headers"].system_libs = ["dl"]
-            if self.options.with_x11:
-                self.cpp_info.components["volk_headers"].requires.append("xorg::xcb")
