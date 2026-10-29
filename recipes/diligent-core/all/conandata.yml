@@ -27,9 +27,11 @@ patches:
     - patch_file: "patches/0016-252-fix-glslang-usage.patch"
     - patch_file: "patches/0017-252-fix-glslang-include.patch"
     - patch_file: "patches/0018-252-fix-warning-as-error.patch"
+    - patch_file: "patches/0026-252-glslang-spirv-cross-compat.patch"
   "2.5.1":
     - patch_file: "patches/0001-remove_warning_as_error.patch"
     - patch_file: "patches/0002-use_conan_dependencies.patch"
     - patch_file: "patches/0003-use_volk_from_conan.patch"
     - patch_file: "patches/0005-spirv-cross-namespace-override.patch"
     - patch_file: "patches/0006-install-linux-platform-header.diff"
+    - patch_file: "patches/0027-251-glslang-spirv-cross-compat.patch"
