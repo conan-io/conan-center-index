@@ -1,9 +1,8 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, rm, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rmdir, rm, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.0.9"
@@ -47,6 +46,7 @@ class JoltPhysicsConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "Jolt", "Jolt.cmake"), "set(CMAKE_CXX_STANDARD 17)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -91,9 +91,7 @@ class JoltPhysicsConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "Jolt::Jolt")
         # INFO: The CMake option ENABLE_OBJECT_STREAM is enabled by default and defines JPH_OBJECT_STREAM as public
         # https://github.com/jrouwe/JoltPhysics/blob/v5.2.0/Build/CMakeLists.txt#L95C8-L95C28
-        self.cpp_info.defines = ["JPH_OBJECT_STREAM"]
-        if Version(self.version) >= "5.6.0":
-            self.cpp_info.defines.append("JPH_USE_CPU_COMPUTE")
+        self.cpp_info.defines = ["JPH_OBJECT_STREAM", "JPH_USE_CPU_COMPUTE"]
         # INFO: Public defines exposed in include/Jolt/Jolt.cmake
         # https://github.com/jrouwe/JoltPhysics/blob/v5.2.0/Build/CMakeLists.txt#L51
         if self.settings.arch in ["x86_64", "x86"]:
