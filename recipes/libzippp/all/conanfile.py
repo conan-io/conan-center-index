@@ -27,35 +27,18 @@ class LibZipppConan(ConanFile):
         "fPIC": True,
         "with_encryption": False,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 11
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
-        versions = str(self.version).split("-")
-        if len(versions) == 2:
-            self.requires(f"libzip/{versions[1]}")
+        self.requires("libzip/[>=1.10.1 <2]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
-        libzippp_version = str(self.version)
-        if libzippp_version != "4.0" and len(libzippp_version.split("-")) != 2:
-            raise ConanInvalidConfiguration(f"{self.ref}: version number must include '-'. (ex. '5.0-1.8.0')")
+            check_min_cppstd(self, 11)
 
         if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++":
             raise ConanInvalidConfiguration(f"{self.ref} does not support clang with libc++. Use libstdc++ instead.")
