@@ -7,3 +7,7 @@ sources:
 patches:
   "8.23.0":
     - patch_file: patches/0002-fix-openssl-ldflags-multiple-l.patch
+cacert:
+  "8.23.0":
+    url: "https://curl.se/ca/cacert-2026-10-20.pem"
+    sha256: "796f1389bfea13c0ed78f663b765baaff54a508e5483786bd6ece73c5e3e3cbe"
