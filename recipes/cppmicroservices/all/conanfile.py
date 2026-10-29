@@ -55,8 +55,6 @@ class CppMicroServicesConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         # Remove third_party dependencies that are managed by Conan, but keep necessary headers
         rm(self, "*", os.path.join(self.source_folder, "third_party"), recursive=True, excludes=["cppmicroservices_pe.h", "dirent_win32.h"])
-        # error: virtual method '~ConfigurationManager' is inside a 'final' class and can never be overridden
-        # Fixed by https://github.com/CppMicroServices/CppMicroServices/pull/1275
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "-Werror", "")
         # Link Boost::nowide from Conan instead of virtual imported target nowide::nowide
         replace_in_file(self, os.path.join(self.source_folder, "tools", "rc", "CMakeLists.txt"), "nowide::nowide", "Boost::nowide")
