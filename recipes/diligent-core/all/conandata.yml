@@ -35,3 +35,4 @@ patches:
     - patch_file: "patches/0005-spirv-cross-namespace-override.patch"
     - patch_file: "patches/0006-install-linux-platform-header.diff"
     - patch_file: "patches/0027-251-glslang-spirv-cross-compat.patch"
+    - patch_file: "patches/0028-251-fix-apple-linker-flags.patch"
