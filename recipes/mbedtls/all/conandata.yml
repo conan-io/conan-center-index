@@ -1,7 +1,7 @@
 sources:
-  "3.6.6":
-    url: "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.6/mbedtls-3.6.6.tar.bz2"
-    sha256: "8fb65fae8dcae5840f793c0a334860a411f884cc537ea290ce1c52bb64ca007a"
+  "3.6.7":
+    url: "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.7/mbedtls-3.6.7.tar.bz2"
+    sha256: "a7e8bcbec0e6f761b4af24f25677626b35f762f68eef79c08677a363212d11f6"
   "3.6.2":
     url: "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.2/mbedtls-3.6.2.tar.bz2"
     sha256: "8b54fb9bcf4d5a7078028e0520acddefb7900b3e66fec7f7175bb5b7d85ccdca"

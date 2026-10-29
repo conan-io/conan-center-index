@@ -46,7 +46,7 @@ class XtensorConan(ConanFile):
             else:
                 self.requires("xsimd/13.2.0")
         if self.options.tbb:
-            self.requires("onetbb/2021.10.0")
+            self.requires("onetbb/[>=2021.10.0 <2024]")
 
     def build_requirements(self):
         # required by newer versions of xtensor
@@ -93,6 +93,11 @@ class XtensorConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "xtensor")
         self.cpp_info.set_property("cmake_target_name", "xtensor")
         self.cpp_info.set_property("pkg_config_name", "xtensor")
+        self.cpp_info.requires = ['xtl::xtl', 'nlohmann_json::nlohmann_json']
+        if self.options.xsimd:
+            self.cpp_info.requires.append('xsimd::xsimd')
+        if self.options.tbb:
+            self.cpp_info.requires.append('onetbb::libtbb')
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         if self.options.xsimd:

@@ -37,7 +37,7 @@ class EiquadprogConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("eigen/3.4.0", transitive_headers=True)
+        self.requires("eigen/[>=3.4.0 <4]", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler == "msvc":

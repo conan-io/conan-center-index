@@ -8,7 +8,6 @@ These are a very important aspects and it helps us to establish the quality of t
 
   * [Picking the Sources](#picking-the-sources)
     * [Source immutability](#source-immutability)
-    * [Sources not accessible](#sources-not-accessible)
   * [Supported Versions](#supported-versions)
     * [Removing old versions](#removing-old-versions)
     * [Adding old versions](#adding-old-versions)
@@ -32,17 +31,6 @@ Downloaded source code must have a deterministic results where the exact same ar
 
 The sources stored under `self.source_folder` should not apply patches or modifications in the `source()` method conditional to options or settings.
 Patches should be applied in the `source()` method - taking special care that the patches are platform agnostic. Patches in the `build()` method can be considered where this is not possible, provided that `no_copy_source` is **not** set to `True`.
-
-### Sources not accessible
-
-Library sources that are not publicly available will not be allowed in this repository even if the license allows their redistribution. See
-our [closed source FAQ answer for more](../faqs.md#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries).
-If library sources cannot be downloaded from their official origin or cannot be consumed directly due to their
-format, the recommendation is to contact the publisher and ask them to provide the sources in a way/format that can be consumed
-programmatically.
-
-As a final option, in case you need to use those binaries as a "build require" for some library, we will consider adding it
-as a system recipe (`<build_require>/system`) and making those binaries available in the CI machines (if the license allows it).
 
 ## Supported Versions
 
@@ -85,21 +73,16 @@ reading the changelog of the library, the documentation, or any statement by the
 
 ### Format and Conventions
 
-Patch files are preferred over programmatic `replace_in_file` statements. This makes it easier to review and prevent
-unwanted side effects when new versions are added. They will be listed in [`conandata.yml`](conandata_yml_format.md)
-file and exported together with the recipe. Patches should include the required [patch fields](conandata_yml_format.md#patches-fields).
+* Patch files must be located in the recipe folder in a `patches/` sub-directory
+* Should be listed in `conandata.yml` as an entry under `patches` (per-version)
+* File name must be minimally descriptive - other relevant information and details must be included in the patchfile's own preamble, and should always be justified in the PR description.
+* In cases where patches may need to be applied in a specific order, please add a number prefix in the filename (e.g `01-`, `02`, ...)
 
-Patches must be located in the recipe folder in a `patches/` sub-directory.
+### Patch files vs replace_in_file
 
-There are a few recommendations about naming patches:
+In some instances, patch files are preferred when they need to modify multiple files, or several lines in the same file. Note that while patch files may help keep the recipe (`conanfile.py`) tidier - they can also make it more tedious to update the recipe to support newer versions if the patches' hunk headers and context lines no are no longer applicable. It is for these reasons that we now aim for patches to *not* be needed in newer yet-to-be-released versions, by reporting issues upstreams (see policy below).
 
-* be descriptive but terse
-* number them so they can be re-used
-* note the specific version
-
-By clearly indicating what the patch does, when it's applied, and how it relates to existing patches, you can
-help make the [review process](../review_process.md) easier for readers and help speed up your pull requests.
-
+The use of `replace_in_file` is perfectly acceptable for simple cases (e.g. single lines), and when the patches are more likely to survive multiple versions.
 
 ### Policy on patches
 

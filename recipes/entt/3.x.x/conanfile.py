@@ -1,11 +1,11 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
-from conan.tools.layout import basic_layout
+from conan.tools.files import copy, get, rmdir
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.1"
 
 
 class EnttConan(ConanFile):
@@ -17,62 +17,41 @@ class EnttConan(ConanFile):
     license = "MIT"
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     @property
     def _min_cppstd(self):
-        return "17"
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "15.9",
-            "msvc": "191",
-            "gcc": "7",
-            "clang": "5",
-            "apple-clang": "10",
-        }
-
-    def export_sources(self):
-        export_conandata_patches(self)
+        return "17" if Version(self.version) < 4 else "20"
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
 
-        def loose_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
-            )
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.28]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def build(self):
-        apply_conandata_patches(self)
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["ENTT_INSTALL"] = True
+        tc.generate()
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "*", src=os.path.join(self.source_folder, "src"), dst=os.path.join(self.package_folder, "include"))
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "EnTT")
         self.cpp_info.set_property("cmake_target_name", "EnTT::EnTT")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "EnTT"
-        self.cpp_info.names["cmake_find_package_multi"] = "EnTT"

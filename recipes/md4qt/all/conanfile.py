@@ -10,7 +10,7 @@ required_conan_version = ">=2.1"
 class Md4QtConan(ConanFile):
     name = "md4qt"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/igormironchik/md4qt"
+    homepage = "https://invent.kde.org/libraries/md4qt"
     license = "MIT"
     description = "C++ library for parsing Markdown."
     topics = ("markdown", "gfm", "parser", "ast", "commonmark", "md", "qt6", "cpp17")
@@ -31,11 +31,13 @@ class Md4QtConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("qt/<host_version>")
-        self.tool_requires("cmake/[>=3.19]")
+        self.tool_requires("cmake/[>=3.27]")
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_MD4QT_TESTS"] = False
+        qt_tools_rootdir = self.conf.get("user.qt:tools_directory", None)
+        tc.cache_variables["CMAKE_AUTOMOC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "moc.exe" if self.settings_build.os == "Windows" else "moc")
         tc.generate()
 
         deps = CMakeDeps(self)

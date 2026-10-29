@@ -21,11 +21,13 @@ class LightPcapNgConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_zstd": [True, False],
+        "with_zlib": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_zstd": True,
+        "with_zlib": False,
     }
 
     def config_options(self):
@@ -35,6 +37,8 @@ class LightPcapNgConan(ConanFile):
     def configure(self):
         if self.options.with_zstd:
             self.options["zstd"].shared = self.options.shared
+        if self.options.with_zlib:
+            self.options["zlib"].shared = self.options.shared
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
         if self.options.shared:
@@ -46,6 +50,8 @@ class LightPcapNgConan(ConanFile):
     def requirements(self):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
+        if self.options.with_zlib:
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -53,6 +59,7 @@ class LightPcapNgConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["LIGHT_USE_ZSTD"] = self.options.with_zstd
+        tc.variables["LIGHT_USE_ZLIB"] = self.options.with_zlib
         tc.variables["BUILD_TESTING"] = False
         tc.generate()
         tc = CMakeDeps(self)
@@ -75,10 +82,6 @@ class LightPcapNgConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "light_pcapng::light_pcapng")
         self.cpp_info.components["liblight_pcapng"].libs = ["light_pcapng"]
         if self.options.with_zstd:
-            self.cpp_info.components["liblight_pcapng"].requires = ["zstd::zstd"]
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "light_pcapng"
-        self.cpp_info.names["cmake_find_package_multi"] = "light_pcapng"
-        self.cpp_info.components["liblight_pcapng"].names["cmake_find_package"] = "light_pcapng"
-        self.cpp_info.components["liblight_pcapng"].names["cmake_find_package_multi"] = "light_pcapng"
+            self.cpp_info.components["liblight_pcapng"].requires.append("zstd::zstd")
+        if self.options.with_zlib:
+            self.cpp_info.components["liblight_pcapng"].requires.append("zlib::zlib")

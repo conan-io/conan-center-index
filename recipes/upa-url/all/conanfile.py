@@ -14,7 +14,7 @@ class upa_urlRecipe(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/upa-url/upa"
     description = "An implementation of the WHATWG URL Standard in C++"
-    topics = ("url", "parser", "psl", "whatwg")
+    topics = ("url", "urlpattern", "parser", "psl", "whatwg")
 
     # Binary configuration
     package_type = "library"
@@ -47,8 +47,9 @@ class upa_urlRecipe(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        # Remove unused files
+
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "upa")

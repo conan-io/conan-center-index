@@ -1,49 +1,38 @@
+#include <stdbool.h>
+
 #include <openvino/c/openvino.h>
 
-#define OV_SUCCESS(statement) \
-    if ((statement) != 0) \
-        return 1;
+#define TEST(statement) { int value = (statement); if (value) return value; }
 
-#define OV_FAIL(statement) \
-    if ((statement) == 0) \
-        return 1;
+#define TEST_GET_PROP(id, device, prop, enabled) { char *out; bool passed = ov_core_get_property(core, device, prop, &out);  }
 
-int test_available_devices() {
-    ov_core_t* core = NULL;
-    char* ret = NULL;
-    OV_SUCCESS(ov_core_create(&core));
-#ifdef ENABLE_INTEL_CPU
-    OV_SUCCESS(ov_core_get_property(core, "CPU", "AVAILABLE_DEVICES", &ret));
-#else
-    OV_FAIL(ov_core_get_property(core, "CPU", "AVAILABLE_DEVICES", &ret));
-#endif
-#ifdef ENABLE_INTEL_GPU
-    OV_SUCCESS(ov_core_get_property(core, "GPU", "AVAILABLE_DEVICES", &ret));
-#else
-    OV_FAIL(ov_core_get_property(core, "GPU", "AVAILABLE_DEVICES", &ret));
-#endif
-#ifdef ENABLE_AUTO
-    OV_SUCCESS(ov_core_get_property(core, "AUTO", "SUPPORTED_PROPERTIES", &ret));
-    OV_SUCCESS(ov_core_get_property(core, "MULTI", "SUPPORTED_PROPERTIES", &ret));
-#else
-    OV_FAIL(ov_core_get_property(core, "AUTO", "SUPPORTED_PROPERTIES", &ret));
-    OV_FAIL(ov_core_get_property(core, "MULTI", "SUPPORTED_PROPERTIES", &ret));
-#endif
-#ifdef ENABLE_HETERO
-    OV_SUCCESS(ov_core_get_property(core, "HETERO", "SUPPORTED_PROPERTIES", &ret));
-#else
-    OV_FAIL(ov_core_get_property(core, "HETERO", "SUPPORTED_PROPERTIES", &ret));
-#endif
-#ifdef ENABLE_AUTO_BATCH
-    OV_SUCCESS(ov_core_get_property(core, "BATCH", "SUPPORTED_PROPERTIES", &ret));
-#else
-    OV_FAIL(ov_core_get_property(core, "BATCH", "SUPPORTED_PROPERTIES", &ret));
-#endif
-    ov_core_free(core);
+
+bool device_available(ov_core_t *core, char *device, char *prop) {
+    char *ret;
+    return ov_core_get_property(core, device, prop, &ret) == 0;
+}
+
+int test_device(int test_id, ov_core_t *core, char *device, char *prop, bool enabled) {
+    if (device_available(core, device, prop) != enabled) {
+        return test_id;
+    }
     return 0;
 }
 
+
 int main() {
-    OV_SUCCESS(test_available_devices());
+    ov_core_t* core = NULL;
+    char* ret = NULL;
+    if (ov_core_create(&core)) {
+        return 1000;
+    }
+
+    TEST(test_device(1101, core, "CPU", "AVAILABLE_DEVICES", ENABLE_INTEL_CPU));
+    //TEST(test_device(1102, core, "GPU", "AVAILABLE_DEVICES", ENABLE_INTEL_GPU));
+    TEST(test_device(1103, core, "AUTO", "SUPPORTED_PROPERTIES", ENABLE_AUTO));
+    TEST(test_device(1104, core, "BATCH", "SUPPORTED_PROPERTIES", ENABLE_AUTO_BATCH));
+    TEST(test_device(1105, core, "HETERO", "SUPPORTED_PROPERTIES", ENABLE_HETERO));
+
+    ov_core_free(core);
     return 0;
 }

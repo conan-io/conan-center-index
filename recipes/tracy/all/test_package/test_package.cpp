@@ -1,7 +1,22 @@
 #include <tracy/Tracy.hpp>
+#include <iostream>
 
 int main(int argc, char **argv) {
-  ZoneScopedN("main");
+    #ifdef MANUAL_LIFETIME
+    tracy::StartupProfiler();
+    #endif
 
-  return 0;
+    std::cout << "TracyIsStarted: " << TracyIsStarted << std::endl;
+    {
+        // The ZoneScoped removes its profiler when it goes out of scope.
+        // Ensure this happens before the profiler is shutdown.
+        ZoneScopedN("main");
+    }
+    #ifdef MANUAL_LIFETIME
+    tracy::ShutdownProfiler();
+    #endif
+
+
+
+    return 0;
 }

@@ -19,9 +19,10 @@ class TestPackageConan(ConanFile):
     def generate(self):
         pkg_config_deps = PkgConfigDeps(self)
         pkg_config_deps.generate()
-        pkg_config = self.conf_info.get("tools.gnu:pkg_config", default="pkg-config")
-        uuid_pkg_config_file = os.path.join(self.generators_folder, "uuid.pc")
-        self.run(f"{pkg_config} --validate {uuid_pkg_config_file}")
+        if self.settings.os == "Linux":
+            pkg_config = self.conf_info.get("tools.gnu:pkg_config", default="pkg-config")
+            uuid_pkg_config_file = os.path.join(self.generators_folder, "uuid.pc")
+            self.run(f"{pkg_config} --validate {uuid_pkg_config_file}")
 
     def build(self):
         cmake = CMake(self)

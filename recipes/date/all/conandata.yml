@@ -1,7 +1,7 @@
 sources:
-  "3.0.4":
-    url: "https://github.com/HowardHinnant/date/archive/refs/tags/v3.0.4.tar.gz"
-    sha256: "56e05531ee8994124eeb498d0e6a5e1c3b9d4fccbecdf555fe266631368fb55f"
+  "3.0.5":
+    url: "https://github.com/HowardHinnant/date/archive/refs/tags/v3.0.5.tar.gz"
+    sha256: "ef786edc203daec76475825640b3af247bd08e31fc52217e5ce8f76107b4bb05"
   "2.4.1":
     url: "https://github.com/HowardHinnant/date/archive/refs/tags/v2.4.1.tar.gz"
     sha256: "98907d243397483bd7ad889bf6c66746db0d7d2a39cc9aacc041834c40b65b98"

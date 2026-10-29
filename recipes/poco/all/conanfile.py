@@ -298,3 +298,5 @@ class PocoConan(ConanFile):
                 self.cpp_info.components["poco_util"].defines.append("POCO_UTIL_NO_JSONCONFIGURATION")
             if not self.options.enable_xml:
                 self.cpp_info.components["poco_util"].defines.append("POCO_UTIL_NO_XMLCONFIGURATION")
+        if not self.options.with_sql_parser:
+            self.cpp_info.components["poco_data"].defines.append("POCO_DATA_NO_SQL_PARSER=1")

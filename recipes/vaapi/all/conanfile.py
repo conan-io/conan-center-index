@@ -46,6 +46,9 @@ class SysConfigVAAPIConan(ConanFile):
         pkg = package_manager.Pkg(self)
         pkg.install(["libva"], update=True, check=True)
 
+        alpine = package_manager.Apk(self)
+        alpine.install(["libva-dev"], update=True, check=True)
+
     def package_info(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
             for name in ['libva', 'libva-x11', 'libva-drm']:

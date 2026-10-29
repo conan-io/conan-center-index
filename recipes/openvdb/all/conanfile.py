@@ -20,8 +20,7 @@ class OpenVDBConan(ConanFile):
         "structure and a large suite of tools for the efficient storage and "
         "manipulation of sparse volumetric data discretized on three-dimensional grids."
     )
-    # The license is defined in the config_options as it depends on the package version.
-    # (openvdb < 12 is MPL-2.0 licensed, openvdb >= 12 is Apache-2 licensed.)
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/AcademySoftwareFoundation/openvdb"
     topics = ("voxel", "voxelizer", "volume-rendering", "fx", "vdb")
@@ -98,9 +97,6 @@ class OpenVDBConan(ConanFile):
         }
 
     def config_options(self):
-        # Setting license conditionally as OpenVDB 12.0.0 switched from MPL 2 to Apache 2.
-        self.license = "Apache-2.0" if Version(self.version) >= "12.0" else "MPL-2.0"
-
         if self.settings.os == "Windows":
             del self.options.fPIC
         if is_msvc(self):
@@ -121,7 +117,7 @@ class OpenVDBConan(ConanFile):
     def requirements(self):
         # https://github.com/AcademySoftwareFoundation/openvdb/blob/v10.0.1/doc/dependencies.txt#L36-L84
         self.requires("boost/1.84.0", transitive_headers=True)
-        self.requires("onetbb/2021.10.0", transitive_headers=True, transitive_libs=True)
+        self.requires("onetbb/[>=2021.10.0 <2024]", transitive_headers=True, transitive_libs=True)
         if self.options.use_imath_half:
             self.requires("imath/[>=3.1.9 <4]", transitive_headers=True, transitive_libs=True)
         if self.options.with_zlib:
@@ -269,7 +265,7 @@ class OpenVDBConan(ConanFile):
         main_component.requires = [
             "boost::iostreams",
             "boost::system",
-            "onetbb::onetbb",
+            "onetbb::libtbb",
         ]
         if self.settings.os == "Windows":
             main_component.requires.append("boost::disable_autolinking")

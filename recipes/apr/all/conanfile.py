@@ -140,6 +140,8 @@ class AprConan(ConanFile):
             tc = CMakeToolchain(self)
             tc.variables["INSTALL_PDB"] = False
             tc.variables["APR_BUILD_TESTAPR"] = False
+            tc.cache_variables["APR_BUILD_SHARED"] = self.options.shared
+            tc.cache_variables["APR_BUILD_STATIC"] = not self.options.shared
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
             tc.generate()
         else:
@@ -162,7 +164,9 @@ class AprConan(ConanFile):
         if is_msvc(self):
             cmake = CMake(self)
             cmake.configure()
-            cmake.build(target="libapr-1" if self.options.shared else "apr-1")
+            cmake.build(target=("libapr-1" if self.options.shared else "apr-1")
+                        if Version(self.version) < "1.7.6" else
+                        None)
         else:
             autotools = Autotools(self)
             if self._should_call_autoreconf:
@@ -175,6 +179,7 @@ class AprConan(ConanFile):
         if is_msvc(self):
             cmake = CMake(self)
             cmake.install()
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         else:
             autotools = Autotools(self)
             autotools.install()

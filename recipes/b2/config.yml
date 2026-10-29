@@ -1,4 +1,6 @@
 versions:
+  "5.6.1":
+    folder: portable
   "4.8.2":
     folder: portable
   "4.9.6":
@@ -24,4 +26,10 @@ versions:
   "5.3.3":
     folder: portable
   "5.4.2":
+    folder: portable
+  "5.5.1":
+    folder: portable
+  "5.5.2":
+    folder: portable
+  "5.5.3":
     folder: portable

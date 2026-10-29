@@ -1,0 +1,75 @@
+# Default autosetup SONAME, out-implib, and DLL basename to libsqlcipher.
+
+--- a/autosetup/sqlite-config.tcl
++++ b/autosetup/sqlite-config.tcl
+@@ -897,21 +897,21 @@
+     # and this project has no direct use for soname, so default to
+     # none. Package maintainers, on the other hand, like to have an
+     # soname.
+     set soname none
+   }
+   switch -exact -- $soname {
+     none - "" { return 0 }
+-    legacy    { set soname libsqlite3.so.0 }
++    legacy    { set soname libsqlcipher.so.0 }
+     default {
+-      if {[string match libsqlite3.* $soname]} {
++      if {[string match libsqlcipher.* $soname]} {
+         # use it as-is
+       } else {
+         # Assume it's a suffix
+-        set soname "libsqlite3.so.${soname}"
++        set soname "libsqlcipher.so.${soname}"
+       }
+     }
+   }
+   proc-debug "soname=$soname"
+   if {[proj-check-soname $soname]} {
+     define LDFLAGS_LIBSQLITE3_SONAME [get-define LDFLAGS_SONAME_PREFIX]$soname
+     msg-result "Setting SONAME using: [get-define LDFLAGS_LIBSQLITE3_SONAME]"
+@@ -1613,24 +1613,24 @@
+ # extension). If --dll-basename is not provided (or programmatically
+ # set - see [sqlite-handle-env-quirks]) then this is always
+ # "libsqlite3", otherwise it may use a different value based on the
+ # value of [get-define host].
+ proc sqlite-handle-dll-basename {} {
+   if {[proj-opt-was-provided dll-basename]} {
+     set dn [join [opt-val dll-basename] ""]
+-    if {$dn in {none default}} { set dn libsqlite3 }
++    if {$dn in {none default}} { set dn libsqlcipher }
+   } else {
+-    set dn libsqlite3
++    set dn libsqlcipher
+   }
+   if {$dn in {auto ""}} {
+     switch -glob -- [get-define host] {
+       *-*-cygwin  { set dn cygsqlite3-0 }
+-      *-*-ming*   { set dn libsqlite3-0 }
++      *-*-ming*   { set dn libsqlcipher-0 }
+       *-*-msys    { set dn msys-sqlite3-0 }
+-      default     { set dn libsqlite3 }
++      default     { set dn libsqlcipher }
+     }
+   }
+   define SQLITE_DLL_BASENAME $dn
+ }
+ 
+ ########################################################################
+ # [define]s LDFLAGS_OUT_IMPLIB to either an empty string or to a
+@@ -1662,15 +1662,15 @@
+ proc sqlite-handle-out-implib {} {
+   define LDFLAGS_OUT_IMPLIB ""
+   define SQLITE_OUT_IMPLIB ""
+   set rc 0
+   if {[proj-opt-was-provided out-implib]} {
+     set olBaseName [join [opt-val out-implib] ""]
+     if {$olBaseName in {auto ""}} {
+-      set olBaseName "libsqlite3" ;# [get-define SQLITE_DLL_BASENAME]
++      set olBaseName "libsqlcipher" ;# [get-define SQLITE_DLL_BASENAME]
+       # Based on discussions with mingw/msys users, the import lib
+       # should always be called libsqlite3.dll.a even on platforms
+       # which rename libsqlite3.dll to something else.
+     }
+     if {$olBaseName ne "none"} {
+       cc-with {-link 1} {
+         set dll "${olBaseName}[get-define TARGET_DLLEXT]"

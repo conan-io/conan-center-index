@@ -1,4 +1,10 @@
 sources:
+  "1.26":
+    url: [
+      "https://ftp.gnu.org/gnu/gdbm/gdbm-1.26.tar.gz",
+      "https://mirrors.tripadvisor.com/gnu/gdbm/gdbm-1.26.tar.gz",
+    ]
+    sha256: "6a24504a14de4a744103dcb936be976df6fbe88ccff26065e54c1c47946f4a5e"
   "1.23":
     url: [
       "https://ftp.gnu.org/gnu/gdbm/gdbm-1.23.tar.gz",
@@ -18,5 +24,10 @@ sources:
     ]
     sha256: "86e613527e5dba544e73208f42b78b7c022d4fa5a6d5498bf18c8d6f745b91dc"
 patches:
+  "1.23":
+    - patch_file: "patches/0002-c23-rename-bool-union-member.patch"
+      patch_description: "C23 compatibility fix"
+      patch_type: "portability"
+      patch_source: "https://git.gnu.org.ua/gdbm.git/commit/?id=734f69451392ffb6280d8a3aef51e2673c9b8554"
   "1.18.1":
     - patch_file: "patches/0001-fix-multiple-definitions.patch"

@@ -1,5 +1,7 @@
 versions:
-  "8.1.1":
+  "9.0.1":
     folder: "all"
-  "7.1.4":
+  "8.1.2":
+    folder: "all"
+  "7.1.5":
     folder: "all"

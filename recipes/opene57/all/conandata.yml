@@ -1,4 +1,4 @@
 sources:
-  "1.8.0":
-    url: "https://github.com/openE57/openE57/archive/1.8.0.tar.gz"
-    sha256: "20fef7fa6dcb6d3a5ea558e5b389e3ee9734ab42e939ae29d999a9268e3781bd"
+  "1.9.0":
+    url: "https://github.com/openE57/openE57/archive/1.9.0.tar.gz"
+    sha256: "43e702780d768dfadff9644afe08a3ffa666a495c7d82293bbdee0dcf5247c43"

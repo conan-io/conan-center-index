@@ -88,6 +88,14 @@ index 525903e..998b18d 100644
    CXX_STANDARD_REQUIRED ON
    CXX_EXTENSIONS OFF
    OUTPUT_NAME fzn-cp-sat
+@@ -162,7 +160,6 @@ target_include_directories(fzn-parser_test PRIVATE
+   )
+ ## Compile options
+ set_target_properties(fzn-parser_test PROPERTIES
+-  CXX_STANDARD 17
+   CXX_STANDARD_REQUIRED ON
+   CXX_EXTENSIONS OFF
+   OUTPUT_NAME fzn-parser-cp-sat
 diff --git a/ortools/third_party_solvers/CMakeLists.txt b/ortools/third_party_solvers/CMakeLists.txt
 index 97232c4..2bfd94e 100644
 --- a/ortools/third_party_solvers/CMakeLists.txt

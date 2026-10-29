@@ -80,7 +80,7 @@ class LibGit2Conan(ConanFile):
             self.requires("llhttp/9.1.3")
 
         if self.options.with_libssh2:
-            self.requires("libssh2/1.11.0")
+            self.requires("libssh2/[>=1.11.0 <2]")
         if self._need_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self._need_mbedtls:

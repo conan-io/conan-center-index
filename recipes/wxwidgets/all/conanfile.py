@@ -81,8 +81,12 @@ class wxWidgetsConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
         if self.settings.os != "Linux":
-            self.options.rm_safe("secretstore")
             self.options.rm_safe("cairo")
+        # secretstore needs no extra dependency on macOS (Keychain, via the
+        # Security framework already linked below) - only strip it where
+        # wx doesn't support wxSecretStore without extra deps at all.
+        if self.settings.os not in ("Linux", "Macos"):
+            self.options.rm_safe("secretstore")
 
     def configure(self):
         if self.options.shared:
@@ -117,7 +121,7 @@ class wxWidgetsConan(ConanFile):
                 self.requires("gst-plugins-base/1.19.2")
             self.requires("libcurl/[>=7.78.0 <9]")
 
-        if self.options.get_safe("secretstore"):
+        if self.options.get_safe("secretstore") and self.settings.os == "Linux":
             self.requires("libsecret/[>=0.21.7 <1]")
         if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/[>=9e]")
@@ -230,7 +234,7 @@ class wxWidgetsConan(ConanFile):
             deps.set_property("gtk", "cmake_file_name", "GTK3")
             deps.set_property("xkbcommon", "cmake_file_name", "XKBCommon")
             deps.set_property("xkbcommon", "cmake_additional_variables_prefixes", ["XKBCOMMON",])
-        if self.options.get_safe("secretstore"):
+        if self.options.get_safe("secretstore") and self.settings.os == "Linux":
             deps.set_property("libsecret", "cmake_file_name", "LIBSECRET")
         if self.options.webview:
             deps.set_property("libsoup", "cmake_file_name", "LIBSOUP")
@@ -409,7 +413,7 @@ class wxWidgetsConan(ConanFile):
                                "gcc": "gcc",
                                "clang": "clang"}.get(str(self.settings.compiler))
 
-            arch_suffix = "_x64" if self.settings.arch == "x86_64" else ""
+            arch_suffix = "_x64" if self.settings.arch in ["x86_64", "armv8"] else ""
             lib_suffix = "_dll" if self.options.shared else "_lib"
             basedir = f"{compiler_prefix}{arch_suffix}{lib_suffix}"
             libdir = os.path.join("lib", basedir)

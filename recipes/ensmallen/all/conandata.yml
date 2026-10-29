@@ -1,7 +1,7 @@
 sources:
+  "3.11.1":
+    url: "https://ensmallen.org/files/ensmallen-3.11.1.tar.gz"
+    sha256: "3606c0d0a06ac75858ddb4eecd0802154bc91d45763aa9521cf53a0e78178d55"
   "2.21.0":
     url: "https://ensmallen.org/files/ensmallen-2.21.0.tar.gz"
     sha256: "076f9d84e1ebc84c0ae19ee63accfc8fd3ec850f8993784bd9277776c3af2932"
-  "2.19.1":
-    url: "https://ensmallen.org/files/ensmallen-2.19.1.tar.gz"
-    sha256: "f36ad7f08b0688d2a8152e1c73dd437c56ed7a5af5facf65db6ffd977b275b2e"

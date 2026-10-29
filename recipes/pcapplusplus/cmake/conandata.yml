@@ -8,3 +8,6 @@ sources:
   "25.05":
     url: "https://github.com/seladb/PcapPlusPlus/archive/v25.05.tar.gz"
     sha256: "66c11d61f3c8019eaf74171ad10229dfaeab27eb86859c897fb0ba1298f80c94"
+  "26.07":
+    url: "https://github.com/seladb/PcapPlusPlus/archive/v26.07.tar.gz"
+    sha256: "58efbebde9df37134ca6abffdc585562155b7fc0937ced1fd6569a8c93a22ba6"

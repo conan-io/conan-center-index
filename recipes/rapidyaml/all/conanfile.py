@@ -11,7 +11,8 @@ required_conan_version = ">=1.53.0"
 class RapidYAMLConan(ConanFile):
     name = "rapidyaml"
     description = "a library to parse and emit YAML, and do it fast."
-    license = "MIT",
+    license = "MIT"
+    package_type = "library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/biojppm/rapidyaml"
     topics = ("yaml", "parser", "emitter")
@@ -43,8 +44,6 @@ class RapidYAMLConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "0.4.0":
-            del self.options.with_tab_tokens
         if Version(self.version) < "0.6.0":
             del self.options.with_default_callback_uses_exceptions
             del self.options.with_assert
@@ -62,6 +61,8 @@ class RapidYAMLConan(ConanFile):
     def requirements(self):
         if Version(self.version) < "0.6.0":
             self.requires("c4core/0.1.11", transitive_headers=True)
+        elif Version(self.version) >= "0.15.2":
+            self.requires("c4core/0.4.0", transitive_headers=True)
         else:
             self.requires("c4core/0.2.0", transitive_headers=True)
 
@@ -76,8 +77,7 @@ class RapidYAMLConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["RYML_DEFAULT_CALLBACKS"] = self.options.with_default_callbacks
-        if Version(self.version) >= "0.4.0":
-            tc.variables["RYML_WITH_TAB_TOKENS"] = self.options.with_tab_tokens
+        tc.variables["RYML_WITH_TAB_TOKENS"] = self.options.with_tab_tokens
         if Version(self.version) >= "0.6.0":
             tc.variables["RYML_DEFAULT_CALLBACK_USES_EXCEPTIONS"] = self.options.with_default_callback_uses_exceptions
             tc.variables["RYML_USE_ASSERT"] = self.options.with_assert
@@ -104,6 +104,5 @@ class RapidYAMLConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "ryml")
         self.cpp_info.set_property("cmake_target_name", "ryml::ryml")
         self.cpp_info.libs = ["ryml"]
-
-        self.cpp_info.names["cmake_find_package"] = "ryml"
-        self.cpp_info.names["cmake_find_package_multi"] = "ryml"
+        if Version(self.version) >= "0.15.2" and self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("C4CORE_SHARED")

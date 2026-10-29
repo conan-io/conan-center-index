@@ -69,11 +69,11 @@ if(NOT HEADER_ONLY)
     endif()
 
     if(WITH_PYTHON)
-        find_package(Boost COMPONENTS python REQUIRED)
+        find_package(Boost COMPONENTS python REQUIRED OPTIONAL_COMPONENTS numpy)
         add_library(hello_ext MODULE python.cpp)
         set_property(TARGET hello_ext PROPERTY PREFIX "")
 
-        find_package(Python ${PYTHON_VERSION_TO_SEARCH} COMPONENTS Interpreter Development NumPy REQUIRED)
+        find_package(Python ${PYTHON_VERSION_TO_SEARCH} COMPONENTS Interpreter Development REQUIRED OPTIONAL_COMPONENTS NumPy)
 
         target_link_libraries(hello_ext PRIVATE Boost::python Python::Python)
         if(WIN32)
@@ -85,15 +85,29 @@ if(NOT HEADER_ONLY)
             COMMENT "Running Boost.Python test"
         )
 
-        add_executable(test_boost_numpy numpy.cpp)
-        target_link_libraries(test_boost_numpy PRIVATE Boost::numpy Python::Python Python::NumPy)
-        set_target_properties(test_boost_numpy PROPERTIES ENVIRONMENT "PYTHONPATH=${Python_SITELIB}")
+        if(TARGET Boost::numpy AND Python_NumPy_FOUND)
+            add_executable(test_boost_numpy numpy.cpp)
+            target_link_libraries(test_boost_numpy PRIVATE Boost::numpy Python::Python Python::NumPy)
+            set_target_properties(test_boost_numpy PROPERTIES ENVIRONMENT "PYTHONPATH=${Python_SITELIB}")
+        endif()
     endif()
 
     if(WITH_URL)
         find_package(Boost COMPONENTS url REQUIRED)
         add_executable(test_boost_url url.cpp)
         target_link_libraries(test_boost_url PRIVATE Boost::url)
+    endif()
+
+    if (WITH_WAVE)
+        find_package(Boost COMPONENTS wave REQUIRED)
+        add_executable(test_boost_wave wave.cpp)
+        target_link_libraries(test_boost_wave PRIVATE Boost::wave)
+    endif()
+
+    if (WITH_MATH)
+        find_package(Boost COMPONENTS math_c99l REQUIRED)
+        add_executable(test_boost_math math.cpp)
+        target_link_libraries(test_boost_math PRIVATE Boost::math_c99l)
     endif()
 
 endif()

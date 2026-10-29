@@ -1,13 +1,12 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get
-from conan.tools.scm import Version
-from os.path import join
+from conan.tools.files import (collect_libs, copy, get, apply_conandata_patches,
+                               export_conandata_patches, replace_in_file)
+import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class SoPlexConan(ConanFile):
@@ -31,20 +30,6 @@ class SoPlexConan(ConanFile):
         "with_boost": True,
         "with_gmp": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "5",
-            "clang": "4",
-            "apple-clang": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
 
     def _determine_lib_name(self):
         if self.options.shared:
@@ -75,18 +60,16 @@ class SoPlexConan(ConanFile):
         if self.options.with_boost:
             self.requires("boost/1.84.0", transitive_headers=True)  # also update Boost_VERSION_MACRO below!
 
-    def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+    def export_sources(self):
+        export_conandata_patches(self)
 
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+    def validate(self):
+        check_min_cppstd(self, 14)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD", "##")
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -107,21 +90,25 @@ class SoPlexConan(ConanFile):
         cmake.build(target=f"lib{self._determine_lib_name()}")
 
     def package(self):
-        copy(self, pattern="LICENSE", src=self.source_folder, dst=join(self.package_folder, "licenses"))
-        copy(self, pattern="soplex.h", src=join(self.source_folder, "src"), dst=join(self.package_folder, "include"))
-        copy(self, pattern="soplex.hpp", src=join(self.source_folder, "src"), dst=join(self.package_folder, "include"))
-        copy(self, pattern="soplex_interface.h", src=join(self.source_folder, "src"), dst=join(self.package_folder, "include"))
-        copy(self, pattern="*.h", src=join(self.source_folder, "src", "soplex"), dst=join(self.package_folder, "include", "soplex"))
-        copy(self, pattern="*.hpp", src=join(self.source_folder, "src", "soplex"), dst=join(self.package_folder, "include", "soplex"))
-        copy(self, pattern="*.h", src=join(self.build_folder, "soplex"), dst=join(self.package_folder, "include", "soplex"))
-        copy(self, pattern="*.lib", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"), keep_path=False)
+        src_folder = os.path.join(self.source_folder, "src")
+        include_folder = os.path.join(self.package_folder, "include")
+        build_lib_folder = os.path.join(self.build_folder, "lib")
+        pkg_lib_folder = os.path.join(self.package_folder, "lib")
+        copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, pattern="soplex.h", src=src_folder, dst=include_folder)
+        copy(self, pattern="soplex.hpp", src=src_folder, dst=include_folder)
+        copy(self, pattern="soplex_interface.h", src=src_folder, dst=include_folder)
+        copy(self, pattern="*.h", src=os.path.join(src_folder, "soplex"), dst=os.path.join(include_folder, "soplex"))
+        copy(self, pattern="*.hpp", src=os.path.join(src_folder, "soplex"), dst=os.path.join(include_folder, "soplex"))
+        copy(self, pattern="*.h", src=os.path.join(self.build_folder, "soplex"), dst=os.path.join(include_folder, "soplex"))
+        copy(self, pattern="*.lib", src=build_lib_folder, dst=pkg_lib_folder, keep_path=False)
         if self.options.shared:
-            copy(self, pattern="*.so*", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"), keep_path=False)
-            copy(self, pattern="*.dylib*", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"), keep_path=False)
-            copy(self, pattern="*.dll", src=join(self.build_folder, "bin"), dst=join(self.package_folder, "bin"), keep_path=False)
-            copy(self, pattern="*.dll.a", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"), keep_path=False)
+            copy(self, pattern="*.so*", src=build_lib_folder, dst=pkg_lib_folder, keep_path=False)
+            copy(self, pattern="*.dylib*", src=build_lib_folder, dst=pkg_lib_folder, keep_path=False)
+            copy(self, pattern="*.dll", src=os.path.join(self.build_folder, "bin"), dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+            copy(self, pattern="*.dll.a", src=build_lib_folder, dst=pkg_lib_folder, keep_path=False)
         else:
-            copy(self, pattern="*.a", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"), keep_path=False)
+            copy(self, pattern="*.a", src=build_lib_folder, dst=pkg_lib_folder, keep_path=False)
         fix_apple_shared_install_name(self)
 
     def package_info(self):

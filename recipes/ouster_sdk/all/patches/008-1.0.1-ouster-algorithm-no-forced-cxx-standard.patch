@@ -1,0 +1,14 @@
+diff --git a/ouster_algorithm/CMakeLists.txt b/ouster_algorithm/CMakeLists.txt
+--- a/ouster_algorithm/CMakeLists.txt
++++ b/ouster_algorithm/CMakeLists.txt
+@@ -8,10 +8,6 @@
+   src/normals.cpp
+   src/voxel_downsample.cpp
+ )
+-set_target_properties(ouster_algorithm PROPERTIES
+-  CXX_STANDARD 14
+-  CXX_STANDARD_REQUIRED ON
+-)
+ 
+ target_include_directories(ouster_algorithm
+   PUBLIC

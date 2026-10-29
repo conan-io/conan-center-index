@@ -1,0 +1,25 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -30,10 +30,7 @@ option(RYML_INSTALL "Enable install target" ON)
+ 
+ #-------------------------------------------------------
+ 
+-c4_require_subproject(c4core INCORPORATE
+-    SUBDIRECTORY ${RYML_EXT_DIR}/c4core
+-    OVERRIDE C4CORE_INSTALL ${RYML_INSTALL}
+-)
++find_package(c4core REQUIRED)
+ 
+ c4_add_library(ryml
+     SOURCES
+@@ -86,6 +83,5 @@ c4_add_library(ryml
+     INC_DIRS
+         $<BUILD_INTERFACE:${RYML_SRC_DIR}>
+         $<INSTALL_INTERFACE:include>
+-    LIBS c4core
+-    INCORPORATE c4core
++    LIBS c4core::c4core
+     )
+ 
+ 

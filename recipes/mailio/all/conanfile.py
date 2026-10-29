@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.files import copy, get, rmdir
 import os
 
 required_conan_version = ">=2.0.9"
@@ -23,27 +23,23 @@ class MailioConan(ConanFile):
         "fPIC": True,
         "shared": False,
     }
-    short_paths = True
     implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.86.0", transitive_headers=True, transitive_libs=True)
+        self.requires("boost/1.91.0", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         check_min_cppstd(self, 17)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16.3]")
+        self.tool_requires("cmake/[>=3.30]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "install(FILES ${CMAKE_BINARY_DIR}/version.hpp",
-                        "install(FILES ${PROJECT_BINARY_DIR}/version.hpp")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -70,7 +66,6 @@ class MailioConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["mailio"]
         self.cpp_info.requires = [
-            "boost::system",
             "boost::date_time",
             "boost::regex",
             "openssl::openssl",
