@@ -38,6 +38,16 @@ class SentryCrashpadConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
+        if Version(self.version) >= "0.7":
+            # Same minimums as the sentry-native recipe with with_crashpad=sentry: mini_chromium uses
+            # concepts and bit_cast, and apple-clang < 14 cannot build crashpad/minidump.
+            return {
+                "Visual Studio": "16",
+                "msvc": "192",
+                "gcc": "11",
+                "clang": "14",
+                "apple-clang": "14",
+            }
         return {
             "Visual Studio": "16",
             "msvc": "191",
@@ -70,13 +80,14 @@ class SentryCrashpadConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             # Set as required in crashpad CMake file.
             # See https://github.com/getsentry/crashpad/blob/71bcaad4cf30294b8de1bfa02064ab629437163b/CMakeLists.txt#L67
-            check_min_cppstd(self, 14)
+            # Since 0.7, the public client headers need C++17 (getsentry/crashpad #160).
+            check_min_cppstd(self, 17 if Version(self.version) >= "0.7" else 14)
 
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warning("Compiler is unknown. Assuming it supports C++14.")
         elif Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"Build requires support for C++14. Minimum version for {self.settings.compiler} is {minimum_version}")
+            raise ConanInvalidConfiguration(f"{self.ref} requires {self.settings.compiler} {minimum_version} or newer.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -122,6 +133,10 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["crashpad_mini_chromium"].libs = ["mini_chromium"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["crashpad_mini_chromium"].system_libs.append("pthread")
+        elif self.settings.os == "Windows":
+            # The public headers use std::min and std::max. Crashpad defines NOMINMAX only on its
+            # own private target, so consumers that include <windows.h> get the min/max macros.
+            self.cpp_info.components["crashpad_mini_chromium"].defines.append("NOMINMAX")
         elif is_apple_os(self):
             self.cpp_info.components["crashpad_mini_chromium"].frameworks = ["CoreFoundation", "Foundation", "Security"]
             if self.settings.os == "Macos":
@@ -142,6 +157,15 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["crashpad_util"].set_property("cmake_target_name", "crashpad::util")
         self.cpp_info.components["crashpad_util"].libs = ["crashpad_util"]
         self.cpp_info.components["crashpad_util"].requires = ["crashpad_compat", "crashpad_mini_chromium", "zlib::zlib"]
+        if Version(self.version) >= "0.7":
+            # crashpad_util uses the vendored mpack (MessagePack) library since 0.7.
+            self.cpp_info.components["crashpad_mpack"].set_property("cmake_target_name", "crashpad::mpack")
+            self.cpp_info.components["crashpad_mpack"].libs = ["crashpad_mpack"]
+            self.cpp_info.components["crashpad_util"].requires.append("crashpad_mpack")
+            # client/settings.h declares different private members when this is 0. Crashpad
+            # sets it with add_compile_definitions() for its own build only (1 except Android).
+            flock = "0" if self.settings.os == "Android" else "1"
+            self.cpp_info.components["crashpad_util"].defines.append(f"CRASHPAD_FLOCK_ALWAYS_SUPPORTED={flock}")
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["crashpad_util"].system_libs.extend(["pthread", "rt"])
             # Requires libcurl https://github.com/getsentry/crashpad/blob/2237d97ee2c38c930c07001e660be57324f69a37/util/CMakeLists.txt#L256
@@ -167,7 +191,7 @@ class SentryCrashpadConan(ConanFile):
             "crashpad_util", "crashpad_mini_chromium",
         ]
         if self.settings.os == "Windows":
-            self.cpp_info.components["snapshot"].system_libs.append("powrprof")
+            self.cpp_info.components["crashpad_snapshot"].system_libs.append("powrprof")
 
         # minidump
         self.cpp_info.components["crashpad_minidump"].set_property("cmake_target_name", "crashpad::minidump")
