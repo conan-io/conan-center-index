@@ -1,0 +1,55 @@
+From 6c02d1ad51de0db7d88ae59345e444edfc5929be Mon Sep 17 00:00:00 2001
+From: Gareth Sylvester-Bradley <garethsb@nvidia.com>
+Date: Fri, 30 Oct 2026 07:17:32 +0000
+Subject: [PATCH] Shut down rather than close connection sockets when the Asio
+ http_listener stops
+
+hostport_listener::stop() closed each connection's socket from the closing
+thread, while a thread pool thread could be starting a write on the same
+socket, which crashed in Boost.Asio. Only shut the sockets down, so that each
+connection fails its pending or next operation and closes its socket on its
+own thread.
+
+See #1.
+
+Signed-off-by: Gareth Sylvester-Bradley <garethsb@nvidia.com>
+---
+ Release/src/http/listener/http_server_asio.cpp | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/Release/src/http/listener/http_server_asio.cpp b/Release/src/http/listener/http_server_asio.cpp
+index e83b9ff5..1117317b 100644
+--- a/Release/src/http/listener/http_server_asio.cpp
++++ b/Release/src/http/listener/http_server_asio.cpp
+@@ -403,6 +403,7 @@ public:
+     }
+ 
+     void close();
++    void shutdown();
+ 
+     asio_server_connection(const asio_server_connection&) = delete;
+     asio_server_connection& operator=(const asio_server_connection&) = delete;
+@@ -555,6 +556,14 @@ void asio_server_connection::close()
+     get_request()._reply_if_not_already(status_codes::InternalError);
+ }
+ 
++void asio_server_connection::shutdown()
++{
++    m_close = true;
++    boost::system::error_code ec;
++    m_socket->shutdown(tcp::socket::shutdown_both, ec);
++    get_request()._reply_if_not_already(status_codes::InternalError);
++}
++
+ will_deref_and_erase_t asio_server_connection::start_request_response()
+ {
+     m_read_size = 0;
+@@ -1245,7 +1254,7 @@ void hostport_listener::stop()
+         m_acceptor.reset();
+         for (auto connection : m_connections)
+         {
+-            connection->close();
++            connection->shutdown();
+         }
+     }
+ 
