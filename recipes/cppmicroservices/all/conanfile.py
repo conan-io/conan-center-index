@@ -47,15 +47,14 @@ class CppMicroServicesConan(ConanFile):
         if self.options.shared:
             # LogService, DeclarativeServices and ConfigurationAdmin bundles are only built as shared libraries
             self.requires("spdlog/[>=1.15 <2]")
-        if self.settings.os == "Windows":
-            self.requires("dirent/1.24")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.17]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        rm(self, "*", os.path.join(self.source_folder, "third_party"), excludes=["cppmicroservices_pe"])
+        # Remove third_party dependencies that are managed by Conan, but keep necessary headers
+        rm(self, "*", os.path.join(self.source_folder, "third_party"), excludes=["cppmicroservices_pe.h", "dirent_win32.h"])
         # error: virtual method '~ConfigurationManager' is inside a 'final' class and can never be overridden
         # Fixed by https://github.com/CppMicroServices/CppMicroServices/pull/1275
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "-Werror", "")
