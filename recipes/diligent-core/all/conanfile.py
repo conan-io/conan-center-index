@@ -91,7 +91,6 @@ class DiligentCoreConan(ConanFile):
         tc.variables["ENABLE_RTTI"] = True
         tc.variables["ENABLE_EXCEPTIONS"] = True
         tc.variables[self._diligent_platform()] = True
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4
         tc.generate()
 
         deps = CMakeDeps(self)
