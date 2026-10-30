@@ -62,6 +62,8 @@ class TesseractConan(ConanFile):
         # libcurl is not required for 4.x
         if self.options.get_safe("with_libcurl", default=False):
             self.requires("libcurl/[>=7.78.0 <9]")
+        if self.settings.os == "Android":
+            self.requires("cpu_features/0.10.1")
 
     def validate(self):
         check_min_cppstd(self, "17")
@@ -72,6 +74,7 @@ class TesseractConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -89,14 +92,20 @@ class TesseractConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        if self.settings.os == "Android":
+            # FIXME: Conan CMakeDeps could not generate multiple config CMake files yet - conan-io/conan#8821
+            # As Workaround, consume CpuFeatures::ndk_compat from CpuFeaturesConfig.cmake
+            deps.set_property("cpu_features", "cmake_file_name", "CpuFeaturesNdkCompat")
         deps.generate()
 
-    def build(self):
-        apply_conandata_patches(self)
+    def _patch_sources(self):
         if self.dependencies["leptonica"].options.get_safe("with_tiff"):
             # version <=5.2 do not contain this check, and if not replaced it fail, strict=False is safe
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "check_leptonica_tiff_support()", "", strict=False)
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -137,6 +146,8 @@ class TesseractConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.components["libtesseract"].system_libs = ["ws2_32"]
         self.cpp_info.components["libtesseract"].set_property("pkg_config_name", "tesseract")
+        if self.settings.os == "Android":
+            self.cpp_info.components["libtesseract"].requires.append("cpu_features::cpu_features")
 
     @property
     def _libname(self):
