@@ -14,4 +14,3 @@ add_custom_command(OUTPUT ${CONVERTED_FILE}
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} diligent-core::diligent-core)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
