@@ -2,9 +2,8 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.files import rm, get, rmdir, collect_libs, export_conandata_patches, copy, apply_conandata_patches, replace_in_file
-from conan.tools.microsoft import visual
+from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.apple import is_apple_os
 import os
 
@@ -33,7 +32,7 @@ class DiligentCoreConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 14)
-        if visual.is_msvc_static_runtime(self):
+        if is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
 
     def export_sources(self):
@@ -45,8 +44,8 @@ class DiligentCoreConan(ConanFile):
         apply_conandata_patches(self)
 
     def package_id(self):
-        if visual.is_msvc(self.info):
-            if visual.is_msvc_static_runtime(self.info):
+        if self.info.settings.compiler == "Visual Studio" or self.info.settings.compiler == "msvc":
+            if is_msvc_static_runtime(self.info):
                 self.info.settings.compiler.runtime = "MT/MTd"
             else:
                 self.info.settings.compiler.runtime = "MD/MDd"
