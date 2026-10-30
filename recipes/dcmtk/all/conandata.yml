@@ -1,16 +1,16 @@
 sources:
-  "3.7.0":
-    url: "https://dicom.offis.de/download/dcmtk/dcmtk370/dcmtk-3.7.0.tar.gz"
-    sha256: "f103df876040a4f904f01d2464f7868b4feb659d8cd3f46a5f1f61aa440be415"
+  "3.7.1":
+    url: "https://dicom.offis.de/download/dcmtk/dcmtk371/dcmtk-3.7.1.tar.gz"
+    sha256: "eb8ea1ae79a8423033efec28ebb2306a2bbb9d59bad1c6e529f3d50015276afc"
   "3.6.7":
     url: "https://dicom.offis.de/download/dcmtk/dcmtk367/dcmtk-3.6.7.tar.gz"
     sha256: "7c58298e3e8d60232ee6fc8408cfadd14463cc11a3c4ca4c59af5988c7e9710a"
 patches:
-  "3.7.0":
-    - patch_file: "patches/3.7.0-0001-cmake-robust-deps-handling.patch"
+  "3.7.1":
+    - patch_file: "patches/3.7.1-0001-cmake-robust-deps-handling.patch"
       patch_description: "CMake: robust discovery with find_package() and use imported targets"
       patch_type: conan
-    - patch_file: "patches/3.7.0-0002-cmake-check-openssl-symbol.patch"
+    - patch_file: "patches/3.7.1-0002-cmake-check-openssl-symbol.patch"
       patch_description: "CMake: fix OpenSSL compatibility checks"
       patch_type: conan
   "3.6.7":
