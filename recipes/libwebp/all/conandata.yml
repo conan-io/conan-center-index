@@ -1,7 +1,7 @@
 sources:
   "1.6.0":
     url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz"
-    sha256: "e4ab7009bf0629fd11982d4c2aa83964cf244cffba7347ecd39019a9e38c4564"
+    sha256: "93a852c2b3efafee3723efd4636de855b46f9fe1efddd607e1f42f60fc8f2136"
   "1.5.0":
     url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.5.0.tar.gz"
     sha256: "7d6fab70cf844bf6769077bd5d7a74893f8ffd4dfb42861745750c63c2a5c92c"

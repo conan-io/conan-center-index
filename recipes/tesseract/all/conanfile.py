@@ -92,6 +92,10 @@ class TesseractConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        if self.settings.os == "Android":
+            # FIXME: Conan CMakeDeps could not generate multiple config CMake files yet - conan-io/conan#8821
+            # As Workaround, consume CpuFeatures::ndk_compat from CpuFeaturesConfig.cmake
+            deps.set_property("cpu_features", "cmake_file_name", "CpuFeaturesNdkCompat")
         deps.generate()
 
     def _patch_sources(self):
@@ -99,12 +103,6 @@ class TesseractConan(ConanFile):
             # version <=5.2 do not contain this check, and if not replaced it fail, strict=False is safe
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "check_leptonica_tiff_support()", "", strict=False)
-        if self.settings.os == "Android":
-            # FIXME: Conan CMakeDeps could not generate multiple config CMake files yet - conan-io/conan#8821
-            # As Workaround, consume CpuFeatures::ndk_compat from CpuFeaturesConfig.cmake
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "find_package(CpuFeaturesNdkCompat REQUIRED)",
-                            "find_package(CpuFeatures CONFIG REQUIRED)")
 
     def build(self):
         self._patch_sources()
