@@ -2,6 +2,7 @@ find_package(SPIRV-Tools REQUIRED CONFIG)
 find_package(spirv-cross REQUIRED CONFIG)
 find_package(volk REQUIRED CONFIG)
 find_package(xxHash REQUIRED CONFIG)
+find_package(glew REQUIRED CONFIG)
 
 if (NOT ${DILIGENT_NO_GLSLANG})
     find_package(glslang REQUIRED CONFIG)
