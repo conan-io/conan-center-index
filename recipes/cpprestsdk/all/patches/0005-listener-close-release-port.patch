@@ -1,0 +1,90 @@
+From 86a493a6999b494f57ec6fbdd9749061218f3e56 Mon Sep 17 00:00:00 2001
+From: Gareth Sylvester-Bradley <garethsb@nvidia.com>
+Date: Fri, 30 Oct 2026 07:17:41 +0000
+Subject: [PATCH] Release the port when the last Asio http_listener for it
+ closes
+
+Closing an http_listener only removed its path, so the port kept accepting
+connections, and its connections continued, until the last listener in the
+process closed. Stop and destroy the hostport_listener when its last listener
+is unregistered.
+
+See #1.
+
+Signed-off-by: Gareth Sylvester-Bradley <garethsb@nvidia.com>
+---
+ .../src/http/listener/http_server_asio.cpp    | 22 ++++++++++++++-----
+ 1 file changed, 17 insertions(+), 5 deletions(-)
+
+diff --git a/Release/src/http/listener/http_server_asio.cpp b/Release/src/http/listener/http_server_asio.cpp
+index 1117317b..289291b4 100644
+--- a/Release/src/http/listener/http_server_asio.cpp
++++ b/Release/src/http/listener/http_server_asio.cpp
+@@ -166,7 +166,7 @@ public:
+     void stop();
+ 
+     void add_listener(const std::string& path, http_listener_impl* listener);
+-    void remove_listener(const std::string& path, http_listener_impl* listener);
++    bool remove_listener(const std::string& path, http_listener_impl* listener);
+ 
+     void internal_erase_connection(asio_server_connection*);
+ 
+@@ -1259,6 +1259,9 @@ void hostport_listener::stop()
+     }
+ 
+     m_all_connections_complete.wait();
++
++    // wait for the connection that set the event to release the lock, since this may be destroyed next
++    std::lock_guard<std::mutex> lock(m_connections_lock);
+ }
+ 
+ void hostport_listener::add_listener(const std::string& path, http_listener_impl* listener)
+@@ -1272,11 +1275,12 @@ void hostport_listener::add_listener(const std::string& path, http_listener_impl
+         throw std::invalid_argument("Error: http_listener is already registered for this path");
+ }
+ 
+-void hostport_listener::remove_listener(const std::string& path, http_listener_impl*)
++bool hostport_listener::remove_listener(const std::string& path, http_listener_impl*)
+ {
+     pplx::extensibility::scoped_rw_lock_t lock(m_listeners_lock);
+ 
+     if (m_listeners.erase(path) != 1) throw std::invalid_argument("Error: no http_listener found for this path");
++    return m_listeners.empty();
+ }
+ 
+ pplx::task<void> http_linux_server::start()
+@@ -1391,16 +1395,21 @@ pplx::task<void> http_linux_server::unregister_listener(http_listener_impl* list
+     auto parts = canonical_parts(listener->uri());
+     auto hostport = parts.first;
+     auto path = parts.second;
+-    // First remove the listener from hostport listener
++    // First remove the listener from hostport listener, and the hostport listener when it has no other listeners
++    std::unique_ptr<hostport_listener> unused_hostport_listener;
+     {
+-        pplx::extensibility::scoped_read_lock_t lock(m_listeners_lock);
++        pplx::extensibility::scoped_rw_lock_t lock(m_listeners_lock);
+         auto itr = m_listeners.find(hostport);
+         if (itr == m_listeners.end())
+         {
+             throw std::invalid_argument("Error: no listener registered for that host");
+         }
+ 
+-        itr->second->remove_listener(path, listener);
++        if (itr->second->remove_listener(path, listener))
++        {
++            unused_hostport_listener = std::move(itr->second);
++            m_listeners.erase(itr);
++        }
+     }
+ 
+     // Second remove the listener form listener collection
+@@ -1419,6 +1428,9 @@ pplx::task<void> http_linux_server::unregister_listener(http_listener_impl* list
+         pplx::extensibility::scoped_rw_lock_t lock(*pListenerLock);
+     }
+ 
++    // Close the port, outside m_listeners_lock since its connections may need that lock to complete
++    unused_hostport_listener.reset();
++
+     return pplx::task_from_result();
+ }
+ 
