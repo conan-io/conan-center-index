@@ -31,7 +31,7 @@ class DiligentCoreConan(ConanFile):
     }
 
     def validate(self):
-        check_min_cppstd(self, 14)
+        check_min_cppstd(self, 17)
         if is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
         # ThirdParty/CMakeLists.txt needs the spirv-cross-core target, and Archiver links spirv-cross-glsl

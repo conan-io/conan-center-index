@@ -1,0 +1,25 @@
+diff --git a/BuildTools/CMake/BuildUtils.cmake b/BuildTools/CMake/BuildUtils.cmake
+index 4c8c6f7..0b29e2c 100644
+--- a/BuildTools/CMake/BuildUtils.cmake
++++ b/BuildTools/CMake/BuildUtils.cmake
+@@ -220,7 +220,6 @@ function(set_common_target_properties TARGET)
+     set_target_properties(${TARGET} PROPERTIES
+         # It is crucial to set CXX_STANDARD flag to only affect c++ files and avoid failures compiling c-files:
+         # error: invalid argument '-std=c++17' not allowed with 'C/ObjC'
+-        CXX_STANDARD ${CXX_STANDARD}
+         CXX_STANDARD_REQUIRED ON
+     )
+ 
+diff --git a/Graphics/Archiver/CMakeLists.txt b/Graphics/Archiver/CMakeLists.txt
+index 4e20f8d..d4fb937 100644
+--- a/Graphics/Archiver/CMakeLists.txt
++++ b/Graphics/Archiver/CMakeLists.txt
+@@ -56,7 +56,7 @@ if(METAL_SUPPORTED)
+     set_property(SOURCE ${MTL_SOURCE} APPEND_STRING PROPERTY
+         # Disable Metal API deprecation warnings such as
+         #   'MTLArgumentType' is deprecated: first deprecated in macOS 13.0
+-        COMPILE_FLAGS " -Wno-deprecated-declarations -std=c++17"
++        COMPILE_FLAGS " -Wno-deprecated-declarations"
+     )
+ endif()
+ 
