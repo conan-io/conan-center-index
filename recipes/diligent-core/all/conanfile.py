@@ -32,31 +32,8 @@ class DiligentCoreConan(ConanFile):
     }
     short_paths = True
 
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "192",
-            "gcc": "6",
-            "clang": "3.4",
-            "apple-clang": "5.1",
-        }
-
-    @property
-    def _minimum_cpp_standard(self):
-        return 14
-
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warning("{} recipe lacks information about the {} compiler support.".format(
-                self.name, self.settings.compiler))
-        else:
-            if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+        check_min_cppstd(self, 14)
         if visual.is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
 
