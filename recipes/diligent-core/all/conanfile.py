@@ -79,6 +79,8 @@ class DiligentCoreConan(ConanFile):
         # want based on options.shared in package(). To avoid building every intermediate library as SHARED,
         # we have to disable BUILD_SHARED_LIBS.
         tc.cache_variables["BUILD_SHARED_LIBS"] = False
+        # Disable installing NVAPI via FetchContent
+        tc.cache_variables["FETCHCONTENT_FULLY_DISCONNECTED"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
