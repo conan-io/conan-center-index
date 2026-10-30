@@ -2,8 +2,8 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, check_min_cppstd
-from conan.tools.files import rm, get, rmdir, collect_libs, export_conandata_patches, copy, apply_conandata_patches, replace_in_file
-from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.files import rm, get, rmdir, collect_libs, export_conandata_patches, copy, apply_conandata_patches
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.apple import is_apple_os
 import os
 
@@ -44,7 +44,7 @@ class DiligentCoreConan(ConanFile):
         apply_conandata_patches(self)
 
     def package_id(self):
-        if self.info.settings.compiler == "Visual Studio" or self.info.settings.compiler == "msvc":
+        if is_msvc(self.info):
             if is_msvc_static_runtime(self.info):
                 self.info.settings.compiler.runtime = "MT/MTd"
             else:
