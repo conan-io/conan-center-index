@@ -6,3 +6,4 @@ patches:
   "api.256019":
     - patch_file: "patches/0024-spirv-1.4.350-compat.patch"
     - patch_file: "patches/0025-remove-cxx-standard.patch"
+    - patch_file: "patches/0026-do-not-add-abseil-cpp.patch"

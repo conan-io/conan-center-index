@@ -44,6 +44,10 @@ class DiligentCoreConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Dependencies are provided by Conan. Dawn and abseil-cpp are only needed by the WebGPU backend, which is disabled
+        for folder in ["abseil-cpp", "dawn", "glew", "glslang", "SPIRV-Cross", "SPIRV-Headers",
+                       "SPIRV-Tools", "volk", "Vulkan-Headers", "xxHash"]:
+            rmdir(self, os.path.join(self.source_folder, "ThirdParty", folder))
         apply_conandata_patches(self)
 
     def package_id(self):
@@ -59,6 +63,7 @@ class DiligentCoreConan(ConanFile):
         tc.variables["DILIGENT_NO_FORMAT_VALIDATION"] = True
         tc.variables["DILIGENT_BUILD_TESTS"] = False
         tc.variables["DILIGENT_NO_DXC"] = True
+        tc.variables["DILIGENT_NO_WEBGPU"] = True
         tc.variables["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
         # DLSS and DirectSR headers are downloaded via cmake FetchContent
         tc.variables["DILIGENT_NO_DLSS"] = True
