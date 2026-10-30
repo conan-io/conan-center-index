@@ -1,3 +1,5 @@
+Custom: let the Conan cppstd setting drive the C++ standard instead of forcing CXX_STANDARD 17 / -std=c++17
+
 diff --git a/BuildTools/CMake/BuildUtils.cmake b/BuildTools/CMake/BuildUtils.cmake
 index 4c8c6f7..0b29e2c 100644
 --- a/BuildTools/CMake/BuildUtils.cmake
