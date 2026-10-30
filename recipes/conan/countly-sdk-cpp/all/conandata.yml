@@ -1,0 +1,4 @@
+sources:
+  "26.8.1":
+    url: "https://github.com/Countly/countly-sdk-cpp/releases/download/26.8.1/countly-sdk-cpp-26.8.1.tar.gz"
+    sha256: "0a5377b567cd00f76f2e661e537a9a570659204f9cb0b89231b4432a36952ae7"
