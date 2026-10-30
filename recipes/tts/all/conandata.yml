@@ -1,0 +1,8 @@
+sources:
+  "3.0":
+    url: "https://github.com/jfalcou/tts/archive/3.0.tar.gz"
+    sha256: "3954fb40a2d444bc935ecf2d439ed72d3c72eae9ec1b021fc99b469166bf57cd"
+  "cpm":
+    url: "https://github.com/cpm-cmake/CPM.cmake/releases/download/v0.40.2/CPM.cmake"
+    sha256: "c8cdc32c03816538ce22781ed72964dc864b2a34a310d3b7104812a5ca2d835d"
+    filename: "CPM_0.40.2.cmake"
