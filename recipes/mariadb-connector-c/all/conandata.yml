@@ -1,4 +1,7 @@
 sources:
+  "3.4.11":
+    url: "https://archive.mariadb.org/connector-c-3.4.11/mariadb-connector-c-3.4.11-src.tar.gz"
+    sha256: "521c0712e9291fa96558df9e2ff431376a3a79329f13751896b694cae12765b4"
   "3.4.8":
     url: "https://dlm.mariadb.com/Connectors/c/connector-c-3.4.8/mariadb-connector-c-3.4.8-src.tar.gz"
     sha256: "156aed3b49f857d0ac74fb76f1982968bcbfd8382da3f5b6ae71f616729920d7"
@@ -21,6 +24,13 @@ sources:
     url: "https://dlm.mariadb.com/Connectors/c/connector-c-3.1.11/mariadb-connector-c-3.1.11-src.tar.gz"
     sha256: "3e6f6c399493fe90efdc21a3fe70c30434b7480e8195642a959f1dd7a0fa5b0f"
 patches:
+  "3.4.11":
+    - patch_file: "patches/3.4.11-0001-fix-install-and-static-or-shared.patch"
+      patch_description: "fix install path, separate static/shared build"
+      patch_type: "conan"
+    - patch_file: "patches/3.4.8-0004-include-mysqld_error-header.patch"
+      patch_description: "always include mysqld_error.h"
+      patch_type: "portability"
   "3.4.8":
     - patch_file: "patches/3.4.8-0001-fix-install-and-static-or-shared.patch"
       patch_description: "fix install path, separate static/shared build"
