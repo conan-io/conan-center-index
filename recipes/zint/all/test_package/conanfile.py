@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import chdir
+import os
 
 
 class TestPackageConan(ConanFile):
@@ -27,5 +27,6 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            with chdir(self, self.build_folder):
-                self.run(f"ctest --output-on-failure -C {self.settings.build_type}", env="conanrun")
+            self.run(os.path.join(self.cpp.build.bindir, "test_package"), env="conanrun")
+            if self.dependencies["zint"].options.with_qt:
+                self.run(os.path.join(self.cpp.build.bindir, "test_package_cpp"), env="conanrun")
