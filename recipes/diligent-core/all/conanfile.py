@@ -30,7 +30,6 @@ class DiligentCoreConan(ConanFile):
         "fPIC": True,
         "with_glslang": True
     }
-    short_paths = True
 
     def validate(self):
         check_min_cppstd(self, 14)
