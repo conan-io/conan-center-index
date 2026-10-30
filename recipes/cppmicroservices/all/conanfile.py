@@ -56,8 +56,10 @@ class CppMicroServicesConan(ConanFile):
         # Remove third_party dependencies that are managed by Conan, but keep necessary headers
         rm(self, "*", os.path.join(self.source_folder, "third_party"), recursive=True, excludes=["cppmicroservices_pe.h", "dirent_win32.h"])
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "-Werror", "")
-        # Link Boost::nowide from Conan instead of virtual imported target nowide::nowide
-        replace_in_file(self, os.path.join(self.source_folder, "tools", "rc", "CMakeLists.txt"), "nowide::nowide", "Boost::nowide")
+        # Upstream's virtual nowide::nowide target (used by usResourceCompiler) only links Boost::boost, link Boost::nowide instead
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "target_link_libraries(nowide::nowide INTERFACE Boost::boost)",
+                        "target_link_libraries(nowide::nowide INTERFACE Boost::nowide)")
         # Let Conan manage cppstd
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 17)", "")
 
@@ -78,7 +80,6 @@ class CppMicroServicesConan(ConanFile):
         tc.cache_variables["US_USE_SYSTEM_CLI11"] = True
         tc.cache_variables["US_BUILD_TESTING"] = False
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
-        tc.preprocessor_definitions["US_HAVE_BOOST_NOWIDE"] = "1"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -114,7 +115,7 @@ class CppMicroServicesConan(ConanFile):
         # The executable is named usResourceCompiler3 on every platform
         self.cpp_info.components["usresourcecompiler3"].exe = "usResourceCompiler3.exe" if self.settings.os == "Windows" else "usResourceCompiler3"
         self.cpp_info.components["usresourcecompiler3"].location = os.path.join(self.package_folder, "bin", self.cpp_info.components["usresourcecompiler3"].exe)
-        # Only the Boost.Nowide headers are used
+        # usResourceCompiler3 links Boost::nowide through upstream's nowide::nowide target
         self.cpp_info.components["usresourcecompiler3"].requires = ["boost::headers", "miniz::miniz", "cli11::cli11", "boost::nowide"]
         self.cpp_info.components["usresourcecompiler3"].libdirs = []
         self.cpp_info.components["usresourcecompiler3"].includedirs = []
