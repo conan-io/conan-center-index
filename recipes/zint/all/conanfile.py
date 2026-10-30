@@ -13,7 +13,7 @@ class ZintConan(ConanFile):
     description = "Zint Barcode Generator"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.zint.org.uk"
-    license = ("BSD-3-Clause", "GPL-3.0")
+    license = ("BSD-3-Clause", "GPL-3.0-or-later")
     topics = ("barcode", "barcode-generator", "qr-code", "2d-barcodes", "gs1")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -75,8 +75,8 @@ class ZintConan(ConanFile):
         tc.cache_variables["ZINT_USE_QT"] = self.options.with_qt
         if self.options.with_qt:
             qt_version = Version(self.dependencies["qt"].ref.version)
-            tc.variables["QT_VERSION_MAJOR"] = str(qt_version.major)
-            tc.variables["ZINT_QT6"] = qt_version.major == "6"
+            tc.cache_variables["QT_VERSION_MAJOR"] = str(qt_version.major)
+            tc.cache_variables["ZINT_QT6"] = qt_version.major == "6"
         tc.cache_variables["ZINT_USE_PNG"] = self.options.with_libpng
         tc.cache_variables["ZINT_SHARED"] = self.options.shared
         tc.cache_variables["ZINT_STATIC"] = not self.options.shared
