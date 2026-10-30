@@ -34,6 +34,9 @@ class DiligentCoreConan(ConanFile):
         check_min_cppstd(self, 14)
         if is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
+        # ThirdParty/CMakeLists.txt needs the spirv-cross-core target, and Archiver links spirv-cross-glsl
+        if self.dependencies["spirv-cross"].options.shared or not self.dependencies["spirv-cross"].options.glsl:
+            raise ConanInvalidConfiguration(f"{self.ref} requires a static spirv-cross with the glsl option enabled")
 
     def export_sources(self):
         copy(self, "conan_deps.cmake", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"), keep_path=False)
@@ -57,6 +60,9 @@ class DiligentCoreConan(ConanFile):
         tc.variables["DILIGENT_BUILD_TESTS"] = False
         tc.variables["DILIGENT_NO_DXC"] = True
         tc.variables["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
+        # DLSS and DirectSR headers are downloaded via cmake FetchContent
+        tc.variables["DILIGENT_NO_DLSS"] = True
+        tc.variables["DILIGENT_NO_DSR"] = True
         tc.variables["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.dependencies["spirv-cross"].options.namespace
         tc.variables["DILIGENT_CLANG_COMPILE_OPTIONS"] = ""
         tc.variables["DILIGENT_MSVC_COMPILE_OPTIONS"] = ""
