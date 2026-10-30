@@ -64,6 +64,10 @@ class DiligentCoreConan(ConanFile):
         tc.variables["ENABLE_EXCEPTIONS"] = True
         tc.variables[self._diligent_platform()] = True
         tc.cache_variables["CMAKE_PROJECT_DiligentCore_INCLUDE"] = os.path.join(self.source_folder, "conan_deps.cmake")
+        # By default, Diligent builds static and shared versions of every main library. We select the one we
+        # want based on options.shared in package(). To avoid building every intermediate library as SHARED,
+        # we have to disable BUILD_SHARED_LIBS.
+        tc.cache_variables["BUILD_SHARED_LIBS"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -123,14 +127,7 @@ class DiligentCoreConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        # By default, Diligent builds static and shared versions of every main library. We select the one we
-        # want based on options.shared in package(). To avoid building every intermediate library as SHARED,
-        # we have to disable BUILD_SHARED_LIBS.
-        # However, BUILD_SHARED_LIBS cannot be disabled normally (in the toolchain in configure()), because
-        # Conan outputs that override after the standard line that enables BUILD_SHARED_LIBS. Since the latter
-        # is a CACHE variable that cannot be overwritten with another set(), we have to specify it on the
-        # command-line, so it takes effect before the toolchain is parsed.
-        cmake.configure(variables={"BUILD_SHARED_LIBS": "OFF"})
+        cmake.configure()
         cmake.build()
 
     def package(self):
