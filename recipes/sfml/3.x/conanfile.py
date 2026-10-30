@@ -78,7 +78,7 @@ class SfmlConan(ConanFile):
                 self.requires("zlib/[>=1.2.11 <2]")
             if self.settings.os == "iOS":
                 self.requires("bzip2/1.0.8")
-            self.requires("freetype/2.13.2")
+            self.requires("freetype/[>=2.13.2 <3]")
             self.requires("stb/[>=cci.20240531]")
 
         if self.options.audio:

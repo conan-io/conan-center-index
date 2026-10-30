@@ -91,7 +91,7 @@ class OpenCVConan(ConanFile):
             # opencv 3.x doesn't support openexr >= 3
             self.requires("openexr/2.5.7")
         if self.options.with_tiff:
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.6.0 <5]")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.parallel == "tbb":
@@ -100,7 +100,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_webp:
             self.requires("libwebp/[>=1.3.2 <5]")
         if self.options.contrib:
-            self.requires("freetype/2.13.2")
+            self.requires("freetype/[>=2.13.2 <3]")
             self.requires("harfbuzz/[>=8.3.0]")
             self.requires("gflags/2.2.2")
             self.requires("glog/0.6.0")

@@ -74,7 +74,7 @@ class PodofoConan(ConanFile):
 
         # Optional dependencies
         if self.options.get_safe("with_fontconfig"):
-            self.requires("fontconfig/2.15.0")
+            self.requires("fontconfig/[>=2.15.0 <3]")
         if self.options.with_libidn:
             self.requires("libidn/1.36")
 
@@ -86,7 +86,7 @@ class PodofoConan(ConanFile):
             self.requires("mozjpeg/[>=4.1.5 <5]")
 
         if self.options.with_tiff:
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.6.0 <5]")
         if self.options.with_png:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_unistring:
