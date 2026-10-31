@@ -1262,7 +1262,7 @@ class QtConan(ConanFile):
             elif self.settings.os == "Emscripten":
                 _create_plugin("QWasmIntegrationPlugin", "qwasm", "platforms", ["Core", "Gui"])
             elif self.options.get_safe("with_x11", False):
-                _create_module("XcbQpaPrivate", ["xkbcommon::libxkbcommon-x11", "xorg::xorg"], has_include_dir=False)
+                _create_module("XcbQpaPrivate", ["Gui", "xkbcommon::libxkbcommon-x11", "xorg::xorg"], has_include_dir=False)
                 _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpaPrivate"])
 
             _create_plugin("QGifPlugin", "qgif", "imageformats", ["Gui"])
