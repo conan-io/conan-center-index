@@ -1057,6 +1057,15 @@ class QtConan(ConanFile):
                 libsuffix = "d"
             if is_apple_os(self):
                 libsuffix = "_debug"
+            if not libsuffix and self.package_folder:
+                # With a multi-config generator (e.g. tools.cmake.cmaketoolchain:generator="Ninja Multi-Config")
+                # Qt appends a debug postfix on every platform: "_debug", MinGW: "d"
+                # (qtbase/cmake/QtTargetHelpers.cmake, qt_internal_setup_cmake_config_postfix).
+                # The generator of the build is not known here => derive the postfix from the packaged Core library
+                for postfix in ("_debug", "d"):
+                    if glob.glob(os.path.join(self.package_folder, "lib", f"*Qt6Core{postfix}.*")):
+                        libsuffix = postfix
+                        break
 
         def _get_corrected_reqs(requires):
             reqs = []
