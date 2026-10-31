@@ -2,3 +2,9 @@ sources:
   "0.17":
     url: "https://github.com/epezent/implot/archive/v0.17.tar.gz"
     sha256: "0aa3ff4fb97e553608e6758e77980eedf01745628fe6c025e647f941ae674127"
+  "1.0":
+    url: "https://github.com/epezent/implot/archive/v1.0.tar.gz"
+    sha256: "e4a9db64eef7bcc604e2a5ea380af124eb97aa3e8a6a96330079c88add0f7e93"
+  "1.1":
+    url: "https://github.com/epezent/implot/archive/v1.1.tar.gz"
+    sha256: "f13e1e111db2df1687e1568644429c2184eb5115867dc76bb0a8bd17a2e72ae8"
