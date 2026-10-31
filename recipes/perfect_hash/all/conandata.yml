@@ -1,0 +1,4 @@
+sources:
+  "0.4.0":
+    url: "https://github.com/ConstexprCore/perfect_hash/archive/refs/tags/v0.4.0.tar.gz"
+    sha256: "517397670ae6c0dbe79722ab37f949958e4eac4336899fc82560191c582596ac"
