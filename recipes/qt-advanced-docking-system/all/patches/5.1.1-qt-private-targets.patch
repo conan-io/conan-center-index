@@ -1,0 +1,35 @@
+Conan's Qt recipe exposes GuiPrivate through the Gui component's build module,
+rather than a separate component. Link its target for Qt 5 as well so that the
+private GUI include directories are available without Qt's native CMake variables.
+
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -49,14 +49,6 @@
+     Gui
+     Widgets
+ )
+-
+-# Qt 6.9+ provides the required private GUI headers through the GuiPrivate
+-# component. Request it explicitly on supported Unix platforms.
+-if(UNIX AND NOT APPLE
+-   AND QT_VERSION_MAJOR STREQUAL "6"
+-   AND QT_VERSION_MINOR GREATER_EQUAL 9)
+-    list(APPEND ads_DEP_LIBS GuiPrivate)
+-endif()
+ 
+ find_package(
+     Qt${QT_VERSION_MAJOR}
+@@ -280,11 +272,11 @@
+ 
+ # ADS uses private Qt GUI APIs on Unix systems other than macOS,
+ # specifically qpa/qplatformnativeinterface.h.
+-if(UNIX AND NOT APPLE AND QT_VERSION_MAJOR STREQUAL "6")
++if(UNIX AND NOT APPLE)
+     target_link_libraries(
+         ${library_name}
+         PRIVATE
+-            Qt6::GuiPrivate
++            Qt${QT_VERSION_MAJOR}::GuiPrivate
+     )
+ endif()
+ 
