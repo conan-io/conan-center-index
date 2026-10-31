@@ -8,8 +8,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Network Qt6::Sql Qt
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC ON AUTORCC ON)
 
-# Only running this Qt macros in macOS
-if (APPLE)
+# Only running this Qt macros in macOS (APPLE is also true for iOS)
+if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     # Related to https://github.com/conan-io/conan-center-index/issues/20574
     qt_standard_project_setup()
     qt_add_executable(test_macos_bundle MACOSX_BUNDLE test_macos_bundle.cpp)

@@ -128,6 +128,11 @@ class QtConan(ConanFile):
     _submodules_tree = None
 
     @property
+    def _apple_embedded(self):
+        # UIKit platforms: no host tools, no QProcess
+        return self.settings.os in ["iOS", "tvOS", "watchOS", "visionOS"]
+
+    @property
     def _get_module_tree(self):
         if self._submodules_tree:
             return self._submodules_tree
@@ -444,7 +449,12 @@ class QtConan(ConanFile):
         if self.options.qtwayland:
             self.tool_requires("wayland/1.22.0")
         if cross_building(self):
-            self.tool_requires(f"qt/{self.version}")
+            tool_options = {}
+            if self._apple_embedded:
+                # Tools are not built for the target (see QT_FORCE_BUILD_TOOLS), the build context Qt must provide them
+                tool_modules = ["qttools", "qtshadertools", "qtdeclarative", "qtremoteobjects", "qtscxml"]
+                tool_options = {m: True for m in tool_modules if self.options.get_safe(m)}
+            self.tool_requires(f"qt/{self.version}", options=tool_options)
 
     def generate(self):
         ms = VirtualBuildEnv(self)
@@ -596,7 +606,8 @@ class QtConan(ConanFile):
             tc.variables[f"FEATURE_{feature}"] = "OFF"
 
 
-        if self.settings.os == "Macos":
+        if is_apple_os(self):
+            # On by default on all Apple platforms, package_info() expects lib/libQt6*.a
             tc.variables["FEATURE_framework"] = "OFF"
         elif self.settings.os == "Android":
             tc.variables["CMAKE_ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
@@ -620,11 +631,21 @@ class QtConan(ConanFile):
             tc.variables["QT_QMAKE_DEVICE_OPTIONS"] = f"CROSS_COMPILE={self.options.cross_compile}"
         if cross_building(self):
             # Mainly to locate Qt6HostInfoConfig.cmake
-            tc.cache_variables["QT_HOST_PATH"] = self.dependencies.direct_build["qt"].package_folder
+            qt_build_package_folder = self.dependencies.direct_build["qt"].package_folder
+            tc.cache_variables["QT_HOST_PATH"] = qt_build_package_folder
             # Stand-in for Qt6CoreTools - which is loaded for the executable targets
-            tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = os.path.join(self.dependencies.direct_build["qt"].package_folder, self._cmake_executables_file)
-            # Ensure tools for host are always built
-            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = True
+            tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = os.path.join(qt_build_package_folder, self._cmake_executables_file)
+            # The iOS SDK cannot build the tools (no ApplicationServices), they come from QT_HOST_PATH
+            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = not self._apple_embedded
+            if self._apple_embedded and self.options.qttranslations and self.options.qttools:
+                # qttranslations needs LinguistTools, only built in the build context Qt
+                tc.cache_variables["CMAKE_PREFIX_PATH"] = qt_build_package_folder
+                tc.cache_variables["Qt6_DIR"] = os.path.join(qt_build_package_folder, "lib", "cmake", "Qt6")
+                linguist_tools_dir = os.path.join(qt_build_package_folder, "lib", "cmake", "Qt6LinguistTools")
+                tc.cache_variables["Qt6LinguistTools_DIR"] = linguist_tools_dir
+                linguist_tools_macros = os.path.join(linguist_tools_dir, "Qt6LinguistToolsMacros.cmake")
+                if os.path.exists(linguist_tools_macros):
+                    tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] += f";{linguist_tools_macros}"
 
         tc.variables["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.get_safe("build_type") == "Debug" and not self.options.shared:
@@ -662,7 +683,7 @@ class QtConan(ConanFile):
             # moc.exe, uic.exe, etc are built first and used subsequently during the build
             # and have DLL dependencies through QtCore library - copy the DLLs so that they
             # are found at runtime to avoid exposing the "host" runenv to the build environment
-            dest_folder = os.path.join(self.build_folder, "qtbase", "bin") 
+            dest_folder = os.path.join(self.build_folder, "qtbase", "bin")
             for dep in self.dependencies.host.values():
                 for bindir in dep.cpp_info.bindirs:
                     copy(self, pattern="*.dll", src=bindir, dst=dest_folder, keep_path=False)
@@ -882,8 +903,8 @@ class QtConan(ConanFile):
         filecontents += f"set(QT_VERSION_MAJOR {ver.major})\n"
         filecontents += f"set(QT_VERSION_MINOR {ver.minor})\n"
         filecontents += f"set(QT_VERSION_PATCH {ver.patch})\n"
-        if self.settings.os == "Macos":
-            filecontents += 'set(__qt_internal_cmake_apple_support_files_path "${CMAKE_CURRENT_LIST_DIR}/../../../lib/cmake/Qt6/macos")\n'
+        if is_apple_os(self):
+            filecontents += f'set(__qt_internal_cmake_apple_support_files_path "${{CMAKE_CURRENT_LIST_DIR}}/../../../lib/cmake/Qt6/{str(self.settings.os).lower()}")\n'
         if self.settings.os == "Windows":
             filecontents += 'set(__qt_internal_cmake_windows_support_files_path "${CMAKE_CURRENT_LIST_DIR}/../../../lib/cmake/Qt6/windows")\n'
         targets = ["moc", "qlalr", "rcc", "tracegen", "cmake_automoc_parser", "qmake", "qtpaths", "syncqt", "tracepointgen"]
@@ -935,7 +956,8 @@ class QtConan(ConanFile):
                     exe_path = path_
                     break
             else:
-                assert False, f"Could not find executable {target}{extension} in {self.package_folder}"
+                # Not built for Apple embedded targets, see QT_FORCE_BUILD_TOOLS
+                assert self._apple_embedded, f"Could not find executable {target}{extension} in {self.package_folder}"
             if not exe_path:
                 self.output.warning(f"Could not find path to {target}{extension}")
             filecontents += textwrap.dedent(f"""\
@@ -1087,9 +1109,19 @@ class QtConan(ConanFile):
                 requires.append("Core")
             self.cpp_info.components[componentname].requires = _get_corrected_reqs(requires)
 
+        def _plugin_library_exists(libname, plugintype):
+            if not self.package_folder:
+                return True
+            libdir = os.path.join(self.package_folder, "plugins", plugintype)
+            return any(os.path.isfile(os.path.join(libdir, name)) for name in (f"{libname}.lib", f"lib{libname}.a"))
+
         def _create_plugin(pluginname, libname, plugintype, requires):
             componentname = f"qt{pluginname}"
             assert componentname not in self.cpp_info.components, f"Plugin {pluginname} already present in self.cpp_info.components"
+            # Some plugins depend on what the build finds (mng needs libmng, jp2 needs jasper)
+            if not self.options.shared and not _plugin_library_exists(libname + libsuffix, plugintype):
+                self.output.warning(f"Plugin {pluginname} not declared: plugins/{plugintype}/{libname}{libsuffix} is not in the package")
+                return
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt6::{pluginname}")
             self.cpp_info.components[componentname].set_property("cmake_target_aliases", [f"Qt::{pluginname}"])
             if not self.options.shared:
@@ -1342,7 +1374,9 @@ class QtConan(ConanFile):
             self.cpp_info.components["qtUiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
             self.cpp_info.components["qtUiPlugin"].libdirs = []
             _create_module("UiTools", ["UiPlugin", "Gui", "Widgets"])
-            if "designer" not in disabled_features:
+            # qttools only builds QtDesigner with QT_FEATURE_process
+            has_process = not self._apple_embedded and "process" not in disabled_features
+            if "designer" not in disabled_features and has_process:
                 _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
             if "assistant" not in disabled_features:
                 _create_module("Help", ["Gui", "Sql", "Widgets"])
@@ -1552,6 +1586,9 @@ class QtConan(ConanFile):
                     self.cpp_info.components["qtEntryPointPrivate"].requires.append("qtEntryPointImplementation")
             if self.settings.os == "iOS":
                 self.cpp_info.components["qtEntryPointPrivate"].exelinkflags.append("-Wl,-e,_qt_main_wrapper")
+                # Defines _qt_main_wrapper, otherwise only linked by qt_add_executable()
+                if "qtQIOSIntegrationPlugin" in self.cpp_info.components:
+                    self.cpp_info.components["qtEntryPointPrivate"].requires.append("qtQIOSIntegrationPlugin")
 
         if self.settings.os != "Windows":
             self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
@@ -1599,9 +1636,10 @@ class QtConan(ConanFile):
                 if Version(self.version) >= "6.10":
                     # https://github.com/qt/qtbase/commit/1299aaa231b1ce989c8aedcfed372bde0e1e3a0e
                     self.cpp_info.components["qtNetwork"].frameworks.append("Network")
-                # https://github.com/qt/qtbase/blob/v6.6.1/src/network/CMakeLists.txt#L216-L221
-                # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
-                self.cpp_info.components["qtCore"].frameworks.append("Cocoa")
+                if self.settings.os == "Macos":
+                    # https://github.com/qt/qtbase/blob/v6.6.1/src/network/CMakeLists.txt#L216-L221
+                    # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
+                    self.cpp_info.components["qtCore"].frameworks.append("Cocoa")
                 # https://github.com/qt/qtbase/blob/v6.8.3/src/corelib/CMakeLists.txt#L712-L717
                 self.cpp_info.components["qtCore"].frameworks.append("UniformTypeIdentifiers")
                 self.cpp_info.components["qtNetwork"].system_libs.append("resolv")
