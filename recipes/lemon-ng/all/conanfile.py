@@ -11,7 +11,7 @@ class LemonNgConan(ConanFile):
     name = "lemon-ng"
     description = ("Maintained fork of LEMON, a C++ library of graphs and of "
                    "network optimization")
-    license = "BSL-1.0"
+    license = ("BSL-1.0", "BSD-3-Clause")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/dmeoli/lemon-ng"
     topics = ("graph", "network-flow", "optimization", "lemon")
@@ -53,6 +53,9 @@ class LemonNgConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", self.source_folder,
+             os.path.join(self.package_folder, "licenses"))
+        # the notice of the Mersenne Twister, which lemon/random.h carries
+        copy(self, "random.h", os.path.join(self.source_folder, "lemon"),
              os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
