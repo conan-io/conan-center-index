@@ -24,7 +24,7 @@ class CprConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_ssl": [False, "openssl", "darwinssl", "winssl"],
+        "with_ssl": [False, "openssl", "darwinssl", "winssl", "wolfssl"],
         "signal": [True, False],
         "verbose_logging": [True, False],
     }
@@ -86,6 +86,8 @@ class CprConan(ConanFile):
         self.requires("libcurl/[>=7.78.0 <9]", transitive_headers=True, transitive_libs=True)
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
+        elif self.options.with_ssl == "wolfssl":
+            self.requires("wolfssl/5.9.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -108,6 +110,8 @@ class CprConan(ConanFile):
                 raise ConanInvalidConfiguration("DarwinSSL is only supported on macOS")
             if ssl_library == "winssl" and self.settings.os != "Windows":
                 raise ConanInvalidConfiguration("WinSSL is only on Windows")
+            if ssl_library == "wolfssl" and Version(self.version) < "1.15.0":
+                raise ConanInvalidConfiguration("Wolfssl is only supported from version 1.15.0")
 
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
@@ -115,6 +119,7 @@ class CprConan(ConanFile):
         if Version(self.version) >= "1.9.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 6")
 
+        
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -124,6 +129,10 @@ class CprConan(ConanFile):
             tc.variables["CPR_USE_SYSTEM_CURL"] = True
         else:
             tc.variables["CPR_FORCE_USE_SYSTEM_CURL"] = True
+
+        if Version(self.version) >= "1.15.0":
+            tc.variables["CPR_FORCE_WOLFSSL_BACKEND"] = (self.options.with_ssl == "wolfssl")
+
         tc.variables["CPR_BUILD_TESTS"] = False
         tc.variables["CPR_GENERATE_COVERAGE"] = False
         tc.variables["CPR_USE_SYSTEM_GTEST"] = False

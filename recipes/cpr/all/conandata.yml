@@ -1,4 +1,7 @@
 sources:
+  "1.15.1":
+    url: "https://github.com/libcpr/cpr/archive/refs/tags/1.15.1.tar.gz"
+    sha256: "c2fc62a030c4ca5d7c3517e8068531297f938bf4ab52bf951d4fc9bbc9222716"
   "1.14.2":
     url: "https://github.com/libcpr/cpr/archive/refs/tags/1.14.2.tar.gz"
     sha256: "b9b529b47083bfe80bba855ca5308d12d767ae7c7b629aef5ef018c4343cf62b"
