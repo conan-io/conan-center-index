@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import get, copy, rmdir, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import get, copy, rmdir
 import os
 
 required_conan_version = ">=2"
@@ -26,9 +26,6 @@ class D3D12MemoryAllocatorConan(ConanFile):
         "with_dxheaders": False,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def validate(self):
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only available in Windows")
@@ -39,7 +36,6 @@ class D3D12MemoryAllocatorConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
-        apply_conandata_patches(self)
 
     def requirements(self):
         if self.options.with_dxheaders:
