@@ -61,9 +61,7 @@ class ImageMagicConan(ConanFile):
 
     def validate(self):
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(
-                "Windows builds of ImageMagick do not currently support MSVC."
-            )
+            raise ConanInvalidConfiguration("Windows not currently supported")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -97,9 +95,6 @@ class ImageMagicConan(ConanFile):
             self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_freetype:
             self.requires("freetype/[>=2.13 <3]")
-            # fontconfig only feeds discovered font paths to freetype for rasterization,
-            # so it is pointless without it. Already pulled in transitively by pango on
-            # most platforms, so this rarely adds a new dependency in practice.
             self.requires("fontconfig/[>=2.13.91 <3]")
 
     def build_requirements(self):
