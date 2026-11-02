@@ -20,6 +20,7 @@ class TestPackageConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables.update({
             "HDF5_CXX": self.dependencies["hdf5"].options.enable_cxx,
+            "HDF5_Fortran": self.dependencies["hdf5"].options.enable_fortran,
             "HDF5_HL": self.dependencies["hdf5"].options.hl,
         })
         tc.generate()
@@ -33,3 +34,6 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
+            if self.dependencies["hdf5"].options.enable_fortran:
+                bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package_fortran")
+                self.run(bin_path, env="conanrun")
