@@ -2,6 +2,7 @@ import configparser
 import glob
 import os
 import platform
+import re
 import textwrap
 
 from conan import ConanFile
@@ -9,7 +10,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, Environment
-from conan.tools.files import copy, get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
+from conan.tools.files import copy, get, load, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
@@ -854,6 +855,13 @@ class QtConan(ConanFile):
             if not getattr(self.options, module):
                 rmdir(self, os.path.join(self.package_folder, "licenses", module))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        # Qt's own Qt6<Module>Config.cmake files register the Qt policies (QTPxxxx) that qt_policy() and the
+        # deploy scripts check. CMakeDeps' files replace them below, so keep their registrations.
+        known_policies = set()
+        for config in glob.glob(os.path.join(self.package_folder, "lib", "cmake", "Qt6*", "Qt6*Config.cmake")):
+            known_policies.update(re.findall(r"^(set\(QT_KNOWN_POLICY_QTP\d+ TRUE\))\r?$", load(self, config), re.MULTILINE))
+        save(self, os.path.join(self.package_folder, "lib", "cmake", "Qt6Core", "conan_qt_qt6_policies.cmake"),
+             "".join(f"{line}\n" for line in sorted(known_policies)))
         for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
             rm(self, mask, self.package_folder, recursive=True, excludes="Qt6HostInfoConfig.cmake")
         rm(self, "*.la*", os.path.join(self.package_folder, "lib"), recursive=True)
@@ -984,11 +992,6 @@ class QtConan(ConanFile):
 
         if self.options.qtdeclarative:
             _create_private_module("Qml", ["CorePrivate", "Qml"])
-            save(self, os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_policies.cmake"), textwrap.dedent("""\
-                    set(QT_KNOWN_POLICY_QTP0001 TRUE)
-                    set(QT_KNOWN_POLICY_QTP0004 TRUE)
-                    set(QT_KNOWN_POLICY_QTP0005 TRUE)
-                    """))
             if self.options.gui and self.options.qtshadertools:
                 _create_private_module("Quick", ["CorePrivate", "GuiPrivate", "QmlPrivate", "Quick"])
 
@@ -1696,10 +1699,7 @@ class QtConan(ConanFile):
                     self.cpp_info.components[component].exelinkflags.extend(obj_files)
                     self.cpp_info.components[component].sharedlinkflags.extend(obj_files)
 
-        build_modules_list = []
-
-        if self.options.qtdeclarative:
-            build_modules_list.append(os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_policies.cmake"))
+        build_modules_list = [os.path.join(self.package_folder, "lib", "cmake", "Qt6Core", "conan_qt_qt6_policies.cmake")]
 
         def _add_build_modules_for_component(component):
             for req in self.cpp_info.components[component].requires:
