@@ -105,7 +105,7 @@ class Hdf5Conan(ConanFile):
             raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.26 <4]")
+        self.tool_requires("cmake/[>=3.26]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
