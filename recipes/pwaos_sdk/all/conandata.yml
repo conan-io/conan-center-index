@@ -1,0 +1,12 @@
+# The SDK is fetched straight from the upstream git branches -- one branch
+# per os/arch target. Branches move faster than the release assets, and the
+# recipe re-resolves each branch tip on EVERY build (force update), so every
+# conan create picks up the newest push. No sha256 pins: git itself is the
+# integrity layer, and the tip commit is always resolved live from GitHub.
+repository: "https://github.com/daqingzd/pwaos.git"
+sources:
+  "0.2.a.0":
+    Linux_x86_64:
+      branch: "sdk-linux-x64-v0.2.a.0"
+    Windows_x86:
+      branch: "sdk-win-x86-v0.2.a.0"
