@@ -1,4 +1,7 @@
 sources:
+  "0.6.4":
+    url: "https://github.com/dvidelabs/flatcc/archive/v0.6.4.tar.gz"
+    sha256: "463c1cbc95777a01e103a6c961325f28e8876cb44a195b5c0f8d1117ae019580"
   "0.6.1":
     url: "https://github.com/dvidelabs/flatcc/archive/v0.6.1.tar.gz"
     sha256: "2533c2f1061498499f15acc7e0937dcf35bc68e685d237325124ae0d6c600c2b"

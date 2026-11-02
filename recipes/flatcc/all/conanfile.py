@@ -88,6 +88,7 @@ class FlatccConan(ConanFile):
         tc.variables["FLATCC_IGNORE_CONST_COND"] = self.options.ignore_const_condition
         tc.variables["FLATCC_TEST"] = False
         tc.variables["FLATCC_ALLOW_WERROR"] = False
+        tc.cache_variables["FLATCC_DEBUG_CLANG_SANITIZE"] = False
         tc.generate()
 
     def build(self):
@@ -111,6 +112,3 @@ class FlatccConan(ConanFile):
             self.cpp_info.libs.append(f"flatcc{debug_suffix}")
         self.cpp_info.libs.append(f"flatccrt{debug_suffix}")
 
-        # TODO: to remove in conan v2
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bin_path)
