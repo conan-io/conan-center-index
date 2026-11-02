@@ -56,8 +56,9 @@ class ReadstatConan(ConanFile):
                 self.tool_requires("pkgconf/[>=2.2 <3]")
             self.tool_requires("libtool/2.4.7")
             self.tool_requires("automake/1.16.5")
-            # gettext provides AM_ICONV macro used in configure.ac
-            self.tool_requires("gettext/0.22.5")
+            # gettext provides AM_ICONV macro used in configure.ac in 1.1.9 or earlier.
+            if self.version <= "1.1.9":
+                self.tool_requires("gettext/0.22.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["release"], strip_root=True)

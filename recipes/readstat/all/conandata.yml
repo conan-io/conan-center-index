@@ -1,4 +1,7 @@
 sources:
+  "cci.20261102":
+      url: "https://github.com/WizardMac/ReadStat/archive/e36e4fb250927346e4a480694fb6a447a7803057.zip"
+      sha256: "dc49a626325bad98d6583997564d62363a3bfaa751a958725a85592538e516b5"
   "1.1.9":
     release:
       # The release does not come with VS solution files, so we use the source archive
