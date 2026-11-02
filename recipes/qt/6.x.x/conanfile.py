@@ -363,7 +363,7 @@ class QtConan(ConanFile):
         if self.options.with_glib:
             self.requires("glib/2.78.3")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
-            self.requires("double-conversion/3.3.0")
+            self.requires("double-conversion/[>=3.3.0 <4]")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
             self.requires("freetype/[>=2.13 <3]")
         if self.options.get_safe("with_fontconfig", False):
@@ -405,7 +405,7 @@ class QtConan(ConanFile):
         if self.options.qtwayland:
             self.requires("wayland/1.22.0")
         if self.options.with_brotli:
-            self.requires("brotli/1.1.0")
+            self.requires("brotli/[>=1.1.0 <2]")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
             self.requires("expat/[>=2.6.2 <3]")
             self.requires("opus/1.4")
