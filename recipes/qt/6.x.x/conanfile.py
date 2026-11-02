@@ -1565,10 +1565,13 @@ class QtConan(ConanFile):
             _create_module("CanvasPainter", canvas_reqs)
 
         if self.settings.os in ["Windows", "iOS"]:
-            if self.settings.os == "Windows":
+            # https://github.com/qt/qtbase/blob/v6.12.0/src/entrypoint/CMakeLists.txt#L62
+            has_entrypoint_library = self.settings.os == "Windows" or Version(self.version) >= "6.12.0"
+            if has_entrypoint_library:
                 self.cpp_info.components["qtEntryPointImplementation"].set_property("cmake_target_name", "Qt6::EntryPointImplementation")
                 self.cpp_info.components["qtEntryPointImplementation"].set_property("cmake_target_aliases", ["Qt::EntryPointImplementation"])
                 self.cpp_info.components["qtEntryPointImplementation"].libs = [f"Qt6EntryPoint{libsuffix}"]
+            if self.settings.os == "Windows":
                 self.cpp_info.components["qtEntryPointImplementation"].system_libs = ["shell32"]
 
                 if self.settings.compiler == "gcc":
@@ -1587,8 +1590,13 @@ class QtConan(ConanFile):
                     self.cpp_info.components["qtEntryPointPrivate"].requires.append("qtEntryPointImplementation")
             if self.settings.os == "iOS":
                 self.cpp_info.components["qtEntryPointPrivate"].exelinkflags.append("-Wl,-e,_qt_main_wrapper")
+                # https://github.com/qt/qtbase/blob/v6.12.0/src/entrypoint/CMakeLists.txt#L116-L129
+                # _qt_main_wrapper moved from the qios plugin to the entry point library
+                if has_entrypoint_library:
+                    self.cpp_info.components["qtEntryPointImplementation"].frameworks = ["Foundation", "UIKit"]
+                    self.cpp_info.components["qtEntryPointPrivate"].requires.append("qtEntryPointImplementation")
                 # Defines _qt_main_wrapper, otherwise only linked by qt_add_executable()
-                if "qtQIOSIntegrationPlugin" in self.cpp_info.components:
+                elif "qtQIOSIntegrationPlugin" in self.cpp_info.components:
                     self.cpp_info.components["qtEntryPointPrivate"].requires.append("qtQIOSIntegrationPlugin")
 
         if self.settings.os != "Windows":
