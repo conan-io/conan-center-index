@@ -23,5 +23,3 @@ sources:
 patches:
   "6.6":
     - patch_file: "patches/0001-win32-remove-duplicate-nc_gettimeofday.patch"
-      patch_description: "MSVC: _nc_gettimeofday() is defined twice (win32con/gettimeofday.c and tinfo/lib_win32util.c), which breaks linking the DLL (LNK2005)"
-      patch_type: "portability"
