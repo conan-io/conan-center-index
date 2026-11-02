@@ -5,7 +5,7 @@ Backport of https://github.com/HDFGroup/hdf5/pull/6673
 
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -1211,7 +1211,7 @@
+@@ -1214,7 +1214,7 @@
  #-----------------------------------------------------------------------------
  # Generate the H5build_settings.c file
  #-----------------------------------------------------------------------------
