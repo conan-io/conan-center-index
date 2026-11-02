@@ -106,7 +106,7 @@ class DCMTKConan(ConanFile):
         if self.options.with_libpng:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_libtiff:
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.6.0 <5]")
         if self.options.get_safe("with_tcpwrappers"):
             self.requires("tcp-wrappers/7.6")
 
@@ -197,7 +197,7 @@ class DCMTKConan(ConanFile):
                 arith_h = "arith_h_Macos_x86_64.h"
                 copy(self, arith_h, self.source_folder, dst_dir)
                 rename(self, os.path.join(dst_dir, arith_h), os.path.join(dst_dir, "arith.h"))
-           
+
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -408,7 +408,9 @@ class DCMTKConan(ConanFile):
             self.cpp_info.components["ofstd"].system_libs = system_libs
 
         if self.options.default_dict == "external":
-            dcmdictpath = os.path.join(self._dcm_datadictionary_path, "dcmtk", "dicom.dic")
+            # Starting with 3.6.9 the data files are installed in a versioned directory
+            data_dir = f"dcmtk-{self.version}" if Version(self.version) >= "3.6.9" else "dcmtk"
+            dcmdictpath = os.path.join(self._dcm_datadictionary_path, data_dir, "dicom.dic")
             self.runenv_info.define_path("DCMDICTPATH", dcmdictpath)
             if self.options.with_applications:
                 self.buildenv_info.define_path("DCMDICTPATH", dcmdictpath)
