@@ -8,3 +8,9 @@ sources:
   "7.1.5":
     url: "https://ffmpeg.org/releases/ffmpeg-7.1.5.tar.xz"
     sha256: "de668509caf9e35e3cd162473441fdb29538c6d96ed080292b3cf9e6fc5d558f"
+patches:
+  "7.1.5":
+    - patch_file: "patches/0001-avfilter-textutils-add-missing-time_internal.patch"
+      patch_description: "Add missing time_internal.h in textutils.c for MSVC"
+      patch_type: "backport"
+      patch_source: "https://ffmpeg.org/pipermail/ffmpeg-devel/2024-November/336239.html"
