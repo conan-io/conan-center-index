@@ -1,4 +1,7 @@
 sources:
+  "0.5.3":
+    url: "https://github.com/mity/md4c/archive/refs/tags/release-0.5.3.tar.gz"
+    sha256: "353c346f376b87c954a13f3415ede2d51264cc61dc5abcd38ff1d2aa0d059b9e"
   "0.5.2":
     url: "https://github.com/mity/md4c/archive/refs/tags/release-0.5.2.tar.gz"
     sha256: "55d0111d48fb11883aaee91465e642b8b640775a4d6993c2d0e7a8092758ef21"
@@ -9,6 +12,10 @@ sources:
     url: "https://github.com/mity/md4c/archive/refs/tags/release-0.4.8.tar.gz"
     sha256: "4a457df853425b6bb6e3457aa1d1a13bccec587a04c38c622b1013a0da41439f"
 patches:
+  "0.5.3":
+    - patch_file: "patches/0.5.3-0001-honor-vc-runtime.patch"
+      patch_description: "Honor msvc runtime from profile"
+      patch_type: "conan"
   "0.5.2":
     - patch_file: "patches/0.5.2-0001-honor-vc-runtime.patch"
       patch_description: "Honor msvc runtime from profile"
