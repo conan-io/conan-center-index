@@ -5,7 +5,7 @@ import textwrap
 from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir, chdir
+from conan.tools.files import copy, get, replace_in_file, rm, chdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, NMakeToolchain
@@ -24,7 +24,7 @@ class NetSnmpConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.net-snmp.org/"
-    topics = "snmp"
+    topics = ("snmp",)
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
