@@ -637,8 +637,9 @@ class QtConan(ConanFile):
             tc.cache_variables["QT_HOST_PATH"] = qt_build_package_folder
             # Stand-in for Qt6CoreTools - which is loaded for the executable targets
             tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = os.path.join(qt_build_package_folder, self._cmake_executables_file)
-            # The iOS SDK cannot build the tools (no ApplicationServices), they come from QT_HOST_PATH
-            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = not self._apple_embedded
+            # The iOS SDK cannot build the tools (no ApplicationServices), they come from QT_HOST_PATH.
+            # Android cannot run them either, and there Qt builds executables as app libraries.
+            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = not (self._apple_embedded or self.settings.os == "Android")
             if self._apple_embedded and self.options.qttranslations:
                 # qttranslations needs qt_add_lrelease(), which is not loaded when lrelease comes from CMAKE_PROJECT_Qt_INCLUDE
                 linguist_tools_macros = os.path.join(qt_build_package_folder, "lib", "cmake", "Qt6LinguistTools", "Qt6LinguistToolsMacros.cmake")
