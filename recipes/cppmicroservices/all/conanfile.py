@@ -33,8 +33,7 @@ class CppMicroServicesConan(ConanFile):
             # FIXME: usResourceCompiler is a build tool in CppMicroServices required by cppmicroservices
             # We need to run it as for native arch and solve its dynamic linking issues
             raise ConanInvalidConfiguration("Cross-building is not supported yet. Contributions are welcome!")
-        # FIXME: usResourceCompiler3 tools have issues locating shared DLLs on Windows
-        # We can patch its cmake to inject library paths
+        # FIXME: usResourceCompiler3 tools have issues locating shared DLLs on Windows: FAILED: framework/CppMicroServices/res_0.zip
         if self.settings.os == "Windows" and (self.dependencies["boost"].options.shared or self.dependencies["miniz"].options.shared):
             raise ConanInvalidConfiguration(
                 "usResourceCompiler3 needs the shared Boost and miniz DLLs on PATH while building, which "
