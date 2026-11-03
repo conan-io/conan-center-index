@@ -960,6 +960,19 @@ class QtConan(ConanFile):
             targets.append("repc")
         if self.options.get_safe("qtscxml"):
             targets.append("qscxmlc")
+        if cross_building(self) and self.settings.os in ["Android", "iOS"]:
+            # The tools are not built for these platforms (see QT_FORCE_BUILD_TOOLS): consumers run
+            # the host Qt's, which the qt tool_requires exposes through QT_HOST_PATH.
+            filecontents += textwrap.dedent("""\
+                if(NOT QT_HOST_PATH AND DEFINED ENV{QT_HOST_PATH})
+                    file(TO_CMAKE_PATH "$ENV{QT_HOST_PATH}" QT_HOST_PATH)
+                endif()
+                if(NOT QT_HOST_PATH)
+                    message(FATAL_ERROR "Qt for this platform runs the host Qt's tools: add a qt tool_requires, or set QT_HOST_PATH.")
+                endif()
+                """)
+            filecontents += f'include("${{QT_HOST_PATH}}/{self._cmake_executables_file.replace(os.sep, "/")}")\n'
+            targets = []
         for target in targets:
             exe_path = None
             for path_ in [f"bin/{target}{extension}",
