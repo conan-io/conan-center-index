@@ -853,14 +853,16 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("postproc"):
             _add_component("postproc", [])
 
-        if self.settings.os in ("FreeBSD", "Linux"):
-            avutil.system_libs.extend(["pthread", "dl"])
+        if self.settings.os in ("FreeBSD", "Linux", "Android"):
             if self.options.get_safe("fPIC") and self.options.avcodec and self.settings.compiler in ("gcc", "clang"):
                 # https://trac.ffmpeg.org/ticket/1713
                 # https://ffmpeg.org/platform.html#Advanced-linking-configuration
                 # https://ffmpeg.org/pipermail/libav-user/2014-December/007719.html
                 avcodec.exelinkflags.append("-Wl,-Bsymbolic")
                 avcodec.sharedlinkflags.append("-Wl,-Bsymbolic")
+
+        if self.settings.os in ("FreeBSD", "Linux"):
+            avutil.system_libs.extend(["pthread", "dl"])
             if self.options.avfilter:
                 avfilter.system_libs.append("pthread")
         elif self.settings.os == "Windows":
