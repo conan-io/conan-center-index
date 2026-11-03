@@ -27,9 +27,6 @@ class LemonNgConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # LEMON declares no symbol for a DLL
-        if self.settings.os == "Windows":
-            self.options.shared = False
 
     def layout(self):
         cmake_layout(self, src_folder="src")
