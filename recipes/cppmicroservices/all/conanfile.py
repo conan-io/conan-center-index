@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, replace_in_file
-from conan.tools.env import VirtualBuildEnv
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -64,9 +63,6 @@ class CppMicroServicesConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 17)", "")
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = CMakeToolchain(self)
         tc.cache_variables["US_USE_SYSTEM_BOOST"] = True
         tc.cache_variables["US_USE_SYSTEM_MINIZ"] = True
