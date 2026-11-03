@@ -165,11 +165,6 @@ class SentryNativeConan(ConanFile):
             tc.variables["CRASHPAD_WER_ENABLED"] = True
         if self.settings.os == "Linux":
             tc.variables["SENTRY_LIBUNWIND_SYSTEM"] = True
-        if self.settings.os == "Windows" and not self.conf.get("tools.cmake.cmaketoolchain:system_version"):
-            if cross_building(self, skip_x64_x86=True):
-                # Conan leaves CMAKE_SYSTEM_VERSION empty when cross-building (e.g. Windows ARM64 from x86_64), and
-                # sentry only links Synchronization.lib (WaitOnAddress) if it is 10.x or 6.2/6.3
-                tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
