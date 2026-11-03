@@ -131,7 +131,6 @@ class CppMicroServicesConan(ConanFile):
         self.cpp_info.components["change_namespace"].libdirs = []
         self.cpp_info.components["change_namespace"].includedirs = []
 
-        self.cpp_info.components["usframework"].set_property("cmake_file_name", "usFramework")
         self.cpp_info.components["usframework"].set_property("cmake_target_name", "CppMicroServices")
         self.cpp_info.components["usframework"].libs = [f"CppMicroServices{libversion}{libsuffix}"]
         self.cpp_info.components["usframework"].includedirs.append(os.path.join("include", "cppmicroservices3"))
@@ -144,7 +143,6 @@ class CppMicroServicesConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.components["usframework"].system_libs.append("shlwapi")
 
-        self.cpp_info.components["cppmicroservices"].set_property("cmake_file_name", "CppMicroServices")
         self.cpp_info.components["cppmicroservices"].requires = ["usframework"]
         self.cpp_info.components["cppmicroservices"].libdirs = []
         self.cpp_info.components["cppmicroservices"].includedirs = []
@@ -156,36 +154,30 @@ class CppMicroServicesConan(ConanFile):
             self.cpp_info.components["scrcodegen3"].libdirs = []
             self.cpp_info.components["scrcodegen3"].includedirs = []
 
-            self.cpp_info.components["uslogservice"].set_property("cmake_file_name", "usLogServiceImpl")
             self.cpp_info.components["uslogservice"].set_property("cmake_target_name", "LogService")
             self.cpp_info.components["uslogservice"].libs = [f"LogService{complibversion}{libsuffix}"]
             self.cpp_info.components["uslogservice"].includedirs.append(os.path.join("include", "cppmicroservices3"))
             self.cpp_info.components["uslogservice"].requires = ["usframework", "spdlog::spdlog"]
 
-            self.cpp_info.components["usasyncworkservice"].set_property("cmake_file_name", "usAsyncWorkService")
             self.cpp_info.components["usasyncworkservice"].set_property("cmake_target_name", "usAsyncWorkService")
             self.cpp_info.components["usasyncworkservice"].libs = [f"usAsyncWorkService{libsuffix}"]
             self.cpp_info.components["usasyncworkservice"].includedirs.append(os.path.join("include", "cppmicroservices3"))
 
-            self.cpp_info.components["usservicecomponent"].set_property("cmake_file_name", "usServiceComponent")
             self.cpp_info.components["usservicecomponent"].set_property("cmake_target_name", "usServiceComponent")
             self.cpp_info.components["usservicecomponent"].libs = [f"usServiceComponent{libsuffix}"]
             self.cpp_info.components["usservicecomponent"].includedirs.append(os.path.join("include", "cppmicroservices3"))
             self.cpp_info.components["usservicecomponent"].requires = ["usframework"]
 
-            self.cpp_info.components["usem"].set_property("cmake_file_name", "usem")
             self.cpp_info.components["usem"].set_property("cmake_target_name", "usEM")
             self.cpp_info.components["usem"].libs = [f"usEM{libsuffix}"]
             self.cpp_info.components["usem"].includedirs.append(os.path.join("include", "cppmicroservices3"))
             self.cpp_info.components["usem"].requires = ["usframework"]
 
-            self.cpp_info.components["usdeclarativeservices"].set_property("cmake_file_name", "usDeclarativeServices")
             self.cpp_info.components["usdeclarativeservices"].set_property("cmake_target_name", "DeclarativeServices")
             self.cpp_info.components["usdeclarativeservices"].libs = [f"DeclarativeServices{complibversion}{libsuffix}"]
             self.cpp_info.components["usdeclarativeservices"].includedirs.append(os.path.join("include", "cppmicroservices3"))
             self.cpp_info.components["usdeclarativeservices"].requires = ["usframework", "usservicecomponent", "usasyncworkservice", "boost::headers"]
 
-            self.cpp_info.components["usconfigurationadmin"].set_property("cmake_file_name", "usConfigurationAdmin")
             self.cpp_info.components["usconfigurationadmin"].set_property("cmake_target_name", "ConfigurationAdmin")
             self.cpp_info.components["usconfigurationadmin"].libs = [f"ConfigurationAdmin{complibversion}{libsuffix}"]
             self.cpp_info.components["usconfigurationadmin"].includedirs.append(os.path.join("include", "cppmicroservices3"))
