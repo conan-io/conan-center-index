@@ -423,7 +423,7 @@ class QtConan(ConanFile):
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.21.2")
         if self.options.get_safe("with_md4c", False):
-            self.requires("md4c/[>=0.4.8 <1]") # stable API since 0.3x as per md4c wiki
+            self.requires("md4c/[>=0.4.8 <0.6]") # 0.6.0 breaks the Qt build: https://github.com/mity/md4c/issues/434
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.25]")
