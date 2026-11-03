@@ -453,7 +453,8 @@ class QtConan(ConanFile):
             tool_options = {}
             if self._apple_embedded:
                 # Tools are not built for the target (see QT_FORCE_BUILD_TOOLS), the build context Qt must provide them
-                tool_modules = ["qttools", "qtshadertools", "qtdeclarative", "qtremoteobjects", "qtscxml"]
+                tool_modules = ["qttools", "qtshadertools", "qtdeclarative", "qtremoteobjects", "qtscxml",
+                                "qtquick3d", "qtlottie", "qtopcua", "qtcanvaspainter"]
                 tool_options = {m: True for m in tool_modules if self.options.get_safe(m)}
             self.tool_requires(f"qt/{self.version}", options=tool_options)
 
@@ -952,6 +953,25 @@ class QtConan(ConanFile):
             targets.append("repc")
         if self.options.get_safe("qtscxml"):
             targets.append("qscxmlc")
+        if self.options.get_safe("qtquick3d"):
+            # https://github.com/qt/qtquick3d/blob/v6.11.3/tools/CMakeLists.txt
+            targets.extend(["balsam", "meshdebug", "shadergen", "instancer"])
+            if self.options.widgets and "concurrent" not in disabled_features:
+                targets.append("balsamui")
+            if "cborstreamwriter" not in disabled_features:
+                targets.append("shapegen")
+            if "localserver" not in disabled_features:
+                targets.append("materialeditor")
+            if ver >= "6.10.0":
+                targets.append("lightmapviewer")
+            if ver >= "6.11.0":
+                targets.append("particleshadergen")
+        if self.options.get_safe("qtlottie") and ver >= "6.10.0":
+            targets.append("lottietoqml")
+        if self.options.get_safe("qtopcua") and "datatypecodegenerator" not in disabled_features:
+            targets.append("qopcuaxmldatatypes2cpp")
+        if self.options.get_safe("qtcanvaspainter"):
+            targets.append("qcshadergen")
         for target in targets:
             exe_path = None
             for path_ in [f"bin/{target}{extension}",
