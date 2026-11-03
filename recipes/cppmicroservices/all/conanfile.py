@@ -74,7 +74,6 @@ class CppMicroServicesConan(ConanFile):
             tc.cache_variables["US_SPDLOG_SHARED"] = bool(spdlog_options.get_safe("shared") or spdlog_options.get_safe("header_only"))
         tc.cache_variables["US_USE_SYSTEM_RAPIDJSON"] = True
         tc.cache_variables["US_USE_SYSTEM_CLI11"] = True
-        tc.cache_variables["US_BUILD_TESTING"] = False
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
         tc.generate()
 
