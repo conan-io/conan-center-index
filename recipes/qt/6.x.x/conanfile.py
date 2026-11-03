@@ -624,8 +624,10 @@ class QtConan(ConanFile):
             tc.cache_variables["QT_HOST_PATH"] = self.dependencies.direct_build["qt"].package_folder
             # Stand-in for Qt6CoreTools - which is loaded for the executable targets
             tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = os.path.join(self.dependencies.direct_build["qt"].package_folder, self._cmake_executables_file)
-            # Ensure tools for host are always built
-            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = True
+            if self.settings.os not in ["Android", "iOS"]:
+                # Ensure tools for host are always built. Android and iOS cannot run them, and there Qt
+                # builds executables as app libraries, so building the tools fails configure.
+                tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = True
 
         tc.variables["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.get_safe("build_type") == "Debug" and not self.options.shared:
