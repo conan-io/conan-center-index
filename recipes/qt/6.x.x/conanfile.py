@@ -983,8 +983,8 @@ class QtConan(ConanFile):
             else:
                 # Not built for Apple embedded targets, see QT_FORCE_BUILD_TOOLS
                 assert self._apple_embedded, f"Could not find executable {target}{extension} in {self.package_folder}"
-            if not exe_path:
-                self.output.warning(f"Could not find path to {target}{extension}")
+                self.output.warning(f"Could not find path to {target}{extension}, {target} target not declared")
+                continue
             filecontents += textwrap.dedent(f"""\
                 if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{target})
                     add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} IMPORTED)
