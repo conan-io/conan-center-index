@@ -63,7 +63,7 @@ class NmosCppConan(ConanFile):
             self.requires("avahi/0.8")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.17 <5]")
+        self.tool_requires("cmake/[>=3.17]")
 
     def validate(self):
         check_min_cppstd(self, 11)
