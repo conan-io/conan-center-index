@@ -1,0 +1,4 @@
+sources:
+  "1.3.7":
+    url: "https://github.com/nevergiveupcpp/obfuscxx/archive/refs/tags/v1.3.7.tar.gz"
+    sha256: "8089a5ef041cd7a15aacca24ee7288bd2125227030fef1143e3b953cd75238af"
