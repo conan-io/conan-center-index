@@ -90,4 +90,4 @@ class JsonSchemaValidatorConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
         elif self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.defines.append("JSON_SCHEMA_VALIDATOR_EXPORTS=1")
+            self.cpp_info.defines.append("JSON_SCHEMA_VALIDATOR_IMPORTS")
