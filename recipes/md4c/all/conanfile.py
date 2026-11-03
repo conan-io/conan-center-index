@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
-from conan.tools.scm import Version
 
 import os
 
@@ -38,14 +37,11 @@ class Md4cConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) >= "0.5.0":
-            # Set it to false for iOS, tvOS, watchOS, visionOS
-            # to prevent cmake from creating a bundle for the md2html executable
-            is_ios_variant = is_apple_os(self) and not self.settings.os == "Macos"
-            self.options.md2html = not is_ios_variant
-        else:
-            # md2html was introduced in 0.5.0
-            del self.options.md2html
+
+        # Set it to false for iOS, tvOS, watchOS, visionOS
+        # to prevent cmake from creating a bundle for the md2html executable
+        is_ios_variant = is_apple_os(self) and not self.settings.os == "Macos"
+        self.options.md2html = not is_ios_variant
 
     def configure(self):
         if self.options.shared:
@@ -62,7 +58,7 @@ class Md4cConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -73,20 +69,7 @@ class Md4cConan(ConanFile):
             tc.preprocessor_definitions["MD4C_USE_UTF16"] = "1"
         elif self.options.encoding == "ascii":
             tc.preprocessor_definitions["MD4C_USE_ASCII"] = "1"
-        if Version(self.version) < "0.5.0":
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # Honor encoding option; 0.5.3 no longer forces UTF-8 in its CMake files
-        if Version(self.version) < "0.5.3":
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "src", "CMakeLists.txt"),
-                "COMPILE_FLAGS \"-DMD4C_USE_UTF8\"",
-                "",
-            )
 
     def build(self):
         cmake = CMake(self)
