@@ -59,8 +59,6 @@ class SentryNativeConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         if self.options.get_safe("with_crashpad") == "sentry":
-            # Sentry-native 0.7.8 requires C++20: Concepts and bit_cast
-            # https://github.com/chromium/mini_chromium/blob/e49947ad445c4ed4bc1bb4ed60bbe0fe17efe6ec/base/numerics/byte_conversions.h#L88
             return {
                 "Visual Studio": "16",
                 "msvc": "192",
@@ -165,10 +163,10 @@ class SentryNativeConan(ConanFile):
         tc.variables["SENTRY_INTEGRATION_QT"] = self.options.qt
         if self.options.get_safe("wer", False):
             tc.variables["CRASHPAD_WER_ENABLED"] = True
+        if self.settings.os == "Linux":
+            tc.variables["SENTRY_LIBUNWIND_SYSTEM"] = True
         tc.generate()
         deps = CMakeDeps(self)
-        if self.settings.os == "Linux":
-            deps.set_property("libunwind", "cmake_target_name", "unwind")
         deps.generate()
 
     def build(self):
