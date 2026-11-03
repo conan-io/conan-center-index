@@ -110,7 +110,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_libpng:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_freetype:
-            self.requires("freetype/2.13.2")
+            self.requires("freetype/[>=2.13.2 <3]")
         if self.options.get_safe("with_opencolorio", True):
             self.requires("opencolorio/[>=2.3.1 <4]")
         if self.options.with_opencv:
