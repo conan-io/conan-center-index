@@ -5,7 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.4"
 
 
 class LibZipppConan(ConanFile):
@@ -37,8 +37,7 @@ class LibZipppConan(ConanFile):
         self.requires("libzip/[>=1.10.1 <2]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
         if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++":
             raise ConanInvalidConfiguration(f"{self.ref} does not support clang with libc++. Use libstdc++ instead.")
