@@ -5,5 +5,3 @@ sources:
 patches:
   "0.6.0":
     - patch_file: "patches/0.6.0-0001-honor-vc-runtime.patch"
-      patch_description: "Honor msvc runtime from profile"
-      patch_type: "conan"
