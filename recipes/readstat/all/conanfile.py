@@ -57,11 +57,14 @@ class ReadstatConan(ConanFile):
             self.tool_requires("libtool/2.4.7")
             self.tool_requires("automake/1.16.5")
             # gettext provides AM_ICONV macro used in configure.ac in 1.1.9 or earlier.
-            if self.version <= "1.1.9":
+            if self.version < "cci.20261102":
                 self.tool_requires("gettext/0.22.5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version]["release"], strip_root=True)
+        if self.version >= "cci.20261102":
+            get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        else:
+            get(self, **self.conan_data["sources"][self.version]["release"], strip_root=True)
         apply_conandata_patches(self)
 
     def generate(self):
@@ -89,14 +92,15 @@ class ReadstatConan(ConanFile):
     def _patch_msvc(self):
         vcxproj_file = os.path.join(self.source_folder, "VS17", "ReadStat.vcxproj")
         # Replace the hardcoded platform toolset by the one from the Conan profile
-        platform_toolset = MSBuildToolchain(self).toolset
-        replace_in_file(self, vcxproj_file,
-                "<PlatformToolset>v141</PlatformToolset>",
-                f"<PlatformToolset>{platform_toolset}</PlatformToolset>")
-        # Remove the hardcoded Windows target platform version, let Conan handle it
-        replace_in_file(self, vcxproj_file,
-                "<WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>",
-                "")
+        if self.version < "cci.20261102":
+            platform_toolset = MSBuildToolchain(self).toolset
+            replace_in_file(self, vcxproj_file,
+                    "<PlatformToolset>v141</PlatformToolset>",
+                    f"<PlatformToolset>{platform_toolset}</PlatformToolset>")
+            # Remove the hardcoded Windows target platform version, let Conan handle it
+            replace_in_file(self, vcxproj_file,
+                    "<WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>",
+                    "")
         # Inject the conan generators into the project file, so we can use the dependencies
         import_conan_generators = ""
         for props_file in ["conantoolchain.props", "conandeps.props"]:
