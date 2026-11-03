@@ -1,4 +1,4 @@
 sources:
-  "0.2.6":
-    url: "https://github.com/awslabs/aws-checksums/archive/v0.2.6.tar.gz"
-    sha256: "e9d94f6f57bfadec7164943aecc4d7d1d8f74b95a626ba5edabfc7df66888cf4"
+  "0.2.10":
+    url: "https://github.com/awslabs/aws-checksums/archive/v0.2.10.tar.gz"
+    sha256: "cb6509f75e42ee25c372a6d379e8582ce5179e5335183842e808f7d8abb0c314"

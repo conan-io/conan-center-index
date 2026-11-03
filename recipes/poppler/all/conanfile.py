@@ -74,7 +74,7 @@ class PopplerConan(ConanFile):
 
     def requirements(self):
         self.requires("poppler-data/0.4.11")
-        self.requires("freetype/2.13.2")
+        self.requires("freetype/[>=2.13.2 <3]")
 
         self.requires("boost/[>=1.81.0 <=1.89.0]", options={"header_only": True})
         self.requires("libiconv/1.17")
@@ -87,7 +87,7 @@ class PopplerConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
 
         if self.options.fontconfiguration == "fontconfig":
-            self.requires("fontconfig/2.15.0")
+            self.requires("fontconfig/[>=2.15.0 <3]")
         if self.options.with_libcurl:
             # Not compatible with libcurl 8 yet
             self.requires("libcurl/[>=7.78.0 <9]")
