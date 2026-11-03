@@ -635,12 +635,13 @@ class QtConan(ConanFile):
             # Mainly to locate Qt6HostInfoConfig.cmake
             qt_build_package_folder = self.dependencies.direct_build["qt"].package_folder
             tc.cache_variables["QT_HOST_PATH"] = qt_build_package_folder
-            # Stand-in for Qt6CoreTools - which is loaded for the executable targets
-            tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = os.path.join(qt_build_package_folder, self._cmake_executables_file)
+            # Stand-in for Qt6<Module>Tools - which is loaded for the executable targets
+            tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = self._generate_host_tools_file()
             # The iOS SDK cannot build the tools (no ApplicationServices), they come from QT_HOST_PATH.
             # Android cannot run them either, and there Qt builds executables as app libraries.
-            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = not (self._apple_embedded or self.settings.os == "Android")
-            if self._apple_embedded and self.options.qttranslations:
+            host_tools_only = self._apple_embedded or self.settings.os == "Android"
+            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = not host_tools_only
+            if host_tools_only and self.options.qttranslations:
                 # qttranslations needs qt_add_lrelease(), which is not loaded when lrelease comes from CMAKE_PROJECT_Qt_INCLUDE
                 linguist_tools_macros = os.path.join(qt_build_package_folder, "lib", "cmake", "Qt6LinguistTools", "Qt6LinguistToolsMacros.cmake")
                 if os.path.exists(linguist_tools_macros):
@@ -686,6 +687,37 @@ class QtConan(ConanFile):
             for dep in self.dependencies.host.values():
                 for bindir in dep.cpp_info.bindirs:
                     copy(self, pattern="*.dll", src=bindir, dst=dest_folder, keep_path=False)
+
+    def _generate_host_tools_file(self):
+        # Without QT_FORCE_BUILD_TOOLS, Qt looks up every tool it would build in the host Qt, so give
+        # each executable the host Qt ships an imported target, not only those in its executables file.
+        # Apps (Designer, Assistant, ...) are built for the target instead, so they keep their names free.
+        apps = set()
+        for cmakelists in glob.glob(os.path.join(self.source_folder, "**", "CMakeLists.txt"), recursive=True):
+            apps.update(re.findall(r"qt_internal_add_app\(\s*([A-Za-z0-9_-]+)", load(self, cmakelists)))
+        host_folder = self.dependencies.direct_build["qt"].package_folder
+        extension = ".exe" if self.settings_build.os == "Windows" else ""
+        executables_file = os.path.join(host_folder, self._cmake_executables_file).replace("\\", "/")
+        contents = f'include("{executables_file}")\n'
+        for subfolder in ["bin", "libexec"]:
+            for path in sorted(glob.glob(os.path.join(host_folder, subfolder, f"*{extension}"))):
+                if not os.path.isfile(path) or not os.access(path, os.X_OK):
+                    continue
+                name = os.path.basename(path)[:len(os.path.basename(path)) - len(extension)]
+                if not re.fullmatch(r"[A-Za-z0-9_-]+", name) or name in apps:
+                    continue
+                location = path.replace("\\", "/")
+                # Qt's own Tools packages define both names; some modules check the versionless one.
+                for target in [f"Qt6::{name}", f"Qt::{name}"]:
+                    contents += textwrap.dedent(f"""\
+                        if(NOT TARGET {target})
+                            add_executable({target} IMPORTED)
+                            set_target_properties({target} PROPERTIES IMPORTED_LOCATION "{location}")
+                        endif()
+                        """)
+        tools_file = os.path.join(self.generators_folder, "conan_qt_host_tools.cmake")
+        save(self, tools_file, contents)
+        return tools_file.replace("\\", "/")
 
     def package_id(self):
         del self.info.options.cross_compile
