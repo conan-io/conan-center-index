@@ -35,9 +35,6 @@ class LibvplConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.13]")
-
     def validate(self):
         if is_apple_os(self):
             raise ConanInvalidConfiguration(f"The library is not supported on Apple OS")
@@ -51,10 +48,11 @@ class LibvplConan(ConanFile):
 
         # INFO: Honor fPIC option. The upstream sets fPIC to ON always
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_POSITION_INDEPENDENT_CODE true)", "")
-
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "CompileOptions.cmake"), "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["INSTALL_EXAMPLES"] = False
         tc.generate()
 
     def build(self):
@@ -75,12 +73,10 @@ class LibvplConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "VPL")
         self.cpp_info.set_property("pkg_config_name", "vpl")
 
-        # Headers might be included without vpl prefix for backward compatibility to mfx
-        self.cpp_info.includedirs = ["include", "include/vpl"]
-
         debug_suffix = ""
         if self.settings.os == "Windows" and self.settings.build_type == "Debug":
             debug_suffix = "d"
+
 
         # ------------------------------------------------------------------
         # dispatcher component (the only one that actually links a .lib/.so)
@@ -88,6 +84,8 @@ class LibvplConan(ConanFile):
         disp = self.cpp_info.components["dispatcher"]
         disp.set_property("cmake_target_name", "VPL::dispatcher")
         disp.libs = [f"vpl{debug_suffix}"]
+        # Note: Headers might be included without vpl prefix for backward compatibility to mfx
+        disp.includedirs = ["include", "include/vpl"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             disp.system_libs = ["dl", "pthread"]
@@ -99,12 +97,12 @@ class LibvplConan(ConanFile):
         # ------------------------------------------------------------------
         api = self.cpp_info.components["api"]
         api.set_property("cmake_target_name", "VPL::api")
-        api.requires = ["dispatcher"]
+        api.includedirs = ["include", "include/vpl"]
 
         # ------------------------------------------------------------------
         # cppapi component (headers for the C++ wrapper API)
         # ------------------------------------------------------------------
         cppapi = self.cpp_info.components["cppapi"]
         cppapi.set_property("cmake_target_name", "VPL::cppapi")
-        cppapi.requires = ["api"]
+        cppapi.includedirs = ["include", "include/vpl"]
 
