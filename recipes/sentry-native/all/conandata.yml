@@ -5,5 +5,3 @@ sources:
 patches:
   "0.16.8":
     - patch_file: "patches/0.16.8-0001-find-package-libunwind.patch"
-      patch_description: "Find libunwind with find_package(CONFIG) instead of pkg-config"
-      patch_type: "conan"
