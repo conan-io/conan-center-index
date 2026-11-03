@@ -14,7 +14,7 @@ class CppMicroServicesConan(ConanFile):
     description = "An OSGi-like C++ dynamic module system and service registry"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://cppmicroservices.org/"
+    homepage = "https://cppmicroservices.org/"
     topics = ("microservice", "osgi", "microservices-framework")
     settings = "os", "arch", "compiler", "build_type"
     package_type = "library"
