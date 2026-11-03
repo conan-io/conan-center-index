@@ -71,7 +71,7 @@ class CppMicroServicesConan(ConanFile):
         tc.cache_variables["US_USE_SYSTEM_BOOST"] = True
         tc.cache_variables["US_USE_SYSTEM_MINIZ"] = True
         # Upstream hides the symbols of static miniz/spdlog when linking them into the shared bundles.
-        tc.cache_variables["US_MINIZ_SHARED"] =self.dependencies["miniz"].options.shared
+        tc.cache_variables["US_MINIZ_SHARED"] = self.dependencies["miniz"].options.shared
         tc.cache_variables["US_USE_SYSTEM_SPDLOG"] = self.options.shared
         if self.options.shared:
             spdlog_options = self.dependencies["spdlog"].options
@@ -83,7 +83,6 @@ class CppMicroServicesConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("boost", "cmake_target_name", "boost::boost")
         deps.set_property("spdlog", "cmake_target_name", "spdlog::spdlog")
         deps.set_property("rapidjson", "cmake_file_name", "rapidjson")
         deps.set_property("rapidjson", "cmake_target_name", "rapidjson::rapidjson")
@@ -116,7 +115,7 @@ class CppMicroServicesConan(ConanFile):
         self.cpp_info.components["usresourcecompiler3"].exe = "usResourceCompiler3.exe" if self.settings.os == "Windows" else "usResourceCompiler3"
         self.cpp_info.components["usresourcecompiler3"].location = os.path.join(self.package_folder, "bin", self.cpp_info.components["usresourcecompiler3"].exe)
         # usResourceCompiler3 links Boost::nowide through upstream's nowide::nowide target
-        self.cpp_info.components["usresourcecompiler3"].requires = ["boost::headers", "miniz::miniz", "cli11::cli11", "boost::nowide"]
+        self.cpp_info.components["usresourcecompiler3"].requires = ["miniz::miniz", "cli11::cli11", "boost::nowide"]
         self.cpp_info.components["usresourcecompiler3"].libdirs = []
         self.cpp_info.components["usresourcecompiler3"].includedirs = []
 
