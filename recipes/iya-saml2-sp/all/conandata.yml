@@ -1,0 +1,7 @@
+sources:
+  "0.1.1":
+    url: "https://github.com/rcbj/saml2-sp-c/archive/refs/tags/v0.1.1.tar.gz"
+    sha256: "083e8657a62de67f19c83d29911082b2247e536d251c7cc14d9c746a0ed748b8"
+  "0.1.0":
+    url: "https://github.com/rcbj/saml2-sp-c/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "b8156363793ca9ea9ca91fc01fec3f9e0c2051da6314bc3e5b4ccac64b87d368"
