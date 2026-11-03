@@ -2,3 +2,8 @@ sources:
   "0.16.8":
     url: "https://github.com/getsentry/sentry-native/releases/download/0.16.8/sentry-native.zip"
     sha256: "ad14e09822464c91f7722ea299f69aef29eb61b5b71e15f5fb557bc25359cd48"
+patches:
+  "0.16.8":
+    - patch_file: "patches/0.16.8-0001-find-package-libunwind.patch"
+      patch_description: "Find libunwind with find_package(CONFIG) instead of pkg-config"
+      patch_type: "conan"

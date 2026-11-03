@@ -5,8 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rm, rmdir
-from conan.tools.gnu import PkgConfigDeps
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
@@ -26,6 +25,9 @@ class SentryNativeConan(ConanFile):
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     options = {
         "shared": [True, False],
@@ -143,11 +145,10 @@ class SentryNativeConan(ConanFile):
     def build_requirements(self):
         if self.settings.os == "Windows":
             self.tool_requires("cmake/[>=3.16.4]")
-        if self.settings.os == "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -172,9 +173,6 @@ class SentryNativeConan(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
-        if self.settings.os == "Linux":
-            pc = PkgConfigDeps(self)
-            pc.generate()
 
     def build(self):
         cmake = CMake(self)
