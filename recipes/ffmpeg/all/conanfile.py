@@ -382,7 +382,11 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_openapv"):
             self.requires("openapv/0.2.0.4")
         if self.options.with_nvenc:
-            self.requires("nv-codec-headers/[>=13 <14]")
+            # See the exact version requirements in:
+            # https://github.com/FFmpeg/FFmpeg/blob/n7.1.5/configure#L6781-L6787
+            # https://github.com/FFmpeg/FFmpeg/blob/n8.1.2/configure#L7124-L7130
+            # https://github.com/FFmpeg/FFmpeg/blob/n9.0.1/configure#L7212-L7216
+            self.requires("nv-codec-headers/[>=11.1.5.3 <12.0 || >=12.0.16.1 <12.1 || >=12.1.14.0 <14]")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
