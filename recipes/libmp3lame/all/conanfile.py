@@ -90,12 +90,11 @@ class LibMP3LameConan(ConanFile):
             if self._is_clang_cl:
                 compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
                 buildenv_vars = VirtualBuildEnv(self).vars()
-                cl = compilers_from_conf.get("c", buildenv_vars.get("CC", "clang-cl"))
-                link = buildenv_vars.get("LD", "lld-link")
-                # Quote the CC path: nmake's .c.obj inference rule cannot resolve
-                # subdirectory targets when $(CC) expands to a path with spaces.
+                cl = compilers_from_conf.get("c", buildenv_vars.get("CC", "clang-cl")).strip('"')
+                link = buildenv_vars.get("LD", "lld-link").strip('"')
+                # nmake can't run unquoted paths with spaces or forward slashes
                 replace_in_file(self, "Makefile.MSVC", "CC = cl", f'CC = "{cl}"')
-                replace_in_file(self, "Makefile.MSVC", "LN = link", f"LN = {link}")
+                replace_in_file(self, "Makefile.MSVC", "LN = link", f'LN = "{link}"')
                 # what is /GAy? MSDN doesn't know it
                 # clang-cl: error: no such file or directory: '/GAy'
                 # https://docs.microsoft.com/en-us/cpp/build/reference/ga-optimize-for-windows-application?view=msvc-170
