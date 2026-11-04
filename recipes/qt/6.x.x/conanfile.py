@@ -250,6 +250,11 @@ class QtConan(ConanFile):
             del self.options.with_gstreamer
             del self.options.with_pulseaudio
 
+        if self.settings.os == "Android" and self.options.get_safe("with_ffmpeg"):
+            # The FFmpeg plugin gives FFmpeg the Java VM when it loads, and decodes video with MediaCodec
+            self.options["ffmpeg"].with_jni = True
+            self.options["ffmpeg"].with_mediacodec = True
+
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.get_safe("qtwebengine"):
                 self.options.with_fontconfig = True
@@ -344,6 +349,9 @@ class QtConan(ConanFile):
             missing = [lib for lib in ("avcodec", "avformat", "swresample", "swscale") if not ffmpeg_options.get_safe(lib)]
             if missing:
                 raise ConanInvalidConfiguration(f"qtmultimedia's FFmpeg backend needs these ffmpeg options enabled: {', '.join(missing)}")
+            if self.settings.os == "Android" and not ffmpeg_options.get_safe("with_jni"):
+                # Without it, the plugin's JNI_OnLoad fails and the application stops at startup
+                raise ConanInvalidConfiguration("qtmultimedia's FFmpeg backend on Android needs ffmpeg/*:with_jni=True")
 
         if self.options.get_safe("qtspeech") and not self.options.qtdeclarative:
             raise ConanInvalidConfiguration("qtspeech requires qtdeclarative, cf QTBUG-108381")
