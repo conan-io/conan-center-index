@@ -1,9 +1,9 @@
-Custom: find libunistring via its CMake config and link it to notcurses and notcurses-static
+Custom: find libunistring via its CMake config
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -170,16 +170,8 @@ endif()
+@@ -170,16 +170,9 @@ endif()
  # don't cache these, or installing them requires clearing the cache to be found.
  # this is going to be true for anything lacking pkg-config/CMake support.
  # unigbrk.h was introduced in libunistring 0.9.4, 2010-02-14.
@@ -19,21 +19,7 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
 -set_package_properties(libunistring PROPERTIES TYPE REQUIRED)
 +find_package(libunistring CONFIG REQUIRED)
 +set(unistring libunistring::libunistring)
++set(CMAKE_REQUIRED_INCLUDES ${libunistring_INCLUDE_DIRS})
  
  # optional dependencies lacking pkg-config support
  # libdeflate has had pkgconf support since 1.9, where is it on ubuntu? FIXME
-@@ -366,10 +358,14 @@ target_compile_definitions(notcurses-static
- target_link_libraries(notcurses
-   PUBLIC
-     notcurses-core
-+  PRIVATE
-+    "${unistring}"
- )
- target_link_libraries(notcurses-static
-   PUBLIC
-     notcurses-core-static
-+  PRIVATE
-+    "${unistring}"
- )
- if(${USE_FFMPEG})
- target_include_directories(notcurses
