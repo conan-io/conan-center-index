@@ -405,7 +405,7 @@ class QtConan(ConanFile):
         if self.options.qtwayland:
             self.requires("wayland/1.22.0")
         if self.options.with_brotli:
-            self.requires("brotli/[>=1.1.0 <2]")
+            self.requires("brotli/[>=1.1.1 <2]")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
             self.requires("expat/[>=2.6.2 <3]")
             self.requires("opus/1.4")
@@ -423,7 +423,8 @@ class QtConan(ConanFile):
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.21.2")
         if self.options.get_safe("with_md4c", False):
-            self.requires("md4c/[>=0.4.8 <0.6]") # 0.6.0 breaks the Qt build: https://github.com/mity/md4c/issues/434
+            # INFO: md4c 0.6.0 breaks the Qt build: https://github.com/mity/md4c/issues/434
+            self.requires("md4c/[>=0.4.8 <0.6]") 
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.25]")
