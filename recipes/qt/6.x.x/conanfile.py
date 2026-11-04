@@ -972,6 +972,16 @@ class QtConan(ConanFile):
                 endif()
                 """)
             filecontents += f'include("${{QT_HOST_PATH}}/{self._cmake_executables_file.replace(os.sep, "/")}")\n'
+            # The host Qt's executables file does not list the deployment tools for these platforms
+            filecontents += textwrap.dedent("""\
+                foreach(tool IN ITEMS androiddeployqt androidtestrunner macdeployqt)
+                    set(location "${QT_HOST_PATH}/bin/${tool}${CMAKE_HOST_EXECUTABLE_SUFFIX}")
+                    if(NOT TARGET Qt6::${tool} AND EXISTS "${location}")
+                        add_executable(Qt6::${tool} IMPORTED)
+                        set_target_properties(Qt6::${tool} PROPERTIES IMPORTED_LOCATION "${location}")
+                    endif()
+                endforeach()
+                """)
             targets = []
         for target in targets:
             exe_path = None
@@ -1104,6 +1114,10 @@ class QtConan(ConanFile):
                 libsuffix = "d"
             if is_apple_os(self):
                 libsuffix = "_debug"
+        if self.settings.os == "Android":
+            # Qt for Android names every library after its ABI, e.g. libQt6Core_arm64-v8a.so
+            libsuffix += "_" + {"armv7": "armeabi-v7a", "armv8": "arm64-v8a",
+                                "x86": "x86", "x86_64": "x86_64"}[str(self.settings.arch)]
 
         def _get_corrected_reqs(requires):
             reqs = []
@@ -1708,7 +1722,8 @@ class QtConan(ConanFile):
                     _add_build_module(component_name, module)
 
                 cmake_dir = os.path.join(self.package_folder, "lib", "cmake", m)
-                helper_modules = glob.glob(os.path.join(cmake_dir, "QtPublic*Helpers.cmake"))
+                # Also QtPublicPluginHelpers_v2.cmake (Qt >= 6.9), which the Android deployment finalizer uses
+                helper_modules = glob.glob(os.path.join(cmake_dir, "QtPublic*Helpers*.cmake"))
 
                 # QtPublicCMakeIncludeGuardHelpers.cmake (Qt >= 6.11.2) defines __qt_internal_cmake_include_guard,
                 # which the other helpers use, so it must be included first (as upstream's QtConfig.cmake.in does)
