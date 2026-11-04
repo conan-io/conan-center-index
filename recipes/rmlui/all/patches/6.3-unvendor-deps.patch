@@ -33,7 +33,7 @@ diff --git a/Source/Core/CMakeLists.txt b/Source/Core/CMakeLists.txt
 index 3ac5fac..32a071a 100644
 --- a/Source/Core/CMakeLists.txt
 +++ b/Source/Core/CMakeLists.txt
-@@ -242,9 +242,6 @@ target_sources(rmlui_core PRIVATE
+@@ -243,9 +243,6 @@ target_sources(rmlui_core PRIVATE
  	"${PROJECT_SOURCE_DIR}/Include/RmlUi/Core/Colour.inl"
  	"${PROJECT_SOURCE_DIR}/Include/RmlUi/Core/CompiledFilterShader.h"
  	"${PROJECT_SOURCE_DIR}/Include/RmlUi/Core/ComputedValues.h"
@@ -43,7 +43,7 @@ index 3ac5fac..32a071a 100644
  	"${PROJECT_SOURCE_DIR}/Include/RmlUi/Core/Context.h"
  	"${PROJECT_SOURCE_DIR}/Include/RmlUi/Core/ContextInstancer.h"
  	"${PROJECT_SOURCE_DIR}/Include/RmlUi/Core/ConvolutionFilter.h"
-@@ -435,6 +432,10 @@ endif()
+@@ -436,6 +433,10 @@ endif()
  if(NOT RMLUI_THIRDPARTY_CONTAINERS)
  	target_compile_definitions(rmlui_core PUBLIC "RMLUI_NO_THIRDPARTY_CONTAINERS")
  	message(STATUS "Disabling third-party containers for RmlUi.")
@@ -53,4 +53,4 @@ index 3ac5fac..32a071a 100644
 +	target_link_libraries(rmlui_core PUBLIC robin_hood::robin_hood itlib::itlib)
  endif()
  
- if(RMLUI_CUSTOM_RTTI)
+ if(RMLUI_MATRIX_ROW_MAJOR)
