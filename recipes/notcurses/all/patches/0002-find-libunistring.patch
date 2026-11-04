@@ -1,0 +1,17 @@
+Custom Conan Center Index patch:
+Find libunistring through its Conan CMake config instead of find_library, keeping the
+`unistring` variable that target_link_libraries() uses later in the file
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -177,7 +177,8 @@
+ if(NOT "${HAVE_UNISTRING_H}")
+   message(FATAL_ERROR "Couldn't find unigbrk.h from GNU libunistring")
+ endif()
+-find_library(unistring unistring REQUIRED)
++find_package(libunistring CONFIG REQUIRED)
++set(unistring libunistring::libunistring)
+ set_property(GLOBAL APPEND PROPERTY PACKAGES_FOUND libunistring)
+ set_package_properties(libunistring PROPERTIES TYPE REQUIRED)
+ 
