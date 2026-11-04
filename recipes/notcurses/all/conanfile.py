@@ -90,7 +90,7 @@ class NotCursesConan(ConanFile):
         self.cpp_info.components["libnotcurses"].libs = ["notcurses"]
         self.cpp_info.components["libnotcurses"].set_property("pkg_config_name", "notcurses")
         self.cpp_info.components["libnotcurses"].set_property("cmake_file_name", "Notcurses")
-        self.cpp_info.components["libnotcurses"].requires = ["core"]
+        self.cpp_info.components["libnotcurses"].requires = ["core", "ffmpeg::avcodec", "ffmpeg::avdevice", "ffmpeg::avformat", "ffmpeg::avutil", "ffmpeg::swscale"]
 
         self.cpp_info.components["notcursespp"].libs = ["notcurses++"]
         self.cpp_info.components["notcursespp"].set_property("pkg_config_name", "notcurses++")
