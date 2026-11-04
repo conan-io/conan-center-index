@@ -1,4 +1,4 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import stdcpp_library
@@ -35,6 +35,8 @@ class HarfbuzzConan(ConanFile):
         "with_directwrite": [True, False],
         "with_subset": [True, False],
         "with_coretext": [True, False],
+        "with_png": [True, False],
+        "with_zlib": [True, False],
     }
     default_options = {
         "shared": False,
@@ -47,6 +49,8 @@ class HarfbuzzConan(ConanFile):
         "with_directwrite": False,
         "with_subset": True,
         "with_coretext": True,
+        "with_png": True,
+        "with_zlib": True,
     }
 
     def config_options(self):
@@ -63,8 +67,7 @@ class HarfbuzzConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         if self.options.shared and self.options.with_glib:
-            wildcard = "" if Version(conan_version) < "2.0.0" else "/*"
-            self.options[f"glib{wildcard}"].shared = True
+            self.options[f"glib/*"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -76,6 +79,10 @@ class HarfbuzzConan(ConanFile):
             self.requires("icu/74.1")
         if self.options.with_glib:
             self.requires("glib/[^2.78]")
+        if self.options.with_png:
+            self.requires("libpng/[>=1.6 <2]")
+        if self.options.with_zlib:
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.options.shared and self.options.with_glib and not self.dependencies["glib"].options.shared:
@@ -140,12 +147,15 @@ class HarfbuzzConan(ConanFile):
             "gdi": is_enabled(self.options.get_safe("with_gdi")),
             "coretext": is_enabled(self.options.get_safe("with_coretext")),
             "directwrite": is_enabled(self.options.get_safe("with_directwrite")),
+            "png": is_enabled(self.options.with_png),
+            "zlib": is_enabled(self.options.with_zlib),
             "gobject": is_enabled(self.options.with_glib),
             "introspection": is_enabled(False),
             "tests": "disabled",
             "docs": "disabled",
             "benchmark": "disabled",
-            "icu_builtin": "false"
+            "icu_builtin": "false",
+            "gpu_demo": "disabled"
         })
         tc.cpp_args += cxxflags
         tc.generate()
@@ -221,6 +231,30 @@ class HarfbuzzConan(ConanFile):
             self.cpp_info.components["gobject"].set_property("pkg_config_name", "harfbuzz-gobject")
             self.cpp_info.components["gobject"].requires = ["core", "glib::glib"]
 
+        self.cpp_info.components["raster"].libs = ["harfbuzz-raster"]
+        self.cpp_info.components["raster"].set_property("cmake_target_name", "harfbuzz::raster")
+        self.cpp_info.components["raster"].set_property("pkg_config_name", "harfbuzz-raster")
+        self.cpp_info.components["raster"].requires = ["core"]
+        if self.options.with_png:
+            self.cpp_info.components["raster"].requires.append("libpng::libpng")
+        if self.settings.os == "Macos":
+            self.cpp_info.components["raster"].frameworks = ["ApplicationServices"]
+
+        self.cpp_info.components["vector"].libs = ["harfbuzz-vector"]
+        self.cpp_info.components["vector"].set_property("cmake_target_name", "harfbuzz::vector")
+        self.cpp_info.components["vector"].set_property("pkg_config_name", "harfbuzz-vector")
+        self.cpp_info.components["vector"].requires = ["core"]
+        if self.options.with_zlib:
+            self.cpp_info.components["vector"].requires.append("zlib::zlib")
+        if self.settings.os == "Macos":
+            self.cpp_info.components["vector"].frameworks = ["ApplicationServices"]
+
+        self.cpp_info.components["gpu"].libs = ["harfbuzz-gpu"]
+        self.cpp_info.components["gpu"].set_property("cmake_target_name", "harfbuzz::gpu")
+        self.cpp_info.components["gpu"].set_property("pkg_config_name", "harfbuzz-gpu")
+        self.cpp_info.components["gpu"].requires = ["core"]
+        if self.settings.os == "Macos":
+            self.cpp_info.components["gpu"].frameworks = ["ApplicationServices"]
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
