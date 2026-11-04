@@ -742,7 +742,7 @@ class BoostConan(ConanFile):
                 if not self.options.get_safe(f"without_{lib}"):
                     raise ConanInvalidConfiguration(f"Boost '{lib}' library requires multi threading")
 
-        if is_msvc(self) and self._shared and is_msvc_static_runtime(self):
+        if (is_msvc(self) or self._toolset == "clang-win") and self._shared and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
 
         # FIXME: In 1.84.0, there are compilation errors on msvc shared build for boost.fiber. https://github.com/boostorg/fiber/issues/314
@@ -1328,9 +1328,11 @@ class BoostConan(ConanFile):
         for define in self.conf.get("tools.build:defines", default=[], check_type=list):
             flags.append(f"define={define}")
 
-        if is_msvc(self):
-            flags.append(f"runtime-link={'static' if is_msvc_static_runtime(self) else 'shared'}")
-            flags.append(f"runtime-debugging={'on' if 'd' in msvc_runtime_flag(self) else 'off'}")
+        # clang-win follows the Microsoft CRT settings only when compiler.runtime is set
+        if is_msvc(self) or (self._toolset == "clang-win" and self.settings.get_safe("compiler.runtime")):
+            runtime = msvc_runtime_flag(self)
+            flags.append(f"runtime-link={'static' if 'MT' in runtime else 'shared'}")
+            flags.append(f"runtime-debugging={'on' if 'd' in runtime else 'off'}")
 
         # For details https://boostorg.github.io/build/manual/master/index.html
         flags.append(f"threading={'single' if not self.options.multithreading else 'multi'}")
