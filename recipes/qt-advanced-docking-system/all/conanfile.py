@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
@@ -44,11 +45,20 @@ class QtADS(ConanFile):
         self.tool_requires("qt/<host_version>")
         self.tool_requires("cmake/[>=3.27]") # to be able to use CMAKE_AUTOMOC_EXECUTABLE
 
+    @property
+    def qt_major(self):
+        return Version(self.dependencies["qt"].ref.version).major
+
     def validate(self):
-        if Version(self.dependencies["qt"].ref.version) >= "6.0.0":
-            check_min_cppstd(self, 17) # Qt6 requires C++17 as a minimum
-        elif Version(self.version) >= "5.1.0":
-            check_min_cppstd(self, 14)
+        # Qt 6 needs C++17; upstream pins CXX_STANDARD 14 for Qt 5 (4.5.0 and 5.1.1 alike)
+        check_min_cppstd(self, 17 if self.qt_major >= 6 else 14)
+
+        qt_options = self.dependencies["qt"].options
+        if not (qt_options.gui and qt_options.widgets):
+            raise ConanInvalidConfiguration(f"{self.ref} requires qt:gui=True and qt:widgets=True")
+        # ads_globals.h includes <xcb/xcb.h> on every Unix but macOS, and xcb only reaches us through Qt's xorg dependency
+        if self.settings.os in ["Linux", "FreeBSD"] and not qt_options.get_safe("with_x11"):
+            raise ConanInvalidConfiguration(f"{self.ref} requires qt:with_x11=True on {self.settings.os}")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -90,12 +100,9 @@ class QtADS(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        # Detect Qt major version from installed include directory name
-        qt_major = 6 if Version(self.dependencies["qt"].ref.version) >= "6.0.0" else 5
-
-        base_name = f"qtadvanceddocking-qt{qt_major}"
+        base_name = f"qtadvanceddocking-qt{self.qt_major}"
         self.cpp_info.includedirs.append(os.path.join("include", base_name))
-        cmake_name = base_name if Version(self.version) >= "5.1.0" else f"qt{qt_major}advanceddocking"
+        cmake_name = base_name if Version(self.version) >= "5.1.0" else f"qt{self.qt_major}advanceddocking"
         debug_suffix = "d" if self.settings.build_type == "Debug" else ""
         static_suffix = "" if self.options.shared else "_static"
         if Version(self.version) >= "5.1.0":

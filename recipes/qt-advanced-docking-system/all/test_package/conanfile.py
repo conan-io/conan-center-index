@@ -18,14 +18,8 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        ads = self.dependencies["qt-advanced-docking-system"]
-        tc.variables["ADS_CMAKE_FILE_NAME"] = ads.cpp_info.get_property("cmake_file_name")
-        tc.variables["ADS_CMAKE_TARGET_NAME"] = ads.cpp_info.get_property("cmake_target_name")
-        version = Version(ads.ref.version)
-        if version >= "5.1.0":
-            tc.preprocessor_definitions["EXPECTED_ADS_VERSION"] = (
-                (int(str(version.major)) << 16) | (int(str(version.minor)) << 8) | int(str(version.patch))
-            )
+        ads = self.dependencies[self.tested_reference_str]
+        tc.cache_variables["ADVANCED_DOCKING_MAJOR_NEW_5"] = Version(ads.ref.version) >= "5.1"
         tc.generate()
 
     def build(self):
