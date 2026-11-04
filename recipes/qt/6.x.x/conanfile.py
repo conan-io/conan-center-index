@@ -963,7 +963,9 @@ class QtConan(ConanFile):
                 targets.append("lightmapviewer")
             if ver >= "6.11.0":
                 targets.append("particleshadergen")
-        if self.options.get_safe("qtlottie") and ver >= "6.10.0":
+        if self.options.get_safe("qtlottie") and ver >= "6.10.0" and \
+                self.options.gui and self.options.qtshadertools and self.options.qtsvg:
+            # https://github.com/qt/qtlottie/blob/v6.12.0/tools/CMakeLists.txt
             targets.append("lottietoqml")
         if self.options.get_safe("qtopcua") and "datatypecodegenerator" not in disabled_features:
             targets.append("qopcuaxmldatatypes2cpp")
