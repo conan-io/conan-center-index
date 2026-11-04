@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir, rm
+from conan.tools.files import get, copy, rmdir, rm, replace_in_file
 
 import os
 
@@ -58,6 +58,8 @@ class SentryCrashpadConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)])
+        # Let Conan configure C++ standard
+        replace_in_file(self, os.path.join(self.source_folder, "external", "crashpad", "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 17)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -77,7 +79,6 @@ class SentryCrashpadConan(ConanFile):
         copy(self, "LICENSE", src=os.path.join(self.source_folder, "external", "crashpad"),
                               dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
-        cmake.configure(build_script_folder="external/crashpad")
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
